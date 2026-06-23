@@ -1,0 +1,113 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+Herod was exceeding wroth, * and slew many children in Bethlehem of Judah, the city of David.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+Herod was exceeding wroth, * and slew many children in Bethlehem of Judah, the city of David.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+Herod slew many children * from two years old, and under, for the Lord's sake.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+Their angels * do always behold the face of the Father.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+In Rama was there a voice * heard, weeping and mourning, Rachel weeping for her children.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
+Under the throne of God * all the saints cry aloud: Avenge our blood, O our God!
+
+[benedictus-antiphon]
+Under the throne of God * all the saints cry aloud: Avenge our blood, O our God!
+
+[magnificat-antiphon]
+Innocent babies * were slain for Christ, sucklings were killed by a wicked king. Now they follow the Lamb without spot and cry without ceasing, Glory be to thee, O Lord.
+
+[commemoration-antiphon]
+These are they * who were not defiled with women; for they are virgins, and follow the Lamb whithersoever he goeth.
+
+[commemoration-versicle]
+V. Herod being wroth, slew many children.
+R. In Bethlehem of Juda, the city of David.
+
+[collect]
+O God, whose praise the martyred Innocents on this day confessed, not by speaking, but by dying, destroy all the evils of sin in us, that our life also may proclaim in deeds, thy faith which our tongues profess.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] — check against diurnal
+!Rev 14:1
+Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/12-28 [Capitulum Sexta] — check against diurnal
+!Rev 14:4
+These are they who were not defiled with women: for they are virgins. These follow the Lamb whithersoever he goeth.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/12-28 [Hymnus Laudes] — check against diurnal
+Salvete, flores Martyrum
+
+All hail, ye little Martyr flowers,
+Sweet rosebuds cut in dawning hours!
+When Herod sought the Christ to find
+Ye fell as bloom before the wind.
+
+First victims of the Martyr bands,
+With crowns and palms in tender hands,
+Around the very altar, gay
+And innocent, ye seem to play.
+
+All honor, laud, and glory be,
+O Jesu, Virgin-born to thee;
+All glory, as is ever meet
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/12-28 [Hymnus Vespera] — check against diurnal
+Salvete, flores Martyrum
+
+All hail, ye little Martyr flowers,
+Sweet rosebuds cut in dawning hours!
+When Herod sought the Christ to find
+Ye fell as bloom before the wind.
+
+First victims of the Martyr bands,
+With crowns and palms in tender hands,
+Around the very altar, gay
+And innocent, ye seem to play.
+
+All honor, laud, and glory be,
+O Jesu, Virgin-born to thee;
+All glory, as is ever meet
+To Father and to Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/12-28 [Versum 2] — check against diurnal
+V. Herod being wroth, slew many children.
+R. In Bethlehem of Juda, the city of David.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/12-28 [Versum 1] — check against diurnal
+V. Herod being wroth, slew many children.
+R. In Bethlehem of Juda, the city of David.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 14:1
+Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 14:1
+Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+R. Thanks be to God.

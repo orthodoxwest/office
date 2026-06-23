@@ -1,0 +1,7 @@
+# Epiphanytide seasonal overrides (after the Octave of Epiphany through Septuagesima)
+
+[hymn-doxology]
+All glory, Lord, to thee we pay,
+For thine Epiphany today;
+All glory, as is ever meet,
+To Father, Son, and Paraclete. Amen.

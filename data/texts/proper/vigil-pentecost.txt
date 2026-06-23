@@ -1,0 +1,7 @@
+[collect]
+# SOURCE: divinum-officium TemporaM/Pasc6-6 [Oratio] — check against diurnal
+O Almighty and everlasting God, grant that our will be ever meekly subject unto thy will, and our heart ever honestly ready to serve thy majesty.
+
+# Whitsun Eve is a ferial paschal office until None; antiphons come from the
+# seasonal/ordinary tiers, and vespers belong to I Vespers of Pentecost.
+# See data/audit-ok.txt.

@@ -1,0 +1,1078 @@
+# Sanctoral (fixed) feasts — base pre-1962 calendar
+
+[circumcision]
+Name = Circumcision of Our Lord
+Rank = double-2nd-class
+Color = white
+Category = lord
+Month = 1
+Day = 1
+
+[holy-name-jesus]
+Name = Holy Name of Jesus
+Rank = double-2nd-class
+Color = white
+Category = lord
+DateRule = holy-name
+
+[octave-day-st-stephen]
+Name = Octave Day of St Stephen
+Rank = simple
+Color = red
+Category = martyr
+ProperName = Stephen
+Month = 1
+Day = 2
+
+[octave-day-st-john]
+Name = Octave Day of St. John, Apostle & Evangelist
+Rank = simple
+Color = white
+Category = apostle
+Month = 1
+Day = 3
+
+[octave-day-holy-innocents]
+Name = Octave Day of the Holy Innocents
+Rank = simple
+Color = red
+Category = martyr
+ProperName = the Holy Innocents
+Month = 1
+Day = 4
+
+[epiphany]
+Name = Epiphany of Our Lord
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 1
+Day = 6
+HasOctave = true
+
+[st-anthony-egypt]
+Name = St. Anthony of Egypt
+Rank = double
+Color = white
+Category = confessor
+ProperName = Anthony
+Month = 1
+Day = 17
+
+[conversion-st-paul]
+Name = Conversion of St. Paul
+Rank = greater-double
+Color = white
+Category = apostle
+Month = 1
+Day = 25
+
+[purification-bvm]
+Name = Purification of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 2
+Day = 2
+
+[st-agatha]
+Name = St. Agatha
+Rank = greater-double
+Color = red
+Category = virgin-martyr
+ProperName = Agatha
+Month = 2
+Day = 5
+
+[chair-peter-antioch]
+Name = Chair of St. Peter at Antioch
+Rank = double-2nd-class
+Color = white
+Category = apostle
+Month = 2
+Day = 22
+
+[st-matthias]
+Name = St. Matthias, Apostle
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 2
+Day = 24
+HasVigil = true
+
+[st-gregory-great]
+Name = St. Gregory the Great
+Rank = double-2nd-class
+Color = white
+Category = confessor-doctor
+ProperName = Gregory
+Month = 3
+Day = 12
+
+[st-patrick]
+Name = St. Patrick
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Patrick
+Month = 3
+Day = 17
+
+[st-joseph]
+Name = St. Joseph, Spouse of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = confessor
+Month = 3
+Day = 19
+
+[st-benedict]
+Name = St. Benedict
+Rank = double-2nd-class
+Color = white
+Category = confessor
+ProperName = Benedict
+Month = 3
+Day = 21
+
+[annunciation]
+Name = Annunciation of the Blessed Virgin Mary
+Rank = double-1st-class
+Color = white
+Category = blessed-virgin
+Month = 3
+Day = 25
+
+[st-george]
+Name = St. George
+Rank = double-1st-class
+Color = red
+Category = martyr
+Month = 4
+Day = 23
+HasOctave = true
+
+[st-mark]
+Name = St. Mark, Evangelist
+Rank = double-2nd-class
+Color = red
+Category = evangelist
+Month = 4
+Day = 25
+
+[ss-philip-james]
+Name = Ss. Philip and James, Apostles
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 5
+Day = 1
+
+[st-athanasius]
+Name = St. Athanasius
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Athanasius
+Month = 5
+Day = 2
+
+[finding-holy-cross]
+Name = Finding of the Holy Cross
+Rank = double-2nd-class
+Color = red
+Category = lord
+Month = 5
+Day = 3
+
+[apparition-st-michael]
+Name = Apparition of St. Michael the Archangel
+Rank = greater-double
+Color = white
+Category = angel
+Month = 5
+Day = 8
+
+[st-barnabas]
+Name = St. Barnabas, Apostle
+Rank = greater-double
+Color = red
+Category = apostle
+Month = 6
+Day = 11
+
+[st-ephrem-syrian]
+Name = St Ephrem the Syrian, Deacon, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Ephrem
+Month = 6
+Day = 18
+
+[st-basil-great]
+Name = St Basil the Great, Bishop, Confessor & Doctor
+Rank = greater-double
+Color = white
+Category = confessor-doctor
+ProperName = Basil
+Month = 6
+Day = 14
+
+[st-alban]
+Name = St Alban, Protomartyr of England
+Rank = double
+Color = red
+Category = martyr
+ProperName = Alban
+Month = 6
+Day = 22
+
+[nativity-john-baptist]
+Name = Nativity of St. John the Baptist
+Rank = double-1st-class
+Color = white
+Category = martyr
+Month = 6
+Day = 24
+HasVigil = true
+HasOctave = true
+
+[st-augustine-canterbury]
+Name = St Augustine of Canterbury, Bishop & Confessor
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Augustine
+Month = 5
+Day = 26
+
+[st-irenaeus]
+Name = St Irenaeus of Lyons, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Irenaeus
+Month = 6
+Day = 28
+
+[ss-peter-paul]
+Name = Ss. Peter and Paul, Apostles
+Rank = double-1st-class
+Color = red
+Category = apostle
+Month = 6
+Day = 29
+HasVigil = true
+HasOctave = true
+
+[visitation-bvm]
+Name = Visitation of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 7
+Day = 2
+
+[commemoration-st-paul-apostle]
+Name = Commemoration of St Paul, Apostle
+Rank = greater-double
+Color = white
+Category = apostle
+Month = 6
+Day = 30
+
+[commemoration-st-peter-apostle]
+Name = Commemoration of St Peter, Apostle
+Rank = commemoration
+Color = red
+Category = apostle
+Month = 6
+Day = 30
+
+[our-lady-einsiedeln]
+Name = Our Lady of Einsiedeln
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 7
+Day = 16
+
+[st-mary-magdalene]
+Name = St. Mary Magdalene
+Rank = greater-double
+Color = white
+Category = holy-woman
+Month = 7
+Day = 22
+
+[st-james-greater]
+Name = St. James the Greater, Apostle
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 7
+Day = 25
+
+[st-anne]
+Name = St. Anne, Mother of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = holy-woman
+Month = 7
+Day = 26
+
+[transfiguration]
+Name = Transfiguration of Our Lord
+Rank = double-2nd-class
+Color = white
+Category = lord
+Month = 8
+Day = 6
+
+[st-lawrence]
+Name = St. Lawrence, Martyr
+Rank = double-2nd-class
+Color = red
+Category = martyr
+Month = 8
+Day = 10
+HasVigil = true
+
+[assumption-bvm]
+Name = Assumption of the Blessed Virgin Mary
+Rank = double-1st-class
+Color = white
+Category = blessed-virgin
+Month = 8
+Day = 15
+HasVigil = true
+HasOctave = true
+
+[st-joachim]
+Name = St Joachim, Father of the B.V.M
+Rank = double-2nd-class
+Color = white
+Category = confessor
+ProperName = Joachim
+Month = 8
+Day = 16
+
+[st-bartholomew]
+Name = St. Bartholomew, Apostle
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 8
+Day = 24
+HasVigil = true
+
+[beheading-john-baptist]
+Name = Beheading of St. John the Baptist
+Rank = greater-double
+Color = red
+Category = martyr
+Month = 8
+Day = 29
+
+[nativity-bvm]
+Name = Nativity of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 9
+Day = 8
+
+[exaltation-holy-cross]
+Name = Exaltation of the Holy Cross
+Rank = greater-double
+Color = red
+Category = lord
+Month = 9
+Day = 14
+
+[seven-sorrows-bvm]
+Name = Seven Sorrows of the B.V.M
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 9
+Day = 15
+
+[st-eustace-companions]
+Name = St Eustace & companions, Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = Eustace and his Companions
+Month = 9
+Day = 20
+
+[st-matthew]
+Name = St. Matthew, Apostle and Evangelist
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 9
+Day = 21
+
+[dedication-st-michael]
+Name = Dedication of St. Michael the Archangel
+Rank = double-1st-class
+Color = white
+Category = angel
+Month = 9
+Day = 29
+
+[guardian-angels]
+Name = Holy Guardian Angels
+Rank = greater-double
+Color = white
+Category = angel
+Month = 10
+Day = 2
+
+[st-luke]
+Name = St. Luke, Evangelist
+Rank = double-2nd-class
+Color = red
+Category = evangelist
+Month = 10
+Day = 18
+
+[ss-simon-jude]
+Name = Ss. Simon and Jude, Apostles
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 10
+Day = 28
+HasVigil = true
+
+[all-saints]
+Name = All Saints
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 11
+Day = 1
+HasVigil = true
+HasOctave = true
+
+[all-souls]
+Name = All Souls' Day
+Rank = double
+Color = black
+Category = feria
+Month = 11
+Day = 2
+
+[st-martin-tours]
+Name = St. Martin of Tours
+Rank = greater-double
+Color = white
+Category = confessor-bishop
+ProperName = Martin
+Month = 11
+Day = 11
+
+[presentation-bvm]
+Name = Presentation of the Blessed Virgin Mary
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 11
+Day = 21
+
+[st-cecilia]
+Name = St. Cecilia
+Rank = double
+Color = red
+Category = virgin-martyr
+Month = 11
+Day = 22
+
+[st-clement-i]
+Name = St. Clement I, Pope and Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+Month = 11
+Day = 23
+
+[st-andrew]
+Name = St. Andrew, Apostle
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 11
+Day = 30
+HasVigil = true
+
+[conception-bvm]
+Name = Conception of the Blessed Virgin Mary
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 12
+Day = 8
+HasOctave = true
+
+[st-nicholas]
+Name = St. Nicholas
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Nicholas
+Month = 12
+Day = 6
+
+[st-ambrose]
+Name = St. Ambrose
+Rank = greater-double
+Color = white
+Category = confessor-doctor
+ProperName = Ambrose
+Month = 12
+Day = 7
+
+[st-lucy]
+Name = St Lucy, Virgin & Martyr
+Rank = greater-double
+Color = red
+Category = virgin-martyr
+ProperName = Lucy
+Month = 12
+Day = 13
+
+[expectation-bvm]
+Name = Expectation of the B.V.M
+Rank = greater-double
+Color = violet
+Category = blessed-virgin
+Month = 12
+Day = 18
+
+[st-thomas-apostle]
+Name = St. Thomas, Apostle
+Rank = double-2nd-class
+Color = red
+Category = apostle
+Month = 12
+Day = 21
+
+[christmas]
+Name = Nativity of Our Lord Jesus Christ
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 12
+Day = 25
+HasOctave = true
+
+[st-stephen]
+Name = St. Stephen, Protomartyr
+Rank = double-2nd-class
+Color = red
+Category = martyr
+Month = 12
+Day = 26
+
+[st-john-evangelist]
+Name = St. John, Apostle and Evangelist
+Rank = double-2nd-class
+Color = white
+Category = apostle
+Month = 12
+Day = 27
+
+[holy-innocents]
+Name = Holy Innocents
+Rank = double-2nd-class
+Color = violet
+Category = martyr
+Month = 12
+Day = 28
+
+[st-sylvester]
+Name = St. Sylvester I, Pope
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Sylvester
+Month = 12
+Day = 31
+
+[vigil-epiphany]
+Name = The Vigil of the Epiphany
+Rank = semi-double
+Color = white
+Category = feria
+Month = 1
+Day = 5
+
+[st-maurus]
+Name = St Maurus, Abbot
+Rank = greater-double
+Color = white
+Category = confessor
+ProperName = Maurus
+Month = 1
+Day = 15
+
+[ss-fabian-sebastian]
+Name = Ss. Fabian (Bishop) & Sebastian, Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = Fabian and Sebastian
+Month = 1
+Day = 20
+
+[st-timothy]
+Name = St Timothy, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Timothy
+Month = 1
+Day = 24
+
+[st-john-chrysostom]
+Name = St. John Chrysostom, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = John
+Month = 1
+Day = 27
+
+[st-scholastica]
+Name = St Scholastica, Virgin
+Rank = greater-double
+Color = white
+Category = virgin
+ProperName = Scholastica
+Month = 2
+Day = 10
+
+[st-cyril-jerusalem]
+Name = St Cyril of Jerusalem, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Cyril
+Month = 3
+Day = 18
+
+[st-isidore-seville]
+Name = St Isidore of Seville, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Isidore
+Month = 4
+Day = 4
+
+[st-venantius]
+Name = St Venantius, Martyr
+Rank = double
+Color = red
+Category = martyr
+ProperName = Venantius
+Month = 5
+Day = 18
+
+[st-vladimir-kiev]
+Name = St Vladimir of Kiev, King & Confessor
+Rank = double
+Color = white
+Category = confessor
+ProperName = Vladimir
+Month = 7
+Day = 15
+
+[st-elias-prophet]
+Name = St Elias the Prophet
+Rank = double
+Color = white
+Category = confessor
+ProperName = Elias
+Month = 7
+Day = 20
+
+[vigil-st-james]
+Name = Vigil of St. James
+Rank = simple
+Color = violet
+Category = feria
+Month = 7
+Day = 24
+
+[st-martha-bethany]
+Name = St. Martha of Bethany, Virgin
+Rank = double
+Color = white
+Category = holy-woman
+ProperName = Martha
+Month = 7
+Day = 29
+
+[chains-st-peter]
+Name = Chains of St Peter, Apostle
+Rank = greater-double
+Color = white
+Category = apostle
+Month = 8
+Day = 1
+
+[finding-st-stephen]
+Name = The Finding of St. Stephen, Protomartyr
+Rank = double
+Color = red
+Category = martyr
+ProperName = Stephen
+Month = 8
+Day = 3
+
+[dedication-our-lady-snows]
+Name = Dedication of Our Lady of the Snows
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 8
+Day = 5
+
+[st-maximus-constantinople]
+Name = St Maximus of Constantinople, Confessor
+Rank = double
+Color = white
+Category = confessor
+ProperName = Maximus
+Month = 8
+Day = 13
+
+[st-augustine-hippo]
+Name = St Augustine of Hippo, Bishop, Confessor & Doctor
+Rank = greater-double
+Color = white
+Category = confessor-doctor
+ProperName = Augustine
+Month = 8
+Day = 28
+
+[st-gorazde-prague]
+Name = St Gorazde of Prague, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Gorazde
+Month = 9
+Day = 4
+
+[st-jerome]
+Name = St Jerome, Priest, Confessor & Doctor
+Rank = greater-double
+Color = white
+Category = confessor-doctor
+ProperName = Jerome
+Month = 9
+Day = 30
+
+[st-placidus-companions]
+Name = St. Placidus & companions, Martyrs
+Rank = greater-double
+Color = red
+Category = martyr
+ProperName = Placidus and his Companions
+Month = 10
+Day = 5
+
+[holy-rosary-bvm]
+Name = The Holy Rosary of the Blessed Virgin Mary
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 10
+Day = 7
+
+[st-callistus]
+Name = St. Callistus, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Callistus
+Month = 10
+Day = 14
+
+[our-lady-walsingham]
+Name = Our Lady of Walsingham
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 10
+Day = 15
+
+[st-raphael-archangel]
+Name = St Raphael the Archangel
+Rank = greater-double
+Color = white
+Category = angel
+ProperName = Raphael
+Month = 10
+Day = 24
+
+[dedication-basilica-st-saviour]
+Name = Dedication of The Basilica of St. Saviour
+Rank = greater-double
+Color = white
+Category = dedication
+Month = 11
+Day = 9
+
+[dedication-basilica-holy-apostles]
+Name = Dedication of the Basilica of the Holy Apostles Peter & Paul
+Rank = greater-double
+Color = white
+Category = dedication
+Month = 11
+Day = 18
+
+[st-edmund]
+Name = St Edmund, King & Martyr
+Rank = double
+Color = red
+Category = martyr
+ProperName = Edmund
+Month = 11
+Day = 20
+
+[st-catherine-alexandria]
+Name = St Catherine of Alexandria, Virgin & Martyr
+Rank = double
+Color = red
+Category = virgin-martyr
+ProperName = Catherine
+Month = 11
+Day = 25
+
+[st-peter-chrysologus]
+Name = St Peter Chrysologus, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Peter
+Month = 12
+Day = 2
+
+[vigil-nativity]
+Name = Vigil of the Nativity of Our Lord
+Rank = double-1st-class
+Color = violet
+Category = feria
+Month = 12
+Day = 24
+
+[st-hilary]
+Name = St. Hilary, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Hilary
+Month = 1
+Day = 14
+
+[chair-peter-rome]
+Name = Chair of St Peter in Rome
+Rank = greater-double
+Color = white
+Category = apostle
+Month = 1
+Day = 18
+
+[st-agnes-rome]
+Name = St. Agnes of Rome, Virgin & Martyr
+Rank = greater-double
+Color = red
+Category = virgin-martyr
+ProperName = Agnes
+Month = 1
+Day = 21
+
+[st-cyril-alexandria]
+Name = St Cyril of Alexandria, Confessor, Bishop & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Cyril
+Month = 1
+Day = 28
+
+[st-ignatius-antioch]
+Name = St Ignatius of Antioch, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Ignatius
+Month = 2
+Day = 1
+
+[st-romuald]
+Name = St Romuald, Abbot
+Rank = double
+Color = white
+Category = confessor
+ProperName = Romuald
+Month = 2
+Day = 7
+
+[st-peter-damian]
+Name = St Peter Damian, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Peter
+Month = 2
+Day = 23
+
+[st-perpetua-felicitas]
+Name = St Perpetua & Felicitas, Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = Perpetua and Felicitas
+Month = 3
+Day = 6
+
+[st-cuthbert]
+Name = St. Cuthbert, Bishop & Confessor
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Cuthbert
+Month = 3
+Day = 20
+
+[st-gabriel-archangel]
+Name = St. Gabriel the Archangel
+Rank = greater-double
+Color = white
+Category = angel
+Month = 3
+Day = 24
+
+[st-john-damascene]
+Name = St. John Damascene, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = John
+Month = 3
+Day = 27
+
+[st-leo-great]
+Name = St Leo the Great, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Leo
+Month = 4
+Day = 11
+
+[st-bede-venerable]
+Name = St Bede the Venerable, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Bede
+Month = 5
+Day = 27
+
+[st-john-latin-gate]
+Name = St. John before the Latin Gate
+Rank = greater-double
+Color = red
+Category = apostle
+Month = 5
+Day = 6
+
+[st-gregory-nazianzen]
+Name = St. Gregory Nazianzen, Bishop, Confessor & Doctor
+Rank = double
+Color = white
+Category = confessor-doctor
+ProperName = Gregory
+Month = 5
+Day = 9
+
+[st-boniface]
+Name = St Boniface, Bishop & Martyr
+Rank = double
+Color = red
+Category = bishop-martyr
+ProperName = Boniface
+Month = 6
+Day = 5
+
+[st-columba-iona]
+Name = St Columba of Iona, Abbot
+Rank = double
+Color = white
+Category = confessor
+ProperName = Columba
+Month = 6
+Day = 9
+
+[ss-john-paul-martyrs]
+Name = Ss. John & Paul, Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = John and Paul
+Month = 6
+Day = 26
+
+[ss-cyril-methodius]
+Name = Ss. Cyril and Methodius, Bishops & Confessors
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Cyril and Methodius
+Month = 7
+Day = 7
+
+[translation-st-raphael]
+Name = Translation of St Raphael of Brooklyn
+Rank = double
+Color = white
+Category = confessor-bishop
+ProperName = Raphael
+Month = 7
+Day = 18
+
+[ss-cornelius-cyprian]
+Name = Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = Cornelius and Cyprian
+Month = 9
+Day = 16
+
+[st-januarius]
+Name = St Januarius & companions, Martyrs
+Rank = double
+Color = red
+Category = martyr
+ProperName = Januarius and his Companions
+Month = 9
+Day = 19
+
+[motherhood-bvm]
+Name = Motherhood of the B.V.M
+Rank = double-2nd-class
+Color = white
+Category = blessed-virgin
+Month = 10
+Day = 11

@@ -1,0 +1,100 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Thou art all fair, O Mary, * there is no spot of original sin in thee.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Thou art all fair, O Mary, * there is no spot of original sin in thee.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Thy raiment * is white as snow, and thy countenance as the sun.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Thou art the exaltation of Jerusalem, * thou art the great glory of Israel, thou art the great rejoicing of our nation.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Virgin Mary, * blessed art thou of the Most High God, above all the women upon the earth.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
+Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
+
+[benedictus-antiphon]
+The Lord hath made known His salvation; * the glory of His Mother hath He openly showed in the sight of the heathen.
+
+[magnificat-antiphon]
+Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
+
+[commemoration-antiphon]
+Thou art all fair, O Mary, * there is no spot of original sin in thee.
+
+[commemoration-versicle]
+V. This day is the Holy Virgin Mary conceived without sin.
+R. The Virgin's foot hath bruised the serpent's head.
+
+[collect]
+O God, by the Immaculate Conception of the Virgin, thou prepared a worthy habitation for thy Son; we beseech thee, that, as by the foreseen death of thy same Son thou preserved her from all stain of sin, so thou would grant us also, through her intercession, to come to thee with pure hearts.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] — check against diurnal
+!Prov 8:22-24
+The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/12-08 [Capitulum Sexta] — check against diurnal
+!Ezek 44:2-3
+This gate shall be shut, it shall not be opened, and no man shall pass through it: because the Lord the God of Israel hath entered in by it, and it shall be shut. For the prince, the prince himself, shall sit in it.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/12-08 [Versum 2] — check against diurnal
+V. This day is the Holy Virgin Mary conceived without sin.
+R. The Virgin's foot hath bruised the serpent's head.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/12-08 [Versum 1] — check against diurnal
+V. This day is the Holy Virgin Mary conceived without sin.
+R. The Virgin's foot hath bruised the serpent's head.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Tertia] — check against diurnal
+R. It is Almighty God * That girdeth me with strength.
+R. It is Almighty God * That girdeth me with strength.
+V. And maketh my way perfect.
+R. That girdeth me with strength.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. It is Almighty God * That girdeth me with strength.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Sexta] — check against diurnal
+R. By this I know that * Thou favourest me.
+R. By this I know that * Thou favourest me.
+V. Because mine enemy shall not triumph over me.
+R. Thou favourest me.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. By this I know that * Thou favourest me.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Nona] — check against diurnal
+R. I will extol thee, O Lord, * for Thou hast lifted me up.
+R. I will extol thee, O Lord, * for Thou hast lifted me up.
+V. And hast not made my foes to rejoice over me.
+R. Thou hast lifted me up.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I will extol thee, O Lord, * for Thou hast lifted me up.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov 8:22-24
+The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov 8:22-24
+The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+R. Thanks be to God.

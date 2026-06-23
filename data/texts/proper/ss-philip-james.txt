@@ -1,0 +1,36 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+Lord, show us the Father, * and it sufficeth us. Alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+Lord, show us the Father, * and it sufficeth us. Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+Philip, * He that hath seen Me hath seen the Father. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+Have I been so long time with you, and yet hast thou not known Me * Philip, he that hath seen Me hath seen the Father. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+If ye had known Me ye should have known My Father also, * and from henceforth ye know Him and have seen Him. Alleluia, Alleluia, Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
+If ye love Me, * keep My commandments. Alleluia, Alleluia, Alleluia.
+
+[magnificat-antiphon]
+If ye love Me, * keep My commandments. Alleluia, Alleluia, Alleluia.
+
+[commemoration-antiphon]
+Lord, show us the Father, * and it sufficeth us. Alleluia.
+
+[collect]
+O God, Who dost every year gladden us by the solemn memorial of thine Apostles Philip and James, grant us grace, we beseech thee, not only to rejoice because of their worthy deeds, but also to tread in their footsteps.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/05-01 [Ant 2] — check against diurnal
+I am the Way * the Truth, and the Life: no man cometh unto the Father, but by Me. Alleluia.

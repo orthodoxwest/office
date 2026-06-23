@@ -1,0 +1,1482 @@
+/* AWRV Divine Office — typography-focused stylesheet */
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RkC49_Gw.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGFmQSNjdsmc35JDF1K5GR0SDw_ZgPJtWoGPg-poi-nfdiA.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-2fRkC49_Gw.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGFmQSNjdsmc35JDF1K5GR0SDw_ZgPJtWoGPg-poi-nB9iA.woff2") format("woff2");
+}
+
+:root {
+  --text: #1a1a1a;
+  --bg: #fdf9f2;
+  --accent: #6b3a1f;
+  --muted: #7a7060;
+  --border: #d9d0c0;
+  --rubric: #8b1a1a;
+  --white: #f8f4ec;
+  --red: #fdf0f0;
+  --green: #f0f4f0;
+  --violet: #f4f0f8;
+  --black: #f0f0f0;
+  --rose: #fdf4f8;
+  --banner-bg: #f5f0e8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 4.5rem;
+}
+
+main {
+  min-height: 60vh;
+}
+
+h1,
+h2,
+h3,
+p,
+li {
+  text-wrap: pretty;
+}
+
+.skip-link {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  transform: translateY(-140%);
+  background: var(--accent);
+  color: var(--bg);
+  padding: 0.55rem 0.85rem;
+  text-decoration: none;
+  border-radius: 0.4rem;
+  z-index: 200;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.js .date-submit {
+  display: none;
+}
+
+/* ── Header / Nav ── */
+
+header {
+  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+  padding: 0.85rem 0 0.7rem;
+  margin-bottom: 1.5rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  justify-content: center;
+}
+
+nav a {
+  color: var(--accent);
+  text-decoration: none;
+  margin-right: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.15rem;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+nav a.active {
+  color: var(--text);
+  border-bottom: 1px solid var(--accent);
+}
+
+/* ── Footer ── */
+
+footer {
+  border-top: 1px solid rgba(26, 26, 26, 0.08);
+  margin-top: 2.5rem;
+  padding: 0.85rem 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── Report a problem ── */
+
+.report-issue {
+  margin-top: 2.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── Home page ── */
+
+.home {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.home-summary,
+.home-prayer-card {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.35);
+  padding: 1.2rem 1.25rem;
+}
+
+.home-kicker {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.65rem;
+}
+
+.home h1 {
+  font-size: 1.9rem;
+  font-weight: normal;
+  margin-bottom: 0.75rem;
+}
+
+.home .feast {
+  font-size: 1.2rem;
+  margin-bottom: 0.35rem;
+  max-width: 24ch;
+}
+
+.home .feast-rank {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.home .commemorations {
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.home .commemorations li::before {
+  content: "Commemoration: ";
+  font-style: italic;
+}
+
+.home .meta {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-top: 0.6rem;
+}
+
+.color-swatch {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+  vertical-align: middle;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.color-swatch.color-white  { background: #e8e0cc; }
+.color-swatch.color-red    { background: #b02a24; }
+.color-swatch.color-green  { background: #3a6b3a; }
+.color-swatch.color-violet { background: #6a3a8a; }
+.color-swatch.color-black  { background: #3a3a3a; }
+.color-swatch.color-rose   { background: #c4607a; }
+
+.home .feast-rank-link {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--muted);
+}
+
+.home .feast-rank-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.home .octave-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.home .penitential {
+  margin-bottom: 0.5rem;
+}
+
+.penitential-badge {
+  display: inline-block;
+  margin-right: 0.4rem;
+  margin-bottom: 0.25rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--rubric);
+  border-radius: 999px;
+  color: var(--rubric);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.pray-now-wrap {
+  margin-bottom: 1rem;
+}
+
+.pray-now {
+  display: inline-block;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 2px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pray-now:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.home-prayer-copy {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.home-hour-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.home-hour-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.45);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.home-hour-link:hover {
+  border-color: var(--accent);
+}
+
+.home-hour-link.is-current {
+  border-color: var(--accent);
+  background: rgba(107, 58, 31, 0.08);
+}
+
+.home-hour-link-name {
+  font-size: 0.98rem;
+}
+
+.home-hour-link-state {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-calendar-link {
+  margin-top: 1rem;
+}
+
+.home-calendar-link a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.home-calendar-link a:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* ── Hour page ── */
+
+.hour-header {
+  margin-bottom: 1.75rem;
+  padding: 0 0 0.85rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.hour-header h1 {
+  font-size: 1.8rem;
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+}
+
+.hour-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 auto 0.85rem;
+  max-width: 34rem;
+  line-height: 1.45;
+}
+
+.day-nav {
+  font-size: 0.82rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.8rem;
+  align-items: center;
+  justify-content: center;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.06);
+}
+
+.day-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  margin-right: 0;
+}
+
+.day-nav a:hover {
+  text-decoration: underline;
+}
+
+.date-jump-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.date-jump {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.05rem 0 0.15rem;
+  cursor: pointer;
+  min-width: 9.5rem;
+}
+
+.date-jump:focus-visible {
+  border-bottom-color: var(--accent);
+}
+
+.date-jump::-webkit-calendar-picker-indicator {
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.date-submit {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.date-submit:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .date-jump::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+  }
+}
+
+:root[data-theme="dark"] .date-jump::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.6;
+}
+
+/* ── Office elements ── */
+
+.office-hour {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.elements {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.elements > * {
+  margin-bottom: 0;
+}
+
+.section-heading {
+  font-size: 1.05rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text);
+  text-align: center;
+  margin-top: 1.45rem;
+  margin-bottom: 0.8rem;
+  padding-top: 0;
+  border-top: none;
+}
+
+.elements > .section-heading:first-child {
+  margin-top: 0;
+}
+
+.rubric {
+  color: var(--rubric);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.cross {
+  color: var(--rubric);
+}
+
+.elements > :is(.psalm, .canticle, .hymn, .chapter, .preces, .marian-antiphon, .liturgical-block) {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.antiphon {
+  display: block;
+  font-style: normal;
+  color: var(--text);
+  max-width: 34rem;
+  margin: 0.25rem auto 0.95rem;
+  padding: 0 1.2rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.antiphon em {
+  font-style: normal;
+  color: var(--rubric);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  margin-right: 0.3rem;
+}
+
+.elements > .antiphon {
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.item-label {
+  font-size: 0.9rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  text-align: center;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.hymn-title {
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.hymn-verses {
+  line-height: 1.75;
+}
+
+.hymn-latin {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.hymn-stanza {
+  margin-bottom: 0.75rem;
+}
+
+.psalm-text {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── Psalm / canticle verse structure ── */
+
+.psalm-verses {
+  line-height: 1.75;
+  margin-top: 0.6rem;
+}
+
+/* Unnumbered first verse — full-width paragraph, carries drop cap */
+.psalm-verses .verse {
+  margin-bottom: 0.3rem;
+}
+
+/* Numbered verses — flex so the number sits in a fixed-width gutter */
+.psalm-verses .verse.numbered {
+  display: flex;
+  padding-left: 0;
+  clear: left;
+}
+
+.psalm-verses .verse-num {
+  flex: 0 0 1.8rem;
+  text-align: right;
+  padding-right: 0.5rem;
+  color: var(--muted);
+  font-size: 0.78em;
+  line-height: 1.75;
+  user-select: none;
+}
+
+.psalm-verses .verse-body {
+  flex: 1;
+}
+
+.psalm-verses .mediant,
+.gloria-patri .mediant {
+  color: var(--muted);
+}
+
+/* Gloria Patri doxology rendered with * mediant like a psalm verse */
+.gloria-patri {
+  line-height: 1.75;
+  padding-left: 1.8rem;
+  padding-right: 0;
+}
+
+.psalm > .gloria-patri,
+.canticle > .gloria-patri {
+  margin-top: 0.3rem;
+}
+
+/* Mid-canticle section break heading (e.g. the two-part structure of Deut 32) */
+.canticle-section {
+  text-align: center;
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--muted);
+  margin: 0.8rem 0 0;
+}
+
+/* Drop cap on the unnumbered opening verse of each psalm/canticle */
+.psalm-verses .verse:first-child::first-letter {
+  font-size: 3.4em;
+  line-height: 0.8;
+  float: left;
+  padding-right: 0.08em;
+  color: var(--accent);
+}
+
+/* Drop cap on chapter and hymn opening text */
+.chapter .liturgical-block .plain-line:first-child::first-letter,
+.chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+  font-size: 3.4em;
+  line-height: 0.8;
+  float: left;
+  padding-right: 0.08em;
+  color: var(--accent);
+}
+
+.chapter-ref {
+  font-style: italic;
+  color: var(--muted);
+  text-align: center;
+  margin-top: -0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.chapter .liturgical-block,
+.preces .liturgical-block,
+.marian-antiphon .liturgical-block {
+  margin-top: 0.45rem;
+}
+
+/* ── Liturgical-block (versicles, responses, prayers, chapters, Marian antiphons) ── */
+
+.liturgical-block > * {
+  margin-bottom: 0.3rem;
+}
+
+.versicle-line,
+.response-line {
+  display: flex;
+  align-items: baseline;
+  font-style: normal;
+}
+
+.sigil {
+  flex: 0 0 auto;
+  margin-right: 0.35rem;
+  font-weight: normal;
+  color: var(--rubric);
+  user-select: none;
+}
+
+.sigil-text {
+  flex: 1;
+}
+
+.scripture-ref {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.85em;
+  margin-bottom: 0.4rem;
+  text-align: center;
+}
+
+
+.liturgical-gap {
+  height: 0.5rem;
+}
+
+/* Marian antiphons — labelled antiphon blocks containing the full office */
+.marian-antiphon {
+  margin: 1rem 0;
+}
+
+.marian-antiphon .item-label {
+  margin-bottom: 0.6rem;
+}
+
+.session-prayers {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0.8rem 0.95rem;
+}
+
+.session-prayers summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+/* ── Construction banner ── */
+
+.site-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--banner-bg);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  z-index: 100;
+  text-align: center;
+}
+
+.site-banner p {
+  margin: 0;
+}
+
+.site-banner button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+.site-banner button:hover {
+  color: var(--text);
+}
+
+/* ── Offline state ── */
+
+.offline-indicator {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 110;
+  padding: 0.18rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--banner-bg);
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  box-shadow: 0 0.15rem 0.4rem rgba(26, 26, 26, 0.08);
+}
+
+.offline-page {
+  text-align: center;
+  padding: 3rem 0 4rem;
+}
+
+.offline-page h1 {
+  font-size: 2rem;
+  font-weight: normal;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.offline-page p {
+  color: var(--muted);
+  max-width: 32rem;
+  margin: 0 auto 0.85rem;
+}
+
+.offline-actions {
+  margin-top: 1.5rem;
+}
+
+/* ── Calendar page ── */
+
+.calendar {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.calendar-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 2rem;
+  margin-bottom: 0;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.calendar-header h1 {
+  font-size: 1.5rem;
+  font-weight: normal;
+}
+
+.calendar-legend {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  max-width: 52rem;
+  margin-bottom: 0;
+}
+
+.year-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.95rem;
+  margin-right: 1rem;
+}
+
+.year-nav a:hover {
+  text-decoration: underline;
+}
+
+.month {
+  margin-bottom: 1.8rem;
+  scroll-margin-top: 1rem;
+}
+
+.month h2 {
+  font-size: 0.95rem;
+  font-weight: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.month-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  table-layout: fixed;
+}
+
+.month-table th {
+  text-align: left;
+  padding: 0.28rem 0.45rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: normal;
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.month-table td {
+  padding: 0.24rem 0.45rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+.day-mobile-head {
+  display: none;
+}
+
+.day-feast-name {
+  display: inline;
+}
+
+.month-table th:nth-child(1),
+.month-table td.day-num {
+  width: 2.8rem;
+}
+
+.month-table th:nth-child(2),
+.month-table td.day-wk {
+  width: 3rem;
+}
+
+.month-table th:nth-child(4),
+.month-table th:nth-child(5),
+.month-table td.day-penitential-flag {
+  width: 2.6rem;
+}
+
+.month-table th:nth-child(6),
+.month-table td.day-color {
+  width: 3.7rem;
+}
+
+.month-table th:nth-child(7),
+.month-table td.day-rank {
+  width: 3.2rem;
+}
+
+.day-wk,
+.day-color,
+.day-rank,
+.day-penitential-flag {
+  white-space: nowrap;
+}
+
+.month-table .day-num a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.month-table .day-num a:hover {
+  text-decoration: underline;
+}
+
+.month-table abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.14em;
+  cursor: default;
+  position: relative;
+}
+
+.month-table abbr::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+}
+
+.month-table abbr:hover::after,
+.month-table abbr:focus::after {
+  display: block;
+}
+
+/* Large screens: always show commemoration text, hide the toggle */
+.day-commemorations {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.day-commemorations summary {
+  display: none;
+}
+
+.day-commemorations .day-commemoration {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.day-commemoration::before {
+  content: "Com. ";
+}
+
+.day-penitential-flag {
+  width: 3.2rem;
+  text-align: center;
+  color: var(--rubric);
+  font-weight: bold;
+}
+
+/* Narrow screens: collapse to tap-to-expand summary */
+@media (max-width: 700px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar {
+    gap: 0.9rem;
+  }
+
+  .month-table,
+  .month-table tbody,
+  .month-table tr,
+  .month-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .month-table thead {
+    display: none;
+  }
+
+  .month-table {
+    font-size: 0.95rem;
+  }
+
+  .month-table tr {
+    margin-bottom: 0.9rem;
+    border: 1px solid var(--border);
+    border-collapse: separate;
+  }
+
+  .month-table td {
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .month-table .day-num,
+  .month-table .day-wk,
+  .month-table .day-penitential-flag,
+  .month-table .day-color,
+  .month-table .day-rank {
+    display: none;
+  }
+
+  .month-table .day-feast {
+    display: block;
+    padding: 0.7rem 0.8rem 0.75rem;
+  }
+
+  .day-mobile-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .day-mobile-date {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .day-mobile-num {
+    font-size: 1.15rem;
+    font-weight: bold;
+    line-height: 1;
+  }
+
+  .day-mobile-weekday {
+    color: var(--muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .day-mobile-flags {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .day-mobile-flag,
+  .day-mobile-rank {
+    color: inherit;
+    text-decoration: underline dotted;
+    text-underline-offset: 0.14em;
+  }
+
+  .day-feast-name {
+    display: block;
+    line-height: 1.4;
+  }
+
+  .month-table abbr::after {
+    left: 0;
+    transform: none;
+    white-space: normal;
+    min-width: 10rem;
+  }
+
+  .day-commemorations summary {
+    display: list-item;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-style: italic;
+    cursor: pointer;
+    margin-top: 0.3rem;
+  }
+
+  .day-commemorations:not([open]) .day-commemoration {
+    display: none;
+  }
+}
+
+/* liturgical color row tints */
+.color-white { background: var(--white); }
+.color-red    { background: var(--red); }
+.color-green  { background: var(--green); }
+.color-violet { background: var(--violet); }
+.color-black  { background: var(--black); }
+.color-rose   { background: var(--rose); }
+
+/* ── Dark mode (system theme or ?theme=dark) ── */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --text: #e8e0d0;
+    --bg: #1a1814;
+    --accent: #c8956a;
+    --muted: #9a9080;
+    --border: #3a3528;
+    --rubric: #d47070;
+    --white: #1e1e1c;
+    --red: #1e1818;
+    --green: #181e18;
+    --violet: #1a1820;
+    --black: #181818;
+    --rose: #1e181c;
+    --banner-bg: #221e18;
+  }
+}
+
+:root[data-theme="dark"] {
+  --text: #e8e0d0;
+  --bg: #1a1814;
+  --accent: #c8956a;
+  --muted: #9a9080;
+  --border: #3a3528;
+  --rubric: #d47070;
+  --white: #1e1e1c;
+  --red: #1e1818;
+  --green: #181e18;
+  --violet: #1a1820;
+  --black: #181818;
+  --rose: #1e181c;
+  --banner-bg: #221e18;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .home-summary,
+  :root:not([data-theme="light"]) .home-prayer-card,
+  :root:not([data-theme="light"]) .hour-header,
+  :root:not([data-theme="light"]) .session-prayers,
+  :root:not([data-theme="light"]) .home-hour-link {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  :root:not([data-theme="light"]) .home-hour-link.is-current {
+    background: rgba(200, 149, 106, 0.12);
+  }
+}
+
+:root[data-theme="dark"] .home-summary,
+:root[data-theme="dark"] .home-prayer-card,
+:root[data-theme="dark"] .hour-header,
+:root[data-theme="dark"] .session-prayers,
+:root[data-theme="dark"] .home-hour-link {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .home-hour-link.is-current {
+  background: rgba(200, 149, 106, 0.12);
+}
+
+/* ── Narrow screens ── */
+
+@media (max-width: 540px) {
+  body {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .day-nav {
+    align-items: center;
+  }
+
+  .date-jump-form {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .date-jump {
+    min-width: 9.5rem;
+    width: auto;
+    flex: 0 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  header, footer, .day-nav, .year-nav, .report-issue {
+    display: none;
+  }
+
+  body {
+    max-width: none;
+    padding: 0;
+    font-size: 11pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .hour-header {
+    border: none;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .rubric {
+    color: #600;
+  }
+
+  /* Remove liturgical color row tints */
+  .color-white, .color-red, .color-green,
+  .color-violet, .color-black, .color-rose {
+    background: none;
+  }
+
+  /* Keep page breaks out of psalm blocks */
+  .psalm, .canticle, .hymn {
+    page-break-inside: avoid;
+  }
+
+
+  .psalm-verses .mediant,
+  .gloria-patri .mediant,
+  .psalm-verses .verse-num,
+  .scripture-ref,
+  .sigil {
+    color: #555;
+  }
+
+  /* Expand all collapsible session-prayer sections */
+  details.session-prayers {
+    display: block;
+  }
+
+  details.session-prayers > summary {
+    display: none;
+  }
+
+  details.session-prayers > * {
+    display: block;
+  }
+
+  .site-banner,
+  .offline-indicator {
+    display: none;
+  }
+}
+
+/* ── 404 page ── */
+
+.not-found {
+  text-align: center;
+  padding: 3rem 0 4rem;
+}
+
+.not-found h1 {
+  font-size: 2rem;
+  font-weight: normal;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.not-found-quote {
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.not-found-ref {
+  font-size: 0.85rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 2rem;
+}
+
+.not-found-msg {
+  color: var(--muted);
+  font-size: 0.95rem;
+  max-width: 36em;
+  margin: 0 auto 2rem;
+}
+
+.not-found-home a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.not-found-home a:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* ===== Reminders page ===== */
+
+.reminders {
+  max-width: 44em;
+  margin: 0 auto;
+}
+
+.reminders h1 {
+  margin-bottom: 0.75rem;
+}
+
+.reminders-intro {
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+  max-width: 38em;
+}
+
+.reminders fieldset {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem 1rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reminders legend {
+  padding: 0 0.5em;
+  color: var(--accent);
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+}
+
+.reminder-hour-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 22em;
+  padding: 0.2rem 0;
+}
+
+.reminder-hour-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.reminder-hour-row input[type="time"] {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--text);
+  padding: 0.15rem 0.4rem;
+}
+
+.reminder-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.reminder-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+}
+
+.reminder-alarm select {
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+}
+
+.reminder-result {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.reminder-result h2,
+.reminder-help h2 {
+  margin-bottom: 0.75rem;
+}
+
+.reminder-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+#reminder-copied {
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.reminder-url {
+  display: block;
+  word-break: break-all;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+}
+
+.reminder-help h3 {
+  margin: 1rem 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.reminder-help p {
+  color: var(--text);
+  max-width: 40em;
+  margin-bottom: 0.5rem;
+}
+
+.reminder-help a {
+  color: var(--accent);
+}

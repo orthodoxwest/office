@@ -1,0 +1,44 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+While as the Archangel Michael fought against the dragon, * I heard voices saying: Salvation unto our God. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+Michael Mine Archangel, * I have appointed thee for a prince over the ingathering of souls.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+O ye Angels of the Lord, bless ye the Lord always.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
+O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
+
+[benedictus-antiphon]
+The sea was moved * and the earth quaked, when the Archangel Michael descended from heaven.
+
+[magnificat-antiphon]
+Great Michael * the Archangel stood before the throne of God, saying: Lord of hosts, with power and with might come thou to deliver us.
+
+[commemoration-antiphon]
+The smoke of the incense ascended up * before the Lord, out of the Angel's hand.
+
+[commemoration-versicle]
+V. In the presence of the Angels I will sing praise unto thee, O God.
+R. I will worship toward thy holy Temple, and praise thy Name.
+
+[collect]
+O God, Who, with wonderful order, dost appoint the ministrations of Angels and of men, mercifully grant that they who ever stand before thee in heaven to minister unto thee, may also defend our life on earth.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/09-29 [Versum 2] — check against diurnal
+V. An Angel stood at the Altar of the Temple. (Alleluia.)
+R. Having a golden censer in his hand. (Alleluia.)

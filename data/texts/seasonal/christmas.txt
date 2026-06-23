@@ -1,0 +1,7 @@
+# Christmas seasonal overrides (Christmas Day through the Octave of Epiphany)
+
+[hymn-doxology]
+All honour, laud, and glory be,
+O Jesu, Virgin-born to thee;
+All glory, as is ever meet,
+To Father, Son, and Paraclete. Amen.

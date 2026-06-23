@@ -1,0 +1,180 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+Holiness becometh thine house, * O Lord, for ever.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+Holiness becometh thine house, * O Lord, for ever.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+My house * shall be called the house of prayer.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+This is the Lord's house * stoutly builded, well founded upon a sure rock.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+The Lord's house is well founded * upon a sure rock.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+All thy walls are of stones most precious, * and the towers of Jerusalem shall be built up with jewels.
+
+[benedictus-antiphon]
+How awe-inspiring is this place! * This is none other but the house of God, and this is the gate of heaven.
+
+[magnificat-antiphon]
+O Lord God of Israel, there is no God like thee in heaven above, or on earth beneath; * who keepest covenant and mercy with thy servants that walk before thee with all their heart.
+
+[commemoration-antiphon]
+This is none other but the house of God, * and this is the gate of heaven.
+
+[commemoration-versicle]
+V. My house shall be called a house of prayer.
+R. For all nations.
+
+[collect]
+O God, who dost invisibly contain all things, and yet for the salvation of mankind dost visibly manifest thy signs; enlighten thy people who resort to this holy place, and grant that they may worthily and devoutly celebrate thy holy mysteries, and when they depart hence receive the fulness of thy blessing.
+
+[chapter-lauds]
+# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] — check against diurnal
+!Rev 21:2
+I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Commune/C8 [Capitulum Sexta] — check against diurnal
+!Rev 21:3
+And I heard a great voice out of the throne, saying Behold, the tabernacle of God is with men, and He will dwell with them. And they shall be His people; and God Himself shall be with them, and be their God.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Commune/C8 [HymnusM Laudes] — check against diurnal
+Angularis fundamentum
+
+Christ is made the sure Foundation,
+Christ the Head and Cornerstone;
+Chosen of the Lord, and precious,
+Binding all the Church in one,
+Holy Zions Help forever,
+And her Confidence alone.
+
+All that dedicated city,
+Dearly loved of God on high,
+In exultant jubilation,
+Pours perpetual melody,
+God the One in Three adoring
+In glad hymns eternally.
+
+To this temple, where we call Thee,
+Come, O Lord of Hosts, today;
+With Thy wonted lovingkindness
+Hear Thy servants as they pray.
+And Thy fullest benediction
+Shed within its walls alway.
+
+Here vouchsafe to all Thy servants
+What they ask of Thee to gain;
+What they gain from Thee forever
+With the blessèd to retain,
+And hereafter in Thy glory
+Evermore with Thee to reign.
+
+Laud and honor to the Father,
+Laud and honor to the Son,
+Laud and honor to the Spirit,
+Ever Three and ever One;
+Consubstantial, co-eternal,
+While unending ages run.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Commune/C8 [HymnusM Vespera] — check against diurnal
+Urbs beata Jerusalem
+
+Blessed city, heavenly Salem,
+vision dear of peace and love,
+who of living stones art builded
+in the height of heaven above,
+and, with angel hosts encircled,
+as a bride dost earthward move;
+
+from celestial realms descending,
+bridal glory round thee shed,
+meet for him whose love espoused thee,
+to thy Lord shalt thou be led;
+all thy streets and all thy bulwarks
+of pure gold are fashioned.
+
+Bright thy gates of pearl are shining;
+they are open evermore;
+and by virtue of his merits
+thither faithful souls do soar,
+who for Christ's dear Name in this world
+pain and tribulation bore.
+
+Many a blow and biting sculpture
+polished well those stones elect,
+in their places now compacted
+by the heavenly Architect,
+who therewith hath willed for ever
+that his palace should be decked.
+
+Laud and honor to the Father,
+laud and honor to the Son,
+laud and honor to the Spirit,
+ever Three, and ever One,
+consubstantial, coeternal,
+while unending ages run.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium CommuneM/C8 [Versum 2] — check against diurnal
+V. This is the house of God, stoutly builded.
+R. Well founded upon a sure rock.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Commune/C8 [Versum 1] — check against diurnal
+V. This is the house of God, stoutly builded.
+R. Well founded upon a sure rock.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Commune/C8 [Responsory Breve Tertia] — check against diurnal
+R. Holiness becometh thine house, * O Lord.
+R. Holiness becometh thine house, * O Lord.
+V. For ever.
+R. O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Holiness becometh thine house, * O Lord.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Commune/C8 [Responsory Breve Sexta] — check against diurnal
+R. This place is holy, * wherein the Priest prayeth.
+R. This place is holy, * wherein the Priest prayeth
+V. For the pardon of the transgressions and offences of the people.
+R. The Priest prayeth.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This place is holy, * wherein the Priest prayeth.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Commune/C8 [Responsory Breve Nona] — check against diurnal
+R. This is the Lord's house, * stoutly builded.
+R. This is the Lord's house, * stoutly builded.
+V. Well founded upon a sure rock.
+R. Stoutly builded.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This is the Lord's house, * stoutly builded.
+
+[chapter-vespers]
+# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 21:2
+I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 21:2
+I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
+R. Thanks be to God.

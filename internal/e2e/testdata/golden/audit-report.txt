@@ -1,0 +1,104 @@
+=== Placeholders: 0 corpus entries ===
+
+=== Missing propers: 0 feast(s) ===
+
+=== Commons fallback: 0 feast(s) ===
+
+=== Flat indexed psalm antiphons: 0 proper, 0 common ===
+
+=== Translation review: 3 mixed-register, 4 modern-pronoun collect(s) ===
+These entries are high-signal candidates for translation normalization.
+Mixed-register entries contain both thou/thee/thy and you/your language in the same text.
+
+  [mixed-register]
+    proper/corpus-christi/collect
+    proper/ss-philip-james/psalm-antiphon-3
+    proper/trinity-sunday/collect
+
+  [modern-pronoun collects]
+    proper/all-souls/collect
+    proper/corpus-christi/collect
+    proper/quinquagesima/collect
+    proper/trinity-sunday/collect
+
+=== Suppressed: 76 feast(s) via data/audit-ok.txt ===
+  our-lady-of-sorrows-passion
+  octave-day-st-stephen
+  octave-day-holy-innocents
+  st-anthony-egypt
+  st-matthias
+  st-gregory-great
+  st-patrick
+  st-benedict
+  st-athanasius
+  st-barnabas
+  st-ephrem-syrian
+  st-basil-great
+  st-alban
+  st-augustine-canterbury
+  st-irenaeus
+  our-lady-einsiedeln
+  st-james-greater
+  st-joachim
+  seven-sorrows-bvm
+  st-eustace-companions
+  st-luke
+  ss-simon-jude
+  st-nicholas
+  st-ambrose
+  st-lucy
+  expectation-bvm
+  st-thomas-apostle
+  st-sylvester
+  st-maurus
+  ss-fabian-sebastian
+  st-timothy
+  st-john-chrysostom
+  st-scholastica
+  st-cyril-jerusalem
+  st-isidore-seville
+  st-venantius
+  st-vladimir-kiev
+  st-elias-prophet
+  st-martha-bethany
+  finding-st-stephen
+  dedication-our-lady-snows
+  st-maximus-constantinople
+  st-augustine-hippo
+  st-gorazde-prague
+  st-jerome
+  st-placidus-companions
+  holy-rosary-bvm
+  st-callistus
+  our-lady-walsingham
+  dedication-basilica-st-saviour
+  dedication-basilica-holy-apostles
+  st-edmund
+  st-catherine-alexandria
+  st-peter-chrysologus
+  st-hilary
+  st-agnes-rome
+  st-cyril-alexandria
+  st-ignatius-antioch
+  st-romuald
+  st-peter-damian
+  st-perpetua-felicitas
+  st-cuthbert
+  st-john-damascene
+  st-leo-great
+  st-bede-venerable
+  st-gregory-nazianzen
+  st-boniface
+  st-columba-iona
+  ss-john-paul-martyrs
+  ss-cyril-methodius
+  translation-st-raphael
+  ss-cornelius-cyprian
+  st-januarius
+  motherhood-bvm
+  st-raphael-of-brooklyn
+  st-tikhon-moscow
+
+To mark intentional fallbacks, add lines to data/audit-ok.txt:
+  feast-id *                   (suppress all warnings for this feast)
+  feast-id ref1 ref2 ...        (suppress specific refs only)

@@ -1,0 +1,75 @@
+[collect]
+O God, who didst loose thy blessed Apostle Peter from his chains and didst make him go forth unharmed, loose, we pray, the chains of our sins, and in thy mercy ward off from us every evil.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium SanctiM/08-01 [Ant 2] — check against diurnal
+Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/08-01 [Ant 3] — check against diurnal
+Thou to whom God hath given the keys * of the kingdom of heaven, loosen the chains which bind the sordid souls of the earthly.
+
+[chapter-lauds]
+# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Laudes] — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Sexta] — check against diurnal
+!Acts 12:5
+Peter therefore was kept in prison. But prayer was made without ceasing of the Church unto God for him.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium SanctiM/08-01 [Hymnus Laudes] — check against diurnal
+Beate Pastor, Petre, clemens accipe
+
+Peter, blest shepherd, hearken to our cry,
+And with a word unloose our guilty chain;
+Thou! who hast power to open the gates on high
+To men below, and power to shut them fast again.
+
+Praise, blessing, majesty, through endless days,
+Be to the Trinity immortal given;
+Who in pure unity profoundly sways
+Eternally alike all things in earth and heaven.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/08-01 [Hymnus Vespera] — check against diurnal
+Miris modis repente liber, ferrea
+
+In wondrous mode set free, lo, at the Lord's command
+The galling iron chain doth fall from Peter's hand,
+From Peter, shepherd blest, who doth with gentle sway,
+His faithful children lead in virtue's fragrant way,
+And e'er with watchful love the tempter drive away.
+
+Now to the Father be eternal glory done;
+Our songs we raise to thee, O everlasting Son;
+O Spirit from on high, thy throne we bow before;
+To thee be honour, praise, and glory evermore:
+The Holy Trinity we worship and adore.
+Amen.
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/08-01 [Versum 1] — check against diurnal
+V. You are Peter.
+R. And on this rock I am going to build my church.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium SanctiM/08-01 [Ant 2] — check against diurnal
+Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+
+[chapter-vespers]
+# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.

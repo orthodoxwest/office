@@ -1,0 +1,160 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+And while they looked * steadfastly towards heaven, as He went up, they said, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+He lifted up His Hands, * and blessed them, and was carried up into heaven, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+Extol the King of kings, * and ascribe praise to God, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
+While they beheld, * He was taken up, and a cloud received Him in heaven, alleluia.
+
+[benedictus-antiphon]
+I ascend to my Father * and to your Father: to my God and your God, alleluia.
+
+[magnificat-antiphon]
+O King of glory, Lord of hosts, * Who hast this day exalted thine Own Self, with great triumph, above all the heavens, leave us not orphans but send unto us the Promise of the Father, even the Spirit of truth, alleluia.
+
+[commemoration-antiphon]
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+
+[commemoration-versicle]
+V. God is ascended with jubilee, alleluia.
+R. And the Lord with the sound of trumpet, alleluia.
+
+[collect]
+Grant, we beseech thee, Almighty God, that just as we do believe thine Only-Begotten Son, our Saviour, to have this day ascended into the heavens, so we may also in heart and mind thither ascend, and with Him continually dwell.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] — check against diurnal
+!Act. 1:1-2
+The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Sexta] — check against diurnal
+!Acts 1:4-5
+And eating together with them, he commanded them, that they should not depart from Jerusalem, but should wait for the promise of the Father, which you have heard (saith he) by my mouth. For John indeed baptized with water, but you shall be baptized with the Holy Ghost, not many days hence.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Hymnus Laudes] — check against diurnal
+Salutis humanae Sator
+
+Hail, thou who man's Redeemer art,
+Jesu, the joy of every heart;
+Great Maker of the world's wide frame,
+And purest love's delight and flame:
+
+What nameless mercy thee o'ercame,
+To bear our load of sin and shame?
+For guiltless, thou thy life didst give,
+That sinful erring man might live.
+
+The realms of woe are forced by thee,
+Its captives from their chains set free;
+And thou, amid thy ransomed train,
+At God's right hand dost victor reign.
+
+Let mercy sweet with thee prevail,
+To cure the wounds we now bewail;
+Oh, bless us with thy holy sight,
+And fill us with eternal light.
+
+Our guide, our way to heavenly rest,
+Be thou the aim of every breast;
+Be thou the soother of our tears,
+Our sweet reward above the spheres.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Hymnus Vespera] — check against diurnal
+Salutis humanae Sator
+
+Hail, thou who man's Redeemer art,
+Jesu, the joy of every heart;
+Great Maker of the world's wide frame,
+And purest love's delight and flame:
+
+What nameless mercy thee o'ercame,
+To bear our load of sin and shame?
+For guiltless, thou thy life didst give,
+That sinful erring man might live.
+
+The realms of woe are forced by thee,
+Its captives from their chains set free;
+And thou, amid thy ransomed train,
+At God's right hand dost victor reign.
+
+Let mercy sweet with thee prevail,
+To cure the wounds we now bewail;
+Oh, bless us with thy holy sight,
+And fill us with eternal light.
+
+Our guide, our way to heavenly rest,
+Be thou the aim of every breast;
+Be thou the soother of our tears,
+Our sweet reward above the spheres.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Versum 2] — check against diurnal
+V. The Lord in heaven, alleluia.
+R. Hath prepared his throne, alleluia.
+
+[versicle-vespers]
+# SOURCE: divinum-officium TemporaM/Pasc5-4 [Versum 1] — check against diurnal
+V. God is ascended with jubilee, alleluia.
+R. And the Lord with the sound of trumpet, alleluia.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Tertia] — check against diurnal
+R. God is gone up with jubilation. * Alleluia, alleluia.
+R. God is gone up with jubilation. * Alleluia, alleluia.
+V. And the Lord with the sound of trumpet.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God is gone up with jubilation. * Alleluia, alleluia.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Sexta] — check against diurnal
+R. When Christ ascended up on high. * Alleluia, alleluia.
+R. When Christ ascended up on high. * Alleluia, alleluia.
+V. He led captivity captive.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. When Christ ascended up on high. * Alleluia, alleluia.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Nona] — check against diurnal
+R. I ascend to my Father and to your Father. * Alleluia, alleluia.
+R. I ascend to my Father and to your Father. * Alleluia, alleluia.
+V. To my God and your God.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I ascend to my Father and to your Father. * Alleluia, alleluia.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Act. 1:1-2
+The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Act. 1:1-2
+The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+R. Thanks be to God.

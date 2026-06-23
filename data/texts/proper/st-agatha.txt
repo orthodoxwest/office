@@ -1,0 +1,39 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+Who art thou * who comest to heal my wounds? I am an Apostle of Christ, have no fear of me, my daughter.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+Who art thou * who comest to heal my wounds? I am an Apostle of Christ, have no fear of me, my daughter.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+I have used no earthly medicine * for my body, but I have for a Master Christ Jesus, by Whose Word alone all things were made.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+O my Lord Jesus Christ, I thank thee, * because Thou hast been mindful of me, and hast sent unto me thine Apostle, to heal my wounds.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+I bless thee, O Father of my Lord Jesus Christ, because by thine Apostle Thou hast put new paps on my breasts.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
+Upon Him Who hath vouchsafed * to heal me of all my wounds, and to put new paps on my breasts, upon Him will I call, even upon the Living God.
+
+[benedictus-antiphon]
+The heathen multitude made haste * and came to the grave of the virgin, and took therefrom her veil wherewith to stem the fire; that the Lord might show Himself to be a Deliverer from the burning, for the sake of Agatha, His blessed Martyr.
+
+[magnificat-antiphon]
+Upon Him Who hath vouchsafed * to heal me of all my wounds, and to put new paps on my breasts, upon Him will I call, even upon the Living God.
+
+[commemoration-antiphon]
+Who art thou * who comest to heal my wounds? I am an Apostle of Christ, have no fear of me, my daughter.
+
+[commemoration-versicle]
+V. In thy comeliness and thy beauty.
+R. Go forward, fare prosperously, and reign.
+
+[collect]
+O God, Who among the other miracles of thy power have bestowed the victory of martyrdom even upon the weaker sex, graciously grant that we who commemorate the anniversary of the death of blessed N., thy Virgin and Martyr, may come to thee by the path of her example.

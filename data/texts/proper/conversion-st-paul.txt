@@ -1,0 +1,86 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+I have planted, * Apollos watered, but God gave the increase. Alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+I have planted, * Apollos watered, but God gave the increase. Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+Most gladly therefore will I rather glory * in my infirmities, that the power of Christ may rest upon me.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+The grace of God which was bestowed upon me was not in vain, * but His grace abideth ever in me.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+In Damascus the governor under Aretas the king was desirous to apprehend me; by the brethren in a basket was I let down by the wall, and so escaped I his hands, in the name of the Lord.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
+Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for Christ's name's sake.
+
+[commemoration-antiphon]
+Ananias, go thy way * and seek Saul for, behold, he prayeth for he is a chosen vessel unto Me, to bear My name before the Gentiles, and kings, and the children of Israel.
+
+[collect]
+O God, Who, through the teaching of the Blessed Apostle Paul, hast caused the light of the Gospel to shine throughout the world, grant, we beseech thee, that we, having his wonderful conversion as on this day in remembrance, may show forth our thankfulness unto thee for the same, by following the holy example which he hath set.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant 2] — check against diurnal
+Thus saith the Lord: * Ye, which have followed Me, shall sit upon twelve thrones, judging the twelve tribes of Israel.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium SanctiM/01-25 [Ant 3] — check against diurnal
+O Holy Apostle Paul, * Preacher of the truth, and Teacher of the Gentiles, pray for us to God Who hath chosen thee.
+
+[chapter-lauds]
+# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] — check against diurnal
+!Acts 9:1-2
+And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/01-25 [Capitulum Sexta] — check against diurnal
+!Acts 9:8-9
+And Saul arose from the ground; and when his eyes were opened, he saw nothing. But they leading him by the hands, brought him to Damascus. And he was there three days, without sight, and he did neither eat nor drink.
+R. Thanks be to God.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/01-25 [Hymnus Vespera] — check against diurnal
+Egregie Doctor, Paule, mores instrue
+
+Our souls' great teacher, Paul, our guide in wisdom's ways,
+Teach us, our fainting hearts, to heaven's glad clime to raise,
+Till faith in clearest light her bright meridian gains,
+And love with sun-like fire within each bosom reigns.
+
+All honour, might, and power, and hymns of joy we bring,
+While to the Trinity eternal praise we sing;
+He rules the universe in wondrous Unity,
+And shall, throughout the days of all eternity.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/01-25 [Versum 2] — check against diurnal
+V. O Holy Apostle Paul, thou art a chosen vessel unto God.
+R. To preach the Gospel throughout the whole world.
+
+[commemoration-versicle]
+# SOURCE: divinum-officium SanctiM/01-25 [Versum 2] — check against diurnal
+V. O Holy Apostle Paul, thou art a chosen vessel unto God.
+R. To preach the Gospel throughout the whole world.
+
+[chapter-vespers]
+# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 9:1-2
+And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 9:1-2
+And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+R. Thanks be to God.

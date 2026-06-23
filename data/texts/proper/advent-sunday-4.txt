@@ -1,0 +1,62 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+Blow ye the trumpet * in Zion, for the day of the Lord is nigh at hand: behold, He cometh to save us! Alleluia, Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+Behold, the desire * of all nations shall come; and the house of the Lord shall be filled with glory. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+The crooked * shall be made straight, and the rough places plain; O Lord, come, and make no tarrying. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+The Lord cometh! * Go ye out to meet Him, and say: How great is His dominion, and of His kingdom there shall be no end! He is the mighty God, the Ruler, the Prince of Peace. Alleluia, Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+Thine Almighty Word, * O Lord, shall leap down out of thy royal throne. Alleluia.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
+Blow ye the trumpet * in Zion, for the day of the Lord is nigh at hand: behold, He cometh to save us! Alleluia, Alleluia.
+
+[collect]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Oratio] — check against diurnal
+Stir up, we beseech thee, O Lord, thy power, and come; make haste to our aid with thy great might; that, by the help of thy grace, that which is hindered by our sins may be hastened by thy merciful forgiveness.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] — check against diurnal
+!1 Cor 4:1-2
+Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Sexta] — check against diurnal
+!1 Cor 4:3
+But to me it is a very small thing to be judged by you, or by man's day; but neither do I judge my own self.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Nona] — check against diurnal
+!1 Cor 4:5
+Therefore judge not before the time; until the Lord come, who both will bring to light the hidden things of darkness, and will make manifest the counsels of the hearts; and then shall every man have praise from God.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Cor 4:1-2
+Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Cor 4:1-2
+Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+R. Thanks be to God.
+
+# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2 for this file is the Ember Wednesday Annunciation-gospel antiphon, not the Sunday's own; supply from diurnal
+# TODO(diurnal): [magnificat-antiphon] — not found in DO Tempora/Adv4-0; supply from diurnal or suppress in audit-ok.txt
+# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv4-0; supply from diurnal or suppress in audit-ok.txt

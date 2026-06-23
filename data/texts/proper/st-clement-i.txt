@@ -1,0 +1,39 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+While St. Clement prayed, * there appeared unto him the Lamb of God.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+While St. Clement prayed, * there appeared unto him the Lamb of God.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+Not for my own merits * hath the Lord sent me unto you, that I may share your crowns.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+I saw on the mountain * the Lamb standing, from beneath whose foot flowed a fountain of living waters.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+From beneath whose foot * a fountain of living waters flowed forth: the stream of the river that maketh glad the city of God.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
+All the nations * round about believed in Christ the Lord.
+
+[benedictus-antiphon]
+As he began to move toward the sea * the people cried out with a loud voice: O Lord Jesus Christ, deliver him! And Clement wept, and said: Father, receive my spirit!
+
+[magnificat-antiphon]
+All the nations * round about believed in Christ the Lord.
+
+[commemoration-antiphon]
+While St. Clement prayed, * there appeared unto him the Lamb of God.
+
+[commemoration-versicle]
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion over the works of thy hands.
+
+[collect]
+O God, Who dost gladden us by the yearly Feast-day of thine holy Martyr, Clement mercifully grant unto us who keep their birthday, the strength to imitate their patience under suffering.

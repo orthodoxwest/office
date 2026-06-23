@@ -1,0 +1,102 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+Save us, * O Christ the Saviour, save us through the might of thy Cross Thou Who didst save Peter when he was ready to sink in the sea, have mercy upon us. (Alleluia.)
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+Behold, the Cross of the Lord! * fly, ye ranks of the adversary! The Lion of the tribe of Judah, the Root of David, hath prevailed. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+But us it behoveth to glory * in the Cross of our Lord Jesus Christ. (Alleluia.)
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+By thy Cross' holy sign, * Jesus, guard this soul of mine from my ghostly enemy. (Alleluia.)
+
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
+O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant 2] — check against diurnal
+Thou art higher * than all cedars, whereon the Life of the world hung, whereon Christ openly triumphed, and His death trampled down death for ever. (Alleluia.)
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/09-14 [Ant 3] — check against diurnal
+O blessed art thou, O Cross * thou which wast counted the only tree worthy to bear the Lord and King of heaven. Alleluia.
+
+[collect]
+# SOURCE: divinum-officium Sancti/09-14 [Oratio] — check against diurnal
+O God, Who dost this day gladden us by the yearly Feast of the Exaltation of the Holy Cross, grant, we beseech thee, that even as we have understood the mystery thereof upon earth, so we may worthily enjoy in heaven the fruits of the redemption which was paid thereon.
+
+[chapter-lauds]
+# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+
+[chapter-sext]
+# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Sexta] — check against diurnal
+!Gal 6:14
+But God forbid that I should glory, save in the Cross of our Lord Jesus Christ, by Whom the world is crucified unto me, and I unto the world.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/09-14 [Versum 2] — check against diurnal
+V. We adore thee, O Christ, and we bless thee. (Alleluia.)
+R. Because that through thy Cross Thou hast redeemed the world. (Alleluia.)
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/09-14 [Versum 1] — check against diurnal
+V. This sign of the Cross shall be in heaven. (Alleluia.)
+R. When the Lord cometh to judgment. (Alleluia.)
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Tertia] — check against diurnal
+R. This sign of the Cross * shall be in heaven.
+R. This sign of the Cross * shall be in heaven.
+V. When the Lord cometh to judgment.
+R. Shall be in heaven.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This sign of the Cross * shall be in heaven.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Sexta] — check against diurnal
+R. We adore thee, O Christ, * and we bless thee.
+R. We adore thee, O Christ, * and we bless thee.
+V. Because that through thy cross thou hast redeemed the world.
+R. And we bless thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. We adore thee, O Christ, * and we bless thee.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Nona] — check against diurnal
+R. Let all the earth worship thee, * and sing unto thee.
+R. Let all the earth worship thee, * and sing unto thee.
+V. Let them sing praises to thy Name, O Lord.
+R. And sing unto thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let all the earth worship thee, * and sing unto thee.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium SanctiM/09-14 [Ant 2] — check against diurnal
+Thou art higher * than all cedars, whereon the Life of the world hung, whereon Christ openly triumphed, and His death trampled down death for ever. (Alleluia.)
+
+[commemoration-versicle]
+# SOURCE: divinum-officium SanctiM/09-14 [Versum 2] — check against diurnal
+V. We adore thee, O Christ, and we bless thee. (Alleluia.)
+R. Because that through thy Cross Thou hast redeemed the world. (Alleluia.)
+
+[chapter-vespers]
+# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+
+[chapter-terce]
+# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.

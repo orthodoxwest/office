@@ -1,0 +1,79 @@
+{{define "title"}}Divine Office — Reminders{{end}}
+{{define "content"}}
+<div class="reminders">
+  <p class="home-kicker">Prayer Reminders</p>
+  <h1>Subscribe to a reminder calendar</h1>
+  <p class="reminders-intro">
+    Choose the hours you pray and when, and subscribe to the generated
+    calendar feed. Your calendar app will show each day's office — with the
+    feast of the day — and remind you before each hour. The schedule lives
+    entirely in the link: nothing is stored on this site.
+  </p>
+
+  <form id="reminders-form">
+    <fieldset class="reminder-hours">
+      <legend>Hours</legend>
+      {{range .Hours}}
+      <div class="reminder-hour-row">
+        <label class="reminder-hour-name">
+          <input type="checkbox" name="hour" value="{{.Slug}}"{{if .Checked}} checked{{end}}>
+          {{.Name}}
+        </label>
+        <input type="time" name="time-{{.Slug}}" value="{{.Default}}" aria-label="Time for {{.Name}}">
+      </div>
+      {{end}}
+    </fieldset>
+
+    <fieldset class="reminder-days">
+      <legend>Days</legend>
+      {{range .Days}}
+      <label class="reminder-day">
+        <input type="checkbox" name="day" value="{{.Slug}}" checked>
+        {{.Name}}
+      </label>
+      {{end}}
+    </fieldset>
+
+    <fieldset class="reminder-alarm">
+      <legend>Remind me</legend>
+      <select name="alarm" aria-label="Reminder lead time">
+        <option value="0">At the hour</option>
+        <option value="5">5 minutes before</option>
+        <option value="10" selected>10 minutes before</option>
+        <option value="15">15 minutes before</option>
+        <option value="30">30 minutes before</option>
+        <option value="none">No alert (events only)</option>
+      </select>
+    </fieldset>
+  </form>
+
+  <div class="reminder-result">
+    <h2>Your calendar feed</h2>
+    <p class="reminder-links">
+      <a id="reminder-webcal" class="pray-now" href="#">Subscribe (Apple&nbsp;Calendar)</a>
+      <button type="button" id="reminder-copy" class="date-submit">Copy feed URL</button>
+      <span id="reminder-copied" hidden>Copied!</span>
+    </p>
+    <p><code id="reminder-url" class="reminder-url"></code></p>
+  </div>
+
+  <div class="reminder-help">
+    <h2>Setting it up</h2>
+    <h3>iPhone, iPad, Mac (Apple Calendar)</h3>
+    <p>Tap <em>Subscribe</em> above and confirm. Reminders work as configured.
+      If alerts don't appear, check that <em>Remove Alerts</em> is off for the
+      subscription (Settings &rsaquo; Calendar &rsaquo; Accounts).</p>
+    <h3>Google Calendar</h3>
+    <p>Copy the feed URL, then in Google Calendar choose
+      <em>Other calendars &rsaquo; + &rsaquo; From URL</em> and paste it.
+      <strong>Google ignores the alerts inside subscribed feeds</strong> — after
+      subscribing, open the calendar's settings and add a default
+      <em>Event notification</em> (e.g. 10 minutes) so reminders fire.
+      Google may take up to a day to first sync the feed.</p>
+    <h3>Android without Google Calendar</h3>
+    <p>Install <a href="https://icsx5.bitfire.at/" rel="noopener">ICSx⁵</a>
+      (free, F-Droid or Play Store), add the feed URL, and its alerts work
+      as configured.</p>
+  </div>
+</div>
+{{end}}

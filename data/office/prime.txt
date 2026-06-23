@@ -1,0 +1,298 @@
+# Prime — the first hour of the day
+# Psalms vary by day of week. Preces follow the same rules as Compline.
+
+[Pre-Office]
+Collapsible = true
+Label = Opening Prayers
+
+Type = rubric
+Ref = ordinary/session/opening-rubric
+
+Type = prayer
+Ref = ordinary/session/open-my-mouth
+
+[Opening]
+Label = Opening
+
+Type = versicle
+Ref = ordinary/prime/opening-versicle
+
+Type = proper-antiphon
+Ref = alleluia
+
+[Hymn]
+Type = proper-hymn
+Ref = hymn
+
+[Psalmody-Sunday]
+Condition = weekday-sunday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/119-i
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/119-ii
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/119-iii
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Monday]
+Condition = weekday-monday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/001
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/002
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/006
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Tuesday]
+Condition = weekday-tuesday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/007
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/008
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/009
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Wednesday]
+Condition = weekday-wednesday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/010
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/011
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/012
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Thursday]
+Condition = weekday-thursday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/013
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/014
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/015
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Friday]
+Condition = weekday-friday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/016
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/017
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/018a
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Psalmody-Saturday]
+Condition = weekday-saturday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/018b
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/019
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/020
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+[Chapter-Ferial]
+Condition = is-ferial,not-season-easter
+
+Type = proper-chapter
+Ref = chapter-ferial
+
+Type = proper-responsory
+Ref = short-responsory
+
+[Chapter-Festal]
+Condition = not-is-ferial
+
+Type = proper-chapter
+Ref = chapter
+
+Type = proper-responsory
+Ref = short-responsory
+
+[Chapter-Easter-Feria]
+Condition = is-ferial,season-easter
+
+Type = proper-chapter
+Ref = chapter
+
+Type = proper-responsory
+Ref = short-responsory
+
+[Pre-Collect]
+Label = Collect
+
+Type = prayer
+Ref = ordinary/prime/pre-collect-versicle
+
+Type = prayer
+Ref = ordinary/shared/kyrie
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+[Preces]
+Condition = if-preces
+Label = Preces
+
+Type = preces
+Ref = ordinary/shared/apostles-creed
+
+Type = prayer
+Ref = ordinary/prime/preces-our-help
+
+Type = prayer
+Ref = ordinary/shared/confiteor
+
+Type = prayer
+Ref = ordinary/prime/preces-vouchsafe
+
+[Collect-Intro]
+Type = prayer
+Ref = ordinary/prime/collect-intro
+
+[Collect]
+Type = proper-collect
+Ref = collect
+
+[Martyrology]
+Type = rubric
+Ref = ordinary/prime/martyrology-rubric
+
+[Athanasian]
+Type = rubric
+Ref = ordinary/prime/athanasian-rubric
+
+[Closing]
+Label = Closing
+
+Type = blessing
+Ref = ordinary/prime/blessing
+
+[Post-Office]
+Collapsible = true
+Label = Closing Prayers
+
+Type = prayer
+Ref = ordinary/session/sacrosanctae

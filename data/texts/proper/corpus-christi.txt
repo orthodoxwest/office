@@ -1,0 +1,183 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+Wisdom hath builded her house, * she hath mingled her wine, she hath also furnished her table, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+Wisdom hath builded her house, * she hath mingled her wine, she hath also furnished her table, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+Thou feddest thine Own people * with Angels' food, and didst send them bread from heaven, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+Out of Christ His bread shall be fat, * and He shall yield royal dainties, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+The Priests shall be holy; * for the offerings of the Lord made by fire, and the bread of their God, they do offer, [therefore they shall be holy], alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
+To him that overcometh will I give of the hidden manna, * and will give him a new name, alleluia.
+
+[benedictus-antiphon]
+To him that overcometh will I give of the hidden manna, * and will give him a new name, alleluia.
+
+[magnificat-antiphon]
+The Lord, That maketh peace in the borders of the Church, * filleth her with the finest of the wheat.
+
+[commemoration-antiphon]
+Christ the Lord, being made an High Priest for ever * after the order of Melchisedec, hath offered bread and wine.
+
+[commemoration-versicle]
+V. Thou didst send them from heaven, alleluia.
+R. Bread able to content every man's delight, alleluia.
+
+[collect]
+O God, under a marvelous sacrament you have left us the memorial of thy Passion; grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within us the fruit of thy Redemption.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] — check against diurnal
+!1 Cor 11:23-24
+Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Sexta] — check against diurnal
+!1 Cor 11:26
+As often as ye eat this Bread, and drink this Cup, ye do show the Lord's death till He come.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Hymnus Laudes] — check against diurnal
+Verbum supernum prodiens
+
+The heav'nly Word proceeding forth,
+Yet leaving not the Father's side,
+And going to his work on earth
+Had reached at length life's eventide.
+
+By false disciple to be given
+To foemen for his blood athirst,
+Himself, the living bread from heaven,
+He gave to his disciples first.
+
+To them he gave, in twofold kind,
+His very flesh, his very blood:
+In love's own fullness thus designed
+Of the whole man to be the food.
+
+By birth, our fellow-man was he;
+Our meat, while sitting at the board;
+He died, our ransomer to be;
+He ever reigns, our great reward.
+
+O saving victim, opening wide
+The gate of heaven to man below,
+Our foes press on from every side,
+Thine aid supply, thy strength bestow.
+
+To thy great name be endless praise,
+Immortal Godhead, One in Three;
+O grant us endless length of days
+In our true native land, with thee.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Hymnus Vespera] — check against diurnal
+Pange, lingua, gloriosi
+
+Sing, my tongue, the Saviour's glory,
+Of his flesh the mystery sing;
+Of the blood, all price exceeding,
+Shed by our immortal King,
+Destined, for the world's redemption,
+From a noble womb to spring.
+
+Of a pure and spotless Virgin
+Born for us on earth below,
+He, as man, with man conversing,
+Stayed, the seeds of truth to sow;
+Then he closed in solemn order
+Wondrously his life of woe.
+
+On the night of that last supper
+Seated with his chosen band,
+He, the paschal victim eating,
+First fulfills the law's command:
+Then as food to all his brethren
+Gives himself with his own hand.
+
+Word made flesh, the bread of nature
+By his word to flesh he turns;
+Wine into his blood he changes:
+What though sense no change discerns?
+Only be the heart in earnest,
+Faith her lesson quickly learns.
+
+
+Down in adoration falling,
+Lo! the sacred Host we hail;
+Lo! o'er ancient forms departing,
+Newer rites of grace prevail;
+Faith for all defects supplying,
+Where the feeble senses fail.
+
+To the everlasting Father,
+And the Son who reigns on high,
+With the Holy Ghost proceeding
+Forth from each eternally,
+Be salvation, honour, blessing,
+Might, and endless majesty.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Versum 2] — check against diurnal
+V. He maketh peace in thy borders, alleluia.
+R. And filleth thee with the finest of wheat, alleluia.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Versum 1] — check against diurnal
+V. Thou didst send them from heaven, alleluia.
+R. Bread able to content every man's delight, alleluia.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Tertia] — check against diurnal
+R. He gave them the bread of heaven. * Alleluia, Alleluia.
+R. He gave them of the bread of heaven. * Alleluia, Alleluia.
+V. Man did eat Angels' bread.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He gave them the bread of heaven. * Alleluia, Aleluia.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Sexta] — check against diurnal
+R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
+R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
+V. And with honey out of the rock did He satisfy them.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Nona] — check against diurnal
+R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
+R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
+V. And wine that maketh glad the heart of man.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Cor 11:23-24
+Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Cor 11:23-24
+Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
+R. Thanks be to God.

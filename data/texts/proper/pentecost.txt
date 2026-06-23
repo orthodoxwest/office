@@ -1,0 +1,186 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+The Spirit of the Lord * filleth the world, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+They were all filled * with the Holy Ghost, and began to speak, alleluia, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+See ye fountains, * and all that move in the waters, ascribe ye praise to God, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+
+[benedictus-antiphon]
+Receive ye the Holy Ghost; * whoseoever sins ye remit, they are remitted unto them, alleluia.
+
+[magnificat-antiphon]
+This day * the day of Pentecost is fully come, alleluia. This day the Holy Ghost appeared in fire unto the disciples, and gave unto them gifts of grace. He sent them into all the world, to preach and to testify that he who believeth, and is baptized, shall be saved, alleluia.
+
+[commemoration-antiphon]
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[commemoration-versicle]
+V. They were all filled with the Holy Ghost, alleluia.
+R. And began to speak, alleluia.
+
+[collect]
+O God, Who on this day didst teach the hearts of thy faithful people, by the sending to them the light of thine Holy Spirit, grant us by the same Spirit to have a right judgment in all things, and evermore to rejoice in His holy comfort.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] — check against diurnal
+!Acts 2:1-2
+When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Sexta] — check against diurnal
+!Acts 2:6
+When this was noised abroad, the multitude came together, and were confounded, because that every man heard them speak in his own language.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Hymnus Laudes] — check against diurnal
+Beata nobis gaudia
+
+Round roll the weeks our hearts to greet,
+With blissful joy returning;
+For lo! the Holy Paraclete
+On twelve bright brows sits burning:
+
+With quivering flame he lights on each,
+In fashion like a tongue, to teach
+That eloquent they are of speech,
+Their hearts with true love yearning.
+
+While with all tongues they speak to all,
+The nations deem them maddened,
+And drunk with wine the prophets call,
+Whom God's good Spirit gladdened;
+
+A marvel this—in mystery done—
+The holy paschaltide outrun,
+By numbers told, whose reckoning won
+Remission for the saddened.
+
+O God most Holy, thee we pray,
+With reverent brow low bending,
+Grant us the Spirit's gifts today
+The gifts from heaven descending;
+
+And, since, thy grace hath deigned to bide
+Within our breasts once sanctified,
+Deign, Lord, to cast our sins aside,
+Henceforth calm seasons sending.
+
+To God the Father, laud and praise,
+Praise to the Son be given;
+Praise to the Spirit of all grace,
+The fount of graces seven—
+
+As was of old, all worlds before,
+Is now and shall be evermore,
+When time and change are spent and o'er
+All praise in earth and heaven.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium TemporaM/Pasc7-0 [Hymnus Vespera] — check against diurnal
+/:Prima stropha hymni sequentis dicitur flexibus genibus.:/
+
+/:The first verse of the following hymn is said genuflecting.:/
+Creator Spirit, all Divine,
+Come, visit every soul of Thine,
+And fill with Thy celestial flame
+The hearts which Thou Thyself didst frame.
+
+O gift of God, Thine is the sweet
+Consoling name of Paraclete
+And spring of life and fire and love
+And unction flowing from above.
+
+The mystic sevenfold gifts are Thine,
+Finger of God's right hand divine;
+The Father's promise sent to teach
+The tongue a rich and heavenly speech.
+
+Kindle with fire brought from above
+Each sense, and fill our hearts with love;
+And grant our flesh, so weak and frail,
+The strength of Thine which cannot fail.
+
+Drive far away our deadly foe,
+And grant us Thy true peace to know;
+So we, led by Thy guidance still,
+May safely pass through every ill.
+
+To us, through Thee, the grace be shown
+To know the Father and the Son;
+And Spirit of Them both, may we
+Forever rest our faith in Thee.
+
+To Sire and Son be praises meet,
+And to the Holy Paraclete;
+And may Christ send us from above
+That Holy Spirit's gift of love.
+Amen
+
+[versicle-lauds]
+# SOURCE: divinum-officium TemporaM/Pasc7-0 [Versum 2] — check against diurnal
+V. They were all filled with the Holy Ghost, alleluia.
+R. And began to speak, alleluia.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Versum 1] — check against diurnal
+V. They were all filled with the Holy Ghost, alleluia.
+R. And began to speak, alleluia.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Tertia] — check against diurnal
+R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
+R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
+V. And That Which containeth all things hath knowledge of the voice.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Sexta] — check against diurnal
+R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
+R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
+V. He shall teach you all things.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Nona] — check against diurnal
+R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
+R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
+V. And began to speak.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 2:1-2
+When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 2:1-2
+When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+R. Thanks be to God.

@@ -1,0 +1,159 @@
+# data/audit-ok.txt — intentional fallback suppressions for make audit
+#
+# Feasts listed here legitimately use ordinary or common texts rather than
+# feast-specific propers. Without this file every such feast appears as a
+# false positive in the audit report.
+#
+# Format:
+#   feast-id *                 suppress all missing-proper warnings for this feast
+#   feast-id ref1 ref2 ...     suppress only the named refs (see list below)
+#
+# Valid refs:
+#   psalm-antiphon         benedictus-antiphon    magnificat-antiphon
+#   commemoration-antiphon commemoration-versicle commemoration-collect
+#
+# Example:
+#   st-raphael-of-brooklyn *
+#   some-martyr commemoration-antiphon commemoration-versicle
+
+# AWRV Eastern saints — no propers defined
+st-raphael-of-brooklyn *
+st-innocent-alaska *
+st-tikhon-moscow *
+st-herman-alaska *
+
+# Apostles and Evangelists — antiphons from commons/apostle or commons/evangelist
+ss-peter-paul psalm-antiphon benedictus-antiphon commemoration-versicle
+ss-philip-james benedictus-antiphon commemoration-versicle
+ss-simon-jude *
+st-andrew benedictus-antiphon commemoration-versicle
+st-bartholomew benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+st-barnabas *
+st-james-greater *
+st-luke *
+st-mark benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+st-matthew benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+st-matthias *
+st-thomas-apostle *
+conversion-st-paul benedictus-antiphon magnificat-antiphon commemoration-versicle
+
+# Confessor-bishops — antiphons from commons/confessor-bishop
+st-martin-tours commemoration-versicle
+st-nicholas *
+st-patrick *
+st-sylvester *
+ss-cyril-methodius *
+translation-st-raphael *
+
+# Confessor-doctors — antiphons from commons/confessor-doctor
+st-augustine-hippo *
+st-basil-great *
+st-jerome *
+st-ambrose *
+st-bede-venerable *
+st-augustine-canterbury *
+st-cyril-alexandria *
+st-cyril-jerusalem *
+st-ephrem-syrian *
+st-isidore-seville *
+st-leo-great *
+st-maximus-constantinople *
+st-peter-chrysologus *
+st-peter-damian *
+st-gregory-nazianzen *
+st-hilary *
+st-john-chrysostom *
+st-john-damascene *
+
+# Confessors — antiphons from commons/confessor
+st-joachim *
+st-benedict *
+st-gregory-great *
+st-maurus *
+st-romuald *
+st-columba-iona *
+st-cuthbert *
+st-vladimir-kiev *
+st-elias-prophet *
+st-anthony-egypt *
+st-athanasius *
+
+# Martyrs — antiphons from commons/martyr
+ss-fabian-sebastian *
+ss-cornelius-cyprian *
+ss-john-paul-martyrs *
+st-alban *
+st-boniface *
+st-edmund *
+st-eustace-companions *
+st-januarius *
+st-venantius *
+st-callistus *
+finding-st-stephen *
+st-placidus-companions *
+st-perpetua-felicitas *
+octave-day-st-stephen *
+octave-day-holy-innocents *
+st-gorazde-prague *
+st-ignatius-antioch *
+st-irenaeus *
+st-timothy *
+
+# Virgin Martyrs — antiphons from commons/virgin-martyr
+st-agnes-rome *
+st-lucy *
+st-catherine-alexandria *
+
+# Virgins — antiphons from commons/virgin
+st-scholastica *
+
+# Holy Women — antiphons from commons/holy-woman
+st-martha-bethany *
+
+# Blessed Virgin Mary — antiphons from commons/blessed-virgin
+motherhood-bvm *
+seven-sorrows-bvm *
+dedication-our-lady-snows *
+expectation-bvm *
+our-lady-einsiedeln *
+our-lady-of-sorrows-passion *
+our-lady-walsingham *
+holy-rosary-bvm *
+
+# Church Dedications — antiphons from commons/dedication
+dedication-basilica-st-saviour *
+dedication-basilica-holy-apostles *
+
+# Apostle feasts with proper collect — antiphons from commons/apostle
+chains-st-peter psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+chair-peter-rome psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+commemoration-st-paul-apostle psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+st-john-latin-gate psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+octave-day-st-john psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+
+# Vigils — ferial offices with proper collect (and sometimes a proper
+# Benedictus antiphon). Psalm antiphons come from the seasonal/ordinary
+# tiers; the evening's vespers belong to I Vespers of the following feast,
+# so the vigil itself never supplies a Magnificat antiphon.
+vigil-nativity magnificat-antiphon commemoration-antiphon commemoration-versicle
+vigil-epiphany psalm-antiphon magnificat-antiphon commemoration-versicle
+vigil-ascension psalm-antiphon magnificat-antiphon commemoration-versicle
+vigil-pentecost psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+vigil-st-james psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+
+# Psalm antiphons taken from the category commons per Divinum Officium
+# (flat per-feast copies removed; see commons/<category>.txt for the texts).
+st-george psalm-antiphon
+st-anne psalm-antiphon
+st-bartholomew psalm-antiphon
+st-mark psalm-antiphon
+st-matthew psalm-antiphon
+st-mary-magdalene psalm-antiphon
+presentation-bvm psalm-antiphon
+
+# Ferias: psalm antiphons come from the weekday psalter tables in
+# data/texts/ordinary/ (Benedictine ferial scheme), as in Divinum Officium.
+ash-wednesday psalm-antiphon
+lent-ember-wednesday psalm-antiphon
+lent-ember-friday psalm-antiphon
+lent-ember-saturday psalm-antiphon

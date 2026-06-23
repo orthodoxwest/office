@@ -1,0 +1,63 @@
+[psalm-antiphon]
+The Lord God will help me * and therefore I am not confounded.
+
+[psalm-antiphon-1]
+The Lord God will help me * and therefore I am not confounded.
+
+[psalm-antiphon-2]
+They compassed me about, * yea, they compassed me about but in the Name of the Lord! I will destroy them.
+
+[psalm-antiphon-3]
+Judge Thou my cause, * and redeem me, O Lord, for Thou art mighty to save.
+
+[psalm-antiphon-4]
+Fare we with Angels and men in faith to meet the Redeemer, * hailing the Slayer of death with joyful shouts of "Hosanna in the highest!"
+
+[psalm-antiphon-5]
+Let them be confounded that persecute me; * but let not me be confounded, O Lord my God.
+
+[benedictus-antiphon]
+Much people that were come to the Feast, cried * unto the Lord: Blessed is He That cometh in the Name of the Lord! Hosanna in the highest!
+
+[magnificat-antiphon]
+It is written: I will smite the Shepherd, * and the sheep of the flock shall be scattered abroad, but after I am risen again, I will go before you into Galilee: there shall ye see Me, saith the Lord.
+
+[commemoration-antiphon]
+O just Father, * the world has not known thee: I however have known thee, for thou hast sent me.
+
+[commemoration-versicle]
+V. I will bless the Lord at all times.
+R. His praise shall continually be in my mouth.
+
+[collect]
+Almighty and everlasting God, Who, of thy tender love towards mankind, hast sent thy Son our Saviour Jesus Christ to take upon Him our flesh and to suffer death upon the Cross, that all mankind should follow the example of His great humility; mercifully grant, that we may both follow the example of His patience, and also be made partakers of His resurrection. 
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] — check against diurnal
+!Phil 2:5-7
+Brothers: For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Sexta] — check against diurnal
+!Phil 2:8-9
+He humbled himself, becoming obedient unto death, even to the death of the cross. For which cause God also hath exalted him, and hath given him a name which is above all names:
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Nona] — check against diurnal
+!Phil 2:10-11
+That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth: And that every tongue should confess that the Lord Jesus Christ is in the glory of God the Father.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+Brothers: For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+Brothers: For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+R. Thanks be to God.

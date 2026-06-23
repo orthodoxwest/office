@@ -1,0 +1,62 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+The bones which thou hast broken * may rejoice.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+The bones which thou hast broken * may rejoice.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+Lord, hear * my prayer; unto thee shall all flesh come.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+Thy right hand * upholdeth me.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+From the gates of hell * deliver my soul, O Lord.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
+Let everything that hath breath * praise the Lord.
+
+[benedictus-antiphon]
+Let everything that hath breath * praise the Lord.
+
+[magnificat-antiphon]
+O Lord, forsake not * the works of thine own hands.
+
+[commemoration-antiphon]
+I will walk before the Lord * in the land of the living.
+
+[commemoration-versicle]
+V. I heard a voice from heaven, saying unto me:
+R. Blessed are the dead which die in the Lord.
+
+[collect]
+O God, Creator and Redeemer of all the faithful, grant to the souls of Your servants and handmaids the remission of all their sins, that by loving prayers they may obtain the forgiveness they have ever desired.
+
+# Vespers of the Dead uses its own antiphon set (the Placebo psalms);
+# the indexed psalm-antiphon-N sections above are the Lauds set.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
+I will walk before the Lord * in the land of the living.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
+Woe is me! O Lord, * that my sojourn is long.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
+The Lord shall keep thee from all evil, * the Lord shall keep thy soul.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
+If Thou, Lord, shouldest mark iniquities, * O Lord, who shall stand.
+
+[psalm-antiphon-5-vespers]
+# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
+O Lord, forsake not * the works of thine own hands.

@@ -1,0 +1,196 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+The God of heaven * will set up a kingdom that shall break in pieces and shall consume all these kingdoms, and itself shall stand for ever.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+The Lord gave him * power and glory, and a kingdom; and all peoples, tribes and tongues shall serve him.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+Living waters shall go out * from Jerusalem; and the Lord shall be king over all the earth.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+Now shall he be magnified * even to the ends of the earth, and this man shall be our peace.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+The nation and the kingdom * that will not serve thee, shall perish: and the Gentiles shall be wasted with desolation.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
+The God of heaven * will set up a kingdom that shall break in pieces and shall consume all these kingdoms, and itself shall stand for ever.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/10-DU [Ant 2] — check against diurnal
+He hath made us * a kingdom to God and his Father: the first begotten of the dead, and the Prince of the kings of the earth, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/10-DU [Ant 3] — check against diurnal
+And he hath on his garment, * and on his thigh written: King of kings, and Lord of lords. To him be glory and empire for ever and ever.
+
+[collect]
+# SOURCE: divinum-officium Sancti/10-DU [Oratio] — check against diurnal
+Almighty and everlasting God, who in thy beloved Son, the King of the whole world, hast willed to restore all things: mercifully grant that all the families of nations, now kept apart by the wound of sin, may be brought under the sweet yoke of his rule.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] — check against diurnal
+!Col 1:12-13
+Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/10-DU [Capitulum Sexta] — check against diurnal
+!Col 1;16-18
+LL things were created by him and in him, and he is before all, and by him all things consist. And he is the head of the body, the Church, who is the beginning, the firstborn from the dead, that in all things he may hold the primacy.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Sancti/10-DU [Capitulum Nona] — check against diurnal
+!Col 1:19-20
+In him, it hath well pleased the Father, that all fullness should dwell, and through him to reconcile all things unto himself, making peace through the blood of his cross, both as to the things that are on earth, and the things that are in heaven, in Christ Jesus our Lord.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/10-DU [Hymnus Laudes] — check against diurnal
+Vexilla Christus inclita
+
+Christ's flag unfurled in glory raised,
+Triumphing o'er the serpent's stings;
+Come humbly forward all ye lands,
+Applauding the great King of kings.
+
+No force or threat doth he need use,
+Not by coersion leadeth he;
+Raised on the cross he draweth all,
+With love unto his fruitful tree.
+
+O! Thrice blest city of the Lord,
+Wherein Christ ruleth without dearth;
+Fervently she doth execute
+His heavenly edicts to the earth,
+
+No fiery weapon can e'er harm,
+The peace 'stablished by Jesus' hand;
+In happiness and unity,
+The ranks of Christ secure do stand.
+
+A marriage blessed by faith in thee,
+Yields virtuous offspring from the womb;
+Like seed in fertile soil doth grow,
+In virtuous homes do children bloom.
+
+We yearn and long to shine on us,
+Thy light, O sweet and winsome King;
+All thus submitted to thy reign,
+To us, thy gift of peace do bring.
+
+O Jesu! King of all the world,
+Honour and glory be to thee;
+With Father and with Paraclete,
+Glory through all eternity.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/10-DU [Hymnus Vespera] — check against diurnal
+Te saeculorum Principem
+
+To thee, O Prince of all that be,
+Thou Christ, O King eternally;
+O Framer of the mind and heart,
+Our one true Judge we say thou art.
+
+The wicked protest, wail and cry,
+Christ Jesus' reign they would deny;
+Rejoice we at thy glorious name,
+Thou Highest King we do proclaim.
+
+O Christ! The Source of all our peace,
+Make all our sinful thoughts to cease;
+And still in us our loves misplaced,
+As Thy one sheepfold be we embraced.
+
+For this, hanging on cruel tree,
+With arms outstretched, for all to see;
+His heart is pierced by soldier's spear,
+Revealing burning love most dear.
+
+From this the altar of the tree
+Thy blood flows forth from Calvary;
+As wine to us it doth appear,
+To thine own heart it draws us near.
+
+Thou Governor of all that be,
+May all thy creatures honour thee;
+All those who rule, O Lord renew!
+Source of all precepts just and true.
+
+To regal glory, all submit,
+All crowns and honours we do remit;—
+To thy scepter—so sweet and mild!
+Submit we as a little child.
+
+All glory be, Jesu, to thee,
+Thy scepter over all that be;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/10-DU [Versum 2] — check against diurnal
+V. His empire shall be multiplied.
+R. And there shall be no end of peace.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/10-DU [Versum 1] — check against diurnal
+V. Given to me is all power.
+R. In heaven and in earth.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Tertia] — check against diurnal
+R. Given to me is * All power.
+R. Given to me is * All power.
+V. In heaven and in earth.
+R. All power.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Given to me is * All power.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Sexta] — check against diurnal
+R. Bring ye to the Lord, * O ye families of the nations.
+R. Bring ye to the Lord, * O ye families of the nations.
+V. Bring ye to the Lord glory and empire.
+R. O ye families of the nations.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Bring ye to the Lord, * O ye families of the nations.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Nona] — check against diurnal
+R. They shall adore him: * All kings of the earth.
+R. They shall adore him: * All kings of the earth.
+V. All nations shall serve him.
+R. All kings of the earth.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. They shall adore him: * All kings of the earth.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium Sancti/10-DU [Ant 2] — check against diurnal
+He hath made us * a kingdom to God and his Father: the first begotten of the dead, and the Prince of the kings of the earth, alleluia.
+
+[commemoration-versicle]
+# SOURCE: divinum-officium Sancti/10-DU [Versum 2] — check against diurnal
+V. His empire shall be multiplied.
+R. And there shall be no end of peace.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Col 1:12-13
+Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Col 1:12-13
+Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
+R. Thanks be to God.

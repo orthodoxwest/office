@@ -1,0 +1,67 @@
+[psalm-antiphon]
+The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+
+[psalm-antiphon-1]
+The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+
+[psalm-antiphon-2]
+Hail, Mary, * full of grace, the Lord is with thee; blessed art thou among women. (Alleluia.)
+
+[psalm-antiphon-3]
+Fear not, Mary, * thou hast found grace with the Lord; behold, thou shalt conceive, and bring forth a Son. (Alleluia.)
+
+[psalm-antiphon-4]
+The Lord shall give unto Him * the throne of His father David, and of His kingdom there shall be no end. (Alleluia.)
+
+[psalm-antiphon-5]
+Behold the handmaid of the Lord, * be it unto me according to thy word. (Alleluia.)
+
+[benedictus-antiphon]
+How shall this be, * thou Angel of God, seeing I know not a man? Hear, O Virgin Mary: the Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee. (Alleluia.)
+
+[magnificat-antiphon]
+The Angel Gabriel said unto Mary: Hail, thou that art full of grace, * the Lord is with thee; blessed art thou among women. (Alleluia.)
+
+[commemoration-antiphon]
+The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+
+[commemoration-versicle]
+V. Hail, Mary, full of grace. (Alleluia.)
+R. The Lord is with thee. (Alleluia.)
+
+[collect]
+O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] — check against diurnal
+!Isa 7:14-15
+Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/03-25 [Capitulum Sexta] — check against diurnal
+!Luke 1:32-33
+The Lord God shall give unto him the throne of David his father; and he shall reign in the house of Jacob for ever. And of his kingdom there shall be no end.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/03-25 [Versum 2] — check against diurnal
+V. Hail, Mary, full of grace. (Alleluia.)
+R. The Lord is with thee. (Alleluia.)
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/03-25 [Versum 1] — check against diurnal
+V. Hail, Mary, full of grace. (Alleluia.)
+R. The Lord is with thee. (Alleluia.)
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Isa 7:14-15
+Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Isa 7:14-15
+Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+R. Thanks be to God.

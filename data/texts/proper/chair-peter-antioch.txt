@@ -1,0 +1,81 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+Behold an high priest, * who in his days pleased God, and was found righteous.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+Behold an high priest, * who in his days pleased God, and was found righteous.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+None was found like unto him, * to keep the Law of the Most High.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+Therefore the Lord assured him * by an oath that He would multiply his seed among His people.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing praises unto our God.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+Good and faithful servant, * enter thou into the joy of thy Lord.
+
+[benedictus-antiphon]
+Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+
+[magnificat-antiphon]
+While he was supreme Pontiff, * he feared not earthly powers, but gloriously went his way to the heavenly kingdom.
+
+[commemoration-antiphon]
+Thou art the Shepherd * of the sheep, and the Prince of the Apostles, and unto thee are given the keys of the kingdom of heaven.
+
+[commemoration-versicle]
+V. You are Peter.
+R. And on this rock I am going to build my church.
+
+[collect]
+O God, Who hast given unto thy Blessed Apostle Peter the keys of the kingdom of heaven, and the power to bind and to loose, loose us, we beseech thee, at his mighty intercession, from all the bands of our sins.
+
+[hymn-lauds]
+# SOURCE: divinum-officium SanctiM/02-22 [Hymnus Laudes] — check against diurnal
+Beate Pastor, Petre, clemens accipe
+
+Peter, blest shepherd, hearken to our cry,
+And with a word unloose our guilty chain;
+Thou! who hast power to open the gates on high
+To men below, and power to shut them fast again.
+
+Praise, blessing, majesty, through endless days,
+Be to the Trinity immortal given;
+Who in pure unity profoundly sways
+Eternally alike all things in earth and heaven.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/02-22 [Hymnus Vespera] — check against diurnal
+Quodcumque in orbe nexibus revinxeris
+
+Peter, whatever thou shalt bind on earth,
+The same is bound above the starry sky;
+What here thy delegated power doth loose,
+Is loosed in heaven's supremest court on high:
+To judgement shalt thou come, when the world's end is nigh.
+
+Praise to the Father, through all ages be;
+Praise to the consubstantial sovereign Son,
+And Holy Ghost, one glorious Trinity;
+To whom all majesty and might belong;
+So sing we now, and such be our eternal song.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/02-22 [Versum 2] — check against diurnal
+V. Let them exalt Him in the congregation of the people.
+R. And praise Him in the assembly of the elders.
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/02-22 [Versum 1] — check against diurnal
+V. You are Peter.
+R. And on this rock I am going to build my church.

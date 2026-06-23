@@ -1,0 +1,81 @@
+[magnificat-antiphon]
+Thou art Peter * and upon this Rock I will build My Church.
+
+[commemoration-antiphon]
+Peter and John * went up together into the Temple at the hour of prayer, being the ninth hour.
+
+[collect]
+O God, Who didst hallow this day by the Testifying of thine Holy Apostles Peter and Paul, grant unto thy Church, whose foundations Thou wast pleased to lay by their hands, the grace always in all things to remain faithful to their teaching.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium SanctiM/06-29 [Ant 2] — check against diurnal
+Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/06-29 [Capitulum Laudes] — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/06-29 [Capitulum Sexta] — check against diurnal
+!Acts 12:5
+Peter therefore was kept in prison. But prayer was made without ceasing of the Church unto God for him.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/06-29 [Hymnus Laudes] — check against diurnal
+Beate Pastor, Petre, clemens accipe
+
+Peter, blest shepherd, hearken to our cry,
+And with a word unloose our guilty chain;
+Thou! who hast power to ope the gates on high
+To men below, and power to shut them fast again.
+
+Lead us, great teacher Paul, in wisdom's ways,
+And lift our hearts with thine to heaven's high throne;
+Till faith beholds the clear meridian blaze;
+And sunlike in the soul reigns charity alone.
+
+Praise, blessing, majesty, through endless days,
+Be to the Trinity immortal given;
+Who in pure unity profoundly sways
+Eternally alike all things in earth and heaven.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/06-29 [Hymnus Vespera] — check against diurnal
+Decora lux aeternitatis, auream
+
+The beauteous light of God's eternal majesty
+Streams down in golden rays to grace this holy day
+Which crowned the princes of the Apostles' glorious choir,
+And unto guilty mortals showed the heavenward way.
+
+The teacher of the world and keeper of heaven's gate,
+Rome's founders twain and rulers too of every land,
+Triumphant over death by sword and shameful cross,
+With laurel crowned are gathered to the eternal band.
+
+O happy Rome! who in thy martyr princes' blood,
+A twofold stream, art washed and doubly sanctified.
+All earthly beauty thou alone outshinest far,
+Empurpled by their outpoured life-blood's glorious tide.
+
+All honour, power, and everlasting jubilee
+To Him who all things made and governs here below,
+To God in essence One, and yet in persons Three,
+Both now and ever, while unending ages flow.
+Amen.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/06-29 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/06-29 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 12:1-3
+Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
+R. Thanks be to God.

@@ -1,0 +1,84 @@
+# Penitential discipline rules for fasting and abstinence.
+# Later rules override earlier ones on the same day.
+
+[friday-abstinence]
+From = date:01-01
+To = date:12-31
+Weekdays = friday
+Abstinence = true
+
+[easter-friday-no-abstinence]
+From = feast:easter-sunday@+5
+To = feast:easter-sunday@+5
+Abstinence = false
+
+[christmas-friday-no-abstinence]
+From = date:12-25
+To = date:12-25
+Weekdays = friday
+Abstinence = false
+
+[lenten-fast]
+From = feast:ash-wednesday
+To = feast:holy-saturday
+Weekdays = monday, tuesday, wednesday, thursday, friday, saturday
+Fast = true
+
+[lenten-abstinence]
+From = feast:ash-wednesday
+To = feast:holy-saturday
+Abstinence = true
+
+[vigil-of-pentecost-fast]
+From = feast:vigil-pentecost
+To = feast:vigil-pentecost
+Fast = true
+
+[whitsun-embers-fast]
+From = feast:whit-ember-wednesday
+To = feast:whit-ember-saturday
+Weekdays = wednesday, friday, saturday
+Fast = true
+
+[vigil-of-assumption-fast]
+From = date:08-14
+To = date:08-14
+Fast = true
+
+[september-embers]
+From = feast:september-ember-wednesday
+To = feast:september-ember-saturday
+Weekdays = wednesday, friday, saturday
+Fast = true
+Abstinence = true
+
+[friday-before-all-saints-fast]
+From = date:10-30
+To = date:10-30
+Fast = true
+
+[vigil-of-all-saints-fast]
+From = date:10-31
+To = date:10-31
+Fast = true
+
+[advent-abstinence]
+From = feast:advent-sunday-1
+To = date:12-24
+Abstinence = true
+
+[advent-fast]
+From = feast:advent-sunday-1
+To = date:12-24
+Weekdays = monday, wednesday, friday
+Fast = true
+
+[advent-ember-saturday-fast]
+From = feast:advent-ember-saturday
+To = feast:advent-ember-saturday
+Fast = true
+
+[christmas-eve-fast]
+From = date:12-24
+To = date:12-24
+Fast = true

@@ -1,0 +1,243 @@
+# Temporal (moveable) feasts — Easter cycle and related observances
+
+[septuagesima]
+Name = Septuagesima Sunday
+Rank = double-2nd-class
+Color = violet
+Category = sunday
+DateRule = easter-63
+
+[sexagesima]
+Name = Sexagesima Sunday
+Rank = double-2nd-class
+Color = violet
+Category = sunday
+DateRule = easter-56
+
+[quinquagesima]
+Name = Quinquagesima Sunday
+Rank = double-2nd-class
+Color = violet
+Category = sunday
+DateRule = easter-49
+
+[ash-wednesday]
+Name = Ash Wednesday
+Rank = double-1st-class
+Color = violet
+Category = feria
+DateRule = easter-46
+
+[lent-sunday-1]
+Name = I Sunday in Lent
+Rank = double-1st-class
+Color = violet
+Category = sunday
+DateRule = easter-42
+
+[lent-ember-wednesday]
+Name = Lent Ember Wednesday
+Rank = semi-double
+Color = violet
+Category = feria
+DateRule = easter-39
+
+[lent-ember-friday]
+Name = Lent Ember Friday
+Rank = semi-double
+Color = violet
+Category = feria
+DateRule = easter-37
+
+[lent-ember-saturday]
+Name = Lent Ember Saturday
+Rank = semi-double
+Color = violet
+Category = feria
+DateRule = easter-36
+
+[lent-sunday-2]
+Name = II Sunday in Lent
+Rank = double-1st-class
+Color = violet
+Category = sunday
+DateRule = easter-35
+
+[lent-sunday-3]
+Name = III Sunday in Lent
+Rank = double-1st-class
+Color = violet
+Category = sunday
+DateRule = easter-28
+
+[laetare-sunday]
+Name = IV Sunday in Lent
+Rank = double-1st-class
+Color = rose
+Category = sunday
+DateRule = easter-21
+
+[passion-sunday]
+Name = Sunday of the Passion
+Rank = double-1st-class
+Color = violet
+Category = sunday
+DateRule = easter-14
+
+[palm-sunday]
+Name = Palm Sunday
+Rank = double-1st-class
+Color = violet
+Category = sunday
+DateRule = easter-7
+
+[holy-monday]
+Name = Holy Monday
+Rank = double-1st-class
+Color = violet
+Category = feria
+DateRule = easter-6
+
+[holy-tuesday]
+Name = Holy Tuesday
+Rank = double-1st-class
+Color = violet
+Category = feria
+DateRule = easter-5
+
+[holy-wednesday]
+Name = Holy Wednesday
+Rank = double-1st-class
+Color = violet
+Category = feria
+DateRule = easter-4
+
+[holy-thursday]
+Name = Holy Thursday
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter-3
+
+[good-friday]
+Name = Good Friday
+Rank = double-1st-class
+Color = black
+Category = lord
+DateRule = easter-2
+
+[holy-saturday]
+Name = Holy Saturday
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter-1
+
+[easter-sunday]
+Name = Sunday of the Resurrection
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+0
+HasOctave = true
+
+[easter-monday]
+Name = Easter Monday
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+1
+
+[easter-tuesday]
+Name = Easter Tuesday
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+2
+
+[low-sunday]
+Name = Low Sunday (Octave of Easter)
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+7
+
+[ascension]
+Name = Ascension of Our Lord
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+39
+HasOctave = true
+
+[vigil-ascension]
+Name = Vigil of the Ascension
+Rank = simple
+Color = white
+Category = feria
+DateRule = easter+38
+
+[vigil-pentecost]
+Name = Vigil of Pentecost
+Rank = double-1st-class
+Color = white
+Category = feria
+DateRule = easter+48
+
+[pentecost]
+Name = Whitsunday — Pentecost
+Rank = double-1st-class
+Color = red
+Category = lord
+DateRule = easter+49
+HasOctave = true
+
+[whit-ember-wednesday]
+Name = Whit Ember Wednesday
+Rank = semi-double
+Color = red
+Category = feria
+DateRule = easter+52
+
+[whit-ember-friday]
+Name = Whit Ember Friday
+Rank = semi-double
+Color = red
+Category = feria
+DateRule = easter+54
+
+[whit-ember-saturday]
+Name = Whit Ember Saturday
+Rank = semi-double
+Color = red
+Category = feria
+DateRule = easter+55
+
+[trinity-sunday]
+Name = Trinity Sunday
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+56
+
+[corpus-christi]
+Name = Corpus Christi
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+60
+HasOctave = true
+
+[our-lady-of-sorrows-passion]
+Name = Our Lady of Sorrows
+Rank = greater-double
+Color = violet
+Category = blessed-virgin
+DateRule = easter-9
+
+[christ-the-king]
+Name = The Feast of O..J.C. The King
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = last-sunday-october

@@ -1,0 +1,46 @@
+# AWRV-specific additions — Eastern saints
+
+[st-raphael-of-brooklyn]
+Name = St. Raphael of Brooklyn
+Rank = greater-double
+Color = white
+Category = confessor-bishop
+ProperName = Raphael
+Month = 2
+Day = 27
+SkipRomanLeapShift = true
+Source = awrv
+Notes = Eastern saint added by the AWRV
+
+[st-innocent-alaska]
+Name = St Innocent of Alaska, Bishop & Confessor
+Rank = commemoration
+Color = white
+Category = confessor-bishop
+ProperName = Innocent
+Month = 3
+Day = 31
+Source = awrv
+Notes = Eastern saint added by the AWRV
+
+[st-tikhon-moscow]
+Name = St. Tikhon of Moscow
+Rank = double-1st-class
+Color = white
+Category = confessor-bishop
+ProperName = Tikhon
+Month = 4
+Day = 7
+Source = awrv
+Notes = Eastern saint added by the AWRV
+
+[st-herman-alaska]
+Name = St Herman of Alaska, Priest & Confessor
+Rank = commemoration
+Color = white
+Category = confessor
+ProperName = Herman
+Month = 12
+Day = 13
+Source = awrv
+Notes = Eastern saint added by the AWRV

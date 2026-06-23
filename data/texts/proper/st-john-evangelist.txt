@@ -1,0 +1,73 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+Right worthy of honour * is the blessed Apostle John, who leaned on the Lord's bosom at the Last Supper.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+Right worthy of honour * is the blessed Apostle John, who leaned on the Lord's bosom at the Last Supper.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+This is the disciple * which testifieth of these things, and we know that his testimony is true.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+This is My disciple * if I will that he tarry till I come?
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+There be some standing here, * which shall not taste of death, till they see the Son of man in His kingdom.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
+Behold My servant, * whom I have chosen, I have put My spirit upon him.
+
+[benedictus-antiphon]
+Behold My servant, * whom I have chosen, I have put My spirit upon him.
+
+[magnificat-antiphon]
+A saying * went abroad among the brethren, that that disciple should not die; and Jesus did not say that he should not die, but so will I have him remain till I come.
+
+[commemoration-antiphon]
+This is John * who leaned at supper on the bosom of the Lord. Blessed Apostle, to whom heavenly secrets were revealed.
+
+[commemoration-versicle]
+V. Right worthy of honour is the blessed Apostle John.
+R. Who leaned on the Lord's bosom at the Last Supper.
+
+[collect]
+Shine upon thy Church, O Lord, in thy goodness, that, enlightened by the teachings of Blessed John, thy Apostle and Evangelist, she may attain to everlasting gifts.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] — check against diurnal
+!Sir 15:1-2
+He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/12-27 [Capitulum Sexta] — check against diurnal
+!Sir 15:3
+With the bread of life and understanding, she shall feed him, and give him the water of wholesome wisdom to drink; God, our Lord.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/12-27 [Versum 2] — check against diurnal
+V. This is that disciple who giveth testimony of these things.
+R. And we know that his testimony is true.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/12-27 [Versum 1] — check against diurnal
+V. Right worthy of honour is the blessed Apostle John.
+R. Who leaned on the Lord's bosom at the Last Supper.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Sir 15:1-2
+He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Sir 15:1-2
+He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+R. Thanks be to God.

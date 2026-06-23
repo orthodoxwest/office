@@ -1,0 +1,120 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+We will run after thee, * in the savour of thy good ointments. The virgins love them exceedingly.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+Lo the winter is past, * the rain is over and gone. Rise up, my love, and come away.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+Come, O My chosen one, * and I will establish My throne in thee. Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
+She is beautiful * among the daughters of Jerusalem.
+
+[benedictus-antiphon]
+Well done, thou good and faithful servant; * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord.
+
+[magnificat-antiphon]
+Thou good and faithful servant, * enter thou into the joy of thy Lord.
+
+[commemoration-antiphon]
+A woman that feareth the Lord, * she shall be praised.
+
+[commemoration-versicle]
+V. The Lord loved her and beautified her.
+R. He clothed her with a robe of glory.
+
+[collect]
+Graciously hear us, O God of our salvation, that as we rejoice in the festivity of blessed N., we may be instructed in the affections of a loving devotion.
+
+[chapter-lauds]
+# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] — check against diurnal
+!Prov. 31:10-11
+Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.
+
+[chapter-sext]
+# SOURCE: divinum-officium CommuneM/C7a [Capitulum Sexta] — check against diurnal
+!Prov 31:20-21
+She hath opened her hand to the needy, and stretched out her hands to the poor. She shall not fear for her house in the cold of snow.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium CommuneM/C7a [Hymnus Laudes] — check against diurnal
+Fortem virili pectore
+
+High let us all our voices raise
+In that heroic woman's praise
+Whose name, with saintly glory bright,
+Shines in the starry realms of light.
+
+Filled with a pure celestial glow,
+She spurned all love of things below;
+And heedless here on earth to stay,
+Climbed to the skies her toilsome way.
+
+With fasts her body she subdued,
+But filled her soul with prayer's sweet food:
+In other worlds she tastes the bliss
+For which she left the joys of this.
+
+O Christ, the strength of all the strong;
+To whom our holiest deeds belong!
+Through her prevailing prayers on high,
+In mercy hear thy people's cry!
+
+* To God the Father, with the Son,
+And Holy Spirit, Three in One,
+Be glory while the ages flow,
+From all above, and all below.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium CommuneM/C7a [HymnusM Vespera] — check against diurnal
+Fortem virili pectore
+
+High let us all our voices raise
+In that heroic woman's praise
+Whose name, with saintly glory bright,
+Shines in the starry realms of light.
+
+Filled with a pure celestial glow,
+She spurned all love of things below;
+And heedless here on earth to stay,
+Climbed to the skies her toilsome way.
+
+With fasts her body she subdued,
+But filled her soul with prayer's sweet food:
+In other worlds she tastes the bliss
+For which she left the joys of this.
+
+O Christ, the strength of all the strong;
+To whom our holiest deeds belong!
+Through her prevailing prayers on high,
+In mercy hear thy people's cry!
+
+* To God the Father, with the Son,
+And Holy Spirit, Three in One,
+Be glory while the ages flow,
+From all above, and all below.
+Amen.
+
+[chapter-vespers]
+# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov. 31:10-11
+Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.
+
+[chapter-terce]
+# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov. 31:10-11
+Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.

@@ -1,0 +1,4 @@
+# Post-Pentecost seasonal overrides (Trinity Sunday through Advent)
+# Ordinary time — Alleluia resumes its standard form from ordinary/shared/alleluia.
+# Add overrides here as needed.
+

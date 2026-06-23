@@ -1,0 +1,155 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+Whosoever shall confess Me * before men, him will I confess also before My Father.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+Whosoever shall confess Me * before men, him will I confess also before My Father.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+He that followeth Me * walketh not in darkness, but shall have the light of life, saith the Lord.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+If any man serve Me, * let him follow Me and where I am, there shall also My servant be.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+If any man serve Me, * him will My Father, who is in heaven, honour.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium CommuneM/C2 [Ant Laudes] — check against diurnal
+Father, I will * that where I am, there shall also My servant be.
+
+[benedictus-antiphon]
+He that loveth his life shall lose it, * and he that hateth his life in this world shall keep it unto life eternal.
+
+[magnificat-antiphon]
+Father, I will * that where I am, there shall also my servant be; if any man serve me, him will my Father honour.
+
+[commemoration-antiphon]
+Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
+
+[commemoration-versicle]
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion over the works of thy hands.
+
+[collect]
+Mercifully consider our weakness, O almighty God, and whereas the burden of our sins weigheth us down, may the glorious intercession of blessed N., thy Martyr and Bishop, sustain us.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Commune/C2 [Capitulum Laudes] — check against diurnal
+!Jas 1:12
+Blessed is the man that endureth temptation; for when he hath been proved, he shall receive a crown of life, which God hath promised to them that love him.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Commune/C2 [Capitulum Sexta] — check against diurnal
+!Sir 15:3
+With the bread of life and understanding, she shall feed him, and give him the water of wholesome wisdom to drink: and she shall be made strong in him, and he shall not be moved.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Commune/C2 [Hymnus Laudes] — check against diurnal
+Invicte Martyr, unicum
+
+Martyr of God, whose strength was steeled
+To follow close God's only Son,
+Well didst thou brave thy battlefield,
+And well thy heavenly bliss was won!
+
+Now join thy prayers with ours, who pray
+That God may pardon us and bless;
+For prayer keeps evil's plague away,
+And draws from life its weariness.
+
+Long, long ago, were loosed the chains
+That held thy body once in thrall;
+For us how many a bond remains!
+O love of God release us all.
+
+All praise to God the Father be,
+All praise to thee, Eternal Son;
+All praise, O Holy Ghost, to thee,
+While never-ending ages run.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Commune/C2 [Hymnus Vespera] — check against diurnal
+Deus tuorum militum
+
+O God, of those that fought thy fight,
+Portion, and prize, and crown of light,
+Break every bond of sin and shame
+As now we praise thy martyr's name.
+
+He recked not of the world's allure,
+But sin and pomp of sin forswore:
+Knew all their gall, and passed them by,
+And reached the throne prepared on high.
+
+Bravely the course of pain he ran,
+And bare his torments as a man:
+For love of thee his blood outpoured,
+And thus obtained the great reward.
+
+With humble voice and suppliant word
+We pray thee therefore, holy Lord,
+While we thy martyr's feast-day keep,
+Forgive thy loved and erring sheep.
+
+* Glory and praise for aye be done
+To God the Father, and the Son,
+And Holy Ghost, who reign on high,
+One God, to all eternity.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Commune/C2 [Versum 2] — check against diurnal
+V. The righteous shall flourish like the palm-tree.
+R. He shall grow like a cedar in Lebanon.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Commune/C2 [Versum 1] — check against diurnal
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion over the works of thy hands.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Commune/C2 [Responsory Breve Tertia] — check against diurnal
+R. Thou hast crowned him * with glory and honour, O Lord.
+R. Thou hast crowned him * with glory and honour, O Lord.
+V. And madest him to have dominion over the works of thy hands.
+R. Thou hast crowned him.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast crowned him * with glory and honour, O Lord.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Commune/C2 [Responsory Breve Sexta] — check against diurnal
+R. O Lord, Thou hast set * Upon his head.
+R. O Lord, Thou hast set * Upon his head.
+V. A Crown of precious stones.
+R. Upon his head.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. O Lord, Thou hast set * Upon his head.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Commune/C2 [Responsory Breve Nona] — check against diurnal
+R. His glory is great * in thy salvation.
+R. His glory is great * in thy salvation.
+V. Honour and great majesty shalt Thou lay upon him.
+R. In thy salvation.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. His glory is great * in thy salvation.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Commune/C2 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Jas 1:12
+Blessed is the man that endureth temptation; for when he hath been proved, he shall receive a crown of life, which God hath promised to them that love him.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Commune/C2 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Jas 1:12
+Blessed is the man that endureth temptation; for when he hath been proved, he shall receive a crown of life, which God hath promised to them that love him.
+R. Thanks be to God.

@@ -1,0 +1,46 @@
+{{define "layout"}}<!DOCTYPE html>
+<html lang="en"{{if .Theme}} data-theme="{{.Theme}}"{{end}}>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
+  <title>{{block "title" .}}Divine Office{{end}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#fdf9f2">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header>
+    <nav aria-label="Primary">
+      {{- $t := .Theme}}
+      {{- $d := .NavDate}}
+      {{- $p := .Page}}
+      <a href="{{navLink "/" $t $d}}"{{if eq $p "home"}} class="active" aria-current="page"{{end}}>Home</a>
+      <a href="{{navLink "/lauds" $t $d}}"{{if eq $p "lauds"}} class="active" aria-current="page"{{end}}>Lauds</a>
+      <a href="{{navLink "/prime" $t $d}}"{{if eq $p "prime"}} class="active" aria-current="page"{{end}}>Prime</a>
+      <a href="{{navLink "/terce" $t $d}}"{{if eq $p "terce"}} class="active" aria-current="page"{{end}}>Terce</a>
+      <a href="{{navLink "/sext" $t $d}}"{{if eq $p "sext"}} class="active" aria-current="page"{{end}}>Sext</a>
+      <a href="{{navLink "/none" $t $d}}"{{if eq $p "none"}} class="active" aria-current="page"{{end}}>None</a>
+      <a href="{{navLink "/vespers" $t $d}}"{{if eq $p "vespers"}} class="active" aria-current="page"{{end}}>Vespers</a>
+      <a href="{{navLink "/compline" $t $d}}"{{if eq $p "compline"}} class="active" aria-current="page"{{end}}>Compline</a>
+      <a href="{{navLink "/calendar" $t $d}}"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Calendar</a>
+      <a href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} class="active" aria-current="page"{{end}}>Reminders</a>
+    </nav>
+  </header>
+  <main id="main-content">
+    {{block "content" .}}{{end}}
+  </main>
+  <footer>
+    <p>Benedictine Divine Office</p>
+  </footer>
+  {{if .ShowBanner}}<div class="site-banner" id="site-banner">
+    <p>This site is under active development &mdash; liturgical data is incomplete and may contain errors.</p>
+    <button type="button" data-dismiss-banner aria-label="Dismiss">&times;</button>
+  </div>{{end}}
+</body>
+</html>
+{{end}}

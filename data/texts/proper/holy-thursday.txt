@@ -1,0 +1,33 @@
+[psalm-antiphon]
+O Lord, Thou shalt be justified * when Thou speakest, and be clear when Thou art judged.
+
+[psalm-antiphon-1]
+O Lord, Thou shalt be justified * when Thou speakest, and be clear when Thou art judged.
+
+[psalm-antiphon-2]
+The Lord was brought as a lamb * to the slaughter, and He opened not His mouth.
+
+[psalm-antiphon-3]
+Mine heart is broken within me * all my bones tremble.
+
+[psalm-antiphon-4]
+O Lord, Thou hast spoken unto us * in thy strength, and in thy Holy Banquet.
+
+[psalm-antiphon-5]
+He was offered up because He willed it * and He bore our sins.
+
+[benedictus-antiphon]
+Now he that betrayed Him * gave them a sign, saying: Whomsoever I shall kiss, That Same is He: hold Him fast.
+
+[magnificat-antiphon]
+And, as they were eating * Jesus took bread, and blessed, and broke it, and gave to His disciples.
+
+[commemoration-antiphon]
+I will take the cup of salvation; * and call upon the Name of the Lord.
+
+[commemoration-versicle]
+V. Mine own familiar friend, in whom I trusted;
+R. Which did eat of my bread, hath lifted up his heel against me.
+
+[collect]
+O God, from whom Judas received the punishment of his guilt, and the thief the reward of his confession: grant unto us the full effect of thy clemency; that as in his Passion our Lord Jesus Christ gave to each a recompense meet for his deserts, so having taken away our old sins, he may bestow on us the grace of his resurrection.

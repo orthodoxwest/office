@@ -1,0 +1,15 @@
+[benedictus-antiphon]
+O Mary * blessed art thou that didst believe! for there shall be a performance of those things which were told thee from the Lord. Alleluia.
+
+[magnificat-antiphon]
+All generations shall call me blessed, * for God hath regarded the lowliness of His hand-maiden.
+
+[commemoration-antiphon]
+O Holy Mary, * be thou an help to the helpless, a strength to the fearful, a comfort to the sorrowful; pray for the people, plead for the clergy, make intercession for all women vowed to God: may all that are keeping this thine holy Feast-day feel the might of thine assistance.
+
+[commemoration-versicle]
+V. Holy Virgin, my praise by thee accepted be.
+R. Give me strength against thine enemies.
+
+[collect]
+O God, Who wast pleased that the blessed Mary always a Virgin, being herself the dwelling-place of the Holy Ghost, should, as on this day, be presented in thine earthly Temple, grant, we beseech thee, that by her prayers we may worthily be presented in the heavenly Temple of thy glory.

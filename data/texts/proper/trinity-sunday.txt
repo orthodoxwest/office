@@ -1,0 +1,146 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+Praise and endless glory be * to God the Father, the Son, and the Holy Paraclete, for ever and ever.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+Let the glory of praise * be heard from the mouth of all to the Father, and to the begotten Son; let it equally resound with perpetual praise to the Holy Spirit.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+Praise be to God the Father, * and to his co-equal Son, and to thee, O Holy Ghost: with perpetual delight may it resound from our lips for ever.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
+From whom are all things, * through whom are all things, and in whom are all things: to him be glory for evermore.
+
+[benedictus-antiphon]
+Blessed be the Holy One * the Maker and Lord of all things. Blessed be the Holy and Undivided Trinity, now and always, and unto unending ages of ages.
+
+[magnificat-antiphon]
+With all our heart * and with all our voice do we acknowledge thee, praise thee, and bless thee, O God the Father the Unbegotten, O God the Only-Begotten Son, O God the Holy Ghost the Comforter, One Holy and Undivided Trinity, To thee be glory for ever.
+
+[commemoration-antiphon]
+Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+
+[commemoration-versicle]
+V. Bless we the Father, and the Son, and the Holy Ghost.
+R. Let us praise Him and exalt Him above all for ever.
+
+[collect]
+Almighty and everlasting God, you have given thy servants in the confession of the true faith, to acknowledge the glory of the Eternal Trinity, and to adore the unity in the power of thy Majesty; grant, that by steadfastness in this faith we may ever be defended from all adversities.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] — check against diurnal
+!Rom 11:33
+O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium TemporaM/Pent01-0 [Capitulum Sexta] — check against diurnal
+!2 Cor 13:13
+The grace of our Lord Jesus Christ, and the charity of God, and the communication of the Holy Ghost be with you all. Amen.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium TemporaM/Pent01-0 [Capitulum Nona] — check against diurnal
+!1 John 5:7
+And there are three who give testimony in heaven, the Father, the Word, and the Holy Ghost. And these three are one.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Hymnus Laudes] — check against diurnal
+Tu, Trinitatis Unitas
+
+O thou, who dost all nature sway,
+Dread Trinity in Unity,
+Accept the trembling praise we pay
+To thy eternal majesty.
+
+The star that heralds in the dawn
+Is slowly fading in the skies;
+The darkness melts; O thou true light,
+Upon our darkened souls arise.
+
+To God the Father glory be,
+And to the sole-begotten Son,
+And Holy Ghost co-equally,
+While everlasting ages run.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-0 [HymnusM Vespera] — check against diurnal
+O lux beata Trinitas
+
+O Trinity of blessed Light,
+O Unity of sovereign might,
+as now the fiery sun departs,
+shed Thou Thy beams within our hearts.
+
+To Thee our morning song of praise,
+to Thee our evening prayer we raise;
+Thee may our glory evermore
+in lowly reverence adore.
+
+All laud to God the Father be;
+all praise, Eternal Son, to Thee;
+all glory, as is ever meet,
+to God the Holy Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium TemporaM/Pent01-0 [Versum 2] — check against diurnal
+V. Bless we the Father, and the Son, and the Holy Ghost.
+R. Let us praise Him and exalt Him above all for ever.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Versum 1] — check against diurnal
+V. Bless we the Father, and the Son, and the Holy Ghost.
+R. Let us praise Him and exalt Him above all for ever.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Responsory Breve Tertia] — check against diurnal
+R. Bless we the Father, and the Son, * and the Holy Ghost.
+R. Bless we the Father, and the Son, * and the Holy Ghost.
+V. Let us praise and exalt Him above all for ever.
+R. And the Holy Ghost.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Bless we the Father, and the Son, * and the Holy Ghost.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Responsory Breve Sexta] — check against diurnal
+R. Blessed art Thou, O Lord, * in the firmament of heaven.
+R. Blessed art Thou, O Lord, * in the firmament of heaven.
+V. And to be praised and glorified for ever.
+R. In the firmament of heaven.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Blessed art Thou, O Lord, * in the firmament of heaven.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Responsory Breve Nona] — check against diurnal
+R. By the Word of the Lord * were the heavens made.
+R. By the Word of the Lord * were the heavens made.
+V. And all the host of them by the Breath of His mouth.
+R. Were the heavens made.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. By the Word of the Lord * were the heavens made.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 11:33
+O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 11:33
+O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+R. Thanks be to God.

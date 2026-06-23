@@ -1,0 +1,62 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+The Lord will come, * and will not tarry; He both will bring to light the hidden things of darkness, and will make Himself manifest to all people. Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+Rejoice greatly, O Jerusalem, * for thy Saviour cometh unto thee. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+I will place salvation in Zion, * and My glory in Jerusalem. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+Every mountain and hill * shall be made low, and the crooked shall be made straight, and the rough places plain; O Lord, come and make no tarrying. Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+We should live * righteously and godly, looking for that blessed hope and the coming of the Lord.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
+The Lord will come, * and will not tarry; He both will bring to light the hidden things of darkness, and will make Himself manifest to all people. Alleluia.
+
+[collect]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Oratio] — check against diurnal
+O Lord, we beseech thee, mercifully incline thine ears unto our prayers, and lighten the darkness of our minds by the grace of thy heavenly visitation.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] — check against diurnal
+!Phil 4:4-5
+Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Sexta] — check against diurnal
+!Phil 4:6
+Be nothing solicitous; but in every thing, by prayer and supplication, with thanksgiving, let your petitions be made known to God.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Nona] — check against diurnal
+!Phil 4:7
+And the peace of God, which surpasseth all understanding, keep your hearts and minds in Christ Jesus.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 4:4-5
+Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 4:4-5
+Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+R. Thanks be to God.
+
+# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember-week (Davidic throne / Visitation gospel) antiphons, not the Sunday's own; supply from diurnal
+# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv3-0; supply from diurnal or suppress in audit-ok.txt

@@ -1,0 +1,121 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+The Angel Raphael was sent * unto Tobias and Sara to heal them.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+The Angel Raphael was sent * unto Tobias and Sara to heal them.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+The Angel went in * unto Tobias, and said: Joy be ever with thee.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+Be of good courage, Tobias, * for it is nigh at hand that God shall heal thee.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+Bless ye the God of Heaven, * and confess Him before all living, for He hath had mercy upon you.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
+Peace be unto you, * fear not, bless ye God, and give praise to Him.
+
+[benedictus-antiphon]
+Be of good courage, Tobias, * for it is nigh at hand that God shall heal thee.
+
+[magnificat-antiphon]
+Bless ye the God of heaven, * and confess him before all living, for he hath had mercy upon you.
+
+[commemoration-antiphon]
+I am the Angel Raphael, * who stand before the Lord: bless ye God, and tell of all his wondrous works.
+
+[commemoration-versicle]
+V. He shall give his Angels charge over thee.
+R. To keep thee in all thy ways.
+
+[collect]
+O God, who didst give thy blessed Archangel Raphael unto thy servant Tobias to be his fellow wayfarer, grant unto us thy servants that the same may ever keep and shield us, help and defend us.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/10-24 [Capitulum Laudes] — check against diurnal
+!Tob 12:12
+Then thou didst pray with tears, and didst bury the dead, and didst leave thy dinner, and didst hide the dead in thine house through the day, and bury them in the night, I offered up thy prayer before the Lord.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/10-24 [Capitulum Sexta] — check against diurnal
+!Tob 12:14
+And now the Lord sent me to heal thee, and to deliver Sara, thy son's wife, from a devil. For I am the Angel Raphael, one of the seven, which stand before the Lord.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/10-24 [Hymnus Laudes] — check against diurnal
+O Christ, Redeemer of us all,
+Protect thy servants when they call,
+And hear with reconciling care
+The Blessed Virgin's holy prayer.
+
+Be ever present, Angel high,
+Whose name doth healing signify:
+From bodily ills protect us sure,
+And keep our souls in health secure.
+
+And ye, O ever blissful throng
+Of heavenly spirits, guardians strong,
+Our past and present ills dispel,
+From future peril shield us well.
+
+From lands wherein thy faithful dwell
+Drive far the trait'rous infidel;
+So we to Christ due hymns of praise
+Henceforth with gladsome hearts we raise.
+
+To God the Father, praise be done,
+Who doth redeem us by his Son,
+Anoint us by his Holy Ghost,
+And guard us by his Angel-host.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/10-24 [Hymnus Vespera] — check against diurnal
+Christe, sanctorum decus Angelorum
+
+Christ, of the angels praise and adoration,
+Father and Saviour thou, of every nation,
+Graciously grant us all to gain a station,
+Where Thou art reigning.
+
+Angel Physician, health on man bestowing,
+Raphael send us from the skies all glowing,
+All sickness curing, wisest counsel showing
+In doubt and danger.
+
+May the fair Mother of the Light be over us,
+Virgin of peace, with all the angel chorus,
+And may the heavenly army go before us,
+Guiding and guarding.
+
+O May the Godhead, endless bliss possessing,
+Father, Son, Spirit, grant to us this blessing;
+All His creation joins His praise confessing,
+Now and forever.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/10-24 [Versum 2] — check against diurnal
+V. Before the Angels will I sing praise unto thee, O my God.
+R. I will worship toward thy holy Temple, and praise thy Name.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/10-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Tob 12:12
+Then thou didst pray with tears, and didst bury the dead, and didst leave thy dinner, and didst hide the dead in thine house through the day, and bury them in the night, I offered up thy prayer before the Lord.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/10-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Tob 12:12
+Then thou didst pray with tears, and didst bury the dead, and didst leave thy dinner, and didst hide the dead in thine house through the day, and bury them in the night, I offered up thy prayer before the Lord.
+R. Thanks be to God.

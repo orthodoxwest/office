@@ -1,0 +1,63 @@
+[psalm-antiphon]
+Then shalt Thou be pleased * with the sacrifices of righteousness, when Thou hast hidden thy face from my sins.
+
+[psalm-antiphon-1]
+Then shalt Thou be pleased * with the sacrifices of righteousness, when Thou hast hidden thy face from my sins.
+
+[psalm-antiphon-2]
+It is better to trust * in the Lord, than to trust in princes.
+
+[psalm-antiphon-3]
+Thy right hand hath * received me, O Lord.
+
+[psalm-antiphon-4]
+In the morning * O Lord, I shall meditate upon thee.
+
+[psalm-antiphon-5]
+Kings of the earth, * and all people, praise God.
+
+[benedictus-antiphon]
+When Jesus lifted up His Eyes, * and saw a great company come unto Him, He saith unto Philip: Whence shall we buy bread that these may eat? And this He said to prove him; for He Himself knew what He would do.
+
+[magnificat-antiphon]
+Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+
+[commemoration-antiphon]
+Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+
+[commemoration-versicle]
+V. I will bless the Lord at all times.
+R. His praise shall continually be in my mouth.
+
+[collect]
+Grant, we beseech thee, Almighty God, that we who for our evil deeds are worthily punished, may, by the comfort of thy grace, mercifully be relieved.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] — check against diurnal
+!Gal 4:22-24
+Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Sexta] — check against diurnal
+!Gal 4:27
+For it is written: Rejoice, thou barren, that bearest not: break forth and cry, thou that travailest not: for many are the children of the desolate, more than of her that hath a husband.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Nona] — check against diurnal
+!Gal 4:31
+So then, brethren, we are not the children of the bondwoman, but of the free: by the freedom wherewith Christ has made us free.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Gal 4:22-24
+Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Gal 4:22-24
+Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
+R. Thanks be to God.

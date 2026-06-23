@@ -1,0 +1,160 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+This is one of the wise virgins, * one chosen out of the number of the careful.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+This is one of the wise virgins, * one chosen out of the number of the careful.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+This is one of the wise virgins, * whom the Lord found watching.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+This, is one which hath not known the sinful bed, * she shall have fruit in the visitation of holy souls.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+Come, O my chosen one, * and I will establish My throne in thee.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
+She is beautiful * among the daughters of Jerusalem.
+
+[benedictus-antiphon]
+Come, Bride of Christ, and take the everlasting crown * which the Lord hath prepared for thee.
+
+[magnificat-antiphon]
+She is beautiful * among the daughters of Jerusalem.
+
+[commemoration-antiphon]
+This is one of the wise virgins, * whom the Lord found watching.
+
+[commemoration-versicle]
+V. In thy comeliness and thy beauty.
+R. Go forward, fare prosperously, and reign.
+
+[collect]
+O God, who among the other miracles of thy power hast bestowed the victory of martyrdom even upon the weaker sex, graciously grant that we who celebrate the feast of blessed N., thy Virgin and Martyr, may come to thee by the path of her example.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] — check against diurnal
+!2 Cor 10:17-18
+Brothers: But he that glorieth, let him glory in the Lord. For not he who commendeth himself, is approved, but he, whom God commendeth.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Commune/C6 [Capitulum Sexta] — check against diurnal
+!2 Cor 11:2
+For I am jealous of you with the jealousy of God. For I have espoused you to one husband that I may present you as a chaste virgin to Christ.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium CommuneM/C6 [Hymnus Laudes] — check against diurnal
+Jesu, corona Virginum
+
+Jesu, the virgins' crown, do thou
+Accept us as in prayer we bow;
+Born of that Virgin, whom alone
+The mother and the maid we own.
+
+Amongst the lilies thou dost feed,
+By virgin choirs accompanied;
+With glory decked, the spotless brides
+Whose bridal gifts thy love provides.
+
+They, wheresoe'er thy footsteps bend,
+With hymns and praises still attend:
+In blessèd troops they follow thee,
+With dance, and song, and melody.
+
+We pray thee therefore to bestow
+Upon our senses here below
+Thy grace, that so we may endure
+From taint of all corruption pure.
+
+* All laud to God the Father be,
+All praise, eternal Son, to thee;
+All glory as is ever meet,
+To God, the holy Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Commune/C6 [Hymnus Vespera] — check against diurnal
+Jesu, corona Virginum
+
+Jesu, the virgins' crown, do thou
+Accept us as in prayer we bow;
+Born of that Virgin, whom alone
+The mother and the maid we own.
+
+Amongst the lilies thou dost feed,
+By virgin choirs accompanied;
+With glory decked, the spotless brides
+Whose bridal gifts thy love provides.
+
+They, wheresoe'er thy footsteps bend,
+With hymns and praises still attend:
+In blessèd troops they follow thee,
+With dance, and song, and melody.
+
+We pray thee therefore to bestow
+Upon our senses here below
+Thy grace, that so we may endure
+From taint of all corruption pure.
+
+* All laud to God the Father be,
+All praise, eternal Son, to thee;
+All glory as is ever meet,
+To God, the holy Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Commune/C6 [Versum 2] — check against diurnal
+V. Grace is poured into thy lips.
+R. Therefore God hath blessed thee for ever.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Commune/C6 [Versum 1] — check against diurnal
+V. In thy comeliness and thy beauty.
+R. Go forward, fare prosperously, and reign.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Commune/C6 [Responsory Breve Tertia] — check against diurnal
+R. In thy comeliness * and in thy beauty.
+R. In thy comeliness * and in thy beauty.
+V. Go forward, fare prosperously, and reign.
+R. In thy beauty.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In thy comeliness * and in thy beauty.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Commune/C6 [Responsory Breve Sexta] — check against diurnal
+R. God shall help her * with His countenance.
+R. God shall help her * with His countenance.
+V. God is in the midst of her, she shall not be moved.
+R. With His countenance.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God shall help her * with His countenance.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Commune/C6 [Responsory Breve Nona] — check against diurnal
+R. God hath chosen her, * and fore-chosen her.
+R. God hath chosen her, * and fore-chosen her.
+V. He hath made her to dwell in His tabernacle.
+R. And fore-chosen her.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God hath chosen her, * and fore-chosen her.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 10:17-18
+Brothers: But he that glorieth, let him glory in the Lord. For not he who commendeth himself, is approved, but he, whom God commendeth.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 10:17-18
+Brothers: But he that glorieth, let him glory in the Lord. For not he who commendeth himself, is approved, but he, whom God commendeth.
+R. Thanks be to God.

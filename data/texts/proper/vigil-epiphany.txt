@@ -1,0 +1,128 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium SanctiM/01-05 [Ant 2] — check against diurnal
+While all things were in quiet silence * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leapt down out of thy Royal Throne.
+
+[collect]
+# SOURCE: divinum-officium SanctiM/01-05 [Oratio] — check against diurnal
+O Almighty and everlasting God, do Thou order all our actions in conformity with thy good pleasure, that through the name of thy well-beloved Son, we may worthily abound in all good works.
+
+[chapter-lauds]
+# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Laudes] — check against diurnal
+!Gal 4:1-2
+Brothers: As long as the heir is a child, he differeth nothing from a servant, though he be lord of all; But is under tutors and governors until the time appointed by the father.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Sexta] — check against diurnal
+!Gal 4:4-5
+But when the fulness of the time was come, God sent his Son, made of a woman, made under the law: That he might redeem them who were under the law: that we might receive the adoption of sons.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium SanctiM/01-05 [Hymnus Laudes] — check against diurnal
+A solis ortus cardine
+
+From lands that see the sun arise
+To earth's remotest boundaries,
+The Virgin-born today we sing,
+The Son of Mary, Christ the King.
+
+Blest Author of this earthly frame,
+To take a servant's form He came,
+That, liberating flesh by flesh,
+Whom He had made might live afresh.
+
+In that chaste parent's holy womb
+Celestial grace hath found its home;
+And she, as earthly bride unknown,
+Yet calls that Offspring blest her own.
+
+The mansion of the modest breast
+Becomes a shrine where God shall rest:
+The pure and undefilèd one
+Conceived in her womb the Son.
+
+That Son, that Royal Son she bore,
+Whom Gabriel's voice had told afore;
+Whom, in His mother yet concealed,
+The infant Baptist had revealed.
+
+The manger and the straw He bore,
+The cradle did He not abhor;
+By milk in infant portions fed,
+Who gives e'en fowls their daily bread.
+
+The heavenly chorus filled the sky,
+The Angels sang to God on high,
+What time to shepherds, watching lone,
+They made creation's Shepherd known.
+
+All honor, laud, and glory be,
+O Jesu, Virgin-born to thee:
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/01-05 [Hymnus Vespera] — check against diurnal
+Jesu, Redemptor omnium
+
+Jesus, the Ransomer of man,
+Who, ere created light began,
+Didst from the sovereign Father spring,
+His power and glory equalling.
+
+The Father's Light and Splendor Thou,
+Their endless hope to Thee that bow;
+Accept the prayers and praise to-day
+That through the world Thy servants pay.
+
+Salvation's Author, call to mind
+How, taking form of humankind,
+Born of a Virgin undefiled,
+Thou in man's flesh becam'st a Child.
+
+Thus testifies the present day,
+Through every year in long array,
+That Thou, salvation's source alone,
+Proceedest from the Father's throne.
+
+The heavens above, the rolling main
+And all that earth's wide realms contain,
+With joyous voice now loudly sing
+The glory of their new-born King.
+
+And we who, by Thy precious Blood
+From sin redeemed, are marked for God,
+On this the day that saw Thy birth,
+Sing the new song of ransomed earth.
+
+O Lord, the Virgin-born, to Thee
+Eternal praise and glory be,
+Whom with the Father we adore
+And Holy Ghost forevermore.
+Amen.
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/01-05 [Versum 1] — check against diurnal
+V. The Lord hath made known, alleluia.
+R. His salvation, alleluia.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium SanctiM/01-05 [Ant 2] — check against diurnal
+While all things were in quiet silence * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leapt down out of thy Royal Throne.
+
+[chapter-vespers]
+# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Gal 4:1-2
+Brothers: As long as the heir is a child, he differeth nothing from a servant, though he be lord of all; But is under tutors and governors until the time appointed by the father.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Gal 4:1-2
+Brothers: As long as the heir is a child, he differeth nothing from a servant, though he be lord of all; But is under tutors and governors until the time appointed by the father.
+R. Thanks be to God.
+
+# Psalm antiphons come from the Christmastide seasonal tier; vespers of
+# Jan 5 belong to I Vespers of the Epiphany. See data/audit-ok.txt.

@@ -1,0 +1,155 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+God hath given His Angels charge over thee, * to keep thee in all thy ways.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+God hath given His Angels charge over thee, * to keep thee in all thy ways.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+Let us praise the Lord, * Whom the Angels do praise, unto Whom Cherubim and Seraphim do cry, Holy, Holy, Holy.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+In heaven their Angels do always behold the face of My Father, * Which is in heaven.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+Blessed be God, * Who sent His Angel, and delivered His servants that trusted in Him.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
+Praise ye God, * all His Angels Praise ye Him, all His hosts.
+
+[benedictus-antiphon]
+The Angel that talked * with me came again, and waked me, as a man that is wakened out of his sleep.
+
+[magnificat-antiphon]
+Praise ye God, * all His Angels Praise ye Him, all His hosts.
+
+[commemoration-antiphon]
+God hath given His Angels charge over thee, * to keep thee in all thy ways.
+
+[commemoration-versicle]
+V. He shall give his Angels charge over thee.
+R. To keep thee in all thy ways.
+
+[collect]
+O God, Who in thine unspeakable Providence hast been pleased to give thine holy Angels charge over us, to keep us, mercifully grant unto our prayers, that we be both ever fenced by their wardship here, and everlastingly blessed by their fellowship hereafter.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] — check against diurnal
+!Exod. 23:20-21
+Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/10-02 [Capitulum Sexta] — check against diurnal
+!Exod. 23:21
+Take notice of him, and hear his voice, and do not think him one to be contemned: for he will not forgive when thou hast sinned, and my name is in him.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/10-02 [Hymnus Laudes] — check against diurnal
+Aeterne Rector siderum
+
+Ruler of the dread immense!
+Maker of this mighty frame!
+Whose eternal providence
+Guides it, as from thee it came:
+
+Low before thy throne we bend;
+Hear our supplicating cries;
+And thy light celestial send
+With the freshly dawning skies.
+
+King of kings, and Lord most high!
+This of thy dear love we pray:
+May thy guardian angel nigh,
+Keep us from all sin this day.
+
+May he crush the deadly wiles
+Of the envious serpent's art,
+Ever spreading cunning toils
+Round about the thoughtless heart.
+
+May he scatter ruthless war
+Ere to this our land it come;
+Plague and famine drive away,
+Fix securely peace at home.
+
+Father, Son, and Holy Ghost,
+One eternal Trinity!
+Guard by thy angelic host
+Us who put our trust in thee.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/10-02 [Hymnus Vespera] — check against diurnal
+Custodes hominum psallimus Angelos
+
+Angel-guardians of men, spirits and powers we sing,
+Whom our Father hath sent, aids to our weakly frame,
+Heavenly friends and guides, help from on high to bring,
+Lest we fail through the foeman's wile.
+
+He, the spoiler of souls, angel-traitor of old,
+Cast in merited wrath out of his honoured place,
+Burns with envy and hate, seeking their souls to gain
+Whom God's mercy invites to heaven.
+
+Therefore come to our help, watchful ward of our lives:
+Turn aside from the land God to thy care confides
+Sickness and woe of soul, yea, and what else of ill
+Peace of heart to its folk denies.
+
+Now to the Holy Three praise evermore resound:
+Under whose hand divine resteth the triple world
+Governed in wondrous wise: glory be theirs and might
+While the ages unending run.
+Amen.
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/10-02 [Versum 1] — check against diurnal
+V. Before the Angels will I sing praise unto thee, O my God.
+R. I will worship toward thy holy Temple, and praise thy Name.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Tertia] — check against diurnal
+R. An Angel stood * at the Altar of the Temple.
+R. An Angel stood * at the Altar of the Temple.
+V. Having a golden censer in his hand.
+R. At the Altar of the Temple.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. An Angel stood * at the Altar of the Temple.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Sexta] — check against diurnal
+R. The smoke of the incense * ascended up before the Lord.
+R. The smoke of the incense * ascended up before the Lord.
+V. Out of the Angel's hand.
+R. Ascended up before the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense * ascended up before the Lord.
+
+[short-responsory-none]
+# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Nona] — check against diurnal
+R. Before the Angels * will I sing praise unto thee, O my God.
+R. Before the Angels * will I sing praise unto thee, O my God.
+V. I will worship toward thy holy Temple, and praise thy Name.
+R. Will I sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Before the Angels * will I sing praise unto thee, O my God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Exod. 23:20-21
+Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Exod. 23:20-21
+Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
+R. Thanks be to God.

@@ -1,0 +1,68 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+They stoned Stephen, * calling upon God, and saying: Lay not this sin to their charge.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+They stoned Stephen, * calling upon God, and saying: Lay not this sin to their charge.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+The stones of the brook * were sweet to him; all the souls of the righteous follow him.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+O my God, my soul followeth hard after thee, * for my flesh hath been stoned for thy sake.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+Stephen saw the heavens opened; * he saw and entered in; blessed is he unto whom the heavens were opened.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
+Behold, I see * the heavens opened, and Jesus standing on the right hand of the power of God.
+
+[benedictus-antiphon]
+Behold, I see * the heavens opened, and Jesus standing on the right hand of the power of God.
+
+[magnificat-antiphon]
+Devout men buried Stephen * And made great mourning over him.
+
+[commemoration-antiphon]
+And Stephen, full of grace * and fortitude, did great signs among the people.
+
+[commemoration-versicle]
+V. Devout men buried Stephen.
+R. And made great mourning over him.
+
+[collect]
+Grant us, we beseech thee, O Lord, so to imitate what we revere, that we may learn to love even our enemies; for we celebrate the heavenly birthday of him who knew how to pray for his very persecutors to our Lord Jesus Christ:
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] — check against diurnal
+!Acts 6:8
+And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/12-26 [Capitulum Sexta] — check against diurnal
+!Acts 6:9-10
+Now there arose some of that which is called the synagogue of the Libertines, and of the Cyrenians, and of the Alexandrians, and of them that were of Cilicia and Asia, disputing with Stephen. And they were not able to resist the wisdom and the spirit that spoke.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/12-26 [Versum 2] — check against diurnal
+V. Devout men buried Stephen.
+R. And made great mourning over him.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 6:8
+And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Acts 6:8
+And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+R. Thanks be to God.

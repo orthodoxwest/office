@@ -1,0 +1,168 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+While as the Archangel Michael fought against the dragon, * I heard voices saying: Salvation unto our God. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+Michael Mine Archangel, * I have appointed thee for a prince over the ingathering of souls.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+O ye Angels of the Lord, bless ye the Lord always.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
+O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
+
+[benedictus-antiphon]
+There was silence * in heaven while as the dragon made war, and Michael fought against him, and prevailed over him. Alleluia.
+
+[magnificat-antiphon]
+O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
+
+[commemoration-antiphon]
+An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+
+[commemoration-versicle]
+V. An Angel stood at the Altar of the Temple. (Alleluia.)
+R. Having a golden censer in his hand. (Alleluia.)
+
+[collect]
+O God, Who hast ordained and constituted the services of angels and men in a wonderful order, mercifully grant that as thy holy angels alway do thee service in heaven, so, by thy appointment, they may succour and defend us on earth.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/05-08 [Capitulum Laudes] — check against diurnal
+!Rev 1:1-2
+God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/05-08 [Capitulum Sexta] — check against diurnal
+!Rev 5:11-12
+I heard the voice of many Angels round about the throne, and the living creatures and the elders and the number of them was thousands of thousands, saying with a loud voice: Salvation unto our God.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/05-08 [Hymnus Laudes] — check against diurnal
+Christe, sanctorum decus Angelorum
+
+Christ, of the angels praise and adoration,
+Father and Saviour thou, of every nation,
+Graciously grant us all to gain a station,
+Where thou art reigning.
+
+Angel all peaceful, to our dwellings send us,
+Michael, from heaven coming to befriend us,
+Breathing serenest peace may he attend us,
+Grim war dispelling.
+
+Angel of strength, who triumphed, tumults quelling,
+Gabriel send us, ancient foes expelling,
+Oft in these temples may he make his dwelling,
+Dear unto heaven.
+
+Angel physician, health on man bestowing,
+Raphael send us from the skies all glowing,
+All sickness curing, wisest counsel showing
+In doubt and danger.
+
+May the fair Mother of the Light be o'er us,
+Virgin of peace, with all the angel chorus,
+And may the heavenly army go before us,
+Guiding and guarding.
+
+O may the Godhead, endless bliss possessing,
+Father, Son, Spirit, grant to us this blessing;
+All his creation joins his praise confessing,
+Now and forever.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/05-08 [HymnusM Vespera] — check against diurnal
+Tibi Christe splendor Patris
+
+Thee, O Christ, the Father's splendour,
+Life and virtue of the heart,
+In the presence of the Angels
+Sing we now with tuneful art,
+Meetly in alternate chorus
+Bearing our responsive part.
+
+Thus we praise with veneration
+All the armies of the sky;
+Chiefly him, the warrior Primate,
+Of celestial chivalry,
+Michael, who in princely virtue
+Cast Abaddon from on high.
+
+By whose watchful care repelling -
+King of everlasting grace -
+Every ghostly adversary,
+All things evil, all things base,
+Grant us of thine only goodness
+In thy Paradise a place.
+
+Laud and honour to the Father,
+Laud and honour to the Son,
+Laud and honour to the Spirit,
+Ever Three, and ever One,
+Consubstantial, co-eternal,
+While unending ages run.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/05-08 [Versum 2] — check against diurnal
+V. An Angel stood at the Altar of the Temple. (Alleluia.)
+R. Having a golden censer in his hand. (Alleluia.)
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/05-08 [Versum 1] — check against diurnal
+V. An Angel stood at the Altar of the Temple. (Alleluia.)
+R. Having a golden censer in his hand. (Alleluia.)
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/05-08 [Responsory Breve Tertia] — check against diurnal
+R. An Angel stood * at the Altar of the Temple.
+R. An Angel stood * at the Altar of the Temple.
+V. Having a golden censer in his hand.
+R. At the Altar of the Temple.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. An Angel stood * at the Altar of the Temple.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/05-08 [Responsory Breve Sexta] — check against diurnal
+R. The smoke of the incense * ascended up before the Lord.
+R. The smoke of the incense * ascended up before the Lord.
+V. Out of the Angel's hand.
+R. Ascended up before the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense * ascended up before the Lord.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/05-08 [Responsory Breve Nona] — check against diurnal
+R. Before the Angels * will I sing praise unto thee, O my God.
+R. Before the Angels * will I sing praise unto thee, O my God.
+V. I will worship toward thy holy Temple, and praise thy Name.
+R. Will I sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Before the Angels * will I sing praise unto thee, O my God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/05-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 1:1-2
+God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/05-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 1:1-2
+God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
+R. Thanks be to God.

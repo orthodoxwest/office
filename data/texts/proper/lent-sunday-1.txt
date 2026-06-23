@@ -1,0 +1,63 @@
+[psalm-antiphon]
+Create in me a clean heart, * O God, and renew a right spirit within me.
+
+[psalm-antiphon-1]
+Create in me a clean heart, * O God, and renew a right spirit within me.
+
+[psalm-antiphon-2]
+Save me now, O Lord; * O Lord, send Thou prosperity.
+
+[psalm-antiphon-3]
+Thus will I bless thee, * O Lord, while I live; and will lift up my hands in thy Name.
+
+[psalm-antiphon-4]
+In an humble spirit * and a contrite heart may we be accepted by thee, O Lord; and so let our sacrifice be this day, that it may be acceptable and pleasant in thy sight, O Lord our God!
+
+[psalm-antiphon-5]
+Praise God, * ye heavens of heavens, and all ye waters.
+
+[benedictus-antiphon]
+Jesus was led up of the Spirit into the wilderness, * to be tempted of the devil and when He had fasted forty days and forty nights, He was afterward hungry.
+
+[magnificat-antiphon]
+Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
+
+[commemoration-antiphon]
+Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
+
+[commemoration-versicle]
+V. I will bless the Lord at all times.
+R. His praise shall continually be in my mouth.
+
+[collect]
+O God, Who dost every year purge thy Church by the Fast of Forty Days, grant unto this thy family, that what things soever they strive to obtain at thy hand by abstaining from meats, they may ever turn to profit by good works.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Laudes] — check against diurnal
+!2 Cor 6:1-2
+Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Sexta] — check against diurnal
+!2 Cor 6:2-3
+For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee. Behold, now is the acceptable time; behold, now is the day of salvation, giving no offense to any man, that our ministry be not blamed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Nona] — check against diurnal
+!2 Cor 6:9-10
+As dying, and behold we live; as chastised, and not killed; as sorrowful, yet always rejoicing; as needy, yet enriching many; as having nothing, and possessing all things.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 6:1-2
+Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 6:1-2
+Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
+R. Thanks be to God.

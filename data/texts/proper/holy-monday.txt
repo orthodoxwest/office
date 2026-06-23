@@ -1,0 +1,33 @@
+[psalm-antiphon]
+I hid not my face * from shame and spitting.
+
+[psalm-antiphon-1]
+I hid not my face * from shame and spitting.
+
+[psalm-antiphon-2]
+Awake, O sword, * against them that scatter my flock.
+
+[psalm-antiphon-3]
+They took the thirty pieces of silver, * my price, that I was prized at of them.
+
+[psalm-antiphon-4]
+Waters flowed over mine head; * I said I am cut off; I will call upon thy Name, O Lord God.
+
+[psalm-antiphon-5]
+O Lord, behold the lips * of those that rose up against me, and their device.
+
+[benedictus-antiphon]
+And now, O Father, glorify Thou Me * with thine Own Self, with the glory which I had with thee before the world was.
+
+[magnificat-antiphon]
+Thou couldest have no power * at all against Me, except it were given thee from above.
+
+[commemoration-antiphon]
+And now, O Father, glorify Thou Me * with thine Own Self, with the glory which I had with thee before the world was.
+
+[commemoration-versicle]
+V. Christ became obedient for us unto death.
+R. Yea, the death of the Cross.
+
+[collect]
+O Almighty God, Which knowest that we be set in such straits that we have no power of ourselves to help ourselves, we pray thee mercifully to relieve us, for whom continually pleadeth the suffering of thine Only Begotten Son.

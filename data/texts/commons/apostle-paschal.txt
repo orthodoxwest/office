@@ -1,0 +1,28 @@
+# Paschal variant of the Common of an Apostle.
+# Add sections here that differ during Paschaltide (Easter season).
+# Sections not present here fall through to the regular commons file.
+# See the regular commons file for available section names.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.

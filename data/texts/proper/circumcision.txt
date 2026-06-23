@@ -1,0 +1,62 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+When thou wast born * all ineffably of a Virgin, then were the Scriptures fulfilled; thou camest down like the dew upon the fleece of wool, to bring salvation unto all mankind; we praise thee, O our God.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+In the bush which Moses saw * unconsumed, we recognize the preservation of thy glorious virginity: holy Mother of God, intercede for us.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+The Root of Jesse hath budded, * the Star hath come out of Jacob, the Virgin hath borne the Saviour: we praise thee, O our God.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
+Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+
+[benedictus-antiphon]
+This day is set forth a wonderful mystery, * a new thing hath been created in the earth: God is made man. That which He was, He remaineth; and that which He was not, He taketh; suffering therein neither confusion nor division.
+
+[magnificat-antiphon]
+Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+
+[commemoration-antiphon]
+O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+
+[commemoration-versicle]
+V. The Word was made flesh, alleluia.
+R. And dwelt among us, alleluia.
+
+[collect]
+O God, Who, by the fruitful virginity of the Blessed Mary, hast given unto mankind the rewards of everlasting life; grant, we beseech thee, that we may continually feel the might of her intercession, through whom we have worthily received the Author of our life, our Lord Jesus Christ, thy Son:
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] — check against diurnal
+!Titus 2:11-12
+The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
+R. Thanks be to God.
+
+[versicle-vespers]
+# SOURCE: divinum-officium SanctiM/01-01 [Versum 1] — check against diurnal
+V. The Lord hath made known, alleluia.
+R. His salvation, alleluia.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Titus 2:11-12
+The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Titus 2:11-12
+The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
+R. Thanks be to God.

@@ -1,0 +1,60 @@
+{{define "title"}}Calendar {{.Year}}{{end}}
+{{define "content"}}
+<div class="calendar">
+  {{$theme := .Theme}}
+  <div class="calendar-header">
+    <h1>{{.Year}} Ordo</h1>
+    <nav class="year-nav">
+      <a href="{{calendarYearLink .PrevYear $theme}}">&laquo; {{.PrevYear}}</a>
+      <a href="{{calendarYearLink .NextYear $theme}}">{{.NextYear}} &raquo;</a>
+    </nav>
+  </div>
+  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> <span aria-hidden="true">🐟</span> Abstinence <span aria-hidden="true">·</span> Liturgical rank abbreviations expand on focus.</p>
+  {{range .Months}}
+  <section class="month" id="{{.Slug}}">
+    <h2>{{.Name}}</h2>
+    <table class="month-table">
+      <caption class="sr-only">{{.Name}} {{$.Year}} ordo with feast, penitential observances, liturgical color, and rank.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Day</th>
+          <th scope="col">Wk</th>
+          <th scope="col">Feast / Observance</th>
+          <th scope="col">Fast</th>
+          <th scope="col">Abst.</th>
+          <th scope="col">Color</th>
+          <th scope="col">Rank</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Days}}
+        <tr class="day {{.ColorClass}}">
+          <td class="day-num" data-label="Day"><a href="{{homeLink .DateSlug $theme}}">{{.DayNum}}</a></td>
+          <td class="day-wk" data-label="Weekday">{{.Weekday}}</td>
+          <td class="day-feast" data-label="Feast">
+            <div class="day-mobile-head">
+              <a class="day-mobile-date" href="{{homeLink .DateSlug $theme}}">
+                <span class="day-mobile-num">{{.DayNum}}</span>
+                <span class="day-mobile-weekday">{{.Weekday}}</span>
+              </a>
+              <span class="day-mobile-flags">
+                {{if .Fast}}<span class="day-mobile-flag" aria-label="Fasting">§</span>{{end}}
+                {{if .Abstinence}}<span class="day-mobile-flag" aria-label="Abstinence">🐟</span>{{end}}
+                {{if .Rank}}{{if .RankFull}}<abbr class="day-mobile-rank" tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}<span class="day-mobile-rank">{{.Rank}}</span>{{end}}{{end}}
+              </span>
+            </div>
+            <span class="day-feast-name">{{.FeastName}}</span>
+            {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
+          </td>
+          <td class="day-penitential-flag" data-label="Fast">{{if .Fast}}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{{end}}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}<span aria-hidden="true">🐟</span><span class="sr-only">Abstinence</span>{{end}}</td>
+          <td class="day-color" data-label="Color">{{.Color}}</td>
+          <td class="day-rank" data-label="Rank">{{if .RankFull}}<abbr tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}{{.Rank}}{{end}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </section>
+  {{end}}
+</div>
+{{end}}

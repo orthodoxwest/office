@@ -1,0 +1,24 @@
+{
+  "name": "Benedictine Divine Office",
+  "short_name": "Divine Office",
+  "description": "The hours of the Benedictine Office, with ordo and liturgical calendar.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf9f2",
+  "theme_color": "#fdf9f2",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Advent seasonal overrides
+# In the Benedictine rite, Alleluia is NOT suppressed during Advent.
+# Add overrides here as needed.
+

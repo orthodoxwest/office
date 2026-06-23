@@ -1,0 +1,68 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+Lawrence wrought a good work, * in that with the sign of the Cross he gave sight to the blind.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+O my God, my soul cleaveth * fast after thee, for my flesh hath been burnt with fire for thy sake.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+The Lord hath sent His Angel, * and hath delivered me out of the midst of the fire, so that I am not scorched.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
+The blessed Lawrence prayed * and said: I give thee thanks, O Lord, that Thou hast made me worthy to enter within thy gates.
+
+[benedictus-antiphon]
+Upon the bars I denied thee not, O God. * And when they put me to the fire, I acknowledged thee to be the Lord, O Christ. Thou has proved mine heart, and visited it by night; Thou hast tried me with fire, and found no wickedness in me.
+
+[magnificat-antiphon]
+The blessed Lawrence prayed * and said: I give thee thanks, O Lord, that Thou hast made me worthy to enter within thy gates.
+
+[commemoration-antiphon]
+Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+
+[commemoration-versicle]
+V. He hath dispersed, he hath given to the poor.
+R. His righteousness endureth for ever.
+
+[collect]
+O Almighty God, Who didst give unto Blessed Lawrence power to be more than conqueror in his fiery torment, grant unto us, we beseech thee, the power to quench the flames of our sinful lusts.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] — check against diurnal
+!2 Cor 9:6
+Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/08-10 [Capitulum Sexta] — check against diurnal
+!2 Cor 9:7
+Every one as he hath determined in his heart, not with sadness, or of necessity: for God loveth a cheerful giver.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/08-10 [Versum 2] — check against diurnal
+V. He hath dispersed, he hath given to the poor.
+R. His righteousness endureth for ever.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 9:6
+Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!2 Cor 9:6
+Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+R. Thanks be to God.

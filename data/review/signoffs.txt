@@ -1,0 +1,8 @@
+# Human review sign-offs. One line per reviewed unit:
+#
+#   hash hour unit-key reviewer date [note...]
+#
+# Record with: ./office review sign HASH REVIEWER [note...]
+# Hashes come from `make review-manifest`. Editing the texts behind a
+# signed-off unit changes its hash; `make review-status` then reports the
+# unit as stale until it is re-reviewed. See REVIEWING.md.

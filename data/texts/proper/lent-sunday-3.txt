@@ -1,0 +1,63 @@
+[psalm-antiphon]
+O be favourable and gracious unto Zion * build thou, O Lord, the walls of Jerusalem.
+
+[psalm-antiphon-1]
+O be favourable and gracious unto Zion * build thou, O Lord, the walls of Jerusalem.
+
+[psalm-antiphon-2]
+The Lord is on my side; * I will not fear what man doeth unto me.
+
+[psalm-antiphon-3]
+My lips shall praise thee as long as I live, * O my God.
+
+[psalm-antiphon-4]
+The fire forgat his power and virtue * that thy children might be delivered unharmed.
+
+[psalm-antiphon-5]
+O ye sun and moon, praise ye the Lord * for his Name only is excellent.
+
+[benedictus-antiphon]
+When a strong man armed keepeth his palace, * all his goods are in peace.
+
+[magnificat-antiphon]
+A certain woman of the company lifed up her voice and cried, Blessed is the womb that bare thee, and the paps which thou hast sucked. But Jesus answered, Yea, rather, blessed are they that hear the word of God, and keep it.
+
+[commemoration-antiphon]
+But the father said to his servants: * Bring forth the best robe, and put it on him, and put a ring on his hand, and shoes on his feet.
+
+[commemoration-versicle]
+V. I will bless the Lord at all times.
+R. His praise shall continually be in my mouth.
+
+[collect]
+We beseech thee, almighty God, look upon the hearty desires of thy humble servants, and stretch forth the right hand of thy Majesty to be our defence against all our enemies.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] — check against diurnal
+!Eph 5:1-2
+Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Sexta] — check against diurnal
+!Eph 5:5
+For know you this and understand, that no fornicator, or unclean, or covetous person (which is a serving of idols), hath inheritance in the kingdom of Christ and of God.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Nona] — check against diurnal
+!Eph 5:8-9
+For you were heretofore darkness, but now light in the Lord. Walk then as children of the light. For the fruit of the light is in all goodness, and justice, and truth.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Eph 5:1-2
+Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Eph 5:1-2
+Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
+R. Thanks be to God.

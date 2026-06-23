@@ -1,0 +1,68 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+When thou wast born * all ineffably of a Virgin, then were the Scriptures fulfilled; thou camest down like the dew upon the fleece of wool, to bring salvation unto all mankind; we praise thee, O our God.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+In the bush which Moses saw * unconsumed, we recognize the preservation of thy glorious virginity: holy Mother of God, intercede for us.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+The Root of Jesse hath budded, * the Star hath come out of Jacob, the Virgin hath borne the Saviour: we praise thee, O our God.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
+Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+
+[benedictus-antiphon]
+They offered for Him * unto the Lord, a pair of turtle doves, or two young pigeons.
+
+[magnificat-antiphon]
+They offered for Him * unto the Lord, a pair of turtle doves, or two young pigeons.
+
+[commemoration-antiphon]
+Simeon was just * and devout, waiting for the consolation of Israel, and the Holy Ghost was upon him.
+
+[commemoration-versicle]
+V. It was revealed unto Simeon by the Holy Ghost.
+R. That he should not see death before he had seen the Lord's Christ.
+
+[collect]
+Almighty and everliving God, we humbly beseech thy Majesty, that as thy Only-begotten Son was this day presented in the temple in substance of our flesh, so we may be presented unto thee with pure and clean hearts.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] — check against diurnal
+!Mal 3:1
+Behold I send my angel, and he shall prepare the way before my face. And presently the Lord, whom you seek, and the angel of the testament, whom you desire, shall come to his temple.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/02-02 [Capitulum Sexta] — check against diurnal
+!Mal 3:1-2
+Lo, the Angel shall come to his temple. Behold he cometh, saith the Lord of hosts. And who shall be able to think of the day of his coming? and who shall stand to see him? For he is like a refining fire, and like the fuller's herb.
+R. Thanks be to God.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/02-02 [Versum 1] — check against diurnal
+V. It was revealed unto Simeon by the Holy Ghost.
+R. That he should not see death before he had seen the Lord's Christ.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Mal 3:1
+Behold I send my angel, and he shall prepare the way before my face. And presently the Lord, whom you seek, and the angel of the testament, whom you desire, shall come to his temple.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Mal 3:1
+Behold I send my angel, and he shall prepare the way before my face. And presently the Lord, whom you seek, and the angel of the testament, whom you desire, shall come to his temple.
+R. Thanks be to God.

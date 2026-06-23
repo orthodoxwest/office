@@ -1,0 +1,162 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+His left hand is under my head, * and his right hand doth embrace me.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+I am black but comely, * O ye daughters of Jerusalem; therefore hath the King loved me, and brought me into his chamber.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+Lo the winter is past, * the rain is over and gone. Rise up, my love, and come away.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
+O Holy Mother of God, thou art become beautiful * and gentle in thy gladness.
+
+[benedictus-antiphon]
+Blessed art thou, O Virgin Mary, * who didst bear the Lord, the Maker of the world: thou didst bring forth him who made thee, and remainest for ever a Virgin.
+
+[magnificat-antiphon]
+All generations shall call me blessed, * for he that is mighty hath done to me great things, and holy is his name.
+
+[commemoration-antiphon]
+Holy Mary, succour the miserable, * help the fainthearted, comfort the sorrowful, pray for the people, plead for the clergy, intercede for all women vowed to God.
+
+[commemoration-versicle]
+V. After childbirth thou remainest a Virgin undefiled.
+R. O Mother of God, intercede for us.
+
+[collect]
+Grant, we beseech thee, O Lord God, unto all thy servants, that they may remain continually in the enjoyment of soundness both of mind and body, and by the glorious intercession of the Blessed Mary, always a Virgin, may be delivered from present sadness, and enter into the joy of thine eternal gladness.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] — check against diurnal
+!Sir 24:14
+From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.
+
+[chapter-sext]
+# SOURCE: divinum-officium Commune/C11 [Capitulum Sexta] — check against diurnal
+!Sir 24:15-16
+And so was I established in Sion, and in the holy city likewise I rested, and my power was in Jerusalem. And I took root in an honourable people, and in the portion of my God his inheritance, and my abode is in the full assembly of saints.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Commune/C11 [Hymnus Laudes] — check against diurnal
+O gloriosa Domina
+
+O glorious lady! throned on high
+Above the star-illumined sky;
+Thereto ordained, thy bosom lent
+To thy Creator nourishment.
+
+Through thy sweet offspring we receive
+The bliss once lost through hapless Eve;
+And heaven to mortals open lies
+Now thou art portal of the skies.
+
+Thou art the door of heaven's high King,
+Light's gateway fair and glistering;
+Life through a Virgin is restored;
+Ye ransomed nations, praise the Lord!
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium CommuneM/C11 [HymnusM Vespera] — check against diurnal
+/:Prima stropha sequentis hymni dicitur flexis genibus.:/
+
+/:The first verse of the following hymn is said genuflecting.:/
+Ave, star of ocean,
+Child divine who barest,
+Mother, ever-Virgin,
+Heaven's portal fairest.
+
+Taking that sweet Ave
+Erst by Gabriel spoken,
+Eva's name reversing,
+Be of peace the token.
+
+Break the sinners' fetters,
+Light to blind restoring,
+All our ills dispelling,
+Every boon imploring.
+
+Show thyself a mother
+In thy supplication;
+He will hear who chose thee
+At his incarnation.
+
+Maid all maids excelling,
+Passing meek and lowly,
+Win for sinners pardon,
+Make us chaste and holy.
+
+As we onward journey
+Aid our weak endeavour,
+Till we gaze on Jesus
+And rejoice forever.
+
+Father, Son, and Spirit,
+Three in One confessing,
+Give we equal glory
+Equal praise and blessing.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium CommuneM/C11 [Versum 2] — check against diurnal
+V. Grace is poured into thy lips.
+R. Therefore God hath blessed thee for ever.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Commune/C11 [Versum 1] — check against diurnal
+V. Holy Virgin, my praise by thee accepted be.
+R. Give me strength against thine enemies.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Tertia] — check against diurnal
+R. In thy comeliness * and in thy beauty.
+R. In thy comeliness * and in thy beauty.
+V. Go forward, fare prosperously, and reign.
+R. In thy beauty.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In thy comeliness * and in thy beauty.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Sexta] — check against diurnal
+R. God shall help her * with His countenance.
+R. God shall help her * with His countenance.
+V. God is in the midst of her, she shall not be moved.
+R. With His countenance.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God shall help her * with His countenance.
+
+[short-responsory-none]
+# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Nona] — check against diurnal
+R. God hath chosen her, * and fore-chosen her.
+R. God hath chosen her, * and fore-chosen her.
+V. He hath made her to dwell in His tabernacle.
+R. And fore-chosen her.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God hath chosen her, * and fore-chosen her.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Sir 24:14
+From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.
+
+[chapter-terce]
+# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Sir 24:14
+From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.

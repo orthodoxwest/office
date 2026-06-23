@@ -1,0 +1,49 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+Mary arose * and went into the hill country with haste, into a city of Judah.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+Mary arose * and went into the hill country with haste, into a city of Judah.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+Mary entered * into the house of Zacharias, and saluted Elizabeth.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+When Elizabeth heard * the salutation of Mary, the babe leaped in her womb, and she was filled with the Holy Ghost. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+Blessed art thou among women, * and blessed is the Fruit of thy womb.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/07-02 [Ant Vespera] — check against diurnal
+As soon as * the voice of thy salutation sounded in mine ears, the babe leaped in my womb for joy. Alleluia.
+
+[benedictus-antiphon]
+When Elizabeth heard the salutation * of Mary, she spoke out with a loud voice and said: Whence is this to me, that the Mother of my Lord should come to me, alleluia.
+
+[magnificat-antiphon]
+As soon as * the voice of thy salutation sounded in mine ears, the babe leaped in my womb for joy. Alleluia.
+
+[commemoration-antiphon]
+Mary arose * and went into the hill country with haste, into a city of Judah.
+
+[commemoration-versicle]
+V. Blessed art thou among women.
+R. And blessed is the Fruit of thy womb.
+
+[collect]
+Grant, O Lord, we beseech thee, unto all thy servants, the gift of thine heavenly grace, that even as the Blessed Virgin being made a Mother hath been unto them the first step unto their salvation, so the godly and solemn memorial of her Visitation may be the bringer of an increase of peace.
+
+[versicle-lauds]
+# SOURCE: divinum-officium SanctiM/07-02 [Versum 2] — check against diurnal
+V. Blessed art thou among women.
+R. And blessed is the Fruit of thy womb.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/07-02 [Versum 1] — check against diurnal
+V. Blessed art thou among women.
+R. And blessed is the Fruit of thy womb.

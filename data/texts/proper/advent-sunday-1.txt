@@ -1,0 +1,61 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+In that day * the mountains shall drop down sweet wine, and the hills shall flow with milk and honey. Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+Sing, O daughter of Zion, * and rejoice with all the heart, O daughter of Jerusalem. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+Behold, the Lord shall come, * and all His saints with Him; and it shall come to pass in that day that the light shall be great. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+Lo, every one that thirsteth * come ye to the waters: seek ye the Lord while He may be found. Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+Behold, a great Prophet * shall arise, and He shall build up a new Jerusalem. Alleluia.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
+In that day * the mountains shall drop down sweet wine, and the hills shall flow with milk and honey. Alleluia.
+
+[collect]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Oratio] — check against diurnal
+Stir up, O Lord, we pray thee, thy strength, and come among us, that whereas through our sins and wickedness we do justly apprehend thy wrathful judgments hanging over us, thy bountiful grace and mercy may speedily help and deliver us;
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] — check against diurnal
+!Rom 13:11
+And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Nona] — check against diurnal
+!Rom 13:13-14
+Let us walk honestly, as in the day: not in rioting and drunkenness, not in chambering and impurities, not in contention and envy: But put ye on the Lord Jesus Christ.
+R. Thanks be to God.
+
+[versicle-vespers]
+# SOURCE: divinum-officium TemporaM/Adv1-0 [Versum 1] — check against diurnal
+V. Drop down dew, ye heavens, from above, and let the clouds rain the Just.
+R. Let the earth be opened, and bud forth the Saviour.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 13:11
+And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 13:11
+And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+R. Thanks be to God.
+
+# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember Wednesday Annunciation-gospel antiphons, not the Sunday's own; supply from diurnal
+# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv1-0; supply from diurnal or suppress in audit-ok.txt

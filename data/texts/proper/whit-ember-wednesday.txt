@@ -1,0 +1,39 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+The Spirit of the Lord * filleth the world, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+They were all filled * with the Holy Ghost, and began to speak, alleluia, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+See ye fountains, * and all that move in the waters, ascribe ye praise to God, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
+The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+
+[benedictus-antiphon]
+Receive ye the Holy Ghost; * whoseoever sins ye remit, they are remitted unto them, alleluia.
+
+[magnificat-antiphon]
+The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+
+[commemoration-antiphon]
+When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+
+[commemoration-versicle]
+V. They were all filled with the Holy Ghost, alleluia.
+R. And began to speak, alleluia.
+
+[collect]
+O Lord, we beseech thee, that the Comforter, Which proceeded from thee, may enlighten our minds, and lead us into all truth, even as thy Son hath promised unto us.

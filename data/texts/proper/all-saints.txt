@@ -1,0 +1,132 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+And all the Angels stood round about the throne, * (and about the Elders, and the four living creatures,) and fell before the throne on their faces, and worshipped God.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+Thou, O Lord God, hast redeemed us by thy Blood, * out of every kindred, and tongue, and people, and nation, and hast made us a kingdom unto our God.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+Bless the Lord, all ye His chosen, * keep holiday, and extol Him.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
+The praise of all His Saints, * even of the children of Israel, a people near unto Him; this honour have all His Saints.
+
+[benedictus-antiphon]
+The glorious company of the Apostles praise thee. * The goodly fellowship of the Prophets praise thee. The white-robed army of Martyrs praise thee. All thy Saints and Elect with one voice do acknowledge thee, O Blessed Trinity, One God!
+
+[magnificat-antiphon]
+Oh! how glorious is the kingdom * where all the Saints rejoice with Christ; clothed in white robes, they follow the Lamb whithersoever he goeth!
+
+[commemoration-antiphon]
+I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+
+[commemoration-versicle]
+V. Let thy Saints be joyful in glory.
+R. Let them rejoice in their beds.
+
+[collect]
+Almighty, eternal God, Who granted us to honor the merits of all Thy Saints in a single solemn festival, bestow on us, we beseech Thee, through their manifold intercession, that abundance of Thy mercy for which we yearn.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] — check against diurnal
+!Rev 7:2-3
+And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/11-01 [Capitulum Sexta] — check against diurnal
+!Rev 7:9
+After this I saw a great multitude, which no man could number, of all nations, and tribes, and peoples, and tongues, standing before the throne, and in sight of the Lamb, clothed with white robes, and palms in their hands.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/11-01 [Hymnus Laudes] — check against diurnal
+Salutis aeternae dator
+
+Giver of life, eternal Lord!
+thy own redeemed defend;
+Mother of grace! thy children save,
+And help them to the end.
+
+Ye thousand thousand angel hosts!
+Assist us in our need;
+Ye patriarchs! with the prophet choir!
+For our forgiveness plead.
+
+Forerunner blest! and thou who still
+Dost heaven's dread keys retain!
+Ye glorious Apostles all!
+Unloose our guilty chain.
+
+Army of martyrs! holy priests
+In beautiful array!
+Ye happy troops of virgins chaste!
+Wash all our stains away.
+
+All ye who high above the stars
+In heavenly glory reign!
+May we through your prevailing prayers
+Unto your joys attain.
+
+Praise, honour, to the Father be,
+Praise to his only Son;
+Praise, Holy Paraclete, to thee,
+While endless ages run.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/11-01 [Hymnus Vespera] — check against diurnal
+Placare, Christe, servulis
+
+O Christ, thy guilty people spare!
+Lo, kneeling at thy gracious throne,
+thy Virgin-Mother pours her prayer,
+Imploring pardon for her own.
+
+Ye angels, happy evermore!
+Who in your circles nine ascend,
+As ye have guarded us before,
+So still from harm our steps defend.
+
+Ye prophets and Apostles high!
+Behold our penitential tears;
+And plead for us when death is nigh,
+our all-searching judge appears.
+
+Ye martyrs all! a purple band,
+And confessors, a white-robed train;
+Oh, call us to our native land,
+From this our exile, back again.
+
+And ye, O choirs of virgins chaste!
+Receive us to your seats on high;
+With hermits whom the desert waste
+Sent up of old into the sky.
+
+Drive from the flock, O Spirit blest!
+The false and faithless race away;
+That all within one fold may rest,
+Secure beneath one shepherd's sway.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 7:2-3
+And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rev 7:2-3
+And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+R. Thanks be to God.

@@ -1,0 +1,155 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+The parents of Jesus * went to Jerusalem every year, at the feast of the Passover.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+The parents of Jesus * went to Jerusalem every year, at the feast of the Passover.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+When they returned, * the Child Jesus tarried behind in Jerusalem, and His parents knew not of it.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+When they found not Jesus, * they turned back again to Jerusalem, seeking Him; and after three days they found Him in the Temple, sitting in the midst of the Doctors, both hearing them and asking them questions.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+His mother said unto Him: * Son, why hast Thou thus dealt with us? Behold, thy father and I have sought thee sorrowing.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
+Jesus went down with them, * and came to Nazareth, and was subject unto them.
+
+[benedictus-antiphon]
+Jesus went down with them, * and came to Nazareth, and was subject unto them.
+
+[magnificat-antiphon]
+But while he thought on these things, behold, the angel of the Lord * appeared unto him in a dream, saying: Joseph, thou son of David, fear not to take unto thee, Mary, thy wife; for that which is conceived in her is of the Holy Ghost: and she shall bring forth a son, and thou shalt call His name Jesus.
+
+[commemoration-antiphon]
+And Jacob begat Joseph * the husband of Mary, of whom was born Jesus, Who is called Christ.
+
+[commemoration-versicle]
+V. He made him lord of His house.
+R. And ruler of all His substance.
+
+[collect]
+Help us, we beseech thee, O Lord, for the sake of the Husband of thy most holy Mother, that what we cannot for ourselves obtain, Thou mayest grant us at his petition.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] — check against diurnal
+!Prov 28:20; 27:18
+A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/03-19 [Capitulum Sexta] — check against diurnal
+!Sir 45:1; 45:4
+Beloved of God, and men: whose memory is in benediction. He sanctified him in his faith, and meekness, and chose him out of all flesh.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium Sancti/03-19 [Hymnus Laudes] — check against diurnal
+Iste, quem laeti colimus, fideles
+
+Worshipped throughout the Church to earth's far ends
+With prayer and solemn rite,
+Joseph this day triumphantly ascends
+Into the realms of light.
+
+O blest beyond the lot of mortal men!
+O'er whose last dying sigh
+Christ and the Virgin-Mother watched serene,
+Soothing his agony.
+
+Loosed from his fleshly chain, gently he fleets,
+As in calm sleep, away;
+And diademed with light, enters the seats
+Of everlasting day.
+
+There throned in power, let us his loving aid
+With fervent prayers implore;
+So may he gain us pardon in our need,
+And peace forevermore.
+
+Glory and praise to thee, blest Trinity!
+One only God and Lord,
+Who to thy faithful ones unfailingly
+Their aureoles dost award.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium Sancti/03-19 [Hymnus Vespera] — check against diurnal
+Te, Joseph, celebrent agmina cǽlitum
+
+Let angels chant thy praise, pure spouse of purest bride,
+While Christendom's sweet choirs the gladsome strains repeat,
+To tell thy wondrous fame, to raise the pealing hymn,
+Wherewith we all thy glory greet.
+
+When doubts and bitter fears thy heavy heart oppressed,
+And filled thy righteous soul with sorrow and dismay,
+An angel quickly came, the wondrous secret told,
+And drove thy anxious griefs away.
+
+Thy arms thy new-born Lord, with tender joy embrace;
+Him then to Egypt's land thy watchful care doth bring;
+Him in the temple's courts once lost thou dost regain,
+And 'mid thy tears dost greet thy King.
+
+Not till death's pangs are o'er do others gain their crown,
+But, Joseph, unto thee the blessed lot was given
+While life did yet endure, thy God to see and know,
+As do the saints above in heaven.
+
+Grant us, great Trinity, for Joseph's holy sake,
+In highest bliss and love, above the stars to reign,
+That we in joy with him may praise our loving God,
+And sing our glad eternal strain.
+Amen.
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/03-19 [Versum 1] — check against diurnal
+V. He made him lord of His house.
+R. And ruler of all His substance.
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Tertia] — check against diurnal
+R. He made him * lord of His house.
+R. He made him * lord of His house.
+V. And ruler of all His substance.
+R. Lord of His house.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He made him * lord of His house.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Sexta] — check against diurnal
+R. His glory is great * in thy salvation.
+R. His glory is great * in thy salvation.
+V. Honour and great majesty shalt Thou lay upon him.
+R. In thy salvation.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. His glory is great * in thy salvation.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Nona] — check against diurnal
+R. The righteous shall grow * as the lily.
+R. The righteous shall grow * as the lily.
+V. Yea, he shall flourish for ever in the presence of the Lord.
+R. As the lily.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The righteous shall grow * as the lily.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov 28:20; 27:18
+A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Prov 28:20; 27:18
+A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
+R. Thanks be to God.

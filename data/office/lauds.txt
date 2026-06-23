@@ -1,0 +1,648 @@
+# Lauds — the major morning hour
+# Psalms vary by day of week. Benedictus antiphon uses proper resolution.
+
+[Pre-Office]
+Collapsible = true
+Label = Opening Prayers
+
+Type = rubric
+Ref = ordinary/session/opening-rubric
+
+Type = prayer
+Ref = ordinary/session/open-my-mouth
+
+[Opening]
+Label = Opening
+
+Type = versicle
+Ref = ordinary/lauds/opening-versicle
+
+Type = proper-antiphon
+Ref = alleluia
+
+[Psalmody-Easter]
+Condition = feast-easter-sunday
+Label = The Psalms
+
+Type = proper-antiphon
+Ref = easter-antiphon-1
+
+Type = psalm
+Ref = psalms/093
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = easter-antiphon-1
+
+Type = proper-antiphon
+Ref = easter-antiphon-2
+
+Type = psalm
+Ref = psalms/100
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = easter-antiphon-2
+
+Type = proper-antiphon
+Ref = easter-antiphon-3
+
+Type = psalm
+Ref = psalms/063
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = easter-antiphon-3
+
+Type = proper-antiphon
+Ref = easter-antiphon-4
+
+Type = canticle
+Ref = canticles/benedicite
+
+Type = proper-antiphon
+Ref = easter-antiphon-4
+
+[Psalmody-Sunday]
+Condition = not-feast-easter-sunday,weekday-sunday,not-is-feast
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/118
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/063
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/benedicite
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Festal]
+Condition = is-feast,not-feast-easter-sunday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/093
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/100
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/063
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/benedicite
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Monday]
+Condition = not-is-feast,weekday-monday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/005
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/036
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/isaiah-12
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Tuesday]
+Condition = not-is-feast,weekday-tuesday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/043
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/057
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/isaiah-38
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Wednesday]
+Condition = not-is-feast,weekday-wednesday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/064
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/065
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/hannah
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Thursday]
+Condition = not-is-feast,weekday-thursday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/088
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/090
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/exodus-15
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Friday]
+Condition = not-is-feast,weekday-friday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/076
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/092
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/habakkuk-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Psalmody-Saturday]
+Condition = not-is-feast,weekday-saturday
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/148a
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/148b
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/deuteronomy-32
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Laudate-Easter]
+Condition = feast-easter-sunday
+
+Type = proper-antiphon
+Ref = easter-antiphon-5
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = easter-antiphon-5
+
+[Laudate]
+Condition = not-feast-easter-sunday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+[Chapter]
+Type = proper-chapter
+Ref = chapter
+
+[Short-Responsory]
+Label = The Short Responsory
+
+Type = proper-responsory
+Ref = short-responsory
+
+[Hymn]
+Type = proper-hymn
+Ref = hymn
+
+[Versicle]
+Label = The Versicle
+
+Type = proper-versicle
+Ref = versicle
+
+[Benedictus]
+Label = The Gospel Canticle
+
+Type = proper-antiphon
+Ref = benedictus-antiphon
+
+Type = canticle
+Ref = canticles/benedictus
+
+Type = proper-antiphon
+Ref = benedictus-antiphon
+
+[Pre-Collect]
+Label = The Prayers
+
+Type = prayer
+Ref = ordinary/shared/kyrie
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/lauds/pre-collect-versicles
+
+[Collect]
+Type = proper-collect
+Ref = collect
+
+[Commemorations]
+Label = Commemorations
+
+Type = commemorations
+Ref = commemorations
+
+[Suffrage]
+Condition = if-suffrage
+Label = Suffrage of All Saints
+
+Type = antiphon
+Ref = ordinary/shared/suffrage-antiphon
+
+Type = versicle
+Ref = ordinary/shared/suffrage-versicle
+
+Type = collect
+Ref = ordinary/shared/suffrage-collect
+
+[CrossCommemoration]
+Condition = if-cross-commemoration
+Label = Commemoration of the Cross
+
+Type = antiphon
+Ref = ordinary/shared/cross-antiphon
+
+Type = versicle
+Ref = ordinary/shared/cross-versicle
+
+Type = collect
+Ref = ordinary/shared/cross-collect
+
+[Closing]
+Label = Closing
+
+Type = blessing
+Ref = ordinary/lauds/blessing
+
+[Post-Office]
+Collapsible = true
+Label = Closing Prayers
+
+Type = prayer
+Ref = ordinary/session/sacrosanctae
+
+Type = rubric
+Ref = ordinary/session/closing-rubric

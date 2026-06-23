@@ -1,0 +1,99 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+This is one of the wise virgins, * one chosen out of the number of the careful.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+This is one of the wise virgins, * one chosen out of the number of the careful.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+This is one of the wise virgins, * whom the Lord found watching.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+This, is one which hath not known the sinful bed, * she shall have fruit in the visitation of holy souls.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+Come, O my chosen one, * and I will establish My throne in thee.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
+She is beautiful * among the daughters of Jerusalem.
+
+[benedictus-antiphon]
+Come, Bride of Christ, and take the everlasting crown * which the Lord hath prepared for thee.
+
+[magnificat-antiphon]
+She is beautiful * among the daughters of Jerusalem.
+
+[commemoration-antiphon]
+This is one of the wise virgins, * whom the Lord found watching.
+
+[commemoration-versicle]
+V. In thy comeliness and thy beauty.
+R. Go forward, fare prosperously, and reign.
+
+[collect]
+Hear us, O God, our Saviour, that as we rejoice in the festival of blessed N. thy Virgin, so we may be instructed by the affections of holy devotion.
+
+[hymn-lauds]
+# SOURCE: divinum-officium CommuneM/C6a [Hymnus Laudes] — check against diurnal
+Jesu, corona Virginum
+
+Jesu, the virgins' crown, do thou
+Accept us as in prayer we bow;
+Born of that Virgin, whom alone
+The mother and the maid we own.
+
+Amongst the lilies thou dost feed,
+By virgin choirs accompanied;
+With glory decked, the spotless brides
+Whose bridal gifts thy love provides.
+
+They, wheresoe'er thy footsteps bend,
+With hymns and praises still attend:
+In blessèd troops they follow thee,
+With dance, and song, and melody.
+
+We pray thee therefore to bestow
+Upon our senses here below
+Thy grace, that so we may endure
+From taint of all corruption pure.
+
+* All laud to God the Father be,
+All praise, eternal Son, to thee;
+All glory as is ever meet,
+To God, the holy Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium CommuneM/C6a [HymnusM Vespera] — check against diurnal
+Jesu, corona Virginum
+
+Jesu, the virgins' crown, do thou
+Accept us as in prayer we bow;
+Born of that Virgin, whom alone
+The mother and the maid we own.
+
+Amongst the lilies thou dost feed,
+By virgin choirs accompanied;
+With glory decked, the spotless brides
+Whose bridal gifts thy love provides.
+
+They, wheresoe'er thy footsteps bend,
+With hymns and praises still attend:
+In blessèd troops they follow thee,
+With dance, and song, and melody.
+
+We pray thee therefore to bestow
+Upon our senses here below
+Thy grace, that so we may endure
+From taint of all corruption pure.
+
+* All laud to God the Father be,
+All praise, eternal Son, to thee;
+All glory as is ever meet,
+To God, the holy Paraclete.
+Amen.

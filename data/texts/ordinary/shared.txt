@@ -1,0 +1,77 @@
+# Suffrage of All Saints
+# Said at Lauds and Vespers in the customary offices: Sundays, ferias, vigils,
+# and the Saturday Office of the B.V.M., in the rubrical seasons.
+[suffrage-antiphon]
+O all ye Saints of God, * vouchsafe to make intercession for our salvation, and the salvation of all the world.
+
+[suffrage-versicle]
+V. Rejoice in the Lord, and be glad, ye righteous.
+R. And all ye that are upright in heart, be glad.
+
+[suffrage-collect]
+Grant, we beseech thee, almighty God, that the intercession of all thy Saints may
+make us glad; and whilst we make our memorial of them, may we feel the help of
+their prayers. Through our Lord Jesus Christ thy Son, who with thee and the Holy
+Spirit liveth and reigneth, God, for ever and ever.
+R. Amen.
+
+[cross-antiphon]
+We adore thy Cross, O Lord; * we praise and glorify thy holy Resurrection: for by the wood of the Cross joy came into the whole world, alleluia.
+
+[cross-versicle]
+V. We adore thee, O Christ, and we bless thee, alleluia.
+R. For by thy holy Cross thou hast redeemed the world, alleluia.
+
+[cross-collect]
+O God, who for our sake didst will thine only-begotten Son to undergo the gibbet
+of the Cross, that thou mightest drive thence from us the power of the enemy:
+grant unto us, thy servants, that we may attain the grace of his Resurrection.
+Through the same our Lord Jesus Christ thy Son, who with thee and the Holy Spirit
+liveth and reigneth, God, for ever and ever.
+R. Amen.
+
+[our-father]
+Our Father, which art in heaven, hallowed be thy Name.
+Thy kingdom come. Thy will be done, on earth as it is in heaven.
+Give us this day our daily bread.
+And forgive us our trespasses, as we forgive those who trespass against us.
+And lead us not into temptation; but deliver us from evil.
+R. Amen.
+
+[confiteor]
+I confess to Almighty God, to blessed Mary ever Virgin, to blessed Michael
+the Archangel, to blessed John the Baptist, to the holy Apostles Peter and
+Paul, and to all the Saints, that I have sinned exceedingly in thought, word,
+and deed, by my fault, by my own fault, by my own most grievous fault.
+Wherefore I beg blessed Mary ever Virgin, blessed Michael the Archangel,
+blessed John the Baptist, the holy Apostles Peter and Paul, and all the Saints,
+to pray for me to the Lord our God.
+
+Almighty God have mercy upon us, forgive us our sins, and bring us to everlasting life.
+R. Amen.
+
+May the Almighty and Merciful Lord grant unto us pardon, ✠ absolution, and
+remission of our sins.
+R. Amen.
+
+[alleluia]
+Alleluia
+
+[gloria-patri]
+Glory be to the Father, and to the Son, and to the Holy Ghost;
+as it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+[kyrie]
+Kyrie eleison. Christe eleison. Kyrie eleison.
+
+[apostles-creed]
+I believe in God the Father Almighty, Maker of heaven and earth:
+
+And in Jesus Christ his only Son our Lord: Who was conceived by the Holy Ghost,
+Born of the Virgin Mary: Suffered under Pontius Pilate, Was crucified, dead,
+and buried: He descended into hell; the third day he rose again from the dead:
+He ascended into heaven, And sitteth on the right hand of God the Father
+Almighty: From thence he shall come to judge the quick and the dead.
+
+I believe in the Holy Ghost: the holy Catholic Church; The Communion of Saints;
+The Forgiveness of sins: The Resurrection of the body: ✠ And the Life everlasting. Amen.

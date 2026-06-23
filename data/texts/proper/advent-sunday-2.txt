@@ -1,0 +1,62 @@
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+Behold, the Lord * cometh in the clouds of heaven with great power. Alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+Our Zion is a strong city, * the Saviour will God appoint in her for walls and bulwarks; open ye the gates, for God is with us. Alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+Behold, the Lord * shall appear and not lie though He tarry, wait for Him, because He will come and will not tarry. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+The mountains and the hills * shall break forth before God into singing, and all the trees of the wood shall clap their hands for the Lord the Ruler cometh, and He shall reign for ever and ever. Alleluia, Alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+Behold, our Lord * cometh with power, and He shall lighten the eyes of His servants. Alleluia.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant Laudes] — check against diurnal
+Behold, the Lord * cometh in the clouds of heaven with great power. Alleluia.
+
+[collect]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Oratio] — check against diurnal
+Stir up our hearts, O Lord, to make ready the ways of thine Only-begotten Son, that by His coming our minds being purified, we may the more worthily give up ourselves to thy service:
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Laudes] — check against diurnal
+!Rom 15:4
+Brothers: For what things soever were written, were written for our learning: that through patience and the comfort of the scriptures, we might have hope.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Sexta] — check against diurnal
+!Rom 15:5-6
+Now the God of patience and of comfort grant you to be of one mind one towards another, according to Jesus Christ:That with one mind, and with one mouth, you may glorify God and the Father of our Lord Jesus Christ.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Nona] — check against diurnal
+!Rom 15:13
+Now the God of hope fill you with all joy and peace in believing; that you may abound in hope, and in the power of the Holy Ghost.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 15:4
+Brothers: For what things soever were written, were written for our learning: that through patience and the comfort of the scriptures, we might have hope.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 15:4
+Brothers: For what things soever were written, were written for our learning: that through patience and the comfort of the scriptures, we might have hope.
+R. Thanks be to God.
+
+# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember Wednesday St. John Baptist gospel antiphons, not the Sunday's own; supply from diurnal
+# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
+# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv2-0; supply from diurnal or suppress in audit-ok.txt

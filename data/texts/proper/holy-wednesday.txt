@@ -1,0 +1,33 @@
+[psalm-antiphon]
+Deliver me * from blood, O God, thou God of my salvation: and my tongue shall extol thy justice.
+
+[psalm-antiphon-1]
+Deliver me * from blood, O God, thou God of my salvation: and my tongue shall extol thy justice.
+
+[psalm-antiphon-2]
+I received * injuries and terrors from them: but the Lord is with me as a strong warrior.
+
+[psalm-antiphon-3]
+But thou, O Lord, * knowest all their plans to put me to death.
+
+[psalm-antiphon-4]
+All my enemies have heard of my evil, * they have rejoiced that thou, O Lord, hast done it.
+
+[psalm-antiphon-5]
+The Lord helpeth them * to right that suffer wrong, but as for the way of the ungodly, he turneth it upside down.
+
+[benedictus-antiphon]
+Simon, do you sleep? * Could you not watch one hour with me?
+
+[magnificat-antiphon]
+The handmaid said to Peter: * Surely thou also art one of them; for even thy speech doth discover thee.
+
+[commemoration-antiphon]
+Simon, do you sleep? * Could you not watch one hour with me?
+
+[commemoration-versicle]
+V. Christ became obedient for us unto death.
+R. Yea, the death of the Cross.
+
+[collect]
+O Almighty God, we beseech Thee that we whose transgressions do unceasingly harm us, may find freedom in the Suffering of Thine Only-begotten Son.

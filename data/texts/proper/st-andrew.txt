@@ -1,0 +1,60 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+The blessed Andrew prayed and said: * O Lord, King of everlasting glory, receive me hanging on this gallows.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+Andrew was the servant of Christ, * a worthy Apostle of God, the brother of Peter, and likened to Christ and to Peter in his death.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+Christ's dear handmaid Maximilla took the body * of the Apostle and buried it with spices in an honourable place.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
+O Lord, Thou hast caused them that persecuted the just to be swallowed up in hell, * but to the just Thou hast thyself shown the way on the tree of the cross.
+
+[magnificat-antiphon]
+O Lord, Thou hast caused them that persecuted the just to be swallowed up in hell, * but to the just Thou hast thyself shown the way on the tree of the cross.
+
+[commemoration-antiphon]
+God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
+
+[collect]
+O Lord, we humbly beseech thy Majesty, that even as Thou didst give thy blessed Apostle Andrew to thy Church to be a teacher and a ruler on earth, so, now that he is with thee, he may continually make intercession for us.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/11-30 [Ant 2] — check against diurnal
+Spare unto us * this just man, release unto us this holy one; slay not the friend of God, who is just, courteous, and godly.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] — check against diurnal
+!Rom 10:10-11
+Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/11-30 [Capitulum Sexta] — check against diurnal
+!Rom 10:12-13
+For there is no distinction of the Jew and the Greek: for the same is Lord over all, rich unto all that call upon him. For whosoever shall call upon the name of the Lord, shall be saved.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 10:10-11
+Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Rom 10:10-11
+Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+R. Thanks be to God.

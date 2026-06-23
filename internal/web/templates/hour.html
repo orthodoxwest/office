@@ -1,0 +1,35 @@
+{{define "title"}}{{.Hour.Title}} — {{.DateStr}}{{end}}
+{{define "content"}}
+<div class="office-hour">
+  <div class="hour-header">
+    <h1>{{.Hour.Title}}</h1>
+    <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}}</p>
+    <nav class="day-nav" aria-label="Date navigation">
+      <a href="{{.PrevLink}}">&laquo; Previous</a>
+      <form class="date-jump-form" action="/{{.HourName}}" method="get">
+        {{if .Theme}}<input type="hidden" name="theme" value="{{.Theme}}">{{end}}
+        <label class="sr-only" for="hour-date-jump">Jump to date</label>
+        <input id="hour-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
+        <button class="date-submit" type="submit">Go</button>
+      </form>
+      <a href="{{.NextLink}}">Next &raquo;</a>
+    </nav>
+  </div>
+  <div class="elements">
+    {{range .Hour.Sections}}
+      {{if .Collapsible}}
+      <details class="session-prayers">
+        <summary>{{.Label}}</summary>
+        {{renderSectionElements .Elements}}
+      </details>
+      {{else}}
+      {{if .Label}}<h2 class="section-heading">{{.Label}}</h2>{{end}}
+      {{renderSectionElements .Elements}}
+      {{end}}
+    {{end}}
+  </div>
+  <p class="report-issue">
+    Spotted an error on this page? <a href="{{.ReportURL}}" target="_blank" rel="noopener">Report a problem</a>
+  </p>
+</div>
+{{end}}

@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and module cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/go/bin
+          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-staticcheck-v0.7.0
+          restore-keys: |
+            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
+
+      - name: Install staticcheck
+        run: |
+          if ! ~/go/bin/staticcheck -version 2>/dev/null | grep -q v0.7.0; then
+            go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
+          fi
+
+      - name: Lint and vet
+        run: make fmt-check vet lint
+
+      - name: Run unit tests
+        run: go test -count=1 $(go list ./... | grep -v '/e2e$')
+
+      - name: Run golden tests
+        id: golden
+        run: go test ./internal/e2e/ -count=1
+        continue-on-error: true
+
+      - name: Capture golden diff
+        id: golden_diff
+        if: steps.golden.outcome == 'failure'
+        run: |
+          make golden
+          DIFF=$(git diff internal/e2e/testdata/golden/)
+          git checkout -- internal/e2e/testdata/golden/
+          MAX=50000
+          if [ "${#DIFF}" -gt "$MAX" ]; then
+            DIFF="${DIFF:0:$MAX}"$'\n\n... (diff truncated — too large to display in full)'
+          fi
+          {
+            echo 'diff<<GOLDEN_EOF'
+            printf '%s\n' "$DIFF"
+            echo 'GOLDEN_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Post or update golden failure comment
+        if: steps.golden.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          GOLDEN_DIFF: ${{ steps.golden_diff.outputs.diff }}
+        with:
+          script: |
+            const marker = '<!-- golden-test-result -->';
+            const diff = process.env.GOLDEN_DIFF || '';
+            const diffSection = diff.trim()
+              ? '\n\n<details>\n<summary>What changed (lines starting with <code>-</code> were removed, <code>+</code> were added)</summary>\n\n```diff\n' + diff + '\n```\n</details>'
+              : '';
+            const body =
+              '## Golden file mismatch detected\n\n' +
+              'The rendered office output doesn\'t match the checked-in golden files. ' +
+              'This usually means a data file edit changed the text of an hour or the audit report.' +
+              diffSection + '\n\n' +
+              '**If this change is intentional** — add the `update-golden` label to this PR. ' +
+              'GitHub Actions will regenerate the golden files and push the result automatically.\n\n' +
+              '**If this is unexpected** — review the diff above and check the CI logs before adding the label.\n\n' +
+              marker;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
+
+      - name: Resolve golden failure comment if tests now pass
+        if: steps.golden.outcome == 'success' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- golden-test-result -->';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: `## Golden tests passing\n\nGolden files are up to date.\n\n${marker}`,
+              });
+            }
+
+      - name: Fail if golden tests failed
+        if: steps.golden.outcome == 'failure'
+        run: exit 1

@@ -1,0 +1,33 @@
+# Liturgical season definitions
+
+[advent]
+Name = Advent
+Color = violet
+
+[christmas]
+Name = Christmastide
+Color = white
+
+[epiphany]
+Name = Time after Epiphany
+Color = green
+
+[septuagesima]
+Name = Septuagesima
+Color = violet
+
+[lent]
+Name = Lent
+Color = violet
+
+[passiontide]
+Name = Passiontide
+Color = violet
+
+[easter]
+Name = Eastertide
+Color = white
+
+[pentecost]
+Name = Time after Pentecost
+Color = green

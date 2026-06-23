@@ -1,0 +1,63 @@
+[psalm-antiphon]
+O Lord, open Thou my lips, * and my mouth shall show forth thy praise.
+
+[psalm-antiphon-1]
+O Lord, open Thou my lips, * and my mouth shall show forth thy praise.
+
+[psalm-antiphon-2]
+The right hand of the Lord * hath done valiantly, the right hand of the Lord hath exalted me.
+
+[psalm-antiphon-3]
+My God * hath been my help.
+
+[psalm-antiphon-4]
+Let us sing the Song of the Three Children, * even the Song that they sang when they blessed the Lord in the burning fiery furnace.
+
+[psalm-antiphon-5]
+He hath established them * for ever and ever: He hath made a decree which shall not pass.
+
+[benedictus-antiphon]
+Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
+
+[magnificat-antiphon]
+Tell the vision that ye have seen to no man, * until the Son of man be risen again from the dead.
+
+[commemoration-antiphon]
+Tell the vision that ye have seen to no man, * until the Son of man be risen again from the dead.
+
+[commemoration-versicle]
+V. I will bless the Lord at all times.
+R. His praise shall continually be in my mouth.
+
+[collect]
+O God, Who seest that we have no power of ourselves to help ourselves, keep us both outwardly in our bodies, and inwardly in our souls, that we may be defended from all adversities which may happen to the body, and from all evil thoughts which may assault and hurt the soul.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] — check against diurnal
+!1 Thess 4:1
+For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Sexta] — check against diurnal
+!1 Thess 4:3-4
+For this is the will of God, your sanctification; that you should abstain from fornication, that every one of you should know how to possess his vessel in sanctification and honour.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Nona] — check against diurnal
+!1 Thess 4:7
+For God hath not called us unto uncleanness, but unto sanctification in Christ Jesus our Lord.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Thess 4:1
+For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!1 Thess 4:1
+For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
+R. Thanks be to God.

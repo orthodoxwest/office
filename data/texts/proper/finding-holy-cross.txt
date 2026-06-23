@@ -1,0 +1,189 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+Save us, * O Christ the Saviour, save us through the might of thy Cross Thou Who didst save Peter when he was ready to sink in the sea, have mercy upon us. (Alleluia.)
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+Behold, the Cross of the Lord! * fly, ye ranks of the adversary! The Lion of the tribe of Judah, the Root of David, hath prevailed. Alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+But us it behoveth to glory * in the Cross of our Lord Jesus Christ. (Alleluia.)
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium SanctiM/05-03 [Ant Laudes] — check against diurnal
+By thy Cross' holy sign, * Jesus, guard this soul of mine from my ghostly enemy. (Alleluia.)
+
+[benedictus-antiphon]
+Thou art higher * than all cedars, whereon the Life of the world hung, whereon Christ openly triumphed, and His death trampled down death for ever. (Alleluia.)
+
+[magnificat-antiphon]
+By thy Cross' holy sign, * Jesus, guard this soul of mine from my ghostly enemy. (Alleluia.)
+
+[commemoration-antiphon]
+O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+
+[commemoration-versicle]
+V. This sign of the Cross shall be in heaven. (Alleluia.)
+R. When the Lord cometh to judgment. (Alleluia.)
+
+[collect]
+O God, Who didst cause that the Cross of our salvation should in most honourable wise be found again, and Who didst manifest thereby the marvellous efficacy of thy sufferings, mercifully grant that by the Ransom which Thou didst pay upon that tree of life we may finally attain unto life eternal.
+
+[chapter-lauds]
+# SOURCE: divinum-officium Sancti/05-03 [Capitulum Laudes] — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+
+[chapter-sext]
+# SOURCE: divinum-officium Sancti/05-03 [Capitulum Sexta] — check against diurnal
+!Gal 6:14
+But God forbid that I should glory, save in the Cross of our Lord Jesus Christ, by Whom the world is crucified unto me, and I unto the world.
+R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: divinum-officium SanctiM/05-03 [Hymnus Laudes] — check against diurnal
+Lustra sex qui jam peregit
+
+Thirty years among us dwelling,
+His appointed time fulfilled,
+Born for this, he meets his passion,
+For that this he freely willed:
+On the cross the Lamb is lifted,
+Where his life-blood shall be spilled.
+
+He endured the nails, the spitting,
+Vinegar, and spear, and reed;
+From that holy body broken
+Blood and water forth proceed:
+Earth, and stars, and sky, and ocean,
+By that flood from stain are free.
+
+Faithful cross! above all other,
+One and only noble tree!
+None in foliage, none in blossom,
+None in fruit thy peers may be;
+Sweetest wood and sweetest iron!
+Sweetest weight is hung on thee.
+
+Bend thy boughs, O tree of glory!
+Thy relaxing sinews bend;
+For awhile the ancient rigour,
+That thy birth bestowed, suspend;
+And the King of heavenly beauty
+On thy bosom gently tend!
+
+Thou alone wast counted worthy
+This world's ransom to uphold;
+For a shipwrecked race preparing
+Harbour, like the ark of old;
+With the sacred blood anointed
+From the smitten Lamb that rolled.
+
+To the Trinity be glory
+Everlasting, as is meet;
+Equal to the Father, equal
+To the Son, and Paraclete:
+Trinal Unity, whose praises
+All created things repeat.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium SanctiM/05-03 [Hymnus Vespera] — check against diurnal
+Vexilla Regis prodeunt
+
+Abroad the regal banners fly,
+Now shines the cross's mystery;
+Upon it Life did death endure,
+And yet by death did life procure.
+
+Who, wounded with a direful spear,
+Did, purposely to wash us clear
+From stain of sin, pour out a flood
+Of precious water mixed with blood.
+
+That which the prophet-king of old
+Hath in mysterious verse foretold,
+Is now accomplished, whilst we see
+God ruling nations from a tree.
+
+O lovely and refulgent tree,
+Adorned with purpled majesty;
+Culled from a worthy stock, to bear
+Those limbs which sanctifièd were.
+
+Blest tree, whose happy branches bore
+The wealth that did the world restore;
+The beam that did that body weigh
+Which raised up hell's expected prey.
+
+
+O Cross, our one reliance, hail!
+On this triumphant day avail
+(sed tempore Passionis)
+This holy Passiontide avail
+(sed tempore Paschali)
+Thou joy of Eastertide, avail
+To give fresh merit to the saint,
+And pardon to the penitent.
+
+Blest Trinity, salvation's spring,
+May every soul thy praises sing;
+To those thou grantest conquest by
+The holy cross, rewards apply.
+Amen.
+
+[versicle-lauds]
+# SOURCE: divinum-officium Sancti/05-03 [Versum 2] — check against diurnal
+V. We adore thee, O Christ, and we bless thee. (Alleluia.)
+R. Because that through thy Cross Thou hast redeemed the world. (Alleluia.)
+
+[versicle-vespers]
+# SOURCE: divinum-officium Sancti/05-03 [Versum 1] — check against diurnal
+V. This sign of the Cross shall be in heaven. (Alleluia.)
+R. When the Lord cometh to judgment. (Alleluia.)
+
+[short-responsory-terce]
+# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Tertia] — check against diurnal
+R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
+R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
+V. When the Lord cometh to judgment.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
+
+[short-responsory-sext]
+# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Sexta] — check against diurnal
+R. We adore thee, O Christ, and we bless thee. * Alleluia, alleluia.
+R. We adore thee, O Christ, and we bless thee. * Alleluia, alleluia.
+V. Because that through thy cross thou hast redeemed the world.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. We adore thee, O Christ, and we bless thee. * Alleluia, Alleluia.
+
+[short-responsory-none]
+# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Nona] — check against diurnal
+R. Let all the earth worship thee, and sing unto thee. * Alleluia, Alleluia.
+R. Let all the earth worship thee, and sing unto thee. * Alleluia, alleluia.
+V. Let them sing praises to thy Name, O Lord.
+R. Alleluia, Alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let all the earth worship thee, and sing unto thee. * Alleluia, Alleluia.
+
+[chapter-vespers]
+# SOURCE: divinum-officium Sancti/05-03 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+
+[chapter-terce]
+# SOURCE: divinum-officium Sancti/05-03 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+!Phil 2:5-7
+For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.

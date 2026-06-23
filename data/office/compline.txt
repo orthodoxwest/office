@@ -1,0 +1,124 @@
+# Compline — the last hour of the day
+# Same structure every day; only preces and Marian antiphon vary.
+
+[Opening]
+Label = Opening
+
+Type = versicle
+Ref = ordinary/compline/opening-versicle
+
+Type = chapter
+Ref = ordinary/compline/short-lesson
+
+Type = rubric
+Ref = ordinary/compline/confiteor-rubric
+
+Type = prayer
+Ref = ordinary/shared/confiteor
+
+Type = versicle
+Ref = ordinary/compline/post-absolution
+
+Type = proper-antiphon
+Ref = alleluia
+
+[Psalmody]
+
+Type = psalm
+Ref = psalms/004
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/091
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/134
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+[Hymn]
+Condition = not-feast-holy-saturday
+Type = proper-hymn
+Ref = hymn
+
+[Nunc-Dimittis]
+Condition = feast-holy-saturday
+
+Type = proper-antiphon
+Ref = nunc-dimittis-antiphon
+
+Type = canticle
+Ref = canticles/nunc-dimittis
+
+Type = proper-antiphon
+Ref = nunc-dimittis-antiphon
+
+[Chapter]
+Condition = not-feast-holy-saturday
+Type = proper-chapter
+Ref = chapter
+
+Type = proper-responsory
+Ref = short-responsory
+
+Type = prayer
+Ref = ordinary/shared/kyrie
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+[Chapter-Easter-Eve]
+Condition = feast-holy-saturday
+
+Type = prayer
+Ref = ordinary/shared/kyrie
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+[Preces]
+Condition = if-preces
+Label = Preces
+
+Type = prayer
+Ref = ordinary/shared/apostles-creed
+
+Type = preces
+Ref = ordinary/compline/preces
+
+[Collect]
+Label = Collect
+
+Type = prayer
+Ref = ordinary/compline/post-preces
+
+Type = collect
+Ref = ordinary/compline/collect
+
+Type = versicle
+Ref = ordinary/compline/post-collect
+
+Type = blessing
+Ref = ordinary/compline/blessing
+
+
+[Marian]
+Label = Marian
+
+Type = marian
+Ref = seasonal
+
+[Closing]
+Label = Closing
+
+Type = blessing
+Ref = ordinary/compline/conclusion
+
+Type = rubric
+Ref = ordinary/compline/concluding-rubric

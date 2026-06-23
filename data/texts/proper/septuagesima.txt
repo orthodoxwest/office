@@ -1,0 +1,51 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+Have mercy upon me, * O God, and cleanse me from my sin, for against thee only have I sinned.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+Have mercy upon me, * O God, and cleanse me from my sin, for against thee only have I sinned.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+I will praise thee, * for thou hast heard me.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+O God, Thou art my God, * early will I seek thee, because thou hast been my help.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+Blessed art thou, * O our God, in the firmament of heaven, and worthy to be praised above all for ever.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
+Praise ye the Lord * from the heavens.
+
+[benedictus-antiphon]
+Praise ye the Lord * from the heavens.
+
+[magnificat-antiphon]
+The householder saith unto his labourers: * Why stand ye here all the day idle? But they answered and said: Because no man hath hired us. Go ye also into my vineyard, and whatsoever is right, that will I give you.
+
+[commemoration-antiphon]
+The Lord said unto Adam: * Of the tree which is in the midst of the garden, thou shalt not eat; in the hour that thou eatest thereof, thou shalt surely die.
+
+[commemoration-versicle]
+V. O Lord, have mercy upon us.
+R. For we have sinned against thee.
+
+[collect]
+O Lord, we beseech thee favourably to hear the prayers of thy people; that we, who are justly punished for our offences, may be mercifully delivered by thy goodness, for the glory of thy Name.
+
+[chapter-sext]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Capitulum Sexta] — check against diurnal
+!1 Cor 9:25
+And every one that striveth for the mastery, refraineth himself from all things: and they indeed that they may receive a corruptible crown; but we an incorruptible one.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Capitulum Nona] — check against diurnal
+!1 Cor 10:4-5
+And all drank the same spiritual drink; and they drank of the spiritual rock that followed them, and the rock was Christ. But with most of them God was not well pleased: for they were overthrown in the desert.
+R. Thanks be to God.

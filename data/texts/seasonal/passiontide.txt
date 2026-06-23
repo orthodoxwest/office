@@ -1,0 +1,47 @@
+# During Passiontide, the Gloria Patri is omitted from the Short Responsory.
+# The final repetition of the response replaces the Gloria Patri (Rubric XXXI.3).
+
+[alleluia]
+Praise be to thee, O Lord, King of eternal glory.
+
+[short-responsory-lauds]
+R. Heal my soul, O Lord, for I have sinned against thee.
+Heal my soul, O Lord, for I have sinned against thee.
+V. I said: O Lord, have mercy on me.
+R. For I have sinned against thee.
+R. Heal my soul, O Lord, for I have sinned against thee.
+
+[short-responsory-vespers]
+R. How great are thy works, O Lord.
+How great are thy works, O Lord.
+V. Thou hast made all things in wisdom.
+R. Thy works, O Lord.
+R. How great are thy works, O Lord.
+
+[short-responsory-prime]
+R. Christ, Son of the living God, have mercy on us.
+Christ, Son of the living God, have mercy on us.
+V. Thou who sittest at the right hand of the Father.
+R. Have mercy on us.
+R. Christ, Son of the living God, have mercy on us.
+
+[short-responsory-terce]
+R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
+Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
+V. Forsake us not, O Lord our God.
+R. And thy holy Name is called upon us.
+R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
+
+[short-responsory-sext]
+R. The Lord hath made known his salvation.
+The Lord hath made known his salvation.
+V. He hath revealed his righteousness in the sight of the nations.
+R. His salvation.
+R. The Lord hath made known his salvation.
+
+[short-responsory-none]
+R. Redeem me, O Lord, and have mercy on me.
+Redeem me, O Lord, and have mercy on me.
+V. My foot standeth in an even place.
+R. Have mercy on me.
+R. Redeem me, O Lord, and have mercy on me.

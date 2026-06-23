@@ -1,0 +1,39 @@
+[psalm-antiphon]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+Valerian found Cecilia praying in her chamber, * and with her the Angel.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+Busy like a bee, * O Lord, did thine handmaiden Cecilia serve thee.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+I bless thee, O Father of my Lord Jesus Christ, * that through thy Son the fire is gone out round about me.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
+I have asked the Lord for three days, * that I may consecrate my house as a Church.
+
+[benedictus-antiphon]
+As dawn was fading * into day, Cecilia cried and said: Arise, O soldiers of Christ, cast away the works of darkness, and put on the armour of light.
+
+[magnificat-antiphon]
+I have asked the Lord for three days, * that I may consecrate my house as a Church.
+
+[commemoration-antiphon]
+The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+
+[commemoration-versicle]
+V. In thy comeliness and thy beauty.
+R. Go forward, fare prosperously, and reign.
+
+[collect]
+O God, Who year by year dost gladden thy people by the solemn feast of thy blessed Virgin and Martyr Cecilia, grant unto us, we beseech thee, not only devoutly to observe the same, but also to follow after the pattern of her godly conversation.
