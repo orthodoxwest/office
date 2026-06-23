@@ -53,6 +53,7 @@ var hourCases = []hourCase{
 	{"lauds", "2026-04-12", "Easter Sunday — 1st class feast, Easter season"},
 	{"lauds", "2026-04-13", "Easter Monday — within octave, no preces"},
 	{"lauds", "2026-06-07", "Trinity Sunday — 1st class feast on a Sunday, Festal psalmody only (not also Sunday psalmody)"},
+	{"lauds", "2026-06-28", "Green Sunday in summer hymn window — Sunday Lauds summer hymn (Ecce iam noctis)"},
 
 	// Vespers
 	{"vespers", "2026-03-15", "Lent Sunday — Sunday psalmody, Magnificat"},
