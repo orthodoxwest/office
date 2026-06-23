@@ -150,10 +150,16 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		}
 	}
 
-	// 4. Weekday ordinary (e.g. ordinary/lauds/hymn-monday)
+	// 4. Weekday ordinary (e.g. ordinary/lauds/hymn-monday). The Sunday Lauds
+	// hymn additionally varies by season: in the summer window it resolves to
+	// hymn-sunday-summer rather than the (winter) hymn-sunday default.
 	weekday := strings.ToLower(day.Date.Weekday().String())
 	for _, cand := range refCands {
-		weekdayRef := "ordinary/" + hourName + "/" + cand + "-" + weekday
+		wd := weekday
+		if hourName == "lauds" && cand == "hymn" && weekday == "sunday" && sundayLaudsHymnIsSummer(day.Date) {
+			wd = "sunday-summer"
+		}
+		weekdayRef := "ordinary/" + hourName + "/" + cand + "-" + wd
 		if text := corpus.Get(weekdayRef); text != "" {
 			return substituteProperName(text, properName), weekdayRef
 		}

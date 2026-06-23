@@ -1,4 +1,7 @@
 [hymn-sunday]
+# The Winter Hymn, said from the Octave of Epiphany
+# through Quinquagesima, and from the Sunday nearest
+# the first day of October until Advent
 Aeterne rerum conditor
 
 O Framer of the earth and sky,
@@ -35,6 +38,27 @@ Thou Light of lights, thy light restore;
 Sloth from the mind of faith repel:
 Thou First of voices, go before
 Our earliest voices as they swell. Amen.
+
+[hymn-sunday-summer]
+# The Summer Hymn — said from the II Sunday after Trinity until the Sunday
+# nearest the first of October (see internal/office/hymn.go).
+# TODO(diurnal): verify translation against the printed diurnal.
+Ecce iam noctis tenuatur umbra
+
+Lo! the dim shadows of the night are waning;
+Radiantly glowing, dawn of day returneth;
+Fervent in spirit, to the mighty Father
+Pray we devoutly.
+
+So shall our Maker, of his great compassion,
+Banish all sickness, kindly health bestowing;
+And may he grant us, of a Father's goodness,
+Mansions in heaven.
+
+This he vouchsafe us, God for ever blessèd,
+Father eternal, Son, and Holy Spirit,
+Whose is the glory which through all creation
+Ever resoundeth. Amen.
 
 [hymn-monday]
 Splendor paternae gloriae
