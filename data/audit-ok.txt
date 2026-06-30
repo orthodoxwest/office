@@ -23,7 +23,7 @@ st-tikhon-moscow *
 st-herman-alaska *
 
 # Apostles and Evangelists — antiphons from commons/apostle or commons/evangelist
-ss-peter-paul psalm-antiphon benedictus-antiphon commemoration-versicle
+ss-peter-paul commemoration-versicle
 ss-philip-james benedictus-antiphon commemoration-versicle
 ss-simon-jude *
 st-andrew benedictus-antiphon commemoration-versicle
