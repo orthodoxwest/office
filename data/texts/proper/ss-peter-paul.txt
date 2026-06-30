@@ -1,3 +1,29 @@
+[psalm-antiphon]
+Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
+
+[psalm-antiphon-1]
+Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
+
+[psalm-antiphon-2]
+Silver and gold have I none; * but such as I have, I give thee.
+
+[psalm-antiphon-3]
+The Angel said unto Peter, * Cast thy garment about thee, and follow me.
+
+[psalm-antiphon-4]
+The Lord hath sent his Angel, * and hath delivered me out of the hand of Herod, alleluia.
+
+[psalm-antiphon-5]
+Thou art Peter, * and upon this rock I will build my Church.
+
+[short-responsory-lauds]
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
 [magnificat-antiphon]
 Thou art Peter * and upon this Rock I will build My Church.
 
@@ -24,48 +50,47 @@ Peter therefore was kept in prison. But prayer was made without ceasing of the C
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/06-29 [Hymnus Laudes] — check against diurnal
-Beate Pastor, Petre, clemens accipe
+Jam, bone Pastor, Petre
 
-Peter, blest shepherd, hearken to our cry,
-And with a word unloose our guilty chain;
-Thou! who hast power to ope the gates on high
-To men below, and power to shut them fast again.
+Peter, good shepherd, may thy ceaseless orisons,
+For us prevailing, break the bands of wickedness:
+For thou of old time didst recieve authority
+The gates to open, or to close, of Paradise.
 
-Lead us, great teacher Paul, in wisdom's ways,
-And lift our hearts with thine to heaven's high throne;
-Till faith beholds the clear meridian blaze;
-And sunlike in the soul reigns charity alone.
+O by thy doctrine, Paul, thou sage illustrious,
+Guide us in virtue, raise our spirits heavenwards;
+Till perfect knowledge stream on us abundantly,
+And that which only is in part be done away.
 
-Praise, blessing, majesty, through endless days,
-Be to the Trinity immortal given;
-Who in pure unity profoundly sways
-Eternally alike all things in earth and heaven.
+Glory eternal to the blessed Trinity,
+With laud and honour, virtue and supremacy,
+Trinal yet Onely, reigning in his majesty
+Both now and ever, thorugh the ages infinite.
 Amen.
 
 [hymn-vespers]
 # SOURCE: divinum-officium Sancti/06-29 [Hymnus Vespera] — check against diurnal
-Decora lux aeternitatis, auream
+Aurea luce et decore roseo
 
-The beauteous light of God's eternal majesty
-Streams down in golden rays to grace this holy day
-Which crowned the princes of the Apostles' glorious choir,
-And unto guilty mortals showed the heavenward way.
+With golden splendor, and with roseate loveliness,
+Thou didst illumine, Light of Light, the universe;
+The heavens adorning with a glorious martyrdom
+This day, which bringeth pardon to the penitent.
 
-The teacher of the world and keeper of heaven's gate,
-Rome's founders twain and rulers too of every land,
-Triumphant over death by sword and shameful cross,
-With laurel crowned are gathered to the eternal band.
+Celestial Warder! Earth's instructor eloquent!
+The world's dread judges, lights mankind enlightening,
+By cross triumphant, by the sword victorious,
+Now are ye laurelled, Life's immortal senators.
 
-O happy Rome! who in thy martyr princes' blood,
-A twofold stream, art washed and doubly sanctified.
-All earthly beauty thou alone outshinest far,
-Empurpled by their outpoured life-blood's glorious tide.
+O Rome, thrice happy, that so great a martyrdom
+Thy walls, empurpled with the rich life-blood, halloweth!
+Not thine the merit; by thy Princes' excellence
+Thou shinest fairer than the world's magnificence.
 
-All honour, power, and everlasting jubilee
-To Him who all things made and governs here below,
-To God in essence One, and yet in persons Three,
-Both now and ever, while unending ages flow.
+Glory eternal to the Blessed Trinity,
+With laud and honour, virtue and supremacy,
+Trinal yet Onely, reigning in his majesty
+Both now and ever, through the ages infinite.
 Amen.
 
 [chapter-vespers]
