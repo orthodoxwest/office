@@ -1,4 +1,4 @@
-.PHONY: help build test lint vet fmt fmt-check check serve ordo validate audit review-manifest review-status tex pdf golden clean
+.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit review-manifest review-status tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -23,7 +23,10 @@ fmt: ## Reformat source files with gofmt
 fmt-check: ## Check formatting without modifying files
 	@test -z "$$(gofmt -l .)" || (gofmt -l . && exit 1)
 
-check: fmt-check vet lint test validate ## Run fmt + vet + lint + test + validate
+lint-texts: build ## Lint the text corpus (mechanical findings fail; advisory printed)
+	./office lint
+
+check: fmt-check vet lint test validate lint-texts ## Run fmt + vet + lint + test + validate + lint-texts
 
 serve: build ## Start the web server
 	./office serve
