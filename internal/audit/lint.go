@@ -64,6 +64,7 @@ func Lint(dataDir string) (*LintReport, error) {
 		lintMechanical(r, key, text)
 		lintLatin(r, key, text)
 		lintTruncation(r, key, text)
+		lintUnpointedAntiphon(r, key, text)
 	}
 
 	lintNearDuplicates(r, entries, keys)
@@ -106,6 +107,31 @@ func lintMechanical(r *LintReport, key, text string) {
 	}
 	if strings.Contains(text, "**") {
 		add("asterisk", "contains doubled asterisk")
+	}
+	if strings.Contains(text, `\n`) {
+		add("escape-sequence", `contains literal \n escape`)
+	}
+	if strings.Contains(text, "`") {
+		add("backtick", "contains backtick (use apostrophe)")
+	}
+}
+
+// indexedAntiphonRE matches indexed psalm-antiphon slot keys, whose texts are
+// expected to carry a " * " pointing mediant.
+var indexedAntiphonRE = regexp.MustCompile(`/psalm-antiphon(-\d+)?$`)
+
+// lintUnpointedAntiphon flags indexed psalm antiphons with no pointing
+// asterisk — usually a transcription slip, occasionally a legitimately short
+// antiphon (hence advisory).
+func lintUnpointedAntiphon(r *LintReport, key, text string) {
+	if !indexedAntiphonRE.MatchString(key) {
+		return
+	}
+	if !strings.Contains(text, "*") {
+		r.Advisory = append(r.Advisory, LintFinding{
+			Key: key, Class: "unpointed-antiphon",
+			Detail: "no pointing asterisk",
+		})
 	}
 }
 
@@ -200,7 +226,7 @@ func lintNearDuplicates(r *LintReport, entries map[string]string, keys []string)
 	}
 
 	for _, docs := range bySlot {
-		for i := 0; i < len(docs); i++ {
+		for i := range docs {
 			for j := i + 1; j < len(docs); j++ {
 				if entries[docs[i].key] == entries[docs[j].key] {
 					continue // identical is intentional reuse, not an error
