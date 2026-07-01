@@ -45,6 +45,8 @@ internal/
     testdata/golden/       Checked-in golden files (regenerate with make golden)
   audit/                   Data completeness audit
     audit.go               Placeholder scanner + missing-propers reporter
+    sweep.go               Composition sweep: not-found markers + ordinary fallbacks on Double+ days
+    lint.go                Text-corpus lints (mechanical fail make check; advisory for triage)
   review/                  Human review coverage tracking
     review.go              Manifest sweep: dedupe composed hours by content hash into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
@@ -83,11 +85,12 @@ make build       # Build binary
 make test        # Run all tests (includes golden)
 make vet         # Run go vet
 make fmt         # Check formatting
-make check       # fmt + vet + lint + test + validate
+make check       # fmt + vet + lint + test + validate + lint-texts
 make serve       # Start web server on :8080
 make ordo        # Print text ordo for current year (YEAR=2026)
 make validate    # Validate data files
-make audit       # Report placeholder texts and feasts with no propers
+make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
+make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
