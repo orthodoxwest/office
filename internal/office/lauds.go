@@ -40,6 +40,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		elems = append(elems, models.OfficeElement{
 			Type:      models.Antiphon,
 			Text:      antText,
+			SlotRef:   "commemoration-antiphon",
 			SourceRef: antSrc,
 		})
 
@@ -48,6 +49,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		elems = append(elems, models.OfficeElement{
 			Type:      models.Versicle,
 			Text:      versText,
+			SlotRef:   "commemoration-versicle",
 			SourceRef: versSrc,
 		})
 
@@ -56,6 +58,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		elems = append(elems, models.OfficeElement{
 			Type:      models.Collect,
 			Text:      collectText,
+			SlotRef:   "commemoration-collect",
 			SourceRef: collectSrc,
 		})
 	}
