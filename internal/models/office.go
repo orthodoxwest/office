@@ -24,11 +24,20 @@ const (
 )
 
 // OfficeElement represents a single element in an office hour.
+// SlotRef and SourceRef are set only for elements that went through proper
+// resolution (proper-* slots and commemoration texts): SlotRef is the ref
+// requested by the hour definition (e.g. "hymn", "psalm-antiphon-1") and
+// SourceRef is the corpus key the text actually resolved from, so audits can
+// tell which tier (proper/commons/seasonal/ordinary) supplied a slot that
+// could have carried a proper text. Both are excluded from review hashes and
+// never rendered.
 type OfficeElement struct {
-	Type   ElementType
-	Text   string
-	Label  string
-	Rubric string
+	Type      ElementType
+	Text      string
+	Label     string
+	Rubric    string
+	SlotRef   string
+	SourceRef string
 }
 
 // OfficeSection groups related elements within an office hour.

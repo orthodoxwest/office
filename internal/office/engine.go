@@ -199,28 +199,28 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 func resolveHourElement(day *models.CalendarDay, hourName string, elem HourElement, corpus *texts.TextCorpus) models.OfficeElement {
 	switch elem.Type {
 	case "proper-antiphon":
-		text, _ := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Antiphon, Text: text}
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		return models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}
 	case "proper-collect":
-		text, _ := resolveProperCollectText(day, hourName, corpus)
-		return models.OfficeElement{Type: models.Collect, Text: text}
+		text, src := resolveProperCollectText(day, hourName, corpus)
+		return models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}
 	case "proper-hymn":
-		text, _ := resolveProperText(day, hourName, elem.Ref, corpus)
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		if dox, doxRef := resolveProperText(day, hourName, "hymn-doxology", corpus); strings.HasPrefix(doxRef, "seasonal/") {
 			text = substituteHymnDoxology(text, dox)
 		}
 		title, body := extractHymnTitle(text)
-		return models.OfficeElement{Type: models.Hymn, Text: body, Label: title}
+		return models.OfficeElement{Type: models.Hymn, Text: body, Label: title, SlotRef: elem.Ref, SourceRef: src}
 	case "proper-responsory":
-		text, _ := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Response, Text: text}
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		return models.OfficeElement{Type: models.Response, Text: text, SlotRef: elem.Ref, SourceRef: src}
 	case "proper-versicle":
-		text, _ := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Versicle, Text: text}
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		return models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}
 	case "proper-chapter":
-		text, _ := resolveProperText(day, hourName, elem.Ref, corpus)
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		ref, body := extractChapterRef(text)
-		return models.OfficeElement{Type: models.Chapter, Text: body, Label: ref}
+		return models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SlotRef: elem.Ref, SourceRef: src}
 	default:
 		return resolveElement(elem, corpus)
 	}

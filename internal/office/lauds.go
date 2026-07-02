@@ -36,24 +36,30 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		})
 
 		// Antiphon: feast-specific or fallback
-		antText := lookupCommemoration(comm, day.Season, hourName, "commemoration-antiphon", corpus)
+		antText, antSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-antiphon", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type: models.Antiphon,
-			Text: antText,
+			Type:      models.Antiphon,
+			Text:      antText,
+			SlotRef:   "commemoration-antiphon",
+			SourceRef: antSrc,
 		})
 
 		// Versicle + Response
-		versText := lookupCommemoration(comm, day.Season, hourName, "commemoration-versicle", corpus)
+		versText, versSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-versicle", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type: models.Versicle,
-			Text: versText,
+			Type:      models.Versicle,
+			Text:      versText,
+			SlotRef:   "commemoration-versicle",
+			SourceRef: versSrc,
 		})
 
 		// Collect
-		collectText := lookupCommemoration(comm, day.Season, hourName, "commemoration-collect", corpus)
+		collectText, collectSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-collect", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type: models.Collect,
-			Text: collectText,
+			Type:      models.Collect,
+			Text:      collectText,
+			SlotRef:   "commemoration-collect",
+			SourceRef: collectSrc,
 		})
 	}
 	return elems
@@ -62,34 +68,36 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 // lookupCommemoration looks up a commemoration text, trying in order:
 // feast-specific proper, commons (paschal then regular), ordinary fallback.
 // Applies N. substitution using the feast's ProperName.
-func lookupCommemoration(feast *models.Feast, season models.Season, hourName, ref string, corpus *texts.TextCorpus) string {
+// Returns the text and the corpus ref it was resolved from.
+func lookupCommemoration(feast *models.Feast, season models.Season, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
 	// 1. Feast-specific
 	for _, feastID := range feastProperIDs(feast) {
 		feastRef := "proper/" + feastID + "/" + ref
 		if text := corpus.Get(feastRef); text != "" {
-			return substituteProperName(text, feast.ProperName)
+			return substituteProperName(text, feast.ProperName), feastRef
 		}
 	}
 
 	// 1b. For commemoration-collect, fall back to the feast's own collect.
 	if ref == "commemoration-collect" {
 		for _, feastID := range feastProperIDs(feast) {
-			if text := corpus.Get("proper/" + feastID + "/collect"); text != "" {
-				return substituteProperName(text, feast.ProperName)
+			collectRef := "proper/" + feastID + "/collect"
+			if text := corpus.Get(collectRef); text != "" {
+				return substituteProperName(text, feast.ProperName), collectRef
 			}
 		}
 	}
 
 	// 2. Commons (paschal, then regular)
-	if text, _ := lookupCommonsText(feast.Category, season, "", ref, corpus); text != "" {
-		return substituteProperName(text, feast.ProperName)
+	if text, resolved := lookupCommonsText(feast.Category, season, "", ref, corpus); text != "" {
+		return substituteProperName(text, feast.ProperName), resolved
 	}
 
 	// 3. Ordinary fallback (hour-specific)
 	ordinaryRef := "ordinary/" + hourName + "/" + ref
 	if text := corpus.Get(ordinaryRef); text != "" {
-		return substituteProperName(text, feast.ProperName)
+		return substituteProperName(text, feast.ProperName), ordinaryRef
 	}
 
-	return fmt.Sprintf("[%s: %s]", ref, feast.ID)
+	return fmt.Sprintf("[%s: %s]", ref, feast.ID), ref
 }

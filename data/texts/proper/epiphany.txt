@@ -76,7 +76,7 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: divinum-officium SanctiM/01-06 [HymnusM Vespera] — check against diurnal
-Hostis Herodes impie,\nChristum venire quid times?
+Hostis Herodes impie
 
 Why, impious Herod, vainly fear
 That Christ the Saviour cometh here?

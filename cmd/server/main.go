@@ -36,6 +36,8 @@ func main() {
 		cmdValidate(dataDir)
 	case "audit":
 		cmdAudit(dataDir)
+	case "lint":
+		cmdLint(dataDir)
 	case "lauds":
 		cmdHour(dataDir, "lauds", "Lauds")
 	case "terce":
@@ -100,12 +102,34 @@ func cmdValidate(dataDir string) {
 }
 
 func cmdAudit(dataDir string) {
+	fs := flag.NewFlagSet("audit", flag.ExitOnError)
+	year := fs.Int("year", time.Now().Year(), "calendar year for the composition sweep")
+	fs.Parse(os.Args[2:])
+
 	r, err := audit.Run(dataDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 	audit.Print(r, os.Stdout)
+
+	sweep, err := audit.SweepYear(dataDir, *year)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error running sweep: %v\n", err)
+		os.Exit(1)
+	}
+	audit.PrintSweep(sweep, os.Stdout)
+}
+
+func cmdLint(dataDir string) {
+	r, err := audit.Lint(dataDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+	if audit.PrintLint(r, os.Stdout) {
+		os.Exit(1)
+	}
 }
 
 // composeHour builds the calendar and engine for the given date and composes the named hour.
