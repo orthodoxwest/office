@@ -84,6 +84,29 @@ document.documentElement.classList.add("js");
 
   updatePrayNow();
 
+  // On narrow screens the primary nav is a single horizontally scrollable
+  // row. Flag it (for the edge-fade hint) only when it actually overflows,
+  // and bring the active page's link into view.
+  var primaryNav = document.querySelector("header nav");
+  if (primaryNav) {
+    var syncNavOverflow = function () {
+      var overflows = primaryNav.scrollWidth > primaryNav.clientWidth + 1;
+      primaryNav.classList.toggle("nav-scrollable", overflows);
+      return overflows;
+    };
+    if (syncNavOverflow()) {
+      // Center the active link by setting scrollLeft directly;
+      // scrollIntoView could also scroll the page vertically on
+      // anchor-navigated loads (e.g. /calendar/2026#july).
+      var activeLink = primaryNav.querySelector("a.active");
+      if (activeLink) {
+        var linkCenter = activeLink.offsetLeft - primaryNav.offsetLeft + activeLink.offsetWidth / 2;
+        primaryNav.scrollLeft = linkCenter - primaryNav.clientWidth / 2;
+      }
+    }
+    window.addEventListener("resize", syncNavOverflow);
+  }
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then(function () {
       return navigator.serviceWorker.ready;

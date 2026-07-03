@@ -2,14 +2,16 @@
 <html lang="en"{{if .Theme}} data-theme="{{.Theme}}"{{end}}>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="manifest" href="/static/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
-  <meta name="theme-color" content="#fdf9f2">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fdf9f2" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1814" media="(prefers-color-scheme: dark)">
   <script src="/static/app.js" defer></script>
 </head>
 <body>
