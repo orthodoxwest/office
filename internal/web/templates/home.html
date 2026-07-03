@@ -32,9 +32,8 @@
     </section>
 
     <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
-      <p class="home-kicker">At A Glance</p>
+      <p class="home-kicker">The Hours</p>
       <h2 id="home-pray-heading">Choose an hour</h2>
-      <p class="home-prayer-copy">Open the hour you need for {{.DateStr}} or jump directly into the office most likely to be prayed now.</p>
       <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
       <div class="home-hour-links" aria-label="Hours for the day">
         {{range .Hours}}

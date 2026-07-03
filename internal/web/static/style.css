@@ -85,6 +85,9 @@ body {
   max-width: 46rem;
   margin: 0 auto;
   padding: 0 1.5rem 4.5rem;
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
 }
 
 main {
@@ -139,7 +142,7 @@ header {
 nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.8rem;
+  gap: 0.1rem 0.45rem;
   justify-content: center;
 }
 
@@ -147,10 +150,10 @@ nav a {
   color: var(--accent);
   text-decoration: none;
   margin-right: 0;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 0.2rem 0.15rem;
+  padding: 0.35rem 0.3rem;
 }
 
 nav a:hover {
@@ -160,6 +163,40 @@ nav a:hover {
 nav a.active {
   color: var(--text);
   border-bottom: 1px solid var(--accent);
+}
+
+/* Narrow screens: one swipeable row instead of two wrapped rows, so the
+   header stays compact and the office text starts higher on the page. */
+@media (max-width: 700px) {
+  header {
+    padding: 0.4rem 0 0.35rem;
+    margin-bottom: 1.1rem;
+  }
+
+  nav {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  nav a {
+    flex: 0 0 auto;
+    padding: 0.6rem 0.5rem;
+  }
+
+  /* Edge fade hinting that the row scrolls; applied by app.js only when
+     the row actually overflows. */
+  nav.nav-scrollable {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 1.1rem, #000 calc(100% - 1.1rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 1.1rem, #000 calc(100% - 1.1rem), transparent);
+  }
 }
 
 /* ── Footer ── */
@@ -303,12 +340,13 @@ footer {
 }
 
 .pray-now {
-  display: inline-block;
-  padding: 0.65rem 1.1rem;
+  display: block;
+  text-align: center;
+  padding: 0.8rem 1.1rem;
   border: 1px solid var(--accent);
   color: var(--accent);
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 1.05rem;
   border-radius: 2px;
   transition: background 0.15s, color 0.15s;
 }
@@ -318,10 +356,10 @@ footer {
   color: var(--bg);
 }
 
-.home-prayer-copy {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
+.home-prayer-card h2 {
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin-bottom: 0.85rem;
 }
 
 .home-hour-links {
@@ -334,7 +372,7 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.35rem 0.65rem;
+  padding: 0.55rem 0.85rem;
   border: 1px solid var(--border);
   color: var(--text);
   text-decoration: none;
@@ -380,36 +418,36 @@ footer {
 /* ── Hour page ── */
 
 .hour-header {
-  margin-bottom: 1.75rem;
-  padding: 0 0 0.85rem;
+  margin-bottom: 1.4rem;
+  padding: 0 0 0.6rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
 
 .hour-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.55rem;
   font-weight: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
 .hour-meta {
   color: var(--muted);
   font-size: 0.9rem;
-  margin: 0 auto 0.85rem;
+  margin: 0 auto 0.55rem;
   max-width: 34rem;
   line-height: 1.45;
 }
 
 .day-nav {
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 0.8rem;
+  gap: 0.25rem 0.55rem;
   align-items: center;
   justify-content: center;
-  padding-top: 0.7rem;
+  padding-top: 0.35rem;
   border-top: 1px solid rgba(26, 26, 26, 0.06);
 }
 
@@ -417,6 +455,7 @@ footer {
   color: var(--accent);
   text-decoration: none;
   margin-right: 0;
+  padding: 0.5rem 0.4rem;
 }
 
 .day-nav a:hover {
@@ -437,7 +476,7 @@ footer {
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--border);
-  padding: 0.05rem 0 0.15rem;
+  padding: 0.35rem 0;
   cursor: pointer;
   min-width: 9.5rem;
 }
@@ -486,6 +525,10 @@ footer {
 .elements {
   display: grid;
   gap: 0.9rem;
+  /* Comfortable reading measure for the office text on wide screens */
+  max-width: 38rem;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .elements > * {
@@ -745,7 +788,8 @@ footer {
   color: var(--muted);
   font-variant: small-caps;
   letter-spacing: 0.08em;
-  margin-bottom: 0.7rem;
+  padding: 0.35rem 0;
+  margin-bottom: 0.35rem;
   text-align: center;
 }
 
@@ -760,7 +804,7 @@ footer {
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 0.85rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom));
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -1216,8 +1260,8 @@ footer {
 
 @media (max-width: 540px) {
   body {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
   }
 
   .day-nav {
@@ -1233,6 +1277,18 @@ footer {
     min-width: 9.5rem;
     width: auto;
     flex: 0 1 auto;
+  }
+
+  /* With JS the Go button is hidden, so prev | date | next fit one row */
+  .js .day-nav {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0.15rem;
+  }
+
+  .js .date-jump {
+    min-width: 0;
+    flex: 0 1 8.5rem;
   }
 }
 
@@ -1260,6 +1316,10 @@ footer {
     font-size: 11pt;
     color: #000;
     background: #fff;
+  }
+
+  .elements {
+    max-width: none;
   }
 
   .hour-header {
