@@ -356,10 +356,10 @@ footer {
   color: var(--bg);
 }
 
-.home-prayer-copy {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-bottom: 1rem;
+.home-prayer-card h2 {
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin-bottom: 0.85rem;
 }
 
 .home-hour-links {

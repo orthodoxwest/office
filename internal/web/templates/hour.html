@@ -3,7 +3,7 @@
 <div class="office-hour">
   <div class="hour-header">
     <h1>{{.Hour.Title}}</h1>
-    <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}}</p>
+    <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}} &bull; <span class="color-swatch color-{{.Hour.Color}}"></span>{{.Hour.Color}}</p>
     <nav class="day-nav" aria-label="Date navigation">
       <a href="{{.PrevLink}}">&laquo; Previous</a>
       <form class="date-jump-form" action="/{{.HourName}}" method="get">
