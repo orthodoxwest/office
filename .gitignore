@@ -28,8 +28,9 @@ go.work.sum
 .DS_Store
 Thumbs.db
 
-# Claude
-.claude/
+# Claude (except checked-in project skills)
+.claude/*
+!.claude/skills/
 
 #LaTeX handling
 *.tex
