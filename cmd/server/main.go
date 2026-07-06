@@ -32,6 +32,8 @@ func main() {
 	switch os.Args[1] {
 	case "ordo":
 		cmdOrdo(dataDir)
+	case "rubrics":
+		cmdRubrics(dataDir)
 	case "validate":
 		cmdValidate(dataDir)
 	case "audit":
@@ -83,6 +85,89 @@ func cmdOrdo(dataDir string) {
 	}
 
 	fmt.Print(output.FormatCalendar(days))
+}
+
+// cmdRubrics prints a per-day TSV of composed rubric flags (preces, suffrage,
+// commemorations) for cross-checking against a printed ordo.
+func cmdRubrics(dataDir string) {
+	if len(os.Args) < 3 {
+		fmt.Fprintln(os.Stderr, "Usage: office rubrics YEAR")
+		os.Exit(1)
+	}
+
+	year, err := strconv.Atoi(os.Args[2])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Invalid year: %s\n", os.Args[2])
+		os.Exit(1)
+	}
+
+	days, err := calendar.BuildCalendar(year, dataDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error building calendar: %v\n", err)
+		os.Exit(1)
+	}
+	moveable := calendar.ComputeMoveableDates(year)
+
+	engine, err := office.NewEngine(dataDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating office engine: %v\n", err)
+		os.Exit(1)
+	}
+
+	flags := func(hour *models.OfficeHour) (preces, suffrage bool, comms []string) {
+		for _, sec := range hour.Sections {
+			if strings.Contains(sec.Label, "Suffrage") {
+				suffrage = true
+			}
+			for _, el := range sec.Elements {
+				if el.Type == models.Preces {
+					preces = true
+				}
+				if el.Type == models.Heading && strings.HasPrefix(el.Text, "Commemoration of ") {
+					comms = append(comms, strings.TrimPrefix(el.Text, "Commemoration of "))
+				}
+			}
+		}
+		return
+	}
+
+	fmt.Println("date\tcelebration\tlauds_preces\tlauds_suffrage\tlauds_comms\thours_preces\tvespers_preces\tvespers_suffrage\tvespers_comms")
+	for i := range days {
+		day := &days[i]
+		celebration := "Feria"
+		if day.Celebration != nil {
+			celebration = day.Celebration.Name
+		}
+
+		row := []string{day.Date.Format("2006-01-02"), celebration}
+		lauds, err := engine.ComposeHour("lauds", day, moveable)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error composing lauds for %s: %v\n", row[0], err)
+			os.Exit(1)
+		}
+		lp, ls, lc := flags(lauds)
+
+		prime, err := engine.ComposeHour("prime", day, moveable)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error composing prime for %s: %v\n", row[0], err)
+			os.Exit(1)
+		}
+		hp, _, _ := flags(prime)
+
+		vespers, err := engine.ComposeHour("vespers", day, moveable)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error composing vespers for %s: %v\n", row[0], err)
+			os.Exit(1)
+		}
+		vp, vs, vc := flags(vespers)
+
+		row = append(row,
+			fmt.Sprintf("%t", lp), fmt.Sprintf("%t", ls), strings.Join(lc, "; "),
+			fmt.Sprintf("%t", hp),
+			fmt.Sprintf("%t", vp), fmt.Sprintf("%t", vs), strings.Join(vc, "; "),
+		)
+		fmt.Println(strings.Join(row, "\t"))
+	}
 }
 
 func cmdValidate(dataDir string) {
