@@ -49,3 +49,23 @@ R. Thanks be to God.
 !1 Cor 10:4-5
 And all drank the same spiritual drink; and they drank of the spiritual rock that followed them, and the rock was Christ. But with most of them God was not well pleased: for they were overthrown in the desert.
 R. Thanks be to God.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quadp1-1 [Ant 3] — check against diurnal
+These last have wrought but one hour, * and thou hast made them equal unto us, which have borne the burden and heat of the day.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quadp1-2 [Ant 3] — check against diurnal
+And the householder said: * Friend, I do thee no wrong didst not thou agree with me for a penny? Take that is thine, and go thy way.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quadp1-3 [Ant 3] — check against diurnal
+Take that thine is, * and go thy way; for I am good, saith the Lord.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quadp1-4 [Ant 3] — check against diurnal
+Is it not lawful for me * to do what I will? Is thine eye evil, because I am gracious?" saith the Lord.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant 1] — check against diurnal
+The Lord said unto Adam: * Of the tree which is in the midst of the garden, thou shalt not eat; in the hour that thou eatest thereof, thou shalt surely die.

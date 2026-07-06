@@ -37,3 +37,19 @@ R. From generation to generation.
 
 [collect]
 O Lord, we beseech thee favourably to hear the prayers of thy people; that we, who are justly punished for our offences, may be mercifully delivered by thy goodness, for the glory of thy Name.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quadp2-1 [Ant 3] — check against diurnal
+If ye would be truly honourable, * strive after our Fatherland which is in heaven.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quadp2-2 [Ant 3] — check against diurnal
+The seed is the word of God, * and the Sower is Christ; if any man find Him, he shall never be moved.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quadp2-3 [Ant 3] — check against diurnal
+But that on the good ground * are they which in an honest and good heart bring forth fruit with patience.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant 1] — check against diurnal
+The Lord said unto Noah: * The end of all flesh is come before Me, make thee an ark of planed timber, that seed of all flesh may be saved therein.

@@ -55,7 +55,65 @@ R. Thanks be to God.
 And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
 R. Thanks be to God.
 
-# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember Wednesday Annunciation-gospel antiphons, not the Sunday's own; supply from diurnal
-# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
-# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
 # TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv1-0; supply from diurnal or suppress in audit-ok.txt
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Adv1-1 [Ant 2] — check against diurnal
+The angel of the Lord * announced unto Mary, and she conceived of the Holy Ghost. Alleluia.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium TemporaM/Adv1-1 [Ant 3] — check against diurnal
+Lift up thine eyes, * O Jerusalem, and see that thy King is mighty behold, thy Saviour shall come and loose thee from thy chain.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv1-2 [Ant 2] — check against diurnal
+Before they came together, * Mary was found with child of the Holy Ghost. Alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv1-2 [Ant 3] — check against diurnal
+Seek ye the Lord * while He may be found; call ye upon Him while He is near. Alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv1-3 [Ant 2] — check against diurnal
+Out of Zion * shall go forth the law, and the word of the Lord from Jerusalem.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv1-3 [Ant 3] — check against diurnal
+There cometh One mightier * than I after me, the latchet of Whose shoes I am not worthy to unloose.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv1-4 [Ant 2] — check against diurnal
+Blessed art thou * among women, and blessed is the fruit of thy womb.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv1-4 [Ant 3] — check against diurnal
+I will wait * upon the Lord my Saviour, and come before Him when He is near, alleluia.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv1-5 [Ant 2] — check against diurnal
+He that is both God and man * shall come of the house of David and sit in David's seat. Alleluia.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv1-5 [Ant 3] — check against diurnal
+Out of Egypt * have I called My Son; He shall come to save His people.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Adv1-6 [Ant 2] — check against diurnal
+Fear not * Zion, behold, thy God cometh, Alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal
+The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy womb the Son of God. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 3] — check against diurnal
+Fear not, Mary, * for thou hast found grace with the Lord; behold, thou shalt conceive in thy womb, and bring forth a son. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 1] — check against diurnal
+Behold, the name of the Lord * cometh from far, and the whole earth is full of His glory.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal
+The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy womb the Son of God. Alleluia.
+

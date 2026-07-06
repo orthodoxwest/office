@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-5 [Ant 2] — check against diurnal
+But that ye may know * that the Son of man hath power upon earth to forgive sins, He said unto the sick of the palsy: I say unto thee, Arise, take up thy couch, and go into thine house. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-5 [Ant 3] — check against diurnal
+But the Comforter which is the Holy Ghost, * Whom the Father will send in My Name, He shall teach you all things, and bring all things to your remembrance, whatsoever I have said unto you. Alleluia.

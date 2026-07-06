@@ -61,3 +61,51 @@ R. Thanks be to God.
 !Gal 4:22-24
 Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
 R. Thanks be to God.
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad4-1 [Ant 2] — check against diurnal
+Thus saith the Lord: * Take these things hence; make not My Father's house an house of merchandise.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad4-1 [Ant 3] — check against diurnal
+Thus saith the Lord: * Destroy this temple, and in three days I will raise it up. But He spoke of the temple of His Body.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad4-2 [Ant 2] — check against diurnal
+Why go ye about to kill Me, * a Man that hath told you the truth?
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad4-2 [Ant 3] — check against diurnal
+No man laid hands on Him; * because His hour was not yet come.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad4-3 [Ant 2] — check against diurnal
+Rabbi, who did sin, this man, or his parents, * that he was born blind? Jesus answered, and said: Neither hath this man sinned, nor his parents; but that the works of God shall be made manifest in him.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad4-3 [Ant 3] — check against diurnal
+The Man that is called Jesus * made clay of His Spittle, and anointed mine eyes, and now I do see.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad4-4 [Ant 2] — check against diurnal
+Jesus went * into a city that is called Naim: and behold, a dead man was being carried out, the only son of his mother.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad4-4 [Ant 3] — check against diurnal
+A great Prophet * is risen up among us, and God hath visited His people.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad4-5 [Ant 2] — check against diurnal
+Our friend Lazarus sleepeth; * let us go and awake him out of sleep.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad4-5 [Ant 3] — check against diurnal
+Lord, if Thou hadst been here * Lazarus had not died; behold, by this time he stinketh, for he hath lain in the grave four days already.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Quad4-6 [Ant 2] — check against diurnal
+Thus saith the Lord: * He that followeth Me walketh not in darkness, but shall have the Light of life.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Quad4-0 [Ant 1] — check against diurnal
+Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.

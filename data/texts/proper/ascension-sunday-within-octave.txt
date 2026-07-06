@@ -1,0 +1,15 @@
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium TemporaM/Pasc6-5 [Ant 2] — check against diurnal
+But when the Comforter is come * Whom I will send unto you from the Father, He shall testify of Me, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc6-0 [Ant 2] — check against diurnal
+But when the Comforter is come * Whom I will send unto you from the Father, He shall testify of Me, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc6-0 [Ant 3] — check against diurnal
+These things have I told * you, that, when the time shall come, ye may remember that I told you of them, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc6-0 [Ant 1] — check against diurnal
+But when the Comforter is come * Whom I will send unto you from the Father, He shall testify of Me, alleluia.

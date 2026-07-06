@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-5 [Ant 2] — check against diurnal
+When the eleven disciples * saw the Lord in Galilee, they worshipped Him, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-5 [Ant 3] — check against diurnal
+All power is given unto Me * in heaven and in earth, alleluia.

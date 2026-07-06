@@ -61,3 +61,47 @@ R. Thanks be to God.
 !1 Thess 4:1
 For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
 R. Thanks be to God.
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad2-1 [Ant 2] — check against diurnal
+The beginning, * who also speak unto you.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad2-1 [Ant 3] — check against diurnal
+He That sent Me is with Me, * and hath not left Me alone, for I do always those things that please Him.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad2-2 [Ant 2] — check against diurnal
+For One is your Master, * Which is in heaven, even Christ the Lord.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad2-2 [Ant 3] — check against diurnal
+And all ye are brethren, * and call no man your father upon earth, for One is your Father, Which is in heaven; neither be ye called masters, for One is your Master, even Christ.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad2-3 [Ant 2] — check against diurnal
+Behold, we go up to Jerusalem, * and the Son of man shall be betrayed to be crucified.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad2-3 [Ant 3] — check against diurnal
+For He shall be delivered to the Gentiles, * to mock, and to scourge, and to crucify.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad2-4 [Ant 2] — check against diurnal
+Son, remember * that thou in thy lifetime receivedst thy good things, and likewise Lazarus evil things.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad2-4 [Ant 3] — check against diurnal
+That rich man * who had refused Lazarus bread-crumbs, cried for a drop of water.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad2-5 [Ant 2] — check against diurnal
+He will miserably destroy * those wicked men, and will let out His vineyard unto other husbandmen, which shall render Him the fruits in their seasons.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad2-5 [Ant 3] — check against diurnal
+When they sought * to lay hands on Him, they feared the multitude, because they took Him for a Prophet.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Quad2-6 [Ant 2] — check against diurnal
+I will arise and go to my father, * and will say unto him: Make me as one of thine hired servants.

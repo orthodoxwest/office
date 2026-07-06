@@ -61,3 +61,51 @@ R. Thanks be to God.
 !Eph 5:1-2
 Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
 R. Thanks be to God.
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad3-1 [Ant 2] — check against diurnal
+Amen I say unto you, * no Prophet is accepted in his own country.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad3-1 [Ant 3] — check against diurnal
+But Jesus, * passing through the midst of them, went His way.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad3-2 [Ant 2] — check against diurnal
+If two of you shall agree on earth * as touching anything that they shall ask, it shall be done for them of My Father, saith the Lord.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad3-2 [Ant 3] — check against diurnal
+Where two or three are gathered together in My Name, * there am I in the midst of them, saith the Lord.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad3-3 [Ant 2] — check against diurnal
+Hear and understand * the traditions which the Lord hath given unto us.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad3-3 [Ant 3] — check against diurnal
+To eat * with unwashen hands, defileth not a man.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad3-4 [Ant 2] — check against diurnal
+And devils also came out of many, * crying out and saying: Thou art Christ, the Son of God. And He, rebuking them, suffered them not to speak, for they knew that He was Christ.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad3-4 [Ant 3] — check against diurnal
+All they that had * any sick brought them unto Jesus, and He healed them.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad3-5 [Ant 2] — check against diurnal
+Whosoever drinketh * of the water that I shall give him, shall never thirst.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad3-5 [Ant 3] — check against diurnal
+Sir, I perceive * that Thou art a prophet: our fathers worshipped in this mountain.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Quad3-6 [Ant 2] — check against diurnal
+Jesus stooped down, * and wrote on the ground: He that is without sin, let him cast a stone at her.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium TemporaM/Quad3-0 [Ant 1] — check against diurnal
+But the father said * to his servants: Bring forth quickly the first robe, and put it on him, and put a ring on his hand, and shoes on his feet.

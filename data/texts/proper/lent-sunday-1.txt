@@ -61,3 +61,51 @@ R. Thanks be to God.
 !2 Cor 6:1-2
 Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
 R. Thanks be to God.
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad1-1 [Ant 2] — check against diurnal
+Come, ye blessed of My Father, * inherit the kingdom prepared for you from the foundation of the world.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quad1-1 [Ant 3] — check against diurnal
+As long as you did it to one * of these my least brethren, you did it to me, said the Lord.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad1-2 [Ant 2] — check against diurnal
+Jesus went into * the temple of God, * and cast out all them that sold and bought, and overthrew the tables of the money-changers, and the seats of them that sold doves.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quad1-2 [Ant 3] — check against diurnal
+For it is written * that My house is the house of prayer * for all nations but ye have made it a den of thieves and He was daily teaching in the temple.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad1-3 [Ant 2] — check against diurnal
+This evil and adulterous generation seeketh after a sign; * and there shall no sign be given to it, but the sign of the Prophet Jonas.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quad1-3 [Ant 3] — check against diurnal
+As Jonas was three days and three nights in the whale's belly, * so shall the Son of man be three days and three nights in the heart of the earth.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad1-4 [Ant 2] — check against diurnal
+And Jesus went from thence * and retired into the coasts of Tyre and Sidon. And behold a woman of Canaan who came out of those coasts, crying out, said to him: Have mercy on me, O thou Son of David.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quad1-4 [Ant 3] — check against diurnal
+O woman * great is thy faith; be it unto thee even as thou wilt.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad1-5 [Ant 2] — check against diurnal
+The Angel of the Lord * came down from heaven and the water was troubled, and one was made whole.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quad1-5 [Ant 3] — check against diurnal
+He that made me whole, * the same said unto me: Take up thy bed, and walk in peace.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Quad1-6 [Ant 2] — check against diurnal
+Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Quad1-0 [Ant 1] — check against diurnal
+Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.

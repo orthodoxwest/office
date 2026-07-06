@@ -37,3 +37,43 @@ R. For we have sinned against thee.
 
 [collect]
 O Lord, we beseech You, mercifully hear our prayers; loose us from the chains of our sins and keep us from all adversity.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Quadp3-1 [Ant 3] — check against diurnal
+And they that went before * rebuked him, that he should hold his peace. But he cried out so much the more: "Have mercy on me, thou Son of David."
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Quadp3-2 [Ant 3] — check against diurnal
+Have mercy on me, * thou Son of David. What wouldst thou that I should do unto thee? Lord, that I may receive my sight.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quadp3-3 [Ant 2] — check against diurnal
+When ye fast, * be not, as the hypocrites, of a sad countenance.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Quadp3-3 [Ant 3] — check against diurnal
+Lay up for yourselves treasures in heaven, * where neither moth nor rust doth corrupt.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quadp3-4 [Ant 2] — check against diurnal
+Lord, * my servant lieth at home sick of the palsy, and is grieviously tormented. Amen, I say unto thee, I will come and heal him.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Quadp3-4 [Ant 3] — check against diurnal
+O Lord, * I am not worthy that thou shouldst enter under my roof: but only say the word, and my servant shall be healed.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Quadp3-5 [Ant 2] — check against diurnal
+When thou dost * alms, let not thy left hand know what thy right hand doth.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium TemporaM/Quadp3-5 [Ant 3] — check against diurnal
+But thou when thou shalt pray, * enter into thy chamber, and having shut the door, pray to thy Father.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Quadp3-6 [Ant 2] — check against diurnal
+For they seek me * from day to day, and desire to know my ways.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant 1] — check against diurnal
+The father of our faith, * the mighty Abraham, offered a burnt offering on the altar for his son.
