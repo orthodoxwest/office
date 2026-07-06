@@ -241,7 +241,7 @@ func pentecostSundayFeasts(easter time.Time, advent1 time.Time) []*models.Feast 
 		last := feasts[len(feasts)-1]
 		feasts[len(feasts)-1] = &models.Feast{
 			ID:       last.ID,
-			Name:     "Last Sunday after Pentecost",
+			Name:     "XXIV & Last Sunday after Pentecost",
 			Rank:     last.Rank,
 			Color:    last.Color,
 			Category: last.Category,
