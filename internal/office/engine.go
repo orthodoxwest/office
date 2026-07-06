@@ -194,10 +194,30 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	}
 }
 
+// resolveMarianElement resolves the seasonal Marian antiphon (with its versicle,
+// response, and collect) for the given day.
+func resolveMarianElement(day *models.CalendarDay, corpus *texts.TextCorpus) models.OfficeElement {
+	ref := "ordinary/marian/" + day.MarianAntiphon
+	oe := models.OfficeElement{
+		Type:  models.Antiphon,
+		Text:  corpus.Get(ref),
+		Label: marianLabel(day.MarianAntiphon),
+	}
+	if oe.Text == "" {
+		oe.Text = "[Text not found: " + ref + "]"
+	}
+	return oe
+}
+
 // resolveHourElement converts a HourElement to an OfficeElement, applying proper resolution
 // for proper-* element types and falling through to resolveElement for all others.
 func resolveHourElement(day *models.CalendarDay, hourName string, elem HourElement, corpus *texts.TextCorpus) models.OfficeElement {
 	switch elem.Type {
+	case "marian":
+		if elem.Ref == "seasonal" {
+			return resolveMarianElement(day, corpus)
+		}
+		return resolveElement(elem, corpus)
 	case "proper-antiphon":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		return models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}

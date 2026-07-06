@@ -450,6 +450,12 @@ Ref = ordinary/shared/cross-versicle
 Type = collect
 Ref = ordinary/shared/cross-collect
 
+[Marian]
+Label = Marian
+
+Type = marian
+Ref = seasonal
+
 [Closing]
 Label = Closing
 
