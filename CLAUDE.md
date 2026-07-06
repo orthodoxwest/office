@@ -78,6 +78,16 @@ All changes must go through a pull request — do not push directly to `master`.
 3. Push the branch: `git push -u origin your-branch-name`
 4. Open a PR against `master` and ensure CI passes before merging
 
+## Issue labeling
+
+Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly every issue worth filing here. Apply based on where the defect actually lives, not the symptom:
+
+- **`bug`** — the Go code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrenceWinner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
+- **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not `internal/`.
+- **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and a decision from clergy is required before any fix can be written. Don't guess an implementation here; file the question and wait for a ruling.
+
+These aren't mutually exclusive — an issue can need a ruling *and* turn into a bug/data-validation fix once the ruling lands (see #13, #15). Use the other labels (`enhancement`, `question`, `documentation`, `duplicate`, `invalid`, `wontfix`, `good first issue`, `help wanted`, `update-golden`) only when none of the three above fit.
+
 ## Dev commands
 
 ```bash
