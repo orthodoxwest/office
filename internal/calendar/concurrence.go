@@ -192,60 +192,73 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 	return models.VespersIOfFollowing
 }
 
+// boundaryCommemoration wraps the celebration that lost a vespers concurrence
+// so it can be commemorated at the evening's Vespers (XIII.2-17). A nil loser
+// (e.g. a plain feria with no Celebration of its own) yields no commemoration.
+func boundaryCommemoration(loser *models.Feast) []*models.Feast {
+	if loser == nil {
+		return nil
+	}
+	return []*models.Feast{loser}
+}
+
 // resolveConcurrence determines the vespers designation for an evening given
 // the preceding day's celebration and the following day's celebration.
+//
+// A day's Celebration is nil for a plain feria, which has no vespers rights
+// of its own (XIII.18) — that must not be confused with "no concurrence to
+// resolve": the following day's I Vespers still applies in that case.
 func resolveConcurrence(preceding, following *models.CalendarDay) models.VespersDesignation {
 	precFeast := preceding.Celebration
 	folFeast := following.Celebration
 
-	// No concurrence if either day has no celebration
-	if precFeast == nil || folFeast == nil {
-		return models.VespersDesignation{}
-	}
-
-	precHasII := hasSecondVespers(precFeast)
-	folHasI := hasFirstVespers(folFeast)
-
-	// If preceding has no II Vespers, following wins by default
-	if !precHasII && folHasI {
-		return models.VespersDesignation{
-			Owner:  models.VespersIOfFollowing,
-			Feast:  folFeast,
-			Color:  following.Color,
-			Season: following.Season,
-		}
-	}
-
-	// If following has no I Vespers, preceding wins by default
-	if precHasII && !folHasI {
-		return models.VespersDesignation{
-			Owner:  models.VespersIIOfPreceding,
-			Feast:  precFeast,
-			Color:  preceding.Color,
-			Season: preceding.Season,
-		}
-	}
+	precHasII := precFeast != nil && hasSecondVespers(precFeast)
+	folHasI := folFeast != nil && hasFirstVespers(folFeast)
 
 	// Neither has vespers — not applicable
 	if !precHasII && !folHasI {
 		return models.VespersDesignation{}
 	}
 
+	// If preceding has no II Vespers, following wins by default
+	if !precHasII {
+		return models.VespersDesignation{
+			Owner:          models.VespersIOfFollowing,
+			Feast:          folFeast,
+			Color:          following.Color,
+			Season:         following.Season,
+			Commemorations: boundaryCommemoration(precFeast),
+		}
+	}
+
+	// If following has no I Vespers, preceding wins by default
+	if !folHasI {
+		return models.VespersDesignation{
+			Owner:          models.VespersIIOfPreceding,
+			Feast:          precFeast,
+			Color:          preceding.Color,
+			Season:         preceding.Season,
+			Commemorations: boundaryCommemoration(folFeast),
+		}
+	}
+
 	// Both have vespers — resolve the concurrence
 	winner := concurrenceWinner(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
 		return models.VespersDesignation{
-			Owner:  models.VespersIIOfPreceding,
-			Feast:  precFeast,
-			Color:  preceding.Color,
-			Season: preceding.Season,
+			Owner:          models.VespersIIOfPreceding,
+			Feast:          precFeast,
+			Color:          preceding.Color,
+			Season:         preceding.Season,
+			Commemorations: boundaryCommemoration(folFeast),
 		}
 	}
 	return models.VespersDesignation{
-		Owner:  models.VespersIOfFollowing,
-		Feast:  folFeast,
-		Color:  following.Color,
-		Season: following.Season,
+		Owner:          models.VespersIOfFollowing,
+		Feast:          folFeast,
+		Color:          following.Color,
+		Season:         following.Season,
+		Commemorations: boundaryCommemoration(precFeast),
 	}
 }
 

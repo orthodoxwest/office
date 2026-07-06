@@ -39,11 +39,23 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		officeDay.Season = day.Vespers.Season
 	}
 
-	if day.Vespers.Owner == models.VespersIOfFollowing {
+	switch day.Vespers.Owner {
+	case models.VespersIOfFollowing:
+		// Vespers belongs liturgically to tomorrow's feast; only the outgoing
+		// office (today's celebration, if any) is commemorated (XIII.2-17).
 		officeDay.Date = day.Date.Add(24 * time.Hour)
-		officeDay.Commemorations = nil
+		officeDay.Commemorations = day.Vespers.Commemorations
 		officeDay.Tempora = ""
 		officeDay.WithinOctaveOf = ""
+	case models.VespersIIOfPreceding:
+		// Vespers is of today's own feast; the incoming feast that lost the
+		// concurrence is commemorated in addition to today's commemorations.
+		if len(day.Vespers.Commemorations) > 0 {
+			comms := make([]*models.Feast, 0, len(day.Commemorations)+len(day.Vespers.Commemorations))
+			comms = append(comms, day.Commemorations...)
+			comms = append(comms, day.Vespers.Commemorations...)
+			officeDay.Commemorations = comms
+		}
 	}
 
 	return &officeDay

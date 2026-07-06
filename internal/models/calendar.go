@@ -329,7 +329,11 @@ type VespersDesignation struct {
 	Feast  *Feast // celebration that owns vespers (may differ from day's Celebration)
 	Color  Color  // liturgical color for vespers
 	Season Season
-	// TODO(phase2): VespersComm []*Feast — commemorations specific to vespers concurrence
+
+	// Commemorations holds the celebration that lost the vespers concurrence
+	// (the outgoing office at I Vespers of a following feast, or the incoming
+	// office at II Vespers of a preceding feast), commemorated per XIII.2-17.
+	Commemorations []*Feast
 }
 
 // CalendarDay represents the resolved calendar for a single day.
