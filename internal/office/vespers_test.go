@@ -173,6 +173,106 @@ func TestVespersUsesFollowingOfficeWhenConcurrenceSaysFirstVespers(t *testing.T)
 	}
 }
 
+func TestVespersCommemoratesOutgoingOfficeAtFirstVespersOfFollowing(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/st-joseph/psalm-antiphon-1-vespers": "Joseph psalm antiphon",
+		"proper/st-joseph/collect":                  "Joseph collect",
+		"commons/confessor/commemoration-antiphon":  "Cyril commemoration antiphon",
+		"commons/confessor/commemoration-collect":   "Cyril commemoration collect",
+	})
+	sections := []HourSection{
+		{
+			Name:  "Collect",
+			Label: "Collect",
+			Elements: []HourElement{
+				{Type: "proper-collect", Ref: "collect"},
+				{Type: "commemorations"},
+			},
+		},
+	}
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 3, 18, 0, 0, 0, 0, time.UTC),
+		Season: models.Lent,
+		Celebration: &models.Feast{
+			ID: "st-cyril", Name: "St Cyril", Rank: models.Double, Category: models.CategoryConfessor,
+		},
+		Vespers: models.VespersDesignation{
+			Owner:          models.VespersIOfFollowing,
+			Feast:          &models.Feast{ID: "st-joseph", Name: "St Joseph", Rank: models.Double2ndClass, Color: models.White},
+			Color:          models.White,
+			Season:         models.Lent,
+			Commemorations: []*models.Feast{{ID: "st-cyril", Name: "St Cyril", Rank: models.Double, Category: models.CategoryConfessor}},
+		},
+	}
+
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	if err != nil {
+		t.Fatalf("Compose: %v", err)
+	}
+
+	var texts []string
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			texts = append(texts, elem.Text)
+		}
+	}
+	joined := strings.Join(texts, "\n")
+	if !strings.Contains(joined, "Commemoration of St Cyril") {
+		t.Fatalf("expected commemoration of the outgoing office, got:\n%s", joined)
+	}
+}
+
+func TestVespersCommemoratesIncomingOfficeAtSecondVespersOfPreceding(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/st-joseph/psalm-antiphon-1-vespers": "Joseph psalm antiphon",
+		"proper/st-joseph/collect":                  "Joseph collect",
+		"commons/confessor/commemoration-antiphon":  "Turibius commemoration antiphon",
+		"commons/confessor/commemoration-collect":   "Turibius commemoration collect",
+	})
+	sections := []HourSection{
+		{
+			Name:  "Collect",
+			Label: "Collect",
+			Elements: []HourElement{
+				{Type: "proper-collect", Ref: "collect"},
+				{Type: "commemorations"},
+			},
+		},
+	}
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 3, 19, 0, 0, 0, 0, time.UTC),
+		Season: models.Lent,
+		Celebration: &models.Feast{
+			ID: "st-joseph", Name: "St Joseph", Rank: models.Double2ndClass, Color: models.White,
+		},
+		Vespers: models.VespersDesignation{
+			Owner:          models.VespersIIOfPreceding,
+			Feast:          &models.Feast{ID: "st-joseph", Name: "St Joseph", Rank: models.Double2ndClass, Color: models.White},
+			Color:          models.White,
+			Season:         models.Lent,
+			Commemorations: []*models.Feast{{ID: "st-turibius", Name: "St Turibius", Rank: models.Double, Category: models.CategoryConfessor}},
+		},
+	}
+
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	if err != nil {
+		t.Fatalf("Compose: %v", err)
+	}
+
+	var texts []string
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			texts = append(texts, elem.Text)
+		}
+	}
+	joined := strings.Join(texts, "\n")
+	if !strings.Contains(joined, "Commemoration of St Turibius") {
+		t.Fatalf("expected commemoration of the incoming office, got:\n%s", joined)
+	}
+}
+
 func TestVespersUsesPrecedingOfficeWhenConcurrenceSaysSecondVespers(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/st-joseph/psalm-antiphon-1-vespers":   "Joseph psalm antiphon",

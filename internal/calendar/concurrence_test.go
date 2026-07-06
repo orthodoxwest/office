@@ -209,6 +209,74 @@ func TestResolveConcurrenceSimplePrecedingYieldsToFollowing(t *testing.T) {
 	}
 }
 
+func TestResolveConcurrenceNilPrecedingYieldsToFollowingDouble(t *testing.T) {
+	// A plain feria (no Celebration) has no vespers rights of its own
+	// (XIII.18) and must not be mistaken for "no concurrence to resolve":
+	// the following Double's I Vespers still takes the evening.
+	double := &models.Feast{
+		ID: "st-anthony-egypt", Rank: models.Double, Category: models.CategoryConfessor,
+		Color: models.White,
+	}
+	day1 := &models.CalendarDay{Celebration: nil, Color: models.Green}
+	day2 := &models.CalendarDay{Celebration: double, Color: models.White}
+	result := resolveConcurrence(day1, day2)
+	if result.Owner != models.VespersIOfFollowing {
+		t.Fatalf("nil preceding vs Double: got owner %d, want VespersIOfFollowing", result.Owner)
+	}
+	if result.Feast != double {
+		t.Error("expected following feast to own vespers")
+	}
+	if len(result.Commemorations) != 0 {
+		t.Errorf("expected no boundary commemoration (preceding has no Celebration), got %v", result.Commemorations)
+	}
+}
+
+func TestResolveConcurrenceNilFollowingYieldsToPrecedingDouble(t *testing.T) {
+	double := &models.Feast{
+		ID: "some-double", Rank: models.Double, Category: models.CategoryMartyr,
+	}
+	day1 := &models.CalendarDay{Celebration: double}
+	day2 := &models.CalendarDay{Celebration: nil}
+	result := resolveConcurrence(day1, day2)
+	if result.Owner != models.VespersIIOfPreceding {
+		t.Fatalf("Double vs nil following: got owner %d, want VespersIIOfPreceding", result.Owner)
+	}
+	if len(result.Commemorations) != 0 {
+		t.Errorf("expected no boundary commemoration (following has no Celebration), got %v", result.Commemorations)
+	}
+}
+
+func TestResolveConcurrenceBoundaryCommemoration(t *testing.T) {
+	simple := &models.Feast{
+		ID: "some-simple", Rank: models.Simple, Category: models.CategoryConfessor,
+		Color: models.White,
+	}
+	double := &models.Feast{
+		ID: "some-double", Rank: models.Double, Category: models.CategoryMartyr,
+		Color: models.Red,
+	}
+	day1 := &models.CalendarDay{Celebration: simple, Color: models.White}
+	day2 := &models.CalendarDay{Celebration: double, Color: models.Red}
+
+	// I Vespers of following: the outgoing (losing) office is commemorated.
+	result := resolveConcurrence(day1, day2)
+	if result.Owner != models.VespersIOfFollowing {
+		t.Fatalf("got owner %d, want VespersIOfFollowing", result.Owner)
+	}
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != simple {
+		t.Errorf("expected boundary commemoration of the outgoing feast, got %v", result.Commemorations)
+	}
+
+	// II Vespers of preceding: the incoming (losing) office is commemorated.
+	result = resolveConcurrence(day2, day1)
+	if result.Owner != models.VespersIIOfPreceding {
+		t.Fatalf("got owner %d, want VespersIIOfPreceding", result.Owner)
+	}
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != simple {
+		t.Errorf("expected boundary commemoration of the incoming feast, got %v", result.Commemorations)
+	}
+}
+
 func TestConcurrenceSecondClassDoubleVsLesserSunday(t *testing.T) {
 	// XIII.6: II Class Double vs Lesser Sunday — feast wins
 	feast := &models.Feast{
