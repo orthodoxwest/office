@@ -1,0 +1,7 @@
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/12-28.txt [Ant 1] (octave day repeats the feast) — check against diurnal
+These are they * who were not defiled with women; for they are virgins, and follow the Lamb whithersoever he goeth.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/12-28.txt [Ant 3] (octave day repeats the feast) — check against diurnal
+Innocent babies * were slain for Christ, sucklings were killed by a wicked king. Now they follow the Lamb without spot and cry without ceasing, Glory be to thee, O Lord.

@@ -1,0 +1,11 @@
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/12-13.txt [Ant 1] — check against diurnal
+In patience * hast thou possessed thy soul, Lucy, Bride of Christ thou hast hated the things that are in the world, and art glorified among the Angels; thou hast shed thine own blood, and conquered the Adversary.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/12-13.txt [Ant 2] — check against diurnal
+Thou art become as a pillar * that cannot be shaken, Lucy, O Bride of Christ: all the people wait for thee, until thou receive the crown of life, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/12-13.txt [Ant 3] — check against diurnal
+With such power * did the Holy Spirit fix her to the ground, that the virgin of Christ remained immovable.

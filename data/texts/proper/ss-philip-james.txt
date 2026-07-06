@@ -34,3 +34,7 @@ O God, Who dost every year gladden us by the solemn memorial of thine Apostles P
 [benedictus-antiphon]
 # SOURCE: divinum-officium Sancti/05-01 [Ant 2] — check against diurnal
 I am the Way * the Truth, and the Life: no man cometh unto the Father, but by Me. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/05-01.txt [Ant 1] — check against diurnal
+Let not your heart be troubled * ye believe in God, believe also in Me. In MyFather’s house are many mansions. Alleluia, Alleluia.

@@ -1,2 +1,10 @@
 [collect]
 Shine upon thy Church, O Lord, in thy goodness, that, enlightened by the teachings of blessed John thy Apostle and Evangelist, she may attain to everlasting gifts.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/12-27.txt [Ant 1] (octave day repeats the feast) — check against diurnal
+This is John * who leaned at supper on the bosom of the Lord. Blessed Apostle, to whom heavenly secrets were revealed.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/12-27.txt [Ant 3] (octave day repeats the feast) — check against diurnal
+A saying * went abroad among the brethren, that that disciple should not die; and Jesus did not say that he should not die, but so will I have him remain till I come.

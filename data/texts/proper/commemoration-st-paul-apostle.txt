@@ -1,2 +1,6 @@
 [collect]
 O God, who through the preaching of the blessed Apostle Paul hast caused the light of the Gospel to shine gloriously among the Gentiles, we beseech thee that we who keep the feast of his commemoration may feel to our comfort the power of his prayer with thee.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/06-30.txt [Ant 1] — check against diurnal
+O Holy Apostle Paul, * Preacher of the truth, and Teacher of the Gentiles, pray for us to God Who hath chosen thee.

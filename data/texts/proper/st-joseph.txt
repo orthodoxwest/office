@@ -153,3 +153,7 @@ R. Thanks be to God.
 !Prov 28:20; 27:18
 A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/03-19.txt [Ant 1] — check against diurnal
+Joseph, being raised * from sleep, did as the Angel of the Lord had bidden him, and took unto him his wife.

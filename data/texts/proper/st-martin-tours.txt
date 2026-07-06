@@ -33,3 +33,7 @@ O how blessed a man is he! * His soul hath entered into possession in Paradise. 
 
 [collect]
 Grant, we beseech thee, O Almighty God, that the worshipful Feast of thy blessed Confessor and Bishop Martin, may avail us to the increase both of godliness toward thee, and healthfulness to our own souls.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/11-11.txt [Ant 1] — check against diurnal
+O how blessed a man is he! * His soul hath entered into possession in Paradise. There the Angels cry aloud for joy, there the Archangels make glad, there the whole company of the Saints do shout, there the army of the Virgins do call others to follow, (saying:) Make thine everlasting abode with us.

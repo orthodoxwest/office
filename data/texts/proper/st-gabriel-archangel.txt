@@ -116,3 +116,7 @@ R. Thanks be to God.
 !Dan 9:21-22
 Behold, the man Gabriel, whom I had seen in the vision at the beginning, being caused to fly swiftly, touched me about the time of the evening oblation; and he informed me, and talked with me, and said: O Daniel, I am now come forth to give thee skill and understanding.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/03-24.txt [Ant 1] — check against diurnal
+The Angel Gabriel * appeared to Daniel and said: From the beginning of thy prayers the word came forth: and I am come to show it to thee, because thou art a man of desires: therefore do thou mark the word, and understand the vision.

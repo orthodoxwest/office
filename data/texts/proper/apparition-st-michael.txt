@@ -166,3 +166,7 @@ R. Thanks be to God.
 !Rev 1:1-2
 God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/05-08.txt [Ant 1] — check against diurnal
+While as John was gazing * upon the holy mystery, the Archangel Michael sounded his trumpet: Forgive us, O Lord our God, Which openest the book, and loosest the seals thereof. Alleluia.

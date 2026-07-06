@@ -152,3 +152,7 @@ R. Thanks be to God.
 !Isa 49:1
 Give ear, ye islands, and hearken, ye people from afar. The Lord hath called me from the womb, from the bowels of my mother he hath been mindful of my name.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/06-24.txt [Ant 1] — check against diurnal
+When Zacharias went * into the Temple of the Lord, the Angel Gabriel appeared unto him, standing on the right side of the altar of incense.

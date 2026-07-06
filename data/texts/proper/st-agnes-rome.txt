@@ -1,0 +1,11 @@
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/01-21.txt [Ant 1] — check against diurnal
+The blessed Agnes * stood in the midst of the fire, and stretched forth her hands, and prayed, saying O Father! Who Alone art Almighty! Who Alone art to be adored! Who Alone art to be worshipped! Who Alone art to be feared! I thank thee because that through thy Holy Son Thou hast delivered me from the threatenings of the godless tyrant, and hast made me to walk with clean feet over the filthy slough of fleshly sin and now, behold, I come unto thee, unto thee Whom I have loved, Whom I have sought, Whom I have ever desired.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-21.txt [Ant 2] — check against diurnal
+Behold, now I see that * which I have desired; now I possess that for which I have hoped now am I united in heaven to Him Whom I loved with my whole heart upon earth.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-21.txt [Ant 3] — check against diurnal
+The blessed Agnes stood in the midst of the fire * and stretched forth her hands unto the Lord, and prayed, saying: O Thou Who Alone art Almighty! Who Alone art to be adored! Who Alone art to be worshipped! Who Alone art to be feared! I bless thee, and glorify thy Name for ever and ever!

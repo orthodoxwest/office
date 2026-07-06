@@ -78,3 +78,7 @@ Amen.
 # SOURCE: divinum-officium Sancti/07-22 [Versum 2] — check against diurnal
 V. God hath chosen her and forechosen her.
 R. He hath made her to dwell in His tabernacle.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/07-22.txt [Ant 1] — check against diurnal
+A woman in the city * which was a sinner, when she knew that Jesus sat at meat in the house of Simon the leper, brought an alabaster box of ointment, and stood at the Feet of Jesus, behind Him, weeping, and began to wash His Feet with tears, and did wipe them with the hairs of her head, and kissed His Feet, and anointed them with the ointment.

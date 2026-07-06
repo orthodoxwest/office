@@ -71,3 +71,7 @@ R. Thanks be to God.
 !Sir 15:1-2
 He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/12-27.txt [Ant 1] — check against diurnal
+This is John * who leaned at supper on the bosom of the Lord. Blessed Apostle, to whom heavenly secrets were revealed.

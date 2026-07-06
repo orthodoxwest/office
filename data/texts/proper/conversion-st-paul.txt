@@ -84,3 +84,7 @@ R. Thanks be to God.
 !Acts 9:1-2
 And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/01-25.txt [Ant 1] — check against diurnal
+Ananias, go thy way * and seek Saul for, behold, he prayeth for he is a chosen vessel unto Me, to bear My name before the Gentiles, and kings, and the children of Israel.
