@@ -114,7 +114,7 @@ func cmdRubrics(dataDir string) {
 		os.Exit(1)
 	}
 
-	flags := func(hour *models.OfficeHour) (preces, suffrage bool, comms []string) {
+	flags := func(hour *models.OfficeHour) (preces, suffrage bool, comms []string, gospelAnt string) {
 		for _, sec := range hour.Sections {
 			if strings.Contains(sec.Label, "Suffrage") {
 				suffrage = true
@@ -126,12 +126,15 @@ func cmdRubrics(dataDir string) {
 				if el.Type == models.Heading && strings.HasPrefix(el.Text, "Commemoration of ") {
 					comms = append(comms, strings.TrimPrefix(el.Text, "Commemoration of "))
 				}
+				if gospelAnt == "" && (el.SlotRef == "benedictus-antiphon" || el.SlotRef == "magnificat-antiphon") {
+					gospelAnt = strings.ReplaceAll(el.Text, "\n", " ")
+				}
 			}
 		}
 		return
 	}
 
-	fmt.Println("date\tcelebration\tlauds_preces\tlauds_suffrage\tlauds_comms\thours_preces\tvespers_preces\tvespers_suffrage\tvespers_comms")
+	fmt.Println("date\tcelebration\tlauds_preces\tlauds_suffrage\tlauds_comms\thours_preces\tvespers_preces\tvespers_suffrage\tvespers_comms\tbenedictus_ant\tmagnificat_ant")
 	for i := range days {
 		day := &days[i]
 		celebration := "Feria"
@@ -145,26 +148,27 @@ func cmdRubrics(dataDir string) {
 			fmt.Fprintf(os.Stderr, "Error composing lauds for %s: %v\n", row[0], err)
 			os.Exit(1)
 		}
-		lp, ls, lc := flags(lauds)
+		lp, ls, lc, benAnt := flags(lauds)
 
 		prime, err := engine.ComposeHour("prime", day, moveable)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error composing prime for %s: %v\n", row[0], err)
 			os.Exit(1)
 		}
-		hp, _, _ := flags(prime)
+		hp, _, _, _ := flags(prime)
 
 		vespers, err := engine.ComposeHour("vespers", day, moveable)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error composing vespers for %s: %v\n", row[0], err)
 			os.Exit(1)
 		}
-		vp, vs, vc := flags(vespers)
+		vp, vs, vc, magAnt := flags(vespers)
 
 		row = append(row,
 			fmt.Sprintf("%t", lp), fmt.Sprintf("%t", ls), strings.Join(lc, "; "),
 			fmt.Sprintf("%t", hp),
 			fmt.Sprintf("%t", vp), fmt.Sprintf("%t", vs), strings.Join(vc, "; "),
+			benAnt, magAnt,
 		)
 		fmt.Println(strings.Join(row, "\t"))
 	}
