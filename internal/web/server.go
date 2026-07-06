@@ -117,9 +117,9 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		}
 		sb.WriteString(string(renderHymnStanzas(elem.Text)))
 		sb.WriteString(`</div>`)
-	case models.Versicle, models.Response, models.Prayer, models.Blessing, models.Doxology:
+	case models.Versicle, models.Response, models.Blessing, models.Doxology:
 		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
-	case models.Collect:
+	case models.Collect, models.Prayer:
 		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 	case models.Chapter:
 		sb.WriteString(`<div class="chapter"><h2 class="section-heading">Chapter</h2>`)
@@ -264,13 +264,13 @@ const (
 )
 
 // renderLiturgicalBlock renders multi-line liturgical text while preserving prose
-// line breaks, as required by prayers, blessings, doxologies, and preces.
+// line breaks, as required by blessings, doxologies, and preces.
 func renderLiturgicalBlock(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, preserveProseLines)
 }
 
-// renderFlowingLiturgicalBlock renders collects and chapters with soft source
-// wrapping, while retaining semantic lines such as versicles and responses.
+// renderFlowingLiturgicalBlock renders collects, chapters, and prayers with soft
+// source wrapping, while retaining semantic lines such as versicles and responses.
 func renderFlowingLiturgicalBlock(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, flowProseLines)
 }

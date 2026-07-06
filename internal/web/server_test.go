@@ -56,14 +56,14 @@ func TestRenderCollectReflowsProseAndPreservesSemanticLines(t *testing.T) {
 	}
 }
 
-func TestRenderPrayerPreservesSourceLines(t *testing.T) {
+func TestRenderPrayerReflowsSourceLines(t *testing.T) {
 	html := renderOfficeElement(models.OfficeElement{
 		Type: models.Prayer,
 		Text: "Thy kingdom come.\nThy will be done.",
 	}, "")
 
-	if !strings.Contains(html, `Thy kingdom come.<br>Thy will be done.`) {
-		t.Fatalf("expected prayer lines to remain hard-wrapped: %s", html)
+	if !strings.Contains(html, `Thy kingdom come. Thy will be done.`) {
+		t.Fatalf("expected prayer source lines to reflow: %s", html)
 	}
 }
 
