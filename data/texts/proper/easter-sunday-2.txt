@@ -1,0 +1,35 @@
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc2-1 [Ant 2] — check against diurnal
+Go * into the whole world, alleluia: and teach all the nations, alleluia.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc2-1 [Ant 3] — check against diurnal
+The good shepherd * gives his life to his sheep, alleluia.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc2-2 [Ant 2] — check against diurnal
+Going therefore * teach ye all nations; baptising them in the name of the Father, and of the Son, and of the Holy Ghost, alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc2-2 [Ant 3] — check against diurnal
+But the hireling * and he that is not the shepherd, whose own the sheep are not, seeth the wolf coming, and leaveth the sheep, and flieth: and the wolf catcheth, and scattereth the sheep, alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc2-3 [Ant 2] — check against diurnal
+Joseph, thou Son of David, * fear not to take unto thee Mary thy wife; for That Which is conceived in her is of the Holy Ghost alleluia.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc2-3 [Ant 3] — check against diurnal
+Son * why hast Thou thus dealt with us? Behold, thy father and I have sought thee sorrowing. Alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc2-0 [Ant 2] — check against diurnal
+I am the Shepherd of the Sheep: * I am the Way, the Truth, and the Life: I am the Good Shepherd, and know My Sheep, and am known of Mine. Alleluia, Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc2-0 [Ant 3] — check against diurnal
+I am the Good Shepherd, * Who feed My sheep: and I lay down My life for My sheep. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc2-0 [Ant 1] — check against diurnal
+I am the Shepherd of the Sheep: * I am the Way, the Truth, and the Life: I am the Good Shepherd, and know My Sheep, and am known of Mine. Alleluia, Alleluia.

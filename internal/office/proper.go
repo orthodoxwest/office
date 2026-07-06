@@ -1,7 +1,9 @@
 package office
 
 import (
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
@@ -130,10 +132,26 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 
 	hourCandidates := hourRefCandidates(hourName, ref)
 	refCands := refCandidates(ref)
+	weekday := strings.ToLower(day.Date.Weekday().String())
 
 	var properName string
 	if day.Celebration != nil {
 		properName = day.Celebration.ProperName
+	}
+
+	// 0. The Greater ("O") Antiphons: at Vespers of December 17-23 the
+	// date-fixed O antiphon supersedes even the Advent Sunday's own
+	// Magnificat antiphon, but yields to a saint's feast that owns the
+	// evening (whose office the ordo follows; the feria is commemorated).
+	if hourName == "vespers" && day.Season == models.Advent &&
+		day.Date.Month() == time.December && day.Date.Day() >= 17 && day.Date.Day() <= 23 &&
+		(day.Celebration == nil || day.Celebration.Category == models.CategorySunday) {
+		for _, cand := range refCands {
+			dateRef := "seasonal/advent/" + cand + "-december-" + strconv.Itoa(day.Date.Day())
+			if text := corpus.Get(dateRef); text != "" {
+				return substituteProperName(text, properName), dateRef
+			}
+		}
 	}
 
 	// 1. Feast-specific proper (hour-qualified, then generic)
@@ -156,6 +174,22 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		}
 	}
 
+	// 2.5. Weekly temporal texts: ferias take per-day texts distributed
+	// through the week from the governing Sunday's proper file
+	// (proper/<week>/<ref>-<weekday>), e.g. the gospel-canticle antiphons
+	// drawn from the Sunday's Gospel. Sundays use the file's own sections
+	// via tier 1; a celebrated feast's propers and commons stay ahead.
+	if day.TemporalWeekID != "" && weekday != "sunday" {
+		prefix := "proper/" + day.TemporalWeekID + "/"
+		wdRefs := make([]string, 0, len(refCands))
+		for _, cand := range refCands {
+			wdRefs = append(wdRefs, cand+"-"+weekday)
+		}
+		if text, resolved := firstText(corpus, prefix, wdRefs); text != "" {
+			return substituteProperName(text, properName), resolved
+		}
+	}
+
 	// 3. Seasonal default (hour-qualified, then generic)
 	if day.Season != "" {
 		prefix := "seasonal/" + string(day.Season) + "/"
@@ -170,7 +204,6 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// 4. Weekday ordinary (e.g. ordinary/lauds/hymn-monday). The Sunday Lauds
 	// hymn additionally varies by season: in the summer window it resolves to
 	// hymn-sunday-summer rather than the (winter) hymn-sunday default.
-	weekday := strings.ToLower(day.Date.Weekday().String())
 	for _, cand := range refCands {
 		wd := weekday
 		if hourName == "lauds" && cand == "hymn" && weekday == "sunday" && sundayLaudsHymnIsSummer(day.Date) {

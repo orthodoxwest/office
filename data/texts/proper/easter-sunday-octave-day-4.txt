@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-3 [Ant 2] — check against diurnal
+Cast the net on the right side of the ship, * and ye shall find, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-3 [Ant 3] — check against diurnal
+Jesus saith * unto His disciples: Bring of the fish which ye have now caught. Simon Peter went up, and drew the net to land, full of great fishes, alleluia.

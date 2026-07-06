@@ -2,3 +2,30 @@
 # In the Benedictine rite, Alleluia is NOT suppressed during Advent.
 # Add overrides here as needed.
 
+[magnificat-antiphon-december-17]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 17] — check against diurnal
+O Wisdom, * that comest out of the mouth of the Most High, that reachest from one end to another, and dost mightily and sweetly order all things; come, to teach us the way of prudence!
+
+[magnificat-antiphon-december-18]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 18] — check against diurnal
+O Adonai, * and Ruler of the house of Israel, who didst appear unto Moses in the burning bush, and gavest him the law in Sinai; come, to redeem us with an outstretched arm!
+
+[magnificat-antiphon-december-19]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 19] — check against diurnal
+O Root of Jesse, * which standest for an ensign of the people, at whom the kings shall shut their mouths, to whom the Gentiles shall seek; come to deliver us, make no tarrying!
+
+[magnificat-antiphon-december-20]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 20] — check against diurnal
+O Key of David, * and Sceptre of the house of Israel that openest, and no man shutteth; and shuttest and no man openeth; come to bring out the prisoners from the prison, and them that sit in darkness, and in the shadow of death!
+
+[magnificat-antiphon-december-21]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 21] — check against diurnal
+O Day-Spring, * brightness of the everlasting Light, Sun of Righteousness; come, to give light to them that sit in darkness, and in the shadow of death!
+
+[magnificat-antiphon-december-22]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 22] — check against diurnal
+O King of the Gentiles, * yea, and Desire thereof, O Cornerstone that makest of twain one; come to save man, whom thou hast made of the dust of the earth!
+
+[magnificat-antiphon-december-23]
+# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 23] — check against diurnal
+O Emmanuel, our King * and our Law-giver, Longing of the Gentiles, yea, and Salvation thereof; come to save us, O Lord our God!

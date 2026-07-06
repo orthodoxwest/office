@@ -588,6 +588,33 @@ func resolveFeastDate(feast *models.Feast, year int, easter time.Time, moveable 
 	return time.Time{}
 }
 
+// temporalWeekID returns the ID of the temporal Sunday office governing the
+// week that begins on the given Sunday, chosen from that day's feast
+// candidates (the Sunday feast is present even when displaced by a higher
+// occurrence). Resumed Sundays report their ProperID so weekday texts
+// resolve to the original Epiphany Sunday's proper file. Returns "" when no
+// temporal Sunday falls on the day (e.g. the Sundays of Christmastide before
+// the computed Sunday-within-the-octave).
+func temporalWeekID(dayCandidates []*models.Feast) string {
+	// Temporal Sundays of Our Lord carry Category "lord" rather than
+	// "sunday"; the ones that head a week with per-day weekly texts are
+	// accepted as fallbacks when no Category=sunday candidate exists.
+	lordSundays := map[string]bool{"easter-sunday": true, "low-sunday": true, "pentecost": true}
+	fallback := ""
+	for _, f := range dayCandidates {
+		if f.Category == models.CategorySunday {
+			if f.ProperID != "" {
+				return f.ProperID
+			}
+			return f.ID
+		}
+		if lordSundays[f.ID] {
+			fallback = f.ID
+		}
+	}
+	return fallback
+}
+
 // lentenFeriaName returns a descriptive name like "Wednesday after Lent III"
 // for unnamed weekday ferias during Lent and Passiontide, or "" for other days.
 func lentenFeriaName(date time.Time, easter time.Time, season models.Season) string {
@@ -716,17 +743,22 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 	end := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 	var calendarDays []models.CalendarDay
 	var pendingTransfers []*models.Feast
+	var weekID string
 
 	for current := start; !current.After(end); current = current.AddDate(0, 0, 1) {
 		season := DetermineSeason(current, moveable)
 		seasonColor := SeasonColors[season]
 
 		dayCandidates := candidates[current]
+		if current.Weekday() == time.Sunday {
+			weekID = temporalWeekID(dayCandidates)
+		}
 		transferredIn := pendingTransfers
 		pendingTransfers = nil
 
 		calDay, transfersOut := ResolveDay(current, dayCandidates, season, seasonColor, moveable, transferredIn)
 		pendingTransfers = append(pendingTransfers, transfersOut...)
+		calDay.TemporalWeekID = weekID
 
 		if calDay.Celebration == nil {
 			calDay.Tempora = lentenFeriaName(current, moveable.Easter, season)

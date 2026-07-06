@@ -125,6 +125,68 @@ var feastDOFiles = map[string]string{
 	"visitation-bvm":         "Sancti/07-02",
 }
 
+// weekDOFiles maps temporal week IDs (the governing Sunday's office, as set
+// in CalendarDay.TemporalWeekID) to DO Tempora file prefixes. The weekday
+// files <prefix>-1..6 supply the per-day gospel-canticle antiphons that the
+// office distributes through the week, seeded into the Sunday's proper file
+// as benedictus-antiphon-<weekday> / magnificat-antiphon-<weekday>. The
+// Sunday file <prefix>-0 additionally seeds the Sunday's own antiphons
+// (Ant 1 = I Vespers Magnificat, Ant 2 = Benedictus, Ant 3 = II Vespers
+// Magnificat) when our file lacks them. Saturday Magnificat antiphons are
+// not seeded: Saturday evening is I Vespers of the Sunday.
+//
+// Per-annum weeks (after Epiphany and Pentecost) and most Paschal weeks have
+// no weekday antiphons in DO — the monastic weekly distribution must come
+// from the diurnal — so only the weeks below are listed.
+var weekDOFiles = map[string]string{
+	"advent-sunday-1":                "Tempora/Adv1",
+	"advent-sunday-2":                "Tempora/Adv2",
+	"advent-sunday-3":                "Tempora/Adv3",
+	"advent-sunday-4":                "Tempora/Adv4",
+	"septuagesima":                   "Tempora/Quadp1",
+	"sexagesima":                     "Tempora/Quadp2",
+	"quinquagesima":                  "Tempora/Quadp3",
+	"lent-sunday-1":                  "Tempora/Quad1",
+	"lent-sunday-2":                  "Tempora/Quad2",
+	"lent-sunday-3":                  "Tempora/Quad3",
+	"laetare-sunday":                 "Tempora/Quad4",
+	"passion-sunday":                 "Tempora/Quad5",
+	"low-sunday":                     "Tempora/Pasc1",
+	"easter-sunday-2":                "Tempora/Pasc2",
+	"easter-sunday-3":                "Tempora/Pasc3",
+	"easter-sunday-4":                "Tempora/Pasc4",
+	"easter-sunday-5":                "Tempora/Pasc5",
+	"ascension-sunday-within-octave": "Tempora/Pasc6",
+}
+
+// octaveDayDOFiles maps per-day octave feast IDs to the DO file carrying that
+// day's proper antiphons, for octaves where DO has a distinct office per day
+// (unlike the in-course …-octave-set-N mechanism).
+var octaveDayDOFiles = map[string]string{
+	"easter-sunday-octave-day-4": "Tempora/Pasc0-3",
+	"easter-sunday-octave-day-5": "Tempora/Pasc0-4",
+	"easter-sunday-octave-day-6": "Tempora/Pasc0-5",
+	"easter-sunday-octave-day-7": "Tempora/Pasc0-6",
+	"pentecost-octave-day-2":     "Tempora/Pasc7-1",
+	"pentecost-octave-day-3":     "Tempora/Pasc7-2",
+	"pentecost-octave-day-4":     "Tempora/Pasc7-3",
+	"pentecost-octave-day-5":     "Tempora/Pasc7-4",
+	"pentecost-octave-day-6":     "Tempora/Pasc7-5",
+	"pentecost-octave-day-7":     "Tempora/Pasc7-6",
+}
+
+// paschalCommonsAnts maps our paschal commons variant files to the DO file
+// carrying the shared Paschaltide gospel-canticle antiphons. In Paschaltide
+// apostles, evangelists and martyrs share one common (DO C1p: "Daughters of
+// Jerusalem" at the Benedictus, "Saints and just" at the Magnificat); DO's
+// C2p/C3p carry no antiphon sections of their own.
+var paschalCommonsAnts = map[string]string{
+	"apostle-paschal":       "Commune/C1p",
+	"evangelist-paschal":    "Commune/C1p",
+	"martyr-paschal":        "Commune/C1p",
+	"bishop-martyr-paschal": "Commune/C1p",
+}
+
 // commonsDOFiles maps our commons files to DO Commune files.
 var commonsDOFiles = map[string]string{
 	"apostle":          "Commune/C1",
@@ -729,6 +791,79 @@ func extractSeeds(eng, lat *doTree, rel, id string) []seed {
 	return seeds
 }
 
+// antiphonSeed resolves one DO antiphon section (monastic-first, English
+// then Latin-indirection) and returns it as a seed for our key, or nil.
+func antiphonSeed(eng, lat *doTree, rel, doSection, key string) *seed {
+	for _, r := range relCandidates(rel) {
+		lines, prov := resolveSection(eng, lat, r, doSection)
+		if lines == nil {
+			continue
+		}
+		body := transform(lines, "antiphon")
+		if len(body) == 0 {
+			return nil
+		}
+		return &seed{key: key, cite: r + " [" + doSection + "]", lines: body, prov: prov}
+	}
+	return nil
+}
+
+// extractWeekSeeds builds the weekday (and, for files we lack, Sunday)
+// antiphon sections for one temporal week from DO's <prefix>-0..6 files.
+func extractWeekSeeds(eng, lat *doTree, prefix string) []seed {
+	weekdays := []string{"", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
+	var seeds []seed
+	for d := 1; d <= 6; d++ {
+		rel := fmt.Sprintf("%s-%d", prefix, d)
+		if sd := antiphonSeed(eng, lat, rel, "Ant 2", "benedictus-antiphon-"+weekdays[d]); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+		// Saturday evening is I Vespers of the Sunday, so a Saturday file's
+		// Ant 3 (where present) is not this week's ferial Magnificat.
+		if d < 6 {
+			if sd := antiphonSeed(eng, lat, rel, "Ant 3", "magnificat-antiphon-"+weekdays[d]); sd != nil {
+				seeds = append(seeds, *sd)
+			}
+		}
+	}
+
+	// Sunday's own antiphons, for weeks whose Sunday has no proper file yet
+	// (mergeFile appends only missing sections, so existing texts are safe).
+	sunday := prefix + "-0"
+	ben := antiphonSeed(eng, lat, sunday, "Ant 2", "benedictus-antiphon")
+	if ben == nil {
+		// Sundays whose DO file carries only Ant 1 use it at the Benedictus.
+		ben = antiphonSeed(eng, lat, sunday, "Ant 1", "benedictus-antiphon")
+	}
+	if ben != nil {
+		seeds = append(seeds, *ben)
+	}
+	mag := antiphonSeed(eng, lat, sunday, "Ant 3", "magnificat-antiphon")
+	if mag != nil {
+		seeds = append(seeds, *mag)
+	}
+	if first := antiphonSeed(eng, lat, sunday, "Ant 1", "magnificat-antiphon-first"); first != nil &&
+		(mag == nil || strings.Join(first.lines, "\n") != strings.Join(mag.lines, "\n")) {
+		seeds = append(seeds, *first)
+	}
+	return seeds
+}
+
+// extractOAntiphonSeeds pulls the Greater ("O") Antiphons of December 17-23
+// from DO's Major Special file, keyed by date for the Advent seasonal tier.
+func extractOAntiphonSeeds(eng, lat *doTree) []seed {
+	const rel = "Psalterium/Special/Major Special"
+	var seeds []seed
+	for day := 17; day <= 23; day++ {
+		doSection := fmt.Sprintf("Adv Ant %d", day)
+		key := fmt.Sprintf("magnificat-antiphon-december-%d", day)
+		if sd := antiphonSeed(eng, lat, rel, doSection, key); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+	}
+	return seeds
+}
+
 // ---------------------------------------------------------------------------
 // Our INI files: parse + merge
 // ---------------------------------------------------------------------------
@@ -970,6 +1105,83 @@ func main() {
 			}
 		}
 	}
+
+	// applySeeds merges pre-built seeds into one of our files (creating it
+	// if absent) under the same dry-run/write and -feast filter conventions.
+	applySeeds := func(id, label, ourPath string, seeds []seed) {
+		if *only != "" && *only != id {
+			return
+		}
+		newText, notes := mergeFile(ourPath, seeds, true, false)
+		if newText == "" && len(notes) == 0 {
+			fmt.Printf("%-28s %-18s no changes\n", id, label)
+			return
+		}
+		fmt.Printf("%-28s %-18s\n", id, label)
+		for _, n := range notes {
+			fmt.Printf("    %s\n", n)
+		}
+		if newText != "" && *write {
+			if err := os.WriteFile(ourPath, []byte(newText), 0644); err != nil {
+				fmt.Fprintf(os.Stderr, "error writing %s: %v\n", ourPath, err)
+				os.Exit(1)
+			}
+		}
+	}
+
+	var weekIDs []string
+	for id := range weekDOFiles {
+		weekIDs = append(weekIDs, id)
+	}
+	sort.Strings(weekIDs)
+	for _, id := range weekIDs {
+		prefix := weekDOFiles[id]
+		applySeeds(id, prefix+"-*", filepath.Join(*dataDir, "texts", "proper", id+".txt"),
+			extractWeekSeeds(eng, lat, prefix))
+	}
+
+	var octaveIDs []string
+	for id := range octaveDayDOFiles {
+		octaveIDs = append(octaveIDs, id)
+	}
+	sort.Strings(octaveIDs)
+	for _, id := range octaveIDs {
+		rel := octaveDayDOFiles[id]
+		var seeds []seed
+		if sd := antiphonSeed(eng, lat, rel, "Ant 2", "benedictus-antiphon"); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+		if sd := antiphonSeed(eng, lat, rel, "Ant 3", "magnificat-antiphon"); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+		applySeeds(id, rel, filepath.Join(*dataDir, "texts", "proper", id+".txt"), seeds)
+	}
+
+	var paschalIDs []string
+	for id := range paschalCommonsAnts {
+		paschalIDs = append(paschalIDs, id)
+	}
+	sort.Strings(paschalIDs)
+	for _, id := range paschalIDs {
+		rel := paschalCommonsAnts[id]
+		var seeds []seed
+		if sd := antiphonSeed(eng, lat, rel, "Ant 2", "benedictus-antiphon"); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+		mag := antiphonSeed(eng, lat, rel, "Ant 3", "magnificat-antiphon")
+		if mag != nil {
+			seeds = append(seeds, *mag)
+		}
+		if first := antiphonSeed(eng, lat, rel, "Ant 1", "magnificat-antiphon-first"); first != nil &&
+			(mag == nil || strings.Join(first.lines, "\n") != strings.Join(mag.lines, "\n")) {
+			seeds = append(seeds, *first)
+		}
+		applySeeds(id, rel, filepath.Join(*dataDir, "texts", "commons", id+".txt"), seeds)
+	}
+
+	applySeeds("advent-o-antiphons", "Major Special",
+		filepath.Join(*dataDir, "texts", "seasonal", "advent.txt"),
+		extractOAntiphonSeeds(eng, lat))
 
 	var feastIDs []string
 	for id := range feastDOFiles {

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-2 [Ant 2] — check against diurnal
+I am the Door * saith the Lord, by Me if any man enter in, he shall be saved, and shall find pasture. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-2 [Ant 3] — check against diurnal
+Peace I leave with you, * My peace I give unto you; not as the world giveth, give I unto you. Alleluia.

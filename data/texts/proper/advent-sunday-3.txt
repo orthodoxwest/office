@@ -56,7 +56,65 @@ R. Thanks be to God.
 Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
 R. Thanks be to God.
 
-# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember-week (Davidic throne / Visitation gospel) antiphons, not the Sunday's own; supply from diurnal
-# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
-# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
 # TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv3-0; supply from diurnal or suppress in audit-ok.txt
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Adv3-1 [Ant 2] — check against diurnal
+There shall come forth a rod * out of the stem of Jesse, and the whole earth shall be filled with the glory of the Lord, and all flesh shall see the salvation of God.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Adv3-1 [Ant 3] — check against diurnal
+All generations shall call me blessed, * for God hath regarded the lowliness of His hand-maiden.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv3-2 [Ant 2] — check against diurnal
+Thou, Bethlehem, * in the land of Judah, shalt not be the least (among the princes of Judah) for out of thee shall come a Ruler, That shall rule my people Israel.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv3-2 [Ant 3] — check against diurnal
+Awake, awake, * arise, O Jerusalem: loose thyself from the bands of thy neck, O captive daughter of Zion.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv3-3 [Ant 2] — check against diurnal
+The angel Gabriel * was sent to Mary, a virgin espoused to Joseph.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv3-3 [Ant 3] — check against diurnal
+Behold the handmaid * of the Lord; be it unto me according to thy word.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv3-4 [Ant 2] — check against diurnal
+Let your soul watch, * the Lord our God is nigh at hand.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv3-4 [Ant 3] — check against diurnal
+Rejoice ye with Jerusalem, * and be glad with her, all ye that love her for ever.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv3-5 [Ant 2] — check against diurnal
+As soon as the voice of thy salutation * sounded in mine ears, the babe leaped in my womb for joy. Alleluia.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv3-5 [Ant 3] — check against diurnal
+John bare witness of Him, * saying He That cometh after me is preferred before me.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Adv3-6 [Ant 2] — check against diurnal
+O thou Angel of God, * how shall this be, seeing I know not a man? Hear, O Virgin Mary! the Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee!
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 2] — check against diurnal
+He shall sit * upon the throne of David, and upon his kingdom for ever. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 3] — check against diurnal
+Blessed art thou, * O Mary, who hast believed the Lord, for there shall be a performance of those things which were told thee from the Lord. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 1] — check against diurnal
+Before Me * there was no god formed, neither shall there be after Me; for unto Me every knee shall bow, and every tongue shall swear.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 2] — check against diurnal
+He shall sit * upon the throne of David, and upon his kingdom for ever. Alleluia.
+

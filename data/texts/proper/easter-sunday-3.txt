@@ -1,0 +1,27 @@
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc3-4 [Ant 2] — check against diurnal
+And He went in with them. * And it came to pass, as He sat at meat with them, He took bread, and blessed it and brake, and gave to them. Alleluia, Alleluia.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc3-4 [Ant 3] — check against diurnal
+Amen, Amen, I say unto you, that I will see you again, * am your heart shall rejoice, and your jo; no man taketh from you. Alleluia.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Pasc3-5 [Ant 2] — check against diurnal
+They knew the Lord Jesus * Alin the breaking of bread Alleluia Alleluia.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Pasc3-5 [Ant 3] — check against diurnal
+A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc3-0 [Ant 2] — check against diurnal
+A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc3-0 [Ant 3] — check against diurnal
+Amen, amen I say to you * that you shall lament and weep, but the world shall rejoice; and you shall be made sorrowful, but your sorrow shall be turned into joy.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc3-0 [Ant 1] — check against diurnal
+A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.

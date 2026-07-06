@@ -1,0 +1,47 @@
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc4-1 [Ant 2] — check against diurnal
+Did not our heart burn within us, at the thought of Jesus, * while he talked with us by the way? Alleluia.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc4-1 [Ant 3] — check against diurnal
+I tell you the truth: * it is expedient for you that I go away, for if I go not away, the Comforter will not come unto you, alleluia.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc4-2 [Ant 2] — check against diurnal
+Peace be unto you, * it is I, alleluia; fear not, alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc4-2 [Ant 3] — check against diurnal
+When the Comforter, the Spirit of truth, is come, * He will reprove the world of sin, and of righteousness, and of judgment. Alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc4-3 [Ant 2] — check against diurnal
+A spirit hath not flesh and bones, * as ye see Me to have: now believe. Alleluia.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc4-3 [Ant 3] — check against diurnal
+I have yet many things to say unto you, but ye cannot bear them now. * Howbeit, when He, the Spirit of truth, is come, He will guide you into all truth. Alleluia.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc4-4 [Ant 2] — check against diurnal
+The disciples gave the Lord a piece * of a broiled fish, and of an honeycomb, alleluia, alleluia.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc4-4 [Ant 3] — check against diurnal
+For He shall not speak of Himself; * but whatsoever He shall hear, that shall He speak and He will show you things to come, alleluia.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Pasc4-5 [Ant 2] — check against diurnal
+These are the words * which I spake unto you, while I was with you. Alleluia, Alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc4-0 [Ant 2] — check against diurnal
+I go My way to Him That sent Me, * and none of you asketh Me: Whither goest Thou? Alleluia, Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc4-0 [Ant 3] — check against diurnal
+I go My way to Him That sent Me, * but because I have said this to you, sadness has filled your hearts, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc4-0 [Ant 1] — check against diurnal
+I go My way to Him That sent Me, * and none of you asketh Me: Whither goest Thou? Alleluia, Alleluia.

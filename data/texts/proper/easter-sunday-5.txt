@@ -1,0 +1,39 @@
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc5-1 [Ant 2] — check against diurnal
+Ask, and ye shall receive; * seek, and ye shall find; knock, and it shall be opened unto you. Alleluia.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc5-1 [Ant 3] — check against diurnal
+The Father Himself loveth you, * because ye have loved Me, and have believed in Me. Alleluia.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc5-2 [Ant 2] — check against diurnal
+Christ ought to have suffered, * and to have risen again from the dead. Alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc5-2 [Ant 3] — check against diurnal
+I came forth from the Father, * and am come into the world; again I leave the world, and go to the Father. Alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc5-3 [Ant 2] — check against diurnal
+Father, the hour is come, * glorify thy Son, with the glory which I had, before the world was, with thee, alleluia.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Ant 2] — check against diurnal
+I ascend to my Father * and to your Father: to my God and your God, alleluia.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc5-4 [Ant 3] — check against diurnal
+O King of glory, Lord of hosts, * Who hast this day exalted thine Own Self, with great triumph, above all the heavens, leave us not orphans but send unto us the Promise of the Father, even the Spirit of truth, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Pasc5-0 [Ant 2] — check against diurnal
+Hitherto * have ye asked nothing in My Name, ask, and ye shall receive. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc5-0 [Ant 3] — check against diurnal
+Ask, and ye shall receive, * that your joy may be full; for the Father Himself loveth you, because ye have loved Me, and have believed in Me, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc5-0 [Ant 1] — check against diurnal
+Hitherto * have ye asked nothing in My Name, ask, and ye shall receive. Alleluia.

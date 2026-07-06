@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-1 [Ant 2] — check against diurnal
+God so loved the world * that He gave His Only-begotten Son, that whosoever believeth in Him should not perish, but have everlasting life. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc7-1 [Ant 3] — check against diurnal
+If a Man love Me * he will keep My word and My Father will love him, and We will come unto him, and make Our abode with him. Alleluia.

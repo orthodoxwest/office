@@ -56,7 +56,65 @@ R. Thanks be to God.
 Brothers: For what things soever were written, were written for our learning: that through patience and the comfort of the scriptures, we might have hope.
 R. Thanks be to God.
 
-# TODO(diurnal): [benedictus-antiphon] — DO's Ant 2/Ant 3 for this file are Ember Wednesday St. John Baptist gospel antiphons, not the Sunday's own; supply from diurnal
-# TODO(diurnal): [magnificat-antiphon] — see benedictus-antiphon note above; supply from diurnal
-# TODO(diurnal): [commemoration-antiphon] — see benedictus-antiphon note above; supply from diurnal
 # TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv2-0; supply from diurnal or suppress in audit-ok.txt
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Adv2-1 [Ant 2] — check against diurnal
+The Lord the Ruler * cometh from heaven, and in His hand are honour and dominion.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Adv2-1 [Ant 3] — check against diurnal
+Behold, the Lord cometh * the King of all the earth, to take off from us the yoke of our captivity.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv2-2 [Ant 2] — check against diurnal
+The Lord shall arise * upon thee, O Jerusalem, and His glory shall be seen upon thee.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Adv2-2 [Ant 3] — check against diurnal
+The voice * of one crying in the wilderness: Prepare ye the way of the Lord, make His paths straight.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv2-3 [Ant 2] — check against diurnal
+Behold I send My angel * which shall prepare My way before thy face.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Adv2-3 [Ant 3] — check against diurnal
+Thou shalt yet be built anew, * O Zion, and thou shalt see thy Righteous One, Who shall come in thee.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv2-4 [Ant 2] — check against diurnal
+O Lord, Thou art He That should come, * for Whom we look, that Thou shouldest save thy people.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Adv2-4 [Ant 3] — check against diurnal
+He it is * Who, coming after me, is preferred before me, Whose shoe's latchet I am not worthy to unloose.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv2-5 [Ant 2] — check against diurnal
+Say: * Ye that are of a fearful heart, be strong; behold, the Lord our God will come.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Adv2-5 [Ant 3] — check against diurnal
+Sing unto the Lord * a new song; from the end of the earth, let the voice of praise be heard.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Adv2-6 [Ant 2] — check against diurnal
+The Lord shall lift up a standard * unto the nations, and shall gather together the outcasts of Israel.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant 2] — check against diurnal
+Now when John * had heard in the prison the works of Christ, he sent two of his disciples and said unto Him: Art Thou He That should come, or do we look for another?
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant 3] — check against diurnal
+Art thou he that art to come * or look we for another? Go and relate to John what you have seen: the blind see, the dead rise again, to the poor the gospel is preached. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant 1] — check against diurnal
+Come, O Lord, * visit us in peace, that we may rejoice before thee with all our heart.
+
+[commemoration-antiphon]
+# SOURCE: divinum-officium Tempora/Adv2-0 [Ant 2] — check against diurnal
+Now when John * had heard in the prison the works of Christ, he sent two of his disciples and said unto Him: Art Thou He That should come, or do we look for another?
+

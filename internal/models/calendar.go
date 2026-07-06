@@ -346,6 +346,13 @@ type CalendarDay struct {
 	Color          Color
 	Notes          string
 
+	// TemporalWeekID is the ID of the temporal Sunday office governing this
+	// day's week (e.g. "advent-sunday-2", "sexagesima"), carried from Sunday
+	// through the following Saturday. Ferias resolve per-day texts (the
+	// weekly gospel-canticle antiphons) from proper/<TemporalWeekID>/.
+	// Empty when no temporal Sunday governs the week (e.g. early January).
+	TemporalWeekID string
+
 	// WithinOctaveOf is the parent feast ID if this day falls within an octave
 	// (days 2-8), or empty string if not. Set by the calendar builder.
 	WithinOctaveOf string

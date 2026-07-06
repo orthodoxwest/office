@@ -67,3 +67,51 @@ R. Thanks be to God.
 !1 John 5:4
 My beloved: For whatsoever is born of God, overcometh the world: and this is the victory which overcometh the world, our faith.
 R. Thanks be to God.
+
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc1-1 [Ant 2] — check against diurnal
+He rising * early the first day of the week, appeared first to Mary Magdalen; out of whom he had cast seven devils. alleluia.
+
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Tempora/Pasc1-1 [Ant 3] — check against diurnal
+Peace be with you, * it is I, alleluia: do not be afraid, alleluia.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc1-2 [Ant 2] — check against diurnal
+I go before you into Galilee, * there shall ye see Me, as I said unto you. Alleluia, Alleluia.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Tempora/Pasc1-2 [Ant 3] — check against diurnal
+Reach hither thine hand * and feel the print of the nails. Alleluia. And be not faithless but believing. Alleluia.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc1-3 [Ant 2] — check against diurnal
+I am the True Vine. * Alleluia. And ye are My branches indeed.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Tempora/Pasc1-3 [Ant 3] — check against diurnal
+Thomas because thou hast seen Me, thou hast believed * blessed are they that have not seen and yet have believed. Alleluia.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc1-4 [Ant 2] — check against diurnal
+Mine heart is on fire: * I would that I might see my Lord: I seek Him, and know not where they have laid Him. Alleluia, Alleluia.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Tempora/Pasc1-4 [Ant 3] — check against diurnal
+I have put my finger into the print of the nails, * and my hand into His Side, and I have said: My Lord, and my God! Alleluia.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Pasc1-5 [Ant 2] — check against diurnal
+Mary Magdalene and the other Mary * came to see the Sepulchre. Alleluia.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Tempora/Pasc1-5 [Ant 3] — check against diurnal
+Now when it was late * the same day, the first of the week, and the doors were shut, where the disciples were gathered together, for fear of the Jews, Jesus came and stood in the midst and said to them: Peace be to you, alleluia.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Tempora/Pasc1-6 [Ant 2] — check against diurnal
+O Lord, give light * to those who sit in darkness and in the shadow of death, and guide our feet into the way of peace
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pasc1-0 [Ant 1] — check against diurnal
+Now when it was late * the same day, the first of the week, and the doors were shut, where the disciples were gathered together, for fear of the Jews, Jesus came and stood in the midst and said to them: Peace be to you, alleluia.

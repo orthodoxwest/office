@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-4 [Ant 2] — check against diurnal
+Mary stood without at the Sepulchre weeping, * and saw two Angels in white, sitting, and the napkin that had been about the Head of Jesus, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pasc0-4 [Ant 3] — check against diurnal
+They have taken away my Lord, * and I know not where they have laid Him: if thou have borne Him hence, tell me, alleluia, and I will take Him away, alleluia.
