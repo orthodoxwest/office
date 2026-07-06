@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-11 [Ant 2]; incipit per 2026 ordo — check against diurnal
+They that despised thee * shall come unto thee, and shall bow themselves down at the soles of thy feet.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-11 [Ant 3] — check against diurnal
+The wise men being warned * in a dream, departed into their own country another way.

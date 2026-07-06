@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-08 [Ant 2]; opening per 2026 ordo ("Three are the gifts") — check against diurnal
+Three are the gifts * which the wise men offered unto the Lord: gold, frankincense, and myrrh; as unto the Son of God, the great King. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-08 [Ant 3]; opening per 2026 ordo ("Light of light") — check against diurnal
+Light of light, * thou art made manifest, O Christ, and the wise men have presented unto thee gifts. Alleluia, alleluia, alleluia.

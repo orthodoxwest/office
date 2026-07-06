@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-09 [Ant 2]; incipit per 2026 ordo — check against diurnal
+We have seen his star * in the East, and are come with gifts to worship the Lord.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-09 [Ant 3]; incipit per 2026 ordo — check against diurnal
+Herod inquired * of the wise men: What is the sign that ye have seen that a King is born? We have seen the shining of the star, the glory whereof enlighteneth the whole world.
