@@ -86,7 +86,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</h3>`)
-			sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+			sb.WriteString(string(renderMarianAntiphon(elem.Text)))
 			sb.WriteString(`</div>`)
 		} else {
 			sb.WriteString(`<p class="antiphon"><em>Ant.</em> `)
@@ -254,13 +254,25 @@ func renderPsalmVerses(text string) template.HTML {
 }
 
 // renderLiturgicalBlock renders a multi-line liturgical text (versicles, responses,
-// prayers, chapters, Marian antiphons) with proper markup for each line type.
+// prayers, and chapters) with proper markup for each line type. Consecutive prose
+// source lines flow as a paragraph; a trailing \\ requests an intentional hard break.
 func renderLiturgicalBlock(text string) template.HTML {
+	return renderLiturgicalBlockWithOptions(text, false)
+}
+
+// renderMarianAntiphon preserves the verse lines in the antiphon's opening prose
+// block while allowing its versicles and concluding prayer to flow normally.
+func renderMarianAntiphon(text string) template.HTML {
+	return renderLiturgicalBlockWithOptions(text, true)
+}
+
+func renderLiturgicalBlockWithOptions(text string, preserveFirstProseBlock bool) template.HTML {
 	lines := strings.Split(text, "\n")
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
 
 	var proseLines []string
+	proseBlocks := 0
 	pendingGap := false
 
 	emitGap := func() {
@@ -276,14 +288,26 @@ func renderLiturgicalBlock(text string) template.HTML {
 		}
 		emitGap()
 		sb.WriteString(`<p class="plain-line">`)
+		preserveLines := preserveFirstProseBlock && proseBlocks == 0
+		previousHardBreak := false
 		for i, l := range proseLines {
 			if i > 0 {
-				sb.WriteString(`<br>`)
+				if preserveLines || previousHardBreak {
+					sb.WriteString(`<br>`)
+				} else {
+					sb.WriteByte(' ')
+				}
+			}
+			hardBreak := strings.HasSuffix(l, `\\`)
+			if hardBreak {
+				l = strings.TrimSpace(strings.TrimSuffix(l, `\\`))
 			}
 			sb.WriteString(escCross(l))
+			previousHardBreak = hardBreak
 		}
 		sb.WriteString(`</p>`)
 		proseLines = nil
+		proseBlocks++
 	}
 
 	for _, line := range lines {

@@ -36,6 +36,57 @@ func TestRenderSectionElementsMergesPsalmDoxologyIntoPsalmBlock(t *testing.T) {
 	}
 }
 
+func TestRenderLiturgicalBlockReflowsProseAndPreservesSemanticLines(t *testing.T) {
+	html := string(renderLiturgicalBlock("Almighty God, who hast brought us\nto the beginning of this day.\n\nV. O Lord, hear my prayer.\nR. And let my cry come unto thee."))
+
+	if !strings.Contains(html, `<p class="plain-line">Almighty God, who hast brought us to the beginning of this day.</p>`) {
+		t.Fatalf("expected source-wrapped prose to flow as one paragraph: %s", html)
+	}
+	if strings.Contains(html, `brought us<br>to`) {
+		t.Fatalf("source wrapping must not produce a hard break: %s", html)
+	}
+	if !strings.Contains(html, `<span class="sigil">℣.</span>`) || !strings.Contains(html, `<span class="sigil">℟.</span>`) {
+		t.Fatalf("expected versicle and response to remain semantic lines: %s", html)
+	}
+	if !strings.Contains(html, `<div class="liturgical-gap"></div>`) {
+		t.Fatalf("expected a blank source line to retain paragraph spacing: %s", html)
+	}
+}
+
+func TestRenderLiturgicalBlockSupportsExplicitHardBreak(t *testing.T) {
+	html := string(renderLiturgicalBlock("First petition.\\\\\nSecond petition."))
+
+	if !strings.Contains(html, `First petition.<br>Second petition.`) {
+		t.Fatalf("expected trailing double backslash to produce a hard break: %s", html)
+	}
+	if strings.Contains(html, `\\`) {
+		t.Fatalf("hard-break marker must not be rendered: %s", html)
+	}
+}
+
+func TestRenderMarianAntiphonPreservesVerseAndReflowsPrayer(t *testing.T) {
+	text := "[Ave Regina Caelorum]\n\nQueen of the heavens, we hail thee,\nHail thee, Lady of all the Angels;\n\nV. Vouchsafe that I may praise thee.\nR. Give me strength.\n\nLet us pray.\n\nGrant us, O merciful God, protection in our weakness:\nthat we may rise again from our sins."
+	html := string(renderMarianAntiphon(text))
+
+	if !strings.Contains(html, `Queen of the heavens, we hail thee,<br>Hail thee, Lady of all the Angels;`) {
+		t.Fatalf("expected the opening Marian verse lines to be preserved: %s", html)
+	}
+	if !strings.Contains(html, `Grant us, O merciful God, protection in our weakness: that we may rise again from our sins.`) {
+		t.Fatalf("expected the concluding Marian prayer to flow: %s", html)
+	}
+	if strings.Contains(html, `weakness:<br>that`) {
+		t.Fatalf("prayer source wrapping must not produce a hard break: %s", html)
+	}
+}
+
+func TestRenderHymnStanzasPreservesVerseLines(t *testing.T) {
+	html := string(renderHymnStanzas("Latin title\n\nFirst verse line,\nSecond verse line.\n\nAnother stanza."))
+
+	if !strings.Contains(html, `<p class="hymn-stanza">First verse line,<br>Second verse line.</p>`) {
+		t.Fatalf("expected hymn verse lines to remain hard-wrapped: %s", html)
+	}
+}
+
 func TestShowVettingBannerDependsOnReviewHash(t *testing.T) {
 	hour := &models.OfficeHour{
 		Hour:   "lauds",
