@@ -63,7 +63,23 @@ data/
 scripts/
   seed-divinum.go          Seed propers/commons from a local Divinum Officium checkout
                            (go run scripts/seed-divinum.go -do <path> [-feast id] [-write])
+  ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
 ```
+
+## Reference materials & verification
+
+`../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026) and rubrics
+documents. **The newest-year ordo is the authority for what this app should produce**; the
+archdiocese has revised its calendar over the years, so sanctoral diffs against older ordos
+are usually noise, while the temporal cycle (paschalion, moveable dates) is valid in all years.
+`diurnal-rubrics.pdf` is the normative rubric text (preces §XXXVII, suffrage §XXXVIII). Where
+the ordo and the rubrics disagree, file an issue for the priest rather than picking a side.
+
+Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the app against
+an ordo PDF: `office rubrics YEAR` emits per-day composition flags, and `scripts/ordo-compare.py`
+diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon incipits, colors, Vespers
+precedence, and moveable dates. Known divergence clusters are tracked in GitHub issues
+(#9–#13 need rulings; #15–#17, #20 are engine/data work).
 
 ## Text provenance
 
@@ -98,6 +114,7 @@ make fmt         # Check formatting
 make check       # fmt + vet + lint + test + validate + lint-texts
 make serve       # Start web server on :8080
 make ordo        # Print text ordo for current year (YEAR=2026)
+./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed

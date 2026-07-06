@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent11-0.txt [Ant 2] — check against diurnal
+When the Lord had departed from the coasts of Tyre, * He made both the deaf to hear and the dumb to speak.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent11-0.txt [Ant 3] — check against diurnal
+He hath done all things well, * He maketh both the deaf to hear and the dumb to speak.

@@ -215,6 +215,30 @@ R. And let the lifting up of my hands be an evening sacrifice.
 [magnificat-antiphon]
 My soul doth magnify the Lord, and my spirit hath rejoiced in God my Saviour.
 
+[magnificat-antiphon-monday]
+# SOURCE: divinum-officium Major Special.txt [Feria2 Ant 3]; incipit per 2026 ordo — check against diurnal
+My soul doth magnify the Lord * for God hath regarded the lowliness of his handmaiden.
+
+[magnificat-antiphon-tuesday]
+# SOURCE: divinum-officium Major Special.txt [Feria3 Ant 3]; incipit per 2026 ordo — check against diurnal
+Let my spirit rejoice * in God my Saviour.
+
+[magnificat-antiphon-wednesday]
+# SOURCE: divinum-officium Major Special.txt [Feria4 Ant 3]; incipit per 2026 ordo — check against diurnal
+The Lord hath regarded * my lowliness, and he that is mighty hath done great things for me.
+
+[magnificat-antiphon-thursday]
+# SOURCE: divinum-officium Major Special.txt [Feria5 Ant 3]; incipit per 2026 ordo ("Show strength") — check against diurnal
+Show strength with thine arm * scatter the proud in the imagination of their hearts.
+
+[magnificat-antiphon-friday]
+# SOURCE: divinum-officium Major Special.txt [Feria6 Ant 3]; incipit per 2026 ordo — check against diurnal
+He hath put down the mighty * from their seat, and hath exalted the humble and meek.
+
+[magnificat-antiphon-saturday]
+# SOURCE: divinum-officium Major Special.txt [Feria7 Ant 3] (monastic variant) — check against diurnal
+God hath received Israel * his servant, as he promised to our forefathers, Abraham and his seed, and hath exalted the humble for ever.
+
 [pre-collect-versicles]
 V. O Lord, hear my prayer.
 R. And let our cry come unto thee.

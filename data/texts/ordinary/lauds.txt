@@ -250,6 +250,30 @@ R. That I may sing of thy glory and honour all the day long.
 [benedictus-antiphon]
 Blessed be the Lord God of Israel, for he hath visited and redeemed his people.
 
+[benedictus-antiphon-monday]
+# SOURCE: divinum-officium Major Special.txt [Feria2 Ant 2]; incipit per 2026 ordo — check against diurnal
+Blessed be the Lord * God of Israel, for he hath visited and redeemed his people.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: divinum-officium Major Special.txt [Feria3 Ant 2]; incipit per 2026 ordo — check against diurnal
+The Lord hath raised up * a mighty salvation for us, in the house of his servant David.
+
+[benedictus-antiphon-wednesday]
+# SOURCE: divinum-officium Major Special.txt [Feria4 Ant 2]; incipit per 2026 ordo — check against diurnal
+From the hand of all that hate us * hath the Lord delivered us.
+
+[benedictus-antiphon-thursday]
+# SOURCE: divinum-officium Major Special.txt [Feria5 Ant 2]; incipit per 2026 ordo — check against diurnal
+Let us serve the Lord * in holiness and righteousness before him, all the days of our life.
+
+[benedictus-antiphon-friday]
+# SOURCE: divinum-officium Major Special.txt [Feria6 Ant 2]; incipit per 2026 ordo — check against diurnal
+Through the tender mercy of our God * the day-spring from on high hath visited us.
+
+[benedictus-antiphon-saturday]
+# SOURCE: divinum-officium Major Special.txt [Feria7 Ant 2] — check against diurnal
+O Lord, give light * to them that sit in darkness and in the shadow of death, and guide our feet into the way of peace.
+
 [pre-collect-versicles]
 V. O Lord, hear my prayer.
 R. And let our cry come unto thee.

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent22-0.txt [Ant 2] — check against diurnal
+Master, we know that Thou art true, * and teachest the way of God in truth, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent22-0.txt [Ant 3] — check against diurnal
+Render therefore unto Caesar the things which are Caesar's, * and unto God the things that are God's, alleluia.

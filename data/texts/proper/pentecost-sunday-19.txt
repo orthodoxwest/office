@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent19-0.txt [Ant 2] — check against diurnal
+Tell them which are bidden: * Behold, I have prepared my dinner; Come unto the marriage. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent19-0.txt [Ant 3] — check against diurnal
+And the King came in * to see the guests, and he saw there a man which had not on a wedding garment. And he saith unto him: Friend, how camest thou in hither, not having a wedding garment?

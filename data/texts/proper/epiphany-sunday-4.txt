@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Epi4-0.txt [Ant 2] — check against diurnal
+When Jesus was entered into a ship, * there arose a great tempest in the sea and His disciples awoke Him, saying: Lord, save us; we perish.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Epi4-0.txt [Ant 3] — check against diurnal
+Lord, save us: * we perish; give the word, O God, and let there be a great calm!
