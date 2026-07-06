@@ -117,8 +117,10 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		}
 		sb.WriteString(string(renderHymnStanzas(elem.Text)))
 		sb.WriteString(`</div>`)
-	case models.Versicle, models.Response, models.Collect, models.Prayer, models.Blessing, models.Doxology:
+	case models.Versicle, models.Response, models.Prayer, models.Blessing, models.Doxology:
 		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+	case models.Collect:
+		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 	case models.Chapter:
 		sb.WriteString(`<div class="chapter"><h2 class="section-heading">Chapter</h2>`)
 		if elem.Label != "" {
@@ -126,7 +128,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</p>`)
 		}
-		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 		sb.WriteString(`</div>`)
 	case models.Preces:
 		sb.WriteString(`<div class="preces">`)
@@ -253,20 +255,33 @@ func renderPsalmVerses(text string) template.HTML {
 	return template.HTML(sb.String())
 }
 
-// renderLiturgicalBlock renders a multi-line liturgical text (versicles, responses,
-// prayers, and chapters) with proper markup for each line type. Consecutive prose
-// source lines flow as a paragraph; a trailing \\ requests an intentional hard break.
+type proseLineMode uint8
+
+const (
+	preserveProseLines proseLineMode = iota
+	flowProseLines
+	preserveFirstProseBlock
+)
+
+// renderLiturgicalBlock renders multi-line liturgical text while preserving prose
+// line breaks, as required by prayers, blessings, doxologies, and preces.
 func renderLiturgicalBlock(text string) template.HTML {
-	return renderLiturgicalBlockWithOptions(text, false)
+	return renderLiturgicalBlockWithMode(text, preserveProseLines)
+}
+
+// renderFlowingLiturgicalBlock renders collects and chapters with soft source
+// wrapping, while retaining semantic lines such as versicles and responses.
+func renderFlowingLiturgicalBlock(text string) template.HTML {
+	return renderLiturgicalBlockWithMode(text, flowProseLines)
 }
 
 // renderMarianAntiphon preserves the verse lines in the antiphon's opening prose
 // block while allowing its versicles and concluding prayer to flow normally.
 func renderMarianAntiphon(text string) template.HTML {
-	return renderLiturgicalBlockWithOptions(text, true)
+	return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
 }
 
-func renderLiturgicalBlockWithOptions(text string, preserveFirstProseBlock bool) template.HTML {
+func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {
 	lines := strings.Split(text, "\n")
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
@@ -288,22 +303,16 @@ func renderLiturgicalBlockWithOptions(text string, preserveFirstProseBlock bool)
 		}
 		emitGap()
 		sb.WriteString(`<p class="plain-line">`)
-		preserveLines := preserveFirstProseBlock && proseBlocks == 0
-		previousHardBreak := false
+		preserveLines := mode == preserveProseLines || (mode == preserveFirstProseBlock && proseBlocks == 0)
 		for i, l := range proseLines {
 			if i > 0 {
-				if preserveLines || previousHardBreak {
+				if preserveLines {
 					sb.WriteString(`<br>`)
 				} else {
 					sb.WriteByte(' ')
 				}
 			}
-			hardBreak := strings.HasSuffix(l, `\\`)
-			if hardBreak {
-				l = strings.TrimSpace(strings.TrimSuffix(l, `\\`))
-			}
 			sb.WriteString(escCross(l))
-			previousHardBreak = hardBreak
 		}
 		sb.WriteString(`</p>`)
 		proseLines = nil

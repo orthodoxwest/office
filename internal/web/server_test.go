@@ -36,8 +36,11 @@ func TestRenderSectionElementsMergesPsalmDoxologyIntoPsalmBlock(t *testing.T) {
 	}
 }
 
-func TestRenderLiturgicalBlockReflowsProseAndPreservesSemanticLines(t *testing.T) {
-	html := string(renderLiturgicalBlock("Almighty God, who hast brought us\nto the beginning of this day.\n\nV. O Lord, hear my prayer.\nR. And let my cry come unto thee."))
+func TestRenderCollectReflowsProseAndPreservesSemanticLines(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type: models.Collect,
+		Text: "Almighty God, who hast brought us\nto the beginning of this day.\n\nV. O Lord, hear my prayer.\nR. And let my cry come unto thee.",
+	}, "")
 
 	if !strings.Contains(html, `<p class="plain-line">Almighty God, who hast brought us to the beginning of this day.</p>`) {
 		t.Fatalf("expected source-wrapped prose to flow as one paragraph: %s", html)
@@ -53,14 +56,14 @@ func TestRenderLiturgicalBlockReflowsProseAndPreservesSemanticLines(t *testing.T
 	}
 }
 
-func TestRenderLiturgicalBlockSupportsExplicitHardBreak(t *testing.T) {
-	html := string(renderLiturgicalBlock("First petition.\\\\\nSecond petition."))
+func TestRenderPrayerPreservesSourceLines(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type: models.Prayer,
+		Text: "Thy kingdom come.\nThy will be done.",
+	}, "")
 
-	if !strings.Contains(html, `First petition.<br>Second petition.`) {
-		t.Fatalf("expected trailing double backslash to produce a hard break: %s", html)
-	}
-	if strings.Contains(html, `\\`) {
-		t.Fatalf("hard-break marker must not be rendered: %s", html)
+	if !strings.Contains(html, `Thy kingdom come.<br>Thy will be done.`) {
+		t.Fatalf("expected prayer lines to remain hard-wrapped: %s", html)
 	}
 }
 
