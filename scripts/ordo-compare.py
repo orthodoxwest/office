@@ -246,7 +246,8 @@ def cmd_colors(pdf_path, ours_path):
     n = tot = 0
     for k in sorted(set(pdf) & set(ours)):
         for sect, field in (("Lauds", "color"), ("Vespers", "vcolor")):
-            m = re.match(r"^\s*([WRGVB])\b", pdf[k].get(sect, "").strip())
+            # section text begins with the section keyword itself
+            m = re.match(sect + r"\s+([WRGVB])\b", pdf[k].get(sect, "").strip())
             ov = ours[k][field]
             if m and ov:
                 tot += 1
