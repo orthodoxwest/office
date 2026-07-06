@@ -58,3 +58,7 @@ R. Thanks be to God.
 !Rom 10:10-11
 Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/11-30.txt [Ant 1] — check against diurnal
+One of the two * which followed the Lord was Andrew, Simon Peter's brother. Alleluia.

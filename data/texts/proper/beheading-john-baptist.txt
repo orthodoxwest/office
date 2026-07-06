@@ -37,3 +37,7 @@ R. And madest him to have dominion over the works of thy hands.
 
 [collect]
 Lord, we beseech thee, that the keeping of this honourable feastday in memory of the holy Baptist John, thy Fore-runner, and thy Martyr, may be a mean to draw upon us the effectual outpouring of thy saving help.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/08-29.txt [Ant 1] — check against diurnal
+Herod sent * an executioner, and commanded that John's head should be cut off in the prison. And when his disciples heard of it, they came and took up his corpse, and laid it in a tomb.

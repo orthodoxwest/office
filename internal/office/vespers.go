@@ -47,6 +47,7 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		officeDay.Commemorations = day.Vespers.Commemorations
 		officeDay.Tempora = ""
 		officeDay.WithinOctaveOf = ""
+		officeDay.FirstVespers = true
 	case models.VespersIIOfPreceding:
 		// Vespers is of today's own feast; the incoming feast that lost the
 		// concurrence is commemorated in addition to today's commemorations.

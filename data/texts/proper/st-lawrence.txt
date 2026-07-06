@@ -66,3 +66,7 @@ R. Thanks be to God.
 !2 Cor 9:6
 Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/08-10.txt [Ant 1] — check against diurnal
+Lawrence the Deacon * performed a pious act by giving sight to the blind through the Sign of the Cross, and by bestowing on the poor the riches of the Church.

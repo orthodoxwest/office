@@ -119,3 +119,7 @@ R. Thanks be to God.
 !Tob 12:12
 Then thou didst pray with tears, and didst bury the dead, and didst leave thy dinner, and didst hide the dead in thine house through the day, and bury them in the night, I offered up thy prayer before the Lord.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/10-24.txt [Ant 1] — check against diurnal
+I am the Angel Raphael * who stand before the Lord; but bless ye God, and tell of all His wondrous works, alleluia.

@@ -37,3 +37,7 @@ R. Go forward, fare prosperously, and reign.
 
 [collect]
 O God, Who year by year dost gladden thy people by the solemn feast of thy blessed Virgin and Martyr Cecilia, grant unto us, we beseech thee, not only devoutly to observe the same, but also to follow after the pattern of her godly conversation.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/11-22.txt [Ant 1] — check against diurnal
+Valerian! there is a secret * which I wish to tell thee. I have an Angel of God for a lover, and he is very jealous to keep my body.

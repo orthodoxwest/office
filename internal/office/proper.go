@@ -111,6 +111,15 @@ func resolveProperCollectText(day *models.CalendarDay, hourName string, corpus *
 // seasonal default, weekday ordinary, ordinary fallback, shared fallback.
 // Returns the text and the ref it was resolved from.
 func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	// At I Vespers of a following feast, texts that differ from II Vespers
+	// carry a "-first" ref variant (e.g. magnificat-antiphon-first); prefer
+	// it across all tiers, falling back to the shared ref.
+	if day.FirstVespers && hourName == "vespers" && !strings.HasSuffix(ref, "-first") {
+		if text, resolved := resolveProperText(day, hourName, ref+"-first", corpus); !strings.HasPrefix(text, "[Proper text not found") {
+			return text, resolved
+		}
+	}
+
 	hourCandidates := hourRefCandidates(hourName, ref)
 	refCands := refCandidates(ref)
 

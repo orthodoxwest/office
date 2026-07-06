@@ -66,3 +66,7 @@ R. Thanks be to God.
 !Acts 6:8
 And Stephen, full of grace and fortitude, did great wonders and signs among the people.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/12-26.txt [Ant 1] — check against diurnal
+And Stephen, full of grace * and fortitude, did great signs among the people.

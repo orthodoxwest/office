@@ -37,3 +37,7 @@ R. And madest him to have dominion over the works of thy hands.
 
 [collect]
 O God, Who dost gladden us by the yearly Feast-day of thine holy Martyr, Clement mercifully grant unto us who keep their birthday, the strength to imitate their patience under suffering.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/11-23.txt [Ant 1] — check against diurnal
+Let us all * pray Our Lord Jesus Christ to open a spring for those that own His Name.

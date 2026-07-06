@@ -1,0 +1,3 @@
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/08-16.txt [Ant 1] — check against diurnal
+Let us praise a man * famous in his generation, with whom the Lord didst establish the blessing of all nations, and on whose head He made His covenant to rest.

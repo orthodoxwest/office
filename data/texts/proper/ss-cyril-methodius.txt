@@ -1,0 +1,11 @@
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/07-07.txt [Ant 1] — check against diurnal
+How beautiful * are the feet of them that preach the gospel of peace, and bring glad tidings of good things, that say unto Sion thy God reigneth.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/07-07.txt [Ant 2] — check against diurnal
+In holiness * and righteousness before Him all the days of their life did they serve the Lord, and therefore the Lord God of Israel hath clothed them with a robe of glory.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/07-07.txt [Ant 3] — check against diurnal
+These are * the holy men become the friends of God and made glorious by the preaching of divine truth; their tongues have become the keys of heaven.

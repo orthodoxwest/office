@@ -357,4 +357,10 @@ type CalendarDay struct {
 	Penitential PenitentialObservance
 
 	Vespers VespersDesignation
+
+	// FirstVespers is set only on the synthetic office-day used while
+	// composing I Vespers of a following feast (never by the calendar
+	// builder): text resolution then prefers "-first" ref variants
+	// (e.g. magnificat-antiphon-first) over the II Vespers defaults.
+	FirstVespers bool
 }

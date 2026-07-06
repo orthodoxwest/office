@@ -37,3 +37,7 @@ R. Go forward, fare prosperously, and reign.
 
 [collect]
 O God, Who among the other miracles of thy power have bestowed the victory of martyrdom even upon the weaker sex, graciously grant that we who commemorate the anniversary of the death of blessed N., thy Virgin and Martyr, may come to thee by the path of her example.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/02-05.txt [Ant 1] — check against diurnal
+The blessed Agatha * stood in the midst of the prison, and stretched forth her hands, and prayed unto the Lord, saying: O Lord Jesus Christ, my Good Master, I thank thee because Thou hast made me to overcome the cruelty of the executioners and now, O Lord, may it please thee that I should happily attain unto thy glory, which fadeth not away.

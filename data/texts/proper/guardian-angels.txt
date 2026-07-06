@@ -153,3 +153,7 @@ R. Thanks be to God.
 !Exod. 23:20-21
 Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
 R. Thanks be to God.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Sancti/10-02.txt [Ant 1] — check against diurnal
+Are they not all * ministering spirits, sent forth to minister for them who shall be heirs of salvation?
