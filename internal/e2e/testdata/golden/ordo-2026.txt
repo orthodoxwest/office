@@ -28,7 +28,7 @@ JANUARY
            Com: St. Benedict Biscop, Abbot
            Vespers: I fol. w (Octave Day of the Epiphany)
  13  Tue     Octave Day of the Epiphany                 [gd]  w
-           Vespers: I fol. w (St. Hilary, Bishop, Confessor & Doctor)
+           Vespers: II prec. w
  14  Wed     St. Hilary, Bishop, Confessor & Doctor     [d]   w
            Com: St. Felix of Nola, Priest & Martyr
            Vespers: I fol. w (St Maurus, Abbot)
@@ -345,7 +345,7 @@ MAY
  27  Wed     St Bede the Venerable, Confessor & Doctor  [d]   w
            Com: St John I, Pope & Martyr
            Com: Day VII within the Octave of the Ascension
-           Vespers: II prec. w
+           Vespers: I fol. w (Octave Day of the Ascension)
  28  Thu     Octave Day of the Ascension                [gd]  w
            Vespers: II prec. w
  29  Fri  L  Feria                                            w
@@ -439,7 +439,7 @@ JUNE
            Com: Commemoration of St Peter, Apostle
            Com: Day VII within the Octave of St John Baptist
            Com: Day II within the Octave of Ss Peter & Paul
-           Vespers: II prec. w
+           Vespers: I fol. w (Octave of St John Baptist)
 
 JULY
 ------------------------------------------------------------
@@ -460,7 +460,7 @@ JULY
            Com: Day VII within the Octave of Ss Peter & Paul
            Vespers: II prec. g
   6  Mon     The Octave of Ss Peter & Paul              [gd]  r
-           Vespers: I fol. w (Ss. Cyril and Methodius, Bishops & Confessors)
+           Vespers: II prec. r
   7  Tue     Ss. Cyril and Methodius, Bishops & Confessors [d]   w
            Vespers: II prec. w
   8  Wed     Feria                                            g

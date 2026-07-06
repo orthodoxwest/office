@@ -156,12 +156,21 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 		return models.VespersIOfFollowing
 	}
 
-	// 9. Double vs Octave Day — Double wins (XIII.10)
+	// 9. Double vs Octave Day — Double wins only if it out-ranks the Octave Day
+	// (XIII.10). A highly-ranked Octave Day (e.g. Epiphany's Greater Double)
+	// out-ranks an ordinary Double, so the win is decided by precedence rather
+	// than applied unconditionally — mirroring rule 10 (Octave Day vs Octave Day).
 	if isDoubleOrAbove(prec) && !isOctaveDay(prec) && isOctaveDay(fol) {
-		return models.VespersIIOfPreceding
+		if compareFeastPrecedence(prec, fol) {
+			return models.VespersIIOfPreceding
+		}
+		return models.VespersIOfFollowing
 	}
 	if isDoubleOrAbove(fol) && !isOctaveDay(fol) && isOctaveDay(prec) {
-		return models.VespersIOfFollowing
+		if compareFeastPrecedence(fol, prec) {
+			return models.VespersIOfFollowing
+		}
+		return models.VespersIIOfPreceding
 	}
 
 	// 10. Octave Day vs Octave Day — worthier wins (XIII.11)
