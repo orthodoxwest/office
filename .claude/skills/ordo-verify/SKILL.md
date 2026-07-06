@@ -38,11 +38,11 @@ scripts/ordo-compare.py moveable ../resources 2017 2018 2019 2021 2022 2023 2024
 
 Baseline numbers (2026, as of PR #14 era) so regressions are obvious:
 moveable all-OK; calendar headlines clean after PR #8; Hours preces 47;
-Vespers suffrage 65; Lauds comm 47; Vespers comm 189; Ben antiphons 156/288;
-Mag antiphons 272/335 (after ferial + Sunday antiphon seeding; residue is octave
-days, propers-vs-commons, and the #16 Vespers boundary); colors 85/712; vespers precedence ~115 agree / ~20
-disagree. Open issues: #9 #10 #11 #12 #13 (rulings needed), #15 #16 #17 #20
-(engine/data work). A fix should move its cluster toward zero without
+Vespers suffrage 10 and Vespers comm 136 (after PR #21); Lauds comm 47;
+Ben antiphons 156/288; Mag antiphons 270/335 (after ferial + Sunday antiphon
+seeding; residue is octave days, propers-vs-commons, and the I-Vespers
+Magnificat antiphon switch); colors 85/712 (pre-#21). Open issues:
+#9 #10 #11 #12 #13 (rulings needed), #15 #17 #20 (engine/data work). A fix should move its cluster toward zero without
 regressing the others.
 
 ## Parsing caveats
