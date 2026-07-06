@@ -38,20 +38,6 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
-			if elem.Type == "marian" && elem.Ref == "seasonal" {
-				ref := "ordinary/marian/" + day.MarianAntiphon
-				oe := models.OfficeElement{
-					Type:  models.Antiphon,
-					Text:  corpus.Get(ref),
-					Label: marianLabel(day.MarianAntiphon),
-				}
-				if oe.Text == "" {
-					oe.Text = "[Text not found: " + ref + "]"
-				}
-				elems = append(elems, oe)
-				continue
-			}
-
 			elems = append(elems, resolveHourElement(day, "compline", elem, corpus))
 		}
 		hour.Sections = append(hour.Sections, models.OfficeSection{
