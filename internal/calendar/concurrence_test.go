@@ -111,19 +111,36 @@ func TestConcurrenceWinnerDoubleVsDayWithinOctave(t *testing.T) {
 }
 
 func TestConcurrenceWinnerOctaveDayVsDouble(t *testing.T) {
-	// XIII.10: Double vs Octave Day — Double wins
+	// XIII.10: Double vs Octave Day — the win is decided by precedence, not
+	// applied unconditionally. A higher-ranked Octave Day out-ranks a plain
+	// Double (issue #22: Octave Day of Epiphany keeps II Vespers vs St. Hilary).
 	double := &models.Feast{
 		ID: "some-double", Rank: models.Double, Category: models.CategoryMartyr,
 	}
-	octDay := &models.Feast{
+	greaterOctDay := &models.Feast{
 		ID: "epiphany-octave-day", Rank: models.GreaterDouble, Category: models.CategoryLord,
 	}
-	if got := concurrenceWinner(double, octDay); got != models.VespersIIOfPreceding {
-		t.Errorf("Double vs Octave Day: got %d, want VespersIIOfPreceding", got)
+	// Octave Day (Greater Double) preceding, plain Double following — Octave Day wins.
+	if got := concurrenceWinner(greaterOctDay, double); got != models.VespersIIOfPreceding {
+		t.Errorf("greater Octave Day vs Double: got %d, want VespersIIOfPreceding", got)
 	}
-	// And the reverse: Octave Day vs Double — Double wins
-	if got := concurrenceWinner(octDay, double); got != models.VespersIOfFollowing {
-		t.Errorf("Octave Day vs Double: got %d, want VespersIOfFollowing", got)
+	// Reverse ordering — the greater Octave Day still wins (I Vespers of following).
+	if got := concurrenceWinner(double, greaterOctDay); got != models.VespersIOfFollowing {
+		t.Errorf("Double vs greater Octave Day: got %d, want VespersIOfFollowing", got)
+	}
+
+	// When the Double genuinely out-ranks a lesser Octave Day, the Double wins.
+	greaterDouble := &models.Feast{
+		ID: "some-greater-double", Rank: models.GreaterDouble, Category: models.CategoryMartyr,
+	}
+	lesserOctDay := &models.Feast{
+		ID: "some-octave-day", Rank: models.Double, Category: models.CategoryConfessor,
+	}
+	if got := concurrenceWinner(greaterDouble, lesserOctDay); got != models.VespersIIOfPreceding {
+		t.Errorf("greater Double vs lesser Octave Day: got %d, want VespersIIOfPreceding", got)
+	}
+	if got := concurrenceWinner(lesserOctDay, greaterDouble); got != models.VespersIOfFollowing {
+		t.Errorf("lesser Octave Day vs greater Double: got %d, want VespersIOfFollowing", got)
 	}
 }
 
