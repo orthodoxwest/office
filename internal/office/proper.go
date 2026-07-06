@@ -40,6 +40,14 @@ func feastProperIDs(feast *models.Feast) []string {
 		return nil
 	}
 	if feast.ProperID != "" && feast.ProperID != feast.ID {
+		// Days within an octave repeat the parent's office; their ProperID
+		// points at an optional per-day antiphon set (…-octave-set-N), so
+		// try day-specific texts, then the set, then the parent feast. For
+		// every other ProperID redirect (borrowed Sunday offices), the
+		// redirect wins.
+		if i := strings.Index(feast.ID, "-octave-day"); i > 0 {
+			return []string{feast.ID, feast.ProperID, feast.ID[:i]}
+		}
 		return []string{feast.ProperID, feast.ID}
 	}
 	return []string{feast.ID}

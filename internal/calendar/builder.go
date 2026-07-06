@@ -393,7 +393,23 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 			}
 
 			// Days within an octave repeat the office of the feast:
-			// resolve proper texts from the parent feast.
+			// resolve proper texts from the parent feast. Ferial days within
+			// the octave additionally take per-day antiphon sets in course,
+			// skipping any Sunday (which has its own office), so the set
+			// index counts non-Sunday days since the feast. Set files are
+			// optional: resolution falls back to the parent's propers.
+			properID := feast.ID
+			if !isOctaveDay {
+				setIdx := 0
+				for n := 2; n <= dayNum; n++ {
+					if parentDate.AddDate(0, 0, n-1).Weekday() != time.Sunday {
+						setIdx++
+					}
+				}
+				if octaveDate.Weekday() != time.Sunday {
+					properID = fmt.Sprintf("%s-octave-set-%d", feast.ID, setIdx)
+				}
+			}
 			if feast.IsFixed() {
 				generated = append(generated, &models.Feast{
 					ID:       feastID,
@@ -401,7 +417,7 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 					Rank:     rank,
 					Color:    feast.Color,
 					Category: feast.Category,
-					ProperID: feast.ID,
+					ProperID: properID,
 					Month:    int(octaveDate.Month()),
 					Day:      octaveDate.Day(),
 				})
@@ -413,7 +429,7 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 					Rank:     rank,
 					Color:    feast.Color,
 					Category: feast.Category,
-					ProperID: feast.ID,
+					ProperID: properID,
 					DateRule: fmt.Sprintf("easter+%d", delta),
 				})
 			}

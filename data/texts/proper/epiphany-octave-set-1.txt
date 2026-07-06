@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-07 [Ant 2]; opening per 2026 ordo ("From the east") — check against diurnal
+From the east * came wise men to Bethlehem to worship the Lord: and when they had opened their treasures, they presented unto him precious gifts; gold, as unto the great King; frankincense as unto the true God; and myrrh for his burying. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-07 [Ant 3]; incipit per 2026 ordo — check against diurnal
+When the wise men saw the star, * they rejoiced with exceeding great joy; and when they were come into the house, they presented unto the Lord gold, frankincense, and myrrh. Alleluia.

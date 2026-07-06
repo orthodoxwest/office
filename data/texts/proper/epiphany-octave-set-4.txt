@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Sancti/01-10 [Ant 2]; opening per 2026 ordo ("Many nations") — check against diurnal
+Many nations * shall come from afar, bringing their gifts with them, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Sancti/01-10 [Ant 3] — check against diurnal
+All they from Saba shall come, * they shall bring gold and frankincense, alleluia, alleluia.
