@@ -127,6 +127,15 @@ Category = confessor
 Month = 3
 Day = 19
 
+[solemnity-st-joseph]
+Name = Solemnity of St. Joseph, Spouse of the Blessed Virgin Mary
+Rank = double-1st-class
+Color = white
+Category = confessor
+DateRule = easter+17
+Source = 2026 archdiocesan ordo
+Notes = Wednesday after the II Sunday after Easter; proper office (TODO: propers)
+
 [st-benedict]
 Name = St. Benedict
 Rank = double-2nd-class
@@ -254,8 +263,9 @@ Rank = double
 Color = red
 Category = bishop-martyr
 ProperName = Irenaeus
-Month = 6
-Day = 28
+Month = 7
+Day = 3
+Notes = AWRV keeps Irenaeus on July 3 (per archdiocesan ordo), clear of the Vigil of Ss. Peter & Paul
 
 [ss-peter-paul]
 Name = Ss. Peter and Paul, Apostles
@@ -383,6 +393,15 @@ Color = white
 Category = blessed-virgin
 Month = 9
 Day = 8
+
+[holy-name-mary]
+Name = The Most Holy Name of Mary
+Rank = greater-double
+Color = white
+Category = blessed-virgin
+Month = 9
+Day = 12
+Source = 2026 archdiocesan ordo
 
 [exaltation-holy-cross]
 Name = Exaltation of the Holy Cross

@@ -1401,6 +1401,15 @@ Month = 7
 Day = 13
 Source = awrv
 
+[comm-extra-07-16-ss-nicholas-and-habib-khasha-martyrs]
+Name = Ss Nicholas & Habib Khasha, Martyrs
+Rank = commemoration
+Color = red
+Category = martyr
+Month = 7
+Day = 16
+Source = awrv
+
 [comm-extra-08-02-st-stephen-pope-and-martyr]
 Name = St Stephen, Pope & Martyr
 Rank = commemoration
@@ -1781,13 +1790,13 @@ Month = 7
 Day = 10
 Source = awrv
 
-[comm-extra-07-03-st-leo-ii-bishop-and-confessor]
+[comm-extra-06-28-st-leo-ii-bishop-and-confessor]
 Name = St Leo II, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
-Month = 7
-Day = 3
+Month = 6
+Day = 28
 Source = awrv
 
 

@@ -190,8 +190,8 @@ func TestBuildCalendarLastSundayAfterPentecostUses24thPropers(t *testing.T) {
 	if nov24 == nil || nov24.Celebration == nil {
 		t.Fatal("2024-11-24 missing celebration")
 	}
-	if nov24.Celebration.Name != "Last Sunday after Pentecost" {
-		t.Fatalf("2024-11-24 celebration = %q, want Last Sunday after Pentecost", nov24.Celebration.Name)
+	if nov24.Celebration.Name != "XXIV & Last Sunday after Pentecost" {
+		t.Fatalf("2024-11-24 celebration = %q, want XXIV & Last Sunday after Pentecost", nov24.Celebration.Name)
 	}
 	if nov24.Celebration.ProperID != "pentecost-sunday-24" {
 		t.Fatalf("2024-11-24 ProperID = %q, want pentecost-sunday-24", nov24.Celebration.ProperID)
