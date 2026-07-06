@@ -234,8 +234,10 @@ APRIL
  27  Mon     Day V within the Octave of St. George      [sd]  r
  28  Tue     Day VI within the Octave of St. George     [sd]  r
            Com: St Vitalis, Martyr
- 29  Wed     Day VII within the Octave of St. George    [sd]  r
-           Vespers: I fol. r (Octave Day of St. George)
+           Vespers: I fol. w (Solemnity of St. Joseph, Spouse of the Blessed Virgin Mary)
+ 29  Wed     SOLEMNITY OF ST. JOSEPH, SPOUSE OF THE BLESSED VIRGIN MARY [1cl] w
+           Com: Day VII within the Octave of St. George
+           Vespers: II prec. w
  30  Thu     Octave Day of St. George                   [gd]  r
            Vespers: I fol. r (Ss. Philip and James, Apostles)
 
@@ -374,7 +376,7 @@ JUNE
            Com: Vigil of Ss Peter & Paul
            Vespers: I fol. g (IV Sunday after Pentecost)
  28  Sun     IV Sunday after Pentecost                  [sd]  g
-           Com: St Irenaeus of Lyons, Bishop & Martyr
+           Com: St Leo II, Bishop & Confessor
            Com: Day V within the Octave of St John Baptist
            Vespers: I fol. r (Ss. Peter and Paul, Apostles)
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
@@ -396,8 +398,9 @@ JULY
            Com: St John of San Francisco, Bishop & Confessor
            Com: Day IV within the Octave of Ss Peter & Paul
            Vespers: II prec. w
-  3  Fri  L  Day V within the Octave of Ss Peter & Paul [sd]  r
-           Com: St Leo II, Bishop & Confessor
+  3  Fri  L  St Irenaeus of Lyons, Bishop & Martyr      [d]   r
+           Com: Day V within the Octave of Ss Peter & Paul
+           Vespers: II prec. r
   4  Sat     Day VI within the Octave of Ss Peter & Paul [sd]  r
            Vespers: I fol. g (V Sunday after Pentecost)
   5  Sun     V Sunday after Pentecost                   [sd]  g
@@ -423,6 +426,7 @@ JULY
            Com: St Henry, Emperor & Confessor
            Vespers: I fol. w (Our Lady of Einsiedeln)
  16  Thu     Our Lady of Einsiedeln                     [gd]  w
+           Com: Ss Nicholas & Habib Khasha, Martyrs
  17  Fri  L  Feria                                            g
            Com: St Alexius, Confessor
  18  Sat     Translation of St Raphael of Brooklyn      [d]   w
@@ -551,7 +555,7 @@ SEPTEMBER
  10  Thu     Feria                                            g
  11  Fri  L  Feria                                            g
            Com: Ss Protus & Hyacinth, Martyrs
- 12  Sat     Saturday Office of the B.V.M               [s]   w
+ 12  Sat     The Most Holy Name of Mary                 [gd]  w
            Vespers: I fol. g (XV Sunday after Pentecost)
  13  Sun     XV Sunday after Pentecost                  [sd]  g
            Vespers: I fol. r (Exaltation of the Holy Cross)
@@ -683,8 +687,8 @@ NOVEMBER
            Com: St Britius of Tours, Bishop & Confessor
  14  Sat     Saturday Office of the B.V.M               [s]   w
            Com: St Gregory Palamas, Bishop & Confessor
-           Vespers: I fol. g (XXIV Sunday after Pentecost)
- 15  Sun     XXIV Sunday after Pentecost                [sd]  g
+           Vespers: I fol. g (VI Sunday after Epiphany (Resumed))
+ 15  Sun     VI Sunday after Epiphany (Resumed)         [sd]  g
  16  Mon     Feria                                            g
  17  Tue     Feria                                            g
            Com: St Gregory the Wonder-worker, Bishop & Confessor
@@ -697,9 +701,10 @@ NOVEMBER
  21  Sat     Presentation of the Blessed Virgin Mary    [gd]  w
            Com: St Columbanus, Abbot
            Com: St Gelasius, Bishop & Confessor
-           Vespers: II prec. w
- 22  Sun     St. Cecilia                                [d]   r
-           Vespers: I fol. r (St. Clement I, Pope and Martyr)
+           Vespers: I fol. g (XXIV & Last Sunday after Pentecost)
+ 22  Sun     XXIV & Last Sunday after Pentecost         [sd]  g
+           Com: St. Cecilia
+           Vespers: II prec. g
  23  Mon     St. Clement I, Pope and Martyr             [d]   r
            Com: St Felicitas, Martyr
  24  Tue     Feria                                            g

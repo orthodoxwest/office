@@ -2,7 +2,9 @@
 
 === Missing propers: 0 feast(s) ===
 
-=== Commons fallback: 0 feast(s) ===
+=== Commons fallback: 2 feast(s) ===
+These refs are covered by the category commons, not feast-specific propers.
+Add to data/audit-ok.txt to acknowledge and suppress.
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 
@@ -98,6 +100,11 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   motherhood-bvm
   st-raphael-of-brooklyn
   st-tikhon-moscow
+
+=== Missing ProperName: 1 feast(s) ===
+These feasts have texts containing "N." but no ProperName set.
+Add ProperName = <name> to the feast definition to replace "N." with the saint's name.
+  solemnity-st-joseph
 
 To mark intentional fallbacks, add lines to data/audit-ok.txt:
   feast-id *                   (suppress all warnings for this feast)

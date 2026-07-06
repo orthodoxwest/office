@@ -178,9 +178,22 @@ func adventSundayFeasts(moveable *MoveableDates) []*models.Feast {
 }
 
 // pentecostSundayFeasts generates Feast objects for Sundays 2-24 after Pentecost.
+// When more than 24 Sundays fall before Advent, the surplus Sundays between the
+// XXIII and the last are the resumed Sundays after Epiphany that had no place
+// earlier in the year, and the last Sunday always takes the XXIV propers.
 func pentecostSundayFeasts(easter time.Time, advent1 time.Time) []*models.Feast {
+	firstSunday := easter.AddDate(0, 0, 56) // I Sunday after Pentecost (Trinity)
+	// Both dates are Sundays, so the difference is a whole number of weeks and
+	// equals the length of the I..last series (the last Sunday is advent1 - 7).
+	total := int(advent1.Sub(firstSunday).Hours() / (24 * 7))
+	surplus := total - 24
+
 	var feasts []*models.Feast
-	for n := 2; n <= 24; n++ {
+	straight := 24
+	if surplus > 0 {
+		straight = 23
+	}
+	for n := 2; n <= straight; n++ {
 		offset := 49 + (n * 7)
 		sundayDate := easter.AddDate(0, 0, offset)
 		if !sundayDate.Before(advent1) {
@@ -193,6 +206,33 @@ func pentecostSundayFeasts(easter time.Time, advent1 time.Time) []*models.Feast 
 			Color:    models.Green,
 			Category: models.CategorySunday,
 			DateRule: fmt.Sprintf("easter+%d", offset),
+		})
+	}
+
+	if surplus > 0 {
+		// Resume the highest-numbered skipped Epiphany Sundays, in order,
+		// on the Sundays between the XXIII and the last.
+		for i := range surplus {
+			n := 6 - surplus + 1 + i
+			offset := 49 + ((24 + i) * 7)
+			feasts = append(feasts, &models.Feast{
+				ID:       fmt.Sprintf("epiphany-sunday-%d-resumed", n),
+				Name:     fmt.Sprintf("%s Sunday after Epiphany (Resumed)", romanNumeral(n)),
+				Rank:     models.SemiDouble,
+				Color:    models.Green,
+				Category: models.CategorySunday,
+				ProperID: fmt.Sprintf("epiphany-sunday-%d", n),
+				DateRule: fmt.Sprintf("easter+%d", offset),
+			})
+		}
+		lastOffset := 49 + ((24 + surplus) * 7)
+		feasts = append(feasts, &models.Feast{
+			ID:       "pentecost-sunday-24",
+			Name:     "XXIV & Last Sunday after Pentecost",
+			Rank:     models.SemiDouble,
+			Color:    models.Green,
+			Category: models.CategorySunday,
+			DateRule: fmt.Sprintf("easter+%d", lastOffset),
 		})
 	}
 
