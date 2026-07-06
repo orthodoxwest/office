@@ -119,6 +119,41 @@ func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 	return feasts
 }
 
+// anticipatedEpiphanySundayFeast generates the anticipated office of the
+// first Sunday after Epiphany displaced by Septuagesima, celebrated on the
+// preceding Saturday (2026 ordo: Feb 7 "Office of the V Sunday After
+// Epiphany" Sd, with St Romuald reduced to a commemoration). Displaced
+// Sundays that will be resumed between the XXIII and last Sundays after
+// Pentecost are not anticipated; only the lowest-numbered leftover is, and
+// only if one exists.
+func anticipatedEpiphanySundayFeast(moveable *MoveableDates) []*models.Feast {
+	epiphany := time.Date(moveable.Septuagesima.Year(), 1, 6, 0, 0, 0, 0, time.UTC)
+	daysUntilSunday := (7 - int(epiphany.Weekday())) % 7
+	if daysUntilSunday == 0 {
+		daysUntilSunday = 7
+	}
+	firstSunday := epiphany.AddDate(0, 0, daysUntilSunday)
+	fitted := int(moveable.Septuagesima.Sub(firstSunday) / (24 * time.Hour * 7))
+	n := fitted + 1 // first displaced Sunday
+
+	// Sundays resumed in autumn are 6-surplus+1..6 (see pentecostSundayFeasts).
+	trinity := moveable.Easter.AddDate(0, 0, 56)
+	surplus := max(int(moveable.Advent1.Sub(trinity)/(24*time.Hour*7))-24, 0)
+	if n > 6 || n > 6-surplus {
+		return nil
+	}
+
+	return []*models.Feast{{
+		ID:       fmt.Sprintf("epiphany-sunday-%d-anticipated", n),
+		Name:     fmt.Sprintf("Office of the %s Sunday after Epiphany", romanNumeral(n)),
+		Rank:     models.SemiDouble,
+		Color:    models.Green,
+		Category: models.CategorySunday,
+		ProperID: fmt.Sprintf("epiphany-sunday-%d", n),
+		DateRule: "easter-64", // Saturday before Septuagesima (easter-63)
+	}}
+}
+
 // eastertideSundayFeasts generates Sundays after Easter through Trinity.
 func eastertideSundayFeasts(easter time.Time) []*models.Feast {
 	type easterSunday struct {
@@ -199,11 +234,21 @@ func pentecostSundayFeasts(easter time.Time, advent1 time.Time) []*models.Feast 
 		if !sundayDate.Before(advent1) {
 			break
 		}
+		name := fmt.Sprintf("%s Sunday after Pentecost", romanNumeral(n))
+		color := models.Green
+		if n == 2 {
+			// The II Sunday after Pentecost (Easter+63) always falls within
+			// the octave of Corpus Christi (Easter+60..+67) and is kept in
+			// white as the Sunday within the octave (2026 ordo: "Sun. within
+			// the Octave of Corpus Christi", Lauds/Vespers W).
+			name = "II Sunday after Pentecost, within the Octave of Corpus Christi"
+			color = models.White
+		}
 		feasts = append(feasts, &models.Feast{
 			ID:       fmt.Sprintf("pentecost-sunday-%d", n),
-			Name:     fmt.Sprintf("%s Sunday after Pentecost", romanNumeral(n)),
+			Name:     name,
 			Rank:     models.SemiDouble,
-			Color:    models.Green,
+			Color:    color,
 			Category: models.CategorySunday,
 			DateRule: fmt.Sprintf("easter+%d", offset),
 		})
@@ -679,6 +724,7 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 
 	// Generate computed Sundays
 	computedSundays := epiphanySundayFeasts(year, moveable.Septuagesima)
+	computedSundays = append(computedSundays, anticipatedEpiphanySundayFeast(moveable)...)
 	computedSundays = append(computedSundays, adventSundayFeasts(moveable)...)
 	computedSundays = append(computedSundays, eastertideSundayFeasts(moveable.Easter)...)
 	computedSundays = append(computedSundays, pentecostSundayFeasts(moveable.Easter, moveable.Advent1)...)
