@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 2] — check against diurnal
+What man of you * that hath an hundred sheep, and if he shall lose one of them, doth he not leave the ninety-nine in the desert and go after that which was lost, until he find it? Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 3] — check against diurnal
+What woman * having ten pieces of silver, if she lose one piece, doth not light a candle, and sweep the house, and seek diligently till she find it?

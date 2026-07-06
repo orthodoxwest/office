@@ -1,0 +1,3 @@
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Epi3-0.txt [Ant 3] — check against diurnal
+Lord, if Thou wilt, * Thou canst make me clean; and Jesus saith to him: I will; be thou clean.

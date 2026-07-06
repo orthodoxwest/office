@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent18-0.txt [Ant 2] — check against diurnal
+The Lord said unto the sick * of the palsy: Son, be of good cheer, thy sins be forgiven thee.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent18-0.txt [Ant 3] — check against diurnal
+And immediately, he that had been sick of the palsy arose, * and took up his bed whereon he lay, glorifying God and all the people, when they saw it, gave praise to God.

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent17-0.txt [Ant 2] — check against diurnal
+Master, which is the great commandment * in the law? Jesus said unto him: Thou shalt love the Lord thy God with all thy heart, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent17-0.txt [Ant 3] — check against diurnal
+What think ye of Christ? Whose Son is He? * They say all unto Him: The Son of David. Jesus saith unto them: How then doth David in spirit call Him Lord, saying: The Lord said unto my Lord, Sit Thou at My right hand?

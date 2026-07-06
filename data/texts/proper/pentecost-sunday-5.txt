@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent05-0.txt [Ant 2] — check against diurnal
+Ye have heard that it was said * by them of old time: Thou shalt not kill; and whosoever shall kill shall be in danger of the judgment.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent05-0.txt [Ant 3] — check against diurnal
+If thou bring thy gift to the Altar, * and there rememberest that thy brother hath aught against thee, leave there thy gift before the Altar, and go thy way; first be reconciled to thy brother, and then come and offer thy gift. Alleluia.

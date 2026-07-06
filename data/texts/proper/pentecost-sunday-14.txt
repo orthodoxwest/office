@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent14-0.txt [Ant 2] — check against diurnal
+Take no thought, saying: What shall we eat? * or: What shall we drink? For your Father knoweth what things ye have need of, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent14-0.txt [Ant 3] — check against diurnal
+Seek ye first the kingdom of God * and His righteousness, and all these things shall be added unto you, alleluia.

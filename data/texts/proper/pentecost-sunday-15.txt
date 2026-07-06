@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent15-0.txt [Ant 2] — check against diurnal
+Jesus went into a city called Nain * and, behold, there was a dead man carried out, the only son of his mother.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent15-0.txt [Ant 3] — check against diurnal
+A great prophet is risen up among us * and God hath visited His people.

@@ -214,7 +214,8 @@ def incipit_matches(incipit, full):
     n = min(len(wi), len(wf), 4)
     hits = sum(1 for a, b in zip(wi[:n], wf[:n])
                if a == b or a.startswith(b) or b.startswith(a))
-    return hits >= max(2, n - 1)
+    # short incipits must match fully; longer ones tolerate one hyphenation slip
+    return hits >= (n if n < 3 else n - 1)
 
 
 def cmd_antiphons(pdf_path, tsv_path):

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent20-0.txt [Ant 2] — check against diurnal
+There was a certain nobleman whose son was sick * at Capernaum. When he heard that Jesus was come into Galilee, he besought Him that He would heal his son.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent20-0.txt [Ant 3] — check against diurnal
+So the father knew * that it was at the same hour in which Jesus said “Thy son liveth.” And he himself believed, and his whole house.

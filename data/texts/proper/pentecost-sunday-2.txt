@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent02-0.txt [Ant 2] — check against diurnal
+A certain man made a great supper, * and bade many and sent his servant at suppertime to say to them that were bidden: Come, for all things are now ready.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent02-0.txt [Ant 3] — check against diurnal
+Go out quickly into the streets * and lanes of the city, and compel the poor and the maimed, and the halt, and the blind, to come in that my house may be full, alleluia.

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent24-0.txt [Ant 2] — check against diurnal
+When ye shall see the abomination of desolation, * spoken of by Daniel the Prophet, stand in the Holy Place, (whoso readeth, let him understand.)
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent24-0.txt [Ant 3] — check against diurnal
+Amen, I say unto you, this generation shall not pass till all these things be fulfilled; * heaven and earth shall pass away, but My words shall not pass away, saith the Lord.

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent04-0.txt [Ant 2] — check against diurnal
+Jesus entered into the ship, * and sat down, and taught the people, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent04-0.txt [Ant 3] — check against diurnal
+Master, we have toiled all night, * and have taken nothing; nevertheless at thy word I will let down the net.

@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Epi2-0.txt [Ant 2] — check against diurnal
+There was a marriage * in Cana of Galilee: and Jesus was there, with Mary, his mother.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Epi2-0.txt [Ant 3] — check against diurnal
+The wine failing, * Jesus commanded the water pots to be filled with water, which was changed into wine, alleluia.

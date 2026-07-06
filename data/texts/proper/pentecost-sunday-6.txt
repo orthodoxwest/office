@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Pent06-0.txt [Ant 2] — check against diurnal
+The multitude being very great, * and having nothing to eat, Jesus called His disciples unto Him, and saith unto them: I have compassion on the multitude, because they have now been with Me three days, and have nothing to eat. Alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Pent06-0.txt [Ant 3] — check against diurnal
+I have compassion on the multitude, * because they have now been with Me three days, and have nothing to eat; and if I send them away fasting, they will faint by the way. Alleluia.

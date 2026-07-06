@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: divinum-officium Tempora/Epi1-0.txt [Ant 2] — check against diurnal
+Enlighten us, O Lord, * by the example of thy family, and direct our feet into the way of peace.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Tempora/Epi1-0.txt [Ant 3] — check against diurnal
+But Mary * kept all these words, pondering them in her heart.
