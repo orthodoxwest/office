@@ -162,7 +162,7 @@ Optional keys: `HasOctave = true`, `HasVigil = true`, `ProperName = Andrew` (sai
 
 Each `[section]` key corresponds to a liturgical text slot. A feast file need only include the slots it actually has — the engine falls back to the common (by `Category`) or ordinary for anything omitted.
 
-In prose sections such as collects and chapters, a single newline is a soft source wrap and the web renderer lets the paragraph reflow. A blank line starts a new paragraph. Hymn and psalm renderers preserve their verse structure automatically.
+In prose sections such as collects, chapters, and prayers, a single newline is a soft source wrap and the web renderer lets the paragraph reflow. A blank line starts a new paragraph. Hymn and psalm renderers preserve their verse structure automatically.
 
 ```ini
 [psalm-antiphon]
