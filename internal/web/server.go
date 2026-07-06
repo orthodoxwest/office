@@ -86,7 +86,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</h3>`)
-			sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+			sb.WriteString(string(renderMarianAntiphon(elem.Text)))
 			sb.WriteString(`</div>`)
 		} else {
 			sb.WriteString(`<p class="antiphon"><em>Ant.</em> `)
@@ -117,8 +117,10 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		}
 		sb.WriteString(string(renderHymnStanzas(elem.Text)))
 		sb.WriteString(`</div>`)
-	case models.Versicle, models.Response, models.Collect, models.Prayer, models.Blessing, models.Doxology:
+	case models.Versicle, models.Response, models.Prayer, models.Blessing, models.Doxology:
 		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+	case models.Collect:
+		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 	case models.Chapter:
 		sb.WriteString(`<div class="chapter"><h2 class="section-heading">Chapter</h2>`)
 		if elem.Label != "" {
@@ -126,7 +128,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</p>`)
 		}
-		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
+		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 		sb.WriteString(`</div>`)
 	case models.Preces:
 		sb.WriteString(`<div class="preces">`)
@@ -253,14 +255,39 @@ func renderPsalmVerses(text string) template.HTML {
 	return template.HTML(sb.String())
 }
 
-// renderLiturgicalBlock renders a multi-line liturgical text (versicles, responses,
-// prayers, chapters, Marian antiphons) with proper markup for each line type.
+type proseLineMode uint8
+
+const (
+	preserveProseLines proseLineMode = iota
+	flowProseLines
+	preserveFirstProseBlock
+)
+
+// renderLiturgicalBlock renders multi-line liturgical text while preserving prose
+// line breaks, as required by prayers, blessings, doxologies, and preces.
 func renderLiturgicalBlock(text string) template.HTML {
+	return renderLiturgicalBlockWithMode(text, preserveProseLines)
+}
+
+// renderFlowingLiturgicalBlock renders collects and chapters with soft source
+// wrapping, while retaining semantic lines such as versicles and responses.
+func renderFlowingLiturgicalBlock(text string) template.HTML {
+	return renderLiturgicalBlockWithMode(text, flowProseLines)
+}
+
+// renderMarianAntiphon preserves the verse lines in the antiphon's opening prose
+// block while allowing its versicles and concluding prayer to flow normally.
+func renderMarianAntiphon(text string) template.HTML {
+	return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
+}
+
+func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {
 	lines := strings.Split(text, "\n")
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
 
 	var proseLines []string
+	proseBlocks := 0
 	pendingGap := false
 
 	emitGap := func() {
@@ -276,14 +303,20 @@ func renderLiturgicalBlock(text string) template.HTML {
 		}
 		emitGap()
 		sb.WriteString(`<p class="plain-line">`)
+		preserveLines := mode == preserveProseLines || (mode == preserveFirstProseBlock && proseBlocks == 0)
 		for i, l := range proseLines {
 			if i > 0 {
-				sb.WriteString(`<br>`)
+				if preserveLines {
+					sb.WriteString(`<br>`)
+				} else {
+					sb.WriteByte(' ')
+				}
 			}
 			sb.WriteString(escCross(l))
 		}
 		sb.WriteString(`</p>`)
 		proseLines = nil
+		proseBlocks++
 	}
 
 	for _, line := range lines {
