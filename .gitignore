@@ -36,5 +36,8 @@ Thumbs.db
 *.tex
 *.log
 
+# Python
+__pycache__/
+
 # Misc
 /references
