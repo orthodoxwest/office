@@ -84,8 +84,10 @@ func resolvedDayColor(winner *models.Feast, season models.Season, seasonColor mo
 		return seasonColor
 	}
 
-	// In penitential seasons, lesser-rank sanctoral observances use the seasonal color.
-	if (season == models.Septuagesima || season == models.Lent || season == models.Passiontide) &&
+	// In Lent and Passiontide, lesser-rank sanctoral observances use the
+	// seasonal color. Not in Septuagesimatide: the 2026 ordo celebrates
+	// St Scholastica (Greater Double) in white during pre-Lent.
+	if (season == models.Lent || season == models.Passiontide) &&
 		winner.Rank.Weight() < models.Double2ndClass.Weight() {
 		return seasonColor
 	}

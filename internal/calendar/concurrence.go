@@ -6,10 +6,41 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 )
 
-// hasFirstVespers returns true if the feast has I Vespers (Double+ or Sunday).
+// sundaysFirstClass are the Greater Sundays of the I Class, which hold their
+// Vespers in concurrence against everything below a I Class Double feast
+// (Rubrics, "Greater Sundays"; the 2026 ordo gives St Tikhon's I Vespers
+// precedence over Low Sunday, so a sanctoral I Class Double supersedes).
+var sundaysFirstClass = map[string]bool{
+	"advent-sunday-1": true,
+	"lent-sunday-1":   true,
+	"lent-sunday-2":   true,
+	"lent-sunday-3":   true,
+	"laetare-sunday":  true,
+	"passion-sunday":  true,
+	"palm-sunday":     true,
+	"easter-sunday":   true,
+	"low-sunday":      true,
+	"pentecost":       true,
+}
+
+// hasFirstVespers returns true if the office begins at I Vespers.
+// Ferias never do (XIII.18) — including the privileged ones modelled as
+// feasts (Ash Wednesday, the Holy Week ferias, vigils; all Category feria)
+// and the Triduum, whose Vespers follow the day's liturgy. The Saturday
+// Office of the BVM does begin at I Vespers on a free Friday evening
+// (2026 ordo: Friday "Vespers W / I of fol." throughout the year).
 func hasFirstVespers(f *models.Feast) bool {
 	if f == nil {
 		return false
+	}
+	if f.Category == models.CategoryFeria {
+		return false // XIII.18
+	}
+	switch f.ID {
+	case "holy-thursday", "good-friday", "holy-saturday":
+		return false
+	case "saturday-office-bvm":
+		return true
 	}
 	if f.Category == models.CategorySunday {
 		return true // IV.7: Sundays always have both I and II Vespers
@@ -33,16 +64,6 @@ func hasSecondVespers(f *models.Feast) bool {
 		return false // XIII.18
 	}
 	return f.Rank.Weight() >= models.Double.Weight()
-}
-
-// isGreaterSunday returns true if f is a Sunday with rank >= Double2ndClass.
-func isGreaterSunday(f *models.Feast) bool {
-	return f.Category == models.CategorySunday && f.Rank.Weight() >= models.Double2ndClass.Weight()
-}
-
-// isLesserSunday returns true if f is a Sunday with rank < Double2ndClass.
-func isLesserSunday(f *models.Feast) bool {
-	return f.Category == models.CategorySunday && f.Rank.Weight() < models.Double2ndClass.Weight()
 }
 
 // isOctaveDay returns true if the feast ID ends with "-octave-day" (terminal octave day).
@@ -81,99 +102,82 @@ func isSunday(f *models.Feast) bool {
 	return f.Category == models.CategorySunday
 }
 
-// isLordFeast returns true if the feast has category "lord".
-func isLordFeast(f *models.Feast) bool {
-	return f.Category == models.CategoryLord
-}
-
 // concurrenceWinner determines which office wins vespers when II Vespers of
 // prec concurs with I Vespers of fol. Returns VespersIIOfPreceding or
 // VespersIOfFollowing.
 //
-// Implements Section XIII.2-17 of the monastic rubrics.
+// Implements Section XIII.2-17 of the monastic rubrics, with the parish
+// ordo's resolutions where the rubrics leave room (equal-rank concurrence,
+// possession against an incoming lesser Sunday).
 func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
-	// 1. Privileged days always win
-	if privilegedFeastIDs[prec.ID] {
-		return models.VespersIIOfPreceding
-	}
-	if privilegedFeastIDs[fol.ID] {
-		return models.VespersIOfFollowing
-	}
-
-	// 2-3. I Class Double vs any Sunday — feast wins (XIII.6, IV.1)
-	if prec.Rank == models.Double1stClass && !isSunday(prec) && isSunday(fol) {
-		return models.VespersIIOfPreceding
-	}
-	if fol.Rank == models.Double1stClass && !isSunday(fol) && isSunday(prec) {
-		return models.VespersIOfFollowing
-	}
-
-	// 4. II Class Double vs Greater Sunday — Sunday wins (XIII.6)
-	if prec.Rank == models.Double2ndClass && !isSunday(prec) && isGreaterSunday(fol) {
-		return models.VespersIOfFollowing
-	}
-	if fol.Rank == models.Double2ndClass && !isSunday(fol) && isGreaterSunday(prec) {
-		return models.VespersIIOfPreceding
-	}
-
-	// 5. II Class Double vs Lesser Sunday — feast wins (XIII.6)
-	if prec.Rank == models.Double2ndClass && !isSunday(prec) && isLesserSunday(fol) {
-		return models.VespersIIOfPreceding
-	}
-	if fol.Rank == models.Double2ndClass && !isSunday(fol) && isLesserSunday(prec) {
-		return models.VespersIOfFollowing
-	}
-
-	// 6. XII-Lesson Feast of Lord (Double+ Lord) vs Lesser Sunday — feast wins (XIII.7)
-	if isDoubleOrAbove(prec) && isLordFeast(prec) && isLesserSunday(fol) {
-		return models.VespersIIOfPreceding
-	}
-	if isDoubleOrAbove(fol) && isLordFeast(fol) && isLesserSunday(prec) {
-		return models.VespersIOfFollowing
-	}
-
-	// 7. Non-I/II-Class Double vs any Sunday — Sunday wins (XIII.3,4)
-	if isDoubleOrAbove(prec) && !isSunday(prec) &&
-		prec.Rank.Weight() < models.Double2ndClass.Weight() && isSunday(fol) {
-		return models.VespersIOfFollowing
-	}
-	if isDoubleOrAbove(fol) && !isSunday(fol) &&
-		fol.Rank.Weight() < models.Double2ndClass.Weight() && isSunday(prec) {
-		return models.VespersIIOfPreceding
-	}
-
-	// 8. Sunday vs non-Lord feast — Sunday wins; Feast of Lord vs Sunday — Lord wins (XIII.8)
-	if isSunday(prec) && !isLordFeast(fol) && !isSunday(fol) {
-		return models.VespersIIOfPreceding
-	}
-	if isSunday(fol) && !isLordFeast(prec) && !isSunday(prec) {
-		return models.VespersIOfFollowing
-	}
-	if isLordFeast(prec) && isSunday(fol) {
-		return models.VespersIIOfPreceding
-	}
-	if isLordFeast(fol) && isSunday(prec) {
-		return models.VespersIOfFollowing
-	}
-
-	// 9. Double vs Octave Day — Double wins only if it out-ranks the Octave Day
-	// (XIII.10). A highly-ranked Octave Day (e.g. Epiphany's Greater Double)
-	// out-ranks an ordinary Double, so the win is decided by precedence rather
-	// than applied unconditionally — mirroring rule 10 (Octave Day vs Octave Day).
-	if isDoubleOrAbove(prec) && !isOctaveDay(prec) && isOctaveDay(fol) {
-		if compareFeastPrecedence(prec, fol) {
-			return models.VespersIIOfPreceding
-		}
-		return models.VespersIOfFollowing
-	}
-	if isDoubleOrAbove(fol) && !isOctaveDay(fol) && isOctaveDay(prec) {
-		if compareFeastPrecedence(fol, prec) {
+	// 1. Greater Sundays of the I Class hold their Vespers against
+	// everything except a sanctoral I Class Double feast (2026 ordo:
+	// St Tikhon's I Vespers supersedes Low Sunday; temporal I Class days
+	// like Easter Monday never displace them, and Easter and Pentecost
+	// themselves yield to nothing).
+	if sundaysFirstClass[prec.ID] {
+		if fol.Rank == models.Double1stClass && !fol.IsTemporal() &&
+			prec.ID != "easter-sunday" && prec.ID != "pentecost" {
 			return models.VespersIOfFollowing
 		}
 		return models.VespersIIOfPreceding
 	}
+	if sundaysFirstClass[fol.ID] {
+		if prec.Rank == models.Double1stClass && !prec.IsTemporal() &&
+			fol.ID != "easter-sunday" && fol.ID != "pentecost" {
+			return models.VespersIIOfPreceding
+		}
+		return models.VespersIOfFollowing
+	}
 
-	// 10. Octave Day vs Octave Day — worthier wins (XIII.11)
+	// 2. I or II Class Double feast vs any other Sunday — feast wins
+	// (XIII.6; ordo: Chair of Peter over Quinquagesima, St Thomas over
+	// IV Advent).
+	if isSunday(prec) != isSunday(fol) {
+		feast := prec
+		feastWins := models.VespersIIOfPreceding
+		sundayWins := models.VespersIOfFollowing
+		if isSunday(prec) {
+			feast = fol
+			feastWins, sundayWins = sundayWins, feastWins
+		}
+
+		if feast.Rank.Weight() >= models.Double2ndClass.Weight() {
+			return feastWins
+		}
+		// 3. Below II Class: the Sunday takes the concurrence (XIII.2-5;
+		// the ordo applies this even to Greater Double feasts — the XV
+		// Sunday keeps its II Vespers against the Exaltation, and Chains
+		// of St Peter, the Name of Mary and the Presentation all yield
+		// their II Vespers to the incoming Sunday). An Octave Day in
+		// possession is the exception: it keeps its II Vespers (2026
+		// ordo: Octave Day of the Assumption before the XII Sunday).
+		if feast == prec && isOctaveDay(feast) {
+			return feastWins
+		}
+		return sundayWins
+	}
+
+	// 5. Octave Day vs a Double below II Class — the Octave Day wins, in
+	// both directions (XIII.10; ordo: Octave Day of the Epiphany over
+	// St Hilary, Octave of John Baptist over the Commemoration of St Paul).
+	if isOctaveDay(prec) != isOctaveDay(fol) {
+		other := fol
+		octaveWins := models.VespersIIOfPreceding
+		otherWins := models.VespersIOfFollowing
+		if isOctaveDay(fol) {
+			other = prec
+			octaveWins, otherWins = otherWins, octaveWins
+		}
+		if other.Rank.Weight() >= models.Double2ndClass.Weight() {
+			return otherWins // XIII.10 excludes I/II Class Doubles
+		}
+		if isDoubleOrAbove(other) {
+			return octaveWins
+		}
+	}
+
+	// 6. Octave Day vs Octave Day — worthier wins (XIII.11)
 	if isOctaveDay(prec) && isOctaveDay(fol) {
 		if compareFeastPrecedence(prec, fol) {
 			return models.VespersIIOfPreceding
@@ -181,7 +185,7 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 		return models.VespersIOfFollowing
 	}
 
-	// 11. Double vs day-within-Octave / Saturday BVM — Double wins (XIII.12)
+	// 7. Double vs day-within-Octave / Saturday BVM — Double wins (XIII.12,13)
 	if isDoubleOrAbove(prec) && (isDayWithinOctave(fol) || isSaturdayBVM(fol)) {
 		return models.VespersIIOfPreceding
 	}
@@ -189,15 +193,20 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 		return models.VespersIOfFollowing
 	}
 
-	// 12. Day-within-Octave vs Double — Double wins (XIII.13)
-	// (already covered by rule 11 above)
-
-	// 13. Equal worth: default to II of preceding (TODO Phase 3: split vespers)
-	// 14. Fallback: use compareFeastPrecedence
+	// 8. Fallback: the worthier office takes the concurrence. When they are
+	// equally worthy, II Class feasts keep the entire Vespers of the
+	// preceding with a commemoration of the following (2026 ordo:
+	// St Stephen/St John/Holy Innocents, Chair of Peter/St Matthias,
+	// St James/St Anne), while lesser equals pass Vespers to the following
+	// from the chapter (XIII.9), which the ordo marks "I of fol." and whose
+	// Magnificat antiphon it quotes (St Chrysostom/St Cyril, St Augustine
+	// of Canterbury/St Bede) — approximated here as I of the following.
 	if compareFeastPrecedence(prec, fol) {
 		return models.VespersIIOfPreceding
 	}
-	// Default: following wins when equal or following is greater
+	if !compareFeastPrecedence(fol, prec) && prec.Rank.Weight() >= models.Double2ndClass.Weight() {
+		return models.VespersIIOfPreceding
+	}
 	return models.VespersIOfFollowing
 }
 

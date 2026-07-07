@@ -609,7 +609,9 @@ Day = 27
 [holy-innocents]
 Name = Holy Innocents
 Rank = double-2nd-class
-Color = violet
+# 2026 ordo: Lauds/Mass/Vespers R on a Monday (older ordos used violet on
+# weekdays; the newest ordo is authoritative for the sanctoral).
+Color = red
 Category = martyr
 Month = 12
 Day = 28
