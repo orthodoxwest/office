@@ -5,3 +5,7 @@ When the Lord had departed from the coasts of Tyre, * He made both the deaf to h
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent11-0.txt [Ant 3] — check against diurnal
 He hath done all things well, * He maketh both the deaf to hear and the dumb to speak.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pent11-0 [Ant 1] — check against diurnal
+I beseech thee, O Lord, * remember now how I have walked before thee in truth and with a perfect heart, and have done that which is good in thy sight.

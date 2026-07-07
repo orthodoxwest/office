@@ -5,3 +5,7 @@ The publican, standing afar off, * would not lift up so much as his eyes unto he
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent10-0.txt [Ant 3] — check against diurnal
 This man went down to his house * justified rather than the other, for every one that exalteth himself shall be abased, and he that humbleth himself shall be exalted.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Pent10-0 [Ant 1] — check against diurnal
+And Joas did * that which was right before the Lord all the days that Joiada, the priest, taught him.

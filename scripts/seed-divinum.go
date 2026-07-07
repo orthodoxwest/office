@@ -137,7 +137,10 @@ var feastDOFiles = map[string]string{
 //
 // Per-annum weeks (after Epiphany and Pentecost) and most Paschal weeks have
 // no weekday antiphons in DO — the monastic weekly distribution must come
-// from the diurnal — so only the weeks below are listed.
+// from the diurnal — but their Sunday files still carry the Sunday's own
+// gospel antiphons (Ant 2/Ant 3), so they are listed and the weekday lookups
+// simply find nothing. pentecost-sunday-1 does not exist as a proper:
+// Trinity Sunday occupies that week with its own office.
 var weekDOFiles = map[string]string{
 	"advent-sunday-1":                "Tempora/Adv1",
 	"advent-sunday-2":                "Tempora/Adv2",
@@ -157,6 +160,89 @@ var weekDOFiles = map[string]string{
 	"easter-sunday-4":                "Tempora/Pasc4",
 	"easter-sunday-5":                "Tempora/Pasc5",
 	"ascension-sunday-within-octave": "Tempora/Pasc6",
+	"epiphany-sunday-1":              "Tempora/Epi1",
+	"epiphany-sunday-2":              "Tempora/Epi2",
+	"epiphany-sunday-3":              "Tempora/Epi3",
+	"epiphany-sunday-4":              "Tempora/Epi4",
+	"epiphany-sunday-5":              "Tempora/Epi5",
+	"epiphany-sunday-6":              "Tempora/Epi6",
+	"pentecost-sunday-2":             "Tempora/Pent02",
+	"pentecost-sunday-3":             "Tempora/Pent03",
+	"pentecost-sunday-4":             "Tempora/Pent04",
+	"pentecost-sunday-5":             "Tempora/Pent05",
+	"pentecost-sunday-6":             "Tempora/Pent06",
+	"pentecost-sunday-7":             "Tempora/Pent07",
+	"pentecost-sunday-8":             "Tempora/Pent08",
+	"pentecost-sunday-9":             "Tempora/Pent09",
+	"pentecost-sunday-10":            "Tempora/Pent10",
+	"pentecost-sunday-11":            "Tempora/Pent11",
+	"pentecost-sunday-12":            "Tempora/Pent12",
+	"pentecost-sunday-13":            "Tempora/Pent13",
+	"pentecost-sunday-14":            "Tempora/Pent14",
+	"pentecost-sunday-15":            "Tempora/Pent15",
+	"pentecost-sunday-16":            "Tempora/Pent16",
+	"pentecost-sunday-17":            "Tempora/Pent17",
+	"pentecost-sunday-18":            "Tempora/Pent18",
+	"pentecost-sunday-19":            "Tempora/Pent19",
+	"pentecost-sunday-20":            "Tempora/Pent20",
+	"pentecost-sunday-21":            "Tempora/Pent21",
+	"pentecost-sunday-22":            "Tempora/Pent22",
+	"pentecost-sunday-23":            "Tempora/Pent23",
+	"pentecost-sunday-24":            "Tempora/Pent24",
+}
+
+// noFirstVespersMagWeeks lists weeks whose DO Sunday file's Ant 1 must NOT be
+// seeded as magnificat-antiphon-first. For the Epiphany weeks DO stores the
+// ferial Saturday Magnificat antiphon there (the engine already falls back to
+// ordinary/vespers/magnificat-antiphon-saturday); seeding it would shadow the
+// Coverdale wording. pentecost-sunday-2's eve belongs to the Corpus Christi
+// octave. For the remaining Pentecost weeks Ant 1 (or the conditional
+// Ant 1_) is the summer historia antiphon, which the engine uses only until
+// the August scripture-month begins.
+var noFirstVespersMagWeeks = map[string]bool{
+	"epiphany-sunday-1":  true,
+	"epiphany-sunday-2":  true,
+	"epiphany-sunday-3":  true,
+	"epiphany-sunday-4":  true,
+	"epiphany-sunday-5":  true,
+	"epiphany-sunday-6":  true,
+	"pentecost-sunday-2": true,
+}
+
+// noWeekdayAntWeeks lists weeks whose DO weekday files must not seed the
+// per-day antiphons. DO's Pent02-5 is the feast of the Sacred Heart (the
+// Friday after the Corpus Christi octave), which the parish does not observe
+// (2026 ordo: a green feria); seeding it would put its antiphons on that
+// Friday via the weekly-temporal tier.
+var noWeekdayAntWeeks = map[string]bool{
+	"pentecost-sunday-2": true,
+}
+
+// historiaDOFiles maps our proper/historia-<month>-<week> antiphon files to
+// the DO month-week Tempora prefixes. The Sunday file's Ant 1 is the
+// Magnificat antiphon of the scripture historia, sung at the Saturday
+// I Vespers of the week's Sunday (calendar.HistoriaWeekID picks the week).
+var historiaDOFiles = map[string]string{
+	"historia-august-1":    "Tempora/081",
+	"historia-august-2":    "Tempora/082",
+	"historia-august-3":    "Tempora/083",
+	"historia-august-4":    "Tempora/084",
+	"historia-august-5":    "Tempora/085",
+	"historia-september-1": "Tempora/091",
+	"historia-september-2": "Tempora/092",
+	"historia-september-3": "Tempora/093",
+	"historia-september-4": "Tempora/094",
+	"historia-september-5": "Tempora/095",
+	"historia-october-1":   "Tempora/101",
+	"historia-october-2":   "Tempora/102",
+	"historia-october-3":   "Tempora/103",
+	"historia-october-4":   "Tempora/104",
+	"historia-october-5":   "Tempora/105",
+	"historia-november-1":  "Tempora/111",
+	"historia-november-2":  "Tempora/112",
+	"historia-november-3":  "Tempora/113",
+	"historia-november-4":  "Tempora/114",
+	"historia-november-5":  "Tempora/115",
 }
 
 // octaveDayDOFiles maps per-day octave feast IDs to the DO file carrying that
@@ -810,10 +896,13 @@ func antiphonSeed(eng, lat *doTree, rel, doSection, key string) *seed {
 
 // extractWeekSeeds builds the weekday (and, for files we lack, Sunday)
 // antiphon sections for one temporal week from DO's <prefix>-0..6 files.
-func extractWeekSeeds(eng, lat *doTree, prefix string) []seed {
+// seedFirst controls whether the Sunday file's Ant 1 (or the conditional
+// Ant 1_) is seeded as the I Vespers magnificat-antiphon-first; seedWeekdays
+// whether the per-day antiphons are taken from the weekday files.
+func extractWeekSeeds(eng, lat *doTree, prefix string, seedFirst, seedWeekdays bool) []seed {
 	weekdays := []string{"", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"}
 	var seeds []seed
-	for d := 1; d <= 6; d++ {
+	for d := 1; seedWeekdays && d <= 6; d++ {
 		rel := fmt.Sprintf("%s-%d", prefix, d)
 		if sd := antiphonSeed(eng, lat, rel, "Ant 2", "benedictus-antiphon-"+weekdays[d]); sd != nil {
 			seeds = append(seeds, *sd)
@@ -842,9 +931,18 @@ func extractWeekSeeds(eng, lat *doTree, prefix string) []seed {
 	if mag != nil {
 		seeds = append(seeds, *mag)
 	}
-	if first := antiphonSeed(eng, lat, sunday, "Ant 1", "magnificat-antiphon-first"); first != nil &&
-		(mag == nil || strings.Join(first.lines, "\n") != strings.Join(mag.lines, "\n")) {
-		seeds = append(seeds, *first)
+	if seedFirst {
+		first := antiphonSeed(eng, lat, sunday, "Ant 1", "magnificat-antiphon-first")
+		if first == nil {
+			// Conditional variant: the summer historia antiphon of the
+			// numbered Pentecost weeks, displaced once the August
+			// scripture-month begins.
+			first = antiphonSeed(eng, lat, sunday, "Ant 1_", "magnificat-antiphon-first")
+		}
+		if first != nil &&
+			(mag == nil || strings.Join(first.lines, "\n") != strings.Join(mag.lines, "\n")) {
+			seeds = append(seeds, *first)
+		}
 	}
 	return seeds
 }
@@ -1137,7 +1235,21 @@ func main() {
 	for _, id := range weekIDs {
 		prefix := weekDOFiles[id]
 		applySeeds(id, prefix+"-*", filepath.Join(*dataDir, "texts", "proper", id+".txt"),
-			extractWeekSeeds(eng, lat, prefix))
+			extractWeekSeeds(eng, lat, prefix, !noFirstVespersMagWeeks[id], !noWeekdayAntWeeks[id]))
+	}
+
+	var historiaIDs []string
+	for id := range historiaDOFiles {
+		historiaIDs = append(historiaIDs, id)
+	}
+	sort.Strings(historiaIDs)
+	for _, id := range historiaIDs {
+		rel := historiaDOFiles[id] + "-0"
+		var seeds []seed
+		if sd := antiphonSeed(eng, lat, rel, "Ant 1", "magnificat-antiphon-first"); sd != nil {
+			seeds = append(seeds, *sd)
+		}
+		applySeeds(id, rel, filepath.Join(*dataDir, "texts", "proper", id+".txt"), seeds)
 	}
 
 	var octaveIDs []string

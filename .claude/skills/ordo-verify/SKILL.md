@@ -39,10 +39,14 @@ scripts/ordo-compare.py moveable ../resources 2017 2018 2019 2021 2022 2023 2024
 Baseline numbers (2026, as of PR #14 era) so regressions are obvious:
 moveable all-OK; calendar headlines clean after PR #8; Hours preces 47;
 Vespers suffrage 10 and Vespers comm 136 (after PR #21); Lauds comm 47;
-Ben antiphons 110/288; Mag antiphons 217/335 (after ferial, Sunday, octave,
-weekly-temporal and O-antiphon seeding; residue is DO-vs-diurnal translation
-drift, per-saint propers DO lacks, ruling-gated Lenten feria/feast days, and
-the per-annum monastic weekly antiphons absent from DO); colors 31/712 and
+Ben antiphons 109/288; Mag antiphons 205/335 (after ferial, Sunday, octave,
+weekly-temporal, O-antiphon and Saturday historia seeding — Saturday
+I Vespers Magnificats follow the scripture cycle via calendar.HistoriaWeekID
+and proper/historia-* files; residue is DO-vs-diurnal translation drift,
+per-saint propers DO lacks, ruling-gated Lenten feria/feast days, and the
+per-annum monastic weekly antiphons absent from DO); colors 31/712 (mostly
+ordo-internal notation artifacts where the printed "Vespers G" contradicts
+the ordo's own described office, plus ruling-gated Ember/All Souls rows) and
 Vespers designations 225 agree / 6 disagree (after the §XIII concurrence
 rewrite; residue is parish rank demotions to memorial, the Ember-day
 precedence question, and three ordo notation artifacts where the quoted
