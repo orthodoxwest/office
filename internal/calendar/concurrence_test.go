@@ -118,27 +118,41 @@ func TestConcurrenceWinnerDoubleVsDayWithinOctave(t *testing.T) {
 
 func TestConcurrenceWinnerOctaveDayVsDouble(t *testing.T) {
 	// XIII.10: an Octave Day concurring with a Double below II Class takes
-	// the concurrence in both directions (2026 ordo: Octave Day of the
-	// Epiphany over St Hilary, Octave of John Baptist over the
-	// Commemoration of St Paul).
+	// the concurrence in both directions, regardless of relative rank
+	// (issue #22; 2026 ordo: Octave Day of the Epiphany over St Hilary,
+	// Octave of John Baptist over the Commemoration of St Paul).
 	double := &models.Feast{
 		ID: "some-double", Rank: models.Double, Category: models.CategoryMartyr,
 	}
-	octDay := &models.Feast{
+	greaterOctDay := &models.Feast{
 		ID: "epiphany-octave-day", Rank: models.GreaterDouble, Category: models.CategoryLord,
 	}
-	if got := concurrenceWinner(double, octDay); got != models.VespersIOfFollowing {
+	if got := concurrenceWinner(double, greaterOctDay); got != models.VespersIOfFollowing {
 		t.Errorf("Double vs Octave Day: got %d, want VespersIOfFollowing", got)
 	}
-	if got := concurrenceWinner(octDay, double); got != models.VespersIIOfPreceding {
+	if got := concurrenceWinner(greaterOctDay, double); got != models.VespersIIOfPreceding {
 		t.Errorf("Octave Day vs Double: got %d, want VespersIIOfPreceding", got)
+	}
+	// A Greater Double does not displace even a lesser-ranked Octave Day:
+	// XIII.10 excludes only I and II Class Doubles.
+	greaterDouble := &models.Feast{
+		ID: "some-greater-double", Rank: models.GreaterDouble, Category: models.CategoryMartyr,
+	}
+	lesserOctDay := &models.Feast{
+		ID: "some-octave-day", Rank: models.Double, Category: models.CategoryConfessor,
+	}
+	if got := concurrenceWinner(greaterDouble, lesserOctDay); got != models.VespersIOfFollowing {
+		t.Errorf("Greater Double vs lesser Octave Day: got %d, want VespersIOfFollowing", got)
+	}
+	if got := concurrenceWinner(lesserOctDay, greaterDouble); got != models.VespersIIOfPreceding {
+		t.Errorf("lesser Octave Day vs Greater Double: got %d, want VespersIIOfPreceding", got)
 	}
 	// But a II Class Double prevails over an Octave Day (XIII.10 excludes
 	// I and II Class Doubles).
 	secondClass := &models.Feast{
 		ID: "visitation-bvm", Rank: models.Double2ndClass, Category: models.CategoryBlessedVirgin,
 	}
-	if got := concurrenceWinner(octDay, secondClass); got != models.VespersIOfFollowing {
+	if got := concurrenceWinner(greaterOctDay, secondClass); got != models.VespersIOfFollowing {
 		t.Errorf("Octave Day vs II Class Double: got %d, want VespersIOfFollowing", got)
 	}
 }
