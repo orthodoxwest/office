@@ -211,6 +211,7 @@ func findFlatCommonAntiphons(corpus *texts.TextCorpus) []string {
 		"evangelist",
 		"holy-woman",
 		"martyr",
+		"martyrs",
 		"virgin",
 		"virgin-martyr",
 	}

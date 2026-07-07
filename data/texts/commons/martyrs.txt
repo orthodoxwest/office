@@ -1,0 +1,102 @@
+[psalm-antiphon]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+O how great torments * have all the Saints endured, that they might surely attain to the palm of martyrdom.
+
+[psalm-antiphon-1]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+O how great torments * have all the Saints endured, that they might surely attain to the palm of martyrdom.
+
+[psalm-antiphon-2]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+The Blessed * with their palms have entered into the kingdom; they have earned their diadems of glory from the hand of God.
+
+[psalm-antiphon-3]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+The bodies of the Saints * are buried in peace: and their name liveth for evermore.
+
+[psalm-antiphon-4]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+O ye Martyrs of the Lord, * bless ye the Lord for ever and ever.
+
+[psalm-antiphon-5]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+O choir of Martyrs, * praise ye the Lord of heaven, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
+The very hairs of your head * are all numbered: fear ye not therefore, ye are of more value than many sparrows.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Commune/C3 [Ant 3] (2026 ordo incipit reads "In the heavenly kingdom") — check against diurnal
+In heaven do rejoice the souls of the Saints * who have followed the steps of Christ; and because they shed their blood for the love of Christ, therefore shall they be made glad for ever with Christ.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C3 [Ant 1] — check against diurnal
+For theirs is the Kingdom of heaven * who love not their lives in this world, and have attained unto the reward of the Kingdom, and have washed their robes in the blood of the Lamb.
+
+[commemoration-antiphon]
+# SOURCE: lauds-commons-manual-noted.pdf (Istorum est enim) — parish noted manual
+For theirs is the kingdom of heaven, * who despised worldly living: who have won the rewards of the kingdom, and have washed their robes in the blood of the Lamb.
+
+[commemoration-versicle]
+# SOURCE: divinum-officium Commune/C3 [Versum 2] — check against diurnal
+V. The saints shall rejoice in glory:
+R. They shall be joyful in their beds.
+
+[collect]
+Grant, we beseech thee, almighty God, that the venerable feast of blessed N. thy Martyr may both increase our devotion and promote our salvation.
+
+[hymn-lauds]
+# SOURCE: divinum-officium CommuneM/C2a [HymnusM Laudes] — check against diurnal
+Martyr Dei, qui unicum
+
+Martyr of God, whose strength was steeled
+To follow close God's only Son,
+Well didst thou brave thy battlefield,
+And well thy heavenly bliss was won!
+
+Now join thy prayers with ours, who pray
+That God may pardon us and bless;
+For prayer keeps evil's plague away,
+And draws from life its weariness.
+
+Long, long ago, were loosed the chains
+That held thy body once in thrall;
+For us how many a bond remains!
+O love of God release us all.
+
+All praise to God the Father be,
+All praise to thee, Eternal Son;
+All praise, O Holy Ghost, to thee,
+While never-ending ages run.
+Amen.
+
+[hymn-vespers]
+# SOURCE: divinum-officium CommuneM/C2a [HymnusM Vespera] — check against diurnal
+Deus tuorum militum
+
+O God, of those that fought thy fight,
+Portion, and prize, and crown of light,
+Break every bond of sin and shame
+As now we praise thy martyr's name.
+
+He recked not of the world's allure,
+But sin and pomp of sin forswore:
+Knew all their gall, and passed them by,
+And reached the throne prepared on high.
+
+Bravely the course of pain he ran,
+And bare his torments as a man:
+For love of thee his blood outpoured,
+And thus obtained the great reward.
+
+With humble voice and suppliant word
+We pray thee therefore, holy Lord,
+While we thy martyr's feast-day keep,
+Forgive thy loved and erring sheep.
+
+* Glory and praise for aye be done
+To God the Father, and the Son,
+And Holy Ghost, who reign on high,
+One God, to all eternity.
+Amen.

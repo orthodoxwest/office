@@ -1,0 +1,40 @@
+# Paschal variant of the Common of a Martyr.
+# Add sections here that differ during Paschaltide (Easter season).
+# Sections not present here fall through to the regular commons file.
+# See the regular commons file for available section names.
+
+[psalm-antiphon]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium Commune/C1p [Ant 2] — check against diurnal
+Daughters of Jerusalem, * come and see the crowned martyrs, the Lord crowned them in his solemnity and delight, alleluia, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: divinum-officium Commune/C1p [Ant 3] — check against diurnal
+Saints and just * rejoice in the Lord, alleluia, the Lord has chosen you for his inheritance, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C1p [Ant 1] — check against diurnal
+Eternal light will shine * over your saints, O Lord, and the eternity of times, alleluia.
