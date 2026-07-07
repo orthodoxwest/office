@@ -59,15 +59,21 @@ func TestConcurrenceWinnerSecondClassDoubleVsGreaterSunday(t *testing.T) {
 }
 
 func TestConcurrenceWinnerLordDoubleVsLesserSunday(t *testing.T) {
-	// XIII.7: XII-Lesson Feast of Lord vs Lesser Sunday — feast wins
+	// XIII.2-5, as the 2026 ordo applies them: a feast below II Class —
+	// even a Greater Double of the Lord — yields the concurrence to the
+	// Sunday (the XV Sunday keeps its II Vespers against the Exaltation
+	// of the Holy Cross, and its I Vespers likewise prevails).
 	lord := &models.Feast{
-		ID: "transfiguration", Rank: models.Double, Category: models.CategoryLord,
+		ID: "exaltation-holy-cross", Rank: models.GreaterDouble, Category: models.CategoryLord,
 	}
 	sunday := &models.Feast{
-		ID: "pentecost-sunday-10", Rank: models.SemiDouble, Category: models.CategorySunday,
+		ID: "pentecost-sunday-15", Rank: models.SemiDouble, Category: models.CategorySunday,
 	}
-	if got := concurrenceWinner(lord, sunday); got != models.VespersIIOfPreceding {
-		t.Errorf("Lord Double vs Lesser Sunday: got %d, want VespersIIOfPreceding", got)
+	if got := concurrenceWinner(sunday, lord); got != models.VespersIIOfPreceding {
+		t.Errorf("Lesser Sunday vs Lord Greater Double: got %d, want VespersIIOfPreceding", got)
+	}
+	if got := concurrenceWinner(lord, sunday); got != models.VespersIOfFollowing {
+		t.Errorf("Lord Greater Double vs Lesser Sunday: got %d, want VespersIOfFollowing", got)
 	}
 }
 
@@ -111,19 +117,43 @@ func TestConcurrenceWinnerDoubleVsDayWithinOctave(t *testing.T) {
 }
 
 func TestConcurrenceWinnerOctaveDayVsDouble(t *testing.T) {
-	// XIII.10: Double vs Octave Day — Double wins
+	// XIII.10: an Octave Day concurring with a Double below II Class takes
+	// the concurrence in both directions, regardless of relative rank
+	// (issue #22; 2026 ordo: Octave Day of the Epiphany over St Hilary,
+	// Octave of John Baptist over the Commemoration of St Paul).
 	double := &models.Feast{
 		ID: "some-double", Rank: models.Double, Category: models.CategoryMartyr,
 	}
-	octDay := &models.Feast{
+	greaterOctDay := &models.Feast{
 		ID: "epiphany-octave-day", Rank: models.GreaterDouble, Category: models.CategoryLord,
 	}
-	if got := concurrenceWinner(double, octDay); got != models.VespersIIOfPreceding {
-		t.Errorf("Double vs Octave Day: got %d, want VespersIIOfPreceding", got)
+	if got := concurrenceWinner(double, greaterOctDay); got != models.VespersIOfFollowing {
+		t.Errorf("Double vs Octave Day: got %d, want VespersIOfFollowing", got)
 	}
-	// And the reverse: Octave Day vs Double — Double wins
-	if got := concurrenceWinner(octDay, double); got != models.VespersIOfFollowing {
-		t.Errorf("Octave Day vs Double: got %d, want VespersIOfFollowing", got)
+	if got := concurrenceWinner(greaterOctDay, double); got != models.VespersIIOfPreceding {
+		t.Errorf("Octave Day vs Double: got %d, want VespersIIOfPreceding", got)
+	}
+	// A Greater Double does not displace even a lesser-ranked Octave Day:
+	// XIII.10 excludes only I and II Class Doubles.
+	greaterDouble := &models.Feast{
+		ID: "some-greater-double", Rank: models.GreaterDouble, Category: models.CategoryMartyr,
+	}
+	lesserOctDay := &models.Feast{
+		ID: "some-octave-day", Rank: models.Double, Category: models.CategoryConfessor,
+	}
+	if got := concurrenceWinner(greaterDouble, lesserOctDay); got != models.VespersIOfFollowing {
+		t.Errorf("Greater Double vs lesser Octave Day: got %d, want VespersIOfFollowing", got)
+	}
+	if got := concurrenceWinner(lesserOctDay, greaterDouble); got != models.VespersIIOfPreceding {
+		t.Errorf("lesser Octave Day vs Greater Double: got %d, want VespersIIOfPreceding", got)
+	}
+	// But a II Class Double prevails over an Octave Day (XIII.10 excludes
+	// I and II Class Doubles).
+	secondClass := &models.Feast{
+		ID: "visitation-bvm", Rank: models.Double2ndClass, Category: models.CategoryBlessedVirgin,
+	}
+	if got := concurrenceWinner(greaterOctDay, secondClass); got != models.VespersIOfFollowing {
+		t.Errorf("Octave Day vs II Class Double: got %d, want VespersIOfFollowing", got)
 	}
 }
 
@@ -173,10 +203,18 @@ func TestConcurrenceWinnerPrivilegedDayAlwaysWins(t *testing.T) {
 		ID: "some-double-1st", Rank: models.Double1stClass, Category: models.CategoryApostle,
 	}
 	if got := concurrenceWinner(easter, double); got != models.VespersIIOfPreceding {
-		t.Errorf("Privileged (prec) vs Double: got %d, want VespersIIOfPreceding", got)
+		t.Errorf("Easter (prec) vs Double: got %d, want VespersIIOfPreceding", got)
 	}
 	if got := concurrenceWinner(double, easter); got != models.VespersIOfFollowing {
-		t.Errorf("Double vs Privileged (fol): got %d, want VespersIOfFollowing", got)
+		t.Errorf("Double vs Easter (fol): got %d, want VespersIOfFollowing", got)
+	}
+	// A sanctoral I Class Double does supersede the other I Class Sundays
+	// (2026 ordo: St Tikhon's I Vespers over Low Sunday).
+	low := &models.Feast{
+		ID: "low-sunday", Rank: models.Double1stClass, Category: models.CategoryLord,
+	}
+	if got := concurrenceWinner(low, double); got != models.VespersIOfFollowing {
+		t.Errorf("Low Sunday vs sanctoral I Class Double: got %d, want VespersIOfFollowing", got)
 	}
 }
 

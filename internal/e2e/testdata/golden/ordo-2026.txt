@@ -28,7 +28,7 @@ JANUARY
            Com: St. Benedict Biscop, Abbot
            Vespers: I fol. w (Octave Day of the Epiphany)
  13  Tue     Octave Day of the Epiphany                 [gd]  w
-           Vespers: I fol. w (St. Hilary, Bishop, Confessor & Doctor)
+           Vespers: II prec. w
  14  Wed     St. Hilary, Bishop, Confessor & Doctor     [d]   w
            Com: St. Felix of Nola, Priest & Martyr
            Vespers: I fol. w (St Maurus, Abbot)
@@ -74,6 +74,7 @@ JANUARY
  29  Thu     Feria                                            g
  30  Fri  L  Feria                                            g
            Com: St. Martina, Virgin & Martyr
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  31  Sat     Saturday Office of the B.V.M               [s]   w
            Vespers: I fol. g (IV Sunday after Epiphany)
 
@@ -96,46 +97,15 @@ FEBRUARY
   6  Fri  L  Feria                                            g
            Com: St Dorothy, Virgin & Martyr
            Com: St Photius, Bishop and Confessor
-           Vespers: I fol. w (St Romuald, Abbot)
-  7  Sat     St Romuald, Abbot                          [d]   w
+           Vespers: I fol. g (Office of the V Sunday after Epiphany)
+  7  Sat     Office of the V Sunday after Epiphany      [sd]  g
+           Com: St Romuald, Abbot
            Vespers: I fol. v (Septuagesima Sunday)
   8  Sun     Septuagesima Sunday                        [2cl] v
            Vespers: II prec. v
   9  Mon     Feria                                            v
            Com: St Apollonia of Alexandria, Virgin & Martyr
-           Vespers: I fol. v (St Scholastica, Virgin)
- 10  Tue     St Scholastica, Virgin                     [gd]  v
-           Com: Tuesday after Septuagesima (Lauds)
-           Vespers: II prec. v
- 11  Wed     Feria                                            v
-           Com: St Gregory II, Pope & Confessor
- 12  Thu     Feria                                            v
- 13  Fri  L  Feria                                            v
- 14  Sat     Feria                                            v
-           Com: St Valentine, Priest & Martyr
-           Vespers: I fol. v (Sexagesima Sunday)
- 15  Sun     Sexagesima Sunday                          [2cl] v
-           Com: Ss. Faustinus & Jovita, Martyrs
-           Vespers: II prec. v
- 16  Mon     Feria                                            v
- 17  Tue     Feria                                            v
- 18  Wed     Feria                                            v
-           Com: St Simeon of Jerusalem, Bishop & Martyr
- 19  Thu     Feria                                            v
- 20  Fri  L  Feria                                            v
- 21  Sat     Feria                                            v
-           Vespers: I fol. v (Quinquagesima Sunday)
- 22  Sun     Quinquagesima Sunday                       [2cl] v
-           Vespers: II prec. v
- 23  Mon     Chair of St. Peter at Antioch              [2cl] w
-           Com: Monday after Quinquagesima (Lauds)
-           Com: St Peter Damian, Bishop, Confessor & Doctor
-           Com: Commemoration of St Paul
-           Com: Vigil of St. Matthias
-           Vespers: I fol. r (St. Matthias, Apostle)
- 24  Tue     St. Matthias, Apostle                      [2cl] r
-           Com: Tuesday after Quinquagesima (Lauds)
-           Vespers: I fol. v (Ash Wednesday)
+           Vespers: II prec. r
  25  Wed  L§ ASH WEDNESDAY                              [1cl] v
            Com: St Walburga of Heidenheim, Virgin
  26  Thu  L§ Feria                                            v
@@ -236,18 +206,15 @@ APRIL
   5  Sun  L  PALM SUNDAY                                [1cl] v
            Vespers: II prec. v
   6  Mon  L§ HOLY MONDAY                                [1cl] v
-           Vespers: I fol. v (Holy Tuesday)
   7  Tue  L§ HOLY TUESDAY                               [1cl] v
-           Vespers: I fol. v (Holy Wednesday)
   8  Wed  L§ HOLY WEDNESDAY                             [1cl] v
-           Vespers: I fol. w (Holy Thursday)
   9  Thu  L§ HOLY THURSDAY                              [1cl] w
            Vespers: II prec. w
  10  Fri  L§ GOOD FRIDAY                                [1cl] b
            Vespers: II prec. b
  11  Sat  L§ HOLY SATURDAY                              [1cl] w
            Com: St Leo the Great, Bishop, Confessor & Doctor
-           Vespers: II prec. w
+           Vespers: I fol. w (Sunday of the Resurrection)
  12  Sun     SUNDAY OF THE RESURRECTION                 [1cl] w
            Vespers: II prec. w
  13  Mon     EASTER MONDAY                              [1cl] w
@@ -267,7 +234,7 @@ APRIL
  18  Sat     DAY VII WITHIN THE OCTAVE OF EASTER        [1cl] w
            Vespers: I fol. w (Low Sunday (Octave of Easter))
  19  Sun     LOW SUNDAY (OCTAVE OF EASTER)              [1cl] w
-           Vespers: II prec. w
+           Vespers: I fol. w (St. Tikhon of Moscow)
  20  Mon     ST. TIKHON OF MOSCOW                       [1cl] w
            Vespers: II prec. w
  21  Tue     Feria                                            w
@@ -330,6 +297,7 @@ MAY
  14  Thu     Feria                                            w
            Com: St Boniface of Tarsus, Martyr
  15  Fri  L  Feria                                            w
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  16  Sat     Saturday Office of the B.V.M               [s]   w
            Vespers: I fol. w (V Sunday after Easter)
  17  Sun     V Sunday after Easter                      [sd]  w
@@ -359,11 +327,10 @@ MAY
  27  Wed     St Bede the Venerable, Confessor & Doctor  [d]   w
            Com: St John I, Pope & Martyr
            Com: Day VII within the Octave of the Ascension
-           Vespers: II prec. w
+           Vespers: I fol. w (Octave Day of the Ascension)
  28  Thu     Octave Day of the Ascension                [gd]  w
            Vespers: II prec. w
  29  Fri  L  Feria                                            w
-           Vespers: I fol. w (Vigil of Pentecost)
  30  Sat  L§ VIGIL OF PENTECOST                         [1cl] w
            Com: St Felix I, Pope & Martyr
            Vespers: I fol. r (Whitsunday — Pentecost)
@@ -404,11 +371,11 @@ JUNE
  12  Fri  L  Day II within the Octave of Corpus Christi [sd]  w
            Com: Ss Basilides, Cyrinus, Nabor & Nazarius, Martyrs
  13  Sat     Day III within the Octave of Corpus Christi [sd]  w
-           Vespers: I fol. g (II Sunday after Pentecost)
- 14  Sun     II Sunday after Pentecost                  [sd]  g
+           Vespers: I fol. w (II Sunday after Pentecost, within the Octave of Corpus Christi)
+ 14  Sun     II Sunday after Pentecost, within the Octave of Corpus Christi [sd]  w
            Com: St Basil the Great, Bishop, Confessor & Doctor
            Com: All Saints of Antioch
-           Vespers: II prec. g
+           Vespers: II prec. w
  15  Mon     Day V within the Octave of Corpus Christi  [sd]  w
            Com: Ss Vitus, Modestus & Crescentia, Martyrs
  16  Tue     Day VI within the Octave of Corpus Christi [sd]  w
@@ -420,6 +387,7 @@ JUNE
            Vespers: II prec. w
  19  Fri  L  Feria                                            g
            Com: Ss. Gervase & Protase, Martyrs
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  20  Sat     Saturday Office of the B.V.M               [s]   w
            Com: St Silverius, Pope & Martyr
            Vespers: I fol. g (III Sunday after Pentecost)
@@ -453,7 +421,7 @@ JUNE
            Com: Commemoration of St Peter, Apostle
            Com: Day VII within the Octave of St John Baptist
            Com: Day II within the Octave of Ss Peter & Paul
-           Vespers: II prec. w
+           Vespers: I fol. w (Octave of St John Baptist)
 
 JULY
 ------------------------------------------------------------
@@ -474,7 +442,7 @@ JULY
            Com: Day VII within the Octave of Ss Peter & Paul
            Vespers: II prec. g
   6  Mon     The Octave of Ss Peter & Paul              [gd]  r
-           Vespers: I fol. w (Ss. Cyril and Methodius, Bishops & Confessors)
+           Vespers: II prec. r
   7  Tue     Ss. Cyril and Methodius, Bishops & Confessors [d]   w
            Vespers: II prec. w
   8  Wed     Feria                                            g
@@ -482,6 +450,7 @@ JULY
  10  Fri  L  Feria                                            g
            Com: The Seven Holy Brothers, with Ss Rufina & Secunda, Martyrs
            Com: St. Joseph of Damascus (Priest) & companions, Martyrs
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  11  Sat     Saturday Office of the B.V.M               [s]   w
            Com: St Pius I, Pope & Martyr
            Vespers: I fol. g (VI Sunday after Pentecost)
@@ -525,7 +494,7 @@ JULY
            Vespers: I fol. r (St. James the Greater, Apostle)
  25  Sat     St. James the Greater, Apostle             [2cl] r
            Com: St Christopher, Martyr
-           Vespers: I fol. w (St. Anne, Mother of the Blessed Virgin Mary)
+           Vespers: II prec. r
  26  Sun     St. Anne, Mother of the Blessed Virgin Mary [2cl] w
            Com: VIII Sunday after Pentecost
            Vespers: II prec. w
@@ -599,7 +568,7 @@ AUGUST
  22  Sat     Octave Day of the Assumption               [gd]  w
            Com: Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm
            Com: Vigil of St. Bartholomew
-           Vespers: I fol. g (XII Sunday after Pentecost)
+           Vespers: II prec. w
  23  Sun     XII Sunday after Pentecost                 [sd]  g
            Vespers: I fol. r (St. Bartholomew, Apostle)
  24  Mon     St. Bartholomew, Apostle                   [2cl] r
@@ -650,7 +619,7 @@ SEPTEMBER
  12  Sat     The Most Holy Name of Mary                 [gd]  w
            Vespers: I fol. g (XV Sunday after Pentecost)
  13  Sun     XV Sunday after Pentecost                  [sd]  g
-           Vespers: I fol. r (Exaltation of the Holy Cross)
+           Vespers: II prec. g
  14  Mon     Exaltation of the Holy Cross               [gd]  r
            Vespers: I fol. w (Seven Sorrows of the B.V.M)
  15  Tue     Seven Sorrows of the B.V.M                 [2cl] w
@@ -679,6 +648,7 @@ SEPTEMBER
            Com: St. Linus, Pope & Martyr
  24  Thu     Feria                                            g
  25  Fri  L  Feria                                            g
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  26  Sat     Saturday Office of the B.V.M               [s]   w
            Com: Ss. Cyprian & Justina, Martyrs
            Vespers: I fol. g (XVII Sunday after Pentecost)
@@ -716,6 +686,7 @@ OCTOBER
   8  Thu     Feria                                            g
   9  Fri  L  Feria                                            g
            Com: Ss. Denys, Rusticus & Eleutherius, Martyrs
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  10  Sat     Saturday Office of the B.V.M               [s]   w
            Vespers: I fol. w (Motherhood of the B.V.M)
  11  Sun     Motherhood of the B.V.M                    [2cl] w
@@ -731,6 +702,7 @@ OCTOBER
  15  Thu     Our Lady of Walsingham                     [gd]  w
            Vespers: II prec. w
  16  Fri  L  Feria                                            g
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  17  Sat     Saturday Office of the B.V.M               [s]   w
            Vespers: I fol. r (St. Luke, Evangelist)
  18  Sun     St. Luke, Evangelist                       [2cl] r
@@ -796,6 +768,7 @@ NOVEMBER
            Com: St Martin I, Pope & Martyr
  13  Fri  L  Feria                                            g
            Com: St Britius of Tours, Bishop & Confessor
+           Vespers: I fol. w (Saturday Office of the B.V.M)
  14  Sat     Saturday Office of the B.V.M               [s]   w
            Com: St Gregory Palamas, Bishop & Confessor
            Vespers: I fol. g (VI Sunday after Epiphany (Resumed))
@@ -886,12 +859,11 @@ DECEMBER
  19  Sat  L§ Advent Ember Saturday                      [sd]  v
            Vespers: I fol. v (IV Sunday of Advent)
  20  Sun  L  IV Sunday of Advent                        [2cl] v
-           Vespers: II prec. v
+           Vespers: I fol. r (St. Thomas, Apostle)
  21  Mon  L§ St. Thomas, Apostle                        [2cl] r
            Vespers: II prec. r
  22  Tue  L  Feria                                            v
  23  Wed  L§ Feria                                            v
-           Vespers: I fol. v (Vigil of the Nativity of Our Lord)
  24  Thu  L§ VIGIL OF THE NATIVITY OF OUR LORD          [1cl] v
            Vespers: I fol. w (Nativity of Our Lord Jesus Christ)
  25  Fri     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
@@ -899,13 +871,13 @@ DECEMBER
            Vespers: II prec. w
  26  Sat     St. Stephen, Protomartyr                   [2cl] r
            Com: Day II within the Nativity Octave
-           Vespers: I fol. w (St. John, Apostle and Evangelist)
+           Vespers: II prec. r
  27  Sun     St. John, Apostle and Evangelist           [2cl] w
            Com: Day III within the Nativity Octave
-           Vespers: I fol. v (Holy Innocents)
- 28  Mon     Holy Innocents                             [2cl] v
+           Vespers: II prec. w
+ 28  Mon     Holy Innocents                             [2cl] r
            Com: Day IV within the Nativity Octave
-           Vespers: II prec. v
+           Vespers: II prec. r
  29  Tue     Sunday within the Octave of the Nativity   [sd]  w
            Com: Day V within the Nativity Octave
            Vespers: II prec. w
