@@ -5,3 +5,7 @@ The multitude being very great, * and having nothing to eat, Jesus called His di
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent06-0.txt [Ant 3] — check against diurnal
 I have compassion on the multitude, * because they have now been with Me three days, and have nothing to eat; and if I send them away fasting, they will faint by the way. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium TemporaM/Pent06-0 [Ant 1] — check against diurnal
+I beseech thee, * O Lord, do away the iniquity of thy servant, for I have done very foolishly.

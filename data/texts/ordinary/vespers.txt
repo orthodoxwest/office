@@ -236,8 +236,8 @@ Show strength with thine arm * scatter the proud in the imagination of their hea
 He hath put down the mighty * from their seat, and hath exalted the humble and meek.
 
 [magnificat-antiphon-saturday]
-# SOURCE: divinum-officium Major Special.txt [Feria7 Ant 3] (monastic variant) — check against diurnal
-God hath received Israel * his servant, as he promised to our forefathers, Abraham and his seed, and hath exalted the humble for ever.
+# SOURCE: divinum-officium Major Special.txt [Feria7 Ant 3] (monastic variant); wording per 2026 ordo incipit "God hath holpen" (diurnal p. 144) — check against diurnal
+God hath holpen * his servant Israel, as he promised to our forefathers, Abraham and his seed, for ever.
 
 [pre-collect-versicles]
 V. O Lord, hear my prayer.

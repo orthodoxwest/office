@@ -1,3 +1,7 @@
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Epi3-0.txt [Ant 3] — check against diurnal
 Lord, if Thou wilt, * Thou canst make me clean; and Jesus saith to him: I will; be thou clean.
+
+[benedictus-antiphon]
+# SOURCE: divinum-officium TemporaM/Epi3-0 [Ant 2] — check against diurnal
+When Jesus was come down from the mountain, * behold, there came a leper, and worshipped Him, saying: Lord, if Thou wilt, Thou canst make me clean. And Jesus put forth His Hand, and touched him, saying: I will; be thou clean.

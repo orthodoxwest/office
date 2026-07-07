@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
 )
@@ -53,6 +54,26 @@ func feastProperIDs(feast *models.Feast) []string {
 		return []string{feast.ProperID, feast.ID}
 	}
 	return []string{feast.ID}
+}
+
+// isPerAnnumSunday reports whether the feast is an ordinary numbered Sunday
+// after Epiphany or Pentecost, including resumed and anticipated Sundays
+// whose ProperID redirects to one. epiphany-sunday-1 and pentecost-sunday-2
+// are excluded: they always fall within the Epiphany and Corpus Christi
+// octaves respectively, whose offices own their eves.
+func isPerAnnumSunday(f *models.Feast) bool {
+	if f == nil || f.Category != models.CategorySunday {
+		return false
+	}
+	for _, id := range feastProperIDs(f) {
+		if id == "epiphany-sunday-1" || id == "pentecost-sunday-2" {
+			return false
+		}
+		if strings.HasPrefix(id, "epiphany-sunday-") || strings.HasPrefix(id, "pentecost-sunday-") {
+			return true
+		}
+	}
+	return false
 }
 
 func firstText(corpus *texts.TextCorpus, prefix string, refs []string) (string, string) {
@@ -151,6 +172,34 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 			if text := corpus.Get(dateRef); text != "" {
 				return substituteProperName(text, properName), dateRef
 			}
+		}
+	}
+
+	// 0.7. Saturday evening before a per-annum Sunday: the I Vespers
+	// Magnificat antiphon follows the scripture cycle rather than the
+	// Sunday's own gospel antiphon — the month historia from August until
+	// Advent, before that the summer (Kings) antiphon seeded as the
+	// Sunday's -first proper, and otherwise the ferial Saturday antiphon
+	// from the psalter (2026 ordo: "God hath holpen" on the free Saturdays
+	// of Epiphanytide, the historia antiphons through summer and autumn).
+	if hourName == "vespers" && day.FirstVespers &&
+		strings.HasPrefix(ref, "magnificat-antiphon") && strings.HasSuffix(ref, "-first") &&
+		isPerAnnumSunday(day.Celebration) {
+		if id := calendar.HistoriaWeekID(day.Date); id != "" {
+			key := "proper/historia-" + id + "/magnificat-antiphon-first"
+			if text := corpus.Get(key); text != "" {
+				return text, key
+			}
+		}
+		for _, feastID := range feastProperIDs(day.Celebration) {
+			key := "proper/" + feastID + "/magnificat-antiphon-first"
+			if text := corpus.Get(key); text != "" {
+				return text, key
+			}
+		}
+		const ferial = "ordinary/vespers/magnificat-antiphon-saturday"
+		if text := corpus.Get(ferial); text != "" {
+			return text, ferial
 		}
 	}
 
