@@ -210,14 +210,20 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 	return models.VespersIOfFollowing
 }
 
-// boundaryCommemoration wraps the celebration that lost a vespers concurrence
-// so it can be commemorated at the evening's Vespers (XIII.2-17). A nil loser
-// (e.g. a plain feria with no Celebration of its own) yields no commemoration.
-func boundaryCommemoration(loser *models.Feast) []*models.Feast {
-	if loser == nil {
-		return nil
+// boundaryCommemorations collects the commemorations proper to an evening's
+// Vespers: the celebration that lost the concurrence (XIII.2-17), followed by
+// the following day's own commemorated feasts, whose observance begins with a
+// commemoration at this Vespers (2026 ordo: Marcellus at St Maurus' II
+// Vespers, Sabina on the eve of the Beheading). A nil loser (e.g. a plain
+// feria with no Celebration of its own) contributes nothing. The winner and
+// duplicates are filtered by finalizeCommemorations.
+func boundaryCommemorations(winner, loser *models.Feast, following *models.CalendarDay) []*models.Feast {
+	var comms []*models.Feast
+	if loser != nil {
+		comms = append(comms, loser)
 	}
-	return []*models.Feast{loser}
+	comms = append(comms, following.Commemorations...)
+	return finalizeCommemorations(winner, comms)
 }
 
 // resolveConcurrence determines the vespers designation for an evening given
@@ -245,7 +251,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          folFeast,
 			Color:          following.Color,
 			Season:         following.Season,
-			Commemorations: boundaryCommemoration(precFeast),
+			Commemorations: boundaryCommemorations(folFeast, precFeast, following),
 		}
 	}
 
@@ -256,7 +262,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemoration(folFeast),
+			Commemorations: boundaryCommemorations(precFeast, folFeast, following),
 		}
 	}
 
@@ -268,7 +274,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemoration(folFeast),
+			Commemorations: boundaryCommemorations(precFeast, folFeast, following),
 		}
 	}
 	return models.VespersDesignation{
@@ -276,7 +282,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		Feast:          folFeast,
 		Color:          following.Color,
 		Season:         following.Season,
-		Commemorations: boundaryCommemoration(precFeast),
+		Commemorations: boundaryCommemorations(folFeast, precFeast, following),
 	}
 }
 
