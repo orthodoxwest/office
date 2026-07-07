@@ -23,10 +23,12 @@ Come, O my chosen one, * and I will establish My throne in thee.
 She is beautiful * among the daughters of Jerusalem.
 
 [benedictus-antiphon]
-Come, Bride of Christ, and take the everlasting crown * which the Lord hath prepared for thee.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Virgins) — parish noted manual
+The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
 
 [magnificat-antiphon]
-She is beautiful * among the daughters of Jerusalem.
+# SOURCE: divinum-officium Commune/C6 [Ant 1] (Veni sponsa Christi) — check against diurnal
+Come, Bride of Christ, and take the everlasting crown * which the Lord hath prepared for thee.
 
 [commemoration-antiphon]
 This is one of the wise virgins, * whom the Lord found watching.

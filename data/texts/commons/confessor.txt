@@ -23,10 +23,16 @@ Blessed is that servant * whom his Lord, when He cometh and knocketh at the door
 Thou good and faithful servant, * enter thou into the joy of thy Lord.
 
 [benedictus-antiphon]
-Well done, thou good and faithful servant; * thou hast been faithful over a few things, I will make thee ruler over many things; enter thou into the joy of thy Lord.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor not a Bishop) — parish noted manual
+Well done, good and faithful servant, * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord.
 
 [magnificat-antiphon]
-Thou good and faithful servant, * enter thou into the joy of thy Lord.
+# SOURCE: divinum-officium Commune/C5 [Ant 3] — check against diurnal
+Lo, a servant of God * who esteemed but little things earthly. And by word and work laid him up treasure in heaven.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C5 [Ant 1] — check against diurnal
+I will liken him unto a wise man, * which built his house upon a rock.
 
 [commemoration-antiphon]
 Lord, Thou deliverest unto me five talents * behold, I have gained beside them five talents more.

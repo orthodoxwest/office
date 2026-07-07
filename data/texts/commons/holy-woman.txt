@@ -23,10 +23,12 @@ Come, O My chosen one, * and I will establish My throne in thee. Alleluia.
 She is beautiful * among the daughters of Jerusalem.
 
 [benedictus-antiphon]
-Well done, thou good and faithful servant; * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Holy Women not Virgins) — parish noted manual
+Give her * of the fruit of her hands; and let her own works praise her in the gates.
 
 [magnificat-antiphon]
-Thou good and faithful servant, * enter thou into the joy of thy Lord.
+# SOURCE: divinum-officium Commune/C7 [Ant 3] — check against diurnal
+She spreadeth out her hand to the poor, * yea, she reacheth forth her hands to the needy, and eateth not the bread of idleness.
 
 [commemoration-antiphon]
 A woman that feareth the Lord, * she shall be praised.

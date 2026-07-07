@@ -23,10 +23,16 @@ If any man serve Me, * him will My Father, who is in heaven, honour.
 Father, I will * that where I am, there shall also My servant be.
 
 [benedictus-antiphon]
-He that loveth his life shall lose it, * and he that hateth his life in this world shall keep it unto life eternal.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of One Martyr) — parish noted manual
+He that hateth his life * in this world shall keep it unto life eternal.
 
 [magnificat-antiphon]
-Father, I will * that where I am, there shall also my servant be; if any man serve me, him will my Father honour.
+# SOURCE: divinum-officium Commune/C2 [Ant 3] — check against diurnal
+If any man will come after me, * let him deny himself and take up his cross daily and follow me.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C2 [Ant 1] — check against diurnal
+This man is holy * for he hath striven for the law of his God even unto death, and hath not feared for the words of the ungodly; for he had his foundation upon a strong rock.
 
 [commemoration-antiphon]
 Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
