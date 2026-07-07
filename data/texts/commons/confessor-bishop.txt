@@ -23,10 +23,16 @@ O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [benedictus-antiphon]
-Well done, thou good and faithful servant * thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor and Bishop) — parish noted manual
+Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.
 
 [magnificat-antiphon]
-Good and faithful servant, * enter thou into the joy of thy Lord.
+# SOURCE: divinum-officium Commune/C4 [Ant 3] — check against diurnal
+The Lord loved him * and beautified him. He clothed him with a robe of glory, and crowned him at the gates of Paradise.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C4 [Ant 1] — check against diurnal
+O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd over God's people, pray for us unto the Lord.
 
 [commemoration-antiphon]
 Behold an high priest, * who in his days pleased God, and was found righteous.

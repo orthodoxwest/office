@@ -23,7 +23,8 @@ Lo the winter is past, * the rain is over and gone. Rise up, my love, and come a
 O Holy Mother of God, thou art become beautiful * and gentle in thy gladness.
 
 [benedictus-antiphon]
-Blessed art thou, O Virgin Mary, * who didst bear the Lord, the Maker of the world: thou didst bring forth him who made thee, and remainest for ever a Virgin.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Feasts of the B.V.M.) — parish noted manual
+Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord.
 
 [magnificat-antiphon]
 All generations shall call me blessed, * for he that is mighty hath done to me great things, and holy is his name.

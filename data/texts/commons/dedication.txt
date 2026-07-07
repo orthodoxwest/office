@@ -23,10 +23,12 @@ The Lord's house is well founded * upon a sure rock.
 All thy walls are of stones most precious, * and the towers of Jerusalem shall be built up with jewels.
 
 [benedictus-antiphon]
-How awe-inspiring is this place! * This is none other but the house of God, and this is the gate of heaven.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of the Dedication of a Church) — parish noted manual
+Zacchaeus, * make haste, and come down; for today I must abide at thy house: and he made haste, and came down, and received him joyfully into his house. This day is salvation come to this house from the Lord.
 
 [magnificat-antiphon]
-O Lord God of Israel, there is no God like thee in heaven above, or on earth beneath; * who keepest covenant and mercy with thy servants that walk before thee with all their heart.
+# Incipit per 2026 ordo (O quam metuenda); text after KJV Gen 28:17 — check against diurnal
+O how dreadful is this place! * this is none other but the house of God, and this is the gate of heaven.
 
 [commemoration-antiphon]
 This is none other but the house of God, * and this is the gate of heaven.

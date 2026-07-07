@@ -2,9 +2,13 @@
 
 === Missing propers: 0 feast(s) ===
 
-=== Commons fallback: 2 feast(s) ===
+=== Commons fallback: 3 feast(s) ===
 These refs are covered by the category commons, not feast-specific propers.
 Add to data/audit-ok.txt to acknowledge and suppress.
+
+  [base]
+  [1cl] St. George (st-george)
+    commons: benedictus-antiphon, magnificat-antiphon
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 

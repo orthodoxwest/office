@@ -23,10 +23,16 @@ Blessed are the peacemakers * the clean of heart, they shall see God.
 In your patience * you shall possess your souls.
 
 [benedictus-antiphon]
-You who left all * and follow me, you will receive hundredfolds, and you will have eternal life.
+# SOURCE: lauds-commons-manual-noted.pdf (Common of Apostles and Evangelists) — parish noted manual
+Ye which have forsaken all * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
 
 [magnificat-antiphon]
-In your patience * you shall possess your souls.
+# SOURCE: divinum-officium Commune/C1 [Ant 3] — check against diurnal
+Be valiant * in battle, fight the ancient serpent and accept the eternal kingdom. Alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Commune/C1 [Ant 1] — check against diurnal
+For they shall deliver you * up to councils: and in the synagogues you shall be beaten: and you shall stand before governors and kings for my sake, for a testimony unto them.
 
 [commemoration-antiphon]
 This is my commandment * that you love one another, as I have loved you.

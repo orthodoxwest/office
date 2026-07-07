@@ -161,17 +161,36 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 0. The Greater ("O") Antiphons: at Vespers of December 17-23 the
-	// date-fixed O antiphon supersedes even the Advent Sunday's own
-	// Magnificat antiphon, but yields to a saint's feast that owns the
-	// evening (whose office the ordo follows; the feria is commemorated).
-	if hourName == "vespers" && day.Season == models.Advent &&
-		day.Date.Month() == time.December && day.Date.Day() >= 17 && day.Date.Day() <= 23 &&
-		(day.Celebration == nil || day.Celebration.Category == models.CategorySunday) {
+	// date-fixed O antiphon supersedes the Advent Sunday's or feria's own
+	// Magnificat antiphon, and (per the ordo, e.g. the Expectation of the
+	// B.V.M.) a feast that would take its antiphon from the commons — but
+	// yields to a feast's own proper antiphon (e.g. St Thomas's Quia
+	// vidisti). The antiphon follows the calendar day the Vespers is sung
+	// on: at I Vespers the office day carries tomorrow's date, so step back.
+	greaterAntiphon := func() (string, string) {
+		if hourName != "vespers" || day.Season != models.Advent || day.Date.Month() != time.December {
+			return "", ""
+		}
+		oDay := day.Date.Day()
+		if day.FirstVespers {
+			oDay--
+		}
+		if oDay < 17 || oDay > 23 {
+			return "", ""
+		}
 		for _, cand := range refCands {
-			dateRef := "seasonal/advent/" + cand + "-december-" + strconv.Itoa(day.Date.Day())
+			dateRef := "seasonal/advent/" + cand + "-december-" + strconv.Itoa(oDay)
 			if text := corpus.Get(dateRef); text != "" {
-				return substituteProperName(text, properName), dateRef
+				return text, dateRef
 			}
+		}
+		return "", ""
+	}
+	if day.Celebration == nil ||
+		day.Celebration.Category == models.CategorySunday ||
+		day.Celebration.Category == models.CategoryFeria {
+		if text, dateRef := greaterAntiphon(); text != "" {
+			return substituteProperName(text, properName), dateRef
 		}
 	}
 
@@ -214,6 +233,12 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 				return substituteProperName(text, properName), resolved
 			}
 		}
+	}
+
+	// 1.5. The O antiphon outranks a feast's commons-sourced Magnificat
+	// antiphon (see step 0); a proper antiphon has already returned above.
+	if text, dateRef := greaterAntiphon(); text != "" {
+		return substituteProperName(text, properName), dateRef
 	}
 
 	// 2. Common of Saints (paschal, then regular; hour-qualified, then generic)
