@@ -73,7 +73,7 @@ func evaluateConditionKnown(condition string, day *models.CalendarDay, moveable 
 //
 // Preces are NOT said when:
 //   - Celebration rank >= Double
-//   - Day is within an octave
+//   - Day is within an octave, or is itself an octave-day office
 //   - Any commemoration is a Double or octave-related
 //   - The Friday after the Ascension octave (Easter+47)
 //   - Vigil of Epiphany (Jan 5)
@@ -85,6 +85,12 @@ func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) 
 
 	// Within an octave
 	if day.WithinOctaveOf != "" {
+		return false
+	}
+
+	// Octave-day offices: preces are not said within octaves (General Rubrics
+	// §XXXVII.2), and the parish treats the octave day itself as covered (#15).
+	if day.Celebration != nil && strings.Contains(day.Celebration.ID, "octave-day") {
 		return false
 	}
 

@@ -62,6 +62,12 @@ func TestShouldSayPreces(t *testing.T) {
 			want: false,
 		},
 		{
+			name: "simple octave-day office (Jan 2, Octave Day of St Stephen) — no preces",
+			day: makeDay(2026, 1, 2,
+				&models.Feast{ID: "octave-day-st-stephen", Rank: models.Simple}, nil, ""),
+			want: false,
+		},
+		{
 			name: "double commemoration — no preces",
 			day: makeDay(2026, 3, 11, nil,
 				[]*models.Feast{{ID: "test", Rank: models.Double}}, ""),
