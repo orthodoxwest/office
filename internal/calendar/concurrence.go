@@ -215,14 +215,47 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 // the following day's own commemorated feasts, whose observance begins with a
 // commemoration at this Vespers (2026 ordo: Marcellus at St Maurus' II
 // Vespers, Sabina on the eve of the Beheading). A nil loser (e.g. a plain
-// feria with no Celebration of its own) contributes nothing. The winner and
-// duplicates are filtered by finalizeCommemorations.
-func boundaryCommemorations(winner, loser *models.Feast, following *models.CalendarDay) []*models.Feast {
+// feria with no Celebration of its own) contributes nothing.
+//
+// The concurrence loser is always commemorated (XIII.2-17: Jerome at
+// St Michael's Vespers, the Octave Day of St John at the Holy Name's
+// I Vespers). The following day's memorial-rank commemorations belong to the
+// day that is beginning: at I Vespers of the following they are always kept
+// (Hadrian at the Nativity BVM's I Vespers, Barnabas at Corpus Christi's),
+// but the II Vespers of an outgoing Double of the II Class or above (Sundays
+// excepted) does not admit them — the ordo prints "No Comm." at the Vespers
+// of the Circumcision, the Purification, St Lawrence and St Matthew, and
+// through the Easter and Pentecost octaves, while a privileged feria
+// (Lent, Embertide, Advent) is still commemorated ("Comm. Fer." at
+// St Joseph's and the Conception's Vespers). The winner and duplicates are
+// filtered by finalizeCommemorations.
+func boundaryCommemorations(winner, loser *models.Feast, following *models.CalendarDay, secondVespers bool) []*models.Feast {
+	suppressIncoming := secondVespers && winner != nil &&
+		winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
+		winner.Category != models.CategorySunday
+
+	suppressed := func(c *models.Feast) bool {
+		return suppressIncoming &&
+			c.Rank.Weight() < models.Double2ndClass.Weight() &&
+			c.Category != models.CategorySunday && c.Category != models.CategoryFeria
+	}
+
 	var comms []*models.Feast
 	if loser != nil {
-		comms = append(comms, loser)
+		// A loser that never had I Vespers rights (a simple octave day, a
+		// day within an octave) is not a true concurrence party: it counts
+		// as an incoming office and is subject to the same suppression
+		// (the ordo's "No Comm." at the Circumcision's and the Epiphany's
+		// II Vespers). A genuine concurrence loser is always commemorated.
+		if hasFirstVespers(loser) || !suppressed(loser) {
+			comms = append(comms, loser)
+		}
 	}
-	comms = append(comms, following.Commemorations...)
+	for _, c := range following.Commemorations {
+		if !suppressed(c) {
+			comms = append(comms, c)
+		}
+	}
 	return finalizeCommemorations(winner, comms)
 }
 
@@ -251,7 +284,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          folFeast,
 			Color:          following.Color,
 			Season:         following.Season,
-			Commemorations: boundaryCommemorations(folFeast, precFeast, following),
+			Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
 		}
 	}
 
@@ -262,7 +295,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemorations(precFeast, folFeast, following),
+			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
 		}
 	}
 
@@ -274,7 +307,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemorations(precFeast, folFeast, following),
+			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
 		}
 	}
 	return models.VespersDesignation{
@@ -282,7 +315,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		Feast:          folFeast,
 		Color:          following.Color,
 		Season:         following.Season,
-		Commemorations: boundaryCommemorations(folFeast, precFeast, following),
+		Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
 	}
 }
 
