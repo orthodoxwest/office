@@ -683,6 +683,73 @@ func lentenFeriaName(date time.Time, easter time.Time, season models.Season) str
 	return ""
 }
 
+// isPenitentialFeriaSeason reports whether occurring ferias of the season are
+// privileged ferias that must be commemorated at Lauds when a feast takes the
+// office (Septuagesima through Passiontide).
+func isPenitentialFeriaSeason(season models.Season) bool {
+	switch season {
+	case models.Septuagesima, models.Lent, models.Passiontide:
+		return true
+	default:
+		return false
+	}
+}
+
+// feriaCommemorationName builds a descriptive name for the occurring feria,
+// e.g. "Friday after Lent III" or "Thursday after Septuagesima". Falls back to
+// a generic "the Feria" when no better label is available.
+func feriaCommemorationName(date, easter time.Time, season models.Season, weekID string) string {
+	if name := lentenFeriaName(date, easter, season); name != "" {
+		return name
+	}
+	if weekID != "" {
+		label := titleCase(strings.ReplaceAll(weekID, "-", " "))
+		return fmt.Sprintf("%s after %s", date.Weekday().String(), label)
+	}
+	return "the Feria"
+}
+
+// feriaCommemoration synthesizes the Lauds commemoration of the occurring
+// privileged feria displaced by a feast on a penitential weekday. Returns nil
+// when no such commemoration applies: on Sundays, when the office is already of
+// the feria (no Celebration, or the Celebration is itself a feria such as an
+// Ember day), or when a feria is already among the day's commemorations (e.g. a
+// demoted Ember-day feria). The collect resolves to the governing (preceding)
+// Sunday per the rubric — Ant. & versicle from the Psalter, Collect of the
+// preceding Sunday (Septuagesima ferias; the best available stand-in for the
+// proper Lenten feria collect, which the corpus does not yet carry).
+func feriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast {
+	if !isPenitentialFeriaSeason(day.Season) {
+		return nil
+	}
+	if day.Date.Weekday() == time.Sunday {
+		return nil
+	}
+	if day.Celebration == nil {
+		return nil // office is already of the feria
+	}
+	if day.Celebration.IsTemporal() {
+		return nil // the temporal office (e.g. the Sacred Triduum) is the day
+	}
+	if day.Celebration.Category == models.CategoryFeria || day.Celebration.Category == models.CategorySunday {
+		return nil // Ember days, vigils, and Sundays are not displaced ferias
+	}
+	for _, comm := range day.Commemorations {
+		if comm.Category == models.CategoryFeria {
+			return nil // feria already commemorated (e.g. a demoted Ember day)
+		}
+	}
+
+	return &models.Feast{
+		ID:       models.FeriaCommemorationID,
+		Name:     feriaCommemorationName(day.Date, easter, day.Season, day.TemporalWeekID),
+		Rank:     models.Commemoration,
+		Color:    SeasonColors[day.Season],
+		Category: models.CategoryFeria,
+		ProperID: day.TemporalWeekID,
+	}
+}
+
 func saturdayOfficeBVMAllowed(season models.Season) bool {
 	switch season {
 	case models.Christmas, models.Epiphany, models.Easter, models.Pentecost:
@@ -818,6 +885,8 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		if parentID, ok := octaveRanges[current]; ok {
 			calDay.WithinOctaveOf = parentID
 		}
+
+		calDay.FeriaCommemoration = feriaCommemoration(calDay, moveable.Easter)
 
 		calDay.MarianAntiphon = DetermineMarianAntiphon(current, moveable)
 

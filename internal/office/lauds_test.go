@@ -168,6 +168,54 @@ func TestLaudsCommemorations(t *testing.T) {
 	}
 }
 
+func TestLaudsFeriaCommemoration(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"ordinary/lauds/benedictus-antiphon":    "Ferial Benedictus antiphon",
+		"ordinary/lauds/versicle":               "Ferial versicle",
+		"ordinary/vespers/magnificat-antiphon":  "Ferial Magnificat antiphon",
+		"ordinary/vespers/versicle":             "Ferial vespers versicle",
+		"proper/lent-sunday-3/collect":          "Collect of the preceding Sunday",
+		"ordinary/lauds/commemoration-antiphon": "Saint antiphon N.",
+		"ordinary/lauds/commemoration-versicle": "Saint versicle",
+		"ordinary/lauds/commemoration-collect":  "Saint collect",
+	})
+
+	day := &models.CalendarDay{
+		Date:        time.Date(2026, 3, 21, 0, 0, 0, 0, time.UTC),
+		Season:      models.Lent,
+		Celebration: &models.Feast{ID: "st-benedict", Name: "St. Benedict", Rank: models.Double2ndClass},
+		FeriaCommemoration: &models.Feast{
+			ID:       "penitential-feria",
+			Name:     "Saturday after Lent III",
+			Rank:     models.Commemoration,
+			Category: models.CategoryFeria,
+			ProperID: "lent-sunday-3",
+		},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if len(elems) != 4 {
+		t.Fatalf("expected 4 elements (feria commemoration), got %d", len(elems))
+	}
+	if elems[0].Text != "Commemoration of Saturday after Lent III" {
+		t.Errorf("heading = %q", elems[0].Text)
+	}
+	if elems[1].Text != "Ferial Benedictus antiphon" {
+		t.Errorf("antiphon = %q, want ferial antiphon from the Psalter", elems[1].Text)
+	}
+	if elems[2].Text != "Ferial versicle" {
+		t.Errorf("versicle = %q, want ferial versicle", elems[2].Text)
+	}
+	if elems[3].Text != "Collect of the preceding Sunday" {
+		t.Errorf("collect = %q, want preceding Sunday collect", elems[3].Text)
+	}
+
+	// The feria commemoration is a Lauds-only concern; Vespers must not surface it.
+	if got := addCommemorations(day, "vespers", corpus); len(got) != 0 {
+		t.Fatalf("vespers should not include the feria commemoration, got %d elements", len(got))
+	}
+}
+
 func TestComposeLaudsSundayPsalmodyOmitsFestalPsalms(t *testing.T) {
 	engine, err := NewEngine(filepath.Join("..", "..", "data"))
 	if err != nil {

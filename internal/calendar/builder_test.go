@@ -589,6 +589,65 @@ func TestBuildCalendarDec31VespersUsesCircumcision(t *testing.T) {
 	}
 }
 
+func TestBuildCalendarFeriaCommemoration(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	// A feast on a penitential weekday commemorates the occurring feria at
+	// Lauds, with the collect carried on the governing Sunday's proper ID.
+	benedict := findDay(days, 2026, 3, 21) // St. Benedict, Saturday after Lent III
+	if benedict.FeriaCommemoration == nil {
+		t.Fatalf("St. Benedict: expected a feria commemoration")
+	}
+	if got, want := benedict.FeriaCommemoration.Name, "Saturday after Lent III"; got != want {
+		t.Errorf("feria name = %q, want %q", got, want)
+	}
+	if got, want := benedict.FeriaCommemoration.ProperID, "lent-sunday-3"; got != want {
+		t.Errorf("feria ProperID = %q, want %q", got, want)
+	}
+
+	// A Septuagesima-season weekday feast is likewise commemorated, named from
+	// the governing Sunday since lentenFeriaName does not cover pre-Lent.
+	matthias := findDay(days, 2026, 2, 24) // St. Matthias, Tuesday after Quinquagesima
+	if matthias.FeriaCommemoration == nil {
+		t.Fatalf("St. Matthias: expected a feria commemoration")
+	}
+	if got, want := matthias.FeriaCommemoration.Name, "Tuesday after Quinquagesima"; got != want {
+		t.Errorf("feria name = %q, want %q", got, want)
+	}
+
+	// The Sacred Triduum is the temporal office of the day, not a displaced
+	// feria — no commemoration.
+	goodFriday := findDay(days, 2026, 4, 10)
+	if goodFriday.FeriaCommemoration != nil {
+		t.Errorf("Good Friday: unexpected feria commemoration %q", goodFriday.FeriaCommemoration.Name)
+	}
+
+	// A plain penitential feria (office already of the feria) has none.
+	plainFeria := findDay(days, 2026, 3, 5)
+	if plainFeria.Celebration != nil {
+		t.Fatalf("2026-03-05 precondition: expected a plain feria, got %q", plainFeria.Celebration.Name)
+	}
+	if plainFeria.FeriaCommemoration != nil {
+		t.Errorf("plain feria: unexpected commemoration %q", plainFeria.FeriaCommemoration.Name)
+	}
+
+	// An Ember day whose office is displaced already carries the feria as a
+	// demoted commemoration; no duplicate synthetic feria is added.
+	emberFriday := findDay(days, 2026, 3, 6) // St. Perpetua & Felicitas on Lent Ember Friday
+	if emberFriday.FeriaCommemoration != nil {
+		t.Errorf("Ember Friday: unexpected extra feria commemoration %q", emberFriday.FeriaCommemoration.Name)
+	}
+	hasFeriaComm := false
+	for _, c := range emberFriday.Commemorations {
+		if c.Category == models.CategoryFeria {
+			hasFeriaComm = true
+		}
+	}
+	if !hasFeriaComm {
+		t.Errorf("Ember Friday: expected the Ember feria among commemorations")
+	}
+}
+
 func findDay(days []models.CalendarDay, year, month, day int) *models.CalendarDay {
 	target := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 	for i, d := range days {

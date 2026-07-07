@@ -222,6 +222,12 @@ const (
 	SourceAWRV FeastSource = "awrv"
 )
 
+// FeriaCommemorationID is the synthetic feast ID assigned to the occurring
+// privileged feria commemorated at Lauds on a penitential weekday feast day.
+// It carries no proper of its own; its texts are the ferial antiphon and
+// versicle "from the Psalter" and the collect of the governing Sunday.
+const FeriaCommemorationID = "penitential-feria"
+
 // Feast represents a liturgical feast or observance.
 type Feast struct {
 	ID       string
@@ -345,6 +351,13 @@ type CalendarDay struct {
 	Commemorations []*Feast
 	Color          Color
 	Notes          string
+
+	// FeriaCommemoration is the occurring privileged feria (of Septuagesima,
+	// Lent, or Passiontide) commemorated at Lauds when a feast takes the office
+	// on a penitential weekday. Nil when no such commemoration applies. Kept
+	// separate from Commemorations because the ferial commemoration at Vespers
+	// is concurrence-dependent and is not derived from this field.
+	FeriaCommemoration *Feast
 
 	// TemporalWeekID is the ID of the temporal Sunday office governing this
 	// day's week (e.g. "advent-sunday-2", "sexagesima"), carried from Sunday

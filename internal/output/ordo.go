@@ -47,6 +47,9 @@ func FormatDay(day *models.CalendarDay) string {
 	}
 
 	lines := []string{line}
+	if day.FeriaCommemoration != nil {
+		lines = append(lines, fmt.Sprintf("           Com: %s (Lauds)", day.FeriaCommemoration.Name))
+	}
 	for _, comm := range day.Commemorations {
 		lines = append(lines, fmt.Sprintf("           Com: %s", comm.Name))
 	}

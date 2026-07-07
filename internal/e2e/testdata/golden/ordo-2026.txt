@@ -107,6 +107,7 @@ FEBRUARY
            Com: St Apollonia of Alexandria, Virgin & Martyr
            Vespers: I fol. w (St Scholastica, Virgin)
  10  Tue     St Scholastica, Virgin                     [gd]  w
+           Com: Tuesday after Septuagesima (Lauds)
            Vespers: II prec. w
  11  Wed     Feria                                            v
            Com: St Gregory II, Pope & Confessor
@@ -129,11 +130,13 @@ FEBRUARY
  22  Sun     Quinquagesima Sunday                       [2cl] v
            Vespers: I fol. w (Chair of St. Peter at Antioch)
  23  Mon     Chair of St. Peter at Antioch              [2cl] w
+           Com: Monday after Quinquagesima (Lauds)
            Com: St Peter Damian, Bishop, Confessor & Doctor
            Com: Commemoration of St Paul
            Com: Vigil of St. Matthias
            Vespers: II prec. w
  24  Tue     St. Matthias, Apostle                      [2cl] r
+           Com: Tuesday after Quinquagesima (Lauds)
            Vespers: II prec. r
  25  Wed  L§ ASH WEDNESDAY                              [1cl] v
            Com: St Walburga of Heidenheim, Virgin
@@ -141,6 +144,7 @@ FEBRUARY
            Com: St. Alexander of Alexandria, Bishop & Confessor
            Vespers: I fol. v (St. Raphael of Brooklyn)
  27  Fri  L§ St. Raphael of Brooklyn                    [gd]  v
+           Com: Friday after Quinquagesima (Lauds)
            Vespers: II prec. v
  28  Sat  L§ Feria                                            v
            Vespers: I fol. v (I Sunday in Lent)
@@ -171,6 +175,7 @@ MARCH
  11  Wed  L§ Wednesday after Lent II                          v
            Vespers: I fol. w (St. Gregory the Great)
  12  Thu  L§ St. Gregory the Great                      [2cl] w
+           Com: Thursday after Lent II (Lauds)
            Vespers: II prec. w
  13  Fri  L§ Friday after Lent II                             v
  14  Sat  L§ Saturday after Lent II                           v
@@ -180,28 +185,36 @@ MARCH
  16  Mon  L§ Monday after Lent III                            v
            Vespers: I fol. v (St. Patrick)
  17  Tue  L§ St. Patrick                                [d]   v
+           Com: Tuesday after Lent III (Lauds)
            Com: St Joseph of Arimathea, C
            Vespers: I fol. v (St Cyril of Jerusalem, Bishop, Confessor & Doctor)
  18  Wed  L§ St Cyril of Jerusalem, Bishop, Confessor & Doctor [d]   v
+           Com: Wednesday after Lent III (Lauds)
            Com: St Edward, King & Martyr
            Vespers: I fol. w (St. Joseph, Spouse of the Blessed Virgin Mary)
  19  Thu  L§ St. Joseph, Spouse of the Blessed Virgin Mary [2cl] w
+           Com: Thursday after Lent III (Lauds)
            Vespers: II prec. w
  20  Fri  L§ St. Cuthbert, Bishop & Confessor           [d]   v
+           Com: Friday after Lent III (Lauds)
            Vespers: I fol. w (St. Benedict)
  21  Sat  L§ St. Benedict                               [2cl] w
+           Com: Saturday after Lent III (Lauds)
            Vespers: I fol. p (IV Sunday in Lent)
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
            Vespers: II prec. p
  23  Mon  L§ Monday after Lent IV                             v
            Vespers: I fol. v (St. Gabriel the Archangel)
  24  Tue  L§ St. Gabriel the Archangel                  [gd]  v
+           Com: Tuesday after Lent IV (Lauds)
            Vespers: I fol. w (Annunciation of the Blessed Virgin Mary)
  25  Wed  L§ ANNUNCIATION OF THE BLESSED VIRGIN MARY    [1cl] w
+           Com: Wednesday after Lent IV (Lauds)
            Vespers: II prec. w
  26  Thu  L§ Thursday after Lent IV                           v
            Vespers: I fol. v (St. John Damascene, Confessor & Doctor)
  27  Fri  L§ St. John Damascene, Confessor & Doctor     [d]   v
+           Com: Friday after Lent IV (Lauds)
            Vespers: II prec. v
  28  Sat  L§ Saturday after Lent IV                           v
            Vespers: I fol. v (Sunday of the Passion)
@@ -220,6 +233,7 @@ APRIL
   3  Fri  L§ Our Lady of Sorrows                        [gd]  v
            Vespers: II prec. v
   4  Sat  L§ St Isidore of Seville, Bishop, Confessor & Doctor [d]   v
+           Com: Saturday after Passion Sunday (Lauds)
            Vespers: I fol. v (Palm Sunday)
   5  Sun  L  PALM SUNDAY                                [1cl] v
            Vespers: II prec. v
