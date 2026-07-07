@@ -146,6 +146,7 @@ const (
 	CategoryApostle         FeastCategory = "apostle"
 	CategoryEvangelist      FeastCategory = "evangelist"
 	CategoryMartyr          FeastCategory = "martyr"
+	CategoryMartyrs         FeastCategory = "martyrs"
 	CategoryBishopMartyr    FeastCategory = "bishop-martyr"
 	CategoryVirginMartyr    FeastCategory = "virgin-martyr"
 	CategoryConfessorBishop FeastCategory = "confessor-bishop"
@@ -161,7 +162,7 @@ const (
 var validCategories = map[FeastCategory]bool{
 	CategoryLord: true, CategoryBlessedVirgin: true, CategoryAngel: true,
 	CategoryApostle: true, CategoryEvangelist: true, CategoryMartyr: true,
-	CategoryBishopMartyr: true, CategoryVirginMartyr: true,
+	CategoryMartyrs: true, CategoryBishopMartyr: true, CategoryVirginMartyr: true,
 	CategoryConfessorBishop: true, CategoryConfessorDoctor: true,
 	CategoryConfessor: true, CategoryVirgin: true, CategoryHolyWoman: true,
 	CategoryDedication: true, CategoryFeria: true, CategorySunday: true,
