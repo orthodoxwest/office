@@ -1,6 +1,14 @@
 [collect]
 Grant us, Lord, we beseech thee, to glory in the solemnity of thy blessed Apostle Thomas, that we may ever be aided by his patronage, and follow his faith with true devotion.
 
+[benedictus-antiphon]
+# Incipit per 2026 ordo (Quia vidisti me, as at I Vespers) — check against diurnal
+Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen and have believed, alleluia.
+
+[magnificat-antiphon]
+# Incipit per 2026 ordo (Quia vidisti me, as at I Vespers) — check against diurnal
+Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen and have believed, alleluia.
+
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/12-21.txt [Ant 1] — check against diurnal
 Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen and have believed, alleluia.
