@@ -3,6 +3,7 @@ package models
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -275,6 +276,19 @@ func (f *Feast) IsFixed() bool {
 // IsTemporal returns true if the feast is moveable (has a date rule).
 func (f *Feast) IsTemporal() bool {
 	return f.DateRule != ""
+}
+
+// CommemorationName is the feast's name as it should read after a
+// "Com." / "Commemoration of" prefix supplied by the composer. Feasts whose
+// proper title already begins with "Commemoration of" (e.g. the June 30
+// "Commemoration of St Paul, Apostle") would otherwise double the word; strip
+// that leading prefix so "Com. St Paul, Apostle" reads correctly while the
+// unprefixed Name still titles the day when the feast owns the office.
+func (f *Feast) CommemorationName() string {
+	if rest, ok := strings.CutPrefix(f.Name, "Commemoration of "); ok {
+		return rest
+	}
+	return f.Name
 }
 
 // SeasonDefinition defines a liturgical season with its default color.
