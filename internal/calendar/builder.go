@@ -84,10 +84,12 @@ func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 	n := 1
 	for current.Before(septuagesima) {
 		var name string
+		var properID string
 		color := models.Green
 		if n == 1 {
 			name = "Sunday within the Octave of Epiphany"
 			color = models.White
+			properID = "epiphany-sunday-within-octave"
 		} else {
 			name = fmt.Sprintf("%s Sunday after Epiphany", romanNumeral(n))
 		}
@@ -99,6 +101,7 @@ func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 			Color:    color,
 			Category: models.CategorySunday,
 			DateRule: fmt.Sprintf("epiphany-sunday-%d", n),
+			ProperID: properID,
 		})
 		current = current.AddDate(0, 0, 7)
 		n++
