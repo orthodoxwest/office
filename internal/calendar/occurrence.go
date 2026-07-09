@@ -58,8 +58,29 @@ func isCorpusOctaveDay(f *models.Feast) bool {
 	return strings.HasPrefix(f.ID, "corpus-christi-octave-day")
 }
 
+func isPrivilegedFeria(f *models.Feast) bool {
+	return f != nil && f.Category == models.CategoryFeria && f.Rank == models.PrivilegedFeria
+}
+
 // compareFeastPrecedence returns true if a should win over b.
 func compareFeastPrecedence(a, b *models.Feast) bool {
+	// Privileged ferias of the second class take the Office over every feast
+	// below a Double of the second class. Their ordinary rank weight is shared
+	// with a Semi-double, so this must precede the general rank comparison.
+	aPrivilegedFeria := isPrivilegedFeria(a)
+	bPrivilegedFeria := isPrivilegedFeria(b)
+	if aPrivilegedFeria != bPrivilegedFeria {
+		other := b
+		if bPrivilegedFeria {
+			other = a
+		}
+		privilegedWins := other.Rank.Weight() < models.Double2ndClass.Weight()
+		if aPrivilegedFeria {
+			return privilegedWins
+		}
+		return !privilegedWins
+	}
+
 	aCorpus := isCorpusOctaveDay(a)
 	bCorpus := isCorpusOctaveDay(b)
 	if aCorpus != bCorpus {

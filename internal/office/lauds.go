@@ -175,7 +175,7 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 	// "N."). It takes its Antiphon and versicle from the Psalter and its collect
 	// from the governing Sunday. Ember days and vigils are real feasts with
 	// their own propers and are resolved by the generic path below.
-	if feast.ID == models.FeriaCommemorationID {
+	if feast.ID == models.FeriaCommemorationID || feast.Rank == models.PrivilegedFeria {
 		return lookupFeriaCommemoration(feast, hourName, ref, corpus)
 	}
 

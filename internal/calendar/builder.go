@@ -669,6 +669,8 @@ func lentenFeriaName(date time.Time, easter time.Time, season models.Season) str
 	weekday := date.Weekday().String()
 	daysToEaster := int(easter.Sub(date) / (24 * time.Hour))
 	switch {
+	case season == models.Lent && daysToEaster >= 43 && daysToEaster <= 45:
+		return fmt.Sprintf("%s after Ash Wednesday", weekday)
 	case season == models.Lent && daysToEaster >= 36 && daysToEaster <= 41:
 		return fmt.Sprintf("%s after Lent I", weekday)
 	case season == models.Lent && daysToEaster >= 29 && daysToEaster <= 34:
@@ -681,6 +683,32 @@ func lentenFeriaName(date time.Time, easter time.Time, season models.Season) str
 		return fmt.Sprintf("%s after Passion Sunday", weekday)
 	}
 	return ""
+}
+
+// privilegedLentenFeria returns the F2 feria that takes the Office on
+// weekdays in Lent and Passiontide. Ember days already appear as explicit
+// feria candidates, so callers add this only where no feria is present.
+func privilegedLentenFeria(date, easter time.Time, season models.Season, weekID string) *models.Feast {
+	if date.Weekday() == time.Sunday || (season != models.Lent && season != models.Passiontide) {
+		return nil
+	}
+	return &models.Feast{
+		ID:       "privileged-lenten-feria",
+		Name:     feriaCommemorationName(date, easter, season, weekID),
+		Rank:     models.PrivilegedFeria,
+		Color:    SeasonColors[season],
+		Category: models.CategoryFeria,
+		ProperID: weekID,
+	}
+}
+
+func hasFeriaCandidate(candidates []*models.Feast) bool {
+	for _, feast := range candidates {
+		if feast.Category == models.CategoryFeria {
+			return true
+		}
+	}
+	return false
 }
 
 // isPenitentialFeriaSeason reports whether occurring ferias of the season are
@@ -862,9 +890,12 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		season := DetermineSeason(current, moveable)
 		seasonColor := SeasonColors[season]
 
-		dayCandidates := candidates[current]
+		dayCandidates := append([]*models.Feast(nil), candidates[current]...)
 		if current.Weekday() == time.Sunday {
 			weekID = temporalWeekID(dayCandidates)
+		}
+		if feria := privilegedLentenFeria(current, moveable.Easter, season, weekID); feria != nil && !hasFeriaCandidate(dayCandidates) {
+			dayCandidates = append(dayCandidates, feria)
 		}
 		transferredIn := pendingTransfers
 		pendingTransfers = nil

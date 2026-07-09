@@ -592,16 +592,23 @@ func TestBuildCalendarDec31VespersUsesCircumcision(t *testing.T) {
 func TestBuildCalendarFeriaCommemoration(t *testing.T) {
 	days := buildCalendar2026(t)
 
-	// A feast on a penitential weekday commemorates the occurring feria at
-	// Lauds, with the collect carried on the governing Sunday's proper ID.
-	benedict := findDay(days, 2026, 3, 21) // St. Benedict, Saturday after Lent III
-	if benedict.FeriaCommemoration == nil {
-		t.Fatalf("St. Benedict: expected a feria commemoration")
+	// A Double of the second class displaces the privileged feria, which is
+	// then commemorated at Lauds with the governing Sunday's proper ID.
+	gregory := findDay(days, 2026, 3, 12) // St. Gregory, Thursday after Lent II
+	var feria *models.Feast
+	for _, comm := range gregory.Commemorations {
+		if comm.Rank == models.PrivilegedFeria {
+			feria = comm
+			break
+		}
 	}
-	if got, want := benedict.FeriaCommemoration.Name, "Saturday after Lent III"; got != want {
+	if feria == nil {
+		t.Fatalf("St. Gregory: expected a privileged-feria commemoration")
+	}
+	if got, want := feria.Name, "Thursday after Lent II"; got != want {
 		t.Errorf("feria name = %q, want %q", got, want)
 	}
-	if got, want := benedict.FeriaCommemoration.ProperID, "lent-sunday-3"; got != want {
+	if got, want := feria.ProperID, "lent-sunday-2"; got != want {
 		t.Errorf("feria ProperID = %q, want %q", got, want)
 	}
 
@@ -622,29 +629,84 @@ func TestBuildCalendarFeriaCommemoration(t *testing.T) {
 		t.Errorf("Good Friday: unexpected feria commemoration %q", goodFriday.FeriaCommemoration.Name)
 	}
 
-	// A plain penitential feria (office already of the feria) has none.
+	// A plain Lenten weekday is itself the privileged feria, so it carries no
+	// additional feria commemoration.
 	plainFeria := findDay(days, 2026, 3, 5)
-	if plainFeria.Celebration != nil {
-		t.Fatalf("2026-03-05 precondition: expected a plain feria, got %q", plainFeria.Celebration.Name)
+	if plainFeria.Celebration == nil || plainFeria.Celebration.Rank != models.PrivilegedFeria {
+		t.Fatalf("2026-03-05: expected privileged feria, got %#v", plainFeria.Celebration)
 	}
 	if plainFeria.FeriaCommemoration != nil {
 		t.Errorf("plain feria: unexpected commemoration %q", plainFeria.FeriaCommemoration.Name)
 	}
 
-	// An Ember day whose office is displaced already carries the feria as a
-	// demoted commemoration; no duplicate synthetic feria is added.
+	// A Lenten Ember day is likewise a privileged feria. It takes the office,
+	// with the occurring saint commemorated, and needs no synthetic duplicate.
 	emberFriday := findDay(days, 2026, 3, 6) // St. Perpetua & Felicitas on Lent Ember Friday
 	if emberFriday.FeriaCommemoration != nil {
 		t.Errorf("Ember Friday: unexpected extra feria commemoration %q", emberFriday.FeriaCommemoration.Name)
 	}
-	hasFeriaComm := false
+	if emberFriday.Celebration == nil || emberFriday.Celebration.ID != "lent-ember-friday" {
+		t.Fatalf("Ember Friday: expected Lent Ember Friday to take the office, got %#v", emberFriday.Celebration)
+	}
+	hasSaintComm := false
 	for _, c := range emberFriday.Commemorations {
-		if c.Category == models.CategoryFeria {
-			hasFeriaComm = true
+		if c.ID == "st-perpetua-felicitas" {
+			hasSaintComm = true
 		}
 	}
-	if !hasFeriaComm {
-		t.Errorf("Ember Friday: expected the Ember feria among commemorations")
+	if !hasSaintComm {
+		t.Errorf("Ember Friday: expected St Perpetua & Felicitas to be commemorated")
+	}
+}
+
+func TestBuildCalendarPrivilegedLentenFerias(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	for _, tt := range []struct {
+		date       time.Time
+		wantID     string
+		wantName   string
+		wantCommID string
+	}{
+		{
+			date:       time.Date(2026, 2, 27, 0, 0, 0, 0, time.UTC),
+			wantID:     "privileged-lenten-feria",
+			wantName:   "Friday after Ash Wednesday",
+			wantCommID: "st-raphael-of-brooklyn",
+		},
+		{
+			date:       time.Date(2026, 3, 6, 0, 0, 0, 0, time.UTC),
+			wantID:     "lent-ember-friday",
+			wantName:   "Lent Ember Friday",
+			wantCommID: "st-perpetua-felicitas",
+		},
+		{
+			date:       time.Date(2026, 4, 3, 0, 0, 0, 0, time.UTC),
+			wantID:     "privileged-lenten-feria",
+			wantName:   "Friday after Passion Sunday",
+			wantCommID: "our-lady-of-sorrows-passion",
+		},
+	} {
+		day := findDay(days, tt.date.Year(), int(tt.date.Month()), tt.date.Day())
+		if day == nil || day.Celebration == nil {
+			t.Fatalf("%s missing celebration", tt.date.Format("2006-01-02"))
+		}
+		if got := day.Celebration.ID; got != tt.wantID {
+			t.Errorf("%s celebration = %q, want %q", tt.date.Format("2006-01-02"), got, tt.wantID)
+		}
+		if got := day.Celebration.Name; got != tt.wantName {
+			t.Errorf("%s celebration name = %q, want %q", tt.date.Format("2006-01-02"), got, tt.wantName)
+		}
+		found := false
+		for _, comm := range day.Commemorations {
+			if comm.ID == tt.wantCommID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("%s missing commemoration %q", tt.date.Format("2006-01-02"), tt.wantCommID)
+		}
 	}
 }
 

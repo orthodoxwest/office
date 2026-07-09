@@ -150,7 +150,7 @@ Month    = 11
 Day      = 30
 ```
 
-Valid `Rank` values: `double-1st-class`, `double-2nd-class`, `greater-double`, `double`, `semi-double`
+Valid `Rank` values: `double-1st-class`, `double-2nd-class`, `greater-double`, `double`, `semi-double`, `privileged-feria`, `simple`, `commemoration`
 
 Valid `Color` values: `white`, `red`, `violet`, `rose`, `black`
 

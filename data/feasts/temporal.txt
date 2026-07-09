@@ -37,21 +37,21 @@ DateRule = easter-42
 
 [lent-ember-wednesday]
 Name = Lent Ember Wednesday
-Rank = semi-double
+Rank = privileged-feria
 Color = violet
 Category = feria
 DateRule = easter-39
 
 [lent-ember-friday]
 Name = Lent Ember Friday
-Rank = semi-double
+Rank = privileged-feria
 Color = violet
 Category = feria
 DateRule = easter-37
 
 [lent-ember-saturday]
 Name = Lent Ember Saturday
-Rank = semi-double
+Rank = privileged-feria
 Color = violet
 Category = feria
 DateRule = easter-36

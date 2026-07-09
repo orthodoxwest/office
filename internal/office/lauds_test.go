@@ -216,6 +216,39 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 	}
 }
 
+func TestLaudsPrivilegedFeriaCommemorationUsesFerialTexts(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"ordinary/lauds/benedictus-antiphon": "Ferial Benedictus antiphon",
+		"ordinary/lauds/versicle":            "Ferial versicle",
+		"proper/lent-sunday-2/collect":       "Governing Sunday collect",
+	})
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 3, 12, 0, 0, 0, 0, time.UTC),
+		Season: models.Lent,
+		Commemorations: []*models.Feast{{
+			ID:       "privileged-lenten-feria",
+			Name:     "Thursday after Lent II",
+			Rank:     models.PrivilegedFeria,
+			Category: models.CategoryFeria,
+			ProperID: "lent-sunday-2",
+		}},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if len(elems) != 4 {
+		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
+	}
+	if got := elems[1].Text; got != "Ferial Benedictus antiphon" {
+		t.Errorf("antiphon = %q, want ferial Benedictus antiphon", got)
+	}
+	if got := elems[2].Text; got != "Ferial versicle" {
+		t.Errorf("versicle = %q, want ferial versicle", got)
+	}
+	if got := elems[3].Text; got != "Governing Sunday collect" {
+		t.Errorf("collect = %q, want governing Sunday collect", got)
+	}
+}
+
 func TestAddCommemorationsStripsRedundantPrefix(t *testing.T) {
 	// A feast whose proper title already begins with "Commemoration of" (e.g. the
 	// June 30 / Jan 18 commemoration of St Paul) must not double the word when the

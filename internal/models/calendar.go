@@ -11,33 +11,36 @@ import (
 type Rank string
 
 const (
-	Double1stClass Rank = "double-1st-class"
-	Double2ndClass Rank = "double-2nd-class"
-	GreaterDouble  Rank = "greater-double"
-	Double         Rank = "double"
-	SemiDouble     Rank = "semi-double"
-	Simple         Rank = "simple"
-	Commemoration  Rank = "commemoration"
+	Double1stClass  Rank = "double-1st-class"
+	Double2ndClass  Rank = "double-2nd-class"
+	GreaterDouble   Rank = "greater-double"
+	Double          Rank = "double"
+	SemiDouble      Rank = "semi-double"
+	PrivilegedFeria Rank = "privileged-feria"
+	Simple          Rank = "simple"
+	Commemoration   Rank = "commemoration"
 )
 
 var rankWeights = map[Rank]int{
-	Double1stClass: 7,
-	Double2ndClass: 6,
-	GreaterDouble:  5,
-	Double:         4,
-	SemiDouble:     3,
-	Simple:         2,
-	Commemoration:  1,
+	Double1stClass:  7,
+	Double2ndClass:  6,
+	GreaterDouble:   5,
+	Double:          4,
+	SemiDouble:      3,
+	PrivilegedFeria: 3,
+	Simple:          2,
+	Commemoration:   1,
 }
 
 var rankAbbreviations = map[Rank]string{
-	Double1stClass: "1cl",
-	Double2ndClass: "2cl",
-	GreaterDouble:  "gd",
-	Double:         "d",
-	SemiDouble:     "sd",
-	Simple:         "s",
-	Commemoration:  "com",
+	Double1stClass:  "1cl",
+	Double2ndClass:  "2cl",
+	GreaterDouble:   "gd",
+	Double:          "d",
+	SemiDouble:      "sd",
+	PrivilegedFeria: "f2",
+	Simple:          "s",
+	Commemoration:   "com",
 }
 
 // Weight returns the numeric weight for rank comparison (higher = more important).
@@ -57,13 +60,14 @@ func (r Rank) Abbrev() string {
 }
 
 var rankDisplayNames = map[Rank]string{
-	Double1stClass: "Double of the 1st Class",
-	Double2ndClass: "Double of the 2nd Class",
-	GreaterDouble:  "Greater Double",
-	Double:         "Double",
-	SemiDouble:     "Semi-double",
-	Simple:         "Simple",
-	Commemoration:  "Commemoration",
+	Double1stClass:  "Double of the 1st Class",
+	Double2ndClass:  "Double of the 2nd Class",
+	GreaterDouble:   "Greater Double",
+	Double:          "Double",
+	SemiDouble:      "Semi-double",
+	PrivilegedFeria: "Privileged Feria",
+	Simple:          "Simple",
+	Commemoration:   "Commemoration",
 }
 
 // DisplayName returns the full human-readable rank name.
