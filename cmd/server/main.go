@@ -83,8 +83,15 @@ func cmdOrdo(dataDir string) {
 		fmt.Fprintf(os.Stderr, "Error building calendar: %v\n", err)
 		os.Exit(1)
 	}
+	moveable := calendar.ComputeMoveableDates(year)
 
-	fmt.Print(output.FormatCalendar(days))
+	engine, err := office.NewEngine(dataDir)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating office engine: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Print(output.FormatCalendar(days, engine, moveable))
 }
 
 // cmdRubrics prints a per-day TSV of composed rubric flags (preces, suffrage,

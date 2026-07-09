@@ -69,17 +69,24 @@ scripts/
 ## Reference materials & verification
 
 `../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026) and rubrics
-documents. **The newest-year ordo is the authority for what this app should produce**; the
-archdiocese has revised its calendar over the years, so sanctoral diffs against older ordos
-are usually noise, while the temporal cycle (paschalion, moveable dates) is valid in all years.
+documents. **The newest-year ordo is the authority for what this app should produce** — it
+reflects current archdiocesan policy, which is revised over time. A feast, rank, or discipline
+that held steady across older ordos and then differs in the newest year may be a deliberate
+revision, so don't assume a typo just because it changed — but typos happen every year too, so
+flag the discrepancy for confirmation rather than silently picking a side. Older ordos stay
+useful for cross-checking anything unchanged, and the temporal cycle (paschalion, moveable
+dates) is valid in all years. (Computus figures — Golden Number, Dominical Letter, moveable
+dates, Ember days — are arithmetic, so a discrepancy there is a genuine error in whichever ordo,
+not policy.)
 `diurnal-rubrics.pdf` is the normative rubric text (preces §XXXVII, suffrage §XXXVIII). Where
 the ordo and the rubrics disagree, file an issue for the priest rather than picking a side.
 
 Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the app against
-an ordo PDF: `office rubrics YEAR` emits per-day composition flags, and `scripts/ordo-compare.py`
-diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon incipits, colors, Vespers
-precedence, and moveable dates. Known divergence clusters are tracked in GitHub issues
-(#9–#13 need rulings; #15–#17, #20 are engine/data work).
+an ordo PDF: `office rubrics YEAR` emits per-day composition flags, `office ordo YEAR` emits
+the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-hour stanzas,
+and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
+incipits, colors, Vespers precedence, and moveable dates. Known divergence clusters are tracked
+in GitHub issues (#9–#13, #42 need rulings; #15–#17, #20, #40, #41 are engine/data work).
 
 ## Text provenance
 
@@ -113,7 +120,7 @@ make vet         # Run go vet
 make fmt         # Check formatting
 make check       # fmt + vet + lint + test + validate + lint-texts
 make serve       # Start web server on :8080
-make ordo        # Print text ordo for current year (YEAR=2026)
+make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)

@@ -161,7 +161,12 @@ func TestOrdoGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("BuildCalendar: %v", err)
 	}
-	checkGolden(t, "ordo-2026.txt", output.FormatCalendar(days))
+	moveable := calendar.ComputeMoveableDates(2026)
+	engine, err := office.NewEngine(dataDir)
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	checkGolden(t, "ordo-2026.txt", output.FormatCalendar(days, engine, moveable))
 }
 
 // checkGolden compares got against the named golden file, or writes it when -update is set.

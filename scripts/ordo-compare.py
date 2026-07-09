@@ -111,12 +111,16 @@ def our_ordo_days(path):
             days[key] = {"title": md.group(3).strip(), "rank": "", "color": None,
                          "coms": [], "vespers": None, "vcolor": None}
             continue
-        if key and s.startswith("Com:"):
+        if key and s.startswith("Com."):
             days[key]["coms"].append(s[4:].strip())
-        mv = re.match(r"^\s*Vespers: (I fol\.|II prec\.) ([wrgvb])", ln)
+        # Vespers stanza line: "Vespers <color> · <owner> · Mag. ... · <suff>".
+        # Owner (I fol./II prec.) is absent when Vespers is not designated.
+        mv = re.match(r"^\s*Vespers\s+([wrgvbp])\b", ln)
         if mv and key:
-            days[key]["vespers"] = {"I fol.": "fol", "II prec.": "prec"}[mv.group(1)]
-            days[key]["vcolor"] = mv.group(2)
+            days[key]["vcolor"] = mv.group(1)
+            mo = re.search(r"(I fol\.|II prec\.)", ln)
+            if mo:
+                days[key]["vespers"] = {"I fol.": "fol", "II prec.": "prec"}[mo.group(1)]
     return days
 
 
@@ -148,6 +152,8 @@ def cmd_calendar(pdf_path, ours_path):
     ours = our_ordo_days(ours_path)
     n = 0
     for k in sorted(set(pdf) & set(ours)):
+        if not pdf[k].get(""):  # day whose title section didn't parse from the PDF
+            continue
         p_title = pdf[k][""].splitlines()[0]
         p_title = RANK_RE.sub("", re.sub(r"^[L§†‡\s]+", "", p_title)).strip()
         o_title = ours[k]["title"]
