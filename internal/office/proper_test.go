@@ -87,6 +87,32 @@ func TestResolveProperTextUsesProperIDAlias(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextPrivilegedFeriaUsesWeekdayTemporalText(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/lent-sunday-2/benedictus-antiphon":           "Sunday Benedictus antiphon",
+		"proper/lent-sunday-2/benedictus-antiphon-wednesday": "Wednesday Benedictus antiphon",
+	})
+	day := &models.CalendarDay{
+		Date:           time.Date(2026, 3, 11, 0, 0, 0, 0, time.UTC),
+		Season:         models.Lent,
+		TemporalWeekID: "lent-sunday-2",
+		Celebration: &models.Feast{
+			ID:       "privileged-lenten-feria",
+			Rank:     models.PrivilegedFeria,
+			Category: models.CategoryFeria,
+			ProperID: "lent-sunday-2",
+		},
+	}
+
+	got, ref := resolveProperText(day, "lauds", "benedictus-antiphon", corpus)
+	if got != "Wednesday Benedictus antiphon" {
+		t.Fatalf("benedictus antiphon = %q, want weekday temporal text", got)
+	}
+	if ref != "proper/lent-sunday-2/benedictus-antiphon-wednesday" {
+		t.Fatalf("source ref = %q, want weekday temporal ref", ref)
+	}
+}
+
 func TestResolveProperTextWeekdayOrdinary(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"ordinary/lauds/hymn-monday": "Monday lauds hymn",

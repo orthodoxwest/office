@@ -91,6 +91,54 @@ func TestResolveDaySundayPrecedence(t *testing.T) {
 	}
 }
 
+func TestResolveDayPrivilegedFeriaPrecedence(t *testing.T) {
+	m := ComputeMoveableDates(2026)
+	date := time.Date(2026, 2, 27, 0, 0, 0, 0, time.UTC)
+	feria := &models.Feast{
+		ID:       "privileged-lenten-feria",
+		Name:     "Friday after Ash Wednesday",
+		Rank:     models.PrivilegedFeria,
+		Color:    models.Violet,
+		Category: models.CategoryFeria,
+	}
+	greaterDouble := &models.Feast{
+		ID:       "st-raphael-of-brooklyn",
+		Name:     "St. Raphael of Brooklyn",
+		Rank:     models.GreaterDouble,
+		Color:    models.White,
+		Category: models.CategoryConfessorBishop,
+	}
+	secondClass := &models.Feast{
+		ID:       "st-joseph",
+		Name:     "St. Joseph",
+		Rank:     models.Double2ndClass,
+		Color:    models.White,
+		Category: models.CategoryConfessor,
+	}
+
+	day, transfers := ResolveDay(date, []*models.Feast{feria, greaterDouble}, models.Lent, models.Violet, m, nil)
+	if day.Celebration != feria {
+		t.Fatal("expected privileged feria to outrank Greater Double")
+	}
+	if len(day.Commemorations) != 1 || day.Commemorations[0] != greaterDouble {
+		t.Fatal("expected Greater Double to be commemorated under privileged feria")
+	}
+	if len(transfers) != 0 {
+		t.Fatal("expected no transfer for Greater Double")
+	}
+
+	day, transfers = ResolveDay(date, []*models.Feast{feria, secondClass}, models.Lent, models.Violet, m, nil)
+	if day.Celebration != secondClass {
+		t.Fatal("expected Double of the second class to outrank privileged feria")
+	}
+	if len(transfers) != 0 {
+		t.Fatal("expected privileged feria to be commemorated, not transferred")
+	}
+	if len(day.Commemorations) != 1 || day.Commemorations[0] != feria {
+		t.Fatal("expected privileged feria to be commemorated under Double of the second class")
+	}
+}
+
 func TestResolveDayTransfer(t *testing.T) {
 	m := ComputeMoveableDates(2026)
 	date := time.Date(2026, 6, 11, 0, 0, 0, 0, time.UTC)

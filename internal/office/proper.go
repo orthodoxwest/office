@@ -223,7 +223,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 1. Feast-specific proper (hour-qualified, then generic)
-	if day.Celebration != nil && day.Celebration.ID != "" {
+	if day.Celebration != nil && day.Celebration.ID != "" && day.Celebration.Rank != models.PrivilegedFeria {
 		for _, feastID := range feastProperIDs(day.Celebration) {
 			prefix := "proper/" + feastID + "/"
 			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
@@ -242,7 +242,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 2. Common of Saints (paschal, then regular; hour-qualified, then generic)
-	if day.Celebration != nil {
+	if day.Celebration != nil && day.Celebration.Rank != models.PrivilegedFeria {
 		if text, resolved := lookupCommonsText(day.Celebration.Category, day.Season, hourName, ref, corpus); text != "" {
 			return substituteProperName(text, properName), resolved
 		}
