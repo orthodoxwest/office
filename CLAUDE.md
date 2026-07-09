@@ -69,9 +69,15 @@ scripts/
 ## Reference materials & verification
 
 `../resources/` (sibling of this repo) holds archdiocesan ordo PDFs (2017–2026) and rubrics
-documents. **The newest-year ordo is the authority for what this app should produce**; the
-archdiocese has revised its calendar over the years, so sanctoral diffs against older ordos
-are usually noise, while the temporal cycle (paschalion, moveable dates) is valid in all years.
+documents. **The newest-year ordo is the authority for what this app should produce** — it
+reflects current archdiocesan policy, which is revised over time. A feast, rank, or discipline
+that held steady across older ordos and then differs in the newest year may be a deliberate
+revision, so don't assume a typo just because it changed — but typos happen every year too, so
+flag the discrepancy for confirmation rather than silently picking a side. Older ordos stay
+useful for cross-checking anything unchanged, and the temporal cycle (paschalion, moveable
+dates) is valid in all years. (Computus figures — Golden Number, Dominical Letter, moveable
+dates, Ember days — are arithmetic, so a discrepancy there is a genuine error in whichever ordo,
+not policy.)
 `diurnal-rubrics.pdf` is the normative rubric text (preces §XXXVII, suffrage §XXXVIII). Where
 the ordo and the rubrics disagree, file an issue for the priest rather than picking a side.
 

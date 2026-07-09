@@ -6,10 +6,19 @@ description: Verify the app's calendar and office composition against the archdi
 # Verifying against the parish ordo
 
 The archdiocesan ordo PDFs in `../resources/` are the ground truth for what
-this app should produce. **Only the newest year is authoritative for the
-sanctoral calendar** (the archdiocese has revised it over the years);
-older years are still valid for the temporal cycle (paschalion, moveable
-dates, Sunday counts).
+this app should produce. **The newest year is authoritative** — it reflects
+current archdiocesan policy, which is revised over time. A feast, rank, or
+discipline that held steady across older ordos and then differs in the newest
+year may be a deliberate revision, so don't assume a typo just because it
+changed — but typos happen every year too. Flag such a discrepancy for
+confirmation (a priest ruling) rather than silently following either. Older
+years stay useful for cross-checking anything unchanged and are always valid
+for the temporal cycle (paschalion, moveable dates, Sunday counts).
+
+One exception: **computus figures** (Golden Number, Dominical Letter, moveable
+dates, Ember days) are mathematically determined, so a discrepancy there is a
+genuine error in whichever ordo carries it — never a policy choice (this is how
+the known-wrong Tabula values below are identifiable as typos).
 
 ## Authority hierarchy
 
@@ -19,7 +28,10 @@ dates, Sunday counts).
    preces), that's a question for the priest — file an issue, don't pick.
 3. `additional-sunday-rubrics.pdf` — extra Epiphany Sundays rule. Trust its
    prose over its year table (the table misclassifies 2024).
-4. Older ordos — temporal cycle only; sanctoral diffs are usually noise.
+4. Older ordos — always valid for the temporal cycle, and useful for
+   confirming unchanged sanctoral/disciplinary content; where they differ from
+   the newest year, treat the newest as current policy but flag the change for
+   confirmation (it may be a deliberate revision or a typo).
 
 ## Workflow
 
