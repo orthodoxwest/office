@@ -76,10 +76,11 @@ are usually noise, while the temporal cycle (paschalion, moveable dates) is vali
 the ordo and the rubrics disagree, file an issue for the priest rather than picking a side.
 
 Use the `/ordo-verify` skill (`.claude/skills/ordo-verify/`) to machine-diff the app against
-an ordo PDF: `office rubrics YEAR` emits per-day composition flags, and `scripts/ordo-compare.py`
-diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon incipits, colors, Vespers
-precedence, and moveable dates. Known divergence clusters are tracked in GitHub issues
-(#9–#13 need rulings; #15–#17, #20 are engine/data work).
+an ordo PDF: `office rubrics YEAR` emits per-day composition flags, `office ordo YEAR` emits
+the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-hour stanzas,
+and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
+incipits, colors, Vespers precedence, and moveable dates. Known divergence clusters are tracked
+in GitHub issues (#9–#13, #42 need rulings; #15–#17, #20, #40, #41 are engine/data work).
 
 ## Text provenance
 
@@ -113,7 +114,7 @@ make vet         # Run go vet
 make fmt         # Check formatting
 make check       # fmt + vet + lint + test + validate + lint-texts
 make serve       # Start web server on :8080
-make ordo        # Print text ordo for current year (YEAR=2026)
+make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)

@@ -36,23 +36,38 @@ scripts/ordo-compare.py vespers   /tmp/2026-ordo.txt /tmp/our-ordo.txt      # I 
 scripts/ordo-compare.py moveable ../resources 2017 2018 2019 2021 2022 2023 2024 2025 2026
 ```
 
-Baseline numbers (2026, as of PR #14 era) so regressions are obvious:
-moveable all-OK; calendar headlines clean after PR #8; Hours preces 47;
-Vespers suffrage 10 and Vespers comm 136 (after PR #21); Lauds comm 47;
-Ben antiphons 109/288; Mag antiphons 205/335 (after ferial, Sunday, octave,
-weekly-temporal, O-antiphon and Saturday historia seeding — Saturday
-I Vespers Magnificats follow the scripture cycle via calendar.HistoriaWeekID
-and proper/historia-* files; residue is DO-vs-diurnal translation drift,
-per-saint propers DO lacks, ruling-gated Lenten feria/feast days, and the
-per-annum monastic weekly antiphons absent from DO); colors 31/712 (mostly
-ordo-internal notation artifacts where the printed "Vespers G" contradicts
-the ordo's own described office, plus ruling-gated Ember/All Souls rows) and
-Vespers designations 225 agree / 6 disagree (after the §XIII concurrence
-rewrite; residue is parish rank demotions to memorial, the Ember-day
-precedence question, and three ordo notation artifacts where the quoted
-content matches ours: 01-04, 05-01, 08-23). Open issues:
-#9 #10 #11 #12 #13 (rulings needed), #15 #17 #20 (engine/data work). A fix should move its cluster toward zero without
-regressing the others.
+`./office ordo` opens with a **Tabula Temporaria** header (Golden Number,
+Dominical Letter, Sundays after Epiphany/Pentecost, moveable feasts, Ember
+days) and renders each day as per-hour stanzas (Lauds/Hours/Vespers with
+color, Ben/Mag incipit, preces + Suffrage, commemorations with incipits). The
+compare parser reads this stanza format; `moveable` still cross-checks the
+moveable dates, and the Tabula header can be eyeballed against the ordo's own
+front matter (its computus figures verify `calendar.ComputeTabula`).
+
+Baseline numbers (2026, as of PR #43) so regressions are obvious:
+moveable all-OK; calendar 35 headline mismatches (older-ordo sanctoral
+naming noise); Hours preces 45; Lauds suffrage 4; Vespers suffrage 8;
+Lauds comm 35; Vespers comm 99; Ben antiphons 94/288; Mag antiphons
+190/335 (after ferial, Sunday, octave, weekly-temporal, O-antiphon and
+Saturday historia seeding — Saturday I Vespers Magnificats follow the
+scripture cycle via calendar.HistoriaWeekID and proper/historia-* files;
+residue is DO-vs-diurnal translation drift, per-saint propers DO lacks,
+ruling-gated Lenten feria/feast days, and the per-annum monastic weekly
+antiphons absent from DO); colors 32/712 (mostly ordo-internal notation
+artifacts where the printed "Vespers G" contradicts the ordo's own
+described office, plus ruling-gated Ember/All Souls rows) and Vespers
+designations 228 agree / 7 disagree (after the §XIII concurrence rewrite;
+residue is parish rank demotions to memorial, the Ember-day precedence
+question, and ordo notation artifacts where the quoted content matches
+ours: 01-04, 05-01, 08-23). Open issues: #9 #10 #11 #12 #13 #42 (rulings
+needed), #15 #17 #20 #40 #41 (engine/data work). A fix should move its
+cluster toward zero without regressing the others.
+
+**Known ordo front-matter errors** (do not re-flag as regressions, see #42):
+the printed 2025 Golden Number/Dominical Letter are copied from 2024 (should
+be XII / E); the 2021 and 2024 "Sundays after Pentecost" figures (23, 21)
+disagree with every calendar count and with our builder. `ComputeTabula`
+deliberately does not reproduce these.
 
 ## Parsing caveats
 
