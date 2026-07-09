@@ -218,6 +218,13 @@ var noWeekdayAntWeeks = map[string]bool{
 	"pentecost-sunday-2": true,
 }
 
+// specialSundayDOFiles supplies Sunday offices that do not share the
+// ordinary numbered-Sunday source. The Sunday within the Epiphany octave is
+// Epi1-0a, distinct from the Holy Family material in Epi1-0.
+var specialSundayDOFiles = map[string]string{
+	"epiphany-sunday-within-octave": "Tempora/Epi1-0a",
+}
+
 // historiaDOFiles maps our proper/historia-<month>-<week> antiphon files to
 // the DO month-week Tempora prefixes. The Sunday file's Ant 1 is the
 // Magnificat antiphon of the scripture historia, sung at the Saturday
@@ -916,9 +923,14 @@ func extractWeekSeeds(eng, lat *doTree, prefix string, seedFirst, seedWeekdays b
 		}
 	}
 
-	// Sunday's own antiphons, for weeks whose Sunday has no proper file yet
-	// (mergeFile appends only missing sections, so existing texts are safe).
-	sunday := prefix + "-0"
+	return append(seeds, extractSundaySeeds(eng, lat, prefix+"-0", seedFirst)...)
+}
+
+// extractSundaySeeds builds a Sunday's gospel-canticle antiphons from its
+// office file. Some Sunday files label the Lauds antiphon Ant 1 rather than
+// Ant 2, so fall back accordingly.
+func extractSundaySeeds(eng, lat *doTree, sunday string, seedFirst bool) []seed {
+	var seeds []seed
 	ben := antiphonSeed(eng, lat, sunday, "Ant 2", "benedictus-antiphon")
 	if ben == nil {
 		// Sundays whose DO file carries only Ant 1 use it at the Benedictus.
@@ -1236,6 +1248,17 @@ func main() {
 		prefix := weekDOFiles[id]
 		applySeeds(id, prefix+"-*", filepath.Join(*dataDir, "texts", "proper", id+".txt"),
 			extractWeekSeeds(eng, lat, prefix, !noFirstVespersMagWeeks[id], !noWeekdayAntWeeks[id]))
+	}
+
+	var specialSundayIDs []string
+	for id := range specialSundayDOFiles {
+		specialSundayIDs = append(specialSundayIDs, id)
+	}
+	sort.Strings(specialSundayIDs)
+	for _, id := range specialSundayIDs {
+		rel := specialSundayDOFiles[id]
+		applySeeds(id, rel, filepath.Join(*dataDir, "texts", "proper", id+".txt"),
+			extractSundaySeeds(eng, lat, rel, true))
 	}
 
 	var historiaIDs []string

@@ -87,6 +87,31 @@ func TestResolveProperTextUsesProperIDAlias(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextUsesSundayWithinEpiphanyOctaveProper(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/epiphany-sunday-within-octave/benedictus-antiphon": "The Child Jesus remained",
+		"proper/epiphany-sunday-1/benedictus-antiphon":             "First Sunday after Epiphany",
+	})
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 1, 11, 0, 0, 0, 0, time.UTC),
+		Season: models.Epiphany,
+		Celebration: &models.Feast{
+			ID:       "epiphany-sunday-1",
+			ProperID: "epiphany-sunday-within-octave",
+			Category: models.CategorySunday,
+		},
+	}
+
+	got, ref := resolveProperText(day, "lauds", "benedictus-antiphon", corpus)
+	if got != "The Child Jesus remained" {
+		t.Fatalf("got %q, want Sunday-within-octave antiphon", got)
+	}
+	if ref != "proper/epiphany-sunday-within-octave/benedictus-antiphon" {
+		t.Fatalf("ref = %q, want Sunday-within-octave proper", ref)
+	}
+}
+
 func TestResolveProperTextPrivilegedFeriaUsesWeekdayTemporalText(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/lent-sunday-2/benedictus-antiphon":           "Sunday Benedictus antiphon",

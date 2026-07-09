@@ -62,6 +62,9 @@ func TestBuildCalendarEpiphanySundays(t *testing.T) {
 	if jan11.Celebration.ID != "epiphany-sunday-1" {
 		t.Errorf("Jan 11 = %v, want epiphany-sunday-1", jan11.Celebration.ID)
 	}
+	if jan11.Celebration.ProperID != "epiphany-sunday-within-octave" {
+		t.Errorf("Jan 11 ProperID = %q, want Sunday-within-octave proper", jan11.Celebration.ProperID)
+	}
 
 	feb1 := findDay(days, 2026, 2, 1)
 	if feb1 == nil || feb1.Celebration == nil {
