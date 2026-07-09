@@ -154,7 +154,7 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 	lines := []string{line}
 	// Commemorated concurrent/incoming feasts keep their existing summary lines.
 	for _, comm := range day.Commemorations {
-		lines = append(lines, fmt.Sprintf("           %s (%s)", comm.Name, comm.Rank.Abbrev()))
+		lines = append(lines, fmt.Sprintf("           %s (%s)", comm.CommemorationName(), comm.Rank.Abbrev()))
 	}
 
 	const indent = "           "

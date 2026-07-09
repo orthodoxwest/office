@@ -216,6 +216,85 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 	}
 }
 
+func TestAddCommemorationsStripsRedundantPrefix(t *testing.T) {
+	// A feast whose proper title already begins with "Commemoration of" (e.g. the
+	// June 30 / Jan 18 commemoration of St Paul) must not double the word when the
+	// composer prefixes its own "Commemoration of".
+	corpus := texts.NewTestCorpus(map[string]string{
+		"commons/apostle/commemoration-antiphon": "This is my commandment",
+		"ordinary/lauds/commemoration-versicle":  "Default versicle",
+		"ordinary/lauds/commemoration-collect":   "Default collect",
+	})
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 6, 29, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Commemorations: []*models.Feast{
+			{ID: "commemoration-st-paul-apostle", Name: "Commemoration of St Paul, Apostle", Category: models.CategoryApostle},
+		},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if elems[0].Text != "Commemoration of St Paul, Apostle" {
+		t.Errorf("heading = %q, want the prefix applied once", elems[0].Text)
+	}
+}
+
+func TestLaudsTemporalCommemorationUsesCanticleAntiphon(t *testing.T) {
+	// A commemorated Sunday with no dedicated commemoration antiphon takes its
+	// own gospel-canticle antiphon and the hour's little versicle — never the
+	// saint-shaped "O holy N." fallback, which would leave an unfilled name.
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/pentecost-sunday-20/benedictus-antiphon": "So the father knew",
+		"ordinary/lauds/versicle":                        "Ferial versicle",
+		"ordinary/lauds/commemoration-antiphon":          "Pray for us, O holy N.",
+		"ordinary/lauds/commemoration-versicle":          "The Lord hath chosen him for himself.",
+		"ordinary/lauds/commemoration-collect":           "Saint collect",
+	})
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 10, 18, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Commemorations: []*models.Feast{
+			{ID: "pentecost-sunday-20", Name: "XX Sunday after Pentecost", Category: models.CategorySunday},
+		},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if len(elems) != 4 {
+		t.Fatalf("expected 4 elements, got %d", len(elems))
+	}
+	if elems[1].Text != "So the father knew" {
+		t.Errorf("antiphon = %q, want the Sunday's own Benedictus antiphon", elems[1].Text)
+	}
+	if elems[2].Text != "Ferial versicle" {
+		t.Errorf("versicle = %q, want the hour's little versicle, not the saint versicle", elems[2].Text)
+	}
+}
+
+func TestLaudsTemporalVigilFallsToPsalterAntiphon(t *testing.T) {
+	// A vigil with no proper of its own falls to the Psalter canticle antiphon,
+	// not the "O holy N." saint fallback.
+	corpus := texts.NewTestCorpus(map[string]string{
+		"ordinary/lauds/benedictus-antiphon":    "Blessed be the Lord God of Israel",
+		"ordinary/lauds/versicle":               "Ferial versicle",
+		"ordinary/lauds/commemoration-antiphon": "Pray for us, O holy N.",
+	})
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 7, 24, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Commemorations: []*models.Feast{
+			{ID: "vigil-of-st-james", Name: "Vigil of St. James", Category: models.CategoryFeria},
+		},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if elems[1].Text != "Blessed be the Lord God of Israel" {
+		t.Errorf("antiphon = %q, want the Psalter Benedictus antiphon", elems[1].Text)
+	}
+}
+
 func TestComposeLaudsSundayPsalmodyOmitsFestalPsalms(t *testing.T) {
 	engine, err := NewEngine(filepath.Join("..", "..", "data"))
 	if err != nil {
