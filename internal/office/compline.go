@@ -31,9 +31,12 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 	}
 
 	for _, section := range sections {
-		// Evaluate section condition
-		if section.Condition != "" && !evaluateCondition(section.Condition, day, c.Moveable) {
-			continue
+		if section.Condition != "" {
+			included := evaluateCondition(section.Condition, day, c.Moveable)
+			recordConditionDecision(hour, section.Condition, included, section.Name)
+			if !included {
+				continue
+			}
 		}
 
 		var elems []models.OfficeElement

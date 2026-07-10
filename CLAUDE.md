@@ -50,6 +50,8 @@ internal/
   review/                  Human review coverage tracking
     review.go              Manifest sweep: dedupe composed hours by content hash into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
+    provenance.go          Structured per-entry source inventory and attestations
+    assurance.go           Composition explanations and minimal structural-review planning
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
 data/
@@ -59,6 +61,7 @@ data/
   office/                  Hour structure definitions (one file per hour)
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   review/signoffs.txt      Human review sign-offs (hash-keyed; see REVIEWING.md)
+  review/provenance.csv    Source/page attestations; citations only, never book contents
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
 scripts/
   seed-divinum.go          Seed propers/commons from a local Divinum Officium checkout
@@ -127,6 +130,9 @@ make audit       # Report placeholder texts, missing propers + composition sweep
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt
+make review-provenance # Report generated corpus source coverage
+make review-plan      # Print minimal structural-review checklist CSV
+./office review explain HOUR DATE # JSON dependencies and rule decisions
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
 make golden      # Regenerate golden test files after intentional changes

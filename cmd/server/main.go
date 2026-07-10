@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -186,6 +187,9 @@ func cmdValidate(dataDir string) {
 	errors = append(errors, calendar.ValidateAll(dataDir)...)
 	errors = append(errors, office.ValidateHourDefinitions(dataDir)...)
 	errors = append(errors, texts.ValidateAll(dataDir)...)
+	if _, err := review.ScanProvenance(dataDir); err != nil {
+		errors = append(errors, "review provenance: "+err.Error())
+	}
 	if len(errors) > 0 {
 		fmt.Println("Validation errors found:")
 		fmt.Println()
@@ -324,6 +328,10 @@ Subcommands:
   manifest [-start YEAR] [-years N] [-base URL]
                                          Print the review-unit checklist as CSV
   status   [-start YEAR] [-years N]      Report coverage vs data/review/signoffs.txt
+  provenance [-csv]                     Report structured corpus provenance
+  explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
+  plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
+                                         Select a minimal coverage-oriented review set
   sign HASH REVIEWER [note...]           Record a sign-off for the unit with HASH`
 
 	if len(os.Args) < 3 {
@@ -367,6 +375,66 @@ Subcommands:
 			os.Exit(1)
 		}
 		review.PrintStatus(review.Classify(m, signoffs), os.Stdout)
+
+	case "provenance":
+		fs := flag.NewFlagSet("review provenance", flag.ExitOnError)
+		csvOutput := fs.Bool("csv", false, "write the complete provenance inventory as CSV")
+		fs.Parse(os.Args[3:])
+		inventory, err := review.ScanProvenance(dataDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error scanning provenance: %v\n", err)
+			os.Exit(1)
+		}
+		if *csvOutput {
+			if err := review.WriteProvenanceCSV(inventory, os.Stdout); err != nil {
+				fmt.Fprintf(os.Stderr, "Error writing provenance CSV: %v\n", err)
+				os.Exit(1)
+			}
+		} else {
+			review.PrintProvenanceSummary(inventory, os.Stdout)
+		}
+
+	case "explain":
+		if len(os.Args) != 5 {
+			fmt.Fprintln(os.Stderr, "Usage: office review explain HOUR YYYY-MM-DD")
+			os.Exit(1)
+		}
+		date, err := time.Parse("2006-01-02", os.Args[4])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Invalid date: %s\n", os.Args[4])
+			os.Exit(1)
+		}
+		assurance, err := review.ExplainComposition(dataDir, os.Args[3], date)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error explaining composition: %v\n", err)
+			os.Exit(1)
+		}
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		if err := enc.Encode(assurance); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing assurance JSON: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "plan":
+		fs := flag.NewFlagSet("review plan", flag.ExitOnError)
+		start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
+		years := fs.Int("years", 1, "number of calendar years to sweep")
+		base := fs.String("base", review.DefaultBaseURL, "base URL prefixed to checklist links")
+		summary := fs.Bool("summary", false, "print counts instead of the selected-page CSV")
+		includeSources := fs.Bool("include-sources", false, "also cover every rendered corpus key; text provenance is separate by default")
+		fs.Parse(os.Args[3:])
+		plan, err := review.BuildReviewPlan(dataDir, *start, *years, *includeSources)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error building review plan: %v\n", err)
+			os.Exit(1)
+		}
+		if *summary {
+			review.PrintReviewPlanSummary(plan, os.Stdout)
+		} else if err := review.WriteReviewPlanCSV(plan, os.Stdout, *base); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing review plan: %v\n", err)
+			os.Exit(1)
+		}
 
 	case "sign":
 		if len(os.Args) < 5 {

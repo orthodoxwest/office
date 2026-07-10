@@ -77,7 +77,45 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 
 	collapseUniformAntiphons(hour)
 	markPsalmDoxologies(hour)
+	appendContextDecisions(hour, day, hourName)
 	return hour, nil
+}
+
+func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, hourName string) {
+	add := func(rule, outcome, detail string) {
+		hour.Decisions = append(hour.Decisions, models.CompositionDecision{Rule: rule, Outcome: outcome, Detail: detail})
+	}
+
+	add("context:season", string(day.Season), "")
+	add("context:weekday", strings.ToLower(day.Date.Weekday().String()), "")
+	add("occurrence", day.ResolutionRule, "")
+	if day.Celebration == nil {
+		add("context:office", "feria", "")
+	} else {
+		add("context:office", "celebration", day.Celebration.ID)
+		add("context:rank", string(day.Celebration.Rank), "")
+		add("context:category", string(day.Celebration.Category), "")
+	}
+	add("context:commemorations", fmt.Sprintf("%d", len(day.Commemorations)), "")
+	if day.WithinOctaveOf != "" {
+		add("context:octave", "within", day.WithinOctaveOf)
+	} else {
+		add("context:octave", "outside", "")
+	}
+	if day.FeriaCommemoration != nil {
+		add("context:feria-commemoration", "present", day.FeriaCommemoration.ProperID)
+	}
+	if hourName == "vespers" {
+		owner := "not-applicable"
+		switch day.Vespers.Owner {
+		case models.VespersIIOfPreceding:
+			owner = "second-of-preceding"
+		case models.VespersIOfFollowing:
+			owner = "first-of-following"
+		}
+		add("vespers:owner", owner, "")
+		add("vespers:rule", day.Vespers.Rule, "")
+	}
 }
 
 // collapseUniformAntiphons renders psalm groups "under one antiphon": within
@@ -182,15 +220,17 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	label := formatLabel(elem.Type, elem.Ref)
 	if elemType == models.Chapter {
 		ref, body := extractChapterRef(text)
-		return models.OfficeElement{Type: models.Chapter, Text: body, Label: ref}
+		return models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SourceRef: elem.Ref, SourceRefs: []string{elem.Ref}}
 	}
 	if elemType == models.Preces {
-		return models.OfficeElement{Type: models.Preces, Text: text, Label: "Preces"}
+		return models.OfficeElement{Type: models.Preces, Text: text, Label: "Preces", SourceRef: elem.Ref, SourceRefs: []string{elem.Ref}}
 	}
 	return models.OfficeElement{
-		Type:  elemType,
-		Text:  text,
-		Label: label,
+		Type:       elemType,
+		Text:       text,
+		Label:      label,
+		SourceRef:  elem.Ref,
+		SourceRefs: []string{elem.Ref},
 	}
 }
 
@@ -199,9 +239,11 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 func resolveMarianElement(day *models.CalendarDay, corpus *texts.TextCorpus) models.OfficeElement {
 	ref := "ordinary/marian/" + day.MarianAntiphon
 	oe := models.OfficeElement{
-		Type:  models.Antiphon,
-		Text:  corpus.Get(ref),
-		Label: marianLabel(day.MarianAntiphon),
+		Type:       models.Antiphon,
+		Text:       corpus.Get(ref),
+		Label:      marianLabel(day.MarianAntiphon),
+		SourceRef:  ref,
+		SourceRefs: []string{ref},
 	}
 	if oe.Text == "" {
 		oe.Text = "[Text not found: " + ref + "]"
@@ -220,30 +262,50 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return resolveElement(elem, corpus)
 	case "proper-antiphon":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}
+		return sourcedElement(models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-collect":
 		text, src := resolveProperCollectText(day, hourName, corpus)
-		return models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}
+		return sourcedElement(models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}, src)
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		refs := []string{src}
 		if dox, doxRef := resolveProperText(day, hourName, "hymn-doxology", corpus); strings.HasPrefix(doxRef, "seasonal/") {
 			text = substituteHymnDoxology(text, dox)
+			refs = append(refs, doxRef)
 		}
 		title, body := extractHymnTitle(text)
-		return models.OfficeElement{Type: models.Hymn, Text: body, Label: title, SlotRef: elem.Ref, SourceRef: src}
+		return models.OfficeElement{Type: models.Hymn, Text: body, Label: title, SlotRef: elem.Ref, SourceRef: src, SourceRefs: compactRefs(refs)}
 	case "proper-responsory":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Response, Text: text, SlotRef: elem.Ref, SourceRef: src}
+		return sourcedElement(models.OfficeElement{Type: models.Response, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-versicle":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
-		return models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}
+		return sourcedElement(models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-chapter":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		ref, body := extractChapterRef(text)
-		return models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SlotRef: elem.Ref, SourceRef: src}
+		return sourcedElement(models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SlotRef: elem.Ref, SourceRef: src}, src)
 	default:
 		return resolveElement(elem, corpus)
 	}
+}
+
+func sourcedElement(elem models.OfficeElement, refs ...string) models.OfficeElement {
+	elem.SourceRefs = compactRefs(refs)
+	return elem
+}
+
+func compactRefs(refs []string) []string {
+	seen := map[string]bool{}
+	out := make([]string, 0, len(refs))
+	for _, ref := range refs {
+		if ref == "" || seen[ref] {
+			continue
+		}
+		seen[ref] = true
+		out = append(out, ref)
+	}
+	return out
 }
 
 // mapElementType converts hour definition type strings to model ElementType constants.

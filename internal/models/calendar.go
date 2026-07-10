@@ -354,6 +354,7 @@ type VespersDesignation struct {
 	Feast  *Feast // celebration that owns vespers (may differ from day's Celebration)
 	Color  Color  // liturgical color for vespers
 	Season Season
+	Rule   string // stable explanation code for the concurrence decision
 
 	// Commemorations holds the celebration that lost the vespers concurrence
 	// (the outgoing office at I Vespers of a following feast, or the incoming
@@ -370,6 +371,7 @@ type CalendarDay struct {
 	Commemorations []*Feast
 	Color          Color
 	Notes          string
+	ResolutionRule string // stable explanation code for the occurrence decision
 
 	// FeriaCommemoration is the occurring privileged feria (of Septuagesima,
 	// Lent, or Passiontide) commemorated at Lauds when a feast takes the office

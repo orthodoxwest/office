@@ -110,6 +110,11 @@ func isSunday(f *models.Feast) bool {
 // ordo's resolutions where the rubrics leave room (equal-rank concurrence,
 // possession against an incoming lesser Sunday).
 func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
+	winner, _ := concurrenceWinnerWithRule(prec, fol)
+	return winner
+}
+
+func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, string) {
 	// 1. Greater Sundays of the I Class hold their Vespers against
 	// everything except a sanctoral I Class Double feast (2026 ordo:
 	// St Tikhon's I Vespers supersedes Low Sunday; temporal I Class days
@@ -118,16 +123,16 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 	if sundaysFirstClass[prec.ID] {
 		if fol.Rank == models.Double1stClass && !fol.IsTemporal() &&
 			prec.ID != "easter-sunday" && prec.ID != "pentecost" {
-			return models.VespersIOfFollowing
+			return models.VespersIOfFollowing, "concurrence:greater-sunday-vs-first-class"
 		}
-		return models.VespersIIOfPreceding
+		return models.VespersIIOfPreceding, "concurrence:greater-sunday"
 	}
 	if sundaysFirstClass[fol.ID] {
 		if prec.Rank == models.Double1stClass && !prec.IsTemporal() &&
 			fol.ID != "easter-sunday" && fol.ID != "pentecost" {
-			return models.VespersIIOfPreceding
+			return models.VespersIIOfPreceding, "concurrence:greater-sunday-vs-first-class"
 		}
-		return models.VespersIOfFollowing
+		return models.VespersIOfFollowing, "concurrence:greater-sunday"
 	}
 
 	// 2. I or II Class Double feast vs any other Sunday — feast wins
@@ -143,7 +148,7 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 		}
 
 		if feast.Rank.Weight() >= models.Double2ndClass.Weight() {
-			return feastWins
+			return feastWins, "concurrence:class-i-ii-vs-sunday"
 		}
 		// 3. Below II Class: the Sunday takes the concurrence (XIII.2-5;
 		// the ordo applies this even to Greater Double feasts — the XV
@@ -153,9 +158,9 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 		// possession is the exception: it keeps its II Vespers (2026
 		// ordo: Octave Day of the Assumption before the XII Sunday).
 		if feast == prec && isOctaveDay(feast) {
-			return feastWins
+			return feastWins, "concurrence:octave-day-in-possession-vs-sunday"
 		}
-		return sundayWins
+		return sundayWins, "concurrence:sunday-below-class-ii"
 	}
 
 	// 5. Octave Day vs a Double below II Class — the Octave Day wins, in
@@ -170,27 +175,27 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 			octaveWins, otherWins = otherWins, octaveWins
 		}
 		if other.Rank.Weight() >= models.Double2ndClass.Weight() {
-			return otherWins // XIII.10 excludes I/II Class Doubles
+			return otherWins, "concurrence:class-i-ii-vs-octave-day" // XIII.10 excludes I/II Class Doubles
 		}
 		if isDoubleOrAbove(other) {
-			return octaveWins
+			return octaveWins, "concurrence:octave-day-vs-double"
 		}
 	}
 
 	// 6. Octave Day vs Octave Day — worthier wins (XIII.11)
 	if isOctaveDay(prec) && isOctaveDay(fol) {
 		if compareFeastPrecedence(prec, fol) {
-			return models.VespersIIOfPreceding
+			return models.VespersIIOfPreceding, "concurrence:octave-day-vs-octave-day"
 		}
-		return models.VespersIOfFollowing
+		return models.VespersIOfFollowing, "concurrence:octave-day-vs-octave-day"
 	}
 
 	// 7. Double vs day-within-Octave / Saturday BVM — Double wins (XIII.12,13)
 	if isDoubleOrAbove(prec) && (isDayWithinOctave(fol) || isSaturdayBVM(fol)) {
-		return models.VespersIIOfPreceding
+		return models.VespersIIOfPreceding, "concurrence:double-vs-octave-or-saturday-bvm"
 	}
 	if isDoubleOrAbove(fol) && (isDayWithinOctave(prec) || isSaturdayBVM(prec)) {
-		return models.VespersIOfFollowing
+		return models.VespersIOfFollowing, "concurrence:double-vs-octave-or-saturday-bvm"
 	}
 
 	// 8. Fallback: the worthier office takes the concurrence. When they are
@@ -202,12 +207,12 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 	// Magnificat antiphon it quotes (St Chrysostom/St Cyril, St Augustine
 	// of Canterbury/St Bede) — approximated here as I of the following.
 	if compareFeastPrecedence(prec, fol) {
-		return models.VespersIIOfPreceding
+		return models.VespersIIOfPreceding, "concurrence:general-precedence"
 	}
 	if !compareFeastPrecedence(fol, prec) && prec.Rank.Weight() >= models.Double2ndClass.Weight() {
-		return models.VespersIIOfPreceding
+		return models.VespersIIOfPreceding, "concurrence:equal-second-class"
 	}
-	return models.VespersIOfFollowing
+	return models.VespersIOfFollowing, "concurrence:equal-following"
 }
 
 // boundaryCommemorations collects the commemorations proper to an evening's
@@ -274,7 +279,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 
 	// Neither has vespers — not applicable
 	if !precHasII && !folHasI {
-		return models.VespersDesignation{}
+		return models.VespersDesignation{Rule: "concurrence:neither-office-has-rights"}
 	}
 
 	// If preceding has no II Vespers, following wins by default
@@ -285,6 +290,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Color:          following.Color,
 			Season:         following.Season,
 			Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
+			Rule:           "concurrence:following-only",
 		}
 	}
 
@@ -296,11 +302,12 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Color:          preceding.Color,
 			Season:         preceding.Season,
 			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
+			Rule:           "concurrence:preceding-only",
 		}
 	}
 
 	// Both have vespers — resolve the concurrence
-	winner := concurrenceWinner(precFeast, folFeast)
+	winner, rule := concurrenceWinnerWithRule(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
@@ -308,6 +315,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Color:          preceding.Color,
 			Season:         preceding.Season,
 			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
+			Rule:           rule,
 		}
 	}
 	return models.VespersDesignation{
@@ -316,6 +324,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		Color:          following.Color,
 		Season:         following.Season,
 		Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
+		Rule:           rule,
 	}
 }
 
