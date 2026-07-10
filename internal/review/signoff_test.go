@@ -1,6 +1,7 @@
 package review
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 	"time"
@@ -28,6 +29,36 @@ fff000fff000 vespers all-saints john.d 2026-06-09
 	}
 	if signoffs[1].Note != "" {
 		t.Errorf("signoffs[1].Note = %q, want empty", signoffs[1].Note)
+	}
+}
+
+func TestSignoffForPageResolvesInternalIdentity(t *testing.T) {
+	date := time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC)
+	signoff, unit, err := SignoffForPage("../../data", "lauds", date, "mary.k", "checked")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if signoff.Hash == "" || signoff.Hash != unit.Hash {
+		t.Fatalf("signoff identity was not resolved: signoff=%#v unit=%#v", signoff, unit)
+	}
+	if signoff.Hour != "lauds" || signoff.UnitKey != "trinity-sunday" || signoff.Reviewer != "mary.k" {
+		t.Fatalf("signoff = %#v", signoff)
+	}
+}
+
+func TestStatusOutputUsesPageIdentity(t *testing.T) {
+	date := time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC)
+	statuses := []UnitStatus{{Unit: &Unit{
+		Hash: "0123456789ab", Hour: "lauds", UnitKey: "trinity-sunday",
+		Name: "Trinity Sunday", Rank: "double-1st-class", Date: date,
+	}, State: Unreviewed}}
+	var out bytes.Buffer
+	PrintStatus(statuses, &out)
+	if strings.Contains(out.String(), "0123456789ab") || strings.Contains(out.String(), "sign HASH") {
+		t.Fatalf("status output exposes internal composition identity:\n%s", out.String())
+	}
+	if !strings.Contains(out.String(), "review sign HOUR YYYY-MM-DD REVIEWER") {
+		t.Fatalf("status output lacks page-based sign-off guidance:\n%s", out.String())
 	}
 }
 

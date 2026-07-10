@@ -291,7 +291,7 @@ func WriteCSV(m *Manifest, w io.Writer, baseURL string) error {
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	header := []string{"priority", "hash", "hour", "date", "unit_key", "celebration", "rank", "season", "context", "occurrences", "url"}
+	header := []string{"priority", "hour", "date", "unit_key", "celebration", "rank", "season", "context", "occurrences", "url"}
 	if err := cw.Write(header); err != nil {
 		return err
 	}
@@ -303,7 +303,6 @@ func WriteCSV(m *Manifest, w io.Writer, baseURL string) error {
 		}
 		row := []string{
 			u.Priority(),
-			u.Hash,
 			u.Hour,
 			u.Date.Format("2006-01-02"),
 			u.UnitKey,

@@ -30,11 +30,11 @@ Each row in the checklist has:
 - a **link** — the exact page to open (e.g. `/lauds/2026-06-07`)
 - a **priority** — A (Sundays and 1st/2nd class feasts), B (greater doubles
   and doubles), C (everything else). Work top down.
-- a **hash** — a short code identifying exactly what you reviewed. When you
-  finish a row, report the hash back so coverage can be recorded. If the
-  texts later change, your sign-off is automatically marked stale and the
-  unit returns to the queue.
 - a **context** note — commemorations or octave the page should reflect.
+
+The link's hour and date identify the page for sign-off. If its contents later
+change, the sign-off is automatically marked stale and the page returns to the
+queue; reviewers do not need to copy or manage a version identifier.
 
 ## What to look for
 
@@ -86,8 +86,8 @@ the category, then write two things:
    page number if you can.
 2. **What the app shows** — paste the text from the page.
 
-If a page is fully correct, that is just as valuable: report the row's hash
-back through your coordinator so it can be signed off.
+If a page is fully correct, that is just as valuable: tell your coordinator
+which linked hour and date you checked so it can be signed off.
 
 ## For the maintainer
 
@@ -99,22 +99,14 @@ make review-provenance-queue > provenance-queue.csv  # highest-leverage texts fi
 make review-plan > review-plan.csv    # minimal structural checklist
 make review-assurance                 # release coverage gates and summary
 ./office review explain lauds 2026-06-07  # one page's assurance JSON
-./office review sign HASH REVIEWER [note...]   # record a sign-off
+./office review sign lauds 2026-06-07 REVIEWER [note...] # record a sign-off
 ```
 
-Explicit text attestations live in `data/review/provenance.csv`:
-
-```csv
-key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
-proper/example/collect,0123456789ab,Printed Diurnal,Proper of Example,123,verified,initials,2026-07-09,word-for-word
-```
-
-The file records only citations, review metadata, and the corpus key. It does
-not copy or embed source-book contents. `review provenance -csv` joins these
-attestations to source comments and current content hashes, so counts never
-need to be maintained by hand. The CLI records the entry's current hash
-internally; if the entry later changes, the attestation automatically becomes
-stale without requiring reviewers to handle hashes themselves.
+Explicit text attestations live in `data/review/provenance.csv`. The file
+records only citations, review metadata, the corpus key, and internal version
+metadata; it does not copy or embed source-book contents. If an entry later
+changes, its attestation automatically becomes stale without requiring
+reviewers to handle version identifiers.
 
 Prefer the safe CLI to manual CSV editing:
 
@@ -144,12 +136,14 @@ reviewable change:
 Each web hour also has a collapsed **Assurance** disclosure. It shows the same
 dependency states, fallback tiers, and stable rule identifiers without
 revealing local paths or source contents. Unverified dependency rows link to a
-prefilled review issue for that exact corpus key.
+prefilled review issue for that exact corpus key. `needs-review` means a source
+lead or explicit review task exists but still needs verification;
+`source-unknown` means provenance research must happen first.
 
-Sign-offs live in `data/review/signoffs.txt` and are keyed by content hash:
-any edit to the texts behind a signed-off unit orphans the hash and the unit
-shows up as **stale** in `review-status` until re-reviewed. Sign-offs are
-committed to git like any other data change.
+Sign-offs live in `data/review/signoffs.txt`. The CLI binds each sign-off to
+the exact page contents automatically, so any later edit makes the unit show
+up as **stale** in `review-status` until re-reviewed. Sign-offs are committed
+to git like any other data change.
 
 ### Annual cadence
 

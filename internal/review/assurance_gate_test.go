@@ -20,7 +20,7 @@ func TestEvaluateAssurance(t *testing.T) {
 func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 	report := &AssuranceReport{
 		StartYear: 2026, Years: 1, CandidateCount: 2555, ModeledFeatures: 10,
-		SelectedPages: 3, Verified: 1, Documented: 2, NeedsReview: 3, Undocumented: 4,
+		SelectedPages: 3, Verified: 1, NeedsReview: 3, SourceUnknown: 4,
 	}
 	var out bytes.Buffer
 	WriteAssuranceSummary(report, nil, &out, true)

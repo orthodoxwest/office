@@ -28,9 +28,8 @@ type AssuranceReport struct {
 	SelectedPages     int
 	UncoveredFeatures []string
 	Verified          int
-	Documented        int
 	NeedsReview       int
-	Undocumented      int
+	SourceUnknown     int
 	StaleAttestations int
 }
 
@@ -53,12 +52,10 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 		switch entry.Status {
 		case ProvenanceVerified:
 			report.Verified++
-		case ProvenanceDocumented:
-			report.Documented++
 		case ProvenanceNeedsReview:
 			report.NeedsReview++
 		default:
-			report.Undocumented++
+			report.SourceUnknown++
 		}
 		if entry.Stale {
 			report.StaleAttestations++
@@ -113,9 +110,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "| Selected structural-review pages | %d |\n", report.SelectedPages)
 		fmt.Fprintf(w, "| Uncovered features | %d |\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "| Verified text entries | %d |\n", report.Verified)
-		fmt.Fprintf(w, "| Documented text entries | %d |\n", report.Documented)
 		fmt.Fprintf(w, "| Text entries needing review | %d |\n", report.NeedsReview)
-		fmt.Fprintf(w, "| Undocumented text entries | %d |\n", report.Undocumented)
+		fmt.Fprintf(w, "| Text entries with unknown source | %d |\n", report.SourceUnknown)
 		fmt.Fprintf(w, "| Stale attestations | %d |\n", report.StaleAttestations)
 	} else {
 		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
@@ -124,9 +120,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "  selected pages:       %d\n", report.SelectedPages)
 		fmt.Fprintf(w, "  uncovered features:   %d\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "  verified:             %d\n", report.Verified)
-		fmt.Fprintf(w, "  documented:           %d\n", report.Documented)
 		fmt.Fprintf(w, "  needs review:         %d\n", report.NeedsReview)
-		fmt.Fprintf(w, "  undocumented:         %d\n", report.Undocumented)
+		fmt.Fprintf(w, "  source unknown:       %d\n", report.SourceUnknown)
 		fmt.Fprintf(w, "  stale attestations:   %d\n", report.StaleAttestations)
 	}
 	if len(failures) > 0 {

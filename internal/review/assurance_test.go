@@ -1,6 +1,8 @@
 package review
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 	"time"
 )
@@ -53,5 +55,20 @@ func TestBuildReviewPlanReducesStructuralChecklist(t *testing.T) {
 				t.Fatalf("structural plan unexpectedly includes source feature %q", feature)
 			}
 		}
+	}
+}
+
+func TestReviewPlanCSVHidesCompositionHashes(t *testing.T) {
+	p := &ReviewPlan{Selected: []PlannedReview{{Candidate: ReviewCandidate{
+		Hash: "0123456789ab", Priority: "A", Hour: "lauds",
+		Date: time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC), UnitKey: "trinity-sunday",
+		Celebration: "Trinity Sunday",
+	}}}}
+	var out bytes.Buffer
+	if err := WriteReviewPlanCSV(p, &out, "https://example.test"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "hash") || strings.Contains(out.String(), "0123456789ab") {
+		t.Fatalf("review plan exposes internal composition identity:\n%s", out.String())
 	}
 }

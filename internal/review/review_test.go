@@ -1,6 +1,7 @@
 package review
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 	"time"
@@ -24,6 +25,20 @@ func sampleHour(date time.Time, collectText string) *models.OfficeHour {
 				},
 			},
 		},
+	}
+}
+
+func TestReviewerManifestHidesCompositionHashes(t *testing.T) {
+	m := &Manifest{Units: []Unit{{
+		Hash: "0123456789ab", Hour: "lauds", UnitKey: "trinity-sunday",
+		Name: "Trinity Sunday", Date: time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC),
+	}}}
+	var out bytes.Buffer
+	if err := WriteCSV(m, &out, "https://example.test"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "hash") || strings.Contains(out.String(), "0123456789ab") {
+		t.Fatalf("reviewer manifest exposes internal composition identity:\n%s", out.String())
 	}
 }
 

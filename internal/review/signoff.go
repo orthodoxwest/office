@@ -9,6 +9,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/office"
 )
 
 // Signoff records that a human reviewed one unit against the source books.
@@ -94,6 +98,39 @@ func AppendSignoff(dataDir string, s Signoff) error {
 	}
 	_, err = fmt.Fprintln(f, line)
 	return err
+}
+
+// SignoffForPage resolves a reviewer-facing hour and date to the exact
+// composition identity stored in the sign-off ledger. Reviewers never need to
+// find or supply that internal identity themselves.
+func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note string) (*Signoff, *Unit, error) {
+	days, err := calendar.BuildCalendar(date.Year(), dataDir)
+	if err != nil {
+		return nil, nil, fmt.Errorf("building calendar: %w", err)
+	}
+	idx := date.YearDay() - 1
+	if idx < 0 || idx >= len(days) {
+		return nil, nil, fmt.Errorf("date out of range: %s", date.Format("2006-01-02"))
+	}
+	eng, err := office.NewEngine(dataDir)
+	if err != nil {
+		return nil, nil, fmt.Errorf("creating office engine: %w", err)
+	}
+	day := &days[idx]
+	hour, err := eng.ComposeHour(hourName, day, calendar.ComputeMoveableDates(date.Year()))
+	if err != nil {
+		return nil, nil, fmt.Errorf("composing %s: %w", hourName, err)
+	}
+	unit := &Unit{
+		Hash: HashHour(hour), Hour: hourName, UnitKey: unitKey(day, hourName),
+		Name: celebrationName(day), Rank: celebrationRank(day, hourName), Season: day.Season,
+		Date: date, Occurrences: 1, Context: contextNote(day, hourName),
+	}
+	signoff := &Signoff{
+		Hash: unit.Hash, Hour: hourName, UnitKey: unit.UnitKey,
+		Reviewer: reviewer, Date: time.Now().Format("2006-01-02"), Note: note,
+	}
+	return signoff, unit, nil
 }
 
 // ReviewState classifies one unit against the recorded sign-offs.
@@ -219,14 +256,14 @@ func PrintStatus(statuses []UnitStatus, w io.Writer) {
 		sortStatuses(unreviewedA)
 		fmt.Fprintf(w, "=== Unreviewed priority-A: %d unit(s) ===\n", len(unreviewedA))
 		for _, st := range unreviewedA {
-			fmt.Fprintf(w, "  %s %s (%s)  %s  hash=%s\n",
-				st.Unit.Hour, st.Unit.Name, st.Unit.UnitKey, st.Unit.URL(), st.Unit.Hash)
+			fmt.Fprintf(w, "  %s %s (%s)  %s\n",
+				st.Unit.Hour, st.Unit.Name, st.Unit.UnitKey, st.Unit.URL())
 		}
 		fmt.Fprintln(w)
 	}
 
 	fmt.Fprintln(w, "Full checklist: ./office review manifest > manifest.csv")
-	fmt.Fprintln(w, "Record a sign-off: ./office review sign HASH REVIEWER [note...]")
+	fmt.Fprintln(w, "Record a sign-off: ./office review sign HOUR YYYY-MM-DD REVIEWER [note...]")
 }
 
 func sortStatuses(sts []UnitStatus) {

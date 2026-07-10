@@ -181,7 +181,7 @@ func PrintProvenanceQueueSummary(q *ProvenanceQueue, w io.Writer) {
 	fmt.Fprintf(w, "  queued entries:      %d\n", len(q.Entries))
 	fmt.Fprintf(w, "  rendered entries:    %d\n", used)
 	fmt.Fprintf(w, "  include verified:    %t\n", q.IncludeVerified)
-	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceDocumented, ProvenanceNeedsReview, ProvenanceUndocumented} {
+	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceNeedsReview, ProvenanceSourceUnknown} {
 		fmt.Fprintf(w, "  %-19s %d\n", string(status)+":", statuses[status])
 	}
 }

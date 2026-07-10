@@ -48,7 +48,7 @@ internal/
     sweep.go               Composition sweep: not-found markers + ordinary fallbacks on Double+ days
     lint.go                Text-corpus lints (mechanical fail make check; advisory for triage)
   review/                  Human review coverage tracking
-    review.go              Manifest sweep: dedupe composed hours by content hash into review units
+    review.go              Manifest sweep: dedupe identical composed hours into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
     provenance.go          Structured per-entry source inventory and attestations
     provenance_queue.go    Dependency-weighted atomic text review ordering
@@ -62,7 +62,7 @@ data/
   texts/                   Liturgical texts
   office/                  Hour structure definitions (one file per hour)
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
-  review/signoffs.txt      Human review sign-offs (hash-keyed; see REVIEWING.md)
+  review/signoffs.txt      Human review sign-offs with internal version binding (see REVIEWING.md)
   review/provenance.csv    Source/page attestations; citations only, never book contents
   review/assurance-baseline.json  Intentional verified/structural coverage floors
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
@@ -139,6 +139,7 @@ make review-plan      # Print minimal structural-review checklist CSV
 make review-assurance # Run release assurance gates and summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
+./office review sign HOUR DATE REVIEWER # Record structural sign-off
 
 Hour pages expose assurance metadata in a collapsed disclosure. Keep it
 source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,

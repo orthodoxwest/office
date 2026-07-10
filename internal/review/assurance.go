@@ -16,12 +16,11 @@ import (
 // DependencyEvidence joins a rendered corpus dependency to its current
 // provenance record.
 type DependencyEvidence struct {
-	Key         string           `json:"key"`
-	ContentHash string           `json:"content_hash,omitempty"`
-	Status      ProvenanceStatus `json:"status"`
-	File        string           `json:"file,omitempty"`
-	Section     string           `json:"section,omitempty"`
-	Sources     []SourceCitation `json:"sources,omitempty"`
+	Key     string           `json:"key"`
+	Status  ProvenanceStatus `json:"status"`
+	File    string           `json:"file,omitempty"`
+	Section string           `json:"section,omitempty"`
+	Sources []SourceCitation `json:"sources,omitempty"`
 }
 
 // CompositionAssurance is the machine-readable explanation for one rendered
@@ -29,7 +28,6 @@ type DependencyEvidence struct {
 type CompositionAssurance struct {
 	Date         string                       `json:"date"`
 	Hour         string                       `json:"hour"`
-	Hash         string                       `json:"hash"`
 	UnitKey      string                       `json:"unit_key"`
 	Celebration  string                       `json:"celebration"`
 	Season       models.Season                `json:"season"`
@@ -66,7 +64,6 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 	a := &CompositionAssurance{
 		Date:        date.Format("2006-01-02"),
 		Hour:        hourName,
-		Hash:        HashHour(hour),
 		UnitKey:     unitKey(&days[idx], hourName),
 		Celebration: celebrationName(&days[idx]),
 		Season:      hour.Season,
@@ -76,11 +73,11 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 	for _, ref := range hourDependencies(hour) {
 		e, ok := byKey[ref]
 		if !ok {
-			a.Dependencies = append(a.Dependencies, DependencyEvidence{Key: ref, Status: ProvenanceUndocumented})
+			a.Dependencies = append(a.Dependencies, DependencyEvidence{Key: ref, Status: ProvenanceSourceUnknown})
 			continue
 		}
 		a.Dependencies = append(a.Dependencies, DependencyEvidence{
-			Key: ref, ContentHash: e.ContentHash, Status: e.Status,
+			Key: ref, Status: e.Status,
 			File: e.File, Section: e.Section, Sources: e.Sources,
 		})
 	}
@@ -139,7 +136,7 @@ func UniqueCompositionDecisions(in []models.CompositionDecision) []models.Compos
 // ReviewCandidate is one representative composition considered by the set
 // cover planner.
 type ReviewCandidate struct {
-	Hash         string
+	Hash         string // internal composition identity; omitted from reviewer output
 	Priority     string
 	Hour         string
 	Date         time.Time
@@ -324,11 +321,11 @@ func WriteReviewPlanCSV(p *ReviewPlan, w io.Writer, baseURL string) error {
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"order", "priority", "hash", "hour", "date", "unit_key", "celebration", "context", "new_coverage", "dependencies", "decisions", "url"})
+	_ = cw.Write([]string{"order", "priority", "hour", "date", "unit_key", "celebration", "context", "new_coverage", "dependencies", "decisions", "url"})
 	for i, selected := range p.Selected {
 		c := selected.Candidate
 		_ = cw.Write([]string{
-			fmt.Sprint(i + 1), c.Priority, c.Hash, c.Hour, c.Date.Format("2006-01-02"),
+			fmt.Sprint(i + 1), c.Priority, c.Hour, c.Date.Format("2006-01-02"),
 			c.UnitKey, c.Celebration, c.Context, fmt.Sprint(len(selected.NewCoverage)),
 			strings.Join(c.Dependencies, "; "), strings.Join(c.Decisions, "; "),
 			baseURL + "/" + c.Hour + "/" + c.Date.Format("2006-01-02"),

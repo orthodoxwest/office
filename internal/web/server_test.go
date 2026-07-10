@@ -124,6 +124,7 @@ func TestHourAssuranceCountsDependenciesWithoutSourceContents(t *testing.T) {
 		Sections: []models.OfficeSection{{Elements: []models.OfficeElement{
 			{Type: models.Collect, Text: "A collect.", SourceRef: "proper/example/collect", SourceRefs: []string{"proper/example/collect"}},
 			{Type: models.Psalm, Text: "A psalm.", SourceRef: "psalms/001", SourceRefs: []string{"psalms/001"}},
+			{Type: models.Chapter, Text: "A chapter.", SourceRef: "proper/example/chapter", SourceRefs: []string{"proper/example/chapter"}},
 		}}},
 		Decisions: []models.CompositionDecision{{Rule: "occurrence:higher-rank", Outcome: "challenger-wins"}},
 	}
@@ -132,14 +133,20 @@ func TestHourAssuranceCountsDependenciesWithoutSourceContents(t *testing.T) {
 		"psalms/001":             {Key: "psalms/001", Status: review.ProvenanceNeedsReview},
 	}}
 	got := s.hourAssurance(hour, "lauds", "2026-01-01")
-	if got.Verified != 1 || got.NeedsReview != 1 || len(got.Dependencies) != 2 {
+	if got.Verified != 1 || got.NeedsReview != 1 || got.SourceUnknown != 1 || len(got.Dependencies) != 3 {
 		t.Fatalf("assurance = %#v", got)
 	}
 	if len(got.Decisions) != 1 || got.Decisions[0].Rule != "occurrence:higher-rank" {
 		t.Fatalf("decisions = %#v", got.Decisions)
 	}
-	if !strings.Contains(got.Dependencies[1].ReportURL, "psalms%2F001") {
-		t.Fatalf("report URL does not identify dependency: %s", got.Dependencies[1].ReportURL)
+	foundPsalmReview := false
+	for _, dependency := range got.Dependencies {
+		if dependency.Key == "psalms/001" && strings.Contains(dependency.ReportURL, "psalms%2F001") {
+			foundPsalmReview = true
+		}
+	}
+	if !foundPsalmReview {
+		t.Fatal("report URL does not identify the psalm dependency")
 	}
 }
 
@@ -157,6 +164,16 @@ func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
 	for _, want := range []string{`<details class="assurance-panel">`, "Text dependencies", "Composition decisions"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hour page missing %q", want)
+		}
+	}
+	for _, want := range []string{"need review", "source unknown"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("hour page missing assurance category %q", want)
+		}
+	}
+	for _, retired := range []string{" documented", "undocumented"} {
+		if strings.Contains(body, retired) {
+			t.Errorf("hour page contains retired assurance category %q", retired)
 		}
 	}
 	for _, forbidden := range []string{"SOURCE:", ".txt", "/home/", "../resources"} {
