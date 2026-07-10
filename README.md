@@ -150,11 +150,12 @@ Record a completed source check without editing CSV manually:
 ```bash
 ./office review attest --source "Printed Diurnal" --page 123 \
   --locator "Proper of Example" --note "word-for-word" \
-  proper/example/collect 0123456789ab reviewer
+  proper/example/collect reviewer
 ```
 
-The key and current hash must match the generated provenance inventory. An
-existing attestation requires `--replace`.
+The command resolves the key to the current corpus text and records its hash
+internally so later changes make the attestation stale. An existing
+attestation requires `--replace`.
 
 `./office review assurance` runs the representative multi-year structural
 plan, validates provenance, and enforces the reviewable floors in

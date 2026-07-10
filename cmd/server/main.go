@@ -331,7 +331,7 @@ Subcommands:
   provenance [-csv]                     Report structured corpus provenance
   provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified]
                                          Rank atomic text review by dependency fan-out
-  attest [flags] KEY HASH REVIEWER         Record a hash-bound source attestation
+  attest [flags] KEY REVIEWER              Record a source attestation for one text
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
@@ -428,19 +428,19 @@ Subcommands:
 		replace := fs.Bool("replace", false, "replace an existing attestation for this key")
 		fs.Parse(os.Args[3:])
 		args := fs.Args()
-		if len(args) != 3 {
-			fmt.Fprintln(os.Stderr, "Usage: office review attest --source SOURCE [--page PAGE|--locator LOCATOR] [--note NOTE] [--date YYYY-MM-DD] [--replace] KEY HASH REVIEWER")
+		if len(args) != 2 {
+			fmt.Fprintln(os.Stderr, "Usage: office review attest --source SOURCE [--page PAGE|--locator LOCATOR] [--note NOTE] [--date YYYY-MM-DD] [--replace] KEY REVIEWER")
 			os.Exit(1)
 		}
 		entry, err := review.RecordAttestation(dataDir, review.AttestOptions{
-			Key: args[0], HashPrefix: args[1], Reviewer: args[2], Source: *source,
+			Key: args[0], Reviewer: args[1], Source: *source,
 			Locator: *locator, Page: *page, ReviewedOn: *reviewedOn, Notes: *note, Replace: *replace,
 		})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error recording attestation: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Verified %s at %s (%s, %s)\n", entry.Key, entry.ContentHash, entry.Reviewer, entry.ReviewedOn)
+		fmt.Printf("Verified %s (%s, %s)\n", entry.Key, entry.Reviewer, entry.ReviewedOn)
 
 	case "assurance":
 		fs := flag.NewFlagSet("review assurance", flag.ExitOnError)

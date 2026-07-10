@@ -193,7 +193,7 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"rank", "score", "key", "content_hash", "status", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
+	_ = cw.Write([]string{"rank", "score", "key", "status", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
 	for i, e := range q.Entries {
 		var sources, locators, pages []string
 		for _, source := range e.Sources {
@@ -206,7 +206,7 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 			url = fmt.Sprintf("%s/%s/%s", baseURL, e.RepresentativeHour, e.RepresentativeDate.Format("2006-01-02"))
 		}
 		_ = cw.Write([]string{
-			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, e.ContentHash, string(e.Status),
+			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, string(e.Status),
 			fmt.Sprint(e.Occurrences), fmt.Sprint(e.PriorityAOccurrences), fmt.Sprint(e.PrincipalOccurrences),
 			fmt.Sprint(e.DistinctCompositions), strings.Join(e.Hours, "; "), strings.Join(sources, "; "),
 			strings.Join(locators, "; "), strings.Join(pages, "; "), url,

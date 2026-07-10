@@ -112,20 +112,21 @@ proper/example/collect,0123456789ab,Printed Diurnal,Proper of Example,123,verifi
 The file records only citations, review metadata, and the corpus key. It does
 not copy or embed source-book contents. `review provenance -csv` joins these
 attestations to source comments and current content hashes, so counts never
-need to be maintained by hand. Copy the current hash from that generated CSV;
-if the entry later changes, the attestation automatically becomes stale.
+need to be maintained by hand. The CLI records the entry's current hash
+internally; if the entry later changes, the attestation automatically becomes
+stale without requiring reviewers to handle hashes themselves.
 
 Prefer the safe CLI to manual CSV editing:
 
 ```bash
 ./office review attest --source "Printed Diurnal" --page 123 \
   --locator "Proper of Example" --note "word-for-word" \
-  proper/example/collect 0123456789ab reviewer
+  proper/example/collect reviewer
 ```
 
-The hash may be an unambiguous prefix of at least six characters. The command
-validates every field and rewrites the ledger atomically; use `--replace` only
-when deliberately superseding an existing attestation.
+The command resolves the corpus key to its current content, validates every
+field, and rewrites the ledger atomically; use `--replace` only when
+deliberately superseding an existing attestation.
 
 ### Release assurance
 
