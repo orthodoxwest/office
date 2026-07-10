@@ -161,6 +161,7 @@ type ReviewPlan struct {
 	Years          int
 	CandidateCount int
 	FeatureCount   int
+	Features       []string
 	Selected       []PlannedReview
 	IncludeSources bool
 	Uncovered      []string
@@ -217,7 +218,12 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 	for f := range allFeatures {
 		uncovered[f] = true
 	}
-	plan := &ReviewPlan{StartYear: startYear, Years: years, CandidateCount: rawCount, FeatureCount: len(allFeatures), IncludeSources: includeSources}
+	plan := &ReviewPlan{StartYear: startYear, Years: years, CandidateCount: rawCount, IncludeSources: includeSources}
+	for feature := range allFeatures {
+		plan.Features = append(plan.Features, feature)
+	}
+	sort.Strings(plan.Features)
+	plan.FeatureCount = len(plan.Features)
 	used := make([]bool, len(candidates))
 	for len(uncovered) > 0 {
 		best, bestNew := -1, []string(nil)

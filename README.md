@@ -121,7 +121,11 @@ make review-plan       # minimal structural-review checklist
 make review-assurance  # release assurance gates
 ```
 
-Golden files live in `internal/e2e/testdata/golden/`. Run `make golden` after changing office composition logic or text output, then review the diff before committing.
+Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
+rendered hours, `assurance-report.md` records the current review counts and
+sorted structural feature inventory so coverage changes appear directly in a
+PR diff. Run `make golden` after changing office composition, text output, or
+assurance coverage, then review the diff before committing.
 
 ### Assurance and review planning
 

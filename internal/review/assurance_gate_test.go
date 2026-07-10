@@ -31,6 +31,27 @@ func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 	}
 }
 
+func TestAssuranceSnapshotIncludesSortedFeatureInventory(t *testing.T) {
+	report := &AssuranceReport{
+		StartYear: 2026, Years: 1, ModeledFeatures: 2,
+		ModeledFeatureIDs: []string{"decision:occurrence=winner", "resolution:collect=proper"},
+	}
+	var out bytes.Buffer
+	WriteAssuranceSnapshot(report, &out)
+	for _, want := range []string{
+		"### Modeled structural features",
+		"- `decision:occurrence=winner`",
+		"- `resolution:collect=proper`",
+	} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("snapshot missing %q:\n%s", want, out.String())
+		}
+	}
+	if strings.Contains(out.String(), "Gate failures") {
+		t.Fatalf("snapshot should describe current state without gate evaluation:\n%s", out.String())
+	}
+}
+
 func TestUpdateAssuranceBaselineRoundTrip(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, dir+"/review/.keep", "")

@@ -41,8 +41,8 @@ internal/
     templates/             Embedded HTML templates (layout, home, hour, calendar)
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
   e2e/                     End-to-end golden-file tests
-    golden_test.go         TestHourGolden + TestOrdoGolden
-    testdata/golden/       Checked-in golden files (regenerate with make golden)
+    golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests
+    testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)
   audit/                   Data completeness audit
     audit.go               Placeholder scanner + missing-propers reporter
     sweep.go               Composition sweep: not-found markers + ordinary fallbacks on Double+ days

@@ -25,6 +25,7 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 	"github.com/orthodoxwest/office/internal/output"
+	"github.com/orthodoxwest/office/internal/review"
 )
 
 var update = flag.Bool("update", false, "update golden files instead of comparing")
@@ -167,6 +168,20 @@ func TestOrdoGolden(t *testing.T) {
 		t.Fatalf("NewEngine: %v", err)
 	}
 	checkGolden(t, "ordo-2026.txt", output.FormatCalendar(days, engine, moveable))
+}
+
+func TestAssuranceGolden(t *testing.T) {
+	baseline, err := review.LoadAssuranceBaseline(dataDir)
+	if err != nil {
+		t.Fatalf("LoadAssuranceBaseline: %v", err)
+	}
+	report, err := review.BuildAssuranceReport(dataDir, baseline.StartYear, baseline.Years)
+	if err != nil {
+		t.Fatalf("BuildAssuranceReport: %v", err)
+	}
+	var buf bytes.Buffer
+	review.WriteAssuranceSnapshot(report, &buf)
+	checkGolden(t, "assurance-report.md", buf.String())
 }
 
 // checkGolden compares got against the named golden file, or writes it when -update is set.

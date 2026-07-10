@@ -2,6 +2,7 @@ package review
 
 import (
 	"bytes"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -48,6 +49,12 @@ func TestBuildReviewPlanReducesStructuralChecklist(t *testing.T) {
 	}
 	if len(p.Uncovered) != 0 {
 		t.Fatalf("uncovered features: %v", p.Uncovered)
+	}
+	if p.FeatureCount == 0 || p.FeatureCount != len(p.Features) {
+		t.Fatalf("feature inventory has %d entries, count reports %d", len(p.Features), p.FeatureCount)
+	}
+	if !sort.StringsAreSorted(p.Features) {
+		t.Fatal("feature inventory is not sorted")
 	}
 	for _, selected := range p.Selected {
 		for _, feature := range selected.NewCoverage {
