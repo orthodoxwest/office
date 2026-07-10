@@ -284,10 +284,10 @@ func loadAttestations(dataDir string) ([]attestation, error) {
 	return out, nil
 }
 
-// AttestOptions describes one hash-bound word-for-word source verification.
+// AttestOptions describes one word-for-word source verification. The current
+// content hash is resolved from Key and recorded as an implementation detail.
 type AttestOptions struct {
 	Key        string
-	HashPrefix string
 	Reviewer   string
 	Source     string
 	Locator    string
@@ -301,8 +301,8 @@ type AttestOptions struct {
 // attestation. It never stores source-book contents.
 func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, error) {
 	trimAttestOptions(&opts)
-	if opts.Key == "" || opts.HashPrefix == "" || opts.Reviewer == "" || opts.Source == "" {
-		return nil, fmt.Errorf("key, hash, reviewer, and source are required")
+	if opts.Key == "" || opts.Reviewer == "" || opts.Source == "" {
+		return nil, fmt.Errorf("key, reviewer, and source are required")
 	}
 	if opts.Page == "" && opts.Locator == "" {
 		return nil, fmt.Errorf("page or locator is required")
@@ -323,9 +323,9 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 	if err != nil {
 		return nil, err
 	}
-	entry, fullHash, err := resolveAttestationTarget(inv, opts.Key, opts.HashPrefix)
-	if err != nil {
-		return nil, err
+	entry, ok := inv.ByKey()[opts.Key]
+	if !ok {
+		return nil, fmt.Errorf("unknown corpus key %q", opts.Key)
 	}
 	existing, err := loadAttestations(dataDir)
 	if err != nil {
@@ -344,7 +344,7 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 		return nil, fmt.Errorf("entry %q already has an attestation; use --replace to replace it", opts.Key)
 	}
 	kept = append(kept, attestation{
-		Key: opts.Key, ContentHash: fullHash, Source: opts.Source, Locator: opts.Locator,
+		Key: opts.Key, ContentHash: entry.ContentHash, Source: opts.Source, Locator: opts.Locator,
 		Page: opts.Page, Status: string(ProvenanceVerified), Reviewer: opts.Reviewer,
 		ReviewedOn: opts.ReviewedOn, Notes: opts.Notes,
 	})
@@ -361,36 +361,12 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 
 func trimAttestOptions(opts *AttestOptions) {
 	opts.Key = strings.TrimSpace(opts.Key)
-	opts.HashPrefix = strings.TrimSpace(opts.HashPrefix)
 	opts.Reviewer = strings.TrimSpace(opts.Reviewer)
 	opts.Source = strings.TrimSpace(opts.Source)
 	opts.Locator = strings.TrimSpace(opts.Locator)
 	opts.Page = strings.TrimSpace(opts.Page)
 	opts.ReviewedOn = strings.TrimSpace(opts.ReviewedOn)
 	opts.Notes = strings.TrimSpace(opts.Notes)
-}
-
-func resolveAttestationTarget(inv *ProvenanceInventory, key, prefix string) (EntryProvenance, string, error) {
-	entry, ok := inv.ByKey()[key]
-	if !ok {
-		return EntryProvenance{}, "", fmt.Errorf("unknown corpus key %q", key)
-	}
-	if len(prefix) < 6 {
-		return EntryProvenance{}, "", fmt.Errorf("hash prefix must contain at least 6 characters")
-	}
-	var matches []string
-	for _, candidate := range inv.Entries {
-		if strings.HasPrefix(candidate.ContentHash, prefix) {
-			matches = append(matches, candidate.Key)
-		}
-	}
-	if len(matches) > 1 {
-		return EntryProvenance{}, "", fmt.Errorf("hash prefix %q is ambiguous across %d corpus entries", prefix, len(matches))
-	}
-	if !strings.HasPrefix(entry.ContentHash, prefix) {
-		return EntryProvenance{}, "", fmt.Errorf("hash %q does not match current content hash %s for %q", prefix, entry.ContentHash, key)
-	}
-	return entry, entry.ContentHash, nil
 }
 
 func writeAttestations(dataDir string, attestations []attestation) error {

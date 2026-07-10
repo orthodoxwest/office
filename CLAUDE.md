@@ -138,7 +138,7 @@ make review-provenance-queue # Rank atomic text review by dependency fan-out
 make review-plan      # Print minimal structural-review checklist CSV
 make review-assurance # Run release assurance gates and summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
-./office review attest --source SOURCE --page PAGE KEY HASH REVIEWER # Record verified text
+./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 
 Hour pages expose assurance metadata in a collapsed disclosure. Keep it
 source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,

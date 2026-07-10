@@ -1,6 +1,10 @@
 package review
 
-import "testing"
+import (
+	"bytes"
+	"strings"
+	"testing"
+)
 
 func TestProvenanceQueueScoreWeightsFanout(t *testing.T) {
 	e := ProvenanceQueueEntry{
@@ -56,5 +60,18 @@ func TestBuildProvenanceQueue(t *testing.T) {
 	}
 	if !used || !unused {
 		t.Fatalf("used=%t unused=%t; queue should include every atomic entry", used, unused)
+	}
+}
+
+func TestProvenanceQueueCSVHidesContentHashes(t *testing.T) {
+	q := &ProvenanceQueue{Entries: []ProvenanceQueueEntry{{
+		Key: "psalms/001", ContentHash: "0123456789abcdef", Status: ProvenanceNeedsReview,
+	}}}
+	var out bytes.Buffer
+	if err := WriteProvenanceQueueCSV(q, &out, "https://example.test"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "content_hash") || strings.Contains(out.String(), "0123456789abcdef") {
+		t.Fatalf("reviewer queue exposes implementation hash:\n%s", out.String())
 	}
 }

@@ -81,7 +81,7 @@ func TestRecordAttestation(t *testing.T) {
 	}
 	hash := inv.ByKey()["example"].ContentHash
 	got, err := RecordAttestation(dir, AttestOptions{
-		Key: "example", HashPrefix: hash[:8], Reviewer: "alice", Source: "Printed Diurnal",
+		Key: "example", Reviewer: "alice", Source: "Printed Diurnal",
 		Page: "10", ReviewedOn: "2026-07-10", Notes: "word-for-word",
 	})
 	if err != nil {
@@ -99,17 +99,17 @@ func TestRecordAttestation(t *testing.T) {
 	}
 }
 
-func TestRecordAttestationFailureDoesNotChangeFile(t *testing.T) {
+func TestRecordAttestationUnknownKeyDoesNotChangeFile(t *testing.T) {
 	dir := t.TempDir()
 	writeTestFile(t, filepath.Join(dir, "texts", "example.txt"), "Current text.\n")
 	path := filepath.Join(dir, "review", "provenance.csv")
 	initial := strings.Join(provenanceHeader, ",") + "\n"
 	writeTestFile(t, path, initial)
 	_, err := RecordAttestation(dir, AttestOptions{
-		Key: "example", HashPrefix: "wronghash", Reviewer: "alice", Source: "Printed Diurnal", Page: "10",
+		Key: "missing", Reviewer: "alice", Source: "Printed Diurnal", Page: "10",
 	})
 	if err == nil {
-		t.Fatal("expected hash mismatch")
+		t.Fatal("expected unknown key error")
 	}
 	after, err := os.ReadFile(path)
 	if err != nil {
@@ -129,7 +129,7 @@ func TestRecordAttestationRequiresReplace(t *testing.T) {
 		"example," + hash + ",Printed Diurnal,Ordinary,10,verified,alice,2026-07-10,first\n"
 	writeTestFile(t, path, initial)
 	_, err := RecordAttestation(dir, AttestOptions{
-		Key: "example", HashPrefix: hash, Reviewer: "bob", Source: "Printed Diurnal", Page: "10",
+		Key: "example", Reviewer: "bob", Source: "Printed Diurnal", Page: "10",
 	})
 	if err == nil || !strings.Contains(err.Error(), "--replace") {
 		t.Fatalf("error = %v", err)
@@ -137,17 +137,6 @@ func TestRecordAttestationRequiresReplace(t *testing.T) {
 	after, _ := os.ReadFile(path)
 	if string(after) != initial {
 		t.Fatal("duplicate failure changed provenance file")
-	}
-}
-
-func TestResolveAttestationTargetRejectsAmbiguousPrefix(t *testing.T) {
-	inv := &ProvenanceInventory{Entries: []EntryProvenance{
-		{Key: "one", ContentHash: "abcdef111111"},
-		{Key: "two", ContentHash: "abcdef222222"},
-	}}
-	_, _, err := resolveAttestationTarget(inv, "one", "abcdef")
-	if err == nil || !strings.Contains(err.Error(), "ambiguous") {
-		t.Fatalf("error = %v", err)
 	}
 }
 
