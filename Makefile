@@ -1,4 +1,4 @@
-.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit review-manifest review-status tex pdf golden clean
+.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit review-manifest review-status review-provenance review-plan tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -45,6 +45,12 @@ review-manifest: build ## Print human-review checklist CSV for current year (STA
 
 review-status: build ## Report human-review coverage vs data/review/signoffs.txt
 	./office review status $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
+
+review-provenance: build ## Report generated corpus provenance coverage
+	./office review provenance
+
+review-plan: build ## Print minimal coverage-oriented review checklist CSV
+	./office review plan $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 DATE ?= $(shell date +%Y-%m-%d)
 CHANT ?=

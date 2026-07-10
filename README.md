@@ -80,6 +80,9 @@ The server finds `data/` relative to the binary or the working directory.
 ./office tex HOUR [YYYY-MM-DD]     # emit LaTeX booklet for HOUR (date defaults to today)
 ./office validate                  # validate all data files
 ./office audit                     # report placeholder texts and missing propers
+./office review provenance         # generated source/provenance coverage summary
+./office review explain HOUR DATE  # JSON dependencies and decisions for one hour
+./office review plan               # minimal structural-review checklist CSV
 ```
 
 ## PDF booklets
@@ -108,9 +111,30 @@ make test     # run all tests (includes golden file tests)
 make check    # fmt + vet + lint + test + validate
 make golden   # regenerate golden files after intentional changes
 make audit    # show data completeness report
+make review-provenance # generated corpus provenance counts
+make review-plan       # minimal structural-review checklist
 ```
 
 Golden files live in `internal/e2e/testdata/golden/`. Run `make golden` after changing office composition logic or text output, then review the diff before committing.
+
+### Assurance and review planning
+
+Text verification and structural verification are tracked separately:
+
+- `./office review provenance` derives non-stale counts from every corpus entry
+  and its adjacent `# SOURCE:` / `# TODO(diurnal):` annotations. Add `-csv` for
+  the complete inventory.
+- `data/review/provenance.csv` records explicit source attestations. A
+  `verified` row must name its source, a page or section locator, reviewer, and
+  review date. It stores citations and hashes, not source-book contents.
+- `./office review explain lauds 2026-06-07` emits a JSON assurance manifest
+  containing the corpus dependencies, provenance status, condition branches,
+  and calendar/concurrence rule identifiers behind that hour.
+- `./office review plan -start 2026 -years 1` uses greedy set cover to select a
+  small checklist exercising every structural decision and fallback tier. Text
+  entries are verified independently through provenance. Add
+  `-include-sources` only when a checklist that also renders every used corpus
+  key is desired.
 
 ---
 

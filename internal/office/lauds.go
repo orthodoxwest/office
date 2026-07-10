@@ -47,28 +47,31 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		// Antiphon: feast-specific or fallback
 		antText, antSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-antiphon", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type:      models.Antiphon,
-			Text:      antText,
-			SlotRef:   "commemoration-antiphon",
-			SourceRef: antSrc,
+			Type:       models.Antiphon,
+			Text:       antText,
+			SlotRef:    "commemoration-antiphon",
+			SourceRef:  antSrc,
+			SourceRefs: compactRefs([]string{antSrc}),
 		})
 
 		// Versicle + Response
 		versText, versSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-versicle", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type:      models.Versicle,
-			Text:      versText,
-			SlotRef:   "commemoration-versicle",
-			SourceRef: versSrc,
+			Type:       models.Versicle,
+			Text:       versText,
+			SlotRef:    "commemoration-versicle",
+			SourceRef:  versSrc,
+			SourceRefs: compactRefs([]string{versSrc}),
 		})
 
 		// Collect
 		collectText, collectSrc := lookupCommemoration(comm, day.Season, hourName, "commemoration-collect", corpus)
 		elems = append(elems, models.OfficeElement{
-			Type:      models.Collect,
-			Text:      collectText,
-			SlotRef:   "commemoration-collect",
-			SourceRef: collectSrc,
+			Type:       models.Collect,
+			Text:       collectText,
+			SlotRef:    "commemoration-collect",
+			SourceRef:  collectSrc,
+			SourceRefs: compactRefs([]string{collectSrc}),
 		})
 	}
 	return elems

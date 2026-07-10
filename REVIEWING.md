@@ -7,6 +7,18 @@ your assigned rows from the review checklist.
 
 ## How review is organized
 
+There are two complementary review tracks:
+
+1. **Text provenance** certifies an individual corpus entry once against a
+   named source and page/section locator.
+2. **Structural review** checks that the engine selected and assembled the
+   right elements. A generated set-cover plan selects representative pages
+   that exercise every known condition branch, occurrence/concurrence rule,
+   and fallback tier.
+
+This distinction prevents a wording check from being repeated merely because
+the same text appears in several calendar contexts.
+
 The unit of review is **one hour of one celebration**, not one calendar date.
 The same composition recurs year after year, so checking "Trinity Sunday
 Lauds" once covers every year it recurs. Some celebrations have more than one
@@ -82,8 +94,24 @@ back through your coordinator so it can be signed off.
 ```bash
 make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEARS=1)
 make review-status                    # coverage report: current / stale / unreviewed
+make review-provenance                # generated text-provenance coverage
+make review-plan > review-plan.csv    # minimal structural checklist
+./office review explain lauds 2026-06-07  # one page's assurance JSON
 ./office review sign HASH REVIEWER [note...]   # record a sign-off
 ```
+
+Explicit text attestations live in `data/review/provenance.csv`:
+
+```csv
+key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
+proper/example/collect,0123456789ab,Printed Diurnal,Proper of Example,123,verified,initials,2026-07-09,word-for-word
+```
+
+The file records only citations, review metadata, and the corpus key. It does
+not copy or embed source-book contents. `review provenance -csv` joins these
+attestations to source comments and current content hashes, so counts never
+need to be maintained by hand. Copy the current hash from that generated CSV;
+if the entry later changes, the attestation automatically becomes stale.
 
 Sign-offs live in `data/review/signoffs.txt` and are keyed by content hash:
 any edit to the texts behind a signed-off unit orphans the hash and the unit

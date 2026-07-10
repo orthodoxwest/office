@@ -46,8 +46,12 @@ func composeMajorHour(
 	}
 
 	for _, section := range sections {
-		if section.Condition != "" && !evaluateCondition(section.Condition, officeDay, moveable) {
-			continue
+		if section.Condition != "" {
+			included := evaluateCondition(section.Condition, officeDay, moveable)
+			recordConditionDecision(hour, section.Condition, included, section.Name)
+			if !included {
+				continue
+			}
 		}
 
 		var elems []models.OfficeElement
@@ -68,4 +72,16 @@ func composeMajorHour(
 	}
 
 	return hour, nil
+}
+
+func recordConditionDecision(hour *models.OfficeHour, condition string, included bool, section string) {
+	outcome := "omitted"
+	if included {
+		outcome = "included"
+	}
+	hour.Decisions = append(hour.Decisions, models.CompositionDecision{
+		Rule:    "condition:" + condition,
+		Outcome: outcome,
+		Detail:  section,
+	})
 }

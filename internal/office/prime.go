@@ -31,8 +31,12 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 	}
 
 	for _, section := range sections {
-		if section.Condition != "" && !evaluateCondition(section.Condition, day, p.Moveable) {
-			continue
+		if section.Condition != "" {
+			included := evaluateCondition(section.Condition, day, p.Moveable)
+			recordConditionDecision(hour, section.Condition, included, section.Name)
+			if !included {
+				continue
+			}
 		}
 
 		var elems []models.OfficeElement

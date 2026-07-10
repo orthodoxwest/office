@@ -37,8 +37,12 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 	}
 
 	for _, section := range sections {
-		if section.Condition != "" && !evaluateCondition(section.Condition, day, m.Moveable) {
-			continue
+		if section.Condition != "" {
+			included := evaluateCondition(section.Condition, day, m.Moveable)
+			recordConditionDecision(hour, section.Condition, included, section.Name)
+			if !included {
+				continue
+			}
 		}
 
 		var elems []models.OfficeElement

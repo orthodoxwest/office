@@ -277,9 +277,10 @@ func ResolveDay(
 
 	if len(allCandidates) == 0 {
 		return &models.CalendarDay{
-			Date:   date,
-			Season: season,
-			Color:  seasonColor,
+			Date:           date,
+			Season:         season,
+			Color:          seasonColor,
+			ResolutionRule: "occurrence:no-candidates",
 		}, transfersOut
 	}
 
@@ -289,6 +290,7 @@ func ResolveDay(
 			Season:         season,
 			Commemorations: finalizeCommemorations(nil, allCandidates),
 			Color:          seasonColor,
+			ResolutionRule: "occurrence:commemorations-only",
 		}, transfersOut
 	}
 
@@ -330,6 +332,7 @@ func ResolveDay(
 			Celebration:    winner,
 			Commemorations: comms,
 			Color:          resolvedDayColor(winner, season, seasonColor),
+			ResolutionRule: "occurrence:privileged-day",
 		}, transfersOut
 	}
 
@@ -360,5 +363,6 @@ func ResolveDay(
 		Celebration:    winner,
 		Commemorations: comms,
 		Color:          resolvedDayColor(winner, season, seasonColor),
+		ResolutionRule: "occurrence:general-precedence",
 	}, transfersOut
 }
