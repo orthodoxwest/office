@@ -95,7 +95,9 @@ back through your coordinator so it can be signed off.
 make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEARS=1)
 make review-status                    # coverage report: current / stale / unreviewed
 make review-provenance                # generated text-provenance coverage
+make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
 make review-plan > review-plan.csv    # minimal structural checklist
+make review-assurance                 # release coverage gates and summary
 ./office review explain lauds 2026-06-07  # one page's assurance JSON
 ./office review sign HASH REVIEWER [note...]   # record a sign-off
 ```
@@ -112,6 +114,36 @@ not copy or embed source-book contents. `review provenance -csv` joins these
 attestations to source comments and current content hashes, so counts never
 need to be maintained by hand. Copy the current hash from that generated CSV;
 if the entry later changes, the attestation automatically becomes stale.
+
+Prefer the safe CLI to manual CSV editing:
+
+```bash
+./office review attest --source "Printed Diurnal" --page 123 \
+  --locator "Proper of Example" --note "word-for-word" \
+  proper/example/collect 0123456789ab reviewer
+```
+
+The hash may be an unambiguous prefix of at least six characters. The command
+validates every field and rewrites the ledger atomically; use `--replace` only
+when deliberately superseding an existing attestation.
+
+### Release assurance
+
+`./office review assurance` fails when modeled structural features are
+uncovered, modeled coverage drops below its intentional floor, or verified
+text coverage falls below its floor. It reports stale attestations separately
+so reviewers can see what changed. The floor lives in
+`data/review/assurance-baseline.json`; update it only as an intentional,
+reviewable change:
+
+```bash
+./office review assurance --update-baseline
+```
+
+Each web hour also has a collapsed **Assurance** disclosure. It shows the same
+dependency states, fallback tiers, and stable rule identifiers without
+revealing local paths or source contents. Unverified dependency rows link to a
+prefilled review issue for that exact corpus key.
 
 Sign-offs live in `data/review/signoffs.txt` and are keyed by content hash:
 any edit to the texts behind a signed-off unit orphans the hash and the unit

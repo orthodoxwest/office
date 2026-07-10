@@ -89,6 +89,7 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 	add("context:season", string(day.Season), "")
 	add("context:weekday", strings.ToLower(day.Date.Weekday().String()), "")
 	add("occurrence", day.ResolutionRule, "")
+	hour.Decisions = append(hour.Decisions, day.OccurrenceDecisions...)
 	if day.Celebration == nil {
 		add("context:office", "feria", "")
 	} else {
@@ -115,6 +116,7 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		}
 		add("vespers:owner", owner, "")
 		add("vespers:rule", day.Vespers.Rule, "")
+		hour.Decisions = append(hour.Decisions, day.Vespers.Decisions...)
 	}
 }
 

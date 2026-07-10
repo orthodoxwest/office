@@ -145,3 +145,22 @@ jobs:
       - name: Fail if golden tests failed
         if: steps.golden.outcome == 'failure'
         run: exit 1
+
+      - name: Run assurance gates
+        id: assurance
+        if: steps.golden.outcome == 'success'
+        run: |
+          go build -o office ./cmd/server
+          set +e
+          ./office review assurance -markdown > assurance-summary.md
+          STATUS=$?
+          set -e
+          cat assurance-summary.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$STATUS"
+
+      - name: Upload assurance summary
+        if: always() && steps.assurance.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: assurance-summary
+          path: assurance-summary.md

@@ -233,8 +233,8 @@ func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, st
 // through the Easter and Pentecost octaves, while a privileged feria
 // (Lent, Embertide, Advent) is still commemorated ("Comm. Fer." at
 // St Joseph's and the Conception's Vespers). The winner and duplicates are
-// filtered by finalizeCommemorations.
-func boundaryCommemorations(winner, loser *models.Feast, following *models.CalendarDay, secondVespers bool) []*models.Feast {
+// filtered by finalizeCommemorationsWithDecisions.
+func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, following *models.CalendarDay, secondVespers bool) ([]*models.Feast, []models.CompositionDecision) {
 	suppressIncoming := secondVespers && winner != nil &&
 		winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
 		winner.Category != models.CategorySunday
@@ -246,6 +246,7 @@ func boundaryCommemorations(winner, loser *models.Feast, following *models.Calen
 	}
 
 	var comms []*models.Feast
+	var decisions []models.CompositionDecision
 	if loser != nil {
 		// A loser that never had I Vespers rights (a simple octave day, a
 		// day within an octave) is not a true concurrence party: it counts
@@ -254,14 +255,19 @@ func boundaryCommemorations(winner, loser *models.Feast, following *models.Calen
 		// II Vespers). A genuine concurrence loser is always commemorated.
 		if hasFirstVespers(loser) || !suppressed(loser) {
 			comms = append(comms, loser)
+		} else {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:non-concurrence-loser-at-second-vespers", Outcome: "suppressed", Detail: loser.ID})
 		}
 	}
 	for _, c := range following.Commemorations {
 		if !suppressed(c) {
 			comms = append(comms, c)
+		} else {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:incoming-at-second-vespers", Outcome: "suppressed", Detail: c.ID})
 		}
 	}
-	return finalizeCommemorations(winner, comms)
+	finalized, finalDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+	return finalized, append(decisions, finalDecisions...)
 }
 
 // resolveConcurrence determines the vespers designation for an evening given
@@ -284,47 +290,55 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 
 	// If preceding has no II Vespers, following wins by default
 	if !precHasII {
+		comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, following, false)
 		return models.VespersDesignation{
 			Owner:          models.VespersIOfFollowing,
 			Feast:          folFeast,
 			Color:          following.Color,
 			Season:         following.Season,
-			Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
+			Commemorations: comms,
 			Rule:           "concurrence:following-only",
+			Decisions:      decisions,
 		}
 	}
 
 	// If following has no I Vespers, preceding wins by default
 	if !folHasI {
+		comms, decisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, following, true)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
+			Commemorations: comms,
 			Rule:           "concurrence:preceding-only",
+			Decisions:      decisions,
 		}
 	}
 
 	// Both have vespers — resolve the concurrence
 	winner, rule := concurrenceWinnerWithRule(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
+		comms, decisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, following, true)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
 			Feast:          precFeast,
 			Color:          preceding.Color,
 			Season:         preceding.Season,
-			Commemorations: boundaryCommemorations(precFeast, folFeast, following, true),
+			Commemorations: comms,
 			Rule:           rule,
+			Decisions:      decisions,
 		}
 	}
+	comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, following, false)
 	return models.VespersDesignation{
 		Owner:          models.VespersIOfFollowing,
 		Feast:          folFeast,
 		Color:          following.Color,
 		Season:         following.Season,
-		Commemorations: boundaryCommemorations(folFeast, precFeast, following, false),
+		Commemorations: comms,
 		Rule:           rule,
+		Decisions:      decisions,
 	}
 }
 

@@ -459,6 +459,7 @@ type Server struct {
 	addr          string
 	version       string
 	reviewed      map[string]bool
+	provenance    map[string]review.EntryProvenance
 }
 
 // New creates a new Server, loading the office engine and parsing templates.
@@ -508,6 +509,10 @@ func New(dataDir, addr string) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading review signoffs: %w", err)
 	}
+	provenanceInventory, err := review.ScanProvenance(dataDir)
+	if err != nil {
+		return nil, fmt.Errorf("loading provenance: %w", err)
+	}
 
 	return &Server{
 		engine:        eng,
@@ -521,6 +526,7 @@ func New(dataDir, addr string) (*Server, error) {
 		addr:          addr,
 		version:       computeVersion(dataDir),
 		reviewed:      reviewed,
+		provenance:    provenanceInventory.ByKey(),
 	}, nil
 }
 

@@ -11,6 +11,7 @@ import (
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/review"
 )
 
 var validHours = map[string]bool{
@@ -68,6 +69,29 @@ type hourData struct {
 	Theme      string
 	Page       string
 	ShowBanner bool
+	Assurance  hourAssuranceData
+}
+
+type hourAssuranceData struct {
+	Verified     int
+	Documented   int
+	NeedsReview  int
+	Undocumented int
+	Dependencies []assuranceDependency
+	Resolutions  []assuranceResolution
+	Decisions    []models.CompositionDecision
+}
+
+type assuranceDependency struct {
+	Key       string
+	Status    review.ProvenanceStatus
+	ReportURL string
+}
+
+type assuranceResolution struct {
+	Slot   string
+	Tier   string
+	Source string
 }
 
 // repoIssuesURL is the GitHub new-issue endpoint used by the per-hour
@@ -103,6 +127,69 @@ func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 	q.Set("body", body)
 	q.Set("labels", "review")
 	return repoIssuesURL + "?" + q.Encode()
+}
+
+func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string, status review.ProvenanceStatus) string {
+	celebration := hour.Feast
+	if celebration == "" {
+		celebration = titleCase(string(hour.Season)) + " feria"
+	}
+	title := fmt.Sprintf("[review] Source verification — %s", key)
+	body := fmt.Sprintf(`**Page:** /%s/%s
+**Celebration:** %s
+**Corpus entry:** %s
+**Current provenance status:** %s
+
+**Source and page/section locator:**
+
+
+**Finding:**
+
+`, hourName, dateSlug, celebration, key, status)
+	q := url.Values{}
+	q.Set("title", title)
+	q.Set("body", body)
+	q.Set("labels", "review")
+	return repoIssuesURL + "?" + q.Encode()
+}
+
+func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug string) hourAssuranceData {
+	data := hourAssuranceData{Decisions: review.UniqueCompositionDecisions(hour.Decisions)}
+	for _, key := range review.HourDependencies(hour) {
+		status := review.ProvenanceUndocumented
+		if entry, ok := s.provenance[key]; ok {
+			status = entry.Status
+		}
+		switch status {
+		case review.ProvenanceVerified:
+			data.Verified++
+		case review.ProvenanceDocumented:
+			data.Documented++
+		case review.ProvenanceNeedsReview:
+			data.NeedsReview++
+		default:
+			data.Undocumented++
+		}
+		data.Dependencies = append(data.Dependencies, assuranceDependency{
+			Key: key, Status: status, ReportURL: dependencyReportURL(hour, hourName, dateSlug, key, status),
+		})
+	}
+	seenResolutions := map[string]bool{}
+	for _, section := range hour.Sections {
+		for _, element := range section.Elements {
+			if element.SlotRef == "" || element.SourceRef == "" {
+				continue
+			}
+			tier, _, _ := strings.Cut(element.SourceRef, "/")
+			key := element.SlotRef + "\x1f" + tier + "\x1f" + element.SourceRef
+			if seenResolutions[key] {
+				continue
+			}
+			seenResolutions[key] = true
+			data.Resolutions = append(data.Resolutions, assuranceResolution{Slot: element.SlotRef, Tier: tier, Source: element.SourceRef})
+		}
+	}
+	return data
 }
 
 type calendarData struct {
@@ -479,6 +566,7 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		Theme:      theme,
 		Page:       hourName,
 		ShowBanner: s.showVettingBanner(hour),
+		Assurance:  s.hourAssurance(hour, hourName, dateStr),
 	}
 	if err := s.tmplHour.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

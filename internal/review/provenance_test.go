@@ -71,6 +71,86 @@ example,oldhash,Printed Diurnal,Ordinary,10,verified,alice,2026-07-09,word-for-w
 	}
 }
 
+func TestRecordAttestation(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, filepath.Join(dir, "texts", "example.txt"), "Current text.\n")
+	writeTestFile(t, filepath.Join(dir, "review", "provenance.csv"), strings.Join(provenanceHeader, ",")+"\n")
+	inv, err := ScanProvenance(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	hash := inv.ByKey()["example"].ContentHash
+	got, err := RecordAttestation(dir, AttestOptions{
+		Key: "example", HashPrefix: hash[:8], Reviewer: "alice", Source: "Printed Diurnal",
+		Page: "10", ReviewedOn: "2026-07-10", Notes: "word-for-word",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.Status != ProvenanceVerified || got.ContentHash != hash {
+		t.Fatalf("attestation result = %#v", got)
+	}
+	rescanned, err := ScanProvenance(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := rescanned.ByKey()["example"]; got.Status != ProvenanceVerified || got.Reviewer != "alice" {
+		t.Fatalf("rescanned provenance = %#v", got)
+	}
+}
+
+func TestRecordAttestationFailureDoesNotChangeFile(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, filepath.Join(dir, "texts", "example.txt"), "Current text.\n")
+	path := filepath.Join(dir, "review", "provenance.csv")
+	initial := strings.Join(provenanceHeader, ",") + "\n"
+	writeTestFile(t, path, initial)
+	_, err := RecordAttestation(dir, AttestOptions{
+		Key: "example", HashPrefix: "wronghash", Reviewer: "alice", Source: "Printed Diurnal", Page: "10",
+	})
+	if err == nil {
+		t.Fatal("expected hash mismatch")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != initial {
+		t.Fatalf("file changed after failure:\n%s", after)
+	}
+}
+
+func TestRecordAttestationRequiresReplace(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, filepath.Join(dir, "texts", "example.txt"), "Current text.\n")
+	hash := contentHash("Current text.")
+	path := filepath.Join(dir, "review", "provenance.csv")
+	initial := strings.Join(provenanceHeader, ",") + "\n" +
+		"example," + hash + ",Printed Diurnal,Ordinary,10,verified,alice,2026-07-10,first\n"
+	writeTestFile(t, path, initial)
+	_, err := RecordAttestation(dir, AttestOptions{
+		Key: "example", HashPrefix: hash, Reviewer: "bob", Source: "Printed Diurnal", Page: "10",
+	})
+	if err == nil || !strings.Contains(err.Error(), "--replace") {
+		t.Fatalf("error = %v", err)
+	}
+	after, _ := os.ReadFile(path)
+	if string(after) != initial {
+		t.Fatal("duplicate failure changed provenance file")
+	}
+}
+
+func TestResolveAttestationTargetRejectsAmbiguousPrefix(t *testing.T) {
+	inv := &ProvenanceInventory{Entries: []EntryProvenance{
+		{Key: "one", ContentHash: "abcdef111111"},
+		{Key: "two", ContentHash: "abcdef222222"},
+	}}
+	_, _, err := resolveAttestationTarget(inv, "one", "abcdef")
+	if err == nil || !strings.Contains(err.Error(), "ambiguous") {
+		t.Fatalf("error = %v", err)
+	}
+}
+
 func writeTestFile(t *testing.T, path, body string) {
 	t.Helper()
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {

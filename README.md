@@ -81,8 +81,10 @@ The server finds `data/` relative to the binary or the working directory.
 ./office validate                  # validate all data files
 ./office audit                     # report placeholder texts and missing propers
 ./office review provenance         # generated source/provenance coverage summary
+./office review provenance-queue   # dependency-weighted atomic text review queue
 ./office review explain HOUR DATE  # JSON dependencies and decisions for one hour
 ./office review plan               # minimal structural-review checklist CSV
+./office review assurance          # release assurance gates and summary
 ```
 
 ## PDF booklets
@@ -112,7 +114,9 @@ make check    # fmt + vet + lint + test + validate
 make golden   # regenerate golden files after intentional changes
 make audit    # show data completeness report
 make review-provenance # generated corpus provenance counts
+make review-provenance-queue # prioritize atomic text verification
 make review-plan       # minimal structural-review checklist
+make review-assurance  # release assurance gates
 ```
 
 Golden files live in `internal/e2e/testdata/golden/`. Run `make golden` after changing office composition logic or text output, then review the diff before committing.
@@ -129,12 +133,40 @@ Text verification and structural verification are tracked separately:
   review date. It stores citations and hashes, not source-book contents.
 - `./office review explain lauds 2026-06-07` emits a JSON assurance manifest
   containing the corpus dependencies, provenance status, condition branches,
-  and calendar/concurrence rule identifiers behind that hour.
+  exact occurrence/commemoration decisions, color resolution, transfers, and
+  calendar/concurrence rule identifiers behind that hour.
+- `./office review provenance-queue -start 2026 -years 1` ranks every atomic
+  corpus entry by distinct composition fan-out, priority-A use, principal-hour
+  use, and total occurrences. Verified entries are excluded unless
+  `-include-verified` is supplied.
 - `./office review plan -start 2026 -years 1` uses greedy set cover to select a
   small checklist exercising every structural decision and fallback tier. Text
   entries are verified independently through provenance. Add
   `-include-sources` only when a checklist that also renders every used corpus
   key is desired.
+
+Record a completed source check without editing CSV manually:
+
+```bash
+./office review attest --source "Printed Diurnal" --page 123 \
+  --locator "Proper of Example" --note "word-for-word" \
+  proper/example/collect 0123456789ab reviewer
+```
+
+The key and current hash must match the generated provenance inventory. An
+existing attestation requires `--replace`.
+
+`./office review assurance` runs the representative multi-year structural
+plan, validates provenance, and enforces the reviewable floors in
+`data/review/assurance-baseline.json`. CI publishes its source-content-free
+Markdown summary. After an intentional increase in verified coverage or
+modeled rules, refresh the floor with `--update-baseline` and review the JSON
+diff.
+
+On rendered hour pages, a collapsed **Assurance** disclosure shows provenance
+counts, corpus dependency keys, fallback tiers, and composition rule IDs.
+It deliberately omits local paths, source-book links, and source contents;
+expanding it is optional and does not alter the prayer view or review hash.
 
 ---
 

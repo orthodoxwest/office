@@ -50,6 +50,18 @@ func TestHashHourIncludesContent(t *testing.T) {
 	}
 }
 
+func TestHashHourExcludesAssuranceMetadata(t *testing.T) {
+	date := time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC)
+	a := sampleHour(date, "Almighty and everlasting God...")
+	b := sampleHour(date, "Almighty and everlasting God...")
+	b.Sections[0].Elements[0].SourceRef = "proper/trinity-sunday/collect"
+	b.Sections[0].Elements[0].SourceRefs = []string{"proper/trinity-sunday/collect"}
+	b.Decisions = []models.CompositionDecision{{Rule: "occurrence:higher-rank", Outcome: "challenger-wins"}}
+	if HashHour(a) != HashHour(b) {
+		t.Error("assurance metadata must not change the liturgical review hash")
+	}
+}
+
 func TestSlugify(t *testing.T) {
 	cases := map[string]string{
 		"Trinity Sunday":              "trinity-sunday",

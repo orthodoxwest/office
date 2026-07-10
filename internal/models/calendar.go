@@ -350,11 +350,12 @@ const (
 
 // VespersDesignation records which office owns vespers on a given evening.
 type VespersDesignation struct {
-	Owner  VespersOwner
-	Feast  *Feast // celebration that owns vespers (may differ from day's Celebration)
-	Color  Color  // liturgical color for vespers
-	Season Season
-	Rule   string // stable explanation code for the concurrence decision
+	Owner     VespersOwner
+	Feast     *Feast // celebration that owns vespers (may differ from day's Celebration)
+	Color     Color  // liturgical color for vespers
+	Season    Season
+	Rule      string                // stable explanation code for the concurrence decision
+	Decisions []CompositionDecision // concurrence and commemoration trace
 
 	// Commemorations holds the celebration that lost the vespers concurrence
 	// (the outgoing office at I Vespers of a following feast, or the incoming
@@ -364,14 +365,15 @@ type VespersDesignation struct {
 
 // CalendarDay represents the resolved calendar for a single day.
 type CalendarDay struct {
-	Date           time.Time
-	Season         Season
-	Tempora        string
-	Celebration    *Feast
-	Commemorations []*Feast
-	Color          Color
-	Notes          string
-	ResolutionRule string // stable explanation code for the occurrence decision
+	Date                time.Time
+	Season              Season
+	Tempora             string
+	Celebration         *Feast
+	Commemorations      []*Feast
+	Color               Color
+	Notes               string
+	ResolutionRule      string                // stable explanation code for the occurrence decision
+	OccurrenceDecisions []CompositionDecision // precedence, transfer, color, and commemoration trace
 
 	// FeriaCommemoration is the occurring privileged feria (of Septuagesima,
 	// Lent, or Passiontide) commemorated at Lauds when a feast takes the office
