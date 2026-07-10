@@ -28,6 +28,26 @@
       {{end}}
     {{end}}
   </div>
+  <details class="assurance-panel">
+    <summary>Assurance: {{.Assurance.Verified}} verified &middot; {{.Assurance.Documented}} documented &middot; {{.Assurance.NeedsReview}} need review &middot; {{.Assurance.Undocumented}} undocumented</summary>
+    <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
+    <h2>Text dependencies</h2>
+    <ul class="assurance-list">
+      {{range .Assurance.Dependencies}}
+      <li><code>{{.Key}}</code> <span class="assurance-status status-{{.Status}}">{{.Status}}</span>{{if ne .Status "verified"}} <a href="{{.ReportURL}}" target="_blank" rel="noopener">review</a>{{end}}</li>
+      {{end}}
+    </ul>
+    {{if .Assurance.Resolutions}}
+    <h2>Fallback resolutions</h2>
+    <ul class="assurance-list">
+      {{range .Assurance.Resolutions}}<li><code>{{.Slot}}</code> &rarr; {{.Tier}} (<code>{{.Source}}</code>)</li>{{end}}
+    </ul>
+    {{end}}
+    <h2>Composition decisions</h2>
+    <ul class="assurance-list assurance-decisions">
+      {{range .Assurance.Decisions}}<li><code>{{.Rule}}</code> &rarr; {{.Outcome}}{{if .Detail}} <span class="assurance-detail">{{.Detail}}</span>{{end}}</li>{{end}}
+    </ul>
+  </details>
   <p class="report-issue">
     Spotted an error on this page? <a href="{{.ReportURL}}" target="_blank" rel="noopener">Report a problem</a>
   </p>

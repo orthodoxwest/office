@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -44,16 +45,6 @@ func sortKey(f *models.Feast) [3]int {
 	return [3]int{weight, temporal, lord}
 }
 
-// compareSortKeys returns true if a > b (a wins over b).
-func compareSortKeys(a, b [3]int) bool {
-	for i := range 3 {
-		if a[i] != b[i] {
-			return a[i] > b[i]
-		}
-	}
-	return false
-}
-
 func isCorpusOctaveDay(f *models.Feast) bool {
 	return strings.HasPrefix(f.ID, "corpus-christi-octave-day")
 }
@@ -64,6 +55,20 @@ func isPrivilegedFeria(f *models.Feast) bool {
 
 // compareFeastPrecedence returns true if a should win over b.
 func compareFeastPrecedence(a, b *models.Feast) bool {
+	wins, _ := compareFeastPrecedenceWithDecision(a, b)
+	return wins
+}
+
+func compareFeastPrecedenceWithDecision(a, b *models.Feast) (bool, models.CompositionDecision) {
+	detail := "challenger=" + a.ID + "; incumbent=" + b.ID
+	decision := func(rule string, wins bool) (bool, models.CompositionDecision) {
+		outcome := "incumbent-holds"
+		if wins {
+			outcome = "challenger-wins"
+		}
+		return wins, models.CompositionDecision{Rule: rule, Outcome: outcome, Detail: detail}
+	}
+
 	// Privileged ferias of the second class take the Office over every feast
 	// below a Double of the second class. Their ordinary rank weight is shared
 	// with a Semi-double, so this must precede the general rank comparison.
@@ -76,9 +81,15 @@ func compareFeastPrecedence(a, b *models.Feast) bool {
 		}
 		privilegedWins := other.Rank.Weight() < models.Double2ndClass.Weight()
 		if aPrivilegedFeria {
-			return privilegedWins
+			if privilegedWins {
+				return decision("occurrence:privileged-feria-below-second-class", true)
+			}
+			return decision("occurrence:second-class-over-privileged-feria", false)
 		}
-		return !privilegedWins
+		if privilegedWins {
+			return decision("occurrence:privileged-feria-below-second-class", false)
+		}
+		return decision("occurrence:second-class-over-privileged-feria", true)
 	}
 
 	aCorpus := isCorpusOctaveDay(a)
@@ -87,22 +98,38 @@ func compareFeastPrecedence(a, b *models.Feast) bool {
 		// Sundays and first-class feasts outrank Corpus octave days.
 		if aCorpus {
 			if b.Category == models.CategorySunday || b.Rank == models.Double1stClass {
-				return false
+				return decision("occurrence:sunday-or-first-class-over-corpus-octave", false)
 			}
-			return true
+			return decision("occurrence:corpus-octave-precedence", true)
 		}
 		if a.Category == models.CategorySunday || a.Rank == models.Double1stClass {
-			return true
+			return decision("occurrence:sunday-or-first-class-over-corpus-octave", true)
 		}
-		return false
+		return decision("occurrence:corpus-octave-precedence", false)
 	}
 
-	return compareSortKeys(sortKey(a), sortKey(b))
+	aKey, bKey := sortKey(a), sortKey(b)
+	if aKey[0] != bKey[0] {
+		rule := "occurrence:higher-rank"
+		aBoosted := a.Category == models.CategorySunday && a.Rank.Weight() < models.GreaterDouble.Weight()
+		bBoosted := b.Category == models.CategorySunday && b.Rank.Weight() < models.GreaterDouble.Weight()
+		if aBoosted || bBoosted {
+			rule = "occurrence:sunday-rank-boost"
+		}
+		return decision(rule, aKey[0] > bKey[0])
+	}
+	if aKey[1] != bKey[1] {
+		return decision("occurrence:temporal-tiebreak", aKey[1] > bKey[1])
+	}
+	if aKey[2] != bKey[2] {
+		return decision("occurrence:lord-tiebreak", aKey[2] > bKey[2])
+	}
+	return decision("occurrence:equal-precedence-possession", false)
 }
 
-func resolvedDayColor(winner *models.Feast, season models.Season, seasonColor models.Color) models.Color {
+func resolvedDayColorWithDecision(winner *models.Feast, season models.Season, seasonColor models.Color) (models.Color, models.CompositionDecision) {
 	if winner == nil {
-		return seasonColor
+		return seasonColor, models.CompositionDecision{Rule: "color:resolution", Outcome: "seasonal-feria", Detail: string(seasonColor)}
 	}
 
 	// In Lent and Passiontide, lesser-rank sanctoral observances use the
@@ -110,10 +137,10 @@ func resolvedDayColor(winner *models.Feast, season models.Season, seasonColor mo
 	// St Scholastica (Greater Double) in white during pre-Lent.
 	if (season == models.Lent || season == models.Passiontide) &&
 		winner.Rank.Weight() < models.Double2ndClass.Weight() {
-		return seasonColor
+		return seasonColor, models.CompositionDecision{Rule: "color:resolution", Outcome: "penitential-season-over-lesser-feast", Detail: winner.ID + "=" + string(seasonColor)}
 	}
 
-	return winner.Color
+	return winner.Color, models.CompositionDecision{Rule: "color:resolution", Outcome: "celebration-color", Detail: winner.ID + "=" + string(winner.Color)}
 }
 
 func allCommemorations(candidates []*models.Feast) bool {
@@ -150,7 +177,7 @@ func normalizeCommemorationName(name string) string {
 	return commNormalizationSpaceRE.ReplaceAllString(n, " ")
 }
 
-func dedupeCommemorations(winner *models.Feast, comms []*models.Feast) []*models.Feast {
+func dedupeCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
 	winnerKey := ""
 	if winner != nil {
 		winnerKey = normalizeCommemorationName(winner.Name)
@@ -165,12 +192,14 @@ func dedupeCommemorations(winner *models.Feast, comms []*models.Feast) []*models
 
 	seen := make([]string, 0, len(comms))
 	deduped := make([]*models.Feast, 0, len(comms))
+	var decisions []models.CompositionDecision
 	for _, comm := range comms {
 		key := normalizeCommemorationName(comm.Name)
 		if key == "" {
 			key = comm.ID
 		}
 		if sameOrContained(key, winnerKey) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:matches-winner", Outcome: "suppressed", Detail: comm.ID})
 			continue
 		}
 		duplicate := false
@@ -181,13 +210,14 @@ func dedupeCommemorations(winner *models.Feast, comms []*models.Feast) []*models
 			}
 		}
 		if duplicate {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:duplicate-name", Outcome: "suppressed", Detail: comm.ID})
 			continue
 		}
 		seen = append(seen, key)
 		deduped = append(deduped, comm)
 	}
 
-	return deduped
+	return deduped, decisions
 }
 
 const maxCommemorationsPerDay = 3
@@ -204,26 +234,26 @@ func suppressesStGeorgeOctave(winner *models.Feast) bool {
 	return strings.HasPrefix(winner.ID, "easter-sunday-octave-day-")
 }
 
-func shouldSuppressCommemoration(winner, comm *models.Feast) bool {
+func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.CompositionDecision) {
 	if comm == nil {
-		return false
+		return false, models.CompositionDecision{}
 	}
 
 	// Data-driven feast coupling (e.g., commemorations that belong only with
 	// a specific winning celebration).
 	if comm.OnlyWith != "" && (winner == nil || winner.ID != comm.OnlyWith) {
-		return true
+		return true, models.CompositionDecision{Rule: "commemoration:only-with", Outcome: "suppressed", Detail: comm.ID + " requires " + comm.OnlyWith}
 	}
 
 	if winner == nil {
-		return false
+		return false, models.CompositionDecision{}
 	}
 
 	// Within the Pentecost octave, the current day takes precedence over the
 	// coincident Whit Ember feria commemoration.
 	if strings.HasPrefix(winner.ID, "pentecost-octave-day-") &&
 		strings.HasPrefix(comm.ID, "whit-ember-") {
-		return true
+		return true, models.CompositionDecision{Rule: "commemoration:pentecost-ember", Outcome: "suppressed", Detail: comm.ID}
 	}
 
 	// The Sunday-within-octave office does not also commemorate Day IV of the
@@ -231,32 +261,40 @@ func shouldSuppressCommemoration(winner, comm *models.Feast) bool {
 	if winner.Category == models.CategorySunday &&
 		(strings.HasPrefix(comm.ID, "ascension-octave-day-4") ||
 			strings.HasPrefix(comm.ID, "corpus-christi-octave-day-4")) {
-		return true
+		return true, models.CompositionDecision{Rule: "commemoration:same-octave-sunday", Outcome: "suppressed", Detail: comm.ID}
 	}
 
 	// Privileged days suppress St George octave commemorations in the years
 	// where the octave overlaps Holy Week or the Easter octave.
 	if suppressesStGeorgeOctave(winner) && strings.HasPrefix(comm.ID, "st-george-octave-day") {
-		return true
+		return true, models.CompositionDecision{Rule: "commemoration:st-george-octave", Outcome: "suppressed", Detail: comm.ID}
 	}
 
-	return false
+	return false, models.CompositionDecision{}
 }
 
-func finalizeCommemorations(winner *models.Feast, comms []*models.Feast) []*models.Feast {
+func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
 	filtered := make([]*models.Feast, 0, len(comms))
+	var decisions []models.CompositionDecision
 	for _, comm := range comms {
-		if shouldSuppressCommemoration(winner, comm) {
+		if suppressed, decision := commemorationSuppressionDecision(winner, comm); suppressed {
+			decisions = append(decisions, decision)
 			continue
 		}
 		filtered = append(filtered, comm)
 	}
 
-	deduped := dedupeCommemorations(winner, filtered)
+	deduped, dedupeDecisions := dedupeCommemorationsWithDecisions(winner, filtered)
+	decisions = append(decisions, dedupeDecisions...)
 	if len(deduped) <= maxCommemorationsPerDay {
-		return deduped
+		return deduped, decisions
 	}
-	return deduped[:maxCommemorationsPerDay]
+	dropped := make([]string, 0, len(deduped)-maxCommemorationsPerDay)
+	for _, comm := range deduped[maxCommemorationsPerDay:] {
+		dropped = append(dropped, comm.ID)
+	}
+	decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:cap", Outcome: "truncated", Detail: strings.Join(dropped, ",")})
+	return deduped[:maxCommemorationsPerDay], decisions
 }
 
 // ResolveDay resolves conflicts for a single day.
@@ -274,23 +312,36 @@ func ResolveDay(
 	allCandidates = append(allCandidates, transferredIn...)
 
 	var transfersOut []*models.Feast
+	decisions := []models.CompositionDecision{{Rule: "occurrence:resolution-mode", Outcome: "start", Detail: fmt.Sprintf("candidates=%d; transferred-in=%d", len(candidates), len(transferredIn))}}
+	if len(transferredIn) > 0 {
+		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-in", Outcome: "considered", Detail: strings.Join(feastIDs(transferredIn), ",")})
+	}
 
 	if len(allCandidates) == 0 {
+		_, colorDecision := resolvedDayColorWithDecision(nil, season, seasonColor)
+		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:resolution-mode", Outcome: "no-candidates"}, colorDecision)
 		return &models.CalendarDay{
-			Date:           date,
-			Season:         season,
-			Color:          seasonColor,
-			ResolutionRule: "occurrence:no-candidates",
+			Date:                date,
+			Season:              season,
+			Color:               seasonColor,
+			ResolutionRule:      "occurrence:no-candidates",
+			OccurrenceDecisions: decisions,
 		}, transfersOut
 	}
 
 	if allCommemorations(allCandidates) {
+		comms, commDecisions := finalizeCommemorationsWithDecisions(nil, allCandidates)
+		_, colorDecision := resolvedDayColorWithDecision(nil, season, seasonColor)
+		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:resolution-mode", Outcome: "commemorations-only"})
+		decisions = append(decisions, commDecisions...)
+		decisions = append(decisions, colorDecision)
 		return &models.CalendarDay{
-			Date:           date,
-			Season:         season,
-			Commemorations: finalizeCommemorations(nil, allCandidates),
-			Color:          seasonColor,
-			ResolutionRule: "occurrence:commemorations-only",
+			Date:                date,
+			Season:              season,
+			Commemorations:      comms,
+			Color:               seasonColor,
+			ResolutionRule:      "occurrence:commemorations-only",
+			OccurrenceDecisions: decisions,
 		}, transfersOut
 	}
 
@@ -303,9 +354,12 @@ func ResolveDay(
 	}
 
 	if len(privileged) > 0 {
+		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:resolution-mode", Outcome: "privileged-fixed-day", Detail: strings.Join(feastIDs(privileged), ",")})
 		winner := privileged[0]
 		for _, f := range privileged[1:] {
-			if compareFeastPrecedence(f, winner) {
+			wins, decision := compareFeastPrecedenceWithDecision(f, winner)
+			decisions = append(decisions, decision)
+			if wins {
 				winner = f
 			}
 		}
@@ -316,30 +370,40 @@ func ResolveDay(
 				continue
 			}
 			if privilegedFeastIDs[f.ID] {
+				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:other-privileged-day", Outcome: "suppressed", Detail: f.ID})
 				continue
 			}
 			if f.Rank.Weight() >= models.Double2ndClass.Weight() && f.Category != models.CategorySunday {
 				transfersOut = append(transfersOut, f)
+				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: "second-class-or-higher", Detail: f.ID})
 			} else if f.Rank.Weight() >= models.Commemoration.Weight() {
 				comms = append(comms, f)
+				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 			}
 		}
-		comms = finalizeCommemorations(winner, comms)
+		comms, commDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+		decisions = append(decisions, commDecisions...)
+		color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
+		decisions = append(decisions, colorDecision)
 
 		return &models.CalendarDay{
-			Date:           date,
-			Season:         season,
-			Celebration:    winner,
-			Commemorations: comms,
-			Color:          resolvedDayColor(winner, season, seasonColor),
-			ResolutionRule: "occurrence:privileged-day",
+			Date:                date,
+			Season:              season,
+			Celebration:         winner,
+			Commemorations:      comms,
+			Color:               color,
+			ResolutionRule:      "occurrence:privileged-day",
+			OccurrenceDecisions: decisions,
 		}, transfersOut
 	}
 
 	// Sort by precedence — find winner
+	decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:resolution-mode", Outcome: "general-precedence"})
 	winner := allCandidates[0]
 	for _, f := range allCandidates[1:] {
-		if compareFeastPrecedence(f, winner) {
+		wins, decision := compareFeastPrecedenceWithDecision(f, winner)
+		decisions = append(decisions, decision)
+		if wins {
 			winner = f
 		}
 	}
@@ -351,18 +415,34 @@ func ResolveDay(
 		}
 		if f.Rank.Weight() >= models.Double2ndClass.Weight() && f.Category != models.CategorySunday {
 			transfersOut = append(transfersOut, f)
+			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: "second-class-or-higher", Detail: f.ID})
 		} else if f.Rank.Weight() >= models.Commemoration.Weight() {
 			comms = append(comms, f)
+			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 		}
 	}
-	comms = finalizeCommemorations(winner, comms)
+	comms, commDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+	decisions = append(decisions, commDecisions...)
+	color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
+	decisions = append(decisions, colorDecision)
 
 	return &models.CalendarDay{
-		Date:           date,
-		Season:         season,
-		Celebration:    winner,
-		Commemorations: comms,
-		Color:          resolvedDayColor(winner, season, seasonColor),
-		ResolutionRule: "occurrence:general-precedence",
+		Date:                date,
+		Season:              season,
+		Celebration:         winner,
+		Commemorations:      comms,
+		Color:               color,
+		ResolutionRule:      "occurrence:general-precedence",
+		OccurrenceDecisions: decisions,
 	}, transfersOut
+}
+
+func feastIDs(feasts []*models.Feast) []string {
+	ids := make([]string, 0, len(feasts))
+	for _, feast := range feasts {
+		if feast != nil {
+			ids = append(ids, feast.ID)
+		}
+	}
+	return ids
 }

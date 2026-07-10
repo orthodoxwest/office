@@ -51,7 +51,9 @@ internal/
     review.go              Manifest sweep: dedupe composed hours by content hash into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
     provenance.go          Structured per-entry source inventory and attestations
+    provenance_queue.go    Dependency-weighted atomic text review ordering
     assurance.go           Composition explanations and minimal structural-review planning
+    assurance_gate.go      Release assurance baseline, gates, and CI summary
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
 data/
@@ -62,6 +64,7 @@ data/
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   review/signoffs.txt      Human review sign-offs (hash-keyed; see REVIEWING.md)
   review/provenance.csv    Source/page attestations; citations only, never book contents
+  review/assurance-baseline.json  Intentional verified/structural coverage floors
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
 scripts/
   seed-divinum.go          Seed propers/commons from a local Divinum Officium checkout
@@ -131,8 +134,15 @@ make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt
 make review-provenance # Report generated corpus source coverage
+make review-provenance-queue # Rank atomic text review by dependency fan-out
 make review-plan      # Print minimal structural-review checklist CSV
+make review-assurance # Run release assurance gates and summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
+./office review attest --source SOURCE --page PAGE KEY HASH REVIEWER # Record verified text
+
+Hour pages expose assurance metadata in a collapsed disclosure. Keep it
+source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,
+and review links are allowed; local paths and inaccessible PDF links are not.
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
 make golden      # Regenerate golden test files after intentional changes

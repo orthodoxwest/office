@@ -219,6 +219,66 @@ footer {
   text-align: center;
 }
 
+/* ── Assurance disclosure ── */
+
+.assurance-panel {
+  margin-top: 2.5rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.18);
+  padding: 0.75rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.assurance-panel > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.assurance-panel h2 {
+  margin: 1rem 0 0.35rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: normal;
+}
+
+.assurance-intro {
+  margin-top: 0.7rem;
+}
+
+.assurance-list {
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.assurance-list code {
+  color: var(--text);
+  font-size: 0.76rem;
+}
+
+.assurance-status {
+  display: inline-block;
+  margin-left: 0.25rem;
+  padding: 0 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.status-verified { color: #356535; }
+.status-needs-review { color: var(--rubric); }
+.assurance-detail { font-style: italic; }
+
+@media (max-width: 700px) {
+  .assurance-panel {
+    padding: 0.65rem 0.7rem;
+    font-size: 0.78rem;
+  }
+}
+
 /* ── Home page ── */
 
 .home {

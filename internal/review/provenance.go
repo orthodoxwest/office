@@ -19,6 +19,8 @@ import (
 
 const provenanceFile = "provenance.csv"
 
+var provenanceHeader = []string{"key", "content_hash", "source", "locator", "page", "status", "reviewer", "reviewed_on", "notes"}
+
 // ProvenanceStatus describes the strongest available evidence for a corpus
 // entry. Only an explicit structured attestation may produce "verified".
 type ProvenanceStatus string
@@ -51,6 +53,7 @@ type EntryProvenance struct {
 	Reviewer    string           `json:"reviewer,omitempty"`
 	ReviewedOn  string           `json:"reviewed_on,omitempty"`
 	Notes       string           `json:"notes,omitempty"`
+	Stale       bool             `json:"stale,omitempty"`
 	Sources     []SourceCitation `json:"sources,omitempty"`
 	TODOs       []string         `json:"todos,omitempty"`
 }
@@ -126,6 +129,7 @@ func ScanProvenance(dataDir string) (*ProvenanceInventory, error) {
 		}
 		if a.ContentHash != "" && a.ContentHash != e.ContentHash {
 			e.Status = ProvenanceNeedsReview
+			e.Stale = true
 			e.Notes = joinNonempty(e.Notes, a.Notes, "stale attestation for content hash "+a.ContentHash)
 		} else if a.Status != "" {
 			e.Status = ProvenanceStatus(a.Status)
@@ -259,7 +263,13 @@ func loadAttestations(dataDir string) ([]attestation, error) {
 	}
 	var out []attestation
 	for i, row := range rows {
-		if i == 0 || len(row) == 0 || strings.TrimSpace(row[0]) == "" {
+		if i == 0 {
+			if strings.Join(row, "\x1f") != strings.Join(provenanceHeader, "\x1f") {
+				return nil, fmt.Errorf("%s: unexpected header", path)
+			}
+			continue
+		}
+		if len(row) == 0 || strings.TrimSpace(row[0]) == "" {
 			continue
 		}
 		if len(row) != 9 {
@@ -272,6 +282,161 @@ func loadAttestations(dataDir string) ([]attestation, error) {
 		out = append(out, a)
 	}
 	return out, nil
+}
+
+// AttestOptions describes one hash-bound word-for-word source verification.
+type AttestOptions struct {
+	Key        string
+	HashPrefix string
+	Reviewer   string
+	Source     string
+	Locator    string
+	Page       string
+	ReviewedOn string
+	Notes      string
+	Replace    bool
+}
+
+// RecordAttestation validates and atomically records a verified provenance
+// attestation. It never stores source-book contents.
+func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, error) {
+	trimAttestOptions(&opts)
+	if opts.Key == "" || opts.HashPrefix == "" || opts.Reviewer == "" || opts.Source == "" {
+		return nil, fmt.Errorf("key, hash, reviewer, and source are required")
+	}
+	if opts.Page == "" && opts.Locator == "" {
+		return nil, fmt.Errorf("page or locator is required")
+	}
+	if opts.ReviewedOn == "" {
+		opts.ReviewedOn = time.Now().Format("2006-01-02")
+	}
+	if _, err := time.Parse("2006-01-02", opts.ReviewedOn); err != nil {
+		return nil, fmt.Errorf("invalid review date %q", opts.ReviewedOn)
+	}
+	for name, value := range map[string]string{"reviewer": opts.Reviewer, "source": opts.Source, "locator": opts.Locator, "page": opts.Page} {
+		if strings.ContainsAny(value, "\r\n") {
+			return nil, fmt.Errorf("%s may not contain a newline", name)
+		}
+	}
+
+	inv, err := ScanProvenance(dataDir)
+	if err != nil {
+		return nil, err
+	}
+	entry, fullHash, err := resolveAttestationTarget(inv, opts.Key, opts.HashPrefix)
+	if err != nil {
+		return nil, err
+	}
+	existing, err := loadAttestations(dataDir)
+	if err != nil {
+		return nil, err
+	}
+	var kept []attestation
+	found := false
+	for _, a := range existing {
+		if a.Key == opts.Key {
+			found = true
+			continue
+		}
+		kept = append(kept, a)
+	}
+	if found && !opts.Replace {
+		return nil, fmt.Errorf("entry %q already has an attestation; use --replace to replace it", opts.Key)
+	}
+	kept = append(kept, attestation{
+		Key: opts.Key, ContentHash: fullHash, Source: opts.Source, Locator: opts.Locator,
+		Page: opts.Page, Status: string(ProvenanceVerified), Reviewer: opts.Reviewer,
+		ReviewedOn: opts.ReviewedOn, Notes: opts.Notes,
+	})
+	sort.Slice(kept, func(i, j int) bool { return kept[i].Key < kept[j].Key })
+	if err := writeAttestations(dataDir, kept); err != nil {
+		return nil, err
+	}
+	result := entry
+	result.Status = ProvenanceVerified
+	result.Reviewer, result.ReviewedOn, result.Notes = opts.Reviewer, opts.ReviewedOn, opts.Notes
+	result.Sources = append(result.Sources, SourceCitation{Kind: "attestation", Source: opts.Source, Locator: opts.Locator, Page: opts.Page, Note: opts.Notes})
+	return &result, nil
+}
+
+func trimAttestOptions(opts *AttestOptions) {
+	opts.Key = strings.TrimSpace(opts.Key)
+	opts.HashPrefix = strings.TrimSpace(opts.HashPrefix)
+	opts.Reviewer = strings.TrimSpace(opts.Reviewer)
+	opts.Source = strings.TrimSpace(opts.Source)
+	opts.Locator = strings.TrimSpace(opts.Locator)
+	opts.Page = strings.TrimSpace(opts.Page)
+	opts.ReviewedOn = strings.TrimSpace(opts.ReviewedOn)
+	opts.Notes = strings.TrimSpace(opts.Notes)
+}
+
+func resolveAttestationTarget(inv *ProvenanceInventory, key, prefix string) (EntryProvenance, string, error) {
+	entry, ok := inv.ByKey()[key]
+	if !ok {
+		return EntryProvenance{}, "", fmt.Errorf("unknown corpus key %q", key)
+	}
+	if len(prefix) < 6 {
+		return EntryProvenance{}, "", fmt.Errorf("hash prefix must contain at least 6 characters")
+	}
+	var matches []string
+	for _, candidate := range inv.Entries {
+		if strings.HasPrefix(candidate.ContentHash, prefix) {
+			matches = append(matches, candidate.Key)
+		}
+	}
+	if len(matches) > 1 {
+		return EntryProvenance{}, "", fmt.Errorf("hash prefix %q is ambiguous across %d corpus entries", prefix, len(matches))
+	}
+	if !strings.HasPrefix(entry.ContentHash, prefix) {
+		return EntryProvenance{}, "", fmt.Errorf("hash %q does not match current content hash %s for %q", prefix, entry.ContentHash, key)
+	}
+	return entry, entry.ContentHash, nil
+}
+
+func writeAttestations(dataDir string, attestations []attestation) error {
+	dir := filepath.Join(dataDir, "review")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(dir, ".provenance-*.csv")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	ok := false
+	defer func() {
+		_ = tmp.Close()
+		if !ok {
+			_ = os.Remove(tmpName)
+		}
+	}()
+	cw := csv.NewWriter(tmp)
+	if err := cw.Write(provenanceHeader); err != nil {
+		return err
+	}
+	for _, a := range attestations {
+		if err := cw.Write([]string{a.Key, a.ContentHash, a.Source, a.Locator, a.Page, a.Status, a.Reviewer, a.ReviewedOn, a.Notes}); err != nil {
+			return err
+		}
+	}
+	cw.Flush()
+	if err := cw.Error(); err != nil {
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := os.Chmod(tmpName, 0o644); err != nil {
+		return err
+	}
+	if err := os.Rename(tmpName, filepath.Join(dir, provenanceFile)); err != nil {
+		return err
+	}
+	ok = true
+	return nil
 }
 
 func validateAttestation(a attestation) error {
@@ -310,8 +475,12 @@ func (p *ProvenanceInventory) ByKey() map[string]EntryProvenance {
 func PrintProvenanceSummary(p *ProvenanceInventory, w io.Writer) {
 	counts := map[ProvenanceStatus]int{}
 	withPage := 0
+	stale := 0
 	for _, e := range p.Entries {
 		counts[e.Status]++
+		if e.Stale {
+			stale++
+		}
 		for _, s := range e.Sources {
 			if s.Page != "" {
 				withPage++
@@ -324,6 +493,7 @@ func PrintProvenanceSummary(p *ProvenanceInventory, w io.Writer) {
 		fmt.Fprintf(w, "  %-14s %5d\n", status, counts[status])
 	}
 	fmt.Fprintf(w, "  %-14s %5d\n", "page-located", withPage)
+	fmt.Fprintf(w, "  %-14s %5d\n", "stale", stale)
 }
 
 // WriteProvenanceCSV writes one row per entry/source claim. Entries with no

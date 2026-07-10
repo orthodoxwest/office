@@ -81,7 +81,9 @@ type Manifest struct {
 
 // HashHour returns a short content hash of a composed hour. The Date field is
 // deliberately excluded so that identical compositions on different dates
-// hash the same; everything a reviewer sees on the page is included.
+// hash the same. Liturgical content is included; assurance metadata such as
+// source keys and decision traces is excluded so observability changes do not
+// invalidate a sign-off on an otherwise unchanged office.
 func HashHour(h *models.OfficeHour) string {
 	var b strings.Builder
 	b.WriteString(h.Hour)

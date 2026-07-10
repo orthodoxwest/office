@@ -118,6 +118,54 @@ func TestShowVettingBannerDependsOnReviewHash(t *testing.T) {
 	}
 }
 
+func TestHourAssuranceCountsDependenciesWithoutSourceContents(t *testing.T) {
+	hour := &models.OfficeHour{
+		Hour: "lauds",
+		Sections: []models.OfficeSection{{Elements: []models.OfficeElement{
+			{Type: models.Collect, Text: "A collect.", SourceRef: "proper/example/collect", SourceRefs: []string{"proper/example/collect"}},
+			{Type: models.Psalm, Text: "A psalm.", SourceRef: "psalms/001", SourceRefs: []string{"psalms/001"}},
+		}}},
+		Decisions: []models.CompositionDecision{{Rule: "occurrence:higher-rank", Outcome: "challenger-wins"}},
+	}
+	s := &Server{provenance: map[string]review.EntryProvenance{
+		"proper/example/collect": {Key: "proper/example/collect", Status: review.ProvenanceVerified},
+		"psalms/001":             {Key: "psalms/001", Status: review.ProvenanceNeedsReview},
+	}}
+	got := s.hourAssurance(hour, "lauds", "2026-01-01")
+	if got.Verified != 1 || got.NeedsReview != 1 || len(got.Dependencies) != 2 {
+		t.Fatalf("assurance = %#v", got)
+	}
+	if len(got.Decisions) != 1 || got.Decisions[0].Rule != "occurrence:higher-rank" {
+		t.Fatalf("decisions = %#v", got.Decisions)
+	}
+	if !strings.Contains(got.Dependencies[1].ReportURL, "psalms%2F001") {
+		t.Fatalf("report URL does not identify dependency: %s", got.Dependencies[1].ReportURL)
+	}
+}
+
+func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
+	s, err := New("../../data", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	s.handleRoot(rec, httptest.NewRequest(http.MethodGet, "/lauds/2026-06-07", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	body := rec.Body.String()
+	for _, want := range []string{`<details class="assurance-panel">`, "Text dependencies", "Composition decisions"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("hour page missing %q", want)
+		}
+	}
+	for _, forbidden := range []string{"SOURCE:", ".txt", "/home/", "../resources"} {
+		if strings.Contains(body, forbidden) {
+			t.Errorf("hour page leaks source metadata %q", forbidden)
+		}
+	}
+}
+
 func TestHandle404DoesNotShowVettingBanner(t *testing.T) {
 	s, err := New("../../data", ":0")
 	if err != nil {

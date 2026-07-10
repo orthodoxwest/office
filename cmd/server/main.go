@@ -329,6 +329,10 @@ Subcommands:
                                          Print the review-unit checklist as CSV
   status   [-start YEAR] [-years N]      Report coverage vs data/review/signoffs.txt
   provenance [-csv]                     Report structured corpus provenance
+  provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified]
+                                         Rank atomic text review by dependency fan-out
+  attest [flags] KEY HASH REVIEWER         Record a hash-bound source attestation
+  assurance [-markdown] [-update-baseline] Run release assurance gates and summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
                                          Select a minimal coverage-oriented review set
@@ -392,6 +396,79 @@ Subcommands:
 			}
 		} else {
 			review.PrintProvenanceSummary(inventory, os.Stdout)
+		}
+
+	case "provenance-queue":
+		fs := flag.NewFlagSet("review provenance-queue", flag.ExitOnError)
+		start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
+		years := fs.Int("years", 1, "number of calendar years to sweep")
+		base := fs.String("base", review.DefaultBaseURL, "base URL prefixed to representative links")
+		summary := fs.Bool("summary", false, "print counts instead of the review queue CSV")
+		includeVerified := fs.Bool("include-verified", false, "include already verified corpus entries")
+		fs.Parse(os.Args[3:])
+		queue, err := review.BuildProvenanceQueue(dataDir, *start, *years, *includeVerified)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error building provenance queue: %v\n", err)
+			os.Exit(1)
+		}
+		if *summary {
+			review.PrintProvenanceQueueSummary(queue, os.Stdout)
+		} else if err := review.WriteProvenanceQueueCSV(queue, os.Stdout, *base); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing provenance queue: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "attest":
+		fs := flag.NewFlagSet("review attest", flag.ExitOnError)
+		source := fs.String("source", "", "source title or edition (required)")
+		locator := fs.String("locator", "", "source section or other locator")
+		page := fs.String("page", "", "visible source page number")
+		note := fs.String("note", "", "short verification note")
+		reviewedOn := fs.String("date", time.Now().Format("2006-01-02"), "review date (YYYY-MM-DD)")
+		replace := fs.Bool("replace", false, "replace an existing attestation for this key")
+		fs.Parse(os.Args[3:])
+		args := fs.Args()
+		if len(args) != 3 {
+			fmt.Fprintln(os.Stderr, "Usage: office review attest --source SOURCE [--page PAGE|--locator LOCATOR] [--note NOTE] [--date YYYY-MM-DD] [--replace] KEY HASH REVIEWER")
+			os.Exit(1)
+		}
+		entry, err := review.RecordAttestation(dataDir, review.AttestOptions{
+			Key: args[0], HashPrefix: args[1], Reviewer: args[2], Source: *source,
+			Locator: *locator, Page: *page, ReviewedOn: *reviewedOn, Notes: *note, Replace: *replace,
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error recording attestation: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Verified %s at %s (%s, %s)\n", entry.Key, entry.ContentHash, entry.Reviewer, entry.ReviewedOn)
+
+	case "assurance":
+		fs := flag.NewFlagSet("review assurance", flag.ExitOnError)
+		markdown := fs.Bool("markdown", false, "write a Markdown CI/release summary")
+		updateBaseline := fs.Bool("update-baseline", false, "set the reviewable coverage floor to current counts")
+		fs.Parse(os.Args[3:])
+		baseline, err := review.LoadAssuranceBaseline(dataDir)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error loading assurance baseline: %v\n", err)
+			os.Exit(1)
+		}
+		report, err := review.BuildAssuranceReport(dataDir, baseline.StartYear, baseline.Years)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error building assurance report: %v\n", err)
+			os.Exit(1)
+		}
+		if *updateBaseline {
+			if err := review.UpdateAssuranceBaseline(dataDir, report); err != nil {
+				fmt.Fprintf(os.Stderr, "Error updating assurance baseline: %v\n", err)
+				os.Exit(1)
+			}
+			baseline.VerifiedMinimum = report.Verified
+			baseline.ModeledFeaturesMinimum = report.ModeledFeatures
+		}
+		failures := review.EvaluateAssurance(report, baseline)
+		review.WriteAssuranceSummary(report, failures, os.Stdout, *markdown)
+		if len(failures) > 0 {
+			os.Exit(1)
 		}
 
 	case "explain":

@@ -109,6 +109,13 @@ func hourDependencies(hour *models.OfficeHour) []string {
 	return refs
 }
 
+// HourDependencies returns the sorted, unique corpus keys behind a rendered
+// hour. It is safe to expose in reviewer interfaces: it contains no source
+// contents or local paths.
+func HourDependencies(hour *models.OfficeHour) []string {
+	return hourDependencies(hour)
+}
+
 func dedupeDecisions(in []models.CompositionDecision) []models.CompositionDecision {
 	seen := map[string]bool{}
 	out := make([]models.CompositionDecision, 0, len(in))
@@ -121,6 +128,12 @@ func dedupeDecisions(in []models.CompositionDecision) []models.CompositionDecisi
 		out = append(out, d)
 	}
 	return out
+}
+
+// UniqueCompositionDecisions removes duplicate trace events while preserving
+// their first-seen order.
+func UniqueCompositionDecisions(in []models.CompositionDecision) []models.CompositionDecision {
+	return dedupeDecisions(in)
 }
 
 // ReviewCandidate is one representative composition considered by the set
