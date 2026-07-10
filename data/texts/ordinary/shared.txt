@@ -59,7 +59,7 @@ Alleluia
 
 [gloria-patri]
 Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
 [kyrie]
 Kyrie eleison. Christe eleison. Kyrie eleison.
