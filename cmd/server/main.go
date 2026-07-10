@@ -331,12 +331,12 @@ Subcommands:
   provenance [-csv]                     Report structured corpus provenance
   provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified]
                                          Rank atomic text review by dependency fan-out
-  attest [flags] KEY REVIEWER              Record a source attestation for one text
+  attest [flags] KEY REVIEWER            Record a source attestation for one text
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
                                          Select a minimal coverage-oriented review set
-  sign HASH REVIEWER [note...]           Record a sign-off for the unit with HASH`
+  sign HOUR YYYY-MM-DD REVIEWER [note...] Record a structural sign-off for one page`
 
 	if len(os.Args) < 3 {
 		fmt.Fprintln(os.Stderr, usage)
@@ -514,40 +514,27 @@ Subcommands:
 		}
 
 	case "sign":
-		if len(os.Args) < 5 {
-			fmt.Fprintln(os.Stderr, "Usage: office review sign HASH REVIEWER [note...]")
+		if len(os.Args) < 6 {
+			fmt.Fprintln(os.Stderr, "Usage: office review sign HOUR YYYY-MM-DD REVIEWER [note...]")
 			os.Exit(1)
 		}
-		hash, reviewer := os.Args[3], os.Args[4]
-		note := strings.Join(os.Args[5:], " ")
-		m := buildManifest(time.Now().Year(), 3)
-		var unit *review.Unit
-		for i := range m.Units {
-			if strings.HasPrefix(m.Units[i].Hash, hash) {
-				if unit != nil {
-					fmt.Fprintf(os.Stderr, "Hash prefix %q is ambiguous\n", hash)
-					os.Exit(1)
-				}
-				unit = &m.Units[i]
-			}
-		}
-		if unit == nil {
-			fmt.Fprintf(os.Stderr, "No review unit with hash %q in the current sweep\n", hash)
+		hourName, reviewer := os.Args[3], os.Args[5]
+		date, err := time.Parse("2006-01-02", os.Args[4])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Invalid date (use YYYY-MM-DD): %s\n", os.Args[4])
 			os.Exit(1)
 		}
-		s := review.Signoff{
-			Hash:     unit.Hash,
-			Hour:     unit.Hour,
-			UnitKey:  unit.UnitKey,
-			Reviewer: reviewer,
-			Date:     time.Now().Format("2006-01-02"),
-			Note:     note,
+		note := strings.Join(os.Args[6:], " ")
+		s, unit, err := review.SignoffForPage(dataDir, hourName, date, reviewer, note)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error resolving reviewed page: %v\n", err)
+			os.Exit(1)
 		}
-		if err := review.AppendSignoff(dataDir, s); err != nil {
+		if err := review.AppendSignoff(dataDir, *s); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing sign-off: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Signed off: %s %s (%s) by %s\n", unit.Hour, unit.Name, unit.Hash, reviewer)
+		fmt.Printf("Signed off: %s %s on %s by %s\n", unit.Hour, unit.Name, date.Format("2006-01-02"), reviewer)
 
 	default:
 		fmt.Fprintln(os.Stderr, usage)

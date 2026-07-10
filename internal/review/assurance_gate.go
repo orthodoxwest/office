@@ -25,12 +25,12 @@ type AssuranceReport struct {
 	Years             int
 	CandidateCount    int
 	ModeledFeatures   int
+	ModeledFeatureIDs []string
 	SelectedPages     int
 	UncoveredFeatures []string
 	Verified          int
-	Documented        int
 	NeedsReview       int
-	Undocumented      int
+	SourceUnknown     int
 	StaleAttestations int
 }
 
@@ -47,24 +47,47 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 	report := &AssuranceReport{
 		StartYear: startYear, Years: years, CandidateCount: plan.CandidateCount,
 		ModeledFeatures: plan.FeatureCount, SelectedPages: len(plan.Selected),
-		UncoveredFeatures: plan.Uncovered,
+		ModeledFeatureIDs: append([]string(nil), plan.Features...),
+		UncoveredFeatures: append([]string(nil), plan.Uncovered...),
 	}
 	for _, entry := range provenance.Entries {
 		switch entry.Status {
 		case ProvenanceVerified:
 			report.Verified++
-		case ProvenanceDocumented:
-			report.Documented++
 		case ProvenanceNeedsReview:
 			report.NeedsReview++
 		default:
-			report.Undocumented++
+			report.SourceUnknown++
 		}
 		if entry.Stale {
 			report.StaleAttestations++
 		}
 	}
 	return report, nil
+}
+
+// WriteAssuranceSnapshot writes the deterministic, source-content-free
+// review artifact checked in as a golden file. The summary makes count changes
+// obvious while the sorted feature inventory catches one-for-one structural
+// substitutions that a count alone would miss.
+func WriteAssuranceSnapshot(report *AssuranceReport, w io.Writer) {
+	WriteAssuranceSummary(report, nil, w, true)
+	fmt.Fprintln(w)
+	fmt.Fprintln(w, "### Modeled structural features")
+	if len(report.ModeledFeatureIDs) == 0 {
+		fmt.Fprintln(w, "_None._")
+	} else {
+		for _, feature := range report.ModeledFeatureIDs {
+			fmt.Fprintf(w, "- `%s`\n", feature)
+		}
+	}
+	if len(report.UncoveredFeatures) > 0 {
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "### Uncovered structural features")
+		for _, feature := range report.UncoveredFeatures {
+			fmt.Fprintf(w, "- `%s`\n", feature)
+		}
+	}
 }
 
 // LoadAssuranceBaseline reads the intentional release floor.
@@ -113,9 +136,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "| Selected structural-review pages | %d |\n", report.SelectedPages)
 		fmt.Fprintf(w, "| Uncovered features | %d |\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "| Verified text entries | %d |\n", report.Verified)
-		fmt.Fprintf(w, "| Documented text entries | %d |\n", report.Documented)
 		fmt.Fprintf(w, "| Text entries needing review | %d |\n", report.NeedsReview)
-		fmt.Fprintf(w, "| Undocumented text entries | %d |\n", report.Undocumented)
+		fmt.Fprintf(w, "| Text entries with unknown source | %d |\n", report.SourceUnknown)
 		fmt.Fprintf(w, "| Stale attestations | %d |\n", report.StaleAttestations)
 	} else {
 		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
@@ -124,9 +146,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "  selected pages:       %d\n", report.SelectedPages)
 		fmt.Fprintf(w, "  uncovered features:   %d\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "  verified:             %d\n", report.Verified)
-		fmt.Fprintf(w, "  documented:           %d\n", report.Documented)
 		fmt.Fprintf(w, "  needs review:         %d\n", report.NeedsReview)
-		fmt.Fprintf(w, "  undocumented:         %d\n", report.Undocumented)
+		fmt.Fprintf(w, "  source unknown:       %d\n", report.SourceUnknown)
 		fmt.Fprintf(w, "  stale attestations:   %d\n", report.StaleAttestations)
 	}
 	if len(failures) > 0 {

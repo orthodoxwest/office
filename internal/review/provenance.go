@@ -26,10 +26,9 @@ var provenanceHeader = []string{"key", "content_hash", "source", "locator", "pag
 type ProvenanceStatus string
 
 const (
-	ProvenanceUndocumented ProvenanceStatus = "undocumented"
-	ProvenanceNeedsReview  ProvenanceStatus = "needs-review"
-	ProvenanceDocumented   ProvenanceStatus = "documented"
-	ProvenanceVerified     ProvenanceStatus = "verified"
+	ProvenanceSourceUnknown ProvenanceStatus = "source-unknown"
+	ProvenanceNeedsReview   ProvenanceStatus = "needs-review"
+	ProvenanceVerified      ProvenanceStatus = "verified"
 )
 
 // SourceCitation is one source claim attached to a corpus entry.
@@ -83,7 +82,7 @@ func ScanProvenance(dataDir string) (*ProvenanceInventory, error) {
 		entries[key] = &EntryProvenance{
 			Key:         key,
 			ContentHash: contentHash(body),
-			Status:      ProvenanceUndocumented,
+			Status:      ProvenanceSourceUnknown,
 		}
 	}
 
@@ -103,12 +102,10 @@ func ScanProvenance(dataDir string) (*ProvenanceInventory, error) {
 
 	for _, e := range entries {
 		switch {
-		case len(e.TODOs) > 0 || hasReviewPendingSource(e.Sources):
+		case len(e.Sources) > 0 || len(e.TODOs) > 0:
 			e.Status = ProvenanceNeedsReview
-		case len(e.Sources) > 0:
-			e.Status = ProvenanceDocumented
 		default:
-			e.Status = ProvenanceUndocumented
+			e.Status = ProvenanceSourceUnknown
 		}
 	}
 
@@ -130,9 +127,9 @@ func ScanProvenance(dataDir string) (*ProvenanceInventory, error) {
 		if a.ContentHash != "" && a.ContentHash != e.ContentHash {
 			e.Status = ProvenanceNeedsReview
 			e.Stale = true
-			e.Notes = joinNonempty(e.Notes, a.Notes, "stale attestation for content hash "+a.ContentHash)
+			e.Notes = joinNonempty(e.Notes, a.Notes, "stale attestation for an earlier text version")
 		} else if a.Status != "" {
-			e.Status = ProvenanceStatus(a.Status)
+			e.Status = normalizedProvenanceStatus(a.Status)
 			e.Notes = a.Notes
 		}
 		e.Reviewer, e.ReviewedOn = a.Reviewer, a.ReviewedOn
@@ -237,13 +234,18 @@ func parseCitation(raw string, line int) SourceCitation {
 	return c
 }
 
-func hasReviewPendingSource(sources []SourceCitation) bool {
-	for _, s := range sources {
-		if s.Kind == "divinum-officium" || strings.Contains(strings.ToLower(s.Note), "check against") {
-			return true
-		}
+// normalizedProvenanceStatus maps the retired documented/undocumented states
+// if an older ledger is encountered. Source citations now remain needs-review
+// until an explicit verified attestation is recorded.
+func normalizedProvenanceStatus(status string) ProvenanceStatus {
+	switch ProvenanceStatus(status) {
+	case ProvenanceVerified:
+		return ProvenanceVerified
+	case ProvenanceNeedsReview, "documented":
+		return ProvenanceNeedsReview
+	default:
+		return ProvenanceSourceUnknown
 	}
-	return false
 }
 
 func loadAttestations(dataDir string) ([]attestation, error) {
@@ -417,7 +419,7 @@ func writeAttestations(dataDir string, attestations []attestation) error {
 
 func validateAttestation(a attestation) error {
 	switch ProvenanceStatus(a.Status) {
-	case ProvenanceNeedsReview, ProvenanceDocumented:
+	case ProvenanceNeedsReview, "documented", ProvenanceSourceUnknown, "undocumented":
 		return nil
 	case ProvenanceVerified:
 		if a.ContentHash == "" {
@@ -465,7 +467,7 @@ func PrintProvenanceSummary(p *ProvenanceInventory, w io.Writer) {
 		}
 	}
 	fmt.Fprintf(w, "=== Corpus provenance: %d entries ===\n", len(p.Entries))
-	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceDocumented, ProvenanceNeedsReview, ProvenanceUndocumented} {
+	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceNeedsReview, ProvenanceSourceUnknown} {
 		fmt.Fprintf(w, "  %-14s %5d\n", status, counts[status])
 	}
 	fmt.Fprintf(w, "  %-14s %5d\n", "page-located", withPage)
@@ -476,7 +478,7 @@ func PrintProvenanceSummary(p *ProvenanceInventory, w io.Writer) {
 // source still receive a row so missing provenance remains machine-visible.
 func WriteProvenanceCSV(p *ProvenanceInventory, w io.Writer) error {
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"key", "file", "section", "line", "content_hash", "status", "source_kind", "source", "locator", "page", "source_line", "reviewer", "reviewed_on", "notes"})
+	_ = cw.Write([]string{"key", "file", "section", "line", "status", "source_kind", "source", "locator", "page", "source_line", "reviewer", "reviewed_on", "notes"})
 	for _, e := range p.Entries {
 		sources := e.Sources
 		if len(sources) == 0 {
@@ -488,7 +490,7 @@ func WriteProvenanceCSV(p *ProvenanceInventory, w io.Writer) error {
 			if s.Line > 0 {
 				sourceLine = fmt.Sprint(s.Line)
 			}
-			_ = cw.Write([]string{e.Key, e.File, e.Section, fmt.Sprint(e.Line), e.ContentHash, string(e.Status), s.Kind, s.Source, s.Locator, s.Page, sourceLine, e.Reviewer, e.ReviewedOn, notes})
+			_ = cw.Write([]string{e.Key, e.File, e.Section, fmt.Sprint(e.Line), string(e.Status), s.Kind, s.Source, s.Locator, s.Page, sourceLine, e.Reviewer, e.ReviewedOn, notes})
 		}
 	}
 	cw.Flush()

@@ -82,8 +82,8 @@ jobs:
               : '';
             const body =
               '## Golden file mismatch detected\n\n' +
-              'The rendered office output doesn\'t match the checked-in golden files. ' +
-              'This usually means a data file edit changed the text of an hour or the audit report.' +
+              'Generated review output doesn\'t match the checked-in golden files. ' +
+              'This usually means a data or logic edit changed a rendered hour, the audit report, or the assurance snapshot.' +
               diffSection + '\n\n' +
               '**If this change is intentional** — add the `update-golden` label to this PR. ' +
               'GitHub Actions will regenerate the golden files and push the result automatically.\n\n' +

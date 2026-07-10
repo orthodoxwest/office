@@ -23,6 +23,10 @@ Verified text.
 
 [unknown]
 Unknown text.
+
+[todo]
+# TODO(diurnal): locate this text in the printed diurnal.
+Text awaiting source research.
 `)
 	writeTestFile(t, filepath.Join(dir, "review", "provenance.csv"), `key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
 proper/example/verified,`+contentHash("Verified text.")+`,Printed Diurnal,Proper of Example,44,verified,alice,2026-07-09,word-for-word
@@ -33,7 +37,7 @@ proper/example/verified,`+contentHash("Verified text.")+`,Printed Diurnal,Proper
 		t.Fatal(err)
 	}
 	byKey := inv.ByKey()
-	if got := byKey["proper/example/collect"]; got.Status != ProvenanceDocumented || got.Sources[0].Page != "12" {
+	if got := byKey["proper/example/collect"]; got.Status != ProvenanceNeedsReview || got.Sources[0].Page != "12" {
 		t.Fatalf("collect provenance = %#v", got)
 	}
 	if got := byKey["proper/example/antiphon"].Status; got != ProvenanceNeedsReview {
@@ -42,8 +46,11 @@ proper/example/verified,`+contentHash("Verified text.")+`,Printed Diurnal,Proper
 	if got := byKey["proper/example/verified"]; got.Status != ProvenanceVerified || got.Reviewer != "alice" {
 		t.Fatalf("verified provenance = %#v", got)
 	}
-	if got := byKey["proper/example/unknown"].Status; got != ProvenanceUndocumented {
+	if got := byKey["proper/example/unknown"].Status; got != ProvenanceSourceUnknown {
 		t.Fatalf("unknown status = %q", got)
+	}
+	if got := byKey["proper/example/todo"].Status; got != ProvenanceNeedsReview {
+		t.Fatalf("TODO status = %q", got)
 	}
 
 	var out bytes.Buffer
@@ -52,6 +59,9 @@ proper/example/verified,`+contentHash("Verified text.")+`,Printed Diurnal,Proper
 	}
 	if !strings.Contains(out.String(), "proper/example/collect") || !strings.Contains(out.String(), "local-book.pdf") {
 		t.Fatalf("CSV missing provenance row:\n%s", out.String())
+	}
+	if strings.Contains(out.String(), "content_hash") || strings.Contains(out.String(), contentHash("Verified text.")) {
+		t.Fatalf("reviewer inventory exposes implementation hash:\n%s", out.String())
 	}
 }
 
@@ -66,7 +76,7 @@ example,oldhash,Printed Diurnal,Ordinary,10,verified,alice,2026-07-09,word-for-w
 		t.Fatal(err)
 	}
 	got := inv.ByKey()["example"]
-	if got.Status != ProvenanceNeedsReview || !strings.Contains(got.Notes, "stale attestation") {
+	if got.Status != ProvenanceNeedsReview || !strings.Contains(got.Notes, "earlier text version") {
 		t.Fatalf("stale provenance = %#v", got)
 	}
 }

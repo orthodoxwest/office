@@ -71,7 +71,7 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 	lualatex --shell-escape --interaction=nonstopmode --output-directory=output output/$(HOUR)-$(DATE).tex
 	@echo "PDF: output/$(HOUR)-$(DATE).pdf"
 
-golden: ## Regenerate golden test files
+golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1
 
 clean: ## Remove build artifacts

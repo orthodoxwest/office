@@ -20,7 +20,7 @@ func TestEvaluateAssurance(t *testing.T) {
 func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 	report := &AssuranceReport{
 		StartYear: 2026, Years: 1, CandidateCount: 2555, ModeledFeatures: 10,
-		SelectedPages: 3, Verified: 1, Documented: 2, NeedsReview: 3, Undocumented: 4,
+		SelectedPages: 3, Verified: 1, NeedsReview: 3, SourceUnknown: 4,
 	}
 	var out bytes.Buffer
 	WriteAssuranceSummary(report, nil, &out, true)
@@ -28,6 +28,27 @@ func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("summary missing %q:\n%s", want, out.String())
 		}
+	}
+}
+
+func TestAssuranceSnapshotIncludesSortedFeatureInventory(t *testing.T) {
+	report := &AssuranceReport{
+		StartYear: 2026, Years: 1, ModeledFeatures: 2,
+		ModeledFeatureIDs: []string{"decision:occurrence=winner", "resolution:collect=proper"},
+	}
+	var out bytes.Buffer
+	WriteAssuranceSnapshot(report, &out)
+	for _, want := range []string{
+		"### Modeled structural features",
+		"- `decision:occurrence=winner`",
+		"- `resolution:collect=proper`",
+	} {
+		if !strings.Contains(out.String(), want) {
+			t.Errorf("snapshot missing %q:\n%s", want, out.String())
+		}
+	}
+	if strings.Contains(out.String(), "Gate failures") {
+		t.Fatalf("snapshot should describe current state without gate evaluation:\n%s", out.String())
 	}
 }
 

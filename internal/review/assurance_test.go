@@ -1,6 +1,9 @@
 package review
 
 import (
+	"bytes"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 )
@@ -47,11 +50,32 @@ func TestBuildReviewPlanReducesStructuralChecklist(t *testing.T) {
 	if len(p.Uncovered) != 0 {
 		t.Fatalf("uncovered features: %v", p.Uncovered)
 	}
+	if p.FeatureCount == 0 || p.FeatureCount != len(p.Features) {
+		t.Fatalf("feature inventory has %d entries, count reports %d", len(p.Features), p.FeatureCount)
+	}
+	if !sort.StringsAreSorted(p.Features) {
+		t.Fatal("feature inventory is not sorted")
+	}
 	for _, selected := range p.Selected {
 		for _, feature := range selected.NewCoverage {
 			if len(feature) >= 7 && feature[:7] == "source:" {
 				t.Fatalf("structural plan unexpectedly includes source feature %q", feature)
 			}
 		}
+	}
+}
+
+func TestReviewPlanCSVHidesCompositionHashes(t *testing.T) {
+	p := &ReviewPlan{Selected: []PlannedReview{{Candidate: ReviewCandidate{
+		Hash: "0123456789ab", Priority: "A", Hour: "lauds",
+		Date: time.Date(2026, 6, 7, 0, 0, 0, 0, time.UTC), UnitKey: "trinity-sunday",
+		Celebration: "Trinity Sunday",
+	}}}}
+	var out bytes.Buffer
+	if err := WriteReviewPlanCSV(p, &out, "https://example.test"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out.String(), "hash") || strings.Contains(out.String(), "0123456789ab") {
+		t.Fatalf("review plan exposes internal composition identity:\n%s", out.String())
 	}
 }

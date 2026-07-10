@@ -270,6 +270,7 @@ footer {
 
 .status-verified { color: #356535; }
 .status-needs-review { color: var(--rubric); }
+.status-source-unknown { color: var(--muted); }
 .assurance-detail { font-style: italic; }
 
 @media (max-width: 700px) {

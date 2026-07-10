@@ -73,13 +73,12 @@ type hourData struct {
 }
 
 type hourAssuranceData struct {
-	Verified     int
-	Documented   int
-	NeedsReview  int
-	Undocumented int
-	Dependencies []assuranceDependency
-	Resolutions  []assuranceResolution
-	Decisions    []models.CompositionDecision
+	Verified      int
+	NeedsReview   int
+	SourceUnknown int
+	Dependencies  []assuranceDependency
+	Resolutions   []assuranceResolution
+	Decisions     []models.CompositionDecision
 }
 
 type assuranceDependency struct {
@@ -156,19 +155,17 @@ func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string
 func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug string) hourAssuranceData {
 	data := hourAssuranceData{Decisions: review.UniqueCompositionDecisions(hour.Decisions)}
 	for _, key := range review.HourDependencies(hour) {
-		status := review.ProvenanceUndocumented
+		status := review.ProvenanceSourceUnknown
 		if entry, ok := s.provenance[key]; ok {
 			status = entry.Status
 		}
 		switch status {
 		case review.ProvenanceVerified:
 			data.Verified++
-		case review.ProvenanceDocumented:
-			data.Documented++
 		case review.ProvenanceNeedsReview:
 			data.NeedsReview++
 		default:
-			data.Undocumented++
+			data.SourceUnknown++
 		}
 		data.Dependencies = append(data.Dependencies, assuranceDependency{
 			Key: key, Status: status, ReportURL: dependencyReportURL(hour, hourName, dateSlug, key, status),

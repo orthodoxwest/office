@@ -82,8 +82,10 @@ The server finds `data/` relative to the binary or the working directory.
 ./office audit                     # report placeholder texts and missing propers
 ./office review provenance         # generated source/provenance coverage summary
 ./office review provenance-queue   # dependency-weighted atomic text review queue
+./office review attest [flags] KEY REVIEWER # verify one text against its source
 ./office review explain HOUR DATE  # JSON dependencies and decisions for one hour
 ./office review plan               # minimal structural-review checklist CSV
+./office review sign HOUR DATE REVIEWER # sign off one reviewed hour page
 ./office review assurance          # release assurance gates and summary
 ```
 
@@ -119,7 +121,11 @@ make review-plan       # minimal structural-review checklist
 make review-assurance  # release assurance gates
 ```
 
-Golden files live in `internal/e2e/testdata/golden/`. Run `make golden` after changing office composition logic or text output, then review the diff before committing.
+Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
+rendered hours, `assurance-report.md` records the current review counts and
+sorted structural feature inventory so coverage changes appear directly in a
+PR diff. Run `make golden` after changing office composition, text output, or
+assurance coverage, then review the diff before committing.
 
 ### Assurance and review planning
 
@@ -130,7 +136,8 @@ Text verification and structural verification are tracked separately:
   the complete inventory.
 - `data/review/provenance.csv` records explicit source attestations. A
   `verified` row must name its source, a page or section locator, reviewer, and
-  review date. It stores citations and hashes, not source-book contents.
+  review date. It stores citations and internal content-version metadata, not
+  source-book contents.
 - `./office review explain lauds 2026-06-07` emits a JSON assurance manifest
   containing the corpus dependencies, provenance status, condition branches,
   exact occurrence/commemoration decisions, color resolution, transfers, and
@@ -153,9 +160,17 @@ Record a completed source check without editing CSV manually:
   proper/example/collect reviewer
 ```
 
-The command resolves the key to the current corpus text and records its hash
-internally so later changes make the attestation stale. An existing
-attestation requires `--replace`.
+The command binds the attestation to the current corpus text automatically so
+later changes make it stale. An existing attestation requires `--replace`.
+
+Record a completed structural review by the hour and date that was checked:
+
+```bash
+./office review sign lauds 2026-06-07 reviewer
+```
+
+The command resolves the page's internal version identity automatically; no
+identifier needs to be copied from a checklist.
 
 `./office review assurance` runs the representative multi-year structural
 plan, validates provenance, and enforces the reviewable floors in
@@ -166,8 +181,11 @@ diff.
 
 On rendered hour pages, a collapsed **Assurance** disclosure shows provenance
 counts, corpus dependency keys, fallback tiers, and composition rule IDs.
+Unverified texts are either `needs-review` when a source lead or explicit
+review task exists, or `source-unknown` when provenance research must come
+first.
 It deliberately omits local paths, source-book links, and source contents;
-expanding it is optional and does not alter the prayer view or review hash.
+expanding it is optional and does not alter the prayer view or review state.
 
 ---
 
