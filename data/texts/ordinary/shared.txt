@@ -31,10 +31,10 @@ liveth and reigneth, God, for ever and ever.
 R. Amen.
 
 [our-father]
-Our Father, which art in heaven, hallowed be thy Name.
-Thy kingdom come. Thy will be done, on earth as it is in heaven.
+Our Father, who art in heaven, Hallowed be thy Name.
+Thy kingdom come. Thy will be done, On earth as it is in heaven.
 Give us this day our daily bread.
-And forgive us our trespasses, as we forgive those who trespass against us.
+And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation; but deliver us from evil.
 R. Amen.
 
@@ -59,7 +59,7 @@ Alleluia
 
 [gloria-patri]
 Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
 [kyrie]
 Kyrie eleison. Christe eleison. Kyrie eleison.
