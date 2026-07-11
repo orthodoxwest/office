@@ -6,9 +6,9 @@
 | Modeled structural features | 218 |
 | Selected structural-review pages | 38 |
 | Uncovered features | 0 |
-| Verified text entries | 191 |
+| Verified text entries | 192 |
 | Text entries needing review | 1412 |
-| Text entries with unknown source | 652 |
+| Text entries with unknown source | 651 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
