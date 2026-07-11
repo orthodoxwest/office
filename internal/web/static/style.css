@@ -133,69 +133,155 @@ summary:focus-visible {
 
 /* ── Header / Nav ── */
 
-header {
+.site-header {
   border-bottom: 1px solid rgba(26, 26, 26, 0.08);
   padding: 0.85rem 0 0.7rem;
   margin-bottom: 1.5rem;
 }
 
-nav {
+.site-nav-shell {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.1rem 0.45rem;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-nav a {
+.site-brand {
+  flex: 0 0 auto;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-brand span {
+  color: var(--rubric);
+  margin-right: 0.2rem;
+}
+
+.site-menu {
+  flex: 1 1 auto;
+}
+
+.site-menu > summary {
+  display: none;
+}
+
+.site-menu > nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.35rem;
+  justify-content: flex-end;
+}
+
+.site-menu nav a {
   color: var(--accent);
   text-decoration: none;
-  margin-right: 0;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   padding: 0.35rem 0.3rem;
 }
 
-nav a:hover {
+.site-menu nav a:hover {
   text-decoration: underline;
 }
 
-nav a.active {
+.site-menu nav a.active {
   color: var(--text);
   border-bottom: 1px solid var(--accent);
 }
 
-/* Narrow screens: one swipeable row instead of two wrapped rows, so the
-   header stays compact and the office text starts higher on the page. */
+.nav-divider {
+  width: 1px;
+  margin: 0.45rem 0.15rem;
+  background: var(--border);
+}
+
+/* Narrow screens: collapse the full list into a compact menu so the office
+   text starts high on the page and remains the visual focus. */
 @media (max-width: 700px) {
-  header {
+  .site-header {
+    position: relative;
+    z-index: 50;
     padding: 0.4rem 0 0.35rem;
     margin-bottom: 1.1rem;
   }
 
-  nav {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    gap: 0;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  .site-nav-shell {
+    min-height: 2.75rem;
   }
 
-  nav::-webkit-scrollbar {
+  .site-menu {
+    flex: 0 0 auto;
+  }
+
+  .site-menu > summary {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.2rem 0 0.8rem;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    list-style: none;
+    text-transform: uppercase;
+  }
+
+  .site-menu > summary::-webkit-details-marker {
     display: none;
   }
 
-  nav a {
-    flex: 0 0 auto;
-    padding: 0.6rem 0.5rem;
+  .site-menu > summary::after {
+    content: "+";
+    margin-left: 0.4rem;
+    color: var(--muted);
+    font-size: 1rem;
   }
 
-  /* Edge fade hinting that the row scrolls; applied by app.js only when
-     the row actually overflows. */
-  nav.nav-scrollable {
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 1.1rem, #000 calc(100% - 1.1rem), transparent);
-    mask-image: linear-gradient(to right, transparent, #000 1.1rem, #000 calc(100% - 1.1rem), transparent);
+  .site-menu[open] > summary::after {
+    content: "−";
+  }
+
+  .site-menu > nav {
+    position: absolute;
+    top: calc(100% + 0.1rem);
+    right: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(7rem, 1fr));
+    width: min(21rem, calc(100vw - 2rem));
+    padding: 0.65rem;
+    gap: 0.15rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    box-shadow: 0 0.65rem 1.5rem rgba(26, 26, 26, 0.12);
+  }
+
+  .site-menu:not([open]) > nav {
+    display: none;
+  }
+
+  .site-menu nav a {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .site-menu nav a.active {
+    background: rgba(107, 58, 31, 0.08);
+    border-bottom: none;
+  }
+
+  .nav-divider {
+    grid-column: 1 / -1;
+    width: auto;
+    height: 1px;
+    margin: 0.25rem 0;
   }
 }
 
@@ -564,6 +650,13 @@ footer {
   color: var(--accent);
 }
 
+.day-nav .today-link {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .date-jump::-webkit-calendar-picker-indicator {
     filter: invert(1);
@@ -581,6 +674,53 @@ footer {
 .office-hour {
   display: grid;
   gap: 1.25rem;
+}
+
+.hour-continuation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  max-width: 38rem;
+  width: 100%;
+  margin: 1.5rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.hour-continuation a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.hour-continuation a:hover {
+  text-decoration: underline;
+}
+
+.hour-continuation-link {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.next-hour {
+  text-align: right;
+}
+
+.continuation-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.day-hours-link {
+  padding: 0.45rem 0.7rem;
+  color: var(--muted) !important;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .elements {
@@ -1349,7 +1489,19 @@ footer {
 
   .js .date-jump {
     min-width: 0;
-    flex: 0 1 8.5rem;
+    flex: 0 1 7.5rem;
+  }
+
+  .hour-continuation {
+    gap: 0.35rem;
+  }
+
+  .hour-continuation-link {
+    font-size: 0.92rem;
+  }
+
+  .day-hours-link {
+    padding-inline: 0.4rem;
   }
 }
 

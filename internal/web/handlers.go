@@ -31,6 +31,8 @@ type homeData struct {
 	NextDate       string
 	PrevLink       string
 	NextLink       string
+	TodayLink      string
+	ShowToday      bool
 	FeastName      string
 	FeastRank      string
 	Commemorations []string
@@ -56,20 +58,27 @@ type homeHourLink struct {
 }
 
 type hourData struct {
-	HourName   string
-	DateStr    string
-	DateSlug   string
-	PrevDate   string
-	NextDate   string
-	PrevLink   string
-	NextLink   string
-	NavDate    string
-	Hour       *models.OfficeHour
-	ReportURL  string
-	Theme      string
-	Page       string
-	ShowBanner bool
-	Assurance  hourAssuranceData
+	HourName         string
+	DateStr          string
+	DateSlug         string
+	PrevDate         string
+	NextDate         string
+	PrevLink         string
+	NextLink         string
+	TodayLink        string
+	ShowToday        bool
+	DayLink          string
+	PreviousHourName string
+	PreviousHourLink string
+	NextHourName     string
+	NextHourLink     string
+	NavDate          string
+	Hour             *models.OfficeHour
+	ReportURL        string
+	Theme            string
+	Page             string
+	ShowBanner       bool
+	Assurance        hourAssuranceData
 }
 
 type hourAssuranceData struct {
@@ -312,21 +321,8 @@ func currentHourEntry(now time.Time) (string, string) {
 }
 
 func buildHomeHours(dateSlug, theme, current string) []homeHourLink {
-	hours := []struct {
-		Name string
-		Slug string
-	}{
-		{Name: "Lauds", Slug: "lauds"},
-		{Name: "Prime", Slug: "prime"},
-		{Name: "Terce", Slug: "terce"},
-		{Name: "Sext", Slug: "sext"},
-		{Name: "None", Slug: "none"},
-		{Name: "Vespers", Slug: "vespers"},
-		{Name: "Compline", Slug: "compline"},
-	}
-
-	links := make([]homeHourLink, 0, len(hours))
-	for _, hour := range hours {
+	links := make([]homeHourLink, 0, len(orderedHours))
+	for _, hour := range orderedHours {
 		links = append(links, homeHourLink{
 			Name:      hour.Name,
 			Slug:      hour.Slug,
@@ -335,6 +331,37 @@ func buildHomeHours(dateSlug, theme, current string) []homeHourLink {
 		})
 	}
 	return links
+}
+
+var orderedHours = []struct {
+	Name string
+	Slug string
+}{
+	{Name: "Lauds", Slug: "lauds"},
+	{Name: "Prime", Slug: "prime"},
+	{Name: "Terce", Slug: "terce"},
+	{Name: "Sext", Slug: "sext"},
+	{Name: "None", Slug: "none"},
+	{Name: "Vespers", Slug: "vespers"},
+	{Name: "Compline", Slug: "compline"},
+}
+
+func adjacentHours(hour, date, theme string) (previousName, previousLink, nextName, nextLink string) {
+	for i, candidate := range orderedHours {
+		if candidate.Slug != hour {
+			continue
+		}
+		if i > 0 {
+			previousName = orderedHours[i-1].Name
+			previousLink = hourLink(orderedHours[i-1].Slug, date, theme)
+		}
+		if i+1 < len(orderedHours) {
+			nextName = orderedHours[i+1].Name
+			nextLink = hourLink(orderedHours[i+1].Slug, date, theme)
+		}
+		break
+	}
+	return
 }
 
 func defaultHourSlug(hour string) string {
@@ -476,6 +503,8 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		NextDate:       date.AddDate(0, 0, 1).Format("2006-01-02"),
 		PrevLink:       homeLink(date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
 		NextLink:       homeLink(date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
+		TodayLink:      homeLink("", theme),
+		ShowToday:      dateSlug != nowSlug,
 		FeastName:      feastName,
 		FeastRank:      feastRank,
 		Commemorations: commemorations,
@@ -549,21 +578,30 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		return
 	}
 
+	previousHourName, previousHourLink, nextHourName, nextHourLink := adjacentHours(hourName, dateStr, theme)
+	todaySlug := time.Now().In(userLocation(r)).Format("2006-01-02")
 	data := hourData{
-		HourName:   hourName,
-		DateStr:    date.Format("Monday, January 2, 2006"),
-		DateSlug:   dateStr,
-		PrevDate:   date.AddDate(0, 0, -1).Format("2006-01-02"),
-		NextDate:   date.AddDate(0, 0, 1).Format("2006-01-02"),
-		PrevLink:   hourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
-		NextLink:   hourLink(hourName, date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
-		NavDate:    navDate,
-		Hour:       hour,
-		ReportURL:  reportURL(hour, hourName, dateStr),
-		Theme:      theme,
-		Page:       hourName,
-		ShowBanner: s.showVettingBanner(hour),
-		Assurance:  s.hourAssurance(hour, hourName, dateStr),
+		HourName:         hourName,
+		DateStr:          date.Format("Monday, January 2, 2006"),
+		DateSlug:         dateStr,
+		PrevDate:         date.AddDate(0, 0, -1).Format("2006-01-02"),
+		NextDate:         date.AddDate(0, 0, 1).Format("2006-01-02"),
+		PrevLink:         hourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
+		NextLink:         hourLink(hourName, date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
+		TodayLink:        hourLink(hourName, "", theme),
+		ShowToday:        dateStr != todaySlug,
+		DayLink:          homeLink(dateStr, theme),
+		PreviousHourName: previousHourName,
+		PreviousHourLink: previousHourLink,
+		NextHourName:     nextHourName,
+		NextHourLink:     nextHourLink,
+		NavDate:          navDate,
+		Hour:             hour,
+		ReportURL:        reportURL(hour, hourName, dateStr),
+		Theme:            theme,
+		Page:             hourName,
+		ShowBanner:       s.showVettingBanner(hour),
+		Assurance:        s.hourAssurance(hour, hourName, dateStr),
 	}
 	if err := s.tmplHour.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
