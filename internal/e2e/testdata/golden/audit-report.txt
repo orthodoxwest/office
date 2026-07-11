@@ -1,6 +1,10 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 0 feast(s) ===
+=== Missing propers: 1 feast(s) ===
+
+  [base]
+  [f2] Rogation Monday (rogation-monday)
+    missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon, commemoration-versicle
 
 === Commons fallback: 3 feast(s) ===
 These refs are covered by the category commons, not feast-specific propers.

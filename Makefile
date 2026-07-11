@@ -10,6 +10,7 @@ build: ## Build the binary
 
 test: ## Run all tests
 	go test ./...
+	python3 scripts/test_ordo_compare.py
 
 lint: ## Run staticcheck linter
 	staticcheck ./...

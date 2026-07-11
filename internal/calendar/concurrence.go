@@ -115,22 +115,22 @@ func concurrenceWinner(prec, fol *models.Feast) models.VespersOwner {
 }
 
 func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, string) {
-	// 1. Greater Sundays of the I Class hold their Vespers against
-	// everything except a sanctoral I Class Double feast (2026 ordo:
-	// St Tikhon's I Vespers supersedes Low Sunday; temporal I Class days
-	// like Easter Monday never displace them, and Easter and Pentecost
-	// themselves yield to nothing).
+	// 1. Greater Sundays of the I Class hold their Vespers against feasts
+	// below II Class. A sanctoral I or II Class Double takes the concurrence
+	// (XIII.6; 2026 ordo: St Benedict D2 retains II Vespers against Laetare,
+	// and St Tikhon's D1 takes I Vespers from Low Sunday). Temporal octave
+	// days do not displace them, and Easter and Pentecost yield to nothing.
 	if sundaysFirstClass[prec.ID] {
-		if fol.Rank == models.Double1stClass && !fol.IsTemporal() &&
+		if fol.Rank.Weight() >= models.Double2ndClass.Weight() && !fol.IsTemporal() &&
 			prec.ID != "easter-sunday" && prec.ID != "pentecost" {
-			return models.VespersIOfFollowing, "concurrence:greater-sunday-vs-first-class"
+			return models.VespersIOfFollowing, "concurrence:greater-sunday-vs-class-i-ii"
 		}
 		return models.VespersIIOfPreceding, "concurrence:greater-sunday"
 	}
 	if sundaysFirstClass[fol.ID] {
-		if prec.Rank == models.Double1stClass && !prec.IsTemporal() &&
+		if prec.Rank.Weight() >= models.Double2ndClass.Weight() && !prec.IsTemporal() &&
 			fol.ID != "easter-sunday" && fol.ID != "pentecost" {
-			return models.VespersIIOfPreceding, "concurrence:greater-sunday-vs-first-class"
+			return models.VespersIIOfPreceding, "concurrence:greater-sunday-vs-class-i-ii"
 		}
 		return models.VespersIOfFollowing, "concurrence:greater-sunday"
 	}

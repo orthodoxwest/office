@@ -161,7 +161,7 @@
 - `decision:vespers:rule=concurrence:following-only`
 - `decision:vespers:rule=concurrence:general-precedence`
 - `decision:vespers:rule=concurrence:greater-sunday`
-- `decision:vespers:rule=concurrence:greater-sunday-vs-first-class`
+- `decision:vespers:rule=concurrence:greater-sunday-vs-class-i-ii`
 - `decision:vespers:rule=concurrence:neither-office-has-rights`
 - `decision:vespers:rule=concurrence:octave-day-in-possession-vs-sunday`
 - `decision:vespers:rule=concurrence:octave-day-vs-double`

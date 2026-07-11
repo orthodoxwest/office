@@ -46,15 +46,18 @@ func TestConcurrenceWinnerFirstClassDoubleVsGreaterSunday(t *testing.T) {
 }
 
 func TestConcurrenceWinnerSecondClassDoubleVsGreaterSunday(t *testing.T) {
-	// XIII.6: II Class Double vs Greater Sunday — Sunday wins
+	// XIII.6: a sanctoral II Class Double vs Greater Sunday — feast wins.
 	feast := &models.Feast{
-		ID: "circumcision", Rank: models.Double2ndClass, Category: models.CategoryLord,
+		ID: "st-benedict", Rank: models.Double2ndClass, Category: models.CategoryConfessor,
 	}
 	sunday := &models.Feast{
 		ID: "advent-sunday-1", Rank: models.Double2ndClass, Category: models.CategorySunday,
 	}
-	if got := concurrenceWinner(feast, sunday); got != models.VespersIOfFollowing {
-		t.Errorf("II Class Double vs Greater Sunday: got %d, want VespersIOfFollowing", got)
+	if got := concurrenceWinner(feast, sunday); got != models.VespersIIOfPreceding {
+		t.Errorf("II Class Double vs Greater Sunday: got %d, want VespersIIOfPreceding", got)
+	}
+	if got := concurrenceWinner(sunday, feast); got != models.VespersIOfFollowing {
+		t.Errorf("Greater Sunday vs II Class Double: got %d, want VespersIOfFollowing", got)
 	}
 }
 

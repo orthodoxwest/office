@@ -12,6 +12,7 @@ Usage:
 
     scripts/ordo-compare.py calendar /tmp/2026-ordo.txt /tmp/our-ordo.txt
     scripts/ordo-compare.py rubrics  /tmp/2026-ordo.txt /tmp/our-rubrics.tsv
+    scripts/ordo-compare.py commemorations /tmp/2026-ordo.txt /tmp/our-rubrics.tsv
     scripts/ordo-compare.py antiphons /tmp/2026-ordo.txt /tmp/our-rubrics.tsv
     scripts/ordo-compare.py colors   /tmp/2026-ordo.txt /tmp/our-ordo.txt
     scripts/ordo-compare.py vespers  /tmp/2026-ordo.txt /tmp/our-ordo.txt
@@ -171,12 +172,114 @@ def read_rubrics(path):
         if p[0] == "date":
             continue
         dt = datetime.date.fromisoformat(p[0])
+        lauds_comms = split_our_commemorations(p[4])
+        vespers_comms = split_our_commemorations(p[8])
         ours[(dt.month, dt.day)] = {
-            "cel": p[1], "l_suff": p[3] == "true", "l_comm": bool(p[4]),
+            "cel": p[1], "l_suff": p[3] == "true", "l_comm": bool(lauds_comms),
+            "l_comms": lauds_comms,
             "h_preces": p[5] == "true", "v_suff": p[7] == "true",
-            "v_comm": bool(p[8]),
+            "v_comm": bool(vespers_comms), "v_comms": vespers_comms,
             "ben": p[9] if len(p) > 9 else "", "mag": p[10] if len(p) > 10 else ""}
     return ours
+
+
+def split_our_commemorations(value):
+    """Split the semicolon-delimited commemoration names in `office rubrics`."""
+    return [name.strip() for name in value.split(";") if name.strip()]
+
+
+def pdf_commemorations(section):
+    """Extract commemoration names from one printed-or-do office section.
+
+    The PDF writes the first item as ``Comm. Name (...)`` and commonly omits
+    the repeated ``Comm.`` after an ampersand. Parenthesized antiphon, collect,
+    and page references delimit the names more reliably than punctuation does.
+    Return None when the section states neither Comm. nor No Comm., so an
+    unparseable/missing section is not counted as agreement.
+    """
+    if section is None:
+        return None
+    starts = list(re.finditer(r"(?<!No )\bComm\.\s*", section))
+    if not starts:
+        return [] if re.search(r"\bNo Comm\.", section) else None
+
+    block = section[starts[0].end():]
+    block = re.split(r"\s+/\s*(?:No )?(?:Comm\.|Suff\.)", block, maxsplit=1)[0]
+    # The ordo's parenthetical references are occasionally unbalanced after
+    # text extraction. A closing page-reference parenthesis followed by "&"
+    # is nevertheless a stable item boundary.
+    parts = re.split(r"\)\s*&\s*(?=(?:Comm\.\s*)?[A-Z])", block)
+    names = []
+    for part in parts:
+        name = part.split("(", 1)[0]
+        # Subsequent items often begin "Comm."; Ash Wednesday can even be
+        # printed as the redundant "Comm. Comm. Walburga".
+        name = re.sub(r"^(?:Comm\.\s*)+", "", name)
+        name = re.sub(r"^[\s&;/]+", "", name).strip()
+        name = re.sub(r"\s+only$", "", name, flags=re.I).strip()
+        # Holy Cross commemorations are reported through a separate rubrics
+        # flag and are not present in the TSV's feast-name column.
+        if name and name.upper() != "HC":
+            names.append(name)
+    return names
+
+
+COMM_STOP = STOP | {
+    "saint", "saints", "bishop", "confessor",
+    "doctor", "virgin", "priest", "pope", "abbot", "king", "emperor",
+    "apostle", "apostles", "evangelist", "companions", "rome",
+}
+
+
+def commemoration_tokens(name):
+    """Normalize a printed/app commemoration name for fuzzy set matching."""
+    text = name.lower().replace("æ", "ae").replace("&c.", " companions ")
+    text = re.sub(r"([a-z])-\s+([a-z])", r"\1\2", text)
+    text = text.replace("&", " and ").replace("pope", "bishop")
+    text = re.sub(r"\bdorothea\b", "dorothy", text)
+    text = re.sub(r"\bcommemoration of\b", " ", text)
+    text = re.sub(r"\b(?:ss?|st)\.?(?=\s)", " saint ", text)
+    text = re.sub(r"\bsun\.?(?=\s|$)", " sunday ", text)
+    text = re.sub(r"\bfer\.?(?=\s|$)", " feria ", text)
+    text = re.sub(r"\boct\.?(?=\s|$)", " octave ", text)
+    words = re.findall(r"[a-z0-9]+", text)
+    normalized = set()
+    for word in words:
+        if word in COMM_STOP:
+            continue
+        # Printed ordos sometimes pluralize a surname or collective title.
+        if len(word) > 4 and word.endswith("s") and not word.endswith("ss"):
+            word = word[:-1]
+        normalized.add(word)
+    # A generic "Comm. Fer." must match the descriptive weekday feria emitted
+    # by the engine; preserve the weekday too so two named ferias stay distinct.
+    if re.match(r"^(monday|tuesday|wednesday|thursday|friday|saturday)\b", text):
+        normalized.add("feria")
+    return normalized
+
+
+def commemoration_similarity(a, b):
+    ta, tb = commemoration_tokens(a), commemoration_tokens(b)
+    if not ta or not tb:
+        return 0.0
+    return len(ta & tb) / min(len(ta), len(tb))
+
+
+def match_commemorations(pdf_names, our_names):
+    """Return (missing_from_app, extra_in_app) after greedy fuzzy matching."""
+    candidates = []
+    for pi, pdf_name in enumerate(pdf_names):
+        for oi, our_name in enumerate(our_names):
+            score = commemoration_similarity(pdf_name, our_name)
+            if score >= 0.6:
+                candidates.append((score, pi, oi))
+    used_pdf, used_ours = set(), set()
+    for _, pi, oi in sorted(candidates, reverse=True):
+        if pi not in used_pdf and oi not in used_ours:
+            used_pdf.add(pi)
+            used_ours.add(oi)
+    return ([name for i, name in enumerate(pdf_names) if i not in used_pdf],
+            [name for i, name in enumerate(our_names) if i not in used_ours])
 
 
 def flag(text, yes, no):
@@ -210,6 +313,39 @@ def cmd_rubrics(pdf_path, tsv_path):
             print(f"   {m:02d}-{d:02d}  ours={ov} pdf={pv}  ({cel[:48]})")
         if len(bad) > 10:
             print(f"   ... and {len(bad) - 10} more")
+
+
+def cmd_commemorations(pdf_path, tsv_path):
+    """Compare normalized commemoration names, not merely presence/absence."""
+    pdf = pdf_days(pdf_path)
+    ours = read_rubrics(tsv_path)
+    for field, sect, label in (
+            ("l_comms", "Lauds", "Lauds"),
+            ("v_comms", "Vespers", "Vespers")):
+        compared = 0
+        bad = []
+        missing_total = extra_total = 0
+        for key in sorted(ours):
+            pdf_names = pdf_commemorations(pdf.get(key, {}).get(sect))
+            if pdf_names is None:
+                continue
+            compared += 1
+            missing, extra = match_commemorations(pdf_names, ours[key][field])
+            if missing or extra:
+                bad.append((key, missing, extra))
+                missing_total += len(missing)
+                extra_total += len(extra)
+        print(f"== {label} commemorations: {len(bad)}/{compared} dates differ; "
+              f"{missing_total} missing; {extra_total} extra ==")
+        for (month, day), missing, extra in bad[:20]:
+            details = []
+            if missing:
+                details.append("missing: " + "; ".join(missing))
+            if extra:
+                details.append("extra: " + "; ".join(extra))
+            print(f"   {month:02d}-{day:02d}  " + " | ".join(details))
+        if len(bad) > 20:
+            print(f"   ... and {len(bad) - 20} more dates")
 
 
 def incipit_matches(incipit, full):
@@ -341,6 +477,8 @@ def main():
         cmd_calendar(sys.argv[2], sys.argv[3])
     elif cmd == "rubrics":
         cmd_rubrics(sys.argv[2], sys.argv[3])
+    elif cmd in ("commemorations", "comms"):
+        cmd_commemorations(sys.argv[2], sys.argv[3])
     elif cmd == "antiphons":
         cmd_antiphons(sys.argv[2], sys.argv[3])
     elif cmd == "colors":

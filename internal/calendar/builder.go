@@ -504,7 +504,7 @@ func remainingEmberFeasts(moveable *MoveableDates, year int) []*models.Feast {
 		feasts = append(feasts, &models.Feast{
 			ID:       label,
 			Name:     titleCase(strings.ReplaceAll(label, "-", " ")),
-			Rank:     models.SemiDouble,
+			Rank:     models.PrivilegedFeria,
 			Color:    models.Violet,
 			Category: models.CategoryFeria,
 			Month:    int(dt.Month()),
@@ -531,7 +531,7 @@ func remainingEmberFeasts(moveable *MoveableDates, year int) []*models.Feast {
 		feasts = append(feasts, &models.Feast{
 			ID:       label,
 			Name:     titleCase(strings.ReplaceAll(label, "-", " ")),
-			Rank:     models.SemiDouble,
+			Rank:     models.PrivilegedFeria,
 			Color:    models.Violet,
 			Category: models.CategoryFeria,
 			Month:    int(dt.Month()),
