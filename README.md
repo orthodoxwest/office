@@ -80,6 +80,7 @@ The server finds `data/` relative to the binary or the working directory.
 ./office tex HOUR [YYYY-MM-DD]     # emit LaTeX booklet for HOUR (date defaults to today)
 ./office validate                  # validate all data files
 ./office audit                     # report placeholder texts and missing propers
+make verify-psalms                  # machine-check all Coverdale Psalm files
 ./office review provenance         # generated source/provenance coverage summary
 ./office review provenance-queue   # dependency-weighted atomic text review queue
 ./office review attest [flags] KEY REVIEWER # verify one text against its source
@@ -295,6 +296,10 @@ some-martyr commemoration-antiphon    # suppress only this one slot
 ### Psalm numbering
 
 Hour and proper definitions use **Vulgate** psalm numbers (liturgical standard). Psalm files use **Hebrew** numbers (Coverdale standard). The engine maps between them automatically. Psalms 1–9 and 147–150 are identical in both schemes; psalms 10–146 differ by one (e.g. Vulgate Psalm 31 = Hebrew Psalm 32).
+
+### Psalm text verification
+
+Run `make verify-psalms` to compare every file in `data/texts/psalms/` with the [Church of England's official 1662 BCP Psalter](https://www.churchofengland.org/prayer-and-worship/worship-texts-and-resources/book-common-prayer/psalter). The check covers wording, punctuation, verse numbering, and chant separators; local `*` separators are retained as the project's representation. Historical readings are checked against the [official 1662 Book of Common Prayer PDF](https://www.churchofengland.org/sites/default/files/2019-10/the-book-of-common-prayer-1662.pdf) where the online transcription differs.
 
 ---
 
