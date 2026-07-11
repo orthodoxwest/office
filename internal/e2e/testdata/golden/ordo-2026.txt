@@ -551,8 +551,9 @@ MARCH
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
                Com. Saturday after Lent III ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers p · I fol. (IV Sunday in Lent) · Mag. Woman, hath no man condemned thee? · No Suff.
-               Com. St. Benedict ("Lord, Thou deliverest unto me five talents")
+           Vespers w · II prec. · Mag. Lo, a servant of God · No Suff.
+               Com. Saturday after Lent III ("My soul doth magnify the Lord, and my spirit…")
+               Com. IV Sunday in Lent ("Woman, hath no man condemned thee?")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
            Lauds   p · Ben. When Jesus lifted up His Eyes · No Preces · Suff.
            Hours   No Preces
@@ -911,12 +912,15 @@ MAY
            Lauds   w · Ben. Hitherto · No Preces · No Suff.
            Hours   Preces
            Vespers w · II prec. · Mag. Ask, and ye shall receive · No Suff.
+               Com. Rogation Monday ("My soul doth magnify the Lord, and my spirit…")
                Com. St Venantius, Martyr ("Whosoever shall confess me")
- 18  Mon     St Venantius, Martyr                       [d]   r
-           Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
+ 18  Mon     Rogation Monday                            [f2]  v
+           St Venantius, Martyr (d)
+           Lauds   v · Ben. Ask, and ye shall receive · No Preces · No Suff.
+               Com. St Venantius, Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Saints and just · No Suff.
-               Com. St Pudentiana, Virgin ("This is one of the wise virgins")
+           Vespers v · Mag. The Father Himself loveth you · No Suff.
+               Com. St Venantius, Martyr ("Whosoever shall confess me")
  19  Tue     Feria                                            w
            St Pudentiana, Virgin (com)
            Lauds   w · Ben. Christ ought to have suffered · No Preces · No Suff.
@@ -1777,38 +1781,34 @@ SEPTEMBER
            Hours   No Preces
            Vespers w · II prec. · Mag. All generations shall call me blessed · No Suff.
                Com. St Nicomedes, Martyr ("Whosoever shall confess me")
-               Com. Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
                Com. September Ember Wednesday ("My soul doth magnify the Lord, and my spirit…")
- 16  Wed  L§ Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs [d]   r
+ 16  Wed  L§ September Ember Wednesday                  [f2]  v
+           Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs (d)
            Ss Euphemia, Lucy & Geminian, Martyrs (com)
-           September Ember Wednesday (sd)
-           Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
+           Lauds   v · Ben. From the hand of all that hate us · No Preces · No Suff.
+               Com. Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
                Com. Ss Euphemia, Lucy & Geminian, Martyrs ("For theirs is the kingdom of heaven")
-               Com. September Ember Wednesday ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers r · II prec. · Mag. In heaven do rejoice the souls of the Saints · No Suff.
+           Vespers v · Mag. The Lord hath regarded · No Suff.
+               Com. Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
                Com. Ss Euphemia, Lucy & Geminian, Martyrs ("For theirs is the kingdom of heaven")
-               Com. September Ember Wednesday ("My soul doth magnify the Lord, and my spirit…")
  17  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
            Vespers g · Mag. Show strength with thine arm · Suff.
- 18  Fri  L§ September Ember Friday                     [sd]  v
+ 18  Fri  L§ September Ember Friday                     [f2]  v
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
-           Vespers r · I fol. (St Januarius & companions, Martyrs) · Mag. For theirs is the Kingdom of heaven · No Suff.
-               Com. September Ember Friday ("My soul doth magnify the Lord, and my spirit…")
-               Com. St Theodore of Canterbury, Bishop & Confessor ("Behold an high priest")
-               Com. September Ember Saturday ("My soul doth magnify the Lord, and my spirit…")
- 19  Sat  L§ St Januarius & companions, Martyrs         [d]   r
+           Vespers v · Mag. He hath put down the mighty · Suff.
+ 19  Sat  L§ September Ember Saturday                   [f2]  v
+           St Januarius & companions, Martyrs (d)
            St Theodore of Canterbury, Bishop & Confessor (com)
-           September Ember Saturday (sd)
-           Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
+           Lauds   v · Ben. O Lord, give light · No Preces · No Suff.
+               Com. St Januarius & companions, Martyrs ("For theirs is the kingdom of heaven")
                Com. St Theodore of Canterbury, Bishop & Confessor ("Behold an high priest")
-               Com. September Ember Saturday ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers g · I fol. (XVI Sunday after Pentecost) · Mag. O Adonai, O Lord God · No Suff.
-               Com. St Januarius & companions, Martyrs ("For theirs is the kingdom of heaven")
+               Com. September Ember Saturday ("My soul doth magnify the Lord, and my spirit…")
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
  20  Sun     XVI Sunday after Pentecost                 [sd]  g
            St Eustace & companions, Martyrs (d)
@@ -2264,9 +2264,8 @@ NOVEMBER
            Lauds   v · Ben. The Holy Ghost shall come upon thee · No Preces · No Suff.
                Com. St Saturninus, Bishop & Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers v · II prec. · Mag. Fear not, Mary · No Suff.
-               Com. St Saturninus, Bishop & Martyr ("Whosoever shall confess me")
-               Com. St. Andrew, Apostle ("God bless thee, precious cross")
+           Vespers r · I fol. (St. Andrew, Apostle) · Mag. One of the two · No Suff.
+               Com. I Sunday of Advent ("The Holy Ghost shall come upon thee")
  30  Mon  L§ St. Andrew, Apostle                        [2cl] r
            Lauds   r · Ben. Spare unto us · No Preces · No Suff.
            Hours   No Preces
@@ -2374,7 +2373,7 @@ DECEMBER
            Vespers w · II prec. · Mag. Draw us · No Suff.
                Com. Advent Ember Wednesday ("My soul doth magnify the Lord, and my spirit…")
                Com. St Eusebius of Vercelli, Bishop & Martyr ("Whosoever shall confess me")
- 16  Wed  L§ Advent Ember Wednesday                     [sd]  v
+ 16  Wed  L§ Advent Ember Wednesday                     [f2]  v
            St Eusebius of Vercelli, Bishop & Martyr (com)
            Lauds   v · Ben. The angel Gabriel · No Preces · No Suff.
                Com. St Eusebius of Vercelli, Bishop & Martyr ("Whosoever shall confess me")
@@ -2384,17 +2383,15 @@ DECEMBER
  17  Thu  L  Feria                                            v
            Lauds   v · Ben. Let your soul watch · No Preces · No Suff.
            Hours   Preces
-           Vespers v · I fol. (Expectation of the B.V.M) · Mag. O Wisdom · No Suff.
-               Com. Advent Ember Friday ("My soul doth magnify the Lord, and my spirit…")
- 18  Fri  L§ Expectation of the B.V.M                   [gd]  v
-           Advent Ember Friday (sd)
-           Lauds   v · Ben. Blessed art thou · No Preces · No Suff.
-               Com. Advent Ember Friday ("Blessed be the Lord God of Israel, for he…")
+           Vespers v · Mag. O Wisdom · No Suff.
+ 18  Fri  L§ Advent Ember Friday                        [f2]  v
+           Expectation of the B.V.M (gd)
+           Lauds   v · Ben. As soon as the voice of thy salutation · No Preces · No Suff.
+               Com. Expectation of the B.V.M ("Holy Mary, succour the miserable")
            Hours   No Preces
-           Vespers v · II prec. · Mag. O Adonai · No Suff.
-               Com. Advent Ember Friday ("My soul doth magnify the Lord, and my spirit…")
-               Com. Advent Ember Saturday ("My soul doth magnify the Lord, and my spirit…")
- 19  Sat  L§ Advent Ember Saturday                      [sd]  v
+           Vespers v · Mag. O Adonai · No Suff.
+               Com. Expectation of the B.V.M ("Holy Mary, succour the miserable")
+ 19  Sat  L§ Advent Ember Saturday                      [f2]  v
            Lauds   v · Ben. O thou Angel of God · No Preces · No Suff.
            Hours   Preces
            Vespers v · I fol. (IV Sunday of Advent) · Mag. O Root of Jesse · No Suff.

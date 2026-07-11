@@ -42,6 +42,7 @@ pdftotext -layout ../resources/2026-ordo.pdf /tmp/2026-ordo.txt
 
 scripts/ordo-compare.py calendar  /tmp/2026-ordo.txt /tmp/our-ordo.txt      # headlines
 scripts/ordo-compare.py rubrics   /tmp/2026-ordo.txt /tmp/our-rubrics.tsv   # preces/suffrage/comms
+scripts/ordo-compare.py commemorations /tmp/2026-ordo.txt /tmp/our-rubrics.tsv # missing/extra comm names
 scripts/ordo-compare.py antiphons /tmp/2026-ordo.txt /tmp/our-rubrics.tsv   # Ben./Mag. incipits
 scripts/ordo-compare.py colors    /tmp/2026-ordo.txt /tmp/our-ordo.txt
 scripts/ordo-compare.py vespers   /tmp/2026-ordo.txt /tmp/our-ordo.txt      # I fol./II prec.
@@ -79,6 +80,10 @@ durable residue categories:
   quoted content matches ours.
 - **preces / suffrage** — governed by the diurnal-rubrics §XXXVII/§XXXVIII
   conditions; disagreements usually trace to a ruling-gated day.
+- **commemorations** — use the dedicated name-aware comparison for triage.
+  The `rubrics` command reports only presence/absence, while `commemorations`
+  normalizes abbreviations, titles, punctuation, Pope/Bishop style, and common
+  printed shorthand before reporting the particular missing and extra names.
 
 **Known ordo front-matter errors** (do not treat as regressions): some
 printed Tabula Temporaria values are transcription errors. The 2025 Golden

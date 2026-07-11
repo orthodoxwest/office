@@ -177,6 +177,13 @@ Color = white
 Category = feria
 DateRule = easter+38
 
+[rogation-monday]
+Name = Rogation Monday
+Rank = privileged-feria
+Color = violet
+Category = feria
+DateRule = easter+36
+
 [vigil-pentecost]
 Name = Vigil of Pentecost
 Rank = double-1st-class

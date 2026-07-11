@@ -407,23 +407,57 @@ func TestBuildCalendarEmberDays(t *testing.T) {
 		t.Errorf("Mar 4 = %v, want lent-ember-wednesday", mar4.Celebration.ID)
 	}
 
-	// Sep 16 has Ss. Cornelius & Cyprian, with Ember Wednesday commemorated.
+	// Sep 16 is a privileged Ember feria, with Ss. Cornelius & Cyprian commemorated.
 	sep16 := findDay(days, 2026, 9, 16)
 	if sep16 == nil || sep16.Celebration == nil {
 		t.Fatal("Sep 16 missing celebration")
 	}
-	if sep16.Celebration.ID != "ss-cornelius-cyprian" {
-		t.Errorf("Sep 16 = %v, want ss-cornelius-cyprian", sep16.Celebration.ID)
+	if sep16.Celebration.ID != "september-ember-wednesday" {
+		t.Errorf("Sep 16 = %v, want september-ember-wednesday", sep16.Celebration.ID)
 	}
-	foundEmber := false
+	foundSaints := false
 	for _, comm := range sep16.Commemorations {
-		if comm.ID == "september-ember-wednesday" {
-			foundEmber = true
+		if comm.ID == "ss-cornelius-cyprian" {
+			foundSaints = true
 			break
 		}
 	}
-	if !foundEmber {
-		t.Error("expected september-ember-wednesday as commemoration on Sep 16")
+	if !foundSaints {
+		t.Error("expected ss-cornelius-cyprian as commemoration on Sep 16")
+	}
+}
+
+func TestBuildCalendarPrivilegedRogationAndEmberFerias(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	for _, tt := range []struct {
+		month      int
+		day        int
+		wantID     string
+		wantCommID string
+	}{
+		{5, 18, "rogation-monday", "st-venantius"},
+		{9, 16, "september-ember-wednesday", "ss-cornelius-cyprian"},
+		{9, 19, "september-ember-saturday", "st-januarius"},
+		{12, 18, "advent-ember-friday", "expectation-bvm"},
+	} {
+		day := findDay(days, 2026, tt.month, tt.day)
+		if day == nil || day.Celebration == nil {
+			t.Fatalf("2026-%02d-%02d missing celebration", tt.month, tt.day)
+		}
+		if got := day.Celebration.ID; got != tt.wantID {
+			t.Errorf("2026-%02d-%02d celebration = %q, want %q", tt.month, tt.day, got, tt.wantID)
+		}
+		found := false
+		for _, comm := range day.Commemorations {
+			if comm.ID == tt.wantCommID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("2026-%02d-%02d missing commemoration %q", tt.month, tt.day, tt.wantCommID)
+		}
 	}
 }
 
@@ -558,6 +592,8 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 		{1, 6, models.VespersIIOfPreceding, "Epiphany D1 should have II prec."},
 		// Jan 17 (St Anthony D): I fol. (II Sunday after Epiphany)
 		{1, 17, models.VespersIOfFollowing, "St Anthony D yields to Sunday"},
+		// Mar 21 (St Benedict D2): II prec. against Laetare Sunday (XIII.6)
+		{3, 21, models.VespersIIOfPreceding, "St Benedict D2 retains Vespers against Laetare"},
 	}
 
 	for _, tt := range tests {
