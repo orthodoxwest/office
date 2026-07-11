@@ -1,4 +1,4 @@
-.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance tex pdf golden clean
+.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -39,6 +39,9 @@ validate: build ## Validate data files
 
 audit: build ## Report placeholder texts and missing feast propers
 	./office audit
+
+verify-psalms: ## Compare the Coverdale psalter against the official 1662 BCP witness
+	go run scripts/verify-psalms.go
 
 review-manifest: build ## Print human-review checklist CSV for current year (START=2026 YEARS=1)
 	./office review manifest $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
