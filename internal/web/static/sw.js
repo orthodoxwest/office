@@ -151,12 +151,15 @@ function offlineResponse() {
     "<meta name=\"theme-color\" content=\"#fdf9f2\">" +
     "<script src=\"/static/app.js\" defer></script></head><body>" +
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
-    "<header><nav aria-label=\"Primary\">" +
-    "<a href=\"/\">Home</a><a href=\"/lauds\">Lauds</a><a href=\"/prime\">Prime</a>" +
+    "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
+    "<a class=\"site-brand\" href=\"/\"><span aria-hidden=\"true\">✠</span> Daily Office</a>" +
+    "<details class=\"site-menu\" open><summary>Menu</summary><nav aria-label=\"Primary\">" +
+    "<a href=\"/lauds\">Lauds</a><a href=\"/prime\">Prime</a>" +
     "<a href=\"/terce\">Terce</a><a href=\"/sext\">Sext</a><a href=\"/none\">None</a>" +
     "<a href=\"/vespers\">Vespers</a><a href=\"/compline\">Compline</a>" +
-    "<a href=\"/calendar\">Calendar</a><a href=\"/reminders\">Reminders</a>" +
-    "</nav></header><main id=\"main-content\">" +
+    "<span class=\"nav-divider\" aria-hidden=\"true\"></span>" +
+    "<a href=\"/calendar\">Ordo</a><a href=\"/reminders\">Reminders</a>" +
+    "</nav></details></div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
     "<p class=\"home-kicker\">Offline</p>" +
     "<h1 id=\"offline-heading\">This page is not saved</h1>" +

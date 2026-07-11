@@ -5,14 +5,15 @@
     <h1>{{.Hour.Title}}</h1>
     <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}} &bull; <span class="color-swatch color-{{.Hour.Color}}"></span>{{.Hour.Color}}</p>
     <nav class="day-nav" aria-label="Date navigation">
-      <a href="{{.PrevLink}}">&laquo; Previous</a>
+      <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
       <form class="date-jump-form" action="/{{.HourName}}" method="get">
         {{if .Theme}}<input type="hidden" name="theme" value="{{.Theme}}">{{end}}
         <label class="sr-only" for="hour-date-jump">Jump to date</label>
         <input id="hour-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
         <button class="date-submit" type="submit">Go</button>
+        {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
       </form>
-      <a href="{{.NextLink}}">Next &raquo;</a>
+      <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
     </nav>
   </div>
   <div class="elements">
@@ -28,6 +29,11 @@
       {{end}}
     {{end}}
   </div>
+  <nav class="hour-continuation" aria-label="Other hours for this day">
+    {{if .PreviousHourLink}}<a class="hour-continuation-link previous-hour" href="{{.PreviousHourLink}}"><span class="continuation-label">Previous hour</span><span>&larr; {{.PreviousHourName}}</span></a>{{else}}<span></span>{{end}}
+    <a class="day-hours-link" href="{{.DayLink}}">All hours</a>
+    {{if .NextHourLink}}<a class="hour-continuation-link next-hour" href="{{.NextHourLink}}"><span class="continuation-label">Next hour</span><span>{{.NextHourName}} &rarr;</span></a>{{else}}<span></span>{{end}}
+  </nav>
   <details class="assurance-panel">
     <summary>Assurance: {{.Assurance.Verified}} verified &middot; {{.Assurance.NeedsReview}} need review &middot; {{.Assurance.SourceUnknown}} source unknown</summary>
     <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>

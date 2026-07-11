@@ -161,7 +161,15 @@ func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
 		t.Fatalf("status = %d", rec.Code)
 	}
 	body := rec.Body.String()
-	for _, want := range []string{`<details class="assurance-panel">`, "Text dependencies", "Composition decisions"} {
+	for _, want := range []string{
+		`<details class="assurance-panel">`,
+		`<details class="site-menu" open>`,
+		`class="today-link"`,
+		`class="hour-continuation"`,
+		`href="/prime/2026-06-07"`,
+		"Text dependencies",
+		"Composition decisions",
+	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hour page missing %q", want)
 		}
@@ -180,6 +188,26 @@ func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
 		if strings.Contains(body, forbidden) {
 			t.Errorf("hour page leaks source metadata %q", forbidden)
 		}
+	}
+}
+
+func TestAdjacentHoursKeepDateAndTheme(t *testing.T) {
+	previousName, previousLink, nextName, nextLink := adjacentHours("sext", "2026-06-07", "dark")
+	if previousName != "Terce" || previousLink != "/terce/2026-06-07?theme=dark" {
+		t.Errorf("previous hour = %q %q", previousName, previousLink)
+	}
+	if nextName != "None" || nextLink != "/none/2026-06-07?theme=dark" {
+		t.Errorf("next hour = %q %q", nextName, nextLink)
+	}
+
+	previousName, previousLink, _, _ = adjacentHours("lauds", "2026-06-07", "")
+	if previousName != "" || previousLink != "" {
+		t.Errorf("lauds should not have a previous hour, got %q %q", previousName, previousLink)
+	}
+
+	_, _, nextName, nextLink = adjacentHours("compline", "2026-06-07", "")
+	if nextName != "" || nextLink != "" {
+		t.Errorf("compline should not have a next hour, got %q %q", nextName, nextLink)
 	}
 }
 

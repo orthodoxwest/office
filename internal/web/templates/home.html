@@ -6,14 +6,15 @@
       <p class="home-kicker">Daily Office</p>
       <h1 id="home-date-heading">{{.DateStr}}</h1>
       <nav class="day-nav" aria-label="Date navigation">
-        <a href="{{.PrevLink}}">&laquo; Previous</a>
+        <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
         <form class="date-jump-form" action="/" method="get">
           {{if .Theme}}<input type="hidden" name="theme" value="{{.Theme}}">{{end}}
           <label class="sr-only" for="home-date-jump">Jump to date</label>
           <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
           <button class="date-submit" type="submit">Go</button>
+          {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
         </form>
-        <a href="{{.NextLink}}">Next &raquo;</a>
+        <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
       </nav>
       {{if .FeastName}}<p class="feast">{{.FeastName}}</p>{{end}}
       {{if .FeastRank}}<p class="feast-rank"><a href="{{.CalendarLink}}" class="feast-rank-link">{{.FeastRank}}</a></p>{{end}}
