@@ -589,6 +589,7 @@ footer::before {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   width: fit-content;
+  min-width: min(100%, 24rem);
   margin: 0 auto 0.3rem;
   padding: 0.2rem 1.3rem 0.25rem;
   border-top: 3px double var(--gold-line);
