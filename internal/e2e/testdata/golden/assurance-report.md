@@ -3,8 +3,8 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 218 |
-| Selected structural-review pages | 38 |
+| Modeled structural features | 219 |
+| Selected structural-review pages | 39 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
 | Text entries needing review | 1412 |
@@ -18,6 +18,7 @@
 - `decision:commemoration:cap=truncated`
 - `decision:commemoration:duplicate-name=suppressed`
 - `decision:commemoration:incoming-at-second-vespers=suppressed`
+- `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:matches-winner=suppressed`
 - `decision:commemoration:non-concurrence-loser-at-second-vespers=suppressed`
 - `decision:commemoration:only-with=suppressed`

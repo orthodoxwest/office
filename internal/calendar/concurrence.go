@@ -270,6 +270,24 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, following 
 	return finalized, append(decisions, finalDecisions...)
 }
 
+// noOwnerCommemorationsWithDecisions returns the following day's occurrence
+// commemorations for an evening on which neither adjacent celebration has
+// I/II Vespers rights. Memorials belong to the day that is beginning: they are
+// commemorated at its I Vespers and Lauds, not carried into Vespers at the end
+// of their civil day (XIV.9). The office itself remains the current ferial or
+// simple office, so this does not create a Vespers owner or change its color.
+func noOwnerCommemorationsWithDecisions(following *models.CalendarDay) ([]*models.Feast, []models.CompositionDecision) {
+	comms, decisions := finalizeCommemorationsWithDecisions(following.Celebration, following.Commemorations)
+	for _, comm := range comms {
+		decisions = append(decisions, models.CompositionDecision{
+			Rule:    "commemoration:incoming-at-unowned-vespers",
+			Outcome: "included",
+			Detail:  comm.ID,
+		})
+	}
+	return comms, decisions
+}
+
 // resolveConcurrence determines the vespers designation for an evening given
 // the preceding day's celebration and the following day's celebration.
 //
@@ -283,9 +301,15 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	precHasII := precFeast != nil && hasSecondVespers(precFeast)
 	folHasI := folFeast != nil && hasFirstVespers(folFeast)
 
-	// Neither has vespers — not applicable
+	// Neither celebration owns I/II Vespers. Keep the current office, but use
+	// the following day's occurrence commemorations (XIV.9).
 	if !precHasII && !folHasI {
-		return models.VespersDesignation{Rule: "concurrence:neither-office-has-rights"}
+		comms, decisions := noOwnerCommemorationsWithDecisions(following)
+		return models.VespersDesignation{
+			Commemorations: comms,
+			Rule:           "concurrence:neither-office-has-rights",
+			Decisions:      decisions,
+		}
 	}
 
 	// If preceding has no II Vespers, following wins by default

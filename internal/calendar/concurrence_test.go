@@ -222,12 +222,18 @@ func TestConcurrenceWinnerPrivilegedDayAlwaysWins(t *testing.T) {
 }
 
 func TestResolveConcurrenceTwoFerias(t *testing.T) {
-	day1 := &models.CalendarDay{Celebration: nil}
-	day2 := &models.CalendarDay{Celebration: nil}
+	current := &models.Feast{ID: "current-memorial", Name: "Current Memorial", Rank: models.Commemoration}
+	incoming := &models.Feast{ID: "incoming-memorial", Name: "Incoming Memorial", Rank: models.Commemoration}
+	day1 := &models.CalendarDay{Celebration: nil, Commemorations: []*models.Feast{current}}
+	day2 := &models.CalendarDay{Celebration: nil, Commemorations: []*models.Feast{incoming}}
 	result := resolveConcurrence(day1, day2)
 	if result.Owner != models.VespersNotApplicable {
 		t.Errorf("Two ferias: got owner %d, want VespersNotApplicable", result.Owner)
 	}
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != incoming {
+		t.Fatalf("commemorations = %#v, want following day's memorial", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:incoming-at-unowned-vespers")
 }
 
 func TestResolveConcurrenceSimplePrecedingYieldsToFollowing(t *testing.T) {

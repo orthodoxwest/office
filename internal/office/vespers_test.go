@@ -223,6 +223,33 @@ func TestVespersCommemoratesOutgoingOfficeAtFirstVespersOfFollowing(t *testing.T
 	}
 }
 
+func TestVespersWithoutOwnerUsesFollowingDayCommemorations(t *testing.T) {
+	current := &models.Feast{ID: "current", Name: "Current Memorial", Rank: models.Commemoration}
+	incoming := &models.Feast{ID: "incoming", Name: "Incoming Memorial", Rank: models.Commemoration}
+	day := &models.CalendarDay{
+		Date:           time.Date(2026, 1, 22, 0, 0, 0, 0, time.UTC),
+		Season:         models.Epiphany,
+		Color:          models.Green,
+		Commemorations: []*models.Feast{current},
+		Vespers: models.VespersDesignation{
+			Owner:          models.VespersNotApplicable,
+			Commemorations: []*models.Feast{incoming},
+			Rule:           "concurrence:neither-office-has-rights",
+		},
+	}
+
+	officeDay := vespersOfficeDay(day)
+	if officeDay == day {
+		t.Fatal("expected a Vespers-specific day copy")
+	}
+	if len(officeDay.Commemorations) != 1 || officeDay.Commemorations[0] != incoming {
+		t.Fatalf("commemorations = %#v, want incoming memorial only", officeDay.Commemorations)
+	}
+	if officeDay.Date != day.Date || officeDay.Color != day.Color {
+		t.Fatalf("no-owner Vespers changed office context: %#v", officeDay)
+	}
+}
+
 func TestVespersCommemoratesIncomingOfficeAtSecondVespersOfPreceding(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/st-joseph/psalm-antiphon-1-vespers": "Joseph psalm antiphon",

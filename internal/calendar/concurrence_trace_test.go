@@ -32,3 +32,18 @@ func TestResolvedConcurrenceCarriesBoundaryTrace(t *testing.T) {
 	}
 	assertTraceRule(t, got.Decisions, "commemoration:incoming-at-second-vespers")
 }
+
+func TestNoOwnerConcurrenceCarriesIncomingCommemorationTrace(t *testing.T) {
+	incoming := traceFeast("incoming", models.Commemoration, models.CategoryMartyr)
+	preceding := &models.CalendarDay{Color: models.Green, Season: models.Pentecost}
+	following := &models.CalendarDay{Commemorations: []*models.Feast{incoming}, Color: models.Green, Season: models.Pentecost}
+
+	got := resolveConcurrence(preceding, following)
+	if got.Owner != models.VespersNotApplicable {
+		t.Fatalf("owner = %v, want not applicable", got.Owner)
+	}
+	if len(got.Commemorations) != 1 || got.Commemorations[0] != incoming {
+		t.Fatalf("commemorations = %#v", got.Commemorations)
+	}
+	assertTraceRule(t, got.Decisions, "commemoration:incoming-at-unowned-vespers")
+}
