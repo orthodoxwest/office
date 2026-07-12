@@ -10,13 +10,13 @@ func TestBoundaryCommemorationTraceRules(t *testing.T) {
 	winner := traceFeast("winner", models.Double2ndClass, models.CategoryMartyr)
 	loser := traceFeast("loser", models.Simple, models.CategoryMartyr)
 	incoming := traceFeast("incoming", models.Commemoration, models.CategoryMartyr)
-	following := &models.CalendarDay{Commemorations: []*models.Feast{incoming}}
+	following := &models.CalendarDay{Celebration: loser, Commemorations: []*models.Feast{incoming}}
 
-	comms, decisions := boundaryCommemorationsWithDecisions(winner, loser, following, true)
+	comms, decisions := boundaryCommemorationsWithDecisions(winner, loser, following, true, false)
 	if len(comms) != 0 {
 		t.Fatalf("commemorations = %#v", comms)
 	}
-	assertTraceRule(t, decisions, "commemoration:non-concurrence-loser-at-second-vespers")
+	assertTraceRule(t, decisions, "commemoration:following-office-at-second-vespers-simple-or-memorial")
 	assertTraceRule(t, decisions, "commemoration:incoming-at-second-vespers")
 }
 
