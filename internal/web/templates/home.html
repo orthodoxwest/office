@@ -3,7 +3,6 @@
 <div class="home">
   <div class="home-hero">
     <section class="home-summary" aria-labelledby="home-date-heading">
-      <p class="home-kicker">Daily Office</p>
       <h1 id="home-date-heading">{{.DateStr}}</h1>
       <nav class="day-nav" aria-label="Date navigation">
         <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
@@ -33,7 +32,6 @@
     </section>
 
     <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
-      <p class="home-kicker">The Hours</p>
       <h2 id="home-pray-heading">Choose an hour</h2>
       <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
       <div class="home-hour-links" aria-label="Hours for the day">

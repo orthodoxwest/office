@@ -387,14 +387,6 @@ footer {
   padding: 1.2rem 1.25rem;
 }
 
-.home-kicker {
-  color: var(--muted);
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 0.65rem;
-}
-
 .home h1 {
   font-size: 1.9rem;
   font-weight: normal;
