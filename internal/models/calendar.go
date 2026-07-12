@@ -357,9 +357,9 @@ type VespersDesignation struct {
 	Rule      string                // stable explanation code for the concurrence decision
 	Decisions []CompositionDecision // concurrence and commemoration trace
 
-	// Commemorations holds the celebration that lost the vespers concurrence
-	// (the outgoing office at I Vespers of a following feast, or the incoming
-	// office at II Vespers of a preceding feast), commemorated per XIII.2-17.
+	// Commemorations holds the celebrations proper to this evening: a loser in
+	// concurrence, or the following day's occurrence commemorations when no
+	// adjacent celebration owns I/II Vespers (XIII.2-19, XIV.9).
 	Commemorations []*Feast
 }
 

@@ -28,11 +28,19 @@ func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSectio
 }
 
 func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
-	if day == nil || day.Vespers.Owner == models.VespersNotApplicable || day.Vespers.Feast == nil {
+	if day == nil {
 		return day
 	}
 
 	officeDay := *day
+	if day.Vespers.Owner == models.VespersNotApplicable || day.Vespers.Feast == nil {
+		// No adjacent celebration owns Vespers. The office remains today's,
+		// but its occurrence commemorations belong to tomorrow rather than
+		// carrying today's Lauds commemorations one evening late (XIV.9).
+		officeDay.Commemorations = day.Vespers.Commemorations
+		return &officeDay
+	}
+
 	officeDay.Celebration = day.Vespers.Feast
 	officeDay.Color = day.Vespers.Color
 	if day.Vespers.Season != "" {
