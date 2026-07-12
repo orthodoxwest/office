@@ -1,10 +1,10 @@
 {{define "title"}}{{.Hour.Title}} — {{.DateStr}}{{end}}
 {{define "content"}}
 <div class="office-hour">
-  <div class="color-band color-band-{{.Hour.Color}}" aria-hidden="true"></div>
+  <div class="color-band color-band-{{.Hour.Color}}"><span class="sr-only">Liturgical color: {{.Hour.Color}}</span></div>
   <div class="hour-header">
     <h1>{{.Hour.Title}}</h1>
-    <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}} &bull; <span class="color-swatch color-{{.Hour.Color}}"></span>{{.Hour.Color}}</p>
+    <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}}</p>
     <nav class="day-nav" aria-label="Date navigation">
       <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
       <form class="date-jump-form" action="/{{.HourName}}" method="get">
