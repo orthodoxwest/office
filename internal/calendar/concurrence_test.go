@@ -305,13 +305,14 @@ func TestResolveConcurrenceBoundaryCommemoration(t *testing.T) {
 	day1 := &models.CalendarDay{Celebration: simple, Color: models.White}
 	day2 := &models.CalendarDay{Celebration: double, Color: models.Red}
 
-	// I Vespers of following: the outgoing (losing) office is commemorated.
+	// A Simple office ends at None and is not commemorated when the following
+	// Double begins I Vespers (XIII.17, XIV.9).
 	result := resolveConcurrence(day1, day2)
 	if result.Owner != models.VespersIOfFollowing {
 		t.Fatalf("got owner %d, want VespersIOfFollowing", result.Owner)
 	}
-	if len(result.Commemorations) != 1 || result.Commemorations[0] != simple {
-		t.Errorf("expected boundary commemoration of the outgoing feast, got %v", result.Commemorations)
+	if len(result.Commemorations) != 0 {
+		t.Errorf("expected outgoing Simple to be suppressed, got %v", result.Commemorations)
 	}
 
 	// II Vespers of preceding: the incoming (losing) office is commemorated.
@@ -321,6 +322,101 @@ func TestResolveConcurrenceBoundaryCommemoration(t *testing.T) {
 	}
 	if len(result.Commemorations) != 1 || result.Commemorations[0] != simple {
 		t.Errorf("expected boundary commemoration of the incoming feast, got %v", result.Commemorations)
+	}
+}
+
+func TestOccurrenceCommemoratedAtSecondVespers(t *testing.T) {
+	firstClass := &models.Feast{ID: "first-class", Rank: models.Double1stClass, Category: models.CategoryLord}
+	secondClass := &models.Feast{ID: "second-class", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	greaterDouble := &models.Feast{ID: "greater-double", Rank: models.GreaterDouble, Category: models.CategoryConfessor}
+
+	tests := []struct {
+		name   string
+		winner *models.Feast
+		comm   *models.Feast
+		want   bool
+	}{
+		{"memorial is I Vespers and Lauds only", greaterDouble, &models.Feast{ID: "memorial", Rank: models.Commemoration}, false},
+		{"simple is not at II Vespers", greaterDouble, &models.Feast{ID: "simple", Rank: models.Simple}, false},
+		{"Ember day is Lauds only", greaterDouble, &models.Feast{ID: "september-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
+		{"Rogation is Lauds only", greaterDouble, &models.Feast{ID: "rogation-monday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
+		{"common vigil is Lauds only", greaterDouble, &models.Feast{ID: "vigil-st-lawrence", Rank: models.Simple, Category: models.CategoryFeria}, false},
+		{"Sunday remains at II Vespers of first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
+		{"Double excluded by first class winner", firstClass, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, false},
+		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
+		{"Double retained under greater double", greaterDouble, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, true},
+		{"seasonal privileged feria retained", greaterDouble, &models.Feast{ID: "privileged-lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _ := occurrenceCommemoratedAtSecondVespers(tt.winner, tt.comm)
+			if got != tt.want {
+				t.Fatalf("got %t, want %t", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *testing.T) {
+	winner := &models.Feast{ID: "winner", Rank: models.GreaterDouble, Category: models.CategoryConfessor}
+	memorial := &models.Feast{ID: "memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
+	simplifiedDouble := &models.Feast{ID: "simplified-double", Rank: models.Double, Category: models.CategoryMartyr}
+	seasonalFeria := &models.Feast{ID: "lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: winner, Commemorations: []*models.Feast{memorial, simplifiedDouble, seasonalFeria}},
+		&models.CalendarDay{},
+	)
+
+	if result.Owner != models.VespersIIOfPreceding {
+		t.Fatalf("got owner %d, want VespersIIOfPreceding", result.Owner)
+	}
+	if len(result.Commemorations) != 2 || result.Commemorations[0] != simplifiedDouble || result.Commemorations[1] != seasonalFeria {
+		t.Fatalf("got commemorations %v, want simplified Double and seasonal feria", result.Commemorations)
+	}
+	foundSuppression := false
+	for _, decision := range result.Decisions {
+		if decision.Rule == "commemoration:second-vespers-memorial-or-simple" && decision.Outcome == "suppressed" && decision.Detail == memorial.ID {
+			foundSuppression = true
+			break
+		}
+	}
+	if !foundSuppression {
+		t.Fatalf("missing traced memorial suppression in decisions: %v", result.Decisions)
+	}
+}
+
+func TestOutgoingCommemoratedAtFirstVespers(t *testing.T) {
+	firstClass := &models.Feast{ID: "first-class", Rank: models.Double1stClass, Category: models.CategoryLord}
+	secondClass := &models.Feast{ID: "second-class", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	double := &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}
+
+	tests := []struct {
+		name   string
+		winner *models.Feast
+		loser  *models.Feast
+		want   bool
+	}{
+		{"Simple ends at None", double, &models.Feast{ID: "simple", Rank: models.Simple, Category: models.CategoryConfessor}, false},
+		{"ordinary feria does not concur", double, &models.Feast{ID: "feria", Rank: models.SemiDouble, Category: models.CategoryFeria}, false},
+		{"day within octave under ordinary Double", double, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, true},
+		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
+		{"seasonal privileged feria retained", double, &models.Feast{ID: "privileged-lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, true},
+		{"seasonal privileged feria excluded by first class", firstClass, &models.Feast{ID: "privileged-advent-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
+		{"second class outgoing excluded by first class", firstClass, secondClass, false},
+		{"Sunday outgoing excluded by first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, false},
+		{"Christmas commemorates outgoing Sunday", &models.Feast{ID: "christmas", Rank: models.Double1stClass, Category: models.CategoryLord}, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
+		{"ordinary Double outgoing under second class", secondClass, double, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _ := outgoingCommemoratedAtFirstVespers(tt.winner, tt.loser)
+			if got != tt.want {
+				t.Fatalf("got %t, want %t", got, tt.want)
+			}
+		})
 	}
 }
 
