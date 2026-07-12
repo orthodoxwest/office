@@ -3,7 +3,7 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 233 |
+| Modeled structural features | 237 |
 | Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
@@ -21,17 +21,21 @@
 - `decision:commemoration:first-vespers-concurrence=included`
 - `decision:commemoration:first-vespers-day-within-octave-exclusion=suppressed`
 - `decision:commemoration:first-vespers-day-within-octave=included`
+- `decision:commemoration:first-vespers-feria-or-vigil-lauds-only=suppressed`
 - `decision:commemoration:first-vespers-first-class-exclusion=suppressed`
 - `decision:commemoration:first-vespers-first-class-seasonal-feria-exclusion=suppressed`
 - `decision:commemoration:first-vespers-first-class-sunday-exclusion=suppressed`
+- `decision:commemoration:first-vespers-occurrence-included=included`
 - `decision:commemoration:first-vespers-office-ended-at-none=suppressed`
 - `decision:commemoration:first-vespers-seasonal-feria=included`
+- `decision:commemoration:following-office-at-second-vespers-included=included`
+- `decision:commemoration:following-office-at-second-vespers-simple-or-memorial=suppressed`
 - `decision:commemoration:incoming-at-second-vespers=suppressed`
 - `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:matches-winner=suppressed`
-- `decision:commemoration:non-concurrence-loser-at-second-vespers=suppressed`
 - `decision:commemoration:only-with=suppressed`
 - `decision:commemoration:pentecost-ember=suppressed`
+- `decision:commemoration:same-octave-boundary=suppressed`
 - `decision:commemoration:same-octave-sunday=suppressed`
 - `decision:commemoration:second-vespers-day-within-octave-exclusion=suppressed`
 - `decision:commemoration:second-vespers-feria-or-vigil-lauds-only=suppressed`

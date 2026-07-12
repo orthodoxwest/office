@@ -315,13 +315,37 @@ func TestResolveConcurrenceBoundaryCommemoration(t *testing.T) {
 		t.Errorf("expected outgoing Simple to be suppressed, got %v", result.Commemorations)
 	}
 
-	// II Vespers of preceding: the incoming (losing) office is commemorated.
+	// II Vespers of preceding: an incoming Simple is explicitly excluded by
+	// XIV.7-8 even though it is the following day's celebration.
 	result = resolveConcurrence(day2, day1)
 	if result.Owner != models.VespersIIOfPreceding {
 		t.Fatalf("got owner %d, want VespersIIOfPreceding", result.Owner)
 	}
-	if len(result.Commemorations) != 1 || result.Commemorations[0] != simple {
-		t.Errorf("expected boundary commemoration of the incoming feast, got %v", result.Commemorations)
+	if len(result.Commemorations) != 0 {
+		t.Errorf("expected incoming Simple to be suppressed, got %v", result.Commemorations)
+	}
+}
+
+func TestOccurrenceCommemoratedAtFirstVespers(t *testing.T) {
+	tests := []struct {
+		name string
+		comm *models.Feast
+		want bool
+	}{
+		{"Memorial begins at I Vespers", &models.Feast{ID: "memorial", Rank: models.Commemoration}, true},
+		{"simplified Double begins at I Vespers", &models.Feast{ID: "double", Rank: models.Double}, true},
+		{"Ember day is Lauds only", &models.Feast{ID: "september-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
+		{"Rogation is Lauds only", &models.Feast{ID: "rogation-monday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
+		{"common vigil is Lauds only", &models.Feast{ID: "comm-extra-08-22-vigil-of-st-bartholomew", Name: "Vigil of St. Bartholomew", Rank: models.Commemoration}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, _ := occurrenceCommemoratedAtFirstVespers(tt.comm)
+			if got != tt.want {
+				t.Fatalf("got %t, want %t", got, tt.want)
+			}
+		})
 	}
 }
 
@@ -384,6 +408,59 @@ func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *tes
 	}
 	if !foundSuppression {
 		t.Fatalf("missing traced memorial suppression in decisions: %v", result.Decisions)
+	}
+}
+
+func TestResolveConcurrenceNoOwnerCombinesHourEligibleCommemorations(t *testing.T) {
+	currentMemorial := &models.Feast{ID: "current-memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
+	currentDouble := &models.Feast{ID: "current-double", Rank: models.Double, Category: models.CategoryMartyr}
+	incomingMemorial := &models.Feast{ID: "incoming-memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
+	incomingVigil := &models.Feast{ID: "comm-extra-vigil", Name: "Vigil of an Apostle", Rank: models.Commemoration, Category: models.CategoryFeria}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Commemorations: []*models.Feast{currentMemorial, currentDouble}},
+		&models.CalendarDay{Commemorations: []*models.Feast{incomingMemorial, incomingVigil}},
+	)
+
+	if result.Owner != models.VespersNotApplicable {
+		t.Fatalf("got owner %d, want VespersNotApplicable", result.Owner)
+	}
+	if len(result.Commemorations) != 2 || result.Commemorations[0] != currentDouble || result.Commemorations[1] != incomingMemorial {
+		t.Fatalf("got commemorations %v, want current Double then incoming Memorial", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:second-vespers-included")
+	assertTraceRule(t, result.Decisions, "commemoration:incoming-at-unowned-vespers")
+	assertTraceRule(t, result.Decisions, "commemoration:first-vespers-feria-or-vigil-lauds-only")
+}
+
+func TestResolveConcurrenceSuppressesSameOctaveBoundary(t *testing.T) {
+	parent := &models.Feast{ID: "octave-feast", Name: "Octave Feast", Rank: models.Double1stClass, Category: models.CategoryLord, HasOctave: true}
+	nextDay := &models.Feast{ID: "octave-feast-octave-day-2", Name: "Day II within the Octave Feast", Rank: models.Double1stClass, Category: models.CategoryLord}
+	preceding := &models.CalendarDay{Celebration: parent, WithinOctaveOf: ""}
+	following := &models.CalendarDay{Celebration: nextDay, WithinOctaveOf: parent.ID}
+
+	result := resolveConcurrence(preceding, following)
+	if len(result.Commemorations) != 0 {
+		t.Fatalf("same-octave boundary commemorations = %v, want none", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:same-octave-boundary")
+}
+
+func TestResolveConcurrenceDoesNotConflateOccurrenceWithinOctaveWithOctaveOffice(t *testing.T) {
+	parent := &models.Feast{ID: "octave-feast", Name: "Octave Feast", Rank: models.Double1stClass, Category: models.CategoryLord, HasOctave: true}
+	saint := &models.Feast{ID: "saint", Name: "Saint", Rank: models.Double, Category: models.CategoryMartyr}
+	sunday := &models.Feast{ID: "sunday", Name: "Sunday within the Octave", Rank: models.SemiDouble, Category: models.CategorySunday}
+	preceding := &models.CalendarDay{Celebration: saint, WithinOctaveOf: parent.ID}
+	following := &models.CalendarDay{Celebration: sunday, WithinOctaveOf: parent.ID}
+
+	result := resolveConcurrence(preceding, following)
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != saint {
+		t.Fatalf("commemorations = %v, want distinct occurring saint", result.Commemorations)
+	}
+	for _, decision := range result.Decisions {
+		if decision.Rule == "commemoration:same-octave-boundary" {
+			t.Fatalf("distinct occurring offices incorrectly treated as the same octave office: %v", result.Decisions)
+		}
 	}
 }
 

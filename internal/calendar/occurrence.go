@@ -286,15 +286,19 @@ func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.F
 
 	deduped, dedupeDecisions := dedupeCommemorationsWithDecisions(winner, filtered)
 	decisions = append(decisions, dedupeDecisions...)
-	if len(deduped) <= maxCommemorationsPerDay {
-		return deduped, decisions
+	capped, capDecisions := capCommemorationsWithDecisions(deduped)
+	return capped, append(decisions, capDecisions...)
+}
+
+func capCommemorationsWithDecisions(comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
+	if len(comms) <= maxCommemorationsPerDay {
+		return comms, nil
 	}
-	dropped := make([]string, 0, len(deduped)-maxCommemorationsPerDay)
-	for _, comm := range deduped[maxCommemorationsPerDay:] {
+	dropped := make([]string, 0, len(comms)-maxCommemorationsPerDay)
+	for _, comm := range comms[maxCommemorationsPerDay:] {
 		dropped = append(dropped, comm.ID)
 	}
-	decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:cap", Outcome: "truncated", Detail: strings.Join(dropped, ",")})
-	return deduped[:maxCommemorationsPerDay], decisions
+	return comms[:maxCommemorationsPerDay], []models.CompositionDecision{{Rule: "commemoration:cap", Outcome: "truncated", Detail: strings.Join(dropped, ",")}}
 }
 
 // ResolveDay resolves conflicts for a single day.
