@@ -81,6 +81,7 @@ input {
 
 body {
   font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  accent-color: var(--accent);
   font-size: 18px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -161,7 +162,7 @@ summary:focus-visible {
 }
 
 .site-brand span {
-  color: var(--rubric);
+  color: var(--gold);
   margin-right: 0.2rem;
 }
 
@@ -452,12 +453,22 @@ footer::before {
   vertical-align: middle;
   border: 1px solid rgba(0,0,0,0.15);
 }
-.color-swatch.color-white  { background: #e8e0cc; }
-.color-swatch.color-red    { background: #b02a24; }
-.color-swatch.color-green  { background: #3a6b3a; }
-.color-swatch.color-violet { background: #6a3a8a; }
-.color-swatch.color-black  { background: #3a3a3a; }
-.color-swatch.color-rose   { background: #c4607a; }
+.color-swatch.color-white,  .color-band-white  { background: #e8e0cc; }
+.color-swatch.color-red,    .color-band-red    { background: #b02a24; }
+.color-swatch.color-green,  .color-band-green  { background: #3a6b3a; }
+.color-swatch.color-violet, .color-band-violet { background: #6a3a8a; }
+.color-swatch.color-black,  .color-band-black  { background: #3a3a3a; }
+.color-swatch.color-rose,   .color-band-rose   { background: #c4607a; }
+
+/* Thin vestment-trim band across the top of hour pages in the day's color */
+.color-band {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 120;
+}
 
 .home .feast-rank-link {
   color: var(--muted);
@@ -1291,6 +1302,10 @@ footer::before {
   font-weight: bold;
 }
 
+.fish-flag {
+  vertical-align: -0.05em;
+}
+
 /* Narrow screens: collapse to tap-to-expand summary */
 @media (max-width: 700px) {
   .home-hero {
@@ -1550,8 +1565,24 @@ footer::before {
 /* ── Print ── */
 
 @media print {
-  header, footer, .day-nav, .year-nav, .report-issue {
+  header, footer, .day-nav, .year-nav, .report-issue, .color-band {
     display: none;
+  }
+
+  /* Gold reads as pale gray on B&W printers — darken decorative elements */
+  .cross,
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+    color: #444;
+  }
+
+  .hour-header h1 {
+    border-color: #888;
+  }
+
+  .hour-continuation::before {
+    color: #888;
   }
 
   body {
