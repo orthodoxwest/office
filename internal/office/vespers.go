@@ -57,14 +57,9 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		officeDay.WithinOctaveOf = ""
 		officeDay.FirstVespers = true
 	case models.VespersIIOfPreceding:
-		// Vespers is of today's own feast; the incoming feast that lost the
-		// concurrence is commemorated in addition to today's commemorations.
-		if len(day.Vespers.Commemorations) > 0 {
-			comms := make([]*models.Feast, 0, len(day.Commemorations)+len(day.Vespers.Commemorations))
-			comms = append(comms, day.Commemorations...)
-			comms = append(comms, day.Vespers.Commemorations...)
-			officeDay.Commemorations = comms
-		}
+		// Calendar resolution has already combined and filtered today's
+		// occurrence commemorations with the incoming concurrence boundary.
+		officeDay.Commemorations = day.Vespers.Commemorations
 	}
 
 	return &officeDay

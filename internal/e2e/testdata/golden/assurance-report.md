@@ -3,8 +3,8 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 219 |
-| Selected structural-review pages | 39 |
+| Modeled structural features | 233 |
+| Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
 | Text entries needing review | 1412 |
@@ -17,6 +17,15 @@
 - `decision:color:resolution=seasonal-feria`
 - `decision:commemoration:cap=truncated`
 - `decision:commemoration:duplicate-name=suppressed`
+- `decision:commemoration:first-vespers-circumcision-exclusion=suppressed`
+- `decision:commemoration:first-vespers-concurrence=included`
+- `decision:commemoration:first-vespers-day-within-octave-exclusion=suppressed`
+- `decision:commemoration:first-vespers-day-within-octave=included`
+- `decision:commemoration:first-vespers-first-class-exclusion=suppressed`
+- `decision:commemoration:first-vespers-first-class-seasonal-feria-exclusion=suppressed`
+- `decision:commemoration:first-vespers-first-class-sunday-exclusion=suppressed`
+- `decision:commemoration:first-vespers-office-ended-at-none=suppressed`
+- `decision:commemoration:first-vespers-seasonal-feria=included`
 - `decision:commemoration:incoming-at-second-vespers=suppressed`
 - `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:matches-winner=suppressed`
@@ -24,6 +33,11 @@
 - `decision:commemoration:only-with=suppressed`
 - `decision:commemoration:pentecost-ember=suppressed`
 - `decision:commemoration:same-octave-sunday=suppressed`
+- `decision:commemoration:second-vespers-day-within-octave-exclusion=suppressed`
+- `decision:commemoration:second-vespers-feria-or-vigil-lauds-only=suppressed`
+- `decision:commemoration:second-vespers-first-class-exclusion=suppressed`
+- `decision:commemoration:second-vespers-included=included`
+- `decision:commemoration:second-vespers-memorial-or-simple=suppressed`
 - `decision:commemoration:st-george-octave=suppressed`
 - `decision:condition:feast-easter-sunday=included`
 - `decision:condition:feast-easter-sunday=omitted`
