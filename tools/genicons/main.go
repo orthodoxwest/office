@@ -16,12 +16,12 @@ import (
 )
 
 var (
-	bg    = color.RGBA{R: 0xfd, G: 0xf9, B: 0xf2, A: 0xff} // site --bg cream
-	brown = color.RGBA{R: 0x6b, G: 0x3a, B: 0x1f, A: 0xff} // site accent
+	bg   = color.RGBA{R: 0x56, G: 0x77, B: 0x6c, A: 0xff} // celadon blue-green (lorica boards / apse sky)
+	gold = color.RGBA{R: 0xe6, G: 0xc8, B: 0x7e, A: 0xff} // gold leaf
 )
 
 // drawIcon renders the favicon cross (defined on a 32-unit grid) centered on a
-// full-bleed cream background. The design is scaled to 60% of the canvas so it
+// full-bleed celadon background. The design is scaled to 60% of the canvas so it
 // stays inside the maskable-icon safe zone (center 80%).
 func drawIcon(size int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, size, size))
@@ -37,8 +37,8 @@ func drawIcon(size int) *image.RGBA {
 	}
 
 	// Same geometry as favicon.svg: vertical bar then horizontal bar.
-	draw.Draw(img, rect(13, 3, 6, 26), &image.Uniform{C: brown}, image.Point{}, draw.Src)
-	draw.Draw(img, rect(5, 10, 22, 6), &image.Uniform{C: brown}, image.Point{}, draw.Src)
+	draw.Draw(img, rect(13, 4, 6, 24), &image.Uniform{C: gold}, image.Point{}, draw.Src)
+	draw.Draw(img, rect(5, 10, 22, 6), &image.Uniform{C: gold}, image.Point{}, draw.Src)
 	return img
 }
 

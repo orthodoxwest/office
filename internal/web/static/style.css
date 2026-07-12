@@ -32,12 +32,16 @@
   src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGFmQSNjdsmc35JDF1K5GR0SDw_ZgPJtWoGPg-poi-nB9iA.woff2") format("woff2");
 }
 
+/* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
+   Dark theme (below): the apse sky — blue-green lime wash with gold stars. */
 :root {
-  --text: #1a1a1a;
-  --bg: #fdf9f2;
+  --text: #241c17;
+  --bg: #faf4ef;
   --accent: #6b3a1f;
-  --muted: #7a7060;
-  --border: #d9d0c0;
+  --gold: #8f6b29;
+  --gold-line: #c9ac72;
+  --muted: #7d6f66;
+  --border: #e0d2c8;
   --rubric: #8b1a1a;
   --white: #f8f4ec;
   --red: #fdf0f0;
@@ -45,7 +49,7 @@
   --violet: #f4f0f8;
   --black: #f0f0f0;
   --rose: #fdf4f8;
-  --banner-bg: #f5f0e8;
+  --banner-bg: #f4ebe4;
 }
 
 * {
@@ -288,12 +292,22 @@ summary:focus-visible {
 /* ── Footer ── */
 
 footer {
-  border-top: 1px solid rgba(26, 26, 26, 0.08);
   margin-top: 2.5rem;
   padding: 0.85rem 0;
   font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
+}
+
+/* Diamond separator, after the lorica boards lining the nave roof */
+footer::before {
+  content: "\2726";
+  display: block;
+  color: var(--gold-line);
+  font-size: 0.8rem;
+  line-height: 1;
+  margin-bottom: 0.85rem;
+  user-select: none;
 }
 
 /* ── Report a problem ── */
@@ -303,6 +317,11 @@ footer {
   font-size: 0.78rem;
   color: var(--muted);
   text-align: center;
+}
+
+.report-issue a,
+.assurance-panel a {
+  color: var(--accent);
 }
 
 /* ── Assurance disclosure ── */
@@ -563,12 +582,17 @@ footer {
   border-bottom: 1px solid var(--border);
 }
 
+/* Double gold hairlines framing the hour title, echoing the gilded altar frame */
 .hour-header h1 {
   font-size: 1.55rem;
   font-weight: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 0.15rem;
+  width: fit-content;
+  margin: 0 auto 0.3rem;
+  padding: 0.2rem 1.3rem 0.25rem;
+  border-top: 3px double var(--gold-line);
+  border-bottom: 3px double var(--gold-line);
 }
 
 .hour-meta {
@@ -676,8 +700,18 @@ footer {
   max-width: 38rem;
   width: 100%;
   margin: 1.5rem auto 0;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+}
+
+/* Diamond separator, after the lorica boards lining the nave roof */
+.hour-continuation::before {
+  content: "\2726";
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--gold-line);
+  font-size: 0.8rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  user-select: none;
 }
 
 .hour-continuation a {
@@ -753,7 +787,7 @@ footer {
 }
 
 .cross {
-  color: var(--rubric);
+  color: var(--gold);
 }
 
 .elements > :is(.psalm, .canticle, .hymn, .chapter, .preces, .marian-antiphon, .liturgical-block) {
@@ -896,7 +930,7 @@ footer {
   line-height: 0.8;
   float: left;
   padding-right: 0.08em;
-  color: var(--accent);
+  color: var(--gold);
 }
 
 /* Drop cap on chapter and hymn opening text */
@@ -906,7 +940,7 @@ footer {
   line-height: 0.8;
   float: left;
   padding-right: 0.08em;
-  color: var(--accent);
+  color: var(--gold);
 }
 
 .chapter-ref {
@@ -1391,36 +1425,40 @@ footer {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --text: #e8e0d0;
-    --bg: #1a1814;
-    --accent: #c8956a;
-    --muted: #9a9080;
-    --border: #3a3528;
+    --text: #e8e2d0;
+    --bg: #14201e;
+    --accent: #cfa85e;
+    --gold: #d3b26c;
+    --gold-line: #5e5335;
+    --muted: #99a29a;
+    --border: #2b3a36;
     --rubric: #d47070;
-    --white: #1e1e1c;
-    --red: #1e1818;
-    --green: #181e18;
-    --violet: #1a1820;
-    --black: #181818;
-    --rose: #1e181c;
-    --banner-bg: #221e18;
+    --white: #1c2624;
+    --red: #261e1d;
+    --green: #14291f;
+    --violet: #1c2030;
+    --black: #191f1e;
+    --rose: #251e24;
+    --banner-bg: #1a2a26;
   }
 }
 
 :root[data-theme="dark"] {
-  --text: #e8e0d0;
-  --bg: #1a1814;
-  --accent: #c8956a;
-  --muted: #9a9080;
-  --border: #3a3528;
+  --text: #e8e2d0;
+  --bg: #14201e;
+  --accent: #cfa85e;
+  --gold: #d3b26c;
+  --gold-line: #5e5335;
+  --muted: #99a29a;
+  --border: #2b3a36;
   --rubric: #d47070;
-  --white: #1e1e1c;
-  --red: #1e1818;
-  --green: #181e18;
-  --violet: #1a1820;
-  --black: #181818;
-  --rose: #1e181c;
-  --banner-bg: #221e18;
+  --white: #1c2624;
+  --red: #261e1d;
+  --green: #14291f;
+  --violet: #1c2030;
+  --black: #191f1e;
+  --rose: #251e24;
+  --banner-bg: #1a2a26;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1433,7 +1471,7 @@ footer {
   }
 
   :root:not([data-theme="light"]) .home-hour-link.is-current {
-    background: rgba(200, 149, 106, 0.12);
+    background: rgba(207, 168, 94, 0.12);
   }
 }
 
@@ -1446,7 +1484,7 @@ footer {
 }
 
 :root[data-theme="dark"] .home-hour-link.is-current {
-  background: rgba(200, 149, 106, 0.12);
+  background: rgba(207, 168, 94, 0.12);
 }
 
 /* ── Narrow screens ── */
