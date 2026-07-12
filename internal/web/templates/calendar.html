@@ -1,4 +1,5 @@
 {{define "title"}}Calendar {{.Year}}{{end}}
+{{define "fish"}}<svg class="fish-flag" viewBox="0 0 24 12" width="18" height="9" fill="currentColor" aria-hidden="true" focusable="false"><path d="M1 6 C5 1.2 13 1.2 17 6 C13 10.8 5 10.8 1 6 Z"/><path d="M16.5 6 L23 1.5 L21.2 6 L23 10.5 Z"/></svg>{{end}}
 {{define "content"}}
 <div class="calendar">
   {{$theme := .Theme}}
@@ -9,7 +10,7 @@
       <a href="{{calendarYearLink .NextYear $theme}}">{{.NextYear}} &raquo;</a>
     </nav>
   </div>
-  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> <span aria-hidden="true">🐟</span> Abstinence <span aria-hidden="true">·</span> Liturgical rank abbreviations expand on focus.</p>
+  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{template "fish"}} Abstinence <span aria-hidden="true">·</span> Liturgical rank abbreviations expand on focus.</p>
   {{range .Months}}
   <section class="month" id="{{.Slug}}">
     <h2>{{.Name}}</h2>
@@ -39,7 +40,7 @@
               </a>
               <span class="day-mobile-flags">
                 {{if .Fast}}<span class="day-mobile-flag" aria-label="Fasting">§</span>{{end}}
-                {{if .Abstinence}}<span class="day-mobile-flag" aria-label="Abstinence">🐟</span>{{end}}
+                {{if .Abstinence}}<span class="day-mobile-flag" aria-label="Abstinence">{{template "fish"}}</span>{{end}}
                 {{if .Rank}}{{if .RankFull}}<abbr class="day-mobile-rank" tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}<span class="day-mobile-rank">{{.Rank}}</span>{{end}}{{end}}
               </span>
             </div>
@@ -47,7 +48,7 @@
             {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
           </td>
           <td class="day-penitential-flag" data-label="Fast">{{if .Fast}}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{{end}}</td>
-          <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}<span aria-hidden="true">🐟</span><span class="sr-only">Abstinence</span>{{end}}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}{{template "fish"}}<span class="sr-only">Abstinence</span>{{end}}</td>
           <td class="day-color" data-label="Color">{{.Color}}</td>
           <td class="day-rank" data-label="Rank">{{if .RankFull}}<abbr tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}{{.Rank}}{{end}}</td>
         </tr>
