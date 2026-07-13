@@ -10,6 +10,12 @@ import (
 
 const saturdayOfficeBVMID = "saturday-office-bvm"
 
+var doubleFeriaOfficeIDs = map[string]bool{
+	"all-souls":       true,
+	"vigil-nativity":  true,
+	"vigil-pentecost": true,
+}
+
 // evaluateCondition reports whether a section condition is satisfied for the given day.
 // Comma-separated conditions are ANDed together: "not-feast-easter-sunday,weekday-sunday"
 // means "Sunday AND not Easter Sunday".
@@ -72,14 +78,13 @@ func evaluateConditionKnown(condition string, day *models.CalendarDay, moveable 
 // shouldSayPreces determines whether preces should be said at the Little Hours and Compline.
 //
 // Preces are NOT said when:
-//   - Celebration rank >= Double
+//   - The celebration has a Double office
 //   - Day is within an octave, or is itself an octave-day office
 //   - Any commemoration is a Double or octave-related
 //   - The Friday after the Ascension octave (Easter+47)
 //   - Vigil of Epiphany (Jan 5)
 func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
-	// Check celebration rank
-	if day.Celebration != nil && day.Celebration.Rank.Weight() >= models.Double.Weight() {
+	if celebrationHasDoubleOffice(day.Celebration) {
 		return false
 	}
 
@@ -118,6 +123,28 @@ func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) 
 	}
 
 	return true
+}
+
+// celebrationHasDoubleOffice distinguishes office form from occurrence
+// precedence. Penitential Sundays and privileged ferias carry elevated ranks
+// so they win the calendar day, but their offices remain Sunday or ferial and
+// therefore do not suppress the preces (General Rubrics §XXXVII.2).
+func celebrationHasDoubleOffice(feast *models.Feast) bool {
+	if feast == nil || feast.Rank.Weight() < models.Double.Weight() {
+		return false
+	}
+
+	switch feast.Category {
+	case models.CategorySunday:
+		return false
+	case models.CategoryFeria:
+		// These are actual Double offices whose calendar category is ferial.
+		// Other elevated ferias use their rank for precedence rather than
+		// office form.
+		return doubleFeriaOfficeIDs[feast.ID]
+	default:
+		return true
+	}
 }
 
 func officeAllowsCustomarySuffrage(day *models.CalendarDay) bool {
