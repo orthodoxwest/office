@@ -513,7 +513,7 @@ Month = 11
 Day = 22
 
 [st-clement-i]
-Name = St. Clement I, Pope and Martyr
+Name = St. Clement I, Bishop and Martyr
 Rank = double
 Color = red
 Category = bishop-martyr
@@ -617,7 +617,7 @@ Month = 12
 Day = 28
 
 [st-sylvester]
-Name = St. Sylvester I, Pope
+Name = St. Sylvester I, Bishop
 Rank = double
 Color = white
 Category = confessor-bishop
@@ -1073,7 +1073,7 @@ Month = 7
 Day = 18
 
 [ss-cornelius-cyprian]
-Name = Ss. Cornelius (Pope) & Cyprian (Bishop), Martyrs
+Name = Ss. Cornelius (Bishop) & Cyprian (Bishop), Martyrs
 Rank = double
 Color = red
 Category = martyrs

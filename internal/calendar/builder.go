@@ -242,9 +242,9 @@ func pentecostSundayFeasts(easter time.Time, advent1 time.Time) []*models.Feast 
 		if n == 2 {
 			// The II Sunday after Pentecost (Easter+63) always falls within
 			// the octave of Corpus Christi (Easter+60..+67) and is kept in
-			// white as the Sunday within the octave (2026 ordo: "Sun. within
-			// the Octave of Corpus Christi", Lauds/Vespers W).
-			name = "II Sunday after Pentecost, within the Octave of Corpus Christi"
+			// white as the Sunday within the octave. The printed ordos put
+			// this title first and the numbered Sunday second.
+			name = "Sunday within the Octave of Corpus Christi"
 			color = models.White
 		}
 		feasts = append(feasts, &models.Feast{

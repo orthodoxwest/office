@@ -1139,7 +1139,7 @@ Day = 14
 Source = awrv
 
 [comm-extra-01-16-st-marcellus-i-of-rome-pope-and-martyr]
-Name = St. Marcellus I of Rome, Pope & Martyr
+Name = St. Marcellus I of Rome, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1166,7 +1166,7 @@ Day = 28
 Source = awrv
 
 [comm-extra-02-11-st-gregory-ii-pope-and-confessor]
-Name = St Gregory II, Pope & Confessor
+Name = St Gregory II, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1185,7 +1185,7 @@ OnlyWith = chair-peter-antioch
 Source = awrv
 
 [comm-extra-03-04-st-lucius-i-pope-and-martyr]
-Name = St Lucius I, Pope & Martyr
+Name = St Lucius I, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1230,7 +1230,7 @@ Day = 24
 Source = awrv
 
 [comm-extra-04-17-st-anicetus-pope-and-martyr]
-Name = St Anicetus, Pope & Martyr
+Name = St Anicetus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1257,7 +1257,7 @@ Day = 8
 Source = awrv
 
 [comm-extra-05-25-st-urban-pope-and-martyr]
-Name = St Urban, Pope & Martyr
+Name = St Urban, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1275,7 +1275,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-05-26-st-eleutherius-pope-and-martyr]
-Name = St Eleutherius, Pope & Martyr
+Name = St Eleutherius, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1284,7 +1284,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-05-27-st-john-i-pope-and-martyr]
-Name = St John I, Pope & Martyr
+Name = St John I, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1293,7 +1293,7 @@ Day = 27
 Source = awrv
 
 [comm-extra-05-30-st-felix-i-pope-and-martyr]
-Name = St Felix I, Pope & Martyr
+Name = St Felix I, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1312,7 +1312,7 @@ Day = 9
 Source = awrv
 
 [comm-extra-06-20-st-silverius-pope-and-martyr]
-Name = St Silverius, Pope & Martyr
+Name = St Silverius, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1384,7 +1384,7 @@ Day = 10
 Source = awrv
 
 [comm-extra-07-11-st-pius-i-pope-and-martyr]
-Name = St Pius I, Pope & Martyr
+Name = St Pius I, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1393,7 +1393,7 @@ Day = 11
 Source = awrv
 
 [comm-extra-07-13-st-anacletus-pope-and-martyr]
-Name = St Anacletus, Pope & Martyr
+Name = St Anacletus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1411,7 +1411,7 @@ Day = 16
 Source = awrv
 
 [comm-extra-08-02-st-stephen-pope-and-martyr]
-Name = St Stephen, Pope & Martyr
+Name = St Stephen, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1420,7 +1420,7 @@ Day = 2
 Source = awrv
 
 [comm-extra-08-06-ss-sixtus-ii-pope-and-martyr-felicissimus-and-agapitus]
-Name = Ss. Sixtus II (Pope & Martyr), Felicissimus & Agapitus
+Name = Ss. Sixtus II (Bishop & Martyr), Felicissimus & Agapitus
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1429,7 +1429,7 @@ Day = 6
 Source = awrv
 
 [comm-extra-08-26-st-zephyrinus-pope-and-martyr]
-Name = St Zephyrinus, Pope & Martyr
+Name = St Zephyrinus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1438,7 +1438,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-09-23-st-linus-pope-and-martyr]
-Name = St. Linus, Pope & Martyr
+Name = St. Linus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1457,7 +1457,7 @@ Day = 25
 Source = awrv
 
 [comm-extra-10-26-st-evaristus-pope-and-martyr]
-Name = St. Evaristus, Pope & Martyr
+Name = St. Evaristus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1466,7 +1466,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-11-12-st-martin-i-pope-and-martyr]
-Name = St Martin I, Pope & Martyr
+Name = St Martin I, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1475,7 +1475,7 @@ Day = 12
 Source = awrv
 
 [comm-extra-11-19-st-pontianus-pope-and-martyr]
-Name = St Pontianus, Pope & Martyr
+Name = St Pontianus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1493,7 +1493,7 @@ Day = 7
 Source = awrv
 
 [comm-extra-12-10-st-melchiades-pope-and-martyr]
-Name = St Melchiades, Pope & Martyr
+Name = St Melchiades, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1802,7 +1802,7 @@ Source = awrv
 
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
-Name = Ss. Nazarius, Celsus, Martyrs; St Victor, Pope & Martyr
+Name = Ss. Nazarius, Celsus, Martyrs; St Victor, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
