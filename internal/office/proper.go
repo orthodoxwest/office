@@ -56,6 +56,17 @@ func feastProperIDs(feast *models.Feast) []string {
 	return []string{feast.ID}
 }
 
+// isSynthesizedFeria reports whether feast is an engine-generated feria with
+// no proper of its own. Named temporal ferias such as the Lent Ember days are
+// also ranked PrivilegedFeria, but must remain eligible for their dedicated
+// proper texts.
+func isSynthesizedFeria(feast *models.Feast) bool {
+	if feast == nil {
+		return false
+	}
+	return feast.ID == "privileged-lenten-feria" || feast.ID == models.FeriaCommemorationID
+}
+
 // isPerAnnumSunday reports whether the feast is an ordinary numbered Sunday
 // after Epiphany or Pentecost, including resumed and anticipated Sundays
 // whose ProperID redirects to one. epiphany-sunday-1 and pentecost-sunday-2
@@ -223,7 +234,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 1. Feast-specific proper (hour-qualified, then generic)
-	if day.Celebration != nil && day.Celebration.ID != "" && day.Celebration.Rank != models.PrivilegedFeria {
+	if day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
 		for _, feastID := range feastProperIDs(day.Celebration) {
 			prefix := "proper/" + feastID + "/"
 			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
@@ -242,7 +253,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 2. Common of Saints (paschal, then regular; hour-qualified, then generic)
-	if day.Celebration != nil && day.Celebration.Rank != models.PrivilegedFeria {
+	if day.Celebration != nil && !isSynthesizedFeria(day.Celebration) {
 		if text, resolved := lookupCommonsText(day.Celebration.Category, day.Season, hourName, ref, corpus); text != "" {
 			return substituteProperName(text, properName), resolved
 		}

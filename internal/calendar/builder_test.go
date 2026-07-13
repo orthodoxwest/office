@@ -181,6 +181,9 @@ func TestBuildCalendarPentecostSundays(t *testing.T) {
 	if jun14.Celebration.ID != "pentecost-sunday-2" {
 		t.Errorf("Jun 14 = %v, want pentecost-sunday-2", jun14.Celebration.ID)
 	}
+	if got := jun14.Celebration.Name; got != "Sunday within the Octave of Corpus Christi" {
+		t.Errorf("Jun 14 name = %q, want Corpus Christi octave title first", got)
+	}
 }
 
 func TestBuildCalendarLastSundayAfterPentecostUses24thPropers(t *testing.T) {

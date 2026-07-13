@@ -1,6 +1,7 @@
 package office
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -135,6 +136,46 @@ func TestResolveProperTextPrivilegedFeriaUsesWeekdayTemporalText(t *testing.T) {
 	}
 	if ref != "proper/lent-sunday-2/benedictus-antiphon-wednesday" {
 		t.Fatalf("source ref = %q, want weekday temporal ref", ref)
+	}
+}
+
+func TestResolveProperTextNamedPrivilegedFeriaUsesOwnProper(t *testing.T) {
+	tests := []struct {
+		name    string
+		id      string
+		weekday time.Weekday
+	}{
+		{name: "Wednesday", id: "lent-ember-wednesday", weekday: time.Wednesday},
+		{name: "Friday", id: "lent-ember-friday", weekday: time.Friday},
+		{name: "Saturday", id: "lent-ember-saturday", weekday: time.Saturday},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			properRef := "proper/" + tt.id + "/benedictus-antiphon"
+			corpus := texts.NewTestCorpus(map[string]string{
+				properRef: "Named Ember antiphon",
+				"proper/lent-sunday-1/benedictus-antiphon-" + strings.ToLower(tt.weekday.String()): "Weekly feria antiphon",
+			})
+			day := &models.CalendarDay{
+				Date:           time.Date(2026, 3, 1+int(tt.weekday), 0, 0, 0, 0, time.UTC),
+				Season:         models.Lent,
+				TemporalWeekID: "lent-sunday-1",
+				Celebration: &models.Feast{
+					ID:       tt.id,
+					Rank:     models.PrivilegedFeria,
+					Category: models.CategoryFeria,
+				},
+			}
+
+			got, ref := resolveProperText(day, "lauds", "benedictus-antiphon", corpus)
+			if got != "Named Ember antiphon" {
+				t.Fatalf("benedictus antiphon = %q, want named Ember proper", got)
+			}
+			if ref != properRef {
+				t.Fatalf("source ref = %q, want %q", ref, properRef)
+			}
+		})
 	}
 }
 

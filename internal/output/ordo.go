@@ -27,6 +27,32 @@ func formatName(name string, rank models.Rank) string {
 	return name
 }
 
+// ordoDisplayRank keeps presentation rank separate from the stronger internal
+// precedence used for days within the privileged Easter and Pentecost octaves.
+// The printed ordos rank Monday and Tuesday D1, but Wednesday through Saturday
+// Sd even though those later days retain privileged-octave precedence.
+func ordoDisplayRank(feast *models.Feast) models.Rank {
+	if feast == nil {
+		return ""
+	}
+	for _, prefix := range []string{"easter-sunday-octave-day-", "pentecost-octave-day-"} {
+		if strings.HasPrefix(feast.ID, prefix) {
+			switch strings.TrimPrefix(feast.ID, prefix) {
+			case "4", "5", "6", "7":
+				return models.SemiDouble
+			}
+		}
+	}
+	return feast.Rank
+}
+
+func ordoSubtitle(feast *models.Feast) string {
+	if feast != nil && feast.ID == "pentecost-sunday-2" {
+		return "II Sunday after Pentecost"
+	}
+	return ""
+}
+
 // commSummary is one commemoration extracted from a composed hour: its name and
 // the incipit of its gospel-canticle antiphon, mirroring the ordo's
 // `Comm. Name ("incipit")` form.
@@ -146,12 +172,16 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 		line = fmt.Sprintf("%s  %s  %s %-42s       %s", dayNum, dow, marker, name, color)
 	} else {
 		feast := day.Celebration
-		name := formatName(feast.Name, feast.Rank)
-		rankStr := fmt.Sprintf("[%s]", feast.Rank.Abbrev())
+		displayRank := ordoDisplayRank(feast)
+		name := formatName(feast.Name, displayRank)
+		rankStr := fmt.Sprintf("[%s]", displayRank.Abbrev())
 		line = fmt.Sprintf("%s  %s  %s %-42s %s %s", dayNum, dow, marker, name, fmt.Sprintf("%-5s", rankStr), color)
 	}
 
 	lines := []string{line}
+	if subtitle := ordoSubtitle(day.Celebration); subtitle != "" {
+		lines = append(lines, fmt.Sprintf("           %s", subtitle))
+	}
 	// Commemorated concurrent/incoming feasts keep their existing summary lines.
 	for _, comm := range day.Commemorations {
 		lines = append(lines, fmt.Sprintf("           %s (%s)", comm.CommemorationName(), comm.Rank.Abbrev()))

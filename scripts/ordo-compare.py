@@ -230,12 +230,20 @@ COMM_STOP = STOP | {
     "apostle", "apostles", "evangelist", "companions", "rome",
 }
 
+BVM_RE = r"b\s*\.?\s*(?:v\s*\.?\s*m|m\s*\.?\s*v)\b\.?"
+
 
 def commemoration_tokens(name):
     """Normalize a printed/app commemoration name for fuzzy set matching."""
     text = name.lower().replace("æ", "ae").replace("&c.", " companions ")
     text = re.sub(r"([a-z])-\s+([a-z])", r"\1\2", text)
     text = text.replace("&", " and ").replace("pope", "bishop")
+    # Historical ordos abbreviate the Saturday Office as BVM, BMV, B.V.M.,
+    # or B.M.V. A bare acronym denotes the Saturday Office; within a named
+    # Marian feast it is only a title abbreviation and must not make every
+    # Marian feast look like the Saturday Office.
+    generic_bvm = bool(re.fullmatch(r"(?:the\s+)?" + BVM_RE, text.strip()))
+    text = re.sub(r"\b" + BVM_RE, " blessed virgin mary ", text)
     text = re.sub(r"\bdorothea\b", "dorothy", text)
     text = re.sub(r"\bcommemoration of\b", " ", text)
     text = re.sub(r"\b(?:ss?|st)\.?(?=\s)", " saint ", text)
@@ -255,6 +263,8 @@ def commemoration_tokens(name):
     # by the engine; preserve the weekday too so two named ferias stay distinct.
     if re.match(r"^(monday|tuesday|wednesday|thursday|friday|saturday)\b", text):
         normalized.add("feria")
+    if generic_bvm:
+        normalized.update(("saturday", "office"))
     return normalized
 
 

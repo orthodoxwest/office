@@ -69,12 +69,21 @@ class CommemorationComparisonTest(unittest.TestCase):
             ("Khashas", "Ss Nicholas & Habib Khasha, Martyrs"),
             ("Dorothea", "St Dorothy, Virgin & Martyr"),
             ("Alexan- der &c.", "Ss. Alexander, Eventius & Theodulus, Martyrs"),
+            ("BVM", "Saturday Office of the B.V.M."),
+            ("BMV", "Saturday Office of the B.V.M."),
+            ("B.V.M.", "Saturday Office of the BVM"),
+            ("B.M.V.", "Saturday Office of the BVM"),
         ]
         for printed, ours in pairs:
             with self.subTest(printed=printed, ours=ours):
                 self.assertGreaterEqual(
                     ORDO_COMPARE.commemoration_similarity(printed, ours), 0.6
                 )
+
+        self.assertLess(
+            ORDO_COMPARE.commemoration_similarity("BVM", "Annunciation of the B.V.M."),
+            0.6,
+        )
 
     def test_reports_missing_and_extra_names(self):
         missing, extra = ORDO_COMPARE.match_commemorations(

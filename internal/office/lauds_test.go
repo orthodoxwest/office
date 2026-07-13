@@ -249,6 +249,39 @@ func TestLaudsPrivilegedFeriaCommemorationUsesFerialTexts(t *testing.T) {
 	}
 }
 
+func TestLaudsNamedPrivilegedFeriaCommemorationUsesOwnProper(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/lent-ember-wednesday/benedictus-antiphon": "Ember Benedictus antiphon",
+		"ordinary/lauds/benedictus-antiphon":              "Ferial Benedictus antiphon",
+		"ordinary/lauds/versicle":                         "Ferial versicle",
+		"proper/lent-ember-wednesday/collect":             "Ember collect",
+	})
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 3, 4, 0, 0, 0, 0, time.UTC),
+		Season: models.Lent,
+		Commemorations: []*models.Feast{{
+			ID:       "lent-ember-wednesday",
+			Name:     "Lent Ember Wednesday",
+			Rank:     models.PrivilegedFeria,
+			Category: models.CategoryFeria,
+		}},
+	}
+
+	elems := addCommemorations(day, "lauds", corpus)
+	if len(elems) != 4 {
+		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
+	}
+	if got := elems[1].Text; got != "Ember Benedictus antiphon" {
+		t.Errorf("antiphon = %q, want named Ember proper", got)
+	}
+	if got := elems[2].Text; got != "Ferial versicle" {
+		t.Errorf("versicle = %q, want ferial versicle", got)
+	}
+	if got := elems[3].Text; got != "Ember collect" {
+		t.Errorf("collect = %q, want named Ember proper", got)
+	}
+}
+
 func TestAddCommemorationsStripsRedundantPrefix(t *testing.T) {
 	// A feast whose proper title already begins with "Commemoration of" (e.g. the
 	// June 30 / Jan 18 commemoration of St Paul) must not double the word when the
