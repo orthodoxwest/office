@@ -278,7 +278,7 @@ FEBRUARY
                Com. Office of the V Sunday after Epiphany ("The master saith: Gather ye together first the tares")
   8  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. The householder saith unto his labourers · Suff.
                Com. St Apollonia of Alexandria, Virgin & Martyr ("This is one of the wise virgins")
   9  Mon     Feria                                            v
@@ -319,7 +319,7 @@ FEBRUARY
            Ss. Faustinus & Jovita, Martyrs (com)
            Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
                Com. Ss. Faustinus & Jovita, Martyrs ("For theirs is the kingdom of heaven")
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. Jesus said to His disciples · Suff.
  16  Mon     Feria                                            v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
@@ -350,7 +350,7 @@ FEBRUARY
            Vespers v · I fol. (Quinquagesima Sunday) · Mag. The father of our faith · Suff.
  22  Sun     Quinquagesima Sunday                       [2cl] v
            Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the Shepherd · No Suff.
                Com. Quinquagesima Sunday ("The father of our faith")
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Behold an high priest")
@@ -378,7 +378,7 @@ FEBRUARY
            St Walburga of Heidenheim, Virgin (com)
            Lauds   v · Ben. When ye fast · No Preces · Suff.
                Com. St Walburga of Heidenheim, Virgin ("This is one of the wise virgins")
-           Hours   No Preces
+           Hours   Preces
            Vespers v · Mag. Lay up for yourselves treasures in heaven · Suff.
                Com. St. Alexander of Alexandria, Bishop & Confessor ("Behold an high priest")
  26  Thu  L§ Thursday after Ash Wednesday               [f2]  v
@@ -407,7 +407,7 @@ MARCH
            St David of Wales, Bishop & Confessor (com)
            Lauds   v · Ben. Jesus was led up of the Spirit into the… · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Behold an high priest")
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. Then shalt thou call · Suff.
                Com. Monday after Lent I ("My soul doth magnify the Lord, and my spirit…")
                Com. St Chad, Bishop & Confessor ("Behold an high priest")
@@ -446,7 +446,7 @@ MARCH
            Vespers v · I fol. (II Sunday in Lent) · Mag. Tell the vision that ye have seen to no… · Suff.
   8  Sun  L  II SUNDAY IN LENT                          [1cl] v
            Lauds   v · Ben. Jesus took His disciples · No Preces · Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. Tell the vision that ye have seen to no… · Suff.
                Com. Monday after Lent II ("My soul doth magnify the Lord, and my spirit…")
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("Behold an high priest")
@@ -487,7 +487,7 @@ MARCH
            Vespers v · I fol. (III Sunday in Lent) · Mag. But the father said · Suff.
  15  Sun  L  III SUNDAY IN LENT                         [1cl] v
            Lauds   v · Ben. When a strong man armed keepeth his palace · No Preces · Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. A certain woman of the company lifed up her… · Suff.
                Com. Monday after Lent III ("My soul doth magnify the Lord, and my spirit…")
  16  Mon  L§ Monday after Lent III                      [f2]  v
@@ -543,7 +543,7 @@ MARCH
                Com. IV Sunday in Lent ("Woman, hath no man condemned thee?")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
            Lauds   p · Ben. When Jesus lifted up His Eyes · No Preces · Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers p · II prec. · Mag. Woman, hath no man condemned thee? · Suff.
                Com. Monday after Lent IV ("My soul doth magnify the Lord, and my spirit…")
  23  Mon  L§ Monday after Lent IV                       [f2]  v
@@ -583,7 +583,7 @@ MARCH
            Vespers v · I fol. (Sunday of the Passion) · Mag. I am One · No Suff.
  29  Sun  L  SUNDAY OF THE PASSION                      [1cl] v
            Lauds   v · Ben. Jesus said · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. Your father Abraham rejoiced to see My day · No Suff.
                Com. Monday after Passion Sunday ("My soul doth magnify the Lord, and my spirit…")
                Com. St John Climacus, Abbot ("Lord, Thou deliverest unto me five talents")
@@ -628,20 +628,20 @@ APRIL
            Vespers v · I fol. (Palm Sunday) · Mag. It is written: I will smite the Shepherd · No Suff.
   5  Sun  L  PALM SUNDAY                                [1cl] v
            Lauds   v · Ben. Much people that were come to the Feast, cried · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · II prec. · Mag. It is written: I will smite the Shepherd · No Suff.
                Com. Holy Monday ("And now, O Father, glorify Thou Me")
   6  Mon  L§ HOLY MONDAY                                [1cl] v
            Lauds   v · Ben. And now, O Father, glorify Thou Me · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · Mag. Thou couldest have no power · No Suff.
   7  Tue  L§ HOLY TUESDAY                               [1cl] v
            Lauds   v · Ben. Now, before the Feast of the Passover, as Jesus… · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · Mag. I have power · No Suff.
   8  Wed  L§ HOLY WEDNESDAY                             [1cl] v
            Lauds   v · Ben. Simon, do you sleep? · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers v · Mag. The handmaid said to Peter · No Suff.
                Com. Thursday after Palm Sunday ("My soul doth magnify the Lord, and my spirit…")
   9  Thu  L§ HOLY THURSDAY                              [1cl] w
@@ -2152,7 +2152,7 @@ NOVEMBER
            St Saturninus, Bishop & Martyr (com)
            Lauds   v · Ben. The Holy Ghost shall come upon thee · No Preces · No Suff.
                Com. St Saturninus, Bishop & Martyr ("Whosoever shall confess me")
-           Hours   No Preces
+           Hours   Preces
            Vespers r · I fol. (St. Andrew, Apostle) · Mag. One of the two · No Suff.
                Com. I Sunday of Advent ("The Holy Ghost shall come upon thee")
  30  Mon  L§ St. Andrew, Apostle                        [2cl] r
@@ -2282,7 +2282,7 @@ DECEMBER
            Vespers v · I fol. (IV Sunday of Advent) · Mag. O Root of Jesse · No Suff.
  20  Sun  L  IV Sunday of Advent                        [2cl] v
            Lauds   v · Ben. Hail, Mary, full of grace · No Preces · No Suff.
-           Hours   No Preces
+           Hours   Preces
            Vespers r · I fol. (St. Thomas, Apostle) · Mag. Because thou hast seen me · No Suff.
                Com. IV Sunday of Advent ("Hail, Mary, full of grace")
  21  Mon  L§ St. Thomas, Apostle                        [2cl] r

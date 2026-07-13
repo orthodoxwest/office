@@ -57,6 +57,43 @@ func TestShouldSayPreces(t *testing.T) {
 			want: false,
 		},
 		{
+			name: "Sunday with elevated precedence rank — preces",
+			day: makeDay(2026, 3, 15,
+				&models.Feast{ID: "lent-sunday-3", Rank: models.Double1stClass, Category: models.CategorySunday}, nil, ""),
+			want: true,
+		},
+		{
+			name: "feria with elevated precedence rank — preces",
+			day: makeDay(2026, 2, 25,
+				&models.Feast{ID: "ash-wednesday", Rank: models.Double1stClass, Category: models.CategoryFeria}, nil, ""),
+			want: true,
+		},
+		{
+			name: "elevated Sunday with double commemoration — no preces",
+			day: makeDay(2026, 3, 15,
+				&models.Feast{ID: "lent-sunday-3", Rank: models.Double1stClass, Category: models.CategorySunday},
+				[]*models.Feast{{ID: "test", Rank: models.Double}}, ""),
+			want: false,
+		},
+		{
+			name: "Vigil of Pentecost is a Double feria — no preces",
+			day: makeDay(2026, 5, 30,
+				&models.Feast{ID: "vigil-pentecost", Rank: models.Double1stClass, Category: models.CategoryFeria}, nil, ""),
+			want: false,
+		},
+		{
+			name: "Vigil of the Nativity is a Double feria — no preces",
+			day: makeDay(2026, 12, 24,
+				&models.Feast{ID: "vigil-nativity", Rank: models.Double1stClass, Category: models.CategoryFeria}, nil, ""),
+			want: false,
+		},
+		{
+			name: "All Souls is a Double feria — no preces",
+			day: makeDay(2026, 11, 2,
+				&models.Feast{ID: "all-souls", Rank: models.Double, Category: models.CategoryFeria}, nil, ""),
+			want: false,
+		},
+		{
 			name: "within octave — no preces",
 			day:  makeDay(2026, 4, 13, nil, nil, "easter-sunday"),
 			want: false,
