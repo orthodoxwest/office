@@ -1,45 +1,65 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-I have planted, * Apollos watered, but God gave the increase. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 370 (Conversion of St Paul)
+# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
+I have planted, * Apollos watered, but God gave the increase, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-I have planted, * Apollos watered, but God gave the increase. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 370 (Conversion of St Paul)
+# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
+I have planted, * Apollos watered, but God gave the increase, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-Most gladly therefore will I rather glory * in my infirmities, that the power of Christ may rest upon me.
+# SOURCE: draft archdiocesan Lauds book, p. 371 (Conversion of St Paul)
+Most gladly will I glory * in my infirmities, that the power of Christ may rest upon me.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-The grace of God which was bestowed upon me was not in vain, * but His grace abideth ever in me.
+# SOURCE: draft archdiocesan Lauds book, p. 371 (Conversion of St Paul)
+The grace of God * which was bestowed upon me was not in vain: but his grace abideth with me always.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-In Damascus the governor under Aretas the king was desirous to apprehend me; by the brethren in a basket was I let down by the wall, and so escaped I his hands, in the name of the Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 372 (Conversion of St Paul)
+In Damascus, * the governor under Aretas the king would have apprehended me: but I was let down the wall by the brethren, in a basket; and so escaped out of his hands in the Name of the Lord.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant Laudes] — check against diurnal
-Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for Christ's name's sake.
+# SOURCE: draft archdiocesan Lauds book, p. 374 (Conversion of St Paul)
+Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for the Name of Christ.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 252, 261 (I and II Vespers, Conversion of St Paul)
+# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
+I have planted, * Apollos watered, but God gave the increase, alleluia.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 253, 262 (I and II Vespers, Conversion of St Paul)
+Most gladly will I glory * in my infirmities, that the power of Christ may rest upon me.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 254, 263 (I and II Vespers, Conversion of St Paul)
+The grace of God * which was bestowed upon me was not in vain: but his grace abideth with me always.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 255, 264 (I and II Vespers, Conversion of St Paul)
+Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for the Name of Christ.
 
 [commemoration-antiphon]
-Ananias, go thy way * and seek Saul for, behold, he prayeth for he is a chosen vessel unto Me, to bear My name before the Gentiles, and kings, and the children of Israel.
+Go forth, Ananias, * and enquire for Saul, for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
 
 [collect]
-O God, Who, through the teaching of the Blessed Apostle Paul, hast caused the light of the Gospel to shine throughout the world, grant, we beseech thee, that we, having his wonderful conversion as on this day in remembrance, may show forth our thankfulness unto thee for the same, by following the holy example which he hath set.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 379, 259, 268 (Conversion of St Paul)
+O God, who hast taught the whole world by the preaching of blessed Paul the Apostle: grant unto us, we beseech thee, that we who on this day celebrate his Conversion may, by following his example, advance in the way that leadeth unto thee.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant 2] — check against diurnal
-Thus saith the Lord: * Ye, which have followed Me, shall sit upon twelve thrones, judging the twelve tribes of Israel.
+# SOURCE: draft archdiocesan Lauds book, p. 378 (Conversion of St Paul)
+Ye which have followed me * shall sit upon twelve thrones, judging the twelve tribes of Israel, saith the Lord.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium SanctiM/01-25 [Ant 3] — check against diurnal
-O Holy Apostle Paul, * Preacher of the truth, and Teacher of the Gentiles, pray for us to God Who hath chosen thee.
+# SOURCE: draft archdiocesan Vespers book, p. 267 (II Vespers, Conversion of St Paul)
+O holy Apostle Paul, * thou preacher of the truth and Doctor of the Gentiles, intercede for us unto God, who hath chosen thee.
 
 [chapter-lauds]
-# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 376 (Conversion of St Paul)
 !Acts 9:1-2
-And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -49,42 +69,100 @@ And Saul arose from the ground; and when his eyes were opened, he saw nothing. B
 R. Thanks be to God.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/01-25 [Hymnus Vespera] — check against diurnal
-Egregie Doctor, Paule, mores instrue
+# SOURCE: draft archdiocesan Vespers book, pp. 257, 266 (I and II Vespers, Conversion of St Paul)
+Doctor egregie Paule
 
-Our souls' great teacher, Paul, our guide in wisdom's ways,
-Teach us, our fainting hearts, to heaven's glad clime to raise,
-Till faith in clearest light her bright meridian gains,
-And love with sun-like fire within each bosom reigns.
+O by thy doctrine, Paul, thou sage illustrious,
+Guide us in virtue, raise our spirits heavenwards;
+Till perfect knowledge stream on us abundantly,
+And that which only is in part be done away.
 
-All honour, might, and power, and hymns of joy we bring,
-While to the Trinity eternal praise we sing;
-He rules the universe in wondrous Unity,
-And shall, throughout the days of all eternity.
+Glory eternal to the blessed Trinity,
+With laud and honour, virtue and supremacy;
+Trinal yet Onely, reigning in his majesty
+Both now and ever, through the ages infinite.
+Amen.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 376-378
+Exsultet cælum laudibus
+
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
+
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
+
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/01-25 [Versum 2] — check against diurnal
-V. O Holy Apostle Paul, thou art a chosen vessel unto God.
-R. To preach the Gospel throughout the whole world.
+# SOURCE: draft archdiocesan Lauds book, p. 378 (Conversion of St Paul)
+V. Thou art a chosen vessel, holy Apostle Paul.
+R. A preacher of the truth throughout all the world.
 
 [commemoration-versicle]
-# SOURCE: divinum-officium SanctiM/01-25 [Versum 2] — check against diurnal
-V. O Holy Apostle Paul, thou art a chosen vessel unto God.
-R. To preach the Gospel throughout the whole world.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 378, 257, 267 (Conversion of St Paul)
+V. Thou art a chosen vessel, holy Apostle Paul.
+R. A preacher of the truth throughout all the world.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 257, 267 (I and II Vespers, Conversion of St Paul)
+V. Thou art a chosen vessel, holy Apostle Paul.
+R. A preacher of the truth throughout all the world.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 376 (Conversion of St Paul)
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 256, 266 (I and II Vespers, Conversion of St Paul)
+R. Thou shalt make them princes * in all lands.
+R. Thou shalt make them princes * in all lands.
+V. They shall remember thy Name, O Lord.
+R. In all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou shalt make them princes * in all lands.
 
 [chapter-vespers]
-# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 256, 265 (I and II Vespers, Conversion of St Paul)
 !Acts 9:1-2
-And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium SanctiM/01-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 376 (Lauds chapter used at Terce)
 !Acts 9:1-2
-And Saul, as yet breathing out threatenings and slaughter against the disciples of the Lord, went to the high priest, and asked of him letters to Damascus, to the synagogues: that if he found any men and women of this way, he might bring them bound to Jerusalem.
+And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/01-25.txt [Ant 1] — check against diurnal
-Ananias, go thy way * and seek Saul for, behold, he prayeth for he is a chosen vessel unto Me, to bear My name before the Gentiles, and kings, and the children of Israel.
+# SOURCE: draft archdiocesan Vespers book, p. 258 (I Vespers, Conversion of St Paul)
+Go forth, Ananias, * and enquire for Saul, for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
