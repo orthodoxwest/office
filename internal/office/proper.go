@@ -236,6 +236,15 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// 1. Feast-specific proper (hour-qualified, then generic)
 	if day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
 		for _, feastID := range feastProperIDs(day.Celebration) {
+			if day.Season == models.Easter {
+				prefix := "proper/" + feastID + "-paschal/"
+				if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+					return substituteProperName(text, properName), resolved
+				}
+				if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+					return substituteProperName(text, properName), resolved
+				}
+			}
 			prefix := "proper/" + feastID + "/"
 			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
 				return substituteProperName(text, properName), resolved
