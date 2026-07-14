@@ -1,48 +1,166 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 380, 278 (Purification BVM)
+Simeon, * a just and devout man, awaited the consolation of Israel; and the Holy Ghost was upon him.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 380, 278 (Purification BVM)
+Simeon, * a just and devout man, awaited the consolation of Israel; and the Holy Ghost was upon him.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-When thou wast born * all ineffably of a Virgin, then were the Scriptures fulfilled; thou camest down like the dew upon the fleece of wool, to bring salvation unto all mankind; we praise thee, O our God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 381, 279 (Purification BVM)
+It was revealed unto Simeon * by the Holy Ghost, that he should not see death, before he had seen the Lord.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-In the bush which Moses saw * unconsumed, we recognize the preservation of thy glorious virginity: holy Mother of God, intercede for us.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 382, 280 (Purification BVM)
+Simeon took the Child * up in his arms; and giving thanks, he blessed the Lord.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-The Root of Jesse hath budded, * the Star hath come out of Jacob, the Virgin hath borne the Saviour: we praise thee, O our God.
+# SOURCE: draft archdiocesan Lauds book, p. 383 (Purification BVM)
+A light * to lighten the Gentiles, and the glory of thy people Israel.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/02-02 [Ant Vespera] — check against diurnal
-Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 384 (Purification BVM)
+And they offered * for him to the Lord a pair of turtle doves, or two young pigeons.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 281 (II Vespers, Purification BVM)
+And they offered * for him to the Lord a pair of turtle doves, or two young pigeons.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 270 (I Vespers, Purification BVM)
+O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 271 (I Vespers, Purification BVM)
+When thou wast born * ineffably of a Virgin, then were the Scriptures fulfilled: thou camest down like the rain into a fleece of wool, to bring salvation unto all mankind: we praise thee, O our God.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 272 (I Vespers, Purification BVM)
+In the bush * which Moses saw unconsumed, we acknowledge the preservation of thy glorious virginity: holy Mother of God, intercede for thy children.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 273 (I Vespers, Purification BVM)
+# NOTE: the source suppresses the final alleluia when February 2 falls after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
+Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
 
 [benedictus-antiphon]
-They offered for Him * unto the Lord, a pair of turtle doves, or two young pigeons.
+# SOURCE: draft archdiocesan Lauds book, p. 388 (Purification BVM)
+And when the parents * brought in the Child Jesus, then Simeon took him up in his arms, and blessed God, saying: Lord, now lettest thou thy servant depart in peace.
 
 [magnificat-antiphon]
-They offered for Him * unto the Lord, a pair of turtle doves, or two young pigeons.
+# SOURCE: draft archdiocesan Vespers book, p. 284 (II Vespers, Purification BVM)
+To-day * the blessed Virgin Mary presented the Child Jesus in the temple; and Simeon, filled with the Holy Spirit, received him into his arms, and blessed God for ever.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 276 (I Vespers, Purification BVM)
+The ancient * carried the Infant, but the Infant governed the ancient: he whom a Virgin bare, and after bearing, remained virgin, the same was worshipped by her who bare him.
 
 [commemoration-antiphon]
-Simeon was just * and devout, waiting for the consolation of Israel, and the Holy Ghost was upon him.
+Simeon, * a just and devout man, awaited the consolation of Israel; and the Holy Ghost was upon him.
 
 [commemoration-versicle]
 V. It was revealed unto Simeon by the Holy Ghost.
 R. That he should not see death before he had seen the Lord's Christ.
 
 [collect]
-Almighty and everliving God, we humbly beseech thy Majesty, that as thy Only-begotten Son was this day presented in the temple in substance of our flesh, so we may be presented unto thee with pure and clean hearts.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 389, 277, 285 (Purification BVM)
+Almighty and everliving God, we humbly beseech thy Majesty; that, as thy only-begotten Son was this day presented in the temple in substance of our flesh, so we may be presented unto thee with pure and clean hearts.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 386 (Purification BVM)
 !Mal 3:1
-Behold I send my angel, and he shall prepare the way before my face. And presently the Lord, whom you seek, and the angel of the testament, whom you desire, shall come to his temple.
+Behold, I will send my messenger, and he shall prepare the way before me: and the Lord, whom ye seek, shall suddenly come to his temple, even the messenger of the covenant, whom ye delight in.
 R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx); draft archdiocesan Lauds book, pp. 387–388
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath pass'd the King,
+O Hall, whence Light shone through the gloom;
+The ransom'd nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, pp. 275, 282–283
+Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 387 (Purification BVM)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 274, 282 (Purification BVM)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 388 (Purification BVM)
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
 
 [chapter-sext]
 # SOURCE: divinum-officium Sancti/02-02 [Capitulum Sexta] — check against diurnal
@@ -51,14 +169,14 @@ Lo, the Angel shall come to his temple. Behold he cometh, saith the Lord of host
 R. Thanks be to God.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/02-02 [Versum 1] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 276, 283 (Purification BVM)
 V. It was revealed unto Simeon by the Holy Ghost.
 R. That he should not see death before he had seen the Lord's Christ.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 274, 281 (Purification BVM; printed 3:11 corrected to match the quoted verse)
 !Mal 3:1
-Behold I send my angel, and he shall prepare the way before my face. And presently the Lord, whom you seek, and the angel of the testament, whom you desire, shall come to his temple.
+Behold, I will send my messenger, and he shall prepare the way before me: and the Lord, whom ye seek, shall suddenly come to his temple, even the messenger of the covenant, whom ye delight in.
 R. Thanks be to God.
 
 [chapter-terce]

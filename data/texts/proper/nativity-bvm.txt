@@ -106,8 +106,9 @@ Amen.
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, pp. 473–474
-/:The first stanza of the following hymn is said kneeling.:/
 Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
 
 Star of ocean fairest,
 Mother, God who barest,
