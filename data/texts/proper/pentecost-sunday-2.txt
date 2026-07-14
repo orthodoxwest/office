@@ -1,7 +1,181 @@
+[psalm-antiphon-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 320 (Sunday within the Octave of Corpus Christi)
+Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
+
+[psalm-antiphon-1-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 320 (Sunday within the Octave of Corpus Christi)
+Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
+
+[psalm-antiphon-2-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 321 (Sunday within the Octave of Corpus Christi)
+Thou feddest * thine own people with angels' food, and didst send them bread from heaven, alleluia.
+
+[psalm-antiphon-3-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 321 (Sunday within the Octave of Corpus Christi)
+Rich is the bread of Christ, * and he shall yield royal dainties, alleluia.
+
+[psalm-antiphon-4-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 322 (Sunday within the Octave of Corpus Christi)
+Consecrated priests * offer bread and incense unto God, alleluia.
+
+[psalm-antiphon-5-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 324 (Sunday within the Octave of Corpus Christi)
+To him that overcometh * will I give the hidden manna, and a new name, alleluia.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 198 (Saturday within the Octave of Corpus Christi)
+Christ the Lord, * a Priest for ever after the order of Melchisedech, offered bread and wine.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 199 (Saturday within the Octave of Corpus Christi)
+The merciful and gracious Lord * hath given meat unto them that fear him, in remembrance of his marvellous doings.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 200 (Saturday within the Octave of Corpus Christi)
+I will receive * the cup of salvation, and offer the sacrifice of thanksgiving.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 202 (Saturday within the Octave of Corpus Christi)
+He that maketh * peace in the Church's borders is the Lord, who filleth us with the flour of wheat.
+
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent02-0.txt [Ant 2] — check against diurnal
-A certain man made a great supper, * and bade many and sent his servant at suppertime to say to them that were bidden: Come, for all things are now ready.
+# SOURCE: draft archdiocesan Lauds book, p. 329 (Sunday within the Octave of Corpus Christi)
+A certain man * made a great supper, and bade many; and sent his servants at supper time to say to them that were bidden, Come; for all things are now ready, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent02-0.txt [Ant 3] — check against diurnal
 Go out quickly into the streets * and lanes of the city, and compel the poor and the maimed, and the halt, and the blind, to come in that my house may be full, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 208 (Saturday within the Octave of Corpus Christi)
+The child Samuel * ministered unto the Lord before Eli, and the word of the Lord was precious in his sight.
+
+[collect]
+# SOURCE: draft archdiocesan Lauds book, p. 330 (Sunday within the Octave of Corpus Christi)
+O Lord, who never failest to help and govern those whom thou dost bring up in thy stedfast fear and love: keep us, we beseech thee, under the protection of thy good providence, and make us to have a perpetual fear and love of thy holy Name.
+
+[collect-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 209 (I Vespers of the Sunday within the Octave of Corpus Christi)
+O Lord, who never failest to govern them whom thou dost stablish in thy love: make us to have a perpetual fear and love of thy holy Name.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 325 (Sunday within the Octave of Corpus Christi)
+!1 John 3:13-14
+Marvel not, my brethren, if the world hate you. We know that we have passed from death unto life, because we love the brethren.
+R. Thanks be to God.
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 203 (Saturday within the Octave of Corpus Christi)
+!1 John 3:13-14
+Marvel not, my brethren, if the world hate you. We know that we have passed from death unto life, because we love the brethren.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 326-327 (Sunday within the Octave of Corpus Christi)
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+V. And with honey out of the stony rock did he satisfy them.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+
+[short-responsory-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 204-205 (Saturday within the Octave of Corpus Christi)
+R. He gave them bread from heaven, * alleluia, alleluia.
+R. He gave them bread from heaven, * alleluia, alleluia.
+V. So man did eat angels' food.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He gave them bread from heaven, * alleluia, alleluia.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 327-328 (Sunday within the Octave of Corpus Christi)
+Verbum supernum prodiens
+
+The Word proceeding from above,
+Yet leaving not the Father's side,
+Went forth upon his work of love,
+And reached at length life's eventide.
+
+By false disciple to be giv'n
+To foemen for his death athirst,
+Himself, the living Bread from heav'n,
+He gave to his disciples first.
+
+To them he gave in twofold kind,
+His Flesh and Blood in very deed;
+For man is of these two combined,
+And he the whole of man would feed.
+
+Our Brother in his birth was he,
+Our Food while seated at the board:
+He died our Ransom thus to be,
+He reigns to be our great reward.
+
+O Saving Victim, op'ning wide
+The gate of heav'n to man below:
+Our foes press on from ev'ry side;
+Thine aid supply, thy strength bestow.
+
+All praise and thanks to thee ascend
+For evermore, blest One in Three;
+O grant us life that shall not end
+In our true native land with thee.
+Amen.
+
+[hymn-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 205-207 (Saturday within the Octave of Corpus Christi)
+Pange lingua gloriosi
+
+Now, my tongue, the Myst'ry telling,
+Of the glorious Body sing,
+And the Blood, all price excelling,
+Which the Gentiles' Lord and King,
+In a noble womb once dwelling,
+Shed for this world's ransoming.
+
+Giv'n for us, and condescending,
+To be born for us below,
+He, with men in converse blending,
+Dwelt the seed of truth to sow,
+Till he closed with wondrous ending
+His most patient life of woe.
+
+That last night, at supper lying,
+'Mid the Twelve, his chosen band,
+Jesus, with the Law complying,
+Keeps the Feast its rites demand;
+Then, more precious Food supplying,
+Gives himself with his own hand.
+
+Word-made-Flesh, by word he maketh,
+Very bread his Flesh to be;
+Man in wine Christ's Blood partaketh:
+And if senses fail to see,
+Faith alone the true heart waketh
+To behold the Mystery.
+
+Therefore we, before him bending,
+This great Sacrament revere;
+Types and shadows have their ending,
+For the newer rite is here;
+Faith, our outward sense befriending,
+Makes the inward vision clear.
+
+Glory let us give, and blessing,
+To the Father, and the Son,
+Honour, might, and praise addressing,
+While unending ages run;
+Ever too his love confessing
+Who from One with both is One.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 328 (Sunday within the Octave of Corpus Christi)
+V. He gave them bread from heaven, alleluia.
+R. So man did eat angels' food, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 207 (Saturday within the Octave of Corpus Christi)
+V. He fed them with the finest wheat flour, alleluia.
+R. And with honey out of the stony rock did he satisfy them, alleluia.

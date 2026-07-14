@@ -19,14 +19,24 @@ Thou art the exaltation of Jerusalem, * thou art the glory of Israel, thou art t
 Blessed art thou, * O Virgin Mary, of the Most High God, above all the women upon the earth.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 363, 246 (The Conception of the B.V.M.)
+# SOURCE: draft archdiocesan Lauds book, p. 363 (The Conception of the B.V.M.)
+Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
 Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
 
 [benedictus-antiphon]
-The Lord hath made known His salvation; * the glory of His Mother hath He openly showed in the sight of the heathen.
+# SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
+The Lord God said * unto the serpent, I will put enmity between thee and the woman, and between thy seed and her seed; it shall bruise thy head, alleluia.
 
 [magnificat-antiphon]
-Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
+# SOURCE: draft archdiocesan Vespers book, p. 249 (II Vespers of the Conception of the B.V.M.)
+Let us celebrate * the worshipful Conception of the blessed and glorious Virgin Mary, whose lowliness the Lord regarded when at the word of an Angel she conceived the world's Redeemer, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 249 (I Vespers of the Conception of the B.V.M.)
+All generations * shall call me blessed: for he that is mighty hath magnified me, alleluia.
 
 [commemoration-antiphon]
 Thou art all fair, O Mary; * there is no spot in thee.
@@ -36,12 +46,13 @@ V. This day is the Holy Virgin Mary conceived without sin.
 R. The Virgin's foot hath bruised the serpent's head.
 
 [collect]
-O God, by the Immaculate Conception of the Virgin, thou prepared a worthy habitation for thy Son; we beseech thee, that, as by the foreseen death of thy same Son thou preserved her from all stain of sin, so thou would grant us also, through her intercession, to come to thee with pure hearts.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 368, 250
+O merciful God, hear the supplication of thy servants: that we who are gathered together to honour the Conception of the Virgin Mother of God may through her intercession be delivered by thee from the perils which beset us.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 365 (The Conception of the B.V.M.)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -118,14 +129,14 @@ Three in One confess thee.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/12-08 [Versum 2] — check against diurnal
-V. This day is the Holy Virgin Mary conceived without sin.
-R. The Virgin's foot hath bruised the serpent's head.
+# SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
+V. To-day is the Conception of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/12-08 [Versum 1] — check against diurnal
-V. This day is the Holy Virgin Mary conceived without sin.
-R. The Virgin's foot hath bruised the serpent's head.
+# SOURCE: draft archdiocesan Vespers book, p. 248 (The Conception of the B.V.M.)
+V. To-day is the Conception of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 366 (The Conception of the B.V.M.)
@@ -173,13 +184,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I will extol thee, O Lord, * for Thou hast lifted me up.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 365 (Lauds chapter used at Terce)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.

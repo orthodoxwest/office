@@ -1,32 +1,58 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-Wisdom hath builded her house, * she hath mingled her wine, she hath also furnished her table, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 320 (Corpus Christi)
+Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-Wisdom hath builded her house, * she hath mingled her wine, she hath also furnished her table, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 320 (Corpus Christi)
+Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-Thou feddest thine Own people * with Angels' food, and didst send them bread from heaven, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 321 (Corpus Christi)
+Thou feddest * thine own people with angels' food, and didst send them bread from heaven, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-Out of Christ His bread shall be fat, * and He shall yield royal dainties, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 321 (Corpus Christi)
+Rich is the bread of Christ, * and he shall yield royal dainties, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-The Priests shall be holy; * for the offerings of the Lord made by fire, and the bread of their God, they do offer, [therefore they shall be holy], alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 322 (Corpus Christi)
+Consecrated priests * offer bread and incense unto God, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Ant Laudes] — check against diurnal
-To him that overcometh will I give of the hidden manna, * and will give him a new name, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 324 (Corpus Christi)
+To him that overcometh * will I give the hidden manna, and a new name, alleluia.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 198 (Corpus Christi)
+Christ the Lord, * a Priest for ever after the order of Melchisedech, offered bread and wine.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 199 (Corpus Christi)
+The merciful and gracious Lord * hath given meat unto them that fear him, in remembrance of his marvellous doings.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 200 (Corpus Christi)
+I will receive * the cup of salvation, and offer the sacrifice of thanksgiving.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 201 (Corpus Christi, Wednesday at I Vespers)
+May the children * of the Church be like the olive branches, round about the table of the Lord.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 202 (Corpus Christi, Thursday at II Vespers)
+He that maketh * peace in the Church's borders is the Lord, who filleth us with the flour of wheat.
 
 [benedictus-antiphon]
-To him that overcometh will I give of the hidden manna, * and will give him a new name, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 329 (Corpus Christi)
+I am * the living bread, which came down from heaven: if any man eat of this bread, he shall live for ever, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 207 (I Vespers for Corpus Christi)
+O how sweet * is thy Spirit, O Lord, who that thou mightest shew thy kindness unto thy children, givest them that sweetest bread from heaven, fillest the hungry with good things, and sendest the rich and scornful empty away.
 
 [magnificat-antiphon]
-The Lord, That maketh peace in the borders of the Church, * filleth her with the finest of the wheat.
+# SOURCE: draft archdiocesan Vespers book, p. 208 (II Vespers for Corpus Christi)
+O sacred banquet, * wherein Christ is received, the memory of his Passion is renewed; the soul with grace is filled, and a pledge of future glory is bestowed, alleluia.
 
 [commemoration-antiphon]
 Christ the Lord, being made an High Priest for ever * after the order of Melchisedec, hath offered bread and wine.
@@ -36,10 +62,31 @@ V. Thou didst send them from heaven, alleluia.
 R. Bread able to content every man's delight, alleluia.
 
 [collect]
-O God, under a marvelous sacrament you have left us the memorial of thy Passion; grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within us the fruit of thy Redemption.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 330, 209 (Corpus Christi; generic form used for commemorations)
+O God, who under a wonderful Sacrament hast left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
+
+[collect-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 330 (Corpus Christi)
+O God, who in a wonderful Sacrament has left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
+
+[collect-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 209 (Corpus Christi)
+O God, who under a wonderful Sacrament hast left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 325 (Corpus Christi)
+!1 Cor 11:23-24
+Brethren: I have received of the Lord that which also I delivered unto you, that the Lord Jesus the same night in which he was betrayed took bread: and when he had given thanks, he brake it, and said, Take, eat: this is my body, which is broken for you: this do in remembrance of me.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 203 (Corpus Christi)
+!1 Cor 11:23-24
+Brethren: I have received of the Lord that which also I delivered unto you, that the Lord Jesus the same night in which he was betrayed took bread: and when he had given thanks, he brake it, and said, Take, eat: this is my body, which is broken for you: this do in remembrance of me.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !1 Cor 11:23-24
 Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
 R. Thanks be to God.
@@ -50,98 +97,115 @@ R. Thanks be to God.
 As often as ye eat this Bread, and drink this Cup, ye do show the Lord's death till He come.
 R. Thanks be to God.
 
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 326 (Corpus Christi)
+R. He gave them bread from heaven, * alleluia, alleluia.
+R. He gave them bread from heaven, * alleluia, alleluia.
+V. So man did eat angels' food.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He gave them bread from heaven, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 203-204 (Corpus Christi; solemn and simple tones have the same text)
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+V. And with honey out of the stony rock did he satisfy them.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He fed them with the finest wheat flour, * alleluia, alleluia.
+
 [hymn-lauds]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Hymnus Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, pp. 327-328 (Corpus Christi)
 Verbum supernum prodiens
 
-The heav'nly Word proceeding forth,
+The Word proceeding from above,
 Yet leaving not the Father's side,
-And going to his work on earth
-Had reached at length life's eventide.
+Went forth upon his work of love,
+And reached at length life's eventide.
 
-By false disciple to be given
-To foemen for his blood athirst,
-Himself, the living bread from heaven,
+By false disciple to be giv'n
+To foemen for his death athirst,
+Himself, the living Bread from heav'n,
 He gave to his disciples first.
 
-To them he gave, in twofold kind,
-His very flesh, his very blood:
-In love's own fullness thus designed
-Of the whole man to be the food.
+To them he gave in twofold kind,
+His Flesh and Blood in very deed;
+For man is of these two combined,
+And he the whole of man would feed.
 
-By birth, our fellow-man was he;
-Our meat, while sitting at the board;
-He died, our ransomer to be;
-He ever reigns, our great reward.
+Our Brother in his birth was he,
+Our Food while seated at the board:
+He died our Ransom thus to be,
+He reigns to be our great reward.
 
-O saving victim, opening wide
-The gate of heaven to man below,
-Our foes press on from every side,
+O Saving Victim, op'ning wide
+The gate of heav'n to man below:
+Our foes press on from ev'ry side;
 Thine aid supply, thy strength bestow.
 
-To thy great name be endless praise,
-Immortal Godhead, One in Three;
-O grant us endless length of days
-In our true native land, with thee.
+All praise and thanks to thee ascend
+For evermore, blest One in Three;
+O grant us life that shall not end
+In our true native land with thee.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Hymnus Vespera] — check against diurnal
-Pange, lingua, gloriosi
+# SOURCE: draft archdiocesan Vespers book, pp. 205-207 (Corpus Christi)
+Pange lingua gloriosi
 
-Sing, my tongue, the Saviour's glory,
-Of his flesh the mystery sing;
-Of the blood, all price exceeding,
-Shed by our immortal King,
-Destined, for the world's redemption,
-From a noble womb to spring.
+Now, my tongue, the Myst'ry telling,
+Of the glorious Body sing,
+And the Blood, all price excelling,
+Which the Gentiles' Lord and King,
+In a noble womb once dwelling,
+Shed for this world's ransoming.
 
-Of a pure and spotless Virgin
-Born for us on earth below,
-He, as man, with man conversing,
-Stayed, the seeds of truth to sow;
-Then he closed in solemn order
-Wondrously his life of woe.
+Giv'n for us, and condescending,
+To be born for us below,
+He, with men in converse blending,
+Dwelt the seed of truth to sow,
+Till he closed with wondrous ending
+His most patient life of woe.
 
-On the night of that last supper
-Seated with his chosen band,
-He, the paschal victim eating,
-First fulfills the law's command:
-Then as food to all his brethren
+That last night, at supper lying,
+'Mid the Twelve, his chosen band,
+Jesus, with the Law complying,
+Keeps the Feast its rites demand;
+Then, more precious Food supplying,
 Gives himself with his own hand.
 
-Word made flesh, the bread of nature
-By his word to flesh he turns;
-Wine into his blood he changes:
-What though sense no change discerns?
-Only be the heart in earnest,
-Faith her lesson quickly learns.
+Word-made-Flesh, by word he maketh,
+Very bread his Flesh to be;
+Man in wine Christ's Blood partaketh:
+And if senses fail to see,
+Faith alone the true heart waketh
+To behold the Mystery.
 
+Therefore we, before him bending,
+This great Sacrament revere;
+Types and shadows have their ending,
+For the newer rite is here;
+Faith, our outward sense befriending,
+Makes the inward vision clear.
 
-Down in adoration falling,
-Lo! the sacred Host we hail;
-Lo! o'er ancient forms departing,
-Newer rites of grace prevail;
-Faith for all defects supplying,
-Where the feeble senses fail.
-
-To the everlasting Father,
-And the Son who reigns on high,
-With the Holy Ghost proceeding
-Forth from each eternally,
-Be salvation, honour, blessing,
-Might, and endless majesty.
+Glory let us give, and blessing,
+To the Father, and the Son,
+Honour, might, and praise addressing,
+While unending ages run;
+Ever too his love confessing
+Who from One with both is One.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Versum 2] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 328 (Corpus Christi)
 V. He maketh peace in thy borders, alleluia.
-R. And filleth thee with the finest of wheat, alleluia.
+R. And filleth thee with the flour of wheat, alleluia.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Versum 1] — check against diurnal
-V. Thou didst send them from heaven, alleluia.
-R. Bread able to content every man's delight, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 207 (I and II Vespers for Corpus Christi)
+V. Thou gavest them bread from heaven, alleluia.
+R. Containing in itself all sweetness, alleluia.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Tertia] — check against diurnal
@@ -169,15 +233,3 @@ V. And wine that maketh glad the heart of man.
 R. Alleluia, Alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
-
-[chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 Cor 11:23-24
-Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
-R. Thanks be to God.
-
-[chapter-terce]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 Cor 11:23-24
-Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
-R. Thanks be to God.

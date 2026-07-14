@@ -1,47 +1,72 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-They stoned Stephen, * calling upon God, and saying: Lay not this sin to their charge.
+# SOURCE: draft archdiocesan Lauds book, p. 71 (Saint Stephen, Protomartyr)
+They stoned Stephen, * calling upon the Lord and saying, Lord, lay not this sin to their charge.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-They stoned Stephen, * calling upon God, and saying: Lay not this sin to their charge.
+# SOURCE: draft archdiocesan Lauds book, p. 71 (Saint Stephen, Protomartyr)
+They stoned Stephen, * calling upon the Lord and saying, Lord, lay not this sin to their charge.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-The stones of the brook * were sweet to him; all the souls of the righteous follow him.
+# SOURCE: draft archdiocesan Lauds book, p. 72 (Saint Stephen, Protomartyr)
+The stones of the torrent * were sweet unto Stephen: him doth every soul of the righteous follow.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-O my God, my soul followeth hard after thee, * for my flesh hath been stoned for thy sake.
+# SOURCE: draft archdiocesan Lauds book, p. 72 (Saint Stephen, Protomartyr)
+My soul * cleaveth fast unto thee, forasmuch as my flesh hath been stoned for thee, O my God.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-Stephen saw the heavens opened; * he saw and entered in; blessed is he unto whom the heavens were opened.
+# SOURCE: draft archdiocesan Lauds book, p. 73 (Saint Stephen, Protomartyr)
+Stephen * saw the heavens opened; he saw, and entered in: how blessed is the man unto whom heaven stood open.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/12-26 [Ant Laudes] — check against diurnal
-Behold, I see * the heavens opened, and Jesus standing on the right hand of the power of God.
+# SOURCE: draft archdiocesan Lauds book, p. 75 (Saint Stephen, Protomartyr)
+Behold, I see * the heavens opened; and Jesus standing on the right hand of God.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 60 (Saint Stephen, Protomartyr)
+In the day of thy power * shall the people offer thee free-will offerings with an holy worship: the dew of thy birth is of the womb of the morning.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 61 (Saint Stephen, Protomartyr)
+The Lord hath sent * redemption unto his people: he hath commanded his covenant for ever.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 62 (Saint Stephen, Protomartyr)
+Unto the godly * there ariseth up light in the darkness: the Lord is merciful, loving, and righteous.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 63 (Saint Stephen, Protomartyr)
+Of the fruit * of thy body shall I set upon thy seat.
 
 [benedictus-antiphon]
-Behold, I see * the heavens opened, and Jesus standing on the right hand of the power of God.
+# SOURCE: draft archdiocesan Lauds book, p. 78 (Saint Stephen, Protomartyr)
+And Stephen, * full of faith and power, did great wonders and miracles among the people.
 
 [magnificat-antiphon]
-Devout men buried Stephen * And made great mourning over him.
+# SOURCE: draft archdiocesan Vespers book, p. 66 (Saint Stephen, Protomartyr)
+Devout men * carried Stephen to his burial, and made great lamentation over him.
 
 [commemoration-antiphon]
-And Stephen, full of grace * and fortitude, did great signs among the people.
+# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
+And Stephen, * full of faith and power, did great wonders and miracles among the people.
 
 [commemoration-versicle]
-V. Devout men buried Stephen.
-R. And made great mourning over him.
+# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion of the works of thy hands.
+
+[commemoration-collect]
+# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
+Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may learn to love our enemies; since we celebrate the birthday of him who knew how to pray even for his persecutors to our Lord Jesus Christ, thy Son.
 
 [collect]
-Grant us, we beseech thee, O Lord, so to imitate what we revere, that we may learn to love even our enemies; for we celebrate the heavenly birthday of him who knew how to pray for his very persecutors to our Lord Jesus Christ:
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 79, 67
+Grant us, we beseech thee, O Lord, so to imitate that which we revere: that we may learn to love even our enemies; forasmuch as we celebrate the birthday of him who knew how to pray even for his persecutors to our Lord Jesus Christ thy Son.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 76 (Saint Stephen, Protomartyr)
 !Acts 6:8
-And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+And Stephen, full of faith and power, did great wonders and miracles among the people.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -50,23 +75,101 @@ R. Thanks be to God.
 Now there arose some of that which is called the synagogue of the Libertines, and of the Cyrenians, and of the Alexandrians, and of them that were of Cilicia and Asia, disputing with Stephen. And they were not able to resist the wisdom and the spirit that spoke.
 R. Thanks be to God.
 
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 77 (Saint Stephen, Protomartyr)
+R. Thou hast crowned him * with glory and honour, O Lord.
+R. Thou hast crowned him * with glory and honour, O Lord.
+V. And madest him to have dominion of the works of thy hands.
+R. With glory and honour, O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast crowned him * with glory and honour, O Lord.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 64 (Saint Stephen, Protomartyr)
+R. Thou hast set * upon his head, O Lord.
+R. Thou hast set * upon his head, O Lord.
+V. A crown of pure gold.
+R. Upon his head.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast set * upon his head, O Lord.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Thou Followest, Martyr of Thy God, St Stephen Lauds.docx); draft archdiocesan Lauds book, pp. 77-78
+Martyr Dei qui unicum
+
+Thou followest, Martyr of thy God,
+The path the only Son hath trod,
+Thy conquered foes thou treadest down,
+And gloriest in a victor's crown.
+
+O may thy prayer for us obtain
+The cleansing of each guilty stain,
+Shield us from sin's contagious blight,
+Put life's long weariness to flight.
+
+The cruel chains are now unwound
+That once thy sacred body bound,
+So may God's Son earth's fetters break
+From us, for his own love's dear sake.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Of All Thy Warrior Saints, O Lord, One Martyr out of Paschaltide Vespers.docx); draft archdiocesan Vespers book, p. 65
+Deus, tuorum militum
+
+Of all thy warrior saints, O Lord,
+The portion, crown, and great reward,
+From all transgressions set us free,
+Who sing thy Martyr's victory.
+
+The pleasures of the world he spurned,
+From sin's pernicious lures he turned,
+Accounting them as transient all,
+He reached at length thy heavenly hall.
+
+For thee through many a woe he ran,
+In many a fight he played the man;
+For thee his blood he dared to pour,
+And thence hath joy for evermore.
+
+We therefore pray thee, full of love,
+Regard us from thy throne above,
+On this thy Martyr's triumph day,
+Wash every stain of sin away.
+
+Enduring laud and praise be done
+To God the Father, and the Son,
+And to the Holy Paraclete,
+For endless ages as is meet.
+Amen.
+
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/12-26 [Versum 2] — check against diurnal
-V. Devout men buried Stephen.
-R. And made great mourning over him.
+# SOURCE: draft archdiocesan Lauds book, p. 78 (Saint Stephen, Protomartyr)
+V. Devout men carried Stephen to his burial.
+R. And made great lamentation over him.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 66 (Saint Stephen, Protomartyr)
+V. Stephen saw the heavens opened.
+R. He saw, and entered in: how blessed is the man unto whom heaven stood open!
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 64 (Saint Stephen, Protomartyr)
 !Acts 6:8
-And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+And Stephen, full of faith and power, did great wonders and miracles among the people.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-26 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 76 (Lauds chapter used at Terce)
 !Acts 6:8
-And Stephen, full of grace and fortitude, did great wonders and signs among the people.
+And Stephen, full of faith and power, did great wonders and miracles among the people.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/12-26.txt [Ant 1] — check against diurnal
-And Stephen, full of grace * and fortitude, did great signs among the people.
+# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
+And Stephen, * full of faith and power, did great wonders and miracles among the people.
