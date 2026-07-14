@@ -1,11 +1,11 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent09-0.txt [Ant 2] — check against diurnal
-When the Lord was come near to Jerusalem, He beheld the city, and wept * over it, saying: If thou hadst known, even thou! For the days shall come upon thee, that thine enemies shall cast a trench about thee, and compass thee round, and keep thee in on every side and shall lay thee even with the ground because thou knewest not the time of thy visitation, alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 5 (Cum appropinquaret)
+When the Lord was come near to Jerusalem, * he beheld the city, and wept over it, saying: If thou hadst known, even thou! For the days shall come upon thee, that thine enemies shall cast a trench about thee, and compass thee round, and keep thee in on every side, and shall lay thee even with the ground; because thou knewest not the time of thy visitation, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent09-0.txt [Ant 3] — check against diurnal
 It is written: My house is the house of prayer * for all nations but ye have made it a den of thieves. And He taught daily in the Temple.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Pent09-0 [Ant 1] — check against diurnal
-When the Lord would take up * Elijah into heaven by a whirlwind, Elisha cried, and said: My father, my father, the chariot of Israel, and the horsemen thereof.
+# SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 3 (Dum tolleret)
+When the Lord took up Elijah * by a whirlwind into heaven Elisha cried, saying: My father, the chariot of Israel and the horses thereof.

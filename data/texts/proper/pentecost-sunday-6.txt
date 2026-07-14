@@ -1,11 +1,11 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent06-0.txt [Ant 2] — check against diurnal
-The multitude being very great, * and having nothing to eat, Jesus called His disciples unto Him, and saith unto them: I have compassion on the multitude, because they have now been with Me three days, and have nothing to eat. Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 4 (Cum turba multa)
+The multitude being very great, * and having nothing to eat, Jesus called his disciples unto him, and saith unto them, I have compassion on the multitude, because they have now been with me three days, and have nothing to eat, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent06-0.txt [Ant 3] — check against diurnal
 I have compassion on the multitude, * because they have now been with Me three days, and have nothing to eat; and if I send them away fasting, they will faint by the way. Alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium TemporaM/Pent06-0 [Ant 1] — check against diurnal
-I beseech thee, * O Lord, do away the iniquity of thy servant, for I have done very foolishly.
+# SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 2 (Obsecro, Domine, aufer)
+O Lord, I beseech thee, * do away the iniquity of thy servant, for I have done very foolishly.

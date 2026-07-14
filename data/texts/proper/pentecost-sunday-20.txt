@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent20-0.txt [Ant 2] — check against diurnal
-There was a certain nobleman whose son was sick * at Capernaum. When he heard that Jesus was come into Galilee, he besought Him that He would heal his son.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Erat quidam regulus)
+There was a certain nobleman, * whose son was sick at Capernaum: when he heard that Jesus was come out of Judæa into Galilee, he besought him that he would heal his son.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent20-0.txt [Ant 3] — check against diurnal

@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent19-0.txt [Ant 2] — check against diurnal
-Tell them which are bidden: * Behold, I have prepared my dinner; Come unto the marriage. Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Dicite invitatis)
+Tell them which are bidden, * Behold, I have prepared my dinner; come unto the marriage, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent19-0.txt [Ant 3] — check against diurnal

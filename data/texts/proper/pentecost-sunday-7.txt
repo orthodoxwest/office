@@ -1,11 +1,11 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent07-0.txt [Ant 2] — check against diurnal
-Beware of false prophets, * which come to you in sheep's clothing, but inwardly they are ravening wolves. Ye shall know them by their fruits. Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 4 (Attendite a falsis)
+Beware * of false prophets, which come to you in sheep’s clothing, but inwardly they are ravening wolves. Ye shall know them by their fruits, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent07-0.txt [Ant 3] — check against diurnal
 A good tree cannot bring forth evil fruit, * neither can a corrupt tree bring forth good fruit. Every tree that bringeth not forth good fruit, is hewn down and cast into the fire. Alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium TemporaM/Pent07-0 [Ant 1] — check against diurnal
-Nathan the Prophet * anointed Solomon King in Gihon, and they went up with joy, and cried, saying: May the King live for ever.
+# SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 3 (Unxerunt Salomonem)
+Zadok the priest * and Nathan the prophet anointed Solomon king in Gihon: and the people came up rejoicing and said, Let the king live for ever.

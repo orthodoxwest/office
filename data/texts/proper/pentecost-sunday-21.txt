@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent21-0.txt [Ant 2] — check against diurnal
-The lord said unto his servant: Pay me * that thou owest. But the servant fell down and besought him, saying: Have patience with me, and I will pay thee all.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Dixit autem dominus)
+Then said the lord * unto the servant, Pay me that thou owest. The servant therefore fell down and worshipped him, saying, Lord, have patience with me, and I will pay thee all.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent21-0.txt [Ant 3] — check against diurnal

@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent22-0.txt [Ant 2] — check against diurnal
-Master, we know that Thou art true, * and teachest the way of God in truth, alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Magister scimus)
+Master * we know that thou art true, and teachest the way of God in truth, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent22-0.txt [Ant 3] — check against diurnal

@@ -42,6 +42,72 @@ MASTER_BOOKS = (
     ("vespers", "00. Vespers for Saturdays & Major Feasts*.docx"),
 )
 
+BENEDICTUS_TARGETS = (
+    *(
+        (
+            f"{number} Sunday after Epiphany",
+            f"proper/epiphany-sunday-{number}/benedictus-antiphon",
+        )
+        for number in range(2, 7)
+    ),
+    *(
+        (
+            f"{number} Sunday after Pentecost",
+            f"proper/pentecost-sunday-{number}/benedictus-antiphon",
+        )
+        for number in range(3, 25)
+    ),
+)
+
+MAGNIFICAT_TARGETS = (
+    (
+        "Saturdays Throughout the Year",
+        "ordinary/vespers/magnificat-antiphon-saturday",
+    ),
+    (
+        "Saturday before Septuagesima Sunday",
+        "proper/septuagesima/magnificat-antiphon-first",
+    ),
+    (
+        "Saturday before Sexagesima Sunday",
+        "proper/sexagesima/magnificat-antiphon-first",
+    ),
+    (
+        "Saturday before Quinquagesima Sunday",
+        "proper/quinquagesima/magnificat-antiphon-first",
+    ),
+    *(
+        (
+            f"Saturday before the {number} Sunday after Pentecost",
+            f"proper/pentecost-sunday-{number}/magnificat-antiphon-first",
+        )
+        for number in range(3, 12)
+    ),
+    *(
+        (
+            f"Saturday before the {week} Sunday of {month.title()}",
+            f"proper/historia-{month}-{week}/magnificat-antiphon-first",
+        )
+        for month in ("august", "september", "october", "november")
+        for week in range(1, 6)
+    ),
+)
+
+STANDALONE_CANTICLE_BOOKS = (
+    (
+        "lauds",
+        "Benedictus",
+        "Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx",
+        BENEDICTUS_TARGETS,
+    ),
+    (
+        "vespers",
+        "Magnificat",
+        "Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx",
+        MAGNIFICAT_TARGETS,
+    ),
+)
+
 HEADINGS = {
     "chapter": "THE CHAPTER",
     "short-responsory": "THE SHORT RESPONSORY",
@@ -158,6 +224,68 @@ def read_docx_paragraphs(path: pathlib.Path) -> list[Paragraph]:
     return paragraphs
 
 
+def clean_canticle_underlay(paragraphs: list[Paragraph]) -> str:
+    """Turn a standalone book's syllabified English chant underlay into prose."""
+    lines = clean_lines(paragraphs)
+    text = collapse_space(" ".join(lines))
+    # These standalone books use hyphens and en/em dashes only to divide sung
+    # syllables; their prose underlay contains no lexical hyphen compounds.
+    text = re.sub(r"(?<=\w)\s*[-–—]\s*(?=\w)", "", text)
+    text = re.sub(r"^([A-Z])\s+([a-z])", r"\1\2", text)
+    # Word drop caps are stored in separate runs without a separating space.
+    text = re.sub(r"\bI(?=(?:beseech|dwell|have|might|saw)\b)", "I ", text)
+    text = re.sub(r"^As\.\s+(?=Jesus\b)", "As ", text)
+    text = text.replace("highplaces", "high places")
+    # A dagger in these antiphon books is the mediation mark represented by an
+    # asterisk in the corpus.
+    text = collapse_space(text.replace("†", "*"))
+    return text
+
+
+def extract_standalone_canticles(
+    source: str,
+    hour: str,
+    canticle: str,
+    paragraphs: list[Paragraph],
+    targets: tuple[tuple[str, str], ...],
+) -> list[SourceCandidate]:
+    pattern = re.compile(rf"Antiphon on {re.escape(canticle)}\.\s*(.*)", re.I)
+    markers = [
+        (index, pattern.search(paragraph.text))
+        for index, paragraph in enumerate(paragraphs)
+        if pattern.search(paragraph.text)
+    ]
+    if len(markers) != len(targets):
+        raise ValueError(
+            f"{source}: expected {len(targets)} {canticle} antiphons, found {len(markers)}"
+        )
+
+    candidates = []
+    for (start, match), (title, corpus_key) in zip(markers, targets):
+        stop = start + 1
+        while stop < len(paragraphs):
+            if paragraphs[stop].text.upper().startswith("THE GOSPEL CANTICLE"):
+                break
+            stop += 1
+        source_text = clean_canticle_underlay(paragraphs[start + 1 : stop])
+        if not source_text:
+            raise ValueError(f"{source}: empty underlay after {match.group(0)!r}")
+        candidates.append(
+            SourceCandidate(
+                source=source,
+                source_page=paragraphs[start].page,
+                hour=hour,
+                office_title=title,
+                office_variant="first" if canticle.lower() == "magnificat" else "",
+                slot=corpus_key.rsplit("/", 1)[1],
+                latin_incipit=collapse_space(match.group(1)),
+                source_text=source_text,
+                corpus_key=corpus_key,
+            )
+        )
+    return candidates
+
+
 def is_chant_code(text: str) -> bool:
     private_use = sum(unicodedata.category(ch) == "Co" for ch in text)
     if private_use:
@@ -174,7 +302,9 @@ def is_artifact(text: str) -> bool:
     text = text.strip()
     if not text or text == "\\" or re.fullmatch(r"\d+", text):
         return True
-    if re.fullmatch(r"(?:[ivx]+|T\.P\.)\.?\d*", text, re.I):
+    if re.fullmatch(
+        r"(?:(?:[ivx]+(?:\.(?:\d+|c))?|T\.P\.)\s*)+", text, re.I
+    ):
         return True
     if is_chant_code(text):
         return True
@@ -828,6 +958,29 @@ def reconcile(
             candidate.slot = generic
 
     for candidate in candidates:
+        # Standalone canticle books have a fixed liturgical sequence and Latin
+        # incipits, so their corpus targets are assigned explicitly during
+        # extraction rather than inferred through fuzzy title matching.
+        if candidate.corpus_key:
+            entry = corpus.get(candidate.corpus_key)
+            review = queue.get(candidate.corpus_key, {})
+            candidate.title_similarity = 1.0
+            candidate.leverage_score = review.get("score", 0)
+            candidate.provenance_status = review.get("status", "")
+            if entry:
+                candidate.current_text = entry.text
+                score = text_similarity(candidate.source_text, entry.text)
+                candidate.text_similarity = round(score, 3)
+                classify_candidate(candidate, score)
+            else:
+                candidate.confidence = "missing"
+                candidate.provenance_status = "missing"
+                flags = source_review_flags(candidate)
+                candidate.review_flags = "; ".join(flags)
+                if source_requires_modeling(flags):
+                    candidate.confidence = "complex"
+            continue
+
         if (
             candidate.hour == "vespers"
             and "saturdays throughout the year" in candidate.office_title.lower()
@@ -1213,6 +1366,15 @@ def cmd_build(args: argparse.Namespace) -> int:
     for office in offices:
         candidates.extend(extract_candidates(office))
 
+    for hour, canticle, pattern, targets in STANDALONE_CANTICLE_BOOKS:
+        path = choose_master(resources, pattern)
+        paragraphs = read_docx_paragraphs(path)
+        candidates.extend(
+            extract_standalone_canticles(
+                path.name, hour, canticle, paragraphs, targets
+            )
+        )
+
     corpus = load_corpus(data_dir)
     feast_names = load_feast_names(data_dir)
     queue = load_review_queue(office_binary, args.start, args.years)
@@ -1318,7 +1480,12 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         return args.func(args)
-    except (FileNotFoundError, subprocess.CalledProcessError, zipfile.BadZipFile) as exc:
+    except (
+        FileNotFoundError,
+        ValueError,
+        subprocess.CalledProcessError,
+        zipfile.BadZipFile,
+    ) as exc:
         print(f"source reconciliation failed: {exc}", file=sys.stderr)
         return 1
 

@@ -1,11 +1,11 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 2] — check against diurnal
-What man of you * that hath an hundred sheep, and if he shall lose one of them, doth he not leave the ninety-nine in the desert and go after that which was lost, until he find it? Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Quis ex vobis homo)
+What man of you * having an hundred sheep, if he lose one of them doth not leave the ninety and nine in the wilderness, and go after that which is lost, until he find it? alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 3] — check against diurnal
 What woman * having ten pieces of silver, if she lose one piece, doth not light a candle, and sweep the house, and seek diligently till she find it?
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Pent03-0 [Ant 1] — check against diurnal
-And they all knew, * from Dan even unto Beersheba, that Samuel was established to be a Prophet of the Lord.
+# SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 1 (Cognoverunt)
+And all Israel knew * from Dan even to Beersheba, that Samuel was established to be a prophet of the Lord.

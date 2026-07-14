@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent18-0.txt [Ant 2] — check against diurnal
-The Lord said unto the sick * of the palsy: Son, be of good cheer, thy sins be forgiven thee.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 8 (Dixit Dominus paralytico)
+The Lord said * unto the sick of the palsy, Son, be of good cheer, thy sins be forgiven thee.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent18-0.txt [Ant 3] — check against diurnal
