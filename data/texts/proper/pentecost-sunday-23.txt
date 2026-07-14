@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent23-0.txt [Ant 2] — check against diurnal
-For she said within herself: * If I may but touch the hem of His garment, I shall be whole.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Dicebat enim)
+For she said within herself, * If I may but touch the hem of his garment, I shall be whole.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent23-0.txt [Ant 3] — check against diurnal

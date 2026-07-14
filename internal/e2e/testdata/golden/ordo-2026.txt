@@ -180,7 +180,7 @@ JANUARY
  25  Sun     III Sunday after Epiphany                  [sd]  g
            Conversion of St. Paul (gd)
            St. Peter (com)
-           Lauds   g · Ben. When Jesus was come down from the mountain · No Preces · No Suff.
+           Lauds   g · Ben. When Jesus · No Preces · No Suff.
                Com. Conversion of St. Paul ("Go forth, Ananias")
                Com. St. Peter ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
@@ -228,7 +228,7 @@ FEBRUARY
   1  Sun     IV Sunday after Epiphany                   [sd]  g
            St Ignatius of Antioch, Bishop & Martyr (d)
            St Bridget of Ireland, Virgin (com)
-           Lauds   g · Ben. When Jesus was entered into a ship · No Preces · No Suff.
+           Lauds   g · Ben. And when Jesus · No Preces · No Suff.
                Com. St Ignatius of Antioch, Bishop & Martyr ("Whosoever shall confess me")
                Com. St Bridget of Ireland, Virgin ("This is one of the wise virgins")
            Hours   No Preces
@@ -271,7 +271,7 @@ FEBRUARY
                Com. St Romuald, Abbot ("Lord, Thou deliverest unto me five talents")
   7  Sat     Office of the V Sunday after Epiphany      [sd]  g
            St Romuald, Abbot (d)
-           Lauds   g · Ben. Sir, didst not thou sow good seed in thy… · No Preces · No Suff.
+           Lauds   g · Ben. Sir · No Preces · No Suff.
                Com. St Romuald, Abbot ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
            Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said unto Adam · Suff.
@@ -1150,7 +1150,7 @@ JUNE
  28  Sun     IV Sunday after Pentecost                  [sd]  g
            St Leo II, Bishop & Confessor (com)
            Day V within the Octave of St John Baptist (sd)
-           Lauds   g · Ben. Jesus entered into the ship · No Preces · No Suff.
+           Lauds   g · Ben. And Jesus entered · No Preces · No Suff.
                Com. St Leo II, Bishop & Confessor ("Behold a great priest")
                Com. Day V within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
@@ -1308,7 +1308,7 @@ JULY
                Com. St Seraphim of Sarov, Priest & Confessor ("Lord, Thou deliverest unto me five talents")
  19  Sun     VII Sunday after Pentecost                 [sd]  g
            St Seraphim of Sarov, Priest & Confessor (com)
-           Lauds   g · Ben. Beware of false prophets · No Preces · Suff.
+           Lauds   g · Ben. Beware · No Preces · Suff.
                Com. St Seraphim of Sarov, Priest & Confessor ("Lord, Thou deliverest unto me five talents")
            Hours   Preces
            Vespers g · II prec. · Mag. A good tree cannot bring forth evil fruit · No Suff.
@@ -1363,7 +1363,7 @@ JULY
  26  Sun     St. Anne, Mother of the Blessed Virgin Mary [2cl] w
            VIII Sunday after Pentecost (sd)
            Lauds   w · Ben. Give her of the fruit of her hands · No Preces · No Suff.
-               Com. VIII Sunday after Pentecost ("The lord said unto his steward")
+               Com. VIII Sunday after Pentecost ("The lord said")
            Hours   No Preces
            Vespers w · II prec. · Mag. She is beautiful · No Suff.
                Com. VIII Sunday after Pentecost ("What shall I do?")
@@ -1415,7 +1415,7 @@ AUGUST
                Com. St Stephen, Bishop & Martyr ("Whosoever shall confess me")
   2  Sun     IX Sunday after Pentecost                  [sd]  g
            St Stephen, Bishop & Martyr (com)
-           Lauds   g · Ben. When the Lord was come near to Jerusalem, He… · No Preces · Suff.
+           Lauds   g · Ben. When the Lord was come near to Jerusalem · No Preces · Suff.
                Com. St Stephen, Bishop & Martyr ("Whosoever shall confess me")
            Hours   Preces
            Vespers g · II prec. · Mag. It is written: My house is the house of… · No Suff.
@@ -1459,7 +1459,7 @@ AUGUST
                Com. St Romanus, Martyr ("Whosoever shall confess me")
   9  Sun     X Sunday after Pentecost                   [sd]  g
            St Romanus, Martyr (com)
-           Lauds   g · Ben. The publican, standing afar off · No Preces · Suff.
+           Lauds   g · Ben. And the publican · No Preces · Suff.
                Com. St Romanus, Martyr ("Whosoever shall confess me")
            Hours   Preces
            Vespers r · I fol. (St. Lawrence, Martyr) · Mag. Laurence the Deacon · No Suff.
@@ -1502,7 +1502,7 @@ AUGUST
            XI Sunday after Pentecost (sd)
            Day II within the Octave of the Assumption (sd)
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
-               Com. XI Sunday after Pentecost ("When the Lord had departed from the coasts of…")
+               Com. XI Sunday after Pentecost ("When the Lord had passed")
                Com. Day II within the Octave of the Assumption ("Through thee have the gates of Paradise been thrown…")
            Hours   No Preces
            Vespers w · II prec. · Mag. Lo, a servant of God · No Suff.
@@ -1547,7 +1547,7 @@ AUGUST
            Vespers w · II prec. · Mag. The holy Mother of God is exalted over choirs… · No Suff.
                Com. XII Sunday after Pentecost ("A certain man went down from Jerusalem")
  23  Sun     XII Sunday after Pentecost                 [sd]  g
-           Lauds   g · Ben. Master, what shall I do · No Preces · Suff.
+           Lauds   g · Ben. Master · No Preces · Suff.
            Hours   Preces
            Vespers r · I fol. (St. Bartholomew, Apostle) · Mag. They will deliver you up · No Suff.
                Com. XII Sunday after Pentecost ("A certain man went down from Jerusalem")
@@ -1633,7 +1633,7 @@ SEPTEMBER
            Hours   Preces
            Vespers g · I fol. (XIV Sunday after Pentecost) · Mag. In all these things Job sinned not · Suff.
   6  Sun     XIV Sunday after Pentecost                 [sd]  g
-           Lauds   g · Ben. Take no thought, saying: What shall we eat? · No Preces · Suff.
+           Lauds   g · Ben. Be not therefore anxious · No Preces · Suff.
            Hours   Preces
            Vespers g · II prec. · Mag. Seek ye first the kingdom of God · Suff.
   7  Mon     Feria                                            g
@@ -1670,7 +1670,7 @@ SEPTEMBER
            Vespers g · I fol. (XV Sunday after Pentecost) · Mag. Remember not, Lord · No Suff.
                Com. The Most Holy Name of Mary ("Holy Mary, succour the miserable")
  13  Sun     XV Sunday after Pentecost                  [sd]  g
-           Lauds   g · Ben. Jesus went into a city called Nain · No Preces · Suff.
+           Lauds   g · Ben. Jesus went into a city · No Preces · Suff.
            Hours   Preces
            Vespers g · II prec. · Mag. A great prophet is risen up among us · No Suff.
                Com. Exaltation of the Holy Cross ("Thou alone")
@@ -1717,7 +1717,7 @@ SEPTEMBER
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
  20  Sun     XVI Sunday after Pentecost                 [sd]  g
            St Eustace & companions, Martyrs (d)
-           Lauds   g · Ben. As Jesus went into the house · No Preces · No Suff.
+           Lauds   g · Ben. As Jesus went · No Preces · No Suff.
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
            Vespers r · I fol. (St. Matthew, Apostle and Evangelist) · Mag. They will deliver you up · No Suff.
@@ -1760,7 +1760,7 @@ SEPTEMBER
                Com. Ss. Cosmas & Damian, Martyrs ("For theirs is the kingdom of heaven")
  27  Sun     XVII Sunday after Pentecost                [sd]  g
            Ss. Cosmas & Damian, Martyrs (com)
-           Lauds   g · Ben. Master, which is the great commandment · No Preces · Suff.
+           Lauds   g · Ben. Master · No Preces · Suff.
                Com. Ss. Cosmas & Damian, Martyrs ("For theirs is the kingdom of heaven")
            Hours   Preces
            Vespers g · II prec. · Mag. What think ye of Christ? Whose Son is He? · Suff.
@@ -1801,7 +1801,7 @@ OCTOBER
            Hours   Preces
            Vespers g · I fol. (XVIII Sunday after Pentecost) · Mag. The Lord open your hearts · Suff.
   4  Sun     XVIII Sunday after Pentecost               [sd]  g
-           Lauds   g · Ben. The Lord said unto the sick · No Preces · Suff.
+           Lauds   g · Ben. The Lord said · No Preces · Suff.
            Hours   Preces
            Vespers g · II prec. · Mag. And immediately, he that had been sick of the… · No Suff.
                Com. St. Placidus & companions, Martyrs ("For theirs is the kingdom of heaven")
@@ -1880,7 +1880,7 @@ OCTOBER
  18  Sun     St. Luke, Evangelist                       [2cl] r
            XX Sunday after Pentecost (sd)
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
-               Com. XX Sunday after Pentecost ("There was a certain nobleman whose son was sick")
+               Com. XX Sunday after Pentecost ("There was a certain nobleman")
            Hours   No Preces
            Vespers r · II prec. · Mag. Be valiant · No Suff.
                Com. XX Sunday after Pentecost ("So the father knew")
@@ -1924,7 +1924,7 @@ OCTOBER
            XXI Sunday after Pentecost (sd)
            Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
                Com. Ss Chrysanthus & Daria, Martyrs ("For theirs is the kingdom of heaven")
-               Com. XXI Sunday after Pentecost ("The lord said unto his servant: Pay me")
+               Com. XXI Sunday after Pentecost ("Then said the lord")
            Hours   No Preces
            Vespers w · II prec. · Mag. And he hath on his garment · No Suff.
                Com. XXI Sunday after Pentecost ("O thou wicked servant, I forgave thee all")
@@ -1961,7 +1961,7 @@ NOVEMBER
   1  Sun     ALL SAINTS                                 [1cl] w
            XXII Sunday after Pentecost (sd)
            Lauds   w · Ben. The glorious company · No Preces · No Suff.
-               Com. XXII Sunday after Pentecost ("Master, we know that Thou art true")
+               Com. XXII Sunday after Pentecost ("Master")
            Hours   No Preces
            Vespers w · II prec. · Mag. O how glorious · No Suff.
                Com. XXII Sunday after Pentecost ("Render therefore unto Caesar the things which are Caesar's")
@@ -2108,7 +2108,7 @@ NOVEMBER
                Com. St. Cecilia ("The musicians played, and Cecilia sang unto the Lord")
  22  Sun     XXIV & Last Sunday after Pentecost         [sd]  g
            St. Cecilia (d)
-           Lauds   g · Ben. When ye shall see the abomination of desolation · No Preces · No Suff.
+           Lauds   g · Ben. When ye, therefore, shall see · No Preces · No Suff.
                Com. St. Cecilia ("The musicians played, and Cecilia sang unto the Lord")
            Hours   No Preces
            Vespers g · II prec. · Mag. Amen, I say unto you, this generation shall not… · No Suff.

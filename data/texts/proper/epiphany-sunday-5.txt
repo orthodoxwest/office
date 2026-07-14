@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Epi5-0.txt [Ant 2] — check against diurnal
-Sir, didst not thou sow good seed in thy field? * From whence then hath it tares? And he saith unto them: An enemy hath done this.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 2 (Domine, nonne bonum)
+Sir, * didst not thou sow good seed in thy field? from whence then hath it tares? He said unto them, An enemy hath done this.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Epi5-0.txt [Ant 3] — check against diurnal

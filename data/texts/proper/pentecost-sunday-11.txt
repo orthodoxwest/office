@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent11-0.txt [Ant 2] — check against diurnal
-When the Lord had departed from the coasts of Tyre, * He made both the deaf to hear and the dumb to speak.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Dum transiret Dominus)
+When the Lord had passed * through the coasts of Tyre, he made the deaf to hear and the dumb to speak.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent11-0.txt [Ant 3] — check against diurnal

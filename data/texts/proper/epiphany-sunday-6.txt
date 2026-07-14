@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Epi6-0.txt [Ant 2] — check against diurnal
-The kingdom of heaven * is like to a grain of mustard-seed, which is the least of all seeds, but, when it is grown, it is the greatest among herbs.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 2 (Simile est regnum…grano)
+The kingdom of heaven * is like unto a grain of mustard seed, which is the least of all seeds; but when it is grown, it is the greatest among herbs.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Epi6-0.txt [Ant 3] — check against diurnal

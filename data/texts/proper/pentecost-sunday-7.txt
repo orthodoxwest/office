@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent07-0.txt [Ant 2] — check against diurnal
-Beware of false prophets, * which come to you in sheep's clothing, but inwardly they are ravening wolves. Ye shall know them by their fruits. Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 4 (Attendite a falsis)
+Beware * of false prophets, which come to you in sheep’s clothing, but inwardly they are ravening wolves. Ye shall know them by their fruits, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent07-0.txt [Ant 3] — check against diurnal

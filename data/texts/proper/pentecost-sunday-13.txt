@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent13-0.txt [Ant 2] — check against diurnal
-As Jesus passed through * a certain village, there met Him ten men that were lepers, which stood afar off; and they lifted up their voices, and said: “Jesus, Master, have mercy on us.”
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 7 (Dum intraret)
+As Jesus passed through * a certain village, there met him ten men that were lepers, which stood afar off: and they lifted up their voices, and said, Jesus, Master, have mercy upon us.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium TemporaM/Pent13-0 [Ant 3] — check against diurnal

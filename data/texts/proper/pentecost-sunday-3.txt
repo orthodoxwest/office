@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 2] — check against diurnal
-What man of you * that hath an hundred sheep, and if he shall lose one of them, doth he not leave the ninety-nine in the desert and go after that which was lost, until he find it? Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Quis ex vobis homo)
+What man of you * having an hundred sheep, if he lose one of them doth not leave the ninety and nine in the wilderness, and go after that which is lost, until he find it? alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent03-0.txt [Ant 3] — check against diurnal

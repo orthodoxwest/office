@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent15-0.txt [Ant 2] — check against diurnal
-Jesus went into a city called Nain * and, behold, there was a dead man carried out, the only son of his mother.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 7 (Ibat Jesus)
+Jesus went into a city * called Nain; and behold, there was a dead man carried out, the only son of his mother.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent15-0.txt [Ant 3] — check against diurnal

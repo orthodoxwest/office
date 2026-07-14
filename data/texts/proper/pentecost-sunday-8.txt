@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent08-0.txt [Ant 2] — check against diurnal
-The lord said unto his steward: * How is it that I hear this of thee? Give an account of thy stewardship. Alleluia.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 5 (Ait dominus villico)
+The lord said * unto the steward, How is it that I hear this of thee? Give an account of thy stewardship, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent08-0.txt [Ant 3] — check against diurnal

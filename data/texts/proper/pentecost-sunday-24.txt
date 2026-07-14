@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent24-0.txt [Ant 2] — check against diurnal
-When ye shall see the abomination of desolation, * spoken of by Daniel the Prophet, stand in the Holy Place, (whoso readeth, let him understand.)
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Cum videritis)
+When ye, therefore, shall see * the abomination of desolation, spoken of by Daniel the prophet, stand in the holy place; whoso readeth, let him understand.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent24-0.txt [Ant 3] — check against diurnal

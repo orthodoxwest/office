@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent05-0.txt [Ant 2] — check against diurnal
-Ye have heard that it was said * by them of old time: Thou shalt not kill; and whosoever shall kill shall be in danger of the judgment.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Audistis)
+Ye have heard that it was said * by them of old time, Thou shalt not kill; and whosoever shall kill, shall be in danger of the judgement.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent05-0.txt [Ant 3] — check against diurnal

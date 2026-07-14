@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pent10-0.txt [Ant 2] — check against diurnal
-The publican, standing afar off, * would not lift up so much as his eyes unto heaven, but smote upon his breast, saying: God, be merciful to me, a sinner.
+# SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Stans a longe)
+And the publican * standing afar off, would not lift up so much as his eyes unto heaven, but smote upon his breast, saying, God be merciful to me a sinner.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Pent10-0.txt [Ant 3] — check against diurnal
