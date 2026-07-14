@@ -220,6 +220,15 @@ class SourceReconcileTest(unittest.TestCase):
             )[0],
             "proper/seven-sorrows-bvm",
         )
+        names["all-saints"] = "All Saints"
+        self.assertEqual(
+            SOURCE_RECONCILE.infer_owner(
+                "November 1 – II Vespers for The Feast of All Saints",
+                corpus,
+                names,
+            )[0],
+            "proper/all-saints",
+        )
 
     def test_different_first_vespers_text_becomes_an_override_gap(self):
         corpus = {

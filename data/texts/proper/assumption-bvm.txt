@@ -135,6 +135,24 @@ R. Over choirs of Angels, into the heavenly kingdom.
 V. The holy Mother of God hath been exalted.
 R. Over choirs of Angels, into the heavenly kingdom.
 
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
+R. The Virgin Mary is taken up * into heavenly chambers.
+R. The Virgin Mary is taken up * into heavenly chambers.
+V. Wherein the King of kings sitteth upon a starry throne.
+R. Into heavenly chambers.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Virgin Mary is taken up * into heavenly chambers.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 464 (The Assumption of the B.V.M.)
+R. Mary is taken up into heaven * the Angels triumph.
+R. Mary is taken up into heaven * the Angels triumph.
+V. Exalting and blessing the Lord.
+R. The Angels triumph.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Mary is taken up into heaven * the Angels triumph.
+
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/08-15 [Responsory Breve Tertia] — check against diurnal
 R. The holy Mother of God * hath been exalted.

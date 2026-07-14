@@ -119,6 +119,85 @@ The false and faithless race away;
 That all within one fold may rest,
 Secure beneath one shepherd's sway.
 
+[hymn-first-vespers]
+# SOURCE: office-hymns.zip (O Christ Redeemer of Us All, All Saints Vespers.docx)
+Christe, Redemptor omnium, conserva
+
+O Christ Redeemer of us all,
+Protect thy servants when they call,
+And here with reconciling care
+The blessed Virgin's holy prayer.
+
+And ye, O ever-blissful throng
+Of heavenly Spirits, guardians strong,
+Our past and present ills dispel,
+From future peril shield us well.
+
+Ye Prophets of the Judge adored,
+Ye twelve Apostles of the Lord,
+For us your ceaseless prayer outpour,
+Salvation for our souls implore.
+
+Martyrs of God, renowned for aye,
+Confessors ranged in bright array,
+Let all your orisons unite
+To bear us to the realms of light.
+
+O sacred Virgin choirs, may ye,
+With Monks of holy ministry,
+And every Saint of Christ, obtain
+That we his fellowship may gain.
+
+From lands wherein thy faithful dwell
+Drive far away the infidel;
+So we to Christ due hymns of praise
+Henceforth with eager hearts may raise.
+
+To thee, O Father, born of none,
+And thee, O sole-begotten Son,
+One with the Holy Paraclete,
+Be glory ever, as is meet.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 598 (The Feast of All Saints)
+R. Be glad, O ye righteous * and rejoice in the Lord.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+V. And be joyful, all ye that are true of heart.
+R. And rejoice in the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 528, 534 (The Feast of All Saints)
+R. Let the righteous rejoice * before God.
+R. Let the righteous rejoice * before God.
+V. Let them also be merry and joyful.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let the righteous rejoice * before God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 536 (II Vespers for The Feast of All Saints)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)
+V. Be glad, O ye righteous, and rejoice in the Lord.
+R. And be joyful, all ye that are true of heart.
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 528 (The Feast of All Saints, I Vespers)
+!Rev 7:2-3
+And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+R. Thanks be to God.
+
 [chapter-vespers]
 # SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !Rev 7:2-3

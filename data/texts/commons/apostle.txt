@@ -1,10 +1,10 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-This is my commandment * that you love one another, as I have loved you.
+# SOURCE: draft archdiocesan Lauds book, p. 603 (Common of Apostles and Evangelists out of Paschaltide)
+This is my commandment * that ye love one another, as I have loved you.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-This is my commandment * that you love one another, as I have loved you.
+# SOURCE: draft archdiocesan Lauds book, p. 603 (Common of Apostles and Evangelists out of Paschaltide)
+This is my commandment * that ye love one another, as I have loved you.
 
 [psalm-antiphon-2]
 # SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
@@ -35,16 +35,17 @@ Be valiant * in battle, fight the ancient serpent and accept the eternal kingdom
 For they shall deliver you * up to councils: and in the synagogues you shall be beaten: and you shall stand before governors and kings for my sake, for a testimony unto them.
 
 [commemoration-antiphon]
-This is my commandment * that you love one another, as I have loved you.
+This is my commandment * that ye love one another, as I have loved you.
 
 [commemoration-versicle]
 V. Their sound hath gone forth into all the earth:
 R. And their words unto the ends of the world.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Commune/C1 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 608 (Common of Apostles and Evangelists out of Paschaltide)
 !Eph 2:19-20
-Brothers: Now therefore you are no more strangers and foreigners; but you are fellow citizens with the saints, and the domestics of God, built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone.
+Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citizens with the saints, and of the household of God; and are built upon the foundation of the Apostles and Prophets, Jesus Christ himself being the chief corner stone.
+R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: divinum-officium Commune/C1 [Capitulum Sexta] — check against diurnal
@@ -123,14 +124,37 @@ And so shall be while ages last.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Commune/C1 [Versum 2] — check against diurnal
-V. They declared the works of God.
-R. And understood his doings.
+# SOURCE: draft archdiocesan Lauds book, p. 610 (Common of Apostles and Evangelists out of Paschaltide)
+V. They declared the work of God.
+R. And wisely considered of his doing.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Commune/C1 [Versum 1] — check against diurnal
-V. Their sound hath gone forth into all the earth:
-R. And their words unto the ends of the world.
+# SOURCE: draft archdiocesan Vespers book, p. 553 (II Vespers for Common of Apostles out of Paschaltide)
+V. They declared the work of God.
+R. And wisely considered of his doing.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 544 (Common of Apostles and Evangelists out of Paschaltide, I Vespers)
+V. Their sound is gone out into all lands.
+R. And their words into the ends of the world.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 609 (Common of Apostles and Evangelists out of Paschaltide)
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 543, 552 (Common of Apostles out of Paschaltide)
+R. Thou shalt make them princes * in all lands.
+R. Thou shalt make them princes * in all lands.
+V. They shall remember thy Name, O Lord.
+R. In all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou shalt make them princes * in all lands.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Commune/C1 [Responsory Breve Tertia] — check against diurnal
@@ -160,9 +184,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thy friends, O God * are made exceedingly honourable.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Commune/C1 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 542, 551 (Common of Apostles out of Paschaltide)
 !Eph 2:19-20
-Brothers: Now therefore you are no more strangers and foreigners; but you are fellow citizens with the saints, and the domestics of God, built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone.
+Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citizens with the saints, and of the household of God; and are built upon the foundation of the Apostles and Prophets, Jesus Christ himself being the chief corner stone.
+R. Thanks be to God.
 
 [chapter-terce]
 # SOURCE: divinum-officium Commune/C1 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
