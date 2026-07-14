@@ -4,12 +4,71 @@
 [alleluia]
 Praise be to thee, O Lord, King of eternal glory.
 
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 126
+!Jer 11:19
+Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name be no more remembered.
+R. Thanks be to God.
+
 [short-responsory-lauds]
-R. Heal my soul, O Lord, for I have sinned against thee.
-Heal my soul, O Lord, for I have sinned against thee.
-V. I said: O Lord, have mercy on me.
-R. For I have sinned against thee.
-R. Heal my soul, O Lord, for I have sinned against thee.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 126
+R. Deliver my soul, O God, * From the sword.
+R. Deliver my soul, O God, * From the sword.
+V. My darling from the power of the dog.
+R. From the sword.
+R. Deliver my soul, O God, * From the sword.
+
+[hymn-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 127; office-hymns.zip (Thirty Years Among Us Dwelling, Passion Sunday Lauds.docx)
+Lustris sex qui jam peractis
+
+Thirty years among us dwelling,
+His appointed time fulfilled,
+Born for this, he meets his Passion,
+For that this he freely willed:
+On the Cross the Lamb is lifted,
+Where his life-blood shall be spilled.
+
+He endured the nails, the spitting,
+Vinegar, and spear, and reed:
+From that holy Body broken
+Blood and Water forth proceed:
+Earth, and stars, and sky, and ocean,
+By that flood from stain are freed.
+
+Faithful Cross, above all other
+One and only noble Tree;
+None in foliage, none in blossom,
+None in fruit thy peer may be:
+Sweetest wood, and sweetest iron!
+Sweetest weight is hung on thee.
+
+Bend thy boughs, O Tree of glory,
+Thy relaxing sinews bend:
+For awhile the ancient rigour
+That thy birth bestowed, suspend:
+And the King of heavenly beauty
+On thy bosom gently tend.
+
+Thou alone wast counted worthy
+This world's ransom to sustain;
+That a shipwrecked race for ever
+Might a port of refuge gain:
+With the sacred Blood anointed
+Of the Lamb for sinners slain.
+
+Glory be to God, and honour
+In the highest, as is meet,
+To the Son and to the Father,
+And the eternal Paraclete,
+Whose is boundless praise and power
+Through the ages infinite.
+Amen.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 127
+V. Deliver me from mine enemies, O God.
+R. Defend me from them that rise up against me.
 
 [short-responsory-vespers]
 R. How great are thy works, O Lord.

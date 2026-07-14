@@ -1,6 +1,12 @@
 [alleluia]
 Praise be to thee, O Lord, King of eternal glory.
 
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 124
+!Isa 58:1
+Cry aloud, spare not; lift up thy voice like a trumpet, and show my people their transgression, and the house of Jacob their sins.
+R. Thanks be to God.
+
 [hymn-lauds]
 # SOURCE: office-hymns.zip (Now Christ, Thou Sun of Righteousness, Lent Lauds.docx); draft archdiocesan Lauds book, pp. 196, 207, 218, 229
 Jam Christe, sol justitiae
@@ -31,6 +37,20 @@ Right soon thy loving pardon grant
 That we our new-made song may chant.
 
 Amen.
+
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 124
+R. He shall deliver thee, * From the snare of the hunter.
+R. He shall deliver thee, * From the snare of the hunter.
+V. And from the noisome pestilence.
+R. From the snare of the hunter.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He shall deliver thee, * From the snare of the hunter.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 125
+V. God shall give his angels charge over thee.
+R. To keep thee in all thy ways.
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 139 (Saturdays in Lent)

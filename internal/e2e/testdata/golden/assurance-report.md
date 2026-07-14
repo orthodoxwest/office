@@ -3,12 +3,12 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 237 |
+| Modeled structural features | 238 |
 | Selected structural-review pages | 45 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 2039 |
-| Text entries with unknown source | 502 |
+| Text entries needing review | 2050 |
+| Text entries with unknown source | 500 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
@@ -196,6 +196,7 @@
 - `resolution:chapter=commons`
 - `resolution:chapter=ordinary`
 - `resolution:chapter=proper`
+- `resolution:chapter=seasonal`
 - `resolution:collect=commons`
 - `resolution:collect=ordinary`
 - `resolution:collect=proper`

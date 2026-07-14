@@ -2,6 +2,12 @@
 # In the Benedictine rite, Alleluia is NOT suppressed during Advent.
 # Add overrides here as needed.
 
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 122
+!Isa 2:3
+Come ye, and let us go up to the mountain of the Lord, to the house of the God of Jacob, and he will teach us of his ways, and we will walk in his paths: for out of Sion shall go forth the law, and the word of the Lord from Jerusalem.
+R. Thanks be to God.
+
 [hymn-lauds]
 # SOURCE: office-hymns.zip (A Thrilling Voice by Jordan Rings, Advent Lauds.docx); draft archdiocesan Lauds book, pp. 13, 24, 36, 46
 Vox clara ecce intonat
