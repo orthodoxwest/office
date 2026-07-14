@@ -195,8 +195,9 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.
 O Lord, hear my prayer; and let our cry come unto thee.
 
 [chapter]
+# SOURCE: draft archdiocesan Vespers book, p. 129 (Wednesday; citation includes the quoted opening of verse 4)
 !2 Cor. 1:3-4
-Blessed be the God and Father of our Lord Jesus Christ, the Father of
+Blessed be God, even the Father of our Lord Jesus Christ, the Father of
 mercies, and the God of all comfort, who comforteth us in all our tribulation.
 R. Thanks be to God.
 
@@ -339,20 +340,20 @@ O Lord, remember Israel * and all his meekness.
 Behold * how good and how pleasant it is for brethren to dwell together in unity.
 
 [psalm-antiphon-1-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 4)] — check against diurnal
-Whatsoever * the Lord hath pleased he hath done.
+# SOURCE: draft archdiocesan Vespers book, p. 124 (Wednesday)
+Whatsoever * the Lord pleased, that did he.
 
 [psalm-antiphon-2-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 4)] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 126 (Wednesday)
 For his mercy * endureth for ever.
 
 [psalm-antiphon-3-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 4)] — check against diurnal
-Sing ye to us * a hymn of the songs of Sion.
+# SOURCE: draft archdiocesan Vespers book, p. 127 (Wednesday)
+Sing us one * of the songs of Sion.
 
 [psalm-antiphon-4-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 4)] — check against diurnal
-Before the Angels will * I sing praise unto thee, O my God.
+# SOURCE: draft archdiocesan Vespers book, p. 128 (Wednesday)
+Before the gods * will I sing praise unto thee, my God.
 
 [psalm-antiphon-1-thursday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal

@@ -41,15 +41,15 @@ R. He clothed him with a robe of glory.
 Grant, we beseech thee, almighty God, that the venerable feast of N. thy blessed Confessor and Bishop may increase our devotion and promote our salvation.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 406 (Bishop, Confessor, & Doctor)
-!Sir 50:1
-Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+# SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 307 (Bishop, Confessor, & Doctor)
-!Sir 50:1
-Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+# SOURCE: draft archdiocesan Vespers book, pp. 626, 638 (Common of a Confessor and Bishop)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -81,3 +81,36 @@ All glory, praise, and thanks we bring:
 All glory, as is ever meet,
 To Father and to Paraclete.
 Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 407, 658
+R. The Lord loved him * and adorned him.
+R. The Lord loved him * and adorned him.
+V. He clothed him with a robe of glory.
+R. And adorned him.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him * and adorned him.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 308, 316, 627, 638
+R. The Lord chose him * for a priest unto himself.
+R. The Lord chose him * for a priest unto himself.
+V. To offer unto him the sacrifice of praise.
+R. For a priest unto himself.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord chose him * for a priest unto himself.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 408, 661
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 309, 631
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 318, 642
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.

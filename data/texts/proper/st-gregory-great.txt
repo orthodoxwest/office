@@ -1,2 +1,49 @@
 [collect]
 O God, who hast blessed the soul of thy servant Gregory with an everlasting blessing, mercifully grant that we, who groan under the burden of our sins, may by his prayers be relieved.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 406 (St Gregory the Great)
+!Sir 50:1
+Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 307 (St Gregory the Great)
+!Sir 50:1
+Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+R. Thanks be to God.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 308, 317 (St Gregory the Great)
+Anglorum jam Apostolus
+
+Apostle of the English, thou
+Art comrade of the Angels now:
+O help the faithful, Gregory,
+Who heardest then the people's cry.
+
+Abundant wealth was naught to thee
+Who, seeking princely penury,
+Didst spurn the glory of the earth
+To follow Jesus in his dearth.
+
+Like some poor needy shipwreck'd soul,
+His messenger besought a dole;
+Twin gifts thou gavest; nothing loth
+To offer self and silver both.
+
+First in the Church from that time forth
+Christ set thee, in thy proven worth;
+So didst thou rise to Peter's throne,
+Whose life was pattern for thine own.
+
+O Priest and Leader of the flock,
+The Church's glory, light, and rock,
+Instructed by thy wise command,
+Let not the sheep in peril stand.
+
+Praise to the unbegotten One,
+And glory to his only Son;
+And thine, O Spirit, breath of God,
+Be equal majesty and laud.
+Amen.

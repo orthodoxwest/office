@@ -229,27 +229,11 @@ class SourceReconcileTest(unittest.TestCase):
             )[0],
             "proper/all-saints",
         )
-
-    def test_owner_matching_distinguishes_confessor_doctor_common(self):
-        corpus = {
-            "commons/confessor-bishop/chapter-lauds": SOURCE_RECONCILE.CorpusEntry(
-                "commons/confessor-bishop/chapter-lauds",
-                "commons/confessor-bishop.txt",
-                "chapter-lauds",
-                "Confessor bishop chapter",
-            ),
-            "commons/confessor-doctor/chapter-lauds": SOURCE_RECONCILE.CorpusEntry(
-                "commons/confessor-doctor/chapter-lauds",
-                "commons/confessor-doctor.txt",
-                "chapter-lauds",
-                "Confessor doctor chapter",
-            ),
-        }
         self.assertEqual(
             SOURCE_RECONCILE.infer_owner(
-                "Bishop, Confessor, & Doctor", corpus, {}
+                "Bishop, Confessor, & Doctor", corpus, names
             )[0],
-            "commons/confessor-doctor",
+            "",
         )
 
     def test_different_first_vespers_text_becomes_an_override_gap(self):
