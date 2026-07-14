@@ -388,8 +388,8 @@ Blessed be * the Lord my God.
 Day by day * I shall bless thee, O Lord.
 
 [psalm-antiphon-1-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 7)] — check against diurnal
-Thy kingdom, * O Lord, is a kingdom for all ages.
+# SOURCE: draft archdiocesan Vespers book, p. 210
+Thy kingdom, * O Lord, is an everlasting kingdom.
 
 [psalm-antiphon-2-saturday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 7)] — check against diurnal

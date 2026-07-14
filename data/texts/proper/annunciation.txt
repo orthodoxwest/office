@@ -33,9 +33,9 @@ R. The Lord is with thee. (Alleluia.)
 O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 437
 !Isa 7:14-15
-Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -122,9 +122,9 @@ V. Hail, Mary, full of grace. (Alleluia.)
 R. The Lord is with thee. (Alleluia.)
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 351
 !Isa 7:14-15
-Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-terce]

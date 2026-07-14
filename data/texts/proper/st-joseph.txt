@@ -39,9 +39,9 @@ R. And ruler of all His substance.
 Help us, we beseech thee, O Lord, for the sake of the Husband of thy most holy Mother, that what we cannot for ourselves obtain, Thou mayest grant us at his petition.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 417
 !Prov 28:20; 27:18
-A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
+A faithful man shall abound with blessings; and he that waiteth on his Master shall be honoured.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -143,9 +143,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The righteous shall grow * as the lily.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 333
 !Prov 28:20; 27:18
-A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
+A faithful man shall abound with blessings; and he that waiteth on his Master shall be honoured.
 R. Thanks be to God.
 
 [chapter-terce]
