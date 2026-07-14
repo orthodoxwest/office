@@ -405,6 +405,40 @@ func TestComposeLaudsSundayPsalmodyOmitsFestalPsalms(t *testing.T) {
 	}
 }
 
+func TestComposeHourKeepsResolutionKeyButCanonicalizesAliasDependency(t *testing.T) {
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 9, 8, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Celebration: &models.Feast{
+			ID: "nativity-bvm", Category: models.CategoryBlessedVirgin,
+		},
+	}
+
+	hour, err := engine.ComposeHour("lauds", day, calendar.ComputeMoveableDates(2026))
+	if err != nil {
+		t.Fatalf("ComposeHour(lauds): %v", err)
+	}
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			if elem.SlotRef != "hymn" {
+				continue
+			}
+			if elem.SourceRef != "proper/nativity-bvm/hymn-lauds" {
+				t.Fatalf("SourceRef = %q, want proper resolution key", elem.SourceRef)
+			}
+			if len(elem.SourceRefs) != 1 || elem.SourceRefs[0] != "shared/blessed-virgin/hymn-lauds" {
+				t.Fatalf("SourceRefs = %v, want canonical shared dependency", elem.SourceRefs)
+			}
+			return
+		}
+	}
+	t.Fatal("composed Lauds has no hymn slot")
+}
+
 func TestAddCommemorationsUsesProperIDAlias(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/pentecost-sunday-23/commemoration-antiphon": "XXIII Pentecost antiphon",

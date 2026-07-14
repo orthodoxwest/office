@@ -55,28 +55,28 @@ R. They shall be joyful in their beds.
 Grant, we beseech thee, almighty God, that the venerable feast of blessed N. thy Martyr may both increase our devotion and promote our salvation.
 
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C2a [HymnusM Laudes] — check against diurnal
-Martyr Dei, qui unicum
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 133, 137
+Rex gloriose martyrum
 
-Martyr of God, whose strength was steeled
-To follow close God's only Son,
-Well didst thou brave thy battlefield,
-And well thy heavenly bliss was won!
+All glorious King of Martyrs thou,
+Crown of Confessors here below;
+Whom, casting earthly joys away,
+Thou guidest to celestial day.
 
-Now join thy prayers with ours, who pray
-That God may pardon us and bless;
-For prayer keeps evil's plague away,
-And draws from life its weariness.
+Thine ear in mercy, Saviour, lend,
+While unto thee our prayers ascend:
+And as we count their triumph won,
+Forgive the sins that we have done.
 
-Long, long ago, were loosed the chains
-That held thy body once in thrall;
-For us how many a bond remains!
-O love of God release us all.
+Martyrs in thee their triumph gain;
+From thee, Confessors grace obtain:
+O'ercome in us the lust of sin,
+That we thy pardoning love may win.
 
-All praise to God the Father be,
-All praise to thee, Eternal Son;
-All praise, O Holy Ghost, to thee,
-While never-ending ages run.
+All laud to God the Father be;
+All laud, eternal Son, to thee;
+All laud, as is for ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [chapter-lauds]
@@ -125,31 +125,54 @@ V. Be glad, O ye righteous, and rejoice in the Lord.
 R. And be joyful, all ye that are true of heart.
 
 [hymn-vespers]
-# SOURCE: divinum-officium CommuneM/C2a [HymnusM Vespera] — check against diurnal
-Deus tuorum militum
+# SOURCE: office-hymns.zip (The Merits of the Saints.docx)
+Sanctorum meritis
 
-O God, of those that fought thy fight,
-Portion, and prize, and crown of light,
-Break every bond of sin and shame
-As now we praise thy martyr's name.
+The merits of the Saints,
+Blessed for evermore,
+Their love that never faints,
+The toils they bravely bore;
+For these the Church today
+Pours forth her joyous lay:
+These victors win the noblest bay.
 
-He recked not of the world's allure,
-But sin and pomp of sin forswore:
-Knew all their gall, and passed them by,
-And reached the throne prepared on high.
+They whom this world of ill,
+While it yet held, abhorred:
+Its withering flow'rs that still
+They spurned with one accord:
+They knew them short-lived all,
+And followed at thy call,
+King Jesu, to thy heavenly hall.
 
-Bravely the course of pain he ran,
-And bare his torments as a man:
-For love of thee his blood outpoured,
-And thus obtained the great reward.
+For thee all pangs they bare,
+Fury and mortal hate,
+The cruel scourge to tear,
+The hook to lacerate;
+But vain their foes' intent:
+For, every torment spent,
+Their valiant spirits stood unbent.
 
-With humble voice and suppliant word
-We pray thee therefore, holy Lord,
-While we thy martyr's feast-day keep,
-Forgive thy loved and erring sheep.
+Like sheep their blood they poured:
+And without groan or tear
+They bent before the sword
+For that their King most dear:
+Their souls, serenely blest,
+In patience they possessed,
+And looked in hope towards their rest.
 
-* Glory and praise for aye be done
-To God the Father, and the Son,
-And Holy Ghost, who reign on high,
-One God, to all eternity.
+What tongue may here declare,
+Fancy or thought descry,
+The joys thou dost prepare
+For these thy Saints on high!
+Empurpled in the flood
+Of their victorious blood,
+They won the laurel from their God.
+
+To thee, O Lord Most High,
+One in Three Persons still,
+To pardon us we cry
+And to preserve from ill:
+Here give thy servants peace,
+Hereafter glad release,
+And pleasures that shall never cease.
 Amen.

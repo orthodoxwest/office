@@ -76,10 +76,38 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 		return nil, fmt.Errorf("composing %s: %w", hourName, err)
 	}
 
+	canonicalizeSourceRefs(hour, e.corpus)
 	collapseUniformAntiphons(hour)
 	markPsalmDoxologies(hour)
 	appendContextDecisions(hour, day, hourName)
 	return hour, nil
+}
+
+// canonicalizeSourceRefs makes review dependencies follow corpus aliases.
+// SourceRef remains the key selected by composition so resolution-tier
+// diagnostics continue to distinguish proper, commons, seasonal, and ordinary
+// selection; SourceRefs carries the canonical texts that humans must review.
+func canonicalizeSourceRefs(hour *models.OfficeHour, corpus *texts.TextCorpus) {
+	canonical := func(ref string) string {
+		if resolved := corpus.CanonicalRef(ref); resolved != "" {
+			return resolved
+		}
+		return ref
+	}
+	for si := range hour.Sections {
+		for ei := range hour.Sections[si].Elements {
+			elem := &hour.Sections[si].Elements[ei]
+			originalRefs := elem.SourceRefs
+			if len(originalRefs) == 0 && elem.SourceRef != "" {
+				originalRefs = []string{elem.SourceRef}
+			}
+			refs := make([]string, len(originalRefs))
+			for i, ref := range originalRefs {
+				refs[i] = canonical(ref)
+			}
+			elem.SourceRefs = compactRefs(refs)
+		}
+	}
 }
 
 func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, hourName string) {

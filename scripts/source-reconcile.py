@@ -108,6 +108,37 @@ STANDALONE_CANTICLE_BOOKS = (
     ),
 )
 
+FERIAL_LAUDS_BOOK = "Copy of OCP Ferial Lauds.pdf"
+
+# The 2025 Sunday/feast master already supplies newer witnesses for Wednesday.
+# These twenty slots are the remaining per-annum Monday, Tuesday, Thursday,
+# and Friday antiphons whose corpus provenance still points only to a generic
+# Divinum Officium seed.  Each target page contains the printed antiphon before
+# and/or after its psalm; extraction below requires every occurrence on that
+# page to agree.
+FERIAL_LAUDS_ANTIPHON_TARGETS = (
+    ("Monday", 1, 7),
+    ("Monday", 2, 8),
+    ("Monday", 3, 9),
+    ("Monday", 4, 10),
+    ("Monday", 5, 11),
+    ("Tuesday", 1, 23),
+    ("Tuesday", 2, 24),
+    ("Tuesday", 3, 25),
+    ("Tuesday", 4, 26),
+    ("Tuesday", 5, 28),
+    ("Thursday", 1, 56),
+    ("Thursday", 2, 57),
+    ("Thursday", 3, 58),
+    ("Thursday", 4, 60),
+    ("Thursday", 5, 62),
+    ("Friday", 1, 76),
+    ("Friday", 2, 77),
+    ("Friday", 3, 78),
+    ("Friday", 4, 79),
+    ("Friday", 5, 82),
+)
+
 HEADINGS = {
     "chapter": "THE CHAPTER",
     "short-responsory": "THE SHORT RESPONSORY",
@@ -222,6 +253,59 @@ def read_docx_paragraphs(path: pathlib.Path) -> list[Paragraph]:
             paragraphs.append(Paragraph(page, text))
         page += sum(1 for _ in node.iter(W_NS + "lastRenderedPageBreak"))
     return paragraphs
+
+
+def read_pdf_pages(path: pathlib.Path) -> dict[int, str]:
+    """Return searchable PDF text keyed by one-based rendered page number."""
+    result = subprocess.run(
+        ["pdftotext", "-layout", str(path), "-"],
+        check=True,
+        text=True,
+        capture_output=True,
+    )
+    return {
+        number: page
+        for number, page in enumerate(result.stdout.split("\f"), start=1)
+        if page.strip()
+    }
+
+
+def extract_ferial_lauds_antiphons(
+    source: str,
+    pages: dict[int, str],
+    targets: tuple[tuple[str, int, int], ...],
+) -> list[SourceCandidate]:
+    """Extract fixed weekday antiphon slots from the searchable OCP booklet."""
+    candidates = []
+    for weekday, slot, page_number in targets:
+        page = pages.get(page_number, "")
+        marker = re.compile(rf"Antiphon\s+{slot}:\s*(.+?)\s*$", re.I | re.M)
+        source_forms = {
+            collapse_space(match.group(1)).replace("†", "*")
+            for match in marker.finditer(page)
+        }
+        if len(source_forms) != 1:
+            raise ValueError(
+                f"{source}: expected one distinct Antiphon {slot} form on "
+                f"page {page_number}, found {sorted(source_forms)!r}"
+            )
+        source_text = collapse_space(source_forms.pop())
+        weekday_key = weekday.lower()
+        corpus_key = f"ordinary/lauds/psalm-antiphon-{slot}-{weekday_key}"
+        candidates.append(
+            SourceCandidate(
+                source=source,
+                source_page=page_number,
+                hour="lauds",
+                office_title=f"{weekday} Ferial Lauds",
+                office_variant="per annum",
+                slot=f"psalm-antiphon-{slot}-{weekday_key}",
+                latin_incipit="",
+                source_text=source_text,
+                corpus_key=corpus_key,
+            )
+        )
+    return candidates
 
 
 def clean_canticle_underlay(paragraphs: list[Paragraph]) -> str:
@@ -1374,6 +1458,15 @@ def cmd_build(args: argparse.Namespace) -> int:
                 path.name, hour, canticle, paragraphs, targets
             )
         )
+
+    ferial_path = choose_master(resources, FERIAL_LAUDS_BOOK)
+    candidates.extend(
+        extract_ferial_lauds_antiphons(
+            ferial_path.name,
+            read_pdf_pages(ferial_path),
+            FERIAL_LAUDS_ANTIPHON_TARGETS,
+        )
+    )
 
     corpus = load_corpus(data_dir)
     feast_names = load_feast_names(data_dir)

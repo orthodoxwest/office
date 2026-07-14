@@ -79,6 +79,39 @@ class SourceReconcileTest(unittest.TestCase):
         self.assertEqual(candidate.current_text, corpus[candidate.corpus_key].text)
         self.assertEqual(candidate.title_similarity, 1.0)
 
+    def test_extracts_fixed_ferial_lauds_antiphons(self):
+        pages = {
+            7: "Antiphon 1: Have mercy † upon me, O God.\nPsalm 50\n"
+            "Antiphon 1: Have mercy † upon me, O God.\n",
+            8: "Antiphon 2: Consider † my meditation, O Lord.\n",
+        }
+        candidates = SOURCE_RECONCILE.extract_ferial_lauds_antiphons(
+            "ferial-lauds.pdf",
+            pages,
+            (("Monday", 1, 7), ("Monday", 2, 8)),
+        )
+        self.assertEqual(len(candidates), 2)
+        self.assertEqual(
+            candidates[0].corpus_key,
+            "ordinary/lauds/psalm-antiphon-1-monday",
+        )
+        self.assertEqual(candidates[0].source_page, 7)
+        self.assertEqual(candidates[0].source_text, "Have mercy * upon me, O God.")
+        self.assertEqual(
+            candidates[1].source_text, "Consider * my meditation, O Lord."
+        )
+
+    def test_rejects_ambiguous_ferial_lauds_page(self):
+        with self.assertRaisesRegex(ValueError, "one distinct Antiphon 1 form"):
+            SOURCE_RECONCILE.extract_ferial_lauds_antiphons(
+                "ferial-lauds.pdf",
+                {
+                    7: "Antiphon 1: First form.\n"
+                    "Antiphon 1: Different form.\n"
+                },
+                (("Monday", 1, 7),),
+            )
+
     def test_title_and_variant_come_from_office_prelude(self):
         history = [
             Paragraph(39, "december 25"),

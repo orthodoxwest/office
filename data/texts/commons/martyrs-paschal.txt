@@ -38,3 +38,23 @@ Saints and just * rejoice in the Lord, alleluia, the Lord has chosen you for his
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Commune/C1p [Ant 1] — check against diurnal
 Eternal light will shine * over your saints, O Lord, and the eternity of times, alleluia.
+
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 136
+!Wis 5:1
+Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labors.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 136
+R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
+R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
+V. God hath chosen you to him to be his inheritance.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 137
+V. Right dear in the sight of the Lord, alleluia.
+R. Is the death of his saints, alleluia.

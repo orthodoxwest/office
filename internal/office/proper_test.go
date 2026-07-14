@@ -470,3 +470,26 @@ func TestResolveProperTextEasterHourQualifiedOverrides(t *testing.T) {
 		t.Fatalf("vespers versicle = %q (%s), want seasonal hour-qualified override", got, ref)
 	}
 }
+
+func TestResolveProperTextEasterFeastProperVariant(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/example/short-responsory-lauds":         "Regular feast response",
+		"proper/example-paschal/short-responsory-lauds": "Paschal feast response",
+		"seasonal/easter/short-responsory-lauds":        "Generic Easter response",
+	})
+
+	day := &models.CalendarDay{
+		Season:      models.Easter,
+		Celebration: &models.Feast{ID: "example"},
+	}
+	got, ref := resolveProperText(day, "lauds", "short-responsory", corpus)
+	if got != "Paschal feast response" || ref != "proper/example-paschal/short-responsory-lauds" {
+		t.Fatalf("short-responsory = %q (%s), want feast-specific Paschal override", got, ref)
+	}
+
+	day.Season = models.Lent
+	got, ref = resolveProperText(day, "lauds", "short-responsory", corpus)
+	if got != "Regular feast response" || ref != "proper/example/short-responsory-lauds" {
+		t.Fatalf("Lent short-responsory = %q (%s), want regular feast proper", got, ref)
+	}
+}

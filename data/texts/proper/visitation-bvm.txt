@@ -38,115 +38,29 @@ Blessed art thou, * O Mary, for thou hast believed: and there shall be a perform
 Mary arose, * and went into the hill country with haste, into a city of Judah.
 
 [commemoration-versicle]
-V. Blessed art thou among women.
-R. And blessed is the fruit of thy womb.
+@use shared/blessed-virgin/versicle-blessed-art-thou
 
 [collect]
 Grant, O Lord, we beseech thee, unto all thy servants, the gift of thine heavenly grace, that even as the Blessed Virgin being made a Mother hath been unto them the first step unto their salvation, so the godly and solemn memorial of her Visitation may be the bringer of an increase of peace.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 497 (Visitation BVM)
-!Sir 24:9-10
-He created me from the beginning from before the world, and I shall never fail. In the holy tabernacle I served before him.
-R. Thanks be to God.
+@use shared/blessed-virgin/chapter-sirach-24-9-10
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 429 (Visitation BVM)
-!Sir 24:9-10
-He created me from the beginning from before the world, and I shall never fail. In the holy tabernacle I served before him.
-R. Thanks be to God.
+@use shared/blessed-virgin/chapter-sirach-24-9-10
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx); draft archdiocesan Lauds book, p. 498
-O gloriosa Domina
-
-O glorious Lady, throned in rest,
-Amidst the starry host above,
-Who gavest nurture from thy breast
-To God, with pure maternal love.
-
-What we had lost through sinful Eve
-The Blossom sprung from thee restores,
-And, granting bliss to souls that grieve,
-Unbars the everlasting doors.
-
-O Gate, through which hath pass'd the King,
-O Hall, whence Light shone through the gloom;
-The ransom'd nations praise and sing
-Life given from the Virgin womb.
-
-All honour, laud, and glory be,
-O Jesu, Virgin-born, to thee;
-All glory, as is ever meet,
-To Father and to Paraclete.
-Amen.
-
+@use shared/blessed-virgin/hymn-lauds
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, pp. 430–431
-Ave, maris stella
-
-/:The first stanza of the following hymn is said kneeling.:/
-
-Star of ocean fairest,
-Mother, God who barest,
-Virgin thou immortal,
-Heaven's blissful portal.
-
-Ave thou receivest,
-Gabriel's word believest,
-Change to peace and gladness
-Eva's name of sadness.
-
-Loose the bonds of terror,
-Lighten blinded error,
-All our ills repressing,
-Pray for every blessing.
-
-Mother's care displaying,
-Offer him thy praying,
-Who, when born our Brother,
-Chose thee for his Mother.
-
-Virgin all-excelling,
-Gentle past our telling,
-Pardoned sinners render
-Gentle, chaste, and tender.
-
-In pure paths direct us,
-On our way protect us,
-Till, on Jesus gazing,
-We shall join thy praising.
-
-Father, Son eternal,
-Holy Ghost supernal,
-With one praise we bless thee,
-Three in One confess thee.
-Amen.
-
+@use shared/blessed-virgin/hymn-vespers
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 498 (Visitation BVM)
-R. Hail, Mary, full of grace, * the Lord is with thee.
-R. Hail, Mary, full of grace, * the Lord is with thee.
-V. Blessed art thou among women, and blessed is the fruit of thy womb.
-R. The Lord is with thee.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Hail, Mary, full of grace, * the Lord is with thee.
+@use shared/blessed-virgin/short-responsory
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 430 (Visitation BVM)
-R. Hail, Mary, full of grace, * the Lord is with thee.
-R. Hail, Mary, full of grace, * the Lord is with thee.
-V. Blessed art thou among women, and blessed is the fruit of thy womb.
-R. The Lord is with thee.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Hail, Mary, full of grace, * the Lord is with thee.
+@use shared/blessed-virgin/short-responsory
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 499 (Visitation BVM)
-V. Blessed art thou among women.
-R. And blessed is the fruit of thy womb.
+@use shared/blessed-virgin/versicle-blessed-art-thou
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 431 (Visitation BVM)
-V. Blessed art thou among women.
-R. And blessed is the fruit of thy womb.
+@use shared/blessed-virgin/versicle-blessed-art-thou

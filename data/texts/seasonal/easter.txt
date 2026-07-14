@@ -4,6 +4,12 @@
 [alleluia]
 Alleluia, alleluia, alleluia.
 
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 128
+!Rom 6:9-10
+Christ being raised from the dead dieth no more; death hath no more dominion over him. For in that he died, he died unto sin once: but in that he liveth, he liveth unto God.
+R. Thanks be to God.
+
 [short-responsory-lauds]
 R. The Lord is risen from the tomb, alleluia, alleluia.
 The Lord is risen from the tomb, alleluia, alleluia.
@@ -19,6 +25,41 @@ V. Who for our sakes hung upon the tree.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord is risen from the tomb, alleluia, alleluia.
+
+[hymn-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129; office-hymns.zip (Light_s Glittering Morn Bedecks the Sky, Paschaltide Lauds.docx)
+Aurora lucis rutilat
+
+Light's glittering morn bedecks the sky,
+Heav'n thunders forth its victor cry,
+The glad earth shouts its triumph high,
+And groaning hell makes wild reply:
+
+While he, the King of glorious might,
+Treads down death's strength in death's despite,
+And trampling hell by victor's right,
+Brings forth his sleeping Saints to light.
+
+Fast barred beneath the stone of late
+In watch and ward where soldiers wait,
+Now shining in triumphant state,
+He rises Victor from death's gate.
+
+Hell's pains are loosed and tears are fled;
+Captivity is captive led;
+The Angel, crowned with light, hath said,
+'The Lord is risen from the dead.'
+
+We pray thee, King with glory decked,
+In this our Paschal joy, protect
+From all that death would fain effect
+Thy ransomed flock, thine own elect.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
 
 [short-responsory-prime]
 R. Christ, Son of the living God, have mercy on us, alleluia, alleluia.
@@ -57,8 +98,9 @@ V. Keep us, O Lord, as the apple of an eye, alleluia.
 R. Hide us under the shadow of thy wings, alleluia.
 
 [versicle-lauds]
-V. Let my mouth be filled with thy praise, alleluia.
-R. That I may sing of thy glory and honour all the day long, alleluia.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129
+V. In thy resurrection, O Christ, alleluia.
+R. Let heaven and earth rejoice, alleluia.
 
 [versicle-vespers]
 V. Let my prayer be set forth in thy sight as the incense, alleluia.

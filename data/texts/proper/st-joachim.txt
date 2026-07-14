@@ -1,3 +1,21 @@
+[collect]
+# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 180
+O God, who didst choose blessed Joachim, before all thy Saints, to be the father of her who bore thy Son: grant, we beseech thee, that as we hold his festival in honour, so we may ever experience his protection.
+
+[benedictus-antiphon]
+# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 180
+Let us praise a man famous * in his generation, with whom the Lord established the blessing of all nations, and the covenant, and made it rest upon his head.
+
+[versicle-lauds]
+# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 180
+V. His seed shall be mighty upon earth.
+R. The generation of the faithful shall be blessed.
+
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/08-16.txt [Ant 1] — check against diurnal
-Let us praise a man * famous in his generation, with whom the Lord didst establish the blessing of all nations, and on whose head He made His covenant to rest.
+# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 243
+Let us praise a man famous * in his generation, with whom the Lord established the blessing of all nations, and the covenant, and made it rest upon his head.
+
+[versicle-first-vespers]
+# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 243
+V. His seed shall be mighty upon earth.
+R. The generation of the faithful shall be blessed.

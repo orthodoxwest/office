@@ -57,49 +57,63 @@ The righteous will give his heart to resort early to the Lord that made him, and
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Commune/C5 [Hymnus Laudes] — check against diurnal
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 141
 Jesu, corona celsior
 
-Jesu, eternal truth sublime,
-Through endless years the same!
-Thou crown of those who through all time
-Confess thy holy name:
+O Jesu, Crown above the sky,
+Thou everlasting Truth most high,
+Who dost to thy Confessor give
+Rewards with those that ever live.
 
-Thy suppliant people, through the prayer
-Of thy blest saint, forgive;
-For his dear sake, thy wrath forbear,
-And bid our spirits live.
+Thy lowly band of suppliants spare;
+O may we, holpen by his prayer,
+Remission of our sins obtain,
+And freedom from each binding chain.
 
-Again returns the sacred day,
-With heavenly glory bright,
-Which saw him go upon his way
-Into the realms of light.
+Again the slowly circling year
+The day of glory bringeth here
+Whereon thy Saint, from flesh set free,
+In power ascended up to thee.
 
-All objects of our vain desire,
-All earthly joys and gains,
-To him were but as filthy mire;
-And now with thee he reigns.
+He deemed the vain delights of earth,
+Its boasted glories, little worth;
+And spurning them as tainted, passed
+To heaven's triumphant joy at last.
 
-Thee, Jesu, his all-gracious Lord,
-Confessing to the last,
-He trod beneath him Satan's fraud,
-And stood forever fast.
+By ever owning thee his King,
+O Christ most gracious, did he fling
+The haughty foe beneath his feet,
+And all his minions bravely beat.
 
-In holy deeds of faith and love,
-In fastings and in prayers,
-His days were spent; and now above
-Thy heavenly feast he shares.
+Renowned for faith and virtue, he
+Confessed his Lord right constantly,
+And with such fasts his flesh subdued
+That he obtained supernal food.
 
-Then, for his sake thy wrath lay by,
-And hear us while we pray;
-And pardon us, O thou most high,
-On this his festal day.
+O thou, most full of love and grace,
+We humbly fall before thy face;
+For this thy servant's sake, we pray,
+Wipe all the debt we owe away.
 
-* All glory to the Father be;
-And sole Incarnate Son;
-Praise, holy Paraclete, to thee;
-While endless ages run.
+Glory to thee, O Father, Lord,
+And to thy Sole-Begotten Word,
+Both with the Holy Spirit One
+While everlasting ages run.
 Amen.
+
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 140
+R. The Lord loved him * and adorned him.
+R. The Lord loved him * and adorned him.
+V. He clothed him with a robe of glory.
+R. And adorned him.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him * and adorned him.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 141
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.
 
 [short-responsory-sext]
 # SOURCE: divinum-officium Commune/C5 [Responsory Breve Sexta] — check against diurnal
@@ -118,6 +132,36 @@ V. None of his steps shall slide.
 R. In his heart.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The law of his God * is in his heart.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (This the Confessor (tune for Conf not Bishop).docx)
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+Merited this day joyfully to enter
+Heavenly mansions.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have our portion
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Only and Trinal.
+Amen.
 
 [chapter-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 649 (Common of a Confessor not a Bishop)

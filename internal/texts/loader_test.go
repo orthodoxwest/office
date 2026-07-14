@@ -92,6 +92,66 @@ Second stanza line one.
 	}
 }
 
+func TestLoadTextsResolvesAliasesAndOmitsThemFromEntries(t *testing.T) {
+	dir := t.TempDir()
+	properDir := filepath.Join(dir, "texts", "proper")
+	os.MkdirAll(properDir, 0755)
+	os.WriteFile(filepath.Join(properDir, "shared.txt"), []byte(`[responsory]
+R. Shared text.
+
+[alias]
+@use proper/shared/responsory
+
+[alias-chain]
+@use proper/shared/alias
+`), 0644)
+
+	corpus, err := LoadTexts(dir)
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+	if got := corpus.Get("proper/shared/alias-chain"); got != "R. Shared text." {
+		t.Fatalf("Get(alias-chain) = %q", got)
+	}
+	if got := corpus.CanonicalRef("proper/shared/alias-chain"); got != "proper/shared/responsory" {
+		t.Fatalf("CanonicalRef(alias-chain) = %q", got)
+	}
+	if !corpus.Has("proper/shared/alias") {
+		t.Fatal("Has(alias) = false")
+	}
+	if _, ok := corpus.Entries()["proper/shared/alias"]; ok {
+		t.Fatal("Entries includes alias")
+	}
+}
+
+func TestLoadTextsRejectsBrokenAliases(t *testing.T) {
+	tests := map[string]string{
+		"missing target": `[alias]
+@use proper/missing/text
+`,
+		"cycle": `[one]
+@use proper/shared/two
+
+[two]
+@use proper/shared/one
+`,
+		"malformed": `[alias]
+@use proper/shared/text extra
+`,
+	}
+	for name, body := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			properDir := filepath.Join(dir, "texts", "proper")
+			os.MkdirAll(properDir, 0755)
+			os.WriteFile(filepath.Join(properDir, "shared.txt"), []byte(body), 0644)
+			if _, err := LoadTexts(dir); err == nil {
+				t.Fatal("LoadTexts accepted broken alias")
+			}
+		})
+	}
+}
+
 func TestFindPlaceholders(t *testing.T) {
 	corpus := NewTestCorpus(map[string]string{
 		// Plain text placeholder (e.g. canticles/benedicite)

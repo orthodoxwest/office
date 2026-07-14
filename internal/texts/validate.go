@@ -90,6 +90,10 @@ func unexpectedDirectiveReason(trimmed string) string {
 	if trimmed == "" || strings.HasPrefix(trimmed, "#") {
 		return ""
 	}
+	fields := strings.Fields(trimmed)
+	if len(fields) == 2 && fields[0] == "@use" {
+		return ""
+	}
 	switch {
 	case strings.HasPrefix(trimmed, "@"):
 		return "unexpected Divinum Officium directive"

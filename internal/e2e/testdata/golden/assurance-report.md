@@ -3,12 +3,12 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 237 |
-| Selected structural-review pages | 45 |
+| Modeled structural features | 248 |
+| Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 2031 |
-| Text entries with unknown source | 510 |
+| Text entries needing review | 2076 |
+| Text entries with unknown source | 485 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
@@ -47,22 +47,28 @@
 - `decision:condition:feast-easter-sunday=omitted`
 - `decision:condition:feast-holy-saturday=included`
 - `decision:condition:feast-holy-saturday=omitted`
+- `decision:condition:feast-saturday-office-bvm,not-season-easter=included`
+- `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
+- `decision:condition:feast-saturday-office-bvm,season-easter=included`
+- `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
 - `decision:condition:if-cross-commemoration=included`
 - `decision:condition:if-cross-commemoration=omitted`
 - `decision:condition:if-preces=included`
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
-- `decision:condition:is-feast,not-feast-easter-sunday=included`
-- `decision:condition:is-feast,not-feast-easter-sunday=omitted`
+- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
+- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=included`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=omitted`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=included`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=omitted`
-- `decision:condition:not-feast-easter-sunday=included`
-- `decision:condition:not-feast-easter-sunday=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
 - `decision:condition:not-is-feast,weekday-friday=included`
@@ -196,6 +202,7 @@
 - `resolution:chapter=commons`
 - `resolution:chapter=ordinary`
 - `resolution:chapter=proper`
+- `resolution:chapter=seasonal`
 - `resolution:collect=commons`
 - `resolution:collect=ordinary`
 - `resolution:collect=proper`
@@ -241,6 +248,10 @@
 - `resolution:psalm-antiphon-5=ordinary`
 - `resolution:psalm-antiphon-5=proper`
 - `resolution:psalm-antiphon-5=seasonal`
+- `resolution:saturday-psalm-antiphon-1=proper`
+- `resolution:saturday-psalm-antiphon-2=proper`
+- `resolution:saturday-psalm-antiphon-3=proper`
+- `resolution:saturday-psalm-antiphon-4=proper`
 - `resolution:short-responsory=commons`
 - `resolution:short-responsory=ordinary`
 - `resolution:short-responsory=proper`

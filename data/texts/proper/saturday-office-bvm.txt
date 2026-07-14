@@ -1,0 +1,58 @@
+[saturday-psalm-antiphon-1]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96, 101 (Saturday festal psalmody)
+Be favourable, * O Lord, and gracious.
+
+[saturday-psalm-antiphon-2]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 101–102 (Saturday festal psalmody)
+Hearken unto me, O Lord, * for thy truth and righteousness' sake.
+
+[saturday-psalm-antiphon-3]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 102–103 (Saturday festal psalmody)
+Show us, * O Lord, the light of thy mercy.
+
+[saturday-psalm-antiphon-4]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 103–104 (Saturday festal psalmody)
+Upon the well-tuned cymbals * O praise God.
+
+[chapter-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 106
+!Sir 24:9-10
+He created me from the beginning before the world, and I shall never fail. In the holy tabernacle I served before him.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 106
+R. Hail Mary, full of grace, * The Lord is with thee.
+R. Hail Mary, full of grace, * The Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail Mary, full of grace, * The Lord is with thee.
+
+[hymn-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107; office-hymns.zip (O Glorious Lady, BVM Lauds.docx)
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath passed the King,
+O Hall, whence Light shone through the gloom;
+The ransomed nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[versicle-lauds]
+@use shared/blessed-virgin/versicle-blessed-art-thou

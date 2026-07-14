@@ -1,0 +1,13 @@
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 120
+R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.
+R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107 (Paschaltide rubric)
+V. Blessed art thou among women, alleluia.
+R. And blessed is the fruit of thy womb, alleluia.

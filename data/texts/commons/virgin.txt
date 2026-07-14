@@ -82,6 +82,20 @@ Laud, honour, might, and glory be
 From age to age eternally.
 Amen.
 
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 142
+R. In thy grace * and in thy beauty.
+R. In thy grace * and in thy beauty.
+V. Go forth, ride prosperously, and reign.
+R. And in thy beauty.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In thy grace * and in thy beauty.
+
+[versicle-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
+
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 662 (Common of Virgins)
 Jesu, corona Virginum

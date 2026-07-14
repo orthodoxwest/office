@@ -356,7 +356,7 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 	}
 }
 
-func TestLaudsSaturdayUsesPsalm148Parts(t *testing.T) {
+func TestLaudsSaturdayUsesPsalm143(t *testing.T) {
 	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
 	sections, err := ParseHourDefinition(path)
 	if err != nil {
@@ -382,16 +382,12 @@ func TestLaudsSaturdayUsesPsalm148Parts(t *testing.T) {
 		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
-		{Type: "psalm", Ref: "psalms/148a"},
+		{Type: "psalm", Ref: "psalms/143"},
 		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
-		{Type: "psalm", Ref: "psalms/148b"},
-		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
 		{Type: "canticle", Ref: "canticles/deuteronomy-32"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
 	}
 
 	if len(saturday.Elements) != len(want) {
@@ -400,6 +396,52 @@ func TestLaudsSaturdayUsesPsalm148Parts(t *testing.T) {
 	for i, wantElem := range want {
 		if saturday.Elements[i] != wantElem {
 			t.Fatalf("Psalmody-Saturday[%d] = %+v, want %+v", i, saturday.Elements[i], wantElem)
+		}
+	}
+}
+
+func TestLaudsSaturdayBVMUsesFestalSaturdayPsalmody(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(lauds.txt): %v", err)
+	}
+
+	var bvm *HourSection
+	for i := range sections {
+		if sections[i].Name == "Psalmody-Saturday-BVM" {
+			bvm = &sections[i]
+			break
+		}
+	}
+	if bvm == nil {
+		t.Fatal("missing Psalmody-Saturday-BVM section")
+	}
+
+	wantRefs := []string{
+		"psalms/067",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-1",
+		"psalms/051",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-1",
+		"saturday-psalm-antiphon-2",
+		"psalms/143a",
+		"ordinary/shared/gloria-patri",
+		"psalms/143b",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-2",
+		"saturday-psalm-antiphon-3",
+		"canticles/sirach-36",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-3",
+	}
+	if len(bvm.Elements) != len(wantRefs) {
+		t.Fatalf("Psalmody-Saturday-BVM elements = %d, want %d", len(bvm.Elements), len(wantRefs))
+	}
+	for i, wantRef := range wantRefs {
+		if bvm.Elements[i].Ref != wantRef {
+			t.Fatalf("Psalmody-Saturday-BVM[%d] ref = %q, want %q", i, bvm.Elements[i].Ref, wantRef)
 		}
 	}
 }

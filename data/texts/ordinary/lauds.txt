@@ -2,42 +2,54 @@
 # The Winter Hymn, said from the Octave of Epiphany
 # through Quinquagesima, and from the Sunday nearest
 # the first day of October until Advent
+# SOURCE: office-hymns.zip (Maker of All, Eternal King, Thru the Year, Lauds Winter Hymn.docx)
 Aeterne rerum conditor
 
-O Framer of the earth and sky,
-Ruler of all things high and low,
-Who, clothing time with mystery,
-Dost make the seasons ebb and flow;
+Maker of all, eternal King,
+Who day and night about dost bring:
+Who weary mortals to relieve
+Dost in their turn the seasons give.
 
-Herald of day, the bird doth raise
-His voice in strains of varied tone,
-And, breaking through the midnight haze,
-Doth make the path of night-time known.
+Now chanticleer proclaims the day
+And calls the sun's awakening ray,
+The wand'ring pilgrim's guiding light,
+That marks the watches night by night.
 
-At this the morning star breaks forth
-And leaves the darkness far behind,
-And all the wandering hosts of night
-Yield to the Morningstar their kind.
+Roused at the note, the morning star
+Heaven's dusky veil uplifts afar:
+Night's vagrant bands no longer roam
+But from their dark ways hie them home.
 
-At this the sailor takes new heart,
-The surging billows quit their roar:
-At this the rock of Peter's tears
-Dissolves in weeping o'er and o'er.
+Th'encouraged sailor's fears are o'er,
+The foaming billows rage no more:
+Lo! e'en the very Church's Rock
+Melts at the crowing of the cock.
 
-Arise, arise, then, slumbering souls;
-Arise; the new day fills the sky:
-The star of stars is mounting high,
-Who dares may win the starry prize.
+O let us then all ardent rise;
+The cock rebukes our slumbering eyes,
+Bestirs who still in sleep would lie
+And shames who would their Lord deny.
 
-Jesu, look back on us who fall;
-Thy glance can error's power restrain:
-We weep, but tears are naught at all,
-Unless thou melt the flinty chain.
+New hope his clarion note awakes,
+Sickness the feeble frame forsakes,
+The robber sheathes his lawless sword,
+Faith to the fallen is restored.
 
-Thou Light of lights, thy light restore;
-Sloth from the mind of faith repel:
-Thou First of voices, go before
-Our earliest voices as they swell. Amen.
+Look on us, Jesu, when we fall,
+And with thy look our souls recall:
+If thou but look, our sins are gone,
+And with due tears our pardon won.
+
+Shed through our hearts thy piercing ray,
+Our souls' dull slumber drive away:
+Thy Name be first on ev'ry tongue,
+To thee our earliest praises sung.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
 
 [hymn-sunday-summer]
 # The Summer Hymn — said from the II Sunday after Trinity until the Sunday
@@ -61,162 +73,198 @@ Whose is the glory which through all creation
 Ever resoundeth. Amen.
 
 [hymn-monday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 15 (Monday)
 Splendor paternae gloriae
 
-O Splendour of God's glory bright,
-O thou that bringest light from light,
-O Light of light, light's living spring,
-O Day, all days illumining;
+Thou Brightness of the Father's ray,
+True Light of light and Day of day:
+Light's fountain and eternal spring:
+Thou Morn, the morn illumining!
 
-O thou true Sun, on us thy glance
-Let fall in royal radiance;
-The Spirit's sanctifying beam
-Upon our earthly senses stream.
+Glide in, thou very Sun divine;
+With everlasting brightness shine:
+And shed abroad on every sense
+The Spirit's light and influence.
 
-The Father too our prayers implore,
-Father of glory evermore,
-The Father of all grace and might,
-To banish sin from our delight.
+Thee, Father, let us seek aright,
+The Father of perpetual light,
+The Father of almighty grace,
+Each wile of sin away to chase.
 
-To guide whate'er we nobly do,
-With love all envy to subdue,
-To make ill-fortune turn to fair,
-And give us grace our wrongs to bear.
+Our acts with courage do thou fill:
+Blunt thou the tempter's tooth of ill:
+Misfortune into good convert,
+Or give us grace to bear unhurt.
 
-Our mind be in his keeping placed,
-Our body true to him and chaste,
-Where only faith her fire shall feed,
-To burn the tares of Satan's seed.
+Our spirits, whatsoe'er betide,
+In chaste and loyal bodies guide;
+Let Faith, with fervour unalloyed,
+The bane of falsehood still avoid.
 
-And Christ to us for food shall be,
-From him our drink that welleth free,
-The Spirit's wine, that maketh whole,
-And, mocking not, exalts the soul.
+And Christ our daily food be nigh,
+And Faith our daily cup supply:
+So may we quaff, to calm and bless,
+The Spirit's rapturous holiness.
 
-Joyful be our day's return,
-As with the dawn our Faith shall burn,
-Like noon be our believing bright,
-Our souls unshadowed by the night. Amen.
+Now let the day in joy pass on:
+Our modesty like early dawn,
+Our faith like noontide splendour glow,
+Our souls the twilight never know.
+
+See! morn pursues her shining way:
+True Morning, all thy beams display!
+Son with the mighty Father one,
+The Father wholly in the Son.
+
+All laud to God the Father be,
+All praise, eternal Son, to Thee;
+All glory, as is ever meet,
+To God the holy Paraclete. Amen.
 
 [hymn-tuesday]
-Nox et tenebrae et nubila
-
-Ye clouds and darkness, hosts of night,
-That breed confusion and affright,
-Begone! o'erhead the dawn shines clear,
-The light breaks in and Christ is here.
-
-Earth's gloom flees broken and dispersed,
-By the sun's piercing shafts coerced:
-Such is the light that must efface
-All inward darkness from his face.
-
-The swooning mind's delirious dreams
-Of fond desires, its wanton gleams
-Of lust, are quenched by purity
-In those that long thy face to see.
-
-Gird us with chastity, O Lord,
-O bid the light to be restored,
-No lie to dim us, and no snare
-Of guile to make us less than fair.
-
-So, as the day runs out its course,
-And brings the evening's sobering force,
-Life's glories by renouncing well,
-We keep a pure life's citadel. Amen.
-
-[hymn-wednesday]
-Rerum creator optime
-
-Best Maker of the heavenly dome,
-Who rulest day and night at home,
-And givest time its shifting ways
-In change of nights and change of days,
-
-Hear us, and let thy light impart
-Its brightness to the weary heart,
-That we may never yield to sin
-Though foes assail us from within.
-
-Grant this, dread Father, throned on high,
-To whom all angels ceaseless cry;
-Whom Son and Spirit, too, proclaim,
-And earth and sea and sky the same. Amen.
-
-[hymn-thursday]
-Lux ecce surgit aurea
-
-Lo! the golden sun awakes,
-Roused from slumber night forsakes;
-Prayer arise, and as we pray,
-Let all evil flee away.
-
-All the tongue's excess control;
-Guard the portals of the soul;
-Let the eye no wandering take,
-But virtue's watch for virtue's sake.
-
-Let the inner man be clean;
-Naught impure of heart be seen;
-Pride of body, pride of will,
-O let neither work us ill.
-
-Whatso'er is hid shall shine
-When the day's all-searching line
-Through each heart its light shall throw;
-Nothing then will lie below.
-
-Grant us, Father, morning light;
-Grant the Son to match the height
-Of the Father; Spirit too
-With them grant us to pursue. Amen.
-
-[hymn-friday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 31 (Tuesday)
 Ales diei nuntius
 
-The bird, that is the herald of the day,
-Proclaims that light is nigh;
-And Christ arousing all that slumbering lay,
-Doth call the souls of men to draw them nigh.
+The wingèd herald of the day
+Proclaims the morn's approaching ray:
+And Christ the Lord our souls excites,
+And so to endless life invites.
 
-Stir up the sluggard heart, cries he aloud;
-Break off the chain of sleep;
-Be sober, chaste, and upright, and be bowed
-In prayer, ye faithful ones who vigil keep.
+Take up thy bed, to each He cries,
+Who sick or wrapped in slumber lies;
+And chaste and just and sober stand
+And watch: My coming is at hand.
 
-Jesu, look back on us who fall;
-Thy glance can error's power restrain:
-We weep, but tears are naught at all,
-Unless thou melt the flinty chain.
+With earnest cry, with tearful care,
+Call we the Lord to hear our prayer;
+While supplication, pure and deep,
+Forbids each chastened heart to sleep.
 
-Thou Light of lights, thy light restore;
-Sloth from the mind of faith repel;
-Thou First of voices, go before
-Our earliest voices as they swell. Amen.
+Do Thou, O Christ, our slumbers wake:
+Do Thou the chains of darkness break;
+Purge Thou our former sins away,
+And in our souls new light display.
+
+All laud to God the Father be,
+All praise, eternal Son, to Thee;
+All glory, as is ever meet,
+To God the holy Paraclete. Amen.
+
+[hymn-wednesday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 48 (Wednesday)
+Nox et tenebrae et nubila
+
+Hence, night and clouds that night time brings,
+Confused and dark and troubled things;
+The dawn is here, the sky grows white,
+Christ is at hand; depart from sight.
+
+Earth's dusky veil is torn away,
+Pierced by the sparkling beams of day:
+The world resumes its hues apace
+Soon as the Day-star shows its face.
+
+But thee, O Christ, alone we seek,
+With conscience pure and temper meek,
+With tears and chants we humbly pray
+That Thou wouldst guide us through the day.
+
+For many a shade obscures each sense,
+Which needs Thy beams to purge it thence:
+Light of the Morning Star, illume,
+Serenely shining, all our gloom.
+
+All laud to God the Father be;
+All laud, Eternal Son, to Thee;
+All laud, as is for ever meet,
+To God the Holy Paraclete. Amen.
+
+[hymn-thursday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 66 (Thursday)
+Lux ecce surgit aurea
+
+Behold the golden dawn arise;
+The paling night forsakes the skies:
+Those shades that hid the world from view,
+And us to dangerous error drew.
+
+May this new day be calmly passed,
+May we keep pure while it shall last:
+Nor let our lips from truth depart,
+Nor dark designs engage the heart.
+
+So may the day speed on; the tongue
+No falsehood know, the hands no wrong:
+Our eyes from wanton gaze refrain,
+No guilt our guarded bodies stain.
+
+For God, all-seeing, from on high
+Surveys us with a watchful eye:
+Each day our every act he knows,
+From early dawn to evening's close.
+
+All laud to God the Father be,
+All praise, eternal Son, to Thee;
+All glory, as is ever meet,
+To God the holy Paraclete. Amen.
+
+[hymn-friday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 86 (Friday)
+Aeterna caeli gloria
+
+Eternal Glory of the sky,
+Blest Hope of frail humanity,
+The Father's Sole-begotten One,
+Yet born a spotless Virgin's Son;
+
+Uplift us with Thine arm of might,
+And let our hearts rise pure and bright;
+And ardent in God's praises, pay
+The thanks we owe Him every day.
+
+The Day-star's rays are glittering clear,
+And tell that Day itself is near;
+The shadows of the night depart;
+Thou, Holy Light, illume the heart.
+
+Within our senses ever dwell,
+And worldly darkness thence expel:
+Long as the days of life endure,
+Preserve our souls devout and pure.
+
+The Faith that first must be possessed,
+Root deep within our inmost breast:
+And joyous Hope in second place,
+Then Charity, Thy greatest grace.
+
+All laud to God the Father be,
+All praise, eternal Son, to Thee;
+All glory, as is ever meet,
+To God the holy Paraclete. Amen.
 
 [hymn-saturday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 109 (Saturday)
 Aurora iam spargit polum
 
-Now the purple dawn of day
-Spreads o'er heaven its glowing ray;
-Come, with voices clear and strong,
-Sing the morning's grateful song.
+Dawn sprinkles all the east with light;
+Day o'er the earth is gliding bright;
+Morn's glittering rays their course begin;
+Farewell to darkness and to sin.
 
-With one accord, your voices raise
-To the Lord of life and praise;
-In the dawn let hymns resound,
-For his mercies so abound.
+Each phantom of night, depart,
+Each thought of guilt, forsake the heart:
+Let every ill that darkness brought
+Beneath its shade, now come to nought!
 
-Night hath passed, and day holds sway;
-Cheerful light puts gloom away;
-Christ who guides us safe shall be,
-He the light that all may see.
+So that last morning, dread and great,
+Which we with trembling hope await,
+With blesséd light for us shall glow,
+Who chant the song we sang below.
 
-Hail to thee, O Christ, the King!
-Praises evermore we bring;
-Thee and Father, Spirit blest,
-One great God whom all confessed. Amen.
+All laud to God the Father be,
+All praise, eternal Son, to Thee;
+All glory, as is ever meet,
+To God the holy Paraclete. Amen.
 
 [opening-versicle]
 V. O God, ✠ make speed to save us.
@@ -237,16 +285,18 @@ honestly, as in the day.
 R. Thanks be to God.
 
 [short-responsory]
-R. Heal my soul, O Lord, for I have sinned against thee.
-Heal my soul, O Lord, for I have sinned against thee.
-V. I said: O Lord, have mercy on me.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 14, 30, 47, 65, 85, 108
+R. Heal my soul, * for I have sinned against thee.
+R. Heal my soul, * for I have sinned against thee.
+V. I said, Lord be merciful unto me.
 R. For I have sinned against thee.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Heal my soul, O Lord, for I have sinned against thee.
+R. Heal my soul, * for I have sinned against thee.
 
 [versicle]
-V. Let my mouth be filled with thy praise.
-R. That I may sing of thy glory and honour all the day long.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 15, 31, 48, 66, 86, 109
+V. O satisfy us with thy mercy, and that soon.
+R. So shall we rejoice and be glad all the days of our life.
 
 [benedictus-antiphon]
 Blessed be the Lord God of Israel, for he hath visited and redeemed his people.
@@ -310,9 +360,8 @@ and reigneth, God, for ever and ever.
 R. Amen.
 
 # Ferial psalm antiphons by weekday (Benedictine Lauds scheme: Ps 51,
-# two day-psalms, OT canticle, Laudate). Saturday slots 2-3 (Ps 148a/b)
-# have no counterpart in the monastic tables and use the generic
-# [psalm-antiphon] fallback above.
+# two day-psalms, OT canticle, Laudate). Saturday has one day-psalm,
+# followed by the Song of Moses and Laudate.
 
 [psalm-antiphon-1-sunday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal
@@ -335,44 +384,44 @@ The three young boys * cast into the furnace by the king, fearing not the flames
 Alleluia, * alleluia, alleluia.
 
 [psalm-antiphon-1-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 7 (Monday)
 Have mercy upon me, * O God.
 
 [psalm-antiphon-2-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Hearken to my cry * O Lord.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 8 (Monday)
+Consider * my meditation, O Lord.
 
 [psalm-antiphon-3-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Thy mercy, * O Lord, is in the heavens.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 9 (Monday)
+Thy mercy, * O Lord, reacheth up to the heavens.
 
 [psalm-antiphon-4-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Thy wrath is turned away, * O Lord, and Thou hast comforted me.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 10 (Monday)
+Thine anger * is turned away, O Lord, and thou comfortedst me.
 
 [psalm-antiphon-5-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Praise ye * the Lord from the heavens.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 11 (Monday)
+O praise * the Lord of heaven.
 
 [psalm-antiphon-1-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Blot out, O Lord * my iniquity.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 23 (Tuesday)
+Do away, O Lord, * mine offenses.
 
 [psalm-antiphon-2-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-The salvation of my countenance * and my God.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 24 (Tuesday)
+The help * of my countenance, and my God.
 
 [psalm-antiphon-3-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-For in thee * my soul trusteth.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 25 (Tuesday)
+For my soul trusteth * in thee.
 
 [psalm-antiphon-4-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Keep us safe, O Lord * all the days of our life.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 26 (Tuesday)
+Be thou ready * to save us all the days of our life, O Lord.
 
 [psalm-antiphon-5-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Praise ye the Lord * from the heavens, all His angels.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 28 (Tuesday)
+All ye angels of his, * O praise the Lord of heaven.
 
 [psalm-antiphon-1-wednesday]
 # SOURCE: draft archdiocesan Lauds book, p. 179 (Wednesday)
@@ -395,53 +444,57 @@ The Lord shall judge * the ends of the earth.
 O all ye heavens, * praise ye the Lord.
 
 [psalm-antiphon-1-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Before thee only have I sinned, * O Lord, have mercy on me.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 56 (Thursday)
+Against thee only * have I sinned, O Lord: have mercy upon me.
 
 [psalm-antiphon-2-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Let my prayer * come in before thee.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 57 (Thursday)
+Let my prayer * O Lord, enter into thy presence.
 
 [psalm-antiphon-3-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Lord, * thou hast been our refuge.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 58 (Thursday)
+O Lord * thou hast been our refuge.
 
 [psalm-antiphon-4-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Let us sing unto the Lord, * for He hath triumphed gloriously.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 60 (Thursday)
+I will sing * unto the Lord, for he hath triumphed gloriously.
 
 [psalm-antiphon-5-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Praise ye the Lord * in his holy places.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 62 (Thursday)
+O praise God * in his holiness.
 
 [psalm-antiphon-1-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-With a perfect spirit * strengthen my heart, O God.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 76 (Friday)
+With thy free Spirit * stablish my heart, O God.
 
 [psalm-antiphon-2-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-His name * is great in Israel.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 77 (Friday)
+His Name * is great in Israel.
 
 [psalm-antiphon-3-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 78 (Friday)
 It is a good thing * to give thanks unto the Lord.
 
 [psalm-antiphon-4-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-O Lord, I have heard thy hearing, * and was afraid.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 79 (Friday)
+O Lord * I have heard thy speech, and was afraid.
 
 [psalm-antiphon-5-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-Praise him with timbrel and choir: * praise him with strings and organs.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 82 (Friday)
+In the cymbals and dances, * upon the strings and pipe, O praise the Lord.
 
 [psalm-antiphon-1-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-In thy good will, O Lord, * deal favourably with Sion.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96 (Saturday)
+Be favourable, * O Lord, and gracious.
+
+[psalm-antiphon-2-saturday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 96–97 (Saturday)
+Hearken unto me, O Lord, * for thy truth and righteousness' sake.
+
+[psalm-antiphon-3-saturday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 97–101 (Saturday)
+Ascribe ye greatness * unto our God.
 
 [psalm-antiphon-4-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-Ascribe greatness * to our God.
-
-[psalm-antiphon-5-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-Praise God * upon the resounding cymbals.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 103–104 (Saturday)
+Upon the well-tuned cymbals * O praise God.
