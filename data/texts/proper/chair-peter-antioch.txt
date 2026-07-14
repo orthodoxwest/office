@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 390, 286, 294 (Chair of St Peter at Antioch)
-Behold a great priest, * who in his days pleased God, and was found righteous.
+@use proper/chair-peter-antioch/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 390, 286, 294 (Chair of St Peter at Antioch)
@@ -23,8 +22,7 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 289, 297 (Chair of St Peter at Antioch)
-Good and faithful servant, * enter thou into the joy of thy Lord.
+@use proper/chair-peter-antioch/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 397 (Chair of St Peter at Antioch)
@@ -38,42 +36,23 @@ During his pontificate * never was he moved by respect of men, but rather went e
 Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
 
 [commemoration-versicle]
-V. Thou art Peter.
-R. And upon this rock I will build my Church.
+@use proper/chair-peter-antioch/versicle-vespers
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 398, 292, 301 (Chair of St Peter at Antioch)
 O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 395 (Chair of St Peter at Antioch)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 289, 298 (Chair of St Peter at Antioch)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 396 (Chair of St Peter at Antioch)
-R. The Lord loved him * and adorned him.
-R. The Lord loved him * and adorned him.
-V. He clothed him with a robe of glory.
-R. And adorned him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord loved him * and adorned him.
+@use commons/confessor-bishop/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 290, 298 (Chair of St Peter at Antioch)
-R. The Lord chose him * for a priest unto himself.
-R. The Lord chose him * for a priest unto himself.
-V. To offer unto him the sacrifice of praise.
-R. For a priest unto himself.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord chose him * for a priest unto himself.
+@use commons/confessor-bishop/short-responsory-vespers
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 396; older Sanctoral Lauds, Chair of St Peter at Antioch

@@ -5,7 +5,7 @@ Jesus took His disciples, * and went up into a mountain, and was transfigured be
 Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
 
 [commemoration-antiphon]
-Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
+@use proper/lent-ember-saturday/benedictus-antiphon
 
 [commemoration-versicle]
 V. O Lord, have mercy upon us.

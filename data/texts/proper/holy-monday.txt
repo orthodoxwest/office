@@ -1,5 +1,5 @@
 [psalm-antiphon]
-I hid not my face * from shame and spitting.
+@use proper/holy-monday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 I hid not my face * from shame and spitting.
@@ -23,7 +23,7 @@ And now, O Father, glorify Thou Me * with thine Own Self, with the glory which I
 Thou couldest have no power * at all against Me, except it were given thee from above.
 
 [commemoration-antiphon]
-And now, O Father, glorify Thou Me * with thine Own Self, with the glory which I had with thee before the world was.
+@use proper/holy-monday/benedictus-antiphon
 
 [commemoration-versicle]
 V. Christ became obedient for us unto death.

@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 222 (Fourth Sunday in Lent)
-Then shalt thou be pleased * with the sacrifice of righteousness, if thou wilt turn thy face from my sins.
+@use proper/laetare-sunday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 222 (Fourth Sunday in Lent)
@@ -30,7 +29,7 @@ When Jesus * lifted up his eyes, and saw a great company come unto him, he saith
 Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
 
 [commemoration-antiphon]
-Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+@use proper/laetare-sunday/magnificat-antiphon
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -59,16 +58,10 @@ So then, brethren, we are not the children of the bondwoman, but of the free: by
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Gal 4:22-24
-Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
-R. Thanks be to God.
+@use proper/laetare-sunday/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Gal 4:22-24
-Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
-R. Thanks be to God.
+@use proper/laetare-sunday/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quad4-1 [Ant 2] — check against diurnal
@@ -118,6 +111,4 @@ Thus saith the Lord: * He that followeth Me walketh not in darkness, but shall h
 # SOURCE: divinum-officium Tempora/Quad4-0 [Ant 1] — check against diurnal
 Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 231 (The Fourth Sunday in Lent)
-V. God shall give his angels charge over thee.
-R. To keep thee in all thy ways.
+@use seasonal/lent/versicle-lauds

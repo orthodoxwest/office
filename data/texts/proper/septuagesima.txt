@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 143 (Septuagesima Sunday)
-Have mercy, O God, upon me, * and cleanse me from my wickedness; for against thee only have I sinned.
+@use proper/septuagesima/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 143 (Septuagesima Sunday)

@@ -19,12 +19,10 @@ But as for us, * it behoveth us to glory in the Cross of our Lord Jesus Christ.
 By the sign * of the Cross, deliver us from our enemies, O our God.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 541, 477 (Exaltation of the Holy Cross)
-O mighty work of mercy! * death then died, when life died upon the Tree.
+@use proper/exaltation-holy-cross/psalm-antiphon-1
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 480 (Exaltation of the Holy Cross)
-By the sign * of the Cross, deliver us from our enemies, O our God.
+@use proper/exaltation-holy-cross/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross)
@@ -201,22 +199,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Let all the earth worship thee, * and sing unto thee.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross; same text as the Benedictus antiphon)
-Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Life of the world was hanged, on thee was Christ victorious, and death over death did for ever triumph.
+@use proper/exaltation-holy-cross/benedictus-antiphon
 
 [commemoration-versicle]
-# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross)
-V. We adore thee, O Christ, and we bless thee.
-R. Because by thy Cross thou hast redeemed the world.
+@use proper/exaltation-holy-cross/versicle-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 481 (Exaltation of the Holy Cross)
-!Phil 2:5-8
-Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
-R. Thanks be to God.
+@use proper/exaltation-holy-cross/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books (same chapter as the major hours)
-!Phil 2:5-8
-Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
-R. Thanks be to God.
+@use proper/exaltation-holy-cross/chapter-lauds

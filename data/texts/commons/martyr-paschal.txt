@@ -4,28 +4,22 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [benedictus-antiphon]
 # SOURCE: divinum-officium Commune/C1p [Ant 2] — check against diurnal

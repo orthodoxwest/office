@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 449, 362, 371 (Saints Philip and James)
-Lord, * shew us the Father, and it sufficeth us, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 449, 362, 371 (Saints Philip and James)
@@ -23,20 +22,16 @@ If ye had known me, * ye should have known my Father also, and from henceforth y
 If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 365, 374 (I and II Vespers for Saints Philip and James)
-If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 362 (I Vespers for Saints Philip and James)
-Lord, * shew us the Father, and it sufficeth us, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-1
 
 [psalm-antiphon-2-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 363 (I Vespers for Saints Philip and James)
-Philip, * he that hath seen me hath seen my Father also, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-2
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 364 (I Vespers for Saints Philip and James)
-Have I been * so long time with you, and yet hast thou not known me, Philip? he that hath seen me hath seen my Father also, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-3
 
 [psalm-antiphon-4-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 365 (I Vespers for Saints Philip and James)
@@ -47,7 +42,7 @@ If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
 If ye abide in me, * and my words abide in you, ye shall ask what ye will, and it shall be done unto you, alleluia, alleluia, alleluia.
 
 [commemoration-antiphon]
-Lord, * shew us the Father, and it sufficeth us, alleluia.
+@use proper/ss-philip-james/psalm-antiphon-1
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 457, 370, 379 (Saints Philip and James)

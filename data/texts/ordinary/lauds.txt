@@ -267,11 +267,7 @@ All glory, as is ever meet,
 To God the holy Paraclete. Amen.
 
 [opening-versicle]
-V. O God, ✠ make speed to save us.
-R. O Lord, make haste to help us.
-
-Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+@use shared/formulas/opening-versicle
 
 [psalm-antiphon]
 O praise the Lord of heaven; praise him in the height.
@@ -326,10 +322,7 @@ Through the tender mercy of our God * the day-spring from on high hath visited u
 O Lord, give light * to them that sit in darkness and in the shadow of death, and guide our feet into the way of peace.
 
 [pre-collect-versicles]
-V. O Lord, hear my prayer.
-R. And let our cry come unto thee.
-
-Let us pray.
+@use shared/formulas/pre-collect-versicles
 
 [collect]
 Almighty and everlasting God, who hast safely brought us to the beginning of
@@ -340,28 +333,16 @@ the Holy Spirit liveth and reigneth, God, for ever and ever.
 R. Amen.
 
 [blessing]
-The Lord be with you.
-R. And with thy spirit.
-May the Lord Almighty bless our days and our works.
-R. Amen.
+@use shared/formulas/daily-blessing
 
 [commemoration-antiphon]
-Pray for us, O holy N., * that we may be made worthy of the promises of Christ.
+@use shared/formulas/commemoration-antiphon
 
 [commemoration-versicle]
-V. The Lord hath chosen him for himself.
-R. As his treasure for ever.
+@use shared/formulas/commemoration-versicle
 
 [commemoration-collect]
-Grant, O Lord, we beseech thee, the prayers of thy holy servant, that we who
-cannot by our own merits attain to thy grace may be helped by his intercession.
-Through our Lord Jesus Christ thy Son, who with thee and the Holy Spirit liveth
-and reigneth, God, for ever and ever.
-R. Amen.
-
-# Ferial psalm antiphons by weekday (Benedictine Lauds scheme: Ps 51,
-# two day-psalms, OT canticle, Laudate). Saturday has one day-psalm,
-# followed by the Song of Moses and Laudate.
+@use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal

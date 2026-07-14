@@ -1,20 +1,20 @@
 [psalm-antiphon]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [psalm-antiphon-1]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [psalm-antiphon-2]
-There was a great earthquake; * for an angel of the Lord descended from heaven, alleluia.
+@use proper/easter-sunday/easter-antiphon-2
 
 [psalm-antiphon-3]
-And his countenance * was as lightning and his raiment as snow, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-3
 
 [psalm-antiphon-4]
-And for fear of him * the guards were struck with terror and became as dead men, alleluia.
+@use proper/easter-sunday/easter-antiphon-4
 
 [psalm-antiphon-5]
-And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
+@use proper/easter-sunday/easter-antiphon-5
 
 [benedictus-antiphon]
 Jesus stood in the midst of His disciples * and said unto them: Peace be unto you, alleluia, alleluia.
@@ -23,11 +23,10 @@ Jesus stood in the midst of His disciples * and said unto them: Peace be unto yo
 Behold My Hands * and my Feet, that it is I myself, alleluia, alleluia.
 
 [commemoration-antiphon]
-Jesus stood in the midst of His disciples * and said unto them: Peace be unto you, alleluia, alleluia.
+@use proper/easter-tuesday/benedictus-antiphon
 
 [commemoration-versicle]
-V. The Lord is risen from the dead, alleluia.
-R. Who for our sakes died and rose again, alleluia.
+@use proper/easter-sunday/commemoration-versicle
 
 [collect]
 O God, Who art ever multiplying the Children of thy Church, grant unto the same thy servants that they may lead the rest of their lives according to this beginning wherein Thou hast given them faith to receive the Sacrament of the New Birth.

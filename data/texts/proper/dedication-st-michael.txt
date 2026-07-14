@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 561, 496 (Dedication of St Michael)
-An Angel stood * at the altar of the temple, having in his hand a golden censer.
+@use proper/dedication-st-michael/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 561, 496 (Dedication of St Michael)
@@ -23,8 +22,7 @@ O ye Angels of the Lord, * bless ye the Lord for ever.
 Angels and Archangels, * Thrones and Dominions, Principalities and Powers, Virtues of the heavens, O praise the Lord of heaven, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 499 (Dedication of St Michael)
-Angels and Archangels, * Thrones and Dominions, Principalities and Powers, Virtues of the heavens, O praise the Lord of heaven, alleluia.
+@use proper/dedication-st-michael/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
@@ -42,8 +40,7 @@ While John beheld * the sacred mystery, the Archangel Michael sounded the trumpe
 The smoke of the incense ascended up * before the Lord, out of the Angel's hand.
 
 [commemoration-versicle]
-V. In the presence of the Angels I will sing praise unto thee, O my God.
-R. I will worship toward thy holy temple, and praise thy Name.
+@use proper/dedication-st-michael/versicle-vespers
 
 [collect]
 # SOURCE: older Sanctoral Lauds/Vespers books (Dedication of St Michael)
@@ -56,10 +53,7 @@ God shewed things which must shortly come to pass, speaking by his Angel unto hi
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 501 (Dedication of St Michael)
-!Rev 1:1-2
-God shewed things which must shortly come to pass, speaking by his Angel unto his servant John, who bare record of the word of God, and of the testimony of Jesus Christ, and of all things that he saw.
-R. Thanks be to God.
+@use proper/dedication-st-michael/chapter-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 567 (Dedication of St Michael)
@@ -153,9 +147,7 @@ V. An Angel stood at the altar of the temple.
 R. Having in his hand a golden censer.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 503 (I Vespers, Dedication of St Michael)
-V. An Angel stood at the altar of the temple.
-R. Having in his hand a golden censer.
+@use proper/dedication-st-michael/versicle-lauds
 
 [versicle-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 503 (II Vespers, Dedication of St Michael)

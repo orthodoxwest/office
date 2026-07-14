@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
-Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
+@use proper/st-lawrence/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
@@ -23,20 +22,16 @@ The Lord hath sent * his Angel, and hath delivered me out of the midst of the fi
 Blessed Laurence * prayed, saying: I render thanks unto thee, O Lord, who hast counted me worthy to enter within thy gates.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 444, 452 (I and II Vespers, Saint Laurence, Martyr)
-Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
+@use proper/st-lawrence/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 445, 453 (I and II Vespers, Saint Laurence, Martyr)
-Laurence hath wrought a pious work; * who by the sign of the Cross enlightened the blind.
+@use proper/st-lawrence/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 446, 454 (I and II Vespers, Saint Laurence, Martyr)
-My soul * cleaveth fast unto thee, forasmuch as my flesh hath been burned for thee, O my God.
+@use proper/st-lawrence/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 447, 455 (I and II Vespers, Saint Laurence, Martyr)
-Blessed Laurence * prayed, saying: I render thanks unto thee, O Lord, who hast counted me worthy to enter within thy gates.
+@use proper/st-lawrence/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 519 (Saint Laurence, Martyr)
@@ -47,13 +42,10 @@ On the iron grate, * O God, I denied thee not; and when fire was kindled beneath
 Blessed Laurence * when laid and burning on the iron grating spake to the impious tyrant, saying: The feast is ready, turn and eat; but the Church's treasures, which thou claimest, have been garnered up in heaven, by the hands of the poor and needy.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
-Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
+@use proper/st-lawrence/psalm-antiphon-1
 
 [commemoration-versicle]
-# SOURCE: draft archdiocesan Lauds book, p. 518 (Saint Laurence, Martyr)
-V. He hath dispersed abroad, and given to the poor.
-R. And his righteousness remaineth for ever.
+@use proper/st-lawrence/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 520, 451, 459 (Saint Laurence, Martyr)
@@ -77,16 +69,10 @@ V. He hath dispersed abroad, and given to the poor.
 R. And his righteousness remaineth for ever.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 448, 456 (I and II Vespers, Saint Laurence, Martyr)
-!2 Cor 9:6
-Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
-R. Thanks be to God.
+@use proper/st-lawrence/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 516, 448, 456 (festal chapter used at Terce)
-!2 Cor 9:6
-Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
-R. Thanks be to God.
+@use proper/st-lawrence/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 450 (I Vespers, Saint Laurence, Martyr)

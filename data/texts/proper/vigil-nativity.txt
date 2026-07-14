@@ -19,8 +19,7 @@ The Lord will come, * go ye out to meet him, saying: Great is his dominion, and 
 Tomorrow * ye shall have salvation, saith the Lord God of hosts.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 49 (Vigil of the Nativity)
-O Judah and Jerusalem, * be ye not dismayed: tomorrow go ye forth, and the Lord himself will be with you, alleluia.
+@use proper/vigil-nativity/psalm-antiphon-1
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
@@ -84,13 +83,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. On the morrow * Ye shall be saved.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
-The Saviour * of the world shall arise as the sun: and shall come down into the Virgin's womb, as the showers upon the grass, alleluia.
+@use proper/vigil-nativity/benedictus-antiphon
 
 [commemoration-versicle]
-# SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
-V. Tomorrow the iniquity of the earth shall be blotted out.
-R. And the Saviour of the world shall reign over us.
+@use proper/vigil-nativity/versicle-lauds
 
 [chapter-vespers]
 # SOURCE: divinum-officium Sancti/12-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 350; Vespers book, pp. 226, 234 (St Andrew)
-Hail, precious Cross, * receive the disciple of him who hanged on thee, my Master Christ.
+@use proper/st-andrew/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 350; Vespers book, pp. 226, 234 (St Andrew)
@@ -23,8 +22,7 @@ Maximilla, beloved of Jesus Christ, * took the Apostle's body: and in a place of
 Thou hast overwhelmed in hell, O Lord, * them that did persecute the righteous: and thou wast his leader on the wood of the Cross.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 229, 237 (St Andrew)
-Thou hast overwhelmed in hell, O Lord, * them that did persecute the righteous: and thou wast his leader on the wood of the Cross.
+@use proper/st-andrew/psalm-antiphon-5
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 241 (II Vespers for St Andrew)
@@ -54,115 +52,29 @@ For there is no distinction of the Jew and the Greek: for the same is Lord over 
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 230, 238 (St Andrew)
-!Rom 10:10-11
-Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
-R. Thanks be to God.
+@use proper/st-andrew/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books (same chapter as the major hours)
-!Rom 10:10-11
-Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
-R. Thanks be to God.
+@use proper/st-andrew/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 232 (I Vespers for St Andrew)
 One of the two * which followed the Lord was Andrew, Simon Peter's brother, alleluia.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 356 (St Andrew)
-R. Their sound is gone out * into all lands.
-R. Their sound is gone out * into all lands.
-V. And their words into the ends of the world.
-R. Into all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound is gone out * into all lands.
+@use commons/apostle/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 230, 239 (St Andrew)
-R. Thou shalt make them princes * in all lands.
-R. Thou shalt make them princes * in all lands.
-V. They shall remember thy Name, O Lord.
-R. In all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * in all lands.
+@use commons/apostle/short-responsory-vespers
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 356-357
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 230-232, 239-240
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 357 (St Andrew)
-V. They declared the work of God.
-R. And wisely considered of his doing.
+@use commons/apostle/versicle-lauds
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 232, 240 (St Andrew)
-V. Their sound is gone out into all lands.
-R. And their words into the ends of the world.
+@use commons/apostle/versicle-first-vespers

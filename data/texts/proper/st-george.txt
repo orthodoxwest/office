@@ -2,8 +2,7 @@
 Whosoever shall confess Me * before men, him will I confess also before My Father.
 
 [commemoration-versicle]
-V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion over the works of thy hands.
+@use commons/bishop-martyr/commemoration-versicle
 
 [collect]
 # SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 92

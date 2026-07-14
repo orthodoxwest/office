@@ -187,11 +187,7 @@ To God the Holy Paraclete.
 Amen.
 
 [opening-versicle]
-V. O God, ✠ make speed to save us.
-R. O Lord, make haste to help us.
-
-Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+@use shared/formulas/opening-versicle
 
 [psalm-antiphon]
 O Lord, hear my prayer; and let our cry come unto thee.
@@ -252,10 +248,7 @@ He hath put down the mighty * from their seat, and hath exalted the humble and m
 God hath holpen * his servant Israel, as he promised to Abraham and to his seed: and hath exalted the humble for ever and ever.
 
 [pre-collect-versicles]
-V. O Lord, hear my prayer.
-R. And let our cry come unto thee.
-
-Let us pray.
+@use shared/formulas/pre-collect-versicles
 
 [collect]
 O God, from whom all holy desires, all good counsels, and all just works do
@@ -275,23 +268,13 @@ V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
 
 [commemoration-antiphon]
-Pray for us, O holy N., * that we may be made worthy of the promises of Christ.
+@use shared/formulas/commemoration-antiphon
 
 [commemoration-versicle]
-V. The Lord hath chosen him for himself.
-R. As his treasure for ever.
+@use shared/formulas/commemoration-versicle
 
 [commemoration-collect]
-Grant, O Lord, we beseech thee, the prayers of thy holy servant, that we who
-cannot by our own merits attain to thy grace may be helped by his intercession.
-Through our Lord Jesus Christ thy Son, who with thee and the Holy Spirit liveth
-and reigneth, God, for ever and ever.
-R. Amen.
-
-# Ferial psalm antiphons by weekday (Benedictine Vespers scheme, four
-# psalms). Repeated antiphons span our split psalms (139a/b, 144a/b,
-# 114/115 = Vulgate 113) — the renderer collapses them to one antiphon
-# over the group.
+@use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera] — check against diurnal

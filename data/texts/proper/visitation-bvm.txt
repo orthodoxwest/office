@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 492, 426 (Visitation BVM)
-Mary arose, * and went into the hill country with haste, into a city of Judah.
+@use proper/visitation-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 492, 426 (Visitation BVM)
@@ -23,8 +22,7 @@ Blessed art thou * among women, and blessed is the fruit of thy womb.
 For lo, as soon * as the voice of thy salutation sounded in mine ears, the babe leaped in my womb for joy, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 429 (Visitation BVM)
-For lo, as soon * as the voice of thy salutation sounded in mine ears, the babe leaped in my womb for joy, alleluia.
+@use proper/visitation-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 499 (Visitation BVM)
@@ -35,7 +33,7 @@ When Elisabeth * heard the salutation of Mary, she spake out with a loud voice, 
 Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord, alleluia.
 
 [commemoration-antiphon]
-Mary arose, * and went into the hill country with haste, into a city of Judah.
+@use proper/visitation-bvm/psalm-antiphon-1
 
 [commemoration-versicle]
 @use shared/blessed-virgin/versicle-blessed-art-thou

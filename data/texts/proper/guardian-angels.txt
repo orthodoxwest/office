@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-God hath given His Angels charge over thee, * to keep thee in all thy ways.
+@use proper/guardian-angels/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
@@ -29,7 +28,7 @@ The Angel that talked * with me came again, and waked me, as a man that is waken
 Praise ye God, * all His Angels Praise ye Him, all His hosts.
 
 [commemoration-antiphon]
-God hath given His Angels charge over thee, * to keep thee in all thy ways.
+@use proper/guardian-angels/psalm-antiphon-1
 
 [commemoration-versicle]
 V. He shall give his Angels charge over thee.
@@ -143,16 +142,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Before the Angels * will I sing praise unto thee, O my God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Exod. 23:20-21
-Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
-R. Thanks be to God.
+@use proper/guardian-angels/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Exod. 23:20-21
-Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
-R. Thanks be to God.
+@use proper/guardian-angels/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/10-02.txt [Ant 1] — check against diurnal

@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 167 (Quinquagesima Sunday)
-According to the multitude * of thy mercies, O Lord, do away mine offences.
+@use proper/quinquagesima/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 167 (Quinquagesima Sunday)

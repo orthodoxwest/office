@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins)
-While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
+@use commons/holy-woman/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins)
@@ -24,8 +23,7 @@ Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 This woman * is beautiful among the daughters of Jerusalem.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 669 (Common of Holy Women not Virgins)
-This woman * is beautiful among the daughters of Jerusalem.
+@use commons/holy-woman/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Holy Women not Virgins) — parish noted manual
@@ -56,13 +54,7 @@ Who can find a virtuous woman? for her price is far above rubies. The heart of h
 R. Thanks be to God.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins)
-R. In thy grace * and in thy beauty.
-R. In thy grace * and in thy beauty.
-V. Go forth, ride prosperously, and reign.
-R. And in thy beauty.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. In thy grace * and in thy beauty.
+@use commons/virgin-martyr/short-responsory-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 695 (Common of Holy Women not Virgins)
@@ -106,40 +98,10 @@ To God the Holy Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 671–672 (Common of Holy Women not Virgins)
-Fortem virili pectore
-
-High let us all our voices raise
-In that heroic woman's praise,
-Whose name, with saintly glory bright,
-Shines in the starry realms of light.
-
-Filled with a pure celestial glow,
-She spurned all love of things below;
-And heedless here on earth to stay,
-Climbed to the skies her toilsome way.
-
-With fasts her body she subdued,
-But filled her soul with prayer's sweet food:
-In other worlds she tastes the bliss
-For which she left the joys of this.
-
-O Christ, the strength of all the strong,
-To whom alone high deeds belong,
-Through her prevailing prayer on high
-In mercy hear thy people's cry.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/holy-woman/hymn-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 670 (Saint neither Virgin nor Martyr)
-!Prov 31:10-11
-Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
-R. Thanks be to God.
+@use commons/holy-woman/chapter-lauds
 
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 670–671 (Common of Holy Women not Virgins)
@@ -156,12 +118,7 @@ V. In thy grace and in thy beauty.
 R. Go forth, ride prosperously, and reign.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
-V. Full of grace are thy lips.
-R. Because God hath blessed thee for ever.
+@use commons/holy-woman/versicle-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 692 (Lauds chapter used at Terce)
-!Prov 31:10-11
-Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
-R. Thanks be to God.
+@use commons/holy-woman/chapter-lauds

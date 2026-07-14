@@ -14,25 +14,25 @@ And for fear of him * the guards were struck with terror and became as dead men,
 And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
 
 [psalm-antiphon-1]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [psalm-antiphon-2]
-There was a great earthquake; * for an angel of the Lord descended from heaven, alleluia.
+@use proper/easter-sunday/easter-antiphon-2
 
 [psalm-antiphon-3]
-And his countenance * was as lightning and his raiment as snow, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-3
 
 [psalm-antiphon-4]
-And for fear of him * the guards were struck with terror and became as dead men, alleluia.
+@use proper/easter-sunday/easter-antiphon-4
 
 [psalm-antiphon-5]
-And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
+@use proper/easter-sunday/easter-antiphon-5
 
 [psalm-antiphon]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [benedictus-antiphon]
-And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
+@use proper/easter-sunday/easter-antiphon-5
 
 [magnificat-antiphon]
 And looking * they saw the stone rolled back, for it was very great, alleluia.

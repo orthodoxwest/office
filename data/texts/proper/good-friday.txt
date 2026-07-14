@@ -1,5 +1,5 @@
 [psalm-antiphon]
-God spared not His Own Son * but delivered Him up for us all.
+@use proper/good-friday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 God spared not His Own Son * but delivered Him up for us all.
@@ -23,7 +23,7 @@ They set up over his head his accusation written: * Jesus of Nazareth, King of t
 When He had received the vinegar, * he said: It is finished! and he bowed his Head, and gave up the Ghost.
 
 [commemoration-antiphon]
-God spared not His Own Son * but delivered Him up for us all.
+@use proper/good-friday/psalm-antiphon-1
 
 [commemoration-versicle]
 V. He hath set me in dark places.

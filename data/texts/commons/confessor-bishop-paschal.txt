@@ -4,8 +4,7 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop, Paschaltide)
-Behold a great priest, * who in his days pleased God, and was found righteous, alleluia.
+@use commons/confessor-bishop-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop, Paschaltide)
@@ -28,8 +27,7 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 626, 637 (Common of a Confessor and Bishop, Paschaltide)
-Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
+@use commons/confessor-bishop-paschal/psalm-antiphon-5
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop, Paschaltide)
@@ -63,9 +61,7 @@ V. The Lord guided the righteous in right paths, alleluia.
 R. And shewed him the kingdom of God, alleluia.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 642 (II Vespers, Common of a Confessor and Bishop, Paschaltide)
-V. The Lord guided the righteous in right paths, alleluia.
-R. And shewed him the kingdom of God, alleluia.
+@use commons/confessor-bishop-paschal/versicle-lauds
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 631 (I Vespers, Common of a Confessor and Bishop, Paschaltide)

@@ -4,34 +4,22 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [short-responsory-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 142
-R. In thy grace and in thy beauty, * alleluia, alleluia.
-R. In thy grace and in thy beauty, alleluia, alleluia.
-V. Go forth, ride prosperously, and reign.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. In thy grace and in thy beauty, alleluia, alleluia.
+@use commons/virgin-martyr-paschal/short-responsory-lauds

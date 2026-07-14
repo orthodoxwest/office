@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 92 (Holy Innocents)
-Herod was exceeding wroth, * and slew many children in Bethlehem Judah, the city of David.
+@use proper/holy-innocents/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 92 (Holy Innocents)
@@ -47,11 +46,10 @@ These are they * which were not defiled with women; for they are virgins: and th
 Then were innocent children * slain instead of Christ by a wicked ruler; the very sucklings were put to death: spotless, they follow the Lamb himself, and say for ever: Glory be to thee, O Lord.
 
 [commemoration-antiphon]
-These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
+@use proper/holy-innocents/benedictus-antiphon
 
 [commemoration-versicle]
-V. Herod was exceeding wroth, and slew many children.
-R. In Bethlehem Judah, the city of David.
+@use proper/holy-innocents/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 100, 87 (Holy Innocents)
@@ -90,24 +88,7 @@ To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (All Hail! Ye Infant Martyr Flowers, Holy Innocents Vespers.docx); draft archdiocesan Lauds/Vespers books, pp. 98, 85
-Salvete, flores Martyrum
-
-All hail! ye infant martyr flowers,
-Cut off in life's first dawning hours:
-As rose-buds snapt in tempest strife
-When Herod sought your Saviour's life.
-
-You, tender flock of Christ, we sing,
-First victims slain for Christ your King:
-Beneath the Altar's heavenly ray
-With Martyr palms and crowns ye play.
-
-All honour, laud, and glory be,
-O Jesu, Virgin-born, to thee;
-All glory, as is ever meet,
-To Father and to Paraclete.
-Amen.
+@use proper/holy-innocents/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 99 (Holy Innocents)
@@ -138,16 +119,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Let the righteous rejoice before God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 84 (Holy Innocents)
-!Rev 14:1
-I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
-R. Thanks be to God.
+@use proper/holy-innocents/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rev 14:1
-I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
-R. Thanks be to God.
+@use proper/holy-innocents/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/12-28.txt [Ant 1] — check against diurnal

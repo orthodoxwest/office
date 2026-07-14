@@ -1,39 +1,32 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+@use proper/pentecost/commemoration-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+@use proper/pentecost/commemoration-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-The Spirit of the Lord * filleth the world, alleluia.
+@use proper/whit-ember-friday/psalm-antiphon-2
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-They were all filled * with the Holy Ghost, and began to speak, alleluia, alleluia.
+@use proper/pentecost/psalm-antiphon-3
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-See ye fountains, * and all that move in the waters, ascribe ye praise to God, alleluia.
+@use proper/whit-ember-friday/psalm-antiphon-4
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+@use proper/whit-ember-friday/magnificat-antiphon
 
 [benedictus-antiphon]
-Receive ye the Holy Ghost; * whoseoever sins ye remit, they are remitted unto them, alleluia.
+@use proper/whit-ember-friday/benedictus-antiphon
 
 [magnificat-antiphon]
-The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+@use proper/whit-ember-friday/magnificat-antiphon
 
 [commemoration-antiphon]
-When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+@use proper/pentecost/commemoration-antiphon
 
 [commemoration-versicle]
-V. They were all filled with the Holy Ghost, alleluia.
-R. And began to speak, alleluia.
+@use proper/pentecost/versicle-lauds
 
 [collect]
 We beseech Thee, O Lord, mercifully to pour into our hearts Thy Holy Spirit, by Whose Wisdom we have been created, and by Whose Providence all our ways are ordered.

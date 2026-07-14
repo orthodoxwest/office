@@ -19,12 +19,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord is risen from the tomb, alleluia, alleluia.
 
 [short-responsory-vespers]
-R. The Lord is risen from the tomb, alleluia, alleluia.
-The Lord is risen from the tomb, alleluia, alleluia.
-V. Who for our sakes hung upon the tree.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord is risen from the tomb, alleluia, alleluia.
+@use seasonal/easter/short-responsory-lauds
 
 [hymn-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129; office-hymns.zip (Light_s Glittering Morn Bedecks the Sky, Paschaltide Lauds.docx)
@@ -107,25 +102,19 @@ V. Let my prayer be set forth in thy sight as the incense, alleluia.
 R. And let the lifting up of my hands be an evening sacrifice, alleluia.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon

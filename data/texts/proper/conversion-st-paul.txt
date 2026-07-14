@@ -1,7 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 370 (Conversion of St Paul)
-# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
-I have planted, * Apollos watered, but God gave the increase, alleluia.
+@use proper/conversion-st-paul/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 370 (Conversion of St Paul)
@@ -25,21 +23,16 @@ In Damascus, * the governor under Aretas the king would have apprehended me: but
 Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for the Name of Christ.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 252, 261 (I and II Vespers, Conversion of St Paul)
-# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
-I have planted, * Apollos watered, but God gave the increase, alleluia.
+@use proper/conversion-st-paul/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 253, 262 (I and II Vespers, Conversion of St Paul)
-Most gladly will I glory * in my infirmities, that the power of Christ may rest upon me.
+@use proper/conversion-st-paul/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 254, 263 (I and II Vespers, Conversion of St Paul)
-The grace of God * which was bestowed upon me was not in vain: but his grace abideth with me always.
+@use proper/conversion-st-paul/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 255, 264 (I and II Vespers, Conversion of St Paul)
-Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck, for the Name of Christ.
+@use proper/conversion-st-paul/psalm-antiphon-5
 
 [commemoration-antiphon]
 Go forth, Ananias, * and enquire for Saul, for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
@@ -84,39 +77,7 @@ Both now and ever, through the ages infinite.
 Amen.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 376-378
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 378 (Conversion of St Paul)
@@ -124,44 +85,22 @@ V. Thou art a chosen vessel, holy Apostle Paul.
 R. A preacher of the truth throughout all the world.
 
 [commemoration-versicle]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 378, 257, 267 (Conversion of St Paul)
-V. Thou art a chosen vessel, holy Apostle Paul.
-R. A preacher of the truth throughout all the world.
+@use proper/conversion-st-paul/versicle-lauds
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 257, 267 (I and II Vespers, Conversion of St Paul)
-V. Thou art a chosen vessel, holy Apostle Paul.
-R. A preacher of the truth throughout all the world.
+@use proper/conversion-st-paul/versicle-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 376 (Conversion of St Paul)
-R. Their sound is gone out * into all lands.
-R. Their sound is gone out * into all lands.
-V. And their words into the ends of the world.
-R. Into all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound is gone out * into all lands.
+@use commons/apostle/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 256, 266 (I and II Vespers, Conversion of St Paul)
-R. Thou shalt make them princes * in all lands.
-R. Thou shalt make them princes * in all lands.
-V. They shall remember thy Name, O Lord.
-R. In all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * in all lands.
+@use commons/apostle/short-responsory-vespers
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 256, 265 (I and II Vespers, Conversion of St Paul)
-!Acts 9:1-2
-And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
-R. Thanks be to God.
+@use proper/conversion-st-paul/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 376 (Lauds chapter used at Terce)
-!Acts 9:1-2
-And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
-R. Thanks be to God.
+@use proper/conversion-st-paul/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 258 (I Vespers, Conversion of St Paul)

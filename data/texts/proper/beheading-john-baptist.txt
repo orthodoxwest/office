@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-For Herod had laid hold upon John, * and bound him, and put him in prison, for Herodias' sake.
+@use proper/beheading-john-baptist/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
@@ -29,11 +28,10 @@ He that hateth his life * in this world, shall keep it unto life eternal.
 Give me in a charger the head of John the Baptist. * And the King was sorry, for his oath's sake.
 
 [commemoration-antiphon]
-For Herod had laid hold upon John, * and bound him, and put him in prison, for Herodias' sake.
+@use proper/beheading-john-baptist/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion over the works of thy hands.
+@use commons/bishop-martyr/commemoration-versicle
 
 [collect]
 Lord, we beseech thee, that the keeping of this honourable feastday in memory of the holy Baptist John, thy Fore-runner, and thy Martyr, may be a mean to draw upon us the effectual outpouring of thy saving help.

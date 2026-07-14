@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 279 (The Solemnity of Saint Joseph)
-And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
+@use proper/solemnity-st-joseph/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 279 (The Solemnity of Saint Joseph)
@@ -23,20 +22,16 @@ And they came * with haste, and found Mary, and Joseph, and the babe lying in a 
 And Jesus himself * was beginning to be about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 163 (The Solemnity of Saint Joseph, I and II Vespers)
-And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
+@use proper/solemnity-st-joseph/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 164 (The Solemnity of Saint Joseph, I and II Vespers)
-The Angel Gabriel * was sent from God to a virgin espoused to a man whose name was Joseph, of the house of David: and the virgin's name was Mary, alleluia.
+@use proper/solemnity-st-joseph/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 165 (The Solemnity of Saint Joseph, I and II Vespers)
-Joseph went up * from Galilee, out of the city of Nazareth into Judaea, unto the city of David, which is called Bethlehem, alleluia.
+@use proper/solemnity-st-joseph/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 166 (The Solemnity of Saint Joseph, I and II Vespers)
-And Jesus himself * was beginning to be about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
+@use proper/solemnity-st-joseph/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 287 (The Solemnity of Saint Joseph)
@@ -61,16 +56,10 @@ The blessings of thy father are strengthened with the blessings of his fathers: 
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 167 (The Solemnity of Saint Joseph, I and II Vespers)
-!Gen 49:26
-The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
-R. Thanks be to God.
+@use proper/solemnity-st-joseph/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 285 (Lauds chapter used at Terce)
-!Gen 49:26
-The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
-R. Thanks be to God.
+@use proper/solemnity-st-joseph/chapter-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 285 (The Solemnity of Saint Joseph)

@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 71 (Saint Stephen, Protomartyr)
-They stoned Stephen, * calling upon the Lord and saying, Lord, lay not this sin to their charge.
+@use proper/st-stephen/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 71 (Saint Stephen, Protomartyr)
@@ -47,8 +46,7 @@ And Stephen, * full of faith and power, did great wonders and miracles among the
 Devout men * carried Stephen to his burial, and made great lamentation over him.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
-And Stephen, * full of faith and power, did great wonders and miracles among the people.
+@use proper/st-stephen/benedictus-antiphon
 
 [commemoration-versicle]
 # SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
@@ -76,13 +74,7 @@ Now there arose some of that which is called the synagogue of the Libertines, an
 R. Thanks be to God.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 77 (Saint Stephen, Protomartyr)
-R. Thou hast crowned him * with glory and honour, O Lord.
-R. Thou hast crowned him * with glory and honour, O Lord.
-V. And madest him to have dominion of the works of thy hands.
-R. With glory and honour, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast crowned him * with glory and honour, O Lord.
+@use commons/martyr/short-responsory-lauds
 
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 64 (Saint Stephen, Protomartyr)
@@ -159,16 +151,10 @@ V. Stephen saw the heavens opened.
 R. He saw, and entered in: how blessed is the man unto whom heaven stood open!
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 64 (Saint Stephen, Protomartyr)
-!Acts 6:8
-And Stephen, full of faith and power, did great wonders and miracles among the people.
-R. Thanks be to God.
+@use proper/st-stephen/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 76 (Lauds chapter used at Terce)
-!Acts 6:8
-And Stephen, full of faith and power, did great wonders and miracles among the people.
-R. Thanks be to God.
+@use proper/st-stephen/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)

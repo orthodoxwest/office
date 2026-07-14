@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 622 (Common of One Martyr out of Paschaltide)
-Whosoever shall confess me * before men, him will I confess also before my Father.
+@use commons/martyr/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 622 (Common of One Martyr out of Paschaltide)
@@ -23,20 +22,16 @@ If any man have served me, * he shall be honoured of my Father which is in heave
 Father, * I will that where I am, there may also my servant be.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 572, 580 (I and II Vespers, Common of One Martyr out of Paschaltide)
-Whosoever shall confess me * before men, him will I confess also before my Father.
+@use commons/martyr/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 573, 581 (I and II Vespers, Common of One Martyr out of Paschaltide)
-He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
+@use commons/martyr/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 574, 582 (I and II Vespers, Common of One Martyr out of Paschaltide)
-If any man serve me, * let him follow me; and where I am, there shall also my servant be.
+@use commons/martyr/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 575, 583 (I and II Vespers, Common of One Martyr out of Paschaltide)
-Father, * I will that where I am, there may also my servant be.
+@use commons/martyr/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of One Martyr) — parish noted manual
@@ -87,16 +82,10 @@ To God the Holy Paraclete.
 Amen.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 627 (Common of One Martyr out of Paschaltide)
-!Jas 1:12
-Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
-R. Thanks be to God.
+@use commons/bishop-martyr/chapter-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 575 (Common of One Martyr out of Paschaltide)
-!Jas 1:12
-Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
-R. Thanks be to God.
+@use commons/bishop-martyr/chapter-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 628 (Common of One Martyr out of Paschaltide)

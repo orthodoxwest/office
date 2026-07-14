@@ -3,8 +3,7 @@
 Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 289, 172 (The Ascension of Our Lord)
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
+@use proper/ascension/psalm-antiphon
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 290, 173 (The Ascension of Our Lord)
@@ -23,8 +22,7 @@ Exalt ye * the King of kings, and sing a hymn unto God, alleluia.
 While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 175 (The Ascension of Our Lord)
-While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
+@use proper/ascension/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 297 (The Ascension of Our Lord)
@@ -39,7 +37,7 @@ O King of glory, * thou Lord of Sabaoth, who triumphing to-day hast ascended abo
 Father, * I have manifested thy Name unto the men which thou gavest me: and now I pray for them, not for the world, because I come to thee, alleluia.
 
 [commemoration-antiphon]
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
+@use proper/ascension/psalm-antiphon
 
 [commemoration-versicle]
 V. God is ascended with jubilee, alleluia.
@@ -92,34 +90,7 @@ For ever and for ever be.
 Amen.
 
 [hymn-vespers]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 295, 177 (The Ascension of Our Lord)
-Jesu, nostra redemptio
-
-Jesu, Redemption all divine,
-Whom here we love, for whom we pine,
-God, working out creation's plan,
-And in the latter time made Man;
-
-What love of thine was that, which led
-To take our woes upon thy head,
-And pangs and cruel death to bear
-To ransom us from death's despair.
-
-To thee hell's gate gave ready way,
-Demanding there his captive prey;
-And now in pomp and victor's pride
-Thou sittest at thy Father's side.
-
-Let very mercy force thee still
-To spare us, conquering all our ill;
-And, granting that we ask, on high
-With thine own face to satisfy.
-
-Be thou our joy and thou our Guard,
-Who art to be our great reward;
-Our glory and our boast in thee
-For ever and for ever be.
-Amen.
+@use proper/ascension/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 296 (The Ascension of Our Lord)
@@ -177,13 +148,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I ascend to my Father and to your Father. * Alleluia, alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 176 (The Ascension of Our Lord)
-!Acts 1:1-2
-The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
-R. Thanks be to God.
+@use proper/ascension/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 294, 176 (festal chapter used at Terce)
-!Acts 1:1-2
-The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
-R. Thanks be to God.
+@use proper/ascension/chapter-lauds

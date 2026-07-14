@@ -1,5 +1,5 @@
 [psalm-antiphon]
-The Lord our Saviour, * begotten before the day-star, and before the ages, is this day made manifest in the world.
+@use proper/epiphany/psalm-antiphon-1
 
 [psalm-antiphon-1]
 The Lord our Saviour, * begotten before the day-star, and before the ages, is this day made manifest in the world.
@@ -27,8 +27,7 @@ This day we keep a holiday in honour of three wonders, * this day a star led the
 When the wise men saw the star * they said one unto another: This is the sign of the Great King; let us go and search diligently for Him, and present unto Him gifts, gold, and frankincense, and myrrh. Alleluia.
 
 [commemoration-versicle]
-V. The kings of Tarshish and of the isles shall bring presents.
-R. The kings of Arabia and Saba shall offer gifts.
+@use proper/epiphany/versicle-vespers
 
 [collect]
 O God, Who by the leading of a star didst, as on this day, manifest thine Only-begotten Son to the Gentiles, mercifully grant that we, which know thee now by faith, may after this life have the fruition of thy glorious Godhead:
@@ -143,13 +142,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Worship the Lord. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/01-06 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Isa 60:1
-Arise, be enlightened, O Jerusalem: for thy light is come, and the glory of the Lord is risen upon thee.
-R. Thanks be to God.
+@use proper/epiphany/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/01-06 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Isa 60:1
-Arise, be enlightened, O Jerusalem: for thy light is come, and the glory of the Lord is risen upon thee.
-R. Thanks be to God.
+@use proper/epiphany/chapter-lauds

@@ -2,8 +2,7 @@
 # Sections not present here fall through to the regular commons file.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins, Paschaltide)
-While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour, alleluia.
+@use commons/holy-woman-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins, Paschaltide)
@@ -26,8 +25,7 @@ Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 This woman * is beautiful among the daughters of Jerusalem, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 669 (Common of Holy Women not Virgins, Paschaltide)
-This woman * is beautiful among the daughters of Jerusalem, alleluia.
+@use commons/holy-woman-paschal/psalm-antiphon-5
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins, Paschaltide)
@@ -58,9 +56,7 @@ V. In thy grace and in thy beauty, alleluia.
 R. Go forth, ride prosperously, and reign, alleluia.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins, Paschaltide)
-V. Full of grace are thy lips, alleluia.
-R. Because God hath blessed thee for ever, alleluia.
+@use commons/holy-woman-paschal/versicle-lauds
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 696 (Common of Holy Women not Virgins, Paschaltide)

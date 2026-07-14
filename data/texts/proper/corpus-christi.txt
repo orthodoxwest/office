@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 320 (Corpus Christi)
-Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
+@use proper/corpus-christi/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 320 (Corpus Christi)
@@ -70,8 +69,7 @@ O God, who under a wonderful Sacrament hast left unto us a memorial of thy Passi
 O God, who in a wonderful Sacrament has left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
 
 [collect-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 209 (Corpus Christi)
-O God, who under a wonderful Sacrament hast left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
+@use proper/corpus-christi/collect
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 325 (Corpus Christi)
@@ -80,10 +78,7 @@ Brethren: I have received of the Lord that which also I delivered unto you, that
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 203 (Corpus Christi)
-!1 Cor 11:23-24
-Brethren: I have received of the Lord that which also I delivered unto you, that the Lord Jesus the same night in which he was betrayed took bread: and when he had given thanks, he brake it, and said, Take, eat: this is my body, which is broken for you: this do in remembrance of me.
-R. Thanks be to God.
+@use proper/corpus-christi/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

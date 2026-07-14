@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 112 (Holy Name of Jesus)
-Thy Name is as ointment * poured forth, therefore do the virgins love thee.
+@use proper/holy-name-jesus/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 112 (Holy Name of Jesus)
@@ -205,10 +204,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. O magnify the Lord with me, * Alleluia, alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 102 (Holy Name of Jesus)
-!Phil 2:8-10
-Brethren: Christ humbled himself, and became obedient unto death, even the death of the Cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name; that at the Name of Jesus every knee should bow.
-R. Thanks be to God.
+@use proper/holy-name-jesus/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Tempora/Nat2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

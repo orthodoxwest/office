@@ -19,8 +19,7 @@ He shall be great, * even unto the ends of the earth: and this man shall be the 
 The nation and kingdom * that will not serve thee shall perish; yea, those nations shall be utterly wasted.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 582 (Christ the King)
-The God of heaven * shall set up a kingdom which shall break in pieces and consume all kingdoms, and it shall stand for ever.
+@use proper/christ-the-king/psalm-antiphon-1
 
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 515 (I Vespers, Christ the King)
@@ -222,10 +221,7 @@ V. His empire shall be multiplied.
 R. And there shall be no end of peace.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 519 (Christ the King)
-!Col 1:12-13
-Brethren: Let us give thanks unto the Father, which hath made us meet to be partakers of the inheritance of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of his dear Son.
-R. Thanks be to God.
+@use proper/christ-the-king/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] (= Lauds chapter) — check against diurnal

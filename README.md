@@ -135,7 +135,9 @@ Text verification and structural verification are tracked separately:
 - Reuse an identical corpus entry without creating another provenance task by
   making the duplicate section contain only `@use path/to/canonical/key`.
   Alias targets are validated at load time, and rendered assurance manifests
-  report the canonical key.
+  report the canonical key. `./office lint` reports remaining identical
+  concrete entries as advisory `duplicate-candidate` findings; these require a
+  semantic reuse decision before they are converted to aliases.
 
 - `./office review provenance` derives non-stale counts from every corpus entry
   and its adjacent `# SOURCE:` / `# TODO(diurnal):` annotations. Add `-csv` for

@@ -1,6 +1,9 @@
 package audit
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestLintMechanical(t *testing.T) {
 	cases := []struct {
@@ -56,5 +59,23 @@ func TestLintTruncation(t *testing.T) {
 	lintTruncation(r, "c", "Amen.")
 	if len(r.Advisory) != 1 || r.Advisory[0].Key != "a" {
 		t.Fatalf("want single truncation finding for key a, got %v", r.Advisory)
+	}
+}
+
+func TestLintDuplicateCandidates(t *testing.T) {
+	entries := map[string]string{
+		"proper/alpha/collect": "Grant us thy grace and mercy, O Lord.",
+		"proper/beta/collect":  "Grant us thy grace and mercy, O Lord.",
+		"proper/gamma/collect": "A distinct collect, O Lord.",
+	}
+	r := &LintReport{}
+	lintDuplicateCandidates(r, entries, []string{
+		"proper/alpha/collect", "proper/beta/collect", "proper/gamma/collect",
+	})
+	if len(r.Advisory) != 1 {
+		t.Fatalf("got %d duplicate findings, want 1: %v", len(r.Advisory), r.Advisory)
+	}
+	if got := r.Advisory[0]; got.Class != "duplicate-candidate" || !strings.Contains(got.Detail, "proper/beta/collect") {
+		t.Fatalf("unexpected duplicate finding: %+v", got)
 	}
 }

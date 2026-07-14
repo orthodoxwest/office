@@ -3,8 +3,7 @@
 Father, the hour is come, * glorify thy Son, with the glory which I had, before the world was, with thee, alleluia.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc5-3 [Ant 2] — check against diurnal
-Father, the hour is come, * glorify thy Son, with the glory which I had, before the world was, with thee, alleluia.
+@use proper/vigil-ascension/benedictus-antiphon
 
 [collect]
 # SOURCE: divinum-officium Tempora/Pasc5-0 [Oratio] — the vigil takes the collect

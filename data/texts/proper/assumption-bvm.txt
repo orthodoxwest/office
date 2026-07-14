@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
-Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
+@use proper/assumption-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
@@ -131,9 +130,7 @@ V. The holy Mother of God is exalted.
 R. Above choirs of Angels to the heavenly kingdom.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 465 (The Assumption of the B.V.M.)
-V. The holy Mother of God is exalted.
-R. Above choirs of Angels to the heavenly kingdom.
+@use proper/assumption-bvm/versicle-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
@@ -181,13 +178,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Virgin Mary hath been taken * into the chamber on high.
 
 [chapter-vespers]
-# SOURCE: divinum-officium SanctiM/08-15 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Jdt 13:22-23
-The Lord hath blessed thee by his power, because by thee he hath brought our enemies to nought. Blessed art thou, O daughter, by the Lord the most high God, above all women upon the earth.
-R. Thanks be to God.
+@use proper/assumption-bvm/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium SanctiM/08-15 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Jdt 13:22-23
-The Lord hath blessed thee by his power, because by thee he hath brought our enemies to nought. Blessed art thou, O daughter, by the Lord the most high God, above all women upon the earth.
-R. Thanks be to God.
+@use proper/assumption-bvm/chapter-lauds

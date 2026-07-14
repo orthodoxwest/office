@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
-I beheld a great multitude * which no man could number, of all nations, standing before the throne.
+@use proper/all-saints/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
@@ -23,20 +22,16 @@ O bless the Lord, * all ye his chosen; keep a day of rejoicing, and give thanks 
 All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 524, 532 (The Feast of All Saints)
-I beheld a great multitude * which no man could number, of all nations, standing before the throne.
+@use proper/all-saints/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 525, 533 (The Feast of All Saints)
-And all the Angels * stood round about the throne, and fell before the throne on their faces, and worshipped God.
+@use proper/all-saints/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 526, 533 (The Feast of All Saints)
-Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
+@use proper/all-saints/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 527, 534 (The Feast of All Saints)
-All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
+@use proper/all-saints/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
@@ -47,11 +42,10 @@ The glorious company * of the Apostles praise thee; the goodly fellowship of the
 O how glorious * is the kingdom wherein all the Saints rejoice with Christ; arrayed in white robes, they follow the Lamb whithersoever he goeth.
 
 [commemoration-antiphon]
-I beheld a great multitude * which no man could number, of all nations, standing before the throne.
+@use proper/all-saints/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Let the Saints be joyful with glory.
-R. Let them rejoice in their beds.
+@use commons/martyrs/versicle-vespers
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 601, 530, 536 (The Feast of All Saints)
@@ -145,55 +139,28 @@ Be glory ever, as is meet.
 Amen.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 598 (The Feast of All Saints)
-R. Be glad, O ye righteous * and rejoice in the Lord.
-R. Be glad, O ye righteous * and rejoice in the Lord.
-V. And be joyful, all ye that are true of heart.
-R. And rejoice in the Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Be glad, O ye righteous * and rejoice in the Lord.
+@use commons/martyrs/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 528, 534 (The Feast of All Saints)
-R. Let the righteous rejoice * before God.
-R. Let the righteous rejoice * before God.
-V. Let them also be merry and joyful.
-R. Before God.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Let the righteous rejoice * before God.
+@use commons/martyrs/short-responsory-vespers
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
-V. Let the Saints be joyful with glory.
-R. Let them rejoice in their beds.
+@use commons/martyrs/versicle-vespers
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 536 (II Vespers for The Feast of All Saints)
-V. Let the Saints be joyful with glory.
-R. Let them rejoice in their beds.
+@use commons/martyrs/versicle-vespers
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)
-V. Be glad, O ye righteous, and rejoice in the Lord.
-R. And be joyful, all ye that are true of heart.
+@use commons/martyrs/versicle-first-vespers
 
 [chapter-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 528 (The Feast of All Saints, I Vespers)
-!Rev 7:2-3
-Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
-R. Thanks be to God.
+@use proper/all-saints/chapter-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 534 (The Feast of All Saints, II Vespers)
-!Rev 7:2-3
-Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
-R. Thanks be to God.
+@use proper/all-saints/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 598 (Lauds chapter used at Terce)
-!Rev 7:2-3
-Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
-R. Thanks be to God.
+@use proper/all-saints/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)

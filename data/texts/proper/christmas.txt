@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
-O ye shepherds, speak, * and tell us what ye have seen; who is appeared in the earth? We saw the newborn Child, and angels singing praise to the Lord, alleluia, alleluia.
+@use proper/christmas/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
@@ -190,9 +189,7 @@ V. The Lord declared, alleluia.
 R. His salvation, alleluia.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 59 (II Vespers of Christmas; the Saturday-within-the-Octave versicle differs)
-V. The Lord declared, alleluia.
-R. His salvation, alleluia.
+@use proper/christmas/versicle-lauds
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 49 (I Vespers of Christmas)
@@ -227,10 +224,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. All the ends of the earth have seen. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 56 (II Vespers of Christmas; the Saturday-within-the-Octave chapter differs)
-!Heb 1:1-2
-God, who at sundry times and in divers manner spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by his Son, whom he hath appointed heir of all things, by whom also he made the worlds.
-R. Thanks be to God.
+@use proper/christmas/chapter-lauds
 
 [chapter-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 46 (I Vespers of Christmas)
@@ -239,13 +233,7 @@ After that the kindness and love of God our Saviour toward man appeared, not by 
 R. Thanks be to God.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 56–57 (II Vespers and days within the Octave)
-R. The Word was made flesh, * alleluia, alleluia.
-R. The Word was made flesh, * alleluia, alleluia.
-V. And dwelt among us.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Word was made flesh, * alleluia, alleluia.
+@use proper/christmas/short-responsory-lauds
 
 [short-responsory-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 47 (I Vespers of Christmas)
@@ -257,7 +245,4 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Ye shall know this day * that the Lord will come.
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 68 (Nativity)
-!Heb 1:1-2
-God, who at sundry times and in divers manner spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by his Son, whom he hath appointed heir of all things, by whom also he made the worlds.
-R. Thanks be to God.
+@use proper/christmas/chapter-lauds

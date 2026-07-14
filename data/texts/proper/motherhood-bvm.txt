@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 571 (Motherhood of the B.V.M.)
-Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+@use proper/motherhood-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 571 (Motherhood of the B.V.M.)
@@ -23,36 +22,29 @@ Blessed art thou, * O daughter, from the Lord: for by thee we have partaken of t
 The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 506 (Motherhood of the B.V.M.)
-Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+@use proper/motherhood-bvm/psalm-antiphon-1
 
 [psalm-antiphon-2-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 507 (Motherhood of the B.V.M.)
-Thou didst give birth * to him who made thee, and remainest a Virgin for ever.
+@use proper/motherhood-bvm/psalm-antiphon-2
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 508 (Motherhood of the B.V.M.)
-Since I was humble, * I was pleasing to the Most High, and from my womb I have given birth to God and Man.
+@use proper/motherhood-bvm/psalm-antiphon-3
 
 [psalm-antiphon-4-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
 The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 506 (Motherhood of the B.V.M.)
-Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+@use proper/motherhood-bvm/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 507 (Motherhood of the B.V.M.)
-Thou didst give birth * to him who made thee, and remainest a Virgin for ever.
+@use proper/motherhood-bvm/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 508 (Motherhood of the B.V.M.)
-Since I was humble, * I was pleasing to the Most High, and from my womb I have given birth to God and Man.
+@use proper/motherhood-bvm/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
-The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
+@use proper/motherhood-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 579 (Motherhood of the B.V.M.)
@@ -67,8 +59,7 @@ With peaceful joy, * let us celebrate the Motherhood of blessed Mary ever a Virg
 Thy Motherhood, * O Virgin Mother of God, hath heralded joy to all the world; for from thee hath risen the Sun of justice, Christ our God.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 579 (Motherhood of the B.V.M.)
-O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thine admirable maternity.
+@use proper/motherhood-bvm/benedictus-antiphon
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 580, 513 (Motherhood of the B.V.M.)
@@ -81,16 +72,10 @@ He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, 
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
-!Sir 24:8
-He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, and strike thy roots among my chosen people.
-R. Thanks be to God.
+@use proper/motherhood-bvm/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 576, 509 (Motherhood of the B.V.M.; duplicated festal chapter)
-!Sir 24:8
-He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, and strike thy roots among my chosen people.
-R. Thanks be to God.
+@use proper/motherhood-bvm/chapter-lauds
 
 [short-responsory-lauds]
 @use shared/blessed-virgin/short-responsory

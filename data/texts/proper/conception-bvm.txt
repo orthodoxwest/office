@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
-Thou art all fair, O Mary; * there is no spot in thee.
+@use proper/conception-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
@@ -23,8 +22,7 @@ Blessed art thou, * O Virgin Mary, of the Most High God, above all the women upo
 Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
-Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
+@use proper/conception-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
@@ -39,7 +37,7 @@ Let us celebrate * the worshipful Conception of the blessed and glorious Virgin 
 All generations * shall call me blessed: for he that is mighty hath magnified me, alleluia.
 
 [commemoration-antiphon]
-Thou art all fair, O Mary; * there is no spot in thee.
+@use proper/conception-bvm/psalm-antiphon-1
 
 [commemoration-versicle]
 V. This day is the Holy Virgin Mary conceived without sin.
@@ -71,9 +69,7 @@ V. To-day is the Conception of the holy Virgin Mary.
 R. Whose glorious life illumineth all the churches.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 248 (The Conception of the B.V.M.)
-V. To-day is the Conception of the holy Virgin Mary.
-R. Whose glorious life illumineth all the churches.
+@use proper/conception-bvm/versicle-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 366 (The Conception of the B.V.M.)
@@ -121,13 +117,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I will extol thee, O Lord, * for Thou hast lifted me up.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
-!Prov 8:22-24
-The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
-R. Thanks be to God.
+@use proper/conception-bvm/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 365 (Lauds chapter used at Terce)
-!Prov 8:22-24
-The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
-R. Thanks be to God.
+@use proper/conception-bvm/chapter-lauds

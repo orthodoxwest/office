@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
-The bones which thou hast broken * may rejoice.
+@use proper/all-souls/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
