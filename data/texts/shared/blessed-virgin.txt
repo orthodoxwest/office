@@ -1,0 +1,91 @@
+[short-responsory]
+# SOURCE: draft archdiocesan Lauds book, pp. 498, 537, 577, 387 (Visitation, Nativity, Motherhood, and Purification of the B.V.M.)
+# SOURCE: draft archdiocesan Vespers book, pp. 430, 473, 510, 274, 282 (Visitation, Nativity, Motherhood, and Purification of the B.V.M.)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx)
+# SOURCE: draft archdiocesan Lauds book, pp. 498, 537–538, 387–388, 439 (Visitation, Nativity, Purification, and Annunciation)
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath pass'd the King,
+O Hall, whence Light shone through the gloom;
+The ransom'd nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx)
+# SOURCE: draft archdiocesan Vespers book, pp. 430–431, 510–511, 473–474, 275, 282–283, 352 (Visitation, Motherhood, Nativity, Purification, and Annunciation)
+Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
+
+[versicle-blessed-art-thou]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107 (Saturday Office of the B.V.M.)
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 499, 431, 511 (Visitation and Motherhood of the B.V.M.)
+V. Blessed art thou among women.
+R. And blessed is the fruit of thy womb.
+
+[chapter-sirach-24-9-10]
+# SOURCE: draft archdiocesan Lauds book, pp. 497, 537 (Visitation and Nativity of the B.V.M.)
+# SOURCE: draft archdiocesan Vespers book, pp. 429, 473 (Visitation and Nativity of the B.V.M.)
+!Sir 24:9-10
+He created me from the beginning from before the world, and I shall never fail. In the holy tabernacle I served before him.
+R. Thanks be to God.

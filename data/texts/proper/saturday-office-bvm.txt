@@ -55,6 +55,4 @@ To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107
-V. Blessed art thou among women.
-R. And blessed is the fruit of thy womb.
+@use shared/blessed-virgin/versicle-blessed-art-thou

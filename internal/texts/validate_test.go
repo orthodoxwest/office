@@ -70,6 +70,28 @@ Look down, we beseech thee, O Lord, on this thy family.
 	}
 }
 
+func TestValidateAllAcceptsCorpusAlias(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "texts", "proper", "example.txt")
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	content := `[canonical]
+Shared text.
+
+[alias]
+@use proper/example/canonical
+`
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if got := ValidateAll(dir); len(got) != 0 {
+		t.Fatalf("ValidateAll() = %v, want no errors", got)
+	}
+}
+
 func TestValidateAllFlagsPlaceholderCorpusEntries(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "texts", "ordinary", "lauds.txt")

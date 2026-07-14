@@ -12,7 +12,8 @@ import (
 
 // TextCorpus holds all loaded liturgical texts, keyed by reference path.
 type TextCorpus struct {
-	texts map[string]string
+	texts   map[string]string
+	aliases map[string]string
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -25,7 +26,10 @@ type TextCorpus struct {
 // Plain text files are everything else.
 func LoadTexts(dataDir string) (*TextCorpus, error) {
 	textsDir := filepath.Join(dataDir, "texts")
-	corpus := &TextCorpus{texts: make(map[string]string)}
+	corpus := &TextCorpus{
+		texts:   make(map[string]string),
+		aliases: make(map[string]string),
+	}
 
 	err := filepath.Walk(textsDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -62,24 +66,48 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading texts: %w", err)
 	}
+	if err := corpus.extractAndValidateAliases(); err != nil {
+		return nil, err
+	}
 
 	return corpus, nil
 }
 
 // NewTestCorpus creates a TextCorpus from a map, for use in tests.
 func NewTestCorpus(texts map[string]string) *TextCorpus {
-	return &TextCorpus{texts: texts}
+	return &TextCorpus{texts: texts, aliases: make(map[string]string)}
 }
 
-// Get returns the text for the given reference path, or empty string if not found.
+// Get returns the text for the given reference path, resolving @use aliases, or
+// empty string if the reference does not exist.
 func (c *TextCorpus) Get(ref string) string {
-	return c.texts[ref]
+	canonical := c.CanonicalRef(ref)
+	return c.texts[canonical]
 }
 
 // Has returns true if the reference exists in the corpus.
 func (c *TextCorpus) Has(ref string) bool {
-	_, ok := c.texts[ref]
-	return ok
+	return c.CanonicalRef(ref) != ""
+}
+
+// CanonicalRef returns the concrete corpus key behind ref. Aliases are
+// resolved transitively. An unknown reference returns the empty string.
+func (c *TextCorpus) CanonicalRef(ref string) string {
+	seen := make(map[string]bool)
+	for {
+		if seen[ref] {
+			return "" // LoadTexts rejects cycles; retain a safe guard for callers.
+		}
+		seen[ref] = true
+		if target, ok := c.aliases[ref]; ok {
+			ref = target
+			continue
+		}
+		if _, ok := c.texts[ref]; ok {
+			return ref
+		}
+		return ""
+	}
 }
 
 // HasKeySuffix returns true if any corpus key ends with "/"+suffix.
@@ -91,16 +119,47 @@ func (c *TextCorpus) HasKeySuffix(suffix string) bool {
 			return true
 		}
 	}
+	for k := range c.aliases {
+		if strings.HasSuffix(k, target) {
+			return true
+		}
+	}
 	return false
 }
 
-// Entries returns a copy of the loaded corpus entries keyed by reference path.
+// Entries returns a copy of the concrete corpus entries keyed by reference
+// path. Aliases are intentionally omitted so provenance and review queues count
+// each shared text only once.
 func (c *TextCorpus) Entries() map[string]string {
 	out := make(map[string]string, len(c.texts))
 	for k, v := range c.texts {
 		out[k] = v
 	}
 	return out
+}
+
+// extractAndValidateAliases moves exact @use directives out of the concrete
+// text map, then verifies that every alias terminates at a real corpus entry.
+func (c *TextCorpus) extractAndValidateAliases() error {
+	for key, body := range c.texts {
+		trimmed := strings.TrimSpace(body)
+		if !strings.HasPrefix(trimmed, "@use") {
+			continue
+		}
+		fields := strings.Fields(trimmed)
+		if len(fields) != 2 || fields[0] != "@use" {
+			return fmt.Errorf("invalid corpus alias %q: expected @use <corpus-key>", key)
+		}
+		c.aliases[key] = fields[1]
+		delete(c.texts, key)
+	}
+
+	for alias := range c.aliases {
+		if canonical := c.CanonicalRef(alias); canonical == "" {
+			return fmt.Errorf("corpus alias %q does not resolve (target %q)", alias, c.aliases[alias])
+		}
+	}
+	return nil
 }
 
 // FindPlaceholders returns all corpus keys whose text begins with "placeholder"
