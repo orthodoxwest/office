@@ -1,28 +1,75 @@
-# Paschal variant of the Common of a Holy Woman.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variants of the Common of Holy Women not Virgins.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins, Paschaltide)
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins, Paschaltide)
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 689 (Common of Holy Women not Virgins, Paschaltide)
+We will run after thee * because of the savour of thine ointments: exceedingly do the virgins love thee, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins, Paschaltide)
+Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins, Paschaltide)
+Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 691 (Common of Holy Women not Virgins, Paschaltide)
+This woman * is beautiful among the daughters of Jerusalem, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 669 (Common of Holy Women not Virgins, Paschaltide)
+This woman * is beautiful among the daughters of Jerusalem, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins, Paschaltide)
+R. In thy grace and in thy beauty * alleluia, alleluia.
+R. In thy grace and in thy beauty * alleluia, alleluia.
+V. Go forth, ride prosperously, and reign.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In thy grace and in thy beauty * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 670–671 (Common of Holy Women not Virgins, Paschaltide)
+R. God shall help her with his countenance * alleluia, alleluia.
+R. God shall help her with his countenance * alleluia, alleluia.
+V. God is in the midst of her, therefore shall she not be removed.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God shall help her with his countenance * alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 695 (Common of Holy Women not Virgins, Paschaltide)
+V. Full of grace are thy lips, alleluia.
+R. Because God hath blessed thee for ever, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins, Paschaltide)
+V. In thy grace and in thy beauty, alleluia.
+R. Go forth, ride prosperously, and reign, alleluia.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins, Paschaltide)
+V. Full of grace are thy lips, alleluia.
+R. Because God hath blessed thee for ever, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 696 (Common of Holy Women not Virgins, Paschaltide)
+Give her * of the fruit of her hands; and let her own works praise her in the gates, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins, Paschaltide)
+The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins, Paschaltide)
+She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to the needy; she eateth not the bread of idleness, alleluia.

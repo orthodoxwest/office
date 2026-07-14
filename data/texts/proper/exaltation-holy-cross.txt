@@ -1,43 +1,52 @@
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 541, 477 (Exaltation of the Holy Cross)
+O mighty work of mercy! * death then died, when life died upon the Tree.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-Save us, * O Christ the Saviour, save us through the might of thy Cross Thou Who didst save Peter when he was ready to sink in the sea, have mercy upon us. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 542, 478 (Exaltation of the Holy Cross)
+Save us, * O Christ our Saviour, by the virtue of the Cross: thou who savedst Peter in the sea, have mercy upon us.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-Behold, the Cross of the Lord! * fly, ye ranks of the adversary! The Lion of the tribe of Judah, the Root of David, hath prevailed. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 542, 479 (Exaltation of the Holy Cross)
+Behold the Cross of the Lord; * flee away, ye adversaries: the Lion of the tribe of Judah, the Root of David hath prevailed, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-But us it behoveth to glory * in the Cross of our Lord Jesus Christ. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 543 (Exaltation of the Holy Cross)
+But as for us, * it behoveth us to glory in the Cross of our Lord Jesus Christ.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-By thy Cross' holy sign, * Jesus, guard this soul of mine from my ghostly enemy. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 545 (Exaltation of the Holy Cross)
+By the sign * of the Cross, deliver us from our enemies, O our God.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant Laudes] — check against diurnal
-O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 541, 477 (Exaltation of the Holy Cross)
+O mighty work of mercy! * death then died, when life died upon the Tree.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 480 (Exaltation of the Holy Cross)
+By the sign * of the Cross, deliver us from our enemies, O our God.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant 2] — check against diurnal
-Thou art higher * than all cedars, whereon the Life of the world hung, whereon Christ openly triumphed, and His death trampled down death for ever. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross)
+Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Life of the world was hanged, on thee was Christ victorious, and death over death did for ever triumph.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Sancti/09-14 [Ant 3] — check against diurnal
-O blessed art thou, O Cross * thou which wast counted the only tree worthy to bear the Lord and King of heaven. Alleluia.
+O blessed art thou, O Cross, * thou which wast counted the only tree worthy to bear the Lord and King of heaven.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 484 (I Vespers, Exaltation of the Holy Cross)
+O Cross, * surpassing all the stars in splendour, world-renowned, exceeding dear unto the hearts of men, holier than all things: thou only wert counted worthy to uphold the world's ransom. Sweet the wood, sweet the iron, bearing so sweet a burden: bring aid to this congregation, who are here assembled to celebrate thy praises.
 
 [collect]
-# SOURCE: divinum-officium Sancti/09-14 [Oratio] — check against diurnal
-O God, Who dost this day gladden us by the yearly Feast of the Exaltation of the Holy Cross, grant, we beseech thee, that even as we have understood the mystery thereof upon earth, so we may worthily enjoy in heaven the fruits of the redemption which was paid thereon.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 550, 485 (Exaltation of the Holy Cross)
+O God, who makest us glad this day by the yearly solemnity of the Exaltation of the Holy Cross: grant, we beseech thee, that we who on earth have learned the mystery of our redemption, may be found worthy of its rewards in heaven.
 
 [chapter-lauds]
-# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] — check against diurnal
-!Phil 2:5-7
-For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+# SOURCE: draft archdiocesan Lauds book, p. 546 (Exaltation of the Holy Cross)
+!Phil 2:5-8
+Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
+R. Thanks be to God.
 
 [chapter-sext]
 # SOURCE: divinum-officium SanctiM/09-14 [Capitulum Sexta] — check against diurnal
@@ -45,15 +54,124 @@ For let this mind be in you, which was also in Christ Jesus: Who being in the fo
 But God forbid that I should glory, save in the Cross of our Lord Jesus Christ, by Whom the world is crucified unto me, and I unto the world.
 R. Thanks be to God.
 
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Thirty Years Among Us Dwelling, Passion Sunday Lauds.docx); draft archdiocesan Lauds book, pp. 547–549
+Lustris sex qui jam peractis
+
+Thirty years among us dwelling,
+His appointed time fulfilled.
+Born for this, he meets his Passion,
+For that this he freely willed.
+On the Cross the Lamb is lifted,
+Where his life-blood shall be spilled.
+
+He endured the nails, the spitting,
+Vinegar, and spear, and reed:
+From that holy Body broken
+Blood and Water forth proceed:
+Earth, and stars, and sky, and ocean
+By that flood from stain are freed.
+
+Faithful Cross above all other
+One and only noble Tree;
+None in foliage, none in blossom,
+None in fruit thy peer may be:
+Sweetest wood, and sweetest iron!
+Sweetest weight is hung on thee.
+
+Bend thy boughs, O Tree of glory,
+Thy relaxing sinews bend;
+For awhile the ancient rigour
+That thy birth bestowed, suspend;
+And the King of heavenly beauty
+On thy bosom gently tend.
+
+Thou alone wast counted worthy
+This world's ransom to sustain;
+That a shipwreck'd race for ever
+Might a port of refuge gain:
+With the sacred Blood anointed
+Of the Lamb for sinners slain.
+
+Glory be to God, and honour
+In the highest as is meet,
+To the Son, and to the Father,
+And th'eternal Paraclete,
+Whose is boundless praise and power
+Through the ages infinite.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (The Royal Banners Forward Go, Passiontide Vespers.docx); draft archdiocesan Vespers book, pp. 482–483
+Vexilla Regis prodeunt
+
+The royal banners forward go;
+The Cross shines forth in mystic glow;
+Where he in flesh, our flesh who made,
+Our sentence bore, our ransom paid.
+
+Where deep for us the spear was dyed,
+Life's torrent rushing from his side,
+To wash us in that precious flood
+Where mingled Water flowed and Blood.
+
+Fulfilled is all that David told
+In true prophetic song of old:
+Amidst the nations, God, saith he,
+Hath reigned and triumphed from the Tree.
+
+O Tree of Beauty! Tree of light!
+O Tree with royal purple dight!
+Elect on whose triumphal breast
+Those holy limbs should find their rest:
+
+On whose dear arms, so widely flung,
+The weight of this world's ransom hung,
+The price of humankind to pay,
+And spoil the spoiler of his prey.
+
+/:The following stanza is said kneeling.:/
+
+O Cross, our one reliance, hail!
+On this triumphant feast, avail
+To give fresh merit to the saint,
+And pardon to the penitent.
+
+/:Stand and bow.:/
+
+To thee, eternal Three in One,
+Let homage meet by all be done:
+Whom by the Cross thou dost restore,
+Preserve and govern evermore.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 547 (Exaltation of the Holy Cross)
+R. This sign of the Cross * shall be in heaven.
+R. This sign of the Cross * shall be in heaven.
+V. When the Lord shall come to judgment.
+R. Shall be in heaven.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This sign of the Cross * shall be in heaven.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 481 (Exaltation of the Holy Cross)
+R. We adore thee, O Christ, * and we bless thee.
+R. We adore thee, O Christ, * and we bless thee.
+V. Because by thy Cross thou hast redeemed the world.
+R. And we bless thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. We adore thee, O Christ, * and we bless thee.
+
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/09-14 [Versum 2] — check against diurnal
-V. We adore thee, O Christ, and we bless thee. (Alleluia.)
-R. Because that through thy Cross Thou hast redeemed the world. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross)
+V. We adore thee, O Christ, and we bless thee.
+R. Because by thy Cross thou hast redeemed the world.
 
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/09-14 [Versum 1] — check against diurnal
-V. This sign of the Cross shall be in heaven. (Alleluia.)
-R. When the Lord cometh to judgment. (Alleluia.)
+# SOURCE: draft archdiocesan Vespers book, p. 483 (Exaltation of the Holy Cross)
+V. This sign of the Cross shall be in heaven.
+R. When the Lord shall come to judgment.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Tertia] — check against diurnal
@@ -83,20 +201,22 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Let all the earth worship thee, * and sing unto thee.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium SanctiM/09-14 [Ant 2] — check against diurnal
-Thou art higher * than all cedars, whereon the Life of the world hung, whereon Christ openly triumphed, and His death trampled down death for ever. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross; same text as the Benedictus antiphon)
+Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Life of the world was hanged, on thee was Christ victorious, and death over death did for ever triumph.
 
 [commemoration-versicle]
-# SOURCE: divinum-officium SanctiM/09-14 [Versum 2] — check against diurnal
-V. We adore thee, O Christ, and we bless thee. (Alleluia.)
-R. Because that through thy Cross Thou hast redeemed the world. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 549 (Exaltation of the Holy Cross)
+V. We adore thee, O Christ, and we bless thee.
+R. Because by thy Cross thou hast redeemed the world.
 
 [chapter-vespers]
-# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Phil 2:5-7
-For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+# SOURCE: draft archdiocesan Vespers book, p. 481 (Exaltation of the Holy Cross)
+!Phil 2:5-8
+Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
+R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Phil 2:5-7
-For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+# SOURCE: draft archdiocesan Lauds/Vespers books (same chapter as the major hours)
+!Phil 2:5-8
+Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
+R. Thanks be to God.

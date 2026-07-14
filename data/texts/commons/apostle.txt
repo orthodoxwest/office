@@ -7,32 +7,65 @@ This is my commandment * that ye love one another, as I have loved you.
 This is my commandment * that ye love one another, as I have loved you.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-Greater love than this no man hath, * that a man lay down his life for his friends.
+# SOURCE: draft archdiocesan Lauds book, p. 604 (Common of Apostles and Evangelists out of Paschaltide)
+Greater love hath no man * than this, that a man lay down his life for his friends.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-You are my friends * if you do the things that I command you, said the Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 604 (Common of Apostles and Evangelists out of Paschaltide)
+Ye are my friends * if ye do whatsoever I command you, saith the Lord.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-Blessed are the peacemakers * the clean of heart, they shall see God.
+# SOURCE: draft archdiocesan Lauds book, p. 605 (Common of Apostles and Evangelists out of Paschaltide)
+Blessed are the peacemakers * blessed are the pure in heart, for they shall see God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C1 [Ant Laudes] — check against diurnal
-In your patience * you shall possess your souls.
+# SOURCE: draft archdiocesan Lauds book, p. 607 (Common of Apostles and Evangelists out of Paschaltide)
+In your patience * possess ye your souls.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 539 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
+This is my commandment * that ye love one another, as I have loved you.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 540 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
+Greater love hath no man * than this, that a man lay down his life for his friends.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 541 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
+Ye are my friends * if ye do whatsoever I command you, saith the Lord.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 542 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
+In your patience * possess ye your souls.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 547 (II Vespers for Common of Apostles out of Paschaltide)
+The Lord sware * and will not repent: Thou art a Priest for ever.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 548 (II Vespers for Common of Apostles out of Paschaltide)
+May the Lord set him * with the princes of his people.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 549 (II Vespers for Common of Apostles out of Paschaltide)
+Thou, O Lord, hast broken * my bonds in sunder: I will offer to thee the sacrifice of thanksgiving.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 550 (II Vespers for Common of Apostles out of Paschaltide)
+Firmly stablished * is their princedom: and highly honoured are thy friends, O God.
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Apostles and Evangelists) — parish noted manual
 Ye which have forsaken all * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C1 [Ant 3] — check against diurnal
-Be valiant * in battle, fight the ancient serpent and accept the eternal kingdom. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 554 (II Vespers for Common of Apostles out of Paschaltide)
+# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
+Be ye valiant in warfare * and contend ye with the old serpent: and ye shall receive an eternal kingdom, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C1 [Ant 1] — check against diurnal
-For they shall deliver you * up to councils: and in the synagogues you shall be beaten: and you shall stand before governors and kings for my sake, for a testimony unto them.
+# SOURCE: draft archdiocesan Vespers book, p. 545 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
+They will deliver you up * to the councils, and they will scourge you in their synagogues; and ye shall be brought before governors and kings for my sake, for a testimony against them and the Gentiles.
 
 [commemoration-antiphon]
 This is my commandment * that ye love one another, as I have loved you.
@@ -54,73 +87,73 @@ And by the hands of the apostles were many signs and wonders wrought among the p
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C1 [Hymnus Laudes] — check against diurnal
-Exsultet orbis gaudiis
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 609-610
+Exsultet cælum laudibus
 
-Now let the earth with joy resound,
-And heaven the chant re-echo round;
-Nor heaven nor earth too high can raise
-The great Apostles' glorious praise.
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
 
 O ye who, throned in glory dread,
 Shall judge the living and the dead,
-Lights of the world forevermore!
-To you the suppliant prayer we pour.
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
 
-Ye close the sacred gates on high;
-At your command apart they fly:
-Oh! loose for us the guilty chain
-We strive to break, and strive in vain.
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
 
-Sickness and health your voice obey;
-At your command they go or stay:
-From sin's disease our souls restore;
-In good confirm us more and more.
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
 
-So when the world is at its end,
-And Christ to judgement shall descend,
-May we be called those joys to see
-Prepared from all eternity.
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
 
-* Praise to the Father, with the Son,
-And Holy Spirit, Three in One;
-As ever was in ages past,
-And so shall be while ages last.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Commune/C1 [Hymnus Vespera] — check against diurnal
-Exsultet orbis gaudiis
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 543-544, 552-553
+Exsultet cælum laudibus
 
-Now let the earth with joy resound,
-And heaven the chant re-echo round;
-Nor heaven nor earth too high can raise
-The great Apostles' glorious praise.
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
 
 O ye who, throned in glory dread,
 Shall judge the living and the dead,
-Lights of the world forevermore!
-To you the suppliant prayer we pour.
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
 
-Ye close the sacred gates on high;
-At your command apart they fly:
-Oh! loose for us the guilty chain
-We strive to break, and strive in vain.
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
 
-Sickness and health your voice obey;
-At your command they go or stay:
-From sin's disease our souls restore;
-In good confirm us more and more.
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
 
-So when the world is at its end,
-And Christ to judgement shall descend,
-May we be called those joys to see
-Prepared from all eternity.
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
 
-* Praise to the Father, with the Son,
-And Holy Spirit, Three in One;
-As ever was in ages past,
-And so shall be while ages last.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [versicle-lauds]
@@ -190,6 +223,7 @@ Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citi
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Commune/C1 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 608 (Lauds chapter used at Terce)
 !Eph 2:19-20
-Brothers: Now therefore you are no more strangers and foreigners; but you are fellow citizens with the saints, and the domestics of God, built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone.
+Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citizens with the saints, and of the household of God; and are built upon the foundation of the Apostles and Prophets, Jesus Christ himself being the chief corner stone.
+R. Thanks be to God.

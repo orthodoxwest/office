@@ -1,38 +1,54 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C2a [Ant Laudes] — check against diurnal
-Whosoever shall confess Me * before men, him will I confess also before My Father.
+# SOURCE: draft archdiocesan Lauds book, p. 622 (Common of One Martyr out of Paschaltide)
+Whosoever shall confess me * before men, him will I confess also before my Father.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C2a [Ant Laudes] — check against diurnal
-Whosoever shall confess Me * before men, him will I confess also before My Father.
+# SOURCE: draft archdiocesan Lauds book, p. 622 (Common of One Martyr out of Paschaltide)
+Whosoever shall confess me * before men, him will I confess also before my Father.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 623, 573, 581 (Common of One Martyr out of Paschaltide)
 He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C2a [Ant Laudes] — check against diurnal
-If any man serve Me, * let him follow Me and where I am, there shall also My servant be.
+# SOURCE: draft archdiocesan Lauds book, p. 623 (Common of One Martyr out of Paschaltide)
+If any man serve me, * let him follow me; and where I am, there shall also my servant be.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C2a [Ant Laudes] — check against diurnal
-If any man serve Me, * him will My Father, who is in heaven, honour.
+# SOURCE: draft archdiocesan Lauds book, p. 624 (Common of One Martyr out of Paschaltide)
+If any man have served me, * he shall be honoured of my Father which is in heaven, saith the Lord.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C2a [Ant Laudes] — check against diurnal
-Father, I will * that where I am, there shall also My servant be.
+# SOURCE: draft archdiocesan Lauds book, p. 626 (Common of One Martyr out of Paschaltide)
+Father, * I will that where I am, there may also my servant be.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 572, 580 (I and II Vespers, Common of One Martyr out of Paschaltide)
+Whosoever shall confess me * before men, him will I confess also before my Father.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 573, 581 (I and II Vespers, Common of One Martyr out of Paschaltide)
+He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 574, 582 (I and II Vespers, Common of One Martyr out of Paschaltide)
+If any man serve me, * let him follow me; and where I am, there shall also my servant be.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 575, 583 (I and II Vespers, Common of One Martyr out of Paschaltide)
+Father, * I will that where I am, there may also my servant be.
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of One Martyr) — parish noted manual
 He that hateth his life * in this world shall keep it unto life eternal.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C2 [Ant 3] — check against diurnal
-If any man will come after me, * let him deny himself and take up his cross daily and follow me.
+# SOURCE: draft archdiocesan Vespers book, p. 585 (II Vespers, Common of One Martyr out of Paschaltide)
+Whosoever will come after me * let him deny himself, and take up his cross, and follow me.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C2 [Ant 1] — check against diurnal
-This man is holy * for he hath striven for the law of his God even unto death, and hath not feared for the words of the ungodly; for he had his foundation upon a strong rock.
+# SOURCE: draft archdiocesan Vespers book, p. 578 (I Vespers, Common of One Martyr out of Paschaltide)
+This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was stablished on a sure foundation.
 
 [commemoration-antiphon]
 Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
@@ -42,31 +58,32 @@ V. The righteous shall flourish like the palm-tree.
 R. He shall grow like a cedar in Lebanon.
 
 [collect]
-Grant, we beseech thee, almighty God, that the venerable feast of blessed N. thy Martyr may both increase our devotion and promote our salvation.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 638, 589, 596 (Common of One Martyr out of Paschaltide, non-bishop collect)
+Grant, we beseech thee, almighty God: that we, who devoutly celebrate the birthday of blessed N., thy Martyr, may by his intercession be stablished in the love of thy Name.
 
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C2a [HymnusM Laudes] — check against diurnal
-Martyr Dei, qui unicum
+# SOURCE: draft archdiocesan Lauds book, pp. 628-629 (Common of One Martyr out of Paschaltide)
+Martyr Dei qui unicum
 
-Martyr of God, whose strength was steeled
-To follow close God's only Son,
-Well didst thou brave thy battlefield,
-And well thy heavenly bliss was won!
+Thou foll'west, Martyr of thy God,
+The path the only Son hath trod,
+Thy conquered foes thou treadest down,
+And gloriest in a victor's crown.
 
-Now join thy prayers with ours, who pray
-That God may pardon us and bless;
-For prayer keeps evil's plague away,
-And draws from life its weariness.
+O may thy prayer for us obtain
+The cleansing of each guilty stain,
+Shield us from sin's contagious blight,
+Put life's long weariness to flight.
 
-Long, long ago, were loosed the chains
-That held thy body once in thrall;
-For us how many a bond remains!
-O love of God release us all.
+The cruel chains are now unwound
+That once thy sacred body bound,
+So may God's Son earth's fetters break
+From us, for his own love's dear sake.
 
-All praise to God the Father be,
-All praise to thee, Eternal Son;
-All praise, O Holy Ghost, to thee,
-While never-ending ages run.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [chapter-lauds]
@@ -115,31 +132,31 @@ V. Thou hast crowned him with glory and honour, O Lord.
 R. And madest him to have dominion of the works of thy hands.
 
 [hymn-vespers]
-# SOURCE: divinum-officium CommuneM/C2a [HymnusM Vespera] — check against diurnal
-Deus tuorum militum
+# SOURCE: draft archdiocesan Vespers book, pp. 576, 584 (I and II Vespers, Common of One Martyr out of Paschaltide)
+Deus, tuorum militum
 
-O God, of those that fought thy fight,
-Portion, and prize, and crown of light,
-Break every bond of sin and shame
-As now we praise thy martyr's name.
+Of all thy warrior saints, O Lord,
+The portion, crown, and great reward,
+From all transgressions set us free,
+Who sing thy Martyr's victory.
 
-He recked not of the world's allure,
-But sin and pomp of sin forswore:
-Knew all their gall, and passed them by,
-And reached the throne prepared on high.
+The pleasures of the world he spurn'd,
+From sin's pernicious lures he turn'd,
+Accounting them as transient all,
+He reach'd at length thy heav'nly hall.
 
-Bravely the course of pain he ran,
-And bare his torments as a man:
-For love of thee his blood outpoured,
-And thus obtained the great reward.
+For thee through many a woe he ran,
+In many a fight he played the man;
+For thee his blood he dared to pour,
+And thence hath joy for evermore.
 
-With humble voice and suppliant word
-We pray thee therefore, holy Lord,
-While we thy martyr's feast-day keep,
-Forgive thy loved and erring sheep.
+We therefore pray thee, full of love,
+Regard us from thy throne above,
+On this thy Martyr's triumph day,
+Wash ev'ry stain of sin away.
 
-* Glory and praise for aye be done
+Enduring laud and praise be done
 To God the Father, and the Son,
-And Holy Ghost, who reign on high,
-One God, to all eternity.
+And to the Holy Paraclete,
+For endless ages as is meet.
 Amen.

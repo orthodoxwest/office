@@ -372,7 +372,7 @@ FEBRUARY
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. Tuesday after Quinquagesima ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
                Com. Ash Wednesday ("Turn ye even to me")
  25  Wed  L§ ASH WEDNESDAY                              [1cl] v
            St Walburga of Heidenheim, Virgin (com)
@@ -1109,7 +1109,7 @@ JUNE
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
                Com. St Paulinus, Bishop & Confessor ("Behold an high priest")
            Hours   No Preces
-           Vespers r · II prec. · Mag. If any man will come after me · No Suff.
+           Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
                Com. St. Etheldreda, Queen & Virgin ("This is one of the wise virgins")
  23  Tue     Vigil of St John the Baptist               [s]   v
            St. Etheldreda, Queen & Virgin (com)
@@ -1154,7 +1154,7 @@ JUNE
                Com. St Leo II, Bishop & Confessor ("Behold an high priest")
                Com. Day V within the Octave of St John Baptist ("He shall go before Him")
            Hours   No Preces
-           Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. They will deliver you up · No Suff.
                Com. Day VI within the Octave of St John Baptist ("He shall go before Him")
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
            Day VI within the Octave of St John Baptist (sd)
@@ -1350,14 +1350,14 @@ JULY
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. St Christina, Virgin & Martyr ("This is one of the wise virgins")
            Hours   Preces
-           Vespers r · I fol. (St. James the Greater, Apostle) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (St. James the Greater, Apostle) · Mag. They will deliver you up · No Suff.
                Com. St Christopher, Martyr ("Whosoever shall confess me")
  25  Sat     St. James the Greater, Apostle             [2cl] r
            St Christopher, Martyr (com)
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. St Christopher, Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
                Com. St. Anne, Mother of the Blessed Virgin Mary ("While the King sitteth at his table")
                Com. VIII Sunday after Pentecost ("What shall I do?")
  26  Sun     St. Anne, Mother of the Blessed Virgin Mary [2cl] w
@@ -1397,7 +1397,7 @@ JULY
  31  Fri  L  Feria                                            g
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (Chains of St Peter, Apostle) · Mag. For they shall deliver you · No Suff.
+           Vespers w · I fol. (Chains of St Peter, Apostle) · Mag. They will deliver you up · No Suff.
                Com. St Paul, Apostle ("This is my commandment")
                Com. Holy Maccabees, Martyrs ("For theirs is the kingdom of heaven")
 
@@ -1423,7 +1423,7 @@ AUGUST
   3  Mon     The Finding of St. Stephen, Protomartyr    [d]   r
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. If any man will come after me · No Suff.
+           Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
   4  Tue     Feria                                            g
            Lauds   g · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
@@ -1549,12 +1549,12 @@ AUGUST
  23  Sun     XII Sunday after Pentecost                 [sd]  g
            Lauds   g · Ben. Master, what shall I do · No Preces · Suff.
            Hours   Preces
-           Vespers r · I fol. (St. Bartholomew, Apostle) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (St. Bartholomew, Apostle) · Mag. They will deliver you up · No Suff.
                Com. XII Sunday after Pentecost ("A certain man went down from Jerusalem")
  24  Mon     St. Bartholomew, Apostle                   [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
  25  Tue     Feria                                            g
            Lauds   g · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
@@ -1673,12 +1673,12 @@ SEPTEMBER
            Lauds   g · Ben. Jesus went into a city called Nain · No Preces · Suff.
            Hours   Preces
            Vespers g · II prec. · Mag. A great prophet is risen up among us · No Suff.
-               Com. Exaltation of the Holy Cross ("Thou art higher")
+               Com. Exaltation of the Holy Cross ("Thou alone")
  14  Mon     Exaltation of the Holy Cross               [gd]  r
-           Lauds   r · Ben. Thou art higher · No Preces · No Suff.
+           Lauds   r · Ben. Thou alone · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Seven Sorrows of the B.V.M) · Mag. All generations shall call me blessed · No Suff.
-               Com. Exaltation of the Holy Cross ("Thou art higher")
+               Com. Exaltation of the Holy Cross ("Thou alone")
                Com. St Nicomedes, Martyr ("Whosoever shall confess me")
  15  Tue     Seven Sorrows of the B.V.M                 [2cl] w
            St Nicomedes, Martyr (com)
@@ -1720,12 +1720,12 @@ SEPTEMBER
            Lauds   g · Ben. As Jesus went into the house · No Preces · No Suff.
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
-           Vespers r · I fol. (St. Matthew, Apostle and Evangelist) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (St. Matthew, Apostle and Evangelist) · Mag. They will deliver you up · No Suff.
                Com. XVI Sunday after Pentecost ("When thou art bidden")
  21  Mon     St. Matthew, Apostle and Evangelist        [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
  22  Tue     Feria                                            g
            St Maurice & companions, Martyrs (com)
            Lauds   g · Ben. The Lord hath raised up · No Preces · Suff.
@@ -1937,11 +1937,11 @@ OCTOBER
  27  Tue     Vigil of Ss. Simon and Jude, Apostles      [s]   v
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
-           Vespers r · I fol. (Ss. Simon and Jude, Apostles) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (Ss. Simon and Jude, Apostles) · Mag. They will deliver you up · No Suff.
  28  Wed     Ss. Simon and Jude, Apostles               [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
  29  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
@@ -2088,7 +2088,7 @@ NOVEMBER
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
                Com. St Pontianus, Bishop & Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers r · I fol. (St Edmund, King & Martyr) · Mag. This man is holy · No Suff.
+           Vespers r · I fol. (St Edmund, King & Martyr) · Mag. This is a Martyr · No Suff.
  20  Fri  L  St Edmund, King & Martyr                   [d]   r
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
            Hours   No Preces
