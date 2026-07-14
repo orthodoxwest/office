@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 180
+O God, who didst choose blessed Joachim, before all thy Saints, to be the father of her who bore thy Son: grant, we beseech thee, that as we hold his festival in honour, so we may ever experience his protection.
+
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/08-16.txt [Ant 1] — check against diurnal
 Let us praise a man * famous in his generation, with whom the Lord didst establish the blessing of all nations, and on whose head He made His covenant to rest.

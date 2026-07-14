@@ -1,5 +1,6 @@
 [collect]
-Grant us, Lord, we beseech thee, to glory in the solemnity of thy blessed Apostle Thomas, that we may ever be aided by his patronage, and follow his faith with true devotion.
+# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 20
+Grant, O Lord, we beseech thee, that we may glory in the solemn festival of thy blessed Apostle Thomas: and ever supported by his protection, may with fitting devotion imitate his faith.
 
 [benedictus-antiphon]
 # Incipit per 2026 ordo (Quia vidisti me, as at I Vespers) — check against diurnal
