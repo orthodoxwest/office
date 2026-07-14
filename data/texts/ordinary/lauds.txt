@@ -335,44 +335,44 @@ The three young boys * cast into the furnace by the king, fearing not the flames
 Alleluia, * alleluia, alleluia.
 
 [psalm-antiphon-1-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 7 (Monday)
 Have mercy upon me, * O God.
 
 [psalm-antiphon-2-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Hearken to my cry * O Lord.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 8 (Monday)
+Consider * my meditation, O Lord.
 
 [psalm-antiphon-3-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Thy mercy, * O Lord, is in the heavens.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 9 (Monday)
+Thy mercy, * O Lord, reacheth up to the heavens.
 
 [psalm-antiphon-4-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Thy wrath is turned away, * O Lord, and Thou hast comforted me.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 10 (Monday)
+Thine anger * is turned away, O Lord, and thou comfortedst me.
 
 [psalm-antiphon-5-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 2)] — check against diurnal
-Praise ye * the Lord from the heavens.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 11 (Monday)
+O praise * the Lord of heaven.
 
 [psalm-antiphon-1-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Blot out, O Lord * my iniquity.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 23 (Tuesday)
+Do away, O Lord, * mine offenses.
 
 [psalm-antiphon-2-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-The salvation of my countenance * and my God.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 24 (Tuesday)
+The help * of my countenance, and my God.
 
 [psalm-antiphon-3-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-For in thee * my soul trusteth.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 25 (Tuesday)
+For my soul trusteth * in thee.
 
 [psalm-antiphon-4-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Keep us safe, O Lord * all the days of our life.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 26 (Tuesday)
+Be thou ready * to save us all the days of our life, O Lord.
 
 [psalm-antiphon-5-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 3)] — check against diurnal
-Praise ye the Lord * from the heavens, all His angels.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 28 (Tuesday)
+All ye angels of his, * O praise the Lord of heaven.
 
 [psalm-antiphon-1-wednesday]
 # SOURCE: draft archdiocesan Lauds book, p. 179 (Wednesday)
@@ -395,44 +395,44 @@ The Lord shall judge * the ends of the earth.
 O all ye heavens, * praise ye the Lord.
 
 [psalm-antiphon-1-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Before thee only have I sinned, * O Lord, have mercy on me.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 56 (Thursday)
+Against thee only * have I sinned, O Lord: have mercy upon me.
 
 [psalm-antiphon-2-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Let my prayer * come in before thee.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 57 (Thursday)
+Let my prayer * O Lord, enter into thy presence.
 
 [psalm-antiphon-3-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Lord, * thou hast been our refuge.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 58 (Thursday)
+O Lord * thou hast been our refuge.
 
 [psalm-antiphon-4-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Let us sing unto the Lord, * for He hath triumphed gloriously.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 60 (Thursday)
+I will sing * unto the Lord, for he hath triumphed gloriously.
 
 [psalm-antiphon-5-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal
-Praise ye the Lord * in his holy places.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 62 (Thursday)
+O praise God * in his holiness.
 
 [psalm-antiphon-1-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-With a perfect spirit * strengthen my heart, O God.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 76 (Friday)
+With thy free Spirit * stablish my heart, O God.
 
 [psalm-antiphon-2-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-His name * is great in Israel.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 77 (Friday)
+His Name * is great in Israel.
 
 [psalm-antiphon-3-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 78 (Friday)
 It is a good thing * to give thanks unto the Lord.
 
 [psalm-antiphon-4-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-O Lord, I have heard thy hearing, * and was afraid.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 79 (Friday)
+O Lord * I have heard thy speech, and was afraid.
 
 [psalm-antiphon-5-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 6)] — check against diurnal
-Praise him with timbrel and choir: * praise him with strings and organs.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 82 (Friday)
+In the cymbals and dances, * upon the strings and pipe, O praise the Lord.
 
 [psalm-antiphon-1-saturday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
