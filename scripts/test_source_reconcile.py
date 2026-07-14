@@ -34,6 +34,51 @@ class SourceReconcileTest(unittest.TestCase):
             )
         )
 
+    def test_extracts_and_maps_standalone_canticle_underlay(self):
+        paragraphs = [
+            Paragraph(1, "THE GOSPEL CANTICLE: MAGNIFICAT"),
+            Paragraph(1, "vii.1 Antiphon on Magnificat. Suscepit Deus"),
+            Paragraph(1, "vii.1"),
+            Paragraph(1, "BvvzGhcvvijcvzygcvhjhcg,cvg,c}ccccccccccccccvv"),
+            Paragraph(1, "G od hath hol–pen † his ser–vant Is–ra–el,"),
+            Paragraph(1, "as he pro–mised to A–bra–ham and to his seed."),
+            Paragraph(2, "THE GOSPEL CANTICLE: MAGNIFICAT"),
+        ]
+        candidates = SOURCE_RECONCILE.extract_standalone_canticles(
+            "magnificat.docx",
+            "vespers",
+            "Magnificat",
+            paragraphs,
+            (
+                (
+                    "Saturdays Throughout the Year",
+                    "ordinary/vespers/magnificat-antiphon-saturday",
+                ),
+            ),
+        )
+        self.assertEqual(len(candidates), 1)
+        candidate = candidates[0]
+        self.assertEqual(
+            candidate.corpus_key, "ordinary/vespers/magnificat-antiphon-saturday"
+        )
+        self.assertEqual(candidate.latin_incipit, "Suscepit Deus")
+        self.assertEqual(
+            candidate.source_text,
+            "God hath holpen * his servant Israel, as he promised to Abraham and to his seed.",
+        )
+
+        corpus = {
+            candidate.corpus_key: SOURCE_RECONCILE.CorpusEntry(
+                candidate.corpus_key,
+                "ordinary/vespers.txt",
+                "magnificat-antiphon-saturday",
+                "God hath holpen * his servant Israel.",
+            )
+        }
+        SOURCE_RECONCILE.reconcile([candidate], corpus, {}, {})
+        self.assertEqual(candidate.current_text, corpus[candidate.corpus_key].text)
+        self.assertEqual(candidate.title_similarity, 1.0)
+
     def test_title_and_variant_come_from_office_prelude(self):
         history = [
             Paragraph(39, "december 25"),
