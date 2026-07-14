@@ -4,28 +4,58 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop, Paschaltide)
+Behold a great priest, * who in his days pleased God, and was found righteous, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop, Paschaltide)
+Behold a great priest, * who in his days pleased God, and was found righteous, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 653 (Common of a Confessor and Bishop, Paschaltide)
+There was none * like unto him, who kept the law of the Most High, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 653 (Common of a Confessor and Bishop, Paschaltide)
+The Lord, * therefore, assured him by an oath that he would bless the nations in his seed, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 654 (Common of a Confessor and Bishop, Paschaltide)
+O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn unto God, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 656 (Common of a Confessor and Bishop, Paschaltide)
+Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 626, 637 (Common of a Confessor and Bishop, Paschaltide)
+Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop, Paschaltide)
+R. The Lord loved him and adorned him, * alleluia, alleluia.
+R. The Lord loved him and adorned him, * alleluia, alleluia.
+V. He clothed him with a robe of glory.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him and adorned him, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 627, 638 (Common of a Confessor and Bishop, Paschaltide)
+R. The Lord chose him for a priest unto himself, * alleluia, alleluia.
+R. The Lord chose him for a priest unto himself, * alleluia, alleluia.
+V. To offer unto him the sacrifice of praise.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord chose him for a priest unto himself, * alleluia, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 661 (Common of a Confessor and Bishop, Paschaltide)
+Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 632 (I Vespers, Common of a Confessor and Bishop, Paschaltide)
+O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of the people, pray unto the Lord for us, alleluia.
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 659 (Common of a Confessor and Bishop, Paschaltide)
