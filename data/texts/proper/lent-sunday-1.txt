@@ -1,23 +1,30 @@
 [psalm-antiphon]
-Create in me a clean heart, * O God, and renew a right spirit within me.
+# SOURCE: draft archdiocesan Lauds book, p. 189 (First Sunday in Lent)
+Make me * a clean heart, O God, and renew a right spirit within me.
 
 [psalm-antiphon-1]
-Create in me a clean heart, * O God, and renew a right spirit within me.
+# SOURCE: draft archdiocesan Lauds book, p. 189 (First Sunday in Lent)
+Make me * a clean heart, O God, and renew a right spirit within me.
 
 [psalm-antiphon-2]
-Save me now, O Lord; * O Lord, send Thou prosperity.
+# SOURCE: draft archdiocesan Lauds book, p. 190 (First Sunday in Lent)
+Help me now, * O Lord: O Lord, send us now prosperity.
 
 [psalm-antiphon-3]
-Thus will I bless thee, * O Lord, while I live; and will lift up my hands in thy Name.
+# SOURCE: draft archdiocesan Lauds book, p. 192 (First Sunday in Lent)
+As long as I live, O Lord, * will I magnify thee on this manner, and lift up my hands in thy Name.
 
 [psalm-antiphon-4]
-In an humble spirit * and a contrite heart may we be accepted by thee, O Lord; and so let our sacrifice be this day, that it may be acceptable and pleasant in thy sight, O Lord our God!
+# SOURCE: draft archdiocesan Lauds book, p. 193 (First Sunday in Lent)
+In the spirit of humility * and with a contrite heart, let us be accepted by thee, O Lord: and so let our sacrifice be offered as to be accepted by thee to-day, and be pleasing in thy sight, O Lord our God.
 
 [psalm-antiphon-5]
-Praise God, * ye heavens of heavens, and all ye waters.
+# SOURCE: draft archdiocesan Lauds book, p. 194 (First Sunday in Lent)
+O praise God, * all ye heavens, and all ye waters.
 
 [benedictus-antiphon]
-Jesus was led up of the Spirit into the wilderness, * to be tempted of the devil and when He had fasted forty days and forty nights, He was afterward hungry.
+# SOURCE: draft archdiocesan Lauds book, p. 198 (First Sunday in Lent)
+Then was Jesus * led up of the Spirit into the wilderness to be tempted of the devil: and when he had fasted forty days and forty nights, he was afterward an hungred.
 
 [magnificat-antiphon]
 Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.

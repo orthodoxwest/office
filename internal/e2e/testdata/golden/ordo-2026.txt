@@ -405,7 +405,7 @@ MARCH
 ------------------------------------------------------------
   1  Sun  L  I SUNDAY IN LENT                           [1cl] v
            St David of Wales, Bishop & Confessor (com)
-           Lauds   v · Ben. Jesus was led up of the Spirit into the… · No Preces · Suff.
+           Lauds   v · Ben. Then was Jesus · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Behold a great priest")
            Hours   Preces
            Vespers v · II prec. · Mag. Then shalt thou call · Suff.
@@ -445,7 +445,7 @@ MARCH
            Hours   Preces
            Vespers v · I fol. (II Sunday in Lent) · Mag. Tell the vision that ye have seen to no… · Suff.
   8  Sun  L  II SUNDAY IN LENT                          [1cl] v
-           Lauds   v · Ben. Jesus took His disciples · No Preces · Suff.
+           Lauds   v · Ben. And Jesus taketh his disciples · No Preces · Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. Tell the vision that ye have seen to no… · Suff.
                Com. Monday after Lent II ("My soul doth magnify the Lord, and my spirit…")
@@ -486,7 +486,7 @@ MARCH
            Hours   Preces
            Vespers v · I fol. (III Sunday in Lent) · Mag. But the father said · Suff.
  15  Sun  L  III SUNDAY IN LENT                         [1cl] v
-           Lauds   v · Ben. When a strong man armed keepeth his palace · No Preces · Suff.
+           Lauds   v · Ben. When a strong man armed · No Preces · Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. A certain woman of the company lifed up her… · Suff.
                Com. Monday after Lent III ("My soul doth magnify the Lord, and my spirit…")
@@ -542,7 +542,7 @@ MARCH
                Com. Saturday after Lent III ("My soul doth magnify the Lord, and my spirit…")
                Com. IV Sunday in Lent ("Woman, hath no man condemned thee?")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
-           Lauds   p · Ben. When Jesus lifted up His Eyes · No Preces · Suff.
+           Lauds   p · Ben. When Jesus · No Preces · Suff.
            Hours   Preces
            Vespers p · II prec. · Mag. Woman, hath no man condemned thee? · Suff.
                Com. Monday after Lent IV ("My soul doth magnify the Lord, and my spirit…")
@@ -627,7 +627,7 @@ APRIL
            Hours   No Preces
            Vespers v · I fol. (Palm Sunday) · Mag. It is written: I will smite the Shepherd · No Suff.
   5  Sun  L  PALM SUNDAY                                [1cl] v
-           Lauds   v · Ben. Much people that were come to the Feast, cried · No Preces · No Suff.
+           Lauds   v · Ben. The multitudes · No Preces · No Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. It is written: I will smite the Shepherd · No Suff.
                Com. Holy Monday ("And now, O Father, glorify Thou Me")
@@ -1000,11 +1000,11 @@ JUNE
   6  Sat  L§ Day VII within the Octave of Pentecost     [sd]  r
            Lauds   r · Ben. The charity of God · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Trinity Sunday) · Mag. With all our heart · No Suff.
+           Vespers w · I fol. (Trinity Sunday) · Mag. Thanks, O God · No Suff.
                Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
   7  Sun     TRINITY SUNDAY                             [1cl] w
            I Sunday after Pentecost (sd)
-           Lauds   w · Ben. Blessed be the Holy One · No Preces · No Suff.
+           Lauds   w · Ben. Blessed be · No Preces · No Suff.
                Com. I Sunday after Pentecost ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. With all our heart · No Suff.
@@ -1116,50 +1116,50 @@ JUNE
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
                Com. St. Etheldreda, Queen & Virgin ("This is one of the wise virgins")
            Hours   Preces
-           Vespers w · I fol. (Nativity of St. John the Baptist) · Mag. When Zacharias went · No Suff.
+           Vespers w · I fol. (Nativity of St. John the Baptist) · Mag. When Zacharias · No Suff.
  24  Wed     NATIVITY OF ST. JOHN THE BAPTIST           [1cl] w
            Lauds   w · Ben. And the mouth of Zacharias was opened · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. The child, that unto us is born · No Suff.
+           Vespers w · II prec. · Mag. The child · No Suff.
  25  Thu     Day II within the Octave of St John Baptist [sd]  w
            Lauds   w · Ben. And the mouth of Zacharias was opened · No Preces · No Suff.
            Hours   No Preces
            Vespers r · I fol. (Ss. John & Paul, Martyrs) · Mag. The righteous stand · No Suff.
-               Com. Day II within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day II within the Octave of St John Baptist ("He shall go before him")
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Lord, Thou deliverest unto me five talents")
-               Com. Day III within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day III within the Octave of St John Baptist ("He shall go before him")
  26  Fri  L  Ss. John & Paul, Martyrs                   [d]   r
            Octave of the Compassion of Our Lord Jesus Christ (com)
            Day III within the Octave of St John Baptist (sd)
            Lauds   r · Ben. These are the holy ones · No Preces · No Suff.
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Lord, Thou deliverest unto me five talents")
-               Com. Day III within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day III within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · II prec. · Mag. These are two olive trees · No Suff.
-               Com. Day III within the Octave of St John Baptist ("He shall go before Him")
-               Com. Day IV within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day III within the Octave of St John Baptist ("He shall go before him")
+               Com. Day IV within the Octave of St John Baptist ("He shall go before him")
  27  Sat     Day IV within the Octave of St John Baptist [sd]  w
            Vigil of Ss Peter & Paul (s)
            Lauds   w · Ben. And the mouth of Zacharias was opened · No Preces · No Suff.
                Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers g · I fol. (IV Sunday after Pentecost) · Mag. So David prevailed · No Suff.
-               Com. Day IV within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day IV within the Octave of St John Baptist ("He shall go before him")
                Com. St Leo II, Bishop & Confessor ("Behold a great priest")
-               Com. Day V within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day V within the Octave of St John Baptist ("He shall go before him")
  28  Sun     IV Sunday after Pentecost                  [sd]  g
            St Leo II, Bishop & Confessor (com)
            Day V within the Octave of St John Baptist (sd)
            Lauds   g · Ben. Jesus entered into the ship · No Preces · No Suff.
                Com. St Leo II, Bishop & Confessor ("Behold a great priest")
-               Com. Day V within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day V within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. They will deliver you up · No Suff.
-               Com. Day VI within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day VI within the Octave of St John Baptist ("He shall go before him")
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
            Day VI within the Octave of St John Baptist (sd)
            Lauds   r · Ben. Thus saith the Lord · No Preces · No Suff.
-               Com. Day VI within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day VI within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · II prec. · Mag. Thou art Peter · No Suff.
                Com. St Paul, Apostle ("This is my commandment")
@@ -1169,10 +1169,10 @@ JUNE
            Day II within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. St Peter, Apostle ("This is my commandment")
-               Com. Day VII within the Octave of St John Baptist ("He shall go before Him")
+               Com. Day VII within the Octave of St John Baptist ("He shall go before him")
                Com. Day II within the Octave of Ss Peter & Paul ("Peter and John")
            Hours   No Preces
-           Vespers w · I fol. (Octave of St John Baptist) · Mag. When Zacharias went · No Suff.
+           Vespers w · I fol. (Octave of St John Baptist) · Mag. When Zacharias · No Suff.
                Com. St Paul, Apostle ("This is my commandment")
                Com. Day III within the Octave of Ss Peter & Paul ("Peter and John")
 
@@ -1184,7 +1184,7 @@ JULY
                Com. Day III within the Octave of Ss Peter & Paul ("Peter and John")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
-               Com. Octave of St John Baptist ("He shall go before Him")
+               Com. Octave of St John Baptist ("He shall go before him")
                Com. Ss. Processus & Martinian, Martyrs ("For theirs is the kingdom of heaven")
                Com. St John of San Francisco, Bishop & Confessor ("Behold a great priest")
   2  Thu     Visitation of the Blessed Virgin Mary      [2cl] w
@@ -1434,15 +1434,15 @@ AUGUST
            Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
                Com. St Oswald, King & Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers w · I fol. (Transfiguration of Our Lord) · Mag. While he yet spake · No Suff.
+           Vespers w · I fol. (Transfiguration of Our Lord) · Mag. Christ Jesus · No Suff.
                Com. Dedication of Our Lady of the Snows ("Holy Mary, succour the miserable")
                Com. Ss. Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("Whosoever shall confess me")
   6  Thu     Transfiguration of Our Lord                [2cl] w
            Ss. Sixtus II (Bishop & Martyr), Felicissimus & Agapitus (com)
-           Lauds   w · Ben. And, behold, a voice out of the cloud · No Preces · No Suff.
+           Lauds   w · Ben. And behold a voice · No Preces · No Suff.
                Com. Ss. Sixtus II (Bishop & Martyr), Felicissimus & Agapitus ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers w · II prec. · Mag. While he yet spake · No Suff.
+           Vespers w · II prec. · Mag. And when the disciples heard it · No Suff.
   7  Fri  L  Feria                                            g
            St Donatus, Bishop & Martyr (com)
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
@@ -1462,12 +1462,12 @@ AUGUST
            Lauds   g · Ben. The publican, standing afar off · No Preces · Suff.
                Com. St Romanus, Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers r · I fol. (St. Lawrence, Martyr) · Mag. Lawrence the Deacon · No Suff.
+           Vespers r · I fol. (St. Lawrence, Martyr) · Mag. Laurence the Deacon · No Suff.
                Com. X Sunday after Pentecost ("This man went down to his house")
  10  Mon     St. Lawrence, Martyr                       [2cl] r
-           Lauds   r · Ben. Upon the bars I denied thee not, O God · No Preces · No Suff.
+           Lauds   r · Ben. On the iron grate · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. The blessed Lawrence prayed · No Suff.
+           Vespers r · II prec. · Mag. Blessed Laurence · No Suff.
  11  Tue     Feria                                            g
            Ss Tiburtius & Susanna, Martyrs (com)
            Lauds   g · Ben. The Lord hath raised up · No Preces · Suff.
@@ -2146,7 +2146,7 @@ NOVEMBER
  28  Sat     Vigil of St. Andrew, Apostle               [s]   v
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
            Hours   Preces
-           Vespers v · I fol. (I Sunday of Advent) · Mag. Behold, the name of the Lord · No Suff.
+           Vespers v · I fol. (I Sunday of Advent) · Mag. Behold, the Name of the Lord · No Suff.
                Com. St Saturninus, Bishop & Martyr ("Whosoever shall confess me")
  29  Sun  L  I Sunday of Advent                         [2cl] v
            St Saturninus, Bishop & Martyr (com)
@@ -2190,7 +2190,7 @@ DECEMBER
            Lauds   v · Ben. Fear not · No Preces · No Suff.
                Com. St Sabbas of Judæa, Abbot ("Lord, Thou deliverest unto me five talents")
            Hours   Preces
-           Vespers v · I fol. (II Sunday of Advent) · Mag. Come, O Lord · No Suff.
+           Vespers v · I fol. (II Sunday of Advent) · Mag. Come, O Lord, in peace · No Suff.
                Com. St. Nicholas ("Behold a great priest")
   6  Sun  L  II Sunday of Advent                        [2cl] v
            St. Nicholas (d)
@@ -2232,7 +2232,7 @@ DECEMBER
  12  Sat  L  Day V within Conception Octave             [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
            Hours   No Preces
-           Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before Me · No Suff.
+           Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
                Com. St Lucy, Virgin & Martyr ("This is one of the wise virgins")
                Com. St Herman of Alaska, Priest & Confessor ("Lord, Thou deliverest unto me five talents")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
@@ -2240,7 +2240,7 @@ DECEMBER
            St Lucy, Virgin & Martyr (gd)
            St Herman of Alaska, Priest & Confessor (com)
            Day VI within Conception Octave (sd)
-           Lauds   p · Ben. He shall sit · No Preces · No Suff.
+           Lauds   p · Ben. He shall sit upon the throne · No Preces · No Suff.
                Com. St Lucy, Virgin & Martyr ("This is one of the wise virgins")
                Com. St Herman of Alaska, Priest & Confessor ("Lord, Thou deliverest unto me five talents")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")

@@ -1,35 +1,35 @@
 [psalm-antiphon-1]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-In that day * the mountains shall drop down sweet wine, and the hills shall flow with milk and honey. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 5, 4 (The First Sunday in Advent)
+In that day * the mountains shall drop down new wine, and the hills shall flow with milk and honey, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-Sing, O daughter of Zion, * and rejoice with all the heart, O daughter of Jerusalem. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 6, 5 (The First Sunday in Advent)
+Be joyful, * O daughter of Sion, and exceeding glad, O daughter of Jerusalem, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-Behold, the Lord shall come, * and all His saints with Him; and it shall come to pass in that day that the light shall be great. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 8, 6 (The First Sunday in Advent)
+Behold, the Lord cometh, * and all his Saints with him; and there shall be in that day a great light, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-Lo, every one that thirsteth * come ye to the waters: seek ye the Lord while He may be found. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 9 (The First Sunday in Advent)
+Ho, every one * that thirsteth, come ye to the waters: seek ye the Lord while he may be found, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-Behold, a great Prophet * shall arise, and He shall build up a new Jerusalem. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 10 (The First Sunday in Advent)
+Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Ant Vespera] — check against diurnal
-In that day * the mountains shall drop down sweet wine, and the hills shall flow with milk and honey. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 5, 4 (The First Sunday in Advent)
+In that day * the mountains shall drop down new wine, and the hills shall flow with milk and honey, alleluia.
 
 [collect]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Oratio] — check against diurnal
-Stir up, O Lord, we pray thee, thy strength, and come among us, that whereas through our sins and wickedness we do justly apprehend thy wrathful judgments hanging over us, thy bountiful grace and mercy may speedily help and deliver us;
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 15, 11 (The First Sunday in Advent)
+Stir up, we beseech thee, O Lord, thy power and come: that by thy protection, we may be found worthy to be set free from the dangers of our sins, and saved by thy deliverance.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 12 (The First Sunday in Advent)
 !Rom 13:11
-And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
 R. Thanks be to God.
 
 [chapter-none]
@@ -43,15 +43,15 @@ R. Thanks be to God.
 Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 8 (The First Sunday in Advent)
 !Rom 13:11
-And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 12 (Lauds chapter used at Terce)
 !Rom 13:11
-And that knowing the season; that it is now the hour for us to rise from sleep. For now our salvation is nearer than when we believed.
+Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
 R. Thanks be to God.
 
 # TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv1-0; supply from diurnal or suppress in audit-ok.txt
@@ -109,8 +109,8 @@ The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy 
 Fear not, Mary, * for thou hast found grace with the Lord; behold, thou shalt conceive in thy womb, and bring forth a son. Alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 1] — check against diurnal
-Behold, the name of the Lord * cometh from far, and the whole earth is full of His glory.
+# SOURCE: draft archdiocesan Vespers book, p. 10 (The First Sunday in Advent, I Vespers)
+Behold, the Name of the Lord * cometh from afar, and his glory filleth all the earth.
 
 [commemoration-antiphon]
 # SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal

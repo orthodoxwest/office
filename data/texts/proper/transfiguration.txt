@@ -1,47 +1,58 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
-Jesus took Peter, * and James, and John his brother, and brought them up into an high mountain apart and was transfigured before them.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 503, 436 (The Transfiguration of Our Lord Jesus Christ)
+Jesus taketh * Peter, James, and John his brother, and bringeth them up into an high mountain apart, and was transfigured before them.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
-Jesus took Peter, * and James, and John his brother, and brought them up into an high mountain apart and was transfigured before them.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 503, 436 (The Transfiguration of Our Lord Jesus Christ)
+Jesus taketh * Peter, James, and John his brother, and bringeth them up into an high mountain apart, and was transfigured before them.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
-His Face did shine as the sun, * and His raiment exceeding white as snow, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 504, 437 (The Transfiguration of Our Lord Jesus Christ)
+His face did shine * as the sun, and his raiment was white as the light, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
-And, behold, there appeared unto them Moses and Elias, * talking with Jesus.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 504, 438 (The Transfiguration of Our Lord Jesus Christ)
+And behold, * there appeared unto them Moses and Elias, talking with Jesus.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
-Then answered Peter, * and said unto Jesus: Lord, it is good for us to be here.
+# SOURCE: draft archdiocesan Lauds book, p. 505 (The Transfiguration of Our Lord Jesus Christ)
+Then answered Peter, * and said unto Jesus, Lord, it is good for us to be here.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/08-06 [Ant Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 506, 439 (The Transfiguration of Our Lord Jesus Christ)
+While he yet spake, * behold, a bright cloud overshadowed them.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 439 (The Transfiguration of Our Lord Jesus Christ)
 While he yet spake, * behold, a bright cloud overshadowed them.
 
 [benedictus-antiphon]
-And, behold, a voice out of the cloud, * which said: This is My beloved Son, in Whom I am well pleased; hear ye Him, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
+And behold a voice * out of the cloud, which said, This is my beloved Son, in whom I am well pleased, hear ye him, alleluia.
 
 [magnificat-antiphon]
-While he yet spake, * behold, a bright cloud overshadowed them.
+# SOURCE: draft archdiocesan Vespers book, p. 442 (II Vespers, The Transfiguration of Our Lord Jesus Christ)
+And when the disciples heard it, * they fell on their face, and were sore afraid: and Jesus came and touched them, and said, Arise, and be not afraid, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 442 (I Vespers, The Transfiguration of Our Lord Jesus Christ)
+Christ Jesus, * the brightness of the Father, and the express image of his person, who upholdeth all things by the word of his power, while he was by himself purging away our sins, vouchsafed on this day to shew himself in glory upon an high mountain.
 
 [commemoration-antiphon]
-Jesus took Peter, * and James, and John his brother, and brought them up into an high mountain apart and was transfigured before them.
+Jesus taketh * Peter, James, and John his brother, and bringeth them up into an high mountain apart, and was transfigured before them.
 
 [commemoration-versicle]
-V. Thou wast manifested in thy glory in the Presence of the Lord.
-R. Therefore the Lord hath clothed thee with majesty.
+V. Glorious didst thou appear in the sight of the Lord.
+R. Because the Lord hath clothed thee with majesty.
 
 [collect]
-O God, Who, in the glorious Transfiguration of thine Only Begotten Son didst attest the mysteries of the Faith by the witness of the Fathers, and didst wonderfully signify by a voice out of a bright cloud, the adoption of sons, mercifully grant unto us to be made co-heirs with the very King of glory, and bestow upon us a partaking of His glory.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 510, 443 (The Transfiguration; recovered directly from DOCX text flow)
+O God, who in the glorious Transfiguration of thine only-begotten Son didst confirm the mysteries of the faith by the testimony of the fathers, and in the voice which came down from the bright cloud didst marvellously foreshew the perfect adoption of sons: vouchsafe in thy mercy to make us coheirs with this glorious King, and grant that we may be partakers of his glory.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/08-06 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 507 (The Transfiguration of Our Lord Jesus Christ)
 !Phil 3:20-21
-We look for the Saviour, the Lord Jesus Christ, Who shall change our vile body, that it may be fashioned like unto His glorious Body.
+We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,69 +62,87 @@ Ye all, with open face beholding as in a glass the glory of the Lord, are change
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/08-06 [Hymnus Laudes] — check against diurnal
-Lux alma, Jesu, mentium
+# SOURCE: draft archdiocesan Lauds book, p. 508 (The Transfiguration of Our Lord Jesus Christ)
+Amor Jesu dulcissime
 
-Light of the anxious heart,
-Jesus, thou dost appear,
-To bid the gloom of guilt depart,
-And shed thy sweetness here.
+O Love of Jesus, sweet and dear,
+When to the heart thou dost appear,
+Away its clouds and darkness roll,
+And sweetness overflows the soul.
 
-Joyous is he, with whom,
-God's Word, thou dost abide;
-Sweet light of our eternal home,
-To fleshly sense denied.
+How happy he who feels thy light,
+Thou Sharer of the Father's might,
+True Radiance of our native land,
+Surpassing all we understand.
 
-Brightness of God above!
-Unfathomable grace!
-thy presence be a fount of love
-Within thy chosen place.
+Thou Brightness of the Father's throne,
+Goodness that never can be known,
+The fulness of thy love impart
+By thy true Presence in the heart.
 
-To thee, whom children see,
-The Father ever blest,
-The Holy Spirit, One and Three,
-Be endless praise addrest.
+All glory, Lord, to thee we pay,
+Transfigured on the mount to-day;
+All glory, as is ever meet,
+To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/08-06 [Hymnus Vespera] — check against diurnal
-Quicumque Christum quǽritis
+# SOURCE: draft archdiocesan Vespers book, p. 441 (The Transfiguration of Our Lord Jesus Christ)
+Quicumque Christum, quæritis
 
-All ye who would the Christ descry,
-Lift up your eyes to him on high:
-There mortal gaze hath strength to see
-The token of his majesty.
+All ye who seek for Jesus, raise
+Your eyes above, and upward gaze:
+There may ye see the wondrous sign
+Of never-ending glory shine.
 
-A wondrous sign we there behold,
-That knows not death nor groweth old,
-Sublime, most high, that cannot fade,
-That was ere earth and heaven were made.
+Behold him in celestial rays
+Who never knoweth end of days;
+Exalted, infinite, sublime;
+Older than heav'n or hell or time.
 
-Here is the King the gentiles fear,
-The Jews' most mighty King is here
-Promised to Abraham of yore,
-And to his seed forevermore.
+This is the Gentiles' King and Lord;
+The Prince by Judah's race adored,
+Promised to Abraham of yore
+And to his seed for evermore.
 
-'Tis he the prophets' words foretold,
-And by their signs shown forth of old;
-The Father's witness hath ordained
-That we should hear with faith unfeigned.
+To him the prophets testify;
+And that same witness, from on high,
+The Father seals by his decree:
+Hear and believe my Son, saith he.
 
-Jesu, to thee our praise we pay,
-To little ones revealed today,
-With Father and blest Spirit One
-Until the ages' course is done.
+All glory, Lord, to thee we pay,
+Transfigured on the mount to-day;
+All glory, as is ever meet,
+To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/08-06 [Versum 2] — check against diurnal
-V. A crown of gold upon his head.
-R. Wherein was engraved holiness, glory, and honour.
+# SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
+V. A crown of gold is upon his head.
+R. A visible sign of holiness, glory, and honour.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/08-06 [Versum 1] — check against diurnal
-V. Thou wast manifested in thy glory in the Presence of the Lord.
-R. Therefore the Lord hath clothed thee with majesty.
+# SOURCE: draft archdiocesan Vespers book, p. 442 (common to I and II Vespers, The Transfiguration)
+V. Glorious didst thou appear in the sight of the Lord.
+R. Because the Lord hath clothed thee with majesty.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 508 (The Transfiguration of Our Lord Jesus Christ)
+R. Glorious didst thou appear in the sight of the Lord, * alleluia, alleluia.
+R. Glorious didst thou appear in the sight of the Lord, * alleluia, alleluia.
+V. Because the Lord hath clothed thee with majesty.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Glorious didst thou appear in the sight of the Lord, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 440 (The Transfiguration of Our Lord Jesus Christ)
+R. Thou hast crowned him with glory and honour, O Lord, * alleluia, alleluia.
+R. Thou hast crowned him with glory and honour, O Lord, * alleluia, alleluia.
+V. And madest him to have dominion of the works of thy hands.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast crowned him with glory and honour, O Lord, * alleluia, alleluia.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/08-06 [Responsory Breve Tertia] — check against diurnal
@@ -143,13 +172,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. His glory is great in thy salvation. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/08-06 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 440 (II Vespers for The Transfiguration of Our Lord Jesus Christ)
 !Phil 3:20-21
-We look for the Saviour, the Lord Jesus Christ, Who shall change our vile body, that it may be fashioned like unto His glorious Body.
+We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/08-06 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 507, 440 (same chapter as Lauds and II Vespers)
 !Phil 3:20-21
-We look for the Saviour, the Lord Jesus Christ, Who shall change our vile body, that it may be fashioned like unto His glorious Body.
+We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
 R. Thanks be to God.

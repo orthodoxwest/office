@@ -1,35 +1,35 @@
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-Blow ye the trumpet * in Zion, for the day of the Lord is nigh at hand: behold, He cometh to save us! Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 39, 28 (The Fourth Sunday in Advent)
+Blow ye the trumpet * in Sion, for the day of the Lord is nigh at hand: behold, he cometh to save us, alleluia, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-Behold, the desire * of all nations shall come; and the house of the Lord shall be filled with glory. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 39, 29 (The Fourth Sunday in Advent)
+Behold * the Desire of all nations shall come: and the house of the Lord shall be filled with glory, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-The crooked * shall be made straight, and the rough places plain; O Lord, come, and make no tarrying. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 41, 30 (The Fourth Sunday in Advent)
+The crooked * shall be made straight, and the rough places plain: come, O Lord, and do not tarry, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-The Lord cometh! * Go ye out to meet Him, and say: How great is His dominion, and of His kingdom there shall be no end! He is the mighty God, the Ruler, the Prince of Peace. Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 42 (The Fourth Sunday in Advent)
+The Lord will come, * go ye out to meet him, saying: Great is his dominion, and of his kingdom there shall be no end: the mighty God, the Governor, the Prince of peace, alleluia, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-Thine Almighty Word, * O Lord, shall leap down out of thy royal throne. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 44 (The Fourth Sunday in Advent)
+Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant Laudes] — check against diurnal
-Blow ye the trumpet * in Zion, for the day of the Lord is nigh at hand: behold, He cometh to save us! Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 39, 28 (The Fourth Sunday in Advent)
+Blow ye the trumpet * in Sion, for the day of the Lord is nigh at hand: behold, he cometh to save us, alleluia, alleluia.
 
 [collect]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Oratio] — check against diurnal
-Stir up, we beseech thee, O Lord, thy power, and come; make haste to our aid with thy great might; that, by the help of thy grace, that which is hindered by our sins may be hastened by thy merciful forgiveness.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 48, 39 (The Fourth Sunday in Advent)
+Stir up, we beseech thee, O Lord, thy power and come: and with great might succour us; that by the help of thy grace, thy merciful pardon may hasten what our sins do hinder.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 45 (The Fourth Sunday in Advent)
 !1 Cor 4:1-2
-Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards, that a man be found faithful.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -45,15 +45,15 @@ Therefore judge not before the time; until the Lord come, who both will bring to
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 32 (The Fourth Sunday in Advent)
 !1 Cor 4:1-2
-Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards that a man be found faithful.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 45 (Lauds chapter used at Terce)
 !1 Cor 4:1-2
-Brothers: Let a man so account of us as of the ministers of Christ, and the dispensers of the mysteries of God. Here now it is required among the dispensers, that a man be found faithful.
+Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards, that a man be found faithful.
 R. Thanks be to God.
 
 # NOTE: no [magnificat-antiphon]: Advent IV Sunday Vespers always falls Dec 18-24, so its Magnificat antiphon is the dated Greater (O) Antiphon in seasonal/advent.txt
@@ -89,4 +89,3 @@ Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women
 [psalm-antiphon-4-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 31 (The Fourth Sunday in Advent)
 Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
-

@@ -1,23 +1,30 @@
 [psalm-antiphon]
-Then shalt Thou be pleased * with the sacrifices of righteousness, when Thou hast hidden thy face from my sins.
+# SOURCE: draft archdiocesan Lauds book, p. 222 (Fourth Sunday in Lent)
+Then shalt thou be pleased * with the sacrifice of righteousness, if thou wilt turn thy face from my sins.
 
 [psalm-antiphon-1]
-Then shalt Thou be pleased * with the sacrifices of righteousness, when Thou hast hidden thy face from my sins.
+# SOURCE: draft archdiocesan Lauds book, p. 222 (Fourth Sunday in Lent)
+Then shalt thou be pleased * with the sacrifice of righteousness, if thou wilt turn thy face from my sins.
 
 [psalm-antiphon-2]
-It is better to trust * in the Lord, than to trust in princes.
+# SOURCE: draft archdiocesan Lauds book, p. 223 (Fourth Sunday in Lent)
+It is better * to trust in the Lord, than to put any confidence in princes.
 
 [psalm-antiphon-3]
-Thy right hand hath * received me, O Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 225 (Fourth Sunday in Lent)
+Have I not thought * upon thee, O Lord, when I was waking?
 
 [psalm-antiphon-4]
-In the morning * O Lord, I shall meditate upon thee.
+# SOURCE: draft archdiocesan Lauds book, p. 226 (Fourth Sunday in Lent)
+Mighty art thou, O Lord, * to deliver us from the hand of the strong: save and deliver us, O our God.
 
 [psalm-antiphon-5]
-Kings of the earth, * and all people, praise God.
+# SOURCE: draft archdiocesan Lauds book, p. 227 (Fourth Sunday in Lent)
+Kings of the earth * and all people, praise ye the Lord.
 
 [benedictus-antiphon]
-When Jesus lifted up His Eyes, * and saw a great company come unto Him, He saith unto Philip: Whence shall we buy bread that these may eat? And this He said to prove him; for He Himself knew what He would do.
+# SOURCE: draft archdiocesan Lauds book, p. 231 (Fourth Sunday in Lent)
+When Jesus * lifted up his eyes, and saw a great company come unto him, he saith unto Philip: Whence shall we buy bread that these may eat? And this he said to prove him; for he himself knew what he would do.
 
 [magnificat-antiphon]
 Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
@@ -30,7 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-Grant, we beseech thee, Almighty God, that we who for our evil deeds are worthily punished, may, by the comfort of thy grace, mercifully be relieved.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 232, 141 (Fourth Sunday in Lent)
+Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthily deserve to be punished, by the comfort of thy grace may mercifully be relieved.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] — check against diurnal

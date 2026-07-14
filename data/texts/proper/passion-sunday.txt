@@ -1,23 +1,30 @@
 [psalm-antiphon]
-O Lord, behold my affliction; * for the enemy hath magnified himself.
+# SOURCE: draft archdiocesan Lauds book, p. 233 (Passion Sunday)
+O Lord, * behold my affliction: for mine enemy hath magnified himself.
 
 [psalm-antiphon-1]
-O Lord, behold my affliction; * for the enemy hath magnified himself.
+# SOURCE: draft archdiocesan Lauds book, p. 233 (Passion Sunday)
+O Lord, * behold my affliction: for mine enemy hath magnified himself.
 
 [psalm-antiphon-2]
-I called upon the Lord * in my distress; and He answered me, and set me at large.
+# SOURCE: draft archdiocesan Lauds book, p. 234 (Passion Sunday)
+I called * upon the Lord in trouble; and the Lord heard me at large.
 
 [psalm-antiphon-3]
-O Lord, Thou hast pleaded the cause of my soul; * Thou hast redeemed my life, O Lord my God.
+# SOURCE: draft archdiocesan Lauds book, p. 236 (Passion Sunday)
+O Lord, thou hast pleaded * the causes of my soul: thou hast defended my life, O Lord my God.
 
 [psalm-antiphon-4]
-O My people, what have I done unto thee? * or wherein have I wearied thee? testify against Me.
+# SOURCE: draft archdiocesan Lauds book, p. 237 (Passion Sunday)
+O my people, * what have I done unto thee? and wherein have I wearied thee? testify against me.
 
 [psalm-antiphon-5]
-Shall evil be recompensed for good? * for they have digged a pit for My soul.
+# SOURCE: draft archdiocesan Lauds book, p. 238 (Passion Sunday)
+Shall evil * be recompensed for good? for they have digged a pit for my soul.
 
 [benedictus-antiphon]
-Jesus said * unto the multitudes of the Jews and unto the Chief Priests: He that is of God heareth God's words; ye, therefore, hear them not, because ye are not of God.
+# SOURCE: draft archdiocesan Lauds book, p. 243 (Passion Sunday)
+Jesus said * unto the multitude of the Jews, and to the chief priests: He that is of God heareth God's words; ye therefore hear them not, because ye are not of God.
 
 [magnificat-antiphon]
 Your father Abraham rejoiced to see My day * and he saw it, and was glad.
@@ -30,7 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-We beseech thee, Almighty God, mercifully to look upon this thy family, that by thy great goodness they may be governed and preserved evermore, both in body and soul.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 244, 151 (Passion Sunday)
+We beseech thee, Almighty God, mercifully to look upon thy people: that by thy great goodness they may be governed and preserved evermore, both in body and soul.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Quad5-0 [Capitulum Laudes] — check against diurnal

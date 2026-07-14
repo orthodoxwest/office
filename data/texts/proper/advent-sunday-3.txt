@@ -1,35 +1,35 @@
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-The Lord will come, * and will not tarry; He both will bring to light the hidden things of darkness, and will make Himself manifest to all people. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 28, 20 (The Third Sunday in Advent)
+The Lord will surely come, * and will not tarry: and will bring to light the hidden things of darkness, and will manifest himself to all nations, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-Rejoice greatly, O Jerusalem, * for thy Saviour cometh unto thee. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 29, 21 (The Third Sunday in Advent)
+Jerusalem, * joy with great rejoicing, for thy Saviour cometh unto thee, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-I will place salvation in Zion, * and My glory in Jerusalem. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 31, 22 (The Third Sunday in Advent)
+I will place salvation * in Sion, and in Jerusalem my glory, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-Every mountain and hill * shall be made low, and the crooked shall be made straight, and the rough places plain; O Lord, come and make no tarrying. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 32 (The Third Sunday in Advent)
+Mountains and all hills * shall be abased, and the crooked shall be made straight, and the rough places plain. Come, O Lord, and tarry not, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-We should live * righteously and godly, looking for that blessed hope and the coming of the Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 33 (The Third Sunday in Advent)
+Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant Laudes] — check against diurnal
-The Lord will come, * and will not tarry; He both will bring to light the hidden things of darkness, and will make Himself manifest to all people. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 28, 20 (The Third Sunday in Advent)
+The Lord will surely come, * and will not tarry: and will bring to light the hidden things of darkness, and will manifest himself to all nations, alleluia.
 
 [collect]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Oratio] — check against diurnal
-O Lord, we beseech thee, mercifully incline thine ears unto our prayers, and lighten the darkness of our minds by the grace of thy heavenly visitation.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 38, 27 (The Third Sunday in Advent)
+Incline thine ear to our prayers, we beseech thee, O Lord; and enlighten the darkness of our minds by the grace of thy visitation.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 35 (The Third Sunday in Advent)
 !Phil 4:4-5
-Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+Brethren: Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -45,15 +45,15 @@ And the peace of God, which surpasseth all understanding, keep your hearts and m
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 24 (The Third Sunday in Advent)
 !Phil 4:4-5
-Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+Brethren: Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 35 (Lauds chapter used at Terce)
 !Phil 4:4-5
-Brothers: Rejoice in the Lord always; again, I say, rejoice. Let your modesty be known to all men. The Lord is nigh.
+Brethren: Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.
 R. Thanks be to God.
 
 # TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv3-0; supply from diurnal or suppress in audit-ok.txt
@@ -103,21 +103,20 @@ John bare witness of Him, * saying He That cometh after me is preferred before m
 O thou Angel of God, * how shall this be, seeing I know not a man? Hear, O Virgin Mary! the Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee!
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 2] — check against diurnal
-He shall sit * upon the throne of David, and upon his kingdom for ever. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 37 (The Third Sunday in Advent)
+He shall sit upon the throne * of David, and of his kingdom there shall be no end, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Adv3-0 [Ant 3] — check against diurnal
 Blessed art thou, * O Mary, who hast believed the Lord, for there shall be a performance of those things which were told thee from the Lord. Alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 1] — check against diurnal
-Before Me * there was no god formed, neither shall there be after Me; for unto Me every knee shall bow, and every tongue shall swear.
+# SOURCE: draft archdiocesan Vespers book, p. 26 (The Third Sunday in Advent, I Vespers)
+Before me * there was no God formed, neither shall there be after me: unto me every knee shall bow, and me shall every tongue confess.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium Tempora/Adv3-0 [Ant 2] — check against diurnal
-He shall sit * upon the throne of David, and upon his kingdom for ever. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 37 (The Third Sunday in Advent)
+He shall sit upon the throne * of David, and of his kingdom there shall be no end, alleluia.
 [psalm-antiphon-4-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 23 (The Third Sunday in Advent)
 Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
-

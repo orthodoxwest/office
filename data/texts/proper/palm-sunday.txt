@@ -1,23 +1,30 @@
 [psalm-antiphon]
-The Lord God will help me * and therefore I am not confounded.
+# SOURCE: draft archdiocesan Lauds book, p. 245 (Palm Sunday)
+For the Lord God * will help me: and therefore shall I not be confounded.
 
 [psalm-antiphon-1]
-The Lord God will help me * and therefore I am not confounded.
+# SOURCE: draft archdiocesan Lauds book, p. 245 (Palm Sunday)
+For the Lord God * will help me: and therefore shall I not be confounded.
 
 [psalm-antiphon-2]
-They compassed me about, * yea, they compassed me about but in the Name of the Lord! I will destroy them.
+# SOURCE: draft archdiocesan Lauds book, p. 246 (Palm Sunday)
+They compassed me about, * yea, they compassed me about: but in the Name of the Lord will I be avenged on them.
 
 [psalm-antiphon-3]
-Judge Thou my cause, * and redeem me, O Lord, for Thou art mighty to save.
+# SOURCE: draft archdiocesan Lauds book, p. 248 (Palm Sunday)
+Judge thou * my cause: defend me, for thou, O Lord, art mighty.
 
 [psalm-antiphon-4]
-Fare we with Angels and men in faith to meet the Redeemer, * hailing the Slayer of death with joyful shouts of "Hosanna in the highest!"
+# SOURCE: draft archdiocesan Lauds book, p. 249 (Palm Sunday)
+May the faithful * to-day be found among the Angels and the children, crying unto the Conqueror of death, Hosanna in the highest.
 
 [psalm-antiphon-5]
-Let them be confounded that persecute me; * but let not me be confounded, O Lord my God.
+# SOURCE: draft archdiocesan Lauds book, p. 250 (Palm Sunday)
+Let them be confounded * that persecute me, but let not me be confounded, O Lord my God.
 
 [benedictus-antiphon]
-Much people that were come to the Feast, cried * unto the Lord: Blessed is He That cometh in the Name of the Lord! Hosanna in the highest!
+# SOURCE: draft archdiocesan Lauds book, p. 255 (Palm Sunday)
+The multitudes * which came together for the feast day cried unto the Lord: Blessed is he that cometh in the Name of the Lord. Hosanna in the highest.
 
 [magnificat-antiphon]
 It is written: I will smite the Shepherd, * and the sheep of the flock shall be scattered abroad, but after I am risen again, I will go before you into Galilee: there shall ye see Me, saith the Lord.
@@ -30,7 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-Almighty and everlasting God, Who, of thy tender love towards mankind, hast sent thy Son our Saviour Jesus Christ to take upon Him our flesh and to suffer death upon the Cross, that all mankind should follow the example of His great humility; mercifully grant, that we may both follow the example of His patience, and also be made partakers of His resurrection. 
+# SOURCE: draft archdiocesan Lauds book, p. 256 (Palm Sunday)
+Almighty and everlasting God, who, of thy tender love towards mankind, hast sent thy Son, our Saviour Jesus Christ, to take upon him our flesh, and to suffer death upon the cross, that all mankind should follow the example of his great humility; mercifully grant, that we may both follow the example of his patience, and also be made partakers of his resurrection.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] — check against diurnal

@@ -1,47 +1,57 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 309, 189 (The Feast of the Most Holy Trinity)
+Glory * to thee, O Trinity co-equal, onely Deity, ere yet the worlds began to be, and now, and through eternity.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 309, 189 (The Feast of the Most Holy Trinity)
+Glory * to thee, O Trinity co-equal, onely Deity, ere yet the worlds began to be, and now, and through eternity.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-Praise and endless glory be * to God the Father, the Son, and the Holy Paraclete, for ever and ever.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 310, 190 (The Feast of the Most Holy Trinity)
+Praise and unending glory * to God the Father, and to the Son, and to the Holy Paraclete, through ages everlasting.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-Let the glory of praise * be heard from the mouth of all to the Father, and to the begotten Son; let it equally resound with perpetual praise to the Holy Spirit.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 311, 191 (The Feast of the Most Holy Trinity)
+Let praise and glory * resound from the lips of all men to the Father and the Sole-begotten; and equal praise be given for ever to the Holy Spirit.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-Praise be to God the Father, * and to his co-equal Son, and to thee, O Holy Ghost: with perpetual delight may it resound from our lips for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 312 (The Feast of the Most Holy Trinity)
+Let praise to God the Father, * to the co-equal Son, and to thee, O Holy Spirit, resound unceasingly from the lips of all creation, for ever and ever.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Ant Vespera] — check against diurnal
-From whom are all things, * through whom are all things, and in whom are all things: to him be glory for evermore.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 313, 192 (The Feast of the Most Holy Trinity)
+Of whom are all things, * through whom are all things, in whom are all things: to him be glory for ever.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 192 (The Feast of the Most Holy Trinity)
+Of whom are all things, * through whom are all things, in whom are all things: to him be glory for ever.
 
 [benedictus-antiphon]
-Blessed be the Holy One * the Maker and Lord of all things. Blessed be the Holy and Undivided Trinity, now and always, and unto unending ages of ages.
+# SOURCE: draft archdiocesan Lauds book, p. 317 (The Feast of the Most Holy Trinity)
+Blessed be * the holy Creator and Governor of all things, the holy and undivided Trinity, both now and ever, and to endless ages of ages.
 
 [magnificat-antiphon]
 With all our heart * and with all our voice do we acknowledge thee, praise thee, and bless thee, O God the Father the Unbegotten, O God the Only-Begotten Son, O God the Holy Ghost the Comforter, One Holy and Undivided Trinity, To thee be glory for ever.
 
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 195 (I Vespers, The Feast of the Most Holy Trinity)
+Thanks, O God, * be unto thee, thanks be unto thee, one and very Trinity, one and supreme Deity, holy and onely Unity.
+
 [commemoration-antiphon]
-Glory be to thee, O equal Trinity * one Deity, from before all ages, so now and for evermore.
+Glory * to thee, O Trinity co-equal, onely Deity, ere yet the worlds began to be, and now, and through eternity.
 
 [commemoration-versicle]
-V. Bless we the Father, and the Son, and the Holy Ghost.
-R. Let us praise Him and exalt Him above all for ever.
+V. Let us bless the Father, and the Son, and the Holy Ghost.
+R. Praise him, and magnify him for ever.
 
 [collect]
-Almighty and everlasting God, you have given thy servants in the confession of the true faith, to acknowledge the glory of the Eternal Trinity, and to adore the unity in the power of thy Majesty; grant, that by steadfastness in this faith we may ever be defended from all adversities.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 318, 196 (The Feast of the Most Holy Trinity; recovered directly from DOCX text flow)
+Almighty and everlasting God, who hast given unto us thy servants in the confession of a true faith to acknowledge the glory of the eternal Trinity, and in the power of the Majesty to worship the Unity: we beseech thee; that through steadfastness in the same Faith, we may evermore be defended from all adversities.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 315 (The Feast of the Most Holy Trinity)
 !Rom 11:33
-O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
 R. Thanks be to God.
 
 [chapter-sext]
@@ -57,54 +67,77 @@ And there are three who give testimony in heaven, the Father, the Word, and the 
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Hymnus Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 316 (The Feast of the Most Holy Trinity)
 Tu, Trinitatis Unitas
 
-O thou, who dost all nature sway,
-Dread Trinity in Unity,
-Accept the trembling praise we pay
-To thy eternal majesty.
+Thou Trinity in Unity
+Who rulest all things mightily,
+Bow down to hear the songs of praise
+Which we, thy wakeful servants raise.
 
-The star that heralds in the dawn
-Is slowly fading in the skies;
-The darkness melts; O thou true light,
-Upon our darkened souls arise.
+The day-star's rays are glitt'ring clear,
+And tell that day itself is near;
+The shadows of the night depart:
+Thou, holy Light, illume the heart.
 
-To God the Father glory be,
-And to the sole-begotten Son,
-And Holy Ghost co-equally,
-While everlasting ages run.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-0 [HymnusM Vespera] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 194 (The Feast of the Most Holy Trinity)
 O lux beata Trinitas
 
-O Trinity of blessed Light,
-O Unity of sovereign might,
-as now the fiery sun departs,
-shed Thou Thy beams within our hearts.
+O Trinity of blessed light,
+O Unity of princely might,
+The fiery sun now goes his way;
+Shed thou within our hearts thy ray.
 
-To Thee our morning song of praise,
-to Thee our evening prayer we raise;
-Thee may our glory evermore
-in lowly reverence adore.
+To thee our morning song of praise,
+To thee our evening prayer we raise;
+Thy glory suppliant we adore
+For ever and for evermore.
 
 All laud to God the Father be;
-all praise, Eternal Son, to Thee;
-all glory, as is ever meet,
-to God the Holy Paraclete.
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium TemporaM/Pent01-0 [Versum 2] — check against diurnal
-V. Bless we the Father, and the Son, and the Holy Ghost.
-R. Let us praise Him and exalt Him above all for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 316 (The Feast of the Most Holy Trinity)
+V. Let us bless the Father, and the Son, and the Holy Ghost.
+R. Praise him, and magnify him for ever.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Versum 1] — check against diurnal
-V. Bless we the Father, and the Son, and the Holy Ghost.
-R. Let us praise Him and exalt Him above all for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 316; divinum-officium Tempora/Pent01-0 [Versum 1] (II Vespers)
+V. Let us bless the Father, and the Son, and the Holy Ghost.
+R. Praise him, and magnify him for ever.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 194 (I Vespers, The Feast of the Most Holy Trinity)
+V. Blessed art thou, O Lord, in the firmament of heaven.
+R. And to be praised, and glorified, and magnified for ever.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 315 (The Feast of the Most Holy Trinity)
+R. Blessed art thou, O Lord, * in the firmament of heaven.
+R. Blessed art thou, O Lord, * in the firmament of heaven.
+V. And to be praised, and glorified, and magnified for ever.
+R. In the firmament of heaven.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Blessed art thou, O Lord, * in the firmament of heaven.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 193 (The Feast of the Most Holy Trinity)
+R. Let us bless the Father, and the Son, * and the Holy Ghost.
+R. Let us bless the Father, and the Son, * and the Holy Ghost.
+V. Praise him, and magnify him for ever.
+R. And the Holy Ghost.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let us bless the Father, and the Son, * and the Holy Ghost.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Tempora/Pent01-0 [Responsory Breve Tertia] — check against diurnal
@@ -134,13 +167,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. By the Word of the Lord * were the heavens made.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 193 (The Feast of the Most Holy Trinity)
 !Rom 11:33
-O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Pent01-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 315, 193 (same chapter as the major hours)
 !Rom 11:33
-O the depth of the riches of the wisdom and of the knowledge of God! How incomprehensible are his judgments, and how unsearchable his ways!
+O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
 R. Thanks be to God.

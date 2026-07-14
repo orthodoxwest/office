@@ -1,10 +1,10 @@
 [psalm-antiphon]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
-Elisabeth, the wife of Zacharias, * brought forth a mighty son, John the Baptist, the Lord's Forerunner.
+Elisabeth, * the wife of Zacharias, brought forth a mighty son, John the Baptist, the Lord's Forerunner.
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
-Elisabeth, the wife of Zacharias, * brought forth a mighty son, John the Baptist, the Lord's Forerunner.
+Elisabeth, * the wife of Zacharias, brought forth a mighty son, John the Baptist, the Lord's Forerunner.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 464, 393 (The Nativity of St John Baptist)
@@ -16,7 +16,7 @@ His name shall be called John: * and many shall rejoice at his birth.
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 465 (The Nativity of St John Baptist)
-Among them that are born of women, * there hath not risen a greater than John the Baptist.
+Among them that are born * of women, there hath not risen a greater than John the Baptist.
 
 [psalm-antiphon-5]
 # SOURCE: draft archdiocesan Lauds book, pp. 467–468 (The Nativity of St John Baptist)
@@ -46,22 +46,24 @@ This child * shall be great in the sight of the Lord: for the hand of the Lord i
 And the mouth of Zacharias was opened, * and he prophesied, saying: Blessed be the Lord God of Israel.
 
 [magnificat-antiphon]
-The child, that unto us is born, * is much more than a Prophet, for this is he of whom the Saviour saith: Among them that are born of women there hath not risen a greater than John the Baptist.
+# SOURCE: draft archdiocesan Vespers book, p. 398 (II Vespers for The Nativity of St John Baptist)
+The child * that is born unto us is more than a prophet; for this is he of whom the Saviour saith: Among them that are born of women, there hath not risen a greater than John the Baptist.
 
 [commemoration-antiphon]
-He shall go before Him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
+He shall go before him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
 
 [commemoration-versicle]
 V. There was a man sent from God.
 R. Whose name was John.
 
 [collect]
-O God, Who hast made this day to be honourable in our eyes because of the Birth of the blessed John, graciously quicken thy people with spiritual joy, and order the minds of all the faithful in the way of everlasting salvation.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 470, 391, 399 (The Nativity of St John Baptist)
+O God, who hast made this day honourable for us by the Nativity of blessed John: grant unto thy people the grace of spiritual joys, and direct the souls of all the faithful into the way of eternal salvation.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/06-24 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 468 (The Nativity of St John Baptist)
 !Isa 49:1
-Give ear, ye islands, and hearken, ye people from afar. The Lord hath called me from the womb, from the bowels of my mother he hath been mindful of my name.
+Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath called me from the womb; from the bowels of my mother hath he made mention of my name.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -101,8 +103,8 @@ Pardon imploring.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/06-24 [Hymnus Vespera] — check against diurnal
-Ut queant laxis resonare fibris
+# SOURCE: draft archdiocesan Vespers book, pp. 389, 397 (The Nativity of St John Baptist)
+Ut queant laxis
 
 O for thy spirit, holy John, to chasten
 Lips sin-polluted, fettered tongues to loosen;
@@ -115,7 +117,7 @@ How he shall name thee, what thy future story,
 Duly revealing.
 
 Scarcely believing message so transcendent,
-Him for season power of speech forsaketh,
+Him for a season pow'r of speech forsaketh,
 Till, at thy wondrous birth, again returneth
 Voice to the voiceless.
 
@@ -124,19 +126,24 @@ Knewest thy Monarch, biding in his chamber,
 Whence the two parents, through their children's merits,
 Mysteries uttered.
 
-Praise to the Father, to the Son begotten,
-And to the Spirit, equal power possessing,
-One God whose glory, through the lapse of ages,
-Ever resoundeth.
+Praise to the Father, to the Sole-begotten,
+And to thee, alway with the Twain co-equal,
+Fostering Spirit; one and only Godhead
+Through all the ages.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/06-24 [Versum 2] — check against diurnal
-V. The child shall be great in the sight of the Lord.
-R. For His hand is with him.
+# SOURCE: draft archdiocesan Lauds book, p. 470 (The Nativity of St John Baptist)
+V. This child shall be great in the sight of the Lord.
+R. For the hand of the Lord is with him.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/06-24 [Versum 1] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 390, 398 (The Nativity of St John Baptist)
+V. There was a man sent from God.
+R. Whose name was John.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 390 (I Vespers for The Nativity of St John Baptist)
 V. There was a man sent from God.
 R. Whose name was John.
 
@@ -168,17 +175,17 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/06-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 388, 396 (The Nativity of St John Baptist)
 !Isa 49:1
-Give ear, ye islands, and hearken, ye people from afar. The Lord hath called me from the womb, from the bowels of my mother he hath been mindful of my name.
+Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath called me from the womb; from the bowels of my mother hath he made mention of my name.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/06-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 468, 388, 396 (same chapter as the major hours)
 !Isa 49:1
-Give ear, ye islands, and hearken, ye people from afar. The Lord hath called me from the womb, from the bowels of my mother he hath been mindful of my name.
+Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath called me from the womb; from the bowels of my mother hath he made mention of my name.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/06-24.txt [Ant 1] — check against diurnal
-When Zacharias went * into the Temple of the Lord, the Angel Gabriel appeared unto him, standing on the right side of the altar of incense.
+# SOURCE: draft archdiocesan Vespers book, p. 390 (I Vespers for The Nativity of St John Baptist)
+When Zacharias * went into the temple, there appeared unto him the Angel Gabriel, standing on the right side of the altar of incense.
