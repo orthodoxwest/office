@@ -274,7 +274,7 @@ FEBRUARY
            Lauds   g · Ben. Sir · No Preces · No Suff.
                Com. St Romuald, Abbot ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
-           Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said unto Adam · Suff.
+           Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said · Suff.
                Com. Office of the V Sunday after Epiphany ("The master saith: Gather ye together first the tares")
   8  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. The kingdom · No Preces · Suff.
@@ -313,7 +313,7 @@ FEBRUARY
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
                Com. St Valentine, Priest & Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers v · I fol. (Sexagesima Sunday) · Mag. The Lord said unto Noah · Suff.
+           Vespers v · I fol. (Sexagesima Sunday) · Mag. The Lord · Suff.
                Com. Ss. Faustinus & Jovita, Martyrs ("For theirs is the kingdom of heaven")
  15  Sun     Sexagesima Sunday                          [2cl] v
            Ss. Faustinus & Jovita, Martyrs (com)
@@ -347,7 +347,7 @@ FEBRUARY
  21  Sat     Feria                                            v
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
            Hours   Preces
-           Vespers v · I fol. (Quinquagesima Sunday) · Mag. The father of our faith · Suff.
+           Vespers v · I fol. (Quinquagesima Sunday) · Mag. Mighty Abraham · Suff.
  22  Sun     Quinquagesima Sunday                       [2cl] v
            Lauds   v · Ben. Behold, we go up · No Preces · Suff.
            Hours   Preces
@@ -1097,7 +1097,7 @@ JUNE
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
                Com. St Silverius, Bishop & Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers g · I fol. (III Sunday after Pentecost) · Mag. And they all knew · Suff.
+           Vespers g · I fol. (III Sunday after Pentecost) · Mag. And all Israel knew · Suff.
  21  Sun     III Sunday after Pentecost                 [sd]  g
            Lauds   g · Ben. What man of you · No Preces · Suff.
            Hours   Preces
@@ -1209,7 +1209,7 @@ JULY
   4  Sat     Day VI within the Octave of Ss Peter & Paul [sd]  r
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
-           Vespers g · I fol. (V Sunday after Pentecost) · Mag. Ye mountains of Gilboa · No Suff.
+           Vespers g · I fol. (V Sunday after Pentecost) · Mag. Ye mountains · No Suff.
                Com. Day VI within the Octave of Ss Peter & Paul ("Peter and John")
                Com. Day VII within the Octave of Ss Peter & Paul ("Peter and John")
   5  Sun     V Sunday after Pentecost                   [sd]  g
@@ -1253,7 +1253,7 @@ JULY
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
                Com. St Pius I, Bishop & Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers g · I fol. (VI Sunday after Pentecost) · Mag. I beseech thee · Suff.
+           Vespers g · I fol. (VI Sunday after Pentecost) · Mag. O Lord, I beseech thee · Suff.
                Com. Ss. Nabor & Felix, Martyrs ("For theirs is the kingdom of heaven")
  12  Sun     VI Sunday after Pentecost                  [sd]  g
            Ss. Nabor & Felix, Martyrs (com)
@@ -1303,7 +1303,7 @@ JULY
                Com. St Sergius of Radonezh, Abbot ("Lord, Thou deliverest unto me five talents")
                Com. St Symphorosa & her seven sons, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
-           Vespers g · I fol. (VII Sunday after Pentecost) · Mag. Nathan the Prophet · No Suff.
+           Vespers g · I fol. (VII Sunday after Pentecost) · Mag. Zadok the priest · No Suff.
                Com. Translation of St Raphael of Brooklyn ("Behold a great priest")
                Com. St Seraphim of Sarov, Priest & Confessor ("Lord, Thou deliverest unto me five talents")
  19  Sun     VII Sunday after Pentecost                 [sd]  g
@@ -1410,7 +1410,7 @@ AUGUST
                Com. St Paul, Apostle ("This is my commandment")
                Com. Holy Maccabees, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
-           Vespers g · I fol. (IX Sunday after Pentecost) · Mag. Wisdom · No Suff.
+           Vespers g · I fol. (IX Sunday after Pentecost) · Mag. Wisdom hath builded her house · No Suff.
                Com. Chains of St Peter, Apostle ("Thus saith the Lord")
                Com. St Stephen, Bishop & Martyr ("Whosoever shall confess me")
   2  Sun     IX Sunday after Pentecost                  [sd]  g
@@ -1455,7 +1455,7 @@ AUGUST
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
                Com. Ss. Cyriacus, Largus & Smaragdus, Martyrs ("For theirs is the kingdom of heaven")
            Hours   Preces
-           Vespers g · I fol. (X Sunday after Pentecost) · Mag. I dwell in the highest · Suff.
+           Vespers g · I fol. (X Sunday after Pentecost) · Mag. I dwell · Suff.
                Com. St Romanus, Martyr ("Whosoever shall confess me")
   9  Sun     X Sunday after Pentecost                   [sd]  g
            St Romanus, Martyr (com)
@@ -1584,7 +1584,7 @@ AUGUST
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
                Com. St Sabina, Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers g · I fol. (XIII Sunday after Pentecost) · Mag. When Job heard the words · No Suff.
+           Vespers g · I fol. (XIII Sunday after Pentecost) · Mag. Now when Job had heard · No Suff.
                Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
                Com. Ss. Felix & Adauctus, Martyrs ("For theirs is the kingdom of heaven")
  30  Sun     XIII Sunday after Pentecost                [sd]  g
@@ -1631,7 +1631,7 @@ SEPTEMBER
   5  Sat     Saturday Office of the B.V.M               [s]   w
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
            Hours   Preces
-           Vespers g · I fol. (XIV Sunday after Pentecost) · Mag. In all these things Job sinned not · Suff.
+           Vespers g · I fol. (XIV Sunday after Pentecost) · Mag. In all this · Suff.
   6  Sun     XIV Sunday after Pentecost                 [sd]  g
            Lauds   g · Ben. Be not therefore anxious · No Preces · Suff.
            Hours   Preces
@@ -1667,7 +1667,7 @@ SEPTEMBER
  12  Sat     The Most Holy Name of Mary                 [gd]  w
            Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
            Hours   No Preces
-           Vespers g · I fol. (XV Sunday after Pentecost) · Mag. Remember not, Lord · No Suff.
+           Vespers g · I fol. (XV Sunday after Pentecost) · Mag. Remember not · No Suff.
                Com. The Most Holy Name of Mary ("Holy Mary, succour the miserable")
  13  Sun     XV Sunday after Pentecost                  [sd]  g
            Lauds   g · Ben. Jesus went into a city · No Preces · Suff.
@@ -1713,7 +1713,7 @@ SEPTEMBER
                Com. St Januarius & companions, Martyrs ("For theirs is the kingdom of heaven")
                Com. St Theodore of Canterbury, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
-           Vespers g · I fol. (XVI Sunday after Pentecost) · Mag. O Adonai, O Lord God · No Suff.
+           Vespers g · I fol. (XVI Sunday after Pentecost) · Mag. Adonai · No Suff.
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
  20  Sun     XVI Sunday after Pentecost                 [sd]  g
            St Eustace & companions, Martyrs (d)
@@ -1756,7 +1756,7 @@ SEPTEMBER
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
                Com. Ss. Cyprian & Justina, Martyrs ("For theirs is the kingdom of heaven")
            Hours   Preces
-           Vespers g · I fol. (XVII Sunday after Pentecost) · Mag. O my Lord, the King Almighty · Suff.
+           Vespers g · I fol. (XVII Sunday after Pentecost) · Mag. O Lord · Suff.
                Com. Ss. Cosmas & Damian, Martyrs ("For theirs is the kingdom of heaven")
  27  Sun     XVII Sunday after Pentecost                [sd]  g
            Ss. Cosmas & Damian, Martyrs (com)
@@ -2004,7 +2004,7 @@ NOVEMBER
            Lauds   w · Ben. The glorious company · No Preces · No Suff.
                Com. St Willibrord, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
-           Vespers g · I fol. (XXIII Sunday after Pentecost) · Mag. Hedge us about · No Suff.
+           Vespers g · I fol. (XXIII Sunday after Pentecost) · Mag. Encompass us · No Suff.
                Com. Day VII within the Octave of All Saints ("I beheld a great multitude")
                Com. Four Crowned Martyrs ("For theirs is the kingdom of heaven")
                Com. Octave Day of All Saints ("I beheld a great multitude")
@@ -2059,7 +2059,7 @@ NOVEMBER
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
                Com. St Gregory Palamas, Bishop & Confessor ("Behold a great priest")
            Hours   Preces
-           Vespers g · I fol. (VI Sunday after Epiphany (Resumed)) · Mag. O Lord, the King of kings, That containest the… · Suff.
+           Vespers g · I fol. (VI Sunday after Epiphany (Resumed)) · Mag. Thou that upholdest · Suff.
  15  Sun     VI Sunday after Epiphany (Resumed)         [sd]  g
            Lauds   g · Ben. The kingdom of heaven · No Preces · Suff.
            Hours   Preces
@@ -2103,7 +2103,7 @@ NOVEMBER
                Com. St Columbanus, Abbot ("Lord, Thou deliverest unto me five talents")
                Com. St Gelasius, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
-           Vespers g · I fol. (XXIV & Last Sunday after Pentecost) · Mag. I have set watchmen upon thy walls, O Jerusalem · No Suff.
+           Vespers g · I fol. (XXIV & Last Sunday after Pentecost) · Mag. I have set watchmen · No Suff.
                Com. Presentation of the Blessed Virgin Mary ("O Holy Mary")
                Com. St. Cecilia ("The musicians played, and Cecilia sang unto the Lord")
  22  Sun     XXIV & Last Sunday after Pentecost         [sd]  g
