@@ -360,9 +360,8 @@ and reigneth, God, for ever and ever.
 R. Amen.
 
 # Ferial psalm antiphons by weekday (Benedictine Lauds scheme: Ps 51,
-# two day-psalms, OT canticle, Laudate). Saturday slots 2-3 (Ps 148a/b)
-# have no counterpart in the monastic tables and use the generic
-# [psalm-antiphon] fallback above.
+# two day-psalms, OT canticle, Laudate). Saturday has one day-psalm,
+# followed by the Song of Moses and Laudate.
 
 [psalm-antiphon-1-sunday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal
@@ -485,13 +484,17 @@ O Lord * I have heard thy speech, and was afraid.
 In the cymbals and dances, * upon the strings and pipe, O praise the Lord.
 
 [psalm-antiphon-1-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-In thy good will, O Lord, * deal favourably with Sion.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96 (Saturday)
+Be favourable, * O Lord, and gracious.
+
+[psalm-antiphon-2-saturday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 96–97 (Saturday)
+Hearken unto me, O Lord, * for thy truth and righteousness' sake.
+
+[psalm-antiphon-3-saturday]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 97–101 (Saturday)
+Ascribe ye greatness * unto our God.
 
 [psalm-antiphon-4-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-Ascribe greatness * to our God.
-
-[psalm-antiphon-5-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 7)] — check against diurnal
-Praise God * upon the resounding cymbals.
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 103–104 (Saturday)
+Upon the well-tuned cymbals * O praise God.

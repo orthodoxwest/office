@@ -3,11 +3,11 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 238 |
+| Modeled structural features | 240 |
 | Selected structural-review pages | 45 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 2090 |
+| Text entries needing review | 2091 |
 | Text entries with unknown source | 486 |
 | Stale attestations | 0 |
 
@@ -55,14 +55,16 @@
 - `decision:condition:if-suffrage=omitted`
 - `decision:condition:is-feast,not-feast-easter-sunday=included`
 - `decision:condition:is-feast,not-feast-easter-sunday=omitted`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday=included`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=included`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=omitted`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=included`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=omitted`
-- `decision:condition:not-feast-easter-sunday=included`
-- `decision:condition:not-feast-easter-sunday=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
 - `decision:condition:not-is-feast,weekday-friday=included`

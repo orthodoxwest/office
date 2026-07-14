@@ -480,7 +480,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 Type = psalm
-Ref = psalms/148a
+Ref = psalms/143
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -491,23 +491,11 @@ Ref = psalm-antiphon-2
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
-Type = psalm
-Ref = psalms/148b
-
-Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
-
-Type = proper-antiphon
-Ref = psalm-antiphon-3
-
-Type = proper-antiphon
-Ref = psalm-antiphon-4
-
 Type = canticle
 Ref = canticles/deuteronomy-32
 
 Type = proper-antiphon
-Ref = psalm-antiphon-4
+Ref = psalm-antiphon-3
 
 [Laudate-Easter]
 Condition = feast-easter-sunday
@@ -530,8 +518,50 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = easter-antiphon-5
 
-[Laudate]
-Condition = not-feast-easter-sunday
+[Laudate-Saturday]
+Condition = not-is-feast,weekday-saturday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+[Laudate-Saturday-Festal]
+Condition = is-feast,weekday-saturday,not-feast-easter-sunday
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+[Laudate-Non-Saturday]
+Condition = not-feast-easter-sunday,not-weekday-saturday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5

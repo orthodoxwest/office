@@ -356,7 +356,7 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 	}
 }
 
-func TestLaudsSaturdayUsesPsalm148Parts(t *testing.T) {
+func TestLaudsSaturdayUsesPsalm143(t *testing.T) {
 	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
 	sections, err := ParseHourDefinition(path)
 	if err != nil {
@@ -382,16 +382,12 @@ func TestLaudsSaturdayUsesPsalm148Parts(t *testing.T) {
 		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
-		{Type: "psalm", Ref: "psalms/148a"},
+		{Type: "psalm", Ref: "psalms/143"},
 		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
-		{Type: "psalm", Ref: "psalms/148b"},
-		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
 		{Type: "canticle", Ref: "canticles/deuteronomy-32"},
-		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
 	}
 
 	if len(saturday.Elements) != len(want) {
