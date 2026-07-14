@@ -1,23 +1,30 @@
 [psalm-antiphon]
-O Lord, behold my affliction; * for the enemy hath magnified himself.
+# SOURCE: draft archdiocesan Lauds book, p. 233 (Passion Sunday)
+O Lord, * behold my affliction: for mine enemy hath magnified himself.
 
 [psalm-antiphon-1]
-O Lord, behold my affliction; * for the enemy hath magnified himself.
+# SOURCE: draft archdiocesan Lauds book, p. 233 (Passion Sunday)
+O Lord, * behold my affliction: for mine enemy hath magnified himself.
 
 [psalm-antiphon-2]
-I called upon the Lord * in my distress; and He answered me, and set me at large.
+# SOURCE: draft archdiocesan Lauds book, p. 234 (Passion Sunday)
+I called * upon the Lord in trouble; and the Lord heard me at large.
 
 [psalm-antiphon-3]
-O Lord, Thou hast pleaded the cause of my soul; * Thou hast redeemed my life, O Lord my God.
+# SOURCE: draft archdiocesan Lauds book, p. 236 (Passion Sunday)
+O Lord, thou hast pleaded * the causes of my soul: thou hast defended my life, O Lord my God.
 
 [psalm-antiphon-4]
-O My people, what have I done unto thee? * or wherein have I wearied thee? testify against Me.
+# SOURCE: draft archdiocesan Lauds book, p. 237 (Passion Sunday)
+O my people, * what have I done unto thee? and wherein have I wearied thee? testify against me.
 
 [psalm-antiphon-5]
-Shall evil be recompensed for good? * for they have digged a pit for My soul.
+# SOURCE: draft archdiocesan Lauds book, p. 238 (Passion Sunday)
+Shall evil * be recompensed for good? for they have digged a pit for my soul.
 
 [benedictus-antiphon]
-Jesus said * unto the multitudes of the Jews and unto the Chief Priests: He that is of God heareth God's words; ye, therefore, hear them not, because ye are not of God.
+# SOURCE: draft archdiocesan Lauds book, p. 243 (Passion Sunday)
+Jesus said * unto the multitude of the Jews, and to the chief priests: He that is of God heareth God's words; ye therefore hear them not, because ye are not of God.
 
 [magnificat-antiphon]
 Your father Abraham rejoiced to see My day * and he saw it, and was glad.
@@ -30,7 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-We beseech thee, Almighty God, mercifully to look upon this thy family, that by thy great goodness they may be governed and preserved evermore, both in body and soul.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 244, 151 (Passion Sunday)
+We beseech thee, Almighty God, mercifully to look upon thy people: that by thy great goodness they may be governed and preserved evermore, both in body and soul.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Quad5-0 [Capitulum Laudes] — check against diurnal
@@ -109,3 +117,54 @@ Father, glorify Thou Me * with thine Own Self, with the glory which I had with t
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium TemporaM/Quad5-0 [Ant 1] — check against diurnal
 I am One * That bear witness of Myself, and the Father That sent Me beareth witness of Me.
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Thirty Years Among Us Dwelling, Passion Sunday Lauds.docx); draft archdiocesan Lauds book, pp. 241–243
+Lustris sex qui jam peractis
+
+Thirty years among us dwelling,
+His appointed time fulfilled,
+Born for this, he meets his Passion,
+For that this he freely willed:
+On the Cross the Lamb is lifted,
+Where his life-blood shall be spilled.
+
+He endured the nails, the spitting,
+Vinegar, and spear, and reed:
+From that holy Body broken
+Blood and Water forth proceed:
+Earth, and stars, and sky, and ocean,
+By that flood from stain are freed.
+
+Faithful Cross, above all other
+One and only noble Tree;
+None in foliage, none in blossom,
+None in fruit thy peer may be:
+Sweetest wood, and sweetest iron!
+Sweetest weight is hung on thee.
+
+Bend thy boughs, O Tree of glory,
+Thy relaxing sinews bend:
+For awhile the ancient rigour
+That thy birth bestowed, suspend:
+And the King of heavenly beauty
+On thy bosom gently tend.
+
+Thou alone wast counted worthy
+This world's ransom to sustain;
+That a shipwrecked race for ever
+Might a port of refuge gain:
+With the sacred Blood anointed
+Of the Lamb for sinners slain.
+
+Glory be to God, and honour
+In the highest, as is meet,
+To the Son and to the Father,
+And the eternal Paraclete,
+Whose is boundless praise and power
+Through the ages infinite.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 243 (Passion Sunday)
+V. Deliver me from mine enemies, O God.
+R. Defend me from them that rise up against me.

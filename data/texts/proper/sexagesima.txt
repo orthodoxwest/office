@@ -1,29 +1,30 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-Have mercy upon me, O God, * after thy great mercy.
+# SOURCE: draft archdiocesan Lauds book, p. 155 (Sexagesima Sunday)
+After thy great goodness, * have mercy upon me, O God.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-Have mercy upon me, O God, * after thy great mercy.
+# SOURCE: draft archdiocesan Lauds book, p. 155 (Sexagesima Sunday)
+After thy great goodness, * have mercy upon me, O God.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-If the Lord be my Saviour * I will not fear what man can do unto me.
+# SOURCE: draft archdiocesan Lauds book, p. 156 (Sexagesima Sunday)
+If the Lord be on my side, * I will not fear what man doeth unto me.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-Within the veil I cried betimes: * O God, Thou art my God, early will I seek thee.
+# SOURCE: draft archdiocesan Lauds book, p. 158 (Sexagesima Sunday)
+Within the veil * have I called very early in the morning: O God, thou art my God, early will I seek thee.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-Let us sing praises * to the Lord our God.
+# SOURCE: draft archdiocesan Lauds book, p. 159 (Sexagesima Sunday)
+Let us sing a hymn * unto the Lord our God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Quadp2-0 [Ant Laudes] — check against diurnal
-In the high places, * praise ye God.
+# SOURCE: draft archdiocesan Lauds book, p. 160 (Sexagesima Sunday)
+In the cymbals and dances, * upon the strings and pipe, O praise the Lord.
 
 [benedictus-antiphon]
-Praise ye the Lord * from the heavens.
+# SOURCE: draft archdiocesan Lauds book, p. 165 (Sexagesima Sunday)
+When much people * were gathered together to Jesus, and were come to him out of every city, he spake by a parable: A sower went out to sow his seed.
 
 [magnificat-antiphon]
 Jesus said to His disciples: * Unto you it is given to know the mysteries of the kingdom of God, but to others in parables.
@@ -36,7 +37,19 @@ V. Lord, thou hast been our refuge.
 R. From generation to generation.
 
 [collect]
-O Lord, we beseech thee favourably to hear the prayers of thy people; that we, who are justly punished for our offences, may be mercifully delivered by thy goodness, for the glory of thy Name.
+# SOURCE: draft archdiocesan Lauds book, p. 166 (Sexagesima Sunday)
+O God, who seest that we put not our trust in anything that we do; mercifully grant that by the protection of the Teacher of the Gentiles we may be defended against all adversity.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 162 (Sexagesima Sunday)
+!2 Cor 11:19-20
+Brethren: Ye suffer fools gladly, seeing ye yourselves are wise. For ye suffer, if a man bring you into bondage, if a man devour you, if a man take of you, if a man exalt himself, if a man smite you on the face.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 164 (Sexagesima Sunday)
+V. Lord, thou hast been our refuge.
+R. From one generation to another.
 
 [magnificat-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quadp2-1 [Ant 3] — check against diurnal

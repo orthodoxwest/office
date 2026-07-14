@@ -1,14 +1,14 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Mary hath been taken to heaven; * the Angels rejoice; they praise and bless the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
+Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Mary hath been taken to heaven; * the Angels rejoice; they praise and bless the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
+Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-The Virgin Mary hath been taken into the chamber on high, * where the King of kings sitteth on a throne amid the stars.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 522, 461 (The Assumption of the B.V.M.)
+The Virgin Mary * is taken up into heavenly chambers, wherein the King of kings sitteth upon a starry throne.
 
 [psalm-antiphon-3]
 # SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
@@ -126,14 +126,32 @@ To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/08-15 [Versum 2] — check against diurnal
-V. The holy Mother of God hath been exalted.
-R. Over choirs of Angels, into the heavenly kingdom.
+# SOURCE: draft archdiocesan Lauds book, p. 528 (The Assumption of the B.V.M.)
+V. The holy Mother of God is exalted.
+R. Above choirs of Angels to the heavenly kingdom.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/08-15 [Versum 1] — check against diurnal
-V. The holy Mother of God hath been exalted.
-R. Over choirs of Angels, into the heavenly kingdom.
+# SOURCE: draft archdiocesan Vespers book, p. 465 (The Assumption of the B.V.M.)
+V. The holy Mother of God is exalted.
+R. Above choirs of Angels to the heavenly kingdom.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
+R. The Virgin Mary is taken up * into heavenly chambers.
+R. The Virgin Mary is taken up * into heavenly chambers.
+V. Wherein the King of kings sitteth upon a starry throne.
+R. Into heavenly chambers.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Virgin Mary is taken up * into heavenly chambers.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 464 (The Assumption of the B.V.M.)
+R. Mary is taken up into heaven * the Angels triumph.
+R. Mary is taken up into heaven * the Angels triumph.
+V. Exalting and blessing the Lord.
+R. The Angels triumph.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Mary is taken up into heaven * the Angels triumph.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/08-15 [Responsory Breve Tertia] — check against diurnal

@@ -1,47 +1,66 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-And all the Angels stood round about the throne, * (and about the Elders, and the four living creatures,) and fell before the throne on their faces, and worshipped God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 593, 525, 533 (The Feast of All Saints)
+And all the Angels * stood round about the throne, and fell before the throne on their faces, and worshipped God.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-Thou, O Lord God, hast redeemed us by thy Blood, * out of every kindred, and tongue, and people, and nation, and hast made us a kingdom unto our God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 593, 526, 533 (The Feast of All Saints)
+Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-Bless the Lord, all ye His chosen, * keep holiday, and extol Him.
+# SOURCE: draft archdiocesan Lauds book, p. 595 (The Feast of All Saints)
+O bless the Lord, * all ye his chosen; keep a day of rejoicing, and give thanks unto him.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-The praise of all His Saints, * even of the children of Israel, a people near unto Him; this honour have all His Saints.
+# SOURCE: draft archdiocesan Lauds book, p. 596 (The Feast of All Saints)
+All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 524, 532 (The Feast of All Saints)
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 525, 533 (The Feast of All Saints)
+And all the Angels * stood round about the throne, and fell before the throne on their faces, and worshipped God.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 526, 533 (The Feast of All Saints)
+Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 527, 534 (The Feast of All Saints)
+All his Saints * shall praise him, even the children of Israel, even the people that serveth him: such honour have all his Saints.
 
 [benedictus-antiphon]
-The glorious company of the Apostles praise thee. * The goodly fellowship of the Prophets praise thee. The white-robed army of Martyrs praise thee. All thy Saints and Elect with one voice do acknowledge thee, O Blessed Trinity, One God!
+# SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
+The glorious company * of the Apostles praise thee; the goodly fellowship of the Prophets praise thee; the white-robed army of Martyrs praise thee; with one heart and voice do all the elect acknowledge thee: O blessed Trinity, one only God.
 
 [magnificat-antiphon]
-Oh! how glorious is the kingdom * where all the Saints rejoice with Christ; clothed in white robes, they follow the Lamb whithersoever he goeth!
+# SOURCE: draft archdiocesan Vespers book, p. 536 (II Vespers for The Feast of All Saints)
+O how glorious * is the kingdom wherein all the Saints rejoice with Christ; arrayed in white robes, they follow the Lamb whithersoever he goeth.
 
 [commemoration-antiphon]
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [commemoration-versicle]
-V. Let thy Saints be joyful in glory.
+V. Let the Saints be joyful with glory.
 R. Let them rejoice in their beds.
 
 [collect]
-Almighty, eternal God, Who granted us to honor the merits of all Thy Saints in a single solemn festival, bestow on us, we beseech Thee, through their manifold intercession, that abundance of Thy mercy for which we yearn.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 601, 530, 536 (The Feast of All Saints)
+Almighty everlasting God, by whose favour we venerate the merits of all thy Saints in one solemnity: we beseech thee to bestow upon us, through so many intercessors, the abundance of thy mercy which we desire.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 598 (The Feast of All Saints)
 !Rev 7:2-3
-And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,86 +70,131 @@ After this I saw a great multitude, which no man could number, of all nations, a
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/11-01 [Hymnus Laudes] — check against diurnal
-Salutis aeternae dator
+# SOURCE: draft archdiocesan Lauds book, pp. 598–599 (The Feast of All Saints)
+Jesu, Salvator sæculi
 
-Giver of life, eternal Lord!
-thy own redeemed defend;
-Mother of grace! thy children save,
-And help them to the end.
+Jesu who cam'st the world to save,
+By thee redeemed, thine aid we crave,
+Mother of God, in time of need,
+For contrite hearts salvation plead.
 
-Ye thousand thousand angel hosts!
-Assist us in our need;
-Ye patriarchs! with the prophet choir!
-For our forgiveness plead.
+Let all the bright Angelic choirs,
+The ranks of Patriarchal sires,
+And Prophet Saints, devout and meek,
+Forgiveness for our errors seek.
 
-Forerunner blest! and thou who still
-Dost heaven's dread keys retain!
-Ye glorious Apostles all!
-Unloose our guilty chain.
+The Baptist, thy great harbinger,
+With heav'n's appointed Keybearer,
+And all Apostles strive to win
+From God remission of our sin.
 
-Army of martyrs! holy priests
-In beautiful array!
-Ye happy troops of virgins chaste!
-Wash all our stains away.
+So may the sacred Martyr band,
+Confessors, Priests, adoring stand,
+And every Virgin chastely pray
+That he would purge our guilt away.
 
-All ye who high above the stars
-In heavenly glory reign!
-May we through your prevailing prayers
-Unto your joys attain.
+Your suffrages, ye Monks, unite
+With all the citizens of light
+To speed our vows, combine your pow'rs
+That life's eternal prize be ours.
 
-Praise, honour, to the Father be,
-Praise to his only Son;
-Praise, Holy Paraclete, to thee,
-While endless ages run.
+To God the Father, God the Son,
+And God the Spirit, Three in One,
+Laud, honour, might, and glory be
+From age to age eternally.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/11-01 [Hymnus Vespera] — check against diurnal
-Placare, Christe, servulis
+# SOURCE: draft archdiocesan Vespers book, pp. 528–529, 534–535 (The Feast of All Saints)
+Christe, Redemptor Omnium, conserva
 
-O Christ, thy guilty people spare!
-Lo, kneeling at thy gracious throne,
-thy Virgin-Mother pours her prayer,
-Imploring pardon for her own.
+O Christ Redeemer of us all,
+Protect thy servants when they call,
+And here with reconciling care
+The blessed Virgin's holy prayer.
 
-Ye angels, happy evermore!
-Who in your circles nine ascend,
-As ye have guarded us before,
-So still from harm our steps defend.
+And ye, O ever-blissful throng
+Of heavenly Spirits, guardians strong,
+Our past and present ills dispel,
+From future peril shield us well.
 
-Ye prophets and Apostles high!
-Behold our penitential tears;
-And plead for us when death is nigh,
-our all-searching judge appears.
+Ye Prophets of the Judge adored,
+Ye twelve Apostles of the Lord,
+For us your ceaseless prayer outpour,
+Salvation for our souls implore.
 
-Ye martyrs all! a purple band,
-And confessors, a white-robed train;
-Oh, call us to our native land,
-From this our exile, back again.
+Martyrs of God, renowned for aye,
+Confessors ranged in bright array,
+Let all your orisons unite
+To bear us to the realms of light.
 
-And ye, O choirs of virgins chaste!
-Receive us to your seats on high;
-With hermits whom the desert waste
-Sent up of old into the sky.
+O sacred Virgin choirs, may ye,
+With Monks of holy ministry,
+And every Saint of Christ, obtain
+That we his fellowship may gain.
 
-Drive from the flock, O Spirit blest!
-The false and faithless race away;
-That all within one fold may rest,
-Secure beneath one shepherd's sway.
+From lands wherein thy faithful dwell
+Drive far away the infidel;
+So we to Christ due hymns of praise
+Henceforth with eager hearts may raise.
+
+To thee, O Father, born of none,
+And thee, O sole-begotten Son,
+One with the Holy Paraclete,
+Be glory ever, as is meet.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 598 (The Feast of All Saints)
+R. Be glad, O ye righteous * and rejoice in the Lord.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+V. And be joyful, all ye that are true of heart.
+R. And rejoice in the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 528, 534 (The Feast of All Saints)
+R. Let the righteous rejoice * before God.
+R. Let the righteous rejoice * before God.
+V. Let them also be merry and joyful.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let the righteous rejoice * before God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 536 (II Vespers for The Feast of All Saints)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)
+V. Be glad, O ye righteous, and rejoice in the Lord.
+R. And be joyful, all ye that are true of heart.
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 528 (The Feast of All Saints, I Vespers)
+!Rev 7:2-3
+Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
+R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 534 (The Feast of All Saints, II Vespers)
 !Rev 7:2-3
-And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/11-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 598 (Lauds chapter used at Terce)
 !Rev 7:2-3
-And I, John, saw another angel ascending from the rising of the sun, having the sign of the living God; and he cried with a loud voice to the four angels, to whom it was given to hurt the earth and the sea, saying: Hurt not the earth, nor the sea, nor the trees, till we sign the servants of our God in their foreheads.
+Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/11-01.txt [Ant 1] — check against diurnal
-O ye Angels, * ye Archangels, ye Thrones and Dominions, ye Principalities and Powers, ye mighty ones of the heavens, ye Cherubim and Seraphim, O ye Patriarchs and Prophets, ye holy Teachers of the Law, O ye Apostles, O all ye Martyrs of Christ, ye holy Confessors, ye Virgins of the Lord, ye Hermits, O all ye holy children of God, make intercession for us.
+# SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)
+O ye Angels and Archangels, * O ye Thrones and Dominions, Principalities and Powers, Virtues of the heavens, Cherubim and Seraphim, O ye Patriarchs and Prophets, ye holy Doctors of the law, O all ye Apostles, ye Martyrs of Christ, ye holy Confessors, ye Virgins of the Lord, ye holy Hermits, and all Saints: offer for us your intercessions.

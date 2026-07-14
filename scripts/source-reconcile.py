@@ -614,6 +614,13 @@ def title_similarity(title: str, key: str, feast_names: dict[str, str]) -> float
 def title_tokens(value: str) -> set[str]:
     value = unicodedata.normalize("NFKD", value.lower())
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
+    value = re.sub(
+        r"^(?:january|february|march|april|may|june|july|august|september|"
+        r"october|november|december)\s+\d{1,2}\s*[–-]\s*"
+        r"(?:i{1,2}|first|second)?\s*vespers\s+for\s+",
+        "",
+        value,
+    )
     value = re.sub(r"\bb\.?\s*v\.?\s*m\.?\b", "blessed virgin mary", value)
     aliases = {
         "first": "1",
@@ -640,6 +647,8 @@ def title_tokens(value: str) -> set[str]:
         "before",
         "after",
         "feast",
+        "for",
+        "vespers",
     }
     words = re.findall(r"[a-z]+|\d+", value)
     return {aliases.get(word, word) for word in words if word not in stop}

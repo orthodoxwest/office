@@ -41,9 +41,9 @@ R. For all nations.
 O God, who dost invisibly contain all things, and yet for the salvation of mankind dost visibly manifest thy signs; enlighten thy people who resort to this holy place, and grant that they may worthily and devoutly celebrate thy holy mysteries, and when they depart hence receive the fulness of thy blessing.
 
 [chapter-lauds]
-# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 703 (Common of the Dedication of a Church)
 !Rev 21:2
-I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
+I saw the holy city, new Jerusalem, coming down from God out of heaven, prepared as a bride adorned for her husband.
 R. Thanks be to God.
 
 [chapter-sext]

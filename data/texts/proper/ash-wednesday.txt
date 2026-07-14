@@ -12,4 +12,97 @@ V. O Lord, have mercy upon us.
 R. For we have sinned against thee.
 
 [collect]
-Grant, O Lord, to thy faithful people, that they may undertake with fitting piety the venerable solemnities of fasting, and complete them with steadfast devotion.
+# SOURCE: draft archdiocesan Lauds book, p. 188 (Ash Wednesday)
+Grant, O Lord, to thy faithful people, that they may both enter upon the venerable solemnity of these fasts with fitting devotion, and perform the same in godly quietness.
+
+[collect-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 131–132 (Ash Wednesday)
+Look favourably, O Lord, on those who bow themselves before thy Majesty; that they who have been refreshed with the divine Gift may ever be sustained by thy heavenly aid.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 185–186; Copy of OCP Ferial Lauds.pdf, p. 47
+Nox et tenebrae et nubila
+
+Hence night and clouds that night-time brings,
+Confused and dark and troubled things;
+The dawn is here, the sky grows white,
+Christ is at hand; depart from sight.
+
+Earth's dusky veil is torn away,
+Pierced by the sparkling beams of day:
+The world resumes its hues apace
+Soon as the day-star shows its face.
+
+But thee, O Christ, alone we seek,
+With conscience pure and temper meek:
+With tears and chants we humbly pray
+That thou wouldst guide us through the day.
+
+For many a shade obscures each sense
+Which needs thy beams to purge it thence:
+Light of the Morning Star, illume,
+Serenely shining, all our gloom.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 185; Copy of OCP Ferial Lauds.pdf
+R. Heal my soul * for I have sinned against thee.
+R. Heal my soul * for I have sinned against thee.
+V. I said: Lord, be merciful unto me.
+R. For I have sinned against thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Heal my soul * for I have sinned against thee.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 187 (Ash Wednesday)
+V. O satisfy us with thy mercy, and that soon.
+R. So shall we rejoice and be glad all the days of our life.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx); draft archdiocesan Vespers book, p. 129
+Caeli Deus sanctissime
+
+O God, whose hand hath spread the sky
+And all its shining hosts on high,
+And, painting it with fiery light,
+Made it so beauteous and so bright:
+
+Thou, when the fourth day was begun,
+Didst frame the circle of the sun,
+And set the moon for ordered change,
+And planets for their wider range:
+
+To night and day, by certain line,
+Their varying bounds thou didst assign:
+And gavest a signal, known and meet,
+For months begun and months complete.
+
+Enlighten thou the hearts of men,
+Polluted souls make pure again:
+Unloose the bands of guilt within,
+Remove the burden of our sin.
+
+O Father, that we ask be done
+Through Jesus Christ, thine only Son,
+Who, with the Holy Ghost and thee,
+Shall live and reign eternally.
+Amen.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 129 (Ash Wednesday)
+R. I will bless the Lord * at all times.
+R. I will bless the Lord * at all times.
+V. His praise shall ever be in my mouth.
+R. At all times.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I will bless the Lord * at all times.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 130 (Ash Wednesday)
+V. Lord, let my prayer be set forth.
+R. In thy sight as the incense.

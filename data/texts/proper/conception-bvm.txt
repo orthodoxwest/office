@@ -1,47 +1,58 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thy raiment * is white as snow, and thy countenance as the sun.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 244 (The Conception of the B.V.M.)
+Thy raiment * is white as snow, and thy countenance like the sun.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art the exaltation of Jerusalem, * thou art the great glory of Israel, thou art the great rejoicing of our nation.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 361, 245 (The Conception of the B.V.M.)
+Thou art the exaltation of Jerusalem, * thou art the glory of Israel, thou art the great rejoicing of our nation.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Virgin Mary, * blessed art thou of the Most High God, above all the women upon the earth.
+# SOURCE: draft archdiocesan Lauds book, p. 362 (The Conception of the B.V.M.)
+Blessed art thou, * O Virgin Mary, of the Most High God, above all the women upon the earth.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
+# SOURCE: draft archdiocesan Lauds book, p. 363 (The Conception of the B.V.M.)
+Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
+Draw us, O Maiden undefiled, * we will run after thee in the goodly fragrance of thine ointments.
 
 [benedictus-antiphon]
-The Lord hath made known His salvation; * the glory of His Mother hath He openly showed in the sight of the heathen.
+# SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
+The Lord God said * unto the serpent, I will put enmity between thee and the woman, and between thy seed and her seed; it shall bruise thy head, alleluia.
 
 [magnificat-antiphon]
-Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
+# SOURCE: draft archdiocesan Vespers book, p. 249 (II Vespers of the Conception of the B.V.M.)
+Let us celebrate * the worshipful Conception of the blessed and glorious Virgin Mary, whose lowliness the Lord regarded when at the word of an Angel she conceived the world's Redeemer, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 249 (I Vespers of the Conception of the B.V.M.)
+All generations * shall call me blessed: for he that is mighty hath magnified me, alleluia.
 
 [commemoration-antiphon]
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [commemoration-versicle]
 V. This day is the Holy Virgin Mary conceived without sin.
 R. The Virgin's foot hath bruised the serpent's head.
 
 [collect]
-O God, by the Immaculate Conception of the Virgin, thou prepared a worthy habitation for thy Son; we beseech thee, that, as by the foreseen death of thy same Son thou preserved her from all stain of sin, so thou would grant us also, through her intercession, to come to thee with pure hearts.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 368, 250
+O merciful God, hear the supplication of thy servants: that we who are gathered together to honour the Conception of the Virgin Mother of God may through her intercession be delivered by thee from the perils which beset us.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 365 (The Conception of the B.V.M.)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -50,15 +61,100 @@ R. Thanks be to God.
 This gate shall be shut, it shall not be opened, and no man shall pass through it: because the Lord the God of Israel hath entered in by it, and it shall be shut. For the prince, the prince himself, shall sit in it.
 R. Thanks be to God.
 
+[hymn-lauds]
+# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx)
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath pass'd the King,
+O Hall, whence Light shone through the gloom;
+The ransom'd nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx)
+Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
+
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/12-08 [Versum 2] — check against diurnal
-V. This day is the Holy Virgin Mary conceived without sin.
-R. The Virgin's foot hath bruised the serpent's head.
+# SOURCE: draft archdiocesan Lauds book, p. 367 (The Conception of the B.V.M.)
+V. To-day is the Conception of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/12-08 [Versum 1] — check against diurnal
-V. This day is the Holy Virgin Mary conceived without sin.
-R. The Virgin's foot hath bruised the serpent's head.
+# SOURCE: draft archdiocesan Vespers book, p. 248 (The Conception of the B.V.M.)
+V. To-day is the Conception of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 366 (The Conception of the B.V.M.)
+R. The Almighty God * hath girded me with strength.
+R. The Almighty God * hath girded me with strength.
+V. And made my way perfect.
+R. Hath girded me with strength.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Almighty God * hath girded me with strength.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 247 (The Conception of the B.V.M.)
+R. By this I know * thou favourest me.
+R. By this I know * thou favourest me.
+V. That mine enemy doth not triumph against me.
+R. Thou favourest me.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. By this I know * thou favourest me.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Tertia] — check against diurnal
@@ -88,13 +184,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I will extol thee, O Lord, * for Thou hast lifted me up.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 246 (The Conception of the B.V.M.)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 365 (Lauds chapter used at Terce)
 !Prov 8:22-24
-The Lord possessed me in the beginning of his ways, before he made any thing from the beginning. I was set up from eternity, and of old before the earth was made. The depths were not as yet, and I was already conceived.
+The Lord possessed me in the beginning of his way, before his works of old. I was set up from everlasting, from the beginning or ever the earth was. When there were no depths, I was brought forth.
 R. Thanks be to God.

@@ -14,6 +14,14 @@ The Blessed * with their palms have entered into the kingdom; they have earned t
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
 The bodies of the Saints * are buried in peace: and their name liveth for evermore.
 
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 590 (I Vespers, Common of Many Martyrs out of Paschaltide)
+The bodies of the Saints * are buried in peace: and their name liveth for evermore.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 598 (II Vespers, Common of Many Martyrs out of Paschaltide)
+The youth * of all the holy Saints shall, like the eagle's, be renewed: and as the lily shall they bloom within the city of the Lord.
+
 [psalm-antiphon-4]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
 O ye Martyrs of the Lord, * bless ye the Lord for ever and ever.
@@ -27,12 +35,12 @@ O choir of Martyrs, * praise ye the Lord of heaven, alleluia.
 The very hairs of your head * are all numbered: fear ye not therefore, ye are of more value than many sparrows.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C3 [Ant 3] (2026 ordo incipit reads "In the heavenly kingdom") — check against diurnal
-In heaven do rejoice the souls of the Saints * who have followed the steps of Christ; and because they shed their blood for the love of Christ, therefore shall they be made glad for ever with Christ.
+# SOURCE: draft archdiocesan Vespers book, p. 603 (II Vespers, Common of Many Martyrs out of Paschaltide)
+In the heavenly kingdom * rejoice the souls of the Blessed, who followed the footsteps of Christ their Master: and since for love of him they poured forth their life-blood, therefore with Christ do they exult for ever.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C3 [Ant 1] — check against diurnal
-For theirs is the Kingdom of heaven * who love not their lives in this world, and have attained unto the reward of the Kingdom, and have washed their robes in the blood of the Lamb.
+# SOURCE: draft archdiocesan Vespers book, p. 594 (I Vespers, Common of Many Martyrs out of Paschaltide)
+For theirs is the kingdom of heaven, * who despised worldly living: who have won the rewards of the kingdom and have washed their robes in the blood of the Lamb.
 
 [commemoration-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Istorum est enim) — parish noted manual

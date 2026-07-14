@@ -1,34 +1,43 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins)
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins)
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-We will run after thee, * in the savour of thy good ointments. The virgins love them exceedingly.
+# SOURCE: draft archdiocesan Lauds book, p. 689 (Common of Holy Women not Virgins)
+We will run after thee * because of the savour of thine ointments: exceedingly do the virgins love thee.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-Lo the winter is past, * the rain is over and gone. Rise up, my love, and come away.
+# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins)
+Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-Come, O My chosen one, * and I will establish My throne in thee. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins)
+# NOTE: The source suppresses the final Alleluia after Septuagesima; no current holy-woman feast exercises that seasonal exception.
+Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C7a [Ant Laudes] — check against diurnal
-She is beautiful * among the daughters of Jerusalem.
+# SOURCE: draft archdiocesan Lauds book, p. 691 (Common of Holy Women not Virgins)
+This woman * is beautiful among the daughters of Jerusalem.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 669 (Common of Holy Women not Virgins)
+This woman * is beautiful among the daughters of Jerusalem.
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Holy Women not Virgins) — parish noted manual
 Give her * of the fruit of her hands; and let her own works praise her in the gates.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C7 [Ant 3] — check against diurnal
-She spreadeth out her hand to the poor, * yea, she reacheth forth her hands to the needy, and eateth not the bread of idleness.
+# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
+She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to the needy; she eateth not the bread of idleness.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
+The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
 
 [commemoration-antiphon]
 A woman that feareth the Lord, * she shall be praised.
@@ -41,9 +50,24 @@ R. He clothed her with a robe of glory.
 Graciously hear us, O God of our salvation, that as we rejoice in the festivity of blessed N., we may be instructed in the affections of a loving devotion.
 
 [chapter-lauds]
-# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] — check against diurnal
-!Prov. 31:10-11
-Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.
+# SOURCE: draft archdiocesan Lauds book, p. 692 (Saint neither Virgin nor Martyr)
+!Prov 31:10-11
+Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins)
+R. In thy grace * and in thy beauty.
+R. In thy grace * and in thy beauty.
+V. Go forth, ride prosperously, and reign.
+R. And in thy beauty.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In thy grace * and in thy beauty.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 695 (Common of Holy Women not Virgins)
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
 
 [chapter-sext]
 # SOURCE: divinum-officium CommuneM/C7a [Capitulum Sexta] — check against diurnal
@@ -52,11 +76,11 @@ She hath opened her hand to the needy, and stretched out her hands to the poor. 
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C7a [Hymnus Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, pp. 694–695 (Common of Holy Women not Virgins)
 Fortem virili pectore
 
 High let us all our voices raise
-In that heroic woman's praise
+In that heroic woman's praise,
 Whose name, with saintly glory bright,
 Shines in the starry realms of light.
 
@@ -70,23 +94,23 @@ But filled her soul with prayer's sweet food:
 In other worlds she tastes the bliss
 For which she left the joys of this.
 
-O Christ, the strength of all the strong;
-To whom our holiest deeds belong!
-Through her prevailing prayers on high,
-In mercy hear thy people's cry!
+O Christ, the strength of all the strong,
+To whom alone high deeds belong,
+Through her prevailing prayer on high
+In mercy hear thy people's cry.
 
-* To God the Father, with the Son,
-And Holy Spirit, Three in One,
-Be glory while the ages flow,
-From all above, and all below.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium CommuneM/C7a [HymnusM Vespera] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 671–672 (Common of Holy Women not Virgins)
 Fortem virili pectore
 
 High let us all our voices raise
-In that heroic woman's praise
+In that heroic woman's praise,
 Whose name, with saintly glory bright,
 Shines in the starry realms of light.
 
@@ -100,23 +124,44 @@ But filled her soul with prayer's sweet food:
 In other worlds she tastes the bliss
 For which she left the joys of this.
 
-O Christ, the strength of all the strong;
-To whom our holiest deeds belong!
-Through her prevailing prayers on high,
-In mercy hear thy people's cry!
+O Christ, the strength of all the strong,
+To whom alone high deeds belong,
+Through her prevailing prayer on high
+In mercy hear thy people's cry.
 
-* To God the Father, with the Son,
-And Holy Spirit, Three in One,
-Be glory while the ages flow,
-From all above, and all below.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
 Amen.
 
 [chapter-vespers]
-# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Prov. 31:10-11
-Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.
+# SOURCE: draft archdiocesan Vespers book, p. 670 (Saint neither Virgin nor Martyr)
+!Prov 31:10-11
+Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
+R. Thanks be to God.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 670–671 (Common of Holy Women not Virgins)
+R. God shall help her * with his countenance.
+R. God shall help her * with his countenance.
+V. God is in the midst of her, therefore shall she not be removed.
+R. With his countenance.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God shall help her * with his countenance.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 673 (Common of Holy Women not Virgins)
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
 
 [chapter-terce]
-# SOURCE: divinum-officium CommuneM/C7a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Prov. 31:10-11
-Who shall find a valiant woman? Far and from the uttermost coasts is the price of her. The heart of her husband trusteth in her, and he shall have no need of spoils.
+# SOURCE: draft archdiocesan Lauds book, p. 692 (Lauds chapter used at Terce)
+!Prov 31:10-11
+Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
+R. Thanks be to God.

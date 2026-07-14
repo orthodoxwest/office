@@ -40,23 +40,35 @@ R. Go forward, fare prosperously, and reign.
 [collect]
 Hear us, O God, our Saviour, that as we rejoice in the festival of blessed N. thy Virgin, so we may be instructed by the affections of holy devotion.
 
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 681 (Common of Virgins)
+!2 Cor 10:17-18
+Brethren: He that glorieth, let him glory in the Lord. For not he that commendeth himself is approved, but whom the Lord commendeth.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 660 (Common of Virgins)
+!2 Cor 10:17-18
+Brethren: He that glorieth, let him glory in the Lord. For not he that commendeth himself is approved, but whom the Lord commendeth.
+R. Thanks be to God.
+
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C6a [Hymnus Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 683 (Common of Virgins)
 Jesu, corona Virginum
 
-Jesu, the virgins' crown, do thou
-Accept us as in prayer we bow;
+Jesu, the Virgins' crown, do thou,
+Accept us, as in prayer we bow;
 Born of that Virgin, whom alone
-The mother and the maid we own.
+The Mother and the Maid we own.
 
 Amongst the lilies thou dost feed,
-By virgin choirs accompanied;
+With Virgin choirs accompanied;
 With glory decked, the spotless brides
 Whose bridal gifts thy love provides.
 
 They, wheresoe'er thy footsteps bend,
-With hymns and praises still attend:
-In blessèd troops they follow thee,
+With hymns and praises still attend;
+In blessed troops they follow thee,
 With dance, and song, and melody.
 
 We pray thee therefore to bestow
@@ -64,29 +76,29 @@ Upon our senses here below
 Thy grace, that so we may endure
 From taint of all corruption pure.
 
-* All laud to God the Father be,
-All praise, eternal Son, to thee;
-All glory as is ever meet,
-To God, the holy Paraclete.
+* To God the Father, God the Son,
+And God the Spirit, Three in One,
+Laud, honour, might, and glory be
+From age to age eternally.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium CommuneM/C6a [HymnusM Vespera] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 662 (Common of Virgins)
 Jesu, corona Virginum
 
-Jesu, the virgins' crown, do thou
-Accept us as in prayer we bow;
+Jesu, the Virgins' crown, do thou,
+Accept us, as in prayer we bow;
 Born of that Virgin, whom alone
-The mother and the maid we own.
+The Mother and the Maid we own.
 
 Amongst the lilies thou dost feed,
-By virgin choirs accompanied;
+With Virgin choirs accompanied;
 With glory decked, the spotless brides
 Whose bridal gifts thy love provides.
 
 They, wheresoe'er thy footsteps bend,
-With hymns and praises still attend:
-In blessèd troops they follow thee,
+With hymns and praises still attend;
+In blessed troops they follow thee,
 With dance, and song, and melody.
 
 We pray thee therefore to bestow
@@ -94,8 +106,8 @@ Upon our senses here below
 Thy grace, that so we may endure
 From taint of all corruption pure.
 
-* All laud to God the Father be,
-All praise, eternal Son, to thee;
-All glory as is ever meet,
-To God, the holy Paraclete.
+* To God the Father, God the Son,
+And God the Spirit, Three in One,
+Laud, honour, might, and glory be
+From age to age eternally.
 Amen.

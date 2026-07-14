@@ -1,32 +1,41 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
-When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 299, 181 (The Feast of Pentecost)
+When the day of Pentecost * was fully come, they were all with one accord in one place, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
-When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 299, 181 (The Feast of Pentecost)
+When the day of Pentecost * was fully come, they were all with one accord in one place, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
-The Spirit of the Lord * filleth the world, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 299, 182 (The Feast of Pentecost)
+The Spirit of the Lord * hath filled the whole world, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 300, 183 (The Feast of Pentecost)
 They were all filled * with the Holy Ghost, and began to speak, alleluia, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
-See ye fountains, * and all that move in the waters, ascribe ye praise to God, alleluia.
+# SOURCE: draft archdiocesan Lauds book, pp. 301–302 (The Feast of Pentecost)
+O ye wells, * and all that move in the waters, sing a hymn unto God, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Vespera] — check against diurnal
-The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, pp. 302–304 (The Feast of Pentecost)
+The Apostles * did speak with other tongues the wonderful works of God, alleluia, alleluia, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 184 (I Vespers, The Feast of Pentecost)
+The Apostles * did speak with other tongues the wonderful works of God, alleluia, alleluia, alleluia.
 
 [benedictus-antiphon]
-Receive ye the Holy Ghost; * whoseoever sins ye remit, they are remitted unto them, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 307 (The Feast of Pentecost)
+Receive ye * the Holy Ghost: whosesoever sins ye remit, they are remitted unto them, alleluia.
 
 [magnificat-antiphon]
 This day * the day of Pentecost is fully come, alleluia. This day the Holy Ghost appeared in fire unto the disciples, and gave unto them gifts of grace. He sent them into all the world, to preach and to testify that he who believeth, and is baptized, shall be saved, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 187 (I Vespers, The Feast of Pentecost)
+I will not leave you * comfortless, alleluia: I go; but I will come to you, alleluia: and your heart shall rejoice, alleluia.
 
 [commemoration-antiphon]
 When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
@@ -36,12 +45,13 @@ V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
 [collect]
-O God, Who on this day didst teach the hearts of thy faithful people, by the sending to them the light of thine Holy Spirit, grant us by the same Spirit to have a right judgment in all things, and evermore to rejoice in His holy comfort.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 308, 188 (The Feast of Pentecost)
+O God, who on this day didst teach the hearts of thy faithful people by sending to them the light of thy Holy Spirit: grant us by the same Spirit to have a right judgment in all things; and evermore to rejoice in his holy comfort.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
 !Acts 2:1-2
-When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,98 +61,92 @@ When this was noised abroad, the multitude came together, and were confounded, b
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Hymnus Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, pp. 305–306 (The Feast of Pentecost)
 Beata nobis gaudia
 
-Round roll the weeks our hearts to greet,
-With blissful joy returning;
-For lo! the Holy Paraclete
-On twelve bright brows sits burning:
+Blest joys for mighty wonders wrought
+The year's revolving orb hath brought,
+What time the Holy Ghost in flame
+Upon the Lord's disciples came.
 
-With quivering flame he lights on each,
-In fashion like a tongue, to teach
-That eloquent they are of speech,
-Their hearts with true love yearning.
+The quiv'ring fire their heads bedew'd
+In cloven tongues' similitude,
+That eloquent their words might be,
+And fervid all their charity.
 
-While with all tongues they speak to all,
-The nations deem them maddened,
-And drunk with wine the prophets call,
-Whom God's good Spirit gladdened;
+In varying tongues the Lord they praised,
+The gathering people stood amazed;
+And whom the Comforter divine
+Inspired, they mocked as full of wine.
 
-A marvel this—in mystery done—
-The holy paschaltide outrun,
-By numbers told, whose reckoning won
-Remission for the saddened.
+These things were done in type to-day,
+When Eastertide had worn away,
+The number told which once set free
+The captive at the jubilee.
 
-O God most Holy, thee we pray,
-With reverent brow low bending,
-Grant us the Spirit's gifts today
-The gifts from heaven descending;
+And now, O holy God, this day
+Regard us, as we humbly pray,
+And send us from thy heav'nly seat
+The blessings of the Paraclete.
 
-And, since, thy grace hath deigned to bide
-Within our breasts once sanctified,
-Deign, Lord, to cast our sins aside,
-Henceforth calm seasons sending.
+Thou once in ev'ry holy breast
+Didst bid indwelling grace to rest:
+This day our sins, we pray, release,
+And in our time, O Lord, give peace.
 
-To God the Father, laud and praise,
-Praise to the Son be given;
-Praise to the Spirit of all grace,
-The fount of graces seven—
-
-As was of old, all worlds before,
-Is now and shall be evermore,
-When time and change are spent and o'er
-All praise in earth and heaven.
+To God the Father and the Son,
+From death arisen praise be done:
+With God the holy Paraclete
+Henceforth to all eternity.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium TemporaM/Pasc7-0 [Hymnus Vespera] — check against diurnal
-/:Prima stropha hymni sequentis dicitur flexibus genibus.:/
+# SOURCE: draft archdiocesan Vespers book, pp. 186–187; office-hymns.zip (Come, Holy Ghost Creator Blest.docx, stanzas 1–6)
+Veni, Creator Spiritus
 
-/:The first verse of the following hymn is said genuflecting.:/
-Creator Spirit, all Divine,
-Come, visit every soul of Thine,
-And fill with Thy celestial flame
-The hearts which Thou Thyself didst frame.
+Come, Holy Ghost, Creator blest,
+Vouchsafe within our souls to rest;
+Come with thy grace and heav'nly aid,
+And fill the hearts which thou hast made.
 
-O gift of God, Thine is the sweet
-Consoling name of Paraclete
-And spring of life and fire and love
-And unction flowing from above.
+To thee, the Comforter, we cry;
+To thee, the Gift of God most high;
+The Fount of life, the Fire of love,
+The soul's Anointing from above.
 
-The mystic sevenfold gifts are Thine,
-Finger of God's right hand divine;
-The Father's promise sent to teach
-The tongue a rich and heavenly speech.
+The sev'nfold gifts of grace are thine,
+O Finger of the Hand Divine;
+True Promise of the Father thou,
+Who dost the tongue with speech endow.
 
-Kindle with fire brought from above
-Each sense, and fill our hearts with love;
-And grant our flesh, so weak and frail,
-The strength of Thine which cannot fail.
+Thy light to ev'ry sense impart,
+And shed thy love in ev'ry heart;
+Thine own unfailing might supply
+To strengthen our infirmity.
 
-Drive far away our deadly foe,
-And grant us Thy true peace to know;
-So we, led by Thy guidance still,
-May safely pass through every ill.
+Drive far away our ghostly foe,
+And thine abiding peace bestow;
+If thou be our preventing Guide,
+No evil can our steps betide.
 
-To us, through Thee, the grace be shown
-To know the Father and the Son;
-And Spirit of Them both, may we
-Forever rest our faith in Thee.
+O let thy grace on us bestow,
+The Father and the Son to know,
+And thee, through endless time confessed,
+Of both th'eternal Spirit Blest.
 
-To Sire and Son be praises meet,
-And to the Holy Paraclete;
-And may Christ send us from above
-That Holy Spirit's gift of love.
-Amen
+To God the Father and the Son,
+From death arisen, praise be done:
+With God the holy Paraclete,
+Henceforth to all eternity.
+Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium TemporaM/Pasc7-0 [Versum 2] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 306 (The Feast of Pentecost)
 V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Versum 1] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 187 (I Vespers, The Feast of Pentecost)
 V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
@@ -192,9 +196,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 185 (The Feast of Pentecost)
 !Acts 2:1-2
-When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
 [chapter-terce]

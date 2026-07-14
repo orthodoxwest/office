@@ -1,44 +1,163 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 561, 496 (Dedication of St Michael)
+An Angel stood * at the altar of the temple, having in his hand a golden censer.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 561, 496 (Dedication of St Michael)
+An Angel stood * at the altar of the temple, having in his hand a golden censer.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-While as the Archangel Michael fought against the dragon, * I heard voices saying: Salvation unto our God. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 562, 497 (Dedication of St Michael)
+While the Archangel * Michael contended with the dragon, a voice was heard of them that said: Salvation to our God, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-Michael Mine Archangel, * I have appointed thee for a prince over the ingathering of souls.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 562, 498 (Dedication of St Michael)
+O Archangel Michael, * I have appointed thee prince over all the souls about to be received.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-O ye Angels of the Lord, bless ye the Lord always.
+# SOURCE: draft archdiocesan Lauds book, p. 563 (Dedication of St Michael)
+O ye Angels of the Lord, * bless ye the Lord for ever.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/09-29 [Ant Laudes] — check against diurnal
-O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 565 (Dedication of St Michael)
+Angels and Archangels, * Thrones and Dominions, Principalities and Powers, Virtues of the heavens, O praise the Lord of heaven, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 499 (Dedication of St Michael)
+Angels and Archangels, * Thrones and Dominions, Principalities and Powers, Virtues of the heavens, O praise the Lord of heaven, alleluia.
 
 [benedictus-antiphon]
-The sea was moved * and the earth quaked, when the Archangel Michael descended from heaven.
+# SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
+There was silence in heaven * while the dragon waged war: and Michael fought against him, and had the victory, alleluia.
 
 [magnificat-antiphon]
-Great Michael * the Archangel stood before the throne of God, saying: Lord of hosts, with power and with might come thou to deliver us.
+# SOURCE: draft archdiocesan Vespers book, p. 503 (II Vespers, Dedication of St Michael)
+O Prince most glorious, * Michael the Archangel, keep us in remembrance: here and everywhere, always, entreat the Son of God for us, alleluia, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 503 (I Vespers, Dedication of St Michael)
+While John beheld * the sacred mystery, the Archangel Michael sounded the trumpet: Forgive us, O Lord our God, that openest the book, and loosest the seals thereof, alleluia.
 
 [commemoration-antiphon]
 The smoke of the incense ascended up * before the Lord, out of the Angel's hand.
 
 [commemoration-versicle]
-V. In the presence of the Angels I will sing praise unto thee, O God.
-R. I will worship toward thy holy Temple, and praise thy Name.
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.
 
 [collect]
-O God, Who, with wonderful order, dost appoint the ministrations of Angels and of men, mercifully grant that they who ever stand before thee in heaven to minister unto thee, may also defend our life on earth.
+# SOURCE: older Sanctoral Lauds/Vespers books (Dedication of St Michael)
+O everlasting God, who hast ordained and constituted the services of Angels and men in a wonderful order; mercifully grant that, as thy holy Angels always do thee service in heaven, so, by thy appointment, they may succour and defend us on earth.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 566 (Dedication of St Michael)
+!Rev 1:1-2
+God shewed things which must shortly come to pass, speaking by his Angel unto his servant John, who bare record of the word of God, and of the testimony of Jesus Christ, and of all things that he saw.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 501 (Dedication of St Michael)
+!Rev 1:1-2
+God shewed things which must shortly come to pass, speaking by his Angel unto his servant John, who bare record of the word of God, and of the testimony of Jesus Christ, and of all things that he saw.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 567 (Dedication of St Michael)
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+V. I will worship toward thy holy temple, and praise thy Name.
+R. I will sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 501 (Dedication of St Michael)
+R. The smoke of the incense ascended up * before God.
+R. The smoke of the incense ascended up * before God.
+V. Out of the Angel's hand.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense ascended up * before God.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 567–569; older Sanctoral Lauds
+Christe, sanctorum
+
+Christ, the fair glory of the holy Angels,
+Thou who hast made us, thou who o'er us rulest,
+Grant of thy mercy unto us thy servants
+Steps up to heaven.
+
+Send thy Archangel, Michael, to our succour;
+Peacemaker blessed, may he banish from us
+Striving and hatred, so that for the peaceful
+All things may prosper.
+
+Send thy Archangel, Gabriel, the mighty,
+Herald of heaven; may he from us mortals
+Spurn the old serpent, watching o'er the temples
+Where thou art worshipped.
+
+Send thy Archangel, Raphael, the restorer
+Of the misguided ways of men who wander,
+Who at thy bidding strengthens soul and body
+With thine anointing.
+
+May the blest Mother of our God and Saviour,
+May the assembly of the Saints in glory,
+May the celestial companies of Angels
+Ever assist us.
+
+This he vouchsafe us, God for ever blessed,
+Father eternal, Son, and Holy Spirit,
+Whose is the glory which through all creation
+Ever resoundeth.
+Amen.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 501–503; older Sanctoral Vespers
+Tibi, Christe, splendor Patris
+
+Thee, O Christ, the Father's splendour,
+Life and virtue of the heart,
+In the presence of the Angels
+Sing we now with tuneful art;
+Meetly in alternate chorus
+Bearing our responsive part.
+
+Thus we praise with veneration
+All the armies of the sky;
+Chiefly him, the warrior Primate
+Of celestial chivalry,
+Michael, who in princely virtue
+Cast Abaddon from on high.
+
+By whose watchful care repelling,
+King of everlasting grace,
+Ev'ry ghostly adversary
+All things evil, all things base,
+Grant us of thine only goodness
+In thy Paradise a place.
+
+Glory to the Father sing we
+With resounding voices sweet,
+Glory unto Christ our Saviour,
+Glory to the Paraclete:
+Standing forth, One God and Trinal,
+Ere the ages; as is meet.
+Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/09-29 [Versum 2] — check against diurnal
-V. An Angel stood at the Altar of the Temple. (Alleluia.)
-R. Having a golden censer in his hand. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
+V. An Angel stood at the altar of the temple.
+R. Having in his hand a golden censer.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 503 (I Vespers, Dedication of St Michael)
+V. An Angel stood at the altar of the temple.
+R. Having in his hand a golden censer.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 503 (II Vespers, Dedication of St Michael)
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.

@@ -1,47 +1,66 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-Herod was exceeding wroth, * and slew many children in Bethlehem of Judah, the city of David.
+# SOURCE: draft archdiocesan Lauds book, p. 92 (Holy Innocents)
+Herod was exceeding wroth, * and slew many children in Bethlehem Judah, the city of David.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-Herod was exceeding wroth, * and slew many children in Bethlehem of Judah, the city of David.
+# SOURCE: draft archdiocesan Lauds book, p. 92 (Holy Innocents)
+Herod was exceeding wroth, * and slew many children in Bethlehem Judah, the city of David.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-Herod slew many children * from two years old, and under, for the Lord's sake.
+# SOURCE: draft archdiocesan Lauds book, p. 93 (Holy Innocents)
+From two years old and under, * did Herod slay all the male children, for the sake of the Lord.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-Their angels * do always behold the face of the Father.
+# SOURCE: draft archdiocesan Lauds book, p. 93 (Holy Innocents)
+Their Angels * do always behold the face of my Father.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-In Rama was there a voice * heard, weeping and mourning, Rachel weeping for her children.
+# SOURCE: draft archdiocesan Lauds book, p. 94 (Holy Innocents)
+In Rama there was heard a voice, * lamentation and bitter weeping, Rachel weeping for her children.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/12-28 [Ant Laudes] — check against diurnal
-Under the throne of God * all the saints cry aloud: Avenge our blood, O our God!
+# SOURCE: draft archdiocesan Lauds book, p. 96 (Holy Innocents)
+Beneath the altar * all the Saints do cry aloud: Shall not our blood be avenged, O our God.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 80 (Holy Innocents)
+In the day of thy power * shall the people offer thee free-will offerings with an holy worship: the dew of thy birth is of the womb of the morning.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 81 (Holy Innocents)
+The Lord hath sent * redemption unto his people: he hath commanded his covenant for ever.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 82 (Holy Innocents)
+Unto the godly * there ariseth up light in the darkness: the Lord is merciful, loving, and righteous.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 83 (Holy Innocents)
+Of the fruit * of thy body shall I set upon thy seat.
 
 [benedictus-antiphon]
-Under the throne of God * all the saints cry aloud: Avenge our blood, O our God!
+# SOURCE: draft archdiocesan Lauds book, p. 99 (Holy Innocents)
+These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
 
 [magnificat-antiphon]
-Innocent babies * were slain for Christ, sucklings were killed by a wicked king. Now they follow the Lamb without spot and cry without ceasing, Glory be to thee, O Lord.
+# SOURCE: draft archdiocesan Vespers book, p. 86 (Holy Innocents)
+Then were innocent children * slain instead of Christ by a wicked ruler; the very sucklings were put to death: spotless, they follow the Lamb himself, and say for ever: Glory be to thee, O Lord.
 
 [commemoration-antiphon]
-These are they * who were not defiled with women; for they are virgins, and follow the Lamb whithersoever he goeth.
+These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
 
 [commemoration-versicle]
-V. Herod being wroth, slew many children.
-R. In Bethlehem of Juda, the city of David.
+V. Herod was exceeding wroth, and slew many children.
+R. In Bethlehem Judah, the city of David.
 
 [collect]
-O God, whose praise the martyred Innocents on this day confessed, not by speaking, but by dying, destroy all the evils of sin in us, that our life also may proclaim in deeds, thy faith which our tongues profess.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 100, 87 (Holy Innocents)
+O God, whose praise the Innocents, thy Martyrs, did confess this day, not by speaking but by dying: mortify all evil vices in us, that, as our tongues do confess thy faith, so our lives may by their actions show forth the same.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 97 (Holy Innocents)
 !Rev 14:1
-Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,65 +70,83 @@ These are they who were not defiled with women: for they are virgins. These foll
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/12-28 [Hymnus Laudes] — check against diurnal
+# SOURCE: office-hymns.zip (All Hail! Ye Infant Martyr Flowers, Holy Innocents Vespers.docx); draft archdiocesan Lauds/Vespers books, pp. 98, 85
 Salvete, flores Martyrum
 
-All hail, ye little Martyr flowers,
-Sweet rosebuds cut in dawning hours!
-When Herod sought the Christ to find
-Ye fell as bloom before the wind.
+All hail! ye infant martyr flowers,
+Cut off in life's first dawning hours:
+As rose-buds snapt in tempest strife
+When Herod sought your Saviour's life.
 
-First victims of the Martyr bands,
-With crowns and palms in tender hands,
-Around the very altar, gay
-And innocent, ye seem to play.
+You, tender flock of Christ, we sing,
+First victims slain for Christ your King:
+Beneath the Altar's heavenly ray
+With Martyr palms and crowns ye play.
 
-All honor, laud, and glory be,
-O Jesu, Virgin-born to thee;
-All glory, as is ever meet
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
 To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/12-28 [Hymnus Vespera] — check against diurnal
+# SOURCE: office-hymns.zip (All Hail! Ye Infant Martyr Flowers, Holy Innocents Vespers.docx); draft archdiocesan Lauds/Vespers books, pp. 98, 85
 Salvete, flores Martyrum
 
-All hail, ye little Martyr flowers,
-Sweet rosebuds cut in dawning hours!
-When Herod sought the Christ to find
-Ye fell as bloom before the wind.
+All hail! ye infant martyr flowers,
+Cut off in life's first dawning hours:
+As rose-buds snapt in tempest strife
+When Herod sought your Saviour's life.
 
-First victims of the Martyr bands,
-With crowns and palms in tender hands,
-Around the very altar, gay
-And innocent, ye seem to play.
+You, tender flock of Christ, we sing,
+First victims slain for Christ your King:
+Beneath the Altar's heavenly ray
+With Martyr palms and crowns ye play.
 
-All honor, laud, and glory be,
-O Jesu, Virgin-born to thee;
-All glory, as is ever meet
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
 To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/12-28 [Versum 2] — check against diurnal
-V. Herod being wroth, slew many children.
-R. In Bethlehem of Juda, the city of David.
+# SOURCE: draft archdiocesan Lauds book, p. 99 (Holy Innocents)
+V. Herod was exceeding wroth, and slew many children.
+R. In Bethlehem Judah, the city of David.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/12-28 [Versum 1] — check against diurnal
-V. Herod being wroth, slew many children.
-R. In Bethlehem of Juda, the city of David.
+# SOURCE: draft archdiocesan Vespers book, p. 85 (Holy Innocents)
+V. Beneath the altar all the Saints do cry aloud.
+R. Shall not our blood be avenged, O our God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 98 (Holy Innocents)
+R. Be glad, O ye righteous, * and rejoice in the Lord.
+R. Be glad, O ye righteous, and rejoice in the Lord.
+V. And be joyful, all ye that are true of heart.
+R. And rejoice in the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Be glad, O ye righteous, and rejoice in the Lord.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 84 (Holy Innocents)
+R. Let the righteous rejoice * before God.
+R. Let the righteous rejoice before God.
+V. Let them also be merry and joyful.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let the righteous rejoice before God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 84 (Holy Innocents)
 !Rev 14:1
-Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
 R. Thanks be to God.
 
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/12-28 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !Rev 14:1
-Lo, a lamb stood upon mount Sion, and with him an hundred forty-four thousand, having his name, and the name of his Father, written on their foreheads.
+I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]

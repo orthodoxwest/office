@@ -1,47 +1,68 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
+Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
+Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-Lawrence wrought a good work, * in that with the sign of the Cross he gave sight to the blind.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 512, 445, 453 (Saint Laurence, Martyr)
+Laurence hath wrought a pious work; * who by the sign of the Cross enlightened the blind.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-O my God, my soul cleaveth * fast after thee, for my flesh hath been burnt with fire for thy sake.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 512, 446, 454 (Saint Laurence, Martyr)
+My soul * cleaveth fast unto thee, forasmuch as my flesh hath been burned for thee, O my God.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-The Lord hath sent His Angel, * and hath delivered me out of the midst of the fire, so that I am not scorched.
+# SOURCE: draft archdiocesan Lauds book, p. 513 (Saint Laurence, Martyr)
+The Lord hath sent * his Angel, and hath delivered me out of the midst of the fire, and I am not burned.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/08-10 [Ant Laudes] — check against diurnal
-The blessed Lawrence prayed * and said: I give thee thanks, O Lord, that Thou hast made me worthy to enter within thy gates.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 515, 447, 455 (Saint Laurence, Martyr)
+Blessed Laurence * prayed, saying: I render thanks unto thee, O Lord, who hast counted me worthy to enter within thy gates.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 444, 452 (I and II Vespers, Saint Laurence, Martyr)
+Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 445, 453 (I and II Vespers, Saint Laurence, Martyr)
+Laurence hath wrought a pious work; * who by the sign of the Cross enlightened the blind.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 446, 454 (I and II Vespers, Saint Laurence, Martyr)
+My soul * cleaveth fast unto thee, forasmuch as my flesh hath been burned for thee, O my God.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 447, 455 (I and II Vespers, Saint Laurence, Martyr)
+Blessed Laurence * prayed, saying: I render thanks unto thee, O Lord, who hast counted me worthy to enter within thy gates.
 
 [benedictus-antiphon]
-Upon the bars I denied thee not, O God. * And when they put me to the fire, I acknowledged thee to be the Lord, O Christ. Thou has proved mine heart, and visited it by night; Thou hast tried me with fire, and found no wickedness in me.
+# SOURCE: draft archdiocesan Lauds book, p. 519 (Saint Laurence, Martyr)
+On the iron grate, * O God, I denied thee not; and when fire was kindled beneath me, O Christ, I confessed thee: thou hast proved my heart and hast visited me in the night season: thou hast tried me with fire, and hast found no wickedness in me.
 
 [magnificat-antiphon]
-The blessed Lawrence prayed * and said: I give thee thanks, O Lord, that Thou hast made me worthy to enter within thy gates.
+# SOURCE: draft archdiocesan Vespers book, p. 458 (II Vespers, Saint Laurence, Martyr)
+Blessed Laurence * when laid and burning on the iron grating spake to the impious tyrant, saying: The feast is ready, turn and eat; but the Church's treasures, which thou claimest, have been garnered up in heaven, by the hands of the poor and needy.
 
 [commemoration-antiphon]
-Lawrence * went in to be a martyr, and acknowledged the name of our Lord Jesus Christ.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 511, 444, 452 (Saint Laurence, Martyr)
+Laurence hath entered in, * and as a Martyr hath confessed the Name of the Lord Jesus Christ.
 
 [commemoration-versicle]
-V. He hath dispersed, he hath given to the poor.
-R. His righteousness endureth for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 518 (Saint Laurence, Martyr)
+V. He hath dispersed abroad, and given to the poor.
+R. And his righteousness remaineth for ever.
 
 [collect]
-O Almighty God, Who didst give unto Blessed Lawrence power to be more than conqueror in his fiery torment, grant unto us, we beseech thee, the power to quench the flames of our sinful lusts.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 520, 451, 459 (Saint Laurence, Martyr)
+Grant us, we beseech thee, Almighty God, grace to quench the flames of our sins: as thou didst endue blessed Laurence with power to overcome the fire of his torments.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 516 (Saint Laurence, Martyr)
 !2 Cor 9:6
-Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,22 +72,32 @@ Every one as he hath determined in his heart, not with sadness, or of necessity:
 R. Thanks be to God.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/08-10 [Versum 2] — check against diurnal
-V. He hath dispersed, he hath given to the poor.
-R. His righteousness endureth for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 518 (Saint Laurence, Martyr)
+V. He hath dispersed abroad, and given to the poor.
+R. And his righteousness remaineth for ever.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 448, 456 (I and II Vespers, Saint Laurence, Martyr)
 !2 Cor 9:6
-Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/08-10 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 516, 448, 456 (festal chapter used at Terce)
 !2 Cor 9:6
-Brethren: He which soweth sparingly shall reap also sparingly, and he which soweth bountifully shall reap also bountifully.
+Brethren: He which soweth sparingly shall reap also sparingly; and he which soweth bountifully shall reap also bountifully.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/08-10.txt [Ant 1] — check against diurnal
-Lawrence the Deacon * performed a pious act by giving sight to the blind through the Sign of the Cross, and by bestowing on the poor the riches of the Church.
+# SOURCE: draft archdiocesan Vespers book, p. 450 (I Vespers, Saint Laurence, Martyr)
+Laurence the Deacon * hath wrought a pious work; who by the sign of the Cross enlightened the blind: and distributed to the poor the Church's treasures.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 449 (I Vespers, Saint Laurence, Martyr)
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion of the works of thy hands.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 457 (II Vespers, Saint Laurence, Martyr)
+V. Laurence the Deacon hath wrought a pious work.
+R. Who by the sign of the Cross enlightened the blind.

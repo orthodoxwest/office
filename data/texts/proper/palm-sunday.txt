@@ -1,23 +1,30 @@
 [psalm-antiphon]
-The Lord God will help me * and therefore I am not confounded.
+# SOURCE: draft archdiocesan Lauds book, p. 245 (Palm Sunday)
+For the Lord God * will help me: and therefore shall I not be confounded.
 
 [psalm-antiphon-1]
-The Lord God will help me * and therefore I am not confounded.
+# SOURCE: draft archdiocesan Lauds book, p. 245 (Palm Sunday)
+For the Lord God * will help me: and therefore shall I not be confounded.
 
 [psalm-antiphon-2]
-They compassed me about, * yea, they compassed me about but in the Name of the Lord! I will destroy them.
+# SOURCE: draft archdiocesan Lauds book, p. 246 (Palm Sunday)
+They compassed me about, * yea, they compassed me about: but in the Name of the Lord will I be avenged on them.
 
 [psalm-antiphon-3]
-Judge Thou my cause, * and redeem me, O Lord, for Thou art mighty to save.
+# SOURCE: draft archdiocesan Lauds book, p. 248 (Palm Sunday)
+Judge thou * my cause: defend me, for thou, O Lord, art mighty.
 
 [psalm-antiphon-4]
-Fare we with Angels and men in faith to meet the Redeemer, * hailing the Slayer of death with joyful shouts of "Hosanna in the highest!"
+# SOURCE: draft archdiocesan Lauds book, p. 249 (Palm Sunday)
+May the faithful * to-day be found among the Angels and the children, crying unto the Conqueror of death, Hosanna in the highest.
 
 [psalm-antiphon-5]
-Let them be confounded that persecute me; * but let not me be confounded, O Lord my God.
+# SOURCE: draft archdiocesan Lauds book, p. 250 (Palm Sunday)
+Let them be confounded * that persecute me, but let not me be confounded, O Lord my God.
 
 [benedictus-antiphon]
-Much people that were come to the Feast, cried * unto the Lord: Blessed is He That cometh in the Name of the Lord! Hosanna in the highest!
+# SOURCE: draft archdiocesan Lauds book, p. 255 (Palm Sunday)
+The multitudes * which came together for the feast day cried unto the Lord: Blessed is he that cometh in the Name of the Lord. Hosanna in the highest.
 
 [magnificat-antiphon]
 It is written: I will smite the Shepherd, * and the sheep of the flock shall be scattered abroad, but after I am risen again, I will go before you into Galilee: there shall ye see Me, saith the Lord.
@@ -30,7 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-Almighty and everlasting God, Who, of thy tender love towards mankind, hast sent thy Son our Saviour Jesus Christ to take upon Him our flesh and to suffer death upon the Cross, that all mankind should follow the example of His great humility; mercifully grant, that we may both follow the example of His patience, and also be made partakers of His resurrection. 
+# SOURCE: draft archdiocesan Lauds book, p. 256 (Palm Sunday)
+Almighty and everlasting God, who, of thy tender love towards mankind, hast sent thy Son, our Saviour Jesus Christ, to take upon him our flesh, and to suffer death upon the cross, that all mankind should follow the example of his great humility; mercifully grant, that we may both follow the example of his patience, and also be made partakers of his resurrection.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] — check against diurnal
@@ -61,3 +69,54 @@ R. Thanks be to God.
 !Phil 2:5-7
 Brothers: For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
 R. Thanks be to God.
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Thirty Years Among Us Dwelling, Passion Sunday Lauds.docx); draft archdiocesan Lauds book, pp. 253–255
+Lustris sex qui jam peractis
+
+Thirty years among us dwelling,
+His appointed time fulfilled,
+Born for this, he meets his Passion,
+For that this he freely willed:
+On the Cross the Lamb is lifted,
+Where his life-blood shall be spilled.
+
+He endured the nails, the spitting,
+Vinegar, and spear, and reed:
+From that holy Body broken
+Blood and Water forth proceed:
+Earth, and stars, and sky, and ocean,
+By that flood from stain are freed.
+
+Faithful Cross, above all other
+One and only noble Tree;
+None in foliage, none in blossom,
+None in fruit thy peer may be:
+Sweetest wood, and sweetest iron!
+Sweetest weight is hung on thee.
+
+Bend thy boughs, O Tree of glory,
+Thy relaxing sinews bend:
+For awhile the ancient rigour
+That thy birth bestowed, suspend:
+And the King of heavenly beauty
+On thy bosom gently tend.
+
+Thou alone wast counted worthy
+This world's ransom to sustain;
+That a shipwrecked race for ever
+Might a port of refuge gain:
+With the sacred Blood anointed
+Of the Lamb for sinners slain.
+
+Glory be to God, and honour
+In the highest, as is meet,
+To the Son and to the Father,
+And the eternal Paraclete,
+Whose is boundless praise and power
+Through the ages infinite.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 255 (Palm Sunday)
+V. Deliver me from mine enemies, O God.
+R. Defend me from them that rise up against me.

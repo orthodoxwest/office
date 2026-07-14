@@ -1,0 +1,188 @@
+[psalm-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 571 (Motherhood of the B.V.M.)
+Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+
+[psalm-antiphon-1]
+# SOURCE: draft archdiocesan Lauds book, p. 571 (Motherhood of the B.V.M.)
+Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+
+[psalm-antiphon-2]
+# SOURCE: draft archdiocesan Lauds book, p. 572 (Motherhood of the B.V.M.)
+Thou didst give birth * to him who made thee, and remainest a Virgin for ever.
+
+[psalm-antiphon-3]
+# SOURCE: draft archdiocesan Lauds book, p. 572 (Motherhood of the B.V.M.)
+Since I was humble, * I was pleasing to the Most High, and from my womb I have given birth to God and Man.
+
+[psalm-antiphon-4]
+# SOURCE: draft archdiocesan Lauds book, p. 573 (Motherhood of the B.V.M.)
+Blessed art thou, * O daughter, from the Lord: for by thee we have partaken of the fruit of life.
+
+[psalm-antiphon-5]
+# SOURCE: draft archdiocesan Lauds book, p. 575 (Motherhood of the B.V.M.)
+The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 506 (Motherhood of the B.V.M.)
+Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 507 (Motherhood of the B.V.M.)
+Thou didst give birth * to him who made thee, and remainest a Virgin for ever.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 508 (Motherhood of the B.V.M.)
+Since I was humble, * I was pleasing to the Most High, and from my womb I have given birth to God and Man.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
+The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 506 (Motherhood of the B.V.M.)
+Blessed art thou, * O Virgin Mary, who hast borne the Creator of all.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 507 (Motherhood of the B.V.M.)
+Thou didst give birth * to him who made thee, and remainest a Virgin for ever.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 508 (Motherhood of the B.V.M.)
+Since I was humble, * I was pleasing to the Most High, and from my womb I have given birth to God and Man.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
+The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 579 (Motherhood of the B.V.M.)
+O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thine admirable maternity.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 512 (I Vespers, Motherhood of the B.V.M.)
+With peaceful joy, * let us celebrate the Motherhood of blessed Mary ever a Virgin.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 512 (II Vespers, Motherhood of the B.V.M.)
+Thy Motherhood, * O Virgin Mother of God, hath heralded joy to all the world; for from thee hath risen the Sun of justice, Christ our God.
+
+[commemoration-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 579 (Motherhood of the B.V.M.)
+O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thine admirable maternity.
+
+[collect]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 580, 513 (Motherhood of the B.V.M.)
+O God, who didst vouchsafe that thy Word should be made flesh in the womb of the Blessed Virgin Mary at the message of an Angel: grant to us thy humble servants; that we, believing her to be indeed the Mother of God, may by her intercession find favour in thy sight.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 576 (Motherhood of the B.V.M.)
+!Sir 24:8
+He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, and strike thy roots among my chosen people.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 509 (Motherhood of the B.V.M.)
+!Sir 24:8
+He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, and strike thy roots among my chosen people.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 576, 509 (Motherhood of the B.V.M.; duplicated festal chapter)
+!Sir 24:8
+He that made me rested in my tabernacle, and said unto me, Dwell thou in Jacob, and strike thy roots among my chosen people.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 577 (Motherhood of the B.V.M.)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 510 (Motherhood of the B.V.M.)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 577–578 (Motherhood of the B.V.M.)
+Te, Mater alma Numinis
+
+Thee, who gave God a mother's care,
+Thy liegemen seek in trustful prayer,
+That thou wouldst now from sin's allure,
+Under that care, keep us secure.
+
+We ruined heirs of Mother-Eve,
+Hail thee who brought our King's reprieve,
+Which came to us when came to thee
+The Sinless-Mother's dignity.
+
+Look kindly on our fallen race,
+And ask thy Son for this sweet grace—
+Grace to repent so heartily
+That his just wrath may cease to be.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, pp. 510–511
+Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 578 (Motherhood of the B.V.M.)
+V. The Root of Jesse hath budded: the Star hath come out of Jacob.
+R. The Virgin hath borne the Saviour: we praise thee, O our God.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 511 (Motherhood of the B.V.M.)
+V. Blessed art thou among women.
+R. And blessed is the fruit of thy womb.

@@ -16,22 +16,18 @@ Add to data/audit-ok.txt to acknowledge and suppress.
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 
-=== Translation review: 5 mixed-register, 4 modern-pronoun collect(s) ===
+=== Translation review: 4 mixed-register, 1 modern-pronoun collect(s) ===
 These entries are high-signal candidates for translation normalization.
 Mixed-register entries contain both thou/thee/thy and you/your language in the same text.
 
   [mixed-register]
     proper/advent-sunday-2/magnificat-antiphon
-    proper/corpus-christi/collect
     proper/easter-sunday-4/benedictus-antiphon
     proper/ss-philip-james/psalm-antiphon-3
-    proper/trinity-sunday/collect
+    proper/ss-philip-james/psalm-antiphon-3-first-vespers
 
   [modern-pronoun collects]
     proper/all-souls/collect
-    proper/corpus-christi/collect
-    proper/quinquagesima/collect
-    proper/trinity-sunday/collect
 
 === Suppressed: 76 feast(s) via data/audit-ok.txt ===
   our-lady-of-sorrows-passion
@@ -110,11 +106,6 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   motherhood-bvm
   st-raphael-of-brooklyn
   st-tikhon-moscow
-
-=== Missing ProperName: 1 feast(s) ===
-These feasts have texts containing "N." but no ProperName set.
-Add ProperName = <name> to the feast definition to replace "N." with the saint's name.
-  solemnity-st-joseph
 
 To mark intentional fallbacks, add lines to data/audit-ok.txt:
   feast-id *                   (suppress all warnings for this feast)

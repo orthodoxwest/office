@@ -1,29 +1,30 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-O Lord, according to the multitude of thy tender mercies, * blot out my transgressions.
+# SOURCE: draft archdiocesan Lauds book, p. 167 (Quinquagesima Sunday)
+According to the multitude * of thy mercies, O Lord, do away mine offences.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-O Lord, according to the multitude of thy tender mercies, * blot out my transgressions.
+# SOURCE: draft archdiocesan Lauds book, p. 167 (Quinquagesima Sunday)
+According to the multitude * of thy mercies, O Lord, do away mine offences.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-Thou art my God, * and I will praise thee; Thou art my God, and I will exalt thee.
+# SOURCE: draft archdiocesan Lauds book, p. 168 (Quinquagesima Sunday)
+Thou art my God, * and I will thank thee: thou art my God, and I will praise thee.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-O God, early will I seek thee, * to see thy power.
+# SOURCE: draft archdiocesan Lauds book, p. 170 (Quinquagesima Sunday)
+Early will I seek thee, * O God, that I may behold thy power.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-Sing praises, * and exalt Him above all for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 171 (Quinquagesima Sunday)
+Sing a hymn, * and magnify him for ever.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Quadp3-0 [Ant Laudes] — check against diurnal
-Praise ye the Lord * from the heavens, all His angels.
+# SOURCE: draft archdiocesan Lauds book, p. 172 (Quinquagesima Sunday)
+All ye Angels of his, * O praise the Lord of heaven.
 
 [benedictus-antiphon]
-Praise ye the Lord * from the heavens, all His angels.
+# SOURCE: draft archdiocesan Lauds book, p. 177 (Quinquagesima Sunday)
+Behold, we go up * to Jerusalem, and all things that are written concerning the Son of man shall be accomplished: for he shall be delivered unto the Gentiles, and shall be mocked, and spitted on; and they shall scourge him, and put him to death; and the third day he shall rise again.
 
 [magnificat-antiphon]
 And Jesus stood, * and commanded the blind man to be brought unto Him, and He asked him, saying: What wilt thou that I shall do unto thee? Lord, that I may receive my sight. And Jesus said unto him: Receive thy sight, thy faith hath saved thee. And immediately he received his sight, and followed Him, glorifying God.
@@ -36,7 +37,19 @@ V. O Lord, have mercy upon us.
 R. For we have sinned against thee.
 
 [collect]
-O Lord, we beseech You, mercifully hear our prayers; loose us from the chains of our sins and keep us from all adversity.
+# SOURCE: draft archdiocesan Lauds book, p. 178 (Quinquagesima Sunday)
+Graciously hear our prayers, we beseech thee, O Lord: that we, being loosed from the chain of our sins, may be kept from all things that may hurt us.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 174 (Quinquagesima Sunday)
+!1 Cor 13:1
+Brethren: Though I speak with the tongues of men and of angels, and have not charity, I am become as sounding brass, or a tinkling cymbal.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 176 (Quinquagesima Sunday)
+V. Lord, thou hast been our refuge.
+R. From one generation to another.
 
 [magnificat-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quadp3-1 [Ant 3] — check against diurnal

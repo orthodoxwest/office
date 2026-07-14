@@ -33,9 +33,9 @@ R. The Lord is with thee. (Alleluia.)
 O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 437
 !Isa 7:14-15
-Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -43,6 +43,73 @@ R. Thanks be to God.
 !Luke 1:32-33
 The Lord God shall give unto him the throne of David his father; and he shall reign in the house of Jacob for ever. And of his kingdom there shall be no end.
 R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx); draft archdiocesan Lauds book, p. 439
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath pass'd the King,
+O Hall, whence Light shone through the gloom;
+The ransom'd nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, p. 352
+Ave, maris stella
+
+/:The first stanza of the following hymn is said kneeling.:/
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
 
 [versicle-lauds]
 # SOURCE: divinum-officium SanctiM/03-25 [Versum 2] — check against diurnal
@@ -55,9 +122,9 @@ V. Hail, Mary, full of grace. (Alleluia.)
 R. The Lord is with thee. (Alleluia.)
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 351
 !Isa 7:14-15
-Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
+Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-terce]

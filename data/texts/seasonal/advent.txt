@@ -2,9 +2,102 @@
 # In the Benedictine rite, Alleluia is NOT suppressed during Advent.
 # Add overrides here as needed.
 
+[hymn-lauds]
+# SOURCE: office-hymns.zip (A Thrilling Voice by Jordan Rings, Advent Lauds.docx); draft archdiocesan Lauds book, pp. 13, 24, 36, 46
+Vox clara ecce intonat
+
+A thrilling voice by Jordan rings,
+Rebuking guilt and darksome things:
+Vain dreams of sin and visions fly;
+Christ in his might shines forth on high.
+
+Now let each torpid soul arise,
+That sunk in guilt and wounded lies;
+See! the new Star's refulgent ray
+Shall chase disease and sin away.
+
+The Lamb descends from heaven above
+To pardon sin with freest love:
+For such indulgent mercy shewn
+With tearful joy our thanks we own.
+
+That when again he shines revealed,
+And trembling worlds to terror yield,
+He give not sin its just reward,
+But in his love protect and guard.
+
+To God the Father, God the Son,
+And God the Spirit, Three in One,
+Laud, honour, might, and glory be
+From age to age eternally.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Creator of the Stars of Night, Advent Vespers.docx); draft archdiocesan Vespers book, pp. 8, 16, 24, 32
+Conditor alme siderum
+
+Creator of the stars of night,
+Thy people's everlasting light,
+Jesu, Redeemer, save us all,
+And hear thy servants when they call.
+
+Thou grieving that the ancient curse
+Should doom to death an universe,
+Hast found the medicine, full of grace,
+To save and heal a ruined race.
+
+Thou camest, the Bridegroom of the Bride,
+As drew the world to evening tide,
+Proceeding from a virgin shrine,
+The spotless Victim all divine.
+
+At whose dread Name, majestic now,
+All knees must bend, all hearts must bow;
+And things celestial thee shall own,
+And things terrestrial, Lord alone.
+
+O thou whose coming is with dread,
+To judge and doom the quick and dead,
+Preserve us while we dwell below,
+From ev'ry insult of the foe.
+
+To God the Father, God the Son,
+And God the Spirit, Three in One,
+Laud, honour, might, and glory be
+From age to age eternally.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 13, 24, 36, 46 (Advent Sundays I–IV)
+R. Come and save us, * O Lord God of hosts.
+R. Come and save us, * O Lord God of hosts.
+V. Shew the light of thy countenance, and we shall be whole.
+R. O Lord God of hosts.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Come and save us, * O Lord God of hosts.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 8, 16, 24, 32 (Advent Sundays I–IV)
+R. Shew us * thy mercy, O Lord.
+R. Shew us * thy mercy, O Lord.
+V. And grant us thy salvation.
+R. Thy mercy, O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Shew us * thy mercy, O Lord.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 14, 25, 37, 47 (Advent Sundays I–IV)
+V. The voice of one crying in the wilderness, prepare ye the way of the Lord.
+R. Make his paths straight.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 9, 18, 25, 34 (Advent Sundays I–IV)
+V. Drop down, ye heavens, from above, and let the skies pour down righteousness.
+R. Let the earth open, and let them bring forth salvation.
+
 [magnificat-antiphon-december-17]
-# SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 17] — check against diurnal
-O Wisdom, * that comest out of the mouth of the Most High, that reachest from one end to another, and dost mightily and sweetly order all things; come, to teach us the way of prudence!
+# SOURCE: draft archdiocesan Vespers book, p. 34 (O Sapientia, December 17)
+O Wisdom, * which camest out of the mouth of the Most High, and reachest from one end to another, mightily and sweetly ordering all things: Come and teach us the way of prudence.
 
 [magnificat-antiphon-december-18]
 # SOURCE: divinum-officium Psalterium/Special/Major Special [Adv Ant 18] — check against diurnal

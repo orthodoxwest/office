@@ -229,6 +229,7 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.
 O praise the Lord of heaven; praise him in the height.
 
 [chapter]
+# SOURCE: draft archdiocesan Lauds book, p. 185 (Wednesday; printed citation corrected to match its Romans text)
 !Rom. 13:12-13
 The night is far spent, the day is at hand: let us therefore cast off the
 works of darkness, and let us put on the armour of light. Let us walk
@@ -374,24 +375,24 @@ Keep us safe, O Lord * all the days of our life.
 Praise ye the Lord * from the heavens, all His angels.
 
 [psalm-antiphon-1-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 4)] — check against diurnal
-Wash me yet more, O Lord * from my iniquity.
+# SOURCE: draft archdiocesan Lauds book, p. 179 (Wednesday)
+Wash me throughly, * O Lord, from my wickedness.
 
 [psalm-antiphon-2-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 4)] — check against diurnal
-Deliver my soul * O Lord, from the fear of the enemy.
+# SOURCE: draft archdiocesan Lauds book, p. 181 (Wednesday)
+Preserve my life, * O Lord, from fear of the enemy.
 
 [psalm-antiphon-3-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 4)] — check against diurnal
-A hymn, O God * becometh thee in Sion.
+# SOURCE: draft archdiocesan Lauds book, p. 182 (Wednesday)
+Thou, O God, * art praised in Sion.
 
 [psalm-antiphon-4-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 4)] — check against diurnal
-The Lord will judge * all the ends of the earth.
+# SOURCE: draft archdiocesan Lauds book, p. 183 (Wednesday)
+The Lord shall judge * the ends of the earth.
 
 [psalm-antiphon-5-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 4)] — check against diurnal
-Ye heavens of heavens * praise the Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 184 (Wednesday)
+O all ye heavens, * praise ye the Lord.
 
 [psalm-antiphon-1-thursday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Laudes (feria 5)] — check against diurnal

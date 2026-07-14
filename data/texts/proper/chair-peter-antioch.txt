@@ -1,85 +1,121 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-Behold an high priest, * who in his days pleased God, and was found righteous.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 390, 286, 294 (Chair of St Peter at Antioch)
+Behold a great priest, * who in his days pleased God, and was found righteous.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-Behold an high priest, * who in his days pleased God, and was found righteous.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 390, 286, 294 (Chair of St Peter at Antioch)
+Behold a great priest, * who in his days pleased God, and was found righteous.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-None was found like unto him, * to keep the Law of the Most High.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 391, 287, 295 (Chair of St Peter at Antioch)
+There was none * like unto him, who kept the law of the Most High.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-Therefore the Lord assured him * by an oath that He would multiply his seed among His people.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 391, 288, 296 (Chair of St Peter at Antioch)
+The Lord, * therefore, assured him by an oath that he would bless the nations in his seed.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing praises unto our God.
+# SOURCE: draft archdiocesan Lauds book, p. 392 (Chair of St Peter at Antioch, after Septuagesima)
+O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn unto God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 394 (Chair of St Peter at Antioch)
+Good and faithful servant, * enter thou into the joy of thy Lord.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 289, 297 (Chair of St Peter at Antioch)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [benedictus-antiphon]
-Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+# SOURCE: draft archdiocesan Lauds book, p. 397 (Chair of St Peter at Antioch)
+Whatsoever * thou shalt bind on earth shall be bound in heaven: and whatsoever thou shalt loose on earth shall be loosed in heaven: saith the Lord unto Simon Peter.
 
 [magnificat-antiphon]
-While he was supreme Pontiff, * he feared not earthly powers, but gloriously went his way to the heavenly kingdom.
+# SOURCE: draft archdiocesan Vespers book, p. 300 (II Vespers, Chair of St Peter at Antioch)
+During his pontificate * never was he moved by respect of men, but rather went ever gloriously on his way to the kingdom of heaven.
 
 [commemoration-antiphon]
-Thou art the Shepherd * of the sheep, and the Prince of the Apostles, and unto thee are given the keys of the kingdom of heaven.
+Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
 
 [commemoration-versicle]
-V. You are Peter.
-R. And on this rock I am going to build my church.
+V. Thou art Peter.
+R. And upon this rock I will build my Church.
 
 [collect]
-O God, Who hast given unto thy Blessed Apostle Peter the keys of the kingdom of heaven, and the power to bind and to loose, loose us, we beseech thee, at his mighty intercession, from all the bands of our sins.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 398, 292, 301 (Chair of St Peter at Antioch)
+O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 395 (Chair of St Peter at Antioch)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 289, 298 (Chair of St Peter at Antioch)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 396 (Chair of St Peter at Antioch)
+R. The Lord loved him * and adorned him.
+R. The Lord loved him * and adorned him.
+V. He clothed him with a robe of glory.
+R. And adorned him.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him * and adorned him.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 290, 298 (Chair of St Peter at Antioch)
+R. The Lord chose him * for a priest unto himself.
+R. The Lord chose him * for a priest unto himself.
+V. To offer unto him the sacrifice of praise.
+R. For a priest unto himself.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord chose him * for a priest unto himself.
 
 [hymn-lauds]
-# SOURCE: divinum-officium SanctiM/02-22 [Hymnus Laudes] — check against diurnal
-Beate Pastor, Petre, clemens accipe
+# SOURCE: draft archdiocesan Lauds book, p. 396; older Sanctoral Lauds, Chair of St Peter at Antioch
+Jam, bone Pastor, Petre
 
-Peter, blest shepherd, hearken to our cry,
-And with a word unloose our guilty chain;
-Thou! who hast power to open the gates on high
-To men below, and power to shut them fast again.
+Peter good shepherd, may thy ceaseless orisons,
+For us prevailing, break the bands of wickedness:
+For thou of old time didst receive authority
+The gates to open, or to close, of Paradise.
 
-Praise, blessing, majesty, through endless days,
-Be to the Trinity immortal given;
-Who in pure unity profoundly sways
-Eternally alike all things in earth and heaven.
+Glory eternal to the blessed Trinity,
+With laud and honour, virtue and supremacy,
+Trinal yet Onely, reigning in his majesty
+Both now and ever, through the ages infinite.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/02-22 [Hymnus Vespera] — check against diurnal
-Quodcumque in orbe nexibus revinxeris
+# SOURCE: draft archdiocesan Vespers book, pp. 290–291, 299–300 (The Chair of St Peter at Antioch)
+Quodcumque vinclis super terram
 
-Peter, whatever thou shalt bind on earth,
-The same is bound above the starry sky;
-What here thy delegated power doth loose,
-Is loosed in heaven's supremest court on high:
-To judgement shalt thou come, when the world's end is nigh.
+Whatever thou bind'st here on earth in punishment
+Likewise remaineth firmly bound in paradise;
+What thou dost loosen here by thine authority
+Over the heavens ever hath its liberty:
+When this world endeth, thou shalt judge eternally.
 
-Praise to the Father, through all ages be;
-Praise to the consubstantial sovereign Son,
-And Holy Ghost, one glorious Trinity;
-To whom all majesty and might belong;
-So sing we now, and such be our eternal song.
+Glory, O Father, be to thee eternally;
+Grace and dominion to the Son adorable;
+Unto the Spirit, honour and authority;
+Praise everlasting through the ages infinite.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/02-22 [Versum 2] — check against diurnal
-V. Let them exalt Him in the congregation of the people.
-R. And praise Him in the assembly of the elders.
+# SOURCE: draft archdiocesan Lauds book, p. 397 (Chair of St Peter at Antioch)
+V. Let them exalt him in the congregation of the people.
+R. And praise him in the seat of the elders.
 
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/02-22 [Versum 1] — check against diurnal
-V. You are Peter.
-R. And on this rock I am going to build my church.
+# SOURCE: draft archdiocesan Vespers book, pp. 291, 299 (Chair of St Peter at Antioch)
+V. Thou art Peter.
+R. And upon this rock I will build my Church.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/02-22.txt [Ant 1] — check against diurnal
-Thou art the Shepherd * of the sheep, and the Prince of the Apostles, and unto thee are given the keys of the kingdom of heaven.
+# SOURCE: draft archdiocesan Vespers book, p. 291 (I Vespers, Chair of St Peter at Antioch)
+Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.

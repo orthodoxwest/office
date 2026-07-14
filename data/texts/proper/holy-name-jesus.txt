@@ -1,31 +1,53 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-Thy Name is as oil * poured forth, therefore do the virgins love thee.
+# SOURCE: draft archdiocesan Lauds book, p. 112 (Holy Name of Jesus)
+Thy Name is as ointment * poured forth, therefore do the virgins love thee.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-Thy Name is as oil * poured forth, therefore do the virgins love thee.
+# SOURCE: draft archdiocesan Lauds book, p. 112 (Holy Name of Jesus)
+Thy Name is as ointment * poured forth, therefore do the virgins love thee.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-Know ye that the Lord He is God, * and His Name endureth for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 113 (Holy Name of Jesus)
+Know ye that the Lord * he is God: his Name is everlasting.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-My soul thirsteth * for thy Holy Name, O Lord.
+# SOURCE: draft archdiocesan Lauds book, p. 113 (Holy Name of Jesus)
+My soul thirsteth * for thy holy Name, O Lord.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-Blessed * is the Holy Name of thy glory, and worthy to be praised, and exalted above all for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 114 (Holy Name of Jesus)
+Blessed is the Name * of thy glory, and holy, and worthy to be praised, and magnified for ever.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant Laudes] — check against diurnal
-Young men and maidens, * old men and children, praise the Name of the Lord, for His Name alone is exalted.
+# SOURCE: draft archdiocesan Lauds book, p. 116 (Holy Name of Jesus)
+Young men and maidens, * old men and children, praise the Name of the Lord, for his Name only is excellent.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 98 (Holy Name of Jesus)
+Whosoever * shall call on the Name of the Lord shall be saved.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 99 (Holy Name of Jesus)
+Holy and reverend * is his Name: the fear of the Lord is the beginning of wisdom.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 100 (Holy Name of Jesus)
+Yet I will * rejoice in the Lord, I will joy in God my Jesus.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 101 (Holy Name of Jesus)
+From the rising of the sun * even unto the going down of the same, the Lord's Name be praised.
 
 [benedictus-antiphon]
-Young men and maidens, * old men and children, praise the Name of the Lord, for His Name alone is exalted.
+# SOURCE: draft archdiocesan Lauds book, p. 119 (Holy Name of Jesus)
+He gave himself * that he might deliver his people, and get him a perpetual Name, alleluia.
 
 [magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 104 (II Vespers, Holy Name of Jesus)
+For he that is mighty * hath magnified me, and holy is his Name, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: divinum-officium Tempora/Nat2-0 [Ant 1] — awaiting direct I Vespers witness
 I will offer * the sacrifice of thanksgiving, and will call upon the Name of the Lord.
 
 [commemoration-antiphon]
@@ -36,12 +58,13 @@ V. Blessed be the Name of the Lord, alleluia.
 R. From this time forth, and for evermore, alleluia.
 
 [collect]
-O Almighty and everlasting God, Who hast dedicated the first-fruits of Thy Martyrs with the blood of the Blessed Stephen; grant, we beseech Thee, that the same may pray for us also, who prayed even for his murderers to our Lord Jesus Christ Thy Son:
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 120, 105 (Holy Name of Jesus)
+O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst command that he should be called Jesus: mercifully grant; that we, who venerate his holy Name on earth, may rejoice to behold him in heaven.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 117 (Holy Name of Jesus)
 !Phil 2:8-10
-He humbled himself, becoming obedient unto death, even to the death of the cross. For which cause God also hath exalted him, and hath given him a name which is above all names: That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth.
+Brethren: Christ humbled himself, and became obedient unto death, even the death of the Cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name; that at the Name of Jesus every knee should bow.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -51,74 +74,108 @@ That in the name of Jesus every knee should bow, of those that are in heaven, on
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Hymnus Laudes] — check against diurnal
+# SOURCE: office-hymns.zip (Jesu, the Beauty Angels See, Holy Name of Jesus Lauds-2.docx); draft archdiocesan Lauds book, pp. 118–119
 Jesu decus angelicum
 
-O Jesu, Thou the Beauty art
-Of Angel worlds above;
-Thy name is music to the heart,
-Enchanting it with love.
+Jesu, the beauty Angels see,
+The ear's ecstatic minstrelsy,
+The nectar of the heavenly home,
+The lips' delicious honey-comb:
 
-Celestial Sweetness unalloyed!
-Who eat thee hunger still;
-Who drink of thee still feel a void,
-Which naught but Thou can fill.
+For they who taste thee hunger sore,
+And they who drink thee thirst the more,
+Desiring naught below, above,
+Save Jesus, whom their spirits love.
 
-O my sweet Jesu! hear the sigh,
-Which unto thee I send;
-To thee mine inmost spirit cries
-My being's hope and end!
+O Jesu, most desired and dear,
+The hope of longing spirits here,
+To thee my earnest tears shall turn,
+For thee my inmost heart shall yearn.
 
-Stay with us, Lord, and with thy light
-Illume the soul's abyss;
-Scatter the darkness of our night,
-And fill the world with bliss.
+Be with us, Lord; our mental gloom
+With all thy holy light illume:
+Disperse th'oppressive shades of ill,
+Creation with thy sweetness fill.
 
-O Jesu, spotless Virgin flower,
-Our life and joy: to thee
-Be praise, beatitude, and power,
-Through all eternity.
+Jesu, the Virgin Mother's Flower,
+Thou love alone of sweetest power,
+All honour to thy Name divine,
+The realm of endless bliss be thine.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Hymnus Vespera] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 103–104 (Holy Name of Jesus)
 Jesu, dulcis memoria
 
-Jesu, the very thought of thee
-With sweetness fills my breast;
-But sweeter far thy face to see,
-And in thy presence rest.
+Jesu! the very thought is sweet;
+In that dear Name all heart-joys meet:
+But sweeter than the honey far
+The glimpses of his presence are.
 
-Nor voice can sing, nor heart can frame,
-Nor can the memory find,
-A sweeter sound than thy blest Name,
-O Saviour of mankind!
+No word is sung more sweet than this,
+No name is heard more full of bliss,
+No thought brings sweeter comfort nigh
+Than Jesus, Son of God Most High.
 
-O Hope of every contrite heart,
-O Joy of all the meek,
-To those who fall, how kind Thou art!
-How good to those who seek!
+Jesu! the hope of souls forlorn,
+How good to them for sin that mourn!
+To them that seek thee, O how kind!
+But what art thou to them that find?
 
-But what to those who find? Ah! this
-Nor tongue nor pen can show:
-The love of Jesus, what it is
-None but his loved ones know.
+No tongue of mortal can express,
+No letters write its blessedness:
+Alone who hath thee in his heart,
+Knows, love of Jesus, what thou art.
 
-Jesu, our only joy be Thou,
-As Thou our prize wilt be;
-Jesu, be Thou our glory now,
-And through eternity.
+Be thou our joy, and thou our guard,
+Who art to be our great reward:
+Our glory and our boast in thee
+For ever and for ever be.
+Amen.
+
+[hymn-doxology-lauds]
+# The feast's proper final stanza supersedes the Christmas seasonal doxology.
+Jesu, the Virgin Mother's Flower,
+Thou love alone of sweetest power,
+All honour to thy Name divine,
+The realm of endless bliss be thine.
+Amen.
+
+[hymn-doxology-vespers]
+# The feast's proper final stanza supersedes the Christmas seasonal doxology.
+Be thou our joy, and thou our guard,
+Who art to be our great reward:
+Our glory and our boast in thee
+For ever and for ever be.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium TemporaM/Nat2-0 [Versum 2] — check against diurnal
-V. Our help is in the Name of the Lord.
-R. Who made heaven and earth.
+# SOURCE: draft archdiocesan Lauds book, p. 119 (Holy Name of Jesus)
+V. Our help standeth in the Name of the Lord, alleluia.
+R. Who hath made heaven and earth, alleluia.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Versum 1] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 104 (Holy Name of Jesus)
 V. Blessed be the Name of the Lord, alleluia.
-R. From this time forth, and for evermore, alleluia.
+R. From this time forth for evermore, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 118 (Holy Name of Jesus)
+R. Blessed be the Name of the Lord, * alleluia, alleluia.
+R. Blessed be the Name of the Lord, alleluia, alleluia.
+V. From this time forth for evermore.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Blessed be the Name of the Lord, alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 102 (Holy Name of Jesus)
+R. Our help standeth in the Name of the Lord, * alleluia, alleluia.
+R. Our help standeth in the Name of the Lord, alleluia, alleluia.
+V. Who hath made heaven and earth.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Our help standeth in the Name of the Lord, alleluia, alleluia.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Tempora/Nat2-0 [Responsory Breve Tertia] — check against diurnal
@@ -148,9 +205,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. O magnify the Lord with me, * Alleluia, alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 102 (Holy Name of Jesus)
 !Phil 2:8-10
-He humbled himself, becoming obedient unto death, even to the death of the cross. For which cause God also hath exalted him, and hath given him a name which is above all names: That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth.
+Brethren: Christ humbled himself, and became obedient unto death, even the death of the Cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name; that at the Name of Jesus every knee should bow.
 R. Thanks be to God.
 
 [chapter-terce]
