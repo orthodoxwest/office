@@ -26,3 +26,18 @@ Alleluia, * alleluia, alleluia.
 [psalm-antiphon-5]
 # SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
 Alleluia, * alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 659 (Common of a Confessor and Bishop, Paschaltide)
+V. The Lord guided the righteous in right paths, alleluia.
+R. And shewed him the kingdom of God, alleluia.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 642 (II Vespers, Common of a Confessor and Bishop, Paschaltide)
+V. The Lord guided the righteous in right paths, alleluia.
+R. And shewed him the kingdom of God, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 631 (I Vespers, Common of a Confessor and Bishop, Paschaltide)
+V. The Lord loved him and adorned him, alleluia.
+R. He clothed him with a robe of glory, alleluia.

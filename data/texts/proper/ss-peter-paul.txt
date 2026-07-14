@@ -5,7 +5,8 @@ Peter and John * went up together into the temple at the ninth hour, being the h
 Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
 
 [psalm-antiphon-2]
-Silver and gold have I none; * but such as I have, I give thee.
+# SOURCE: draft archdiocesan Vespers book, pp. 401, 409 (Saints Peter and Paul, Apostles)
+Silver and gold have I none; * but such as I have, give I thee.
 
 [psalm-antiphon-3]
 The Angel said unto Peter, * Cast thy garment about thee, and follow me.

@@ -45,9 +45,9 @@ R. He clothed him with a robe of glory.
 Grant, we beseech thee, almighty God, that the venerable feast of N. thy blessed Confessor and Bishop may increase our devotion and promote our salvation.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Commune/C4 [Capitulum Laudes] — check against diurnal
-!Sir 44:16-17
-Behold an high priest, who in his days pleased God, and was found righteous, and in the time of wrath he was made a propitiation.
+# SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -117,13 +117,18 @@ Onely and Trinal.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Commune/C4 [Versum 2] — check against diurnal
-V. The Lord guided the just in right paths.
-R. And showed him the kingdom of God.
+# SOURCE: draft archdiocesan Lauds book, p. 659 (Common of a Confessor and Bishop)
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Commune/C4 [Versum 1] — check against diurnal
-V. The Lord loved him and beautified him.
+# SOURCE: draft archdiocesan Vespers book, p. 642 (II Vespers, Common of a Confessor and Bishop)
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 631 (I Vespers, Common of a Confessor and Bishop)
+V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.
 
 [short-responsory-terce]
@@ -154,9 +159,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou art a Priest * for ever.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Commune/C4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Sir 44:16-17
-Behold an high priest, who in his days pleased God, and was found righteous, and in the time of wrath he was made a propitiation.
+# SOURCE: draft archdiocesan Vespers book, pp. 626, 638 (Common of a Confessor and Bishop)
+!Sir 44:17
+Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-terce]

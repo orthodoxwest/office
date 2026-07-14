@@ -54,20 +54,19 @@ Eternally alike all things in earth and heaven.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/02-22 [Hymnus Vespera] — check against diurnal
-Quodcumque in orbe nexibus revinxeris
+# SOURCE: draft archdiocesan Vespers book, pp. 290–291, 299–300 (The Chair of St Peter at Antioch)
+Quodcumque vinclis super terram
 
-Peter, whatever thou shalt bind on earth,
-The same is bound above the starry sky;
-What here thy delegated power doth loose,
-Is loosed in heaven's supremest court on high:
-To judgement shalt thou come, when the world's end is nigh.
+Whatever thou bind'st here on earth in punishment
+Likewise remaineth firmly bound in paradise;
+What thou dost loosen here by thine authority
+Over the heavens ever hath its liberty:
+When this world endeth, thou shalt judge eternally.
 
-Praise to the Father, through all ages be;
-Praise to the consubstantial sovereign Son,
-And Holy Ghost, one glorious Trinity;
-To whom all majesty and might belong;
-So sing we now, and such be our eternal song.
+Glory, O Father, be to thee eternally;
+Grace and dominion to the Son adorable;
+Unto the Spirit, honour and authority;
+Praise everlasting through the ages infinite.
 Amen.
 
 [versicle-lauds]

@@ -36,7 +36,19 @@ V. O Lord, have mercy upon us.
 R. For we have sinned against thee.
 
 [collect]
+# SOURCE: draft archdiocesan Lauds book, p. 154 (Septuagesima Sunday)
 O Lord, we beseech thee favourably to hear the prayers of thy people; that we, who are justly punished for our offences, may be mercifully delivered by thy goodness, for the glory of thy Name.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 150 (Septuagesima Sunday)
+!1 Cor 9:24
+Brethren: Know ye not that they which run a race run all, but one receiveth the prize? So run, that ye may obtain.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 152 (Septuagesima Sunday)
+V. Lord, thou hast been our refuge.
+R. From one generation to another.
 
 [chapter-sext]
 # SOURCE: divinum-officium Tempora/Quadp1-0 [Capitulum Sexta] — check against diurnal

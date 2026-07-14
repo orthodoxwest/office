@@ -45,9 +45,9 @@ R. He clothed him with a robe of glory.
 O God, Who, year by year, dost gladden us by the solemn feast-day of thy blessed confessor N., mercifully grant unto all who keep his birthday, grace to follow after the pattern of his godly conversation.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Commune/C5 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 668 (Common of a Confessor not a Bishop)
 !Sir 31:8-9
-Blessed is the rich man that is found without blemish: and that hath not gone after gold, nor put his trust in money nor in treasures. Who is he, and we will praise him? for he hath done wonderful things in his life.
+Blessed is the man that is found without blemish, and hath not gone after gold. Who is he? and we will call him blessed: for wonderful things hath he done among his people.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -120,9 +120,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The law of his God * is in his heart.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Commune/C5 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 649 (Common of a Confessor not a Bishop)
 !Sir 31:8-9
-Blessed is the rich man that is found without blemish: and that hath not gone after gold, nor put his trust in money nor in treasures. Who is he, and we will praise him? for he hath done wonderful things in his life.
+Blessed is the man that is found without blemish, and hath not gone after gold. Who is he? and we will call him blessed: for wonderful things hath he done among his people.
 R. Thanks be to God.
 
 [chapter-terce]

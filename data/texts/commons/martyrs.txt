@@ -14,6 +14,14 @@ The Blessed * with their palms have entered into the kingdom; they have earned t
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
 The bodies of the Saints * are buried in peace: and their name liveth for evermore.
 
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 590 (I Vespers, Common of Many Martyrs out of Paschaltide)
+The bodies of the Saints * are buried in peace: and their name liveth for evermore.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 598 (II Vespers, Common of Many Martyrs out of Paschaltide)
+The youth * of all the holy Saints shall, like the eagle's, be renewed: and as the lily shall they bloom within the city of the Lord.
+
 [psalm-antiphon-4]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
 O ye Martyrs of the Lord, * bless ye the Lord for ever and ever.

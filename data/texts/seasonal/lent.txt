@@ -31,3 +31,8 @@ Right soon thy loving pardon grant
 That we our new-made song may chant.
 
 Amen.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 139 (Saturdays in Lent)
+V. God shall give his Angels charge over thee.
+R. To keep thee in all thy ways.

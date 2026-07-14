@@ -39,9 +39,9 @@ R. And began to speak, alleluia.
 O God, Who on this day didst teach the hearts of thy faithful people, by the sending to them the light of thine Holy Spirit, grant us by the same Spirit to have a right judgment in all things, and evermore to rejoice in His holy comfort.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
 !Acts 2:1-2
-When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -192,9 +192,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 185 (The Feast of Pentecost)
 !Acts 2:1-2
-When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
+When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
 R. Thanks be to God.
 
 [chapter-terce]

@@ -126,14 +126,14 @@ To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/08-15 [Versum 2] — check against diurnal
-V. The holy Mother of God hath been exalted.
-R. Over choirs of Angels, into the heavenly kingdom.
+# SOURCE: draft archdiocesan Lauds book, p. 528 (The Assumption of the B.V.M.)
+V. The holy Mother of God is exalted.
+R. Above choirs of Angels to the heavenly kingdom.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/08-15 [Versum 1] — check against diurnal
-V. The holy Mother of God hath been exalted.
-R. Over choirs of Angels, into the heavenly kingdom.
+# SOURCE: draft archdiocesan Vespers book, p. 465 (The Assumption of the B.V.M.)
+V. The holy Mother of God is exalted.
+R. Above choirs of Angels to the heavenly kingdom.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
