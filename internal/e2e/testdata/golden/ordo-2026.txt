@@ -784,18 +784,18 @@ MAY
   2  Sat     St. Athanasius                             [d]   w
            Lauds   w · Ben. Well done · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (Finding of the Holy Cross) · Mag. By thy Cross' holy sign · No Suff.
+           Vespers r · I fol. (Finding of the Holy Cross) · Mag. O Cross · No Suff.
                Com. St. Athanasius ("Behold an high priest")
                Com. Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve- ("Lord, Thou deliverest unto me five talents")
                Com. III Sunday after Easter ("Amen, amen I say to you")
   3  Sun     Finding of the Holy Cross                  [2cl] r
            Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve- (com)
            III Sunday after Easter (sd)
-           Lauds   r · Ben. Thou art higher · No Preces · No Suff.
+           Lauds   r · Ben. Thou alone · No Preces · No Suff.
                Com. Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve- ("Lord, Thou deliverest unto me five talents")
                Com. III Sunday after Easter ("A little while")
            Hours   No Preces
-           Vespers r · II prec. · Mag. By thy Cross' holy sign · No Suff.
+           Vespers r · II prec. · Mag. He the holy Cross endured · No Suff.
                Com. III Sunday after Easter ("Amen, amen I say to you")
   4  Mon     Feria                                            w
            St. Monica, Widow (com)
@@ -1770,11 +1770,11 @@ SEPTEMBER
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
                Com. St. Wenceslaus, Duke, Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers w · I fol. (Dedication of St. Michael the Archangel) · Mag. Great Michael · No Suff.
+           Vespers w · I fol. (Dedication of St. Michael the Archangel) · Mag. While John beheld · No Suff.
  29  Tue     DEDICATION OF ST. MICHAEL THE ARCHANGEL    [1cl] w
-           Lauds   w · Ben. The sea was moved · No Preces · No Suff.
+           Lauds   w · Ben. There was silence in heaven · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. Great Michael · No Suff.
+           Vespers w · II prec. · Mag. O Prince most glorious · No Suff.
                Com. St Jerome, Priest, Confessor & Doctor ("Behold an high priest")
  30  Wed     St Jerome, Priest, Confessor & Doctor      [gd]  w
            St Gregory of Armenia, Bishop & Confessor (com)
@@ -2325,10 +2325,10 @@ DECEMBER
                Com. Holy Innocents ("These are they")
  28  Mon     Holy Innocents                             [2cl] r
            Day IV within the Nativity Octave (sd)
-           Lauds   r · Ben. Under the throne of God · No Preces · No Suff.
+           Lauds   r · Ben. These are they · No Preces · No Suff.
                Com. Day IV within the Nativity Octave ("The King of Peace")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Innocent babies · No Suff.
+           Vespers r · II prec. · Mag. Then were innocent children · No Suff.
                Com. Sunday within the Octave of the Nativity ("My soul doth magnify the Lord, and my spirit…")
  29  Tue     Sunday within the Octave of the Nativity   [sd]  w
            Day V within the Nativity Octave (sd)

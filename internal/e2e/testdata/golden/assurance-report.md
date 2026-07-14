@@ -7,8 +7,8 @@
 | Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 1543 |
-| Text entries with unknown source | 631 |
+| Text entries needing review | 1572 |
+| Text entries with unknown source | 622 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
