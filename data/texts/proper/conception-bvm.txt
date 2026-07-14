@@ -1,18 +1,18 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 243 (The Conception of the B.V.M.)
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thy raiment * is white as snow, and thy countenance as the sun.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 360, 244 (The Conception of the B.V.M.)
+Thy raiment * is white as snow, and thy countenance like the sun.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
-Thou art the exaltation of Jerusalem, * thou art the great glory of Israel, thou art the great rejoicing of our nation.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 361, 245 (The Conception of the B.V.M.)
+Thou art the exaltation of Jerusalem, * thou art the glory of Israel, thou art the great rejoicing of our nation.
 
 [psalm-antiphon-4]
 # SOURCE: divinum-officium Sancti/12-08 [Ant Vespera] — check against diurnal
@@ -29,7 +29,7 @@ The Lord hath made known His salvation; * the glory of His Mother hath He openly
 Draw us, * Maiden undefiled, we will run after thee in the odour of thy perfumes.
 
 [commemoration-antiphon]
-Thou art all fair, O Mary, * there is no spot of original sin in thee.
+Thou art all fair, O Mary; * there is no spot in thee.
 
 [commemoration-versicle]
 V. This day is the Holy Virgin Mary conceived without sin.

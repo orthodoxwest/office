@@ -1,18 +1,18 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 592, 524, 532 (The Feast of All Saints)
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-And all the Angels stood round about the throne, * (and about the Elders, and the four living creatures,) and fell before the throne on their faces, and worshipped God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 593, 525, 533 (The Feast of All Saints)
+And all the Angels * stood round about the throne, and fell before the throne on their faces, and worshipped God.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
-Thou, O Lord God, hast redeemed us by thy Blood, * out of every kindred, and tongue, and people, and nation, and hast made us a kingdom unto our God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 593, 526, 533 (The Feast of All Saints)
+Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
 
 [psalm-antiphon-4]
 # SOURCE: divinum-officium SanctiM/11-01 [Ant Laudes] — check against diurnal
@@ -29,7 +29,7 @@ The glorious company of the Apostles praise thee. * The goodly fellowship of the
 Oh! how glorious is the kingdom * where all the Saints rejoice with Christ; clothed in white robes, they follow the Lamb whithersoever he goeth!
 
 [commemoration-antiphon]
-I beheld, and, lo, great multitude, which no man could number, * of all nations, (and kindreds, and people, and tongues,) stood before the throne.
+I beheld a great multitude * which no man could number, of all nations, standing before the throne.
 
 [commemoration-versicle]
 V. Let thy Saints be joyful in glory.

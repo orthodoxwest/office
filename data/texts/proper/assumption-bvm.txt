@@ -1,14 +1,14 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Mary hath been taken to heaven; * the Angels rejoice; they praise and bless the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
+Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Mary hath been taken to heaven; * the Angels rejoice; they praise and bless the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 521, 460 (The Assumption of the B.V.M.)
+Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-The Virgin Mary hath been taken into the chamber on high, * where the King of kings sitteth on a throne amid the stars.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 522, 461 (The Assumption of the B.V.M.)
+The Virgin Mary * is taken up into heavenly chambers, wherein the King of kings sitteth upon a starry throne.
 
 [psalm-antiphon-3]
 # SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
