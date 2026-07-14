@@ -133,6 +133,36 @@ R. In his heart.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The law of his God * is in his heart.
 
+[hymn-vespers]
+# SOURCE: office-hymns.zip (This the Confessor (tune for Conf not Bishop).docx)
+Iste Confessor
+
+This the Confessor of the Lord, whose triumph
+Now through the wide world celebrate the faithful,
+Merited this day joyfully to enter
+Heavenly mansions.
+
+Saintly and prudent, continent and humble,
+Chaste was he ever, peaceable and sober,
+While living vigour, coursing through his body,
+Quickened his being.
+
+When to his honoured sepulchre with members
+Languishing sorely, sufferers resorted,
+Oft unto wholeness did the Lord restore them
+At his petition.
+
+Wherefore our chorus chanteth in his honour
+Here, on his feast day, this most willing anthem;
+That in his merits we may have our portion
+Now and for ever.
+
+His be the glory, power and salvation
+Who, o'er the heavens, dwelling in the highest,
+Earth's mighty fabric ruleth and directeth,
+Only and Trinal.
+Amen.
+
 [chapter-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 649 (Common of a Confessor not a Bishop)
 !Sir 31:8-9

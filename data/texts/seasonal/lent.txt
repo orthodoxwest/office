@@ -52,6 +52,36 @@ R. He shall deliver thee, * From the snare of the hunter.
 V. God shall give his angels charge over thee.
 R. To keep thee in all thy ways.
 
+[hymn-vespers]
+# SOURCE: office-hymns.zip (O Maker of the World, Give Ear, Lent Vespers.docx)
+Audi benigne Conditor
+
+O Maker of the world, give ear;
+Accept the prayer and own the tear
+Towards thy seat of mercy sent
+In this most holy fast of Lent.
+
+Each heart is manifest to thee;
+Thou knowest our infirmity.
+Forgive thou then each soul that fain
+Would seek to thee, and turn again.
+
+Our sins are manifold and sore,
+But pardon them that sin deplore:
+And for thy Name's sake, make each soul
+That feels and owns its languor, whole.
+
+So mortify we every sense
+By grace of outward abstinence,
+That from each stain and spot of sin
+The soul may keep her fast within.
+
+Grant, O thou blessed Trinity,
+Grant, O essential Unity,
+That this our fast of forty days
+May work our profit and thy praise.
+Amen.
+
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 139 (Saturdays in Lent)
 V. God shall give his Angels charge over thee.

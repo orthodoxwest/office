@@ -167,22 +167,24 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-saturday]
+# SOURCE: office-hymns.zip (O Trinity of Blessed Light, Thru the Year Vespers, winter and summer tunes.docx); draft archdiocesan Vespers book, p. 215
 O lux beata Trinitas
 
-O TRINITY of blessed light,
+O Trinity of blessed light,
 O Unity of princely might,
 The fiery sun now goes his way;
 Shed thou within our hearts thy ray.
 
-To thee our mourning song of praise,
+To thee our morning song of praise,
 To thee our evening prayer we raise;
 Thy glory suppliant we adore
 For ever and for evermore.
 
-O Father, that we ask be done
-Through Jesus Christ, thine only Son,
-Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
 
 [opening-versicle]
 V. O God, ✠ make speed to save us.
