@@ -1,0 +1,161 @@
+[psalm-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 279 (The Solemnity of Saint Joseph)
+And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
+
+[psalm-antiphon-1]
+# SOURCE: draft archdiocesan Lauds book, p. 279 (The Solemnity of Saint Joseph)
+And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
+
+[psalm-antiphon-2]
+# SOURCE: draft archdiocesan Lauds book, p. 280 (The Solemnity of Saint Joseph)
+The Angel Gabriel * was sent from God to a virgin espoused to a man whose name was Joseph, of the house of David: and the virgin's name was Mary, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: draft archdiocesan Lauds book, p. 281 (The Solemnity of Saint Joseph)
+Joseph went up * from Galilee, out of the city of Nazareth into Judaea, unto the city of David, which is called Bethlehem, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: draft archdiocesan Lauds book, p. 282 (The Solemnity of Saint Joseph)
+And they came * with haste, and found Mary, and Joseph, and the babe lying in a manger, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: draft archdiocesan Lauds book, p. 283 (The Solemnity of Saint Joseph)
+And Jesus himself * was beginning to be about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 163 (The Solemnity of Saint Joseph, I and II Vespers)
+And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ, alleluia.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 164 (The Solemnity of Saint Joseph, I and II Vespers)
+The Angel Gabriel * was sent from God to a virgin espoused to a man whose name was Joseph, of the house of David: and the virgin's name was Mary, alleluia.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 165 (The Solemnity of Saint Joseph, I and II Vespers)
+Joseph went up * from Galilee, out of the city of Nazareth into Judaea, unto the city of David, which is called Bethlehem, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 166 (The Solemnity of Saint Joseph, I and II Vespers)
+And Jesus himself * was beginning to be about the age of thirty years, being, as it was supposed, the son of Joseph, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 287 (The Solemnity of Saint Joseph)
+Joseph, thou son of David * fear not to take unto thee Mary thy wife, for that which is conceived in her is of the Holy Ghost, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 170 (The Solemnity of Saint Joseph, I Vespers)
+When Mary * the mother of Jesus was espoused to Joseph, before they came together, she was found with child of the Holy Ghost, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 170 (The Solemnity of Saint Joseph, II Vespers)
+Son, * why hast thou thus dealt with us? behold thy father and I have sought thee sorrowing, alleluia.
+
+[collect]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 288, 171 (The Solemnity of Saint Joseph)
+O God, who in thy unspeakable providence didst vouchsafe to choose blessed Joseph to be the spouse of thy most holy Mother: grant, we beseech thee; that we, who venerate him as a protector on earth, may be found worthy to have him as an intercessor in heaven.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 285 (The Solemnity of Saint Joseph)
+!Gen 49:26
+The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 167 (The Solemnity of Saint Joseph, I and II Vespers)
+!Gen 49:26
+The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: draft archdiocesan Lauds book, p. 285 (Lauds chapter used at Terce)
+!Gen 49:26
+The blessings of thy father are strengthened with the blessings of his fathers: until the Desire of the everlasting hills should come; May they be upon the head of Joseph, and upon the crown of the Nazarite among his brethren.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 285 (The Solemnity of Saint Joseph)
+R. I do give praise unto thy name, * alleluia, alleluia.
+R. I do give praise unto thy name, * alleluia, alleluia.
+V. And madest him to have dominion of the works of thy hands.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I do give praise unto thy name, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 167 (The Solemnity of Saint Joseph, I and II Vespers)
+R. He made him Lord of his house, * alleluia, alleluia.
+R. He made him Lord of his house, * alleluia, alleluia.
+V. And ruler of all his substance.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He made him Lord of his house, * alleluia, alleluia.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 286 (The Solemnity of Saint Joseph)
+Cælitum Joseph decus
+
+Joseph, whose glory fills the Church with praises,
+Spouse of the Virgin, Jesu's foster-father,
+From the Almighty came thy high vocation,
+Best of protectors.
+
+When the Redeemer, whom the Prophets' chorus
+Long had predicted, lay within the manger,
+Glad was thy spirit, whilst in adoration,
+Low thou adorest.
+
+He who as Monarch reigns o'er all creation,
+Feared in the deepest, worshipped in the highest,
+Veiling his Godhead, rendered meek subjection,
+Unto thy bidding.
+
+Praise we with fervour God the One and Trinal,
+Who thee hath given grace and honour wondrous;
+O may he grant us, hearing thy petition,
+Joys everlasting!
+Amen.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 168 (The Solemnity of Saint Joseph, I and II Vespers)
+Te, Joseph, celebrent
+
+O Joseph, heav'nly hosts thy worthiness proclaim,
+And Christendom conspires to celebrate thy fame,
+Thou who in purest bonds wert to the Virgin bound;
+How glorious is thy name renowned.
+
+Thou, when thou didst behold thy Spouse about to bear,
+Wert sore oppress'd with doubt, wert filled with wond'ring care;
+At length the Angel's word thy anxious heart relieved:
+She by the Spirit hath conceived.
+
+Thou with thy new-born Lord didst seek far Egypt's land,
+As wand'ring pilgrims, ye fled o'er the desert sand;
+That Lord, when lost, by thee is in the temple found,
+While tears are shed, and joys abound.
+
+Not till death's hour is past do other men obtain
+The meed of holiness, and glorious rest attain;
+Thou, like to Angels made, in life completely blest,
+Dost clasp thy God unto thy breast.
+
+O Holy Trinity, thy suppliant servants spare;
+Grant us to rise to heav'n, for Joseph's sake and prayer,
+And so our grateful hearts to thee shall ever raise
+Exulting canticles of praise.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 287 (The Solemnity of Saint Joseph, Paschaltide)
+V. Thou hast given me the protection of thy salvation, alleluia.
+R. And thy right hand hath held me up, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 169 (The Solemnity of Saint Joseph, I Vespers)
+V. I do give praise unto thy name, alleluia.
+R. For thou art my defender and helper, alleluia.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 169 (The Solemnity of Saint Joseph, II Vespers)
+V. I sat down under his shadow, whom I desired, alleluia.
+R. And his fruit was sweet to my palate, alleluia.

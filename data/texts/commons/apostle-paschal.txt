@@ -1,40 +1,158 @@
-# Paschal variant of the Common of an Apostle.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of Apostles and Evangelists.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 612 (Common of Apostles and Evangelists in Paschaltide)
+Thy Saints, * O Lord, shall blossom as a lily, alleluia: and as the odour of balsam shall they be before thee, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 612 (Common of Apostles and Evangelists in Paschaltide)
+Thy Saints, * O Lord, shall blossom as a lily, alleluia: and as the odour of balsam shall they be before thee, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 613 (Common of Apostles and Evangelists in Paschaltide)
+In the heavenly kingdom * the Blessed have their dwelling-place, alleluia: and their rest for ever and ever, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 613 (Common of Apostles and Evangelists in Paschaltide)
+Thy blessed Saints, O Lord, * cried out within the veil, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 614 (Common of Apostles and Evangelists in Paschaltide)
+O ye spirits and souls * of the righteous, sing a hymn unto the Lord our God, alleluia, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 616 (Common of Apostles and Evangelists in Paschaltide)
+Then shall the righteous * shine forth as the sun in the presence of God, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 558, 566 (I and II Vespers, Common of Apostles in Paschaltide)
+Then shall the righteous * shine forth as the sun in the presence of God, alleluia.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 616 (Common of Apostles and Evangelists in Paschaltide)
+!Wis 5:1
+Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: draft archdiocesan Lauds book, p. 616 (Lauds chapter used at Terce)
+!Wis 5:1
+Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 559, 567 (I and II Vespers, Common of Apostles in Paschaltide)
+!Wis 5:1
+Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 616–617 (Common of Apostles and Evangelists in Paschaltide)
+R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
+R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
+V. God hath chosen you to him to be his inheritance.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 559, 568 (I and II Vespers, Common of Apostles in Paschaltide)
+R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
+R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
+V. And an ageless eternity.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 618–619 (Common of Apostles and Evangelists in Paschaltide)
+Claro paschali gaudio
+
+In this our bright and Paschal day
+The sun shines out with purer ray,
+When Christ, to earthly sight made plain,
+The glad Apostles see again.
+
+The wounds, the riven wounds he shows
+In that his flesh with light that glows,
+In loud accord both far and nigh
+The Lord's arising testify.
+
+O Christ, the King who lov'st to bless,
+Do thou our hearts and souls possess;
+To thee our praise that we may pay,
+To whom our laud is due for aye.
+
+We pray thee, King with glory deck'd,
+In this our Paschal joy, protect
+From all that death would fain effect
+Thy ransom'd flock, thine own elect.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Th_Apostles Hearts Were Full of Pain, Apost and Evang in Paschaltide Vespers.docx); draft archdiocesan Vespers book, pp. 560–561, 568–570
+Tristes erant Apostoli
+
+Th'Apostles' hearts were full of pain
+For their dear Lord so lately slain:
+That Lord his servants' wicked train
+With bitter scorn had dared arraign.
+
+With gentle voice the Angel gave
+The women tidings at the grave;
+'Forthwith your Master shall ye see:
+He goes before to Galilee.'
+
+And while with fear and joy they press'd
+To tell these tidings to the rest,
+Their Lord, their living Lord, they meet,
+And see his form, and kiss his feet.
+
+Th'Eleven, when they hear, with speed,
+To Galilee forthwith proceed:
+That there they may behold once more
+The Lord's dear face, as oft before.
+
+We pray thee, King with glory deck'd,
+In this our Paschal joy, protect
+From all that death would fain effect
+Thy ransom'd flock, thine own elect.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 619 (Common of Apostles and Evangelists in Paschaltide)
+V. Right dear in the sight of the Lord, alleluia.
+R. Is the death of his Saints, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 561 (I Vespers, Common of Apostles in Paschaltide)
+V. O ye holy and righteous, rejoice in the Lord.
+R. God hath chosen you to him to be his inheritance, alleluia.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 570 (II Vespers, Common of Apostles in Paschaltide)
+V. Right dear in the sight of the Lord, alleluia.
+R. Is the death of his Saints, alleluia.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 2] — check against diurnal
-Daughters of Jerusalem, * come and see the crowned martyrs, the Lord crowned them in his solemnity and delight, alleluia, alleluia.
-
-[magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 3] — check against diurnal
-Saints and just * rejoice in the Lord, alleluia, the Lord has chosen you for his inheritance, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 620 (Common of Apostles and Evangelists in Paschaltide)
+Daughters of Jerusalem * come forth and behold the Martyrs with the diadems wherewith the Lord hath crowned them in the day of solemnity and rejoicing, alleluia, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C1p [Ant 1] — check against diurnal
-Eternal light will shine * over your saints, O Lord, and the eternity of times, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 562 (I Vespers, Common of Apostles in Paschaltide)
+Light perpetual * shall shine upon thy Saints, O Lord, and an ageless eternity, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 570 (II Vespers, Common of Apostles in Paschaltide)
+O ye holy and righteous, * rejoice in the Lord, alleluia: God hath chosen you to him to be his inheritance, alleluia.

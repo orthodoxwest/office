@@ -1,0 +1,179 @@
+[psalm-antiphon]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 551, 486 (The Seven Sorrows of the B.V.M.)
+Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
+
+[psalm-antiphon-1]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 551, 486 (The Seven Sorrows of the B.V.M.)
+Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
+
+[psalm-antiphon-2]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 552, 487 (The Seven Sorrows of the B.V.M.)
+Look away from me; * I will weep bitterly, labour not to comfort me.
+
+[psalm-antiphon-3]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 552, 488 (The Seven Sorrows of the B.V.M.)
+He hath no form * nor comeliness; and when we shall see him, there is no beauty that we should desire him.
+
+[psalm-antiphon-4]
+# SOURCE: draft archdiocesan Lauds book, p. 553 (The Seven Sorrows of the B.V.M.)
+From the sole of the foot * even unto the head, there is no soundness in him.
+
+[psalm-antiphon-5]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 555, 489 (The Seven Sorrows of the B.V.M.)
+Stay me with flagons, * comfort me with apples; for I am sick of love.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 486 (The Seven Sorrows of the B.V.M.)
+Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 487 (The Seven Sorrows of the B.V.M.)
+Look away from me; * I will weep bitterly, labour not to comfort me.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 488 (The Seven Sorrows of the B.V.M.)
+He hath no form * nor comeliness; and when we shall see him, there is no beauty that we should desire him.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 489 (The Seven Sorrows of the B.V.M.)
+Stay me with flagons, * comfort me with apples; for I am sick of love.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
+Come ye, * and let us go up to the mountain of the Lord, and see if there be any sorrow like unto my sorrow.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 492 (I Vespers for The Seven Sorrows of the B.V.M.)
+Look not * upon me, because I am black, because the sun hath looked upon me: my mother's children were angry with me.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 492 (II Vespers for The Seven Sorrows of the B.V.M.)
+Sorrow oppresseth me, * my face is swollen with weeping, and on my eyelids is the shadow of death.
+
+[collect]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 559, 493 (The Seven Sorrows of the B.V.M.)
+O God, in whose Passion, according to the prophecy of Simeon, a sword of grief pierced through the well-beloved soul of the glorious Virgin Mother Mary: mercifully grant that we who devoutly call to mind her sorrows, may obtain the blessed fruit of thy Passion.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 556 (The Seven Sorrows of the B.V.M.)
+!Lam 2:13
+What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 489 (The Seven Sorrows of the B.V.M.)
+!Lam 2:13
+What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
+R. Thanks be to God.
+
+[chapter-terce]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 556, 489 (The Seven Sorrows of the B.V.M.; repeated chapter)
+!Lam 2:13
+What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 557 (The Seven Sorrows of the B.V.M.)
+R. Mine eyes do fail * with weeping.
+R. Mine eyes do fail * with weeping.
+V. My heart within me is troubled.
+R. With weeping.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Mine eyes do fail * with weeping.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 490 (The Seven Sorrows of the B.V.M.)
+R. A bundle of myrrh * is my well-beloved unto me.
+R. A bundle of myrrh * is my well-beloved unto me.
+V. He shall lie all night betwixt my breasts.
+R. Is my well-beloved unto me.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. A bundle of myrrh * is my well-beloved unto me.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 557–558 (The Seven Sorrows of the B.V.M.)
+Summæ Deus clementiæ
+
+O God, in whom all grace doth dwell,
+Grant us the grace to ponder well
+The Virgin Mother's sorrows sev'n,
+The cruel wounds to Jesus giv'n.
+
+O may the tears which Mary poured
+Gain for us pardon of the Lord;
+The holy tears which in their worth
+Excel all penances of earth.
+
+And may the contemplation sore
+Of those five wounds which Jesus bore
+With all the Virgin's sorrows be
+Our joy throughout eternity.
+
+Glory to thee, O Lord, we give,
+Who died to make thy servants live;
+Whom with the Father we adore
+And Holy Spirit evermore.
+Amen.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 490–492 (The Seven Sorrows of the B.V.M.)
+Jam toto subitus
+
+Now let the darkling eve
+Mount suddenly on high,
+The sun affrighted reave
+His splendours from the sky,
+While I in silence grieve
+O'er the mocked agony
+And the divine catastrophe.
+
+Grief-drenched, thou dost appear
+With heart of adamant,
+O Mother; and dost hear
+The Great Hierophant,
+Upon his wooden bier
+Locked in the arms of Death,
+Utter in groans his parting breath.
+
+What lookest thou upon,
+Mangled and bruised and torn?
+Ah, 'tis the very Son
+Thy yearning breast hath borne!
+Surely, each breaking moan
+And each deep-mouthed wound
+Its fellow in thy heart hath found.
+
+Surely, the taunts and woes,
+The scourge, the dripping thorn,
+The spitting and the blows,
+The gall, the lance, the scorn;
+Surely, each torment throws
+A poison-dart at thee,
+Crushed by their varied tyranny.
+
+Yet thou with patient mien
+Beneath his Cross dost stand,
+Nobler in this, I ween,
+Than all the martyr-band:
+A thousand deaths, O Queen,
+Upon thy spirit lie,
+Yet thou, O marvel! dost not die.
+
+O Holy Trinity,
+Let earth and heaven raise
+Their song of laud to thee
+The while my spirit prays:
+When evil comes to me,
+The strength do thou impart
+That erst upheld the Virgin's heart!
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
+V. O Virgin Mary, by thy sorrow's might.
+R. Make us rejoice in heaven's kingdom bright.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 492 (The Seven Sorrows of the B.V.M.)
+V. Pray for us, O Queen of Martyrs.
+R. Who didst stand by the Cross of Jesus.

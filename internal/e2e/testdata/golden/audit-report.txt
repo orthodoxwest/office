@@ -109,11 +109,6 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   st-raphael-of-brooklyn
   st-tikhon-moscow
 
-=== Missing ProperName: 1 feast(s) ===
-These feasts have texts containing "N." but no ProperName set.
-Add ProperName = <name> to the feast definition to replace "N." with the saint's name.
-  solemnity-st-joseph
-
 To mark intentional fallbacks, add lines to data/audit-ok.txt:
   feast-id *                   (suppress all warnings for this feast)
   feast-id ref1 ref2 ...        (suppress specific refs only)
