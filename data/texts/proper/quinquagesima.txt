@@ -38,6 +38,17 @@ R. For we have sinned against thee.
 [collect]
 O Lord, we beseech You, mercifully hear our prayers; loose us from the chains of our sins and keep us from all adversity.
 
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 174 (Quinquagesima Sunday)
+!1 Cor 13:1
+Brethren: Though I speak with the tongues of men and of angels, and have not charity, I am become as sounding brass, or a tinkling cymbal.
+R. Thanks be to God.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 176 (Quinquagesima Sunday)
+V. Lord, thou hast been our refuge.
+R. From one generation to another.
+
 [magnificat-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quadp3-1 [Ant 3] — check against diurnal
 And they that went before * rebuked him, that he should hold his peace. But he cried out so much the more: "Have mercy on me, thou Son of David."

@@ -1,26 +1,30 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 289, 172 (The Ascension of Our Lord)
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 289, 172 (The Ascension of Our Lord)
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-And while they looked * steadfastly towards heaven, as He went up, they said, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 290, 173 (The Ascension of Our Lord)
+And while they looked * stedfastly toward heaven as he went up, they said, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-He lifted up His Hands, * and blessed them, and was carried up into heaven, alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 290, 174 (The Ascension of Our Lord)
+He lifted up his hands * and blessed them, and was carried up into heaven, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-Extol the King of kings, * and ascribe praise to God, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 291 (The Ascension of Our Lord)
+Exalt ye * the King of kings, and sing a hymn unto God, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Ant Laudes] — check against diurnal
-While they beheld, * He was taken up, and a cloud received Him in heaven, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 293 (The Ascension of Our Lord)
+While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 175 (The Ascension of Our Lord)
+While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
 
 [benedictus-antiphon]
 I ascend to my Father * and to your Father: to my God and your God, alleluia.
@@ -29,7 +33,7 @@ I ascend to my Father * and to your Father: to my God and your God, alleluia.
 O King of glory, Lord of hosts, * Who hast this day exalted thine Own Self, with great triumph, above all the heavens, leave us not orphans but send unto us the Promise of the Father, even the Spirit of truth, alleluia.
 
 [commemoration-antiphon]
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, Which is taken up from you into heaven, shall so come in like manner, alleluia.
+Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
 
 [commemoration-versicle]
 V. God is ascended with jubilee, alleluia.

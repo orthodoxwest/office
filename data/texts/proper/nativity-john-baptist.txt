@@ -1,20 +1,46 @@
 [psalm-antiphon]
-Elizabeth, the wife of Zacharias, * was the mother of a mighty man, even of John the Baptist, the Fore-runner of the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
+Elisabeth, the wife of Zacharias, * brought forth a mighty son, John the Baptist, the Lord's Forerunner.
 
 [psalm-antiphon-1]
-Elizabeth, the wife of Zacharias, * was the mother of a mighty man, even of John the Baptist, the Fore-runner of the Lord.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
+Elisabeth, the wife of Zacharias, * brought forth a mighty son, John the Baptist, the Lord's Forerunner.
 
 [psalm-antiphon-2]
-They made signs to his father * how he would have him called; and he asked for a writing-table, and wrote, saying: His name is John.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 464, 393 (The Nativity of St John Baptist)
+They made signs * to his father, how he would have him called: and he wrote, saying, His name is John.
 
 [psalm-antiphon-3]
-Thou shalt call his name John; * and many shall rejoice at his birth.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 464–465, 394 (The Nativity of St John Baptist)
+His name shall be called John: * and many shall rejoice at his birth.
 
 [psalm-antiphon-4]
-Among them that are born of women * there hath not risen a greater than John the Baptist.
+# SOURCE: draft archdiocesan Lauds book, p. 465 (The Nativity of St John Baptist)
+Among them that are born of women, * there hath not risen a greater than John the Baptist.
 
 [psalm-antiphon-5]
-Thou, child, shalt be called the Prophet of the Highest; * for thou shalt go before the face of the Lord, to prepare His ways.
+# SOURCE: draft archdiocesan Lauds book, pp. 467–468 (The Nativity of St John Baptist)
+Thou, child, * shalt be called the prophet of the Highest; for thou shalt go before the face of the Lord, to prepare his ways.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 395 (II Vespers for The Nativity of St John Baptist)
+Thou, child, * shalt be called the prophet of the Highest; for thou shalt go before the face of the Lord, to prepare his ways.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 384 (I Vespers for The Nativity of St John Baptist)
+He shall go before him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 385 (I Vespers for The Nativity of St John Baptist)
+Thou shalt call his name John: * he shall drink neither wine nor strong drink: and many shall rejoice at his birth.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 386 (I Vespers for The Nativity of St John Baptist)
+From the womb of the aged * and barren was brought forth John, the Lord's Forerunner.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 387 (I Vespers for The Nativity of St John Baptist)
+This child * shall be great in the sight of the Lord: for the hand of the Lord is with him.
 
 [benedictus-antiphon]
 And the mouth of Zacharias was opened, * and he prophesied, saying: Blessed be the Lord God of Israel.

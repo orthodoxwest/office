@@ -116,9 +116,9 @@ Equal praise and blessing.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium CommuneM/C11 [Versum 2] — check against diurnal
-V. Grace is poured into thy lips.
-R. Therefore God hath blessed thee for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 717 (Common of Feasts of the B.V.M.)
+V. Full of grace are thy lips.
+R. Because God hath blessed thee for ever.
 
 [versicle-vespers]
 # SOURCE: divinum-officium Commune/C11 [Versum 1] — check against diurnal
