@@ -59,17 +59,10 @@ V. You are Peter.
 R. And on this rock I am going to build my church.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium SanctiM/08-01 [Ant 2] — check against diurnal
-Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+@use proper/chains-st-peter/benedictus-antiphon
 
 [chapter-vespers]
-# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Acts 12:1-3
-Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
-R. Thanks be to God.
+@use proper/chains-st-peter/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium SanctiM/08-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Acts 12:1-3
-Herod the King stretched forth his hands, to vex certain of the Church. And he killed James, the brother of John, with the sword. And because he saw it pleased the Jews, he proceeded farther to take Peter also.
-R. Thanks be to God.
+@use proper/chains-st-peter/chapter-lauds

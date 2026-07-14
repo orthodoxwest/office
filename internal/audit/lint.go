@@ -67,10 +67,35 @@ func Lint(dataDir string) (*LintReport, error) {
 		lintUnpointedAntiphon(r, key, text)
 	}
 
+	lintDuplicateCandidates(r, entries, keys)
 	lintNearDuplicates(r, entries, keys)
 	lintChantOrphans(r, dataDir)
 
 	return r, nil
+}
+
+// lintDuplicateCandidates keeps identical concrete entries visible after the
+// unambiguous cases have been replaced by corpus aliases. Remaining matches
+// may be intentional independent witnesses, so they are advisory rather than
+// mechanical failures.
+func lintDuplicateCandidates(r *LintReport, entries map[string]string, keys []string) {
+	byText := make(map[string][]string)
+	for _, key := range keys {
+		if len(entries[key]) < 20 {
+			continue
+		}
+		byText[entries[key]] = append(byText[entries[key]], key)
+	}
+	for _, duplicates := range byText {
+		if len(duplicates) < 2 {
+			continue
+		}
+		sort.Strings(duplicates)
+		r.Advisory = append(r.Advisory, LintFinding{
+			Key: duplicates[0], Class: "duplicate-candidate",
+			Detail: "identical concrete entries: " + strings.Join(duplicates[1:], ", "),
+		})
+	}
 }
 
 // lintMechanical flags deterministic formatting errors.

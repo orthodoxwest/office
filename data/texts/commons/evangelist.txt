@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
-This is my commandment * that you love one another, as I have loved you.
+@use commons/evangelist/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
@@ -35,7 +34,7 @@ Be valiant * in battle, fight the ancient serpent and accept the eternal kingdom
 For they shall deliver you * up to councils: and in the synagogues you shall be beaten: and you shall stand before governors and kings for my sake, for a testimony unto them.
 
 [commemoration-antiphon]
-This is my commandment * that you love one another, as I have loved you.
+@use commons/evangelist/psalm-antiphon-1
 
 [commemoration-versicle]
 V. Their sound hath gone forth into all the earth:
@@ -82,11 +81,7 @@ And so shall be while ages last.
 Amen.
 
 [chapter-vespers]
-# SOURCE: divinum-officium CommuneM/C1a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Eph 2:19-20
-Brothers: Now therefore you are no more strangers and foreigners; but you are fellow citizens with the saints, and the domestics of God, built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone.
+@use commons/evangelist/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium CommuneM/C1a [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Eph 2:19-20
-Brothers: Now therefore you are no more strangers and foreigners; but you are fellow citizens with the saints, and the domestics of God, built upon the foundation of the apostles and prophets, Jesus Christ himself being the chief corner stone.
+@use commons/evangelist/chapter-lauds

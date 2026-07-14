@@ -1,5 +1,5 @@
 [psalm-antiphon]
-Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
+@use proper/ss-peter-paul/psalm-antiphon-1
 
 [psalm-antiphon-1]
 Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
@@ -18,32 +18,23 @@ The Lord hath sent his Angel, * and hath delivered me out of the hand of Herod, 
 Thou art Peter, * and upon this rock I will build my Church.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 403, 411 (I and II Vespers for Saints Peter and Paul)
-Thou art Peter, * and upon this rock I will build my Church.
+@use proper/ss-peter-paul/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 400 (I Vespers for Saints Peter and Paul)
-Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
+@use proper/ss-peter-paul/psalm-antiphon-1
 
 [psalm-antiphon-2-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 401 (I Vespers for Saints Peter and Paul)
-Silver and gold have I none; * but such as I have, give I thee.
+@use proper/ss-peter-paul/psalm-antiphon-2
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 402 (I Vespers for Saints Peter and Paul)
-The Angel said unto Peter, * Cast thy garment about thee, and follow me.
+@use proper/ss-peter-paul/psalm-antiphon-3
 
 [psalm-antiphon-4-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 403 (I Vespers for Saints Peter and Paul)
 Thou art Peter, * and upon this rock I will build my Church.
 
 [short-responsory-lauds]
-R. Their sound is gone out * into all lands.
-R. Their sound is gone out * into all lands.
-V. And their words into the ends of the world.
-R. Into all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound is gone out * into all lands.
+@use commons/apostle/short-responsory-lauds
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 420 (II Vespers for Saints Peter and Paul)
@@ -121,32 +112,16 @@ Both now and ever, through the ages infinite.
 Amen.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 403, 412 (I and II Vespers for Saints Peter and Paul)
-!Acts 12:1-3
-Herod the king stretched forth his hands to vex certain of the church. And he killed James the brother of John with the sword. And because he saw it pleased the Jews, he proceeded further to take Peter also.
-R. Thanks be to God.
+@use proper/ss-peter-paul/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books (same chapter as the major hours)
-!Acts 12:1-3
-Herod the king stretched forth his hands to vex certain of the church. And he killed James the brother of John with the sword. And because he saw it pleased the Jews, he proceeded further to take Peter also.
-R. Thanks be to God.
+@use proper/ss-peter-paul/chapter-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 411 (I Vespers for Saints Peter and Paul)
-V. Their sound is gone out into all lands.
-R. And their words into the ends of the world.
+@use commons/apostle/versicle-first-vespers
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 420 (II Vespers for Saints Peter and Paul)
-V. They declared the work of God.
-R. And wisely considered of his doing.
+@use commons/apostle/versicle-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 409, 418 (I and II Vespers for Saints Peter and Paul)
-R. Thou shalt make them princes * in all lands.
-R. Thou shalt make them princes * in all lands.
-V. They shall remember thy Name, O Lord.
-R. In all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * in all lands.
+@use commons/apostle/short-responsory-vespers

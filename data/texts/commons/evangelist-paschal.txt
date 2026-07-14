@@ -4,37 +4,28 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 2] — check against diurnal
-Daughters of Jerusalem, * come and see the crowned martyrs, the Lord crowned them in his solemnity and delight, alleluia, alleluia.
+@use commons/martyr-paschal/benedictus-antiphon
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 3] — check against diurnal
-Saints and just * rejoice in the Lord, alleluia, the Lord has chosen you for his inheritance, alleluia.
+@use commons/martyr-paschal/magnificat-antiphon
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C1p [Ant 1] — check against diurnal
-Eternal light will shine * over your saints, O Lord, and the eternity of times, alleluia.
+@use commons/martyr-paschal/magnificat-antiphon-first

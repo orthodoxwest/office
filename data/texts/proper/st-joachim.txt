@@ -16,6 +16,4 @@ R. The generation of the faithful shall be blessed.
 Let us praise a man famous * in his generation, with whom the Lord established the blessing of all nations, and the covenant, and made it rest upon his head.
 
 [versicle-first-vespers]
-# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 243
-V. His seed shall be mighty upon earth.
-R. The generation of the faithful shall be blessed.
+@use proper/st-joachim/versicle-lauds

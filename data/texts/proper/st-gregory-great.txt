@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 401, 304, 312 (St Gregory the Great)
-The blessed Gregory, * lifted up to the throne of Peter, shewed forth in deeds his name of 'the Watchful'.
+@use proper/st-gregory-great/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 401, 304, 312 (St Gregory the Great)
@@ -23,8 +22,7 @@ O ye servants of the Lord, * bless ye the Lord: your servant Gregory hath risen 
 Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 307, 315 (I/II Vespers, St Gregory the Great)
-Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
+@use proper/st-gregory-great/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 409 (St Gregory the Great)
@@ -45,10 +43,7 @@ Behold a great priest, who in his life repaired the house again, and in his days
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 307 (St Gregory the Great)
-!Sir 50:1
-Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
-R. Thanks be to God.
+@use proper/st-gregory-great/chapter-lauds
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 407–408 (St Gregory the Great)
@@ -116,34 +111,16 @@ Be equal majesty and laud.
 Amen.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 407 (St Gregory the Great)
-R. The Lord loved him * and adorned him.
-R. The Lord loved him * and adorned him.
-V. He clothed him with a robe of glory.
-R. And adorned him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord loved him * and adorned him.
+@use commons/confessor-bishop/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 308, 316 (I/II Vespers, St Gregory the Great)
-R. The Lord chose him * for a priest unto himself.
-R. The Lord chose him * for a priest unto himself.
-V. To offer unto him the sacrifice of praise.
-R. For a priest unto himself.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord chose him * for a priest unto himself.
+@use commons/confessor-bishop/short-responsory-vespers
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 408 (St Gregory the Great)
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 309 (I Vespers, St Gregory the Great)
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
+@use commons/confessor-bishop/commemoration-versicle
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 318 (II Vespers, St Gregory the Great)
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds

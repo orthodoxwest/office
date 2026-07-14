@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 81 (Saint John, Apostle and Evangelist)
-Right worthy of honour * is blessed John the Apostle, who leaned on the Lord's bosom at the last supper.
+@use proper/st-john-evangelist/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 81 (Saint John, Apostle and Evangelist)
@@ -47,12 +46,10 @@ This is the same John, * who leaned on the Lord's bosom at the last supper: the 
 There went this saying abroad * among the brethren, that that disciple should not die: yet Jesus said not unto him, He shall not die; but, if I will that he tarry till I come.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
-This is the same John, * who leaned on the Lord's bosom at the last supper: the blessed Apostle, unto whom were revealed the secret things of heaven.
+@use proper/st-john-evangelist/benedictus-antiphon
 
 [commemoration-versicle]
-V. Right worthy of honour is blessed John the Apostle.
-R. Who leaned on the Lord's bosom at the last supper.
+@use proper/st-john-evangelist/versicle-vespers
 
 [commemoration-collect]
 # SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
@@ -75,92 +72,16 @@ With the bread of life and understanding, she shall feed him, and give him the w
 R. Thanks be to God.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 87 (Saint John, Apostle and Evangelist)
-R. Their sound is gone out * into all lands.
-R. Their sound is gone out * into all lands.
-V. And their words into the ends of the world.
-R. Into all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound is gone out * into all lands.
+@use commons/apostle/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 74 (Saint John, Apostle and Evangelist)
-R. Thou shalt make them princes * in all lands.
-R. Thou shalt make them princes * in all lands.
-V. They shall remember thy Name, O Lord.
-R. In all lands.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * in all lands.
+@use commons/apostle/short-responsory-vespers
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 87-88
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 75-76
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 88 (Saint John, Apostle and Evangelist)
@@ -173,16 +94,10 @@ V. Right worthy of honour is blessed John the Apostle.
 R. Who leaned on the Lord's bosom at the last supper.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 74 (Saint John, Apostle and Evangelist)
-!Sir 15:1-2
-He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
-R. Thanks be to God.
+@use proper/st-john-evangelist/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 86 (Lauds chapter used at Terce)
-!Sir 15:1-2
-He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
-R. Thanks be to God.
+@use proper/st-john-evangelist/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)

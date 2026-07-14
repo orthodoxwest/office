@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-While St. Clement prayed, * there appeared unto him the Lamb of God.
+@use proper/st-clement-i/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
@@ -29,11 +28,10 @@ As he began to move toward the sea * the people cried out with a loud voice: O L
 All the nations * round about believed in Christ the Lord.
 
 [commemoration-antiphon]
-While St. Clement prayed, * there appeared unto him the Lamb of God.
+@use proper/st-clement-i/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion over the works of thy hands.
+@use commons/bishop-martyr/commemoration-versicle
 
 [collect]
 O God, Who dost gladden us by the yearly Feast-day of thine holy Martyr, Clement mercifully grant unto us who keep their birthday, the strength to imitate their patience under suffering.

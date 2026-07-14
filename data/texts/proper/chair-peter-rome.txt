@@ -52,13 +52,10 @@ V. You are Peter.
 R. And on this rock I am going to build my church.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium SanctiM/01-18 [Ant 2] — check against diurnal
-Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
+@use proper/chair-peter-rome/benedictus-antiphon
 
 [commemoration-versicle]
-# SOURCE: divinum-officium SanctiM/01-18 [Versum 2] — check against diurnal
-V. Let them exalt Him in the congregation of the people.
-R. And praise Him in the assembly of the elders.
+@use proper/chair-peter-rome/versicle-lauds
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
@@ -81,5 +78,4 @@ O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium Commune/C4 [Ant Laudes] — check against diurnal
-Behold an high priest, * who in his days pleased God, and was found righteous.
+@use proper/chair-peter-rome/psalm-antiphon-1

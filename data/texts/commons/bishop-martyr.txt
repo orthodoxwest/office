@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 20 (Common of One Martyr out of Paschaltide)
-Whosoever shall confess me * before men, him will I confess also before my Father.
+@use commons/bishop-martyr/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Commons Lauds book, p. 20 (Common of One Martyr out of Paschaltide)
@@ -23,35 +22,28 @@ If any man have served me * he shall be honoured of my Father which is in heaven
 Father * I will that where I am, there may also my servant be.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 34, 42 (I and II Vespers, Common of One Martyr out of Paschaltide)
-Whosoever shall confess me * before men, him will I confess also before my Father.
+@use commons/bishop-martyr/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 35, 43 (I and II Vespers, Common of One Martyr out of Paschaltide)
-He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
+@use commons/bishop-martyr/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 36, 44 (I and II Vespers, Common of One Martyr out of Paschaltide)
-If any man serve me * let him follow me; and where I am, there shall also my servant be.
+@use commons/bishop-martyr/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 37, 45 (I and II Vespers, Common of One Martyr out of Paschaltide)
-Father * I will that where I am, there may also my servant be.
+@use commons/bishop-martyr/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 27 (Common of One Martyr out of Paschaltide)
-He that hateth his life * in this world shall keep it unto life eternal.
+@use commons/martyr/benedictus-antiphon
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 47 (II Vespers, Common of One Martyr out of Paschaltide)
-Whosoever will come after me * let him deny himself, and take up his cross, and follow me.
+@use commons/martyr/magnificat-antiphon
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 39 (I Vespers, Common of One Martyr out of Paschaltide)
-This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was stablished on a sure foundation.
+@use commons/martyr/magnificat-antiphon-first
 
 [commemoration-antiphon]
-Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
+@use commons/martyr/commemoration-antiphon
 
 [commemoration-versicle]
 V. Thou hast crowned him with glory and honour, O Lord.
@@ -74,59 +66,10 @@ With the bread of life and understanding, she shall feed him, and give him the w
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Thou followest, Martyr of thy God.docx); draft archdiocesan Commons Lauds book, pp. 26-27
-Martyr Dei qui unicum
-
-Thou foll'west, Martyr of thy God,
-The path the only Son hath trod,
-Thy conquered foes thou treadest down,
-And gloriest in a victor's crown.
-
-O may thy prayer for us obtain
-The cleansing of each guilty stain,
-Shield us from sin's contagious blight,
-Put life's long weariness to flight.
-
-The cruel chains are now unwound
-That once thy sacred body bound,
-So may God's Son earth's fetters break
-From us, for his own love's dear sake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/martyr/hymn-lauds
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Of All Thy Warrior Saints, O Lord, One Martyr out of Paschaltide Vespers.docx); draft archdiocesan Commons Vespers book, pp. 38, 46
-Deus, tuorum militum
-
-Of all thy warrior saints, O Lord,
-The portion, crown, and great reward,
-From all transgressions set us free,
-Who sing thy Martyr's victory.
-
-The pleasures of the world he spurn'd,
-From sin's pernicious lures he turn'd,
-Accounting them as transient all,
-He reach'd at length thy heav'nly hall.
-
-For thee through many a woe he ran,
-In many a fight he played the man;
-For thee his blood he dared to pour,
-And thence hath joy for evermore.
-
-We therefore pray thee, full of love,
-Regard us from thy throne above,
-On this thy Martyr's triumph day,
-Wash ev'ry stain of sin away.
-
-Enduring laud and praise be done
-To God the Father, and the Son,
-And to the Holy Paraclete,
-For endless ages as is meet.
-Amen.
+@use commons/martyr/hymn-vespers
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Commons Lauds book, p. 27 (Common of One Martyr out of Paschaltide)
@@ -134,32 +77,16 @@ V. The righteous shall flourish like the palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 47 (II Vespers, Common of One Martyr out of Paschaltide)
-V. The righteous shall flourish like a palm-tree.
-R. And shall spread abroad like a cedar in Libanus.
+@use commons/martyr/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 39 (I Vespers, Common of One Martyr out of Paschaltide)
-V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion over the works of thy hands.
+@use commons/bishop-martyr/commemoration-versicle
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 26 (Common of One Martyr out of Paschaltide)
-R. Thou hast crowned him * with glory and honour, O Lord.
-R. Thou hast crowned him * with glory and honour, O Lord.
-V. And madest him to have dominion of the works of thy hands.
-R. With glory and honour, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast crowned him * with glory and honour, O Lord.
+@use commons/martyr/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 37, 45 (I and II Vespers, Common of One Martyr out of Paschaltide)
-R. Thou hast set * upon his head, O Lord.
-R. Thou hast set * upon his head, O Lord.
-V. A crown of pure gold.
-R. Upon his head, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast set * upon his head, O Lord.
+@use commons/martyr/short-responsory-vespers
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Commune/C2 [Responsory Breve Tertia] — check against diurnal
@@ -189,13 +116,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. His glory is great * in thy salvation.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, pp. 37, 45 (I and II Vespers, Common of One Martyr out of Paschaltide)
-!Jas 1:12
-Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
-R. Thanks be to God.
+@use commons/bishop-martyr/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 25 (Lauds chapter used at Terce)
-!Jas 1:12
-Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
-R. Thanks be to God.
+@use commons/bishop-martyr/chapter-lauds

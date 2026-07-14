@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
-O how great torments * have all the Saints endured, that they might surely attain to the palm of martyrdom.
+@use commons/martyrs/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Many Martyrs) — parish noted manual
@@ -15,8 +14,7 @@ The Blessed * with their palms have entered into the kingdom; they have earned t
 The bodies of the Saints * are buried in peace: and their name liveth for evermore.
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 590 (I Vespers, Common of Many Martyrs out of Paschaltide)
-The bodies of the Saints * are buried in peace: and their name liveth for evermore.
+@use commons/martyrs/psalm-antiphon-3
 
 [psalm-antiphon-3-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 598 (II Vespers, Common of Many Martyrs out of Paschaltide)
@@ -100,10 +98,7 @@ V. Let the saints be joyful with glory.
 R. Let them rejoice in their beds.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 600 (II Vespers, Common of Many Martyrs out of Paschaltide)
-!Wis 3:1-3
-The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise, they seemed to die, but they are in peace.
-R. Thanks be to God.
+@use commons/martyrs/chapter-lauds
 
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 600 (II Vespers, Common of Many Martyrs out of Paschaltide)

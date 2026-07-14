@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 551, 486 (The Seven Sorrows of the B.V.M.)
-Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
+@use proper/seven-sorrows-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 551, 486 (The Seven Sorrows of the B.V.M.)
@@ -23,20 +22,16 @@ From the sole of the foot * even unto the head, there is no soundness in him.
 Stay me with flagons, * comfort me with apples; for I am sick of love.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 486 (The Seven Sorrows of the B.V.M.)
-Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
+@use proper/seven-sorrows-bvm/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 487 (The Seven Sorrows of the B.V.M.)
-Look away from me; * I will weep bitterly, labour not to comfort me.
+@use proper/seven-sorrows-bvm/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 488 (The Seven Sorrows of the B.V.M.)
-He hath no form * nor comeliness; and when we shall see him, there is no beauty that we should desire him.
+@use proper/seven-sorrows-bvm/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 489 (The Seven Sorrows of the B.V.M.)
-Stay me with flagons, * comfort me with apples; for I am sick of love.
+@use proper/seven-sorrows-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
@@ -61,16 +56,10 @@ What thing shall I take to witness for thee? what thing shall I liken to thee, O
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 489 (The Seven Sorrows of the B.V.M.)
-!Lam 2:13
-What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
-R. Thanks be to God.
+@use proper/seven-sorrows-bvm/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 556, 489 (The Seven Sorrows of the B.V.M.; repeated chapter)
-!Lam 2:13
-What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
-R. Thanks be to God.
+@use proper/seven-sorrows-bvm/chapter-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 557 (The Seven Sorrows of the B.V.M.)

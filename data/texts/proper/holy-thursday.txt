@@ -1,5 +1,5 @@
 [psalm-antiphon]
-O Lord, Thou shalt be justified * when Thou speakest, and be clear when Thou art judged.
+@use proper/holy-thursday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 O Lord, Thou shalt be justified * when Thou speakest, and be clear when Thou art judged.

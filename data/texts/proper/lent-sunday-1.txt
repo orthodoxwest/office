@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 189 (First Sunday in Lent)
-Make me * a clean heart, O God, and renew a right spirit within me.
+@use proper/lent-sunday-1/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 189 (First Sunday in Lent)
@@ -30,7 +29,7 @@ Then was Jesus * led up of the Spirit into the wilderness to be tempted of the d
 Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
 
 [commemoration-antiphon]
-Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
+@use proper/lent-sunday-1/magnificat-antiphon
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -58,16 +57,10 @@ As dying, and behold we live; as chastised, and not killed; as sorrowful, yet al
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!2 Cor 6:1-2
-Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
-R. Thanks be to God.
+@use proper/lent-sunday-1/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Quad1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!2 Cor 6:1-2
-Brothers, we exhort you, that you receive not the grace of God in vain. For he saith: In an accepted time have I heard thee; and in the day of salvation have I helped thee.
-R. Thanks be to God.
+@use proper/lent-sunday-1/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quad1-1 [Ant 2] — check against diurnal
@@ -117,6 +110,4 @@ Jesus took His disciples, * and went up into a mountain, and was transfigured be
 # SOURCE: divinum-officium Tempora/Quad1-0 [Ant 1] — check against diurnal
 Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 198 (The First Sunday in Lent)
-V. God shall give his angels charge over thee.
-R. To keep thee in all thy ways.
+@use seasonal/lent/versicle-lauds

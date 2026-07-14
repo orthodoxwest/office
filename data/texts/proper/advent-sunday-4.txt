@@ -19,8 +19,7 @@ The Lord will come, * go ye out to meet him, saying: Great is his dominion, and 
 Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 39, 28 (The Fourth Sunday in Advent)
-Blow ye the trumpet * in Sion, for the day of the Lord is nigh at hand: behold, he cometh to save us, alleluia, alleluia.
+@use proper/advent-sunday-4/psalm-antiphon-1
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 48, 39 (The Fourth Sunday in Advent)
@@ -51,13 +50,7 @@ Brethren: Let a man so account of us as of the ministers of Christ, and stewards
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 45 (Lauds chapter used at Terce)
-!1 Cor 4:1-2
-Brethren: Let a man so account of us as of the ministers of Christ, and stewards of the mysteries of God. Moreover, it is required in stewards, that a man be found faithful.
-R. Thanks be to God.
-
-# NOTE: no [magnificat-antiphon]: Advent IV Sunday Vespers always falls Dec 18-24, so its Magnificat antiphon is the dated Greater (O) Antiphon in seasonal/advent.txt
-# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv4-0; supply from diurnal or suppress in audit-ok.txt
+@use proper/advent-sunday-4/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Adv4-1 [Ant 2] — check against diurnal
@@ -84,8 +77,7 @@ Behold, all things are fulfilled * which were spoken by the Angel concerning the
 Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women. Alleluia.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant 2] — check against diurnal
-Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women. Alleluia.
+@use proper/advent-sunday-4/benedictus-antiphon
+
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 31 (The Fourth Sunday in Advent)
-Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
+@use proper/advent-sunday-4/psalm-antiphon-5

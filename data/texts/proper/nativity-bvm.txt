@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 531, 469 (Nativity BVM)
-The Nativity * of the glorious Virgin Mary, of the seed of Abraham, sprung from the tribe of Juda, of the noble stem of David.
+@use proper/nativity-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 531, 469 (Nativity BVM)
@@ -23,8 +22,7 @@ With all our heart and soul, * let us sing glory unto Christ on this holy solemn
 With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 472 (Nativity BVM)
-With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
+@use proper/nativity-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 539 (Nativity BVM)
@@ -71,6 +69,4 @@ V. To-day is the Nativity of the holy Virgin Mary.
 R. Whose glorious life illumineth all the churches.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 474 (Nativity BVM)
-V. To-day is the Nativity of the holy Virgin Mary.
-R. Whose glorious life illumineth all the churches.
+@use proper/nativity-bvm/versicle-lauds

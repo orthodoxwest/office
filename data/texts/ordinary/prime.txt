@@ -63,10 +63,7 @@ V. Arise, O Christ, and help us.
 R. And deliver us for thy Name's sake.
 
 [collect-intro]
-V. O Lord, hear my prayer.
-R. And let our cry come unto thee.
-
-Let us pray.
+@use shared/formulas/pre-collect-versicles
 
 [preces-our-help]
 V. Our help ✠ is in the Name of the Lord.
@@ -93,7 +90,4 @@ On Sundays and feasts outside of Eastertide, the Athanasian Creed
 (Quicumque vult) is sung here.
 
 [blessing]
-The Lord be with you.
-R. And with thy spirit.
-May the Lord Almighty bless our days and our works.
-R. Amen.
+@use shared/formulas/daily-blessing

@@ -1,26 +1,20 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [benedictus-antiphon]
 Thomas, because thou hast seen me, thou hast believed: * blessed are they that have not seen, and yet have believed, alleluia.
@@ -32,8 +26,7 @@ After eight days * came the Lord, the doors being shut, and said unto them: Peac
 Now when it was late * the same day, the first of the week, and the doors were shut, where the disciples were gathered together, for fear of the Jews, Jesus came and stood in the midst and said to them: Peace be to you, alleluia.
 
 [commemoration-versicle]
-V. The Lord is risen from the dead, alleluia.
-R. Who for our sakes died and rose again, alleluia.
+@use proper/easter-sunday/commemoration-versicle
 
 [collect]
 Grant, we beseech Thee, almighty God, that we who have celebrated the Paschal Feast, may, by Thy bounty, retain its fruits in our daily habits and behaviour.
@@ -57,16 +50,10 @@ If we receive the testimony of men, the testimony of God is greater. For this is
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pasc1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 John 5:4
-My beloved: For whatsoever is born of God, overcometh the world: and this is the victory which overcometh the world, our faith.
-R. Thanks be to God.
+@use proper/low-sunday/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Pasc1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 John 5:4
-My beloved: For whatsoever is born of God, overcometh the world: and this is the victory which overcometh the world, our faith.
-R. Thanks be to God.
+@use proper/low-sunday/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Pasc1-1 [Ant 2] — check against diurnal

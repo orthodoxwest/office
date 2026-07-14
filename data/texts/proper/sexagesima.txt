@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 155 (Sexagesima Sunday)
-After thy great goodness, * have mercy upon me, O God.
+@use proper/sexagesima/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 155 (Sexagesima Sunday)

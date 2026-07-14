@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
-Behold an high priest, * who in his days pleased God, and was found righteous.
+@use commons/confessor-doctor/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
@@ -23,34 +22,27 @@ O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [benedictus-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor and Bishop) — parish noted manual
-Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.
+@use commons/confessor-bishop/benedictus-antiphon
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Commune/C4a [Ant 1] (O Doctor optime; both Vespers) — check against diurnal
 O right excellent Teacher * Light of the Holy Church, N., blessed lover of the Divine Law, pray for us to the Son of God.
 
 [commemoration-antiphon]
-Behold an high priest, * who in his days pleased God, and was found righteous.
+@use commons/confessor-doctor/psalm-antiphon-1
 
 [commemoration-versicle]
 V. The Lord loved him and beautified him.
 R. He clothed him with a robe of glory.
 
 [collect]
-Grant, we beseech thee, almighty God, that the venerable feast of N. thy blessed Confessor and Bishop may increase our devotion and promote our salvation.
+@use commons/confessor-bishop/collect
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 626, 638 (Common of a Confessor and Bishop)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds
 
 [hymn-lauds]
 # SOURCE: divinum-officium CommuneM/C4a [HymnusM Laudes] — check against diurnal
@@ -83,34 +75,16 @@ To Father and to Paraclete.
 Amen.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 407, 658
-R. The Lord loved him * and adorned him.
-R. The Lord loved him * and adorned him.
-V. He clothed him with a robe of glory.
-R. And adorned him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord loved him * and adorned him.
+@use commons/confessor-bishop/short-responsory-lauds
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 308, 316, 627, 638
-R. The Lord chose him * for a priest unto himself.
-R. The Lord chose him * for a priest unto himself.
-V. To offer unto him the sacrifice of praise.
-R. For a priest unto himself.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord chose him * for a priest unto himself.
+@use commons/confessor-bishop/short-responsory-vespers
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 408, 661
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 309, 631
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
+@use commons/confessor-bishop/commemoration-versicle
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 318, 642
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds

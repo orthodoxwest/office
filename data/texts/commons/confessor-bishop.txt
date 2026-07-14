@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop)
-Behold a great priest, * who in his days pleased God, and was found righteous.
+@use commons/confessor-bishop/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop)
@@ -24,8 +23,7 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 626, 637 (Common of a Confessor and Bishop)
-Good and faithful servant, * enter thou into the joy of thy Lord.
+@use commons/confessor-bishop/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor and Bishop) — parish noted manual
@@ -40,7 +38,7 @@ The Lord loved him * and adorned him; he clothed him with a robe of glory, and a
 O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of the people, pray unto the Lord for us.
 
 [commemoration-antiphon]
-Behold a great priest, * who in his days pleased God, and was found righteous.
+@use commons/confessor-bishop/psalm-antiphon-1
 
 [commemoration-versicle]
 V. The Lord loved him and adorned him.
@@ -128,14 +126,10 @@ V. The Lord guided the righteous in right paths.
 R. And shewed him the kingdom of God.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 642 (II Vespers, Common of a Confessor and Bishop)
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 631 (I Vespers, Common of a Confessor and Bishop)
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
+@use commons/confessor-bishop/commemoration-versicle
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop)
@@ -183,13 +177,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou art a Priest * for ever.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 626, 638 (Common of a Confessor and Bishop)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 658; Vespers book, pp. 626, 638 (Common of a Confessor and Bishop)
-!Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
-R. Thanks be to God.
+@use commons/confessor-bishop/chapter-lauds

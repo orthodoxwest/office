@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 200 (Second Sunday in Lent)
-Thou shalt open * my lips, O Lord, and my mouth shall shew thy praise.
+@use proper/lent-sunday-2/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 200 (Second Sunday in Lent)
@@ -30,7 +29,7 @@ And Jesus taketh his disciples, * and goeth up into a mountain, and was transfig
 Tell the vision that ye have seen to no man, * until the Son of man be risen again from the dead.
 
 [commemoration-antiphon]
-Tell the vision that ye have seen to no man, * until the Son of man be risen again from the dead.
+@use proper/lent-sunday-2/magnificat-antiphon
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -59,16 +58,10 @@ For God hath not called us unto uncleanness, but unto sanctification in Christ J
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 Thess 4:1
-For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
-R. Thanks be to God.
+@use proper/lent-sunday-2/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 Thess 4:1
-For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
-R. Thanks be to God.
+@use proper/lent-sunday-2/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quad2-1 [Ant 2] — check against diurnal
@@ -114,6 +107,4 @@ When they sought * to lay hands on Him, they feared the multitude, because they 
 # SOURCE: divinum-officium Tempora/Quad2-6 [Ant 2] — check against diurnal
 I will arise and go to my father, * and will say unto him: Make me as one of thine hired servants.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 209 (The Second Sunday in Lent)
-V. God shall give his angels charge over thee.
-R. To keep thee in all thy ways.
+@use seasonal/lent/versicle-lauds

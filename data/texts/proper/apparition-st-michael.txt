@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
-An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+@use proper/apparition-st-michael/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
@@ -29,11 +28,10 @@ There was silence * in heaven while as the dragon made war, and Michael fought a
 O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
 
 [commemoration-antiphon]
-An Angel stood at the Altar * of the Temple, having a golden censer in his hand.
+@use proper/apparition-st-michael/psalm-antiphon-1
 
 [commemoration-versicle]
-V. An Angel stood at the Altar of the Temple. (Alleluia.)
-R. Having a golden censer in his hand. (Alleluia.)
+@use proper/apparition-st-michael/versicle-lauds
 
 [collect]
 O God, Who hast ordained and constituted the services of angels and men in a wonderful order, mercifully grant that as thy holy angels alway do thee service in heaven, so, by thy appointment, they may succour and defend us on earth.
@@ -124,9 +122,7 @@ V. An Angel stood at the Altar of the Temple. (Alleluia.)
 R. Having a golden censer in his hand. (Alleluia.)
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/05-08 [Versum 1] — check against diurnal
-V. An Angel stood at the Altar of the Temple. (Alleluia.)
-R. Having a golden censer in his hand. (Alleluia.)
+@use proper/apparition-st-michael/versicle-lauds
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/05-08 [Responsory Breve Tertia] — check against diurnal
@@ -156,16 +152,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Before the Angels * will I sing praise unto thee, O my God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/05-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rev 1:1-2
-God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
-R. Thanks be to God.
+@use proper/apparition-st-michael/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/05-08 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rev 1:1-2
-God gave unto Jesus Christ to show unto His servants the things which must shortly come to pass and He sent and signified it by His Angel unto His servant John, who bare witness of the Word of God and of the testimony of Jesus Christ, of all the things which he saw.
-R. Thanks be to God.
+@use proper/apparition-st-michael/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/05-08.txt [Ant 1] — check against diurnal

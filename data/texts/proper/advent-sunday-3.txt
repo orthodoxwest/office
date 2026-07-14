@@ -19,8 +19,7 @@ Mountains and all hills * shall be abased, and the crooked shall be made straigh
 Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 28, 20 (The Third Sunday in Advent)
-The Lord will surely come, * and will not tarry: and will bring to light the hidden things of darkness, and will manifest himself to all nations, alleluia.
+@use proper/advent-sunday-3/psalm-antiphon-1
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 38, 27 (The Third Sunday in Advent)
@@ -45,18 +44,10 @@ And the peace of God, which surpasseth all understanding, keep your hearts and m
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 24 (The Third Sunday in Advent)
-!Phil 4:4-5
-Brethren: Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.
-R. Thanks be to God.
+@use proper/advent-sunday-3/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 35 (Lauds chapter used at Terce)
-!Phil 4:4-5
-Brethren: Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.
-R. Thanks be to God.
-
-# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv3-0; supply from diurnal or suppress in audit-ok.txt
+@use proper/advent-sunday-3/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Adv3-1 [Ant 2] — check against diurnal
@@ -115,8 +106,7 @@ Blessed art thou, * O Mary, who hast believed the Lord, for there shall be a per
 Before me * there was no God formed, neither shall there be after me: unto me every knee shall bow, and me shall every tongue confess.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 37 (The Third Sunday in Advent)
-He shall sit upon the throne * of David, and of his kingdom there shall be no end, alleluia.
+@use proper/advent-sunday-3/benedictus-antiphon
+
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 23 (The Third Sunday in Advent)
-Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
+@use proper/advent-sunday-3/psalm-antiphon-5

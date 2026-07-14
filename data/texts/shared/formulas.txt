@@ -1,0 +1,36 @@
+[paschal-psalm-antiphon]
+# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+Alleluia, * alleluia, alleluia.
+
+[opening-versicle]
+V. O God, ✠ make speed to save us.
+R. O Lord, make haste to help us.
+
+Glory be to the Father, and to the Son, and to the Holy Ghost;
+as it was in the beginning, is now, and ever shall be, world without end. Amen.
+
+[pre-collect-versicles]
+V. O Lord, hear my prayer.
+R. And let our cry come unto thee.
+
+Let us pray.
+
+[daily-blessing]
+The Lord be with you.
+R. And with thy spirit.
+May the Lord Almighty bless our days and our works.
+R. Amen.
+
+[commemoration-antiphon]
+Pray for us, O holy N., * that we may be made worthy of the promises of Christ.
+
+[commemoration-versicle]
+V. The Lord hath chosen him for himself.
+R. As his treasure for ever.
+
+[commemoration-collect]
+Grant, O Lord, we beseech thee, the prayers of thy holy servant, that we who
+cannot by our own merits attain to thy grace may be helped by his intercession.
+Through our Lord Jesus Christ thy Son, who with thee and the Holy Spirit liveth
+and reigneth, God, for ever and ever.
+R. Amen.

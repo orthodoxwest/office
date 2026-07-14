@@ -17,11 +17,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [opening-versicle]
-V. O God, ✠ make speed to save us.
-R. O Lord, make haste to help us.
-
-Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+@use shared/formulas/opening-versicle
 
 [psalm-antiphon]
 My soul waiteth only upon God; of him cometh my salvation.
@@ -41,10 +37,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Redeem me, O Lord, and have mercy on me.
 
 [pre-collect-versicles]
-V. O Lord, hear my prayer.
-R. And let our cry come unto thee.
-
-Let us pray.
+@use shared/formulas/pre-collect-versicles
 
 [collect]
 O God, who didst at this hour give salvation to the world through the death
@@ -55,7 +48,4 @@ liveth and reigneth, God, for ever and ever.
 R. Amen.
 
 [blessing]
-The Lord be with you.
-R. And with thy spirit.
-May the Lord Almighty bless our days and our works.
-R. Amen.
+@use shared/formulas/daily-blessing

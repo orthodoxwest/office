@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 309, 189 (The Feast of the Most Holy Trinity)
-Glory * to thee, O Trinity co-equal, onely Deity, ere yet the worlds began to be, and now, and through eternity.
+@use proper/trinity-sunday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 309, 189 (The Feast of the Most Holy Trinity)
@@ -23,8 +22,7 @@ Let praise to God the Father, * to the co-equal Son, and to thee, O Holy Spirit,
 Of whom are all things, * through whom are all things, in whom are all things: to him be glory for ever.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 192 (The Feast of the Most Holy Trinity)
-Of whom are all things, * through whom are all things, in whom are all things: to him be glory for ever.
+@use proper/trinity-sunday/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 317 (The Feast of the Most Holy Trinity)
@@ -38,11 +36,10 @@ With all our heart * and with all our voice do we acknowledge thee, praise thee,
 Thanks, O God, * be unto thee, thanks be unto thee, one and very Trinity, one and supreme Deity, holy and onely Unity.
 
 [commemoration-antiphon]
-Glory * to thee, O Trinity co-equal, onely Deity, ere yet the worlds began to be, and now, and through eternity.
+@use proper/trinity-sunday/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Let us bless the Father, and the Son, and the Holy Ghost.
-R. Praise him, and magnify him for ever.
+@use proper/trinity-sunday/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 318, 196 (The Feast of the Most Holy Trinity; recovered directly from DOCX text flow)
@@ -112,9 +109,7 @@ V. Let us bless the Father, and the Son, and the Holy Ghost.
 R. Praise him, and magnify him for ever.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Lauds book, p. 316; divinum-officium Tempora/Pent01-0 [Versum 1] (II Vespers)
-V. Let us bless the Father, and the Son, and the Holy Ghost.
-R. Praise him, and magnify him for ever.
+@use proper/trinity-sunday/versicle-lauds
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 194 (I Vespers, The Feast of the Most Holy Trinity)
@@ -167,13 +162,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. By the Word of the Lord * were the heavens made.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 193 (The Feast of the Most Holy Trinity)
-!Rom 11:33
-O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
-R. Thanks be to God.
+@use proper/trinity-sunday/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 315, 193 (same chapter as the major hours)
-!Rom 11:33
-O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
-R. Thanks be to God.
+@use proper/trinity-sunday/chapter-lauds

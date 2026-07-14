@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 299, 181 (The Feast of Pentecost)
-When the day of Pentecost * was fully come, they were all with one accord in one place, alleluia.
+@use proper/pentecost/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 299, 181 (The Feast of Pentecost)
@@ -23,8 +22,7 @@ O ye wells, * and all that move in the waters, sing a hymn unto God, alleluia.
 The Apostles * did speak with other tongues the wonderful works of God, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 184 (I Vespers, The Feast of Pentecost)
-The Apostles * did speak with other tongues the wonderful works of God, alleluia, alleluia, alleluia.
+@use proper/pentecost/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 307 (The Feast of Pentecost)
@@ -41,8 +39,7 @@ I will not leave you * comfortless, alleluia: I go; but I will come to you, alle
 When the day of Pentecost was fully come * they were all with one accord in one place, alleluia.
 
 [commemoration-versicle]
-V. They were all filled with the Holy Ghost, alleluia.
-R. And began to speak, alleluia.
+@use proper/pentecost/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 308, 188 (The Feast of Pentecost)
@@ -146,9 +143,7 @@ V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 187 (I Vespers, The Feast of Pentecost)
-V. They were all filled with the Holy Ghost, alleluia.
-R. And began to speak, alleluia.
+@use proper/pentecost/versicle-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
@@ -196,10 +191,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 185 (The Feast of Pentecost)
-!Acts 2:1-2
-When the day of Pentecost was fully come, they were all with one accord in one place. And suddenly there came a sound from heaven as of a rushing mighty wind, and it filled all the house where they were sitting.
-R. Thanks be to God.
+@use proper/pentecost/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

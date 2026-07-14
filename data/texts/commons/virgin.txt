@@ -1,56 +1,42 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-This is one of the wise virgins, * one chosen out of the number of the careful.
+@use commons/virgin-martyr/psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-This is one of the wise virgins, * one chosen out of the number of the careful.
+@use commons/virgin-martyr/psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-This is one of the wise virgins, * whom the Lord found watching.
+@use commons/virgin-martyr/commemoration-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-This, is one which hath not known the sinful bed, * she shall have fruit in the visitation of holy souls.
+@use commons/virgin-martyr/psalm-antiphon-3
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-Come, O my chosen one, * and I will establish My throne in thee.
+@use commons/virgin-martyr/psalm-antiphon-4
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C6a [Ant Laudes] — check against diurnal
-She is beautiful * among the daughters of Jerusalem.
+@use commons/virgin-martyr/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Virgins) — parish noted manual
 The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C6 [Ant 1] (Veni sponsa Christi) — check against diurnal
-Come, Bride of Christ, and take the everlasting crown * which the Lord hath prepared for thee.
+@use commons/virgin-martyr/magnificat-antiphon
 
 [commemoration-antiphon]
-This is one of the wise virgins, * whom the Lord found watching.
+@use commons/virgin-martyr/commemoration-antiphon
 
 [commemoration-versicle]
-V. In thy comeliness and thy beauty.
-R. Go forward, fare prosperously, and reign.
+@use commons/virgin-martyr/commemoration-versicle
 
 [collect]
 Hear us, O God, our Saviour, that as we rejoice in the festival of blessed N. thy Virgin, so we may be instructed by the affections of holy devotion.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 681 (Common of Virgins)
-!2 Cor 10:17-18
-Brethren: He that glorieth, let him glory in the Lord. For not he that commendeth himself is approved, but whom the Lord commendeth.
-R. Thanks be to God.
+@use commons/virgin-martyr/chapter-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 660 (Common of Virgins)
-!2 Cor 10:17-18
-Brethren: He that glorieth, let him glory in the Lord. For not he that commendeth himself is approved, but whom the Lord commendeth.
-R. Thanks be to God.
+@use commons/virgin-martyr/chapter-lauds
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 683 (Common of Virgins)
@@ -83,13 +69,7 @@ From age to age eternally.
 Amen.
 
 [short-responsory-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 142
-R. In thy grace * and in thy beauty.
-R. In thy grace * and in thy beauty.
-V. Go forth, ride prosperously, and reign.
-R. And in thy beauty.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. In thy grace * and in thy beauty.
+@use commons/virgin-martyr/short-responsory-lauds
 
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
@@ -97,31 +77,4 @@ V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 662 (Common of Virgins)
-Jesu, corona Virginum
-
-Jesu, the Virgins' crown, do thou,
-Accept us, as in prayer we bow;
-Born of that Virgin, whom alone
-The Mother and the Maid we own.
-
-Amongst the lilies thou dost feed,
-With Virgin choirs accompanied;
-With glory decked, the spotless brides
-Whose bridal gifts thy love provides.
-
-They, wheresoe'er thy footsteps bend,
-With hymns and praises still attend;
-In blessed troops they follow thee,
-With dance, and song, and melody.
-
-We pray thee therefore to bestow
-Upon our senses here below
-Thy grace, that so we may endure
-From taint of all corruption pure.
-
-* To God the Father, God the Son,
-And God the Spirit, Three in One,
-Laud, honour, might, and glory be
-From age to age eternally.
-Amen.
+@use commons/virgin/hymn-lauds

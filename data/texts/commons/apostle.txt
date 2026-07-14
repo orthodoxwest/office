@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 603 (Common of Apostles and Evangelists out of Paschaltide)
-This is my commandment * that ye love one another, as I have loved you.
+@use commons/apostle/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 603 (Common of Apostles and Evangelists out of Paschaltide)
@@ -23,16 +22,13 @@ Blessed are the peacemakers * blessed are the pure in heart, for they shall see 
 In your patience * possess ye your souls.
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 539 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
-This is my commandment * that ye love one another, as I have loved you.
+@use commons/apostle/psalm-antiphon-1
 
 [psalm-antiphon-2-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 540 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
-Greater love hath no man * than this, that a man lay down his life for his friends.
+@use commons/apostle/psalm-antiphon-2
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 541 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
-Ye are my friends * if ye do whatsoever I command you, saith the Lord.
+@use commons/apostle/psalm-antiphon-3
 
 [psalm-antiphon-4-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 542 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
@@ -68,7 +64,7 @@ Be ye valiant in warfare * and contend ye with the old serpent: and ye shall rec
 They will deliver you up * to the councils, and they will scourge you in their synagogues; and ye shall be brought before governors and kings for my sake, for a testimony against them and the Gentiles.
 
 [commemoration-antiphon]
-This is my commandment * that ye love one another, as I have loved you.
+@use commons/apostle/psalm-antiphon-1
 
 [commemoration-versicle]
 V. Their sound hath gone forth into all the earth:
@@ -122,39 +118,7 @@ To God the Holy Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 543-544, 552-553
-Exsultet cælum laudibus
-
-Let heav'n's exultant praises ring,
-And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
-This festal-tide we celebrate.
-
-O ye who, throned in glory dread,
-Shall judge the living and the dead,
-True lights, the world illuminating,
-Regard the suppliant prayer we bring.
-
-The gates of heav'n at your command,
-To all or closed or open stand:
-May we, at your august decree,
-Be loosed from our iniquity.
-
-The pow'r, of old, to you conveyed,
-Sickness and health alike obeyed:
-May ye our ailing souls once more
-To strength and holiness restore.
-
-That Christ, th'unerring Judge of doom,
-When he at time's last end shall come,
-May grant us, for his mercy's sake,
-Of joys eternal to partake.
-
-All laud to God the Father be;
-All praise, eternal Son, to thee;
-All glory, as is ever meet,
-To God the Holy Paraclete.
-Amen.
+@use commons/apostle/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 610 (Common of Apostles and Evangelists out of Paschaltide)
@@ -162,9 +126,7 @@ V. They declared the work of God.
 R. And wisely considered of his doing.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 553 (II Vespers for Common of Apostles out of Paschaltide)
-V. They declared the work of God.
-R. And wisely considered of his doing.
+@use commons/apostle/versicle-lauds
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 544 (Common of Apostles and Evangelists out of Paschaltide, I Vespers)
@@ -217,13 +179,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thy friends, O God * are made exceedingly honourable.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 542, 551 (Common of Apostles out of Paschaltide)
-!Eph 2:19-20
-Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citizens with the saints, and of the household of God; and are built upon the foundation of the Apostles and Prophets, Jesus Christ himself being the chief corner stone.
-R. Thanks be to God.
+@use commons/apostle/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 608 (Lauds chapter used at Terce)
-!Eph 2:19-20
-Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citizens with the saints, and of the household of God; and are built upon the foundation of the Apostles and Prophets, Jesus Christ himself being the chief corner stone.
-R. Thanks be to God.
+@use commons/apostle/chapter-lauds

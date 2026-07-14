@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 453, 375 (Finding of the Holy Cross)
-O mighty work of mercy! * death then died, when life died upon the Tree, alleluia.
+@use proper/finding-holy-cross/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 453, 375 (Finding of the Holy Cross)
@@ -23,8 +22,7 @@ But as for us, * it behoveth us to glory in the Cross of our Lord Jesus Christ, 
 By the sign of the Cross, * deliver us from our enemies, O our God, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 378 (Finding of the Holy Cross)
-By the sign of the Cross, * deliver us from our enemies, O our God, alleluia.
+@use proper/finding-holy-cross/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 461 (Finding of the Holy Cross)
@@ -50,63 +48,13 @@ R. When the Lord cometh to judgment. (Alleluia.)
 O God, who in the glorious Finding of thy saving Cross didst renew the wonders of thy Passion: grant, that by the ransom brought us by the Tree of Life, we may obtain election unto Life eternal.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 458 (Finding of the Holy Cross)
-!Phil 2:5-8
-Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
-R. Thanks be to God.
+@use proper/exaltation-holy-cross/chapter-lauds
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/05-03 [Capitulum Sexta] — check against diurnal
-!Gal 6:14
-But God forbid that I should glory, save in the Cross of our Lord Jesus Christ, by Whom the world is crucified unto me, and I unto the world.
-R. Thanks be to God.
+@use proper/exaltation-holy-cross/chapter-sext
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Thirty Years Among Us Dwelling, Passion Sunday Lauds.docx); draft archdiocesan Lauds book, pp. 459–461
-Lustris sex qui jam peractis
-
-Thirty years among us dwelling,
-His appointed time fulfilled.
-Born for this, he meets his Passion,
-For that this he freely willed.
-On the Cross the Lamb is lifted,
-Where his life-blood shall be spilled.
-
-He endured the nails, the spitting,
-Vinegar, and spear, and reed:
-From that holy Body broken
-Blood and Water forth proceed:
-Earth, and stars, and sky, and ocean
-By that flood from stain are freed.
-
-Faithful Cross above all other
-One and only noble Tree;
-None in foliage, none in blossom,
-None in fruit thy peer may be:
-Sweetest wood, and sweetest iron!
-Sweetest weight is hung on thee.
-
-Bend thy boughs, O Tree of glory,
-Thy relaxing sinews bend;
-For awhile the ancient rigour
-That thy birth bestowed, suspend;
-And the King of heavenly beauty
-On thy bosom gently tend.
-
-Thou alone wast counted worthy
-This world's ransom to sustain;
-That a shipwreck'd race for ever
-Might a port of refuge gain:
-With the sacred Blood anointed
-Of the Lamb for sinners slain.
-
-Glory be to God, and honour
-In the highest as is meet,
-To the Son, and to the Father,
-And th'eternal Paraclete,
-Whose is boundless praise and power
-Through the ages infinite.
-Amen.
+@use proper/exaltation-holy-cross/hymn-lauds
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (The Royal Banners Forward Go, Passiontide Vespers.docx); draft archdiocesan Vespers book, pp. 380–381
@@ -204,10 +152,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Let all the earth worship thee, and sing unto thee. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 379 (Finding of the Holy Cross)
-!Phil 2:5-8
-Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
-R. Thanks be to God.
+@use proper/exaltation-holy-cross/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/05-03 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

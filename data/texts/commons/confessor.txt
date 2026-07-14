@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-Lord, Thou deliverest unto me five talents * behold, I have gained beside them five talents more.
+@use commons/confessor/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
@@ -35,11 +34,10 @@ Lo, a servant of God * who esteemed but little things earthly. And by word and w
 I will liken him unto a wise man, * which built his house upon a rock.
 
 [commemoration-antiphon]
-Lord, Thou deliverest unto me five talents * behold, I have gained beside them five talents more.
+@use commons/confessor/psalm-antiphon-1
 
 [commemoration-versicle]
-V. The Lord loved him and beautified him.
-R. He clothed him with a robe of glory.
+@use commons/confessor-doctor/commemoration-versicle
 
 [collect]
 O God, Who, year by year, dost gladden us by the solemn feast-day of thy blessed confessor N., mercifully grant unto all who keep his birthday, grace to follow after the pattern of his godly conversation.
@@ -102,18 +100,10 @@ While everlasting ages run.
 Amen.
 
 [short-responsory-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 140
-R. The Lord loved him * and adorned him.
-R. The Lord loved him * and adorned him.
-V. He clothed him with a robe of glory.
-R. And adorned him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord loved him * and adorned him.
+@use commons/confessor-bishop/short-responsory-lauds
 
 [versicle-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 141
-V. The Lord guided the righteous in right paths.
-R. And shewed him the kingdom of God.
+@use commons/confessor-bishop/versicle-lauds
 
 [short-responsory-sext]
 # SOURCE: divinum-officium Commune/C5 [Responsory Breve Sexta] — check against diurnal
@@ -164,10 +154,7 @@ Only and Trinal.
 Amen.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 649 (Common of a Confessor not a Bishop)
-!Sir 31:8-9
-Blessed is the man that is found without blemish, and hath not gone after gold. Who is he? and we will call him blessed: for wonderful things hath he done among his people.
-R. Thanks be to God.
+@use commons/confessor/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Commune/C5 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

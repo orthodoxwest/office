@@ -1,21 +1,21 @@
 [psalm-antiphon]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [psalm-antiphon-1]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-1
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds book, p. 258 (Easter Day antiphon repeated within the Easter octave)
 And behold, * there was a great earthquake: for the Angel of the Lord descended from heaven, alleluia.
 
 [psalm-antiphon-3]
-And his countenance * was as lightning and his raiment as snow, alleluia, alleluia.
+@use proper/easter-sunday/easter-antiphon-3
 
 [psalm-antiphon-4]
-And for fear of him * the guards were struck with terror and became as dead men, alleluia.
+@use proper/easter-sunday/easter-antiphon-4
 
 [psalm-antiphon-5]
-And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
+@use proper/easter-sunday/easter-antiphon-5
 
 [benedictus-antiphon]
 While they walked * Jesus drew near, and went with His disciples: but their eyes were holden that they should not know Him: and He rebuked them, saying: O fools, and slow of heart to believe all that the Prophets have spoken! Alleluia.
@@ -24,11 +24,10 @@ While they walked * Jesus drew near, and went with His disciples: but their eyes
 What manner of communications are these * that ye have one to another, as ye walk, and are sad? Alleluia.
 
 [commemoration-antiphon]
-And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
+@use proper/easter-sunday/easter-antiphon-5
 
 [commemoration-versicle]
-V. The Lord is risen from the dead, alleluia.
-R. Who for our sakes died and rose again, alleluia.
+@use proper/easter-sunday/commemoration-versicle
 
 [collect]
 O God, Who dost heal the sick world by the solemn gladness of the Passover, continue, we beseech thee, to pour forth thine heavenly gifts upon thy people, till the same shall bring them into perfect liberty, and finally avail them unto life everlasting.

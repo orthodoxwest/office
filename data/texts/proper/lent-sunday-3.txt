@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 211 (Third Sunday in Lent)
-O be favourable and gracious * unto Sion: build thou, O Lord, the walls of Jerusalem.
+@use proper/lent-sunday-3/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 211 (Third Sunday in Lent)
@@ -59,10 +58,7 @@ For you were heretofore darkness, but now light in the Lord. Walk then as childr
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Eph 5:1-2
-Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
-R. Thanks be to God.
+@use proper/lent-sunday-3/chapter-lauds
 
 [chapter-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 136 (Saturday before the Third Sunday in Lent)
@@ -71,10 +67,7 @@ Brethren: Be ye therefore followers of God, as dear children; and walk in love, 
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Eph 5:1-2
-Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
-R. Thanks be to God.
+@use proper/lent-sunday-3/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Quad3-1 [Ant 2] — check against diurnal
@@ -124,6 +117,4 @@ Jesus stooped down, * and wrote on the ground: He that is without sin, let him c
 # SOURCE: divinum-officium TemporaM/Quad3-0 [Ant 1] — check against diurnal
 But the father said * to his servants: Bring forth quickly the first robe, and put it on him, and put a ring on his hand, and shoes on his feet.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 220 (The Third Sunday in Lent)
-V. God shall give his angels charge over thee.
-R. To keep thee in all thy ways.
+@use seasonal/lent/versicle-lauds

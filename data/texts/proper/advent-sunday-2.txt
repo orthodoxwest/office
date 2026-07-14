@@ -19,8 +19,7 @@ The mountains and the hills * shall break forth before God into singing, and all
 Behold, * our Lord shall come with power, to enlighten the eyes of his servants, alleluia.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 16, 12 (The Second Sunday in Advent)
-Behold, the Lord shall appear * in the clouds of heaven, with power and great glory, alleluia.
+@use proper/advent-sunday-2/psalm-antiphon-1
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 27, 19 (The Second Sunday in Advent)
@@ -45,18 +44,10 @@ Now the God of hope fill you with all joy and peace in believing; that you may a
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 16 (The Second Sunday in Advent)
-!Rom 15:4
-Brethren: Whatsoever things were written aforetime were written for our learning, that we through patience and comfort of the scriptures might have hope.
-R. Thanks be to God.
+@use proper/advent-sunday-2/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 23 (Lauds chapter used at Terce)
-!Rom 15:4
-Brethren: Whatsoever things were written aforetime were written for our learning, that we through patience and comfort of the scriptures might have hope.
-R. Thanks be to God.
-
-# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv2-0; supply from diurnal or suppress in audit-ok.txt
+@use proper/advent-sunday-2/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Adv2-1 [Ant 2] — check against diurnal
@@ -115,8 +106,7 @@ Art thou he that art to come * or look we for another? Go and relate to John wha
 Come, O Lord, in peace, * visit us with thy salvation, that we may rejoice before thee with a perfect heart.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 26 (The Second Sunday in Advent)
-Now when John * had heard in the prison the works of Christ, he sent two of his disciples, and said unto him: Art thou he that should come, or do we look for another?
+@use proper/advent-sunday-2/benedictus-antiphon
+
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 15 (The Second Sunday in Advent)
-Behold, * our Lord shall come with power, to enlighten the eyes of his servants, alleluia.
+@use proper/advent-sunday-2/psalm-antiphon-5

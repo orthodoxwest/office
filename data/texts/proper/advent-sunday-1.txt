@@ -19,8 +19,7 @@ Ho, every one * that thirsteth, come ye to the waters: seek ye the Lord while he
 Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 5, 4 (The First Sunday in Advent)
-In that day * the mountains shall drop down new wine, and the hills shall flow with milk and honey, alleluia.
+@use proper/advent-sunday-1/psalm-antiphon-1
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 15, 11 (The First Sunday in Advent)
@@ -39,22 +38,13 @@ Let us walk honestly, as in the day: not in rioting and drunkenness, not in cham
 R. Thanks be to God.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 7 (The First Sunday in Advent)
-Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
+@use proper/advent-sunday-1/psalm-antiphon-5
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 8 (The First Sunday in Advent)
-!Rom 13:11
-Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
-R. Thanks be to God.
+@use proper/advent-sunday-1/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 12 (Lauds chapter used at Terce)
-!Rom 13:11
-Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
-R. Thanks be to God.
-
-# TODO(diurnal): [commemoration-versicle] — not found in DO Tempora/Adv1-0; supply from diurnal or suppress in audit-ok.txt
+@use proper/advent-sunday-1/chapter-lauds
 
 [benedictus-antiphon-monday]
 # SOURCE: divinum-officium Tempora/Adv1-1 [Ant 2] — check against diurnal
@@ -113,5 +103,4 @@ Fear not, Mary, * for thou hast found grace with the Lord; behold, thou shalt co
 Behold, the Name of the Lord * cometh from afar, and his glory filleth all the earth.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal
-The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy womb the Son of God. Alleluia.
+@use proper/advent-sunday-1/benedictus-antiphon

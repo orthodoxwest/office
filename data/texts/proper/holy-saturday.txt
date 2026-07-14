@@ -1,5 +1,5 @@
 [psalm-antiphon]
-O death, I will be thy death; * O grave, I will be thy destruction.
+@use proper/holy-saturday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 O death, I will be thy death; * O grave, I will be thy destruction.

@@ -1,5 +1,5 @@
 [psalm-antiphon]
-Behold, O Lord, and see, * for I am in trouble; hear me speedily.
+@use proper/holy-tuesday/psalm-antiphon-1
 
 [psalm-antiphon-1]
 Behold, O Lord, and see, * for I am in trouble; hear me speedily.
@@ -23,11 +23,10 @@ Now, before the Feast of the Passover, as Jesus knew that His hour was come, * h
 I have power * to lay down my life: and to take it up again.
 
 [commemoration-antiphon]
-Now, before the Feast of the Passover, as Jesus knew that His hour was come, * having loved His Own which were in the world, He loved them unto the end.
+@use proper/holy-tuesday/benedictus-antiphon
 
 [commemoration-versicle]
-V. Christ became obedient for us unto death.
-R. Yea, the death of the Cross.
+@use proper/holy-monday/commemoration-versicle
 
 [collect]
 O Almighty and everlasting God, give us grace so to use the solemn and mysterious memorial of the Lord's Suffering, that the same may be unto us a mean whereby worthily to win thy forgiveness.

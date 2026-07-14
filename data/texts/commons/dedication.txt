@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
-Holiness becometh thine house, * O Lord, for ever.
+@use commons/dedication/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
@@ -138,9 +137,7 @@ V. This is the house of God, stoutly builded.
 R. Well founded upon a sure rock.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Commune/C8 [Versum 1] — check against diurnal
-V. This is the house of God, stoutly builded.
-R. Well founded upon a sure rock.
+@use commons/dedication/versicle-lauds
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Commune/C8 [Responsory Breve Tertia] — check against diurnal

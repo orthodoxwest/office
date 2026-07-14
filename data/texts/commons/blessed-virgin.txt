@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+@use commons/blessed-virgin/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
@@ -153,11 +152,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God hath chosen her, * and fore-chosen her.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Sir 24:14
-From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.
+@use commons/blessed-virgin/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Sir 24:14
-From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.
+@use commons/blessed-virgin/chapter-lauds

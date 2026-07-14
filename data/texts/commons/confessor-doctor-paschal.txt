@@ -4,28 +4,22 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
-Alleluia, * alleluia, alleluia.
+@use shared/formulas/paschal-psalm-antiphon
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 407, 658 (Paschaltide)
@@ -46,16 +40,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord chose him for a priest unto himself, alleluia, alleluia.
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 408, 661 (Paschaltide)
-V. The Lord guided the righteous in right paths, alleluia.
-R. And shewed him the kingdom of God, alleluia.
+@use commons/confessor-bishop-paschal/versicle-lauds
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 309, 631 (Paschaltide)
-V. The Lord loved him and adorned him, alleluia.
-R. He clothed him with a robe of glory, alleluia.
+@use commons/confessor-bishop-paschal/versicle-first-vespers
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 318, 642 (Paschaltide)
-V. The Lord guided the righteous in right paths, alleluia.
-R. And shewed him the kingdom of God, alleluia.
+@use commons/confessor-bishop-paschal/versicle-lauds

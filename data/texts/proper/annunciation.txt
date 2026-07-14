@@ -1,5 +1,5 @@
 [psalm-antiphon]
-The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+@use proper/annunciation/psalm-antiphon-1
 
 [psalm-antiphon-1]
 The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
@@ -23,11 +23,10 @@ How shall this be, * thou Angel of God, seeing I know not a man? Hear, O Virgin 
 The Angel Gabriel said unto Mary: Hail, thou that art full of grace, * the Lord is with thee; blessed art thou among women. (Alleluia.)
 
 [commemoration-antiphon]
-The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+@use proper/annunciation/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Hail, Mary, full of grace. (Alleluia.)
-R. The Lord is with thee. (Alleluia.)
+@use proper/annunciation/versicle-lauds
 
 [collect]
 O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
@@ -54,15 +53,10 @@ V. Hail, Mary, full of grace. (Alleluia.)
 R. The Lord is with thee. (Alleluia.)
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/03-25 [Versum 1] — check against diurnal
-V. Hail, Mary, full of grace. (Alleluia.)
-R. The Lord is with thee. (Alleluia.)
+@use proper/annunciation/versicle-lauds
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 351
-!Isa 7:14-15
-Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
-R. Thanks be to God.
+@use proper/annunciation/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

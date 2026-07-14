@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
-Elisabeth, * the wife of Zacharias, brought forth a mighty son, John the Baptist, the Lord's Forerunner.
+@use proper/nativity-john-baptist/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 463, 392 (The Nativity of St John Baptist)
@@ -23,8 +22,7 @@ Among them that are born * of women, there hath not risen a greater than John th
 Thou, child, * shalt be called the prophet of the Highest; for thou shalt go before the face of the Lord, to prepare his ways.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 395 (II Vespers for The Nativity of St John Baptist)
-Thou, child, * shalt be called the prophet of the Highest; for thou shalt go before the face of the Lord, to prepare his ways.
+@use proper/nativity-john-baptist/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 384 (I Vespers for The Nativity of St John Baptist)
@@ -53,8 +51,7 @@ The child * that is born unto us is more than a prophet; for this is he of whom 
 He shall go before him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
 
 [commemoration-versicle]
-V. There was a man sent from God.
-R. Whose name was John.
+@use proper/nativity-john-baptist/versicle-vespers
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 470, 391, 399 (The Nativity of St John Baptist)
@@ -143,9 +140,7 @@ V. There was a man sent from God.
 R. Whose name was John.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 390 (I Vespers for The Nativity of St John Baptist)
-V. There was a man sent from God.
-R. Whose name was John.
+@use proper/nativity-john-baptist/versicle-vespers
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/06-24 [Responsory Breve Tertia] — check against diurnal
@@ -175,16 +170,10 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 388, 396 (The Nativity of St John Baptist)
-!Isa 49:1
-Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath called me from the womb; from the bowels of my mother hath he made mention of my name.
-R. Thanks be to God.
+@use proper/nativity-john-baptist/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 468, 388, 396 (same chapter as the major hours)
-!Isa 49:1
-Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath called me from the womb; from the bowels of my mother hath he made mention of my name.
-R. Thanks be to God.
+@use proper/nativity-john-baptist/chapter-lauds
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 390 (I Vespers for The Nativity of St John Baptist)

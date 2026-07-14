@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal
-His disciples said * unto Blessed Martin: Father, why wilt thou go away from us? or with whom wilt thou leave us orphans? For ravening wolves will break in upon thy flock.
+@use proper/st-martin-tours/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal

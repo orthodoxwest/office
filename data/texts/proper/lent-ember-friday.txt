@@ -5,7 +5,7 @@ The Angel of the Lord * came down from heaven and the water was troubled, and on
 He that made me whole, * the same said unto me: Take up thy bed, and walk in peace.
 
 [commemoration-antiphon]
-The Angel of the Lord * came down from heaven and the water was troubled, and one was made whole.
+@use proper/lent-ember-friday/benedictus-antiphon
 
 [commemoration-versicle]
 V. O Lord, have mercy upon us.

@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 503, 436 (The Transfiguration of Our Lord Jesus Christ)
-Jesus taketh * Peter, James, and John his brother, and bringeth them up into an high mountain apart, and was transfigured before them.
+@use proper/transfiguration/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 503, 436 (The Transfiguration of Our Lord Jesus Christ)
@@ -23,8 +22,7 @@ Then answered Peter, * and said unto Jesus, Lord, it is good for us to be here.
 While he yet spake, * behold, a bright cloud overshadowed them.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 439 (The Transfiguration of Our Lord Jesus Christ)
-While he yet spake, * behold, a bright cloud overshadowed them.
+@use proper/transfiguration/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
@@ -39,11 +37,10 @@ And when the disciples heard it, * they fell on their face, and were sore afraid
 Christ Jesus, * the brightness of the Father, and the express image of his person, who upholdeth all things by the word of his power, while he was by himself purging away our sins, vouchsafed on this day to shew himself in glory upon an high mountain.
 
 [commemoration-antiphon]
-Jesus taketh * Peter, James, and John his brother, and bringeth them up into an high mountain apart, and was transfigured before them.
+@use proper/transfiguration/psalm-antiphon-1
 
 [commemoration-versicle]
-V. Glorious didst thou appear in the sight of the Lord.
-R. Because the Lord hath clothed thee with majesty.
+@use proper/transfiguration/versicle-vespers
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 510, 443 (The Transfiguration; recovered directly from DOCX text flow)
@@ -172,13 +169,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. His glory is great in thy salvation. * Alleluia, Alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 440 (II Vespers for The Transfiguration of Our Lord Jesus Christ)
-!Phil 3:20-21
-We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
-R. Thanks be to God.
+@use proper/transfiguration/chapter-lauds
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 507, 440 (same chapter as Lauds and II Vespers)
-!Phil 3:20-21
-We look for the Saviour, the Lord Jesus Christ, who shall change the body of our humiliation, that it may be conformed unto the body of his glory.
-R. Thanks be to God.
+@use proper/transfiguration/chapter-lauds

@@ -17,11 +17,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [opening-versicle]
-V. O God, ✠ make speed to save us.
-R. O Lord, make haste to help us.
-
-Glory be to the Father, and to the Son, and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, world without end. Amen.
+@use shared/formulas/opening-versicle
 
 [psalm-antiphon]
 My help cometh from the Lord, who made heaven and earth.
@@ -40,10 +36,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord hath made known his salvation.
 
 [pre-collect-versicles]
-V. O Lord, hear my prayer.
-R. And let our cry come unto thee.
-
-Let us pray.
+@use shared/formulas/pre-collect-versicles
 
 [collect]
 Grant unto us, O Lord, the right use of this midday hour; and let thy
@@ -54,7 +47,4 @@ liveth and reigneth, God, for ever and ever.
 R. Amen.
 
 [blessing]
-The Lord be with you.
-R. And with thy spirit.
-May the Lord Almighty bless our days and our works.
-R. Amen.
+@use shared/formulas/daily-blessing

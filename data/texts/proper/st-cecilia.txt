@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+@use proper/st-cecilia/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
@@ -29,11 +28,10 @@ As dawn was fading * into day, Cecilia cried and said: Arise, O soldiers of Chri
 I have asked the Lord for three days, * that I may consecrate my house as a Church.
 
 [commemoration-antiphon]
-The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+@use proper/st-cecilia/psalm-antiphon-1
 
 [commemoration-versicle]
-V. In thy comeliness and thy beauty.
-R. Go forward, fare prosperously, and reign.
+@use commons/virgin-martyr/commemoration-versicle
 
 [collect]
 O God, Who year by year dost gladden thy people by the solemn feast of thy blessed Virgin and Martyr Cecilia, grant unto us, we beseech thee, not only devoutly to observe the same, but also to follow after the pattern of her godly conversation.

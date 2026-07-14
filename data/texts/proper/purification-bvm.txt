@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 380, 278 (Purification BVM)
-Simeon, * a just and devout man, awaited the consolation of Israel; and the Holy Ghost was upon him.
+@use proper/purification-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 380, 278 (Purification BVM)
@@ -23,8 +22,7 @@ A light * to lighten the Gentiles, and the glory of thy people Israel.
 And they offered * for him to the Lord a pair of turtle doves, or two young pigeons.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 281 (II Vespers, Purification BVM)
-And they offered * for him to the Lord a pair of turtle doves, or two young pigeons.
+@use proper/purification-bvm/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 270 (I Vespers, Purification BVM)
@@ -56,11 +54,10 @@ To-day * the blessed Virgin Mary presented the Child Jesus in the temple; and Si
 The ancient * carried the Infant, but the Infant governed the ancient: he whom a Virgin bare, and after bearing, remained virgin, the same was worshipped by her who bare him.
 
 [commemoration-antiphon]
-Simeon, * a just and devout man, awaited the consolation of Israel; and the Holy Ghost was upon him.
+@use proper/purification-bvm/psalm-antiphon-1
 
 [commemoration-versicle]
-V. It was revealed unto Simeon by the Holy Ghost.
-R. That he should not see death before he had seen the Lord's Christ.
+@use proper/purification-bvm/versicle-vespers
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 389, 277, 285 (Purification BVM)
@@ -99,10 +96,7 @@ V. It was revealed unto Simeon by the Holy Ghost.
 R. That he should not see death before he had seen the Lord's Christ.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 274, 281 (Purification BVM; printed 3:11 corrected to match the quoted verse)
-!Mal 3:1
-Behold, I will send my messenger, and he shall prepare the way before me: and the Lord, whom ye seek, shall suddenly come to his temple, even the messenger of the covenant, whom ye delight in.
-R. Thanks be to God.
+@use proper/purification-bvm/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/02-02 [Capitulum Laudes] (= Lauds chapter) — check against diurnal

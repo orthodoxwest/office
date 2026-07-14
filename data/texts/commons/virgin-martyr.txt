@@ -3,12 +3,10 @@
 This is one of the wise virgins, * one chosen out of the number of the careful.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-This is one of the wise virgins, * one chosen out of the number of the careful.
+@use commons/virgin-martyr/psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-This is one of the wise virgins, * whom the Lord found watching.
+@use commons/virgin-martyr/commemoration-antiphon
 
 [psalm-antiphon-3]
 # SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
@@ -127,9 +125,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace * and in thy beauty.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Commune/C6 [Versum 1] — check against diurnal
-V. In thy comeliness and thy beauty.
-R. Go forward, fare prosperously, and reign.
+@use commons/virgin-martyr/commemoration-versicle
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Commune/C6 [Responsory Breve Tertia] — check against diurnal

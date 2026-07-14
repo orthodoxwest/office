@@ -1,42 +1,32 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 289 (Sunday within the Octave of the Ascension shares the festal antiphons)
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
+@use proper/ascension/psalm-antiphon
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 289 (Sunday within the Octave of the Ascension)
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
+@use proper/ascension/psalm-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Lauds book, p. 290 (Sunday within the Octave of the Ascension)
-And while they looked * stedfastly toward heaven as he went up, they said, alleluia.
+@use proper/ascension/psalm-antiphon-2
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 290 (Sunday within the Octave of the Ascension)
-He lifted up his hands * and blessed them, and was carried up into heaven, alleluia.
+@use proper/ascension/psalm-antiphon-3
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 291 (Sunday within the Octave of the Ascension)
-Exalt ye * the King of kings, and sing a hymn unto God, alleluia.
+@use proper/ascension/psalm-antiphon-4
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 293 (Sunday within the Octave of the Ascension)
-While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
+@use proper/ascension/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 172 (Saturday within the Octave of the Ascension)
-Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
+@use proper/ascension/psalm-antiphon
 
 [psalm-antiphon-2-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 173 (Saturday within the Octave of the Ascension)
-And while they looked * stedfastly toward heaven as he went up, they said, alleluia.
+@use proper/ascension/psalm-antiphon-2
 
 [psalm-antiphon-3-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 174 (Saturday within the Octave of the Ascension)
-He lifted up his hands * and blessed them, and was carried up into heaven, alleluia.
+@use proper/ascension/psalm-antiphon-3
 
 [psalm-antiphon-4-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 175 (Saturday within the Octave of the Ascension)
-While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
+@use proper/ascension/psalm-antiphon-5
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 294 (Sunday within the Octave of the Ascension)
@@ -45,94 +35,22 @@ Dearly beloved: Be ye therefore sober, and watch unto prayer. And above all thin
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 294 (Lauds chapter used at Terce)
-!1 Pet 4:7-8
-Dearly beloved: Be ye therefore sober, and watch unto prayer. And above all things have fervent charity among yourselves: for charity shall cover the multitude of sins.
-R. Thanks be to God.
+@use proper/ascension-sunday-within-octave/chapter-lauds
 
 [chapter-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 176 (Saturday within the Octave of the Ascension)
-!1 Pet 4:7-8
-Dearly beloved: Be ye therefore sober, and watch unto prayer. And above all things have fervent charity among yourselves: for charity shall cover the multitude of sins.
-R. Thanks be to God.
+@use proper/ascension-sunday-within-octave/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 295 (Sunday within the Octave of the Ascension)
-R. God is gone up with a merry noise, * alleluia, alleluia.
-R. God is gone up with a merry noise, * alleluia, alleluia.
-V. And the Lord with the sound of the trump.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God is gone up with a merry noise, * alleluia, alleluia.
+@use proper/ascension/short-responsory-lauds
 
 [short-responsory-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 176 (Saturday within the Octave of the Ascension)
-R. When Christ ascended up on high, * alleluia, alleluia.
-R. When Christ ascended up on high, * alleluia, alleluia.
-V. He led captivity captive.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. When Christ ascended up on high, * alleluia, alleluia.
+@use proper/ascension/short-responsory-vespers
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 295 (Sunday within the Octave of the Ascension)
-Jesu, nostra redemptio
-
-Jesu, Redemption all divine,
-Whom here we love, for whom we pine,
-God, working out creation's plan,
-And in the latter time made Man;
-
-What love of thine was that, which led
-To take our woes upon thy head,
-And pangs and cruel death to bear
-To ransom us from death's despair.
-
-To thee hell's gate gave ready way,
-Demanding there his captive prey;
-And now in pomp and victor's pride
-Thou sittest at thy Father's side.
-
-Let very mercy force thee still
-To spare us, conquering all our ill;
-And, granting that we ask, on high
-With thine own face to satisfy.
-
-Be thou our joy and thou our Guard,
-Who art to be our great reward;
-Our glory and our boast in thee
-For ever and for ever be.
-Amen.
+@use proper/ascension/hymn-lauds
 
 [hymn-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 177 (Saturday within the Octave of the Ascension)
-Jesu, nostra redemptio
-
-Jesu, Redemption all divine,
-Whom here we love, for whom we pine,
-God, working out creation's plan,
-And in the latter time made Man;
-
-What love of thine was that, which led
-To take our woes upon thy head,
-And pangs and cruel death to bear
-To ransom us from death's despair.
-
-To thee hell's gate gave ready way,
-Demanding there his captive prey;
-And now in pomp and victor's pride
-Thou sittest at thy Father's side.
-
-Let very mercy force thee still
-To spare us, conquering all our ill;
-And, granting that we ask, on high
-With thine own face to satisfy.
-
-Be thou our joy and thou our Guard,
-Who art to be our great reward;
-Our glory and our boast in thee
-For ever and for ever be.
-Amen.
+@use proper/ascension/hymn-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 296 (Sunday within the Octave of the Ascension)
@@ -140,9 +58,7 @@ V. When Christ ascended up on high, alleluia.
 R. He led captivity captive, alleluia.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 178 (Saturday within the Octave of the Ascension)
-V. The Lord hath prepared, alleluia.
-R. His seat in heaven, alleluia.
+@use proper/ascension/versicle-lauds
 
 [benedictus-antiphon-friday]
 # SOURCE: divinum-officium TemporaM/Pasc6-5 [Ant 2] — check against diurnal

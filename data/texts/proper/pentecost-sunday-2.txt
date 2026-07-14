@@ -65,10 +65,7 @@ Marvel not, my brethren, if the world hate you. We know that we have passed from
 R. Thanks be to God.
 
 [chapter-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 203 (Saturday within the Octave of Corpus Christi)
-!1 John 3:13-14
-Marvel not, my brethren, if the world hate you. We know that we have passed from death unto life, because we love the brethren.
-R. Thanks be to God.
+@use proper/pentecost-sunday-2/chapter-lauds
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 326-327 (Sunday within the Octave of Corpus Christi)

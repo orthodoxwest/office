@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 102, 89 (Circumcision)
-O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
+@use proper/circumcision/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 102, 89 (Circumcision)
@@ -23,8 +22,7 @@ The Root of Jesse * hath budded: the Star hath come out of Jacob: a Virgin hath 
 Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 92 (Circumcision)
-Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
+@use proper/circumcision/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 110 (Circumcision)
@@ -42,8 +40,7 @@ God, * for his great love wherewith he loved us, hath sent his own Son in the li
 O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
 
 [commemoration-versicle]
-V. The Word was made flesh, alleluia.
-R. And dwelt among us, alleluia.
+@use proper/circumcision/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 111, 97; older Temporal-cycle books
@@ -169,13 +166,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Word was made flesh, * alleluia, alleluia.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 93 (Circumcision)
-!Titus 2:11-12
-The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
-R. Thanks be to God.
+@use proper/circumcision/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Titus 2:11-12
-The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
-R. Thanks be to God.
+@use proper/circumcision/chapter-lauds

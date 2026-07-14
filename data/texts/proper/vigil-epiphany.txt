@@ -1,6 +1,5 @@
 [psalm-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 121 (Vigil of the Epiphany)
-O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
+@use proper/vigil-epiphany/psalm-antiphon-1
 
 [psalm-antiphon-1]
 # SOURCE: draft archdiocesan Lauds book, p. 121 (Vigil of the Epiphany)
@@ -23,20 +22,16 @@ The Root of Jesse * hath budded: the Star hath come out of Jacob: a Virgin hath 
 Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 106 (Vigil of the Epiphany)
-O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
+@use proper/vigil-epiphany/psalm-antiphon-1
 
 [psalm-antiphon-2-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 107 (Vigil of the Epiphany)
-When thou wast born * ineffably of a Virgin, then were the Scriptures fulfilled: thou camest down like the rain into a fleece of wool, to bring salvation unto all mankind: we praise thee, O our God.
+@use proper/vigil-epiphany/psalm-antiphon-2
 
 [psalm-antiphon-3-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 108 (Vigil of the Epiphany)
-In the bush * which Moses saw unconsumed, we acknowledge the preservation of thy glorious virginity: holy Mother of God, intercede for thy children.
+@use proper/vigil-epiphany/psalm-antiphon-3
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 109 (Vigil of the Epiphany)
-Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
+@use proper/vigil-epiphany/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 129 (Vigil of the Epiphany)
@@ -47,13 +42,10 @@ While all things were in quiet silence, * and that night was in the midst of her
 The Child Jesus * increased in wisdom and stature in the sight of God and man.
 
 [commemoration-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 129 (Vigil of the Epiphany; Benedictus antiphon used for commemoration)
-While all things were in quiet silence, * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne. Alleluia.
+@use proper/vigil-epiphany/benedictus-antiphon
 
 [commemoration-versicle]
-# SOURCE: draft archdiocesan Lauds book, p. 129 (Vigil of the Epiphany)
-V. The Word was made flesh, alleluia.
-R. And dwelt among us, alleluia.
+@use proper/vigil-epiphany/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 130, 113 (Vigil of the Epiphany)
@@ -66,10 +58,7 @@ Brethren: The heir, as long as he is a child, differeth nothing from a servant, 
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 110 (Vigil of the Epiphany; dormant at the January 5 Epiphany boundary)
-!Gal 4:1-2
-Brethren: The heir, as long as he is a child, differeth nothing from a servant, though he be lord of all; but is under tutors and governors until the time appointed of the father.
-R. Thanks be to God.
+@use proper/vigil-epiphany/chapter-lauds
 
 [chapter-terce]
 # SOURCE: divinum-officium SanctiM/01-05 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
