@@ -2,11 +2,12 @@
 Praise be to thee, O Lord, King of eternal glory.
 
 [hymn-lauds]
+# SOURCE: office-hymns.zip (Now Christ, Thou Sun of Righteousness, Lent Lauds.docx); draft archdiocesan Lauds book, pp. 196, 207, 218, 229
 Jam Christe, sol justitiae
 
-NOW Christ, thou Sun of righteousness,
+Now Christ, thou Sun of righteousness,
 Let dawn our darkened spirits bless:
-The light of grace to us restore
+Thy light of grace to us restore
 While day to earth returns once more.
 
 Thou who dost give the accepted time,

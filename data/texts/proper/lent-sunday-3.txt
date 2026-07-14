@@ -109,3 +109,7 @@ Jesus stooped down, * and wrote on the ground: He that is without sin, let him c
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium TemporaM/Quad3-0 [Ant 1] — check against diurnal
 But the father said * to his servants: Bring forth quickly the first robe, and put it on him, and put a ring on his hand, and shoes on his feet.
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 220 (The Third Sunday in Lent)
+V. God shall give his angels charge over thee.
+R. To keep thee in all thy ways.

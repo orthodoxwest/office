@@ -109,3 +109,7 @@ Thus saith the Lord: * He that followeth Me walketh not in darkness, but shall h
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Tempora/Quad4-0 [Ant 1] — check against diurnal
 Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 231 (The Fourth Sunday in Lent)
+V. God shall give his angels charge over thee.
+R. To keep thee in all thy ways.

@@ -109,3 +109,7 @@ Jesus took His disciples, * and went up into a mountain, and was transfigured be
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Tempora/Quad1-0 [Ant 1] — check against diurnal
 Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 198 (The First Sunday in Lent)
+V. God shall give his angels charge over thee.
+R. To keep thee in all thy ways.
