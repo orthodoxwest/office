@@ -7,7 +7,7 @@
 | Selected structural-review pages | 45 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 2050 |
+| Text entries needing review | 2064 |
 | Text entries with unknown source | 500 |
 | Stale attestations | 0 |
 

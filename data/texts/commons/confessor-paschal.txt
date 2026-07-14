@@ -26,3 +26,12 @@ Alleluia, * alleluia, alleluia.
 [psalm-antiphon-5]
 # SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
 Alleluia, * alleluia, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 140
+R. The Lord loved him and adorned him, * alleluia, alleluia.
+R. The Lord loved him and adorned him, alleluia, alleluia.
+V. He clothed him with a robe of glory.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him and adorned him, alleluia, alleluia.
