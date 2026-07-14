@@ -86,4 +86,7 @@ Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women
 [commemoration-antiphon]
 # SOURCE: divinum-officium Tempora/Adv4-0 [Ant 2] — check against diurnal
 Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women. Alleluia.
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 31 (The Fourth Sunday in Advent)
+Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
 

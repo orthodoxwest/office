@@ -4,10 +4,10 @@
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
 | Modeled structural features | 237 |
-| Selected structural-review pages | 44 |
+| Selected structural-review pages | 45 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 1482 |
+| Text entries needing review | 1493 |
 | Text entries with unknown source | 640 |
 | Stale attestations | 0 |
 

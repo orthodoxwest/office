@@ -40,6 +40,18 @@ R. He clothed him with a robe of glory.
 [collect]
 Grant, we beseech thee, almighty God, that the venerable feast of N. thy blessed Confessor and Bishop may increase our devotion and promote our salvation.
 
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 406 (Bishop, Confessor, & Doctor)
+!Sir 50:1
+Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 307 (Bishop, Confessor, & Doctor)
+!Sir 50:1
+Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
+R. Thanks be to God.
+
 [hymn-lauds]
 # SOURCE: divinum-officium CommuneM/C4a [HymnusM Laudes] — check against diurnal
 Jesu Redemptor omnium

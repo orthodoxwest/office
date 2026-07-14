@@ -70,6 +70,7 @@ BOILERPLATE_PREFIXES = (
 )
 
 COMMON_OWNER_PATTERNS = (
+    (r"bishop,\s*confessor,\s*(?:&|and)\s*doctor", "commons/confessor-doctor"),
     (r"common of (?:feasts of )?(?:the )?blessed virgin mary", "commons/blessed-virgin"),
     (r"common of (?:a )?confessor (?:and|&) bishop", "commons/confessor-bishop"),
     (r"common of (?:a )?confessor not a bishop", "commons/confessor"),

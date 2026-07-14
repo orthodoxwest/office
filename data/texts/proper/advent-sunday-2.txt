@@ -117,4 +117,7 @@ Come, O Lord, * visit us in peace, that we may rejoice before thee with all our 
 [commemoration-antiphon]
 # SOURCE: divinum-officium Tempora/Adv2-0 [Ant 2] — check against diurnal
 Now when John * had heard in the prison the works of Christ, he sent two of his disciples and said unto Him: Art Thou He That should come, or do we look for another?
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 15 (The Second Sunday in Advent)
+Behold, * our Lord shall come with power, to enlighten the eyes of his servants, alleluia.
 

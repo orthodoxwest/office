@@ -38,10 +38,9 @@ R. Thanks be to God.
 Let us walk honestly, as in the day: not in rioting and drunkenness, not in chambering and impurities, not in contention and envy: But put ye on the Lord Jesus Christ.
 R. Thanks be to God.
 
-[versicle-vespers]
-# SOURCE: divinum-officium TemporaM/Adv1-0 [Versum 1] — check against diurnal
-V. Drop down dew, ye heavens, from above, and let the clouds rain the Just.
-R. Let the earth be opened, and bud forth the Saviour.
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 7 (The First Sunday in Advent)
+Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 
 [chapter-vespers]
 # SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
@@ -116,4 +115,3 @@ Behold, the name of the Lord * cometh from far, and the whole earth is full of H
 [commemoration-antiphon]
 # SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal
 The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy womb the Son of God. Alleluia.
-

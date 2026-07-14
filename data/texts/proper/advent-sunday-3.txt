@@ -117,4 +117,7 @@ Before Me * there was no god formed, neither shall there be after Me; for unto M
 [commemoration-antiphon]
 # SOURCE: divinum-officium Tempora/Adv3-0 [Ant 2] — check against diurnal
 He shall sit * upon the throne of David, and upon his kingdom for ever. Alleluia.
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 23 (The Third Sunday in Advent)
+Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
 
