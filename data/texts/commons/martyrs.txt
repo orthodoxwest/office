@@ -71,6 +71,51 @@ All praise, O Holy Ghost, to thee,
 While never-ending ages run.
 Amen.
 
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 637 (Common of Many Martyrs out of Paschaltide)
+!Wis 3:1-3
+The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise, they seemed to die, but they are in peace.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 638 (Common of Many Martyrs out of Paschaltide)
+R. Be glad, O ye righteous * and rejoice in the Lord.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+V. And be joyful, all ye that are true of heart.
+R. And rejoice in the Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Be glad, O ye righteous * and rejoice in the Lord.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 639 (Common of Many Martyrs out of Paschaltide)
+V. Let the saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 600 (II Vespers, Common of Many Martyrs out of Paschaltide)
+!Wis 3:1-3
+The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise, they seemed to die, but they are in peace.
+R. Thanks be to God.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 600 (II Vespers, Common of Many Martyrs out of Paschaltide)
+R. Let the righteous rejoice * before God.
+R. Let the righteous rejoice * before God.
+V. Let them also be merry and joyful.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Let the righteous rejoice * before God.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 602 (II Vespers, Common of Many Martyrs out of Paschaltide)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 594 (I Vespers, Common of Many Martyrs out of Paschaltide)
+V. Be glad, O ye righteous, and rejoice in the Lord.
+R. And be joyful, all ye that are true of heart.
+
 [hymn-vespers]
 # SOURCE: divinum-officium CommuneM/C2a [HymnusM Vespera] — check against diurnal
 Deus tuorum militum
