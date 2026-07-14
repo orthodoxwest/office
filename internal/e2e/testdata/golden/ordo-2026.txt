@@ -24,9 +24,9 @@ TABULA TEMPORARIA — ANNO DOMINI 2026
 JANUARY
 ------------------------------------------------------------
   1  Thu     Circumcision of Our Lord                   [2cl] w
-           Lauds   w · Ben. This day is set forth a wonderful mystery · No Preces · No Suff.
+           Lauds   w · Ben. A great and wondrous mystery · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. Lo, Mary hath brought forth · No Suff.
+           Vespers w · II prec. · Mag. Great · No Suff.
   2  Fri  L  Octave Day of St Stephen                   [s]   r
            Lauds   r · Ben. And Stephen, full of grace · No Preces · No Suff.
            Hours   No Preces
@@ -351,7 +351,7 @@ FEBRUARY
  22  Sun     Quinquagesima Sunday                       [2cl] v
            Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the Shepherd · No Suff.
+           Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the shepherd of the sheep · No Suff.
                Com. Quinquagesima Sunday ("The father of our faith")
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Behold an high priest")
                Com. St Paul ("Lord, Thou deliverest unto me five talents")
@@ -359,13 +359,13 @@ FEBRUARY
            St Peter Damian, Bishop, Confessor & Doctor (d)
            St Paul (com)
            Vigil of St. Matthias (com)
-           Lauds   w · Ben. Thus saith the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Whatsoever · No Preces · No Suff.
                Com. Monday after Quinquagesima ("Blessed be the Lord God of Israel, for he…")
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Behold an high priest")
                Com. St Paul ("Lord, Thou deliverest unto me five talents")
                Com. Vigil of St. Matthias ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
-           Vespers w · II prec. · Mag. While he was supreme Pontiff · No Suff.
+           Vespers w · II prec. · Mag. During his pontificate · No Suff.
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Behold an high priest")
                Com. St. Matthias, Apostle ("This is my commandment")
  24  Tue     St. Matthias, Apostle                      [2cl] r
@@ -1915,14 +1915,14 @@ OCTOBER
  24  Sat     St Raphael the Archangel                   [gd]  w
            Lauds   w · Ben. Be of good courage, Tobias · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. And he hath on his garment · No Suff.
+           Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. The Lord God shall give unto him · No Suff.
                Com. St Raphael the Archangel ("I am the Angel Raphael")
                Com. Ss Chrysanthus & Daria, Martyrs ("For theirs is the kingdom of heaven")
                Com. XXI Sunday after Pentecost ("O thou wicked servant, I forgave thee all")
  25  Sun     THE FEAST OF O..J.C. THE KING              [1cl] w
            Ss Chrysanthus & Daria, Martyrs (com)
            XXI Sunday after Pentecost (sd)
-           Lauds   w · Ben. He hath made us · No Preces · No Suff.
+           Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
                Com. Ss Chrysanthus & Daria, Martyrs ("For theirs is the kingdom of heaven")
                Com. XXI Sunday after Pentecost ("The lord said unto his servant: Pay me")
            Hours   No Preces
@@ -2349,5 +2349,5 @@ DECEMBER
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. Day VII within the Nativity Octave ("The King of Peace")
            Hours   No Preces
-           Vespers w · I fol. (Circumcision of Our Lord) · Mag. Lo, Mary hath brought forth · No Suff.
+           Vespers w · I fol. (Circumcision of Our Lord) · Mag. God · No Suff.
                Com. St. Sylvester I, Bishop ("Behold an high priest")

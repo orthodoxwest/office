@@ -1,43 +1,63 @@
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-The God of heaven * will set up a kingdom that shall break in pieces and shall consume all these kingdoms, and itself shall stand for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 582 (Christ the King)
+The God of heaven * shall set up a kingdom which shall break in pieces and consume all kingdoms, and it shall stand for ever.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-The Lord gave him * power and glory, and a kingdom; and all peoples, tribes and tongues shall serve him.
+# SOURCE: draft archdiocesan Lauds book, p. 583 (Christ the King)
+The Lord hath given him * dominion and glory and a kingdom, that all people, nations, and languages should serve him.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-Living waters shall go out * from Jerusalem; and the Lord shall be king over all the earth.
+# SOURCE: draft archdiocesan Lauds book, p. 583 (Christ the King)
+Living waters shall go out * from Jerusalem; and the Lord shall be King over all the earth.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-Now shall he be magnified * even to the ends of the earth, and this man shall be our peace.
+# SOURCE: draft archdiocesan Lauds book, p. 584 (Christ the King)
+He shall be great, * even unto the ends of the earth: and this man shall be the peace.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-The nation and the kingdom * that will not serve thee, shall perish: and the Gentiles shall be wasted with desolation.
+# SOURCE: draft archdiocesan Lauds book, p. 586 (Christ the King)
+The nation and kingdom * that will not serve thee shall perish; yea, those nations shall be utterly wasted.
 
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/10-DU [Ant Laudes] — check against diurnal
-The God of heaven * will set up a kingdom that shall break in pieces and shall consume all these kingdoms, and itself shall stand for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 582 (Christ the King)
+The God of heaven * shall set up a kingdom which shall break in pieces and consume all kingdoms, and it shall stand for ever.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 515 (I Vespers, Christ the King)
+He shall be called * the Peaceful One, and his throne shall be established for ever and ever.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 516 (I Vespers, Christ the King)
+His kingdom * is an everlasting kingdom, and all dominions shall serve and obey him.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 517 (I Vespers, Christ the King)
+Behold the man * whose name is the Branch; he shall sit and rule upon his throne, and he shall speak peace unto the heathen.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 518 (I Vespers, Christ the King)
+I will give thee * for a light to the Gentiles, that thou mayest be my salvation unto the end of the earth.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/10-DU [Ant 2] — check against diurnal
-He hath made us * a kingdom to God and his Father: the first begotten of the dead, and the Prince of the kings of the earth, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 590 (Christ the King)
+Unto God and his Father * hath he made us to be a kingdom, who is the first begotten of the dead, and the Prince of the kings of the earth, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Sancti/10-DU [Ant 3] — check against diurnal
 And he hath on his garment, * and on his thigh written: King of kings, and Lord of lords. To him be glory and empire for ever and ever.
 
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 522 (I Vespers, Christ the King)
+The Lord God shall give unto him * the throne of his father David: and he shall reign over the house of Jacob for ever; and of his kingdom there shall be no end, alleluia.
+
 [collect]
-# SOURCE: divinum-officium Sancti/10-DU [Oratio] — check against diurnal
-Almighty and everlasting God, who in thy beloved Son, the King of the whole world, hast willed to restore all things: mercifully grant that all the families of nations, now kept apart by the wound of sin, may be brought under the sweet yoke of his rule.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 591, 523 (Christ the King)
+Almighty and everlasting God, who didst will to restore all things in thy well beloved Son, the King of kings and Lord of lords: mercifully grant that all the kindreds of the earth, set free from the calamity of sin, may be brought under his most gracious dominion.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 587 (Christ the King)
 !Col 1:12-13
-Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
+Brethren: Let us give thanks unto the Father, which hath made us meet to be partakers of the inheritance of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of his dear Son.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -53,99 +73,117 @@ In him, it hath well pleased the Father, that all fullness should dwell, and thr
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/10-DU [Hymnus Laudes] — check against diurnal
-Vexilla Christus inclita
+# SOURCE: office-hymns.zip (Now Christ Unfurls, in Triumph High, Christ the King Lauds.docx); draft archdiocesan Lauds book, pp. 588–590
+Vexilla Christus inclyta
 
-Christ's flag unfurled in glory raised,
-Triumphing o'er the serpent's stings;
-Come humbly forward all ye lands,
-Applauding the great King of kings.
+Now Christ unfurls, in triumph high,
+His glorious banner to the sky:
+Ye suppliant nations, kneel and praise
+The King of kings with joyful lays.
 
-No force or threat doth he need use,
-Not by coersion leadeth he;
-Raised on the cross he draweth all,
-With love unto his fruitful tree.
+He hath not won his kingdom here
+By devastation, force, or fear;
+But on the Cross uplifted high
+By love alone draws all men nigh.
 
-O! Thrice blest city of the Lord,
-Wherein Christ ruleth without dearth;
-Fervently she doth execute
-His heavenly edicts to the earth,
+How trebly blessed is the land
+Obedient unto Christ's command,
+Which urges laws that prove the worth
+Of heavenly edicts here on earth.
 
-No fiery weapon can e'er harm,
-The peace 'stablished by Jesus' hand;
-In happiness and unity,
-The ranks of Christ secure do stand.
+No armed rebellion kindles there,
+Peace strengthens union everywhere,
+And concord smiles; upon all sides
+The civil order safe abides.
 
-A marriage blessed by faith in thee,
-Yields virtuous offspring from the womb;
-Like seed in fertile soil doth grow,
-In virtuous homes do children bloom.
+There married faith is kept secure;
+There ripening youth is ever pure;
+And modest household flourish fair
+With sweet and homely virtues there.
 
-We yearn and long to shine on us,
-Thy light, O sweet and winsome King;
-All thus submitted to thy reign,
-To us, thy gift of peace do bring.
+Pour down that longed-for light of thine
+Upon us all, dear King divine;
+And let the conquered world adore
+In shining peace for evermore.
 
-O Jesu! King of all the world,
-Honour and glory be to thee;
-With Father and with Paraclete,
-Glory through all eternity.
+All glory, Lord, to thee, whose sway
+The world's dominion doth obey;
+All glory as is ever meet,
+To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/10-DU [Hymnus Vespera] — check against diurnal
+# SOURCE: office-hymns.zip (O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx); draft archdiocesan Vespers book, pp. 520–521
 Te saeculorum Principem
 
-To thee, O Prince of all that be,
-Thou Christ, O King eternally;
-O Framer of the mind and heart,
-Our one true Judge we say thou art.
+O Lord of ages, thee we sing;
+We hail thee as the nations' King,
+O Christ; our only Judge thou art,
+Thou Searcher of the mind and heart.
 
-The wicked protest, wail and cry,
-Christ Jesus' reign they would deny;
-Rejoice we at thy glorious name,
-Thou Highest King we do proclaim.
+Though evil shouting mobs maintain
+“We will not have this Christ to reign,”
+Not such is our triumphant cry
+Who hail thee King of kings most high.
 
-O Christ! The Source of all our peace,
-Make all our sinful thoughts to cease;
-And still in us our loves misplaced,
-As Thy one sheepfold be we embraced.
+O Christ, thou Prince of peace, subdue
+All rebel thoughts; our minds renew;
+And gather into thy one fold
+The wanderers whom thy love doth hold.
 
-For this, hanging on cruel tree,
-With arms outstretched, for all to see;
-His heart is pierced by soldier's spear,
-Revealing burning love most dear.
+For this thou hangedst on the Tree
+With arms outspread in fervent plea;
+And shewedst forth thy burning heart
+Transfixed by the cruel dart.
 
-From this the altar of the tree
-Thy blood flows forth from Calvary;
-As wine to us it doth appear,
-To thine own heart it draws us near.
+For this thy pierced side doth shed,
+Beneath the forms of wine and bread,
+Thy grace upon thy sons; yet thou
+Art hidden in the Altar now.
 
-Thou Governor of all that be,
-May all thy creatures honour thee;
-All those who rule, O Lord renew!
-Source of all precepts just and true.
+The rulers of the nations raise
+To thee their meed of public praise;
+Instructors, judges, thee confess;
+Art, science, law, thy truth express.
 
-To regal glory, all submit,
-All crowns and honours we do remit;—
-To thy scepter—so sweet and mild!
-Submit we as a little child.
+Let kings be fain to dedicate
+To thee the emblems of their state;
+And let our homes and fatherland
+Be subject to thy kind command.
 
-All glory be, Jesu, to thee,
-Thy scepter over all that be;
-All glory, as is ever meet,
+All glory, Lord, to thee, whose sway
+The world's dominion doth obey;
+All glory as is ever meet,
 To Father and to Paraclete.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/10-DU [Versum 2] — check against diurnal
-V. His empire shall be multiplied.
-R. And there shall be no end of peace.
+# SOURCE: draft archdiocesan Lauds book, p. 590 (Christ the King)
+V. His kingdom shall be increased.
+R. And of his peace there shall be no end.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/10-DU [Versum 1] — check against diurnal
-V. Given to me is all power.
+# SOURCE: draft archdiocesan Vespers book, p. 521 (Christ the King)
+V. All power is given unto me.
 R. In heaven and in earth.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 588 (Christ the King)
+R. There is given unto me * all power.
+R. There is given unto me * all power.
+V. In heaven and earth.
+R. All power.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. There is given unto me * all power.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 519 (Christ the King)
+R. Ascribe unto the Lord, * O ye kindreds of the people.
+R. Ascribe unto the Lord, O ye kindreds of the people.
+V. Ascribe unto the Lord glory and dominion.
+R. O ye kindreds of the people.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Ascribe unto the Lord, O ye kindreds of the people.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Tertia] — check against diurnal
@@ -184,9 +222,9 @@ V. His empire shall be multiplied.
 R. And there shall be no end of peace.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 519 (Christ the King)
 !Col 1:12-13
-Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
+Brethren: Let us give thanks unto the Father, which hath made us meet to be partakers of the inheritance of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of his dear Son.
 R. Thanks be to God.
 
 [chapter-terce]

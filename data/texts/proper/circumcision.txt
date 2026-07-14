@@ -1,32 +1,42 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 102, 89 (Circumcision)
+O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 102, 89 (Circumcision)
+O wondrous interchange! * The Creator of mankind, taking upon him a living body, vouchsafed to be born of a Virgin: and proceeding forth as Man, without seed, hath made us partakers of his Divinity.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-When thou wast born * all ineffably of a Virgin, then were the Scriptures fulfilled; thou camest down like the dew upon the fleece of wool, to bring salvation unto all mankind; we praise thee, O our God.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 103, 90 (Circumcision)
+When thou wast born * ineffably of a Virgin, then were the Scriptures fulfilled: thou camest down like the rain into a fleece of wool, to bring salvation unto all mankind: we praise thee, O our God.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-In the bush which Moses saw * unconsumed, we recognize the preservation of thy glorious virginity: holy Mother of God, intercede for us.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 103, 91 (Circumcision)
+In the bush * which Moses saw unconsumed, we acknowledge the preservation of thy glorious virginity: holy Mother of God, intercede for thy children.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-The Root of Jesse hath budded, * the Star hath come out of Jacob, the Virgin hath borne the Saviour: we praise thee, O our God.
+# SOURCE: draft archdiocesan Lauds book, p. 105 (Circumcision)
+The Root of Jesse * hath budded: the Star hath come out of Jacob: a Virgin hath borne the Saviour: we praise thee, O our God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/01-01 [Ant Vespera] — check against diurnal
-Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 106 (Circumcision)
+Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 92 (Circumcision)
+Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried saying: Behold the Lamb of God, which taketh away the sin of the world, alleluia.
 
 [benedictus-antiphon]
-This day is set forth a wonderful mystery, * a new thing hath been created in the earth: God is made man. That which He was, He remaineth; and that which He was not, He taketh; suffering therein neither confusion nor division.
+# SOURCE: draft archdiocesan Lauds book, p. 110 (Circumcision)
+A great and wondrous mystery * is made known to us this day; a new thing is wrought in both natures: God is made man; that which was, remained, and that which was not, he assumed; suffering no confusion, nor yet division.
 
 [magnificat-antiphon]
-Lo, Mary hath brought forth * the Saviour of whom when John saw him, he did proclaim: Behold the Lamb of God that taketh away the sins of the world, alleluia.
+# SOURCE: draft archdiocesan Vespers book, II Vespers of the Circumcision
+Great * is the mystery of the inheritance: the womb of her that knew not man is become the temple of the Godhead: by taking flesh of her, he was no way defiled: all the nations shall gather, saying: Glory be to thee, O Lord.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 96 (I Vespers, Circumcision)
+God, * for his great love wherewith he loved us, hath sent his own Son in the likeness of sinful flesh, alleluia.
 
 [commemoration-antiphon]
 O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
@@ -36,21 +46,130 @@ V. The Word was made flesh, alleluia.
 R. And dwelt among us, alleluia.
 
 [collect]
-O God, Who, by the fruitful virginity of the Blessed Mary, hast given unto mankind the rewards of everlasting life; grant, we beseech thee, that we may continually feel the might of her intercession, through whom we have worthily received the Author of our life, our Lord Jesus Christ, thy Son:
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 111, 97; older Temporal-cycle books
+O God, who by virgin child-bearing of blessed Mary hast bestowed upon mankind the rewards of eternal salvation: grant, we beseech thee, that we perceive her intercession for us, through whom we have been accounted worthy to receive the Author of Life, Jesus Christ, thy Son, our Lord.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 108 (Circumcision)
 !Titus 2:11-12
 The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
 R. Thanks be to God.
 
+[hymn-lauds]
+# SOURCE: office-hymns.zip (From Lands That See the Sun Arise, Circum Lauds.docx); draft archdiocesan Lauds book, pp. 108–110
+A solis ortus cardine
+
+From lands that see the sun arise,
+To earth's remotest boundaries,
+The Virgin born today we sing,
+The Son of Mary, Christ the King.
+
+Blest Author of this earthly frame,
+To take a servant's form he came,
+That, liberating flesh by flesh,
+Whom he had made might live afresh.
+
+In that chaste parent's holy womb,
+Celestial grace hath found its home:
+And she, as earthly bride unknown,
+Yet calls that Offspring blest her own.
+
+The mansion of the modest breast
+Becomes a shrine where God shall rest:
+The pure and undefiled one
+Conceived in her womb the Son.
+
+That Son, that royal Son she bore
+Whom Gabriel's voice had told afore;
+Whom, in his Mother yet concealed,
+The Infant Baptist had revealed.
+
+The manger and the straw he bore,
+The cradle did he not abhor:
+A little milk his infant fare
+Who feedeth ev'n each fowl of air.
+
+The heavenly chorus filled the sky,
+The Angels sang to God on high,
+What time to shepherds, watching lone,
+They made creation's Shepherd known.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 108 (Circumcision)
+R. The Lord declared, * alleluia, alleluia.
+R. The Lord declared, * alleluia, alleluia.
+V. His salvation.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord declared, * alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 110 (Circumcision)
+V. The Word was made flesh, alleluia.
+R. And dwelt among us, alleluia.
+
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/01-01 [Versum 1] — check against diurnal
-V. The Lord hath made known, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 95 (Circumcision)
+V. The Lord declared, alleluia.
 R. His salvation, alleluia.
 
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Jesu, the Father's Only Son, Xmas & Circum Vespers.docx); draft archdiocesan Vespers book, pp. 94–95
+Christe, Redemptor Omnium
+
+Jesu, the Father's only son;
+Whose death for all redemption won,
+Before the worlds, of God Most High,
+Begotten all ineffably.
+
+The Father's Light and Splendour thou,
+Their endless hope to thee that bow:
+Accept the prayers and praise today
+That through the world thy servants pay.
+
+Salvation's Author, call to mind
+Thou took'st the form of humankind,
+When of the Virgin undefiled
+Thou in man's flesh becamest a Child.
+
+Thus testifies the present day
+Through every year in long array,
+That thou, salvation's source alone,
+Proceededst from the Father's Throne.
+
+Whence sky, and stars, and sea's abyss,
+And earth, and all that therein is,
+Shall still, with laud and carol meet,
+The Author of thine Advent greet.
+
+And we who, by thy precious Blood,
+From sin redeemed, are marked for God,
+On this, the day that saw thy Birth,
+Sing the new song of ransomed earth.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 93 (Circumcision)
+R. The Word was made flesh, * alleluia, alleluia.
+R. The Word was made flesh, * alleluia, alleluia.
+V. And dwelt among us.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Word was made flesh, * alleluia, alleluia.
+
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/01-01 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 93 (Circumcision)
 !Titus 2:11-12
 The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
 R. Thanks be to God.
