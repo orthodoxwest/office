@@ -1,44 +1,50 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
+# SOURCE: draft archdiocesan Lauds book, p. 350; Vespers book, pp. 226, 234 (St Andrew)
+Hail, precious Cross, * receive the disciple of him who hanged on thee, my Master Christ.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
+# SOURCE: draft archdiocesan Lauds book, p. 350; Vespers book, pp. 226, 234 (St Andrew)
+Hail, precious Cross, * receive the disciple of him who hanged on thee, my Master Christ.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-The blessed Andrew prayed and said: * O Lord, King of everlasting glory, receive me hanging on this gallows.
+# SOURCE: draft archdiocesan Lauds book, p. 350; Vespers book, pp. 227, 235 (St Andrew)
+Blessed Andrew * prayed, saying, O Lord, King of eternal glory, sustain me, as I hang upon the tree.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-Andrew was the servant of Christ, * a worthy Apostle of God, the brother of Peter, and likened to Christ and to Peter in his death.
+# SOURCE: draft archdiocesan Lauds book, p. 351; Vespers book, pp. 228, 236 (St Andrew)
+Andrew, the servant of Jesus Christ, * a worthy Apostle of God, was Peter's brother, and partaker of his passion.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-Christ's dear handmaid Maximilla took the body * of the Apostle and buried it with spices in an honourable place.
+# SOURCE: draft archdiocesan Lauds book, p. 352 (St Andrew)
+Maximilla, beloved of Jesus Christ, * took the Apostle's body: and in a place of honour buried it with sweet-smelling spices.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/11-30 [Ant Laudes] — check against diurnal
-O Lord, Thou hast caused them that persecuted the just to be swallowed up in hell, * but to the just Thou hast thyself shown the way on the tree of the cross.
+# SOURCE: draft archdiocesan Lauds book, p. 354 (St Andrew)
+Thou hast overwhelmed in hell, O Lord, * them that did persecute the righteous: and thou wast his leader on the wood of the Cross.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 229, 237 (St Andrew)
+Thou hast overwhelmed in hell, O Lord, * them that did persecute the righteous: and thou wast his leader on the wood of the Cross.
 
 [magnificat-antiphon]
-O Lord, Thou hast caused them that persecuted the just to be swallowed up in hell, * but to the just Thou hast thyself shown the way on the tree of the cross.
+# SOURCE: draft archdiocesan Vespers book, p. 241 (II Vespers for St Andrew)
+When blessed Andrew * came to the place where the Cross had been prepared, he cried out and said: O goodly Cross, so long desired, and now made ready for my eager spirit; fearless and joyful do I come to thee: therefore do thou also receive me gladly, as his disciple, who did hang upon thee.
 
 [commemoration-antiphon]
 God bless thee, precious cross, * be welcome to the follower of Him That hung on thee, even my Master Christ.
 
 [collect]
-O Lord, we humbly beseech thy Majesty, that even as Thou didst give thy blessed Apostle Andrew to thy Church to be a teacher and a ruler on earth, so, now that he is with thee, he may continually make intercession for us.
+# SOURCE: draft archdiocesan Lauds book, p. 359; Vespers book, pp. 233, 242 (St Andrew)
+We humbly entreat thy Majesty, O Lord: that as the blessed Apostle Andrew stood forth as a preacher and ruler in thy Church, so he may be our constant intercessor before thee.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/11-30 [Ant 2] — check against diurnal
-Spare unto us * this just man, release unto us this holy one; slay not the friend of God, who is just, courteous, and godly.
+# SOURCE: draft archdiocesan Lauds book, p. 358 (St Andrew)
+Yield up to us * a man so righteous, restore to us a man so holy: destroy not a man so dear to God, righteous, dutiful, and gentle.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 355 (St Andrew)
 !Rom 10:10-11
-Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -48,17 +54,115 @@ For there is no distinction of the Jew and the Greek: for the same is Lord over 
 R. Thanks be to God.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, pp. 230, 238 (St Andrew)
 !Rom 10:10-11
-Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/11-30 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds/Vespers books (same chapter as the major hours)
 !Rom 10:10-11
-Brothers: For, with the heart, we believe unto justice; but, with the mouth, confession is made unto salvation. For the scripture saith: Whosoever believeth in him, shall not be confounded.
+Brethren: With the heart man believeth unto righteousness; and with the mouth confession is made unto salvation. For the scripture saith, Whosoever believeth on him shall not be ashamed.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/11-30.txt [Ant 1] — check against diurnal
-One of the two * which followed the Lord was Andrew, Simon Peter's brother. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 232 (I Vespers for St Andrew)
+One of the two * which followed the Lord was Andrew, Simon Peter's brother, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 356 (St Andrew)
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 230, 239 (St Andrew)
+R. Thou shalt make them princes * in all lands.
+R. Thou shalt make them princes * in all lands.
+V. They shall remember thy Name, O Lord.
+R. In all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou shalt make them princes * in all lands.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 356-357
+Exsultet cælum laudibus
+
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
+
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
+
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 230-232, 239-240
+Exsultet cælum laudibus
+
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
+
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
+
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 357 (St Andrew)
+V. They declared the work of God.
+R. And wisely considered of his doing.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 232, 240 (St Andrew)
+V. Their sound is gone out into all lands.
+R. And their words into the ends of the world.

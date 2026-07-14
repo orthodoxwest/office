@@ -1,5 +1,42 @@
+[psalm-antiphon]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 401, 304, 312 (St Gregory the Great)
+The blessed Gregory, * lifted up to the throne of Peter, shewed forth in deeds his name of 'the Watchful'.
+
+[psalm-antiphon-1]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 401, 304, 312 (St Gregory the Great)
+The blessed Gregory, * lifted up to the throne of Peter, shewed forth in deeds his name of 'the Watchful'.
+
+[psalm-antiphon-2]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 402, 305, 313 (St Gregory the Great)
+The excellent shepherd * left behind him an example and pattern of priestly life.
+
+[psalm-antiphon-3]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 402, 306, 314 (St Gregory the Great)
+While he revealed * the mysteries of Holy Writ, there appeared a dove, whiter than snow.
+
+[psalm-antiphon-4]
+# SOURCE: draft archdiocesan Lauds book, p. 403 (St Gregory the Great)
+O ye servants of the Lord, * bless ye the Lord: your servant Gregory hath risen to the heavens.
+
+[psalm-antiphon-5]
+# SOURCE: draft archdiocesan Lauds book, p. 405 (St Gregory the Great)
+Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 307, 315 (I/II Vespers, St Gregory the Great)
+Gregory, * mirror of the cloistered, father of the City, beloved of all the world.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 409 (St Gregory the Great)
+Gregory, * when he looked upon the youthful Angels, said: They have the countenance of Angels, and such as these should be of the fellowship of the Angels in heaven.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, pp. 310, 318 (I/II Vespers, St Gregory the Great)
+O Teacher right excellent, * O light of Holy Church, O blessed Gregory, lover of the divine law: intercede for us unto the Son of God.
+
 [collect]
-O God, who hast blessed the soul of thy servant Gregory with an everlasting blessing, mercifully grant that we, who groan under the burden of our sins, may by his prayers be relieved.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 410, 311, 319 (St Gregory the Great)
+O God, who hast bestowed upon the soul of thy servant Gregory the reward of eternal blessedness: mercifully grant that we, who are weighed down with the burden of our sins, may be upheld by his prayers before thee.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 406 (St Gregory the Great)
@@ -12,6 +49,36 @@ R. Thanks be to God.
 !Sir 50:1
 Behold a great priest, who in his life repaired the house again, and in his days fortified the temple.
 R. Thanks be to God.
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 407–408 (St Gregory the Great)
+Mella cor obdulcantia
+
+Thy lips, O Gregory, distil,
+The honey that thy heart doth fill;
+In spiced sweetness floweth thence
+The savour of thine eloquence.
+
+The hidden mysteries that lie
+In Holy Scripture, to thine eye
+Are plain; the Truth himself draws near
+To make their subtle secrets clear.
+
+At once the Apostolic throne
+And majesty become thine own:
+O free us from sin's binding chain
+That heav'nly mansions we may gain.
+
+O Priest and Leader of the flock,
+The Church's glory, light, and rock,
+Instructed by thy wise command,
+Let not the sheep in peril stand.
+
+Praise to the unbegotten One,
+And glory to his only Son;
+And thine, O Spirit, Breath of God,
+Be equal majesty and laud.
+Amen.
 
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 308, 317 (St Gregory the Great)
@@ -47,3 +114,36 @@ And glory to his only Son;
 And thine, O Spirit, breath of God,
 Be equal majesty and laud.
 Amen.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 407 (St Gregory the Great)
+R. The Lord loved him * and adorned him.
+R. The Lord loved him * and adorned him.
+V. He clothed him with a robe of glory.
+R. And adorned him.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord loved him * and adorned him.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 308, 316 (I/II Vespers, St Gregory the Great)
+R. The Lord chose him * for a priest unto himself.
+R. The Lord chose him * for a priest unto himself.
+V. To offer unto him the sacrifice of praise.
+R. For a priest unto himself.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord chose him * for a priest unto himself.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 408 (St Gregory the Great)
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 309 (I Vespers, St Gregory the Great)
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 318 (II Vespers, St Gregory the Great)
+V. The Lord guided the righteous in right paths.
+R. And shewed him the kingdom of God.

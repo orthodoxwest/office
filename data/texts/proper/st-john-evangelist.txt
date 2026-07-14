@@ -1,47 +1,71 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-Right worthy of honour * is the blessed Apostle John, who leaned on the Lord's bosom at the Last Supper.
+# SOURCE: draft archdiocesan Lauds book, p. 81 (Saint John, Apostle and Evangelist)
+Right worthy of honour * is blessed John the Apostle, who leaned on the Lord's bosom at the last supper.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-Right worthy of honour * is the blessed Apostle John, who leaned on the Lord's bosom at the Last Supper.
+# SOURCE: draft archdiocesan Lauds book, p. 81 (Saint John, Apostle and Evangelist)
+Right worthy of honour * is blessed John the Apostle, who leaned on the Lord's bosom at the last supper.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-This is the disciple * which testifieth of these things, and we know that his testimony is true.
+# SOURCE: draft archdiocesan Lauds book, p. 82 (Saint John, Apostle and Evangelist)
+This is that disciple * which testifieth of these things: and we know that his testimony is true.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-This is My disciple * if I will that he tarry till I come?
+# SOURCE: draft archdiocesan Lauds book, p. 82 (Saint John, Apostle and Evangelist)
+This is my disciple * if I will that he tarry till I come.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-There be some standing here, * which shall not taste of death, till they see the Son of man in His kingdom.
+# SOURCE: draft archdiocesan Lauds book, p. 83 (Saint John, Apostle and Evangelist)
+There be some standing here * which shall not taste of death till they see the Son of man in his kingdom.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/12-27 [Ant Laudes] — check against diurnal
-Behold My servant, * whom I have chosen, I have put My spirit upon him.
+# SOURCE: draft archdiocesan Lauds book, p. 85 (Saint John, Apostle and Evangelist)
+Behold, my servant, mine elect, * whom I have chosen: I have put my spirit upon him.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 70 (Saint John, Apostle and Evangelist)
+In the day of thy power * shall the people offer thee free-will offerings with an holy worship: the dew of thy birth is of the womb of the morning.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 71 (Saint John, Apostle and Evangelist)
+The Lord hath sent * redemption unto his people: he hath commanded his covenant for ever.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 72 (Saint John, Apostle and Evangelist)
+Unto the godly * there ariseth up light in the darkness: the Lord is merciful, loving, and righteous.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 73 (Saint John, Apostle and Evangelist)
+With the Lord * there is mercy, and with him is plenteous redemption.
 
 [benedictus-antiphon]
-Behold My servant, * whom I have chosen, I have put My spirit upon him.
+# SOURCE: draft archdiocesan Lauds book, p. 89 (Saint John, Apostle and Evangelist)
+This is the same John, * who leaned on the Lord's bosom at the last supper: the blessed Apostle, unto whom were revealed the secret things of heaven.
 
 [magnificat-antiphon]
-A saying * went abroad among the brethren, that that disciple should not die; and Jesus did not say that he should not die, but so will I have him remain till I come.
+# SOURCE: draft archdiocesan Vespers book, p. 76 (Saint John, Apostle and Evangelist)
+There went this saying abroad * among the brethren, that that disciple should not die: yet Jesus said not unto him, He shall not die; but, if I will that he tarry till I come.
 
 [commemoration-antiphon]
-This is John * who leaned at supper on the bosom of the Lord. Blessed Apostle, to whom heavenly secrets were revealed.
+# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
+This is the same John, * who leaned on the Lord's bosom at the last supper: the blessed Apostle, unto whom were revealed the secret things of heaven.
 
 [commemoration-versicle]
-V. Right worthy of honour is the blessed Apostle John.
-R. Who leaned on the Lord's bosom at the Last Supper.
+V. Right worthy of honour is blessed John the Apostle.
+R. Who leaned on the Lord's bosom at the last supper.
+
+[commemoration-collect]
+# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
+Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church; that it, being illumined by the doctrine of thy blessed Apostle and Evangelist Saint John, may so walk in the light of thy truth, that it may at length attain to life everlasting.
 
 [collect]
-Shine upon thy Church, O Lord, in thy goodness, that, enlightened by the teachings of Blessed John, thy Apostle and Evangelist, she may attain to everlasting gifts.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 90, 77
+O Lord, graciously illumine thy Church; that, being enlightened by the doctrine of blessed John, thy Apostle and Evangelist, she may attain unto everlasting gifts.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 86 (Saint John, Apostle and Evangelist)
 !Sir 15:1-2
-He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -50,28 +74,116 @@ R. Thanks be to God.
 With the bread of life and understanding, she shall feed him, and give him the water of wholesome wisdom to drink; God, our Lord.
 R. Thanks be to God.
 
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 87 (Saint John, Apostle and Evangelist)
+R. Their sound is gone out * into all lands.
+R. Their sound is gone out * into all lands.
+V. And their words into the ends of the world.
+R. Into all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Their sound is gone out * into all lands.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 74 (Saint John, Apostle and Evangelist)
+R. Thou shalt make them princes * in all lands.
+R. Thou shalt make them princes * in all lands.
+V. They shall remember thy Name, O Lord.
+R. In all lands.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou shalt make them princes * in all lands.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 87-88
+Exsultet cælum laudibus
+
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
+
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
+
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Vespers book, pp. 75-76
+Exsultet cælum laudibus
+
+Let heav'n's exultant praises ring,
+And earth with joy responsive sing:
+Th'Apostles' deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illuminating,
+Regard the suppliant prayer we bring.
+
+The gates of heav'n at your command,
+To all or closed or open stand:
+May we, at your august decree,
+Be loosed from our iniquity.
+
+The pow'r, of old, to you conveyed,
+Sickness and health alike obeyed:
+May ye our ailing souls once more
+To strength and holiness restore.
+
+That Christ, th'unerring Judge of doom,
+When he at time's last end shall come,
+May grant us, for his mercy's sake,
+Of joys eternal to partake.
+
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete.
+Amen.
+
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/12-27 [Versum 2] — check against diurnal
-V. This is that disciple who giveth testimony of these things.
+# SOURCE: draft archdiocesan Lauds book, p. 88 (Saint John, Apostle and Evangelist)
+V. This is that disciple which testifieth of these things.
 R. And we know that his testimony is true.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/12-27 [Versum 1] — check against diurnal
-V. Right worthy of honour is the blessed Apostle John.
-R. Who leaned on the Lord's bosom at the Last Supper.
+# SOURCE: draft archdiocesan Vespers book, p. 76 (Saint John, Apostle and Evangelist)
+V. Right worthy of honour is blessed John the Apostle.
+R. Who leaned on the Lord's bosom at the last supper.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 74 (Saint John, Apostle and Evangelist)
 !Sir 15:1-2
-He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-27 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 86 (Lauds chapter used at Terce)
 !Sir 15:1-2
-He that feareth God, will do good: and he that possesseth justice, shall lay hold on her, and she will meet him as an honourable mother.
+He that feareth the Lord will do good; and he that hath the knowledge of the law shall obtain Wisdom, and as a mother shall she meet him.
 R. Thanks be to God.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/12-27.txt [Ant 1] — check against diurnal
-This is John * who leaned at supper on the bosom of the Lord. Blessed Apostle, to whom heavenly secrets were revealed.
+# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
+This is the same John, * who leaned on the Lord's bosom at the last supper: the blessed Apostle, unto whom were revealed the secret things of heaven.
