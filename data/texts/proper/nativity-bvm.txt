@@ -1,32 +1,42 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-This day was born the glorious Virgin Mary, * a child of the seed of Abraham, a daughter of the tribe of Judah, a Princess of the lineage of David.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 531, 469 (Nativity BVM)
+The Nativity * of the glorious Virgin Mary, of the seed of Abraham, sprung from the tribe of Juda, of the noble stem of David.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-This day was born the glorious Virgin Mary, * a child of the seed of Abraham, a daughter of the tribe of Judah, a Princess of the lineage of David.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 531, 469 (Nativity BVM)
+The Nativity * of the glorious Virgin Mary, of the seed of Abraham, sprung from the tribe of Juda, of the noble stem of David.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-This day is the Birthday of the holy Virgin Mary, * whose famous life still sheddeth lustre upon all the Churches.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 532, 470 (Nativity BVM)
+To-day is the Nativity * of the holy Virgin Mary, whose glorious life illumineth all the churches.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-Mary was a maiden of illustrious birth, * the daughter of a Kingly race. We earnestly entreat her to help our minds and souls by her prayers.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 532, 471 (Nativity BVM)
+Sprung from a royal race, * lo, Mary shineth resplendent: by whose prayers we ask devoutly that we may be aided both in mind and spirit.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-With all our heart and with all our soul let us sing praise to Christ * on this the solemn Feast-day of Mary, the mighty Mother of God.
+# SOURCE: draft archdiocesan Lauds book, p. 533 (Nativity BVM)
+With all our heart and soul, * let us sing glory unto Christ on this holy solemnity of Mary, the exalted Mother of God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/09-08 [Ant Vespera] — check against diurnal
-Let us keep with rejoicing the Birthday of the Blessed Virgin Mary, * that she may pray for us to our Lord Jesus Christ.
+# SOURCE: draft archdiocesan Lauds book, p. 535 (Nativity BVM)
+With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 472 (Nativity BVM)
+With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
 
 [benedictus-antiphon]
-Let us this day keep solemnly * the Birthday of Mary, Mother but still Maiden, her Birth, a step toward the loftiness of her throne. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 539 (Nativity BVM)
+To-day let us celebrate * with due solemnity the Nativity of God's Mother, the ever Virgin Mary: from whom the Son of the Highest proceeded, alleluia.
 
 [magnificat-antiphon]
-Let us keep with rejoicing the Birthday of the Blessed Virgin Mary, * that she may pray for us to our Lord Jesus Christ.
+# SOURCE: older Sanctoral Vespers (II Vespers, Nativity BVM)
+Thy Nativity, * O Virgin Mother of God, hath proclaimed joyful tidings unto all the world: for out of thee hath arisen the Sun of righteousness, even Christ our God: who, taking away the curse, hath bestowed a blessing; and confounding death, hath given unto us life everlasting.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 475 (I Vespers, Nativity BVM)
+Let us celebrate * the worshipful Nativity of the blessed and glorious Virgin Mary: for she hath obtained the dignity of Motherhood, and yet lost not her maiden purity.
 
 [commemoration-antiphon]
 This day was born the glorious Virgin Mary, * a child of the seed of Abraham, a daughter of the tribe of Judah, a Princess of the lineage of David.
@@ -36,14 +46,111 @@ V. This day is the Birthday of the holy Virgin Mary.
 R. Whose famous life still sheddeth lustre upon all the Churches.
 
 [collect]
-Grant unto us thy servants, we beseech thee, O Lord, the gift of thy heavenly grace, unto whom Thou didst give the first sight of a Saviour as the offspring of a Blessed Virgin, and grant that this Feast, which they keep in honour of the same Virgin, may avail them unto the increase of peace.
+# SOURCE: older Sanctoral Lauds/Vespers (Nativity BVM)
+We beseech thee, O Lord, bestow upon us thy servants the gift of thy heavenly grace: that as our salvation began by the Child-bearing of the blessed Virgin, so this devout solemnity of her Nativity may afford us an increase of peace.
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 537 (Nativity BVM)
+!Sir 24:9-10
+He created me from the beginning from before the world, and I shall never fail. In the holy tabernacle I served before him.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 473 (Nativity BVM)
+!Sir 24:9-10
+He created me from the beginning from before the world, and I shall never fail. In the holy tabernacle I served before him.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 537 (Nativity BVM)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 473 (Nativity BVM)
+R. Hail, Mary, full of grace, * the Lord is with thee.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail, Mary, full of grace, * the Lord is with thee.
+
+[hymn-lauds]
+# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx); draft archdiocesan Lauds book, pp. 537–538
+O gloriosa Domina
+
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
+
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
+
+O Gate, through which hath pass'd the King,
+O Hall, whence Light shone through the gloom;
+The ransom'd nations praise and sing
+Life given from the Virgin womb.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx); draft archdiocesan Vespers book, pp. 473–474
+/:The first stanza of the following hymn is said kneeling.:/
+Ave, maris stella
+
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
+
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
+
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for every blessing.
+
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
+
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
+
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
+
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
+Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/09-08 [Versum 2] — check against diurnal
-V. This day is the Birthday of the holy Virgin Mary.
-R. Whose famous life still sheddeth lustre upon all the Churches.
+# SOURCE: draft archdiocesan Lauds book, p. 538 (Nativity BVM)
+V. To-day is the Nativity of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/09-08 [Versum 1] — check against diurnal
-V. This day is the Birthday of the holy Virgin Mary.
-R. Whose famous life still sheddeth lustre upon all the Churches.
+# SOURCE: draft archdiocesan Vespers book, p. 474 (Nativity BVM)
+V. To-day is the Nativity of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
