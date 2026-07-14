@@ -400,6 +400,52 @@ func TestLaudsSaturdayUsesPsalm143(t *testing.T) {
 	}
 }
 
+func TestLaudsSaturdayBVMUsesFestalSaturdayPsalmody(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(lauds.txt): %v", err)
+	}
+
+	var bvm *HourSection
+	for i := range sections {
+		if sections[i].Name == "Psalmody-Saturday-BVM" {
+			bvm = &sections[i]
+			break
+		}
+	}
+	if bvm == nil {
+		t.Fatal("missing Psalmody-Saturday-BVM section")
+	}
+
+	wantRefs := []string{
+		"psalms/067",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-1",
+		"psalms/051",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-1",
+		"saturday-psalm-antiphon-2",
+		"psalms/143a",
+		"ordinary/shared/gloria-patri",
+		"psalms/143b",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-2",
+		"saturday-psalm-antiphon-3",
+		"canticles/sirach-36",
+		"ordinary/shared/gloria-patri",
+		"saturday-psalm-antiphon-3",
+	}
+	if len(bvm.Elements) != len(wantRefs) {
+		t.Fatalf("Psalmody-Saturday-BVM elements = %d, want %d", len(bvm.Elements), len(wantRefs))
+	}
+	for i, wantRef := range wantRefs {
+		if bvm.Elements[i].Ref != wantRef {
+			t.Fatalf("Psalmody-Saturday-BVM[%d] ref = %q, want %q", i, bvm.Elements[i].Ref, wantRef)
+		}
+	}
+}
+
 func TestProperAndCommonTextsExposeIndexedPsalmAntiphons(t *testing.T) {
 	roots := []string{
 		filepath.Join("..", "..", "data", "texts", "proper"),

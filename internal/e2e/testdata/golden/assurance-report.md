@@ -3,11 +3,11 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 240 |
-| Selected structural-review pages | 45 |
+| Modeled structural features | 248 |
+| Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 2091 |
+| Text entries needing review | 2098 |
 | Text entries with unknown source | 486 |
 | Stale attestations | 0 |
 
@@ -47,16 +47,20 @@
 - `decision:condition:feast-easter-sunday=omitted`
 - `decision:condition:feast-holy-saturday=included`
 - `decision:condition:feast-holy-saturday=omitted`
+- `decision:condition:feast-saturday-office-bvm,not-season-easter=included`
+- `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
+- `decision:condition:feast-saturday-office-bvm,season-easter=included`
+- `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
 - `decision:condition:if-cross-commemoration=included`
 - `decision:condition:if-cross-commemoration=omitted`
 - `decision:condition:if-preces=included`
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
-- `decision:condition:is-feast,not-feast-easter-sunday=included`
-- `decision:condition:is-feast,not-feast-easter-sunday=omitted`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday=included`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday=omitted`
+- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
+- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
@@ -244,6 +248,10 @@
 - `resolution:psalm-antiphon-5=ordinary`
 - `resolution:psalm-antiphon-5=proper`
 - `resolution:psalm-antiphon-5=seasonal`
+- `resolution:saturday-psalm-antiphon-1=proper`
+- `resolution:saturday-psalm-antiphon-2=proper`
+- `resolution:saturday-psalm-antiphon-3=proper`
+- `resolution:saturday-psalm-antiphon-4=proper`
 - `resolution:short-responsory=commons`
 - `resolution:short-responsory=ordinary`
 - `resolution:short-responsory=proper`

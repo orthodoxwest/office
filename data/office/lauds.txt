@@ -124,8 +124,115 @@ Ref = canticles/benedicite
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Psalmody-Saturday-BVM]
+Condition = feast-saturday-office-bvm,not-season-easter
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/143a
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/143b
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-3
+
+Type = canticle
+Ref = canticles/sirach-36
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-3
+
+[Psalmody-Saturday-BVM-Easter-Fallback]
+Condition = feast-saturday-office-bvm,season-easter
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/093
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/100
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/063
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/benedicite
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Festal]
-Condition = is-feast,not-feast-easter-sunday
+Condition = is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm
 Label = The Psalms
 
 Type = psalm
@@ -540,7 +647,49 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Laudate-Saturday-Festal]
-Condition = is-feast,weekday-saturday,not-feast-easter-sunday
+Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+[Laudate-Saturday-BVM]
+Condition = feast-saturday-office-bvm,not-season-easter
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-4
+
+Type = psalm
+Ref = psalms/148
+
+Type = psalm
+Ref = psalms/149
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = saturday-psalm-antiphon-4
+
+[Laudate-Saturday-BVM-Easter-Fallback]
+Condition = feast-saturday-office-bvm,season-easter
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5

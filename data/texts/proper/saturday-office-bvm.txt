@@ -1,3 +1,19 @@
+[saturday-psalm-antiphon-1]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96, 101 (Saturday festal psalmody)
+Be favourable, * O Lord, and gracious.
+
+[saturday-psalm-antiphon-2]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 101–102 (Saturday festal psalmody)
+Hearken unto me, O Lord, * for thy truth and righteousness' sake.
+
+[saturday-psalm-antiphon-3]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 102–103 (Saturday festal psalmody)
+Show us, * O Lord, the light of thy mercy.
+
+[saturday-psalm-antiphon-4]
+# SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 103–104 (Saturday festal psalmody)
+Upon the well-tuned cymbals * O praise God.
+
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 106
 !Sir 24:9-10
