@@ -277,7 +277,7 @@ FEBRUARY
            Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said unto Adam · Suff.
                Com. Office of the V Sunday after Epiphany ("The master saith: Gather ye together first the tares")
   8  Sun     Septuagesima Sunday                        [2cl] v
-           Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
+           Lauds   v · Ben. The kingdom · No Preces · Suff.
            Hours   Preces
            Vespers v · II prec. · Mag. The householder saith unto his labourers · Suff.
                Com. St Apollonia of Alexandria, Virgin & Martyr ("This is one of the wise virgins")
@@ -349,7 +349,7 @@ FEBRUARY
            Hours   Preces
            Vespers v · I fol. (Quinquagesima Sunday) · Mag. The father of our faith · Suff.
  22  Sun     Quinquagesima Sunday                       [2cl] v
-           Lauds   v · Ben. Praise ye the Lord · No Preces · Suff.
+           Lauds   v · Ben. Behold, we go up · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the shepherd of the sheep · No Suff.
                Com. Quinquagesima Sunday ("The father of our faith")
@@ -771,15 +771,15 @@ APRIL
  30  Thu     Octave Day of St. George                   [gd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (Ss. Philip and James, Apostles) · Mag. Let not your heart be troubled · No Suff.
+           Vespers r · I fol. (Ss. Philip and James, Apostles) · Mag. Let not your heart · No Suff.
                Com. Octave Day of St. George ("Whosoever shall confess Me")
 
 MAY
 ------------------------------------------------------------
   1  Fri  L  Ss. Philip and James, Apostles             [2cl] r
-           Lauds   r · Ben. I am the Way · No Preces · No Suff.
+           Lauds   r · Ben. I am the way · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. If ye love Me · No Suff.
+           Vespers r · II prec. · Mag. If ye abide in me · No Suff.
                Com. St. Athanasius ("Behold an high priest")
   2  Sat     St. Athanasius                             [d]   w
            Lauds   w · Ben. Well done · No Preces · No Suff.
@@ -894,26 +894,26 @@ MAY
  20  Wed     Vigil of the Ascension                     [s]   w
            Lauds   w · Ben. Father, the hour is come · No Preces · No Suff.
            Hours   Preces
-           Vespers w · I fol. (Ascension of Our Lord) · Mag. O King of glory, Lord of hosts · No Suff.
+           Vespers w · I fol. (Ascension of Our Lord) · Mag. Father · No Suff.
  21  Thu     ASCENSION OF OUR LORD                      [1cl] w
-           Lauds   w · Ben. I ascend to my Father · No Preces · No Suff.
+           Lauds   w · Ben. I ascend · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. O King of glory, Lord of hosts · No Suff.
+           Vespers w · II prec. · Mag. O King of glory · No Suff.
  22  Fri  L  Day II within the Octave of the Ascension  [sd]  w
            St. Romanus, Abbot (com)
-           Lauds   w · Ben. I ascend to my Father · No Preces · No Suff.
+           Lauds   w · Ben. I ascend · No Preces · No Suff.
                Com. St. Romanus, Abbot ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
-           Vespers w · Mag. O King of glory, Lord of hosts · No Suff.
+           Vespers w · Mag. O King of glory · No Suff.
  23  Sat     Day III within the Octave of the Ascension [sd]  w
-           Lauds   w · Ben. I ascend to my Father · No Preces · No Suff.
+           Lauds   w · Ben. I ascend · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Sunday within the Octave of the Ascension) · Mag. But when the Comforter is come · No Suff.
+           Vespers w · I fol. (Sunday within the Octave of the Ascension) · Mag. When the Comforter is come · No Suff.
                Com. Day III within the Octave of the Ascension ("Ye men of Galilee")
                Com. St Vincent of Lerins, Confessor ("Lord, Thou deliverest unto me five talents")
  24  Sun     Sunday within the Octave of the Ascension  [sd]  w
            St Vincent of Lerins, Confessor (com)
-           Lauds   w · Ben. But when the Comforter is come · No Preces · No Suff.
+           Lauds   w · Ben. When the Comforter is come · No Preces · No Suff.
                Com. St Vincent of Lerins, Confessor ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
            Vespers w · II prec. · Mag. These things have I told · No Suff.
@@ -921,7 +921,7 @@ MAY
                Com. St Urban, Bishop & Martyr ("Whosoever shall confess me")
  25  Mon     Day V within the Octave of the Ascension   [sd]  w
            St Urban, Bishop & Martyr (com)
-           Lauds   w · Ben. I ascend to my Father · No Preces · No Suff.
+           Lauds   w · Ben. I ascend · No Preces · No Suff.
                Com. St Urban, Bishop & Martyr ("Whosoever shall confess me")
            Hours   No Preces
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
@@ -946,12 +946,12 @@ MAY
                Com. St John I, Bishop & Martyr ("Whosoever shall confess me")
                Com. Day VII within the Octave of the Ascension ("Ye men of Galilee")
            Hours   No Preces
-           Vespers w · I fol. (Octave Day of the Ascension) · Mag. O King of glory, Lord of hosts · No Suff.
+           Vespers w · I fol. (Octave Day of the Ascension) · Mag. Father · No Suff.
                Com. St Bede the Venerable, Confessor & Doctor ("Behold an high priest")
  28  Thu     Octave Day of the Ascension                [gd]  w
-           Lauds   w · Ben. I ascend to my Father · No Preces · No Suff.
+           Lauds   w · Ben. I ascend · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. O King of glory, Lord of hosts · No Suff.
+           Vespers w · II prec. · Mag. O King of glory · No Suff.
  29  Fri  L  Feria                                            w
            Lauds   w · Ben. But when the Comforter is come · No Preces · No Suff.
            Hours   No Preces
@@ -1154,14 +1154,14 @@ JUNE
                Com. St Leo II, Bishop & Confessor ("Behold a great priest")
                Com. Day V within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
-           Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. They will deliver you up · No Suff.
+           Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. Thou art the shepherd of the sheep · No Suff.
                Com. Day VI within the Octave of St John Baptist ("He shall go before him")
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
            Day VI within the Octave of St John Baptist (sd)
-           Lauds   r · Ben. Thus saith the Lord · No Preces · No Suff.
+           Lauds   r · Ben. Whatsoever · No Preces · No Suff.
                Com. Day VI within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Thou art Peter · No Suff.
+           Vespers r · II prec. · Mag. Today · No Suff.
                Com. St Paul, Apostle ("This is my commandment")
  30  Tue     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)
@@ -1207,7 +1207,7 @@ JULY
                Com. Day V within the Octave of Ss Peter & Paul ("Peter and John")
                Com. Day VI within the Octave of Ss Peter & Paul ("Peter and John")
   4  Sat     Day VI within the Octave of Ss Peter & Paul [sd]  r
-           Lauds   r · Ben. Thus saith the Lord · No Preces · No Suff.
+           Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
            Vespers g · I fol. (V Sunday after Pentecost) · Mag. Ye mountains of Gilboa · No Suff.
                Com. Day VI within the Octave of Ss Peter & Paul ("Peter and John")
@@ -1221,9 +1221,9 @@ JULY
                Com. Day VII within the Octave of Ss Peter & Paul ("Peter and John")
                Com. The Octave of Ss Peter & Paul ("Peter and John")
   6  Mon     The Octave of Ss Peter & Paul              [gd]  r
-           Lauds   r · Ben. Thus saith the Lord · No Preces · No Suff.
+           Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Thou art Peter · No Suff.
+           Vespers r · II prec. · Mag. Today · No Suff.
                Com. Ss. Cyril and Methodius, Bishops & Confessors ("Behold a great priest")
   7  Tue     Ss. Cyril and Methodius, Bishops & Confessors [d]   w
            Lauds   w · Ben. In holiness · No Preces · No Suff.
@@ -2300,14 +2300,14 @@ DECEMBER
  24  Thu  L§ VIGIL OF THE NATIVITY OF OUR LORD          [1cl] v
            Lauds   v · Ben. The Saviour · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Nativity of Our Lord Jesus Christ) · Mag. This day the Christ is born this day the… · No Suff.
+           Vespers w · I fol. (Nativity of Our Lord Jesus Christ) · Mag. When the sun hath risen · No Suff.
                Com. St Anastasia, Virgin & Martyr ("This is one of the wise virgins")
  25  Fri     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
            St Anastasia, Virgin & Martyr (com)
-           Lauds   w · Ben. Glory be to God in the highest · No Preces · No Suff.
+           Lauds   w · Ben. Glory · No Preces · No Suff.
                Com. St Anastasia, Virgin & Martyr ("This is one of the wise virgins")
            Hours   No Preces
-           Vespers w · II prec. · Mag. This day the Christ is born this day the… · No Suff.
+           Vespers w · II prec. · Mag. Today · No Suff.
                Com. St. Stephen, Protomartyr ("And Stephen")
  26  Sat     St. Stephen, Protomartyr                   [2cl] r
            Day II within the Nativity Octave (sd)
@@ -2339,7 +2339,7 @@ DECEMBER
                Com. Day V within the Nativity Octave ("The King of Peace")
                Com. Day VI within the Nativity Octave ("The King of Peace")
  30  Wed     Day VI within the Nativity Octave          [sd]  w
-           Lauds   w · Ben. Glory be to God in the highest · No Preces · No Suff.
+           Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (St. Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
                Com. Day VI within the Nativity Octave ("The King of Peace")

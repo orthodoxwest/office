@@ -1,29 +1,30 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-Have mercy upon me, * O God, and cleanse me from my sin, for against thee only have I sinned.
+# SOURCE: draft archdiocesan Lauds book, p. 143 (Septuagesima Sunday)
+Have mercy, O God, upon me, * and cleanse me from my wickedness; for against thee only have I sinned.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-Have mercy upon me, * O God, and cleanse me from my sin, for against thee only have I sinned.
+# SOURCE: draft archdiocesan Lauds book, p. 143 (Septuagesima Sunday)
+Have mercy, O God, upon me, * and cleanse me from my wickedness; for against thee only have I sinned.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-I will praise thee, * for thou hast heard me.
+# SOURCE: draft archdiocesan Lauds book, p. 144 (Septuagesima Sunday)
+I will thank thee, * for thou hast heard me.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-O God, Thou art my God, * early will I seek thee, because thou hast been my help.
+# SOURCE: draft archdiocesan Lauds book, p. 146 (Septuagesima Sunday)
+O God, thou art my God, * early will I seek thee, because thou hast been my helper.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-Blessed art thou, * O our God, in the firmament of heaven, and worthy to be praised above all for ever.
+# SOURCE: draft archdiocesan Lauds book, p. 147 (Septuagesima Sunday)
+Blessed art thou * in the firmament of heaven: and worthy to be praised for ever, O our God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Ant Laudes] — check against diurnal
-Praise ye the Lord * from the heavens.
+# SOURCE: draft archdiocesan Lauds book, p. 148 (Septuagesima Sunday)
+O praise * the Lord of heaven.
 
 [benedictus-antiphon]
-Praise ye the Lord * from the heavens.
+# SOURCE: draft archdiocesan Lauds book, p. 153 (Septuagesima Sunday)
+The kingdom * of heaven is like unto a man that is an householder, which went out early in the morning to hire labourers into his vineyard, saith the Lord.
 
 [magnificat-antiphon]
 The householder saith unto his labourers: * Why stand ye here all the day idle? But they answered and said: Because no man hath hired us. Go ye also into my vineyard, and whatsoever is right, that will I give you.

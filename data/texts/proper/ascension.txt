@@ -27,10 +27,16 @@ While they beheld, * he was taken up, and a cloud received him out of their sigh
 While they beheld, * he was taken up, and a cloud received him out of their sight, alleluia.
 
 [benedictus-antiphon]
-I ascend to my Father * and to your Father: to my God and your God, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 297 (The Ascension of Our Lord)
+I ascend * unto my Father, and your Father: and to my God, and your God, alleluia.
 
 [magnificat-antiphon]
-O King of glory, Lord of hosts, * Who hast this day exalted thine Own Self, with great triumph, above all the heavens, leave us not orphans but send unto us the Promise of the Father, even the Spirit of truth, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 179 (II Vespers, The Ascension of Our Lord)
+O King of glory, * thou Lord of Sabaoth, who triumphing to-day hast ascended above all heavens, leave us not comfortless; but send on us the promise of the Father, even the Spirit of truth, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 178 (I Vespers, The Ascension of Our Lord)
+Father, * I have manifested thy Name unto the men which thou gavest me: and now I pray for them, not for the world, because I come to thee, alleluia.
 
 [commemoration-antiphon]
 Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.
@@ -40,12 +46,13 @@ V. God is ascended with jubilee, alleluia.
 R. And the Lord with the sound of trumpet, alleluia.
 
 [collect]
-Grant, we beseech thee, Almighty God, that just as we do believe thine Only-Begotten Son, our Saviour, to have this day ascended into the heavens, so we may also in heart and mind thither ascend, and with Him continually dwell.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 298, 180 (The Ascension of Our Lord)
+Grant, we beseech thee, Almighty God, that like as we do believe thy only-begotten Son our Redeemer to have this day ascended into the heavens; so we may also in mind dwell in heavenly places.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] — check against diurnal
-!Act. 1:1-2
-The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+# SOURCE: draft archdiocesan Lauds book, p. 294 (The Ascension of Our Lord)
+!Acts 1:1-2
+The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -55,74 +62,92 @@ And eating together with them, he commanded them, that they should not depart fr
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Hymnus Laudes] — check against diurnal
-Salutis humanae Sator
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 295, 177 (The Ascension of Our Lord)
+Jesu, nostra redemptio
 
-Hail, thou who man's Redeemer art,
-Jesu, the joy of every heart;
-Great Maker of the world's wide frame,
-And purest love's delight and flame:
+Jesu, Redemption all divine,
+Whom here we love, for whom we pine,
+God, working out creation's plan,
+And in the latter time made Man;
 
-What nameless mercy thee o'ercame,
-To bear our load of sin and shame?
-For guiltless, thou thy life didst give,
-That sinful erring man might live.
+What love of thine was that, which led
+To take our woes upon thy head,
+And pangs and cruel death to bear
+To ransom us from death's despair.
 
-The realms of woe are forced by thee,
-Its captives from their chains set free;
-And thou, amid thy ransomed train,
-At God's right hand dost victor reign.
+To thee hell's gate gave ready way,
+Demanding there his captive prey;
+And now in pomp and victor's pride
+Thou sittest at thy Father's side.
 
-Let mercy sweet with thee prevail,
-To cure the wounds we now bewail;
-Oh, bless us with thy holy sight,
-And fill us with eternal light.
+Let very mercy force thee still
+To spare us, conquering all our ill;
+And, granting that we ask, on high
+With thine own face to satisfy.
 
-Our guide, our way to heavenly rest,
-Be thou the aim of every breast;
-Be thou the soother of our tears,
-Our sweet reward above the spheres.
+Be thou our joy and thou our Guard,
+Who art to be our great reward;
+Our glory and our boast in thee
+For ever and for ever be.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Hymnus Vespera] — check against diurnal
-Salutis humanae Sator
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 295, 177 (The Ascension of Our Lord)
+Jesu, nostra redemptio
 
-Hail, thou who man's Redeemer art,
-Jesu, the joy of every heart;
-Great Maker of the world's wide frame,
-And purest love's delight and flame:
+Jesu, Redemption all divine,
+Whom here we love, for whom we pine,
+God, working out creation's plan,
+And in the latter time made Man;
 
-What nameless mercy thee o'ercame,
-To bear our load of sin and shame?
-For guiltless, thou thy life didst give,
-That sinful erring man might live.
+What love of thine was that, which led
+To take our woes upon thy head,
+And pangs and cruel death to bear
+To ransom us from death's despair.
 
-The realms of woe are forced by thee,
-Its captives from their chains set free;
-And thou, amid thy ransomed train,
-At God's right hand dost victor reign.
+To thee hell's gate gave ready way,
+Demanding there his captive prey;
+And now in pomp and victor's pride
+Thou sittest at thy Father's side.
 
-Let mercy sweet with thee prevail,
-To cure the wounds we now bewail;
-Oh, bless us with thy holy sight,
-And fill us with eternal light.
+Let very mercy force thee still
+To spare us, conquering all our ill;
+And, granting that we ask, on high
+With thine own face to satisfy.
 
-Our guide, our way to heavenly rest,
-Be thou the aim of every breast;
-Be thou the soother of our tears,
-Our sweet reward above the spheres.
+Be thou our joy and thou our Guard,
+Who art to be our great reward;
+Our glory and our boast in thee
+For ever and for ever be.
 Amen.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Versum 2] — check against diurnal
-V. The Lord in heaven, alleluia.
-R. Hath prepared his throne, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 296 (The Ascension of Our Lord)
+V. The Lord hath prepared, alleluia.
+R. His seat in heaven, alleluia.
 
 [versicle-vespers]
-# SOURCE: divinum-officium TemporaM/Pasc5-4 [Versum 1] — check against diurnal
-V. God is ascended with jubilee, alleluia.
-R. And the Lord with the sound of trumpet, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 178 (I and II Vespers, The Ascension of Our Lord)
+V. God is gone up with a merry noise, alleluia.
+R. And the Lord with the sound of the trump, alleluia.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 295 (The Ascension of Our Lord)
+R. God is gone up with a merry noise, * alleluia, alleluia.
+R. God is gone up with a merry noise, * alleluia, alleluia.
+V. And the Lord with the sound of the trump.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God is gone up with a merry noise, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 176 (The Ascension of Our Lord)
+R. When Christ ascended up on high, * alleluia, alleluia.
+R. When Christ ascended up on high, * alleluia, alleluia.
+V. He led captivity captive.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. When Christ ascended up on high, * alleluia, alleluia.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Tertia] — check against diurnal
@@ -152,13 +177,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I ascend to my Father and to your Father. * Alleluia, alleluia.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Act. 1:1-2
-The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+# SOURCE: draft archdiocesan Vespers book, p. 176 (The Ascension of Our Lord)
+!Acts 1:1-2
+The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
 R. Thanks be to God.
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Act. 1:1-2
-The former treatise I made, O Theophilus, of all things which Jesus began to do and to teach, Until the day on which, giving commandments by the Holy Ghost to the apostles whom he had chosen, he was taken up.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 294, 176 (festal chapter used at Terce)
+!Acts 1:1-2
+The former treatise have I made, O Theophilus, of all that Jesus began both to do and teach, until the day in which he was taken up, after that he through the Holy Ghost had given commandments unto the Apostles whom he had chosen.
 R. Thanks be to God.

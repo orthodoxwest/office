@@ -1,40 +1,67 @@
 [psalm-antiphon]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-Lord, show us the Father, * and it sufficeth us. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 449, 362, 371 (Saints Philip and James)
+Lord, * shew us the Father, and it sufficeth us, alleluia.
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-Lord, show us the Father, * and it sufficeth us. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 449, 362, 371 (Saints Philip and James)
+Lord, * shew us the Father, and it sufficeth us, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-Philip, * He that hath seen Me hath seen the Father. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 449, 363, 372 (Saints Philip and James)
+Philip, * he that hath seen me hath seen my Father also, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-Have I been so long time with you, and yet hast thou not known Me * Philip, he that hath seen Me hath seen the Father. Alleluia.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 450, 364, 373 (Saints Philip and James)
+Have I been * so long time with you, and yet hast thou not known me, Philip? he that hath seen me hath seen my Father also, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-If ye had known Me ye should have known My Father also, * and from henceforth ye know Him and have seen Him. Alleluia, Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 451 (Saints Philip and James)
+If ye had known me, * ye should have known my Father also, and from henceforth ye know him, and have seen him, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/05-01 [Ant Vespera] — check against diurnal
-If ye love Me, * keep My commandments. Alleluia, Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 452 (Saints Philip and James)
+If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 365, 374 (I and II Vespers for Saints Philip and James)
+If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 362 (I Vespers for Saints Philip and James)
+Lord, * shew us the Father, and it sufficeth us, alleluia.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 363 (I Vespers for Saints Philip and James)
+Philip, * he that hath seen me hath seen my Father also, alleluia.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 364 (I Vespers for Saints Philip and James)
+Have I been * so long time with you, and yet hast thou not known me, Philip? he that hath seen me hath seen my Father also, alleluia.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 365 (I Vespers for Saints Philip and James)
+If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
 
 [magnificat-antiphon]
-If ye love Me, * keep My commandments. Alleluia, Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 378 (II Vespers for Saints Philip and James)
+If ye abide in me, * and my words abide in you, ye shall ask what ye will, and it shall be done unto you, alleluia, alleluia, alleluia.
 
 [commemoration-antiphon]
-Lord, show us the Father, * and it sufficeth us. Alleluia.
+Lord, * shew us the Father, and it sufficeth us, alleluia.
 
 [collect]
-O God, Who dost every year gladden us by the solemn memorial of thine Apostles Philip and James, grant us grace, we beseech thee, not only to rejoice because of their worthy deeds, but also to tread in their footsteps.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 457, 370, 379 (Saints Philip and James)
+O God, who makest us glad by the yearly solemnity of thine Apostles Philip and James: grant, we beseech thee, that we who rejoice in their merits may be taught by their example.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/05-01 [Ant 2] — check against diurnal
-I am the Way * the Truth, and the Life: no man cometh unto the Father, but by Me. Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 456 (Saints Philip and James)
+I am the way, * the truth, and the life: no man cometh unto the Father, but by me, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/05-01.txt [Ant 1] — check against diurnal
-Let not your heart be troubled * ye believe in God, believe also in Me. In MyFather’s house are many mansions. Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 369 (I Vespers for Saints Philip and James)
+Let not your heart * be troubled, neither let it be afraid; ye believe in God, believe also in me: in my Father's house are many mansions, alleluia, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 369 (I Vespers for Saints Philip and James)
+V. O ye holy and righteous, rejoice in the Lord, alleluia.
+R. God hath chosen you to him to be his inheritance, alleluia.
