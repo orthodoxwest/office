@@ -69,6 +69,51 @@ All praise, O Holy Ghost, to thee,
 While never-ending ages run.
 Amen.
 
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 627 (Common of One Martyr out of Paschaltide)
+!Jas 1:12
+Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 575 (Common of One Martyr out of Paschaltide)
+!Jas 1:12
+Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 628 (Common of One Martyr out of Paschaltide)
+R. Thou hast crowned him * with glory and honour, O Lord.
+R. Thou hast crowned him * with glory and honour, O Lord.
+V. And madest him to have dominion of the works of thy hands.
+R. With glory and honour, O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast crowned him * with glory and honour, O Lord.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 584 (II Vespers, Common of One Martyr out of Paschaltide)
+R. Thou hast set * upon his head, O Lord.
+R. Thou hast set * upon his head, O Lord.
+V. A crown of pure gold.
+R. Upon his head, O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou hast set * upon his head, O Lord.
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 629 (Common of One Martyr out of Paschaltide)
+V. The righteous shall flourish like a palm-tree.
+R. And shall spread abroad like a cedar in Libanus.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 585 (II Vespers, Common of One Martyr out of Paschaltide)
+V. The righteous shall flourish like a palm tree.
+R. And shall spread abroad like a cedar in Libanus.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 577 (I Vespers, Common of One Martyr out of Paschaltide)
+V. Thou hast crowned him with glory and honour, O Lord.
+R. And madest him to have dominion of the works of thy hands.
+
 [hymn-vespers]
 # SOURCE: divinum-officium CommuneM/C2a [HymnusM Vespera] — check against diurnal
 Deus tuorum militum

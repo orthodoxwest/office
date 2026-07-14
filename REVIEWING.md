@@ -145,6 +145,45 @@ the exact page contents automatically, so any later edit makes the unit show
 up as **stale** in `review-status` until re-reviewed. Sign-offs are committed
 to git like any other data change.
 
+### Pairing against local draft office books
+
+When the local `../resources/` directory contains the full Lauds and Vespers
+DOCX books, generate page-aware source comparisons with:
+
+```bash
+make review-sources
+```
+
+The command extracts into `output/source-reconcile/`, which is gitignored. It
+does not edit the corpus, copy source text into tracked files, or record human
+attestations. Start with `output/source-reconcile/README.md`, then work through
+the small Markdown files under `batches/`. Candidate IDs can be printed again
+without rebuilding:
+
+```bash
+scripts/source-reconcile.py show SR-0001-01234567
+```
+
+Keep local decisions from returning to later batches with the ignored scratch
+ledger:
+
+```bash
+scripts/source-reconcile.py decide retain SR-0001-01234567 --note "current text is intentional"
+scripts/source-reconcile.py decide defer SR-0002-89abcdef --note "needs seasonal variants"
+make review-sources
+```
+
+Use `applied` after a corpus change has been validated, `manual` when a source
+lead has become a hand-entry task, and `pending` to remove a prior decision.
+Both the extracted excerpts and `decisions.csv` remain under the gitignored
+`output/source-reconcile/` tree.
+
+For each candidate, compare the page-aware source extraction with the current
+corpus and decide to retain it, replace it from the source, edit it manually,
+or defer it. Apply and validate accepted changes in small batches. Record a
+`review attest` entry only after a person has actually checked the wording;
+the reconciliation script deliberately never marks its own matches verified.
+
 ### Annual cadence
 
 The checklist deliberately covers only the current year — the archdiocese

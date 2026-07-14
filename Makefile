@@ -1,4 +1,4 @@
-.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance tex pdf golden clean
+.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -11,6 +11,7 @@ build: ## Build the binary
 test: ## Run all tests
 	go test ./...
 	python3 scripts/test_ordo_compare.py
+	python3 scripts/test_source_reconcile.py
 
 lint: ## Run staticcheck linter
 	staticcheck ./...
@@ -61,6 +62,9 @@ review-plan: build ## Print minimal coverage-oriented review checklist CSV
 
 review-assurance: build ## Run release assurance coverage gates
 	./office review assurance
+
+review-sources: build ## Build disposable source-vs-corpus review packets under output/
+	python3 scripts/source-reconcile.py build --resources ../resources --data data --office ./office --output output/source-reconcile
 
 DATE ?= $(shell date +%Y-%m-%d)
 CHANT ?=

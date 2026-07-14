@@ -208,6 +208,15 @@ R. Thy works, O Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. How great are thy works, O Lord.
 
+[short-responsory-saturday]
+# SOURCE: draft archdiocesan Vespers book, p. 214 (Saturdays Throughout the Year)
+R. Great is our Lord * and great is his power.
+R. Great is our Lord * and great is his power.
+V. Yea, and his wisdom is infinite.
+R. And great is his power.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Great is our Lord * and great is his power.
+
 [versicle]
 V. Let my prayer be set forth in thy sight as the incense.
 R. And let the lifting up of my hands be an evening sacrifice.

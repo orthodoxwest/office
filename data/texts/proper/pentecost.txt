@@ -146,6 +146,24 @@ R. And began to speak, alleluia.
 V. They were all filled with the Holy Ghost, alleluia.
 R. And began to speak, alleluia.
 
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)
+R. The Spirit of the Lord hath filled the whole world * alleluia, alleluia.
+R. The Spirit of the Lord hath filled the whole world * alleluia, alleluia.
+V. And that which containeth all things hath knowledge of the voice.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Spirit of the Lord hath filled the whole world * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 185 (The Feast of Pentecost)
+R. The Holy Ghost, the Comforter * alleluia, alleluia.
+R. The Holy Ghost, the Comforter * alleluia, alleluia.
+V. Shall teach you all things.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Holy Ghost, the Comforter * alleluia, alleluia.
+
 [short-responsory-terce]
 # SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Tertia] — check against diurnal
 R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
