@@ -69,8 +69,12 @@ func DetermineSeason(date time.Time, moveable *MoveableDates) models.Season {
 //	alma-redemptoris-advent:    day before Advent 1 through Dec 24
 //	alma-redemptoris-christmas: Dec 25 through Feb 1
 //	ave-regina-caelorum:        Feb 2 through Holy Wednesday
-//	regina-caeli:               Holy Saturday through Saturday of Pentecost octave
-//	salve-regina:               Trinity Sunday through 2 days before Advent 1
+//	regina-caeli:               Holy Saturday through Friday of Pentecost octave
+//	salve-regina:               Saturday of Pentecost octave through 2 days before Advent 1
+//
+// The Saturday handoff follows the office boundary: Regina Caeli is sung
+// through None, then Salve Regina begins with I Vespers of Trinity and is
+// therefore the antiphon at Compline that evening.
 func DetermineMarianAntiphon(date time.Time, moveable *MoveableDates) string {
 	year := date.Year()
 
@@ -81,8 +85,8 @@ func DetermineMarianAntiphon(date time.Time, moveable *MoveableDates) string {
 	feb2 := time.Date(year, 2, 2, 0, 0, 0, 0, time.UTC)
 	holyWednesday := moveable.HolyWednesday
 	holySaturday := moveable.HolySaturday
+	pentecostOctaveFriday := moveable.Pentecost.AddDate(0, 0, 5)
 	pentecostOctaveSaturday := moveable.Pentecost.AddDate(0, 0, 6)
-	trinitySunday := moveable.TrinitySunday
 	twoDaysBeforeAdvent1 := advent1.AddDate(0, 0, -2)
 
 	switch {
@@ -94,9 +98,9 @@ func DetermineMarianAntiphon(date time.Time, moveable *MoveableDates) string {
 		return "alma-redemptoris-christmas"
 	case !date.Before(feb2) && !date.After(holyWednesday):
 		return "ave-regina-caelorum"
-	case !date.Before(holySaturday) && !date.After(pentecostOctaveSaturday):
+	case !date.Before(holySaturday) && !date.After(pentecostOctaveFriday):
 		return "regina-caeli"
-	case !date.Before(trinitySunday) && !date.After(twoDaysBeforeAdvent1):
+	case !date.Before(pentecostOctaveSaturday) && !date.After(twoDaysBeforeAdvent1):
 		return "salve-regina"
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -238,12 +239,18 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 
 // resolveMarianElement resolves the seasonal Marian antiphon (with its versicle,
 // response, and collect) for the given day.
-func resolveMarianElement(day *models.CalendarDay, corpus *texts.TextCorpus) models.OfficeElement {
-	ref := "ordinary/marian/" + day.MarianAntiphon
+func resolveMarianElement(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus) models.OfficeElement {
+	key := day.MarianAntiphon
+	// Alma Redemptoris continues through II Vespers of the Purification;
+	// Ave Regina begins at Compline on February 2.
+	if hourName == "vespers" && day.Date.Month() == time.February && day.Date.Day() == 2 {
+		key = "alma-redemptoris-christmas"
+	}
+	ref := "ordinary/marian/" + key
 	oe := models.OfficeElement{
 		Type:       models.Antiphon,
 		Text:       corpus.Get(ref),
-		Label:      marianLabel(day.MarianAntiphon),
+		Label:      marianLabel(key),
 		SourceRef:  ref,
 		SourceRefs: []string{ref},
 	}
@@ -259,7 +266,7 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	switch elem.Type {
 	case "marian":
 		if elem.Ref == "seasonal" {
-			return resolveMarianElement(day, corpus)
+			return resolveMarianElement(day, hourName, corpus)
 		}
 		return resolveElement(elem, corpus)
 	case "proper-antiphon":

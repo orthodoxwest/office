@@ -37,16 +37,15 @@ func TestDetermineMarianAntiphon(t *testing.T) {
 		{"mid Lent", date(3, 15), "ave-regina-caelorum"},
 		{"Holy Wednesday", moveable.HolyWednesday, "ave-regina-caelorum"},
 
-		// regina-caeli: Holy Saturday through Saturday of Pentecost octave
-		// 2026: Holy Saturday = Apr 11, Pentecost = Jun 2 (Easter+49), octave Sat = Jun 8
+		// regina-caeli at Compline: Holy Saturday through Friday of Pentecost octave
 		{"Holy Saturday", moveable.HolySaturday, "regina-caeli"},
 		{"Easter Sunday", moveable.Easter, "regina-caeli"},
 		{"Ascension", moveable.Ascension, "regina-caeli"},
-		{"Pentecost Saturday", moveable.Pentecost.AddDate(0, 0, 6), "regina-caeli"},
+		{"Pentecost octave Friday", moveable.Pentecost.AddDate(0, 0, 5), "regina-caeli"},
 
-		// salve-regina: Trinity Sunday through 2 days before Advent 1
-		// Note: day before Trinity = Pentecost octave Saturday, which is still Regina Caeli.
-		{"day before Trinity (= Pentecost oct Sat)", moveable.TrinitySunday.AddDate(0, 0, -1), "regina-caeli"},
+		// salve-regina at Compline: from I Vespers of Trinity through 2 days before Advent 1
+		{"Pentecost octave Saturday", moveable.Pentecost.AddDate(0, 0, 6), "salve-regina"},
+		{"day before Trinity (= Pentecost oct Sat)", moveable.TrinitySunday.AddDate(0, 0, -1), "salve-regina"},
 		{"Trinity Sunday", moveable.TrinitySunday, "salve-regina"},
 		{"mid summer", date(7, 15), "salve-regina"},
 		{"Nov 1", date(11, 1), "salve-regina"},
@@ -74,8 +73,9 @@ func TestDetermineMarianAntiphonBoundaries2027(t *testing.T) {
 	}{
 		{"Feb 2", time.Date(2027, 2, 2, 0, 0, 0, 0, time.UTC), "ave-regina-caelorum"},
 		{"Holy Saturday", moveable.HolySaturday, "regina-caeli"},
-		{"Pentecost octave Sat", moveable.Pentecost.AddDate(0, 0, 6), "regina-caeli"},
-		{"day before Trinity (= Pentecost oct Sat)", moveable.TrinitySunday.AddDate(0, 0, -1), "regina-caeli"},
+		{"Pentecost octave Fri", moveable.Pentecost.AddDate(0, 0, 5), "regina-caeli"},
+		{"Pentecost octave Sat", moveable.Pentecost.AddDate(0, 0, 6), "salve-regina"},
+		{"day before Trinity (= Pentecost oct Sat)", moveable.TrinitySunday.AddDate(0, 0, -1), "salve-regina"},
 	}
 
 	for _, tt := range tests {

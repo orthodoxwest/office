@@ -3,6 +3,7 @@ package office
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
@@ -395,4 +396,25 @@ func TestResolveHourElement(t *testing.T) {
 			t.Fatalf("Text = %q, want %q", got.Text, "Ordinary collect")
 		}
 	})
+}
+
+func TestResolveMarianElementUsesFebruarySecondOfficeBoundary(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"ordinary/marian/alma-redemptoris-christmas": "Alma",
+		"ordinary/marian/ave-regina-caelorum":        "Ave",
+	})
+	day := &models.CalendarDay{
+		Date:           time.Date(2026, time.February, 2, 0, 0, 0, 0, time.UTC),
+		MarianAntiphon: "ave-regina-caelorum",
+	}
+
+	vespers := resolveMarianElement(day, "vespers", corpus)
+	if vespers.Text != "Alma" || vespers.Label != "Alma Redemptoris Mater" {
+		t.Fatalf("Vespers Marian antiphon = (%q, %q), want Alma Redemptoris", vespers.Text, vespers.Label)
+	}
+
+	compline := resolveMarianElement(day, "compline", corpus)
+	if compline.Text != "Ave" || compline.Label != "Ave Regina Caelorum" {
+		t.Fatalf("Compline Marian antiphon = (%q, %q), want Ave Regina", compline.Text, compline.Label)
+	}
 }
