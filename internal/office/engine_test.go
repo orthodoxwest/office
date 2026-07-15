@@ -348,6 +348,49 @@ func TestSubstituteHymnDoxology(t *testing.T) {
 	}
 }
 
+func TestUsesAscensionHymnDoxology(t *testing.T) {
+	tests := []struct {
+		name   string
+		date   time.Time
+		season models.Season
+		want   bool
+	}{
+		{"Eastertide before Ascension", time.Date(2026, 5, 20, 0, 0, 0, 0, time.UTC), models.Easter, false},
+		{"Ascension Day", time.Date(2026, 5, 21, 0, 0, 0, 0, time.UTC), models.Easter, true},
+		{"Eastertide after Ascension", time.Date(2026, 5, 30, 0, 0, 0, 0, time.UTC), models.Easter, true},
+		{"Pentecost", time.Date(2026, 5, 31, 0, 0, 0, 0, time.UTC), models.Pentecost, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{Date: tt.date, Season: tt.season}
+			if got := usesAscensionHymnDoxology(day); got != tt.want {
+				t.Fatalf("usesAscensionHymnDoxology() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResolveHourElementUsesAscensionHymnDoxology(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"commons/martyr-paschal/hymn-lauds":       "Martyr hymn\n\nFirst stanza.\n\nEaster ending.\nAmen.",
+		"seasonal/easter/hymn-doxology-ascension": "Ascension ending.\nAmen.",
+	})
+	day := &models.CalendarDay{
+		Date:        time.Date(2026, 5, 21, 0, 0, 0, 0, time.UTC),
+		Season:      models.Easter,
+		Celebration: &models.Feast{ID: "test-martyr", Category: models.CategoryMartyr},
+	}
+
+	got := resolveHourElement(day, "lauds", HourElement{Type: "proper-hymn", Ref: "hymn"}, corpus)
+	if !strings.HasSuffix(got.Text, "Ascension ending.\nAmen.") {
+		t.Fatalf("hymn text = %q, want Ascension ending", got.Text)
+	}
+	if len(got.SourceRefs) != 2 || got.SourceRefs[1] != "seasonal/easter/hymn-doxology-ascension" {
+		t.Fatalf("source refs = %v, want seasonal Ascension doxology dependency", got.SourceRefs)
+	}
+}
+
 func TestResolveHourElement(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"ordinary/lauds/antiphon":    "Ordinary antiphon",

@@ -1,6 +1,14 @@
 # Eastertide seasonal overrides (Easter Sunday through the Saturday after Pentecost)
 # Alleluia is doubled throughout Eastertide.
 
+[hymn-doxology-ascension]
+# SOURCE: draft archdiocesan Lauds/Vespers books (seasonal hymn rubric from Ascension Day until Pentecost)
+All glory, Lord, to thee we pay,
+Ascending o'er the stars today;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
 [alleluia]
 Alleluia, alleluia, alleluia.
 

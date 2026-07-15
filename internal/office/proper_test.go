@@ -414,6 +414,51 @@ func TestResolveProperTextPaschalCommons(t *testing.T) {
 	})
 }
 
+func TestPaschalMartyrCommonsUseSharedOfficeAndNumberedHymns(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+
+	tests := []struct {
+		name     string
+		category models.FeastCategory
+		hour     string
+		ref      string
+		want     string
+	}{
+		{"one martyr Lauds hymn", models.CategoryMartyr, "lauds", "hymn", "Thou foll'west, Martyr of thy God"},
+		{"many martyrs Lauds hymn", models.CategoryMartyrs, "lauds", "hymn", "All glorious King of Martyrs thou"},
+		{"many martyrs Vespers hymn", models.CategoryMartyrs, "vespers", "hymn", "All glorious King of Martyrs thou"},
+		{"shared Vespers antiphon", models.CategoryMartyrs, "vespers", "psalm-antiphon-4", "Then shall the righteous"},
+		{"shared Vespers responsory", models.CategoryMartyrs, "vespers", "short-responsory", "Light perpetual shall shine"},
+		{"shared I Vespers versicle", models.CategoryMartyrs, "vespers", "versicle-first", "O ye holy and righteous"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			refName := tt.ref
+			day := &models.CalendarDay{
+				Date:        time.Date(2026, 4, 23, 0, 0, 0, 0, time.UTC),
+				Season:      models.Easter,
+				Celebration: &models.Feast{ID: "test-martyrs", Category: tt.category},
+			}
+			if refName == "versicle-first" {
+				day.FirstVespers = true
+				refName = "versicle"
+			}
+			got, ref := resolveProperText(day, tt.hour, refName, corpus)
+			if !strings.Contains(got, tt.want) {
+				t.Fatalf("text = %q, want it to contain %q", got, tt.want)
+			}
+			wantPrefix := "commons/" + string(tt.category) + "-paschal/"
+			if !strings.HasPrefix(ref, wantPrefix) {
+				t.Fatalf("source ref = %q, want prefix %q", ref, wantPrefix)
+			}
+		})
+	}
+}
+
 func TestResolveProperTextSeasonalHourQualified(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"seasonal/lent/antiphon-lauds": "Lent lauds antiphon",

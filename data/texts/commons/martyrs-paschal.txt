@@ -1,40 +1,83 @@
-# Paschal variant of the Common of a Martyr.
-# Add sections here that differ during Paschaltide (Easter season).
-# Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
+# Paschal variant of the Common of Many Martyrs.
+# The local books provide one shared office for one or many martyrs in
+# Paschaltide; only the hymns vary with the number of martyrs.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyrs-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-5
 
-[benedictus-antiphon]
-@use commons/martyr-paschal/benedictus-antiphon
-
-[magnificat-antiphon]
-@use commons/martyr-paschal/magnificat-antiphon
-
-[magnificat-antiphon-first]
-@use commons/martyr-paschal/magnificat-antiphon-first
+[psalm-antiphon-4-vespers]
+@use commons/martyr-paschal/psalm-antiphon-4-vespers
 
 [chapter-lauds]
 @use commons/martyr-paschal/chapter-lauds
 
+[chapter-vespers]
+@use commons/martyr-paschal/chapter-vespers
+
 [short-responsory-lauds]
 @use commons/martyr-paschal/short-responsory-lauds
 
+[short-responsory-vespers]
+@use commons/martyr-paschal/short-responsory-vespers
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 648-649 (Common of One or Many Martyrs in Paschaltide)
+Rex gloriose Martyrum
+
+All glorious King of Martyrs thou,
+Crown of Confessors here below,
+Whom, casting earthly joys away,
+Thou guidest to celestial day:
+
+Thine ear in mercy, Saviour, lend,
+While unto thee our prayers ascend:
+And as we count their triumphs won,
+Forgive the sins that we have done.
+
+Martyrs in thee their triumph gain;
+From thee, Confessors grace obtain:
+O'ercome in us the lust of sin,
+That we thy pard'ning love may win.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 611-612, 620-621 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/martyrs-paschal/hymn-lauds
+
 [versicle-lauds]
 @use commons/martyr-paschal/versicle-lauds
+
+[versicle-first-vespers]
+@use commons/martyr-paschal/versicle-first-vespers
+
+[versicle-vespers]
+@use commons/martyr-paschal/versicle-vespers
+
+[benedictus-antiphon]
+@use commons/martyr-paschal/benedictus-antiphon
+
+[magnificat-antiphon-first]
+@use commons/martyr-paschal/magnificat-antiphon-first
+
+[magnificat-antiphon]
+@use commons/martyr-paschal/magnificat-antiphon
