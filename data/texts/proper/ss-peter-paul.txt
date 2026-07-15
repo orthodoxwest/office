@@ -2,6 +2,7 @@
 @use proper/ss-peter-paul/psalm-antiphon-1
 
 [psalm-antiphon-1]
+# SOURCE: draft archdiocesan Lauds book, p. 473 (Saints Peter and Paul, Apostles)
 Peter and John * went up together into the temple at the ninth hour, being the hour of prayer.
 
 [psalm-antiphon-2]
@@ -9,9 +10,11 @@ Peter and John * went up together into the temple at the ninth hour, being the h
 Silver and gold have I none; * but such as I have, give I thee.
 
 [psalm-antiphon-3]
+# SOURCE: draft archdiocesan Lauds book, p. 474 (Saints Peter and Paul, Apostles)
 The Angel said unto Peter, * Cast thy garment about thee, and follow me.
 
 [psalm-antiphon-4]
+# SOURCE: draft archdiocesan Lauds book, p. 475 (Saints Peter and Paul, Apostles)
 The Lord hath sent his Angel, * and hath delivered me out of the hand of Herod, alleluia.
 
 [psalm-antiphon-5]
@@ -68,6 +71,7 @@ Peter therefore was kept in prison. But prayer was made without ceasing of the C
 R. Thanks be to God.
 
 [hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 479 (Saints Peter and Paul, Apostles)
 Jam, bone Pastor, Petre
 
 Peter, good shepherd, may thy ceaseless orisons,

@@ -45,30 +45,30 @@ R. He clothed him with a robe of glory.
 @use commons/confessor-bishop/chapter-lauds
 
 [hymn-lauds]
-# SOURCE: divinum-officium CommuneM/C4a [HymnusM Laudes] — check against diurnal
+# SOURCE: office-hymns.zip (Jesu, the World_s Redeemer Hear.docx)
 Jesu Redemptor omnium
 
-Jesu, the world's Redeemer, O hear;
-thy bishops' fadeless crown, draw near:
+Jesu, the world's Redeemer, hear;
+Thy Bishop's fadeless crown, draw near:
 Accept with gentlest love today
 The prayers and praises that we pay.
 
-The meek confessor of thy name
-Today attained a glorious fame;
+This meek Confessor of thy Name
+Today attain'd a glorious fame;
 Whose yearly feast, in solemn state,
 Thy faithful people celebrate.
 
 The world and all its boasted good,
 As vain and passing, he eschewed;
-And therefore with angelic bands,
-In endless joy forever stands.
+And therefore with Angelic bands
+In endless joy for ever stands.
 
 Grant then that we, most gracious God,
 May follow in the steps he trod:
-And, at his prayer, thy servants free
+And at his prayer thy servants free
 From stain of all iniquity.
 
-* To thee, O Christ, our loving King,
+To thee, O Christ, our loving King,
 All glory, praise, and thanks we bring:
 All glory, as is ever meet,
 To Father and to Paraclete.
