@@ -56,6 +56,8 @@ func evaluateConditionKnown(condition string, day *models.CalendarDay, moveable 
 		return day.Celebration != nil &&
 			day.Celebration.Category != models.CategoryFeria &&
 			day.Celebration.Category != models.CategorySunday, true
+	case "festal-lauds-psalmody":
+		return usesFestalLaudsPsalmody(day), true
 	case "is-ferial":
 		if day.Celebration == nil {
 			return true, true
@@ -73,6 +75,22 @@ func evaluateConditionKnown(condition string, day *models.CalendarDay, moveable 
 		}
 		return false, false
 	}
+}
+
+// usesFestalLaudsPsalmody reports whether Lauds takes the festal psalms. Most
+// Sunday offices retain the Sunday psalter, but the printed office for the
+// Sunday within the Epiphany octave explicitly shares the feast's psalmody.
+func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
+	if day == nil || day.Celebration == nil {
+		return false
+	}
+	for _, id := range feastProperIDs(day.Celebration) {
+		if id == "epiphany-sunday-within-octave" {
+			return true
+		}
+	}
+	return day.Celebration.Category != models.CategoryFeria &&
+		day.Celebration.Category != models.CategorySunday
 }
 
 // shouldSayPreces determines whether preces should be said at the Little Hours and Compline.

@@ -13,6 +13,7 @@ func TestIsValidCondition(t *testing.T) {
 	}{
 		// Named conditions
 		{"if-preces", true},
+		{"festal-lauds-psalmody", true},
 
 		// feast- prefix
 		{"feast-easter-sunday", true},

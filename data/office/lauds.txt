@@ -70,7 +70,7 @@ Type = proper-antiphon
 Ref = easter-antiphon-4
 
 [Psalmody-Sunday]
-Condition = not-feast-easter-sunday,weekday-sunday,not-is-feast
+Condition = not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -232,7 +232,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Festal]
-Condition = is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm
+Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm
 Label = The Psalms
 
 Type = psalm

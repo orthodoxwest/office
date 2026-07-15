@@ -29,7 +29,7 @@ func isValidCondition(condition string) bool {
 		return isValidCondition(condition[4:])
 	}
 	switch condition {
-	case "if-preces", "is-feast", "is-ferial", "if-suffrage", "if-cross-commemoration":
+	case "if-preces", "is-feast", "is-ferial", "festal-lauds-psalmody", "if-suffrage", "if-cross-commemoration":
 		return true
 	}
 	if strings.HasPrefix(condition, "feast-") {

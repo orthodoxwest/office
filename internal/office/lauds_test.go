@@ -405,6 +405,48 @@ func TestComposeLaudsSundayPsalmodyOmitsFestalPsalms(t *testing.T) {
 	}
 }
 
+func TestComposeLaudsEpiphanyOctaveSundayUsesFestalPsalmody(t *testing.T) {
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 1, 11, 0, 0, 0, 0, time.UTC),
+		Season: models.Epiphany,
+		Color:  models.White,
+		Celebration: &models.Feast{
+			ID:       "epiphany-sunday-1",
+			ProperID: "epiphany-sunday-within-octave",
+			Category: models.CategorySunday,
+		},
+	}
+
+	hour, err := engine.ComposeHour("lauds", day, calendar.ComputeMoveableDates(2026))
+	if err != nil {
+		t.Fatalf("ComposeHour(lauds): %v", err)
+	}
+
+	var psalmLabels []string
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			if elem.Type == models.Psalm {
+				psalmLabels = append(psalmLabels, elem.Label)
+			}
+		}
+	}
+
+	wantPrefix := []string{"Psalm 67", "Psalm 93", "Psalm 100", "Psalm 63"}
+	if len(psalmLabels) < len(wantPrefix) {
+		t.Fatalf("got %d psalms, want at least %d: %v", len(psalmLabels), len(wantPrefix), psalmLabels)
+	}
+	for i, want := range wantPrefix {
+		if psalmLabels[i] != want {
+			t.Fatalf("psalm %d = %q, want %q (all psalms: %v)", i, psalmLabels[i], want, psalmLabels)
+		}
+	}
+}
+
 func TestComposeHourKeepsResolutionKeyButCanonicalizesAliasDependency(t *testing.T) {
 	engine, err := NewEngine(filepath.Join("..", "..", "data"))
 	if err != nil {
