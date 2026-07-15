@@ -43,5 +43,4 @@ I go My way to Him That sent Me, * and none of you asketh Me: Whither goest Thou
 I go My way to Him That sent Me, * but because I have said this to you, sadness has filled your hearts, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Pasc4-0 [Ant 1] — check against diurnal
-I go My way to Him That sent Me, * and none of you asketh Me: Whither goest Thou? Alleluia, Alleluia.
+@use proper/easter-sunday-4/benedictus-antiphon

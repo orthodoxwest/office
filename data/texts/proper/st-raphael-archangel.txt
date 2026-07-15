@@ -10,9 +10,7 @@ The Angel Raphael was sent * unto Tobias and Sara to heal them.
 The Angel went in * unto Tobias, and said: Joy be ever with thee.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
-Be of good courage, Tobias, * for it is nigh at hand that God shall heal thee.
-
+@use proper/st-raphael-archangel/benedictus-antiphon
 [psalm-antiphon-4]
 # SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
 Bless ye the God of Heaven, * and confess Him before all living, for He hath had mercy upon you.

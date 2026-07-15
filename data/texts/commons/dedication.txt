@@ -167,11 +167,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. This is the Lord's house, * stoutly builded.
 
 [chapter-vespers]
-# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rev 21:2
-I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
-R. Thanks be to God.
-
+@use commons/dedication/chapter-terce
 [chapter-terce]
 # SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !Rev 21:2

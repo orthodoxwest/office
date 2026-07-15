@@ -18,9 +18,7 @@ Busy like a bee, * O Lord, did thine handmaiden Cecilia serve thee.
 I bless thee, O Father of my Lord Jesus Christ, * that through thy Son the fire is gone out round about me.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-I have asked the Lord for three days, * that I may consecrate my house as a Church.
-
+@use proper/st-cecilia/magnificat-antiphon
 [benedictus-antiphon]
 As dawn was fading * into day, Cecilia cried and said: Arise, O soldiers of Christ, cast away the works of darkness, and put on the armour of light.
 

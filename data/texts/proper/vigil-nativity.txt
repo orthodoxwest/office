@@ -89,11 +89,7 @@ R. On the morrow * Ye shall be saved.
 @use proper/vigil-nativity/versicle-lauds
 
 [chapter-vespers]
-# SOURCE: divinum-officium Sancti/12-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rom 1:1-3
-Paul, a servant of Jesus Christ, called to be an apostle, separated unto the gospel of God, which he had promised before, by his prophets, in the holy scriptures concerning his Son, who was made to him of the seed of David, according to the flesh.
-R. Thanks be to God.
-
+@use proper/vigil-nativity/chapter-terce
 [chapter-terce]
 # SOURCE: divinum-officium Sancti/12-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !Rom 1:1-3

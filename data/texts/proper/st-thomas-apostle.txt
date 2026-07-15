@@ -7,9 +7,6 @@ Grant, O Lord, we beseech thee, that we may glory in the solemn festival of thy 
 Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen, and yet have believed, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 26
-Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen, and yet have believed, alleluia.
-
+@use proper/st-thomas-apostle/benedictus-antiphon
 [magnificat-antiphon-first]
-# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 26
-Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen, and yet have believed, alleluia.
+@use proper/st-thomas-apostle/benedictus-antiphon

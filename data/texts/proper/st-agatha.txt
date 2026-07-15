@@ -18,9 +18,7 @@ O my Lord Jesus Christ, I thank thee, * because Thou hast been mindful of me, an
 I bless thee, O Father of my Lord Jesus Christ, because by thine Apostle Thou hast put new paps on my breasts.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/02-05 [Ant Laudes] — check against diurnal
-Upon Him Who hath vouchsafed * to heal me of all my wounds, and to put new paps on my breasts, upon Him will I call, even upon the Living God.
-
+@use proper/st-agatha/magnificat-antiphon
 [benedictus-antiphon]
 The heathen multitude made haste * and came to the grave of the virgin, and took therefrom her veil wherewith to stem the fire; that the Lord might show Himself to be a Deliverer from the burning, for the sake of Agatha, His blessed Martyr.
 

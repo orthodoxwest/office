@@ -18,8 +18,7 @@ The Angel said unto Peter, * Cast thy garment about thee, and follow me.
 The Lord hath sent his Angel, * and hath delivered me out of the hand of Herod, alleluia.
 
 [psalm-antiphon-5]
-Thou art Peter, * and upon this rock I will build my Church.
-
+@use proper/ss-peter-paul/psalm-antiphon-4-first-vespers
 [psalm-antiphon-4-vespers]
 @use proper/ss-peter-paul/psalm-antiphon-5
 

@@ -303,9 +303,7 @@ Blessed be the name of the Lord * from henceforth now and for ever.
 But we that live * bless the Lord.
 
 [psalm-antiphon-2-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 2)] — check against diurnal
-But we that live * bless the Lord.
-
+@use ordinary/vespers/psalm-antiphon-1-monday
 [psalm-antiphon-3-monday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 2)] — check against diurnal
 The Lord hath inclined * his ear unto me.
@@ -351,9 +349,7 @@ Before the gods * will I sing praise unto thee, my God.
 O Lord * thou hast proved me, and known me.
 
 [psalm-antiphon-2-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal
-O Lord * thou hast proved me, and known me.
-
+@use ordinary/vespers/psalm-antiphon-1-thursday
 [psalm-antiphon-3-thursday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal
 Deliver me, O Lord * from the evil man.
@@ -371,9 +367,7 @@ May my portion * O Lord, be in the land of the living.
 Blessed be * the Lord my God.
 
 [psalm-antiphon-3-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
-Blessed be * the Lord my God.
-
+@use ordinary/vespers/psalm-antiphon-2-friday
 [psalm-antiphon-4-friday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
 Day by day * I shall bless thee, O Lord.

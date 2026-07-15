@@ -155,11 +155,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God hath chosen her, * and fore-chosen her.
 
 [chapter-vespers]
-# SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!2 Cor 10:17-18
-Brothers: But he that glorieth, let him glory in the Lord. For not he who commendeth himself, is approved, but he, whom God commendeth.
-R. Thanks be to God.
-
+@use commons/virgin-martyr/chapter-terce
 [chapter-terce]
 # SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
 !2 Cor 10:17-18

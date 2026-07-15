@@ -3,9 +3,7 @@
 And Stephen, full of grace * and fortitude, did great signs among the people.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/12-26.txt [Ant 1] (octave day repeats the feast) — check against diurnal
-And Stephen, full of grace * and fortitude, did great signs among the people.
-
+@use proper/octave-day-st-stephen/benedictus-antiphon
 [magnificat-antiphon]
 # SOURCE: divinum-officium Sancti/12-26.txt [Ant 3] (octave day repeats the feast) — check against diurnal
 Devout men buried Stephen * And made great mourning over him.

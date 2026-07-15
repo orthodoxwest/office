@@ -2,8 +2,7 @@
 @use proper/holy-saturday/psalm-antiphon-1
 
 [psalm-antiphon-1]
-O death, I will be thy death; * O grave, I will be thy destruction.
-
+@use proper/holy-saturday/magnificat-antiphon
 [psalm-antiphon-2]
 They shall mourn for Him * as one mourneth for his only son, for the innocent Lord hath been put to death.
 
@@ -14,8 +13,7 @@ O all ye nations, behold * and see my sorrow.
 O Lord, deliver my soul * from the gates of the grave.
 
 [psalm-antiphon-5]
-O all ye that pass by * behold, and see if there be any sorrow like unto my sorrow.
-
+@use proper/holy-saturday/commemoration-antiphon
 [benedictus-antiphon]
 There were women sitting over against the sepulchre * weeping, and making lamentation for the Lord.
 

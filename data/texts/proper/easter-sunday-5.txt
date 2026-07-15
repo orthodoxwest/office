@@ -35,5 +35,4 @@ Hitherto * have ye asked nothing in My Name, ask, and ye shall receive. Alleluia
 Ask, and ye shall receive, * that your joy may be full; for the Father Himself loveth you, because ye have loved Me, and have believed in Me, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Pasc5-0 [Ant 1] — check against diurnal
-Hitherto * have ye asked nothing in My Name, ask, and ye shall receive. Alleluia.
+@use proper/easter-sunday-5/benedictus-antiphon

@@ -18,9 +18,7 @@ Have I been * so long time with you, and yet hast thou not known me, Philip? he 
 If ye had known me, * ye should have known my Father also, and from henceforth ye know him, and have seen him, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 452 (Saints Philip and James)
-If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
-
+@use proper/ss-philip-james/psalm-antiphon-4-first-vespers
 [psalm-antiphon-4-vespers]
 @use proper/ss-philip-james/psalm-antiphon-5
 
