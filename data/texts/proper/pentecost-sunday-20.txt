@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XX Sunday after Pentecost)
+Grant, we beseech thee, merciful Lord, to thy faithful people pardon and peace; that they may be cleansed from all their sins, and serve thee with a quiet mind.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Erat quidam regulus)
 There was a certain nobleman, * whose son was sick at Capernaum: when he heard that Jesus was come out of Judæa into Galilee, he besought him that he would heal his son.

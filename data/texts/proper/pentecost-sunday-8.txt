@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (VIII Sunday after Pentecost)
+Grant to us, Lord, we beseech thee, the spirit to think and do always such things as be rightful: that we, who cannot exist without thee, may by thee be enabled to live according to thy will.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 5 (Ait dominus villico)
 The lord said * unto the steward, How is it that I hear this of thee? Give an account of thy stewardship, alleluia.

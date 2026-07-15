@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XXIV and Last Sunday after Pentecost)
+Stir up, we beseech thee, O Lord, the wills of thy faithful people; that they, plenteously bringing forth the fruit of good works, may of thee be plenteously rewarded.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Cum videritis)
 When ye, therefore, shall see * the abomination of desolation, spoken of by Daniel the prophet, stand in the holy place; whoso readeth, let him understand.

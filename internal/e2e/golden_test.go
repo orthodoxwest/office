@@ -57,9 +57,13 @@ var hourCases = []hourCase{
 	{"lauds", "2026-06-28", "Green Sunday in summer hymn window — Sunday Lauds summer hymn (Ecce iam noctis)"},
 
 	// Vespers
+	{"vespers", "2026-01-31", "Saturday before a per-annum Sunday — Saturday psalter and ordinary with Sunday collect"},
+	{"vespers", "2026-03-07", "Saturday in Lent — Saturday psalter with Lenten chapter, responsory, hymn, and versicle"},
 	{"vespers", "2026-03-15", "Lent Sunday — Sunday psalmody, Magnificat"},
 	{"vespers", "2026-03-18", "I Vespers of following St. Joseph — concurrence owner"},
 	{"vespers", "2026-03-19", "St. Joseph — double feast, proper antiphon"},
+	{"vespers", "2027-04-17", "Saturday in Passiontide — Saturday psalter with Passiontide responsory, hymn, and versicle"},
+	{"vespers", "2026-04-18", "Saturday before Low Sunday — Lord-category Sunday still uses the Saturday Paschaltide office"},
 
 	// Vespers — Easter exercises hour-qualified hymn (vespers vs lauds)
 	{"vespers", "2026-04-12", "Easter Sunday — proper vespers hymn, hour-qualified"},

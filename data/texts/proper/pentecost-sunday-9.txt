@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (IX Sunday after Pentecost)
+Let thy merciful ears, O Lord, be open to the prayers of thy humble servants; and that they may obtain their petitions, make them to ask such things as shall please thee.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 5 (Cum appropinquaret)
 When the Lord was come near to Jerusalem, * he beheld the city, and wept over it, saying: If thou hadst known, even thou! For the days shall come upon thee, that thine enemies shall cast a trench about thee, and compass thee round, and keep thee in on every side, and shall lay thee even with the ground; because thou knewest not the time of thy visitation, alleluia.

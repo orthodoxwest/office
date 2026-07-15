@@ -36,3 +36,13 @@ Ask, and ye shall receive, * that your joy may be full; for the Father Himself l
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-5/benedictus-antiphon
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 156 (Fifth Saturday after Easter)
+!Jas 1:22-24
+Dearly beloved: Be ye doers of the word, and not hearers only, deceiving your own selves. For if any be a hearer of the word, and not a doer, he is like unto a man beholding his natural face in a glass: for he beholdeth himself, and goeth his way and straightway forgetteth what manner of man he was.
+R. Thanks be to God.
+
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 161 (Fifth Saturday after Easter)
+O God, from whom all good things do proceed; grant to us thy humble servants, that by thy inspiration we may think those things that be right, and by thy merciful guiding may perform the same.

@@ -196,6 +196,85 @@ func TestResolveProperTextWeekdayOrdinary(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextSundayFirstVespersUsesSaturdayPsalmAntiphon(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:         time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC),
+		Season:       models.Lent,
+		FirstVespers: true,
+		Celebration: &models.Feast{
+			ID:       "lent-sunday-4",
+			Category: models.CategorySunday,
+		},
+	}
+
+	t.Run("Saturday psalter outranks generic Sunday antiphon", func(t *testing.T) {
+		corpus := texts.NewTestCorpus(map[string]string{
+			"proper/lent-sunday-4/psalm-antiphon-1":      "Sunday Lauds antiphon",
+			"ordinary/vespers/psalm-antiphon-1-saturday": "Saturday Vespers antiphon",
+		})
+		got, ref := resolveProperText(day, "vespers", "psalm-antiphon-1", corpus)
+		if got != "Saturday Vespers antiphon" || ref != "ordinary/vespers/psalm-antiphon-1-saturday" {
+			t.Fatalf("antiphon = %q (%s), want Saturday psalter", got, ref)
+		}
+	})
+
+	t.Run("explicit Sunday Vespers antiphon still wins", func(t *testing.T) {
+		corpus := texts.NewTestCorpus(map[string]string{
+			"proper/lent-sunday-4/psalm-antiphon-1-vespers": "Sunday Vespers antiphon",
+			"ordinary/vespers/psalm-antiphon-1-saturday":    "Saturday Vespers antiphon",
+		})
+		got, ref := resolveProperText(day, "vespers", "psalm-antiphon-1", corpus)
+		if got != "Sunday Vespers antiphon" || ref != "proper/lent-sunday-4/psalm-antiphon-1-vespers" {
+			t.Fatalf("antiphon = %q (%s), want explicit Sunday Vespers proper", got, ref)
+		}
+	})
+
+	t.Run("Paschaltide seasonal antiphon outranks Saturday ordinary", func(t *testing.T) {
+		corpus := texts.NewTestCorpus(map[string]string{
+			"proper/easter-sunday-3/psalm-antiphon-1":    "Sunday Lauds antiphon",
+			"seasonal/easter/psalm-antiphon-1":           "Alleluia, alleluia, alleluia.",
+			"ordinary/vespers/psalm-antiphon-1-saturday": "Saturday Vespers antiphon",
+		})
+		day.Season = models.Easter
+		day.Celebration.ID = "easter-sunday-3"
+		day.Celebration.Category = models.CategoryLord
+		got, ref := resolveProperText(day, "vespers", "psalm-antiphon-1", corpus)
+		if got != "Alleluia, alleluia, alleluia." || ref != "seasonal/easter/psalm-antiphon-1" {
+			t.Fatalf("antiphon = %q (%s), want Paschaltide seasonal antiphon", got, ref)
+		}
+	})
+}
+
+func TestResolveProperTextSeasonalFirstVespersOnlyAppliesBeforeSunday(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/st-joseph/short-responsory-vespers":    "Proper feast responsory",
+		"seasonal/lent/short-responsory-first-vespers": "Saturday Lent responsory",
+		"ordinary/vespers/short-responsory":            "Ordinary responsory",
+	})
+
+	weekdayFeast := &models.CalendarDay{
+		Date:         time.Date(2026, 3, 19, 0, 0, 0, 0, time.UTC),
+		Season:       models.Lent,
+		FirstVespers: true,
+		Celebration:  &models.Feast{ID: "st-joseph", Category: models.CategoryConfessor},
+	}
+	got, ref := resolveProperText(weekdayFeast, "vespers", "short-responsory", corpus)
+	if got != "Proper feast responsory" || ref != "proper/st-joseph/short-responsory-vespers" {
+		t.Fatalf("weekday feast responsory = %q (%s), want feast proper", got, ref)
+	}
+
+	sunday := &models.CalendarDay{
+		Date:         time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC),
+		Season:       models.Lent,
+		FirstVespers: true,
+		Celebration:  &models.Feast{ID: "passion-sunday", Category: models.CategorySunday},
+	}
+	got, ref = resolveProperText(sunday, "vespers", "short-responsory", corpus)
+	if got != "Saturday Lent responsory" || ref != "seasonal/lent/short-responsory-first-vespers" {
+		t.Fatalf("Sunday first Vespers responsory = %q (%s), want Saturday seasonal text", got, ref)
+	}
+}
+
 func TestResolveProperTextSharedFallback(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"ordinary/shared/collect": "Shared collect",

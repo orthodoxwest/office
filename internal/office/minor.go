@@ -62,22 +62,41 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 // isWeekdayMatch checks whether the day matches a weekday-* condition.
 func isWeekdayMatch(condition string, day *models.CalendarDay) bool {
 	weekdayName := strings.TrimPrefix(condition, "weekday-")
+	weekday := civilWeekday(day)
 	switch weekdayName {
 	case "sunday":
-		return day.Date.Weekday() == time.Sunday
+		return weekday == time.Sunday
 	case "monday":
-		return day.Date.Weekday() == time.Monday
+		return weekday == time.Monday
 	case "tuesday":
-		return day.Date.Weekday() == time.Tuesday
+		return weekday == time.Tuesday
 	case "wednesday":
-		return day.Date.Weekday() == time.Wednesday
+		return weekday == time.Wednesday
 	case "thursday":
-		return day.Date.Weekday() == time.Thursday
+		return weekday == time.Thursday
 	case "friday":
-		return day.Date.Weekday() == time.Friday
+		return weekday == time.Friday
 	case "saturday":
-		return day.Date.Weekday() == time.Saturday
+		return weekday == time.Saturday
 	default:
 		return false
 	}
+}
+
+// civilWeekday returns the weekday used by the psalter and weekday ordinary.
+// At I Vespers of a Sunday the office day has advanced to Sunday, while the
+// local Saturday Vespers books retain the Saturday psalter and ordinary.
+func civilWeekday(day *models.CalendarDay) time.Weekday {
+	date := day.Date
+	if isSundayFirstVespers(day) {
+		date = date.AddDate(0, 0, -1)
+	}
+	return date.Weekday()
+}
+
+// isSundayFirstVespers uses the liturgical office date rather than the feast
+// category: Low Sunday is categorized as a feast of the Lord, but its first
+// Vespers is nevertheless recited on Saturday evening.
+func isSundayFirstVespers(day *models.CalendarDay) bool {
+	return day != nil && day.FirstVespers && day.Date.Weekday() == time.Sunday
 }

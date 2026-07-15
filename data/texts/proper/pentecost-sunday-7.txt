@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (VII Sunday after Pentecost)
+O God, whose never-failing providence ordereth all things both in heaven and earth: we humbly beseech thee, to put away from us all hurtful things, and to give us those things which be profitable for us.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 4 (Attendite a falsis)
 Beware * of false prophets, which come to you in sheep’s clothing, but inwardly they are ravening wolves. Ye shall know them by their fruits, alleluia.

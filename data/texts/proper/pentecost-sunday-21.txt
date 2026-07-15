@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XXI Sunday after Pentecost)
+Lord, we beseech thee to keep thy household the Church in continual godliness; that through thy protection it may be free from all adversities, and devoutly given to serve thee in good works, to the glory of thy Name.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Dixit autem dominus)
 Then said the lord * unto the servant, Pay me that thou owest. The servant therefore fell down and worshipped him, saying, Lord, have patience with me, and I will pay thee all.

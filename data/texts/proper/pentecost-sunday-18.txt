@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XVIII Sunday after Pentecost)
+O Lord, forasmuch as without thee we are not able to please thee; we beseech thee to direct our hearts by the operation of thy mercy.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 8 (Dixit Dominus paralytico)
 The Lord said * unto the sick of the palsy, Son, be of good cheer, thy sins be forgiven thee.

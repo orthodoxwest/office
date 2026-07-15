@@ -164,7 +164,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 
 	hourCandidates := hourRefCandidates(hourName, ref)
 	refCands := refCandidates(ref)
-	weekday := strings.ToLower(day.Date.Weekday().String())
+	weekday := strings.ToLower(civilWeekday(day).String())
 
 	var properName string
 	if day.Celebration != nil {
@@ -233,6 +233,45 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		}
 	}
 
+	// 0.8. I Vespers of a Sunday is recited on Saturday and uses the
+	// Saturday psalter. An explicitly Vespers-qualified Sunday antiphon still
+	// wins; otherwise do not let a generic Sunday Lauds antiphon displace the
+	// Saturday psalter antiphon.
+	if hourName == "vespers" && isSundayFirstVespers(day) &&
+		day.Celebration != nil &&
+		strings.HasPrefix(ref, "psalm-antiphon") && !strings.HasSuffix(ref, "-first") {
+		for _, feastID := range feastProperIDs(day.Celebration) {
+			if day.Season == models.Easter {
+				prefix := "proper/" + feastID + "-paschal/"
+				if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+					return substituteProperName(text, properName), resolved
+				}
+			}
+			prefix := "proper/" + feastID + "/"
+			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+				return substituteProperName(text, properName), resolved
+			}
+		}
+		// Paschaltide replaces the individual Saturday antiphons with the
+		// single seasonal Alleluia antiphon while retaining the Saturday
+		// psalms themselves.
+		if day.Season == models.Easter {
+			prefix := "seasonal/" + string(day.Season) + "/"
+			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+				return text, resolved
+			}
+			if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+				return text, resolved
+			}
+		}
+		for _, cand := range refCands {
+			saturdayRef := "ordinary/vespers/" + cand + "-saturday"
+			if text := corpus.Get(saturdayRef); text != "" {
+				return text, saturdayRef
+			}
+		}
+	}
+
 	// 1. Feast-specific proper (hour-qualified, then generic)
 	if day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
 		for _, feastID := range feastProperIDs(day.Celebration) {
@@ -285,7 +324,11 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 3. Seasonal default (hour-qualified, then generic)
-	if day.Season != "" {
+	// The seasonal "-first" entries model the Saturday books before Sundays;
+	// they must not displace a weekday feast's own generic Vespers text merely
+	// because that feast is also celebrating first Vespers.
+	seasonalSundayFirst := strings.HasSuffix(ref, "-first") && hourName == "vespers"
+	if day.Season != "" && (!seasonalSundayFirst || isSundayFirstVespers(day)) {
 		prefix := "seasonal/" + string(day.Season) + "/"
 		if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
 			return substituteProperName(text, properName), resolved

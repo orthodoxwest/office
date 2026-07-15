@@ -205,6 +205,12 @@ Blessed be God, even the Father of our Lord Jesus Christ, the Father of
 mercies, and the God of all comfort, who comforteth us in all our tribulation.
 R. Thanks be to God.
 
+[chapter-saturday]
+# SOURCE: draft archdiocesan Vespers book, p. 214 (Saturdays Throughout the Year)
+!Rom. 11:33
+O the depth of the riches both of the wisdom and knowledge of God! how unsearchable are his judgments, and his ways past finding out!
+R. Thanks be to God.
+
 [short-responsory]
 R. How great are thy works, O Lord.
 How great are thy works, O Lord.
@@ -225,6 +231,11 @@ R. Great is our Lord * and great is his power.
 [versicle]
 V. Let my prayer be set forth in thy sight as the incense.
 R. And let the lifting up of my hands be an evening sacrifice.
+
+[versicle-saturday]
+# SOURCE: draft archdiocesan Vespers book, p. 216 (Saturdays Throughout the Year)
+V. Let our evening prayer come up before thee, O Lord.
+R. And let thy mercy come down upon us.
 
 [magnificat-antiphon]
 My soul doth magnify the Lord, and my spirit hath rejoiced in God my Saviour.
@@ -377,13 +388,13 @@ Day by day * I shall bless thee, O Lord.
 Thy kingdom, * O Lord, is an everlasting kingdom.
 
 [psalm-antiphon-2-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 7)] — check against diurnal
-I shall praise the Lord * in my life.
+# SOURCE: draft archdiocesan Vespers book, p. 211 (Saturdays Throughout the Year)
+While I have my being * will I praise my God.
 
 [psalm-antiphon-3-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 7)] — check against diurnal
-To our God * be joyful and fitting praise.
+# SOURCE: draft archdiocesan Vespers book, p. 212 (Saturdays Throughout the Year)
+O how joyful * a thing it is to be thankful unto our God.
 
 [psalm-antiphon-4-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 7)] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 213 (Saturdays Throughout the Year)
 Praise the Lord, * O Jerusalem.

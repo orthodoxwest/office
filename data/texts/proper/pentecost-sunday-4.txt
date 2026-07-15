@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (IV Sunday after Pentecost)
+Grant, O Lord, we beseech thee: that the course of this world may be so peaceably ordered by thy governance, that thy Church may joyfully serve thee in all godly quietness.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Ascendens Jesus)
 And Jesus entered * into a ship, and sat down, and taught the people, alleluia.

@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (XII Sunday after Pentecost)
+Almighty and merciful God, of whose only gift it cometh that thy faithful people do unto thee worthy and laudable service; grant, we beseech thee, that we may run without stumbling to thy heavenly promises.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Magister quid faciendo)
 Master, * what shall I do to inherit eternal life? He said unto him, What is written in the law? how readest thou? Thou shalt love the Lord thy God with all thy heart, alleluia.

@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 221 (V Saturday after the Epiphany)
+O God, we beseech thee to keep thy household continually in thy true religion; that they who do lean only upon the hope of thy heavenly grace may evermore be defended by thy heavenly protection.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 2 (Domine, nonne bonum)
 Sir, * didst not thou sow good seed in thy field? from whence then hath it tares? He said unto them, An enemy hath done this.

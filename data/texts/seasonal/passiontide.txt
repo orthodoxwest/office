@@ -71,11 +71,57 @@ V. Deliver me from mine enemies, O God.
 R. Defend me from them that rise up against me.
 
 [short-responsory-vespers]
-R. How great are thy works, O Lord.
-How great are thy works, O Lord.
-V. Thou hast made all things in wisdom.
-R. Thy works, O Lord.
-R. How great are thy works, O Lord.
+# SOURCE: draft archdiocesan Vespers book, p. 147 (Saturdays in Passiontide)
+R. Save me, O Lord, * from the lion's mouth.
+R. Save me, O Lord, * from the lion's mouth.
+V. Thou hast heard me also from among the horns of the unicorns.
+R. From the lion's mouth.
+R. Save me, O Lord, * from the lion's mouth.
+
+[hymn-first-vespers]
+# SOURCE: office-hymns.zip (The Royal Banners Forward Go, Passiontide Vespers.docx); draft archdiocesan Vespers book, pp. 148-149
+Vexilla Regis prodeunt
+
+The royal banners forward go;
+The Cross shines forth in mystic glow;
+Where he in flesh, our flesh who made,
+Our sentence bore, our ransom paid.
+
+Where deep for us the spear was dyed,
+Life's torrent rushing from his side,
+To wash us in that precious flood
+Where mingled Water flowed and Blood.
+
+Fulfilled is all that David told
+In true prophetic song of old:
+Amidst the nations, God, saith he,
+Hath reigned and triumphed from the Tree.
+
+O Tree of Beauty! Tree of light!
+O Tree with royal purple dight!
+Elect on whose triumphal breast
+Those holy limbs should find their rest:
+
+On whose dear arms, so widely flung,
+The weight of this world's ransom hung,
+The price of humankind to pay,
+And spoil the spoiler of his prey.
+
+O Cross, our one reliance, hail!
+This holy Passiontide avail
+To give fresh merit to the saint
+And pardon to the penitent.
+
+To thee, eternal Three in One,
+Let homage meet by all be done:
+Whom by the Cross thou dost restore,
+Preserve and govern evermore.
+Amen.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 149 (Saturdays in Passiontide)
+V. Deliver me, O Lord, from the evil man.
+R. And preserve me from the wicked man.
 
 [short-responsory-prime]
 R. Christ, Son of the living God, have mercy on us.
