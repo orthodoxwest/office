@@ -1,14 +1,15 @@
 [hymn-sunday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 28
 Lucis Creator optime
 
 O BLEST Creator of the light,
 Who makest the day with radiance bright,
 And o'er the forming world didst call
-the light from chaos first of all:
+The light from chaos first of all:
 
 Whose wisdom joined in meet array
 The morn and eve, and named them day:
-Night comes with all in darkling fears,
+Night comes with all its darkling fears,
 Regard thy people's prayers and tears.
 
 Lest, sunk in sin and whelmed with strife,
@@ -27,6 +28,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-monday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 31
 Immense caeli Conditor
 
 O GREAT Creator of the sky,
@@ -55,6 +57,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-tuesday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 34
 Telluris ingens Conditor
 
 EARTH's mighty Maker, whose command
@@ -83,6 +86,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-wednesday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 37
 Caeli Deus sanctissime
 
 O GOD, whose hand hath spread the sky
@@ -111,6 +115,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-thursday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 40
 Magnae Deus potentiae
 
 ALMIGHTY God, whose will supreme
@@ -139,6 +144,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally. Amen.
 
 [hymn-friday]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 43
 Plasmator hominis, Deus
 
 MAKER of men, from heaven, thy throne,
@@ -151,10 +157,10 @@ Instinct with life at thy command,
 Are given subdued to human-kind
 For service in their rank assigned.
 
-From all thy servants drive away
-Whate'er of thought impure to-day
-Hath mingled with the heart's intent,
-Or with the actions hath been blent.
+Therefore subdue in us today
+Fierce passions which would else have sway,
+Or mingle with the heart's intent,
+And with our actions thus be blent.
 
 In heaven thine endless joys bestow,
 But grant thy gifts of grace below;
