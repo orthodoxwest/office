@@ -5,7 +5,8 @@
 The Lord our Saviour, * begotten before the day-star, and before the ages, is this day made manifest in the world.
 
 [psalm-antiphon-2]
-O Jerusalem, * thy light is come, and the glory of the Lord is risen upon thee, and the Gentiles shall walk in thy light. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 115 (The Epiphany of Our Lord and Saturday within the Octave)
+Thy light is come, * O Jerusalem, and the glory of the Lord is risen upon thee: and the Gentiles shall come to thy light, alleluia.
 
 [psalm-antiphon-3]
 # SOURCE: draft archdiocesan Vespers book, p. 116 (The Epiphany of Our Lord)
@@ -75,27 +76,27 @@ To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium SanctiM/01-06 [HymnusM Vespera] — check against diurnal
+# SOURCE: office-hymns.zip (Why, Impious Herod, Vainly Fear, Sat in oct of Epiphany Vespers.docx)
 Hostis Herodes impie
 
 Why, impious Herod, vainly fear
 That Christ the Saviour cometh here?
-He takes no earthly realms away
+He takes not earthly realms away
 Who gives the crown that lasts for aye.
 
-To greet His birth the Wise Men went,
+To greet his birth the wise men went,
 Led by the star before them sent;
-Called on by light, towards light they pressed,
-And by their gifts their God confessed.
+Called on by light, towards Light they pressed,
+And by their gifts they God confessed.
 
 In holy Jordan's purest wave
 The heavenly Lamb vouchsafed to lave;
-That He, to whom was sin unknown,
-Might cleanse His people from their own.
+That he, to whom was sin unknown,
+Might cleanse his people from their own.
 
 New miracle of power divine!
 The water reddens into wine:
-He spake the word: and poured the wave
+He spoke the word, and poured the wave
 In other streams than nature gave.
 
 All glory, Lord, to thee we pay

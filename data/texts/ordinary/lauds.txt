@@ -54,7 +54,7 @@ Amen.
 [hymn-sunday-summer]
 # The Summer Hymn — said from the II Sunday after Trinity until the Sunday
 # nearest the first of October (see internal/office/hymn.go).
-# TODO(diurnal): verify translation against the printed diurnal.
+# SOURCE: office-hymns.zip (Lo! the Dim Shadows, Thru the Year, Lauds Summer Hymn.docx)
 Ecce iam noctis tenuatur umbra
 
 Lo! the dim shadows of the night are waning;

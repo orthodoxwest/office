@@ -1,6 +1,7 @@
 # Christmas seasonal overrides (Christmas Day through the Octave of Epiphany)
 
 [hymn-doxology]
+# SOURCE: office-hymns.zip (From Lands That See the Sun Arise, Circum Lauds.docx; Jesu, the Father_s Only Son, Xmas & Circum Vespers.docx)
 All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
