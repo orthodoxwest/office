@@ -1,4 +1,4 @@
-.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -11,6 +11,7 @@ build: ## Build the binary
 test: ## Run all tests
 	go test ./...
 	python3 scripts/test_ordo_compare.py
+	python3 scripts/test_project_status.py
 	python3 scripts/test_source_reconcile.py
 
 lint: ## Run staticcheck linter
@@ -41,6 +42,9 @@ validate: build ## Validate data files
 
 audit: build ## Report placeholder texts and missing feast propers
 	./office audit
+
+project-status: build ## Generate clergy-facing proper, assurance, and YEAR ordo status
+	python3 scripts/project-status.py --year $(YEAR)
 
 verify-psalms: ## Compare the Coverdale psalter against the official 1662 BCP witness
 	go run scripts/verify-psalms.go
