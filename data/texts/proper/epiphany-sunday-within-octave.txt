@@ -1,5 +1,67 @@
+[psalm-antiphon]
+@use proper/epiphany/psalm-antiphon-1
+
+[psalm-antiphon-1]
+@use proper/epiphany/psalm-antiphon-1
+
+[psalm-antiphon-2]
+@use proper/epiphany/psalm-antiphon-2
+
+[psalm-antiphon-3]
+@use proper/epiphany/psalm-antiphon-3
+
+[psalm-antiphon-4]
+@use proper/epiphany/psalm-antiphon-4
+
+[psalm-antiphon-5]
+@use proper/epiphany/psalm-antiphon-5
+
+[psalm-antiphon-1-first-vespers]
+@use proper/epiphany/psalm-antiphon-1
+
+[psalm-antiphon-2-first-vespers]
+@use proper/epiphany/psalm-antiphon-2
+
+[psalm-antiphon-3-first-vespers]
+@use proper/epiphany/psalm-antiphon-3
+
+[psalm-antiphon-4-first-vespers]
+@use proper/epiphany/psalm-antiphon-5
+
+[chapter-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 137 (Sunday within the Octave of the Epiphany)
+!Rom 12:1
+I beseech you therefore, brethren, by the mercies of God, that ye present your bodies a living sacrifice, holy, acceptable unto God, which is your reasonable service.
+R. Thanks be to God.
+
+[chapter-first-vespers]
+@use proper/epiphany-sunday-within-octave/chapter-lauds
+
+[short-responsory-lauds]
+@use proper/epiphany/short-responsory-lauds
+
+[short-responsory-first-vespers]
+@use proper/epiphany/short-responsory-vespers
+
+[hymn-lauds]
+@use proper/epiphany/hymn-lauds
+
+[hymn-first-vespers]
+@use proper/epiphany/hymn-vespers
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 139 (Sunday within the Octave of the Epiphany)
+V. All they from Sheba shall come, alleluia.
+R. They shall bring gold and incense, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 120 (I Vespers of the Sunday within the Octave of the Epiphany)
+V. We have seen his star in the east, alleluia.
+R. And are come with gifts to worship the Lord, alleluia.
+
 [magnificat-antiphon-first]
 @use proper/epiphany-sunday-within-octave/benedictus-antiphon
+
 [benedictus-antiphon]
 # SOURCE: divinum-officium Tempora/Epi1-0a.txt [Ant 1]; 2026 ordo Jan 11 incipit "The Child Jesus" — check against diurnal
 The child Jesus * remained in Jerusalem; and his parents knew it not. And thinking that he was in the company, they came a day's journey, and sought him among their kinsfolks and acquaintance.
@@ -7,3 +69,7 @@ The child Jesus * remained in Jerusalem; and his parents knew it not. And thinki
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Epi1-0a.txt [Ant 3]; 2026 ordo Jan 11 incipit "Son" — check against diurnal
 Son, why hast thou thus dealt with us? Behold, thy father and I have sought thee sorrowing. How is it that ye sought me? Wist ye not that I must be about my Father's business?
+
+[collect]
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 141, 122 (Sunday within the Octave of the Epiphany)
+O Lord, we beseech thee mercifully to receive the prayers of thy people who call upon thee; and grant that they may both perceive and know what things they ought to do, and also may have grace and power faithfully to fulfil the same.

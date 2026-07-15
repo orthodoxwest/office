@@ -45,6 +45,8 @@ type hourCase struct {
 
 var hourCases = []hourCase{
 	// Lauds — covers the main branches in the largest hour
+	{"lauds", "2026-01-06", "Epiphany — proper psalmody and short responsory"},
+	{"lauds", "2026-01-11", "Sunday within the Epiphany octave — complete proper Lauds office"},
 	{"lauds", "2026-01-18", "Epiphany Sunday — simplified-double commemoration suppresses suffrage"},
 	{"lauds", "2026-02-08", "Septuagesima Sunday — suffrage retained"},
 	{"lauds", "2026-03-01", "Lent Sunday — suffrage retained after ordinary commemoration"},
@@ -57,6 +59,8 @@ var hourCases = []hourCase{
 	{"lauds", "2026-06-28", "Green Sunday in summer hymn window — Sunday Lauds summer hymn (Ecce iam noctis)"},
 
 	// Vespers
+	{"vespers", "2026-01-06", "Epiphany — proper short responsory"},
+	{"vespers", "2026-01-10", "Saturday within the Epiphany octave — Sunday proper with Saturday psalms"},
 	{"vespers", "2026-01-31", "Saturday before a per-annum Sunday — Saturday psalter and ordinary with Sunday collect"},
 	{"vespers", "2026-03-07", "Saturday in Lent — Saturday psalter with Lenten chapter, responsory, hymn, and versicle"},
 	{"vespers", "2026-03-15", "Lent Sunday — Sunday psalmody, Magnificat"},

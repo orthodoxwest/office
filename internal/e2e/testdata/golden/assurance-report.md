@@ -7,7 +7,7 @@
 | Selected structural-review pages | 44 |
 | Uncovered features | 0 |
 | Verified text entries | 193 |
-| Text entries needing review | 1611 |
+| Text entries needing review | 1617 |
 | Text entries with unknown source | 341 |
 | Stale attestations | 0 |
 
@@ -51,14 +51,14 @@
 - `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
 - `decision:condition:feast-saturday-office-bvm,season-easter=included`
 - `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:if-cross-commemoration=included`
 - `decision:condition:if-cross-commemoration=omitted`
 - `decision:condition:if-preces=included`
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
-- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
-- `decision:condition:is-feast,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
 - `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
@@ -67,8 +67,8 @@
 - `decision:condition:is-ferial,season-easter=omitted`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday=included`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday=omitted`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=included`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-is-feast=omitted`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
 - `decision:condition:not-is-feast,weekday-friday=included`
