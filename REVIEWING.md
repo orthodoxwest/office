@@ -197,3 +197,57 @@ Calendar resolution itself (which feast wins each day, transfers,
 commemorations) is checked separately by diffing `make ordo YEAR=20XX`
 against the published ordo when it arrives — volunteers reviewing texts
 against the diurnal and supplement do not need the ordo.
+
+### Clergy-facing project status
+
+Generate the repeatable high-level report with:
+
+```bash
+make project-status YEAR=2026
+```
+
+This rebuilds the app, extracts `../resources/2026-ordo.pdf`, composes the
+annual ordo and rubrics, runs the proper and provenance audits, and optionally
+queries GitHub for open `needs ruling` issues. It writes three ignored working
+artifacts under `output/status/`: a Markdown report suitable for forwarding,
+a JSON snapshot for automation, and `ordo-findings-2026.csv` as the complete
+date/aspect discrepancy queue. If GitHub is unavailable, every local metric is
+still generated and the ruling count is marked unavailable; use
+`scripts/project-status.py --year 2026 --offline` to request that behavior.
+
+Ordo cause classifications are deliberately not inferred from symptoms.
+Durable rules live in `data/review/ordo-triage.csv` with these categories:
+`translation-mismatch`, `data-gap`, `engine-bug`, `open-question`, and
+`reference-error`. The `year`, `aspect`, and `date` fields accept shell-style
+wildcards, while a more-specific rule wins over a broad one. Use wildcard
+rules only for a genuinely uniform cluster; after diagnosing a finding,
+prefer an exact row with a GitHub issue number and a short reason. Anything
+not covered by the ledger remains visibly `untriaged` and is never silently
+guessed. In particular, a mismatched canticle-antiphon incipit remains
+untriaged until review distinguishes a translation difference from selection
+of the wrong antiphon.
+
+The report also derives non-adjudicative diagnostic clusters from the current
+findings: Vespers share and aspect totals, ownership and commemoration
+direction, co-occurring symptoms, repeated generated incipits, multi-word
+reference incipits that occur later in the generated text, monthly hotspots,
+and same-date/aspect recurrence in the immediately preceding local ordo when
+that PDF is available. These clusters are written into the JSON snapshot as
+well as the Markdown report. They help order the queue but never assign a
+cause or turn a wording/boundary difference into an agreement.
+
+The report keeps several percentages separate:
+
+- **known proper-slot coverage** counts the six feast-proper lookup slots
+  audited by `office audit`; accepted common/seasonal fallbacks count as
+  covered, and acknowledged exclusions in `data/audit-ok.txt` leave the
+  denominator;
+- **rendered completeness** comes from composing every hour for the year;
+- **text source verification** is the explicit attestation rate from the
+  provenance inventory;
+- **strict ordo parity** gives equal weight to each comparable date/aspect
+  assertion, with exact commemoration sets counted once per office and date.
+
+This makes the headline stable without conflating “the page renders,” “we
+have no known proper gap,” “the wording was checked against a book,” and “the
+calendar matches the annual ordo.”
