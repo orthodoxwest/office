@@ -100,16 +100,13 @@ With desire I have desired * to eat this Passover with you before I suffer.
 When Jesus saw His Mother, * and the disciple whom He loved, standing by the Cross, He saith unto His Mother: Woman, behold thy Son! Then saith He to the disciple: Behold thy Mother!
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad5-5 [Ant 3] — check against diurnal
-When Jesus saw His Mother, * and the disciple whom He loved, standing by the Cross, He saith unto His Mother: Woman, behold thy Son! Then saith He to the disciple: Behold thy Mother!
-
+@use proper/passion-sunday/benedictus-antiphon-friday
 [benedictus-antiphon-saturday]
 # SOURCE: divinum-officium Tempora/Quad5-6 [Ant 2] — check against diurnal
 Father, glorify Thou Me * with thine Own Self, with the glory which I had with thee before the world was.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium TemporaM/Quad5-0 [Ant 1] — check against diurnal
-I am One * That bear witness of Myself, and the Father That sent Me beareth witness of Me.
+@use proper/passion-sunday/commemoration-antiphon
 [hymn-lauds]
 @use seasonal/passiontide/hymn-lauds
 

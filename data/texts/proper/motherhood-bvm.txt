@@ -18,9 +18,7 @@ Since I was humble, * I was pleasing to the Most High, and from my womb I have g
 Blessed art thou, * O daughter, from the Lord: for by thee we have partaken of the fruit of life.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 575 (Motherhood of the B.V.M.)
-The daughters of Sion * have seen her and have declared her blessed, and the queens have praised her.
-
+@use proper/motherhood-bvm/psalm-antiphon-4-first-vespers
 [psalm-antiphon-1-first-vespers]
 @use proper/motherhood-bvm/psalm-antiphon-1
 

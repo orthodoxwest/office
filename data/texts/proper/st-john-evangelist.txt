@@ -100,5 +100,4 @@ R. Who leaned on the Lord's bosom at the last supper.
 @use proper/st-john-evangelist/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
-This is the same John, * who leaned on the Lord's bosom at the last supper: the blessed Apostle, unto whom were revealed the secret things of heaven.
+@use proper/st-john-evangelist/benedictus-antiphon

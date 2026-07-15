@@ -25,9 +25,7 @@ Thou, child, * shalt be called the prophet of the Highest; for thou shalt go bef
 @use proper/nativity-john-baptist/psalm-antiphon-5
 
 [psalm-antiphon-1-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 384 (I Vespers for The Nativity of St John Baptist)
-He shall go before him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
-
+@use proper/nativity-john-baptist/commemoration-antiphon
 [psalm-antiphon-2-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 385 (I Vespers for The Nativity of St John Baptist)
 Thou shalt call his name John: * he shall drink neither wine nor strong drink: and many shall rejoice at his birth.

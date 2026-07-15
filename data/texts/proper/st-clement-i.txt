@@ -18,9 +18,7 @@ I saw on the mountain * the Lamb standing, from beneath whose foot flowed a foun
 From beneath whose foot * a fountain of living waters flowed forth: the stream of the river that maketh glad the city of God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-All the nations * round about believed in Christ the Lord.
-
+@use proper/st-clement-i/magnificat-antiphon
 [benedictus-antiphon]
 As he began to move toward the sea * the people cried out with a loud voice: O Lord Jesus Christ, deliver him! And Clement wept, and said: Father, receive my spirit!
 

@@ -107,7 +107,6 @@ He that made me whole, * the same said unto me: Take up thy bed, and walk in pea
 Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Quad1-0 [Ant 1] — check against diurnal
-Then shalt thou call, * and the Lord shall answer; thou shalt cry, and He shall say: Here I am.
+@use proper/lent-sunday-1/magnificat-antiphon
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds

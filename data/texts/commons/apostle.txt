@@ -18,9 +18,7 @@ Ye are my friends * if ye do whatsoever I command you, saith the Lord.
 Blessed are the peacemakers * blessed are the pure in heart, for they shall see God.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 607 (Common of Apostles and Evangelists out of Paschaltide)
-In your patience * possess ye your souls.
-
+@use commons/apostle/psalm-antiphon-4-first-vespers
 [psalm-antiphon-1-first-vespers]
 @use commons/apostle/psalm-antiphon-1
 

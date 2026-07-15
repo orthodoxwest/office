@@ -1,7 +1,5 @@
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Epi1-0a.txt [Ant 1]; 2026 ordo Jan 10 incipit "The Child Jesus" — check against diurnal
-The child Jesus * remained in Jerusalem; and his parents knew it not. And thinking that he was in the company, they came a day's journey, and sought him among their kinsfolks and acquaintance.
-
+@use proper/epiphany-sunday-within-octave/benedictus-antiphon
 [benedictus-antiphon]
 # SOURCE: divinum-officium Tempora/Epi1-0a.txt [Ant 1]; 2026 ordo Jan 11 incipit "The Child Jesus" — check against diurnal
 The child Jesus * remained in Jerusalem; and his parents knew it not. And thinking that he was in the company, they came a day's journey, and sought him among their kinsfolks and acquaintance.

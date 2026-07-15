@@ -157,5 +157,4 @@ R. He saw, and entered in: how blessed is the man unto whom heaven stood open!
 @use proper/st-stephen/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
-And Stephen, * full of faith and power, did great wonders and miracles among the people.
+@use proper/st-stephen/benedictus-antiphon

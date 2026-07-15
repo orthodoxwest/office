@@ -11,9 +11,7 @@ Amen, Amen, I say unto you, that I will see you again, * am your heart shall rej
 They knew the Lord Jesus * Alin the breaking of bread Alleluia Alleluia.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Pasc3-5 [Ant 3] — check against diurnal
-A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.
-
+@use proper/easter-sunday-3/benedictus-antiphon
 [benedictus-antiphon]
 # SOURCE: divinum-officium TemporaM/Pasc3-0 [Ant 2] — check against diurnal
 A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.
@@ -23,5 +21,4 @@ A little while * and you shall not see me; and again a little while, and you sha
 Amen, amen I say to you * that you shall lament and weep, but the world shall rejoice; and you shall be made sorrowful, but your sorrow shall be turned into joy.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Pasc3-0 [Ant 1] — check against diurnal
-A little while * and you shall not see me; and again a little while, and you shall see me, saith the Lord, because I go to the Father, alleluia, alleluia.
+@use proper/easter-sunday-3/benedictus-antiphon

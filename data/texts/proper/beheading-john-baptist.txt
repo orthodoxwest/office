@@ -18,9 +18,7 @@ The damsel danced, * and her mother charged her, saying: See thou ask nothing, b
 John had rebuked Herod for Herodias' sake, * his brother Philip's wife, for he had taken her.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-Give me in a charger the head of John the Baptist. * And the King was sorry, for his oath's sake.
-
+@use proper/beheading-john-baptist/magnificat-antiphon
 [benedictus-antiphon]
 He that hateth his life * in this world, shall keep it unto life eternal.
 

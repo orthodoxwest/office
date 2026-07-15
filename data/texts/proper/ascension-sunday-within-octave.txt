@@ -73,9 +73,7 @@ When the Comforter is come, * whom I will send unto you from the Father, even th
 These things have I told * you, that, when the time shall come, ye may remember that I told you of them, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 179 (Saturday within the Octave of the Ascension)
-When the Comforter is come, * whom I will send unto you from the Father, even the Spirit of truth, which proceedeth from the Father, he shall testify of me, alleluia.
-
+@use proper/ascension-sunday-within-octave/benedictus-antiphon
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 298, 180 (Sunday within the Octave of the Ascension)
 Almighty, everlasting God: grant that our wills may be ever subjected unto thee; and that we may serve thy majesty in sincerity of heart.

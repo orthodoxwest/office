@@ -103,5 +103,4 @@ R. A preacher of the truth throughout all the world.
 @use proper/conversion-st-paul/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 258 (I Vespers, Conversion of St Paul)
-Go forth, Ananias, * and enquire for Saul, for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
+@use proper/conversion-st-paul/commemoration-antiphon

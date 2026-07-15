@@ -18,9 +18,7 @@ Michael Mine Archangel, * I have appointed thee for a prince over the ingatherin
 O ye Angels of the Lord, bless ye the Lord always.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/05-08 [Ant Laudes] — check against diurnal
-O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
-
+@use proper/apparition-st-michael/magnificat-antiphon
 [benedictus-antiphon]
 There was silence * in heaven while as the dragon made war, and Michael fought against him, and prevailed over him. Alleluia.
 

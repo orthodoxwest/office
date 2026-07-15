@@ -12,8 +12,6 @@ V. His seed shall be mighty upon earth.
 R. The generation of the faithful shall be blessed.
 
 [magnificat-antiphon-first]
-# SOURCE: 00. The Sanctoral Cycle - Vespers 2025 Jacob edit 03-31 v.10.pdf, p. 243
-Let us praise a man famous * in his generation, with whom the Lord established the blessing of all nations, and the covenant, and made it rest upon his head.
-
+@use proper/st-joachim/benedictus-antiphon
 [versicle-first-vespers]
 @use proper/st-joachim/versicle-lauds

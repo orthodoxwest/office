@@ -18,9 +18,7 @@ In heaven their Angels do always behold the face of My Father, * Which is in hea
 Blessed be God, * Who sent His Angel, and delivered His servants that trusted in Him.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-Praise ye God, * all His Angels Praise ye Him, all His hosts.
-
+@use proper/guardian-angels/magnificat-antiphon
 [benedictus-antiphon]
 The Angel that talked * with me came again, and waked me, as a man that is wakened out of his sleep.
 

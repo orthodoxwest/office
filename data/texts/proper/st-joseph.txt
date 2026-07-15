@@ -18,9 +18,7 @@ When they found not Jesus, * they turned back again to Jerusalem, seeking Him; a
 His mother said unto Him: * Son, why hast Thou thus dealt with us? Behold, thy father and I have sought thee sorrowing.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
-Jesus went down with them, * and came to Nazareth, and was subject unto them.
-
+@use proper/st-joseph/benedictus-antiphon
 [benedictus-antiphon]
 Jesus went down with them, * and came to Nazareth, and was subject unto them.
 

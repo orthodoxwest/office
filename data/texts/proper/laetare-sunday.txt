@@ -108,7 +108,6 @@ Lord, if Thou hadst been here * Lazarus had not died; behold, by this time he st
 Thus saith the Lord: * He that followeth Me walketh not in darkness, but shall have the Light of life.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Ant 1] — check against diurnal
-Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+@use proper/laetare-sunday/magnificat-antiphon
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
