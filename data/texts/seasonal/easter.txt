@@ -21,6 +21,19 @@ R. The Lord is risen from the tomb, alleluia, alleluia.
 [short-responsory-vespers]
 @use seasonal/easter/short-responsory-lauds
 
+[short-responsory-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 157 (Saturdays in Paschaltide)
+R. The Lord is risen indeed, * alleluia, alleluia.
+R. The Lord is risen indeed, * alleluia, alleluia.
+V. And hath appeared to Simon.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Lord is risen indeed, * alleluia, alleluia.
+
+[hymn-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 157-159 (Saturdays in Paschaltide)
+@use proper/easter-sunday/hymn-vespers
+
 [hymn-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129; office-hymns.zip (Light_s Glittering Morn Bedecks the Sky, Paschaltide Lauds.docx)
 Aurora lucis rutilat
@@ -100,6 +113,11 @@ R. Let heaven and earth rejoice, alleluia.
 [versicle-vespers]
 V. Let my prayer be set forth in thy sight as the incense, alleluia.
 R. And let the lifting up of my hands be an evening sacrifice, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 159 (Saturdays in Paschaltide)
+V. Abide with us, Lord, alleluia.
+R. For it is toward evening, alleluia.
 
 [psalm-antiphon]
 @use shared/formulas/paschal-psalm-antiphon

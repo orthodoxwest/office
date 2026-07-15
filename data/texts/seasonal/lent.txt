@@ -86,3 +86,12 @@ Amen.
 # SOURCE: draft archdiocesan Vespers book, p. 139 (Saturdays in Lent)
 V. God shall give his Angels charge over thee.
 R. To keep thee in all thy ways.
+
+[short-responsory-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 137 (Saturdays in Lent)
+R. He shall defend thee * under his wings.
+R. He shall defend thee * under his wings.
+V. And thou shalt be safe under his feathers.
+R. Under his wings.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He shall defend thee * under his wings.

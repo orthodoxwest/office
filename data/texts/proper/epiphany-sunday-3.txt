@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 221 (III Saturday after the Epiphany)
+Almighty and everlasting God, mercifully look upon our infirmities, and in all our dangers and necessities stretch forth thy right hand to help and defend us.
+
 [magnificat-antiphon]
 # SOURCE: divinum-officium Tempora/Epi3-0.txt [Ant 3] — check against diurnal
 Lord, if Thou wilt, * Thou canst make me clean; and Jesus saith to him: I will; be thou clean.

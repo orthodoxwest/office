@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (V Sunday after Pentecost)
+O God, who hast prepared for those who love thee such good things as pass man's understanding; pour into our hearts such love toward thee, that we, loving thee above all things, may obtain thy promises, which exceed all that we can desire.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Audistis)
 Ye have heard that it was said * by them of old time, Thou shalt not kill; and whosoever shall kill, shall be in danger of the judgement.

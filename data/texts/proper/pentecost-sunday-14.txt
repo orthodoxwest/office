@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (XIV Sunday after Pentecost)
+Keep, we beseech thee, O Lord, thy Church with thy perpetual mercy; and, because the frailty of man without thee cannot but fall, keep us ever by thy help from all things hurtful, and lead us to all things profitable to our salvation.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 7 (Nolite solliciti esse)
 Be not therefore anxious, * saying, What shall we eat? or What shall we drink? for your heavenly Father knoweth that ye have need of all these things, alleluia.

@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 221 (IV Saturday after the Epiphany)
+O God, who knowest us to be set in the midst of so many and great dangers, that by reason of the frailty of our nature we cannot always stand uprightly; grant to us such strength and protection, as may support us in all dangers, and carry us through all temptations.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 2 (Ascendente Jesu)
 And when Jesus * was entered into a ship, behold, there arose a great tempest in the sea: and his disciples awoke him, saying: Lord, save us, we perish.

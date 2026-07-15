@@ -44,3 +44,13 @@ I go My way to Him That sent Me, * but because I have said this to you, sadness 
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-4/benedictus-antiphon
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 156 (Fourth Saturday after Easter)
+!Jas 1:17
+Dearly beloved: Every good gift and every perfect gift is from above, and cometh down from the Father of lights, with whom is no variableness, neither shadow of turning.
+R. Thanks be to God.
+
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 161 (Fourth Saturday after Easter)
+O God, who makest the faithful to be of one mind and will; grant unto thy people, that they may love what thou dost command, and desire what thou dost promise; that amid the changes of the world, our hearts may there be fixed where true joys are to be found.

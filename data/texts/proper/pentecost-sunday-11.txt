@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (XI Sunday after Pentecost)
+Almighty and everlasting God, who in the abundance of thy loving-kindness dost give more than thy suppliants either desire or deserve: pour down upon us thy mercy; forgiving us those things whereof our conscience is afraid, and giving us those things which we do not presume to ask.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Dum transiret Dominus)
 When the Lord had passed * through the coasts of Tyre, he made the deaf to hear and the dumb to speak.

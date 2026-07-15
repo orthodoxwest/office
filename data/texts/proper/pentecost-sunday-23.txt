@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XXIII Sunday after Pentecost)
+O Lord, we beseech thee: absolve thy people from their offences; that through thy bountiful goodness we may be delivered from the bands of all those sins, which by our frailty we have committed.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Dicebat enim)
 For she said within herself, * If I may but touch the hem of his garment, I shall be whole.

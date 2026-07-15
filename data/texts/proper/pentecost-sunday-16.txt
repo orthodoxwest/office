@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (XVI Sunday after Pentecost)
+Lord, we pray thee that thy grace may always precede and follow us; and make us continually to be given to all good works.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 8 (Cum intraret)
 As Jesus went * into the house of one of the chief Pharisees to eat bread on the sabbath day, behold there was a certain man before him which had the dropsy; and he took him, and healed him, and let him go.

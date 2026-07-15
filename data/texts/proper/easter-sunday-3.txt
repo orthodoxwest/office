@@ -22,3 +22,13 @@ Amen, amen I say to you * that you shall lament and weep, but the world shall re
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-3/benedictus-antiphon
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 156 (Third Saturday after Easter)
+!1 Pet 2:11
+Dearly beloved: I beseech you as strangers and pilgrims, abstain from fleshly lusts, which war against the soul.
+R. Thanks be to God.
+
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 161 (Third Saturday after Easter)
+O God, who showest to them that be in error the light of thy truth that they may return into the way of righteousness; grant unto all them profess themselves Christian, that they may eschew those things that are contrary to that name, and follow all such things as are agreeable to the same.

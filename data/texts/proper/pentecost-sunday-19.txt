@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XIX Sunday after Pentecost)
+O Almighty and most merciful God: of thy bountiful goodness keep us from all things that may hurt us; that we, being ready both in mind and body, may freely accomplish thy will.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Dicite invitatis)
 Tell them which are bidden, * Behold, I have prepared my dinner; come unto the marriage, alleluia.

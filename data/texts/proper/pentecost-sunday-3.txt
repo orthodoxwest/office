@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (III Sunday after Pentecost)
+O God, the protector of all that trust in thee, without whom nothing is strong, nothing is holy; increase and multiply upon us thy mercy; that, thou being our ruler and guide, we may so pass through things temporal, that we finally lose not the things eternal.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 3 (Quis ex vobis homo)
 What man of you * having an hundred sheep, if he lose one of them doth not leave the ninety and nine in the wilderness, and go after that which is lost, until he find it? alleluia.

@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 224 (XXII Sunday after Pentecost)
+O God, our refuge and strength, who art the author of all godliness; be ready, we beseech thee, to hear the devout prayers of thy Church; and grant that those things which we ask faithfully we may obtain effectually.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 10 (Magister scimus)
 Master * we know that thou art true, and teachest the way of God in truth, alleluia.

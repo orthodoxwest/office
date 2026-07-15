@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (X Sunday after Pentecost)
+O God, who declarest thy almighty power most chiefly in showing mercy and pity; multiply upon us thy loving-kindness; that we, running toward thy promises, may by thee be made partakers of thy heavenly gifts.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Stans a longe)
 And the publican * standing afar off, would not lift up so much as his eyes unto heaven, but smote upon his breast, saying, God be merciful to me a sinner.

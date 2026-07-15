@@ -32,3 +32,13 @@ I am the Good Shepherd, * Who feed My sheep: and I lay down My life for My sheep
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-2/benedictus-antiphon
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 156 (Second Saturday after Easter)
+!1 Pet 2:21-22
+Dearly beloved: Christ also suffered for us, leaving us an example, that ye should follow his steps: who did no sin, neither was guile found in his mouth.
+R. Thanks be to God.
+
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 161 (Second Saturday after Easter)
+O God, who in the humility of thy Son hast raised up a fallen world: grant unto thy faithful people perpetual gladness; that those, whom thou hast delivered from the peril of eternal death, may be brought to the fruition of everlasting joys.

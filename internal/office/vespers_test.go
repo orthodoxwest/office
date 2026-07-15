@@ -16,18 +16,28 @@ func TestVespersWeekdayCondition(t *testing.T) {
 	tests := []struct {
 		name      string
 		date      time.Time
+		first     bool
 		condition string
 		want      bool
 	}{
-		{"Sunday matches weekday-sunday", time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC), "weekday-sunday", true},
-		{"Sunday does not match weekday-monday", time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC), "weekday-monday", false},
-		{"Monday matches weekday-monday", time.Date(2026, 3, 16, 0, 0, 0, 0, time.UTC), "weekday-monday", true},
-		{"Saturday matches weekday-saturday", time.Date(2026, 3, 21, 0, 0, 0, 0, time.UTC), "weekday-saturday", true},
+		{"Sunday matches weekday-sunday", time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC), false, "weekday-sunday", true},
+		{"Sunday does not match weekday-monday", time.Date(2026, 3, 15, 0, 0, 0, 0, time.UTC), false, "weekday-monday", false},
+		{"Monday matches weekday-monday", time.Date(2026, 3, 16, 0, 0, 0, 0, time.UTC), false, "weekday-monday", true},
+		{"Saturday matches weekday-saturday", time.Date(2026, 3, 21, 0, 0, 0, 0, time.UTC), false, "weekday-saturday", true},
+		{"Sunday first Vespers uses civil Saturday", time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC), true, "weekday-saturday", true},
+		{"Sunday first Vespers is not civil Sunday", time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC), true, "weekday-sunday", false},
+		{"Low Sunday first Vespers uses civil Saturday", time.Date(2026, 4, 19, 0, 0, 0, 0, time.UTC), true, "weekday-saturday", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			day := &models.CalendarDay{Date: tt.date}
+			day := &models.CalendarDay{Date: tt.date, FirstVespers: tt.first}
+			if tt.first {
+				day.Celebration = &models.Feast{Category: models.CategorySunday}
+				if tt.name == "Low Sunday first Vespers uses civil Saturday" {
+					day.Celebration.Category = models.CategoryLord
+				}
+			}
 			got := evaluateCondition(tt.condition, day, composer.Moveable)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(%q) = %v, want %v", tt.condition, got, tt.want)

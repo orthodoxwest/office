@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 222 (VI Sunday after Pentecost)
+God of all power and might, who art the author of all good things; graft in our hearts the love of thy Name, and increase in us true religion; that, nourishing all that is good, thou mayest mercifully guard that which thou hast nourished.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 4 (Cum turba multa)
 The multitude being very great, * and having nothing to eat, Jesus called his disciples unto him, and saith unto them, I have compassion on the multitude, because they have now been with me three days, and have nothing to eat, alleluia.

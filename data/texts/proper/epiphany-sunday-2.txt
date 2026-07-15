@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 221 (II Saturday after the Epiphany)
+Almighty and everlasting God, who dost govern all things in heaven and earth; mercifully hear the supplications of thy people, and grant us thy peace all the days of our life.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 1 (Nuptiæ factæ sunt)
 There was a marriage * in Cana of Galilee, and Jesus was there with Mary his Mother.

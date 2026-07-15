@@ -29,7 +29,8 @@ Now when it was late * the same day, the first of the week, and the doors were s
 @use proper/easter-sunday/commemoration-versicle
 
 [collect]
-Grant, we beseech Thee, almighty God, that we who have celebrated the Paschal Feast, may, by Thy bounty, retain its fruits in our daily habits and behaviour.
+# SOURCE: draft archdiocesan Vespers book, p. 161 (Saturday before Low Sunday)
+Grant, we beseech thee, Almighty God: that we who have celebrated the paschal feasts, may, through thy bounty, ever keep them in our life and conduct.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Tempora/Pasc1-0 [Capitulum Laudes] — check against diurnal
@@ -51,6 +52,12 @@ R. Thanks be to God.
 
 [chapter-vespers]
 @use proper/low-sunday/chapter-lauds
+
+[chapter-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 156 (Saturday before Low Sunday)
+!1 John 5:4
+Dearly beloved: Whatsoever is born of God overcometh the world: and this is the victory that overcometh the world, even our faith.
+R. Thanks be to God.
 
 [chapter-terce]
 @use proper/low-sunday/chapter-lauds

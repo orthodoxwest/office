@@ -40,10 +40,13 @@ R. For we have sinned against thee.
 Graciously hear our prayers, we beseech thee, O Lord: that we, being loosed from the chain of our sins, may be kept from all things that may hurt us.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 174 (Quinquagesima Sunday)
+# SOURCE: draft archdiocesan Lauds book, p. 174 (Quinquagesima Sunday); draft archdiocesan Vespers book, p. 214 (Saturday before Quinquagesima)
 !1 Cor 13:1
 Brethren: Though I speak with the tongues of men and of angels, and have not charity, I am become as sounding brass, or a tinkling cymbal.
 R. Thanks be to God.
+
+[chapter-first]
+@use proper/quinquagesima/chapter-lauds
 
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 176 (Quinquagesima Sunday)

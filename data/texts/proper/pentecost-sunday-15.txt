@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: draft archdiocesan Vespers book, p. 223 (XV Sunday after Pentecost)
+O Lord, we beseech thee, let thy continual pity cleanse and defend thy Church; and, because it cannot continue in safety without thee, preserve it evermore by thy help and goodness.
+
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 7 (Ibat Jesus)
 Jesus went into a city * called Nain; and behold, there was a dead man carried out, the only son of his mother.
