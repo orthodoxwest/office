@@ -92,43 +92,43 @@ While unending ages run.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium Commune/C8 [HymnusM Vespera] — check against diurnal
-Urbs beata Jerusalem
+# SOURCE: office-hymns.zip (Blessed City, Heav_nly Salem, Church Dedication Vespers.docx)
+Urbs Jerusalem beata
 
-Blessed city, heavenly Salem,
-vision dear of peace and love,
-who of living stones art builded
-in the height of heaven above,
-and, with angel hosts encircled,
-as a bride dost earthward move;
+Blessed city, heav'nly Salem,
+Vision dear of peace and love,
+Who of living stones upbuilded,
+Art the joy of heav'n above,
+And with angel cohorts circled,
+As a bride to earth dost move!
 
-from celestial realms descending,
-bridal glory round thee shed,
-meet for him whose love espoused thee,
-to thy Lord shalt thou be led;
-all thy streets and all thy bulwarks
-of pure gold are fashioned.
+From celestial realms descending,
+Ready for the nuptial bed,
+To his presence, deck'd with jewels,
+By her Lord shall she be led;
+All her streets, and all her bulwarks,
+Of pure gold are fashioned.
 
-Bright thy gates of pearl are shining;
-they are open evermore;
-and by virtue of his merits
-thither faithful souls do soar,
-who for Christ's dear Name in this world
-pain and tribulation bore.
+Bright with pearls her portal glitters,
+It is open evermore;
+And by virtue of his merits,
+Thither faithful souls may soar,
+Who for Christ's dear Name in this world
+Pain and tribulation bore.
 
 Many a blow and biting sculpture
-polished well those stones elect,
-in their places now compacted
-by the heavenly Architect,
-who therewith hath willed for ever
-that his palace should be decked.
+Polish'd well those stones elect,
+In their places now compacted
+By the heav'nly Architect,
+Who therewith hath will'd for ever
+That his palace should be deck'd.
 
-Laud and honor to the Father,
-laud and honor to the Son,
-laud and honor to the Spirit,
-ever Three, and ever One,
-consubstantial, coeternal,
-while unending ages run.
+Glory be to God and honour
+In the highest, as is meet,
+To the Son and to the Father,
+And th'eternal Paraclete,
+Whose is boundless praise and power
+Through the ages infinite.
 Amen.
 
 [versicle-lauds]

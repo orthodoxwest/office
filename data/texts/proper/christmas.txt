@@ -2,16 +2,16 @@
 @use proper/christmas/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
-O ye shepherds, speak, * and tell us what ye have seen; who is appeared in the earth? We saw the newborn Child, and angels singing praise to the Lord, alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 59 (Nativity and Sunday within the Octave)
+Whom beheld ye, * O shepherds? Tell us, declare to us the tidings, on earth who hath appeared? We saw the newborn Infant, and the choir of Angels, praising the Lord together, alleluia, alleluia.
 
 [psalm-antiphon-2]
 # SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
 The Mother brought forth the King, * Whose name is called The Eternal; the joy of a Mother was hers, remaining a Virgin unsullied; neither before nor henceforth hath there been or shall be such another, alleluia.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
-The Angel said unto the shepherds * I bring you good tidings of great joy; for unto you is born this day a Saviour of the world, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 61 (Nativity and Sunday within the Octave)
+The Angel * said unto the shepherds, Behold, I bring you joyful tidings: for unto you is born this day the world's Redeemer, alleluia.
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 62 (Nativity and Sunday within the Octave)

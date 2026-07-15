@@ -1,7 +1,9 @@
 # Epiphanytide seasonal overrides (after the Octave of Epiphany through Septuagesima)
 
 [hymn-doxology]
+# SOURCE: office-hymns.zip (O More Than Mighty Cities Known, Sun oct of Epiphany Lauds.docx; Why, Impious Herod, Vainly Fear, Sat in oct of Epiphany Vespers.docx)
 All glory, Lord, to thee we pay,
 For thine Epiphany today;
 All glory, as is ever meet,
-To Father, Son, and Paraclete. Amen.
+To Father and to Paraclete.
+Amen.
