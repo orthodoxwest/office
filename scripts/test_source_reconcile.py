@@ -4,6 +4,7 @@
 import importlib.util
 import pathlib
 import sys
+import tempfile
 import unittest
 
 
@@ -202,6 +203,33 @@ class SourceReconcileTest(unittest.TestCase):
         current = "Brethren: the household of God: Jesus Christ."
         self.assertGreater(SOURCE_RECONCILE.text_similarity(source, current), 0.98)
 
+    def test_long_repetitive_text_keeps_sequence_anchors(self):
+        stanza = "All praise to God the Father and the Son and Holy Ghost. "
+        current = stanza * 20
+        midpoint = len(current) // 2
+        source = current[:midpoint] + "Page header " + current[midpoint:]
+        self.assertGreater(
+            SOURCE_RECONCILE.anchored_text_similarity(source, current), 0.98
+        )
+
+    def test_load_corpus_resolves_use_alias_text(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            texts = pathlib.Path(tmp) / "texts"
+            (texts / "proper").mkdir(parents=True)
+            (texts / "commons").mkdir()
+            (texts / "commons" / "apostle.txt").write_text(
+                "[hymn-lauds]\nLet heaven's exultant praises ring.\n"
+            )
+            (texts / "proper" / "st-andrew.txt").write_text(
+                "[hymn-vespers]\n@use commons/apostle/hymn-lauds\n"
+            )
+
+            corpus = SOURCE_RECONCILE.load_corpus(pathlib.Path(tmp))
+            self.assertEqual(
+                corpus["proper/st-andrew/hymn-vespers"].text,
+                "Let heaven's exultant praises ring.",
+            )
+
     def test_slot_compatibility_allows_plain_ordinary_fallback(self):
         self.assertEqual(
             SOURCE_RECONCILE.slot_compatibility("chapter-lauds", "chapter"), 0.90
@@ -314,6 +342,125 @@ class SourceReconcileTest(unittest.TestCase):
             "",
         )
 
+    def test_owner_aliases_duplicate_commemoration_to_principal_feast(self):
+        corpus = {
+            "proper/conversion-st-paul/collect": SOURCE_RECONCILE.CorpusEntry(
+                "proper/conversion-st-paul/collect",
+                "proper/conversion-st-paul.txt",
+                "collect",
+                "O God, who hast taught the whole world.",
+            )
+        }
+        names = {
+            "conversion-st-paul": "Conversion of St. Paul",
+            "comm-extra-01-25-the-conversion-of-st-paul-the-apostle": (
+                "The Conversion of St. Paul The Apostle"
+            ),
+        }
+        self.assertEqual(
+            SOURCE_RECONCILE.infer_owner(
+                "The Conversion of Saint Paul, Apostle", corpus, names
+            )[0],
+            "proper/conversion-st-paul",
+        )
+
+    def test_absent_advent_proper_uses_seasonal_fallback(self):
+        corpus = {
+            "proper/advent-sunday-1/collect": SOURCE_RECONCILE.CorpusEntry(
+                "proper/advent-sunday-1/collect",
+                "proper/advent-sunday-1.txt",
+                "collect",
+                "Stir up thy power, O Lord.",
+            ),
+            "seasonal/advent/hymn-lauds": SOURCE_RECONCILE.CorpusEntry(
+                "seasonal/advent/hymn-lauds",
+                "seasonal/advent.txt",
+                "hymn-lauds",
+                "A thrilling voice by Jordan rings.",
+            ),
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="lauds.docx",
+            source_page=13,
+            hour="lauds",
+            office_title="The First Sunday in Advent",
+            office_variant="",
+            slot="hymn-lauds",
+            latin_incipit="Vox clara ecce intonat",
+            source_text="A thrilling voice by Jordan rings.",
+        )
+        SOURCE_RECONCILE.reconcile([candidate], corpus, {}, {})
+        self.assertEqual(candidate.corpus_key, "seasonal/advent/hymn-lauds")
+        self.assertEqual(candidate.confidence, "exact")
+
+    def test_advent_first_vespers_matches_date_specific_o_antiphon(self):
+        corpus = {
+            "proper/advent-sunday-4/collect": SOURCE_RECONCILE.CorpusEntry(
+                "proper/advent-sunday-4/collect",
+                "proper/advent-sunday-4.txt",
+                "collect",
+                "Raise up thy power, O Lord.",
+            ),
+            "seasonal/advent/magnificat-antiphon-december-17": (
+                SOURCE_RECONCILE.CorpusEntry(
+                    "seasonal/advent/magnificat-antiphon-december-17",
+                    "seasonal/advent.txt",
+                    "magnificat-antiphon-december-17",
+                    "O Wisdom, which camest out of the mouth of the Most High.",
+                )
+            ),
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="vespers.docx",
+            source_page=34,
+            hour="vespers",
+            office_title="Saturday before the IV Sunday in Advent",
+            office_variant="first",
+            slot="magnificat-antiphon-first",
+            latin_incipit="O Sapientia",
+            source_text="O Wisdom, which camest out of the mouth of the Most High.",
+        )
+        SOURCE_RECONCILE.reconcile([candidate], corpus, {}, {})
+        self.assertEqual(
+            candidate.corpus_key,
+            "seasonal/advent/magnificat-antiphon-december-17",
+        )
+        self.assertEqual(candidate.confidence, "exact")
+
+    def test_ash_wednesday_uses_weekday_ordinary_fallback(self):
+        corpus = {
+            "proper/ash-wednesday/collect": SOURCE_RECONCILE.CorpusEntry(
+                "proper/ash-wednesday/collect",
+                "proper/ash-wednesday.txt",
+                "collect",
+                "Grant us, O Lord, to begin with holy fasting.",
+            ),
+            "ordinary/lauds/psalm-antiphon-1-wednesday": (
+                SOURCE_RECONCILE.CorpusEntry(
+                    "ordinary/lauds/psalm-antiphon-1-wednesday",
+                    "ordinary/lauds.txt",
+                    "psalm-antiphon-1-wednesday",
+                    "Wash me throughly, O Lord, from my wickedness.",
+                )
+            ),
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="lauds.docx",
+            source_page=179,
+            hour="lauds",
+            office_title="Ash Wednesday",
+            office_variant="",
+            slot="psalm-antiphon-1",
+            latin_incipit="",
+            source_text="Wash me throughly, O Lord, from my wickedness.",
+        )
+        SOURCE_RECONCILE.reconcile([candidate], corpus, {}, {})
+        self.assertEqual(
+            candidate.corpus_key,
+            "ordinary/lauds/psalm-antiphon-1-wednesday",
+        )
+        self.assertEqual(candidate.confidence, "exact")
+
     def test_different_first_vespers_text_becomes_an_override_gap(self):
         corpus = {
             "commons/martyr/versicle-vespers": SOURCE_RECONCILE.CorpusEntry(
@@ -348,6 +495,42 @@ class SourceReconcileTest(unittest.TestCase):
             candidate.corpus_key, "commons/martyr/versicle-first-vespers"
         )
         self.assertEqual(candidate.confidence, "missing")
+
+    def test_matching_first_vespers_text_uses_generic_fallback(self):
+        hymn = " ".join(
+            ["Let heaven and earth their joyful praises sing."] * 20
+        )
+        corpus = {
+            "proper/st-andrew/hymn-vespers": SOURCE_RECONCILE.CorpusEntry(
+                "proper/st-andrew/hymn-vespers",
+                "proper/st-andrew.txt",
+                "hymn-vespers",
+                hymn,
+            )
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="vespers.docx",
+            source_page=230,
+            hour="vespers",
+            office_title="Saint Andrew, Apostle",
+            office_variant="first",
+            slot="hymn-first-vespers",
+            latin_incipit="Exsultet caelum laudibus",
+            source_text=hymn + " November 29 - I Vespers for Saint Andrew",
+        )
+        second = SOURCE_RECONCILE.SourceCandidate(
+            source="vespers.docx",
+            source_page=240,
+            hour="vespers",
+            office_title="II Vespers for Saint Andrew, Apostle",
+            office_variant="second",
+            slot="hymn-vespers",
+            latin_incipit="Deus, tuorum militum",
+            source_text="A genuinely different later hymn.",
+        )
+        SOURCE_RECONCILE.reconcile([candidate, second], corpus, {}, {})
+        self.assertEqual(candidate.corpus_key, "proper/st-andrew/hymn-vespers")
+        self.assertNotEqual(candidate.confidence, "missing")
 
     def test_saturday_ordinary_does_not_replace_all_week_fallback(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(

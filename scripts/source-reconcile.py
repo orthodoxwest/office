@@ -185,6 +185,11 @@ PROPER_OWNER_PATTERNS = (
     (r"most holy body of christ", "proper/corpus-christi"),
 )
 
+OWNER_ALIASES = {
+    # The lower-ranked duplicate record shares the principal feast's proper.
+    "comm-extra-01-25-the-conversion-of-st-paul-the-apostle": "conversion-st-paul",
+}
+
 
 @dataclass(frozen=True)
 class Paragraph:
@@ -746,7 +751,21 @@ def load_corpus(data_dir: pathlib.Path) -> dict[str, CorpusEntry]:
     for path in sorted(text_root.rglob("*.txt")):
         for entry in load_ini_file(path, text_root):
             entries[entry.key] = entry
-    return entries
+
+    resolved = {}
+
+    def resolve(entry: CorpusEntry, trail: tuple[str, ...] = ()) -> str:
+        match = re.fullmatch(r"@use\s+([^\s]+)", entry.text)
+        if not match:
+            return entry.text
+        target_key = match.group(1)
+        if target_key in trail or target_key not in entries:
+            return entry.text
+        return resolve(entries[target_key], trail + (entry.key,))
+
+    for key, entry in entries.items():
+        resolved[key] = CorpusEntry(entry.key, entry.file, entry.section, resolve(entry))
+    return resolved
 
 
 def load_feast_names(data_dir: pathlib.Path) -> dict[str, str]:
@@ -802,6 +821,20 @@ def text_similarity(source: str, current: str) -> float:
     if len(shorter) >= 30 and shorter in longer:
         return min(1.0, 0.94 + 0.06 * len(shorter) / len(longer))
     return difflib.SequenceMatcher(None, left, right).ratio()
+
+
+def anchored_text_similarity(source: str, current: str) -> float:
+    """Compare known-owner texts without discarding repeated hymn anchors."""
+    left = normalize_for_comparison(source)
+    right = normalize_for_comparison(current)
+    if not left or not right:
+        return 0.0
+    shorter, longer = sorted((left, right), key=len)
+    if len(shorter) >= 30 and shorter in longer:
+        return min(1.0, 0.94 + 0.06 * len(shorter) / len(longer))
+    # Hymns and responsories repeat enough short words for SequenceMatcher's
+    # auto-junk heuristic to discard meaningful anchors in longer texts.
+    return difflib.SequenceMatcher(None, left, right, autojunk=False).ratio()
 
 
 def title_similarity(title: str, key: str, feast_names: dict[str, str]) -> float:
@@ -915,8 +948,54 @@ def infer_owner(
     score, identifier = scored[0] if scored else (0.0, "")
     runner_up = scored[1][0] if len(scored) > 1 else 0.0
     if score >= 0.72 and score - runner_up >= 0.08:
+        identifier = OWNER_ALIASES.get(identifier, identifier)
         return f"proper/{identifier}", score
     return "", score
+
+
+def fallback_entries(
+    owner: str, candidate: SourceCandidate, corpus: dict[str, CorpusEntry]
+) -> list[tuple[float, CorpusEntry]]:
+    """Return legal runtime fallback targets for an absent proper slot."""
+    identifier = owner.removeprefix("proper/")
+    seasonal = ""
+    if identifier.startswith("advent-sunday-") or identifier == "vigil-nativity":
+        seasonal = "advent"
+    elif identifier.startswith("lent-sunday-") or identifier == "laetare-sunday":
+        seasonal = "lent"
+
+    possible: list[tuple[float, CorpusEntry]] = []
+    if seasonal:
+        prefix = f"seasonal/{seasonal}/"
+        for key, entry in corpus.items():
+            if not key.startswith(prefix):
+                continue
+            compatibility = slot_compatibility(candidate.slot, entry.section)
+            if (
+                seasonal == "advent"
+                and candidate.slot == "magnificat-antiphon-first"
+                and entry.section.startswith("magnificat-antiphon-december-")
+            ):
+                compatibility = 0.90
+            if compatibility:
+                possible.append((compatibility, entry))
+
+    weekday = {"ash-wednesday": "wednesday"}.get(identifier, "")
+    if weekday:
+        prefix = f"ordinary/{candidate.hour}/"
+        for key, entry in corpus.items():
+            if not key.startswith(prefix):
+                continue
+            section = entry.section
+            compatibility = slot_compatibility(candidate.slot, section)
+            if section.endswith(f"-{weekday}"):
+                compatibility = slot_compatibility(
+                    candidate.slot, section.removesuffix(f"-{weekday}")
+                )
+            if compatibility:
+                possible.append((compatibility, entry))
+
+    return possible
 
 
 def source_review_flags(candidate: SourceCandidate) -> list[str]:
@@ -1036,7 +1115,7 @@ def reconcile(
             and owner
         ]
         if not later or max(
-            text_similarity(candidate.source_text, other.source_text)
+            anchored_text_similarity(candidate.source_text, other.source_text)
             for other in later
         ) >= 0.84:
             candidate.slot = generic
@@ -1053,7 +1132,7 @@ def reconcile(
             candidate.provenance_status = review.get("status", "")
             if entry:
                 candidate.current_text = entry.text
-                score = text_similarity(candidate.source_text, entry.text)
+                score = anchored_text_similarity(candidate.source_text, entry.text)
                 candidate.text_similarity = round(score, 3)
                 classify_candidate(candidate, score)
             else:
@@ -1076,7 +1155,7 @@ def reconcile(
             review = queue.get(key, {})
             if entry:
                 candidate.current_text = entry.text
-                score = text_similarity(candidate.source_text, entry.text)
+                score = anchored_text_similarity(candidate.source_text, entry.text)
                 candidate.text_similarity = round(score, 3)
                 candidate.leverage_score = review.get("score", 0)
                 candidate.provenance_status = review.get("status", "")
@@ -1096,6 +1175,25 @@ def reconcile(
         if owner:
             owned = owner_entries(owner, candidate, corpus)
             if not owned:
+                fallbacks = fallback_entries(owner, candidate, corpus)
+                if fallbacks:
+                    possible = []
+                    for compatibility, entry in fallbacks:
+                        source_score = anchored_text_similarity(
+                            candidate.source_text, entry.text
+                        )
+                        combined = compatibility * source_score
+                        possible.append((combined, source_score, entry))
+                    _, source_score, entry = max(possible, key=lambda item: item[:2])
+                    candidate.corpus_key = entry.key
+                    candidate.current_text = entry.text
+                    candidate.text_similarity = round(source_score, 3)
+                    candidate.title_similarity = round(owner_score, 3)
+                    review = queue.get(entry.key, {})
+                    candidate.leverage_score = review.get("score", 0)
+                    candidate.provenance_status = review.get("status", "")
+                    classify_candidate(candidate, source_score)
+                    continue
                 candidate.corpus_key = f"{owner}/{candidate.slot}"
                 candidate.title_similarity = round(owner_score, 3)
                 candidate.confidence = "missing"
@@ -1116,7 +1214,9 @@ def reconcile(
 
             possible = []
             for compatibility, entry in owned:
-                source_score = text_similarity(candidate.source_text, entry.text)
+                source_score = anchored_text_similarity(
+                    candidate.source_text, entry.text
+                )
                 heading_score = title_similarity(candidate.office_title, entry.key, feast_names)
                 combined = compatibility * (0.82 * source_score + 0.18 * heading_score)
                 possible.append((combined, source_score, heading_score, entry))
