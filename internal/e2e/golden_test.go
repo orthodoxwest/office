@@ -55,6 +55,8 @@ var hourCases = []hourCase{
 	{"lauds", "2026-03-19", "St. Joseph (double) — feast, no preces, proper antiphon"},
 	{"lauds", "2026-04-12", "Easter Sunday — 1st class feast, Easter season"},
 	{"lauds", "2026-04-13", "Easter Monday — within octave, no preces"},
+	{"lauds", "2026-04-23", "St. George — Common of One Martyr in Paschaltide"},
+	{"lauds", "2026-05-21", "Ascension Day — Ascensiontide hymn doxology"},
 	{"lauds", "2026-06-07", "Trinity Sunday — 1st class feast on a Sunday, Festal psalmody only (not also Sunday psalmody)"},
 	{"lauds", "2026-06-28", "Green Sunday in summer hymn window — Sunday Lauds summer hymn (Ecce iam noctis)"},
 
@@ -68,6 +70,8 @@ var hourCases = []hourCase{
 	{"vespers", "2026-03-19", "St. Joseph — double feast, proper antiphon"},
 	{"vespers", "2027-04-17", "Saturday in Passiontide — Saturday psalter with Passiontide responsory, hymn, and versicle"},
 	{"vespers", "2026-04-18", "Saturday before Low Sunday — Lord-category Sunday still uses the Saturday Paschaltide office"},
+	{"vespers", "2026-04-22", "I Vespers of St. George — Common of One Martyr in Paschaltide"},
+	{"vespers", "2026-04-23", "II Vespers of St. George — Common of One Martyr in Paschaltide"},
 
 	// Vespers — Easter exercises hour-qualified hymn (vespers vs lauds)
 	{"vespers", "2026-04-12", "Easter Sunday — proper vespers hymn, hour-qualified"},

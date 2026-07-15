@@ -306,7 +306,11 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		refs := []string{src}
-		if dox, doxRef := resolveProperText(day, hourName, "hymn-doxology", corpus); strings.HasPrefix(doxRef, "seasonal/") {
+		doxologyRef := "hymn-doxology"
+		if usesAscensionHymnDoxology(day) {
+			doxologyRef = "hymn-doxology-ascension"
+		}
+		if dox, doxRef := resolveProperText(day, hourName, doxologyRef, corpus); strings.HasPrefix(doxRef, "seasonal/") {
 			text = substituteHymnDoxology(text, dox)
 			refs = append(refs, doxRef)
 		}
@@ -325,6 +329,17 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	default:
 		return resolveElement(elem, corpus)
 	}
+}
+
+// usesAscensionHymnDoxology reports whether the Ascensiontide ending replaces
+// a hymn's ordinary or Easter ending. The calendar's Easter season runs until
+// Pentecost, so the date boundary is the moveable Ascension feast itself.
+func usesAscensionHymnDoxology(day *models.CalendarDay) bool {
+	if day == nil || day.Season != models.Easter {
+		return false
+	}
+	ascension := calendar.ComputeMoveableDates(day.Date.Year()).Ascension
+	return !day.Date.Before(ascension)
 }
 
 func sourcedElement(elem models.OfficeElement, refs ...string) models.OfficeElement {

@@ -1,54 +1,126 @@
-# Paschal variant of the Common of a Martyr.
-# Add sections here that differ during Paschaltide (Easter season).
-# Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
+# Paschal variant of the Common of One Martyr.
+# The local books provide one shared office for one or many martyrs in
+# Paschaltide; only the hymns vary with the number of martyrs.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 641, 605, 614 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 642, 606, 615 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 642, 607, 616 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Lauds book, p. 643 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 645, 608, 617 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/psalm-antiphon-5
 
-[benedictus-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 2] — check against diurnal
-Daughters of Jerusalem, * come and see the crowned martyrs, the Lord crowned them in his solemnity and delight, alleluia, alleluia.
-
-[magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C1p [Ant 3] — check against diurnal
-Saints and just * rejoice in the Lord, alleluia, the Lord has chosen you for his inheritance, alleluia.
-
-[magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C1p [Ant 1] — check against diurnal
-Eternal light will shine * over your saints, O Lord, and the eternity of times, alleluia.
+[psalm-antiphon-4-vespers]
+@use commons/martyr-paschal/psalm-antiphon-5
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 134
-!Wis 5:1
-Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labors.
-R. Thanks be to God.
+# SOURCE: draft archdiocesan Lauds book, p. 646 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/chapter-lauds
+
+[chapter-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 609, 618 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/martyr-paschal/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 134
-R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
-R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
-V. God hath chosen you to him to be his inheritance.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. O ye holy and righteous, rejoice in the Lord, * Alleluia, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 646 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/short-responsory-lauds
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 609, 618 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/short-responsory-vespers
+
+[hymn-lauds]
+# SOURCE: draft archdiocesan Lauds book, pp. 647-648 (Common of One or Many Martyrs in Paschaltide)
+Martyr Dei qui unicum
+
+Thou foll'west, Martyr of thy God,
+The path the only Son hath trod,
+Thy conquered foes thou treadest down,
+And gloriest in a victor's crown.
+
+O may thy prayer for us obtain
+The cleansing of each guilty stain,
+Shield us from sin's contagious blight,
+Put life's long weariness to flight.
+
+The cruel chains are now unwound
+That once thy sacred body bound,
+So may God's Son earth's fetters break
+From us, for his own love's dear sake.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
+
+[hymn-vespers]
+# SOURCE: draft archdiocesan Vespers book, pp. 610-611, 619-620 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
+Deus, tuorum militum
+
+Of all thy warrior Saints, O Lord,
+The portion, crown, and great reward,
+From all transgressions set us free,
+Who sing thy Martyr's victory.
+
+The pleasures of the world he spurn'd,
+From sin's pernicious lures he turn'd,
+Accounting them as transient all,
+He reach'd at length thy heav'nly hall.
+
+For thee through many a woe he ran,
+In many a fight he played the man;
+For thee his blood he dared to pour,
+And thence hath joy for evermore.
+
+We therefore pray thee, full of love,
+Regard us from thy throne above,
+On this thy Martyr's triumph day,
+Wash ev'ry stain of sin away.
+
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+All glory, as is ever meet,
+To Father and to Paraclete.
+Amen.
 
 [versicle-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 135
+# SOURCE: draft archdiocesan Lauds book, p. 649 (Common of One or Many Martyrs in Paschaltide)
 V. Right dear in the sight of the Lord, alleluia.
-R. Is the death of his saints, alleluia.
+R. Is the death of his Saints, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 612 (I Vespers, Common of One or Many Martyrs in Paschaltide)
+V. O ye holy and righteous, rejoice in the Lord, alleluia.
+R. God hath chosen you to him to be his inheritance, alleluia.
+
+[versicle-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 621 (II Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/martyr-paschal/versicle-lauds
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 650 (Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/benedictus-antiphon
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 613 (I Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/magnificat-antiphon-first
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 621 (II Vespers, Common of One or Many Martyrs in Paschaltide)
+@use commons/apostle-paschal/magnificat-antiphon
