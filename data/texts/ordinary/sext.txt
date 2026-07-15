@@ -1,4 +1,5 @@
 [hymn]
+# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 13
 Rector potens, verax Deus
 
 O God of truth, O Lord of might,
