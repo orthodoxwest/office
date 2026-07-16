@@ -133,6 +133,32 @@ func TestLoadFeasts(t *testing.T) {
 	}
 }
 
+func TestLoadFeastsVigilTraits(t *testing.T) {
+	feasts, err := LoadFeasts(findDataDir(t))
+	if err != nil {
+		t.Fatalf("LoadFeasts error: %v", err)
+	}
+	want := map[string]bool{
+		"vigil-ascension": true, "vigil-pentecost": true,
+		"vigil-epiphany": true, "vigil-st-james": true, "vigil-nativity": true,
+		"comm-extra-12-07-vigil-of-the-conception": true,
+		"comm-extra-02-23-vigil-of-st-matthias":    true,
+		"comm-extra-08-22-vigil-of-st-bartholomew": true,
+	}
+	for _, feast := range feasts {
+		if !feast.IsVigil {
+			continue
+		}
+		if !want[feast.ID] {
+			t.Errorf("unexpected IsVigil trait on %q", feast.ID)
+		}
+		delete(want, feast.ID)
+	}
+	for id := range want {
+		t.Errorf("missing IsVigil trait on %q", id)
+	}
+}
+
 func TestLoadPenitentialRules(t *testing.T) {
 	dataDir := findDataDir(t)
 	rules, err := loadPenitentialRules(dataDir)
@@ -199,6 +225,20 @@ func TestSectionToFeastSkipRomanLeapShift(t *testing.T) {
 	}
 }
 
+func TestSectionToFeastIsVigil(t *testing.T) {
+	feast, err := sectionToFeast(map[string]string{
+		"_id": "example-vigil", "Name": "Example Vigil", "Rank": "simple",
+		"Color": "violet", "Category": "feria", "Month": "6", "Day": "1",
+		"IsVigil": "true",
+	}, "test.txt")
+	if err != nil {
+		t.Fatalf("sectionToFeast returned error: %v", err)
+	}
+	if !feast.IsVigil {
+		t.Fatal("IsVigil = false, want true")
+	}
+}
+
 func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -207,6 +247,7 @@ func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 		wantErr string
 	}{
 		{name: "invalid boolean", key: "HasOctave", value: "yes", wantErr: "expected true or false"},
+		{name: "invalid vigil boolean", key: "IsVigil", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid month", key: "Month", value: "13", wantErr: "invalid fixed date"},
 		{name: "invalid day", key: "Day", value: "30", wantErr: "invalid fixed date"},
 	}

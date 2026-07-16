@@ -1491,6 +1491,7 @@ Category = confessor
 Month = 12
 Day = 7
 Source = awrv
+IsVigil = true
 
 [comm-extra-12-10-st-melchiades-pope-and-martyr]
 Name = St Melchiades, Bishop & Martyr
@@ -1593,6 +1594,7 @@ Category = confessor
 Month = 2
 Day = 23
 Source = awrv
+IsVigil = true
 
 [comm-extra-02-25-st-walburga-of-heidenheim-virgin]
 Name = St Walburga of Heidenheim, Virgin
@@ -1829,6 +1831,7 @@ Category = confessor
 Month = 8
 Day = 22
 Source = awrv
+IsVigil = true
 
 
 [comm-extra-08-30-ss-felix-and-adauctus-martyrs]

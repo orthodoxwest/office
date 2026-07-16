@@ -264,7 +264,7 @@ Valid `Color` values: `white`, `red`, `green`, `violet`, `rose`, `black`
 
 Valid `Category` values: `lord`, `blessed-virgin`, `angel`, `apostle`, `evangelist`, `martyr`, `martyrs`, `bishop-martyr`, `virgin-martyr`, `confessor-bishop`, `confessor-doctor`, `confessor`, `virgin`, `holy-woman`, `dedication`, `sunday`, `feria`
 
-Optional keys: `HasOctave = true`, `HasVigil = true`, `ProperName = Andrew` (saint's given name, substituted for `N.` in common texts), `ProperID` (use another feast's proper texts), `DateRule` (for moveable feasts instead of `Month`/`Day`), `OnlyWith` (only kept on days where the named feast wins the day), `SkipRomanLeapShift = true` (keep a fixed late-February feast on its civil date in leap years), `Source` and `Notes` (documentation).
+Optional keys: `HasOctave = true`, `HasVigil = true` (generate a preceding vigil), `IsVigil = true` (this observance is itself a vigil), `ProperName = Andrew` (saint's given name, substituted for `N.` in common texts), `ProperID` (use another feast's proper texts), `DateRule` (for moveable feasts instead of `Month`/`Day`), `OnlyWith` (only kept on days where the named feast wins the day), `SkipRomanLeapShift = true` (keep a fixed late-February feast on its civil date in leap years), `Source` and `Notes` (documentation).
 
 **Feast proper** (`data/texts/proper/st-andrew.txt`):
 

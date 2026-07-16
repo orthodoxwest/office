@@ -259,6 +259,10 @@ type Feast struct {
 
 	HasOctave bool
 	HasVigil  bool
+	// IsVigil identifies an observance which is itself a vigil. It is distinct
+	// from HasVigil, which generates a vigil for the feast on the preceding day.
+	// This rule trait is composition input, not rendered calendar output.
+	IsVigil bool `json:"-"`
 
 	// OnlyWith restricts this feast/commemoration to days where the winning
 	// celebration has the given feast ID.

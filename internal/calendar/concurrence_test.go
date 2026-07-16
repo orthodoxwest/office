@@ -336,7 +336,8 @@ func TestOccurrenceCommemoratedAtFirstVespers(t *testing.T) {
 		{"simplified Double begins at I Vespers", &models.Feast{ID: "double", Rank: models.Double}, true},
 		{"Ember day is Lauds only", &models.Feast{ID: "september-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
 		{"Rogation is Lauds only", &models.Feast{ID: "rogation-monday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
-		{"common vigil is Lauds only", &models.Feast{ID: "comm-extra-08-22-vigil-of-st-bartholomew", Name: "Vigil of St. Bartholomew", Rank: models.Commemoration}, false},
+		{"common vigil is Lauds only", &models.Feast{ID: "comm-extra-08-22-vigil-of-st-bartholomew", Name: "Vigil of St. Bartholomew", Rank: models.Commemoration, IsVigil: true}, false},
+		{"vigil-looking name without trait follows rank", &models.Feast{ID: "vigil-looking-memorial", Name: "Vigil of an Example", Rank: models.Commemoration}, true},
 	}
 
 	for _, tt := range tests {
@@ -364,7 +365,7 @@ func TestOccurrenceCommemoratedAtSecondVespers(t *testing.T) {
 		{"simple is not at II Vespers", greaterDouble, &models.Feast{ID: "simple", Rank: models.Simple}, false},
 		{"Ember day is Lauds only", greaterDouble, &models.Feast{ID: "september-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
 		{"Rogation is Lauds only", greaterDouble, &models.Feast{ID: "rogation-monday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
-		{"common vigil is Lauds only", greaterDouble, &models.Feast{ID: "vigil-st-lawrence", Rank: models.Simple, Category: models.CategoryFeria}, false},
+		{"common vigil is Lauds only", greaterDouble, &models.Feast{ID: "vigil-st-lawrence", Rank: models.Simple, Category: models.CategoryFeria, IsVigil: true}, false},
 		{"Sunday remains at II Vespers of first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
 		{"Double excluded by first class winner", firstClass, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, false},
 		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
@@ -415,7 +416,7 @@ func TestResolveConcurrenceNoOwnerCombinesHourEligibleCommemorations(t *testing.
 	currentMemorial := &models.Feast{ID: "current-memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
 	currentDouble := &models.Feast{ID: "current-double", Rank: models.Double, Category: models.CategoryMartyr}
 	incomingMemorial := &models.Feast{ID: "incoming-memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
-	incomingVigil := &models.Feast{ID: "comm-extra-vigil", Name: "Vigil of an Apostle", Rank: models.Commemoration, Category: models.CategoryFeria}
+	incomingVigil := &models.Feast{ID: "comm-extra-vigil", Name: "Vigil of an Apostle", Rank: models.Commemoration, Category: models.CategoryFeria, IsVigil: true}
 
 	result := resolveConcurrence(
 		&models.CalendarDay{Commemorations: []*models.Feast{currentMemorial, currentDouble}},

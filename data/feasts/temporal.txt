@@ -176,6 +176,7 @@ Rank = simple
 Color = white
 Category = feria
 DateRule = easter+38
+IsVigil = true
 
 [rogation-monday]
 Name = Rogation Monday
@@ -190,6 +191,7 @@ Rank = double-1st-class
 Color = white
 Category = feria
 DateRule = easter+48
+IsVigil = true
 
 [pentecost]
 Name = Whitsunday — Pentecost

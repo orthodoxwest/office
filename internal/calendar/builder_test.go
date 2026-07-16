@@ -371,6 +371,9 @@ func TestBuildCalendarVigils(t *testing.T) {
 	if oct31.Celebration.ID != "vigil-of-all-saints" {
 		t.Errorf("Oct 31 = %v, want vigil-of-all-saints", oct31.Celebration.ID)
 	}
+	if !oct31.Celebration.IsVigil {
+		t.Error("generated Vigil of All Saints is missing IsVigil trait")
+	}
 }
 
 func TestBuildCalendarOctaves(t *testing.T) {
