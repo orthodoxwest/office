@@ -12,7 +12,7 @@ func TestBoundaryCommemorationTraceRules(t *testing.T) {
 	incoming := traceFeast("incoming", models.Commemoration, models.CategoryMartyr)
 	following := &models.CalendarDay{Celebration: loser, Commemorations: []*models.Feast{incoming}}
 
-	comms, decisions := boundaryCommemorationsWithDecisions(winner, loser, following, true, false)
+	comms, decisions := boundaryCommemorationsWithDecisions(winner, loser, nil, following, true, false)
 	if len(comms) != 0 {
 		t.Fatalf("commemorations = %#v", comms)
 	}
