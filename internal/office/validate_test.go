@@ -30,6 +30,12 @@ func TestIsValidCondition(t *testing.T) {
 		{"weekday-invalid", false},
 		{"weekday-", false},
 
+		// season- prefix is validated against the modeled season names.
+		{"season-lent", true},
+		{"season-passiontide", true},
+		{"season-lnt", false},
+		{"season-", false},
+
 		// not- negation
 		{"not-if-preces", true},
 		{"not-feast-easter-sunday", true},
@@ -47,6 +53,7 @@ func TestIsValidCondition(t *testing.T) {
 		{"", false},
 		{"unknown", false},
 		{"not-unknown", false},
+		{"weekday-sunday,", false},
 	}
 
 	for _, tt := range tests {

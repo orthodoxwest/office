@@ -9,18 +9,11 @@ import (
 )
 
 // LaudsComposer composes the hour of Lauds.
-type LaudsComposer struct {
-	Moveable *calendar.MoveableDates
-}
-
-// SetMoveable sets the moveable feast dates for preces calculation.
-func (l *LaudsComposer) SetMoveable(m *calendar.MoveableDates) {
-	l.Moveable = m
-}
+type LaudsComposer struct{}
 
 // Compose builds a complete Lauds hour for the given day.
-func (l *LaudsComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error) {
-	return composeMajorHour(day, sections, corpus, l.Moveable, majorHourOptions{
+func (l *LaudsComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
+	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
 		hourName: "lauds",
 		title:    "Lauds",
 	})

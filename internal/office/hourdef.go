@@ -15,11 +15,12 @@ type HourElement struct {
 
 // HourSection represents a named section of an hour definition with an optional condition.
 type HourSection struct {
-	Name        string
-	Condition   string
-	Collapsible bool
-	Label       string
-	Elements    []HourElement
+	Name            string
+	Condition       string
+	parsedCondition *parsedCondition
+	Collapsible     bool
+	Label           string
+	Elements        []HourElement
 }
 
 // ParseHourDefinition reads an hour definition file and returns ordered sections
@@ -43,6 +44,7 @@ func ParseHourDefinition(path string) ([]HourSection, error) {
 	var sections []HourSection
 	var current *HourSection
 	pendingType := ""
+	conditionLine := 0
 
 	scanner := bufio.NewScanner(f)
 	lineNum := 0
@@ -60,11 +62,17 @@ func ParseHourDefinition(path string) ([]HourSection, error) {
 				if pendingType != "" {
 					return nil, fmt.Errorf("%s:%d: Type without matching Ref in section [%s]", path, lineNum, current.Name)
 				}
+				if conditionLine != 0 {
+					if err := compileSectionCondition(path, conditionLine, current); err != nil {
+						return nil, err
+					}
+				}
 				sections = append(sections, *current)
 			}
 			name := line[1 : len(line)-1]
 			current = &HourSection{Name: name}
 			pendingType = ""
+			conditionLine = 0
 			continue
 		}
 
@@ -82,7 +90,11 @@ func ParseHourDefinition(path string) ([]HourSection, error) {
 
 		switch key {
 		case "Condition":
+			if conditionLine != 0 {
+				return nil, fmt.Errorf("%s:%d: duplicate Condition in section [%s]", path, lineNum, current.Name)
+			}
 			current.Condition = value
+			conditionLine = lineNum
 		case "Collapsible":
 			current.Collapsible = value == "true"
 		case "Label":
@@ -111,8 +123,22 @@ func ParseHourDefinition(path string) ([]HourSection, error) {
 		if pendingType != "" {
 			return nil, fmt.Errorf("%s: Type without matching Ref at end of section [%s]", path, current.Name)
 		}
+		if conditionLine != 0 {
+			if err := compileSectionCondition(path, conditionLine, current); err != nil {
+				return nil, err
+			}
+		}
 		sections = append(sections, *current)
 	}
 
 	return sections, nil
+}
+
+func compileSectionCondition(path string, line int, section *HourSection) error {
+	parsed, err := parseCondition(section.Condition)
+	if err != nil {
+		return fmt.Errorf("%s:%d: invalid condition in section [%s]: %w", path, line, section.Name, err)
+	}
+	section.parsedCondition = &parsed
+	return nil
 }

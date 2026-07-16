@@ -198,6 +198,22 @@ func TestAssuranceGolden(t *testing.T) {
 	checkGolden(t, "assurance-report.md", buf.String())
 }
 
+func TestParityGolden(t *testing.T) {
+	baseline, err := review.LoadAssuranceBaseline(dataDir)
+	if err != nil {
+		t.Fatalf("LoadAssuranceBaseline: %v", err)
+	}
+	snapshot, err := review.BuildParitySnapshot(dataDir, baseline.StartYear, baseline.Years)
+	if err != nil {
+		t.Fatalf("BuildParitySnapshot: %v", err)
+	}
+	var buf bytes.Buffer
+	if err := review.WriteParitySnapshot(snapshot, &buf); err != nil {
+		t.Fatalf("WriteParitySnapshot: %v", err)
+	}
+	checkGolden(t, "parity-snapshot.json", buf.String())
+}
+
 // checkGolden compares got against the named golden file, or writes it when -update is set.
 func checkGolden(t *testing.T, name, got string) {
 	t.Helper()

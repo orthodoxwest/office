@@ -11,8 +11,6 @@ import (
 )
 
 func TestVespersWeekdayCondition(t *testing.T) {
-	composer := &VespersComposer{}
-
 	tests := []struct {
 		name      string
 		date      time.Time
@@ -38,7 +36,7 @@ func TestVespersWeekdayCondition(t *testing.T) {
 					day.Celebration.Category = models.CategoryLord
 				}
 			}
-			got := evaluateCondition(tt.condition, day, composer.Moveable)
+			got := evaluateCondition(tt.condition, day, nil)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(%q) = %v, want %v", tt.condition, got, tt.want)
 			}
@@ -48,7 +46,6 @@ func TestVespersWeekdayCondition(t *testing.T) {
 
 func TestVespersPreces(t *testing.T) {
 	moveable := calendar.ComputeMoveableDates(2026)
-	composer := &VespersComposer{Moveable: moveable}
 
 	tests := []struct {
 		name string
@@ -74,7 +71,7 @@ func TestVespersPreces(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := evaluateCondition("if-preces", tt.day, composer.Moveable)
+			got := evaluateCondition("if-preces", tt.day, moveable)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(if-preces) = %v, want %v", got, tt.want)
 			}
@@ -153,7 +150,7 @@ func TestVespersUsesFollowingOfficeWhenConcurrenceSaysFirstVespers(t *testing.T)
 		},
 	}
 
-	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus, nil)
 	if err != nil {
 		t.Fatalf("Compose: %v", err)
 	}
@@ -216,7 +213,7 @@ func TestVespersCommemoratesOutgoingOfficeAtFirstVespersOfFollowing(t *testing.T
 		},
 	}
 
-	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus, nil)
 	if err != nil {
 		t.Fatalf("Compose: %v", err)
 	}
@@ -293,7 +290,7 @@ func TestVespersCommemoratesIncomingOfficeAtSecondVespersOfPreceding(t *testing.
 		},
 	}
 
-	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus, nil)
 	if err != nil {
 		t.Fatalf("Compose: %v", err)
 	}
@@ -354,7 +351,7 @@ func TestVespersUsesPrecedingOfficeWhenConcurrenceSaysSecondVespers(t *testing.T
 		},
 	}
 
-	hour, err := (&VespersComposer{}).Compose(day, sections, corpus)
+	hour, err := (&VespersComposer{}).Compose(day, sections, corpus, nil)
 	if err != nil {
 		t.Fatalf("Compose: %v", err)
 	}

@@ -9,18 +9,11 @@ import (
 )
 
 // VespersComposer composes the hour of Vespers.
-type VespersComposer struct {
-	Moveable *calendar.MoveableDates
-}
-
-// SetMoveable sets the moveable feast dates for preces calculation.
-func (v *VespersComposer) SetMoveable(m *calendar.MoveableDates) {
-	v.Moveable = m
-}
+type VespersComposer struct{}
 
 // Compose builds a complete Vespers hour for the given day.
-func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error) {
-	return composeMajorHour(day, sections, corpus, v.Moveable, majorHourOptions{
+func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
+	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
 		hourName:  "vespers",
 		title:     "Vespers",
 		officeDay: vespersOfficeDay,

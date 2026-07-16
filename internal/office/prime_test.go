@@ -10,8 +10,6 @@ import (
 )
 
 func TestPrimeWeekdayCondition(t *testing.T) {
-	composer := &PrimeComposer{}
-
 	tests := []struct {
 		name      string
 		date      time.Time
@@ -71,7 +69,7 @@ func TestPrimeWeekdayCondition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			day := &models.CalendarDay{Date: tt.date}
-			got := evaluateCondition(tt.condition, day, composer.Moveable)
+			got := evaluateCondition(tt.condition, day, nil)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(%q) = %v, want %v (weekday=%s)",
 					tt.condition, got, tt.want, tt.date.Weekday())
@@ -82,7 +80,6 @@ func TestPrimeWeekdayCondition(t *testing.T) {
 
 func TestPrimePreces(t *testing.T) {
 	moveable := calendar.ComputeMoveableDates(2026)
-	composer := &PrimeComposer{Moveable: moveable}
 
 	tests := []struct {
 		name string
@@ -115,7 +112,7 @@ func TestPrimePreces(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := evaluateCondition("if-preces", tt.day, composer.Moveable)
+			got := evaluateCondition("if-preces", tt.day, moveable)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(if-preces) = %v, want %v", got, tt.want)
 			}
@@ -233,7 +230,7 @@ func TestResolvePrimePsalmAntiphon(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := resolvePrimePsalmAntiphon(tt.day, corpus)
+			got := resolvePrimePsalmAntiphon(tt.day, corpus, calendar.ComputeMoveableDates(tt.day.Date.Year()))
 			if got.Text != tt.want || got.SourceRef != tt.ref {
 				t.Fatalf("resolvePrimePsalmAntiphon() = (%q, %q), want (%q, %q)", got.Text, got.SourceRef, tt.want, tt.ref)
 			}

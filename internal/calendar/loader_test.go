@@ -3,6 +3,7 @@ package calendar
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -132,33 +133,6 @@ func TestLoadFeasts(t *testing.T) {
 	}
 }
 
-func TestLoadSeasons(t *testing.T) {
-	dataDir := findDataDir(t)
-	seasons, err := LoadSeasons(dataDir)
-	if err != nil {
-		t.Fatalf("LoadSeasons error: %v", err)
-	}
-
-	if len(seasons) != 8 {
-		t.Fatalf("expected 8 seasons, got %d", len(seasons))
-	}
-
-	// Check a specific season
-	var advent *models.SeasonDefinition
-	for _, s := range seasons {
-		if s.ID == models.Advent {
-			advent = s
-			break
-		}
-	}
-	if advent == nil {
-		t.Fatal("advent season not found")
-	}
-	if advent.Color != models.Violet {
-		t.Errorf("advent color = %v, want violet", advent.Color)
-	}
-}
-
 func TestLoadPenitentialRules(t *testing.T) {
 	dataDir := findDataDir(t)
 	rules, err := loadPenitentialRules(dataDir)
@@ -222,6 +196,43 @@ func TestSectionToFeastSkipRomanLeapShift(t *testing.T) {
 	}
 	if !feast.SkipRomanLeapShift {
 		t.Fatal("SkipRomanLeapShift = false, want true")
+	}
+}
+
+func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
+	tests := []struct {
+		name    string
+		key     string
+		value   string
+		wantErr string
+	}{
+		{name: "invalid boolean", key: "HasOctave", value: "yes", wantErr: "expected true or false"},
+		{name: "invalid month", key: "Month", value: "13", wantErr: "invalid fixed date"},
+		{name: "invalid day", key: "Day", value: "30", wantErr: "invalid fixed date"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data := map[string]string{
+				"_id": "test-feast", "Name": "Test Feast", "Rank": "simple",
+				"Color": "white", "Category": "confessor", "Month": "2", "Day": "28",
+			}
+			data[tt.key] = tt.value
+			_, err := sectionToFeast(data, "test.txt")
+			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("sectionToFeast error = %v, want containing %q", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestSectionToFeastRequiresCompleteFixedDate(t *testing.T) {
+	_, err := sectionToFeast(map[string]string{
+		"_id": "test-feast", "Name": "Test Feast", "Rank": "simple",
+		"Color": "white", "Category": "confessor", "Month": "2",
+	}, "test.txt")
+	if err == nil || !strings.Contains(err.Error(), "Month and Day together") {
+		t.Fatalf("sectionToFeast error = %v, want incomplete-date error", err)
 	}
 }
 

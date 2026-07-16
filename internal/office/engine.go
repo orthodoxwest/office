@@ -14,22 +14,18 @@ import (
 
 // HourComposer composes a specific liturgical hour for a given calendar day.
 type HourComposer interface {
-	Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error)
-}
-
-// MoveableReceiver is implemented by composers that need moveable feast dates.
-type MoveableReceiver interface {
-	SetMoveable(m *calendar.MoveableDates)
+	Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error)
 }
 
 // Engine loads hour definitions and text corpus, then delegates to hour-specific composers.
 type Engine struct {
-	dataDir   string
-	corpus    *texts.TextCorpus
-	composers map[string]HourComposer
+	corpus      *texts.TextCorpus
+	composers   map[string]HourComposer
+	definitions map[string][]HourSection
 }
 
-// NewEngine creates a new office engine, loading the text corpus from dataDir.
+// NewEngine creates an office engine, loading the text corpus and compiling
+// all hour definitions from dataDir once for immutable concurrent reuse.
 func NewEngine(dataDir string) (*Engine, error) {
 	corpus, err := texts.LoadTexts(dataDir)
 	if err != nil {
@@ -37,9 +33,9 @@ func NewEngine(dataDir string) (*Engine, error) {
 	}
 
 	e := &Engine{
-		dataDir:   dataDir,
-		corpus:    corpus,
-		composers: make(map[string]HourComposer),
+		corpus:      corpus,
+		composers:   make(map[string]HourComposer),
+		definitions: make(map[string][]HourSection, len(hourNames)),
 	}
 
 	e.composers["compline"] = &ComplineComposer{}
@@ -49,6 +45,14 @@ func NewEngine(dataDir string) (*Engine, error) {
 	e.composers["terce"] = &MinorHourComposer{Name: "Terce"}
 	e.composers["sext"] = &MinorHourComposer{Name: "Sext"}
 	e.composers["none"] = &MinorHourComposer{Name: "None"}
+	for _, hourName := range hourNames {
+		defPath := filepath.Join(dataDir, "office", hourName+".txt")
+		sections, err := ParseHourDefinition(defPath)
+		if err != nil {
+			return nil, fmt.Errorf("parsing %s definition: %w", hourName, err)
+		}
+		e.definitions[hourName] = sections
+	}
 
 	return e, nil
 }
@@ -60,18 +64,8 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 		return nil, fmt.Errorf("unknown hour: %s", hourName)
 	}
 
-	// Set moveable dates on composers that need them
-	if mr, ok := composer.(MoveableReceiver); ok {
-		mr.SetMoveable(moveable)
-	}
-
-	defPath := filepath.Join(e.dataDir, "office", hourName+".txt")
-	sections, err := ParseHourDefinition(defPath)
-	if err != nil {
-		return nil, fmt.Errorf("parsing hour definition: %w", err)
-	}
-
-	hour, err := composer.Compose(day, sections, e.corpus)
+	sections := e.definitions[hourName]
+	hour, err := composer.Compose(day, sections, e.corpus, moveable)
 	if err != nil {
 		return nil, fmt.Errorf("composing %s: %w", hourName, err)
 	}

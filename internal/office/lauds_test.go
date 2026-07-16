@@ -11,8 +11,6 @@ import (
 )
 
 func TestLaudsWeekdayCondition(t *testing.T) {
-	composer := &LaudsComposer{}
-
 	tests := []struct {
 		name      string
 		date      time.Time
@@ -28,7 +26,7 @@ func TestLaudsWeekdayCondition(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			day := &models.CalendarDay{Date: tt.date}
-			got := evaluateCondition(tt.condition, day, composer.Moveable)
+			got := evaluateCondition(tt.condition, day, nil)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(%q) = %v, want %v", tt.condition, got, tt.want)
 			}
@@ -38,7 +36,6 @@ func TestLaudsWeekdayCondition(t *testing.T) {
 
 func TestLaudsPreces(t *testing.T) {
 	moveable := calendar.ComputeMoveableDates(2026)
-	composer := &LaudsComposer{Moveable: moveable}
 
 	tests := []struct {
 		name string
@@ -64,7 +61,7 @@ func TestLaudsPreces(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := evaluateCondition("if-preces", tt.day, composer.Moveable)
+			got := evaluateCondition("if-preces", tt.day, moveable)
 			if got != tt.want {
 				t.Errorf("evaluateCondition(if-preces) = %v, want %v", got, tt.want)
 			}

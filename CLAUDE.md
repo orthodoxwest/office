@@ -58,7 +58,6 @@ tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
 data/
   feasts/                  Feast definitions (INI-like format)
-  seasons.txt              Season definitions
   texts/                   Liturgical texts
   office/                  Hour structure definitions (one file per hour)
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)

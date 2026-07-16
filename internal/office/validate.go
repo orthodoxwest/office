@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/orthodoxwest/office/internal/texts"
 )
@@ -12,41 +11,9 @@ import (
 // hourNames lists the canonical hour names (stems of the office/*.txt files).
 var hourNames = []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
 
-// isValidCondition mirrors the pattern logic of evaluateCondition to validate
-// a condition string without needing runtime calendar data.
-// Comma-separated conditions are ANDed; "not-" prefix negates; "feast-*" and
-// "weekday-*" prefixes are structural patterns; "if-preces" is a named condition.
 func isValidCondition(condition string) bool {
-	if strings.Contains(condition, ",") {
-		for _, part := range strings.Split(condition, ",") {
-			if !isValidCondition(strings.TrimSpace(part)) {
-				return false
-			}
-		}
-		return true
-	}
-	if strings.HasPrefix(condition, "not-") {
-		return isValidCondition(condition[4:])
-	}
-	switch condition {
-	case "if-preces", "is-feast", "is-ferial", "festal-lauds-psalmody", "if-suffrage", "if-cross-commemoration":
-		return true
-	}
-	if strings.HasPrefix(condition, "feast-") {
-		return len(condition) > 6 // feast ID must be non-empty
-	}
-	if strings.HasPrefix(condition, "weekday-") {
-		day := condition[8:]
-		switch day {
-		case "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday":
-			return true
-		}
-		return false
-	}
-	if strings.HasPrefix(condition, "season-") {
-		return len(condition) > 7 // season name must be non-empty
-	}
-	return false
+	_, err := parseCondition(condition)
+	return err == nil
 }
 
 // validElementTypes is the set of Type values recognised by mapElementType.

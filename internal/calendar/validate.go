@@ -48,21 +48,6 @@ func ValidateAll(dataDir string) []string {
 		}
 	}
 
-	// Seasons file
-	seasonsPath := filepath.Join(dataDir, "seasons.txt")
-	if _, err := os.Stat(seasonsPath); err == nil {
-		sections, err := parseINISections(seasonsPath)
-		if err != nil {
-			allErrors = append(allErrors, fmt.Sprintf("Syntax error in seasons.txt: %v", err))
-		} else {
-			for _, section := range sections {
-				if _, err := sectionToSeason(section, "seasons.txt"); err != nil {
-					allErrors = append(allErrors, err.Error())
-				}
-			}
-		}
-	}
-
 	// Layer 3: Semantic validation
 	if len(allFeasts) > 0 {
 		allErrors = append(allErrors, validateSemantics(allFeasts)...)

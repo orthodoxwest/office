@@ -295,14 +295,6 @@ func (f *Feast) CommemorationName() string {
 	return f.Name
 }
 
-// SeasonDefinition defines a liturgical season with its default color.
-type SeasonDefinition struct {
-	ID    Season
-	Name  string
-	Color Color
-	Notes string
-}
-
 // PenitentialObservance captures fasting and abstinence obligations for a day.
 type PenitentialObservance struct {
 	Fast       bool

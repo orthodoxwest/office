@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 )
@@ -116,16 +117,25 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	}
 
 	if v, ok := m["HasOctave"]; ok {
-		f.HasOctave = v == "true"
+		f.HasOctave, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: HasOctave: %w", sourceFile, f.ID, err)
+		}
 	}
 	if v, ok := m["HasVigil"]; ok {
-		f.HasVigil = v == "true"
+		f.HasVigil, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: HasVigil: %w", sourceFile, f.ID, err)
+		}
 	}
 	if v, ok := m["OnlyWith"]; ok {
 		f.OnlyWith = v
 	}
 	if v, ok := m["SkipRomanLeapShift"]; ok {
-		f.SkipRomanLeapShift = v == "true"
+		f.SkipRomanLeapShift, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: SkipRomanLeapShift: %w", sourceFile, f.ID, err)
+		}
 	}
 	if v, ok := m["Source"]; ok {
 		f.Source = models.FeastSource(v)
@@ -153,7 +163,10 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		}
 	}
 
-	// Validate: must have either month/day or date_rule
+	// Validate: must have either a complete, valid month/day or a date rule.
+	if (f.Month == 0) != (f.Day == 0) {
+		return nil, fmt.Errorf("%s: feast %q must specify Month and Day together", sourceFile, f.ID)
+	}
 	hasFixed := f.Month != 0 && f.Day != 0
 	hasRule := f.DateRule != ""
 	if !hasFixed && !hasRule {
@@ -162,8 +175,31 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	if hasFixed && hasRule {
 		return nil, fmt.Errorf("%s: feast %q must not have both Month/Day and DateRule", sourceFile, f.ID)
 	}
+	if hasFixed && !validFixedDate(f.Month, f.Day) {
+		return nil, fmt.Errorf("%s: feast %q has invalid fixed date %d/%d", sourceFile, f.ID, f.Month, f.Day)
+	}
 
 	return f, nil
+}
+
+func parseDataBool(value string) (bool, error) {
+	switch value {
+	case "true":
+		return true, nil
+	case "false":
+		return false, nil
+	default:
+		return false, fmt.Errorf("expected true or false, got %q", value)
+	}
+}
+
+func validFixedDate(month, day int) bool {
+	if month < 1 || month > 12 || day < 1 {
+		return false
+	}
+	// Leap year 2000 permits February 29 while still rejecting impossible dates.
+	date := time.Date(2000, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+	return int(date.Month()) == month && date.Day() == day
 }
 
 // LoadFeasts loads and merges all feast definition files from dataDir/feasts/.
@@ -192,53 +228,4 @@ func LoadFeasts(dataDir string) ([]*models.Feast, error) {
 	}
 
 	return feasts, nil
-}
-
-// sectionToSeason converts a parsed INI section into a SeasonDefinition.
-func sectionToSeason(m map[string]string, sourceFile string) (*models.SeasonDefinition, error) {
-	id, err := models.ParseSeason(m["_id"])
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", sourceFile, err)
-	}
-
-	name := m["Name"]
-	if name == "" {
-		return nil, fmt.Errorf("%s: season %q missing Name", sourceFile, m["_id"])
-	}
-
-	color, err := models.ParseColor(m["Color"])
-	if err != nil {
-		return nil, fmt.Errorf("%s: season %q: %w", sourceFile, m["_id"], err)
-	}
-
-	return &models.SeasonDefinition{
-		ID:    id,
-		Name:  name,
-		Color: color,
-		Notes: m["Notes"],
-	}, nil
-}
-
-// LoadSeasons loads season definitions from dataDir/seasons.txt.
-func LoadSeasons(dataDir string) ([]*models.SeasonDefinition, error) {
-	path := filepath.Join(dataDir, "seasons.txt")
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, nil
-	}
-
-	sections, err := parseINISections(path)
-	if err != nil {
-		return nil, fmt.Errorf("parsing seasons.txt: %w", err)
-	}
-
-	var seasons []*models.SeasonDefinition
-	for _, section := range sections {
-		s, err := sectionToSeason(section, "seasons.txt")
-		if err != nil {
-			return nil, err
-		}
-		seasons = append(seasons, s)
-	}
-
-	return seasons, nil
 }

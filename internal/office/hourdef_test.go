@@ -97,6 +97,10 @@ func TestParseHourDefinitionErrors(t *testing.T) {
 		{"consecutive types", "[S]\nType = a\nType = b\nRef = c\n"},
 		{"kv before section", "Type = foo\n"},
 		{"unknown key", "[S]\nFoo = bar\n"},
+		{"unknown condition", "[S]\nCondition = season-lnt\nType = rubric\nRef = foo\n"},
+		{"empty condition", "[S]\nCondition =\nType = rubric\nRef = foo\n"},
+		{"empty condition clause", "[S]\nCondition = weekday-sunday,\nType = rubric\nRef = foo\n"},
+		{"duplicate condition", "[S]\nCondition = season-lent\nCondition = weekday-sunday\n"},
 	}
 
 	for _, tt := range tests {
