@@ -97,7 +97,7 @@ Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
 
 Type = psalm
-Ref = psalms/009
+Ref = psalms/009a
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -110,6 +110,9 @@ Condition = weekday-wednesday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/009b
 
 Type = psalm
 Ref = psalms/010
@@ -219,17 +222,11 @@ Condition = is-ferial,not-season-easter
 Type = proper-chapter
 Ref = chapter-ferial
 
-Type = proper-responsory
-Ref = short-responsory
-
 [Chapter-Festal]
 Condition = not-is-ferial
 
 Type = proper-chapter
 Ref = chapter
-
-Type = proper-responsory
-Ref = short-responsory
 
 [Chapter-Easter-Feria]
 Condition = is-ferial,season-easter
@@ -237,14 +234,11 @@ Condition = is-ferial,season-easter
 Type = proper-chapter
 Ref = chapter
 
-Type = proper-responsory
-Ref = short-responsory
-
 [Pre-Collect]
 Label = Collect
 
-Type = prayer
-Ref = ordinary/prime/pre-collect-versicle
+Type = proper-versicle
+Ref = pre-collect-versicle
 
 Type = prayer
 Ref = ordinary/shared/kyrie
@@ -273,8 +267,8 @@ Type = prayer
 Ref = ordinary/prime/collect-intro
 
 [Collect]
-Type = proper-collect
-Ref = collect
+Type = collect
+Ref = ordinary/prime/collect
 
 [Martyrology]
 Type = rubric

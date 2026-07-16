@@ -3,6 +3,7 @@ package office
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -110,18 +111,18 @@ func TestParseHourDefinitionErrors(t *testing.T) {
 	}
 }
 
-func TestOfficeDataUsesFixedPreCollectSections(t *testing.T) {
+func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	tests := []struct {
-		file    string
-		refs    []string
-		noIfPre bool
+		file     string
+		elements []HourElement
+		noIfPre  bool
 	}{
-		{file: "lauds.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/lauds/pre-collect-versicles"}, noIfPre: true},
-		{file: "vespers.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/vespers/pre-collect-versicles"}, noIfPre: true},
-		{file: "terce.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/terce/pre-collect-versicles"}, noIfPre: true},
-		{file: "sext.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/sext/pre-collect-versicles"}, noIfPre: true},
-		{file: "none.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/none/pre-collect-versicles"}, noIfPre: true},
-		{file: "prime.txt", refs: []string{"ordinary/prime/pre-collect-versicle", "ordinary/shared/kyrie", "ordinary/shared/our-father"}, noIfPre: false},
+		{file: "lauds.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
+		{file: "vespers.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 	}
 
 	for _, tt := range tests {
@@ -140,12 +141,12 @@ func TestOfficeDataUsesFixedPreCollectSections(t *testing.T) {
 				if section.Name != "Pre-Collect" {
 					continue
 				}
-				if len(section.Elements) != len(tt.refs) {
-					t.Fatalf("%s Pre-Collect elements = %d, want %d", tt.file, len(section.Elements), len(tt.refs))
+				if len(section.Elements) != len(tt.elements) {
+					t.Fatalf("%s Pre-Collect elements = %d, want %d", tt.file, len(section.Elements), len(tt.elements))
 				}
-				for i, wantRef := range tt.refs {
-					if section.Elements[i].Type != "prayer" || section.Elements[i].Ref != wantRef {
-						t.Fatalf("%s Pre-Collect[%d] = %+v, want prayer %q", tt.file, i, section.Elements[i], wantRef)
+				for i, want := range tt.elements {
+					if section.Elements[i] != want {
+						t.Fatalf("%s Pre-Collect[%d] = %+v, want %+v", tt.file, i, section.Elements[i], want)
 					}
 				}
 				foundPreCollect = true
@@ -242,7 +243,6 @@ func TestMinorHoursUseIndexedLaudsAntiphons(t *testing.T) {
 		file string
 		ref  string
 	}{
-		{file: "prime.txt", ref: "psalm-antiphon-1"},
 		{file: "terce.txt", ref: "psalm-antiphon-2"},
 		{file: "sext.txt", ref: "psalm-antiphon-3"},
 		{file: "none.txt", ref: "psalm-antiphon-5"},
@@ -271,6 +271,67 @@ func TestMinorHoursUseIndexedLaudsAntiphons(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPrimeUsesFixedCollectAndSplitPsalm9(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "prime.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(prime.txt): %v", err)
+	}
+
+	byName := make(map[string]HourSection, len(sections))
+	for _, section := range sections {
+		byName[section.Name] = section
+	}
+
+	collect := byName["Collect"]
+	wantCollect := []HourElement{{Type: "collect", Ref: "ordinary/prime/collect"}}
+	if !reflect.DeepEqual(collect.Elements, wantCollect) {
+		t.Fatalf("Prime Collect = %+v, want %+v", collect.Elements, wantCollect)
+	}
+
+	tuesday := byName["Psalmody-Tuesday"]
+	wednesday := byName["Psalmody-Wednesday"]
+	for name, section := range byName {
+		if !strings.HasPrefix(name, "Psalmody-") {
+			continue
+		}
+		for _, elem := range section.Elements {
+			if strings.Contains(elem.Type, "antiphon") && elem.Ref != "psalm-antiphon-1" {
+				t.Fatalf("%s antiphon = %+v, want Prime psalm-antiphon-1 slot", name, elem)
+			}
+		}
+	}
+	if !hasHourRef(tuesday.Elements, "psalms/009a") || hasHourRef(tuesday.Elements, "psalms/009") {
+		t.Fatalf("Tuesday psalmody = %+v, want split psalms/009a only", tuesday.Elements)
+	}
+	if !adjacentHourRefs(wednesday.Elements, "psalms/009b", "psalms/010") {
+		t.Fatalf("Wednesday psalmody = %+v, want Psalm 9:19-20 immediately followed by Psalm 10", wednesday.Elements)
+	}
+	for i, elem := range wednesday.Elements {
+		if elem.Ref == "psalms/009b" && i+1 < len(wednesday.Elements) && wednesday.Elements[i+1].Type == "gloria-patri" {
+			t.Fatal("Wednesday inserts a doxology between Psalm 9:19-20 and Psalm 10")
+		}
+	}
+}
+
+func hasHourRef(elements []HourElement, ref string) bool {
+	for _, elem := range elements {
+		if elem.Ref == ref {
+			return true
+		}
+	}
+	return false
+}
+
+func adjacentHourRefs(elements []HourElement, first, second string) bool {
+	for i := 0; i+1 < len(elements); i++ {
+		if elements[i].Ref == first && elements[i+1].Ref == second {
+			return true
+		}
+	}
+	return false
 }
 
 func TestLaudsAndVespersUseIndexedPsalmAntiphons(t *testing.T) {
