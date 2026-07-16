@@ -1,3 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: Final Antiphons of the Blessed Virgin Mary.pdf (Regina caeli), pointed as an antiphon — 2026 ordo May 16 assigns "O Queen of heaven" to the Saturday Office of the B.V.M. in Paschaltide.
+O Queen of Heaven, be joyful, alleluia: * because he whom so meetly thou barest, alleluia, hath arisen, as he promised, alleluia: pray for us to the Father, alleluia.
+
 [short-responsory-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 120
 R. Hail Mary, full of grace, the Lord is with thee: * Alleluia, alleluia.

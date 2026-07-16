@@ -1,3 +1,8 @@
+# TODO(diurnal): the per-annum Benedictus antiphon (2026 ordo incipit "O ever
+# blessed", eight Saturdays Jun-Nov) is absent from the draft books and the
+# parish manuals; needs the Monastic Diurnal Noted. Until then the office
+# falls back to commons/blessed-virgin ("Blessed art thou, O Mary").
+
 [saturday-psalm-antiphon-1]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96, 101 (Saturday festal psalmody)
 Be favourable, * O Lord, and gracious.
