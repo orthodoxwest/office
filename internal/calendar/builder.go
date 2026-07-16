@@ -790,7 +790,16 @@ func saturdayOfficeBVMAllowed(season models.Season) bool {
 	}
 }
 
-func saturdayOfficeBVMFeast(date time.Time) *models.Feast {
+func saturdayOfficeBVMFeast(date time.Time, season models.Season) *models.Feast {
+	// From Christmas until the Purification (Feb 2) the office keeps the
+	// Christmastide antiphon set (2026 ordo Jan 31: "A great and wondrous");
+	// the ProperID redirect falls back to the base office texts.
+	properID := ""
+	if season == models.Christmas ||
+		(season == models.Epiphany &&
+			(date.Month() == time.January || (date.Month() == time.February && date.Day() < 2))) {
+		properID = "saturday-office-bvm-christmastide"
+	}
 	return &models.Feast{
 		ID:       "saturday-office-bvm",
 		Name:     "Saturday Office of the B.V.M",
@@ -799,6 +808,7 @@ func saturdayOfficeBVMFeast(date time.Time) *models.Feast {
 		Category: models.CategoryBlessedVirgin,
 		Month:    int(date.Month()),
 		Day:      date.Day(),
+		ProperID: properID,
 	}
 }
 
@@ -912,7 +922,7 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		}
 
 		if current.Weekday() == time.Saturday && calDay.Celebration == nil && saturdayOfficeBVMAllowed(season) {
-			calDay.Celebration = saturdayOfficeBVMFeast(current)
+			calDay.Celebration = saturdayOfficeBVMFeast(current, season)
 			calDay.Color = calDay.Celebration.Color
 		}
 
