@@ -1,6 +1,9 @@
 key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
 canticles/magnificat,0c7b11b156c6,diurnal,,115,verified,bwaldrep,2026-07-11,
+ordinary/prime/chapter,b9ab0498a31d,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
+ordinary/prime/chapter-ferial,ba58f15a0c32,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
+ordinary/prime/pre-collect-versicle,b3ea375a6784,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/psalm-antiphon-1-friday,b8646181fc65,st patrick prayer book,,37,verified,bwaldrep,2026-07-15,
 ordinary/prime/psalm-antiphon-1-monday,7f6a3ac0a243,st patrick prayer book,,27,verified,bwaldrep,2026-07-15,
 ordinary/prime/psalm-antiphon-1-saturday,33a4fd84a83e,st patrick prayer book,,40,verified,bwaldrep,2026-07-15,
@@ -201,6 +204,7 @@ psalms/148a,9791f6b89cee,Coverdale Psalter,Psalm 148a,,verified,codex,2026-07-10
 psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+seasonal/easter/pre-collect-versicle-prime,991eed765c77,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,
 shared/formulas/opening-versicle,9cda7ff3a79e,diurnal,,2,verified,bwaldrep,2026-07-15,
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,

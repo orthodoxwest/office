@@ -111,18 +111,18 @@ func TestParseHourDefinitionErrors(t *testing.T) {
 	}
 }
 
-func TestOfficeDataUsesFixedPreCollectSections(t *testing.T) {
+func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	tests := []struct {
-		file    string
-		refs    []string
-		noIfPre bool
+		file     string
+		elements []HourElement
+		noIfPre  bool
 	}{
-		{file: "lauds.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/lauds/pre-collect-versicles"}, noIfPre: true},
-		{file: "vespers.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/vespers/pre-collect-versicles"}, noIfPre: true},
-		{file: "terce.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/terce/pre-collect-versicles"}, noIfPre: true},
-		{file: "sext.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/sext/pre-collect-versicles"}, noIfPre: true},
-		{file: "none.txt", refs: []string{"ordinary/shared/kyrie", "ordinary/shared/our-father", "ordinary/none/pre-collect-versicles"}, noIfPre: true},
-		{file: "prime.txt", refs: []string{"ordinary/prime/pre-collect-versicle", "ordinary/shared/kyrie", "ordinary/shared/our-father"}, noIfPre: false},
+		{file: "lauds.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
+		{file: "vespers.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 	}
 
 	for _, tt := range tests {
@@ -141,12 +141,12 @@ func TestOfficeDataUsesFixedPreCollectSections(t *testing.T) {
 				if section.Name != "Pre-Collect" {
 					continue
 				}
-				if len(section.Elements) != len(tt.refs) {
-					t.Fatalf("%s Pre-Collect elements = %d, want %d", tt.file, len(section.Elements), len(tt.refs))
+				if len(section.Elements) != len(tt.elements) {
+					t.Fatalf("%s Pre-Collect elements = %d, want %d", tt.file, len(section.Elements), len(tt.elements))
 				}
-				for i, wantRef := range tt.refs {
-					if section.Elements[i].Type != "prayer" || section.Elements[i].Ref != wantRef {
-						t.Fatalf("%s Pre-Collect[%d] = %+v, want prayer %q", tt.file, i, section.Elements[i], wantRef)
+				for i, want := range tt.elements {
+					if section.Elements[i] != want {
+						t.Fatalf("%s Pre-Collect[%d] = %+v, want %+v", tt.file, i, section.Elements[i], want)
 					}
 				}
 				foundPreCollect = true

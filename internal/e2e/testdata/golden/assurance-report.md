@@ -3,12 +3,12 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 248 |
-| Selected structural-review pages | 44 |
+| Modeled structural features | 250 |
+| Selected structural-review pages | 46 |
 | Uncovered features | 0 |
-| Verified text entries | 205 |
+| Verified text entries | 209 |
 | Text entries needing review | 1625 |
-| Text entries with unknown source | 337 |
+| Text entries with unknown source | 331 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
@@ -228,6 +228,8 @@
 - `resolution:magnificat-antiphon=proper`
 - `resolution:magnificat-antiphon=seasonal`
 - `resolution:nunc-dimittis-antiphon=proper`
+- `resolution:pre-collect-versicle=ordinary`
+- `resolution:pre-collect-versicle=seasonal`
 - `resolution:psalm-antiphon-1=commons`
 - `resolution:psalm-antiphon-1=ordinary`
 - `resolution:psalm-antiphon-1=proper`

@@ -60,25 +60,17 @@ The Lord liveth, * and blessed be the God of my salvation.
 
 [chapter]
 !1 Tim. 1:17
-Now to the King of ages, immortal, invisible, the only God, be honour and
-glory for ever and ever. Amen.
+Now unto the King eternal, immortal, invisible, the only wise God,
+be honour and glory * for ever and ever. Amen.
 R. Thanks be to God.
 
 [chapter-ferial]
 !Zach. 8:19
-Love ye truth and peace, saith the Lord Almighty.
+Love the truth and peace, saith the Lord of hosts.
 R. Thanks be to God.
 
-[short-responsory]
-R. Christ, Son of the living God, have mercy on us.
-Christ, Son of the living God, have mercy on us.
-V. Thou who sittest at the right hand of the Father.
-R. Have mercy on us.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Christ, Son of the living God, have mercy on us.
-
 [pre-collect-versicle]
-V. Arise, O Christ, and help us.
+V. O Christ, arise, help us.
 R. And deliver us for thy Name's sake.
 
 [collect-intro]
