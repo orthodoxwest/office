@@ -26,8 +26,8 @@ Thou good and faithful servant, * enter thou into the joy of thy Lord.
 Well done, good and faithful servant, * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C5 [Ant 3] — check against diurnal
-Lo, a servant of God * who esteemed but little things earthly. And by word and work laid him up treasure in heaven.
+# SOURCE: draft archdiocesan Vespers book, p. 664 (Common of a Confessor not a Bishop, II Vespers; Hic vir despiciens)
+The world, and all things earthly, * this man despised, triumphant: he laid up treasures in heaven by word and deed.
 
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Commune/C5 [Ant 1] — check against diurnal
