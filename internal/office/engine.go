@@ -140,6 +140,38 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("vespers:owner", owner, "")
 		add("vespers:rule", day.Vespers.Rule, "")
 		hour.Decisions = append(hour.Decisions, day.Vespers.Decisions...)
+		appendVespersOfficeContextDecisions(hour, vespersOfficeDay(day))
+	}
+}
+
+// appendVespersOfficeContextDecisions describes the synthetic office day that
+// actually drove Vespers composition. The existing context:* and occurrence
+// decisions remain civil-day provenance; these distinct rule IDs make the two
+// frames explicit without changing the meaning of the review-facing API.
+func appendVespersOfficeContextDecisions(hour *models.OfficeHour, officeDay *models.CalendarDay) {
+	add := func(rule, outcome, detail string) {
+		hour.Decisions = append(hour.Decisions, models.CompositionDecision{Rule: rule, Outcome: outcome, Detail: detail})
+	}
+
+	add("office-context:season", string(officeDay.Season), "")
+	add("office-context:weekday", strings.ToLower(officeDay.Date.Weekday().String()), "")
+	if officeDay.Celebration == nil {
+		add("office-context:office", "feria", "")
+	} else {
+		add("office-context:office", "celebration", officeDay.Celebration.ID)
+		add("office-context:rank", string(officeDay.Celebration.Rank), "")
+		add("office-context:category", string(officeDay.Celebration.Category), "")
+	}
+	add("office-context:commemorations", fmt.Sprintf("%d", len(officeDay.Commemorations)), "")
+	if officeDay.WithinOctaveOf != "" {
+		add("office-context:octave", "within", officeDay.WithinOctaveOf)
+	} else {
+		add("office-context:octave", "outside", "")
+	}
+	if officeDay.FirstVespers {
+		add("office-context:first-vespers", "yes", "")
+	} else {
+		add("office-context:first-vespers", "no", "")
 	}
 }
 

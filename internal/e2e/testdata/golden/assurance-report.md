@@ -3,8 +3,8 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 254 |
-| Selected structural-review pages | 46 |
+| Modeled structural features | 306 |
+| Selected structural-review pages | 51 |
 | Uncovered features | 0 |
 | Verified text entries | 210 |
 | Text entries needing review | 1648 |
@@ -179,6 +179,58 @@
 - `decision:occurrence=occurrence:general-precedence`
 - `decision:occurrence=occurrence:no-candidates`
 - `decision:occurrence=occurrence:privileged-day`
+- `decision:office-context:category=angel`
+- `decision:office-context:category=apostle`
+- `decision:office-context:category=bishop-martyr`
+- `decision:office-context:category=blessed-virgin`
+- `decision:office-context:category=confessor`
+- `decision:office-context:category=confessor-bishop`
+- `decision:office-context:category=confessor-doctor`
+- `decision:office-context:category=dedication`
+- `decision:office-context:category=evangelist`
+- `decision:office-context:category=feria`
+- `decision:office-context:category=holy-woman`
+- `decision:office-context:category=lord`
+- `decision:office-context:category=martyr`
+- `decision:office-context:category=martyrs`
+- `decision:office-context:category=sunday`
+- `decision:office-context:category=virgin`
+- `decision:office-context:category=virgin-martyr`
+- `decision:office-context:commemorations=0`
+- `decision:office-context:commemorations=1`
+- `decision:office-context:commemorations=2`
+- `decision:office-context:commemorations=3`
+- `decision:office-context:commemorations=4`
+- `decision:office-context:commemorations=5`
+- `decision:office-context:commemorations=6`
+- `decision:office-context:first-vespers=no`
+- `decision:office-context:first-vespers=yes`
+- `decision:office-context:octave=outside`
+- `decision:office-context:octave=within`
+- `decision:office-context:office=celebration`
+- `decision:office-context:office=feria`
+- `decision:office-context:rank=double`
+- `decision:office-context:rank=double-1st-class`
+- `decision:office-context:rank=double-2nd-class`
+- `decision:office-context:rank=greater-double`
+- `decision:office-context:rank=privileged-feria`
+- `decision:office-context:rank=semi-double`
+- `decision:office-context:rank=simple`
+- `decision:office-context:season=advent`
+- `decision:office-context:season=christmas`
+- `decision:office-context:season=easter`
+- `decision:office-context:season=epiphany`
+- `decision:office-context:season=lent`
+- `decision:office-context:season=passiontide`
+- `decision:office-context:season=pentecost`
+- `decision:office-context:season=septuagesima`
+- `decision:office-context:weekday=friday`
+- `decision:office-context:weekday=monday`
+- `decision:office-context:weekday=saturday`
+- `decision:office-context:weekday=sunday`
+- `decision:office-context:weekday=thursday`
+- `decision:office-context:weekday=tuesday`
+- `decision:office-context:weekday=wednesday`
 - `decision:vespers:owner=first-of-following`
 - `decision:vespers:owner=not-applicable`
 - `decision:vespers:owner=second-of-preceding`

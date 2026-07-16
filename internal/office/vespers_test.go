@@ -79,6 +79,43 @@ func TestVespersPreces(t *testing.T) {
 	}
 }
 
+func TestVespersDecisionsExposeCivilAndOfficeContexts(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:           time.Date(2026, 1, 17, 0, 0, 0, 0, time.UTC),
+		Season:         models.Epiphany,
+		Celebration:    &models.Feast{ID: "st-anthony-egypt", Rank: models.Double, Category: models.CategoryConfessor},
+		ResolutionRule: "occurrence:general-precedence",
+		Vespers: models.VespersDesignation{
+			Owner:  models.VespersIOfFollowing,
+			Feast:  &models.Feast{ID: "epiphany-sunday-2", Rank: models.SemiDouble, Category: models.CategorySunday},
+			Season: models.Epiphany,
+			Commemorations: []*models.Feast{
+				{ID: "comm-1"}, {ID: "comm-2"}, {ID: "comm-3"}, {ID: "comm-4"},
+			},
+		},
+	}
+	hour := &models.OfficeHour{}
+	appendContextDecisions(hour, day, "vespers")
+
+	assertDecision(t, hour.Decisions, "context:weekday", "saturday", "")
+	assertDecision(t, hour.Decisions, "context:office", "celebration", "st-anthony-egypt")
+	assertDecision(t, hour.Decisions, "context:commemorations", "0", "")
+	assertDecision(t, hour.Decisions, "office-context:weekday", "sunday", "")
+	assertDecision(t, hour.Decisions, "office-context:office", "celebration", "epiphany-sunday-2")
+	assertDecision(t, hour.Decisions, "office-context:commemorations", "4", "")
+	assertDecision(t, hour.Decisions, "office-context:first-vespers", "yes", "")
+}
+
+func assertDecision(t *testing.T, decisions []models.CompositionDecision, rule, outcome, detail string) {
+	t.Helper()
+	for _, decision := range decisions {
+		if decision.Rule == rule && decision.Outcome == outcome && decision.Detail == detail {
+			return
+		}
+	}
+	t.Errorf("missing decision %s=%s (%s) in %#v", rule, outcome, detail, decisions)
+}
+
 func TestVespersProperAntiphonFallback(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"ordinary/vespers/psalm-antiphon":      "Vespers antiphon",
