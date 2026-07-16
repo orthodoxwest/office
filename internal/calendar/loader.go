@@ -134,6 +134,12 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 			return nil, fmt.Errorf("%s: feast %q: IsVigil: %w", sourceFile, f.ID, err)
 		}
 	}
+	if v, ok := m["IsApostolicCompanion"]; ok {
+		f.IsApostolicCompanion, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: IsApostolicCompanion: %w", sourceFile, f.ID, err)
+		}
+	}
 	if v, ok := m["OnlyWith"]; ok {
 		f.OnlyWith = v
 	}
@@ -161,7 +167,8 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"_id": true, "Name": true, "Rank": true, "Color": true,
 		"Category": true, "ProperName": true, "ProperID": true, "DateRule": true,
 		"Month": true, "Day": true, "HasOctave": true, "HasVigil": true, "IsVigil": true,
-		"OnlyWith": true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
+		"IsApostolicCompanion": true,
+		"OnlyWith":             true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}
 	for key := range m {
 		if !knownKeys[key] {

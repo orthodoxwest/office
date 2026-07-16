@@ -263,6 +263,9 @@ type Feast struct {
 	// from HasVigil, which generates a vigil for the feast on the preceding day.
 	// This rule trait is composition input, not rendered calendar output.
 	IsVigil bool `json:"-"`
+	// IsApostolicCompanion marks the perpetual Peter/Paul commemoration kept
+	// at the other apostle's II Vespers. This rule trait is not presentation data.
+	IsApostolicCompanion bool `json:"-"`
 
 	// OnlyWith restricts this feast/commemoration to days where the winning
 	// celebration has the given feast ID.

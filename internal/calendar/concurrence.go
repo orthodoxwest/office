@@ -135,12 +135,7 @@ func occurrenceCommemoratedAtFirstVespers(comm *models.Feast) (bool, string) {
 // "Comm. ... & Paul" at the II Vespers of the Chair of St Peter (Jan 18) and
 // "& Peter" at the Conversion of St Paul (Jan 25).
 func isApostolicCompanionCommemoration(f *models.Feast) bool {
-	if f == nil || f.Rank != models.Commemoration {
-		return false
-	}
-	name := strings.ToLower(f.Name)
-	return strings.HasPrefix(name, "commemoration of st") &&
-		(strings.Contains(name, "paul") || strings.Contains(name, "peter"))
+	return f != nil && f.IsApostolicCompanion
 }
 
 // occurrenceCommemoratedAtSecondVespers reports whether an observance

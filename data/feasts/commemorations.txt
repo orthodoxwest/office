@@ -63,6 +63,7 @@ Category = confessor
 Month = 1
 Day = 18
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-01-18-st-prisca-of-rome-virgin-martyr]
 Name = St. Prisca of Rome, Virgin Martyr
@@ -117,6 +118,7 @@ Category = confessor
 Month = 1
 Day = 25
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-01-26-st-polycarp-of-smyrna-bishop-and-martyr]
 Name = St. Polycarp of Smyrna, Bishop & Martyr
@@ -558,6 +560,7 @@ Category = apostle
 Month = 8
 Day = 1
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-08-01-holy-maccabees-martyrs]
 Name = Holy Maccabees, Martyrs
@@ -1183,6 +1186,7 @@ Month = 2
 Day = 22
 OnlyWith = chair-peter-antioch
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-extra-03-04-st-lucius-i-pope-and-martyr]
 Name = St Lucius I, Bishop & Martyr
@@ -1355,6 +1359,7 @@ Category = apostle
 Month = 6
 Day = 30
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-extra-07-06-the-octave-of-ss-peter-and-paul]
 Name = The Octave of Ss Peter & Paul
@@ -1585,6 +1590,7 @@ Month = 2
 Day = 23
 OnlyWith = chair-peter-antioch
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-extra-02-23-vigil-of-st-matthias]
 Name = Vigil of St. Matthias
@@ -1782,6 +1788,7 @@ Category = apostle
 Month = 6
 Day = 30
 Source = awrv
+IsApostolicCompanion = true
 
 [comm-extra-07-10-st-joseph-of-damascus-priest-and-companions-martyrs]
 Name = St. Joseph of Damascus (Priest) & companions, Martyrs

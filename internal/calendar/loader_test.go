@@ -159,6 +159,35 @@ func TestLoadFeastsVigilTraits(t *testing.T) {
 	}
 }
 
+func TestLoadFeastsApostolicCompanionTraits(t *testing.T) {
+	feasts, err := LoadFeasts(findDataDir(t))
+	if err != nil {
+		t.Fatalf("LoadFeasts error: %v", err)
+	}
+	want := map[string]bool{
+		"comm-01-18-commemoration-of-st-paul":                true,
+		"comm-01-25-commemoration-of-st-peter":               true,
+		"comm-08-01-commemoration-of-st-paul-apostle":        true,
+		"comm-extra-02-22-commemoration-of-st-paul":          true,
+		"comm-extra-02-23-commemoration-of-st-paul":          true,
+		"comm-extra-06-30-commemoration-of-st-paul-apostle":  true,
+		"comm-extra-06-30-commemoration-of-st-peter-apostle": true,
+		"commemoration-st-peter-apostle":                     true,
+	}
+	for _, feast := range feasts {
+		if !feast.IsApostolicCompanion {
+			continue
+		}
+		if !want[feast.ID] {
+			t.Errorf("unexpected IsApostolicCompanion trait on %q", feast.ID)
+		}
+		delete(want, feast.ID)
+	}
+	for id := range want {
+		t.Errorf("missing IsApostolicCompanion trait on %q", id)
+	}
+}
+
 func TestLoadPenitentialRules(t *testing.T) {
 	dataDir := findDataDir(t)
 	rules, err := loadPenitentialRules(dataDir)
@@ -239,6 +268,20 @@ func TestSectionToFeastIsVigil(t *testing.T) {
 	}
 }
 
+func TestSectionToFeastIsApostolicCompanion(t *testing.T) {
+	feast, err := sectionToFeast(map[string]string{
+		"_id": "companion", "Name": "Companion", "Rank": "commemoration",
+		"Color": "white", "Category": "apostle", "Month": "1", "Day": "1",
+		"IsApostolicCompanion": "true",
+	}, "test.txt")
+	if err != nil {
+		t.Fatalf("sectionToFeast returned error: %v", err)
+	}
+	if !feast.IsApostolicCompanion {
+		t.Fatal("IsApostolicCompanion = false, want true")
+	}
+}
+
 func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -248,6 +291,7 @@ func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 	}{
 		{name: "invalid boolean", key: "HasOctave", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid vigil boolean", key: "IsVigil", value: "yes", wantErr: "expected true or false"},
+		{name: "invalid companion boolean", key: "IsApostolicCompanion", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid month", key: "Month", value: "13", wantErr: "invalid fixed date"},
 		{name: "invalid day", key: "Day", value: "30", wantErr: "invalid fixed date"},
 	}
