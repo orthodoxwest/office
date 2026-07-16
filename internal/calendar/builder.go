@@ -813,7 +813,10 @@ func saturdayOfficeBVMFeast(date time.Time, season models.Season) *models.Feast 
 	}
 }
 
-// BuildCalendar builds the complete liturgical calendar for a year.
+// BuildCalendar builds the complete liturgical calendar for a year. Adjacent
+// years are computed as padding so occurrence transfers can cross Jan 1 and
+// Dec 31 Vespers can resolve against the fully modeled following day. Only the
+// requested civil year is returned.
 func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 	feasts, err := LoadFeasts(dataDir)
 	if err != nil {
@@ -824,6 +827,36 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		return nil, fmt.Errorf("loading penitential rules: %w", err)
 	}
 
+	_, incomingTransfers, err := buildCalendarYear(year-1, feasts, penitentialRules, nil)
+	if err != nil {
+		return nil, fmt.Errorf("building previous-year padding: %w", err)
+	}
+
+	days, outgoingTransfers, err := buildCalendarYear(year, feasts, penitentialRules, incomingTransfers)
+	if err != nil {
+		return nil, err
+	}
+	nextDays, _, err := buildCalendarYear(year+1, feasts, penitentialRules, outgoingTransfers)
+	if err != nil {
+		return nil, fmt.Errorf("building following-year padding: %w", err)
+	}
+	if len(nextDays) == 0 {
+		return nil, fmt.Errorf("following-year padding for %d is empty", year+1)
+	}
+
+	// The extra Jan 1 is present only to resolve the requested year's final
+	// evening. Clamp capacity on return so callers cannot append into padding.
+	padded := make([]models.CalendarDay, 0, len(days)+1)
+	padded = append(padded, days...)
+	padded = append(padded, nextDays[0])
+	resolveVespersConcurrence(padded)
+	return padded[:len(days):len(days)], nil
+}
+
+// buildCalendarYear resolves occurrence for one civil year, accepting and
+// returning the transfer queue at its boundaries. Concurrence is resolved by
+// BuildCalendar only after the following Jan 1 has been built.
+func buildCalendarYear(year int, feasts []*models.Feast, penitentialRules []penitentialRule, incomingTransfers []*models.Feast) ([]models.CalendarDay, []*models.Feast, error) {
 	moveable := ComputeMoveableDates(year)
 
 	// Generate computed Sundays
@@ -892,7 +925,7 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 	start := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 	end := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
 	var calendarDays []models.CalendarDay
-	var pendingTransfers []*models.Feast
+	pendingTransfers := append([]*models.Feast(nil), incomingTransfers...)
 	var weekID string
 
 	for current := start; !current.After(end); current = current.AddDate(0, 0, 1) {
@@ -933,15 +966,9 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		calendarDays = append(calendarDays, *calDay)
 	}
 
-	// A transfer still pending here cannot be represented by this single-year
-	// result and is currently dropped. A boundary fixture documents the case
-	// until cross-year transfer policy and API shape receive a ruling.
-
 	if err := applyPenitentialRules(calendarDays, penitentialRules, anchorDates); err != nil {
-		return nil, fmt.Errorf("applying penitential rules: %w", err)
+		return nil, nil, fmt.Errorf("applying penitential rules: %w", err)
 	}
 
-	resolveVespersConcurrence(calendarDays)
-
-	return calendarDays, nil
+	return calendarDays, pendingTransfers, nil
 }

@@ -643,25 +643,4 @@ func resolveVespersConcurrence(days []models.CalendarDay) {
 	for i := 0; i < len(days)-1; i++ {
 		days[i].Vespers = resolveConcurrence(&days[i], &days[i+1])
 	}
-
-	// Current Dec 31 boundary contract: resolve against a minimal synthetic
-	// Jan 1 Circumcision. It intentionally carries no date, commemorations, or
-	// octave context; characterization tests pin this until a cross-year ruling.
-	if len(days) > 0 {
-		last := &days[len(days)-1]
-		jan1 := &models.CalendarDay{
-			Season: models.Christmas,
-			Celebration: &models.Feast{
-				ID:       "circumcision",
-				Name:     "Circumcision of Our Lord",
-				Rank:     models.Double2ndClass,
-				Color:    models.White,
-				Category: models.CategoryLord,
-				Month:    1,
-				Day:      1,
-			},
-			Color: models.White,
-		}
-		last.Vespers = resolveConcurrence(last, jan1)
-	}
 }
