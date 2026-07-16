@@ -111,13 +111,7 @@ func isRogationDay(f *models.Feast) bool {
 }
 
 func isVigil(f *models.Feast) bool {
-	if f == nil {
-		return false
-	}
-	id := strings.ToLower(f.ID)
-	name := strings.ToLower(f.Name)
-	return strings.HasPrefix(id, "vigil-") || strings.Contains(id, "-vigil-") ||
-		strings.HasPrefix(name, "vigil of ") || strings.HasPrefix(name, "the vigil of ")
+	return f != nil && f.IsVigil
 }
 
 // occurrenceCommemoratedAtFirstVespers reports whether a following day's

@@ -355,6 +355,7 @@ func vigilFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *M
 			Category: models.CategoryFeria,
 			Month:    int(vigilDate.Month()),
 			Day:      vigilDate.Day(),
+			IsVigil:  true,
 		})
 	}
 	return vigils

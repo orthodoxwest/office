@@ -632,6 +632,7 @@ Color = white
 Category = feria
 Month = 1
 Day = 5
+IsVigil = true
 
 [st-maurus]
 Name = St Maurus, Abbot
@@ -730,6 +731,7 @@ Color = violet
 Category = feria
 Month = 7
 Day = 24
+IsVigil = true
 
 [st-martha-bethany]
 Name = St. Martha of Bethany, Virgin
@@ -894,6 +896,7 @@ Color = violet
 Category = feria
 Month = 12
 Day = 24
+IsVigil = true
 
 [st-hilary]
 Name = St. Hilary, Bishop, Confessor & Doctor
