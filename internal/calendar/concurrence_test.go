@@ -415,6 +415,44 @@ func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *tes
 	}
 }
 
+func TestResolveConcurrenceCarriesOutgoingApostolicCompanion(t *testing.T) {
+	outgoing := &models.Feast{ID: "chair-peter", Rank: models.GreaterDouble, Category: models.CategoryApostle}
+	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	ordinary := &models.Feast{ID: "named-only-companion", Name: "Commemoration of St Paul", Rank: models.Commemoration, Category: models.CategoryApostle}
+	sunday := &models.Feast{ID: "lesser-sunday", Rank: models.SemiDouble, Category: models.CategorySunday}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: outgoing, Commemorations: []*models.Feast{companion, ordinary}},
+		&models.CalendarDay{Celebration: sunday},
+	)
+
+	if result.Owner != models.VespersIOfFollowing {
+		t.Fatalf("owner = %d, want VespersIOfFollowing", result.Owner)
+	}
+	if len(result.Commemorations) != 2 || result.Commemorations[0] != outgoing || result.Commemorations[1] != companion {
+		t.Fatalf("commemorations = %v, want outgoing feast and its apostolic companion", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:outgoing-apostolic-companion")
+}
+
+func TestResolveConcurrenceDoesNotOrphanOutgoingApostolicCompanion(t *testing.T) {
+	outgoing := &models.Feast{ID: "second-class", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	incoming := &models.Feast{ID: "first-class", Rank: models.Double1stClass, Category: models.CategoryLord}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: outgoing, Commemorations: []*models.Feast{companion}},
+		&models.CalendarDay{Celebration: incoming},
+	)
+
+	if result.Owner != models.VespersIOfFollowing {
+		t.Fatalf("owner = %d, want VespersIOfFollowing", result.Owner)
+	}
+	if len(result.Commemorations) != 0 {
+		t.Fatalf("commemorations = %v, want none when outgoing feast is suppressed", result.Commemorations)
+	}
+}
+
 func TestResolveConcurrenceNoOwnerCombinesHourEligibleCommemorations(t *testing.T) {
 	currentMemorial := &models.Feast{ID: "current-memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
 	currentDouble := &models.Feast{ID: "current-double", Rank: models.Double, Category: models.CategoryMartyr}
