@@ -25,8 +25,8 @@ Good and faithful servant, * enter thou into the joy of thy Lord.
 @use commons/confessor-bishop/benedictus-antiphon
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C4a [Ant 1] (O Doctor optime; both Vespers) — check against diurnal
-O right excellent Teacher * Light of the Holy Church, N., blessed lover of the Divine Law, pray for us to the Son of God.
+# SOURCE: draft archdiocesan Vespers book, p. 665 (Common of Doctors, Doctor optime; both Vespers)
+O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God.
 
 [commemoration-antiphon]
 @use commons/confessor-doctor/psalm-antiphon-1

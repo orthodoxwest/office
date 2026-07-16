@@ -51,11 +51,11 @@ JANUARY
            Lauds   w · Ben. While all things were in quiet silence · No Preces · No Suff.
                Com. St. Telesphorus of Rome, Bishop & Martyr ("Whosoever shall confess me")
            Hours   No Preces
-           Vespers w · I fol. (Epiphany of Our Lord) · Mag. This day we keep a holiday in honour of… · No Suff.
+           Vespers w · I fol. (Epiphany of Our Lord) · Mag. The wise men · No Suff.
   6  Tue     EPIPHANY OF OUR LORD                       [1cl] w
            Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. This day we keep a holiday in honour of… · No Suff.
+           Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
   7  Wed     Day II within the Octave of the Epiphany   [sd]  w
            Lauds   w · Ben. From the east · No Preces · No Suff.
            Hours   No Preces
@@ -94,11 +94,11 @@ JANUARY
            Lauds   w · Ben. They that despised thee · No Preces · No Suff.
                Com. St. Benedict Biscop, Abbot ("Lord, Thou deliverest unto me five talents")
            Hours   No Preces
-           Vespers w · I fol. (Octave Day of the Epiphany) · Mag. This day we keep a holiday in honour of… · No Suff.
+           Vespers w · I fol. (Octave Day of the Epiphany) · Mag. The wise men · No Suff.
  13  Tue     Octave Day of the Epiphany                 [gd]  w
            Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. This day we keep a holiday in honour of… · No Suff.
+           Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("Behold an high priest")
                Com. St. Felix of Nola, Priest & Martyr ("Whosoever shall confess me")
  14  Wed     St. Hilary, Bishop, Confessor & Doctor     [d]   w
@@ -192,11 +192,11 @@ JANUARY
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
                Com. St. Polycarp of Smyrna, Bishop & Martyr ("Whosoever shall confess me")
            Hours   Preces
-           Vespers w · I fol. (St. John Chrysostom, Bishop, Confessor & Doctor) · Mag. O right excellent Teacher · No Suff.
+           Vespers w · I fol. (St. John Chrysostom, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
  27  Tue     St. John Chrysostom, Bishop, Confessor & Doctor [d]   w
            Lauds   w · Ben. Well done · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (St Cyril of Alexandria, Confessor, Bishop & Doctor) · Mag. O right excellent Teacher · No Suff.
+           Vespers w · I fol. (St Cyril of Alexandria, Confessor, Bishop & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St. John Chrysostom, Bishop, Confessor & Doctor ("Behold an high priest")
                Com. The Second Feast of St. Agnes, Virgin Martyr ("This is one of the wise virgins")
  28  Wed     St Cyril of Alexandria, Confessor, Bishop & Doctor [d]   w
@@ -204,7 +204,7 @@ JANUARY
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. The Second Feast of St. Agnes, Virgin Martyr ("This is one of the wise virgins")
            Hours   No Preces
-           Vespers w · II prec. · Mag. O right excellent Teacher · No Suff.
+           Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
  29  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
@@ -935,7 +935,7 @@ MAY
                Com. St Eleutherius, Bishop & Martyr ("Whosoever shall confess me")
                Com. Day VI within the Octave of the Ascension ("Ye men of Galilee")
            Hours   No Preces
-           Vespers w · I fol. (St Bede the Venerable, Confessor & Doctor) · Mag. O right excellent Teacher · No Suff.
+           Vespers w · I fol. (St Bede the Venerable, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Augustine of Canterbury, Bishop & Confessor ("Behold a great priest")
                Com. St John I, Bishop & Martyr ("Whosoever shall confess me")
                Com. Day VII within the Octave of the Ascension ("Ye men of Galilee")
@@ -1569,7 +1569,7 @@ AUGUST
  27  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Augustine of Hippo, Bishop, Confessor & Doctor) · Mag. O right excellent Teacher · No Suff.
+           Vespers w · I fol. (St Augustine of Hippo, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Hermes, Martyr ("Whosoever shall confess me")
  28  Fri  L  St Augustine of Hippo, Bishop, Confessor & Doctor [gd]  w
            St Hermes, Martyr (com)
@@ -1781,7 +1781,7 @@ SEPTEMBER
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St Gregory of Armenia, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
-           Vespers w · II prec. · Mag. O right excellent Teacher · No Suff.
+           Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
                Com. St Remigius, Bishop & Confessor ("Behold a great priest")
 
 OCTOBER
@@ -2165,14 +2165,14 @@ DECEMBER
   1  Tue  L  Feria                                            v
            Lauds   v · Ben. Before they came together · No Preces · No Suff.
            Hours   Preces
-           Vespers w · I fol. (St Peter Chrysologus, Bishop, Confessor & Doctor) · Mag. O right excellent Teacher · No Suff.
+           Vespers w · I fol. (St Peter Chrysologus, Bishop, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Bibiana, Virgin & Martyr ("This is one of the wise virgins")
   2  Wed  L§ St Peter Chrysologus, Bishop, Confessor & Doctor [d]   w
            St Bibiana, Virgin & Martyr (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St Bibiana, Virgin & Martyr ("This is one of the wise virgins")
            Hours   No Preces
-           Vespers w · II prec. · Mag. O right excellent Teacher · No Suff.
+           Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
   3  Thu  L  Feria                                            v
            Lauds   v · Ben. Blessed art thou · No Preces · No Suff.
            Hours   Preces
