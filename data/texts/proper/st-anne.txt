@@ -2,7 +2,8 @@
 Give her of the fruit of her hands, * and let her own works praise her in the gates.
 
 [magnificat-antiphon]
-She is beautiful * among the daughters of Jerusalem.
+# SOURCE: draft archdiocesan Vespers book, p. 674 (St. Anne said as in the Common of a Holy Woman not a Virgin; Manum suam, II Vespers)
+@use commons/holy-woman/magnificat-antiphon
 
 [commemoration-antiphon]
 While the King sitteth at his table, * my spikenard sendeth forth the smell thereof.
