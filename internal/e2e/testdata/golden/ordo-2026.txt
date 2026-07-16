@@ -1862,7 +1862,7 @@ OCTOBER
  14  Wed     St. Callistus, Bishop & Martyr             [d]   r
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Our Lady of Walsingham) · Mag. All generations shall call me blessed · No Suff.
+           Vespers w · I fol. (Our Lady of Walsingham) · Mag. O holy Mary · No Suff.
                Com. St. Callistus, Bishop & Martyr ("Whosoever shall confess me")
  15  Thu     Our Lady of Walsingham                     [gd]  w
            Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
@@ -1875,14 +1875,14 @@ OCTOBER
  17  Sat     Saturday Office of the B.V.M               [s]   w
            Lauds   w · Ben. Blessed art thou · No Preces · Suff.
            Hours   Preces
-           Vespers r · I fol. (St. Luke, Evangelist) · Mag. For they shall deliver you · No Suff.
+           Vespers r · I fol. (St. Luke, Evangelist) · Mag. They will deliver you up · No Suff.
                Com. XX Sunday after Pentecost ("So the father knew")
  18  Sun     St. Luke, Evangelist                       [2cl] r
            XX Sunday after Pentecost (sd)
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. XX Sunday after Pentecost ("There was a certain nobleman")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Be valiant · No Suff.
+           Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
                Com. XX Sunday after Pentecost ("So the father knew")
  19  Mon     Feria                                            g
            St. Frideswide, Virgin (com)
@@ -2271,13 +2271,13 @@ DECEMBER
                Com. Expectation of the B.V.M ("Holy Mary, succour the miserable")
  18  Fri  L§ Advent Ember Friday                        [f2]  v
            Expectation of the B.V.M (gd)
-           Lauds   v · Ben. As soon as the voice of thy salutation · No Preces · No Suff.
+           Lauds   v · Ben. For lo, as soon · No Preces · No Suff.
                Com. Expectation of the B.V.M ("Holy Mary, succour the miserable")
            Hours   No Preces
            Vespers v · Mag. O Adonai · No Suff.
                Com. Expectation of the B.V.M ("Holy Mary, succour the miserable")
  19  Sat  L§ Advent Ember Saturday                      [f2]  v
-           Lauds   v · Ben. O thou Angel of God · No Preces · No Suff.
+           Lauds   v · Ben. How shall this be · No Preces · No Suff.
            Hours   Preces
            Vespers v · I fol. (IV Sunday of Advent) · Mag. O Root of Jesse · No Suff.
  20  Sun  L  IV Sunday of Advent                        [2cl] v
@@ -2329,13 +2329,13 @@ DECEMBER
                Com. Day IV within the Nativity Octave ("The King of Peace")
            Hours   No Preces
            Vespers r · II prec. · Mag. Then were innocent children · No Suff.
-               Com. Sunday within the Octave of the Nativity ("My soul doth magnify the Lord, and my spirit…")
+               Com. Sunday within the Octave of the Nativity ("The Child Jesus")
  29  Tue     Sunday within the Octave of the Nativity   [sd]  w
            Day V within the Nativity Octave (sd)
-           Lauds   w · Ben. The Lord hath raised up · No Preces · No Suff.
+           Lauds   w · Ben. While all things · No Preces · No Suff.
                Com. Day V within the Nativity Octave ("The King of Peace")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Let my spirit rejoice · No Suff.
+           Vespers w · II prec. · Mag. The Child Jesus · No Suff.
                Com. Day V within the Nativity Octave ("The King of Peace")
                Com. Day VI within the Nativity Octave ("The King of Peace")
  30  Wed     Day VI within the Nativity Octave          [sd]  w

@@ -26,12 +26,12 @@ In your patience * you shall possess your souls.
 Ye which have forsaken all * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Commune/C1 [Ant 3] — check against diurnal
-Be valiant * in battle, fight the ancient serpent and accept the eternal kingdom. Alleluia.
+# SOURCE: draft archdiocesan Vespers book (Common of Apostles and Evangelists; Estote fortes, II Vespers)
+Be ye valiant in warfare * and contend ye with the old serpent: and ye shall receive an eternal kingdom, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C1 [Ant 1] — check against diurnal
-For they shall deliver you * up to councils: and in the synagogues you shall be beaten: and you shall stand before governors and kings for my sake, for a testimony unto them.
+# SOURCE: draft archdiocesan Vespers book (Common of Apostles and Evangelists; Tradent enim vos, I Vespers)
+They will deliver you up * to the councils, and they will scourge you in their synagogues; and ye shall be brought before governors and kings for my sake, for a testimony against them and the Gentiles.
 
 [commemoration-antiphon]
 @use commons/evangelist/psalm-antiphon-1
