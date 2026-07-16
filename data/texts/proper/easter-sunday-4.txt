@@ -35,12 +35,12 @@ For He shall not speak of Himself; * but whatsoever He shall hear, that shall He
 These are the words * which I spake unto you, while I was with you. Alleluia, Alleluia.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium TemporaM/Pasc4-0 [Ant 2] — check against diurnal
-I go My way to Him That sent Me, * and none of you asketh Me: Whither goest Thou? Alleluia, Alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 279 (IV Sunday after Easter; Vado… et nemo)
+Now I go my way * to him that sent me; and none of you asketh me, Whither goest thou? alleluia, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc4-0 [Ant 3] — check against diurnal
-I go My way to Him That sent Me, * but because I have said this to you, sadness has filled your hearts, alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 163 (IV Sunday after Easter Vespers; Vado… et nemo)
+Now I go my way * to him that sent me; and none of you asketh me, Whither goest thou? alleluia, alleluia.
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-4/benedictus-antiphon

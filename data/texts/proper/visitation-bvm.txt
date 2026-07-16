@@ -28,9 +28,13 @@ For lo, as soon * as the voice of thy salutation sounded in mine ears, the babe 
 # SOURCE: draft archdiocesan Lauds book, p. 499 (Visitation BVM)
 When Elisabeth * heard the salutation of Mary, she spake out with a loud voice, and said: Whence is this to me, that the mother of my Lord should come to me? alleluia.
 
-[magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 432 (Visitation BVM)
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 432 (Visitation BVM; Beata es Maria, I Vespers)
 Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: draft Sanctoral Cycle Vespers book (Visitation BVM; Beatam me dicent, II Vespers)
+All generations * shall call me blessed: for God hath regarded the lowliness of his handmaiden, alleluia.
 
 [commemoration-antiphon]
 @use proper/visitation-bvm/psalm-antiphon-1

@@ -23,7 +23,8 @@ O ye Angels of the Lord, bless ye the Lord always.
 There was silence * in heaven while as the dragon made war, and Michael fought against him, and prevailed over him. Alleluia.
 
 [magnificat-antiphon]
-O ye Angels and Archangels, * O ye Thrones and Dominions, O ye Principalities and Powers, O ye mighty Ones of heaven, praise ye the Lord from the heavens. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 509 (St. Michael II Vespers, shared by Apparition; Princeps gloriosissime)
+O Prince most glorious, * Michael the Archangel, keep us in remembrance: here and everywhere, always, entreat the Son of God for us, alleluia, alleluia.
 
 [commemoration-antiphon]
 @use proper/apparition-st-michael/psalm-antiphon-1
@@ -156,5 +157,5 @@ R. Before the Angels * will I sing praise unto thee, O my God.
 @use proper/apparition-st-michael/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/05-08.txt [Ant 1] — check against diurnal
-While as John was gazing * upon the holy mystery, the Archangel Michael sounded his trumpet: Forgive us, O Lord our God, Which openest the book, and loosest the seals thereof. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 508 (St. Michael I Vespers, shared by Apparition; Dum sacrum mysterium)
+While John beheld * the sacred mystery, the Archangel Michael sounded the trumpet: Forgive us, O Lord our God, that openest the book, and loosest the seals thereof, alleluia.

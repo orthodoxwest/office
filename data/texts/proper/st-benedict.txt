@@ -1,0 +1,11 @@
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 432 (St. Benedict; Vir Dei Benedictus)
+Benedict, the man of God, * was filled with the spirit of all the righteous: may he intercede for the whole conventual profession.
+
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 351 (St. Benedict, I Vespers; Exsultet omnium)
+Let all the multitude * of the faithful exult in the glory of the gracious Father Benedict: and chiefly let the company of monks be joyful, celebrating his festival on earth, in whose goodly fellowship the Saints rejoice in heaven.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 351 (St. Benedict, II Vespers; Hodie sanctus Benedictus)
+Today holy Benedict, * while his disciples beheld it, ascended by way of the East on a straight pathway to heaven: today with hands uplifted he died between the words of his supplication: today he was received into glory by the Angels.

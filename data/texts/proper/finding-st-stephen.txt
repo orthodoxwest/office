@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 78 (proper of St. Stephen, Protomartyr; And Stephen)
+@use proper/st-stephen/benedictus-antiphon
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book, p. 66 (proper of St. Stephen, Protomartyr; Devout men)
+@use proper/st-stephen/magnificat-antiphon

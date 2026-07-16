@@ -24,8 +24,13 @@ Fair and comely art thou, O daughter of Jerusalem, * terrible as a fenced camp s
 [benedictus-antiphon]
 Sing to the Lord * a new song, for he hath done marvelous things unto thee, O Mary.
 
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, p. 471 (Assumption BVM; Virgo prudentissima, I Vespers)
+O most prudent Virgin, * whither goest thou, shining resplendent like the glowing dawn? Daughter of Sion, thou art all comely and beautiful, fair as the moon, clear as the sun.
+
 [magnificat-antiphon]
-The holy Mother of God is exalted over choirs of Angels * into the heavenly kingdom.
+# SOURCE: draft archdiocesan Vespers book, p. 472 (Assumption BVM; Et audientes, II Vespers)
+On this day, * the Virgin Mary went up into heaven: rejoice, because she reigneth with Christ for ever and ever.
 
 [commemoration-antiphon]
 Through thee have the gates of Paradise been thrown open to us, * O thou who this day dost triumph so gloriously among the Angels.

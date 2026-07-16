@@ -46,8 +46,8 @@ He gave himself * that he might deliver his people, and get him a perpetual Name
 For he that is mighty * hath magnified me, and holy is his Name, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Ant 1] — awaiting direct I Vespers witness
-I will offer * the sacrifice of thanksgiving, and will call upon the Name of the Lord.
+# 2026 ordo (Jan 3): I Vespers repeats the II Vespers antiphon "For he that is mighty".
+@use proper/holy-name-jesus/magnificat-antiphon
 
 [commemoration-antiphon]
 Whosoever shall call * on the name of the Lord shall be saved.

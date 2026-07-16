@@ -21,8 +21,13 @@ This star shineth * as a flame of fire, and pointeth out God, the King of kings:
 [benedictus-antiphon]
 This day is the Church joined unto the Heavenly Bridegroom, * since Christ hath washed away her sins in Jordan; the wise men hasten with gifts to the marriage supper of the King; and they that sit at meat together make merry with water turned into wine. Alleluia.
 
+[magnificat-antiphon-first]
+# SOURCE: draft archdiocesan Vespers book, pp. 122–123 (I Vespers, The Epiphany of Our Lord; Magi videntes stellam)
+The wise men, * beholding the star, said one to another, This is the sign of a mighty King; forth fare we, and let us seek him: and let us offer him gifts, gold, incense, and myrrh, alleluia.
+
 [magnificat-antiphon]
-This day we keep a holiday in honour of three wonders, * this day a star led the wise men to the manger; this day at the marriage, water was made wine; this day was Christ, for our salvation, pleased to be baptized of John in Jordan. Alleluia.
+# SOURCE: draft archdiocesan Vespers book, p. 124 (II Vespers, The Epiphany of Our Lord; Tribus miraculis)
+Now do we celebrate * a holy day adorned by three miracles: today a star led the wise men to the manger; today water was made wine at the wedding feast; today Christ vouchsafed to be baptized of John in Jordan that he might save us, alleluia.
 
 [commemoration-antiphon]
 When the wise men saw the star * they said one unto another: This is the sign of the Great King; let us go and search diligently for Him, and present unto Him gifts, gold, and frankincense, and myrrh. Alleluia.

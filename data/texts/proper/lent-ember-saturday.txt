@@ -1,5 +1,6 @@
 [benedictus-antiphon]
-Jesus took His disciples, * and went up into a mountain, and was transfigured before them.
+# SOURCE: draft archdiocesan Lauds book, p. 212 (II Sunday in Lent / Ember Saturday; Assumpsit Jesus)
+And Jesus taketh his disciples, * and goeth up into a mountain, and was transfigured before them.
 
 [magnificat-antiphon]
 Jesus took His disciples, * and went up into a mountain, and was transfigured before them.

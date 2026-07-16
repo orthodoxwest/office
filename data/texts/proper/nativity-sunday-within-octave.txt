@@ -1,0 +1,7 @@
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book (The Sunday within the Octave of the Nativity; Dum medium silentium)
+While all things * were in quiet silence, and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: draft archdiocesan Vespers book (The Sunday within the Octave of the Nativity; Puer Jesus)
+The Child Jesus * increased in wisdom and stature in the sight of God and man.

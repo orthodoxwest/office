@@ -5,6 +5,10 @@ O God, who didst loose thy blessed Apostle Peter from his chains and didst make 
 # SOURCE: divinum-officium SanctiM/08-01 [Ant 2] — check against diurnal
 Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
 
+[magnificat-antiphon-first]
+# SOURCE: draft Sanctoral Cycle Vespers book (St. Peter's Chains; Tu es pastor, I Vespers)
+Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
+
 [magnificat-antiphon]
 # SOURCE: divinum-officium Sancti/08-01 [Ant 3] — check against diurnal
 Thou to whom God hath given the keys * of the kingdom of heaven, loosen the chains which bind the sordid souls of the earthly.
