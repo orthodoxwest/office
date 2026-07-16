@@ -89,6 +89,8 @@ var hourCases = []hourCase{
 	// Prime
 	{"prime", "2026-03-15", "Sunday — Ps 119 sections i–iii"},
 	{"prime", "2026-03-16", "Monday — weekday psalms"},
+	{"prime", "2026-03-17", "Tuesday — Psalm 9 ends at verse 18"},
+	{"prime", "2026-03-18", "Wednesday — Psalm 9:19–20 continues directly into Psalm 10"},
 
 	// Terce — minor hour Ps 119 sections on Sun/Mon, ordinary on Tue–Sat
 	{"terce", "2026-03-15", "Sunday — Ps 119 sections iv–vi"},

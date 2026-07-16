@@ -1,6 +1,10 @@
 [alleluia]
 Praise be to thee, O Lord, King of eternal glory.
 
+[psalm-antiphon-1-prime]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Quad, 1] — checked against user-supplied diurnal rubric
+As I live, * saith the Lord, I have no pleasure in the death of the sinner, but rather that he be converted and live.
+
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 124
 !Isa 58:1

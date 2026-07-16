@@ -2,6 +2,30 @@
 # In the Benedictine rite, Alleluia is NOT suppressed during Advent.
 # Add overrides here as needed.
 
+[psalm-antiphon-1-prime-monday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv42, 1] — check against diurnal
+Behold, the Lord cometh, * the Prince of the Kings of the earth: blessed are they that are ready to go forth to meet him.
+
+[psalm-antiphon-1-prime-tuesday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv43, 1] — check against diurnal
+Drop down, ye heavens, from above, * and let the skies pour down the Righteous One: let the earth open and bring forth the Saviour.
+
+[psalm-antiphon-1-prime-wednesday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv44, 1] — check against diurnal
+The Prophets foretold * that the Saviour should be born of the Virgin Mary.
+
+[psalm-antiphon-1-prime-thursday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv45, 1] — check against diurnal
+The Lord, the Almighty, * cometh out of Zion, to save his people.
+
+[psalm-antiphon-1-prime-friday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv46, 1] — check against diurnal
+Stand still * and you shall see the salvation of the Lord.
+
+[psalm-antiphon-1-prime-saturday]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv47, 1] — check against diurnal
+Consider how glorious is the one * who shall bring about the salvation of the peoples.
+
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 122
 !Isa 2:3

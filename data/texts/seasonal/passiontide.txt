@@ -4,6 +4,10 @@
 [alleluia]
 Praise be to thee, O Lord, King of eternal glory.
 
+[psalm-antiphon-1-prime]
+# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Quad5_, 1] — checked against user-supplied diurnal rubric
+Deliver me, O Lord, * and set me beside thee, and any man's hand may fight against me.
+
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 126
 !Jer 11:19

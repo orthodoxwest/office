@@ -1,5 +1,12 @@
 key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
 canticles/magnificat,0c7b11b156c6,diurnal,,115,verified,bwaldrep,2026-07-11,
+ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-friday,b8646181fc65,st patrick prayer book,,37,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-monday,7f6a3ac0a243,st patrick prayer book,,27,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-saturday,33a4fd84a83e,st patrick prayer book,,40,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-thursday,dfed6d18e1aa,st patrick prayer book,,34,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-tuesday,ce8e7af0fabc,st patrick prayer book,,30,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-wednesday,82ae73f24b17,st patrick prayer book,,32,verified,bwaldrep,2026-07-15,
 ordinary/session/closing-rubric,bb4888da6f7b,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/open-my-mouth,6f62e3beb617,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/opening-rubric,2c43e230f57a,diurnal,,A,verified,bwaldrep,2026-07-11,
@@ -17,6 +24,8 @@ psalms/006,123a70534a91,Coverdale Psalter,Psalm 6,,verified,codex,2026-07-10,Mac
 psalms/007,7c05c04669b7,Coverdale Psalter,Psalm 7,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/008,03e5de7ab393,Coverdale Psalter,Psalm 8,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/009,9dbba3771e38,Coverdale Psalter,Psalm 9,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+psalms/009a,4d50bb471ef6,Coverdale Psalter,Psalm 9:1-18,,verified,codex,2026-07-15,Text extracted from verified psalms/009; Prime division confirmed against parish prayerbook
+psalms/009b,7a0744ed2318,Coverdale Psalter,Psalm 9:19-20,,verified,codex,2026-07-15,Text extracted from verified psalms/009; Prime division confirmed against parish prayerbook
 psalms/010,75baa9c5f3d4,Coverdale Psalter,Psalm 10,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/011,49be3fd46375,Coverdale Psalter,Psalm 11,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/012,6a52a330701e,Coverdale Psalter,Psalm 12,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -192,3 +201,6 @@ psalms/148a,9791f6b89cee,Coverdale Psalter,Psalm 148a,,verified,codex,2026-07-10
 psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,
+shared/formulas/opening-versicle,9cda7ff3a79e,diurnal,,2,verified,bwaldrep,2026-07-15,
+shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,

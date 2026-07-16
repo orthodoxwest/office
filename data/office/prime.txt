@@ -97,7 +97,7 @@ Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
 
 Type = psalm
-Ref = psalms/009
+Ref = psalms/009a
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -110,6 +110,9 @@ Condition = weekday-wednesday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/009b
 
 Type = psalm
 Ref = psalms/010
@@ -273,8 +276,8 @@ Type = prayer
 Ref = ordinary/prime/collect-intro
 
 [Collect]
-Type = proper-collect
-Ref = collect
+Type = collect
+Ref = ordinary/prime/collect
 
 [Martyrology]
 Type = rubric

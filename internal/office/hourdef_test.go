@@ -3,6 +3,7 @@ package office
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -242,7 +243,6 @@ func TestMinorHoursUseIndexedLaudsAntiphons(t *testing.T) {
 		file string
 		ref  string
 	}{
-		{file: "prime.txt", ref: "psalm-antiphon-1"},
 		{file: "terce.txt", ref: "psalm-antiphon-2"},
 		{file: "sext.txt", ref: "psalm-antiphon-3"},
 		{file: "none.txt", ref: "psalm-antiphon-5"},
@@ -271,6 +271,67 @@ func TestMinorHoursUseIndexedLaudsAntiphons(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPrimeUsesFixedCollectAndSplitPsalm9(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "prime.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(prime.txt): %v", err)
+	}
+
+	byName := make(map[string]HourSection, len(sections))
+	for _, section := range sections {
+		byName[section.Name] = section
+	}
+
+	collect := byName["Collect"]
+	wantCollect := []HourElement{{Type: "collect", Ref: "ordinary/prime/collect"}}
+	if !reflect.DeepEqual(collect.Elements, wantCollect) {
+		t.Fatalf("Prime Collect = %+v, want %+v", collect.Elements, wantCollect)
+	}
+
+	tuesday := byName["Psalmody-Tuesday"]
+	wednesday := byName["Psalmody-Wednesday"]
+	for name, section := range byName {
+		if !strings.HasPrefix(name, "Psalmody-") {
+			continue
+		}
+		for _, elem := range section.Elements {
+			if strings.Contains(elem.Type, "antiphon") && elem.Ref != "psalm-antiphon-1" {
+				t.Fatalf("%s antiphon = %+v, want Prime psalm-antiphon-1 slot", name, elem)
+			}
+		}
+	}
+	if !hasHourRef(tuesday.Elements, "psalms/009a") || hasHourRef(tuesday.Elements, "psalms/009") {
+		t.Fatalf("Tuesday psalmody = %+v, want split psalms/009a only", tuesday.Elements)
+	}
+	if !adjacentHourRefs(wednesday.Elements, "psalms/009b", "psalms/010") {
+		t.Fatalf("Wednesday psalmody = %+v, want Psalm 9:19-20 immediately followed by Psalm 10", wednesday.Elements)
+	}
+	for i, elem := range wednesday.Elements {
+		if elem.Ref == "psalms/009b" && i+1 < len(wednesday.Elements) && wednesday.Elements[i+1].Type == "gloria-patri" {
+			t.Fatal("Wednesday inserts a doxology between Psalm 9:19-20 and Psalm 10")
+		}
+	}
+}
+
+func hasHourRef(elements []HourElement, ref string) bool {
+	for _, elem := range elements {
+		if elem.Ref == ref {
+			return true
+		}
+	}
+	return false
+}
+
+func adjacentHourRefs(elements []HourElement, first, second string) bool {
+	for i := 0; i+1 < len(elements); i++ {
+		if elements[i].Ref == first && elements[i+1].Ref == second {
+			return true
+		}
+	}
+	return false
 }
 
 func TestLaudsAndVespersUseIndexedPsalmAntiphons(t *testing.T) {
