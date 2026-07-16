@@ -1,6 +1,8 @@
 package calendar
 
 import (
+	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 	"time"
@@ -579,6 +581,65 @@ func TestBuildCalendarTransfers(t *testing.T) {
 	// Let's just verify the ordo output matches later
 }
 
+func TestBuildCalendarCarriesTransferAcrossYearBoundary(t *testing.T) {
+	dataDir := t.TempDir()
+	feastDir := filepath.Join(dataDir, "feasts")
+	if err := os.MkdirAll(feastDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	feasts := `[year-end-winner]
+Name = Year End Winner
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 12
+Day = 31
+
+[cross-year-transfer]
+Name = Cross-Year Transfer
+Rank = double-2nd-class
+Color = red
+Category = martyr
+Month = 12
+Day = 31
+
+[jan1-blocker]
+Name = January 1 Blocker
+Rank = double-1st-class
+Color = white
+Category = lord
+Month = 1
+Day = 1
+`
+	if err := os.WriteFile(filepath.Join(feastDir, "temporal.txt"), []byte(feasts), 0644); err != nil {
+		t.Fatal(err)
+	}
+	penitential := `[noop]
+From = date:01-01
+To = date:01-01
+Abstinence = false
+`
+	if err := os.WriteFile(filepath.Join(dataDir, "penitential.txt"), []byte(penitential), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	days, err := BuildCalendar(2027, dataDir)
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	jan1 := findDay(days, 2027, 1, 1)
+	jan2 := findDay(days, 2027, 1, 2)
+	if jan1 == nil || jan1.Celebration == nil || jan1.Celebration.ID != "jan1-blocker" {
+		t.Fatalf("Jan 1 celebration = %#v, want jan1-blocker", jan1)
+	}
+	assertTraceRule(t, jan1.OccurrenceDecisions, "occurrence:transfer-in")
+	assertTraceRule(t, jan1.OccurrenceDecisions, "occurrence:transfer-out")
+	if jan2 == nil || jan2.Celebration == nil || jan2.Celebration.ID != "cross-year-transfer" {
+		t.Fatalf("Jan 2 celebration = %#v, want cross-year-transfer", jan2)
+	}
+	assertTraceRule(t, jan2.OccurrenceDecisions, "occurrence:transfer-in")
+}
+
 func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 	days := buildCalendar2026(t)
 
@@ -633,6 +694,9 @@ func TestBuildCalendarDec31VespersUsesCircumcision(t *testing.T) {
 		}
 		if dec31.Vespers.Feast == nil || dec31.Vespers.Feast.ID != "circumcision" {
 			t.Fatalf("%d Dec 31 vespers feast = %#v, want circumcision", year, dec31.Vespers.Feast)
+		}
+		if dec31.Vespers.Feast.Source != models.SourceBase {
+			t.Fatalf("%d Dec 31 vespers feast source = %q, want loaded base feast", year, dec31.Vespers.Feast.Source)
 		}
 		if dec31.Vespers.Color != models.White || dec31.Vespers.Season != models.Christmas {
 			t.Fatalf("%d Dec 31 vespers color/season = %s/%s, want white/christmas",
