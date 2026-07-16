@@ -153,5 +153,34 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertIn("wording/boundary review candidates", markdown)
 
 
+class IncipitMatchTest(unittest.TestCase):
+    OC = PROJECT_STATUS.ORDO_COMPARE
+
+    def test_leading_o_interjection_is_ignored(self):
+        self.assertTrue(self.OC.incipit_matches(
+            "King of glory",
+            "O King of glory, * thou Lord of Sabaoth, who triumphing to-day"))
+        self.assertTrue(self.OC.incipit_matches(
+            "O King of glory", "King of glory, thou Lord of Sabaoth"))
+
+    def test_leading_o_on_both_sides_still_compared(self):
+        self.assertTrue(self.OC.incipit_matches(
+            "O Teacher right excellent",
+            "O Teacher right excellent, * O light of Holy Church"))
+        self.assertFalse(self.OC.incipit_matches(
+            "O right excellent Teacher",
+            "O Teacher right excellent, * O light of Holy Church"))
+
+    def test_s_z_spelling_variants_fold(self):
+        self.assertTrue(self.OC.incipit_matches(
+            "When Elizabeth",
+            "When Elisabeth * heard the salutation of Mary"))
+
+    def test_different_antiphons_still_mismatch(self):
+        self.assertFalse(self.OC.incipit_matches(
+            "Come, Bride of Christ",
+            "All generations shall call me blessed"))
+
+
 if __name__ == "__main__":
     unittest.main()
