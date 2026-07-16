@@ -150,6 +150,32 @@ func TestResolveDayTraceIncludesTransfersAndDisposition(t *testing.T) {
 	}
 }
 
+func TestResolveDayCanTransferBeyondYearBoundary(t *testing.T) {
+	winner := traceFeast("december-31-winner", models.Double1stClass, models.CategoryLord)
+	loser := traceFeast("cross-year-transfer", models.Double2ndClass, models.CategoryMartyr)
+	day, transfers := ResolveDay(
+		time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC),
+		[]*models.Feast{winner, loser}, models.Christmas, models.White, nil, nil,
+	)
+	if len(transfers) != 1 || transfers[0].ID != loser.ID {
+		t.Fatalf("Dec 31 transfers = %#v, want %s", transfers, loser.ID)
+	}
+	assertTraceRule(t, day.OccurrenceDecisions, "occurrence:transfer-out")
+}
+
+func TestCommemorationDedupeContainmentBehavior(t *testing.T) {
+	short := traceFeast("st-john", models.Commemoration, models.CategoryMartyr)
+	long := traceFeast("st-john-baptist", models.Commemoration, models.CategoryMartyr)
+	short.Name = "St John"
+	long.Name = "St John Baptist"
+
+	got, decisions := dedupeCommemorationsWithDecisions(nil, []*models.Feast{short, long})
+	if len(got) != 1 || got[0].ID != short.ID {
+		t.Fatalf("deduped commemorations = %#v, want only %s", got, short.ID)
+	}
+	assertTraceRule(t, decisions, "commemoration:duplicate-name")
+}
+
 func assertTraceRule(t *testing.T, decisions []models.CompositionDecision, rule string) {
 	t.Helper()
 	for _, decision := range decisions {

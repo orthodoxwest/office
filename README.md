@@ -226,7 +226,6 @@ Liturgical data lives in `data/`. The engine reads these at startup — no recom
 ```
 data/
   feasts/          feast definitions (sanctoral, temporal, AWRV-specific)
-  seasons.txt      season date rules
   penitential.txt  fasting and abstinence discipline rules
   audit-ok.txt     feasts that intentionally use ordinary/common texts
   texts/

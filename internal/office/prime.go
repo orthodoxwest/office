@@ -9,17 +9,10 @@ import (
 )
 
 // PrimeComposer composes the hour of Prime.
-type PrimeComposer struct {
-	Moveable *calendar.MoveableDates
-}
-
-// SetMoveable sets the moveable feast dates for preces calculation.
-func (p *PrimeComposer) SetMoveable(m *calendar.MoveableDates) {
-	p.Moveable = m
-}
+type PrimeComposer struct{}
 
 // Compose builds a complete Prime hour for the given day.
-func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error) {
+func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
 	hour := &models.OfficeHour{
 		Date:   day.Date,
 		Hour:   "Prime",
@@ -34,7 +27,7 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateCondition(section.Condition, day, p.Moveable)
+			included := evaluateHourSectionCondition(section, day, moveable)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue
@@ -44,7 +37,7 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
 			if elem.Type == "proper-antiphon" && elem.Ref == "psalm-antiphon-1" {
-				elems = append(elems, resolvePrimePsalmAntiphon(day, corpus))
+				elems = append(elems, resolvePrimePsalmAntiphon(day, corpus, moveable))
 				continue
 			}
 			elems = append(elems, resolveHourElement(day, "prime", elem, corpus))
@@ -62,7 +55,7 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 // resolvePrimePsalmAntiphon follows Prime's antiphon rubric. Feasts and
 // Sundays use the first antiphon from their Lauds proper or common. Ferias use
 // the seasonal exceptions appointed for Prime, then the weekday psalter form.
-func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus) models.OfficeElement {
+func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) models.OfficeElement {
 	const slot = "psalm-antiphon-1"
 	if day == nil {
 		return primePsalmAntiphonElement(slot, "", "")
@@ -81,7 +74,9 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 		return primePsalmAntiphonElement(slot, key, text)
 	}
 
-	moveable := calendar.ComputeMoveableDates(day.Date.Year())
+	if moveable == nil {
+		moveable = calendar.ComputeMoveableDates(day.Date.Year())
+	}
 	weekday := strings.ToLower(civilWeekday(day).String())
 	weekdayKey := "ordinary/prime/" + slot + "-" + weekday
 	key := weekdayKey

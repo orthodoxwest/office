@@ -823,11 +823,6 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 		return nil, fmt.Errorf("loading penitential rules: %w", err)
 	}
 
-	_, err = LoadSeasons(dataDir)
-	if err != nil {
-		return nil, fmt.Errorf("loading seasons: %w", err)
-	}
-
 	moveable := ComputeMoveableDates(year)
 
 	// Generate computed Sundays
@@ -936,6 +931,10 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 
 		calendarDays = append(calendarDays, *calDay)
 	}
+
+	// A transfer still pending here cannot be represented by this single-year
+	// result and is currently dropped. A boundary fixture documents the case
+	// until cross-year transfer policy and API shape receive a ruling.
 
 	if err := applyPenitentialRules(calendarDays, penitentialRules, anchorDates); err != nil {
 		return nil, fmt.Errorf("applying penitential rules: %w", err)

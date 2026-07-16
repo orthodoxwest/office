@@ -16,67 +16,6 @@ var doubleFeriaOfficeIDs = map[string]bool{
 	"vigil-pentecost": true,
 }
 
-// evaluateCondition reports whether a section condition is satisfied for the given day.
-// Comma-separated conditions are ANDed together: "not-feast-easter-sunday,weekday-sunday"
-// means "Sunday AND not Easter Sunday".
-func evaluateCondition(condition string, day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
-	ok, known := evaluateConditionKnown(condition, day, moveable)
-	return known && ok
-}
-
-func evaluateConditionKnown(condition string, day *models.CalendarDay, moveable *calendar.MoveableDates) (bool, bool) {
-	// Handle comma-separated AND conditions
-	if strings.Contains(condition, ",") {
-		for _, part := range strings.Split(condition, ",") {
-			ok, known := evaluateConditionKnown(strings.TrimSpace(part), day, moveable)
-			if !known || !ok {
-				return false, known
-			}
-		}
-		return true, true
-	}
-
-	// Handle negated conditions: "not-feast-easter-sunday" → negate "feast-easter-sunday"
-	if strings.HasPrefix(condition, "not-") {
-		ok, known := evaluateConditionKnown(condition[4:], day, moveable)
-		if !known {
-			return false, false
-		}
-		return !ok, true
-	}
-
-	switch condition {
-	case "if-preces":
-		return shouldSayPreces(day, moveable), true
-	case "if-suffrage":
-		return shouldSaySuffrage(day, moveable), true
-	case "if-cross-commemoration":
-		return shouldSayCrossCommemoration(day, moveable), true
-	case "is-feast":
-		return day.Celebration != nil &&
-			day.Celebration.Category != models.CategoryFeria &&
-			day.Celebration.Category != models.CategorySunday, true
-	case "festal-lauds-psalmody":
-		return usesFestalLaudsPsalmody(day), true
-	case "is-ferial":
-		if day.Celebration == nil {
-			return true, true
-		}
-		return day.Celebration.Category == models.CategoryFeria, true
-	default:
-		if strings.HasPrefix(condition, "weekday-") {
-			return isWeekdayMatch(condition, day), true
-		}
-		if strings.HasPrefix(condition, "feast-") {
-			return day.Celebration != nil && day.Celebration.ID == condition[6:], true
-		}
-		if strings.HasPrefix(condition, "season-") {
-			return string(day.Season) == condition[7:], true
-		}
-		return false, false
-	}
-}
-
 // usesFestalLaudsPsalmody reports whether Lauds takes the festal psalms. Most
 // Sunday offices retain the Sunday psalter, but the printed office for the
 // Sunday within the Epiphany octave explicitly shares the feast's psalmody.

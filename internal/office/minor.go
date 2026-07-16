@@ -13,17 +13,11 @@ import (
 // All three share identical logic; the hour name and psalm assignments
 // come from the hour definition file.
 type MinorHourComposer struct {
-	Name     string
-	Moveable *calendar.MoveableDates
-}
-
-// SetMoveable sets the moveable feast dates for preces calculation.
-func (m *MinorHourComposer) SetMoveable(mv *calendar.MoveableDates) {
-	m.Moveable = mv
+	Name string
 }
 
 // Compose builds a complete minor hour for the given day.
-func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error) {
+func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
 	hour := &models.OfficeHour{
 		Date:   day.Date,
 		Hour:   m.Name,
@@ -38,7 +32,7 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateCondition(section.Condition, day, m.Moveable)
+			included := evaluateHourSectionCondition(section, day, moveable)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue
@@ -57,30 +51,6 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 	}
 
 	return hour, nil
-}
-
-// isWeekdayMatch checks whether the day matches a weekday-* condition.
-func isWeekdayMatch(condition string, day *models.CalendarDay) bool {
-	weekdayName := strings.TrimPrefix(condition, "weekday-")
-	weekday := civilWeekday(day)
-	switch weekdayName {
-	case "sunday":
-		return weekday == time.Sunday
-	case "monday":
-		return weekday == time.Monday
-	case "tuesday":
-		return weekday == time.Tuesday
-	case "wednesday":
-		return weekday == time.Wednesday
-	case "thursday":
-		return weekday == time.Thursday
-	case "friday":
-		return weekday == time.Friday
-	case "saturday":
-		return weekday == time.Saturday
-	default:
-		return false
-	}
 }
 
 // civilWeekday returns the weekday used by the psalter and weekday ordinary.

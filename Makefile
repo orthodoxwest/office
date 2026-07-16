@@ -1,4 +1,4 @@
-.PHONY: help build test lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help build test test-race parity lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -13,6 +13,12 @@ test: ## Run all tests
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_source_reconcile.py
+
+test-race: ## Run Go tests with the race detector
+	go test -race ./...
+
+parity: ## Verify the 2026-2053 date-sensitive parity snapshot
+	go test ./internal/e2e -run TestParityGolden -count=1
 
 lint: ## Run staticcheck linter
 	staticcheck ./...

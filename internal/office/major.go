@@ -47,7 +47,7 @@ func composeMajorHour(
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateCondition(section.Condition, officeDay, moveable)
+			included := evaluateHourSectionCondition(section, officeDay, moveable)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue

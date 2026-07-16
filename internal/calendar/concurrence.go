@@ -650,8 +650,9 @@ func resolveVespersConcurrence(days []models.CalendarDay) {
 		days[i].Vespers = resolveConcurrence(&days[i], &days[i+1])
 	}
 
-	// Dec 31 edge case: resolve against Jan 1 Circumcision, which is always
-	// the same feast regardless of year.
+	// Current Dec 31 boundary contract: resolve against a minimal synthetic
+	// Jan 1 Circumcision. It intentionally carries no date, commemorations, or
+	// octave context; characterization tests pin this until a cross-year ruling.
 	if len(days) > 0 {
 		last := &days[len(days)-1]
 		jan1 := &models.CalendarDay{

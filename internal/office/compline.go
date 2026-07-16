@@ -7,17 +7,10 @@ import (
 )
 
 // ComplineComposer composes the hour of Compline.
-type ComplineComposer struct {
-	Moveable *calendar.MoveableDates
-}
-
-// SetMoveable sets the moveable feast dates for preces.
-func (c *ComplineComposer) SetMoveable(m *calendar.MoveableDates) {
-	c.Moveable = m
-}
+type ComplineComposer struct{}
 
 // Compose builds a complete Compline hour for the given day.
-func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus) (*models.OfficeHour, error) {
+func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
 	hour := &models.OfficeHour{
 		Date:   day.Date,
 		Hour:   "Compline",
@@ -32,7 +25,7 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateCondition(section.Condition, day, c.Moveable)
+			included := evaluateHourSectionCondition(section, day, moveable)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue

@@ -612,22 +612,52 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 }
 
 func TestBuildCalendarDec31VespersUsesCircumcision(t *testing.T) {
+	// 2020-2029 covers every weekday. This pins the current synthetic-Jan-1
+	// boundary behavior until the full cross-year policy receives a ruling.
+	seenWeekdays := make(map[time.Weekday]bool)
+	for year := 2020; year <= 2029; year++ {
+		days, err := BuildCalendar(year, findDataDir(t))
+		if err != nil {
+			t.Fatalf("BuildCalendar(%d): %v", year, err)
+		}
+		dec31 := findDay(days, year, 12, 31)
+		if dec31 == nil {
+			t.Fatalf("%d-12-31 not found", year)
+		}
+		seenWeekdays[dec31.Date.Weekday()] = true
+		if dec31.Vespers.Owner != models.VespersIOfFollowing {
+			t.Fatalf("%d Dec 31 vespers owner = %v, want I of following", year, dec31.Vespers.Owner)
+		}
+		if dec31.Vespers.Feast == nil || dec31.Vespers.Feast.ID != "circumcision" {
+			t.Fatalf("%d Dec 31 vespers feast = %#v, want circumcision", year, dec31.Vespers.Feast)
+		}
+		if dec31.Vespers.Color != models.White || dec31.Vespers.Season != models.Christmas {
+			t.Fatalf("%d Dec 31 vespers color/season = %s/%s, want white/christmas",
+				year, dec31.Vespers.Color, dec31.Vespers.Season)
+		}
+	}
+	if len(seenWeekdays) != 7 {
+		t.Fatalf("Dec 31 fixture covered %d weekdays, want 7", len(seenWeekdays))
+	}
+}
+
+func TestBuildCalendarOverlappingOctaveRangeUsesLaterFeast(t *testing.T) {
 	days := buildCalendar2026(t)
-	dec31 := findDay(days, 2026, 12, 31)
-	if dec31 == nil {
-		t.Fatal("2026-12-31 not found")
+	john := findDay(days, 2026, 6, 28)
+	if john == nil {
+		t.Fatal("June 28 not found")
 	}
-	if dec31.Vespers.Owner != models.VespersIOfFollowing {
-		t.Fatalf("Dec 31 vespers owner = %v, want I of following", dec31.Vespers.Owner)
+	if john.WithinOctaveOf != "nativity-john-baptist" {
+		t.Fatalf("June 28 octave = %q, want nativity-john-baptist", john.WithinOctaveOf)
 	}
-	if dec31.Vespers.Feast == nil || dec31.Vespers.Feast.ID != "circumcision" {
-		t.Fatalf("Dec 31 vespers feast = %#v, want circumcision", dec31.Vespers.Feast)
-	}
-	if dec31.Vespers.Color != models.White {
-		t.Fatalf("Dec 31 vespers color = %s, want white", dec31.Vespers.Color)
-	}
-	if dec31.Vespers.Season != models.Christmas {
-		t.Fatalf("Dec 31 vespers season = %s, want christmas", dec31.Vespers.Season)
+	for day := 29; day <= 30; day++ {
+		got := findDay(days, 2026, 6, day)
+		if got == nil {
+			t.Fatalf("June %d not found", day)
+		}
+		if got.WithinOctaveOf != "ss-peter-paul" {
+			t.Fatalf("June %d octave = %q, want later-loaded ss-peter-paul", day, got.WithinOctaveOf)
+		}
 	}
 }
 
