@@ -32,7 +32,8 @@ And the angel answering * said to the women: Fear not you: for I know that you s
 @use proper/easter-sunday/easter-antiphon-1
 
 [benedictus-antiphon]
-@use proper/easter-sunday/easter-antiphon-5
+# SOURCE: draft archdiocesan Lauds book, p. 268 (Easter Sunday; Et valde mane)
+And very early in the morning * the first day of the week, they came unto the sepulchre at the rising of the sun, alleluia.
 
 [magnificat-antiphon]
 And looking * they saw the stone rolled back, for it was very great, alleluia.

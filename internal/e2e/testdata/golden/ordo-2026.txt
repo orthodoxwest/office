@@ -441,7 +441,7 @@ MARCH
            Vespers v · Mag. He that made me whole · No Suff.
                Com. St Perpetua & Felicitas, Martyrs ("For theirs is the kingdom of heaven")
   7  Sat  L§ Lent Ember Saturday                        [f2]  v
-           Lauds   v · Ben. Jesus took His disciples · No Preces · Suff.
+           Lauds   v · Ben. And Jesus taketh his disciples · No Preces · Suff.
            Hours   Preces
            Vespers v · I fol. (II Sunday in Lent) · Mag. Tell the vision that ye have seen to no… · Suff.
   8  Sun  L  II SUNDAY IN LENT                          [1cl] v
@@ -519,10 +519,10 @@ MARCH
                Com. Thursday after Lent III ("My soul doth magnify the Lord, and my spirit…")
  19  Thu  L§ St. Joseph, Spouse of the Blessed Virgin Mary [2cl] w
            Thursday after Lent III (f2)
-           Lauds   w · Ben. Jesus went down with them · No Preces · No Suff.
+           Lauds   w · Ben. Jesus himself · No Preces · No Suff.
                Com. Thursday after Lent III ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers w · II prec. · Mag. But while he thought on these things, behold, the… · No Suff.
+           Vespers w · II prec. · Mag. Behold a faithful · No Suff.
                Com. Thursday after Lent III ("My soul doth magnify the Lord, and my spirit…")
                Com. Friday after Lent III ("My soul doth magnify the Lord, and my spirit…")
  20  Fri  L§ Friday after Lent III                      [f2]  v
@@ -530,15 +530,15 @@ MARCH
            Lauds   v · Ben. Whosoever drinketh · No Preces · No Suff.
                Com. St. Cuthbert, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
-           Vespers w · I fol. (St. Benedict) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St. Benedict) · Mag. Let all the multitude · No Suff.
                Com. Friday after Lent III ("My soul doth magnify the Lord, and my spirit…")
                Com. Saturday after Lent III ("My soul doth magnify the Lord, and my spirit…")
  21  Sat  L§ St. Benedict                               [2cl] w
            Saturday after Lent III (f2)
-           Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
+           Lauds   w · Ben. Benedict, the man of God · No Preces · No Suff.
                Com. Saturday after Lent III ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Lo, a servant of God · No Suff.
+           Vespers w · II prec. · Mag. Today holy Benedict · No Suff.
                Com. Saturday after Lent III ("My soul doth magnify the Lord, and my spirit…")
                Com. IV Sunday in Lent ("Woman, hath no man condemned thee?")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
@@ -556,7 +556,7 @@ MARCH
            Lauds   v · Ben. Why go ye about to kill Me · No Preces · No Suff.
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
            Hours   No Preces
-           Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Angel Gabriel said unto Mary: Hail, thou that… · No Suff.
+           Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Holy Ghost · No Suff.
                Com. Wednesday after Lent IV ("My soul doth magnify the Lord, and my spirit…")
  25  Wed  L§ ANNUNCIATION OF THE BLESSED VIRGIN MARY    [1cl] w
            Wednesday after Lent IV (f2)
@@ -669,7 +669,7 @@ APRIL
            Hours   No Preces
            Vespers w · I fol. (Sunday of the Resurrection) · Mag. And looking · No Suff.
  12  Sun     SUNDAY OF THE RESURRECTION                 [1cl] w
-           Lauds   w · Ben. And the angel answering · No Preces · No Suff.
+           Lauds   w · Ben. And very early in the morning · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. And looking · No Suff.
  13  Mon     EASTER MONDAY                              [1cl] w
@@ -705,7 +705,7 @@ APRIL
            Hours   No Preces
            Vespers w · I fol. (Low Sunday (Octave of Easter)) · Mag. The same day · No Suff.
  19  Sun     LOW SUNDAY (OCTAVE OF EASTER)              [1cl] w
-           Lauds   w · Ben. Thomas, because thou hast seen me, thou hast believed · No Preces · No Suff.
+           Lauds   w · Ben. The same day · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (St. Tikhon of Moscow) · Mag. O thou Priest and Bishop · No Suff.
  20  Mon     ST. TIKHON OF MOSCOW                       [1cl] w
@@ -715,7 +715,7 @@ APRIL
  21  Tue     Feria                                            w
            Lauds   w · Ben. I go before you into Galilee · No Preces · No Suff.
            Hours   Preces
-           Vespers w · Mag. Reach hither thine hand · No Suff.
+           Vespers w · Mag. Because thou hast seen me · No Suff.
                Com. Ss. Soter & Caius, Martyrs ("For theirs is the kingdom of heaven")
  22  Wed     Feria                                            w
            Ss. Soter & Caius, Martyrs (com)
