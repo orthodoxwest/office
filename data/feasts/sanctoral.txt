@@ -300,6 +300,7 @@ Color = red
 Category = apostle
 Month = 6
 Day = 30
+IsApostolicCompanion = true
 
 [our-lady-einsiedeln]
 Name = Our Lady of Einsiedeln

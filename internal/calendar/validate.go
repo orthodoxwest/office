@@ -119,6 +119,12 @@ func validateSemantics(feasts []*models.Feast) []string {
 				f.ID, f.Rank,
 			))
 		}
+		if f.IsApostolicCompanion && f.Rank != models.Commemoration {
+			errs = append(errs, fmt.Sprintf(
+				"Feast '%s' is an apostolic companion but is ranked %s instead of commemoration",
+				f.ID, f.Rank,
+			))
+		}
 	}
 
 	// DateRule format validation
