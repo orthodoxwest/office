@@ -3,7 +3,7 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 250 |
+| Modeled structural features | 254 |
 | Selected structural-review pages | 46 |
 | Uncovered features | 0 |
 | Verified text entries | 210 |
@@ -15,7 +15,6 @@
 - `decision:color:resolution=celebration-color`
 - `decision:color:resolution=penitential-season-over-lesser-feast`
 - `decision:color:resolution=seasonal-feria`
-- `decision:commemoration:cap=truncated`
 - `decision:commemoration:duplicate-name=suppressed`
 - `decision:commemoration:first-vespers-circumcision-exclusion=suppressed`
 - `decision:commemoration:first-vespers-concurrence=included`
@@ -25,6 +24,7 @@
 - `decision:commemoration:first-vespers-first-class-exclusion=suppressed`
 - `decision:commemoration:first-vespers-first-class-seasonal-feria-exclusion=suppressed`
 - `decision:commemoration:first-vespers-first-class-sunday-exclusion=suppressed`
+- `decision:commemoration:first-vespers-nativity-epiphany-sunday=included`
 - `decision:commemoration:first-vespers-occurrence-included=included`
 - `decision:commemoration:first-vespers-office-ended-at-none=suppressed`
 - `decision:commemoration:first-vespers-seasonal-feria=included`
@@ -34,9 +34,11 @@
 - `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:matches-winner=suppressed`
 - `decision:commemoration:only-with=suppressed`
+- `decision:commemoration:outgoing-below-greater-double=suppressed`
 - `decision:commemoration:pentecost-ember=suppressed`
 - `decision:commemoration:same-octave-boundary=suppressed`
 - `decision:commemoration:same-octave-sunday=suppressed`
+- `decision:commemoration:second-vespers-apostolic-companion=included`
 - `decision:commemoration:second-vespers-day-within-octave-exclusion=suppressed`
 - `decision:commemoration:second-vespers-feria-or-vigil-lauds-only=suppressed`
 - `decision:commemoration:second-vespers-first-class-exclusion=suppressed`
@@ -120,6 +122,8 @@
 - `decision:context:commemorations=1`
 - `decision:context:commemorations=2`
 - `decision:context:commemorations=3`
+- `decision:context:commemorations=4`
+- `decision:context:commemorations=5`
 - `decision:context:feria-commemoration=present`
 - `decision:context:octave=outside`
 - `decision:context:octave=within`

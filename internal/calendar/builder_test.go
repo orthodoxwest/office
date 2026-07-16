@@ -789,3 +789,46 @@ func TestSaturdayOfficeBVMSeasonalProperID(t *testing.T) {
 		}
 	}
 }
+
+// TestVespersBoundaryCommemorations2026 pins the boundary-commemoration rules
+// against printed 2026 ordo evenings: the perpetual Peter/Paul companion at
+// II Vespers, a displaced Greater Double (but not a plain Double) carried to
+// I Vespers of the following, an incoming Double admitted at a II Class
+// II Vespers, and the octave exclusions at II Class I Vespers.
+func TestVespersBoundaryCommemorations2026(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	has := func(month, day int, name string) bool {
+		d := findDay(days, 2026, month, day)
+		if d == nil {
+			t.Fatalf("2026-%02d-%02d not found", month, day)
+		}
+		for _, c := range d.Vespers.Commemorations {
+			if c.Name == name {
+				return true
+			}
+		}
+		return false
+	}
+
+	tests := []struct {
+		month, day int
+		name       string
+		want       bool
+		desc       string
+	}{
+		{1, 18, "Commemoration of St Paul", true, "companion of the Chair of St Peter at II Vespers"},
+		{1, 25, "Commemoration of St. Peter", true, "companion of the Conversion of St Paul at II Vespers"},
+		{3, 24, "St. Gabriel the Archangel", true, "displaced Greater Double at the Annunciation's I Vespers"},
+		{3, 19, "St. Cuthbert, Bishop & Confessor", true, "incoming Double at St Joseph's II Vespers"},
+		{3, 20, "St. Cuthbert, Bishop & Confessor", false, "displaced plain Double not carried to St Benedict's I Vespers"},
+		{7, 1, "Day IV within the Octave of Ss Peter & Paul", false, "octave day excluded at the Visitation's I Vespers"},
+		{12, 12, "Day VI within Conception Octave", true, "octave day admitted at Gaudete Sunday's I Vespers"},
+	}
+	for _, tt := range tests {
+		if got := has(tt.month, tt.day, tt.name); got != tt.want {
+			t.Errorf("2026-%02d-%02d %q present=%t, want %t (%s)",
+				tt.month, tt.day, tt.name, got, tt.want, tt.desc)
+		}
+	}
+}

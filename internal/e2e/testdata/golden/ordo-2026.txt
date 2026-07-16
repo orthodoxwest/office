@@ -126,6 +126,7 @@ JANUARY
                Com. St. Anthony of Egypt ("Lord, Thou deliverest unto me five talents")
                Com. Chair of St Peter in Rome ("Thus saith the Lord")
                Com. St Paul ("Lord, Thou deliverest unto me five talents")
+               Com. St. Prisca of Rome, Virgin Martyr ("This is one of the wise virgins")
  18  Sun     II Sunday after Epiphany                   [sd]  g
            Chair of St Peter in Rome (gd)
            St Paul (com)
@@ -137,6 +138,7 @@ JANUARY
            Hours   No Preces
            Vespers g · II prec. · Mag. The wine failing · No Suff.
                Com. Chair of St Peter in Rome ("Thus saith the Lord")
+               Com. St Paul ("Lord, Thou deliverest unto me five talents")
                Com. Ss. Marius, Martha, Audifax, & Abachum, Martyrs ("For theirs is the kingdom of heaven")
                Com. St. Mark of Ephesus, Bishop & Confessor ("Behold a great priest")
  19  Mon     Feria                                            g
@@ -186,6 +188,7 @@ JANUARY
            Hours   No Preces
            Vespers g · II prec. · Mag. Lord, if Thou wilt · No Suff.
                Com. Conversion of St. Paul ("Go forth, Ananias")
+               Com. St. Peter ("Lord, Thou deliverest unto me five talents")
                Com. St. Polycarp of Smyrna, Bishop & Martyr ("Whosoever shall confess me")
  26  Mon     Feria                                            g
            St. Polycarp of Smyrna, Bishop & Martyr (com)
@@ -367,6 +370,7 @@ FEBRUARY
            Hours   No Preces
            Vespers w · II prec. · Mag. During his pontificate · No Suff.
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Behold an high priest")
+               Com. St Paul ("Lord, Thou deliverest unto me five talents")
                Com. St. Matthias, Apostle ("This is my commandment")
  24  Tue     St. Matthias, Apostle                      [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
@@ -525,6 +529,7 @@ MARCH
            Vespers w · II prec. · Mag. Behold a faithful · No Suff.
                Com. Thursday after Lent III ("My soul doth magnify the Lord, and my spirit…")
                Com. Friday after Lent III ("My soul doth magnify the Lord, and my spirit…")
+               Com. St. Cuthbert, Bishop & Confessor ("Behold a great priest")
  20  Fri  L§ Friday after Lent III                      [f2]  v
            St. Cuthbert, Bishop & Confessor (d)
            Lauds   v · Ben. Whosoever drinketh · No Preces · No Suff.
@@ -557,6 +562,7 @@ MARCH
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
            Hours   No Preces
            Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Holy Ghost · No Suff.
+               Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
                Com. Wednesday after Lent IV ("My soul doth magnify the Lord, and my spirit…")
  25  Wed  L§ ANNUNCIATION OF THE BLESSED VIRGIN MARY    [1cl] w
            Wednesday after Lent IV (f2)
@@ -731,7 +737,6 @@ APRIL
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
            Vespers r · I fol. (St. Mark, Evangelist) · Mag. Light perpetual · No Suff.
-               Com. Day III within the Octave of St. George ("Whosoever shall confess Me")
  25  Sat     St. Mark, Evangelist                       [2cl] r
            Day III within the Octave of St. George (sd)
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
@@ -760,7 +765,6 @@ APRIL
                Com. St Vitalis, Martyr ("Whosoever shall confess me")
            Hours   No Preces
            Vespers w · I fol. (Solemnity of St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. When Mary · No Suff.
-               Com. Day VII within the Octave of St. George ("Whosoever shall confess Me")
  29  Wed     SOLEMNITY OF ST. JOSEPH, SPOUSE OF THE BLESSED VIRGIN MARY [1cl] w
            Day VII within the Octave of St. George (sd)
            Lauds   w · Ben. Joseph, thou son of David · No Preces · No Suff.
@@ -1155,7 +1159,6 @@ JUNE
                Com. Day V within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. Thou art the shepherd of the sheep · No Suff.
-               Com. Day VI within the Octave of St John Baptist ("He shall go before him")
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
            Day VI within the Octave of St John Baptist (sd)
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
@@ -1687,6 +1690,7 @@ SEPTEMBER
            Hours   No Preces
            Vespers w · II prec. · Mag. Sorrow oppresseth me · No Suff.
                Com. September Ember Wednesday ("My soul doth magnify the Lord, and my spirit…")
+               Com. Ss. Cornelius (Bishop) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
  16  Wed  L§ September Ember Wednesday                  [f2]  v
            Ss. Cornelius (Bishop) & Cyprian (Bishop), Martyrs (d)
            Ss Euphemia, Lucy & Geminian, Martyrs (com)

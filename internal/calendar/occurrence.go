@@ -220,7 +220,11 @@ func dedupeCommemorationsWithDecisions(winner *models.Feast, comms []*models.Fea
 	return deduped, decisions
 }
 
-const maxCommemorationsPerDay = 3
+// maxCommemorationsPerDay is a sanity guard, not a rubric: the pre-1962
+// monastic rubrics do not cap commemorations (the three-commemoration limit
+// is a 1960-code rule), and the 2026 ordo prints four at the Vespers of
+// Jan 17 and Jan 18.
+const maxCommemorationsPerDay = 6
 
 func suppressesStGeorgeOctave(winner *models.Feast) bool {
 	if winner == nil {

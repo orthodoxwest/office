@@ -354,8 +354,8 @@ func TestResolveDayAllCommemorationsDedupeAndCap(t *testing.T) {
 	if len(transfers) != 0 {
 		t.Fatal("expected no transfers when all candidates are commemorations")
 	}
-	if len(day.Commemorations) != 3 {
-		t.Fatalf("expected commemorations to be capped at 3, got %d", len(day.Commemorations))
+	if len(day.Commemorations) != 4 {
+		t.Fatalf("expected 4 commemorations after deduplication, got %d", len(day.Commemorations))
 	}
 	for _, comm := range day.Commemorations {
 		if comm == dupeB {

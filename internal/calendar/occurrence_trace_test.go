@@ -118,7 +118,7 @@ func TestCommemorationTraceRules(t *testing.T) {
 	assertTraceRule(t, decisions, "commemoration:duplicate-name")
 
 	var many []*models.Feast
-	for _, id := range []string{"one", "two", "three", "four"} {
+	for _, id := range []string{"one", "two", "three", "four", "five", "six", "seven"} {
 		many = append(many, traceFeast(id, models.Commemoration, models.CategoryMartyr))
 	}
 	got, decisions := finalizeCommemorationsWithDecisions(nil, many)

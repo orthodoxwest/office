@@ -135,6 +135,20 @@ func occurrenceCommemoratedAtFirstVespers(comm *models.Feast) (bool, string) {
 	return true, "commemoration:first-vespers-occurrence-included"
 }
 
+// isApostolicCompanionCommemoration reports the perpetual commemoration of
+// St Peter or St Paul kept on the other apostle's feasts. Unlike ordinary
+// Memorials it is retained at II Vespers as well: the 2026 ordo prints
+// "Comm. ... & Paul" at the II Vespers of the Chair of St Peter (Jan 18) and
+// "& Peter" at the Conversion of St Paul (Jan 25).
+func isApostolicCompanionCommemoration(f *models.Feast) bool {
+	if f == nil || f.Rank != models.Commemoration {
+		return false
+	}
+	name := strings.ToLower(f.Name)
+	return strings.HasPrefix(name, "commemoration of st") &&
+		(strings.Contains(name, "paul") || strings.Contains(name, "peter"))
+}
+
 // occurrenceCommemoratedAtSecondVespers reports whether an observance
 // commemorated at Lauds remains at II Vespers of the day's winning office.
 // XIV.9 gives Memorials and simple octave days only I Vespers and Lauds;
@@ -149,6 +163,13 @@ func occurrenceCommemoratedAtSecondVespers(winner, comm *models.Feast) (bool, st
 		return false, "commemoration:second-vespers-feria-or-vigil-lauds-only"
 	}
 	if comm.Rank == models.Commemoration || comm.Rank == models.Simple {
+		// The perpetual Peter/Paul companion stays through II Vespers, but
+		// not at a I Class winner (2026 ordo: "No Comm." at the II Vespers
+		// of Ss Peter & Paul itself).
+		if isApostolicCompanionCommemoration(comm) &&
+			(winner == nil || winner.Rank != models.Double1stClass) {
+			return true, "commemoration:second-vespers-apostolic-companion"
+		}
 		return false, "commemoration:second-vespers-memorial-or-simple"
 	}
 	if winner != nil && winner.Rank == models.Double1stClass && comm.Category != models.CategorySunday {
@@ -396,15 +417,27 @@ func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, st
 // (Lent, Embertide, Advent) is still commemorated ("Comm. Fer." at
 // St Joseph's and the Conception's Vespers). The winner and duplicates are
 // filtered by finalizeCommemorationsWithDecisions.
-func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, following *models.CalendarDay, secondVespers, sameOctave bool) ([]*models.Feast, []models.CompositionDecision) {
+func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding, following *models.CalendarDay, secondVespers, sameOctave bool) ([]*models.Feast, []models.CompositionDecision) {
 	suppressIncoming := secondVespers && winner != nil &&
 		winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
 		winner.Category != models.CategorySunday
 
+	// An incoming observance beginning at this evening's I Vespers must also
+	// be admissible against the outgoing office actually being sung: the
+	// ordo's "No Comm." evenings (Circumcision, Purification, St Lawrence,
+	// St Matthew, the Easter and Pentecost octaves) shut out incoming
+	// memorials and simples, and a I Class II Vespers shuts out everything
+	// below a Sunday — while an incoming Double is commemorated even at the
+	// II Vespers of a Double of the II Class (Cuthbert at St Joseph's, 2026
+	// ordo Mar 19). occurrenceCommemoratedAtSecondVespers carries exactly
+	// those exclusions relative to the winner.
 	suppressed := func(c *models.Feast) bool {
-		return suppressIncoming &&
-			c.Rank.Weight() < models.Double2ndClass.Weight() &&
-			c.Category != models.CategorySunday && c.Category != models.CategoryFeria
+		if !suppressIncoming ||
+			c.Category == models.CategorySunday || c.Category == models.CategoryFeria {
+			return false
+		}
+		included, _ := occurrenceCommemoratedAtSecondVespers(winner, c)
+		return !included
 	}
 
 	var comms []*models.Feast
@@ -428,7 +461,43 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, following 
 			}
 		}
 	}
+	// At I Vespers of the following, a Greater Double displaced from the
+	// outgoing day accompanies the displaced office (2026 ordo: Gabriel at
+	// the Annunciation's I Vespers, Mar 24). Displaced plain Doubles end at
+	// Lauds (the ordo omits Romuald Feb 7, Cyril Mar 18, Cuthbert Mar 20,
+	// Eustace Sep 20 — though it prints Ignatius Feb 1, an apparent
+	// inconsistency with Sep 20). Octave commemorations at the boundary
+	// follow their own policy and are not collected here.
+	if !secondVespers && preceding != nil {
+		for _, c := range preceding.Commemorations {
+			if c.Category == models.CategoryFeria || isDayWithinOctave(c) || isOctaveDay(c) {
+				continue
+			}
+			if c.Rank.Weight() < models.GreaterDouble.Weight() {
+				decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:outgoing-below-greater-double", Outcome: "suppressed", Detail: c.ID})
+				continue
+			}
+			if included, rule := outgoingCommemoratedAtFirstVespers(winner, c); included {
+				comms = append(comms, c)
+				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: c.ID})
+			} else {
+				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: c.ID})
+			}
+		}
+	}
 	for _, c := range following.Commemorations {
+		// A day within an octave is not commemorated at the I Vespers of a
+		// II Class or higher feast (2026 ordo: no Ss Peter & Paul octave
+		// commemoration at the Visitation's I Vespers Jul 1, while the
+		// Ascension octave is commemorated at St Bede's, May 26). Sundays
+		// still admit it (the Conception octave at Gaudete's I Vespers,
+		// Dec 12).
+		if !secondVespers && isDayWithinOctave(c) &&
+			winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
+			winner.Category != models.CategorySunday {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-day-within-octave-exclusion", Outcome: "suppressed", Detail: c.ID})
+			continue
+		}
 		if included, rule := occurrenceCommemoratedAtFirstVespers(c); !included {
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: c.ID})
 		} else if !suppressed(c) {
@@ -520,7 +589,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 
 	// If preceding has no II Vespers, following wins by default
 	if !precHasII {
-		comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, following, false, sameOctave)
+		comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, preceding, following, false, sameOctave)
 		return models.VespersDesignation{
 			Owner:          models.VespersIOfFollowing,
 			Feast:          folFeast,
@@ -534,7 +603,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 
 	// If following has no I Vespers, preceding wins by default
 	if !folHasI {
-		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, following, true, sameOctave)
+		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
 		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, boundary, boundaryDecisions)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
@@ -550,7 +619,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	// Both have vespers — resolve the concurrence
 	winner, rule := concurrenceWinnerWithRule(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
-		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, following, true, sameOctave)
+		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
 		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, boundary, boundaryDecisions)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
@@ -562,7 +631,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Decisions:      decisions,
 		}
 	}
-	comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, following, false, sameOctave)
+	comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, preceding, following, false, sameOctave)
 	return models.VespersDesignation{
 		Owner:          models.VespersIOfFollowing,
 		Feast:          folFeast,
