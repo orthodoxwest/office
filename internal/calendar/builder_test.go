@@ -761,3 +761,31 @@ func findDay(days []models.CalendarDay, year, month, day int) *models.CalendarDa
 	}
 	return nil
 }
+
+func TestSaturdayOfficeBVMSeasonalProperID(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	tests := []struct {
+		month, day   int
+		wantProperID string
+		desc         string
+	}{
+		{1, 31, "saturday-office-bvm-christmastide", "before the Purification"},
+		{5, 16, "", "Paschaltide (handled by the -paschal proper tier)"},
+		{6, 20, "", "per annum"},
+	}
+	for _, tt := range tests {
+		d := findDay(days, 2026, tt.month, tt.day)
+		if d == nil {
+			t.Fatalf("2026-%02d-%02d not found", tt.month, tt.day)
+		}
+		if d.Celebration == nil || d.Celebration.ID != "saturday-office-bvm" {
+			t.Fatalf("2026-%02d-%02d: expected Saturday Office of the BVM, got %v",
+				tt.month, tt.day, d.Celebration)
+		}
+		if got := d.Celebration.ProperID; got != tt.wantProperID {
+			t.Errorf("2026-%02d-%02d ProperID = %q, want %q (%s)",
+				tt.month, tt.day, got, tt.wantProperID, tt.desc)
+		}
+	}
+}

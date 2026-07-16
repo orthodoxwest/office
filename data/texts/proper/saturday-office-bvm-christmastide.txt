@@ -1,0 +1,7 @@
+# Saturday Office of the B.V.M., Christmas until the Purification.
+# Antiphon set shared with the Christmastide BVM offices; all other
+# sections fall back to proper/saturday-office-bvm and the commons.
+
+[benedictus-antiphon]
+# SOURCE: draft archdiocesan Lauds book, p. 114 (The Circumcision; Mirabile mysterium) — 2026 ordo Jan 31 assigns it to the Saturday Office of the B.V.M.
+A great and wondrous mystery * is made known to us this day; a new thing is wrought in both natures: God is made man; that which was, remained, and that which was not, he assumed; suffering no confusion, nor yet division.
