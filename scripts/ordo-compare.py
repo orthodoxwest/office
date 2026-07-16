@@ -358,9 +358,25 @@ def cmd_commemorations(pdf_path, tsv_path):
             print(f"   ... and {len(bad) - 20} more dates")
 
 
+def _incipit_words(text):
+    # æ→ae and z→s fold the books' orthographic variants (Elisabeth/Elizabeth,
+    # Sion/Zion) that the ordo quotes interchangeably.
+    norm = text.lower().replace("æ", "ae").replace("z", "s")
+    return re.sub(r"[^a-z0-9 ]", " ", norm).split()
+
+
 def incipit_matches(incipit, full):
-    wi = re.sub(r"[^a-z0-9 ]", " ", incipit.lower().replace("æ", "ae")).split()
-    wf = re.sub(r"[^a-z0-9 ]", " ", full.lower().replace("æ", "ae")).split()
+    wi = _incipit_words(incipit)
+    wf = _incipit_words(full)
+    if not wi or not wf:
+        return None
+    # The printed ordo quotes the same antiphon with and without a leading
+    # "O" interjection (e.g. "King of glory" vs "O King of glory"); align by
+    # dropping the lone leading O from whichever side has it.
+    if wi[0] == "o" and wf[0] != "o":
+        wi = wi[1:] or wi
+    elif wf[0] == "o" and wi[0] != "o":
+        wf = wf[1:] or wf
     if not wi or not wf:
         return None
     n = min(len(wi), len(wf), 4)
