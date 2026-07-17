@@ -460,6 +460,7 @@ type Server struct {
 	version       string
 	reviewed      map[string]bool
 	provenance    map[string]review.EntryProvenance
+	suspicions    map[string][]review.Suspicion
 }
 
 // New creates a new Server, loading the office engine and parsing templates.
@@ -513,6 +514,10 @@ func New(dataDir, addr string) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading provenance: %w", err)
 	}
+	suspicions, err := review.SuspicionByKey(dataDir, provenanceInventory)
+	if err != nil {
+		return nil, fmt.Errorf("loading review suspicions: %w", err)
+	}
 
 	return &Server{
 		engine:        eng,
@@ -527,6 +532,7 @@ func New(dataDir, addr string) (*Server, error) {
 		version:       computeVersion(dataDir),
 		reviewed:      reviewed,
 		provenance:    provenanceInventory.ByKey(),
+		suspicions:    suspicions,
 	}, nil
 }
 

@@ -329,9 +329,11 @@ Subcommands:
                                          Print the review-unit checklist as CSV
   status   [-start YEAR] [-years N]      Report coverage vs data/review/signoffs.txt
   provenance [-csv]                     Report structured corpus provenance
-  provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified]
-                                         Rank atomic text review by dependency fan-out
+  provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified] [-suspect-only]
+                                         Rank atomic text review by dependency fan-out,
+                                         suspect (pre-flagged) entries first
   attest [flags] KEY REVIEWER            Record a source attestation for one text
+  flag [flags] KEY                       Record a prescreen suspicion for one text
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
@@ -405,11 +407,15 @@ Subcommands:
 		base := fs.String("base", review.DefaultBaseURL, "base URL prefixed to representative links")
 		summary := fs.Bool("summary", false, "print counts instead of the review queue CSV")
 		includeVerified := fs.Bool("include-verified", false, "include already verified corpus entries")
+		suspectOnly := fs.Bool("suspect-only", false, "keep only entries with a prescreen flag or advisory lint")
 		fs.Parse(os.Args[3:])
 		queue, err := review.BuildProvenanceQueue(dataDir, *start, *years, *includeVerified)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error building provenance queue: %v\n", err)
 			os.Exit(1)
+		}
+		if *suspectOnly {
+			queue.FilterSuspect()
 		}
 		if *summary {
 			review.PrintProvenanceQueueSummary(queue, os.Stdout)
@@ -441,6 +447,29 @@ Subcommands:
 			os.Exit(1)
 		}
 		fmt.Printf("Verified %s (%s, %s)\n", entry.Key, entry.Reviewer, entry.ReviewedOn)
+
+	case "flag":
+		fs := flag.NewFlagSet("review flag", flag.ExitOnError)
+		severity := fs.String("severity", "high", "how likely the text is wrong: high or medium")
+		reason := fs.String("reason", "", "short statement of the suspected defect (required)")
+		flagged := fs.String("flagged", time.Now().Format("2006-01"), "prescreen batch identifier")
+		issue := fs.String("issue", "", "related GitHub issue number")
+		replace := fs.Bool("replace", false, "replace an existing flag for this key")
+		fs.Parse(os.Args[3:])
+		args := fs.Args()
+		if len(args) != 1 || *reason == "" {
+			fmt.Fprintln(os.Stderr, "Usage: office review flag --reason REASON [--severity high|medium] [--flagged YYYY-MM] [--issue N] [--replace] KEY")
+			os.Exit(1)
+		}
+		recorded, err := review.RecordPrescreenFlag(dataDir, review.PrescreenFlag{
+			Key: args[0], Severity: review.PrescreenSeverity(*severity),
+			Reason: *reason, Flagged: *flagged, Issue: *issue,
+		}, *replace)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error recording prescreen flag: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Flagged %s (%s): %s\n", recorded.Key, recorded.Severity, recorded.Reason)
 
 	case "assurance":
 		fs := flag.NewFlagSet("review assurance", flag.ExitOnError)

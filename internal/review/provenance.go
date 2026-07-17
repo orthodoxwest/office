@@ -354,6 +354,9 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 	if err := writeAttestations(dataDir, kept); err != nil {
 		return nil, err
 	}
+	if _, err := prunePrescreenFlag(dataDir, opts.Key); err != nil {
+		return nil, fmt.Errorf("pruning prescreen flag: %w", err)
+	}
 	result := entry
 	result.Status = ProvenanceVerified
 	result.Reviewer, result.ReviewedOn, result.Notes = opts.Reviewer, opts.ReviewedOn, opts.Notes

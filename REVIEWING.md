@@ -96,6 +96,7 @@ make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEA
 make review-status                    # coverage report: current / stale / unreviewed
 make review-provenance                # generated text-provenance coverage
 make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
+make review-suspects > suspects.csv   # only pre-flagged texts — the findings-sprint list
 make review-plan > review-plan.csv    # minimal structural checklist
 make review-assurance                 # release coverage gates and summary
 ./office review explain lauds 2026-06-07  # one page's assurance JSON
@@ -119,6 +120,44 @@ Prefer the safe CLI to manual CSV editing:
 The command resolves the corpus key to its current content, validates every
 field, and rewrites the ledger atomically; use `--replace` only when
 deliberately superseding an existing attestation.
+
+### Prescreen flags: sending book time where findings are likely
+
+The provenance queue ranks texts by exposure (how many pages a verification
+would cover). Exposure alone sends volunteers to hundreds of probably-fine
+texts first, so a second signal feeds the queue: **suspicion**. Entries with
+any suspicion flag form the queue's top tier, and `make review-suspects`
+prints only that tier — a short list where a book check is likely to yield a
+finding rather than a quick confirm. Suspicion comes from two places:
+
+1. **The prescreen ledger** (`data/review/prescreen.csv`) — durable
+   read-through findings ("this collect ends mid-sentence") recorded once and
+   tracked until resolved. Record one with:
+
+   ```bash
+   ./office review flag --severity high \
+     --reason "collect ends mid-sentence; no termination formula" \
+     proper/example/collect
+   ```
+
+   The command binds the flag to the entry's current content version. A flag
+   resolves when the text is **attested** (verified word for word):
+   `review attest` prunes the flag's row from the ledger, and its history
+   stays in git. If the text is merely **edited** after flagging, the flag
+   shows as `(addressed)` — the fix still needs its book check — until an
+   attestation lands. The ledger records suspicions only, never source-book
+   contents.
+
+2. **Advisory corpus lints** (`./office lint`) — mechanical heuristics
+   (truncated text, unpointed antiphons, near-duplicate pairs, leftover
+   Latin) recomputed from the corpus on every run, so they clear themselves
+   when the text is fixed.
+
+Both kinds appear in the queue's `flags` column and in each hour page's
+Assurance disclosure, so a reviewer on any page is pointed at the exact
+element most likely to be wrong. Record read-through findings directly in
+the ledger, keyed by corpus entry — narrative prescreen write-ups rot as
+items get fixed, with no way to tell which findings still apply.
 
 ### Release assurance
 
