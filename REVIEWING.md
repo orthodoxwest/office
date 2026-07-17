@@ -140,6 +140,28 @@ prefilled review issue for that exact corpus key. `needs-review` means a source
 lead or explicit review task exists but still needs verification;
 `source-unknown` means provenance research must happen first.
 
+### Date-sensitive parity and commemoration dedupe
+
+`make parity` verifies the checked-in 2026–2053 snapshot of calendar state,
+rendered hour content, selected source references, and decision traces. Its
+`commemoration_merges` array remains deliberately readable rather than hidden
+inside a digest because fuzzy name containment deserves direct review.
+
+The complete inventory was human-reviewed on 2026-07-17:
+
+- 957 suppressions resolve to 69 unique kept/dropped pairs;
+- 61 pairs are duplicate records or title variants of the same observance;
+- 8 pairs are parent-feast/octave aliases on collision dates;
+- every dropped item resolves to the corresponding item retained on the final
+  occurrence or Vespers surface; and
+- no distinct observances, unmatched items, or ambiguous pairs were found.
+
+This evidence does not justify replacing the current dedupe with a typed
+commemoration pipeline or a new canonical-identity layer. If the readable
+inventory changes, review each new or altered pair before accepting the golden
+update; a false merge should be corrected narrowly and its behavior pinned in
+a dedicated test.
+
 Sign-offs live in `data/review/signoffs.txt`. The CLI binds each sign-off to
 the exact page contents automatically, so any later edit makes the unit show
 up as **stale** in `review-status` until re-reviewed. Sign-offs are committed
