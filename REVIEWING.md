@@ -153,9 +153,9 @@ finding rather than a quick confirm. Suspicion comes from two places:
 
 Both kinds appear in the queue's `flags` column and in each hour page's
 Assurance disclosure, so a reviewer on any page is pointed at the exact
-element most likely to be wrong. One-off prescreen write-ups (like
-`data/review/prescreen-2026-07.md`) are narrative only; their still-valid
-findings belong in the ledger, keyed by corpus entry, or they will rot.
+element most likely to be wrong. Record read-through findings directly in
+the ledger, keyed by corpus entry — narrative prescreen write-ups rot as
+items get fixed, with no way to tell which findings still apply.
 
 ### Release assurance
 
