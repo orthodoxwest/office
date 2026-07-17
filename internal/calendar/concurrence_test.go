@@ -61,6 +61,24 @@ func TestConcurrenceWinnerSecondClassDoubleVsGreaterSunday(t *testing.T) {
 	}
 }
 
+func TestConcurrenceWinnerMoveableSecondClassVsGreaterSunday(t *testing.T) {
+	// A moveable temporal observance is not the sanctoral I/II Class
+	// exception: the Greater Sunday keeps the concurrence in both directions.
+	moveable := &models.Feast{
+		ID: "moveable-temporal-office", Rank: models.Double2ndClass,
+		Category: models.CategoryLord, DateRule: "easter+10",
+	}
+	greaterSunday := &models.Feast{
+		ID: "advent-sunday-1", Rank: models.Double2ndClass, Category: models.CategorySunday,
+	}
+	if got := concurrenceWinner(greaterSunday, moveable); got != models.VespersIIOfPreceding {
+		t.Errorf("Greater Sunday vs moveable II Class: got %d, want VespersIIOfPreceding", got)
+	}
+	if got := concurrenceWinner(moveable, greaterSunday); got != models.VespersIOfFollowing {
+		t.Errorf("moveable II Class vs Greater Sunday: got %d, want VespersIOfFollowing", got)
+	}
+}
+
 func TestConcurrenceWinnerLordDoubleVsLesserSunday(t *testing.T) {
 	// XIII.2-5, as the 2026 ordo applies them: a feast below II Class —
 	// even a Greater Double of the Lord — yields the concurrence to the

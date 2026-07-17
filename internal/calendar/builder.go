@@ -760,8 +760,8 @@ func feriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast
 	if day.Celebration == nil {
 		return nil // office is already of the feria
 	}
-	if day.Celebration.IsTemporal() {
-		return nil // the temporal office (e.g. the Sacred Triduum) is the day
+	if day.Celebration.IsMoveable() {
+		return nil // the moveable office (e.g. the Sacred Triduum) is the day
 	}
 	if day.Celebration.Category == models.CategoryFeria || day.Celebration.Category == models.CategorySunday {
 		return nil // Ember days, vigils, and Sundays are not displaced ferias

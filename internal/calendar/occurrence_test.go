@@ -82,7 +82,8 @@ func TestResolveDaySundayPrecedence(t *testing.T) {
 
 	day, _ := ResolveDay(date, []*models.Feast{sunday, saint}, models.Epiphany, models.Green, m, nil)
 
-	// Sunday (boosted to greater-double) should beat greater-double saint via temporal bonus
+	// Moveable Sunday (boosted to greater-double) should beat the fixed
+	// greater-double saint via the moveable-date bonus.
 	if day.Celebration != sunday {
 		t.Errorf("expected Sunday to win, got %v", day.Celebration.Name)
 	}
