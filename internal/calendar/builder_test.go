@@ -916,6 +916,7 @@ func TestVespersBoundaryCommemorations2026(t *testing.T) {
 	}{
 		{1, 18, "Commemoration of St Paul", true, "companion of the Chair of St Peter at II Vespers"},
 		{1, 25, "Commemoration of St. Peter", true, "companion of the Conversion of St Paul at II Vespers"},
+		{8, 1, "Commemoration of St Paul, Apostle", true, "companion accompanies the displaced Chains of St Peter"},
 		{3, 24, "St. Gabriel the Archangel", true, "displaced Greater Double at the Annunciation's I Vespers"},
 		{3, 19, "St. Cuthbert, Bishop & Confessor", true, "incoming Double at St Joseph's II Vespers"},
 		{3, 20, "St. Cuthbert, Bishop & Confessor", false, "displaced plain Double not carried to St Benedict's I Vespers"},

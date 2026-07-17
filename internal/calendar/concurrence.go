@@ -431,12 +431,14 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 
 	var comms []*models.Feast
 	var decisions []models.CompositionDecision
+	loserIncluded := false
 	if loser != nil {
 		if sameOctave {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: loser.ID})
 		} else if !secondVespers {
 			if included, rule := outgoingCommemoratedAtFirstVespers(winner, loser); included {
 				comms = append(comms, loser)
+				loserIncluded = true
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: loser.ID})
 			} else {
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: loser.ID})
@@ -452,14 +454,22 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	}
 	// At I Vespers of the following, a Greater Double displaced from the
 	// outgoing day accompanies the displaced office (2026 ordo: Gabriel at
-	// the Annunciation's I Vespers, Mar 24). Displaced plain Doubles end at
-	// Lauds (the ordo omits Romuald Feb 7, Cyril Mar 18, Cuthbert Mar 20,
-	// Eustace Sep 20 — though it prints Ignatius Feb 1, an apparent
-	// inconsistency with Sep 20). Octave commemorations at the boundary
-	// follow their own policy and are not collected here.
+	// the Annunciation's I Vespers, Mar 24). The perpetual Peter/Paul
+	// companion also accompanies that office when it is admitted (2025 ordo:
+	// Paul with the Chair of Peter, Jan 18; 2026 ordo: Paul with the Chains of
+	// Peter, Aug 1). Displaced plain Doubles end at Lauds (the ordo omits
+	// Romuald Feb 7, Cyril Mar 18, Cuthbert Mar 20, Eustace Sep 20 — though it
+	// prints Ignatius Feb 1, an apparent inconsistency with Sep 20). Octave
+	// commemorations at the boundary follow their own policy and are not
+	// collected here.
 	if !secondVespers && preceding != nil {
 		for _, c := range preceding.Commemorations {
 			if c.Category == models.CategoryFeria || isDayWithinOctave(c) || isOctaveDay(c) {
+				continue
+			}
+			if isApostolicCompanionCommemoration(c) && loserIncluded {
+				comms = append(comms, c)
+				decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:outgoing-apostolic-companion", Outcome: "included", Detail: c.ID})
 				continue
 			}
 			if c.Rank.Weight() < models.GreaterDouble.Weight() {

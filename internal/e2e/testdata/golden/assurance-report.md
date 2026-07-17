@@ -3,7 +3,7 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 306 |
+| Modeled structural features | 307 |
 | Selected structural-review pages | 51 |
 | Uncovered features | 0 |
 | Verified text entries | 210 |
@@ -34,6 +34,7 @@
 - `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:matches-winner=suppressed`
 - `decision:commemoration:only-with=suppressed`
+- `decision:commemoration:outgoing-apostolic-companion=included`
 - `decision:commemoration:outgoing-below-greater-double=suppressed`
 - `decision:commemoration:pentecost-ember=suppressed`
 - `decision:commemoration:same-octave-boundary=suppressed`
