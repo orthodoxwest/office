@@ -20,7 +20,7 @@
   <div class="elements">
     {{range .Hour.Sections}}
       {{if .Collapsible}}
-      <details class="session-prayers">
+      <details class="session-prayers"{{if or (eq $.HourName "lauds") (eq $.HourName "prime") (eq $.HourName "vespers")}} open{{end}}>
         <summary>{{.Label}}</summary>
         {{renderSectionElements .Elements}}
       </details>
