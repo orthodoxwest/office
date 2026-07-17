@@ -141,10 +141,12 @@ finding rather than a quick confirm. Suspicion comes from two places:
    ```
 
    The command binds the flag to the entry's current content version. A flag
-   resolves automatically when the text is **attested** (verified word for
-   word). If the text is merely **edited** after flagging, the flag shows as
-   `(addressed)` — the fix still needs its book check — until an attestation
-   lands. The ledger records suspicions only, never source-book contents.
+   resolves when the text is **attested** (verified word for word):
+   `review attest` prunes the flag's row from the ledger, and its history
+   stays in git. If the text is merely **edited** after flagging, the flag
+   shows as `(addressed)` — the fix still needs its book check — until an
+   attestation lands. The ledger records suspicions only, never source-book
+   contents.
 
 2. **Advisory corpus lints** (`./office lint`) — mechanical heuristics
    (truncated text, unpointed antiphons, near-duplicate pairs, leftover

@@ -249,6 +249,26 @@ func RecordPrescreenFlag(dataDir string, flag PrescreenFlag, replace bool) (*Pre
 	return &flag, nil
 }
 
+// prunePrescreenFlag removes any ledger row for key, reporting whether one
+// was present. Called when an attestation lands: the verified wording
+// supersedes the suspicion, and the flag's history stays in git.
+func prunePrescreenFlag(dataDir, key string) (bool, error) {
+	flags, err := LoadPrescreen(dataDir)
+	if err != nil {
+		return false, err
+	}
+	kept := flags[:0]
+	for _, f := range flags {
+		if f.Key != key {
+			kept = append(kept, f)
+		}
+	}
+	if len(kept) == len(flags) {
+		return false, nil
+	}
+	return true, writePrescreen(dataDir, kept)
+}
+
 func writePrescreen(dataDir string, flags []PrescreenFlag) error {
 	dir := filepath.Join(dataDir, "review")
 	if err := os.MkdirAll(dir, 0o755); err != nil {

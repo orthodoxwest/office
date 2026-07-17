@@ -138,6 +138,33 @@ func TestRecordPrescreenFlag(t *testing.T) {
 	}
 }
 
+func TestAttestPrunesPrescreenFlag(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, filepath.Join(dir, "texts", "example.txt"), "Current text.\n")
+	writeTestFile(t, filepath.Join(dir, "texts", "other.txt"), "Other text.\n")
+	for _, key := range []string{"example", "other"} {
+		if _, err := RecordPrescreenFlag(dir, PrescreenFlag{
+			Key: key, Severity: PrescreenHigh, Reason: "suspect", Flagged: "2026-07",
+		}, false); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if _, err := RecordAttestation(dir, AttestOptions{
+		Key: "example", Reviewer: "alice", Source: "Printed Diurnal", Page: "10",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	flags, err := LoadPrescreen(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(flags) != 1 || flags[0].Key != "other" {
+		t.Fatalf("attestation should prune only the verified key's flag: %#v", flags)
+	}
+}
+
 func TestSuspicionString(t *testing.T) {
 	s := Suspicion{Label: "prescreen:high", State: SuspicionAddressed, Reason: "dropped word"}
 	if got, want := s.String(), "prescreen:high (addressed) — dropped word"; got != want {
