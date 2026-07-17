@@ -164,8 +164,7 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 	case models.Antiphon:
 		if elem.Text != "" {
 			if strings.Contains(elem.Text, "\n") {
-				// Multi-line (e.g., Marian antiphon) — use liturgical block
-				b.WriteString(formatLiturgicalBlockTeX(elem.Text))
+				b.WriteString(formatMultilineAntiphonTeX(elem))
 			} else {
 				fmt.Fprintf(&b, "\\ant{%s}\n\n", texLine(elem.Text))
 			}
@@ -344,8 +343,39 @@ func formatHymnTeX(text, dataDir, label string, chant bool) string {
 	return b.String()
 }
 
+// formatMultilineAntiphonTeX renders a multi-line antiphon (e.g., a Marian
+// antiphon). The first paragraph is the anthem proper and is set in italics;
+// any remainder (versicle, collect) uses the standard liturgical block.
+func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
+	var b strings.Builder
+
+	if elem.Label != "" {
+		fmt.Fprintf(&b, "\n{\\small\\itshape %s}\n\n", escapeTeX(elem.Label))
+	}
+
+	anthem, rest, _ := strings.Cut(elem.Text, "\n\n")
+	var anthemLines []string
+	for line := range strings.SplitSeq(anthem, "\n") {
+		if line = strings.TrimSpace(line); line != "" {
+			anthemLines = append(anthemLines, texLine(line))
+		}
+	}
+	if len(anthemLines) > 0 {
+		fmt.Fprintf(&b, "\\noindent{\\itshape %s}\\par\n", strings.Join(anthemLines, " "))
+	}
+	if rest = strings.TrimSpace(rest); rest != "" {
+		b.WriteString("\\smallskip\n")
+		b.WriteString(formatLiturgicalBlockTeX(rest))
+	} else {
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
 // formatLiturgicalBlockTeX renders versicles, responses, prayers, chapters,
-// blessings, and preces with appropriate LaTeX markup.
+// blessings, and preces with appropriate LaTeX markup. Consecutive prose
+// lines are hard-wrapped sense-lines in the corpus, so they are joined into
+// a flowing paragraph; blank lines mark paragraph breaks.
 func formatLiturgicalBlockTeX(text string) string {
 	lines := strings.Split(text, "\n")
 	var b strings.Builder
@@ -357,12 +387,7 @@ func formatLiturgicalBlockTeX(text string) string {
 			return
 		}
 		b.WriteString("\\noindent ")
-		for i, l := range proseLines {
-			if i > 0 {
-				b.WriteString("\\\\\n")
-			}
-			b.WriteString(texLine(l))
-		}
+		b.WriteString(strings.Join(proseLines, " "))
 		b.WriteString("\\par\n")
 		proseLines = nil
 	}
@@ -410,7 +435,7 @@ func formatLiturgicalBlockTeX(text string) string {
 			continue
 		}
 
-		proseLines = append(proseLines, line)
+		proseLines = append(proseLines, texLine(line))
 	}
 
 	flushProse()
