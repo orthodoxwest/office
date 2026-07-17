@@ -158,7 +158,7 @@ Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `
 - CLI: `./office tex HOUR [YYYY-MM-DD]` — date defaults to today
 - Makefile: `make pdf HOUR=compline` (chains `./office tex` → `lualatex`)
 - Font: EB Garamond (`fonts-ebgaramond`). Cross ✠ via Noto Sans Symbols Black (`fonts-noto-extra`).
-- gregoriotex: loaded via `\IfFileExists` — skipped silently if not installed.
+- gregoriotex: required (TeX Live `gregorio` package) — the preamble loads it unconditionally; it supplies the ℣/℟ glyphs (`\Vbar`/`\Rbar`) even in non-chant booklets.
 - GABC chant files: `data/texts/chant/{psalms,canticles,hymns}/{slug}.gabc`. When present, element renders as `\gregorioscore{}` instead of formatted text. Psalm slugs zero-padded to 3 digits (e.g. `psalms/067.gabc`).
 
 ## Liturgical specifics

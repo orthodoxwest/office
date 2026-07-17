@@ -145,6 +145,69 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.`
 	}
 }
 
+func TestFormatLiturgicalBlockTeXFlowsProse(t *testing.T) {
+	text := `Visit, we beseech thee, O Lord, this habitation, and drive far from it all snares of the enemy:
+let thy holy Angels dwell herein to preserve us in peace, and let thy blessing be ever upon us.
+
+Through Jesus Christ thy son, our LORD.`
+
+	got := formatLiturgicalBlockTeX(text)
+
+	if strings.Contains(got, `\\`) {
+		t.Errorf("hard-wrapped prose should flow, not force line breaks:\n%s", got)
+	}
+	if !strings.Contains(got, "enemy: let thy holy Angels") {
+		t.Errorf("consecutive prose lines should be joined with a space:\n%s", got)
+	}
+	if strings.Count(got, `\noindent`) != 2 {
+		t.Errorf("blank line should start a new paragraph:\n%s", got)
+	}
+}
+
+func TestFormatMultilineAntiphonTeX(t *testing.T) {
+	elem := models.OfficeElement{
+		Type:  models.Antiphon,
+		Label: "Salve Regina",
+		Text: `Hail, holy Queen, Mother of mercy,
+our life, our sweetness, and our hope.
+
+V. Pray for us, O holy Mother of God.
+R. That we may be made worthy of the promises of Christ.
+
+Let us pray.
+
+Almighty, everlasting God, grant unto us thy servants health of mind and body.`,
+	}
+
+	got := formatMultilineAntiphonTeX(elem)
+
+	if !strings.Contains(got, `\small\itshape Salve Regina`) {
+		t.Error("expected label heading")
+	}
+	if !strings.Contains(got, `{\itshape Hail, holy Queen, Mother of mercy, our life, our sweetness, and our hope.}`) {
+		t.Errorf("anthem paragraph should be italic and flowed:\n%s", got)
+	}
+	if !strings.Contains(got, `\Vbar{}`) || !strings.Contains(got, `\Rbar{}`) {
+		t.Error("versicle/response after the anthem should use liturgical block markup")
+	}
+	if !strings.Contains(got, "Almighty, everlasting God") {
+		t.Error("collect after the anthem should be rendered")
+	}
+}
+
+func TestFormatMultilineAntiphonTeXAnthemOnly(t *testing.T) {
+	elem := models.OfficeElement{
+		Type: models.Antiphon,
+		Text: "Line one of the anthem,\nline two of the anthem.",
+	}
+
+	got := formatMultilineAntiphonTeX(elem)
+
+	if !strings.Contains(got, `{\itshape Line one of the anthem, line two of the anthem.}`) {
+		t.Errorf("anthem-only antiphon should be one italic paragraph:\n%s", got)
+	}
+}
+
 func TestFormatLiturgicalBlockTeXBracketTitle(t *testing.T) {
 	text := `[Ave Regina Caelorum]
 Hail, O Queen of Heaven enthroned.`
