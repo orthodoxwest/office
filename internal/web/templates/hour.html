@@ -36,12 +36,12 @@
     {{if .NextHourLink}}<a class="hour-continuation-link next-hour" href="{{.NextHourLink}}"><span class="continuation-label">Next hour</span><span>{{.NextHourName}} &rarr;</span></a>{{else}}<span></span>{{end}}
   </nav>
   <details class="assurance-panel">
-    <summary>Assurance: {{.Assurance.Verified}} verified &middot; {{.Assurance.NeedsReview}} need review &middot; {{.Assurance.SourceUnknown}} source unknown</summary>
+    <summary>Assurance: {{.Assurance.Verified}} verified &middot; {{.Assurance.NeedsReview}} need review &middot; {{.Assurance.SourceUnknown}} source unknown{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
     <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
     <h2>Text dependencies</h2>
     <ul class="assurance-list">
       {{range .Assurance.Dependencies}}
-      <li><code>{{.Key}}</code> <span class="assurance-status status-{{.Status}}">{{.Status}}</span>{{if ne .Status "verified"}} <a href="{{.ReportURL}}" target="_blank" rel="noopener">review</a>{{end}}</li>
+      <li><code>{{.Key}}</code> <span class="assurance-status status-{{.Status}}">{{.Status}}</span>{{if ne .Status "verified"}} <a href="{{.ReportURL}}" target="_blank" rel="noopener">review</a>{{end}}{{range .Flags}}<br><span class="assurance-flag">&#9873; {{.Label}}{{if eq .State "addressed"}} (addressed &mdash; confirm against book){{end}}: {{.Reason}}</span>{{end}}</li>
       {{end}}
     </ul>
     {{if .Assurance.Resolutions}}

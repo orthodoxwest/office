@@ -85,6 +85,7 @@ type hourAssuranceData struct {
 	Verified      int
 	NeedsReview   int
 	SourceUnknown int
+	Flagged       int
 	Dependencies  []assuranceDependency
 	Resolutions   []assuranceResolution
 	Decisions     []models.CompositionDecision
@@ -93,6 +94,7 @@ type hourAssuranceData struct {
 type assuranceDependency struct {
 	Key       string
 	Status    review.ProvenanceStatus
+	Flags     []review.Suspicion
 	ReportURL string
 }
 
@@ -176,8 +178,12 @@ func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug strin
 		default:
 			data.SourceUnknown++
 		}
+		if len(s.suspicions[key]) > 0 {
+			data.Flagged++
+		}
 		data.Dependencies = append(data.Dependencies, assuranceDependency{
-			Key: key, Status: status, ReportURL: dependencyReportURL(hour, hourName, dateSlug, key, status),
+			Key: key, Status: status, Flags: s.suspicions[key],
+			ReportURL: dependencyReportURL(hour, hourName, dateSlug, key, status),
 		})
 	}
 	seenResolutions := map[string]bool{}

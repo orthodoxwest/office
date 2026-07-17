@@ -379,6 +379,12 @@ footer::before {
 .status-source-unknown { color: var(--muted); }
 .assurance-detail { font-style: italic; }
 
+.assurance-flag {
+  color: var(--rubric);
+  font-size: 0.76rem;
+  padding-left: 1rem;
+}
+
 @media (max-width: 700px) {
   .assurance-panel {
     padding: 0.65rem 0.7rem;

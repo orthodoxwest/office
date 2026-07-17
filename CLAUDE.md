@@ -51,7 +51,8 @@ internal/
     review.go              Manifest sweep: dedupe identical composed hours into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
     provenance.go          Structured per-entry source inventory and attestations
-    provenance_queue.go    Dependency-weighted atomic text review ordering
+    provenance_queue.go    Dependency-weighted atomic text review ordering (suspect tier first)
+    prescreen.go           Durable prescreen-flag ledger + suspicion map (flags ∪ advisory lints)
     assurance.go           Composition explanations and minimal structural-review planning
     assurance_gate.go      Release assurance baseline, gates, and CI summary
 tools/
@@ -63,6 +64,7 @@ data/
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
   review/signoffs.txt      Human review sign-offs with internal version binding (see REVIEWING.md)
   review/provenance.csv    Source/page attestations; citations only, never book contents
+  review/prescreen.csv     Read-through suspicion flags bound to text versions (see REVIEWING.md)
   review/assurance-baseline.json  Intentional verified/structural coverage floors
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
 scripts/
@@ -133,11 +135,13 @@ make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt
 make review-provenance # Report generated corpus source coverage
-make review-provenance-queue # Rank atomic text review by dependency fan-out
+make review-provenance-queue # Rank atomic text review by dependency fan-out (suspect tier first)
+make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-sprint list
 make review-plan      # Print minimal structural-review checklist CSV
 make review-assurance # Run release assurance gates and summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
+./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
 ./office review sign HOUR DATE REVIEWER # Record structural sign-off
 
 Hour pages expose assurance metadata in a collapsed disclosure. Keep it

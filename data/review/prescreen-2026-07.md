@@ -7,6 +7,16 @@ item still needs checking against the diurnal/supplement — but these rows
 should jump the review queue, and rows not listed here are likelier to be
 quick confirms.
 
+> **Status (2026-07-16):** this document is now narrative history. Its
+> still-valid findings were re-verified against the current corpus and moved
+> into the machine-read ledger `data/review/prescreen.csv`, which feeds the
+> provenance queue's suspect tier (`make review-suspects`) and the hour
+> pages' Assurance disclosures. Many items below (the six truncated collects
+> except Epiphany, the Pentecost/All Saints hymns, items 8, 10, 12, 16
+> mostly, 20, 21, 22) had already been fixed by draft-book reconciliation
+> and were not carried into the ledger. New read-through findings should be
+> recorded with `./office review flag`, not appended here.
+
 Fixed directly in this PR (mechanical, no book needed):
 - `proper/epiphany.txt [hymn-vespers]` — title line contained a literal `\n`
   escape that rendered to users.

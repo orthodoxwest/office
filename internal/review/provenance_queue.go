@@ -27,7 +27,12 @@ type ProvenanceQueueEntry struct {
 	RepresentativeHour   string
 	RepresentativeDate   time.Time
 	Sources              []SourceCitation
+	Flags                []Suspicion
 }
+
+// Suspect reports whether the entry carries any reason (prescreen flag or
+// advisory lint) to believe a book check will yield a finding.
+func (e ProvenanceQueueEntry) Suspect() bool { return len(e.Flags) > 0 }
 
 // ProvenanceQueue is a deterministic dependency-weighted corpus work queue.
 type ProvenanceQueue struct {
@@ -46,8 +51,10 @@ type queueAccumulator struct {
 }
 
 // BuildProvenanceQueue sweeps composed hours and ranks each corpus entry.
-// The score favors fan-out across distinct compositions, then priority-A and
-// principal-hour use, while still counting raw occurrences:
+// Suspect entries (prescreen-flagged or advisory-lint-flagged) form the top
+// tier; within each tier the score favors fan-out across distinct
+// compositions, then priority-A and principal-hour use, while still counting
+// raw occurrences:
 //
 //	20*distinct compositions + 5*priority-A uses + 3*principal-hour uses + uses
 func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified bool) (*ProvenanceQueue, error) {
@@ -55,6 +62,10 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		return nil, fmt.Errorf("years must be at least 1")
 	}
 	inventory, err := ScanProvenance(dataDir)
+	if err != nil {
+		return nil, err
+	}
+	suspicions, err := SuspicionByKey(dataDir, inventory)
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +77,7 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		acc[p.Key] = &queueAccumulator{
 			entry: ProvenanceQueueEntry{
 				Key: p.Key, ContentHash: p.ContentHash, Status: p.Status, Sources: p.Sources,
+				Flags: suspicions[p.Key],
 			},
 			hours: make(map[string]bool), compositions: make(map[string]bool),
 		}
@@ -132,6 +144,18 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 	return queue, nil
 }
 
+// FilterSuspect drops every entry with no suspicion flag, leaving the short
+// "findings sprint" list a coordinator can hand to a volunteer.
+func (q *ProvenanceQueue) FilterSuspect() {
+	kept := q.Entries[:0]
+	for _, e := range q.Entries {
+		if e.Suspect() {
+			kept = append(kept, e)
+		}
+	}
+	q.Entries = kept
+}
+
 func shouldQueueProvenance(status ProvenanceStatus, includeVerified bool) bool {
 	return status != ProvenanceVerified || includeVerified
 }
@@ -140,7 +164,14 @@ func provenanceQueueScore(e ProvenanceQueueEntry) int {
 	return 20*e.DistinctCompositions + 5*e.PriorityAOccurrences + 3*e.PrincipalOccurrences + e.Occurrences
 }
 
+// provenanceQueueLess ranks suspect entries (pre-flagged or lint-flagged)
+// ahead of clean-unknown ones, then keeps the fan-out score ordering within
+// each tier: book time goes first where a finding is most likely, and among
+// equally suspect texts where verification unlocks the most coverage.
 func provenanceQueueLess(a, b ProvenanceQueueEntry) bool {
+	if a.Suspect() != b.Suspect() {
+		return a.Suspect()
+	}
 	if a.Score != b.Score {
 		return a.Score > b.Score
 	}
@@ -170,16 +201,21 @@ func representativeLess(a, b ReviewCandidate) bool {
 // PrintProvenanceQueueSummary writes compact queue and usage counts.
 func PrintProvenanceQueueSummary(q *ProvenanceQueue, w io.Writer) {
 	used := 0
+	suspect := 0
 	statuses := map[ProvenanceStatus]int{}
 	for _, e := range q.Entries {
 		statuses[e.Status]++
 		if e.Occurrences > 0 {
 			used++
 		}
+		if e.Suspect() {
+			suspect++
+		}
 	}
 	fmt.Fprintf(w, "=== Atomic provenance review queue: %d-%d ===\n", q.StartYear, q.StartYear+q.Years-1)
 	fmt.Fprintf(w, "  queued entries:      %d\n", len(q.Entries))
 	fmt.Fprintf(w, "  rendered entries:    %d\n", used)
+	fmt.Fprintf(w, "  suspect entries:     %d\n", suspect)
 	fmt.Fprintf(w, "  include verified:    %t\n", q.IncludeVerified)
 	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceNeedsReview, ProvenanceSourceUnknown} {
 		fmt.Fprintf(w, "  %-19s %d\n", string(status)+":", statuses[status])
@@ -193,7 +229,7 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"rank", "score", "key", "status", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
+	_ = cw.Write([]string{"rank", "score", "key", "status", "flags", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
 	for i, e := range q.Entries {
 		var sources, locators, pages []string
 		for _, source := range e.Sources {
@@ -205,8 +241,12 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 		if !e.RepresentativeDate.IsZero() {
 			url = fmt.Sprintf("%s/%s/%s", baseURL, e.RepresentativeHour, e.RepresentativeDate.Format("2006-01-02"))
 		}
+		flags := make([]string, len(e.Flags))
+		for j, flag := range e.Flags {
+			flags[j] = flag.String()
+		}
 		_ = cw.Write([]string{
-			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, string(e.Status),
+			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, string(e.Status), strings.Join(flags, "; "),
 			fmt.Sprint(e.Occurrences), fmt.Sprint(e.PriorityAOccurrences), fmt.Sprint(e.PrincipalOccurrences),
 			fmt.Sprint(e.DistinctCompositions), strings.Join(e.Hours, "; "), strings.Join(sources, "; "),
 			strings.Join(locators, "; "), strings.Join(pages, "; "), url,

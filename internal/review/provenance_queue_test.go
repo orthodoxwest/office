@@ -27,6 +27,17 @@ func TestProvenanceQueueOrderingIsStable(t *testing.T) {
 	}
 }
 
+func TestProvenanceQueueSuspectTierSortsFirst(t *testing.T) {
+	suspect := ProvenanceQueueEntry{Key: "s", Score: 1, Flags: []Suspicion{{Label: "prescreen:high", State: SuspicionOpen}}}
+	clean := ProvenanceQueueEntry{Key: "c", Score: 100}
+	if !provenanceQueueLess(suspect, clean) {
+		t.Error("suspect entry should outrank any clean entry")
+	}
+	if provenanceQueueLess(clean, suspect) {
+		t.Error("clean entry sorted above suspect entry")
+	}
+}
+
 func TestVerifiedQueueFilter(t *testing.T) {
 	if shouldQueueProvenance(ProvenanceVerified, false) {
 		t.Error("verified entry included by default")
@@ -47,8 +58,17 @@ func TestBuildProvenanceQueue(t *testing.T) {
 	if len(q.Entries) == 0 {
 		t.Fatal("empty queue")
 	}
-	if q.Entries[0].Score < q.Entries[len(q.Entries)-1].Score {
-		t.Fatal("queue is not score-descending")
+	seenClean := false
+	prevScore := 0
+	for i, e := range q.Entries {
+		if e.Suspect() && seenClean {
+			t.Fatalf("suspect entry %s ranked below a clean entry", e.Key)
+		}
+		if i > 0 && e.Suspect() == q.Entries[i-1].Suspect() && e.Score > prevScore {
+			t.Fatalf("entry %s breaks score ordering within its tier", e.Key)
+		}
+		seenClean = seenClean || !e.Suspect()
+		prevScore = e.Score
 	}
 	used, unused := false, false
 	for _, e := range q.Entries {
