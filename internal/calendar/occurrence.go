@@ -34,15 +34,15 @@ func sortKey(f *models.Feast) [3]int {
 	if f.Category == models.CategorySunday && weight < models.GreaterDouble.Weight() {
 		weight = models.GreaterDouble.Weight()
 	}
-	temporal := 0
-	if f.IsTemporal() {
-		temporal = 1
+	moveable := 0
+	if f.IsMoveable() {
+		moveable = 1
 	}
 	lord := 0
 	if f.Category == models.CategoryLord {
 		lord = 1
 	}
-	return [3]int{weight, temporal, lord}
+	return [3]int{weight, moveable, lord}
 }
 
 func isCorpusOctaveDay(f *models.Feast) bool {

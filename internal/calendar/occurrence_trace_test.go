@@ -18,8 +18,8 @@ func TestPrecedenceTraceRules(t *testing.T) {
 	corpus := traceFeast("corpus-christi-octave-day-2", models.SemiDouble, models.CategoryLord)
 	sunday := traceFeast("ordinary-sunday", models.SemiDouble, models.CategorySunday)
 	greater := traceFeast("greater", models.GreaterDouble, models.CategoryMartyr)
-	temporal := traceFeast("temporal", models.Double, models.CategoryMartyr)
-	temporal.DateRule = "easter+1"
+	moveable := traceFeast("moveable", models.Double, models.CategoryMartyr)
+	moveable.DateRule = "easter+1"
 	lord := traceFeast("lord", models.Double, models.CategoryLord)
 	equal := traceFeast("equal", models.Double, models.CategoryMartyr)
 
@@ -36,7 +36,7 @@ func TestPrecedenceTraceRules(t *testing.T) {
 		{"sunday beats corpus octave", sunday, corpus, true, "occurrence:sunday-or-first-class-over-corpus-octave"},
 		{"higher rank", second, greater, true, "occurrence:higher-rank"},
 		{"sunday rank boost", sunday, double, true, "occurrence:sunday-rank-boost"},
-		{"temporal tie break", temporal, double, true, "occurrence:temporal-tiebreak"},
+		{"moveable tie break", moveable, double, true, "occurrence:temporal-tiebreak"},
 		{"lord tie break", lord, equal, true, "occurrence:lord-tiebreak"},
 		{"equal keeps incumbent", equal, double, false, "occurrence:equal-precedence-possession"},
 	}

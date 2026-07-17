@@ -250,7 +250,7 @@ type Feast struct {
 	// preserving this feast's own calendar identity and displayed name.
 	ProperID string
 
-	// For temporal (moveable) feasts: offset from Easter or a named rule.
+	// For moveable feasts: offset from Easter or a named rule.
 	DateRule string
 
 	// For sanctoral (fixed) feasts: month and day.
@@ -284,8 +284,10 @@ func (f *Feast) IsFixed() bool {
 	return f.Month != 0 && f.Day != 0
 }
 
-// IsTemporal returns true if the feast is moveable (has a date rule).
-func (f *Feast) IsTemporal() bool {
+// IsMoveable returns true if the feast has a computed date rule rather than a
+// fixed month and day. This is deliberately a date classification, not a
+// statement about whether the observance belongs broadly to the temporal cycle.
+func (f *Feast) IsMoveable() bool {
 	return f.DateRule != ""
 }
 
