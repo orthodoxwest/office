@@ -392,6 +392,7 @@ func TestOccurrenceCommemoratedAtSecondVespers(t *testing.T) {
 		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
 		{"Double retained under greater double", greaterDouble, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, true},
 		{"seasonal privileged feria retained", greaterDouble, &models.Feast{ID: "privileged-lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, true},
+		{"synthetic displaced seasonal feria retained", secondClass, &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}, true},
 	}
 
 	for _, tt := range tests {
@@ -409,17 +410,25 @@ func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *tes
 	memorial := &models.Feast{ID: "memorial", Rank: models.Commemoration, Category: models.CategoryMartyr}
 	simplifiedDouble := &models.Feast{ID: "simplified-double", Rank: models.Double, Category: models.CategoryMartyr}
 	seasonalFeria := &models.Feast{ID: "lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}
+	displacedFeria := &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}
 
 	result := resolveConcurrence(
-		&models.CalendarDay{Celebration: winner, Commemorations: []*models.Feast{memorial, simplifiedDouble, seasonalFeria}},
+		&models.CalendarDay{
+			Celebration:        winner,
+			Commemorations:     []*models.Feast{memorial, simplifiedDouble, seasonalFeria},
+			FeriaCommemoration: displacedFeria,
+		},
 		&models.CalendarDay{},
 	)
 
 	if result.Owner != models.VespersIIOfPreceding {
 		t.Fatalf("got owner %d, want VespersIIOfPreceding", result.Owner)
 	}
-	if len(result.Commemorations) != 2 || result.Commemorations[0] != simplifiedDouble || result.Commemorations[1] != seasonalFeria {
-		t.Fatalf("got commemorations %v, want simplified Double and seasonal feria", result.Commemorations)
+	if len(result.Commemorations) != 3 ||
+		result.Commemorations[0] != simplifiedDouble ||
+		result.Commemorations[1] != seasonalFeria ||
+		result.Commemorations[2] != displacedFeria {
+		t.Fatalf("got commemorations %v, want simplified Double and both seasonal feria forms", result.Commemorations)
 	}
 	foundSuppression := false
 	for _, decision := range result.Decisions {
@@ -430,6 +439,88 @@ func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *tes
 	}
 	if !foundSuppression {
 		t.Fatalf("missing traced memorial suppression in decisions: %v", result.Decisions)
+	}
+}
+
+func TestResolveConcurrenceOrdersFollowingOfficeBeforeOccurrenceCommemorations(t *testing.T) {
+	winner := &models.Feast{ID: "chair-peter", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	following := &models.Feast{ID: "st-matthias", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	doctor := &models.Feast{ID: "st-peter-damian", Rank: models.Double, Category: models.CategoryConfessorDoctor}
+	companion := &models.Feast{ID: "commemoration-st-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	feria := &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{
+			Celebration:        winner,
+			Commemorations:     []*models.Feast{doctor, companion},
+			FeriaCommemoration: feria,
+		},
+		&models.CalendarDay{Celebration: following},
+	)
+
+	want := []*models.Feast{following, doctor, companion, feria}
+	if len(result.Commemorations) != len(want) {
+		t.Fatalf("commemorations = %v, want %v", result.Commemorations, want)
+	}
+	for i := range want {
+		if result.Commemorations[i] != want[i] {
+			t.Fatalf("commemoration %d = %v, want %v", i, result.Commemorations[i], want[i])
+		}
+	}
+	if result.FollowingOfficeCommemorationID != following.ID {
+		t.Fatalf("following office ID = %q, want %q", result.FollowingOfficeCommemorationID, following.ID)
+	}
+}
+
+func TestResolveConcurrenceSuppressesFollowingFeriaAtFirstVespers(t *testing.T) {
+	outgoingFeria := &models.Feast{ID: "privileged-lenten-feria", Name: "Wednesday after Lent II", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}
+	incomingFeria := &models.Feast{ID: "privileged-lenten-feria", Name: "Thursday after Lent II", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}
+	following := &models.Feast{ID: "st-gregory", Rank: models.GreaterDouble, Category: models.CategoryConfessorDoctor}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: outgoingFeria},
+		&models.CalendarDay{Celebration: following, Commemorations: []*models.Feast{incomingFeria}},
+	)
+
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != outgoingFeria {
+		t.Fatalf("commemorations = %v, want outgoing feria only", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:incoming-feria-not-at-vespers-boundary")
+}
+
+func TestResolveConcurrenceSuppressesFollowingFeriaAtSecondVespers(t *testing.T) {
+	winner := &models.Feast{ID: "st-gregory", Rank: models.Double2ndClass, Category: models.CategoryConfessorDoctor}
+	currentFeria := &models.Feast{ID: models.FeriaCommemorationID, Name: "Thursday after Lent II", Rank: models.Commemoration, Category: models.CategoryFeria}
+	followingFeria := &models.Feast{ID: "privileged-lenten-feria", Name: "Friday after Lent II", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: winner, FeriaCommemoration: currentFeria},
+		&models.CalendarDay{Celebration: followingFeria},
+	)
+
+	if len(result.Commemorations) != 1 || result.Commemorations[0] != currentFeria {
+		t.Fatalf("commemorations = %v, want current feria only", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:following-feria-not-at-second-vespers")
+}
+
+func TestResolveConcurrenceRetainsVigilOfEpiphanyException(t *testing.T) {
+	winner := &models.Feast{ID: "holy-name-jesus", Rank: models.Double2ndClass, Category: models.CategoryLord}
+	vigil := &models.Feast{ID: "vigil-epiphany", Rank: models.SemiDouble, Category: models.CategoryFeria, IsVigil: true}
+	telesphorus := &models.Feast{ID: "st-telesphorus", Rank: models.Commemoration, Category: models.CategoryBishopMartyr}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: winner},
+		&models.CalendarDay{Celebration: vigil, Commemorations: []*models.Feast{telesphorus}},
+	)
+
+	if len(result.Commemorations) != 2 ||
+		result.Commemorations[0] != vigil ||
+		result.Commemorations[1] != telesphorus {
+		t.Fatalf("commemorations = %v, want Vigil of Epiphany and Telesphorus", result.Commemorations)
+	}
+	if result.FollowingOfficeCommemorationID != vigil.ID {
+		t.Fatalf("following office ID = %q, want %q", result.FollowingOfficeCommemorationID, vigil.ID)
 	}
 }
 

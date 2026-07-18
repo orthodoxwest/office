@@ -33,6 +33,9 @@ func hasFirstVespers(f *models.Feast) bool {
 	if f == nil {
 		return false
 	}
+	if f.ID == "vigil-epiphany" {
+		return true // XIV.9: the Vigil of Epiphany is the vigil exception
+	}
 	if f.Category == models.CategoryFeria {
 		return false // XIII.18
 	}
@@ -114,6 +117,13 @@ func isVigil(f *models.Feast) bool {
 	return f != nil && f.IsVigil
 }
 
+// incomingFeriaExcludedAtVespers reports de Tempore offices that do not begin
+// on the preceding evening. The Vigil of the Epiphany is the explicit XIV.9
+// exception and is commemorated at Vespers as well as Lauds.
+func incomingFeriaExcludedAtVespers(f *models.Feast) bool {
+	return f != nil && f.Category == models.CategoryFeria && f.ID != "vigil-epiphany"
+}
+
 // occurrenceCommemoratedAtFirstVespers reports whether a following day's
 // occurrence commemoration begins on the preceding evening. XIV.9 gives
 // Ember days, Rogation Monday, and common vigils Lauds only; the remaining
@@ -148,6 +158,9 @@ func occurrenceCommemoratedAtSecondVespers(winner, comm *models.Feast) (bool, st
 	if comm == nil {
 		return false, "commemoration:second-vespers-nil"
 	}
+	if comm.ID == models.FeriaCommemorationID {
+		return true, "commemoration:second-vespers-seasonal-feria"
+	}
 	if isEmberDay(comm) || isRogationDay(comm) || isVigil(comm) {
 		return false, "commemoration:second-vespers-feria-or-vigil-lauds-only"
 	}
@@ -179,6 +192,9 @@ func followingOfficeCommemoratedAtSecondVespers(following *models.CalendarDay) (
 		return false, "commemoration:following-office-at-second-vespers-nil"
 	}
 	feast := following.Celebration
+	if incomingFeriaExcludedAtVespers(feast) {
+		return false, "commemoration:following-feria-not-at-second-vespers"
+	}
 	if feast.Rank == models.Simple || feast.Rank == models.Commemoration {
 		return false, "commemoration:following-office-at-second-vespers-simple-or-memorial"
 	}
@@ -409,7 +425,8 @@ func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, st
 func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding, following *models.CalendarDay, secondVespers, sameOctave bool) ([]*models.Feast, []models.CompositionDecision) {
 	suppressIncoming := secondVespers && winner != nil &&
 		winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
-		winner.Category != models.CategorySunday
+		winner.Category != models.CategorySunday &&
+		(loser == nil || loser.ID != "vigil-epiphany")
 
 	// An incoming observance beginning at this evening's I Vespers must also
 	// be admissible against the outgoing office actually being sung: the
@@ -485,6 +502,14 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 		}
 	}
 	for _, c := range following.Commemorations {
+		// A displaced seasonal feria belongs to the following civil day and
+		// does not begin at I Vespers. The outgoing civil-day feria, when
+		// privileged, has already been considered above (2026 ordo: St
+		// Gregory's I Vespers on Mar 11 commemorates Wednesday, not Thursday).
+		if incomingFeriaExcludedAtVespers(c) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:incoming-feria-not-at-vespers-boundary", Outcome: "suppressed", Detail: c.ID})
+			continue
+		}
 		// A day within an octave is not commemorated at the I Vespers of a
 		// II Class or higher feast (2026 ordo: no Ss Peter & Paul octave
 		// commemoration at the Visitation's I Vespers Jul 1, while the
@@ -510,10 +535,22 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	return finalized, append(decisions, finalDecisions...)
 }
 
-func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.CalendarDay, boundary []*models.Feast, boundaryDecisions []models.CompositionDecision) ([]*models.Feast, []models.CompositionDecision) {
-	comms := make([]*models.Feast, 0, len(day.Commemorations)+len(boundary))
+func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.CalendarDay, followingOfficeID string, boundary []*models.Feast, boundaryDecisions []models.CompositionDecision) ([]*models.Feast, []models.CompositionDecision) {
+	occurrenceCommemorations := append([]*models.Feast(nil), day.Commemorations...)
+	if day.FeriaCommemoration != nil {
+		occurrenceCommemorations = append(occurrenceCommemorations, day.FeriaCommemoration)
+	}
+	comms := make([]*models.Feast, 0, len(occurrenceCommemorations)+len(boundary))
 	decisions := append([]models.CompositionDecision{}, boundaryDecisions...)
-	for _, comm := range day.Commemorations {
+	// The concurrent following office itself is commemorated first (XIV.14).
+	// Other following-day occurrence commemorations remain after the current
+	// day's occurrence commemorations.
+	for _, comm := range boundary {
+		if comm != nil && comm.ID == followingOfficeID {
+			comms = append(comms, comm)
+		}
+	}
+	for _, comm := range occurrenceCommemorations {
 		if included, rule := occurrenceCommemoratedAtSecondVespers(winner, comm); included {
 			comms = append(comms, comm)
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: comm.ID})
@@ -521,9 +558,25 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: comm.ID})
 		}
 	}
-	comms = append(comms, boundary...)
+	for _, comm := range boundary {
+		if comm == nil || comm.ID != followingOfficeID {
+			comms = append(comms, comm)
+		}
+	}
 	finalized, finalDecisions := finalizeCommemorationsWithDecisions(winner, comms)
 	return finalized, append(decisions, finalDecisions...)
+}
+
+func containsCommemoration(comms []*models.Feast, id string) bool {
+	if id == "" {
+		return false
+	}
+	for _, comm := range comms {
+		if comm != nil && comm.ID == id {
+			return true
+		}
+	}
+	return false
 }
 
 // noOwnerCommemorationsWithDecisions composes an evening on which neither
@@ -570,6 +623,10 @@ func noOwnerCommemorationsWithDecisions(preceding, following *models.CalendarDay
 func resolveConcurrence(preceding, following *models.CalendarDay) models.VespersDesignation {
 	precFeast := preceding.Celebration
 	folFeast := following.Celebration
+	followingOfficeID := ""
+	if folFeast != nil {
+		followingOfficeID = folFeast.ID
+	}
 
 	precHasII := precFeast != nil && hasSecondVespers(precFeast)
 	folHasI := folFeast != nil && hasFirstVespers(folFeast)
@@ -594,6 +651,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Feast:          folFeast,
 			Color:          following.Color,
 			Season:         following.Season,
+			WithinOctaveOf: following.WithinOctaveOf,
 			Commemorations: comms,
 			Rule:           "concurrence:following-only",
 			Decisions:      decisions,
@@ -603,7 +661,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	// If following has no I Vespers, preceding wins by default
 	if !folHasI {
 		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
-		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, boundary, boundaryDecisions)
+		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, followingOfficeID, boundary, boundaryDecisions)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
 			Feast:          precFeast,
@@ -619,15 +677,20 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	winner, rule := concurrenceWinnerWithRule(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
 		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
-		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, boundary, boundaryDecisions)
+		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, followingOfficeID, boundary, boundaryDecisions)
+		followingOfficeCommemorationID := ""
+		if containsCommemoration(comms, folFeast.ID) {
+			followingOfficeCommemorationID = folFeast.ID
+		}
 		return models.VespersDesignation{
-			Owner:          models.VespersIIOfPreceding,
-			Feast:          precFeast,
-			Color:          preceding.Color,
-			Season:         preceding.Season,
-			Commemorations: comms,
-			Rule:           rule,
-			Decisions:      decisions,
+			Owner:                          models.VespersIIOfPreceding,
+			Feast:                          precFeast,
+			Color:                          preceding.Color,
+			Season:                         preceding.Season,
+			Commemorations:                 comms,
+			FollowingOfficeCommemorationID: followingOfficeCommemorationID,
+			Rule:                           rule,
+			Decisions:                      decisions,
 		}
 	}
 	comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, preceding, following, false, sameOctave)
@@ -636,6 +699,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		Feast:          folFeast,
 		Color:          following.Color,
 		Season:         following.Season,
+		WithinOctaveOf: following.WithinOctaveOf,
 		Commemorations: comms,
 		Rule:           rule,
 		Decisions:      decisions,

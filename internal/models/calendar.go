@@ -351,17 +351,25 @@ const (
 
 // VespersDesignation records which office owns vespers on a given evening.
 type VespersDesignation struct {
-	Owner     VespersOwner
-	Feast     *Feast // celebration that owns vespers (may differ from day's Celebration)
-	Color     Color  // liturgical color for vespers
-	Season    Season
-	Rule      string                // stable explanation code for the concurrence decision
-	Decisions []CompositionDecision // concurrence and commemoration trace
+	Owner  VespersOwner
+	Feast  *Feast // celebration that owns vespers (may differ from day's Celebration)
+	Color  Color  // liturgical color for vespers
+	Season Season
+	// WithinOctaveOf carries the following day's octave context when it owns
+	// I Vespers; it is empty when the owning office is outside an octave.
+	WithinOctaveOf string
+	Rule           string                // stable explanation code for the concurrence decision
+	Decisions      []CompositionDecision // concurrence and commemoration trace
 
 	// Commemorations holds the celebrations proper to this evening: a loser in
 	// concurrence, or the following day's occurrence commemorations when no
 	// adjacent celebration owns I/II Vespers (XIII.2-19, XIV.9).
 	Commemorations []*Feast
+
+	// FollowingOfficeCommemorationID identifies the following celebration
+	// when its office is commemorated at II Vespers. The office composer uses
+	// this context to take its Antiphon and versicle from I Vespers (XIV.14).
+	FollowingOfficeCommemorationID string
 }
 
 // CalendarDay represents the resolved calendar for a single day.
@@ -377,10 +385,10 @@ type CalendarDay struct {
 	OccurrenceDecisions []CompositionDecision // precedence, transfer, color, and commemoration trace
 
 	// FeriaCommemoration is the occurring privileged feria (of Septuagesima,
-	// Lent, or Passiontide) commemorated at Lauds when a feast takes the office
-	// on a penitential weekday. Nil when no such commemoration applies. Kept
-	// separate from Commemorations because the ferial commemoration at Vespers
-	// is concurrence-dependent and is not derived from this field.
+	// Lent, or Passiontide) commemorated at Lauds and eligible at II Vespers
+	// when a feast takes the office on a penitential weekday. Nil when no such
+	// commemoration applies. It remains separate from Commemorations because
+	// its Vespers inclusion is concurrence-dependent.
 	FeriaCommemoration *Feast
 
 	// TemporalWeekID is the ID of the temporal Sunday office governing this
@@ -407,4 +415,9 @@ type CalendarDay struct {
 	// builder): text resolution then prefers "-first" ref variants
 	// (e.g. magnificat-antiphon-first) over the II Vespers defaults.
 	FirstVespers bool
+
+	// FollowingOfficeCommemorationID is copied from Vespers onto the synthetic
+	// office-day so commemoration text resolution can retain concurrence
+	// context without encoding it in feast data.
+	FollowingOfficeCommemorationID string
 }

@@ -520,6 +520,104 @@ func TestResolveVespersPsalmodyLayering(t *testing.T) {
 	}
 }
 
+func TestFerialVespersDeclarationKeepsCivilWeekdayAntiphon(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:         time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC),
+		FirstVespers: true,
+		Celebration: &models.Feast{
+			ID:       "test-martyrs",
+			Rank:     models.Double,
+			Category: models.CategoryMartyrs,
+		},
+	}
+	corpus := texts.NewTestCorpus(map[string]string{
+		"commons/martyrs/psalm-antiphon-1":         "Festal common antiphon",
+		"ordinary/vespers/psalm-antiphon-1-monday": "Monday psalter antiphon",
+	})
+
+	text, source := resolveProperText(day, "vespers", "psalm-antiphon-1", corpus)
+	if text != "Monday psalter antiphon" || source != "ordinary/vespers/psalm-antiphon-1-monday" {
+		t.Fatalf("antiphon = %q (%s), want civil Monday psalter", text, source)
+	}
+}
+
+func TestPlainDoubleVespersPsalmodyAllowsExplicitProperOverride(t *testing.T) {
+	day := &models.CalendarDay{
+		Celebration: &models.Feast{
+			ID:       "test-martyrs",
+			Rank:     models.Double,
+			Category: models.CategoryMartyrs,
+		},
+	}
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/test-martyrs/vespers-psalmody": "psalm-antiphon-1 = psalms/110",
+		"commons/martyrs/vespers-psalmody":     ferialPsalmodyDeclaration,
+	})
+
+	items, source, err := resolveVespersPsalmody(day, corpus)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if source != "proper/test-martyrs/vespers-psalmody" || len(items) != 1 || items[0].psalm != "psalms/110" {
+		t.Fatalf("psalmody = %#v (%s), want explicit feast proper", items, source)
+	}
+}
+
+func TestPlainDoubleWithProperAntiphonsUsesCommonPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Celebration: &models.Feast{
+			ID:       "test-martyr",
+			Rank:     models.Double,
+			Category: models.CategoryMartyr,
+		},
+	}
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/test-martyr/psalm-antiphon-1": "Proper feast antiphon",
+		"commons/martyr/vespers-psalmody":     "psalm-antiphon-1 = psalms/110",
+	})
+
+	items, source, err := resolveVespersPsalmody(day, corpus)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if source != "commons/martyr/vespers-psalmody" || len(items) != 1 || items[0].psalm != "psalms/110" {
+		t.Fatalf("psalmody = %#v (%s), want Common psalmody with feast-proper antiphon", items, source)
+	}
+}
+
+func TestFollowingOfficeCommemorationUsesFirstVespersTexts(t *testing.T) {
+	feast := &models.Feast{
+		ID:         "st-matthias",
+		ProperName: "Matthias",
+		Category:   models.CategoryApostle,
+	}
+	day := &models.CalendarDay{
+		Season:                         models.Septuagesima,
+		Commemorations:                 []*models.Feast{feast},
+		FollowingOfficeCommemorationID: feast.ID,
+	}
+	corpus := texts.NewTestCorpus(map[string]string{
+		"commons/apostle/magnificat-antiphon-first": "First Vespers antiphon for N.",
+		"commons/apostle/commemoration-antiphon":    "Ordinary commemoration antiphon for N.",
+		"commons/apostle/versicle-first-vespers":    "First Vespers versicle",
+		"commons/apostle/commemoration-versicle":    "Ordinary commemoration versicle",
+		"proper/st-matthias/collect":                "Matthias collect",
+	})
+
+	elems := addCommemorations(day, "vespers", corpus)
+	if len(elems) != 4 {
+		t.Fatalf("got %d elements, want 4", len(elems))
+	}
+	if elems[1].Text != "First Vespers antiphon for Matthias" ||
+		elems[1].SourceRef != "commons/apostle/magnificat-antiphon-first" {
+		t.Fatalf("antiphon = %q (%s)", elems[1].Text, elems[1].SourceRef)
+	}
+	if elems[2].Text != "First Vespers versicle" ||
+		elems[2].SourceRef != "commons/apostle/versicle-first-vespers" {
+		t.Fatalf("versicle = %q (%s)", elems[2].Text, elems[2].SourceRef)
+	}
+}
+
 func TestParsePsalmodyDeclarationRejectsMalformedData(t *testing.T) {
 	tests := []string{
 		"",
@@ -614,6 +712,7 @@ func TestVespersWeekdayCondition(t *testing.T) {
 		{"Saturday matches weekday-saturday", time.Date(2026, 3, 21, 0, 0, 0, 0, time.UTC), false, "weekday-saturday", true},
 		{"Sunday first Vespers uses civil Saturday", time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC), true, "weekday-saturday", true},
 		{"Sunday first Vespers is not civil Sunday", time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC), true, "weekday-sunday", false},
+		{"Tuesday feast first Vespers uses civil Monday", time.Date(2026, 1, 20, 0, 0, 0, 0, time.UTC), true, "weekday-monday", true},
 		{"Low Sunday first Vespers uses civil Saturday", time.Date(2026, 4, 19, 0, 0, 0, 0, time.UTC), true, "weekday-saturday", true},
 	}
 
@@ -738,9 +837,9 @@ func TestVespersUsesFollowingOfficeWhenConcurrenceSaysFirstVespers(t *testing.T)
 	})
 	sections := []HourSection{
 		{
-			Name:      "Psalmody-Thursday",
+			Name:      "Psalmody-Wednesday",
 			Label:     "Psalmody",
-			Condition: "weekday-thursday",
+			Condition: "weekday-wednesday",
 			Elements: []HourElement{
 				{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
 			},

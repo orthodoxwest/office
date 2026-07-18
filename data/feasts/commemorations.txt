@@ -1588,6 +1588,7 @@ Color = white
 Category = confessor
 Month = 2
 Day = 23
+ProperID = commemoration-st-paul-apostle
 OnlyWith = chair-peter-antioch
 Source = awrv
 IsApostolicCompanion = true
