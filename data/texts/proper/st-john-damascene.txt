@@ -13,3 +13,15 @@
 
 [psalm-antiphon-4-vespers]
 @use commons/confessor/psalm-antiphon-4-vespers
+
+[psalm-antiphon-1-vespers-easter]
+@use commons/confessor-paschal/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers-easter]
+@use commons/confessor-paschal/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers-easter]
+@use commons/confessor-paschal/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers-easter]
+@use commons/confessor-paschal/psalm-antiphon-4-vespers

@@ -296,11 +296,13 @@ func TestComposeVespersNewFestalClassPsalmAntiphonPairs(t *testing.T) {
 		day           *models.CalendarDay
 		wantPsalms    []string
 		wantAntiphons []string
+		wantAlleluia  bool
 	}{
 		{
 			name: "bishop doctor",
 			day: &models.CalendarDay{
 				Date:        time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC),
+				Season:      models.Easter,
 				Celebration: &models.Feast{ID: "st-athanasius", Category: models.CategoryConfessorDoctor},
 			},
 			wantPsalms: []string{"Psalm 110", "Psalm 112", "Psalm 113", "Psalm 132"},
@@ -310,12 +312,14 @@ func TestComposeVespersNewFestalClassPsalmAntiphonPairs(t *testing.T) {
 				"The Lord, * therefore",
 				"Good and faithful servant",
 			},
+			wantAlleluia: true,
 		},
 		{
 			name: "doctor not a bishop",
 			day: &models.CalendarDay{
-				Date:        time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC),
-				Celebration: &models.Feast{ID: "st-ephrem-syrian", Category: models.CategoryConfessorDoctor},
+				Date:        time.Date(2026, 5, 27, 0, 0, 0, 0, time.UTC),
+				Season:      models.Easter,
+				Celebration: &models.Feast{ID: "st-bede-venerable", Category: models.CategoryConfessorDoctor},
 			},
 			wantPsalms: []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 113"},
 			wantAntiphons: []string{
@@ -324,6 +328,7 @@ func TestComposeVespersNewFestalClassPsalmAntiphonPairs(t *testing.T) {
 				"A wise and faithful servant",
 				"Good and faithful servant",
 			},
+			wantAlleluia: true,
 		},
 		{
 			name: "generic angel",
@@ -371,6 +376,9 @@ func TestComposeVespersNewFestalClassPsalmAntiphonPairs(t *testing.T) {
 			for i, want := range tt.wantAntiphons {
 				if !strings.HasPrefix(antiphons[i], want) {
 					t.Errorf("pair %d antiphon = %q, want incipit %q with %s", i+1, antiphons[i], want, psalms[i])
+				}
+				if tt.wantAlleluia && !strings.HasSuffix(strings.ToLower(antiphons[i]), "alleluia.") {
+					t.Errorf("pair %d antiphon = %q, want Paschaltide alleluia", i+1, antiphons[i])
 				}
 			}
 		})

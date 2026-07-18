@@ -21,6 +21,22 @@
 [psalm-antiphon-5]
 @use shared/formulas/paschal-psalm-antiphon
 
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 678 (Common of a Confessor not a Bishop, Paschaltide)
+Lord, thou deliveredst unto me five talents: * behold, I have gained beside them five talents more, alleluia.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 679 (Common of a Confessor not a Bishop, Paschaltide)
+Well done, thou good servant, * in little things found faithful, enter thou into the joy of thy Lord, alleluia.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 680 (Common of a Confessor not a Bishop, Paschaltide)
+A wise and faithful servant, * whom the Lord hath made ruler over all his household, alleluia.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 681 (Common of a Confessor not a Bishop, Paschaltide)
+Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
+
 [short-responsory-lauds]
 @use commons/confessor-doctor-paschal/short-responsory-lauds
 
