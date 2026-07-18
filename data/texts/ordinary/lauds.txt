@@ -362,7 +362,7 @@ Alleluia, * alleluia, alleluia.
 
 [psalm-antiphon-1-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 7 (Monday)
-Have mercy upon me, * O God.
+Have mercy * upon me, O God.
 
 [psalm-antiphon-2-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 8 (Monday)
@@ -446,7 +446,7 @@ With thy free Spirit * stablish my heart, O God.
 
 [psalm-antiphon-2-friday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 77 (Friday)
-His Name * is great in Israel.
+His Name is great * in Israel.
 
 [psalm-antiphon-3-friday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 78 (Friday)

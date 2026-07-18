@@ -145,13 +145,13 @@ R. Whose name was John.
 @use proper/nativity-john-baptist/versicle-vespers
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/06-24 [Responsory Breve Tertia] — check against diurnal
-R. There was a man sent from God.
-R. There was a man sent from God.
+# SOURCE: draft archdiocesan Lauds book, p. 474 (Nativity of Saint John Baptist)
+R. There was a man * sent from God.
+R. There was a man * sent from God.
 V. Whose name was John.
 R. Sent from God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. There was a man sent from God.
+R. There was a man * sent from God.
 
 [short-responsory-sext]
 # SOURCE: divinum-officium Sancti/06-24 [Responsory Breve Sexta] — check against diurnal
