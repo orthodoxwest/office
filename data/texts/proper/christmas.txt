@@ -41,8 +41,14 @@ Unto the godly * there ariseth up light in the darkness: the Lord is merciful, l
 
 [psalm-antiphon-4-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 54 (II Vespers of Christmas; also December 27 and 29)
-# NOTE: the source appoints "Of the fruit of thy body" with Psalm 131 on December 26, 28, and 30; that date-specific octave variant needs its own proper.
 With the Lord * there is mercy, and with him is plenteous redemption.
+
+[psalm-antiphon-4-alternate-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 55 (within the Octave of Christmas, December 26, 28, and 30)
+Of the fruit * of thy body shall I set upon thy seat.
+
+[psalm-antiphon-4-alternate]
+@use proper/christmas/psalm-antiphon-4-alternate-vespers
 
 [psalm-antiphon-1-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 40 (I Vespers of Christmas)

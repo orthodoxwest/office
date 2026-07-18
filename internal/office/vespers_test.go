@@ -45,9 +45,123 @@ func TestComposeVespersNativityIIUsesProperFestalPsalmody(t *testing.T) {
 	}
 
 	got := vespersPsalmLabels(t, day)
-	want := []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 130", "Psalm 132"}
+	want := []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 130"}
 	if strings.Join(got, "|") != strings.Join(want, "|") {
 		t.Fatalf("Nativity II Vespers psalms = %v, want %v", got, want)
+	}
+}
+
+func TestComposeVespersAffectedFestalPsalmodyPairs(t *testing.T) {
+	days, err := calendar.BuildCalendar(2026, filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	moveable := calendar.ComputeMoveableDates(2026)
+
+	tests := []struct {
+		date          string
+		fourthPsalm   string
+		fourthIncipit string
+	}{
+		{"2026-06-10", "Psalm 128", "May the children"},
+		{"2026-06-11", "Psalm 147b", "He that maketh"},
+		{"2026-06-12", "Psalm 128", "May the children"},
+		{"2026-06-15", "Psalm 147b", "He that maketh"},
+		{"2026-06-16", "Psalm 128", "May the children"},
+		{"2026-06-17", "Psalm 147b", "He that maketh"},
+		{"2026-06-18", "Psalm 128", "May the children"},
+		{"2026-09-28", "Psalm 113", "Angels and Archangels"},
+		{"2026-09-29", "Psalm 138", "Angels and Archangels"},
+		{"2026-12-25", "Psalm 130", "With the Lord"},
+	}
+
+	byDate := make(map[string]*models.CalendarDay, len(days))
+	for i := range days {
+		byDate[days[i].Date.Format("2006-01-02")] = &days[i]
+	}
+	for _, tt := range tests {
+		t.Run(tt.date, func(t *testing.T) {
+			day := byDate[tt.date]
+			if day == nil {
+				t.Fatalf("calendar day not found")
+			}
+			hour, err := engine.ComposeHour("vespers", day, moveable)
+			if err != nil {
+				t.Fatalf("ComposeHour: %v", err)
+			}
+			type pair struct {
+				psalm    string
+				antiphon string
+			}
+			var pairs []pair
+			for _, section := range hour.Sections {
+				for i, elem := range section.Elements {
+					if elem.Type != models.Psalm {
+						continue
+					}
+					antiphon := ""
+					if i > 0 && section.Elements[i-1].Type == models.Antiphon {
+						antiphon = section.Elements[i-1].Text
+					}
+					pairs = append(pairs, pair{psalm: elem.Label, antiphon: antiphon})
+				}
+			}
+			if len(pairs) != 4 {
+				t.Fatalf("psalm pairs = %#v, want four", pairs)
+			}
+			fourth := pairs[3]
+			if fourth.psalm != tt.fourthPsalm || !strings.HasPrefix(fourth.antiphon, tt.fourthIncipit) {
+				t.Fatalf("fourth pair = %q / %q, want %q / %q", fourth.antiphon, fourth.psalm, tt.fourthIncipit, tt.fourthPsalm)
+			}
+		})
+	}
+}
+
+func TestComposeVespersNativityOctaveDateSetsAndConcurrence(t *testing.T) {
+	days, err := calendar.BuildCalendar(2026, filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	moveable := calendar.ComputeMoveableDates(2026)
+	wantFourth := map[string]string{
+		"2026-12-25": "Psalm 130",
+		"2026-12-26": "Psalm 132",
+		"2026-12-27": "Psalm 130",
+		"2026-12-28": "Psalm 132",
+		"2026-12-29": "Psalm 130",
+		// Dec. 30 is I Vespers of St Sylvester, so his common supersedes
+		// the Nativity octave's date-conditioned Psalm 132.
+		"2026-12-30": "Psalm 113",
+	}
+	for i := range days {
+		date := days[i].Date.Format("2006-01-02")
+		want, ok := wantFourth[date]
+		if !ok {
+			continue
+		}
+		hour, err := engine.ComposeHour("vespers", &days[i], moveable)
+		if err != nil {
+			t.Fatalf("%s: ComposeHour: %v", date, err)
+		}
+		var psalms []string
+		for _, section := range hour.Sections {
+			for _, elem := range section.Elements {
+				if elem.Type == models.Psalm {
+					psalms = append(psalms, elem.Label)
+				}
+			}
+		}
+		if len(psalms) != 4 || psalms[3] != want {
+			t.Errorf("%s psalms = %v, want fourth %s", date, psalms, want)
+		}
 	}
 }
 
@@ -207,11 +321,47 @@ func TestParsePsalmodyDeclarationRejectsMalformedData(t *testing.T) {
 		"psalm-antiphon-1 psalms/110",
 		"psalm-antiphon-1 =",
 		"psalm-antiphon-1 = psalms/110\npsalm-antiphon-1 = psalms/111",
+		"psalm-antiphon-1 = psalms/110 dates=12-25,12-25",
+		"psalm-antiphon-1 = psalms/110 dates=12-25\npsalm-antiphon-1 = psalms/111 dates=12-25",
+		"psalm-antiphon-1 = psalms/110 dates=2-30",
+		"psalm-antiphon-1 = psalms/110 weekday=friday",
 	}
 	for _, declaration := range tests {
 		if _, _, err := parsePsalmodyDeclaration(declaration); err == nil {
 			t.Errorf("parsePsalmodyDeclaration(%q) succeeded, want error", declaration)
 		}
+	}
+}
+
+func TestSelectPsalmodyItemsByFixedDate(t *testing.T) {
+	declaration := `psalm-antiphon-1 = psalms/110
+psalm-antiphon-4 = psalms/130 dates=12-25,12-27,12-29
+psalm-antiphon-4 = psalms/132 dates=12-26,12-28,12-30 antiphon=psalm-antiphon-4-alternate`
+	items, ferial, err := parsePsalmodyDeclaration(declaration)
+	if err != nil || ferial {
+		t.Fatalf("parsePsalmodyDeclaration() = (%v, %t, %v)", items, ferial, err)
+	}
+
+	for day := 25; day <= 30; day++ {
+		selected, err := selectPsalmodyItems(items, time.Date(2026, 12, day, 0, 0, 0, 0, time.UTC))
+		if err != nil {
+			t.Fatalf("December %d: %v", day, err)
+		}
+		if len(selected) != 2 {
+			t.Fatalf("December %d selected %d items, want 2", day, len(selected))
+		}
+		wantPsalm := "psalms/130"
+		wantAntiphon := "psalm-antiphon-4"
+		if day%2 == 0 {
+			wantPsalm = "psalms/132"
+			wantAntiphon = "psalm-antiphon-4-alternate"
+		}
+		if selected[1].psalm != wantPsalm || selected[1].antiphon != wantAntiphon {
+			t.Errorf("December %d fourth = %s/%s, want %s/%s", day, selected[1].antiphon, selected[1].psalm, wantAntiphon, wantPsalm)
+		}
+	}
+	if _, err := selectPsalmodyItems(items, time.Date(2026, 12, 31, 0, 0, 0, 0, time.UTC)); err == nil {
+		t.Fatal("December 31 unexpectedly matched a conditional fourth psalm")
 	}
 }
 

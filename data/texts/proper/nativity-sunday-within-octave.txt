@@ -1,3 +1,21 @@
+[vespers-psalmody]
+@use psalmody/vespers/nativity
+
+[psalm-antiphon-1-vespers]
+@use proper/christmas/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+@use proper/christmas/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+@use proper/christmas/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+@use proper/christmas/psalm-antiphon-4-vespers
+
+[psalm-antiphon-4-alternate-vespers]
+@use proper/christmas/psalm-antiphon-4-alternate-vespers
+
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book (The Sunday within the Octave of the Nativity; Dum medium silentium)
 While all things * were in quiet silence, and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne, alleluia.

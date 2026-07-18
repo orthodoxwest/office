@@ -1,3 +1,6 @@
+[vespers-psalmody-first]
+@use psalmody/vespers/archangel-first
+
 [vespers-psalmody]
 @use psalmody/vespers/archangel
 

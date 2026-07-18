@@ -44,8 +44,8 @@ psalm-antiphon-4 = psalms/147b
 psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/112
-psalm-antiphon-4 = psalms/130
-psalm-antiphon-5 = psalms/132
+psalm-antiphon-4 = psalms/130 dates=12-25,12-27,12-29
+psalm-antiphon-4 = psalms/132 dates=12-26,12-28,12-30 antiphon=psalm-antiphon-4-alternate
 
 [st-stephen]
 psalm-antiphon-1 = psalms/110
@@ -59,16 +59,26 @@ psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/112
 psalm-antiphon-4 = psalms/130
 
-[corpus-christi]
+[corpus-christi-first]
 psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/116b
 psalm-antiphon-4 = psalms/128
-psalm-antiphon-5 = psalms/147b
+
+[corpus-christi]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/116b
+psalm-antiphon-4 = psalms/147b
+
+[archangel-first]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/113
 
 [archangel]
 psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/112
-psalm-antiphon-4 = psalms/113
-psalm-antiphon-5 = psalms/138
+psalm-antiphon-4 = psalms/138

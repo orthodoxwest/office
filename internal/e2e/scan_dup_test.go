@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -8,6 +9,44 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 )
+
+// TestVespers2026PsalmodySweep guards the annual adversarial-review sweep:
+// every Vespers must compose, no service may grow a fifth psalm, and corpus
+// annotation lines must never reach rendered elements.
+func TestVespers2026PsalmodySweep(t *testing.T) {
+	eng, err := office.NewEngine(dataDir)
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	days, err := calendar.BuildCalendar(2026, dataDir)
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	moveable := calendar.ComputeMoveableDates(2026)
+	for i := range days {
+		day := &days[i]
+		hour, err := eng.ComposeHour("vespers", day, moveable)
+		if err != nil {
+			t.Fatalf("ComposeHour(vespers, %s): %v", day.Date.Format(time.DateOnly), err)
+		}
+		psalms := 0
+		for _, section := range hour.Sections {
+			for _, elem := range section.Elements {
+				if elem.Type == models.Psalm {
+					psalms++
+				}
+				for _, line := range strings.Split(elem.Text, "\n") {
+					if strings.HasPrefix(strings.TrimSpace(line), "#") {
+						t.Errorf("Vespers on %s leaked corpus comment %q", day.Date.Format(time.DateOnly), line)
+					}
+				}
+			}
+		}
+		if psalms > 4 {
+			t.Errorf("Vespers on %s (%s) has %d psalms", day.Date.Format(time.DateOnly), feastID(day), psalms)
+		}
+	}
+}
 
 // TestScanDuplicateSectionLabels composes every hour for every day across several
 // years and flags any composed hour where a non-empty section Label appears more

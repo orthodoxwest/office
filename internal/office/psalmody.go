@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
@@ -17,14 +18,19 @@ const (
 )
 
 type psalmodyItem struct {
+	slot     string
 	antiphon string
 	psalm    string
+	dates    map[string]bool
 }
 
 // parsePsalmodyDeclaration parses one corpus declaration. Each non-empty line
 // pairs the symbolic antiphon slot on the left with a concrete psalm key on
-// the right, for example "psalm-antiphon-1 = psalms/110". The single word
-// "ferial" is a stop marker: it preserves the weekday psalter instead of
+// the right, for example "psalm-antiphon-1 = psalms/110". A row may carry a
+// fixed-date selector, for example "... = psalms/130 dates=12-25,12-27";
+// disjoint alternatives for the same antiphon slot are allowed. An alternative
+// whose antiphon text also differs may add "antiphon=<corpus-key>". The single
+// word "ferial" is a stop marker: it preserves the weekday psalter instead of
 // falling through to the shared festal default.
 func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 	body = strings.TrimSpace(body)
@@ -36,27 +42,90 @@ func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 	}
 
 	var items []psalmodyItem
-	seenAntiphons := make(map[string]bool)
+	type antiphonAlternatives struct {
+		unconditional bool
+		dates         map[string]bool
+	}
+	seenAntiphons := make(map[string]antiphonAlternatives)
 	scanner := bufio.NewScanner(strings.NewReader(body))
 	for lineNumber := 1; scanner.Scan(); lineNumber++ {
 		line := strings.TrimSpace(scanner.Text())
 		if line == "" {
 			continue
 		}
-		antiphon, psalm, found := strings.Cut(line, "=")
+		antiphon, rhs, found := strings.Cut(line, "=")
 		antiphon = strings.TrimSpace(antiphon)
-		psalm = strings.TrimSpace(psalm)
-		if !found || antiphon == "" || psalm == "" || strings.Contains(psalm, "=") {
+		rhs = strings.TrimSpace(rhs)
+		if !found || antiphon == "" || rhs == "" {
 			return nil, false, fmt.Errorf("line %d: expected <antiphon-key> = <psalm-key>", lineNumber)
 		}
-		if strings.ContainsAny(antiphon, " \t") || strings.ContainsAny(psalm, " \t") {
+
+		fields := strings.Fields(rhs)
+		if len(fields) == 0 || len(fields) > 3 || strings.Contains(fields[0], "=") {
+			return nil, false, fmt.Errorf("line %d: expected <antiphon-key> = <psalm-key> [dates=MM-DD,...] [antiphon=<corpus-key>]", lineNumber)
+		}
+		psalm := fields[0]
+		antiphonRef := antiphon
+		var dates map[string]bool
+		for _, option := range fields[1:] {
+			switch {
+			case strings.HasPrefix(option, "dates="):
+				if dates != nil {
+					return nil, false, fmt.Errorf("line %d: duplicate dates option", lineNumber)
+				}
+				value := strings.TrimPrefix(option, "dates=")
+				if value == "" {
+					return nil, false, fmt.Errorf("line %d: expected dates=MM-DD,...", lineNumber)
+				}
+				dates = make(map[string]bool)
+				for _, date := range strings.Split(value, ",") {
+					parsed, err := time.Parse("01-02", date)
+					if err != nil || parsed.Format("01-02") != date {
+						return nil, false, fmt.Errorf("line %d: invalid declaration date %q (expected MM-DD)", lineNumber, date)
+					}
+					if dates[date] {
+						return nil, false, fmt.Errorf("line %d: duplicate declaration date %q", lineNumber, date)
+					}
+					dates[date] = true
+				}
+			case strings.HasPrefix(option, "antiphon="):
+				if antiphonRef != antiphon {
+					return nil, false, fmt.Errorf("line %d: duplicate antiphon option", lineNumber)
+				}
+				antiphonRef = strings.TrimPrefix(option, "antiphon=")
+				if antiphonRef == "" {
+					return nil, false, fmt.Errorf("line %d: antiphon option requires a corpus key", lineNumber)
+				}
+			default:
+				return nil, false, fmt.Errorf("line %d: unknown declaration option %q", lineNumber, option)
+			}
+		}
+		if strings.ContainsAny(antiphon, " \t") || strings.ContainsAny(psalm, " \t") || strings.ContainsAny(antiphonRef, " \t") {
 			return nil, false, fmt.Errorf("line %d: corpus keys may not contain whitespace", lineNumber)
 		}
-		if seenAntiphons[antiphon] {
-			return nil, false, fmt.Errorf("line %d: duplicate antiphon key %q", lineNumber, antiphon)
+
+		seen, exists := seenAntiphons[antiphon]
+		if len(dates) == 0 {
+			if exists {
+				return nil, false, fmt.Errorf("line %d: duplicate antiphon key %q", lineNumber, antiphon)
+			}
+			seen.unconditional = true
+		} else {
+			if seen.unconditional {
+				return nil, false, fmt.Errorf("line %d: conditional alternative overlaps unconditional antiphon key %q", lineNumber, antiphon)
+			}
+			if seen.dates == nil {
+				seen.dates = make(map[string]bool)
+			}
+			for date := range dates {
+				if seen.dates[date] {
+					return nil, false, fmt.Errorf("line %d: antiphon key %q repeats date %s", lineNumber, antiphon, date)
+				}
+				seen.dates[date] = true
+			}
 		}
-		seenAntiphons[antiphon] = true
-		items = append(items, psalmodyItem{antiphon: antiphon, psalm: psalm})
+		seenAntiphons[antiphon] = seen
+		items = append(items, psalmodyItem{slot: antiphon, antiphon: antiphonRef, psalm: psalm, dates: dates})
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, false, err
@@ -65,6 +134,30 @@ func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 		return nil, false, fmt.Errorf("declaration has no psalms")
 	}
 	return items, false, nil
+}
+
+func selectPsalmodyItems(items []psalmodyItem, date time.Time) ([]psalmodyItem, error) {
+	monthDay := date.Format("01-02")
+	selected := make([]psalmodyItem, 0, len(items))
+	expected := make(map[string]bool)
+	counts := make(map[string]int)
+	for _, item := range items {
+		expected[item.slot] = true
+		if len(item.dates) != 0 && !item.dates[monthDay] {
+			continue
+		}
+		selected = append(selected, item)
+		counts[item.slot]++
+	}
+	for antiphon := range expected {
+		if counts[antiphon] == 0 {
+			return nil, fmt.Errorf("antiphon key %q has no alternative for date %s", antiphon, monthDay)
+		}
+		if counts[antiphon] > 1 {
+			return nil, fmt.Errorf("antiphon key %q has multiple alternatives for date %s", antiphon, monthDay)
+		}
+	}
+	return selected, nil
 }
 
 func vespersPsalmodyCandidates(day *models.CalendarDay) []string {
@@ -126,6 +219,10 @@ func resolveVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (
 	}
 	if ferial {
 		return nil, source, nil
+	}
+	items, err = selectPsalmodyItems(items, day.Date)
+	if err != nil {
+		return nil, source, fmt.Errorf("invalid vespers psalmody declaration %q: %w", source, err)
 	}
 	return items, source, nil
 }
