@@ -3,11 +3,11 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 307 |
-| Selected structural-review pages | 50 |
+| Modeled structural features | 324 |
+| Selected structural-review pages | 54 |
 | Uncovered features | 0 |
-| Verified text entries | 332 |
-| Text entries needing review | 1560 |
+| Verified text entries | 333 |
+| Text entries needing review | 1561 |
 | Text entries with unknown source | 308 |
 | Stale attestations | 0 |
 
@@ -56,6 +56,8 @@
 - `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
 - `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
 - `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
+- `decision:condition:festal-vespers-psalmody=included`
+- `decision:condition:festal-vespers-psalmody=omitted`
 - `decision:condition:if-cross-commemoration=included`
 - `decision:condition:if-cross-commemoration=omitted`
 - `decision:condition:if-preces=included`
@@ -74,6 +76,20 @@
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-friday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-friday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-monday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-monday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-saturday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-saturday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-sunday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-sunday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-thursday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-thursday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-tuesday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-tuesday=omitted`
+- `decision:condition:not-festal-vespers-psalmody,weekday-wednesday=included`
+- `decision:condition:not-festal-vespers-psalmody,weekday-wednesday=omitted`
 - `decision:condition:not-is-feast,weekday-friday=included`
 - `decision:condition:not-is-feast,weekday-friday=omitted`
 - `decision:condition:not-is-feast,weekday-monday=included`
@@ -299,6 +315,7 @@
 - `resolution:psalm-antiphon-3=ordinary`
 - `resolution:psalm-antiphon-3=proper`
 - `resolution:psalm-antiphon-3=seasonal`
+- `resolution:psalm-antiphon-4-alternate=proper`
 - `resolution:psalm-antiphon-4=commons`
 - `resolution:psalm-antiphon-4=ordinary`
 - `resolution:psalm-antiphon-4=proper`

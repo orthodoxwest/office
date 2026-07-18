@@ -92,6 +92,37 @@ Shared text.
 	}
 }
 
+func TestValidateAllRejectsNearMissVespersPsalmodySection(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "texts", "commons", "apostle.txt")
+	declarationPath := filepath.Join(dir, "texts", "psalmody", "vespers.txt")
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(declarationPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	content := `[vespers-psalmodi]
+@use psalmody/vespers/apostles
+`
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(declarationPath, []byte("[apostles]\nferial\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	got := ValidateAll(dir)
+	want := `texts/commons/apostle.txt:1: unrecognized section name "vespers-psalmodi" (did you mean "vespers-psalmody"?)`
+	if len(got) != 1 {
+		t.Fatalf("ValidateAll() len = %d, want 1 (%v)", len(got), got)
+	}
+	if got[0] != want {
+		t.Fatalf("ValidateAll()[0] = %q, want %q", got[0], want)
+	}
+}
+
 func TestValidateAllFlagsPlaceholderCorpusEntries(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "texts", "ordinary", "lauds.txt")

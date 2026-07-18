@@ -433,7 +433,7 @@ func TestLaudsAndVespersUseIndexedPsalmAntiphons(t *testing.T) {
 		maxRefNum string
 	}{
 		{file: "lauds.txt", laudate: true, maxRefNum: "5"},
-		{file: "vespers.txt", laudate: false, maxRefNum: "4"},
+		{file: "vespers.txt", laudate: false, maxRefNum: "5"},
 	}
 
 	for _, tt := range tests {

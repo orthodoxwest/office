@@ -1,3 +1,6 @@
+[vespers-psalmody]
+@use psalmody/vespers/blessed-virgin
+
 [psalm-antiphon]
 @use proper/vigil-epiphany/psalm-antiphon-1
 

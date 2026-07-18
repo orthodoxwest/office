@@ -47,7 +47,7 @@ func composeMajorHour(
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateHourSectionCondition(section, officeDay, moveable)
+			included := evaluateHourSectionCondition(section, officeDay, moveable, corpus)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue
@@ -59,6 +59,12 @@ func composeMajorHour(
 			switch elem.Type {
 			case "commemorations":
 				elems = append(elems, addCommemorations(officeDay, opts.hourName, corpus)...)
+			case "proper-psalmody":
+				psalmody, _, err := resolveVespersPsalmody(officeDay, corpus)
+				if err != nil {
+					return nil, err
+				}
+				elems = append(elems, composeResolvedPsalmody(officeDay, opts.hourName, psalmody, corpus)...)
 			default:
 				elems = append(elems, resolveHourElement(officeDay, opts.hourName, elem, corpus))
 			}

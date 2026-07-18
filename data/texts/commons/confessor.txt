@@ -1,3 +1,6 @@
+[vespers-psalmody]
+@use ordinary/vespers/festal-psalmody
+
 [psalm-antiphon]
 @use commons/confessor/psalm-antiphon-1
 

@@ -25,7 +25,7 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 
 	for _, section := range sections {
 		if section.Condition != "" {
-			included := evaluateHourSectionCondition(section, day, moveable)
+			included := evaluateHourSectionCondition(section, day, moveable, corpus)
 			recordConditionDecision(hour, section.Condition, included, section.Name)
 			if !included {
 				continue

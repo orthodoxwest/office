@@ -18,6 +18,9 @@ He shall be great, * even unto the ends of the earth: and this man shall be the 
 # SOURCE: draft archdiocesan Lauds book, p. 586 (Christ the King)
 The nation and kingdom * that will not serve thee shall perish; yea, those nations shall be utterly wasted.
 
+[vespers-psalmody-first]
+@use ordinary/vespers/festal-psalmody
+
 [psalm-antiphon]
 @use proper/christ-the-king/psalm-antiphon-1
 

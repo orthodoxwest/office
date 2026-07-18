@@ -59,7 +59,7 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 		// Plain text file: key is path without .txt extension
 		key := strings.TrimSuffix(relPath, ".txt")
 		key = filepath.ToSlash(key)
-		corpus.texts[key] = strings.TrimSpace(text)
+		corpus.texts[key] = strings.TrimSpace(stripCommentLines(text))
 		return nil
 	})
 
@@ -71,6 +71,21 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	}
 
 	return corpus, nil
+}
+
+// stripCommentLines removes corpus annotations from plain-text files using
+// the same whole-line rule as loadINIFile. Blank lines and inline hash
+// characters remain liturgical content.
+func stripCommentLines(text string) string {
+	lines := strings.Split(text, "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "#") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	return strings.Join(kept, "\n")
 }
 
 // NewTestCorpus creates a TextCorpus from a map, for use in tests.
@@ -127,15 +142,34 @@ func (c *TextCorpus) HasKeySuffix(suffix string) bool {
 	return false
 }
 
-// Entries returns a copy of the concrete corpus entries keyed by reference
-// path. Aliases are intentionally omitted so provenance and review queues count
-// each shared text only once.
+// Entries returns a copy of the concrete renderable-text entries keyed by
+// reference path. Aliases and structural declarations in the psalmody/
+// namespace are intentionally omitted so provenance and review queues count
+// each shared liturgical text only once.
 func (c *TextCorpus) Entries() map[string]string {
 	out := make(map[string]string, len(c.texts))
 	for k, v := range c.texts {
+		if strings.HasPrefix(k, "psalmody/") {
+			continue
+		}
 		out[k] = v
 	}
 	return out
+}
+
+// References returns every resolvable corpus key, including aliases, sorted
+// alphabetically. It is intended for validators that must inspect declarations
+// stored behind @use as well as concrete text entries.
+func (c *TextCorpus) References() []string {
+	refs := make([]string, 0, len(c.texts)+len(c.aliases))
+	for key := range c.texts {
+		refs = append(refs, key)
+	}
+	for key := range c.aliases {
+		refs = append(refs, key)
+	}
+	sort.Strings(refs)
+	return refs
 }
 
 // extractAndValidateAliases moves exact @use directives out of the concrete

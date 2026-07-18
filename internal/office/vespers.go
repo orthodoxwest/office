@@ -13,6 +13,11 @@ type VespersComposer struct{}
 
 // Compose builds a complete Vespers hour for the given day.
 func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
+	if day != nil {
+		if _, _, err := resolveVespersPsalmody(vespersOfficeDay(day), corpus); err != nil {
+			return nil, err
+		}
+	}
 	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
 		hourName:  "vespers",
 		title:     "Vespers",

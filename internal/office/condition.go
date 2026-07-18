@@ -7,6 +7,7 @@ import (
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/texts"
 )
 
 type conditionKind uint8
@@ -17,6 +18,7 @@ const (
 	conditionCrossCommemoration
 	conditionIsFeast
 	conditionFestalLaudsPsalmody
+	conditionFestalVespersPsalmody
 	conditionIsFerial
 	conditionWeekday
 	conditionFeast
@@ -76,10 +78,11 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionIsFeast}, nil
 	case "festal-lauds-psalmody":
 		return conditionClause{kind: conditionFestalLaudsPsalmody}, nil
+	case "festal-vespers-psalmody":
+		return conditionClause{kind: conditionFestalVespersPsalmody}, nil
 	case "is-ferial":
 		return conditionClause{kind: conditionIsFerial}, nil
 	}
-
 	if value, ok := strings.CutPrefix(atom, "weekday-"); ok {
 		weekdays := map[string]time.Weekday{
 			"sunday": time.Sunday, "monday": time.Monday, "tuesday": time.Tuesday,
@@ -108,9 +111,9 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 	return conditionClause{}, fmt.Errorf("unknown condition %q", atom)
 }
 
-func (c parsedCondition) evaluate(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+func (c parsedCondition) evaluate(day *models.CalendarDay, moveable *calendar.MoveableDates, corpus *texts.TextCorpus) bool {
 	for _, clause := range c.clauses {
-		matched := clause.evaluate(day, moveable)
+		matched := clause.evaluate(day, moveable, corpus)
 		if clause.negated {
 			matched = !matched
 		}
@@ -121,7 +124,7 @@ func (c parsedCondition) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 	return true
 }
 
-func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.MoveableDates, corpus *texts.TextCorpus) bool {
 	switch c.kind {
 	case conditionPreces:
 		return shouldSayPreces(day, moveable)
@@ -135,6 +138,8 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 			day.Celebration.Category != models.CategorySunday
 	case conditionFestalLaudsPsalmody:
 		return usesFestalLaudsPsalmody(day)
+	case conditionFestalVespersPsalmody:
+		return usesFestalVespersPsalmody(day, corpus)
 	case conditionIsFerial:
 		return day.Celebration == nil || day.Celebration.Category == models.CategoryFeria
 	case conditionWeekday:
@@ -152,13 +157,14 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 // evaluates the condition already compiled into HourSection.
 func evaluateCondition(condition string, day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
 	parsed, err := parseCondition(condition)
-	return err == nil && parsed.evaluate(day, moveable)
+	return err == nil && parsed.evaluate(day, moveable, nil)
 }
 
-func evaluateHourSectionCondition(section HourSection, day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+func evaluateHourSectionCondition(section HourSection, day *models.CalendarDay, moveable *calendar.MoveableDates, corpus *texts.TextCorpus) bool {
 	if section.parsedCondition != nil {
-		return section.parsedCondition.evaluate(day, moveable)
+		return section.parsedCondition.evaluate(day, moveable, corpus)
 	}
 	// Hand-built sections in unit tests do not pass through the file parser.
-	return evaluateCondition(section.Condition, day, moveable)
+	parsed, err := parseCondition(section.Condition)
+	return err == nil && parsed.evaluate(day, moveable, corpus)
 }

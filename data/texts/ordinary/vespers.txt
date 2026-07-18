@@ -195,6 +195,9 @@ Amen.
 [opening-versicle]
 @use shared/formulas/opening-versicle
 
+[festal-psalmody]
+@use psalmody/vespers/festal
+
 [psalm-antiphon]
 O Lord, hear my prayer; and let our cry come unto thee.
 

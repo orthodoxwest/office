@@ -24,6 +24,9 @@ By the sign of the Cross, * deliver us from our enemies, O our God, alleluia.
 [psalm-antiphon-4-vespers]
 @use proper/finding-holy-cross/psalm-antiphon-5
 
+[vespers-psalmody]
+@use ordinary/vespers/festal-psalmody
+
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 461 (Finding of the Holy Cross)
 Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Life of the world was hanged, on thee was Christ victorious, and death over death did for ever triumph, alleluia.

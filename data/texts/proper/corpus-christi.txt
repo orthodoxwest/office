@@ -1,3 +1,9 @@
+[vespers-psalmody-first]
+@use psalmody/vespers/corpus-christi-first
+
+[vespers-psalmody]
+@use psalmody/vespers/corpus-christi
+
 [psalm-antiphon]
 @use proper/corpus-christi/psalm-antiphon-1
 

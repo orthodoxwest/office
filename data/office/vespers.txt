@@ -20,8 +20,14 @@ Ref = ordinary/vespers/opening-versicle
 Type = proper-antiphon
 Ref = alleluia
 
+[Psalmody-Festal]
+Condition = festal-vespers-psalmody
+
+Type = proper-psalmody
+Ref = vespers-psalmody
+
 [Psalmody-Sunday]
-Condition = weekday-sunday
+Condition = not-festal-vespers-psalmody,weekday-sunday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -72,7 +78,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Monday]
-Condition = weekday-monday
+Condition = not-festal-vespers-psalmody,weekday-monday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -123,7 +129,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Tuesday]
-Condition = weekday-tuesday
+Condition = not-festal-vespers-psalmody,weekday-tuesday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -174,7 +180,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Wednesday]
-Condition = weekday-wednesday
+Condition = not-festal-vespers-psalmody,weekday-wednesday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -225,7 +231,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Thursday]
-Condition = weekday-thursday
+Condition = not-festal-vespers-psalmody,weekday-thursday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -276,7 +282,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Friday]
-Condition = weekday-friday
+Condition = not-festal-vespers-psalmody,weekday-friday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -327,7 +333,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Saturday]
-Condition = weekday-saturday
+Condition = not-festal-vespers-psalmody,weekday-saturday
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1

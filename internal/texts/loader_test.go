@@ -65,7 +65,9 @@ Have mercy upon me, O Lord.
 func TestLoadTextsStripsComments(t *testing.T) {
 	dir := t.TempDir()
 	ordinaryDir := filepath.Join(dir, "texts", "ordinary")
+	psalmDir := filepath.Join(dir, "texts", "psalms")
 	os.MkdirAll(ordinaryDir, 0755)
+	os.MkdirAll(psalmDir, 0755)
 	os.WriteFile(filepath.Join(ordinaryDir, "lauds.txt"), []byte(`# File-level comment before any section.
 
 [collect]
@@ -77,6 +79,12 @@ O God, who hast prepared for them that love thee.
 First stanza line one.
 
 Second stanza line one.
+`), 0644)
+	os.WriteFile(filepath.Join(psalmDir, "116b.txt"), []byte(`Psalm 116:10-16
+
+# SOURCE: printed psalter
+I believed, and therefore will I speak * but I was sore troubled.
+The # character in a liturgical line remains.
 `), 0644)
 
 	corpus, err := LoadTexts(dir)
@@ -90,12 +98,17 @@ Second stanza line one.
 	if got := corpus.Get("ordinary/lauds/hymn"); got != "First stanza line one.\n\nSecond stanza line one." {
 		t.Errorf("hymn = %q, want stanza break preserved", got)
 	}
+	if got := corpus.Get("psalms/116b"); got != "Psalm 116:10-16\n\nI believed, and therefore will I speak * but I was sore troubled.\nThe # character in a liturgical line remains." {
+		t.Errorf("psalms/116b = %q, plain-text comment not stripped", got)
+	}
 }
 
 func TestLoadTextsResolvesAliasesAndOmitsThemFromEntries(t *testing.T) {
 	dir := t.TempDir()
 	properDir := filepath.Join(dir, "texts", "proper")
+	psalmodyDir := filepath.Join(dir, "texts", "psalmody")
 	os.MkdirAll(properDir, 0755)
+	os.MkdirAll(psalmodyDir, 0755)
 	os.WriteFile(filepath.Join(properDir, "shared.txt"), []byte(`[responsory]
 R. Shared text.
 
@@ -104,6 +117,9 @@ R. Shared text.
 
 [alias-chain]
 @use proper/shared/alias
+`), 0644)
+	os.WriteFile(filepath.Join(psalmodyDir, "vespers.txt"), []byte(`[festal]
+psalm-antiphon-1 = psalms/110
 `), 0644)
 
 	corpus, err := LoadTexts(dir)
@@ -121,6 +137,12 @@ R. Shared text.
 	}
 	if _, ok := corpus.Entries()["proper/shared/alias"]; ok {
 		t.Fatal("Entries includes alias")
+	}
+	if _, ok := corpus.Entries()["psalmody/vespers/festal"]; ok {
+		t.Fatal("Entries includes structural psalmody declaration")
+	}
+	if !corpus.Has("psalmody/vespers/festal") {
+		t.Fatal("Has(psalmody declaration) = false")
 	}
 }
 

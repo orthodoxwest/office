@@ -1,3 +1,6 @@
+[vespers-psalmody]
+@use psalmody/vespers/blessed-virgin
+
 [psalm-antiphon]
 @use proper/circumcision/psalm-antiphon-1
 
