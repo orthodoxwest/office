@@ -40,11 +40,22 @@ He the holy Cross endured, * burst the gates of hell in twain: begirt with might
 O Cross, * surpassing all the stars in splendour, world-renowned, exceeding dear unto the hearts of men, holier than all things: thou only wert counted worthy to uphold the world's ransom. Sweet the wood, sweet the iron, bearing so sweet a burden: bring aid to this congregation, who are here assembled to celebrate thy praises, alleluia, alleluia.
 
 [commemoration-antiphon]
-O what a work of love was that * when Life and death died together upon the Tree. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 541 (Exaltation of the Holy Cross; out of Paschaltide)
+O mighty work of mercy! * death then died, when life died upon the Tree.
+
+[commemoration-antiphon-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 453 (Finding of the Holy Cross; Paschaltide)
+O mighty work of mercy! * death then died, when life died upon the Tree, alleluia.
 
 [commemoration-versicle]
-V. This sign of the Cross shall be in heaven. (Alleluia.)
-R. When the Lord cometh to judgment. (Alleluia.)
+# SOURCE: draft archdiocesan Vespers book, p. 483 (Exaltation of the Holy Cross; out of Paschaltide)
+V. This sign of the Cross shall be in heaven.
+R. When the Lord shall come to judgment.
+
+[commemoration-versicle-easter]
+# SOURCE: draft archdiocesan Vespers book, p. 381 (Finding of the Holy Cross; Paschaltide)
+V. This sign of the Cross shall be in heaven, alleluia.
+R. When the Lord shall come to judgment, alleluia.
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 462, 383 (Finding of the Holy Cross)

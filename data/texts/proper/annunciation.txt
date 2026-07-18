@@ -112,13 +112,41 @@ R. The Lord is with thee, alleluia.
 [versicle-vespers-easter]
 @use proper/annunciation/versicle-lauds-easter
 
-[short-responsory-vespers]
+[short-responsory-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 438 (Annunciation; out of Paschaltide)
 R. The Angel of the Lord * announced unto Mary.
 R. The Angel of the Lord * announced unto Mary.
 V. And she conceived by the Holy Ghost.
 R. Announced unto Mary.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Angel of the Lord * announced unto Mary.
+
+[short-responsory-lauds-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 438 (Annunciation; Paschaltide)
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
+V. And she conceived by the Holy Ghost.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
+
+[short-responsory-vespers]
+# SOURCE: draft archdiocesan Vespers book, p. 351 (Annunciation; out of Paschaltide)
+R. The Angel of the Lord * announced unto Mary.
+R. The Angel of the Lord * announced unto Mary.
+V. And she conceived by the Holy Ghost.
+R. Announced unto Mary.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Angel of the Lord * announced unto Mary.
+
+[short-responsory-vespers-easter]
+# SOURCE: draft archdiocesan Vespers book, p. 351 (Annunciation; Paschaltide)
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
+V. And she conceived by the Holy Ghost.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/annunciation/chapter-lauds

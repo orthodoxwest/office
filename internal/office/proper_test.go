@@ -687,6 +687,7 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 			"psalm-antiphon-3",
 			"psalm-antiphon-4",
 			"psalm-antiphon-5",
+			"short-responsory",
 			"versicle",
 			"benedictus-antiphon",
 			"magnificat-antiphon",
@@ -702,6 +703,9 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 				wantSuffix := slot
 				if slot == "versicle" {
 					wantSuffix = "versicle-lauds"
+				}
+				if slot == "short-responsory" {
+					wantSuffix = "short-responsory-lauds"
 				}
 				if season == models.Easter {
 					wantSuffix += "-easter"
@@ -721,6 +725,15 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 			if ref != wantRef {
 				t.Errorf("%s I Vespers source ref = %q, want %q", season, ref, wantRef)
 			}
+
+			_, ref = resolveProperText(day, "vespers", "short-responsory", corpus)
+			wantRef = "proper/annunciation/short-responsory-vespers"
+			if season == models.Easter {
+				wantRef += "-easter"
+			}
+			if ref != wantRef {
+				t.Errorf("%s Vespers short-responsory source ref = %q, want %q", season, ref, wantRef)
+			}
 		}
 
 		commemoration := &models.Feast{
@@ -731,6 +744,65 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 		if got != "The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph. Alleluia." ||
 			ref != "proper/annunciation/commemoration-antiphon-easter" {
 			t.Errorf("Easter commemoration antiphon = %q (%s), want Annunciation Easter variant", got, ref)
+		}
+	})
+
+	t.Run("Finding of the Holy Cross uses Easter commemoration sections only in Eastertide", func(t *testing.T) {
+		commemoration := &models.Feast{
+			ID:       "finding-holy-cross",
+			Category: models.CategoryLord,
+		}
+		tests := []struct {
+			name         string
+			season       models.Season
+			slot         string
+			wantText     string
+			wantRef      string
+			wantAlleluia bool
+		}{
+			{
+				name:         "antiphon out of Paschaltide",
+				season:       models.Lent,
+				slot:         "commemoration-antiphon",
+				wantText:     "O mighty work of mercy! * death then died, when life died upon the Tree.",
+				wantRef:      "proper/finding-holy-cross/commemoration-antiphon",
+				wantAlleluia: false,
+			},
+			{
+				name:         "antiphon in Paschaltide",
+				season:       models.Easter,
+				slot:         "commemoration-antiphon",
+				wantText:     "O mighty work of mercy! * death then died, when life died upon the Tree, alleluia.",
+				wantRef:      "proper/finding-holy-cross/commemoration-antiphon-easter",
+				wantAlleluia: true,
+			},
+			{
+				name:         "versicle out of Paschaltide",
+				season:       models.Lent,
+				slot:         "commemoration-versicle",
+				wantText:     "V. This sign of the Cross shall be in heaven.\nR. When the Lord shall come to judgment.",
+				wantRef:      "proper/finding-holy-cross/commemoration-versicle",
+				wantAlleluia: false,
+			},
+			{
+				name:         "versicle in Paschaltide",
+				season:       models.Easter,
+				slot:         "commemoration-versicle",
+				wantText:     "V. This sign of the Cross shall be in heaven, alleluia.\nR. When the Lord shall come to judgment, alleluia.",
+				wantRef:      "proper/finding-holy-cross/commemoration-versicle-easter",
+				wantAlleluia: true,
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				got, ref := lookupCommemoration(commemoration, tt.season, "lauds", tt.slot, corpus)
+				if got != tt.wantText || ref != tt.wantRef {
+					t.Fatalf("text = %q (%s), want %q (%s)", got, ref, tt.wantText, tt.wantRef)
+				}
+				if strings.Contains(strings.ToLower(got), "alleluia") != tt.wantAlleluia {
+					t.Fatalf("Alleluia presence in %q = %v, want %v", got, strings.Contains(strings.ToLower(got), "alleluia"), tt.wantAlleluia)
+				}
+			})
 		}
 	})
 
