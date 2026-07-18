@@ -152,13 +152,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Holiness becometh thine house, * O Lord.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C8 [Responsory Breve Sexta] — check against diurnal
-R. This place is holy, * wherein the Priest prayeth.
-R. This place is holy, * wherein the Priest prayeth
-V. For the pardon of the transgressions and offences of the people.
-R. The Priest prayeth.
+# SOURCE: draft archdiocesan Commons Vespers book, p. 143 (Common of the Dedication of a Church)
+R. This place is holy, * wherein the priest prayeth.
+R. This place is holy, * wherein the priest prayeth.
+V. For the sins and offences of the people.
+R. Wherein the priest prayeth.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This place is holy, * wherein the Priest prayeth.
+R. This place is holy, * wherein the priest prayeth.
 
 [short-responsory-none]
 # SOURCE: divinum-officium Commune/C8 [Responsory Breve Nona] — check against diurnal

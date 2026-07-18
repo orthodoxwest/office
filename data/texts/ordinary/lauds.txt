@@ -362,7 +362,7 @@ Alleluia, * alleluia, alleluia.
 
 [psalm-antiphon-1-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 7 (Monday)
-Have mercy upon me, * O God.
+Have mercy * upon me, O God.
 
 [psalm-antiphon-2-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 8 (Monday)

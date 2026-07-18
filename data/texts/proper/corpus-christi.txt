@@ -209,13 +209,13 @@ V. Thou gavest them bread from heaven, alleluia.
 R. Containing in itself all sweetness, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Tertia] — check against diurnal
-R. He gave them the bread of heaven. * Alleluia, Alleluia.
-R. He gave them of the bread of heaven. * Alleluia, Alleluia.
-V. Man did eat Angels' bread.
-R. Alleluia, Alleluia.
+# SOURCE: draft Temporal Cycle Vespers book, pp. 200–201 (Saturday within the Octave of Corpus Christi)
+R. He gave them bread from heaven, * alleluia, alleluia.
+R. He gave them bread from heaven, * alleluia, alleluia.
+V. So man did eat angels' food.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. He gave them the bread of heaven. * Alleluia, Aleluia.
+R. He gave them bread from heaven, * alleluia, alleluia.
 
 [short-responsory-sext]
 # SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Sexta] — check against diurnal
