@@ -1,6 +1,7 @@
 package office
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -9,6 +10,115 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
 )
+
+func vespersPsalmLabels(t *testing.T, day *models.CalendarDay) []string {
+	t.Helper()
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	hour, err := engine.ComposeHour("vespers", day, calendar.ComputeMoveableDates(day.Date.Year()))
+	if err != nil {
+		t.Fatalf("ComposeHour(vespers): %v", err)
+	}
+
+	var labels []string
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			if elem.Type == models.Psalm {
+				labels = append(labels, elem.Label)
+			}
+		}
+	}
+	return labels
+}
+
+func TestComposeVespersNativityIIUsesProperFestalPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 12, 25, 0, 0, 0, 0, time.UTC),
+		Season: models.Christmas,
+		Color:  models.White,
+		Celebration: &models.Feast{
+			ID:       "christmas",
+			Category: models.CategoryLord,
+		},
+	}
+
+	got := vespersPsalmLabels(t, day)
+	want := []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 130", "Psalm 132"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("Nativity II Vespers psalms = %v, want %v", got, want)
+	}
+}
+
+func TestComposeVespersApostleUsesCommonFestalPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 11, 30, 0, 0, 0, 0, time.UTC),
+		Season: models.Advent,
+		Color:  models.Red,
+		Celebration: &models.Feast{
+			ID:       "st-andrew",
+			Category: models.CategoryApostle,
+		},
+	}
+
+	got := vespersPsalmLabels(t, day)
+	want := []string{"Psalm 110", "Psalm 113", "Psalm 116b", "Psalm 139"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("apostle II Vespers psalms = %v, want %v", got, want)
+	}
+}
+
+func TestComposeVespersFirstVespersUsesFollowingFeastFestalPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 4, 30, 0, 0, 0, 0, time.UTC),
+		Season: models.Easter,
+		Color:  models.White,
+		Vespers: models.VespersDesignation{
+			Owner: models.VespersIOfFollowing,
+			Feast: &models.Feast{
+				ID:       "ss-philip-james",
+				Category: models.CategoryApostle,
+				Color:    models.Red,
+			},
+			Color:  models.Red,
+			Season: models.Easter,
+		},
+	}
+
+	got := vespersPsalmLabels(t, day)
+	want := []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 113"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("apostle I Vespers psalms = %v, want %v", got, want)
+	}
+}
+
+func TestComposeVespersFeriaRetainsWeekdayPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 7, 7, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Color:  models.Green,
+	}
+
+	got := vespersPsalmLabels(t, day)
+	want := []string{"Psalm 130", "Psalm 131", "Psalm 132", "Psalm 133"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("ferial Tuesday Vespers psalms = %v, want %v", got, want)
+	}
+}
+
+func TestFestalVespersPsalmodyLeavesUnattestedClassOnPsalter(t *testing.T) {
+	day := &models.CalendarDay{
+		Date: time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC),
+		Celebration: &models.Feast{
+			ID:       "st-athanasius",
+			Category: models.CategoryConfessorDoctor,
+		},
+	}
+	if usesFestalVespersPsalmody(day) {
+		t.Fatalf("unattested confessor-doctor class selected profile %q", festalVespersPsalmody(day))
+	}
+}
 
 func TestVespersWeekdayCondition(t *testing.T) {
 	tests := []struct {

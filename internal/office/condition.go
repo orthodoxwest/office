@@ -17,6 +17,7 @@ const (
 	conditionCrossCommemoration
 	conditionIsFeast
 	conditionFestalLaudsPsalmody
+	conditionFestalVespersPsalmody
 	conditionIsFerial
 	conditionWeekday
 	conditionFeast
@@ -76,8 +77,17 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionIsFeast}, nil
 	case "festal-lauds-psalmody":
 		return conditionClause{kind: conditionFestalLaudsPsalmody}, nil
+	case "festal-vespers-psalmody":
+		return conditionClause{kind: conditionFestalVespersPsalmody}, nil
 	case "is-ferial":
 		return conditionClause{kind: conditionIsFerial}, nil
+	}
+	if value, ok := strings.CutPrefix(atom, "festal-vespers-psalmody-"); ok {
+		profile := vespersPsalmodyProfile(value)
+		if !profile.valid() {
+			return conditionClause{}, fmt.Errorf("invalid festal Vespers psalmody profile %q", value)
+		}
+		return conditionClause{kind: conditionFestalVespersPsalmody, value: value}, nil
 	}
 
 	if value, ok := strings.CutPrefix(atom, "weekday-"); ok {
@@ -135,6 +145,11 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 			day.Celebration.Category != models.CategorySunday
 	case conditionFestalLaudsPsalmody:
 		return usesFestalLaudsPsalmody(day)
+	case conditionFestalVespersPsalmody:
+		if c.value == "" {
+			return usesFestalVespersPsalmody(day)
+		}
+		return festalVespersPsalmody(day) == vespersPsalmodyProfile(c.value)
 	case conditionIsFerial:
 		return day.Celebration == nil || day.Celebration.Category == models.CategoryFeria
 	case conditionWeekday:
