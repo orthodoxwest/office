@@ -1,3 +1,7 @@
+[vespers-psalmody]
+# The generic Lord profile is not evidence for this unprinted Paschal office.
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/easter-sunday/easter-antiphon-1
 

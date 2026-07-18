@@ -1,5 +1,10 @@
+[vespers-psalmody-first]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 656–659 (Common of a Confessor and Bishop, I Vespers; Doctor variant on p. 665)
+@use ordinary/vespers/festal-psalmody
+
 [vespers-psalmody]
-@use psalmody/vespers/ferial
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 667–670 (Common of a Confessor and Bishop, II Vespers; Doctor variant on p. 676)
+@use psalmody/vespers/confessor-bishop
 
 [psalm-antiphon]
 @use commons/confessor-doctor/psalm-antiphon-1
@@ -23,6 +28,22 @@ O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing
 [psalm-antiphon-5]
 # SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
 Good and faithful servant, * enter thou into the joy of thy Lord.
+
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 656, 667 (Common of a Confessor and Bishop)
+@use commons/confessor-bishop/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 657, 668 (Common of a Confessor and Bishop)
+@use commons/confessor-bishop/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 658, 669 (Common of a Confessor and Bishop)
+@use commons/confessor-bishop/psalm-antiphon-3
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 659, 670 (Common of a Confessor and Bishop)
+@use commons/confessor-bishop/psalm-antiphon-5
 
 [benedictus-antiphon]
 @use commons/confessor-bishop/benedictus-antiphon

@@ -1,6 +1,10 @@
 [vespers-psalmody-first]
 @use ordinary/vespers/festal-psalmody
 
+[vespers-psalmody]
+# SOURCE: draft Temporal Cycle Vespers book, pp. 181–188 (The Feast of Pentecost) — only I Vespers is printed
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/pentecost/psalm-antiphon-1
 

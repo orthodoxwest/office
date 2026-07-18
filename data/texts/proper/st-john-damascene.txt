@@ -1,0 +1,15 @@
+[vespers-psalmody]
+# SOURCE: draft archdiocesan Commons Vespers book, pp. 678–681, 687 (Common of a Confessor not a Bishop; John named among the non-bishop Doctors)
+@use ordinary/vespers/festal-psalmody
+
+[psalm-antiphon-1-vespers]
+@use commons/confessor/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+@use commons/confessor/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+@use commons/confessor/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+@use commons/confessor/psalm-antiphon-4-vespers

@@ -21,6 +21,10 @@ By the sign * of the Cross, deliver us from our enemies, O our God.
 [vespers-psalmody-first]
 @use ordinary/vespers/festal-psalmody
 
+[vespers-psalmody]
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 477–485 (Exaltation of the Holy Cross) — only I Vespers is printed
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/exaltation-holy-cross/psalm-antiphon-1
 

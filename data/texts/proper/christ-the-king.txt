@@ -21,6 +21,10 @@ The nation and kingdom * that will not serve thee shall perish; yea, those natio
 [vespers-psalmody-first]
 @use ordinary/vespers/festal-psalmody
 
+[vespers-psalmody]
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 515–523 (Christ the King) — only I Vespers is printed
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/christ-the-king/psalm-antiphon-1
 
