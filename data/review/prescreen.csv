@@ -1,8 +1,5 @@
 key,content_hash,severity,reason,flagged,issue
-commons/apostle/psalm-antiphon-4-first-vespers,d8c01a0143cf,medium,modern pronouns (you/your) amid archaic register; diurnal likely thou-form,2026-07,
 commons/bishop-martyr/short-responsory-sext,f86f1da5a79b,high,"division of Ps 21:3 garbled: stray capitals, wrong split of responsory",2026-07,
-commons/blessed-virgin/hymn-vespers,7ab64f1db97a,high,begins with untranslated DO rubric line where the hymn title belongs; Ave maris stella title absent,2026-07,
-commons/confessor/psalm-antiphon-1,267eed1e880c,medium,'deliverest' where Matt 25:20 wants past tense 'deliveredst',2026-07,
 commons/dedication/hymn-lauds,1c0f44685a4c,medium,American spellings (honor/splendor) and 'Holy Zions Help' missing apostrophe,2026-07,
 commons/dedication/short-responsory-sext,d4cd9e21d700,medium,R. line missing final period,2026-07,
 commons/evangelist/psalm-antiphon-1,4e2d648ffd88,medium,modern pronouns (you/your) amid archaic register; diurnal likely thou-form,2026-07,
@@ -26,7 +23,6 @@ proper/christ-the-king/chapter-sext,51694a704d0f,high,text begins 'LL things' (d
 proper/corpus-christi/short-responsory-terce,26a1551bf34c,high,repeated R. lines differ ('the bread' vs 'of the bread'); 'Aleluia' misspelling,2026-07,
 proper/easter-sunday-3/benedictus-antiphon-friday,970ac73e509f,high,garbled 'Alin the breaking of bread' and missing punctuation 'bread Alleluia Alleluia' (Luke 24:35),2026-07,
 proper/easter-sunday-3/magnificat-antiphon-thursday,092a1fd8bc0a,high,garbled seeding: 'am' for 'and' plus truncated 'your jo;' with stray semicolon (John 16:22),2026-07,
-proper/epiphany/collect,257df252103d,high,collect ends with a colon and no termination formula; verify the ending the diurnal prints,2026-07,
 proper/finding-holy-cross/chapter-terce,cc9884ddfa82,medium,missing 'R. Thanks be to God.' after chapter,2026-07,
 proper/finding-holy-cross/commemoration-antiphon,7696bd33c7ec,medium,parenthesized '(Alleluia.)' renders year-round; confirm Eastertide-conditional rendering against book,2026-07,
 proper/finding-holy-cross/commemoration-versicle,1287dca8dbd1,medium,parenthesized '(Alleluia.)' renders year-round; confirm Eastertide-conditional rendering against book,2026-07,

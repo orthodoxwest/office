@@ -36,7 +36,7 @@ When the wise men saw the star * they said one unto another: This is the sign of
 @use proper/epiphany/versicle-vespers
 
 [collect]
-O God, Who by the leading of a star didst, as on this day, manifest thine Only-begotten Son to the Gentiles, mercifully grant that we, which know thee now by faith, may after this life have the fruition of thy glorious Godhead:
+O God, who on this day by the leading of a star didst manifest thy only-begotten Son to the Gentiles: mercifully grant; that we, which know thee now by faith, may be brought even to the contemplation of the beauty of thy majesty.
 
 [chapter-lauds]
 # SOURCE: divinum-officium Sancti/01-06 [Capitulum Laudes] — check against diurnal

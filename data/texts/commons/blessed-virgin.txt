@@ -2,8 +2,7 @@
 @use commons/blessed-virgin/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-While the King sitteth at his table, * my spikenard sendeth forth the smell thereof
+While the King sitteth at his table, * my spikenard sendeth forth a sweet-smelling savour.
 
 [psalm-antiphon-2]
 # SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
@@ -14,8 +13,7 @@ His left hand is under my head, * and his right hand doth embrace me.
 I am black but comely, * O ye daughters of Jerusalem; therefore hath the King loved me, and brought me into his chamber.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-Lo the winter is past, * the rain is over and gone. Rise up, my love, and come away.
+Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away.
 
 [psalm-antiphon-5]
 # SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
@@ -74,44 +72,42 @@ To Father and to Paraclete.
 Amen.
 
 [hymn-vespers]
-# SOURCE: divinum-officium CommuneM/C11 [HymnusM Vespera] — check against diurnal
-/:Prima stropha sequentis hymni dicitur flexis genibus.:/
+Ave, maris stella
 
-/:The first verse of the following hymn is said genuflecting.:/
-Ave, star of ocean,
-Child divine who barest,
-Mother, ever-Virgin,
-Heaven's portal fairest.
+Star of ocean fairest,
+Mother, God who barest,
+Virgin thou immortal,
+Heaven's blissful portal.
 
-Taking that sweet Ave
-Erst by Gabriel spoken,
-Eva's name reversing,
-Be of peace the token.
+Ave thou receivest,
+Gabriel's word believest,
+Change to peace and gladness
+Eva's name of sadness.
 
-Break the sinners' fetters,
-Light to blind restoring,
-All our ills dispelling,
-Every boon imploring.
+Loose the bonds of terror,
+Lighten blinded error,
+All our ills repressing,
+Pray for ev'ry blessing.
 
-Show thyself a mother
-In thy supplication;
-He will hear who chose thee
-At his incarnation.
+Mother's care displaying,
+Offer him thy praying,
+Who, when born our Brother,
+Chose thee for his Mother.
 
-Maid all maids excelling,
-Passing meek and lowly,
-Win for sinners pardon,
-Make us chaste and holy.
+Virgin all-excelling,
+Gentle past our telling,
+Pardoned sinners render
+Gentle, chaste, and tender.
 
-As we onward journey
-Aid our weak endeavour,
-Till we gaze on Jesus
-And rejoice forever.
+In pure paths direct us,
+On our way protect us,
+Till, on Jesus gazing,
+We shall join thy praising.
 
-Father, Son, and Spirit,
-Three in One confessing,
-Give we equal glory
-Equal praise and blessing.
+Father, Son eternal,
+Holy Ghost supernal,
+With one praise we bless thee,
+Three in One confess thee.
 Amen.
 
 [versicle-lauds]

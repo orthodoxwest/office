@@ -32,7 +32,7 @@ O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the 
 @use commons/confessor-doctor/psalm-antiphon-1
 
 [commemoration-versicle]
-V. The Lord loved him and beautified him.
+V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.
 
 [collect]
