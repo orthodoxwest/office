@@ -18,6 +18,15 @@ Mountains and all hills * shall be abased, and the crooked shall be made straigh
 # SOURCE: draft archdiocesan Lauds book, p. 33 (The Third Sunday in Advent)
 Let us live righteously and godly, * looking for that blessed hope, and the coming of the Lord.
 
+[psalm-antiphon-1-vespers]
+@use proper/advent-sunday-3/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/advent-sunday-3/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/advent-sunday-3/psalm-antiphon-3
+
 [psalm-antiphon]
 @use proper/advent-sunday-3/psalm-antiphon-1
 

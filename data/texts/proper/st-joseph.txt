@@ -115,6 +115,17 @@ Amen.
 V. He made him lord of His house.
 R. And ruler of all His substance.
 
+[short-responsory-first-vespers]
+@use proper/st-joseph/short-responsory-vespers
+
+[short-responsory-vespers]
+R. I called upon the Lord, * the Father of my Lord.
+R. I called upon the Lord, * the Father of my Lord.
+V. That he would not leave me in the days of my trouble.
+R. The Father of my Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I called upon the Lord, * the Father of my Lord.
+
 [short-responsory-terce]
 # SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Tertia] — check against diurnal
 R. He made him * lord of His house.

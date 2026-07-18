@@ -18,6 +18,15 @@ Ho, every one * that thirsteth, come ye to the waters: seek ye the Lord while he
 # SOURCE: draft archdiocesan Lauds book, p. 10 (The First Sunday in Advent)
 Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 
+[psalm-antiphon-1-vespers]
+@use proper/advent-sunday-1/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/advent-sunday-1/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/advent-sunday-1/psalm-antiphon-3
+
 [psalm-antiphon]
 @use proper/advent-sunday-1/psalm-antiphon-1
 

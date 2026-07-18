@@ -21,6 +21,15 @@ O ye wells, * and all that move in the waters, sing a hymn unto God, alleluia.
 # SOURCE: draft archdiocesan Lauds book, pp. 302–304 (The Feast of Pentecost)
 The Apostles * did speak with other tongues the wonderful works of God, alleluia, alleluia, alleluia.
 
+[psalm-antiphon-1-vespers]
+@use proper/pentecost/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/pentecost/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/pentecost/psalm-antiphon-3
+
 [psalm-antiphon-4-vespers]
 @use proper/pentecost/psalm-antiphon-5
 

@@ -63,6 +63,11 @@ R. Heal my soul * for I have sinned against thee.
 V. O satisfy us with thy mercy, and that soon.
 R. So shall we rejoice and be glad all the days of our life.
 
+[chapter-vespers]
+!2 Cor 1:3-4
+Blessed be God, even the Father of our Lord Jesus Christ, the Father of mercies, and the God of all comfort, who comforteth us in all our tribulation.
+R. Thanks be to God.
+
 [hymn-vespers]
 # SOURCE: office-hymns.zip (O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx); draft archdiocesan Vespers book, p. 129
 Caeli Deus sanctissime

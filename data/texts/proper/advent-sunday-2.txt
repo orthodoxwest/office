@@ -18,6 +18,15 @@ The mountains and the hills * shall break forth before God into singing, and all
 # SOURCE: draft archdiocesan Lauds book, p. 22 (The Second Sunday in Advent)
 Behold, * our Lord shall come with power, to enlighten the eyes of his servants, alleluia.
 
+[psalm-antiphon-1-vespers]
+@use proper/advent-sunday-2/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/advent-sunday-2/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/advent-sunday-2/psalm-antiphon-3
+
 [psalm-antiphon]
 @use proper/advent-sunday-2/psalm-antiphon-1
 
