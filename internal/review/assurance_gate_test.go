@@ -24,7 +24,7 @@ func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 	}
 	var out bytes.Buffer
 	WriteAssuranceSummary(report, nil, &out, true)
-	for _, want := range []string{"Office assurance summary", "Modeled structural features", "Verified text entries"} {
+	for _, want := range []string{"Office assurance summary", "Modeled structural features", "Verified text entries", "Classified zero-occurrence entries"} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("summary missing %q:\n%s", want, out.String())
 		}
