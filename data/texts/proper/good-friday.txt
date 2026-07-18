@@ -1,3 +1,7 @@
+[vespers-psalmody]
+# The generic Lord profile is not evidence for the special Triduum office.
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/good-friday/psalm-antiphon-1
 

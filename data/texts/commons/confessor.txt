@@ -23,6 +23,22 @@ Blessed is that servant * whom his Lord, when He cometh and knocketh at the door
 # SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
 Thou good and faithful servant, * enter thou into the joy of thy Lord.
 
+[psalm-antiphon-1-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 678 (Common of a Confessor not a Bishop)
+Lord, thou deliveredst unto me five talents: * behold, I have gained beside them five talents more.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 679 (Common of a Confessor not a Bishop)
+Well done, thou good servant, * in little things found faithful, enter thou into the joy of thy Lord.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 680 (Common of a Confessor not a Bishop)
+A wise and faithful servant, * whom the Lord hath made ruler over all his household.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: draft archdiocesan Commons Vespers book, p. 681 (Common of a Confessor not a Bishop)
+Good and faithful servant, * enter thou into the joy of thy Lord.
+
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor not a Bishop) — parish noted manual
 Well done, good and faithful servant, * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord.

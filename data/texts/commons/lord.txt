@@ -1,2 +1,3 @@
 [vespers-psalmody]
-@use psalmody/vespers/ferial
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 436–439 (Transfiguration-class feast; both Vespers use the printed office)
+@use ordinary/vespers/festal-psalmody

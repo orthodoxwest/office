@@ -82,3 +82,19 @@ psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/112
 psalm-antiphon-4 = psalms/138
+
+# Other angel feasts use the first, second, third, and fifth festal
+# antiphons, as the printed St Michael office does on both Vespers sides.
+[angels-first]
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 496–499 (Dedication of St Michael, I Vespers)
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-5 = psalms/113
+
+[angels]
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 496–500 (Dedication of St Michael, II Vespers)
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-5 = psalms/138

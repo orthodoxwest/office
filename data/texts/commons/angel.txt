@@ -1,2 +1,7 @@
+[vespers-psalmody-first]
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 496–499 (Dedication of St Michael, I Vespers)
+@use psalmody/vespers/angels-first
+
 [vespers-psalmody]
-@use psalmody/vespers/ferial
+# SOURCE: draft Sanctoral Cycle Vespers book, pp. 496–500 (Dedication of St Michael, II Vespers)
+@use psalmody/vespers/angels

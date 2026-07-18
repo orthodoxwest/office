@@ -1,6 +1,10 @@
 [vespers-psalmody-first]
 @use ordinary/vespers/festal-psalmody
 
+[vespers-psalmody]
+# SOURCE: draft Temporal Cycle Vespers book, pp. 189–196 (The Feast of the Most Holy Trinity) — only I Vespers is printed
+@use psalmody/vespers/ferial
+
 [psalm-antiphon]
 @use proper/trinity-sunday/psalm-antiphon-1
 

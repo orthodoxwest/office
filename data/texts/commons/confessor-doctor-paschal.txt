@@ -21,6 +21,18 @@
 [psalm-antiphon-5]
 @use shared/formulas/paschal-psalm-antiphon
 
+[psalm-antiphon-1-vespers]
+@use commons/confessor-bishop-paschal/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use commons/confessor-bishop-paschal/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use commons/confessor-bishop-paschal/psalm-antiphon-3
+
+[psalm-antiphon-4-vespers]
+@use commons/confessor-bishop-paschal/psalm-antiphon-5
+
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 665 (Common of Doctors, Doctor optime; "P.T. Alleluia")
 O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God. Alleluia.
