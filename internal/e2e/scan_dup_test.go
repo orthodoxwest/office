@@ -11,8 +11,8 @@ import (
 )
 
 // TestVespers2026PsalmodySweep guards the annual adversarial-review sweep:
-// every Vespers must compose, no service may grow a fifth psalm, and corpus
-// annotation lines must never reach rendered elements.
+// every hour must compose without leaking corpus annotations, and each
+// Vespers must contain exactly four psalms.
 func TestVespers2026PsalmodySweep(t *testing.T) {
 	eng, err := office.NewEngine(dataDir)
 	if err != nil {
@@ -23,27 +23,30 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 		t.Fatalf("BuildCalendar: %v", err)
 	}
 	moveable := calendar.ComputeMoveableDates(2026)
+	hours := []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
 	for i := range days {
 		day := &days[i]
-		hour, err := eng.ComposeHour("vespers", day, moveable)
-		if err != nil {
-			t.Fatalf("ComposeHour(vespers, %s): %v", day.Date.Format(time.DateOnly), err)
-		}
-		psalms := 0
-		for _, section := range hour.Sections {
-			for _, elem := range section.Elements {
-				if elem.Type == models.Psalm {
-					psalms++
-				}
-				for _, line := range strings.Split(elem.Text, "\n") {
-					if strings.HasPrefix(strings.TrimSpace(line), "#") {
-						t.Errorf("Vespers on %s leaked corpus comment %q", day.Date.Format(time.DateOnly), line)
+		for _, hourName := range hours {
+			hour, err := eng.ComposeHour(hourName, day, moveable)
+			if err != nil {
+				t.Fatalf("ComposeHour(%s, %s): %v", hourName, day.Date.Format(time.DateOnly), err)
+			}
+			psalms := 0
+			for _, section := range hour.Sections {
+				for _, elem := range section.Elements {
+					if elem.Type == models.Psalm {
+						psalms++
+					}
+					for _, line := range strings.Split(elem.Text, "\n") {
+						if strings.HasPrefix(strings.TrimSpace(line), "#") {
+							t.Errorf("%s on %s leaked corpus comment %q", hourName, day.Date.Format(time.DateOnly), line)
+						}
 					}
 				}
 			}
-		}
-		if psalms > 4 {
-			t.Errorf("Vespers on %s (%s) has %d psalms", day.Date.Format(time.DateOnly), feastID(day), psalms)
+			if hourName == "vespers" && psalms != 4 {
+				t.Errorf("Vespers on %s (%s) has %d psalms, want four", day.Date.Format(time.DateOnly), feastID(day), psalms)
+			}
 		}
 	}
 }

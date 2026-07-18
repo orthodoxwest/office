@@ -72,6 +72,16 @@ var hourCases = []hourCase{
 	{"vespers", "2026-04-18", "Saturday before Low Sunday — Lord-category Sunday still uses the Saturday Paschaltide office"},
 	{"vespers", "2026-04-22", "I Vespers of St. George — Common of One Martyr in Paschaltide"},
 	{"vespers", "2026-04-23", "II Vespers of St. George — Common of One Martyr in Paschaltide"},
+	{"vespers", "2026-06-10", "Corpus Christi I Vespers — Psalm 128 fourth"},
+	{"vespers", "2026-06-11", "Corpus Christi II Vespers — Psalm 147b fourth"},
+	{"vespers", "2026-06-12", "Corpus Christi octave Friday — Psalm 128 fourth"},
+	{"vespers", "2026-06-15", "Corpus Christi octave Monday — Psalm 147b fourth"},
+	{"vespers", "2026-06-16", "Corpus Christi octave Tuesday — Psalm 128 fourth"},
+	{"vespers", "2026-06-17", "Corpus Christi octave Wednesday — Psalm 147b fourth"},
+	{"vespers", "2026-06-18", "Corpus Christi octave day — Psalm 128 fourth"},
+	{"vespers", "2026-09-28", "Dedication of St Michael I Vespers — Psalm 113 fourth"},
+	{"vespers", "2026-09-29", "Dedication of St Michael II Vespers — Psalm 138 fourth"},
+	{"vespers", "2026-12-25", "Nativity II Vespers — Psalm 130 fourth"},
 
 	// Vespers — Easter exercises hour-qualified hymn (vespers vs lauds)
 	{"vespers", "2026-04-12", "Easter Sunday — proper vespers hymn, hour-qualified"},
