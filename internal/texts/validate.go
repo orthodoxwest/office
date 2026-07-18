@@ -68,6 +68,12 @@ func validateFile(relPath, text string) []string {
 		if hasSections && strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
 			inner := trimmed[1 : len(trimmed)-1]
 			if len(inner) > 0 && !strings.ContainsAny(inner, " :\t") {
+				if suggestion := nearPsalmodySectionName(relPath, inner); suggestion != "" {
+					errs = append(errs, fmt.Sprintf(
+						"%s:%d: unrecognized section name %q (did you mean %q?)",
+						relPath, lineNo, inner, suggestion,
+					))
+				}
 				currentSection = inner
 				continue
 			}
@@ -84,6 +90,50 @@ func validateFile(relPath, text string) []string {
 
 	errs = append(errs, validateControlCharacters(relPath, []byte(text))...)
 	return errs
+}
+
+func nearPsalmodySectionName(relPath, section string) string {
+	if !strings.HasPrefix(relPath, "texts/proper/") && !strings.HasPrefix(relPath, "texts/commons/") {
+		return ""
+	}
+	reserved := []string{"vespers-psalmody", "vespers-psalmody-first"}
+	for _, name := range reserved {
+		if section == name {
+			return ""
+		}
+	}
+	best := ""
+	bestDistance := 3
+	for _, name := range reserved {
+		if distance := editDistance(section, name); distance < bestDistance {
+			best = name
+			bestDistance = distance
+		}
+	}
+	if bestDistance <= 2 {
+		return best
+	}
+	return ""
+}
+
+func editDistance(a, b string) int {
+	previous := make([]int, len(b)+1)
+	for j := range previous {
+		previous[j] = j
+	}
+	for i := 1; i <= len(a); i++ {
+		current := make([]int, len(b)+1)
+		current[0] = i
+		for j := 1; j <= len(b); j++ {
+			cost := 0
+			if a[i-1] != b[j-1] {
+				cost = 1
+			}
+			current[j] = min(current[j-1]+1, previous[j]+1, previous[j-1]+cost)
+		}
+		previous = current
+	}
+	return previous[len(b)]
 }
 
 func unexpectedDirectiveReason(trimmed string) string {
