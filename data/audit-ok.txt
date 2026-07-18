@@ -157,3 +157,19 @@ ash-wednesday psalm-antiphon
 lent-ember-wednesday psalm-antiphon
 lent-ember-friday psalm-antiphon
 lent-ember-saturday psalm-antiphon
+
+# The Saturday Vespers books appoint the Saturday psalter for I Vespers of
+# these Sundays. Quinquagesima's remaining warned Lauds/Vespers slots are
+# likewise printed as the ordinary forms in the parish books.
+septuagesima psalm-antiphon
+sexagesima psalm-antiphon
+quinquagesima psalm-antiphon hymn short-responsory versicle
+lent-sunday-1 psalm-antiphon
+lent-sunday-2 psalm-antiphon
+lent-sunday-3 psalm-antiphon
+passion-sunday psalm-antiphon
+palm-sunday psalm-antiphon
+
+# St. Mark is directed wholly to the Common of Apostles and Evangelists,
+# apart from his collect.
+st-mark hymn
