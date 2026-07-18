@@ -81,6 +81,9 @@ var hourCases = []hourCase{
 	{"vespers", "2026-06-18", "Corpus Christi octave day — Psalm 128 fourth"},
 	{"vespers", "2026-09-28", "Dedication of St Michael I Vespers — Psalm 113 fourth"},
 	{"vespers", "2026-09-29", "Dedication of St Michael II Vespers — Psalm 138 fourth"},
+	{"vespers", "2026-09-30", "St Jerome — non-bishop Doctor common with standard festal psalms"},
+	{"vespers", "2026-10-02", "Guardian Angels — generic Angel psalmody with Psalm 138 fourth"},
+	{"vespers", "2026-12-02", "St Peter Chrysologus — bishop-Doctor II Vespers psalmody"},
 	{"vespers", "2026-12-25", "Nativity II Vespers — Psalm 130 fourth"},
 
 	// Vespers — Easter exercises hour-qualified hymn (vespers vs lauds)
