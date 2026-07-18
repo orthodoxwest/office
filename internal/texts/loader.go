@@ -59,7 +59,7 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 		// Plain text file: key is path without .txt extension
 		key := strings.TrimSuffix(relPath, ".txt")
 		key = filepath.ToSlash(key)
-		corpus.texts[key] = strings.TrimSpace(text)
+		corpus.texts[key] = strings.TrimSpace(stripCommentLines(text))
 		return nil
 	})
 
@@ -71,6 +71,21 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	}
 
 	return corpus, nil
+}
+
+// stripCommentLines removes corpus annotations from plain-text files using
+// the same whole-line rule as loadINIFile. Blank lines and inline hash
+// characters remain liturgical content.
+func stripCommentLines(text string) string {
+	lines := strings.Split(text, "\n")
+	kept := make([]string, 0, len(lines))
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "#") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	return strings.Join(kept, "\n")
 }
 
 // NewTestCorpus creates a TextCorpus from a map, for use in tests.

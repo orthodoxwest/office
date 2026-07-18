@@ -65,7 +65,9 @@ Have mercy upon me, O Lord.
 func TestLoadTextsStripsComments(t *testing.T) {
 	dir := t.TempDir()
 	ordinaryDir := filepath.Join(dir, "texts", "ordinary")
+	psalmDir := filepath.Join(dir, "texts", "psalms")
 	os.MkdirAll(ordinaryDir, 0755)
+	os.MkdirAll(psalmDir, 0755)
 	os.WriteFile(filepath.Join(ordinaryDir, "lauds.txt"), []byte(`# File-level comment before any section.
 
 [collect]
@@ -78,6 +80,12 @@ First stanza line one.
 
 Second stanza line one.
 `), 0644)
+	os.WriteFile(filepath.Join(psalmDir, "116b.txt"), []byte(`Psalm 116:10-16
+
+# SOURCE: printed psalter
+I believed, and therefore will I speak * but I was sore troubled.
+The # character in a liturgical line remains.
+`), 0644)
 
 	corpus, err := LoadTexts(dir)
 	if err != nil {
@@ -89,6 +97,9 @@ Second stanza line one.
 	}
 	if got := corpus.Get("ordinary/lauds/hymn"); got != "First stanza line one.\n\nSecond stanza line one." {
 		t.Errorf("hymn = %q, want stanza break preserved", got)
+	}
+	if got := corpus.Get("psalms/116b"); got != "Psalm 116:10-16\n\nI believed, and therefore will I speak * but I was sore troubled.\nThe # character in a liturgical line remains." {
+		t.Errorf("psalms/116b = %q, plain-text comment not stripped", got)
 	}
 }
 
