@@ -1,3 +1,6 @@
+[vespers-psalmody]
+@use psalmody/vespers/archangel
+
 [psalm-antiphon]
 @use proper/dedication-st-michael/psalm-antiphon-1
 

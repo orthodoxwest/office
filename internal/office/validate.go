@@ -38,6 +38,7 @@ var validElementTypes = map[string]bool{
 	"proper-responsory": true,
 	"proper-versicle":   true,
 	"proper-chapter":    true,
+	"proper-psalmody":   true,
 	"commemorations":    true,
 	"gloria-patri":      true,
 }
@@ -76,6 +77,7 @@ func ValidateHourDefinitions(dataDir string) []string {
 	if err != nil {
 		return []string{fmt.Sprintf("loading text corpus: %v", err)}
 	}
+	declarationErrors := validateVespersPsalmodyDeclarations(corpus)
 
 	var parseErrors []string
 	// required maps corpus key → first source location for error messages
@@ -105,6 +107,12 @@ func ValidateHourDefinitions(dataDir string) []string {
 					))
 				}
 				switch elem.Type {
+				case "proper-psalmody":
+					if hour != "vespers" || elem.Ref != vespersPsalmodyRef {
+						parseErrors = append(parseErrors, fmt.Sprintf(
+							"%s: proper-psalmody must use Ref %q in Vespers", src, vespersPsalmodyRef,
+						))
+					}
 				case "proper-antiphon", "proper-collect", "proper-hymn", "proper-responsory", "proper-versicle", "proper-chapter":
 					// Symbolic ref; validate that the ordinary fallback exists.
 					// The engine tries (mirroring resolveProperText / resolveProperCollectText):
@@ -194,6 +202,7 @@ func ValidateHourDefinitions(dataDir string) []string {
 	}
 	sort.Strings(refErrors)
 
+	parseErrors = append(parseErrors, declarationErrors...)
 	return append(parseErrors, refErrors...)
 }
 

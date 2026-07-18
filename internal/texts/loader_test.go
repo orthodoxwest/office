@@ -95,7 +95,9 @@ Second stanza line one.
 func TestLoadTextsResolvesAliasesAndOmitsThemFromEntries(t *testing.T) {
 	dir := t.TempDir()
 	properDir := filepath.Join(dir, "texts", "proper")
+	psalmodyDir := filepath.Join(dir, "texts", "psalmody")
 	os.MkdirAll(properDir, 0755)
+	os.MkdirAll(psalmodyDir, 0755)
 	os.WriteFile(filepath.Join(properDir, "shared.txt"), []byte(`[responsory]
 R. Shared text.
 
@@ -104,6 +106,9 @@ R. Shared text.
 
 [alias-chain]
 @use proper/shared/alias
+`), 0644)
+	os.WriteFile(filepath.Join(psalmodyDir, "vespers.txt"), []byte(`[festal]
+psalm-antiphon-1 = psalms/110
 `), 0644)
 
 	corpus, err := LoadTexts(dir)
@@ -121,6 +126,12 @@ R. Shared text.
 	}
 	if _, ok := corpus.Entries()["proper/shared/alias"]; ok {
 		t.Fatal("Entries includes alias")
+	}
+	if _, ok := corpus.Entries()["psalmody/vespers/festal"]; ok {
+		t.Fatal("Entries includes structural psalmody declaration")
+	}
+	if !corpus.Has("psalmody/vespers/festal") {
+		t.Fatal("Has(psalmody declaration) = false")
 	}
 }
 

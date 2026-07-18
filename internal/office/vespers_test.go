@@ -115,8 +115,114 @@ func TestFestalVespersPsalmodyLeavesUnattestedClassOnPsalter(t *testing.T) {
 			Category: models.CategoryConfessorDoctor,
 		},
 	}
-	if usesFestalVespersPsalmody(day) {
-		t.Fatalf("unattested confessor-doctor class selected profile %q", festalVespersPsalmody(day))
+	corpus, err := texts.LoadTexts(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+	psalmody, source, err := resolveVespersPsalmody(day, corpus)
+	if err != nil {
+		t.Fatalf("resolveVespersPsalmody: %v", err)
+	}
+	if len(psalmody) != 0 {
+		t.Fatalf("unattested confessor-doctor class selected psalmody from %q: %#v", source, psalmody)
+	}
+}
+
+func TestResolveVespersPsalmodyLayering(t *testing.T) {
+	const standard = "psalm-antiphon-1 = psalms/110"
+	const common = "psalm-antiphon-1 = psalms/112"
+	const proper = "psalm-antiphon-1 = psalms/132"
+	day := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "test-feast", Category: models.CategoryMartyr},
+	}
+
+	tests := []struct {
+		name       string
+		corpus     map[string]string
+		wantPsalm  string
+		wantSource string
+	}{
+		{
+			name: "proper overrides common",
+			corpus: map[string]string{
+				defaultVespersPsalmodyKey:            standard,
+				"commons/martyr/vespers-psalmody":    common,
+				"proper/test-feast/vespers-psalmody": proper,
+			},
+			wantPsalm:  "psalms/132",
+			wantSource: "proper/test-feast/vespers-psalmody",
+		},
+		{
+			name: "common overrides default",
+			corpus: map[string]string{
+				defaultVespersPsalmodyKey:         standard,
+				"commons/martyr/vespers-psalmody": common,
+			},
+			wantPsalm:  "psalms/112",
+			wantSource: "commons/martyr/vespers-psalmody",
+		},
+		{
+			name: "default applies after absent proper and common",
+			corpus: map[string]string{
+				defaultVespersPsalmodyKey: standard,
+			},
+			wantPsalm:  "psalms/110",
+			wantSource: defaultVespersPsalmodyKey,
+		},
+		{
+			name: "ferial declaration stops default",
+			corpus: map[string]string{
+				defaultVespersPsalmodyKey:         standard,
+				"commons/martyr/vespers-psalmody": ferialPsalmodyDeclaration,
+			},
+			wantSource: "commons/martyr/vespers-psalmody",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			items, source, err := resolveVespersPsalmody(day, texts.NewTestCorpus(tt.corpus))
+			if err != nil {
+				t.Fatalf("resolveVespersPsalmody: %v", err)
+			}
+			if source != tt.wantSource {
+				t.Errorf("source = %q, want %q", source, tt.wantSource)
+			}
+			if tt.wantPsalm == "" {
+				if len(items) != 0 {
+					t.Fatalf("psalmody = %#v, want ferial", items)
+				}
+				return
+			}
+			if len(items) != 1 || items[0].psalm != tt.wantPsalm {
+				t.Fatalf("psalmody = %#v, want %s", items, tt.wantPsalm)
+			}
+		})
+	}
+}
+
+func TestParsePsalmodyDeclarationRejectsMalformedData(t *testing.T) {
+	tests := []string{
+		"",
+		"psalm-antiphon-1 psalms/110",
+		"psalm-antiphon-1 =",
+		"psalm-antiphon-1 = psalms/110\npsalm-antiphon-1 = psalms/111",
+	}
+	for _, declaration := range tests {
+		if _, _, err := parsePsalmodyDeclaration(declaration); err == nil {
+			t.Errorf("parsePsalmodyDeclaration(%q) succeeded, want error", declaration)
+		}
+	}
+}
+
+func TestValidateVespersPsalmodyDeclarationReferences(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		defaultVespersPsalmodyKey:           "psalm-antiphon-1 = psalms/missing",
+		"ordinary/vespers/psalm-antiphon-1": "Antiphon text.",
+	})
+	errs := validateVespersPsalmodyDeclarations(corpus)
+	if len(errs) != 1 || !strings.Contains(errs[0], "psalm ref not found in corpus: psalms/missing") {
+		t.Fatalf("validation errors = %v, want missing psalm ref", errs)
 	}
 }
 

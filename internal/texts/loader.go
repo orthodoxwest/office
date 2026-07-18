@@ -127,15 +127,34 @@ func (c *TextCorpus) HasKeySuffix(suffix string) bool {
 	return false
 }
 
-// Entries returns a copy of the concrete corpus entries keyed by reference
-// path. Aliases are intentionally omitted so provenance and review queues count
-// each shared text only once.
+// Entries returns a copy of the concrete renderable-text entries keyed by
+// reference path. Aliases and structural declarations in the psalmody/
+// namespace are intentionally omitted so provenance and review queues count
+// each shared liturgical text only once.
 func (c *TextCorpus) Entries() map[string]string {
 	out := make(map[string]string, len(c.texts))
 	for k, v := range c.texts {
+		if strings.HasPrefix(k, "psalmody/") {
+			continue
+		}
 		out[k] = v
 	}
 	return out
+}
+
+// References returns every resolvable corpus key, including aliases, sorted
+// alphabetically. It is intended for validators that must inspect declarations
+// stored behind @use as well as concrete text entries.
+func (c *TextCorpus) References() []string {
+	refs := make([]string, 0, len(c.texts)+len(c.aliases))
+	for key := range c.texts {
+		refs = append(refs, key)
+	}
+	for key := range c.aliases {
+		refs = append(refs, key)
+	}
+	sort.Strings(refs)
+	return refs
 }
 
 // extractAndValidateAliases moves exact @use directives out of the concrete

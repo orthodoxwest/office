@@ -18,6 +18,9 @@ But as for us, * it behoveth us to glory in the Cross of our Lord Jesus Christ.
 # SOURCE: draft archdiocesan Lauds book, p. 545 (Exaltation of the Holy Cross)
 By the sign * of the Cross, deliver us from our enemies, O our God.
 
+[vespers-psalmody-first]
+@use ordinary/vespers/festal-psalmody
+
 [psalm-antiphon]
 @use proper/exaltation-holy-cross/psalm-antiphon-1
 

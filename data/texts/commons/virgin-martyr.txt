@@ -1,3 +1,9 @@
+[vespers-psalmody-first]
+@use ordinary/vespers/festal-psalmody
+
+[vespers-psalmody]
+@use psalmody/vespers/martyrs
+
 [psalm-antiphon]
 # SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
 This is one of the wise virgins, * one chosen out of the number of the careful.

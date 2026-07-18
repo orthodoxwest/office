@@ -1,3 +1,6 @@
+[vespers-psalmody]
+@use ordinary/vespers/festal-psalmody
+
 [psalm-antiphon]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 289, 172 (The Ascension of Our Lord)
 Ye men of Galilee, * why stand ye gazing up into heaven? This same Jesus, which is taken up from you into heaven, shall so come, alleluia.

@@ -1,3 +1,9 @@
+[vespers-psalmody-first]
+@use ordinary/vespers/festal-psalmody
+
+[vespers-psalmody]
+@use psalmody/vespers/nativity
+
 [psalm-antiphon]
 @use proper/christmas/psalm-antiphon-1
 

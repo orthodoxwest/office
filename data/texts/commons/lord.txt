@@ -1,0 +1,2 @@
+[vespers-psalmody]
+@use psalmody/vespers/ferial

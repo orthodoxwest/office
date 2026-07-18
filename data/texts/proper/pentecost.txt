@@ -1,3 +1,6 @@
+[vespers-psalmody-first]
+@use ordinary/vespers/festal-psalmody
+
 [psalm-antiphon]
 @use proper/pentecost/psalm-antiphon-1
 

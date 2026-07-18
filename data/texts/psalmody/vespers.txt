@@ -1,0 +1,74 @@
+# Shared Vespers psalmody declarations. Feast propers and commons select these
+# with @use aliases; each line pairs its antiphon slot with its appointed psalm.
+
+[festal]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/113
+
+[ferial]
+ferial
+
+[apostles]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/113
+psalm-antiphon-3 = psalms/116b
+psalm-antiphon-4 = psalms/139
+
+[martyrs]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/112
+psalm-antiphon-3 = psalms/113
+psalm-antiphon-4 = psalms/116b
+
+[confessor-bishop]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/112
+psalm-antiphon-3 = psalms/113
+psalm-antiphon-4 = psalms/132
+
+[blessed-virgin]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/113
+psalm-antiphon-3 = psalms/122
+psalm-antiphon-4 = psalms/127
+
+[dedication]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/147b
+
+[nativity]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/130
+psalm-antiphon-5 = psalms/132
+
+[st-stephen]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/132
+
+[st-john]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/130
+
+[corpus-christi]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/116b
+psalm-antiphon-4 = psalms/128
+psalm-antiphon-5 = psalms/147b
+
+[archangel]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/111
+psalm-antiphon-3 = psalms/112
+psalm-antiphon-4 = psalms/113
+psalm-antiphon-5 = psalms/138
