@@ -16,7 +16,7 @@ func TestProvenanceQueueScoreWeightsFanout(t *testing.T) {
 }
 
 func TestProvenanceQueueOrderingIsStable(t *testing.T) {
-	high := ProvenanceQueueEntry{Key: "z", Score: 2}
+	high := ProvenanceQueueEntry{Key: "z", Score: 2, Occurrences: 2}
 	lowA := ProvenanceQueueEntry{Key: "a", Score: 1, Occurrences: 2}
 	lowB := ProvenanceQueueEntry{Key: "b", Score: 1, Occurrences: 2}
 	if !provenanceQueueLess(high, lowA) {
@@ -35,6 +35,19 @@ func TestProvenanceQueueSuspectTierSortsFirst(t *testing.T) {
 	}
 	if provenanceQueueLess(clean, suspect) {
 		t.Error("clean entry sorted above suspect entry")
+	}
+}
+
+func TestProvenanceQueueSegregatesClassifiedZeroes(t *testing.T) {
+	classification := ZeroClassification{Disposition: ZeroDormantPolicy}
+	rendered := ProvenanceQueueEntry{Key: "rendered", Occurrences: 1}
+	unclassified := ProvenanceQueueEntry{Key: "unclassified"}
+	classified := ProvenanceQueueEntry{Key: "classified", ZeroClassification: &classification}
+	if !provenanceQueueLess(rendered, unclassified) || !provenanceQueueLess(unclassified, classified) {
+		t.Fatal("work tiers should order rendered, unclassified zero, classified zero")
+	}
+	if got := provenanceWorkType(classified); got != "classified-zero" {
+		t.Fatalf("work type = %q", got)
 	}
 }
 
@@ -58,16 +71,17 @@ func TestBuildProvenanceQueue(t *testing.T) {
 	if len(q.Entries) == 0 {
 		t.Fatal("empty queue")
 	}
-	seenClean := false
+	seenCleanByTier := map[int]bool{}
 	prevScore := 0
 	for i, e := range q.Entries {
-		if e.Suspect() && seenClean {
+		tier := provenanceWorkRank(e)
+		if e.Suspect() && seenCleanByTier[tier] {
 			t.Fatalf("suspect entry %s ranked below a clean entry", e.Key)
 		}
-		if i > 0 && e.Suspect() == q.Entries[i-1].Suspect() && e.Score > prevScore {
+		if i > 0 && tier == provenanceWorkRank(q.Entries[i-1]) && e.Suspect() == q.Entries[i-1].Suspect() && e.Score > prevScore {
 			t.Fatalf("entry %s breaks score ordering within its tier", e.Key)
 		}
-		seenClean = seenClean || !e.Suspect()
+		seenCleanByTier[tier] = seenCleanByTier[tier] || !e.Suspect()
 		prevScore = e.Score
 	}
 	used, unused := false, false
@@ -93,5 +107,8 @@ func TestProvenanceQueueCSVHidesContentHashes(t *testing.T) {
 	}
 	if strings.Contains(out.String(), "content_hash") || strings.Contains(out.String(), "0123456789abcdef") {
 		t.Fatalf("reviewer queue exposes implementation hash:\n%s", out.String())
+	}
+	if !strings.Contains(out.String(), "work_type") || !strings.Contains(out.String(), "zero-needs-classification") {
+		t.Fatalf("reviewer queue does not surface zero-occurrence work type:\n%s", out.String())
 	}
 }

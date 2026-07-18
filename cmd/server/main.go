@@ -187,8 +187,10 @@ func cmdValidate(dataDir string) {
 	errors = append(errors, calendar.ValidateAll(dataDir)...)
 	errors = append(errors, office.ValidateHourDefinitions(dataDir)...)
 	errors = append(errors, texts.ValidateAll(dataDir)...)
-	if _, err := review.ScanProvenance(dataDir); err != nil {
+	if inventory, err := review.ScanProvenance(dataDir); err != nil {
 		errors = append(errors, "review provenance: "+err.Error())
+	} else if _, err := review.LoadZeroClassifications(dataDir, inventory); err != nil {
+		errors = append(errors, "review zero occurrences: "+err.Error())
 	}
 	if len(errors) > 0 {
 		fmt.Println("Validation errors found:")
@@ -332,6 +334,8 @@ Subcommands:
   provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified] [-suspect-only]
                                          Rank atomic text review by dependency fan-out,
                                          suspect (pre-flagged) entries first
+  zero-occurrences [-start YEAR] [-years N] [-summary]
+                                         List unverified entries never selected in a sweep
   attest [flags] KEY REVIEWER            Record a source attestation for one text
   flag [flags] KEY                       Record a prescreen suspicion for one text
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
@@ -421,6 +425,24 @@ Subcommands:
 			review.PrintProvenanceQueueSummary(queue, os.Stdout)
 		} else if err := review.WriteProvenanceQueueCSV(queue, os.Stdout, *base); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing provenance queue: %v\n", err)
+			os.Exit(1)
+		}
+
+	case "zero-occurrences":
+		fs := flag.NewFlagSet("review zero-occurrences", flag.ExitOnError)
+		start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
+		years := fs.Int("years", 1, "number of calendar years to sweep")
+		summary := fs.Bool("summary", false, "print category and ledger counts instead of CSV")
+		fs.Parse(os.Args[3:])
+		report, err := review.BuildZeroOccurrenceReport(dataDir, *start, *years)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error building zero-occurrence report: %v\n", err)
+			os.Exit(1)
+		}
+		if *summary {
+			review.PrintZeroOccurrenceSummary(report, os.Stdout)
+		} else if err := review.WriteZeroOccurrenceCSV(report, os.Stdout); err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing zero-occurrence CSV: %v\n", err)
 			os.Exit(1)
 		}
 

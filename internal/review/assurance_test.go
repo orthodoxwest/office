@@ -56,6 +56,9 @@ func TestBuildReviewPlanReducesStructuralChecklist(t *testing.T) {
 	if !sort.StringsAreSorted(p.Features) {
 		t.Fatal("feature inventory is not sorted")
 	}
+	if len(p.RenderedKeys) == 0 || !sort.StringsAreSorted(p.RenderedKeys) {
+		t.Fatal("rendered dependency inventory is empty or unsorted")
+	}
 	for _, selected := range p.Selected {
 		for _, feature := range selected.NewCoverage {
 			if len(feature) >= 7 && feature[:7] == "source:" {

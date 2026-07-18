@@ -1,4 +1,4 @@
-.PHONY: help build test test-race parity lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-suspects review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help build test test-race parity lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -66,6 +66,9 @@ review-provenance: build ## Report generated corpus provenance coverage
 
 review-provenance-queue: build ## Rank atomic text review by rendered dependency fan-out
 	./office review provenance-queue $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
+
+review-zero-occurrences: build ## List unrendered atomic texts with classification heuristics
+	./office review zero-occurrences $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-suspects: build ## Print only pre-flagged/lint-flagged texts — the findings-sprint list
 	./office review provenance-queue -suspect-only $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)

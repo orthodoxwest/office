@@ -28,6 +28,7 @@ type ProvenanceQueueEntry struct {
 	RepresentativeDate   time.Time
 	Sources              []SourceCitation
 	Flags                []Suspicion
+	ZeroClassification   *ZeroClassification
 }
 
 // Suspect reports whether the entry carries any reason (prescreen flag or
@@ -69,16 +70,24 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 	if err != nil {
 		return nil, err
 	}
+	zeroClassifications, err := LoadZeroClassifications(dataDir, inventory)
+	if err != nil {
+		return nil, err
+	}
 	acc := make(map[string]*queueAccumulator, len(inventory.Entries))
 	for _, p := range inventory.Entries {
 		if !shouldQueueProvenance(p.Status, includeVerified) {
 			continue
 		}
+		entry := ProvenanceQueueEntry{
+			Key: p.Key, ContentHash: p.ContentHash, Status: p.Status, Sources: p.Sources,
+			Flags: suspicions[p.Key],
+		}
+		if classification, ok := zeroClassifications[p.Key]; ok {
+			entry.ZeroClassification = &classification
+		}
 		acc[p.Key] = &queueAccumulator{
-			entry: ProvenanceQueueEntry{
-				Key: p.Key, ContentHash: p.ContentHash, Status: p.Status, Sources: p.Sources,
-				Flags: suspicions[p.Key],
-			},
+			entry: entry,
 			hours: make(map[string]bool), compositions: make(map[string]bool),
 		}
 	}
@@ -169,6 +178,9 @@ func provenanceQueueScore(e ProvenanceQueueEntry) int {
 // each tier: book time goes first where a finding is most likely, and among
 // equally suspect texts where verification unlocks the most coverage.
 func provenanceQueueLess(a, b ProvenanceQueueEntry) bool {
+	if provenanceWorkRank(a) != provenanceWorkRank(b) {
+		return provenanceWorkRank(a) < provenanceWorkRank(b)
+	}
 	if a.Suspect() != b.Suspect() {
 		return a.Suspect()
 	}
@@ -182,6 +194,26 @@ func provenanceQueueLess(a, b ProvenanceQueueEntry) bool {
 		return a.Occurrences > b.Occurrences
 	}
 	return a.Key < b.Key
+}
+
+func provenanceWorkRank(entry ProvenanceQueueEntry) int {
+	if entry.Occurrences > 0 {
+		return 0
+	}
+	if entry.ZeroClassification != nil && entry.ZeroClassification.Classified() {
+		return 2
+	}
+	return 1
+}
+
+func provenanceWorkType(entry ProvenanceQueueEntry) string {
+	if entry.Occurrences > 0 {
+		return "attestation"
+	}
+	if entry.ZeroClassification != nil && entry.ZeroClassification.Classified() {
+		return "classified-zero"
+	}
+	return "zero-needs-classification"
 }
 
 func representativeLess(a, b ReviewCandidate) bool {
@@ -202,11 +234,21 @@ func representativeLess(a, b ReviewCandidate) bool {
 func PrintProvenanceQueueSummary(q *ProvenanceQueue, w io.Writer) {
 	used := 0
 	suspect := 0
+	classifiedZeroes := 0
+	unclassifiedZeroes := 0
+	staleClassifications := 0
 	statuses := map[ProvenanceStatus]int{}
 	for _, e := range q.Entries {
-		statuses[e.Status]++
 		if e.Occurrences > 0 {
 			used++
+			statuses[e.Status]++
+		} else if e.ZeroClassification != nil && e.ZeroClassification.Classified() {
+			classifiedZeroes++
+		} else {
+			unclassifiedZeroes++
+			if e.ZeroClassification != nil && e.ZeroClassification.Stale {
+				staleClassifications++
+			}
 		}
 		if e.Suspect() {
 			suspect++
@@ -215,10 +257,13 @@ func PrintProvenanceQueueSummary(q *ProvenanceQueue, w io.Writer) {
 	fmt.Fprintf(w, "=== Atomic provenance review queue: %d-%d ===\n", q.StartYear, q.StartYear+q.Years-1)
 	fmt.Fprintf(w, "  queued entries:      %d\n", len(q.Entries))
 	fmt.Fprintf(w, "  rendered entries:    %d\n", used)
+	fmt.Fprintf(w, "  classified zeroes:   %d\n", classifiedZeroes)
+	fmt.Fprintf(w, "  unclassified zeroes: %d\n", unclassifiedZeroes)
+	fmt.Fprintf(w, "  stale zero classes:  %d\n", staleClassifications)
 	fmt.Fprintf(w, "  suspect entries:     %d\n", suspect)
 	fmt.Fprintf(w, "  include verified:    %t\n", q.IncludeVerified)
 	for _, status := range []ProvenanceStatus{ProvenanceVerified, ProvenanceNeedsReview, ProvenanceSourceUnknown} {
-		fmt.Fprintf(w, "  %-19s %d\n", string(status)+":", statuses[status])
+		fmt.Fprintf(w, "  %-19s %d\n", "rendered "+string(status)+":", statuses[status])
 	}
 }
 
@@ -229,7 +274,7 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"rank", "score", "key", "status", "flags", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
+	_ = cw.Write([]string{"rank", "score", "key", "status", "work_type", "zero_classification_state", "zero_disposition", "zero_issue", "zero_reason", "flags", "occurrences", "priority_a_occurrences", "principal_occurrences", "distinct_compositions", "hours", "source", "locator", "page", "representative_url"})
 	for i, e := range q.Entries {
 		var sources, locators, pages []string
 		for _, source := range e.Sources {
@@ -245,8 +290,19 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 		for j, flag := range e.Flags {
 			flags[j] = flag.String()
 		}
+		classificationState, disposition, issue, reason := "", "", "", ""
+		if e.Occurrences == 0 && e.ZeroClassification != nil {
+			classificationState = "current"
+			if e.ZeroClassification.Stale {
+				classificationState = "stale"
+			}
+			disposition = string(e.ZeroClassification.Disposition)
+			issue = e.ZeroClassification.Issue
+			reason = e.ZeroClassification.Reason
+		}
 		_ = cw.Write([]string{
-			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, string(e.Status), strings.Join(flags, "; "),
+			fmt.Sprint(i + 1), fmt.Sprint(e.Score), e.Key, string(e.Status), provenanceWorkType(e),
+			classificationState, disposition, issue, reason, strings.Join(flags, "; "),
 			fmt.Sprint(e.Occurrences), fmt.Sprint(e.PriorityAOccurrences), fmt.Sprint(e.PrincipalOccurrences),
 			fmt.Sprint(e.DistinctCompositions), strings.Join(e.Hours, "; "), strings.Join(sources, "; "),
 			strings.Join(locators, "; "), strings.Join(pages, "; "), url,
