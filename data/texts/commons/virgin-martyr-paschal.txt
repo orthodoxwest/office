@@ -29,3 +29,9 @@ V. Go forth, ride prosperously, and reign.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace and in thy beauty, alleluia, alleluia.
+
+[hymn-lauds]
+@use commons/virgin/hymn-lauds
+
+[hymn-vespers]
+@use commons/virgin/hymn-lauds

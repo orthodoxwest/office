@@ -42,6 +42,9 @@ R. The Lord is risen indeed, * alleluia, alleluia.
 # SOURCE: draft archdiocesan Vespers book, pp. 157-159 (Saturdays in Paschaltide)
 @use proper/easter-sunday/hymn-vespers
 
+[hymn-vespers]
+@use proper/easter-sunday/hymn-vespers
+
 [hymn-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129; office-hymns.zip (Light_s Glittering Morn Bedecks the Sky, Paschaltide Lauds.docx)
 Aurora lucis rutilat
