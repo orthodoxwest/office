@@ -2,24 +2,21 @@
 @use commons/evangelist/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
-This is my commandment * that you love one another, as I have loved you.
+This is my commandment * that ye love one another, as I have loved you.
 
 [psalm-antiphon-2]
 # SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
 Greater love than this no man hath, * that a man lay down his life for his friends.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
-You are my friends * if you do the things that I command you, said the Lord.
+Ye are my friends * if ye do whatsoever I command you, saith the Lord.
 
 [psalm-antiphon-4]
 # SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
 Blessed are the peacemakers * the clean of heart, they shall see God.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C1a [Ant Laudes] — check against diurnal
-In your patience * you shall possess your souls.
+In your patience * possess ye your souls.
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Apostles and Evangelists) — parish noted manual

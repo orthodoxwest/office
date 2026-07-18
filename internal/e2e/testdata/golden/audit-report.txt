@@ -16,7 +16,7 @@ Add to data/audit-ok.txt to acknowledge and suppress.
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 
-=== Translation review: 4 mixed-register, 1 modern-pronoun collect(s) ===
+=== Translation review: 4 mixed-register, 0 modern-pronoun collect(s) ===
 These entries are high-signal candidates for translation normalization.
 Mixed-register entries contain both thou/thee/thy and you/your language in the same text.
 
@@ -25,9 +25,6 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
     proper/easter-sunday-4/benedictus-antiphon
     proper/easter-sunday-4/magnificat-antiphon
     proper/ss-philip-james/psalm-antiphon-3
-
-  [modern-pronoun collects]
-    proper/all-souls/collect
 
 === Suppressed: 76 feast(s) via data/audit-ok.txt ===
   our-lady-of-sorrows-passion
