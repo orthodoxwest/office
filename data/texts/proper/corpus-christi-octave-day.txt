@@ -1,3 +1,7 @@
 [psalm-antiphon-4-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 201 (Thursday Octave Day of Corpus Christi)
 May the children * of the Church be like the olive branches, round about the table of the Lord.
+
+[magnificat-antiphon-first]
+# SOURCE: draft Temporal Cycle Vespers book, p. 204 (II Vespers of Corpus Christi)
+O sacred banquet, * wherein Christ is received, the memory of his Passion is renewed; the soul with grace is filled, and a pledge of future glory is bestowed, alleluia.
