@@ -2,6 +2,8 @@ package office
 
 import (
 	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -440,6 +442,155 @@ func TestComposeLaudsEpiphanyOctaveSundayUsesFestalPsalmody(t *testing.T) {
 	for i, want := range wantPrefix {
 		if psalmLabels[i] != want {
 			t.Fatalf("psalm %d = %q, want %q (all psalms: %v)", i, psalmLabels[i], want, psalmLabels)
+		}
+	}
+}
+
+func TestComposeLaudsNativityOctaveSundayUsesPrintedProper(t *testing.T) {
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 12, 29, 0, 0, 0, 0, time.UTC),
+		Season: models.Christmas,
+		Color:  models.White,
+		Celebration: &models.Feast{
+			ID:       "nativity-sunday-within-octave",
+			Category: models.CategorySunday,
+		},
+	}
+
+	hour, err := engine.ComposeHour("lauds", day, calendar.ComputeMoveableDates(2026))
+	if err != nil {
+		t.Fatalf("ComposeHour(lauds): %v", err)
+	}
+
+	var psalmLabels []string
+	benediciteCount := 0
+	sourceRefs := make(map[string]string)
+	canonicalRefs := make(map[string][]string)
+	resolvedTexts := make(map[string]string)
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			if elem.Type == models.Psalm {
+				psalmLabels = append(psalmLabels, elem.Label)
+			}
+			if elem.Type == models.Canticle && elem.SourceRef == "canticles/benedicite" {
+				benediciteCount++
+			}
+			if elem.SlotRef != "" {
+				sourceRefs[elem.SlotRef] = elem.SourceRef
+			}
+			if elem.SourceRef != "" {
+				canonicalRefs[elem.SourceRef] = elem.SourceRefs
+				resolvedTexts[elem.SourceRef] = elem.Text
+			}
+		}
+	}
+
+	wantPsalms := []string{
+		"Psalm 67", "Psalm 93", "Psalm 100", "Psalm 63",
+		"Psalm 148", "Psalm 149", "Psalm 150",
+	}
+	if !slices.Equal(psalmLabels, wantPsalms) {
+		t.Fatalf("psalms = %v, want exactly %v", psalmLabels, wantPsalms)
+	}
+	if benediciteCount != 1 {
+		t.Fatalf("Benedicite count = %d, want 1", benediciteCount)
+	}
+
+	for slot, want := range map[string]string{
+		"chapter":             "proper/nativity-sunday-within-octave/chapter-lauds",
+		"short-responsory":    "proper/nativity-sunday-within-octave/short-responsory-lauds",
+		"hymn":                "proper/nativity-sunday-within-octave/hymn-lauds",
+		"versicle":            "proper/nativity-sunday-within-octave/versicle-lauds",
+		"benedictus-antiphon": "proper/nativity-sunday-within-octave/benedictus-antiphon",
+		"collect":             "proper/nativity-sunday-within-octave/collect",
+	} {
+		if got := sourceRefs[slot]; got != want {
+			t.Errorf("%s source ref = %q, want %q", slot, got, want)
+		}
+	}
+
+	for alias, canonical := range map[string]string{
+		"proper/nativity-sunday-within-octave/psalm-antiphon-1":       "proper/christmas/psalm-antiphon-1",
+		"proper/nativity-sunday-within-octave/psalm-antiphon-2":       "proper/christmas/psalm-antiphon-2",
+		"proper/nativity-sunday-within-octave/psalm-antiphon-3":       "proper/christmas/psalm-antiphon-3",
+		"proper/nativity-sunday-within-octave/psalm-antiphon-4":       "proper/christmas/psalm-antiphon-4",
+		"proper/nativity-sunday-within-octave/psalm-antiphon-5":       "proper/christmas/psalm-antiphon-5",
+		"proper/nativity-sunday-within-octave/chapter-lauds":          "proper/vigil-epiphany/chapter-lauds",
+		"proper/nativity-sunday-within-octave/short-responsory-lauds": "proper/christmas/short-responsory-lauds",
+		"proper/nativity-sunday-within-octave/hymn-lauds":             "proper/christmas/hymn-lauds",
+	} {
+		if !slices.Contains(canonicalRefs[alias], canonical) {
+			t.Errorf("%s canonical refs = %v, want %s", alias, canonicalRefs[alias], canonical)
+		}
+		if got, want := resolvedTexts[alias], engine.corpus.Get(canonical); got != want &&
+			(alias != "proper/nativity-sunday-within-octave/chapter-lauds") &&
+			(alias != "proper/nativity-sunday-within-octave/hymn-lauds") {
+			t.Errorf("%s text = %q, want canonical %s text %q", alias, got, canonical, want)
+		}
+	}
+	if got := resolvedTexts["proper/nativity-sunday-within-octave/collect"]; !strings.Contains(got, "may be made worthy") {
+		t.Errorf("Sunday collect = %q, want distinct local wording with 'may be made worthy'", got)
+	}
+}
+
+func TestNativityOctaveSundayCommemoratesOctaveFromFeastLauds(t *testing.T) {
+	dataDir := filepath.Join("..", "..", "data")
+	days, err := calendar.BuildCalendar(2028, dataDir)
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+
+	var day *models.CalendarDay
+	for i := range days {
+		if days[i].Date.Equal(time.Date(2028, 12, 31, 0, 0, 0, 0, time.UTC)) {
+			day = &days[i]
+			break
+		}
+	}
+	if day == nil {
+		t.Fatal("calendar has no 2028-12-31")
+	}
+
+	var octave *models.Feast
+	for _, comm := range day.Commemorations {
+		if comm.ProperID == "christmas" {
+			octave = comm
+			break
+		}
+	}
+	if octave == nil {
+		t.Fatalf("commemorations = %v, want Nativity octave", day.Commemorations)
+	}
+
+	corpus, err := texts.LoadTexts(dataDir)
+	if err != nil {
+		t.Fatalf("LoadCorpus: %v", err)
+	}
+	for slot, want := range map[string]struct {
+		text string
+		ref  string
+	}{
+		"commemoration-antiphon": {
+			text: corpus.Get("proper/christmas/benedictus-antiphon"),
+			ref:  "proper/christmas/commemoration-antiphon-lauds",
+		},
+		"commemoration-versicle": {
+			text: corpus.Get("proper/christmas/versicle-lauds"),
+			ref:  "proper/christmas/commemoration-versicle-lauds",
+		},
+		"commemoration-collect": {
+			text: corpus.Get("proper/christmas/collect"),
+			ref:  "proper/christmas/collect",
+		},
+	} {
+		got, ref := lookupCommemoration(octave, day.Season, "lauds", slot, corpus)
+		if got != want.text || ref != want.ref {
+			t.Errorf("%s = (%q, %q), want (%q, %q)", slot, got, ref, want.text, want.ref)
 		}
 	}
 }

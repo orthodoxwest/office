@@ -3,11 +3,11 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 324 |
+| Modeled structural features | 326 |
 | Selected structural-review pages | 52 |
 | Uncovered features | 0 |
-| Verified text entries | 441 |
-| Rendered text entries needing review | 1410 |
+| Verified text entries | 458 |
+| Rendered text entries needing review | 1395 |
 | Rendered text entries with unknown source | 268 |
 | Classified zero-occurrence entries | 94 |
 | Zeroes needing classification | 2 |
@@ -93,18 +93,20 @@
 - `decision:condition:not-festal-vespers-psalmody,weekday-tuesday=omitted`
 - `decision:condition:not-festal-vespers-psalmody,weekday-wednesday=included`
 - `decision:condition:not-festal-vespers-psalmody,weekday-wednesday=omitted`
-- `decision:condition:not-is-feast,weekday-friday=included`
-- `decision:condition:not-is-feast,weekday-friday=omitted`
-- `decision:condition:not-is-feast,weekday-monday=included`
-- `decision:condition:not-is-feast,weekday-monday=omitted`
+- `decision:condition:not-is-feast,weekday-friday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-friday,not-festal-lauds-psalmody=omitted`
+- `decision:condition:not-is-feast,weekday-monday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-monday,not-festal-lauds-psalmody=omitted`
+- `decision:condition:not-is-feast,weekday-saturday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-saturday,not-festal-lauds-psalmody=omitted`
 - `decision:condition:not-is-feast,weekday-saturday=included`
 - `decision:condition:not-is-feast,weekday-saturday=omitted`
-- `decision:condition:not-is-feast,weekday-thursday=included`
-- `decision:condition:not-is-feast,weekday-thursday=omitted`
-- `decision:condition:not-is-feast,weekday-tuesday=included`
-- `decision:condition:not-is-feast,weekday-tuesday=omitted`
-- `decision:condition:not-is-feast,weekday-wednesday=included`
-- `decision:condition:not-is-feast,weekday-wednesday=omitted`
+- `decision:condition:not-is-feast,weekday-thursday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-thursday,not-festal-lauds-psalmody=omitted`
+- `decision:condition:not-is-feast,weekday-tuesday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-tuesday,not-festal-lauds-psalmody=omitted`
+- `decision:condition:not-is-feast,weekday-wednesday,not-festal-lauds-psalmody=included`
+- `decision:condition:not-is-feast,weekday-wednesday,not-festal-lauds-psalmody=omitted`
 - `decision:condition:not-is-ferial=included`
 - `decision:condition:not-is-ferial=omitted`
 - `decision:condition:weekday-friday=included`

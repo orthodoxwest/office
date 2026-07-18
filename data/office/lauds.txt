@@ -287,7 +287,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Monday]
-Condition = not-is-feast,weekday-monday
+Condition = not-is-feast,weekday-monday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -342,7 +342,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Tuesday]
-Condition = not-is-feast,weekday-tuesday
+Condition = not-is-feast,weekday-tuesday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -397,7 +397,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Wednesday]
-Condition = not-is-feast,weekday-wednesday
+Condition = not-is-feast,weekday-wednesday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -452,7 +452,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Thursday]
-Condition = not-is-feast,weekday-thursday
+Condition = not-is-feast,weekday-thursday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -507,7 +507,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Friday]
-Condition = not-is-feast,weekday-friday
+Condition = not-is-feast,weekday-friday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm
@@ -562,7 +562,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Saturday]
-Condition = not-is-feast,weekday-saturday
+Condition = not-is-feast,weekday-saturday,not-festal-lauds-psalmody
 Label = The Psalms
 
 Type = psalm

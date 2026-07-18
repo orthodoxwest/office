@@ -7,6 +7,7 @@ commons/apostle-paschal/psalm-antiphon-2,eebae0d7adbd,draft archdiocesan Lauds b
 commons/apostle-paschal/psalm-antiphon-3,2b1e1c6548ad,draft archdiocesan Vespers book,"Second Vespers, Common of Apostles in Paschaltide",565,verified,codex,2026-07-18,
 commons/apostle-paschal/versicle-first-vespers,e3c6e91bb33f,draft archdiocesan Vespers book,,571,verified,codex,2026-07-17,
 commons/apostle/chapter-lauds,4cb8e19d13a4,draft archdiocesan Lauds book,,608,verified,codex,2026-07-18,
+commons/apostle/hymn-lauds,d206a7990efd,draft archdiocesan Vespers book,"Saint Andrew, I Vespers",230-231,verified,codex,2026-07-18,canonical Apostles hymn wording and verse order checked against dehyphenated chant underlay
 commons/apostle/psalm-antiphon-1,c6041b6635df,draft archdiocesan Lauds book,,603,verified,codex,2026-07-17,
 commons/apostle/psalm-antiphon-2,a9e4b8ea3fd5,draft archdiocesan Lauds book,,604,verified,codex,2026-07-17,
 commons/apostle/psalm-antiphon-4-first-vespers,d8c01a0143cf,draft archdiocesan Vespers book,,542,verified,codex,2026-07-17,
@@ -83,6 +84,7 @@ commons/martyr/hymn-lauds,6b7c575e8fae,draft archdiocesan Lauds book,,628,verifi
 commons/martyr/hymn-vespers,291dddf2c7e2,draft archdiocesan Vespers book,,584,verified,codex,2026-07-17,
 commons/martyr/short-responsory-lauds,1981436935d4,draft archdiocesan Lauds book,Common of One Martyr out of Paschaltide,628,verified,codex,2026-07-18,
 commons/martyr/short-responsory-vespers,40d478dbb58d,draft archdiocesan Vespers book,,584,verified,codex,2026-07-17,
+commons/martyrs/hymn-lauds,1af65ddd277f,draft archdiocesan Lauds book,Common of Many Martyrs out of Paschaltide,638,verified,codex,2026-07-18,updated to and checked against local wording
 commons/martyrs/magnificat-antiphon,65ef00a539f0,draft archdiocesan Vespers book,,613,verified,codex,2026-07-17,
 commons/martyrs/short-responsory-lauds,6d3fc83fa938,draft archdiocesan Lauds book,,638,verified,codex,2026-07-17,
 commons/martyrs/short-responsory-vespers,08dd03f9d2f2,draft archdiocesan Vespers book,,600,verified,codex,2026-07-17,
@@ -156,6 +158,7 @@ proper/advent-sunday-4/psalm-antiphon-1,1366da2e99de,draft archdiocesan Vespers 
 proper/advent-sunday-4/psalm-antiphon-2,80fa46f62ebf,draft archdiocesan Vespers book,,29,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-3,488e7ad8bf64,draft archdiocesan Vespers book,,30,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-4,1ba943492c77,draft archdiocesan Lauds book,,45,verified,codex,2026-07-17,
+proper/all-saints/hymn-vespers,72cae542ac31,draft archdiocesan Vespers book,"The Feast of All Saints, I Vespers",528-529,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/all-saints/psalm-antiphon-1,8638dd5a4117,draft archdiocesan Vespers book,,524,verified,codex,2026-07-18,
 proper/all-saints/psalm-antiphon-3,e0d099e79783,draft archdiocesan Vespers book,,533,verified,codex,2026-07-18,
 proper/all-saints/psalm-antiphon-5,587d8ce4ce82,draft archdiocesan Lauds book,,596,verified,codex,2026-07-18,
@@ -188,9 +191,19 @@ proper/assumption-bvm/psalm-antiphon-1,4f464a27b205,draft archdiocesan Vespers b
 proper/assumption-bvm/psalm-antiphon-2,35724bd00a5f,draft archdiocesan Vespers book,,461,verified,codex,2026-07-18,
 proper/assumption-bvm/versicle-lauds,65002c4aac6d,draft archdiocesan Lauds book,The Assumption of the Blessed Virgin Mary,528,verified,codex,2026-07-18,
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
+proper/chair-peter-antioch/hymn-vespers,3a8cdc081f9d,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
+proper/christmas/benedictus-antiphon,563e7d19001d,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,72,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/collect,482a33f21028,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,73,verified,codex,2026-07-18,checked word for word
 proper/christmas/hymn-lauds,fb1b35ec9c54,draft archdiocesan Lauds book,,70-71,verified,codex,2026-07-18,
 proper/christmas/hymn-vespers,78b8dd8d9ab2,draft archdiocesan Vespers book,,"47-48, 58-59",verified,codex,2026-07-18,
+proper/christmas/psalm-antiphon-1,bdfccf9bdb4e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,62,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/psalm-antiphon-2,7e0c916f843e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,63,verified,codex,2026-07-18,updated to and checked against local wording
+proper/christmas/psalm-antiphon-3,bb60d2c0a995,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,64,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/psalm-antiphon-4,76ac128d7ac5,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,65,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/psalm-antiphon-5,7b020cfa0f86,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,66,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/short-responsory-lauds,c314b1468146,draft archdiocesan Lauds book,Nativity and days within the Octave,68-69,verified,codex,2026-07-18,simple-tone wording checked; optional solemn tone does not change text
+proper/christmas/versicle-lauds,e2fa7635953e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,71,verified,codex,2026-07-18,checked word for word
 proper/circumcision/hymn-vespers,78b8dd8d9ab2,draft archdiocesan Vespers book,,94-95,verified,codex,2026-07-18,
 proper/conception-bvm/chapter-lauds,f920a86583d0,draft archdiocesan Lauds book,,365,verified,codex,2026-07-18,
 proper/conception-bvm/psalm-antiphon-1,485b67b9622f,draft archdiocesan Vespers book,,243,verified,codex,2026-07-18,
@@ -226,6 +239,8 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
+proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
+proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,71,verified,codex,2026-07-18,Sunday-specific versicle checked word for word
 proper/pentecost/benedictus-antiphon,947ffcdb05e3,draft archdiocesan Lauds book,,310,verified,codex,2026-07-17,
 proper/pentecost/chapter-lauds,736f1f1c8b19,draft archdiocesan Lauds book,The Feast of Pentecost,304,verified,codex,2026-07-18,
 proper/pentecost/psalm-antiphon-1,0764e19393b9,draft archdiocesan Vespers book,,181,verified,codex,2026-07-17,
@@ -235,11 +250,13 @@ proper/pentecost/versicle-lauds,1717e2913fbc,draft archdiocesan Lauds book,The F
 proper/saturday-office-bvm-paschal/short-responsory-lauds,91143d1f7b76,Copy of OCP Ferial Lauds.pdf,,120,verified,codex,2026-07-18,
 proper/saturday-office-bvm/hymn-lauds,ef36c9ddd8e5,Copy of OCP Ferial Lauds.pdf,,107,verified,codex,2026-07-18,
 proper/solemnity-st-joseph/hymn-vespers,d37dc735511b,draft archdiocesan Vespers book,,168,verified,codex,2026-07-18,
+proper/st-joseph/hymn-vespers,ee8a6d88b6a9,draft archdiocesan Vespers book,"Saint Joseph, I Vespers",325-326,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/st-joseph/short-responsory-vespers,97970bbbbb33,draft archdiocesan Vespers book,,"324, 333",verified,codex,2026-07-17,
 proper/st-lawrence/psalm-antiphon-3,441ca5cf4bc3,draft archdiocesan Lauds book,,517,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-1,116ab0c2b5da,draft archdiocesan Vespers book,,189,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-2,c491b409b4d9,draft archdiocesan Vespers book,,190,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-3,f538e9d68586,draft archdiocesan Vespers book,,191,verified,codex,2026-07-17,
+proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word
 psalms/001,e19d81a02f61,Coverdale Psalter,Psalm 1,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/002,cebfe3005251,Coverdale Psalter,Psalm 2,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/003,90dcbba6a990,Coverdale Psalter,Psalm 3,,verified,codex,2026-07-10,Machine-verified against 1662 BCP

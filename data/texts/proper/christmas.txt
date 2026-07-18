@@ -12,8 +12,8 @@
 Whom beheld ye, * O shepherds? Tell us, declare to us the tidings, on earth who hath appeared? We saw the newborn Infant, and the choir of Angels, praising the Lord together, alleluia, alleluia.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/12-25 [Ant Laudes] — check against diurnal
-The Mother brought forth the King, * Whose name is called The Eternal; the joy of a Mother was hers, remaining a Virgin unsullied; neither before nor henceforth hath there been or shall be such another, alleluia.
+# SOURCE: draft archdiocesan Lauds book, p. 63 (Nativity and Sunday within the Octave)
+She that travailed * hath borne the Monarch whose Name is everlasting: she hath the joy of a mother, with the honour of virginity; before her none hath been seen like her, nor shall there be after, alleluia.
 
 [psalm-antiphon-3]
 # SOURCE: draft archdiocesan Lauds book, p. 61 (Nativity and Sunday within the Octave)
@@ -81,9 +81,15 @@ When the sun hath risen * in the heavens, ye shall see the King of kings, procee
 [commemoration-antiphon]
 The King of Peace * is magnified, whose face the whole earth desireth.
 
+[commemoration-antiphon-lauds]
+@use proper/christmas/benedictus-antiphon
+
 [commemoration-versicle]
 V. Tomorrow the iniquity of the earth shall be blotted out.
 R. And the Saviour of the world shall reign over us.
+
+[commemoration-versicle-lauds]
+@use proper/christmas/versicle-lauds
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 70, 50, 61 (Nativity)
