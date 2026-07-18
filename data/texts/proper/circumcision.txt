@@ -121,7 +121,7 @@ R. His salvation, alleluia.
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Jesu, the Father's Only Son, Xmas & Circum Vespers.docx); draft archdiocesan Vespers book, pp. 94–95
-Christe, Redemptor Omnium
+Christe, Redemptor omnium, ex Patre
 
 Jesu, the Father's only son;
 Whose death for all redemption won,
@@ -130,7 +130,7 @@ Begotten all ineffably.
 
 The Father's Light and Splendour thou,
 Their endless hope to thee that bow:
-Accept the prayers and praise today
+Accept the prayers and praise to-day
 That through the world thy servants pay.
 
 Salvation's Author, call to mind

@@ -31,19 +31,19 @@ This woman * is beautiful among the daughters of Jerusalem, alleluia.
 # SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins, Paschaltide)
 R. In thy grace and in thy beauty * alleluia, alleluia.
 R. In thy grace and in thy beauty * alleluia, alleluia.
-V. Go forth, ride prosperously, and reign.
+V. Go forth, ride prosp'rously, and reign.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace and in thy beauty * alleluia, alleluia.
 
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 670–671 (Common of Holy Women not Virgins, Paschaltide)
-R. God shall help her with his countenance * alleluia, alleluia.
-R. God shall help her with his countenance * alleluia, alleluia.
+R. God shall help her with his countenance, * alleluia, alleluia.
+R. God shall help her with his countenance, * alleluia, alleluia.
 V. God is in the midst of her, therefore shall she not be removed.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God shall help her with his countenance * alleluia, alleluia.
+R. God shall help her with his countenance, * alleluia, alleluia.
 
 [hymn-lauds]
 @use commons/holy-woman/hymn-lauds
