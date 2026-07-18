@@ -1,4 +1,6 @@
 key,content_hash,source,locator,page,status,reviewer,reviewed_on,notes
+canticles/benedicite,3e0383df2a96,00. The Temporal Cycle - Lauds 2025 Jacob edit 03-31 v.11.pdf,"The First Sunday in Advent, Song of the Three Children",5-6,verified,codex,2026-07-18,Word-for-word after normalizing chant pointing and typography.
+canticles/benedictus,495a10d187ae,Copy of OCP Ferial Lauds.pdf,"The Benedictus, tones I through Tonus Peregrinus C",146-161,verified,codex,2026-07-18,Word-for-word across every printed tone after normalizing chant pointing and typography.
 canticles/magnificat,0c7b11b156c6,diurnal,,115,verified,bwaldrep,2026-07-11,
 commons/apostle-paschal/hymn-lauds,60465c206836,A Noted Hymnary for the Anglican Breviary,,101,verified,codex,2026-07-17,
 commons/apostle-paschal/hymn-vespers,fa9b1a9fcfe2,A Noted Hymnary for the Anglican Breviary,,97,verified,codex,2026-07-17,
@@ -117,6 +119,8 @@ ordinary/lauds/psalm-antiphon-5-monday,01649f2ac975,Copy of OCP Ferial Lauds.pdf
 ordinary/lauds/psalm-antiphon-5-thursday,bac7bfd010c5,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,62,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-tuesday,f0edaf80ca03,Copy of OCP Ferial Lauds.pdf,,28,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-wednesday,d12bdd529e0f,draft archdiocesan Lauds book,Ash Wednesday,183,verified,codex,2026-07-18,
+ordinary/lauds/short-responsory,a7d33830d539,Copy of OCP Ferial Lauds.pdf,"Per Annum Monday-Saturday, The Short Response","14, 30, 47, 65, 85, 108",verified,codex,2026-07-18,Word-for-word in all six weekday offices after normalizing chant typography and rubric layout.
+ordinary/lauds/versicle,ac568d1bc2e1,Copy of OCP Ferial Lauds.pdf,"Per Annum Monday-Saturday, The Versicle","15, 31, 48, 66, 86, 109",verified,codex,2026-07-18,Word-for-word in all six weekday offices after normalizing chant typography.
 ordinary/marian/alma-redemptoris-advent,03099b8ea0aa,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/alma-redemptoris-christmas,7e2a049236ad,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/ave-regina-caelorum,8093c39100a2,Final Antiphons of the Blessed Virgin Mary.pdf,,6-7,verified,codex,2026-07-18,
@@ -141,6 +145,8 @@ ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwald
 ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,68cc37ec0d58,diurnal,,B,verified,bwaldrep,2026-07-10,
+ordinary/vespers/blessing,946f8c64292c,00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf,"Common of Apostles and Evangelists, The Prayers",8,verified,codex,2026-07-18,Word-for-word after normalizing print typography and rubric layout.
+ordinary/vespers/chapter,209d8d16cfcd,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ash Wednesday, The Chapter",129,verified,codex,2026-07-18,Word-for-word; the printed 2 Corinthians 1:3 heading is followed by the quoted opening of verse 4.
 ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,draft archdiocesan Vespers book,,210,verified,codex,2026-07-18,
 ordinary/vespers/psalm-antiphon-2-saturday,53e9146bfec8,draft archdiocesan Vespers book,,211,verified,codex,2026-07-18,
 ordinary/vespers/psalm-antiphon-3-saturday,3b963b10355b,draft archdiocesan Vespers book,,212,verified,codex,2026-07-18,
