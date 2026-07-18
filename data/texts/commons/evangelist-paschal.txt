@@ -29,3 +29,9 @@
 
 [magnificat-antiphon-first]
 @use commons/martyr-paschal/magnificat-antiphon-first
+
+[hymn-lauds]
+@use commons/apostle-paschal/hymn-lauds
+
+[hymn-vespers]
+@use commons/apostle-paschal/hymn-vespers

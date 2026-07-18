@@ -23,3 +23,9 @@
 
 [short-responsory-lauds]
 @use commons/virgin-martyr-paschal/short-responsory-lauds
+
+[hymn-lauds]
+@use commons/virgin/hymn-lauds
+
+[hymn-vespers]
+@use commons/virgin/hymn-lauds
