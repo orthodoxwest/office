@@ -747,6 +747,24 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 		}
 	})
 
+	t.Run("commemoration collect fallback remains generic", func(t *testing.T) {
+		commemoration := &models.Feast{
+			ID:       "corpus-christi",
+			Category: models.CategoryLord,
+		}
+		got, ref := lookupCommemoration(
+			commemoration,
+			models.Pentecost,
+			"lauds",
+			"commemoration-collect",
+			corpus,
+		)
+		want := corpus.Get("proper/corpus-christi/collect")
+		if got != want || ref != "proper/corpus-christi/collect" {
+			t.Fatalf("collect = %q (%s), want generic commemoration form %q", got, ref, want)
+		}
+	})
+
 	t.Run("Finding of the Holy Cross uses Easter commemoration sections only in Eastertide", func(t *testing.T) {
 		commemoration := &models.Feast{
 			ID:       "finding-holy-cross",

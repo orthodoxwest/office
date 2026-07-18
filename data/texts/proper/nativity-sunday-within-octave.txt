@@ -1,6 +1,24 @@
 [vespers-psalmody]
 @use psalmody/vespers/nativity
 
+[psalm-antiphon]
+@use proper/christmas/psalm-antiphon-1
+
+[psalm-antiphon-1]
+@use proper/christmas/psalm-antiphon-1
+
+[psalm-antiphon-2]
+@use proper/christmas/psalm-antiphon-2
+
+[psalm-antiphon-3]
+@use proper/christmas/psalm-antiphon-3
+
+[psalm-antiphon-4]
+@use proper/christmas/psalm-antiphon-4
+
+[psalm-antiphon-5]
+@use proper/christmas/psalm-antiphon-5
+
 [psalm-antiphon-1-vespers]
 @use proper/christmas/psalm-antiphon-1-vespers
 
@@ -16,6 +34,20 @@
 [psalm-antiphon-4-alternate-vespers]
 @use proper/christmas/psalm-antiphon-4-alternate-vespers
 
+[chapter-lauds]
+@use proper/vigil-epiphany/chapter-lauds
+
+[short-responsory-lauds]
+@use proper/christmas/short-responsory-lauds
+
+[hymn-lauds]
+@use proper/christmas/hymn-lauds
+
+[versicle-lauds]
+# SOURCE: draft archdiocesan Lauds book, p. 71 (Sunday within the Octave of the Nativity)
+V. All the ends of the world have seen, alleluia.
+R. The salvation of our God, alleluia.
+
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book (The Sunday within the Octave of the Nativity; Dum medium silentium)
 While all things * were in quiet silence, and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne, alleluia.
@@ -23,3 +55,7 @@ While all things * were in quiet silence, and that night was in the midst of her
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book (The Sunday within the Octave of the Nativity; Puer Jesus)
 The Child Jesus * increased in wisdom and stature in the sight of God and man.
+
+[collect]
+# SOURCE: draft archdiocesan Lauds book, p. 73 (Sunday within the Octave of the Nativity)
+Almighty and everlasting God, direct our actions according to thy good pleasure: that in the Name of thy well-beloved Son, we may be made worthy to abound in good works.

@@ -185,7 +185,7 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 	// 1. Feast-specific
 	for _, feastID := range feastProperIDs(feast) {
 		prefix := "proper/" + feastID + "/"
-		if text, resolved := lookupSectionText(prefix, season, "", ref, corpus); text != "" {
+		if text, resolved := lookupSectionText(prefix, season, hourName, ref, corpus); text != "" {
 			return substituteProperName(text, feast.ProperName), resolved
 		}
 	}
@@ -201,7 +201,7 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 	}
 
 	// 2. Commons (paschal, then regular)
-	if text, resolved := lookupCommonsText(feast.Category, season, "", ref, corpus); text != "" {
+	if text, resolved := lookupCommonsText(feast.Category, season, hourName, ref, corpus); text != "" {
 		return substituteProperName(text, feast.ProperName), resolved
 	}
 
