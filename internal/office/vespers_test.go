@@ -365,6 +365,25 @@ psalm-antiphon-4 = psalms/132 dates=12-26,12-28,12-30 antiphon=psalm-antiphon-4-
 	}
 }
 
+func TestResolvePsalmodyFixedDateUsesCivilEveningAtFirstVespers(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:         time.Date(2028, 12, 31, 0, 0, 0, 0, time.UTC),
+		FirstVespers: true,
+		Celebration:  &models.Feast{ID: "test-feast", Category: models.CategoryLord},
+	}
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/test-feast/vespers-psalmody": `psalm-antiphon-4 = psalms/130 dates=12-29
+psalm-antiphon-4 = psalms/132 dates=12-30`,
+	})
+	items, _, err := resolveVespersPsalmody(day, corpus)
+	if err != nil {
+		t.Fatalf("resolveVespersPsalmody: %v", err)
+	}
+	if len(items) != 1 || items[0].psalm != "psalms/132" {
+		t.Fatalf("resolved items = %#v, want civil Dec. 30 Psalm 132", items)
+	}
+}
+
 func TestValidateVespersPsalmodyDeclarationReferences(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		defaultVespersPsalmodyKey:           "psalm-antiphon-1 = psalms/missing",

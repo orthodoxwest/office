@@ -75,7 +75,7 @@ func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 				}
 				value := strings.TrimPrefix(option, "dates=")
 				if value == "" {
-					return nil, false, fmt.Errorf("line %d: expected dates=MM-DD,...", lineNumber)
+					return nil, false, fmt.Errorf("line %d: expected a non-empty dates=MM-DD list", lineNumber)
 				}
 				dates = make(map[string]bool)
 				for _, date := range strings.Split(value, ",") {
@@ -220,7 +220,15 @@ func resolveVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (
 	if ferial {
 		return nil, source, nil
 	}
-	items, err = selectPsalmodyItems(items, day.Date)
+	date := day.Date
+	if day.FirstVespers {
+		// vespersOfficeDay advances Date to the following feast so ordinary
+		// proper resolution uses its liturgical date. Fixed-date psalmody
+		// appointments, however, are printed for the civil evening on which
+		// Vespers is sung (notably Dec. 30 I Vespers of an octave Sunday).
+		date = date.AddDate(0, 0, -1)
+	}
+	items, err = selectPsalmodyItems(items, date)
 	if err != nil {
 		return nil, source, fmt.Errorf("invalid vespers psalmody declaration %q: %w", source, err)
 	}
