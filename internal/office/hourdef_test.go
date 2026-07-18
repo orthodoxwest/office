@@ -163,6 +163,94 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	}
 }
 
+func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
+	tests := []struct {
+		file     string
+		start    string
+		sections []HourSection
+	}{
+		{
+			file:  "lauds.txt",
+			start: "Closing",
+			sections: []HourSection{
+				{Name: "Closing", Elements: []HourElement{
+					{Type: "blessing", Ref: "ordinary/lauds/blessing"},
+					{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
+					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
+				}},
+				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
+				{Name: "Conclusion", Elements: []HourElement{{Type: "versicle", Ref: "shared/formulas/divine-help"}}},
+				{Name: "Post-Office", Elements: []HourElement{
+					{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
+					{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
+				}},
+			},
+		},
+		{
+			file:  "vespers.txt",
+			start: "Closing",
+			sections: []HourSection{
+				{Name: "Closing", Elements: []HourElement{
+					{Type: "blessing", Ref: "ordinary/vespers/blessing"},
+					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
+				}},
+				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
+				{Name: "Conclusion", Elements: []HourElement{{Type: "versicle", Ref: "shared/formulas/divine-help"}}},
+				{Name: "Post-Office", Elements: []HourElement{
+					{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
+					{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
+				}},
+			},
+		},
+		{
+			file:  "compline.txt",
+			start: "Marian",
+			sections: []HourSection{
+				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
+				{Name: "Closing", Elements: []HourElement{
+					{Type: "blessing", Ref: "ordinary/compline/conclusion"},
+					{Type: "rubric", Ref: "ordinary/compline/concluding-rubric"},
+				}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.file, func(t *testing.T) {
+			path := filepath.Join("..", "..", "data", "office", tt.file)
+			sections, err := ParseHourDefinition(path)
+			if err != nil {
+				t.Fatalf("ParseHourDefinition(%s): %v", tt.file, err)
+			}
+
+			start := -1
+			for i, section := range sections {
+				if section.Name == tt.start {
+					start = i
+					break
+				}
+			}
+			if start < 0 {
+				t.Fatalf("%s missing %s section", tt.file, tt.start)
+			}
+			got := sections[start:]
+			if len(got) != len(tt.sections) {
+				t.Fatalf("%s closing section count = %d, want %d", tt.file, len(got), len(tt.sections))
+			}
+			for i, want := range tt.sections {
+				if got[i].Name != want.Name {
+					t.Fatalf("%s closing section %d = %q, want %q", tt.file, i, got[i].Name, want.Name)
+				}
+				if !reflect.DeepEqual(got[i].Elements, want.Elements) {
+					t.Fatalf("%s %s elements = %+v, want %+v", tt.file, got[i].Name, got[i].Elements, want.Elements)
+				}
+			}
+		})
+	}
+}
+
 func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 	path := filepath.Join("..", "..", "data", "office", "prime.txt")
 	sections, err := ParseHourDefinition(path)
