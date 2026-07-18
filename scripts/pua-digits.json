@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "description": "PUA replacements for the four AWRV 2025 cycle draft PDFs",
+  "derivation": {
+    "method": "corpus-verified Psalm headings with Coverdale-to-Vulgate conversion",
+    "anchors": [
+      {
+        "coverdale": 51,
+        "vulgate": 50,
+        "incipit": "Miserere mei, Deus"
+      },
+      {
+        "coverdale": 118,
+        "vulgate": 117,
+        "incipit": "Confitemini Domino"
+      },
+      {
+        "coverdale": 63,
+        "vulgate": 62,
+        "incipit": "Deus, Deus meus"
+      },
+      {
+        "coverdale": 132,
+        "vulgate": 131,
+        "incipit": "Memento, Domine"
+      },
+      {
+        "coverdale": 148,
+        "vulgate": 148,
+        "incipit": "Laudate Dominum"
+      },
+      {
+        "coverdale": 100,
+        "vulgate": 99,
+        "incipit": "Jubilate Deo"
+      }
+    ]
+  },
+  "digits": {
+    "U+F643": "0",
+    "U+F644": "1",
+    "U+F645": "2",
+    "U+F646": "3",
+    "U+F647": "4",
+    "U+F648": "5",
+    "U+F649": "6",
+    "U+F64A": "7",
+    "U+F64B": "8",
+    "U+F64C": "9"
+  },
+  "literals": {
+    "U+F650": "#"
+  }
+}
