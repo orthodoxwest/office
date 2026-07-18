@@ -23,3 +23,9 @@
 
 [short-responsory-lauds]
 @use commons/confessor-doctor-paschal/short-responsory-lauds
+
+[hymn-lauds]
+@use commons/confessor/hymn-lauds
+
+[hymn-vespers]
+@use commons/confessor/hymn-vespers

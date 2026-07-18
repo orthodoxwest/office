@@ -43,6 +43,12 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord chose him for a priest unto himself, alleluia, alleluia.
 
+[hymn-lauds]
+@use commons/confessor-doctor/hymn-lauds
+
+[hymn-vespers]
+@use commons/confessor-bishop/hymn-vespers
+
 [versicle-lauds]
 @use commons/confessor-bishop-paschal/versicle-lauds
 

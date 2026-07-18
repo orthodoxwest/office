@@ -42,12 +42,12 @@ From the rising of the sun * even unto the going down of the same, the Lord's Na
 He gave himself * that he might deliver his people, and get him a perpetual Name, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 104 (II Vespers, Holy Name of Jesus)
-For he that is mighty * hath magnified me, and holy is his Name, alleluia.
+# SOURCE: draft Temporal Cycle Vespers book, p. 100 (II Vespers, Holy Name of Jesus)
+Thou shalt call * his name Jesus, for he shall save his people from their sins, alleluia.
 
 [magnificat-antiphon-first]
-# 2026 ordo (Jan 3): I Vespers repeats the II Vespers antiphon "For he that is mighty".
-@use proper/holy-name-jesus/magnificat-antiphon
+# SOURCE: draft Temporal Cycle Vespers book, p. 100 (I Vespers, Holy Name of Jesus)
+For he that is mighty * hath magnified me, and holy is his Name, alleluia.
 
 [commemoration-antiphon]
 Whosoever shall call * on the name of the Lord shall be saved.

@@ -414,7 +414,7 @@ func TestResolveProperTextPaschalCommons(t *testing.T) {
 	})
 }
 
-func TestPaschalMartyrCommonsUseSharedOfficeAndNumberedHymns(t *testing.T) {
+func TestPaschalCommonsUseExplicitHymns(t *testing.T) {
 	corpus, err := texts.LoadTexts("../../data")
 	if err != nil {
 		t.Fatalf("LoadTexts: %v", err)
@@ -430,6 +430,20 @@ func TestPaschalMartyrCommonsUseSharedOfficeAndNumberedHymns(t *testing.T) {
 		{"one martyr Lauds hymn", models.CategoryMartyr, "lauds", "hymn", "Thou foll'west, Martyr of thy God"},
 		{"many martyrs Lauds hymn", models.CategoryMartyrs, "lauds", "hymn", "All glorious King of Martyrs thou"},
 		{"many martyrs Vespers hymn", models.CategoryMartyrs, "vespers", "hymn", "All glorious King of Martyrs thou"},
+		{"bishop martyr Lauds hymn", models.CategoryBishopMartyr, "lauds", "hymn", "Thou foll'west, Martyr of thy God"},
+		{"bishop martyr Vespers hymn", models.CategoryBishopMartyr, "vespers", "hymn", "Of all thy warrior Saints"},
+		{"evangelist Lauds hymn", models.CategoryEvangelist, "lauds", "hymn", "In this our bright and Paschal day"},
+		{"evangelist Vespers hymn", models.CategoryEvangelist, "vespers", "hymn", "Th'Apostles' hearts were full of pain"},
+		{"confessor Lauds hymn", models.CategoryConfessor, "lauds", "hymn", "O Jesu, Crown above the sky"},
+		{"confessor Vespers hymn", models.CategoryConfessor, "vespers", "hymn", "This the Confessor of the Lord"},
+		{"confessor doctor Lauds hymn", models.CategoryConfessorDoctor, "lauds", "hymn", "Jesu, the world's Redeemer"},
+		{"confessor doctor Vespers hymn", models.CategoryConfessorDoctor, "vespers", "hymn", "This the Confessor of the Lord"},
+		{"virgin Lauds hymn", models.CategoryVirgin, "lauds", "hymn", "Jesu, the Virgins' crown"},
+		{"virgin Vespers hymn", models.CategoryVirgin, "vespers", "hymn", "Jesu, the Virgins' crown"},
+		{"virgin martyr Lauds hymn", models.CategoryVirginMartyr, "lauds", "hymn", "Jesu, the Virgins' crown"},
+		{"virgin martyr Vespers hymn", models.CategoryVirginMartyr, "vespers", "hymn", "Jesu, the Virgins' crown"},
+		{"holy woman Lauds hymn", models.CategoryHolyWoman, "lauds", "hymn", "High let us all our voices raise"},
+		{"holy woman Vespers hymn", models.CategoryHolyWoman, "vespers", "hymn", "High let us all our voices raise"},
 		{"shared Vespers antiphon", models.CategoryMartyrs, "vespers", "psalm-antiphon-4", "Then shall the righteous"},
 		{"shared Vespers responsory", models.CategoryMartyrs, "vespers", "short-responsory", "Light perpetual shall shine"},
 		{"shared I Vespers versicle", models.CategoryMartyrs, "vespers", "versicle-first", "O ye holy and righteous"},

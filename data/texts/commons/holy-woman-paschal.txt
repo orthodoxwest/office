@@ -45,6 +45,12 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God shall help her with his countenance * alleluia, alleluia.
 
+[hymn-lauds]
+@use commons/holy-woman/hymn-lauds
+
+[hymn-vespers]
+@use commons/holy-woman/hymn-lauds
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 695 (Common of Holy Women not Virgins, Paschaltide)
 V. Full of grace are thy lips, alleluia.
