@@ -184,18 +184,18 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 
 	// 1. Feast-specific
 	for _, feastID := range feastProperIDs(feast) {
-		feastRef := "proper/" + feastID + "/" + ref
-		if text := corpus.Get(feastRef); text != "" {
-			return substituteProperName(text, feast.ProperName), feastRef
+		prefix := "proper/" + feastID + "/"
+		if text, resolved := lookupSectionText(prefix, season, "", ref, corpus); text != "" {
+			return substituteProperName(text, feast.ProperName), resolved
 		}
 	}
 
 	// 1b. For commemoration-collect, fall back to the feast's own collect.
 	if ref == "commemoration-collect" {
 		for _, feastID := range feastProperIDs(feast) {
-			collectRef := "proper/" + feastID + "/collect"
-			if text := corpus.Get(collectRef); text != "" {
-				return substituteProperName(text, feast.ProperName), collectRef
+			prefix := "proper/" + feastID + "/"
+			if text, resolved := lookupSectionText(prefix, season, "", "collect", corpus); text != "" {
+				return substituteProperName(text, feast.ProperName), resolved
 			}
 		}
 	}
