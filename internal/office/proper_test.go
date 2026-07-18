@@ -631,3 +631,137 @@ func TestResolveProperTextEasterFeastProperVariant(t *testing.T) {
 		t.Fatalf("Lent short-responsory = %q (%s), want regular feast proper", got, ref)
 	}
 }
+
+func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+
+	t.Run("Annunciation uses Easter sections only in Eastertide", func(t *testing.T) {
+		tests := []struct {
+			name         string
+			date         time.Time
+			season       models.Season
+			wantText     string
+			wantRef      string
+			wantAlleluia bool
+		}{
+			{
+				name:         "Lent",
+				date:         time.Date(2026, 3, 25, 0, 0, 0, 0, time.UTC),
+				season:       models.Lent,
+				wantText:     "The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph.",
+				wantRef:      "proper/annunciation/psalm-antiphon-1",
+				wantAlleluia: false,
+			},
+			{
+				name:         "Eastertide",
+				date:         time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC),
+				season:       models.Easter,
+				wantText:     "The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph. Alleluia.",
+				wantRef:      "proper/annunciation/psalm-antiphon-1-easter",
+				wantAlleluia: true,
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				day := &models.CalendarDay{
+					Date:        tt.date,
+					Season:      tt.season,
+					Celebration: &models.Feast{ID: "annunciation", Category: models.CategoryBlessedVirgin},
+				}
+				got, ref := resolveProperText(day, "lauds", "psalm-antiphon-1", corpus)
+				if got != tt.wantText || ref != tt.wantRef {
+					t.Fatalf("text = %q (%s), want %q (%s)", got, ref, tt.wantText, tt.wantRef)
+				}
+				if strings.Contains(got, "Alleluia") != tt.wantAlleluia {
+					t.Fatalf("Alleluia presence in %q = %v, want %v", got, strings.Contains(got, "Alleluia"), tt.wantAlleluia)
+				}
+			})
+		}
+
+		slots := []string{
+			"psalm-antiphon-1",
+			"psalm-antiphon-2",
+			"psalm-antiphon-3",
+			"psalm-antiphon-4",
+			"psalm-antiphon-5",
+			"versicle",
+			"benedictus-antiphon",
+			"magnificat-antiphon",
+		}
+		for _, season := range []models.Season{models.Lent, models.Easter} {
+			day := &models.CalendarDay{
+				Date:        time.Date(2026, 3, 25, 0, 0, 0, 0, time.UTC),
+				Season:      season,
+				Celebration: &models.Feast{ID: "annunciation", Category: models.CategoryBlessedVirgin},
+			}
+			for _, slot := range slots {
+				_, ref := resolveProperText(day, "lauds", slot, corpus)
+				wantSuffix := slot
+				if slot == "versicle" {
+					wantSuffix = "versicle-lauds"
+				}
+				if season == models.Easter {
+					wantSuffix += "-easter"
+				}
+				wantRef := "proper/annunciation/" + wantSuffix
+				if ref != wantRef {
+					t.Errorf("%s %s source ref = %q, want %q", season, slot, ref, wantRef)
+				}
+			}
+
+			day.FirstVespers = true
+			_, ref := resolveProperText(day, "vespers", "magnificat-antiphon", corpus)
+			wantRef := "proper/annunciation/magnificat-antiphon-first"
+			if season == models.Easter {
+				wantRef += "-easter"
+			}
+			if ref != wantRef {
+				t.Errorf("%s I Vespers source ref = %q, want %q", season, ref, wantRef)
+			}
+		}
+
+		commemoration := &models.Feast{
+			ID:       "annunciation",
+			Category: models.CategoryBlessedVirgin,
+		}
+		got, ref := lookupCommemoration(commemoration, models.Easter, "lauds", "commemoration-antiphon", corpus)
+		if got != "The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph. Alleluia." ||
+			ref != "proper/annunciation/commemoration-antiphon-easter" {
+			t.Errorf("Easter commemoration antiphon = %q (%s), want Annunciation Easter variant", got, ref)
+		}
+	})
+
+	t.Run("confessor bishop suppresses Alleluia from Septuagesima", func(t *testing.T) {
+		tests := []struct {
+			name         string
+			date         time.Time
+			season       models.Season
+			wantRef      string
+			wantAlleluia bool
+		}{
+			{"before Septuagesima", time.Date(2026, 2, 7, 0, 0, 0, 0, time.UTC), models.Epiphany, "commons/confessor-bishop/psalm-antiphon-4", true},
+			{"Septuagesima", time.Date(2026, 2, 8, 0, 0, 0, 0, time.UTC), models.Septuagesima, "commons/confessor-bishop/psalm-antiphon-4-septuagesima", false},
+			{"Lent", time.Date(2026, 3, 12, 0, 0, 0, 0, time.UTC), models.Lent, "commons/confessor-bishop/psalm-antiphon-4-lent", false},
+			{"Passiontide", time.Date(2026, 3, 30, 0, 0, 0, 0, time.UTC), models.Passiontide, "commons/confessor-bishop/psalm-antiphon-4-passiontide", false},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				day := &models.CalendarDay{
+					Date:        tt.date,
+					Season:      tt.season,
+					Celebration: &models.Feast{ID: "example-bishop", Category: models.CategoryConfessorBishop},
+				}
+				got, ref := resolveProperText(day, "lauds", "psalm-antiphon-4", corpus)
+				if ref != tt.wantRef {
+					t.Fatalf("source ref = %q, want %q", ref, tt.wantRef)
+				}
+				if strings.Contains(strings.ToLower(got), "alleluia") != tt.wantAlleluia {
+					t.Fatalf("Alleluia presence in %q = %v, want %v", got, strings.Contains(strings.ToLower(got), "alleluia"), tt.wantAlleluia)
+				}
+			})
+		}
+	})
+}

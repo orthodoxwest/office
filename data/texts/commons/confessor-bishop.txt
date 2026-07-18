@@ -15,8 +15,17 @@ The Lord, * therefore, assured him by an oath that he would bless the nations in
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 654 (Common of a Confessor and Bishop)
-# NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
 O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn unto God, alleluia.
+
+[psalm-antiphon-4-septuagesima]
+# SOURCE: draft archdiocesan Lauds book, p. 654 (Common of a Confessor and Bishop; after Septuagesima)
+O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn unto God.
+
+[psalm-antiphon-4-lent]
+@use commons/confessor-bishop/psalm-antiphon-4-septuagesima
+
+[psalm-antiphon-4-passiontide]
+@use commons/confessor-bishop/psalm-antiphon-4-septuagesima
 
 [psalm-antiphon-5]
 # SOURCE: draft archdiocesan Lauds book, p. 656 (Common of a Confessor and Bishop)

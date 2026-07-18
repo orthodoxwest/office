@@ -97,6 +97,39 @@ func firstText(corpus *texts.TextCorpus, prefix string, refs []string) (string, 
 	return "", ""
 }
 
+func seasonRefCandidates(refs []string, season models.Season) []string {
+	if season == "" {
+		return nil
+	}
+	out := make([]string, 0, len(refs))
+	for _, ref := range refs {
+		out = append(out, ref+"-"+string(season))
+	}
+	return out
+}
+
+// lookupSectionText resolves a section within one corpus tier. A
+// season-qualified section (for example, versicle-lauds-easter) overrides the
+// ordinary section at that same tier; a missing variant falls through to the
+// existing hour-qualified and generic section candidates.
+func lookupSectionText(prefix string, season models.Season, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	var hourCandidates []string
+	if hourName != "" {
+		hourCandidates = hourRefCandidates(hourName, ref)
+	}
+	refCands := refCandidates(ref)
+	if text, resolved := firstText(corpus, prefix, seasonRefCandidates(hourCandidates, season)); text != "" {
+		return text, resolved
+	}
+	if text, resolved := firstText(corpus, prefix, seasonRefCandidates(refCands, season)); text != "" {
+		return text, resolved
+	}
+	if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+		return text, resolved
+	}
+	return firstText(corpus, prefix, refCands)
+}
+
 // substituteProperName replaces the liturgical placeholder "N." with the
 // saint's proper name in resolved text. Returns text unchanged if name is empty.
 func substituteProperName(text, name string) string {
@@ -119,20 +152,14 @@ func lookupCommonsText(category models.FeastCategory, season models.Season, hour
 	// Paschal variant (Easter season only)
 	if season == models.Easter {
 		prefix := "commons/" + cat + "-paschal/"
-		if text, resolved := firstText(corpus, prefix, hourRefCandidates(hourName, ref)); text != "" {
-			return text, resolved
-		}
-		if text, resolved := firstText(corpus, prefix, refCandidates(ref)); text != "" {
+		if text, resolved := lookupSectionText(prefix, "", hourName, ref, corpus); text != "" {
 			return text, resolved
 		}
 	}
 
 	// Regular commons
 	prefix := "commons/" + cat + "/"
-	if text, resolved := firstText(corpus, prefix, hourRefCandidates(hourName, ref)); text != "" {
-		return text, resolved
-	}
-	if text, resolved := firstText(corpus, prefix, refCandidates(ref)); text != "" {
+	if text, resolved := lookupSectionText(prefix, season, hourName, ref, corpus); text != "" {
 		return text, resolved
 	}
 
@@ -285,10 +312,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 				}
 			}
 			prefix := "proper/" + feastID + "/"
-			if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
-				return substituteProperName(text, properName), resolved
-			}
-			if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+			if text, resolved := lookupSectionText(prefix, day.Season, hourName, ref, corpus); text != "" {
 				return substituteProperName(text, properName), resolved
 			}
 		}

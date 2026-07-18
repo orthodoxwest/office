@@ -2,35 +2,80 @@
 @use proper/annunciation/psalm-antiphon-1
 
 [psalm-antiphon-1]
-The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph; and the virgin's name was Mary. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 432 (Annunciation; out of Paschaltide)
+The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph.
+
+[psalm-antiphon-1-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 432 (Annunciation; Paschaltide)
+The Angel Gabriel was sent * to Mary, a Virgin espoused to Joseph. Alleluia.
 
 [psalm-antiphon-2]
-Hail, Mary, * full of grace, the Lord is with thee; blessed art thou among women. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 433 (Annunciation; out of Paschaltide)
+Hail Mary, * thou that art full of grace, the Lord is with thee: blessed art thou among women.
+
+[psalm-antiphon-2-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 433 (Annunciation; Paschaltide)
+Hail Mary, * thou that art full of grace, the Lord is with thee: blessed art thou among women, alleluia.
 
 [psalm-antiphon-3]
-Fear not, Mary, * thou hast found grace with the Lord; behold, thou shalt conceive, and bring forth a Son. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 433 (Annunciation; out of Paschaltide)
+Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt conceive, and bring forth a Son.
+
+[psalm-antiphon-3-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 433 (Annunciation; Paschaltide)
+Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt conceive, and bring forth a Son, alleluia.
 
 [psalm-antiphon-4]
-The Lord shall give unto Him * the throne of His father David, and of His kingdom there shall be no end. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 434 (Annunciation; out of Paschaltide)
+The Lord shall give unto him * the throne of his father David, and he shall reign for ever.
+
+[psalm-antiphon-4-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 434 (Annunciation; Paschaltide)
+The Lord shall give unto him * the throne of his father David, and he shall reign for ever, alleluia.
 
 [psalm-antiphon-5]
-Behold the handmaid of the Lord, * be it unto me according to thy word. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 436 (Annunciation; out of Paschaltide)
+Behold the handmaid of the Lord; * be it unto me according to thy word.
+
+[psalm-antiphon-5-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 436 (Annunciation; Paschaltide)
+Behold the handmaid of the Lord; * be it unto me according to thy word. Alleluia.
 
 [benedictus-antiphon]
-How shall this be, * thou Angel of God, seeing I know not a man? Hear, O Virgin Mary: the Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 440 (Annunciation; out of Paschaltide)
+How shall this be, * O Angel of God, seeing I know not a man? Hearken, O Virgin Mary: The Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee.
+
+[benedictus-antiphon-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 440 (Annunciation; Paschaltide)
+How shall this be, * O Angel of God, seeing I know not a man? Hearken, O Virgin Mary: The Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee. Alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 359 (Annunciation, I Vespers; Spiritus Sanctus)
+# SOURCE: draft archdiocesan Vespers book, p. 354 (Annunciation, I Vespers; out of Paschaltide)
 The Holy Ghost * shall come upon thee, Mary: and the power of the Highest shall overshadow thee.
 
+[magnificat-antiphon-first-easter]
+# SOURCE: draft archdiocesan Vespers book, p. 354 (Annunciation, I Vespers; Paschaltide)
+The Holy Ghost * shall come upon thee, Mary: and the power of the Highest shall overshadow thee, alleluia.
+
 [magnificat-antiphon]
-The Angel Gabriel said unto Mary: Hail, thou that art full of grace, * the Lord is with thee; blessed art thou among women. (Alleluia.)
+# SOURCE: draft archdiocesan Vespers book, p. 354 (Annunciation, II Vespers; out of Paschaltide)
+The Angel Gabriel * spake unto Mary, saying: Hail, thou that art full of grace, the Lord is with thee; blessed art thou among women.
+
+[magnificat-antiphon-easter]
+# SOURCE: draft archdiocesan Vespers book, p. 354 (Annunciation, II Vespers; Paschaltide)
+The Angel Gabriel * spake unto Mary, saying: Hail, thou that art full of grace, the Lord is with thee; blessed art thou among women. Alleluia.
 
 [commemoration-antiphon]
 @use proper/annunciation/psalm-antiphon-1
 
+[commemoration-antiphon-easter]
+@use proper/annunciation/psalm-antiphon-1-easter
+
 [commemoration-versicle]
 @use proper/annunciation/versicle-lauds
+
+[commemoration-versicle-easter]
+@use proper/annunciation/versicle-lauds-easter
 
 [collect]
 O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
@@ -52,12 +97,20 @@ R. Thanks be to God.
 [hymn-vespers]
 @use shared/blessed-virgin/hymn-vespers
 [versicle-lauds]
-# SOURCE: divinum-officium SanctiM/03-25 [Versum 2] — check against diurnal
-V. Hail, Mary, full of grace. (Alleluia.)
-R. The Lord is with thee. (Alleluia.)
+# SOURCE: draft archdiocesan Lauds book, p. 440 (Annunciation; out of Paschaltide)
+V. Hail Mary, full of grace.
+R. The Lord is with thee.
+
+[versicle-lauds-easter]
+# SOURCE: draft archdiocesan Lauds book, p. 440 (Annunciation; Paschaltide)
+V. Hail Mary, full of grace, alleluia.
+R. The Lord is with thee, alleluia.
 
 [versicle-vespers]
 @use proper/annunciation/versicle-lauds
+
+[versicle-vespers-easter]
+@use proper/annunciation/versicle-lauds-easter
 
 [short-responsory-vespers]
 R. The Angel of the Lord * announced unto Mary.
