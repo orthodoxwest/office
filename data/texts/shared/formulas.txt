@@ -21,6 +21,21 @@ R. And with thy spirit.
 V. Let us bless the Lord.
 R. Thanks be to God.
 
+[faithful-departed]
+V. May the souls of the faithful, through the mercy of God, rest in peace.
+R. Amen.
+
+[closing-our-father]
+Our Father is said secretly.
+
+[closing-peace]
+V. The Lord give us his peace.
+R. And life everlasting. Amen.
+
+[divine-help]
+V. May the divine help remain with us always.
+R. And with our absent brethren. Amen.
+
 [commemoration-antiphon]
 Pray for us, O holy N., * that we may be made worthy of the promises of Christ.
 

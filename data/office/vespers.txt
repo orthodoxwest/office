@@ -450,17 +450,29 @@ Ref = ordinary/shared/cross-versicle
 Type = collect
 Ref = ordinary/shared/cross-collect
 
+[Closing]
+Label = Closing
+
+Type = blessing
+Ref = ordinary/vespers/blessing
+
+Type = rubric
+Ref = shared/formulas/closing-our-father
+
+Type = versicle
+Ref = shared/formulas/closing-peace
+
 [Marian]
 Label = Marian
 
 Type = marian
 Ref = seasonal
 
-[Closing]
-Label = Closing
+[Conclusion]
+Label = Conclusion
 
-Type = blessing
-Ref = ordinary/vespers/blessing
+Type = versicle
+Ref = shared/formulas/divine-help
 
 [Post-Office]
 Collapsible = true
@@ -468,3 +480,6 @@ Label = Closing Prayers
 
 Type = prayer
 Ref = ordinary/session/sacrosanctae
+
+Type = rubric
+Ref = ordinary/session/closing-rubric

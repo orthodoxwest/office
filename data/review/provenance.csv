@@ -42,8 +42,6 @@ ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwald
 ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,68cc37ec0d58,diurnal,,B,verified,bwaldrep,2026-07-10,
-proper/conception-bvm/versicle-lauds,2532ac9326a1,draft archdiocesan Lauds book,,367,verified,codex,2026-07-17,
-proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-1,7de540e90841,draft archdiocesan Vespers book,,4,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-2,313b9a7eaed8,draft archdiocesan Vespers book,,5,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-3,eaf2860c47f3,draft archdiocesan Vespers book,,6,verified,codex,2026-07-17,
@@ -58,6 +56,8 @@ proper/advent-sunday-4/psalm-antiphon-2,80fa46f62ebf,draft archdiocesan Vespers 
 proper/advent-sunday-4/psalm-antiphon-3,488e7ad8bf64,draft archdiocesan Vespers book,,30,verified,codex,2026-07-17,
 proper/annunciation/short-responsory-vespers,e9818c8e1dec,draft archdiocesan Vespers book,,351,verified,codex,2026-07-17,
 proper/ash-wednesday/chapter-vespers,ad8fb9b1bbfd,draft archdiocesan Vespers book,,129,verified,codex,2026-07-17,
+proper/conception-bvm/versicle-lauds,2532ac9326a1,draft archdiocesan Lauds book,,367,verified,codex,2026-07-17,
+proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
 proper/pentecost/psalm-antiphon-1,0764e19393b9,draft archdiocesan Vespers book,,181,verified,codex,2026-07-17,
 proper/pentecost/psalm-antiphon-2,55916376dd89,draft archdiocesan Vespers book,,182,verified,codex,2026-07-17,
 proper/pentecost/psalm-antiphon-3,a4c49844e898,draft archdiocesan Vespers book,,183,verified,codex,2026-07-17,
@@ -252,6 +252,10 @@ psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 seasonal/easter/pre-collect-versicle-prime,991eed765c77,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
+shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
+shared/formulas/closing-peace,6dd169108046,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,
+shared/formulas/divine-help,c73885541916,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
+shared/formulas/faithful-departed,78cd4856d8a2,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/opening-versicle,9cda7ff3a79e,diurnal,,2,verified,bwaldrep,2026-07-15,
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,

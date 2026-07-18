@@ -816,6 +816,27 @@ Label = Closing
 Type = blessing
 Ref = ordinary/lauds/blessing
 
+Type = versicle
+Ref = shared/formulas/faithful-departed
+
+Type = rubric
+Ref = shared/formulas/closing-our-father
+
+Type = versicle
+Ref = shared/formulas/closing-peace
+
+[Marian]
+Label = Marian
+
+Type = marian
+Ref = seasonal
+
+[Conclusion]
+Label = Conclusion
+
+Type = versicle
+Ref = shared/formulas/divine-help
+
 [Post-Office]
 Collapsible = true
 Label = Closing Prayers
