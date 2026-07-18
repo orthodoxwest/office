@@ -2,8 +2,7 @@
 @use commons/confessor/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-Lord, Thou deliverest unto me five talents * behold, I have gained beside them five talents more.
+Lord, thou deliveredst unto me five talents: * behold, I have gained beside them five talents more.
 
 [psalm-antiphon-2]
 # SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
