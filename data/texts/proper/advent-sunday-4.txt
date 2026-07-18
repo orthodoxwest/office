@@ -18,6 +18,15 @@ The Lord will come, * go ye out to meet him, saying: Great is his dominion, and 
 # SOURCE: draft archdiocesan Lauds book, p. 44 (The Fourth Sunday in Advent)
 Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne, alleluia.
 
+[psalm-antiphon-1-vespers]
+@use proper/advent-sunday-4/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/advent-sunday-4/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/advent-sunday-4/psalm-antiphon-3
+
 [psalm-antiphon]
 @use proper/advent-sunday-4/psalm-antiphon-1
 

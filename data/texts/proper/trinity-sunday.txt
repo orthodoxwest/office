@@ -21,6 +21,15 @@ Let praise to God the Father, * to the co-equal Son, and to thee, O Holy Spirit,
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 313, 192 (The Feast of the Most Holy Trinity)
 Of whom are all things, * through whom are all things, in whom are all things: to him be glory for ever.
 
+[psalm-antiphon-1-vespers]
+@use proper/trinity-sunday/psalm-antiphon-1
+
+[psalm-antiphon-2-vespers]
+@use proper/trinity-sunday/psalm-antiphon-2
+
+[psalm-antiphon-3-vespers]
+@use proper/trinity-sunday/psalm-antiphon-3
+
 [psalm-antiphon-4-vespers]
 @use proper/trinity-sunday/psalm-antiphon-5
 

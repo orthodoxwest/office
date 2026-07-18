@@ -59,6 +59,14 @@ R. The Lord is with thee. (Alleluia.)
 [versicle-vespers]
 @use proper/annunciation/versicle-lauds
 
+[short-responsory-vespers]
+R. The Angel of the Lord * announced unto Mary.
+R. The Angel of the Lord * announced unto Mary.
+V. And she conceived by the Holy Ghost.
+R. Announced unto Mary.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Angel of the Lord * announced unto Mary.
+
 [chapter-vespers]
 @use proper/annunciation/chapter-lauds
 
