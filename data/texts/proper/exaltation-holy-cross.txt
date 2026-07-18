@@ -179,19 +179,19 @@ V. This sign of the Cross shall be in heaven.
 R. When the Lord shall come to judgment.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Tertia] — check against diurnal
+# SOURCE: draft archdiocesan Lauds book, p. 552 (Exaltation of the Holy Cross)
 R. This sign of the Cross * shall be in heaven.
 R. This sign of the Cross * shall be in heaven.
-V. When the Lord cometh to judgment.
+V. When the Lord shall come to judgment.
 R. Shall be in heaven.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. This sign of the Cross * shall be in heaven.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Sexta] — check against diurnal
+# SOURCE: draft archdiocesan Vespers book, p. 481 (Exaltation of the Holy Cross)
 R. We adore thee, O Christ, * and we bless thee.
 R. We adore thee, O Christ, * and we bless thee.
-V. Because that through thy cross thou hast redeemed the world.
+V. Because by thy Cross thou hast redeemed the world.
 R. And we bless thee.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. We adore thee, O Christ, * and we bless thee.
