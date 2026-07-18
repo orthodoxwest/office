@@ -21,17 +21,20 @@ type AssuranceBaseline struct {
 
 // AssuranceReport is a source-content-free release assurance summary.
 type AssuranceReport struct {
-	StartYear         int
-	Years             int
-	CandidateCount    int
-	ModeledFeatures   int
-	ModeledFeatureIDs []string
-	SelectedPages     int
-	UncoveredFeatures []string
-	Verified          int
-	NeedsReview       int
-	SourceUnknown     int
-	StaleAttestations int
+	StartYear          int
+	Years              int
+	CandidateCount     int
+	ModeledFeatures    int
+	ModeledFeatureIDs  []string
+	SelectedPages      int
+	UncoveredFeatures  []string
+	Verified           int
+	NeedsReview        int
+	SourceUnknown      int
+	ClassifiedZeroes   int
+	UnclassifiedZeroes int
+	StaleZeroClasses   int
+	StaleAttestations  int
 }
 
 // BuildAssuranceReport generates the structural and provenance release facts.
@@ -44,6 +47,14 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 	if err != nil {
 		return nil, err
 	}
+	zeroClassifications, err := LoadZeroClassifications(dataDir, provenance)
+	if err != nil {
+		return nil, err
+	}
+	rendered := make(map[string]bool, len(plan.RenderedKeys))
+	for _, key := range plan.RenderedKeys {
+		rendered[key] = true
+	}
 	report := &AssuranceReport{
 		StartYear: startYear, Years: years, CandidateCount: plan.CandidateCount,
 		ModeledFeatures: plan.FeatureCount, SelectedPages: len(plan.Selected),
@@ -51,13 +62,21 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 		UncoveredFeatures: append([]string(nil), plan.Uncovered...),
 	}
 	for _, entry := range provenance.Entries {
-		switch entry.Status {
-		case ProvenanceVerified:
+		if entry.Status == ProvenanceVerified {
 			report.Verified++
-		case ProvenanceNeedsReview:
-			report.NeedsReview++
-		default:
-			report.SourceUnknown++
+		} else if rendered[entry.Key] {
+			if entry.Status == ProvenanceNeedsReview {
+				report.NeedsReview++
+			} else {
+				report.SourceUnknown++
+			}
+		} else if classification, ok := zeroClassifications[entry.Key]; ok && classification.Classified() {
+			report.ClassifiedZeroes++
+		} else {
+			report.UnclassifiedZeroes++
+			if classification.Stale {
+				report.StaleZeroClasses++
+			}
 		}
 		if entry.Stale {
 			report.StaleAttestations++
@@ -136,8 +155,11 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "| Selected structural-review pages | %d |\n", report.SelectedPages)
 		fmt.Fprintf(w, "| Uncovered features | %d |\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "| Verified text entries | %d |\n", report.Verified)
-		fmt.Fprintf(w, "| Text entries needing review | %d |\n", report.NeedsReview)
-		fmt.Fprintf(w, "| Text entries with unknown source | %d |\n", report.SourceUnknown)
+		fmt.Fprintf(w, "| Rendered text entries needing review | %d |\n", report.NeedsReview)
+		fmt.Fprintf(w, "| Rendered text entries with unknown source | %d |\n", report.SourceUnknown)
+		fmt.Fprintf(w, "| Classified zero-occurrence entries | %d |\n", report.ClassifiedZeroes)
+		fmt.Fprintf(w, "| Zeroes needing classification | %d |\n", report.UnclassifiedZeroes)
+		fmt.Fprintf(w, "| Stale zero-occurrence classifications | %d |\n", report.StaleZeroClasses)
 		fmt.Fprintf(w, "| Stale attestations | %d |\n", report.StaleAttestations)
 	} else {
 		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
@@ -146,8 +168,11 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "  selected pages:       %d\n", report.SelectedPages)
 		fmt.Fprintf(w, "  uncovered features:   %d\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "  verified:             %d\n", report.Verified)
-		fmt.Fprintf(w, "  needs review:         %d\n", report.NeedsReview)
-		fmt.Fprintf(w, "  source unknown:       %d\n", report.SourceUnknown)
+		fmt.Fprintf(w, "  rendered needs review:%5d\n", report.NeedsReview)
+		fmt.Fprintf(w, "  rendered unknown:     %d\n", report.SourceUnknown)
+		fmt.Fprintf(w, "  classified zeroes:    %d\n", report.ClassifiedZeroes)
+		fmt.Fprintf(w, "  unclassified zeroes:  %d\n", report.UnclassifiedZeroes)
+		fmt.Fprintf(w, "  stale zero classes:   %d\n", report.StaleZeroClasses)
 		fmt.Fprintf(w, "  stale attestations:   %d\n", report.StaleAttestations)
 	}
 	if len(failures) > 0 {

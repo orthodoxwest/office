@@ -162,6 +162,7 @@ type ReviewPlan struct {
 	CandidateCount int
 	FeatureCount   int
 	Features       []string
+	RenderedKeys   []string
 	Selected       []PlannedReview
 	IncludeSources bool
 	Uncovered      []string
@@ -181,6 +182,7 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 
 	bySignature := map[string]ReviewCandidate{}
 	allFeatures := map[string]bool{}
+	renderedKeys := map[string]bool{}
 	rawCount := 0
 	for year := startYear; year < startYear+years; year++ {
 		days, err := calendar.BuildCalendar(year, dataDir)
@@ -197,6 +199,9 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 				}
 				rawCount++
 				c := candidateFor(day, hourName, hour, includeSources)
+				for _, dependency := range c.Dependencies {
+					renderedKeys[dependency] = true
+				}
 				for _, f := range c.Features {
 					allFeatures[f] = true
 				}
@@ -219,6 +224,10 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 		uncovered[f] = true
 	}
 	plan := &ReviewPlan{StartYear: startYear, Years: years, CandidateCount: rawCount, IncludeSources: includeSources}
+	for key := range renderedKeys {
+		plan.RenderedKeys = append(plan.RenderedKeys, key)
+	}
+	sort.Strings(plan.RenderedKeys)
 	for feature := range allFeatures {
 		plan.Features = append(plan.Features, feature)
 	}

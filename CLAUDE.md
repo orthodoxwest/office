@@ -136,6 +136,7 @@ make review-manifest  # Print human-review checklist CSV for current year (START
 make review-status    # Report review coverage vs data/review/signoffs.txt
 make review-provenance # Report generated corpus source coverage
 make review-provenance-queue # Rank atomic text review by dependency fan-out (suspect tier first)
+make review-zero-occurrences # List unrendered corpus entries with classification heuristics
 make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-sprint list
 make review-plan      # Print minimal structural-review checklist CSV
 make review-assurance # Run release assurance gates and summary

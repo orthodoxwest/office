@@ -96,6 +96,7 @@ make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEA
 make review-status                    # coverage report: current / stale / unreviewed
 make review-provenance                # generated text-provenance coverage
 make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
+make review-zero-occurrences START=2026 YEARS=30 > zero-occurrences.csv  # classification worklist
 make review-suspects > suspects.csv   # only pre-flagged texts — the findings-sprint list
 make review-plan > review-plan.csv    # minimal structural checklist
 make review-assurance                 # release coverage gates and summary
@@ -158,6 +159,18 @@ Assurance disclosure, so a reviewer on any page is pointed at the exact
 element most likely to be wrong. Record read-through findings directly in
 the ledger, keyed by corpus entry — narrative prescreen write-ups rot as
 items get fixed, with no way to tell which findings still apply.
+
+Entries not selected anywhere in a sweep are classification work, not text
+attestation work. `review zero-occurrences` groups those entries by mechanical
+key-shape heuristics and joins the durable judgments in
+`data/review/zero-occurrences.csv`. The ledger dispositions are
+`shadowed-fallback`, `displaced`, `dormant-policy`, `suppressed`, `dead`,
+`defect`, and `unclassified`; a defect row must cite its issue. Rows are bound
+to the entry's content hash, so an edit makes the judgment stale. The standard
+provenance queue labels these rows `classified-zero` or
+`zero-needs-classification` and keeps current classified zeroes in a separate
+final tier. The assurance summary counts pending provenance only for rendered
+entries and reports classified and unclassified zeroes separately.
 
 ### Release assurance
 
