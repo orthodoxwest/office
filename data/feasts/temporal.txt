@@ -177,6 +177,7 @@ Color = white
 Category = feria
 DateRule = easter+38
 IsVigil = true
+VigilOf = ascension
 
 [rogation-monday]
 Name = Rogation Monday
@@ -192,6 +193,7 @@ Color = white
 Category = feria
 DateRule = easter+48
 IsVigil = true
+VigilOf = pentecost
 
 [pentecost]
 Name = Whitsunday — Pentecost

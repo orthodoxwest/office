@@ -238,6 +238,13 @@ func outgoingCommemoratedAtFirstVespers(winner, loser *models.Feast) (bool, stri
 		return false, "commemoration:first-vespers-no-outgoing-office"
 	}
 
+	if loser.ID == models.FeriaCommemorationID {
+		if winner != nil && winner.Rank == models.Double1stClass {
+			return false, "commemoration:first-vespers-first-class-seasonal-feria-exclusion"
+		}
+		return true, "commemoration:first-vespers-seasonal-feria"
+	}
+
 	// XIV.7 excludes seasonal ferias before a I Class Double, while XIV.8
 	// expressly retains them before a II Class Double.
 	if winner != nil && winner.Rank == models.Double1stClass &&
@@ -476,10 +483,19 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	// Paul with the Chair of Peter, Jan 18; 2026 ordo: Paul with the Chains of
 	// Peter, Aug 1). Displaced plain Doubles end at Lauds (the ordo omits
 	// Romuald Feb 7, Cyril Mar 18, Cuthbert Mar 20, Eustace Sep 20 — though it
-	// prints Ignatius Feb 1, an apparent inconsistency with Sep 20). Octave
+	// prints Ignatius Feb 1, an apparent inconsistency with Sep 20). The
+	// displaced seasonal feria is retained separately under XIV.8. Octave
 	// commemorations at the boundary follow their own policy and are not
 	// collected here.
 	if !secondVespers && preceding != nil {
+		if c := preceding.FeriaCommemoration; c != nil {
+			if included, rule := outgoingCommemoratedAtFirstVespers(winner, c); included {
+				comms = append(comms, c)
+				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: c.ID})
+			} else {
+				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: c.ID})
+			}
+		}
 		for _, c := range preceding.Commemorations {
 			if c.Category == models.CategoryFeria || isDayWithinOctave(c) || isOctaveDay(c) {
 				continue

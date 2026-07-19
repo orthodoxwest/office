@@ -163,6 +163,68 @@ func TestResolveDayCanTransferBeyondYearBoundary(t *testing.T) {
 	assertTraceRule(t, day.OccurrenceDecisions, "occurrence:transfer-out")
 }
 
+func TestResolveDaySuppressesSeasonallyExcludedCommonVigil(t *testing.T) {
+	tests := []struct {
+		name       string
+		season     models.Season
+		candidates []*models.Feast
+		wantWinner string
+		vigilID    string
+	}{
+		{
+			name:   "unimpeded vigil in Advent",
+			season: models.Advent,
+			candidates: []*models.Feast{
+				{ID: "vigil-of-st-andrew", Rank: models.Simple, Category: models.CategoryFeria, IsVigil: true},
+			},
+			vigilID: "vigil-of-st-andrew",
+		},
+		{
+			name:   "vigil on Ember day",
+			season: models.Septuagesima,
+			candidates: []*models.Feast{
+				{ID: "lent-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria},
+				{ID: "vigil-of-st-example", Rank: models.Simple, Category: models.CategoryFeria, IsVigil: true},
+			},
+			wantWinner: "lent-ember-wednesday",
+			vigilID:    "vigil-of-st-example",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day, _ := ResolveDay(
+				time.Date(2027, 11, 29, 0, 0, 0, 0, time.UTC),
+				tt.candidates, tt.season, models.Violet, nil, nil,
+			)
+			gotWinner := ""
+			if day.Celebration != nil {
+				gotWinner = day.Celebration.ID
+			}
+			if gotWinner != tt.wantWinner {
+				t.Fatalf("winner = %q, want %q", gotWinner, tt.wantWinner)
+			}
+			assertTraceDecision(t, day.OccurrenceDecisions, "commemoration:vigil-seasonal-exclusion", tt.vigilID)
+		})
+	}
+}
+
+func TestResolveDayRetainsPrivilegedVigilInAdvent(t *testing.T) {
+	vigil := &models.Feast{
+		ID:       "vigil-nativity",
+		Rank:     models.Double1stClass,
+		Category: models.CategoryFeria,
+		IsVigil:  true,
+	}
+	day, _ := ResolveDay(
+		time.Date(2026, 12, 24, 0, 0, 0, 0, time.UTC),
+		[]*models.Feast{vigil}, models.Advent, models.Violet, nil, nil,
+	)
+	if day.Celebration != vigil {
+		t.Fatalf("celebration = %#v, want privileged Vigil of the Nativity", day.Celebration)
+	}
+}
+
 func TestCommemorationDedupeContainmentBehavior(t *testing.T) {
 	short := traceFeast("st-john", models.Commemoration, models.CategoryMartyr)
 	long := traceFeast("st-john-baptist", models.Commemoration, models.CategoryMartyr)
@@ -184,4 +246,14 @@ func assertTraceRule(t *testing.T, decisions []models.CompositionDecision, rule 
 		}
 	}
 	t.Errorf("missing trace rule %q in %#v", rule, decisions)
+}
+
+func assertTraceDecision(t *testing.T, decisions []models.CompositionDecision, rule, detail string) {
+	t.Helper()
+	for _, decision := range decisions {
+		if decision.Rule == rule && decision.Detail == detail {
+			return
+		}
+	}
+	t.Errorf("missing trace rule %q with detail %q in %#v", rule, detail, decisions)
 }

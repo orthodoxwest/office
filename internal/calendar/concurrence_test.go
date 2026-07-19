@@ -488,6 +488,27 @@ func TestResolveConcurrenceSuppressesFollowingFeriaAtFirstVespers(t *testing.T) 
 	assertTraceRule(t, result.Decisions, "commemoration:incoming-feria-not-at-vespers-boundary")
 }
 
+func TestResolveConcurrenceRetainsDisplacedFeriaAtFollowingFirstVespers(t *testing.T) {
+	ambrose := &models.Feast{ID: "st-ambrose", Rank: models.GreaterDouble, Category: models.CategoryConfessorDoctor}
+	conception := &models.Feast{ID: "conception-bvm", Rank: models.Double2ndClass, Category: models.CategoryBlessedVirgin}
+	feria := &models.Feast{ID: models.FeriaCommemorationID, Name: "Monday after Advent II", Rank: models.Commemoration, Category: models.CategoryFeria}
+
+	result := resolveConcurrence(
+		&models.CalendarDay{Celebration: ambrose, FeriaCommemoration: feria},
+		&models.CalendarDay{Celebration: conception},
+	)
+
+	if result.Owner != models.VespersIOfFollowing {
+		t.Fatalf("owner = %v, want I Vespers of following", result.Owner)
+	}
+	if len(result.Commemorations) != 2 ||
+		result.Commemorations[0] != ambrose ||
+		result.Commemorations[1] != feria {
+		t.Fatalf("commemorations = %v, want St Ambrose and Advent feria", result.Commemorations)
+	}
+	assertTraceRule(t, result.Decisions, "commemoration:first-vespers-seasonal-feria")
+}
+
 func TestResolveConcurrenceSuppressesFollowingFeriaAtSecondVespers(t *testing.T) {
 	winner := &models.Feast{ID: "st-gregory", Rank: models.Double2ndClass, Category: models.CategoryConfessorDoctor}
 	currentFeria := &models.Feast{ID: models.FeriaCommemorationID, Name: "Thursday after Lent II", Rank: models.Commemoration, Category: models.CategoryFeria}

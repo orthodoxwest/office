@@ -3,13 +3,13 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 330 |
+| Modeled structural features | 331 |
 | Selected structural-review pages | 53 |
 | Uncovered features | 0 |
 | Verified text entries | 464 |
-| Rendered text entries needing review | 1406 |
+| Rendered text entries needing review | 1415 |
 | Rendered text entries with unknown source | 257 |
-| Classified zero-occurrence entries | 82 |
+| Classified zero-occurrence entries | 73 |
 | Zeroes needing classification | 12 |
 | Stale zero-occurrence classifications | 1 |
 | Stale attestations | 0 |
@@ -52,6 +52,7 @@
 - `decision:commemoration:second-vespers-memorial-or-simple=suppressed`
 - `decision:commemoration:second-vespers-seasonal-feria=included`
 - `decision:commemoration:st-george-octave=suppressed`
+- `decision:commemoration:vigil-seasonal-exclusion=suppressed`
 - `decision:condition:feast-easter-sunday=included`
 - `decision:condition:feast-easter-sunday=omitted`
 - `decision:condition:feast-holy-saturday=included`

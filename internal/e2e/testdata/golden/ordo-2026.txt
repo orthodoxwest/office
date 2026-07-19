@@ -363,12 +363,12 @@ FEBRUARY
  23  Mon     Chair of St. Peter at Antioch              [2cl] w
            St Peter Damian, Bishop, Confessor & Doctor (d)
            St Paul (com)
-           Vigil of St. Matthias (com)
+           Vigil of St. Matthias (s)
            Lauds   w · Ben. Whatsoever · No Preces · No Suff.
                Com. Monday after Quinquagesima ("Blessed be the Lord God of Israel, for he…")
                Com. St Peter Damian, Bishop, Confessor & Doctor ("Well done")
                Com. St Paul ("O holy Apostle Paul")
-               Com. Vigil of St. Matthias ("Lord, thou deliveredst unto me five talents")
+               Com. Vigil of St. Matthias ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. During his pontificate · No Suff.
                Com. St. Matthias, Apostle ("They will deliver you up")
@@ -1531,10 +1531,10 @@ AUGUST
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("Behold a great priest")
  22  Sat     Octave Day of the Assumption               [gd]  w
            Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
-           Vigil of St. Bartholomew (com)
+           Vigil of St. Bartholomew (s)
            Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("Behold a great priest")
-               Com. Vigil of St. Bartholomew ("Lord, thou deliveredst unto me five talents")
+               Com. Vigil of St. Bartholomew ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. On this day · No Suff.
                Com. XII Sunday after Pentecost ("A certain man went down from Jerusalem")
@@ -2148,8 +2148,10 @@ NOVEMBER
                Com. I Sunday of Advent ("The Holy Ghost shall come upon thee")
  30  Mon  L§ St. Andrew, Apostle                        [2cl] r
            Lauds   r · Ben. Yield up to us · No Preces · No Suff.
+               Com. Monday after Advent Sunday 1 ("The angel of the Lord")
            Hours   No Preces
            Vespers r · II prec. · Mag. When blessed Andrew · No Suff.
+               Com. Monday after Advent Sunday 1 ("Lift up thine eyes")
 
 DECEMBER
 ------------------------------------------------------------
@@ -2161,9 +2163,11 @@ DECEMBER
   2  Wed  L§ St Peter Chrysologus, Bishop, Confessor & Doctor [d]   w
            St Bibiana, Virgin & Martyr (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
+               Com. Wednesday after Advent Sunday 1 ("Out of Zion")
                Com. St Bibiana, Virgin & Martyr ("This is one of the wise virgins")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
+               Com. Wednesday after Advent Sunday 1 ("There cometh One mightier")
   3  Thu  L  Feria                                            v
            Lauds   v · Ben. Blessed art thou · No Preces · No Suff.
            Hours   Preces
@@ -2192,24 +2196,28 @@ DECEMBER
                Com. St. Ambrose ("O Teacher right excellent")
                Com. St. Nicholas ("Behold a great priest")
   7  Mon  L§ St. Ambrose                                [gd]  w
-           Vigil of the Conception (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Vigil of the Conception ("Lord, thou deliveredst unto me five talents")
+               Com. Monday after Advent Sunday 2 ("The Lord the Ruler")
            Hours   No Preces
            Vespers w · I fol. (Conception of the Blessed Virgin Mary) · Mag. All generations · No Suff.
                Com. St. Ambrose ("O Teacher right excellent")
+               Com. Monday after Advent Sunday 2 ("Behold, the Lord cometh")
   8  Tue  L  Conception of the Blessed Virgin Mary      [2cl] w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Tuesday after Advent Sunday 2 ("The Lord shall arise")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
+               Com. Tuesday after Advent Sunday 2 ("The voice")
   9  Wed  L§ Day II within Conception Octave            [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Wednesday after Advent Sunday 2 ("Behold I send My angel")
            Hours   No Preces
            Vespers w · Mag. Let us celebrate · No Suff.
                Com. St Melchiades, Bishop & Martyr ("Whosoever shall confess me")
  10  Thu  L  Day III within Conception Octave           [sd]  w
            St Melchiades, Bishop & Martyr (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Thursday after Advent Sunday 2 ("O Lord, Thou art He That should come")
                Com. St Melchiades, Bishop & Martyr ("Whosoever shall confess me")
            Hours   No Preces
            Vespers w · Mag. Let us celebrate · No Suff.
@@ -2217,13 +2225,16 @@ DECEMBER
  11  Fri  L§ Day IV within Conception Octave            [sd]  w
            St Damasus, Bishop & Confessor (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Friday after Advent Sunday 2 ("Say")
                Com. St Damasus, Bishop & Confessor ("Behold a great priest")
            Hours   No Preces
            Vespers w · Mag. Let us celebrate · No Suff.
  12  Sat  L  Day V within Conception Octave             [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Saturday after Advent Sunday 2 ("The Lord shall lift up a standard")
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
+               Com. Saturday after Advent Sunday 2 ("My soul doth magnify the Lord, and my spirit…")
                Com. St Lucy, Virgin & Martyr ("This is one of the wise virgins")
                Com. St Herman of Alaska, Priest & Confessor ("Lord, thou deliveredst unto me five talents")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
@@ -2241,12 +2252,16 @@ DECEMBER
                Com. St Lucy, Virgin & Martyr ("This is one of the wise virgins")
  14  Mon  L§ Day VII within Conception Octave           [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Monday after Advent Sunday 3 ("There shall come forth a rod")
            Hours   No Preces
            Vespers w · I fol. (Octave of the Conception of the B.V.M) · Mag. All generations · No Suff.
+               Com. Monday after Advent Sunday 3 ("All generations shall call me blessed")
  15  Tue  L  Octave of the Conception of the B.V.M      [gd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
+               Com. Tuesday after Advent Sunday 3 ("Thou, Bethlehem")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
+               Com. Tuesday after Advent Sunday 3 ("Awake, awake")
                Com. St Eusebius of Vercelli, Bishop & Martyr ("Whosoever shall confess me")
  16  Wed  L§ Advent Ember Wednesday                     [f2]  v
            St Eusebius of Vercelli, Bishop & Martyr (com)
@@ -2277,8 +2292,10 @@ DECEMBER
                Com. IV Sunday of Advent ("Hail, Mary, full of grace")
  21  Mon  L§ St. Thomas, Apostle                        [2cl] r
            Lauds   r · Ben. Because thou hast seen me · No Preces · No Suff.
+               Com. Monday after Advent Sunday 4 ("Thus saith the Lord")
            Hours   No Preces
            Vespers r · II prec. · Mag. Because thou hast seen me · No Suff.
+               Com. Monday after Advent Sunday 4 ("My soul doth magnify the Lord, and my spirit…")
  22  Tue  L  Feria                                            v
            Lauds   v · Ben. Awake, awake · No Preces · No Suff.
            Hours   Preces

@@ -1488,16 +1488,6 @@ Month = 11
 Day = 19
 Source = awrv
 
-[comm-extra-12-07-vigil-of-the-conception]
-Name = Vigil of the Conception
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 12
-Day = 7
-Source = awrv
-IsVigil = true
-
 [comm-extra-12-10-st-melchiades-pope-and-martyr]
 Name = St Melchiades, Bishop & Martyr
 Rank = commemoration
@@ -1592,16 +1582,6 @@ ProperID = commemoration-st-paul-apostle
 OnlyWith = chair-peter-antioch
 Source = awrv
 IsApostolicCompanion = true
-
-[comm-extra-02-23-vigil-of-st-matthias]
-Name = Vigil of St. Matthias
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 2
-Day = 23
-Source = awrv
-IsVigil = true
 
 [comm-extra-02-25-st-walburga-of-heidenheim-virgin]
 Name = St Walburga of Heidenheim, Virgin
@@ -1829,17 +1809,6 @@ Month = 7
 Day = 29
 Source = awrv
 
-
-
-[comm-extra-08-22-vigil-of-st-bartholomew]
-Name = Vigil of St. Bartholomew
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 8
-Day = 22
-Source = awrv
-IsVigil = true
 
 
 [comm-extra-08-30-ss-felix-and-adauctus-martyrs]
