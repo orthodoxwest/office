@@ -60,7 +60,7 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 // proper explicitly appoints ferial psalmody.
 func civilWeekday(day *models.CalendarDay) time.Weekday {
 	date := day.Date
-	if day != nil && day.FirstVespers {
+	if day.FirstVespers {
 		date = date.AddDate(0, 0, -1)
 	}
 	return date.Weekday()
