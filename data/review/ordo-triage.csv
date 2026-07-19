@@ -15,3 +15,4 @@ year,aspect,date,category,confidence,issue,note
 2026,lauds-commemorations,07-16,open-question,confirmed,11,Downstream of the Our Lady of Einsiedeln scope ruling.
 2026,vespers-commemorations,07-16,open-question,confirmed,11,Downstream of the Our Lady of Einsiedeln scope ruling.
 2026,vespers-commemorations,02-01,open-question,confirmed,93,Ordo commemorates displaced Ignatius at Purification I Vespers but omits the identical Eustace case Sep 20; awaiting ruling.
+2026,vespers-commemorations,02-23,reference-error,confirmed,40,"Ordo omits occurrent Peter Damian and following St Matthias at Chair of Peter II Vespers, contrary to General Rubrics XI.6, XIII.9, and XIV.5,7-9; the engine retains both."

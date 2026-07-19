@@ -55,12 +55,22 @@ O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the 
 [commemoration-antiphon]
 @use commons/confessor-doctor/psalm-antiphon-1
 
+[commemoration-antiphon-lauds]
+@use commons/confessor-doctor/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+@use commons/confessor-doctor/magnificat-antiphon
+
 [commemoration-versicle]
 V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.
 
+[commemoration-collect]
+@use commons/confessor-doctor/collect
+
 [collect]
-@use commons/confessor-bishop/collect
+# SOURCE: 00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf, p. 117 (For a Doctor, Collect)
+O God, who gavest blessed N. to thy people as a minister of eternal salvation: grant, we beseech thee, that we may be worthy to have him as our intercessor in heaven, whom we had as our teacher here upon earth.
 
 [chapter-lauds]
 @use commons/confessor-bishop/chapter-lauds

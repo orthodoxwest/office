@@ -54,11 +54,13 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 }
 
 // civilWeekday returns the weekday used by the psalter and weekday ordinary.
-// At I Vespers of a Sunday the office day has advanced to Sunday, while the
-// local Saturday Vespers books retain the Saturday psalter and ordinary.
+// At I Vespers the office day has advanced to the following feast, while the
+// psalter and weekday ordinary retain the civil evening on which Vespers is
+// recited. Most feasts use proper psalmody, but the same rule matters when a
+// proper explicitly appoints ferial psalmody.
 func civilWeekday(day *models.CalendarDay) time.Weekday {
 	date := day.Date
-	if isSundayFirstVespers(day) {
+	if day.FirstVespers {
 		date = date.AddDate(0, 0, -1)
 	}
 	return date.Weekday()

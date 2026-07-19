@@ -169,14 +169,14 @@ func TestLaudsCommemorations(t *testing.T) {
 
 func TestLaudsFeriaCommemoration(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
-		"ordinary/lauds/benedictus-antiphon":    "Ferial Benedictus antiphon",
-		"ordinary/lauds/versicle":               "Ferial versicle",
-		"ordinary/vespers/magnificat-antiphon":  "Ferial Magnificat antiphon",
-		"ordinary/vespers/versicle":             "Ferial vespers versicle",
-		"proper/lent-sunday-3/collect":          "Collect of the preceding Sunday",
-		"ordinary/lauds/commemoration-antiphon": "Saint antiphon N.",
-		"ordinary/lauds/commemoration-versicle": "Saint versicle",
-		"ordinary/lauds/commemoration-collect":  "Saint collect",
+		"proper/lent-sunday-3/benedictus-antiphon-saturday": "Ferial Benedictus antiphon",
+		"ordinary/lauds/versicle":                           "Ferial versicle",
+		"ordinary/vespers/magnificat-antiphon":              "Ferial Magnificat antiphon",
+		"ordinary/vespers/versicle":                         "Ferial vespers versicle",
+		"proper/lent-sunday-3/collect":                      "Collect of the preceding Sunday",
+		"ordinary/lauds/commemoration-antiphon":             "Saint antiphon N.",
+		"ordinary/lauds/commemoration-versicle":             "Saint versicle",
+		"ordinary/lauds/commemoration-collect":              "Saint collect",
 	})
 
 	day := &models.CalendarDay{
@@ -209,9 +209,11 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 		t.Errorf("collect = %q, want preceding Sunday collect", elems[3].Text)
 	}
 
-	// The feria commemoration is a Lauds-only concern; Vespers must not surface it.
+	// Concurrence places the feria in Vespers.Commemorations. The raw
+	// FeriaCommemoration field is inserted here only for Lauds, avoiding a
+	// duplicate when the Vespers office day is composed.
 	if got := addCommemorations(day, "vespers", corpus); len(got) != 0 {
-		t.Fatalf("vespers should not include the feria commemoration, got %d elements", len(got))
+		t.Fatalf("raw feria field should not be inserted directly at Vespers, got %d elements", len(got))
 	}
 }
 
@@ -654,5 +656,29 @@ func TestAddCommemorationsUsesProperIDAlias(t *testing.T) {
 	}
 	if elems[1].Text != "XXIII Pentecost antiphon" {
 		t.Fatalf("element 1 text = %q, want ProperID-backed antiphon", elems[1].Text)
+	}
+}
+
+func TestDoctorCommemorationAntiphonVariesByHour(t *testing.T) {
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	doctor := &models.Feast{
+		ID:         "test-doctor",
+		ProperName: "Example",
+		Category:   models.CategoryConfessorDoctor,
+	}
+
+	lauds, laudsRef := lookupCommemoration(doctor, models.Pentecost, "lauds", "commemoration-antiphon", engine.corpus)
+	if !strings.HasPrefix(lauds, "Well done") ||
+		laudsRef != "commons/confessor-doctor/commemoration-antiphon-lauds" {
+		t.Fatalf("Lauds antiphon = %q (%s), want Benedictus antiphon", lauds, laudsRef)
+	}
+
+	vespers, vespersRef := lookupCommemoration(doctor, models.Pentecost, "vespers", "commemoration-antiphon", engine.corpus)
+	if !strings.HasPrefix(vespers, "O Teacher right excellent") ||
+		vespersRef != "commons/confessor-doctor/commemoration-antiphon-vespers" {
+		t.Fatalf("Vespers antiphon = %q (%s), want Magnificat antiphon", vespers, vespersRef)
 	}
 }

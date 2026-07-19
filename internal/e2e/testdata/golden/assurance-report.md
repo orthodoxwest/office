@@ -3,14 +3,14 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 326 |
-| Selected structural-review pages | 52 |
+| Modeled structural features | 330 |
+| Selected structural-review pages | 53 |
 | Uncovered features | 0 |
 | Verified text entries | 464 |
-| Rendered text entries needing review | 1392 |
-| Rendered text entries with unknown source | 265 |
-| Classified zero-occurrence entries | 94 |
-| Zeroes needing classification | 2 |
+| Rendered text entries needing review | 1406 |
+| Rendered text entries with unknown source | 257 |
+| Classified zero-occurrence entries | 82 |
+| Zeroes needing classification | 12 |
 | Stale zero-occurrence classifications | 1 |
 | Stale attestations | 0 |
 
@@ -31,10 +31,12 @@
 - `decision:commemoration:first-vespers-occurrence-included=included`
 - `decision:commemoration:first-vespers-office-ended-at-none=suppressed`
 - `decision:commemoration:first-vespers-seasonal-feria=included`
+- `decision:commemoration:following-feria-not-at-second-vespers=suppressed`
 - `decision:commemoration:following-office-at-second-vespers-included=included`
 - `decision:commemoration:following-office-at-second-vespers-simple-or-memorial=suppressed`
 - `decision:commemoration:incoming-at-second-vespers=suppressed`
 - `decision:commemoration:incoming-at-unowned-vespers=included`
+- `decision:commemoration:incoming-feria-not-at-vespers-boundary=suppressed`
 - `decision:commemoration:matches-winner=suppressed`
 - `decision:commemoration:only-with=suppressed`
 - `decision:commemoration:outgoing-apostolic-companion=included`
@@ -48,6 +50,7 @@
 - `decision:commemoration:second-vespers-first-class-exclusion=suppressed`
 - `decision:commemoration:second-vespers-included=included`
 - `decision:commemoration:second-vespers-memorial-or-simple=suppressed`
+- `decision:commemoration:second-vespers-seasonal-feria=included`
 - `decision:commemoration:st-george-octave=suppressed`
 - `decision:condition:feast-easter-sunday=included`
 - `decision:condition:feast-easter-sunday=omitted`
@@ -287,6 +290,7 @@
 - `resolution:commemoration-antiphon=commons`
 - `resolution:commemoration-antiphon=ordinary`
 - `resolution:commemoration-antiphon=proper`
+- `resolution:commemoration-collect=commons`
 - `resolution:commemoration-collect=ordinary`
 - `resolution:commemoration-collect=proper`
 - `resolution:commemoration-versicle=commons`

@@ -741,8 +741,10 @@ func feriaCommemorationName(date, easter time.Time, season models.Season, weekID
 	return "the Feria"
 }
 
-// feriaCommemoration synthesizes the Lauds commemoration of the occurring
-// privileged feria displaced by a feast on a penitential weekday. Returns nil
+// feriaCommemoration synthesizes the commemoration of the occurring privileged
+// feria displaced by a feast on a penitential weekday. It is observed at Lauds
+// and II Vespers under XIV.9; at I Vespers the current civil day's outgoing
+// feria is handled by concurrence instead. Returns nil
 // when no such commemoration applies: on Sundays, when the office is already of
 // the feria (no Celebration, or the Celebration is itself a feria such as an
 // Ember day), or when a feria is already among the day's commemorations (e.g. a

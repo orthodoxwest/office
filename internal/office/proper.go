@@ -197,6 +197,9 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	if day.Celebration != nil {
 		properName = day.Celebration.ProperName
 	}
+	ferialVespersAntiphon := hourName == "vespers" &&
+		strings.HasPrefix(baseProperRef(ref), "psalm-antiphon") &&
+		usesWeekdayVespersAntiphons(day, corpus)
 
 	// 0. The Greater ("O") Antiphons: at Vespers of December 17-23 the
 	// date-fixed O antiphon supersedes the Advent Sunday's or feria's own
@@ -300,7 +303,8 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 1. Feast-specific proper (hour-qualified, then generic)
-	if day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
+	if !ferialVespersAntiphon &&
+		day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
 		for _, feastID := range feastProperIDs(day.Celebration) {
 			if day.Season == models.Easter {
 				prefix := "proper/" + feastID + "-paschal/"
@@ -325,7 +329,8 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 2. Common of Saints (paschal, then regular; hour-qualified, then generic)
-	if day.Celebration != nil && !isSynthesizedFeria(day.Celebration) {
+	if !ferialVespersAntiphon &&
+		day.Celebration != nil && !isSynthesizedFeria(day.Celebration) {
 		if text, resolved := lookupCommonsText(day.Celebration.Category, day.Season, hourName, ref, corpus); text != "" {
 			return substituteProperName(text, properName), resolved
 		}

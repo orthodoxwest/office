@@ -52,12 +52,13 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		officeDay.Date = day.Date.Add(24 * time.Hour)
 		officeDay.Commemorations = day.Vespers.Commemorations
 		officeDay.Tempora = ""
-		officeDay.WithinOctaveOf = ""
+		officeDay.WithinOctaveOf = day.Vespers.WithinOctaveOf
 		officeDay.FirstVespers = true
 	case models.VespersIIOfPreceding:
 		// Calendar resolution has already combined and filtered today's
 		// occurrence commemorations with the incoming concurrence boundary.
 		officeDay.Commemorations = day.Vespers.Commemorations
+		officeDay.FollowingOfficeCommemorationID = day.Vespers.FollowingOfficeCommemorationID
 	}
 
 	return &officeDay

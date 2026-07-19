@@ -12,9 +12,10 @@ import (
 )
 
 const (
-	vespersPsalmodyRef        = "vespers-psalmody"
-	defaultVespersPsalmodyKey = "ordinary/vespers/festal-psalmody"
-	ferialPsalmodyDeclaration = "ferial"
+	vespersPsalmodyRef                            = "vespers-psalmody"
+	defaultVespersPsalmodyKey                     = "ordinary/vespers/festal-psalmody"
+	ferialPsalmodyDeclaration                     = "ferial"
+	ferialPsalmodyWithWeekdayAntiphonsDeclaration = "ferial weekday-antiphons"
 )
 
 type psalmodyItem struct {
@@ -30,11 +31,14 @@ type psalmodyItem struct {
 // fixed-date selector, for example "... = psalms/130 dates=12-25,12-27";
 // disjoint alternatives for the same antiphon slot are allowed. An alternative
 // whose antiphon text also differs may add "antiphon=<corpus-key>". The single
-// word "ferial" is a stop marker: it preserves the weekday psalter instead of
-// falling through to the shared festal default.
+// word "ferial" is a stop marker: it preserves the weekday psalms instead of
+// falling through to the shared festal default, while still allowing proper
+// antiphons. "ferial weekday-antiphons" also preserves the weekday psalter's
+// antiphons.
 func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 	body = strings.TrimSpace(body)
-	if body == ferialPsalmodyDeclaration {
+	if body == ferialPsalmodyDeclaration ||
+		body == ferialPsalmodyWithWeekdayAntiphonsDeclaration {
 		return nil, true, nil
 	}
 	if body == "" {
@@ -167,6 +171,23 @@ func vespersPsalmodyCandidates(day *models.CalendarDay) []string {
 	return []string{vespersPsalmodyRef}
 }
 
+func hasFeastProperVespersPsalmAntiphons(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
+	if day == nil || day.Celebration == nil || corpus == nil {
+		return false
+	}
+	for _, feastID := range feastProperIDs(day.Celebration) {
+		if day.Season == models.Easter {
+			if text, _ := lookupSectionText("proper/"+feastID+"-paschal/", "", "vespers", "psalm-antiphon-1", corpus); text != "" {
+				return true
+			}
+		}
+		if text, _ := lookupSectionText("proper/"+feastID+"/", day.Season, "vespers", "psalm-antiphon-1", corpus); text != "" {
+			return true
+		}
+	}
+	return false
+}
+
 func lookupVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (string, string) {
 	if day == nil || day.Celebration == nil || corpus == nil || isSynthesizedFeria(day.Celebration) {
 		return "", ""
@@ -182,6 +203,17 @@ func lookupVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (s
 		if body, key := firstText(corpus, "proper/"+feastID+"/", refs); body != "" {
 			return body, key
 		}
+	}
+
+	// A plain Double with neither a feast-proper psalmody declaration nor
+	// feast-proper Vespers psalm antiphons takes the civil weekday psalter
+	// (General Rubrics XX.1, XXV.4). This gate belongs before the Common so a
+	// Common cannot manufacture festal psalmody. An office within an octave
+	// retains that octave's psalmody context.
+	if day.Celebration.Rank == models.Double &&
+		day.WithinOctaveOf == "" &&
+		!hasFeastProperVespersPsalmAntiphons(day, corpus) {
+		return ferialPsalmodyWithWeekdayAntiphonsDeclaration, "rubric/plain-double-ferial-vespers"
 	}
 
 	category := day.Celebration.Category
@@ -238,6 +270,11 @@ func resolveVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (
 func usesFestalVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
 	items, _, err := resolveVespersPsalmody(day, corpus)
 	return err == nil && len(items) != 0
+}
+
+func usesWeekdayVespersAntiphons(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
+	body, _ := lookupVespersPsalmody(day, corpus)
+	return strings.TrimSpace(body) == ferialPsalmodyWithWeekdayAntiphonsDeclaration
 }
 
 func composeResolvedPsalmody(day *models.CalendarDay, hourName string, items []psalmodyItem, corpus *texts.TextCorpus) []models.OfficeElement {
