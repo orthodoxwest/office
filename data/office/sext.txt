@@ -6,10 +6,7 @@ Collapsible = true
 Label = Opening Prayers
 
 Type = rubric
-Ref = ordinary/session/opening-rubric
-
-Type = prayer
-Ref = ordinary/session/open-my-mouth
+Ref = ordinary/session/little-hours-opening-rubric
 
 [Opening]
 Label = Opening
@@ -217,8 +214,8 @@ Ref = psalm-antiphon-3
 Type = proper-chapter
 Ref = chapter
 
-Type = proper-responsory
-Ref = short-responsory
+Type = proper-versicle
+Ref = versicle
 
 [Pre-Collect]
 Label = Collect
@@ -227,7 +224,7 @@ Type = prayer
 Ref = ordinary/shared/kyrie
 
 Type = prayer
-Ref = ordinary/shared/our-father
+Ref = ordinary/shared/our-father-little-hours
 
 Type = prayer
 Ref = ordinary/sext/pre-collect-versicles
@@ -242,9 +239,12 @@ Label = Closing
 Type = blessing
 Ref = ordinary/sext/blessing
 
+Type = versicle
+Ref = shared/formulas/faithful-departed
+
 [Post-Office]
 Collapsible = true
 Label = Closing Prayers
 
-Type = prayer
-Ref = ordinary/session/sacrosanctae
+Type = rubric
+Ref = shared/formulas/closing-our-father

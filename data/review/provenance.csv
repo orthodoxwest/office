@@ -127,9 +127,11 @@ ordinary/marian/ave-regina-caelorum,8093c39100a2,Final Antiphons of the Blessed 
 ordinary/marian/regina-caeli,ce0c82cf2d5e,Final Antiphons of the Blessed Virgin Mary.pdf,,10-11,verified,codex,2026-07-18,
 ordinary/marian/salve-regina,e98bdf367733,Final Antiphons of the Blessed Virgin Mary.pdf,,14-16,verified,codex,2026-07-18,
 ordinary/none/chapter,c6ad9ca60ea1,01. None Sunday Alex edit 12-07 v.01.docx,The Chapter; 1 Corinthians 6:20,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/none/pre-collect-versicles,f2f75ffa6d8f,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/none/psalm-antiphon,22765e57dafa,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Psalms; Antiphon Beati omnes,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/none/psalm-antiphon-monday,570c9d45b8e4,02. None Monday Alex edit 12-07 v.01.docx,The Psalms; Antiphon Adjuvet me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/none/psalm-antiphon-sunday,d92894995670,01. None Sunday Alex edit 12-07 v.01.docx,The Psalms; Antiphon Alleluia,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/none/versicle,4ad5f3a0f454,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 ordinary/prime/chapter,b9ab0498a31d,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/chapter-ferial,ba58f15a0c32,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
@@ -143,23 +145,30 @@ ordinary/prime/psalm-antiphon-1-thursday,dfed6d18e1aa,st patrick prayer book,,34
 ordinary/prime/psalm-antiphon-1-tuesday,ce8e7af0fabc,st patrick prayer book,,30,verified,bwaldrep,2026-07-15,
 ordinary/prime/psalm-antiphon-1-wednesday,82ae73f24b17,st patrick prayer book,,32,verified,bwaldrep,2026-07-15,
 ordinary/session/closing-rubric,bb4888da6f7b,diurnal,,A,verified,bwaldrep,2026-07-11,
+ordinary/session/little-hours-opening-rubric,e5431f70ff36,01. Terce Sunday Alex edit 11-24 v.01.docx,At Terce; before the Office,2,verified,codex,2026-07-20,Word-for-word after normalizing rubric typography.
 ordinary/session/open-my-mouth,6f62e3beb617,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/opening-rubric,2c43e230f57a,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/sacrosanctae,8f75adec497d,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/sext/chapter,f2d562a633b1,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Chapter; Galatians 6:2,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/sext/pre-collect-versicles,f2f75ffa6d8f,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/sext/psalm-antiphon,2b757ade2908,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Psalms; Antiphon Ad te levavi,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/sext/psalm-antiphon-monday,b66e8794b961,02. Sext Monday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Aspice in me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/sext/psalm-antiphon-sunday,d92894995670,01. Sext Sunday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Alleluia,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/sext/versicle,436144ea56c9,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 ordinary/shared/alleluia,0595c5c9f33e,diurnal,,2,verified,bwaldrep,2026-07-11,
 ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwaldrep,2026-07-16,
 ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,68cc37ec0d58,diurnal,,B,verified,bwaldrep,2026-07-10,
+ordinary/shared/our-father-little-hours,563a921a61d6,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Closing Prayers; Our Father,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/terce/chapter,e3f9b39f398a,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Chapter; Jeremiah 17:14,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/chapter-sunday,cf04763fa083,01. Terce Sunday Alex edit 11-24 v.01.docx,The Chapter; 1 John 4:16,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/terce/pre-collect-versicles,f2f75ffa6d8f,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/terce/psalm-antiphon,c7db29531e8d,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Psalms; Antiphon Clamavi,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/psalm-antiphon-monday,852f645d5b9a,02. Terce Monday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Adjuva me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/psalm-antiphon-sunday,d92894995670,01. Terce Sunday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Alleluia,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/terce/versicle,c31662e95fb9,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
+ordinary/terce/versicle-sunday,193147f3465f,01. Terce Sunday Alex edit 11-24 v.01.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 ordinary/vespers/blessing,946f8c64292c,00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf,"Common of Apostles and Evangelists, The Prayers",8,verified,codex,2026-07-18,Word-for-word after normalizing print typography and rubric layout.
 ordinary/vespers/chapter,209d8d16cfcd,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ash Wednesday, The Chapter",129,verified,codex,2026-07-18,Word-for-word; the printed 2 Corinthians 1:3 heading is followed by the quoted opening of verse 4.
 ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,draft archdiocesan Vespers book,,210,verified,codex,2026-07-18,

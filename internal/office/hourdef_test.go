@@ -123,9 +123,9 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	}{
 		{file: "lauds.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
 		{file: "vespers.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
 		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 	}
 
@@ -246,6 +246,52 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 				if !reflect.DeepEqual(got[i].Elements, want.Elements) {
 					t.Fatalf("%s %s elements = %+v, want %+v", tt.file, got[i].Name, got[i].Elements, want.Elements)
 				}
+			}
+		})
+	}
+}
+
+func TestMinorHourDataUsesParishStructure(t *testing.T) {
+	for _, file := range []string{"terce.txt", "sext.txt", "none.txt"} {
+		t.Run(file, func(t *testing.T) {
+			path := filepath.Join("..", "..", "data", "office", file)
+			sections, err := ParseHourDefinition(path)
+			if err != nil {
+				t.Fatalf("ParseHourDefinition(%s): %v", file, err)
+			}
+
+			byName := make(map[string]HourSection, len(sections))
+			for _, section := range sections {
+				byName[section.Name] = section
+				for _, elem := range section.Elements {
+					if elem.Type == "proper-responsory" {
+						t.Fatalf("%s still renders a Little Hours responsory: %+v", file, elem)
+					}
+				}
+			}
+
+			if got := byName["Pre-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
+				{Type: "rubric", Ref: "ordinary/session/little-hours-opening-rubric"},
+			}) {
+				t.Fatalf("%s Pre-Office = %+v", file, got)
+			}
+			if got := byName["Chapter"].Elements; !reflect.DeepEqual(got, []HourElement{
+				{Type: "proper-chapter", Ref: "chapter"},
+				{Type: "proper-versicle", Ref: "versicle"},
+			}) {
+				t.Fatalf("%s Chapter = %+v", file, got)
+			}
+			hour := strings.TrimSuffix(file, ".txt")
+			if got := byName["Closing"].Elements; !reflect.DeepEqual(got, []HourElement{
+				{Type: "blessing", Ref: "ordinary/" + hour + "/blessing"},
+				{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
+			}) {
+				t.Fatalf("%s Closing = %+v", file, got)
+			}
+			if got := byName["Post-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
+				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+			}) {
+				t.Fatalf("%s Post-Office = %+v", file, got)
 			}
 		})
 	}

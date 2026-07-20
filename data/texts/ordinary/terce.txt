@@ -44,6 +44,16 @@ R. Thanks be to God.
 God is love; and he that dwelleth in love dwelleth in God, and God in him.
 R. Thanks be to God.
 
+[versicle]
+# SOURCE: 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
+V. Thou hast been my succour; leave me not.
+R. Neither forsake me, O God of my salvation.
+
+[versicle-sunday]
+# SOURCE: 01. Terce Sunday Alex edit 11-24 v.01.docx, p. 5
+V. I said, Lord, be merciful unto me.
+R. Heal my soul, for I have sinned against thee.
+
 [short-responsory]
 R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
 Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
@@ -53,7 +63,11 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
 
 [pre-collect-versicles]
-@use shared/formulas/pre-collect-versicles
+# SOURCE: 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
+V. The Lord be with you.
+R. And with thy spirit.
+
+Let us pray.
 
 [collect]
 O God, who didst consecrate this hour by the descent of the Holy Spirit upon

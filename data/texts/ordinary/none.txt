@@ -38,6 +38,11 @@ Let thine hand help me, O Lord; * for I have chosen thy commandments.
 For ye are bought with a price: therefore glorify God in your body, and in your spirit, which are God's.
 R. Thanks be to God.
 
+[versicle]
+# SOURCE: 03. None Throughout the Week Alex edit 12-07 v.01.docx, p. 5
+V. O cleanse thou me from my secret faults.
+R. Keep thy servant also from presumptuous sins.
+
 [short-responsory]
 R. Redeem me, O Lord, and have mercy on me.
 Redeem me, O Lord, and have mercy on me.
@@ -47,7 +52,11 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Redeem me, O Lord, and have mercy on me.
 
 [pre-collect-versicles]
-@use shared/formulas/pre-collect-versicles
+# SOURCE: 03. None Throughout the Week Alex edit 12-07 v.01.docx, p. 5
+V. The Lord be with you.
+R. And with thy spirit.
+
+Let us pray.
 
 [collect]
 O God, who didst at this hour give salvation to the world through the death
