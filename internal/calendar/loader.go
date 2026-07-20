@@ -134,6 +134,9 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 			return nil, fmt.Errorf("%s: feast %q: IsVigil: %w", sourceFile, f.ID, err)
 		}
 	}
+	if v, ok := m["VigilOf"]; ok {
+		f.VigilOf = v
+	}
 	if v, ok := m["IsApostolicCompanion"]; ok {
 		f.IsApostolicCompanion, err = parseDataBool(v)
 		if err != nil {
@@ -167,6 +170,7 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"_id": true, "Name": true, "Rank": true, "Color": true,
 		"Category": true, "ProperName": true, "ProperID": true, "DateRule": true,
 		"Month": true, "Day": true, "HasOctave": true, "HasVigil": true, "IsVigil": true,
+		"VigilOf":              true,
 		"IsApostolicCompanion": true,
 		"OnlyWith":             true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}
@@ -190,6 +194,18 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	}
 	if hasFixed && !validFixedDate(f.Month, f.Day) {
 		return nil, fmt.Errorf("%s: feast %q has invalid fixed date %d/%d", sourceFile, f.ID, f.Month, f.Day)
+	}
+	if f.IsVigil && f.Category != models.CategoryFeria {
+		return nil, fmt.Errorf(
+			"%s: feast %q is a vigil but has category %q instead of feria",
+			sourceFile, f.ID, f.Category,
+		)
+	}
+	if f.IsVigil && f.VigilOf == "" {
+		return nil, fmt.Errorf("%s: feast %q is a vigil but does not specify VigilOf", sourceFile, f.ID)
+	}
+	if !f.IsVigil && f.VigilOf != "" {
+		return nil, fmt.Errorf("%s: feast %q specifies VigilOf but is not a vigil", sourceFile, f.ID)
 	}
 
 	return f, nil

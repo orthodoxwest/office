@@ -141,9 +141,6 @@ func TestLoadFeastsVigilTraits(t *testing.T) {
 	want := map[string]bool{
 		"vigil-ascension": true, "vigil-pentecost": true,
 		"vigil-epiphany": true, "vigil-st-james": true, "vigil-nativity": true,
-		"comm-extra-12-07-vigil-of-the-conception": true,
-		"comm-extra-02-23-vigil-of-st-matthias":    true,
-		"comm-extra-08-22-vigil-of-st-bartholomew": true,
 	}
 	for _, feast := range feasts {
 		if !feast.IsVigil {
@@ -258,13 +255,27 @@ func TestSectionToFeastIsVigil(t *testing.T) {
 	feast, err := sectionToFeast(map[string]string{
 		"_id": "example-vigil", "Name": "Example Vigil", "Rank": "simple",
 		"Color": "violet", "Category": "feria", "Month": "6", "Day": "1",
-		"IsVigil": "true",
+		"IsVigil": "true", "VigilOf": "example",
 	}, "test.txt")
 	if err != nil {
 		t.Fatalf("sectionToFeast returned error: %v", err)
 	}
 	if !feast.IsVigil {
 		t.Fatal("IsVigil = false, want true")
+	}
+	if feast.VigilOf != "example" {
+		t.Fatalf("VigilOf = %q, want example", feast.VigilOf)
+	}
+}
+
+func TestSectionToFeastRejectsNonFerialVigil(t *testing.T) {
+	_, err := sectionToFeast(map[string]string{
+		"_id": "example-vigil", "Name": "Example Vigil", "Rank": "commemoration",
+		"Color": "white", "Category": "confessor", "Month": "6", "Day": "1",
+		"IsVigil": "true", "VigilOf": "example",
+	}, "test.txt")
+	if err == nil || !strings.Contains(err.Error(), "category \"confessor\" instead of feria") {
+		t.Fatalf("sectionToFeast error = %v, want vigil-category error", err)
 	}
 }
 

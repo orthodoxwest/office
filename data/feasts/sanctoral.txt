@@ -537,6 +537,7 @@ Color = white
 Category = blessed-virgin
 Month = 12
 Day = 8
+HasVigil = true
 HasOctave = true
 
 [st-nicholas]
@@ -634,6 +635,7 @@ Category = feria
 Month = 1
 Day = 5
 IsVigil = true
+VigilOf = epiphany
 
 [st-maurus]
 Name = St Maurus, Abbot
@@ -733,6 +735,7 @@ Category = feria
 Month = 7
 Day = 24
 IsVigil = true
+VigilOf = st-james-greater
 
 [st-martha-bethany]
 Name = St. Martha of Bethany, Virgin
@@ -898,6 +901,7 @@ Category = feria
 Month = 12
 Day = 24
 IsVigil = true
+VigilOf = christmas
 
 [st-hilary]
 Name = St. Hilary, Bishop, Confessor & Doctor

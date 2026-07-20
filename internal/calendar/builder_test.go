@@ -378,6 +378,69 @@ func TestBuildCalendarVigils(t *testing.T) {
 	}
 }
 
+func TestBuildCalendarCommonVigilOwnership(t *testing.T) {
+	tests := []struct {
+		year, month, day int
+		vigilID          string
+		want             bool
+	}{
+		{2024, 2, 23, "vigil-of-st-matthias", false},
+		{2024, 2, 24, "vigil-of-st-matthias", true},
+		{2025, 8, 22, "vigil-of-st-bartholomew", false},
+		{2025, 8, 23, "vigil-of-st-bartholomew", true},
+		{2026, 2, 23, "vigil-of-st-matthias", true},
+		{2026, 8, 22, "vigil-of-st-bartholomew", true},
+		{2027, 11, 29, "vigil-of-st-andrew", false},
+	}
+
+	calendars := make(map[int][]models.CalendarDay)
+	for _, tt := range tests {
+		days := calendars[tt.year]
+		if days == nil {
+			var err error
+			days, err = BuildCalendar(tt.year, findDataDir(t))
+			if err != nil {
+				t.Fatalf("BuildCalendar(%d) error: %v", tt.year, err)
+			}
+			calendars[tt.year] = days
+		}
+		day := findDay(days, tt.year, tt.month, tt.day)
+		var found []*models.Feast
+		if day.Celebration != nil && day.Celebration.ID == tt.vigilID {
+			found = append(found, day.Celebration)
+		}
+		for _, comm := range day.Commemorations {
+			if comm.ID == tt.vigilID {
+				found = append(found, comm)
+			}
+		}
+		wantCount := 0
+		if tt.want {
+			wantCount = 1
+		}
+		if len(found) != wantCount {
+			t.Errorf("%d-%02d-%02d %s count=%d, want %d", tt.year, tt.month, tt.day, tt.vigilID, len(found), wantCount)
+		}
+		if len(found) == 1 && (!found[0].IsVigil || found[0].Category != models.CategoryFeria || found[0].VigilOf == "") {
+			t.Errorf("%d-%02d-%02d %s traits = IsVigil:%t Category:%q VigilOf:%q, want true/feria/non-empty",
+				tt.year, tt.month, tt.day, tt.vigilID, found[0].IsVigil, found[0].Category, found[0].VigilOf)
+		}
+	}
+
+	dec7 := findDay(calendars[2026], 2026, 12, 7)
+	for _, comm := range dec7.Commemorations {
+		if comm.ID == "vigil-of-conception-bvm" {
+			t.Fatal("2026-12-07: Conception vigil must not be commemorated in Advent")
+		}
+	}
+	if dec7.FeriaCommemoration == nil {
+		t.Fatal("2026-12-07: displaced Advent feria must be commemorated")
+	}
+	assertTraceDecision(t, dec7.OccurrenceDecisions, "commemoration:vigil-seasonal-exclusion", "vigil-of-conception-bvm")
+	nov29 := findDay(calendars[2027], 2027, 11, 29)
+	assertTraceDecision(t, nov29.OccurrenceDecisions, "commemoration:vigil-seasonal-exclusion", "vigil-of-st-andrew")
+}
+
 func TestBuildCalendarOctaves(t *testing.T) {
 	days := buildCalendar2026(t)
 

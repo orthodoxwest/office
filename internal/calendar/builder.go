@@ -42,6 +42,8 @@ var shortNames = map[string]string{
 	"conception-bvm":        "the Conception of the B.V.M.",
 	"all-saints":            "All Saints",
 	"nativity-john-baptist": "St John the Baptist",
+	"st-matthias":           "St. Matthias",
+	"st-bartholomew":        "St. Bartholomew",
 }
 
 var privilegedOctaves = map[string]bool{
@@ -356,6 +358,7 @@ func vigilFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *M
 			Month:    int(vigilDate.Month()),
 			Day:      vigilDate.Day(),
 			IsVigil:  true,
+			VigilOf:  feast.ID,
 		})
 	}
 	return vigils
@@ -720,7 +723,7 @@ func hasFeriaCandidate(candidates []*models.Feast) bool {
 // office (Septuagesima through Passiontide).
 func isPenitentialFeriaSeason(season models.Season) bool {
 	switch season {
-	case models.Septuagesima, models.Lent, models.Passiontide:
+	case models.Advent, models.Septuagesima, models.Lent, models.Passiontide:
 		return true
 	default:
 		return false
@@ -741,17 +744,19 @@ func feriaCommemorationName(date, easter time.Time, season models.Season, weekID
 	return "the Feria"
 }
 
-// feriaCommemoration synthesizes the commemoration of the occurring privileged
-// feria displaced by a feast on a penitential weekday. It is observed at Lauds
-// and II Vespers under XIV.9; at I Vespers the current civil day's outgoing
-// feria is handled by concurrence instead. Returns nil
+// feriaCommemoration synthesizes the commemoration of the occurring seasonal
+// feria displaced by a feast in Advent or on a penitential weekday. It is
+// observed at Lauds and II Vespers under XIV.2,9; at I Vespers the current
+// civil day's outgoing feria is handled by concurrence instead. Returns nil
 // when no such commemoration applies: on Sundays, when the office is already of
 // the feria (no Celebration, or the Celebration is itself a feria such as an
-// Ember day), or when a feria is already among the day's commemorations (e.g. a
-// demoted Ember-day feria). The collect resolves to the governing (preceding)
-// Sunday per the rubric — Ant. & versicle from the Psalter, Collect of the
-// preceding Sunday (Septuagesima ferias; the best available stand-in for the
-// proper Lenten feria collect, which the corpus does not yet carry).
+// Ember day), or when a non-vigil feria is already among the day's
+// commemorations (e.g. a demoted Ember-day feria). A common vigil is also
+// CategoryFeria, but it is distinct from the occurring seasonal feria; XIV.2
+// can require both to be commemorated. The collect resolves to the governing
+// (preceding) Sunday per the rubric — Ant. & versicle from the Psalter, Collect
+// of the preceding Sunday (Septuagesima ferias; the best available stand-in
+// for the proper Lenten feria collect, which the corpus does not yet carry).
 func feriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast {
 	if !isPenitentialFeriaSeason(day.Season) {
 		return nil
@@ -769,7 +774,7 @@ func feriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast
 		return nil // Ember days, vigils, and Sundays are not displaced ferias
 	}
 	for _, comm := range day.Commemorations {
-		if comm.Category == models.CategoryFeria {
+		if comm.Category == models.CategoryFeria && !comm.IsVigil {
 			return nil // feria already commemorated (e.g. a demoted Ember day)
 		}
 	}

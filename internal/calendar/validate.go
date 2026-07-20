@@ -62,8 +62,12 @@ func validateSemantics(feasts []*models.Feast) []string {
 
 	// Duplicate IDs
 	seenIDs := make(map[string]int)
+	feastByID := make(map[string]*models.Feast)
 	for _, f := range feasts {
 		seenIDs[f.ID]++
+		if feastByID[f.ID] == nil {
+			feastByID[f.ID] = f
+		}
 		if seenIDs[f.ID] > 1 {
 			errs = append(errs, fmt.Sprintf("Duplicate feast ID: '%s'", f.ID))
 		}
@@ -79,6 +83,46 @@ func validateSemantics(feasts []*models.Feast) []string {
 				"Feast '%s' has OnlyWith target '%s' which does not exist",
 				f.ID, f.OnlyWith,
 			))
+		}
+	}
+
+	// A vigil has exactly one owner. HasVigil makes the builder generate the
+	// preceding vigil (including leap-year and Sunday anticipation), so an
+	// explicit IsVigil entry with the same VigilOf target would create a
+	// second, independently dated observance.
+	explicitVigilByOwner := make(map[string]string)
+	for _, f := range feasts {
+		if !f.IsVigil {
+			continue
+		}
+		if seenIDs[f.VigilOf] == 0 {
+			errs = append(errs, fmt.Sprintf(
+				"Vigil '%s' has VigilOf target '%s' which does not exist",
+				f.ID, f.VigilOf,
+			))
+			continue
+		}
+		owner := feastByID[f.VigilOf]
+		if owner == f || owner.IsVigil {
+			errs = append(errs, fmt.Sprintf(
+				"Vigil '%s' has invalid vigil target '%s'",
+				f.ID, f.VigilOf,
+			))
+			continue
+		}
+		if owner.HasVigil {
+			errs = append(errs, fmt.Sprintf(
+				"Feast '%s' generates a vigil but explicit vigil '%s' defines the same observance",
+				owner.ID, f.ID,
+			))
+		}
+		if priorID := explicitVigilByOwner[f.VigilOf]; priorID != "" {
+			errs = append(errs, fmt.Sprintf(
+				"Explicit vigils '%s' and '%s' define the same observance for '%s'",
+				priorID, f.ID, f.VigilOf,
+			))
+		} else {
+			explicitVigilByOwner[f.VigilOf] = f.ID
 		}
 	}
 

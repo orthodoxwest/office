@@ -294,6 +294,47 @@ func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.F
 	return capped, append(decisions, capDecisions...)
 }
 
+// excludeSeasonalVigils applies General Rubrics VI.2 before occurrence is
+// resolved. A common (Simple) vigil in Advent or Lent, or on an Ember Day, has
+// neither an office nor a commemoration; filtering only the loser list would
+// allow an otherwise unimpeded vigil to become the principal office. The
+// privileged vigils (especially the Vigil of the Nativity in Advent) retain
+// the distinct offices assigned in their Propers.
+func excludeSeasonalVigils(
+	candidates []*models.Feast,
+	season models.Season,
+) ([]*models.Feast, []models.CompositionDecision) {
+	emberDay := false
+	for _, candidate := range candidates {
+		if isEmberDay(candidate) {
+			emberDay = true
+			break
+		}
+	}
+	excluded := season == models.Advent ||
+		season == models.Lent ||
+		season == models.Passiontide ||
+		emberDay
+	if !excluded {
+		return candidates, nil
+	}
+
+	filtered := make([]*models.Feast, 0, len(candidates))
+	var decisions []models.CompositionDecision
+	for _, candidate := range candidates {
+		if candidate != nil && candidate.IsVigil && candidate.Rank == models.Simple {
+			decisions = append(decisions, models.CompositionDecision{
+				Rule:    "commemoration:vigil-seasonal-exclusion",
+				Outcome: "suppressed",
+				Detail:  candidate.ID,
+			})
+			continue
+		}
+		filtered = append(filtered, candidate)
+	}
+	return filtered, decisions
+}
+
 func capCommemorationsWithDecisions(comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
 	if len(comms) <= maxCommemorationsPerDay {
 		return comms, nil
@@ -321,6 +362,8 @@ func ResolveDay(
 
 	var transfersOut []*models.Feast
 	decisions := []models.CompositionDecision{{Rule: "occurrence:resolution-mode", Outcome: "start", Detail: fmt.Sprintf("candidates=%d; transferred-in=%d", len(candidates), len(transferredIn))}}
+	allCandidates, vigilDecisions := excludeSeasonalVigils(allCandidates, season)
+	decisions = append(decisions, vigilDecisions...)
 	if len(transferredIn) > 0 {
 		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-in", Outcome: "considered", Detail: strings.Join(feastIDs(transferredIn), ",")})
 	}
