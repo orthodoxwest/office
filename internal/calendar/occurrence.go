@@ -274,7 +274,40 @@ func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.
 		return true, models.CompositionDecision{Rule: "commemoration:st-george-octave", Outcome: "suppressed", Detail: comm.ID}
 	}
 
+	// Certain Double of the 1st Class days list M-rank saints and lesser octave
+	// days in the kalendar but do not commemorate them at the Office (2026
+	// ordo). This is narrower than "all D1": Ash Wednesday, Lenten Sundays, and
+	// later Easter-octave days (internally D1 for precedence, printed Sd) still
+	// take ordinary commemorations. Greater Doubles such as St Barnabas on
+	// Corpus Christi are retained by the rank threshold.
+	if suppressesLowRankCommemorations(winner) &&
+		comm.Category != models.CategorySunday &&
+		comm.Rank != models.PrivilegedFeria &&
+		comm.Rank.Weight() < models.Double.Weight() {
+		return true, models.CompositionDecision{Rule: "commemoration:first-class-low-rank", Outcome: "suppressed", Detail: comm.ID}
+	}
+
 	return false, models.CompositionDecision{}
+}
+
+// suppressesLowRankCommemorations reports feast IDs whose 1st-class office omits
+// simple/commemoration saints and semi-double octave days at Lauds/Hours.
+func suppressesLowRankCommemorations(winner *models.Feast) bool {
+	if winner == nil {
+		return false
+	}
+	switch winner.ID {
+	case "easter-monday", "easter-tuesday",
+		"pentecost", "pentecost-octave-day-2", "pentecost-octave-day-3",
+		"vigil-pentecost",
+		"christmas",
+		"ss-peter-paul",
+		"solemnity-st-joseph",
+		"christ-the-king":
+		return true
+	default:
+		return false
+	}
 }
 
 func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {

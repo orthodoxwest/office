@@ -127,6 +127,26 @@ func TestShouldSayPreces(t *testing.T) {
 				nil, nil, ""),
 			want: false,
 		},
+		{
+			name: "Eastertide Sunday (IV after Easter) — no preces",
+			day: func() *models.CalendarDay {
+				d := makeDay(2026, 5, 10,
+					&models.Feast{ID: "easter-sunday-4", Rank: models.SemiDouble, Category: models.CategorySunday},
+					nil, "")
+				d.Season = models.Easter
+				return d
+			}(),
+			want: false,
+		},
+		{
+			name: "Eastertide feria — preces",
+			day: func() *models.CalendarDay {
+				d := makeDay(2026, 5, 11, nil, nil, "")
+				d.Season = models.Easter
+				return d
+			}(),
+			want: true,
+		},
 	}
 
 	for _, tt := range tests {

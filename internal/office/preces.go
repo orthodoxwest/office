@@ -42,6 +42,11 @@ func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 //   - Any commemoration is a Double or octave-related
 //   - The Friday after the Ascension octave (Easter+47)
 //   - Vigil of Epiphany (Jan 5)
+//   - Any Sunday in Eastertide (season Easter: Low Sunday through the
+//     Saturday/Sunday before Pentecost). The 2026 archdiocesan ordo prints
+//     No Preces on every such Sunday while retaining Preces on the ferias
+//     of the same weeks; this is parish practice beyond the bare diurnal
+//     §XXXVII list (see #15).
 func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
 	if celebrationHasDoubleOffice(day.Celebration) {
 		return false
@@ -78,6 +83,13 @@ func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) 
 
 	// Vigil of Epiphany (Jan 5)
 	if day.Date.Month() == 1 && day.Date.Day() == 5 {
+		return false
+	}
+
+	// Eastertide Sundays (2026 ordo: No Preces on every Sunday of season
+	// Easter, including II–V after Easter and the Sunday in the Ascension
+	// octave, while ferias of those weeks keep Preces).
+	if day.Season == models.Easter && day.Date.Weekday() == time.Sunday {
 		return false
 	}
 

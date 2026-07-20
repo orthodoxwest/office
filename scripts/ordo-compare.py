@@ -309,7 +309,9 @@ def cmd_rubrics(pdf_path, tsv_path):
         ("h_preces", "Hours preces", "Hours", r"Preces", r"No [Pp]re-?\s*ces"),
         ("l_suff", "Lauds suffrage", "Lauds", r"Suff\.", r"No Suff"),
         ("v_suff", "Vespers suffrage", "Vespers", r"Suff\.", r"No Suff"),
-        ("l_comm", "Lauds comm", "Lauds", r"Comm\.", r"No Comm\."),
+        # "No Comm. HC" means no Commemoration of the Holy Cross, not the
+        # absence of saint commemorations; Vespers already had the lookahead.
+        ("l_comm", "Lauds comm", "Lauds", r"Comm\.", r"No Comm\.(?!\s*HC)"),
         ("v_comm", "Vespers comm", "Vespers", r"Comm\.", r"No Comm\.(?!\s*HC)"),
     ]
     for f, label, sect, yes, no in fields:
@@ -365,6 +367,19 @@ def _incipit_words(text):
     return re.sub(r"[^a-z0-9 ]", " ", norm).split()
 
 
+def _words_align(a, b):
+    """True if two tokens are the same antiphon-word under light folding."""
+    if a == b or a.startswith(b) or b.startswith(a):
+        return True
+    # doest/dost, goest/goest-style -est/-st endings in Coverdale
+    for x, y in ((a, b), (b, a)):
+        if x.endswith("est") and y.endswith("st") and x[: -len("est")] == y[: -len("st")]:
+            return True
+        if x.endswith("eth") and y.endswith("s") and x[: -len("eth")] == y[: -len("s")]:
+            return True
+    return False
+
+
 def incipit_matches(incipit, full):
     wi = _incipit_words(incipit)
     wf = _incipit_words(full)
@@ -377,13 +392,61 @@ def incipit_matches(incipit, full):
         wi = wi[1:] or wi
     elif wf[0] == "o" and wi[0] != "o":
         wf = wf[1:] or wf
+    # Drop leading stock phrases that the ordo and corpus use inconsistently
+    # ("O Lord, give light" vs "Give light"; "And Jesus" vs "Jesus …").
+    for prefix in (("o", "lord"), ("lord",), ("and",)):
+        for side_name, side in (("i", wi), ("f", wf)):
+            if len(side) > len(prefix) and tuple(side[: len(prefix)]) == prefix:
+                other = wf if side_name == "i" else wi
+                if other and other[0] != side[0]:
+                    if side_name == "i":
+                        wi = side[len(prefix) :]
+                    else:
+                        wf = side[len(prefix) :]
     if not wi or not wf:
         return None
+
+    # Ordo sometimes abbreviates with an ellipsis ("Ask…seek", "Ask…that").
+    # Treat each side of the ellipsis as an ordered fragment that must appear
+    # in the full antiphon.
+    if "…" in incipit or "..." in incipit:
+        parts = re.split(r"(?:\u2026|\.\.\.)", incipit)
+        pos = 0
+        for part in parts:
+            pw = _incipit_words(part)
+            if not pw:
+                continue
+            found = False
+            for i in range(pos, max(pos + 1, len(wf) - len(pw) + 1)):
+                if all(_words_align(pw[j], wf[i + j]) for j in range(len(pw))):
+                    pos = i + len(pw)
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
+
     n = min(len(wi), len(wf), 4)
-    hits = sum(1 for a, b in zip(wi[:n], wf[:n])
-               if a == b or a.startswith(b) or b.startswith(a))
-    # short incipits must match fully; longer ones tolerate one hyphenation slip
-    return hits >= (n if n < 3 else n - 1)
+    hits = sum(1 for a, b in zip(wi[:n], wf[:n]) if _words_align(a, b))
+    if hits >= (n if n < 3 else n - 1):
+        return True
+
+    # Short ordo quotes often skip early adjectives ("The multitude" for
+    # "The heathen multitude …"). Accept when every ordo word appears in order
+    # within the first stretch of the full antiphon.
+    if len(wi) <= 4:
+        pos = 0
+        for w in wi:
+            found = False
+            for i in range(pos, min(len(wf), pos + 6)):
+                if _words_align(w, wf[i]):
+                    pos = i + 1
+                    found = True
+                    break
+            if not found:
+                return False
+        return True
+    return False
 
 
 def cmd_antiphons(pdf_path, tsv_path):
