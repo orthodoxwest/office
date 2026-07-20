@@ -1887,14 +1887,3 @@ Category = martyr
 Month = 2
 Day = 14
 Source = awrv
-
-# St Henry (Jul 15) is not observed in the AWRV 2026 ordo (St Vladimir alone
-# takes the day with No Comm.); kept out of the active corpus.
-# [comm-extra-07-15-st-henry-emperor-and-confessor]
-# Name = St Henry, Emperor & Confessor
-# Rank = commemoration
-# Color = white
-# Category = confessor
-# Month = 7
-# Day = 15
-# Source = awrv
