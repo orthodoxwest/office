@@ -196,6 +196,70 @@ func TestResolveProperTextWeekdayOrdinary(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextLittleHoursWeekdayOrdinary(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"ordinary/terce/psalm-antiphon":        "Weekday Terce antiphon",
+		"ordinary/terce/psalm-antiphon-sunday": "Sunday Terce antiphon",
+		"ordinary/terce/psalm-antiphon-monday": "Monday Terce antiphon",
+		"ordinary/terce/chapter":               "Weekday Terce chapter",
+		"ordinary/terce/chapter-sunday":        "Sunday Terce chapter",
+	})
+
+	tests := []struct {
+		name     string
+		date     time.Time
+		ref      string
+		wantText string
+		wantRef  string
+	}{
+		{
+			name:     "indexed Sunday antiphon falls back to base weekday key",
+			date:     time.Date(2026, 7, 19, 0, 0, 0, 0, time.UTC),
+			ref:      "psalm-antiphon-2",
+			wantText: "Sunday Terce antiphon",
+			wantRef:  "ordinary/terce/psalm-antiphon-sunday",
+		},
+		{
+			name:     "indexed Monday antiphon falls back to base weekday key",
+			date:     time.Date(2026, 7, 20, 0, 0, 0, 0, time.UTC),
+			ref:      "psalm-antiphon-2",
+			wantText: "Monday Terce antiphon",
+			wantRef:  "ordinary/terce/psalm-antiphon-monday",
+		},
+		{
+			name:     "Tuesday antiphon uses generic through-week key",
+			date:     time.Date(2026, 7, 21, 0, 0, 0, 0, time.UTC),
+			ref:      "psalm-antiphon-2",
+			wantText: "Weekday Terce antiphon",
+			wantRef:  "ordinary/terce/psalm-antiphon",
+		},
+		{
+			name:     "Sunday chapter uses weekday override",
+			date:     time.Date(2026, 7, 19, 0, 0, 0, 0, time.UTC),
+			ref:      "chapter",
+			wantText: "Sunday Terce chapter",
+			wantRef:  "ordinary/terce/chapter-sunday",
+		},
+		{
+			name:     "Tuesday chapter uses generic through-week key",
+			date:     time.Date(2026, 7, 21, 0, 0, 0, 0, time.UTC),
+			ref:      "chapter",
+			wantText: "Weekday Terce chapter",
+			wantRef:  "ordinary/terce/chapter",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{Date: tt.date, Season: models.Pentecost}
+			got, ref := resolveProperText(day, "terce", tt.ref, corpus)
+			if got != tt.wantText || ref != tt.wantRef {
+				t.Fatalf("resolveProperText() = %q (%s), want %q (%s)", got, ref, tt.wantText, tt.wantRef)
+			}
+		})
+	}
+}
+
 func TestResolveProperTextSundayFirstVespersUsesSaturdayPsalmAntiphon(t *testing.T) {
 	day := &models.CalendarDay{
 		Date:         time.Date(2026, 3, 22, 0, 0, 0, 0, time.UTC),
