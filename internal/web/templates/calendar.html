@@ -7,9 +7,13 @@
     <h1>{{.Year}} Ordo</h1>
     <nav class="year-nav">
       <a href="{{calendarYearLink .PrevYear $theme}}">&laquo; {{.PrevYear}}</a>
+      <a id="calendar-today-link" class="calendar-today-link" href="#" hidden>Today</a>
       <a href="{{calendarYearLink .NextYear $theme}}">{{.NextYear}} &raquo;</a>
     </nav>
   </div>
+  <nav class="month-jump" aria-label="Jump to month">
+    {{range .Months}}<a href="#{{.Slug}}">{{printf "%.3s" .Name}}</a>{{end}}
+  </nav>
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{template "fish"}} Abstinence <span aria-hidden="true">·</span> Liturgical rank abbreviations expand on focus.</p>
   {{range .Months}}
   <section class="month" id="{{.Slug}}">
