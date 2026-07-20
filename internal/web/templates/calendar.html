@@ -50,6 +50,39 @@
             </div>
             <span class="day-feast-name">{{.FeastName}}</span>
             {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
+            {{if or .BenedictusAntiphon .MagnificatAntiphon .LaudsPreces .LaudsSuffrage .HoursPreces .VespersPreces .VespersSuffrage .VespersNote}}
+            <dl class="day-office-digest">
+              {{if or .BenedictusAntiphon .LaudsPreces .LaudsSuffrage .LaudsComms}}
+              <div class="day-office-hour">
+                <dt>Lauds</dt>
+                <dd>
+                  {{if .BenedictusAntiphon}}<span class="day-office-incipit">Ben. &ldquo;{{.BenedictusAntiphon}}&rdquo;</span>{{end}}
+                  {{if .LaudsPreces}}<span class="day-office-badge">Preces</span>{{end}}
+                  {{if .LaudsSuffrage}}<span class="day-office-badge">Suffrage</span>{{end}}
+                  {{range .LaudsComms}}<span class="day-office-comm">Com. {{.Name}}{{if .Incipit}} &ldquo;{{.Incipit}}&rdquo;{{end}}</span>{{end}}
+                </dd>
+              </div>
+              {{end}}
+              {{if .HoursPreces}}
+              <div class="day-office-hour">
+                <dt>Hours</dt>
+                <dd><span class="day-office-badge">Preces</span></dd>
+              </div>
+              {{end}}
+              {{if or .MagnificatAntiphon .VespersPreces .VespersSuffrage .VespersComms .VespersNote}}
+              <div class="day-office-hour">
+                <dt>Vespers</dt>
+                <dd>
+                  {{if .VespersNote}}<span class="day-office-note">{{.VespersNote}}</span>{{end}}
+                  {{if .MagnificatAntiphon}}<span class="day-office-incipit">Mag. &ldquo;{{.MagnificatAntiphon}}&rdquo;</span>{{end}}
+                  {{if .VespersPreces}}<span class="day-office-badge">Preces</span>{{end}}
+                  {{if .VespersSuffrage}}<span class="day-office-badge">Suffrage</span>{{end}}
+                  {{range .VespersComms}}<span class="day-office-comm">Com. {{.Name}}{{if .Incipit}} &ldquo;{{.Incipit}}&rdquo;{{end}}</span>{{end}}
+                </dd>
+              </div>
+              {{end}}
+            </dl>
+            {{end}}
           </td>
           <td class="day-penitential-flag" data-label="Fast">{{if .Fast}}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{{end}}</td>
           <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}{{template "fish"}}<span class="sr-only">Abstinence</span>{{end}}</td>

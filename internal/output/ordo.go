@@ -53,51 +53,53 @@ func ordoSubtitle(feast *models.Feast) string {
 	return ""
 }
 
-// commSummary is one commemoration extracted from a composed hour: its name and
+// CommSummary is one commemoration extracted from a composed hour: its name and
 // the incipit of its gospel-canticle antiphon, mirroring the ordo's
 // `Comm. Name ("incipit")` form.
-type commSummary struct {
-	name    string
-	incipit string
+type CommSummary struct {
+	Name    string
+	Incipit string
 }
 
-// hourSummary is the ordo-relevant digest of a single composed hour.
-type hourSummary struct {
-	color     models.Color
-	gospelAnt string
-	preces    bool
-	suffrage  bool
-	comms     []commSummary
+// HourSummary is the ordo-relevant digest of a single composed hour. Exported
+// so both the text ordo (FormatDay) and the web calendar view can share the
+// same extraction logic (SummarizeHour) instead of re-walking composed hours.
+type HourSummary struct {
+	Color     models.Color
+	GospelAnt string
+	Preces    bool
+	Suffrage  bool
+	Comms     []CommSummary
 }
 
-// summarizeHour walks a composed hour and pulls out the fields the ordo prints:
+// SummarizeHour walks a composed hour and pulls out the fields the ordo prints:
 // the Benedictus/Magnificat antiphon incipit, whether preces and the Suffrage
 // are said, and each commemoration with its antiphon incipit.
-func summarizeHour(hour *models.OfficeHour) hourSummary {
-	s := hourSummary{color: hour.Color}
+func SummarizeHour(hour *models.OfficeHour) HourSummary {
+	s := HourSummary{Color: hour.Color}
 	for _, sec := range hour.Sections {
 		if strings.Contains(sec.Label, "Suffrage") {
-			s.suffrage = true
+			s.Suffrage = true
 		}
 		for i, el := range sec.Elements {
 			switch {
 			case el.Type == models.Preces:
-				s.preces = true
+				s.Preces = true
 			case el.Type == models.Heading && strings.HasPrefix(el.Text, "Commemoration of "):
-				c := commSummary{name: strings.TrimPrefix(el.Text, "Commemoration of ")}
+				c := CommSummary{Name: strings.TrimPrefix(el.Text, "Commemoration of ")}
 				// The commemoration antiphon is the next Antiphon element.
 				for _, next := range sec.Elements[i+1:] {
 					if next.Type == models.Antiphon {
-						c.incipit = incipit(next.Text)
+						c.Incipit = incipit(next.Text)
 						break
 					}
 					if next.Type == models.Heading {
 						break
 					}
 				}
-				s.comms = append(s.comms, c)
-			case s.gospelAnt == "" && (el.SlotRef == "benedictus-antiphon" || el.SlotRef == "magnificat-antiphon"):
-				s.gospelAnt = incipit(el.Text)
+				s.Comms = append(s.Comms, c)
+			case s.GospelAnt == "" && (el.SlotRef == "benedictus-antiphon" || el.SlotRef == "magnificat-antiphon"):
+				s.GospelAnt = incipit(el.Text)
 			}
 		}
 	}
@@ -189,7 +191,7 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 
 	const indent = "           "
 
-	compose := func(hourName string) *hourSummary {
+	compose := func(hourName string) *HourSummary {
 		if eng == nil {
 			return nil
 		}
@@ -197,17 +199,17 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 		if err != nil {
 			return nil
 		}
-		s := summarizeHour(hour)
+		s := SummarizeHour(hour)
 		return &s
 	}
 
-	commLines := func(comms []commSummary) []string {
+	commLines := func(comms []CommSummary) []string {
 		var out []string
 		for _, c := range comms {
-			if c.incipit != "" {
-				out = append(out, fmt.Sprintf("%s    Com. %s (%q)", indent, c.name, c.incipit))
+			if c.Incipit != "" {
+				out = append(out, fmt.Sprintf("%s    Com. %s (%q)", indent, c.Name, c.Incipit))
 			} else {
-				out = append(out, fmt.Sprintf("%s    Com. %s", indent, c.name))
+				out = append(out, fmt.Sprintf("%s    Com. %s", indent, c.Name))
 			}
 		}
 		return out
@@ -215,17 +217,17 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 
 	if lauds := compose("lauds"); lauds != nil {
 		ben := ""
-		if lauds.gospelAnt != "" {
-			ben = "Ben. " + lauds.gospelAnt
+		if lauds.GospelAnt != "" {
+			ben = "Ben. " + lauds.GospelAnt
 		}
 		lines = append(lines, fmt.Sprintf("%sLauds   %s", indent,
-			joinBar(lauds.color.Abbrev(), ben, precesLabel(lauds.preces), suffrageLabel(lauds.suffrage))))
-		lines = append(lines, commLines(lauds.comms)...)
+			joinBar(lauds.Color.Abbrev(), ben, precesLabel(lauds.Preces), suffrageLabel(lauds.Suffrage))))
+		lines = append(lines, commLines(lauds.Comms)...)
 	}
 
 	// The minor hours share one preces disposition; Prime is representative.
 	if hours := compose("prime"); hours != nil {
-		lines = append(lines, fmt.Sprintf("%sHours   %s", indent, precesLabel(hours.preces)))
+		lines = append(lines, fmt.Sprintf("%sHours   %s", indent, precesLabel(hours.Preces)))
 	}
 
 	if vespers := compose("vespers"); vespers != nil {
@@ -237,12 +239,12 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 			owner = fmt.Sprintf("I fol. (%s)", day.Vespers.Feast.Name)
 		}
 		mag := ""
-		if vespers.gospelAnt != "" {
-			mag = "Mag. " + vespers.gospelAnt
+		if vespers.GospelAnt != "" {
+			mag = "Mag. " + vespers.GospelAnt
 		}
 		lines = append(lines, fmt.Sprintf("%sVespers %s", indent,
-			joinBar(vespers.color.Abbrev(), owner, mag, suffrageLabel(vespers.suffrage))))
-		lines = append(lines, commLines(vespers.comms)...)
+			joinBar(vespers.Color.Abbrev(), owner, mag, suffrageLabel(vespers.Suffrage))))
+		lines = append(lines, commLines(vespers.Comms)...)
 	} else if day.Vespers.Owner != models.VespersNotApplicable {
 		// Fallback (no engine): keep the terse owner line.
 		switch day.Vespers.Owner {
