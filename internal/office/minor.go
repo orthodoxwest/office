@@ -41,6 +41,10 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
+			if elem.Type == "proper-versicle" && elem.Ref == "versicle" {
+				elems = append(elems, resolveMinorHourVersicle(day, strings.ToLower(m.Name), corpus))
+				continue
+			}
 			elems = append(elems, resolveHourElement(day, strings.ToLower(m.Name), elem, corpus))
 		}
 		hour.Sections = append(hour.Sections, models.OfficeSection{
@@ -51,6 +55,94 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 	}
 
 	return hour, nil
+}
+
+// resolveMinorHourVersicle follows the Monastic Diurnal's Little Hours
+// structure: the chapter is followed by a simple versicle, not a short
+// responsory. The seeded feast/common corpus records the same two texts in
+// Responsory Breve form, so non-ferial selections are reduced to their opening
+// response and verse. Ordinary Sunday/weekday forms are stored directly as
+// versicles because their texts differ from the seeded ordinary responsories.
+func resolveMinorHourVersicle(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus) models.OfficeElement {
+	responsory, responsoryRef := resolveProperText(day, hourName, "short-responsory", corpus)
+	ordinaryResponsory := "ordinary/" + hourName + "/short-responsory"
+	if responsoryRef == ordinaryResponsory {
+		text, ref := resolveProperText(day, hourName, "versicle", corpus)
+		text = decorateMinorHourVersicle(day, text)
+		return sourcedElement(models.OfficeElement{
+			Type:      models.Versicle,
+			Text:      text,
+			SlotRef:   "versicle",
+			SourceRef: ref,
+		}, ref)
+	}
+
+	text, ok := shortResponsoryVersicle(responsory)
+	if !ok {
+		text = "[Little Hours versicle not found: " + responsoryRef + "]"
+	} else {
+		text = decorateMinorHourVersicle(day, text)
+	}
+	return sourcedElement(models.OfficeElement{
+		Type:      models.Versicle,
+		Text:      text,
+		SlotRef:   "versicle",
+		SourceRef: responsoryRef,
+	}, responsoryRef)
+}
+
+func decorateMinorHourVersicle(day *models.CalendarDay, text string) string {
+	if day == nil || day.Season != models.Easter {
+		return text
+	}
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if !strings.HasPrefix(trimmed, "V. ") && !strings.HasPrefix(trimmed, "R. ") {
+			continue
+		}
+		prefix := trimmed[:3]
+		body := strings.TrimSpace(trimmed[3:])
+		body = stripTrailingAlleluias(body)
+		lines[i] = prefix + body + ", alleluia."
+	}
+	return strings.Join(lines, "\n")
+}
+
+func stripTrailingAlleluias(text string) string {
+	text = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(text), "."))
+	for {
+		lower := strings.ToLower(text)
+		switch {
+		case strings.HasSuffix(lower, ", alleluia"):
+			text = strings.TrimSpace(text[:len(text)-len(", alleluia")])
+		case strings.HasSuffix(lower, " alleluia"):
+			text = strings.TrimSpace(text[:len(text)-len(" alleluia")])
+		default:
+			return strings.TrimRight(text, " ,;:")
+		}
+	}
+}
+
+func shortResponsoryVersicle(responsory string) (string, bool) {
+	var versicle, response string
+	for _, line := range strings.Split(responsory, "\n") {
+		line = strings.TrimSpace(line)
+		switch {
+		case versicle == "" && strings.HasPrefix(line, "R. "):
+			versicle = strings.TrimSpace(strings.ReplaceAll(strings.TrimPrefix(line, "R. "), "*", ""))
+		case versicle != "" && strings.HasPrefix(line, "V. "):
+			response = strings.TrimSpace(strings.TrimPrefix(line, "V. "))
+		}
+		if versicle != "" && response != "" {
+			break
+		}
+	}
+	if versicle == "" || response == "" {
+		return "", false
+	}
+	return "V. " + strings.Join(strings.Fields(versicle), " ") +
+		"\nR. " + response, true
 }
 
 // civilWeekday returns the weekday used by the psalter and weekday ordinary.

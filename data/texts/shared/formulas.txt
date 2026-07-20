@@ -25,6 +25,11 @@ R. Thanks be to God.
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
 
+[our-father-partly-secret-rubric]
+# SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2;
+# 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
+The Our Father is said secretly until And lead us not into temptation, which is said aloud; the response But deliver us from evil is also said aloud.
+
 [closing-our-father]
 Our Father is said secretly.
 
