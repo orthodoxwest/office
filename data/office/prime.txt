@@ -290,6 +290,9 @@ Label = Closing
 Type = blessing
 Ref = ordinary/prime/blessing
 
+Type = versicle
+Ref = shared/formulas/faithful-departed
+
 [Post-Office]
 Collapsible = true
 Label = Closing Prayers

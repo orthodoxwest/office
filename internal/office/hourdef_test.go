@@ -123,9 +123,9 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	}{
 		{file: "lauds.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
 		{file: "vespers.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father-little-hours"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
 		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 	}
 
@@ -290,6 +290,7 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 			}
 			if got := byName["Post-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
 				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+				{Type: "prayer", Ref: "ordinary/shared/our-father"},
 			}) {
 				t.Fatalf("%s Post-Office = %+v", file, got)
 			}
@@ -341,6 +342,32 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 	}
 	if !foundCollectIntro {
 		t.Fatal("prime.txt missing Collect-Intro section")
+	}
+}
+
+func TestPrimeUsesParishOpeningAndClosingStructure(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "prime.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(prime.txt): %v", err)
+	}
+
+	byName := make(map[string]HourSection, len(sections))
+	for _, section := range sections {
+		byName[section.Name] = section
+	}
+
+	if got := byName["Opening"].Elements; !reflect.DeepEqual(got, []HourElement{
+		{Type: "versicle", Ref: "ordinary/prime/opening-versicle"},
+		{Type: "proper-antiphon", Ref: "alleluia"},
+	}) {
+		t.Fatalf("Prime Opening = %+v", got)
+	}
+	if got := byName["Closing"].Elements; !reflect.DeepEqual(got, []HourElement{
+		{Type: "blessing", Ref: "ordinary/prime/blessing"},
+		{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
+	}) {
+		t.Fatalf("Prime Closing = %+v", got)
 	}
 }
 

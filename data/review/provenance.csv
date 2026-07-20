@@ -135,6 +135,7 @@ ordinary/none/versicle,4ad5f3a0f454,03. None Throughout the Week Alex edit 12-07
 ordinary/prime/chapter,b9ab0498a31d,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/chapter-ferial,ba58f15a0c32,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
+ordinary/prime/hymn,4a6c2cac218b,01. Monday Prime Alex edit 10-28 v.01.docx,The Hymn — Iam lucis orto sidere,3-4,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, elisions, and typography."
 ordinary/prime/pre-collect-versicle,b3ea375a6784,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/preces-our-help,e7ba8a0297d0,01. Monday Prime Alex edit 10-28 v.01.docx,The Preces,8,verified,codex,2026-07-20,Word-for-word; the source chant font cross is normalized to the corpus cross glyph.
 ordinary/prime/preces-vouchsafe,1756a1196e36,01. Monday Prime Alex edit 10-28 v.01.docx,After the Absolution is added,9,verified,codex,2026-07-20,Word-for-word after normalizing capitalization and punctuation.
@@ -156,11 +157,11 @@ ordinary/sext/psalm-antiphon-monday,b66e8794b961,02. Sext Monday Alex edit 11-24
 ordinary/sext/psalm-antiphon-sunday,d92894995670,01. Sext Sunday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Alleluia,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/sext/versicle,436144ea56c9,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 ordinary/shared/alleluia,0595c5c9f33e,diurnal,,2,verified,bwaldrep,2026-07-11,
+ordinary/shared/apostles-creed,01e8acad0703,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Apostles’ Creed,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, typography, and the sign-of-cross glyph."
 ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwaldrep,2026-07-16,
 ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,68cc37ec0d58,diurnal,,B,verified,bwaldrep,2026-07-10,
-ordinary/shared/our-father-little-hours,563a921a61d6,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Closing Prayers; Our Father,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/terce/chapter,e3f9b39f398a,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Chapter; Jeremiah 17:14,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/chapter-sunday,cf04763fa083,01. Terce Sunday Alex edit 11-24 v.01.docx,The Chapter; 1 John 4:16,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/pre-collect-versicles,f2f75ffa6d8f,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
@@ -489,4 +490,6 @@ shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-0
 shared/formulas/divine-help,c73885541916,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/faithful-departed,78cd4856d8a2,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/opening-versicle,9cda7ff3a79e,diurnal,,2,verified,bwaldrep,2026-07-15,
+shared/formulas/our-father-partly-secret-rubric,f0c8170f526b,General Rubrics of the Monastic Breviary,XXXV.1-2 — The Lord’s Prayer,51,verified,codex,2026-07-20,Rubric faithfully states the prescribed secret recitation and public final versicle and response.
+shared/formulas/paschal-psalm-antiphon,d92894995670,00. Sunday Prime Alex edit 10-31 v.01.docx,The Psalms — Alleluia antiphon,3-5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography; directly verifies its use at Prime.
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,

@@ -223,8 +223,11 @@ Label = Collect
 Type = prayer
 Ref = ordinary/shared/kyrie
 
+Type = rubric
+Ref = shared/formulas/our-father-partly-secret-rubric
+
 Type = prayer
-Ref = ordinary/shared/our-father-little-hours
+Ref = ordinary/shared/our-father
 
 Type = prayer
 Ref = ordinary/none/pre-collect-versicles
@@ -248,3 +251,6 @@ Label = Closing Prayers
 
 Type = rubric
 Ref = shared/formulas/closing-our-father
+
+Type = prayer
+Ref = ordinary/shared/our-father

@@ -1,6 +1,7 @@
 package office
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -8,6 +9,26 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
 )
+
+func TestPrimeOrdinaryUsesParishOpeningAndHymnDoxology(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+
+	opening := corpus.Get("ordinary/prime/opening-versicle")
+	if want := corpus.Get("shared/formulas/opening-versicle"); opening != want {
+		t.Fatalf("Prime opening versicle = %q, want shared formula %q", opening, want)
+	}
+	if strings.Contains(opening, "Praise ye the Lord") {
+		t.Fatalf("Prime opening still includes the displaced seasonal conclusion: %q", opening)
+	}
+
+	hymn := corpus.Get("ordinary/prime/hymn")
+	if !strings.HasSuffix(hymn, "To Father and to Paraclete. Amen.") {
+		t.Fatalf("Prime hymn has wrong parish doxology: %q", hymn)
+	}
+}
 
 func TestPrimeWeekdayCondition(t *testing.T) {
 	tests := []struct {
