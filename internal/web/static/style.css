@@ -1129,6 +1129,16 @@ footer::before {
   gap: 1.15rem;
 }
 
+/* On wide viewports the calendar page breaks out of the site's normal 46rem
+   reading-width cap so the office digest (below) has room to sit beside the
+   feast name instead of stacking into a much taller page. Other pages keep
+   the narrower, prose-friendly width. */
+@media (min-width: 920px) {
+  body.page-calendar {
+    max-width: 68rem;
+  }
+}
+
 .calendar-header {
   display: flex;
   flex-wrap: wrap;
@@ -1365,6 +1375,56 @@ footer::before {
 
 .day-commemoration::before {
   content: "Com. ";
+}
+
+/* Desktop-only office digest (Lauds/Hours/Vespers preces, suffrage, and
+   gospel-antiphon incipits) — the same fields `office rubrics` prints,
+   surfaced for cross-checking the ordo without opening each hour. Hidden by
+   default; the mobile card view stays as sparse as it is today. */
+.day-office-digest {
+  display: none;
+}
+
+@media (min-width: 920px) {
+  .day-office-digest {
+    display: block;
+    margin-top: 0.3rem;
+    padding-top: 0.25rem;
+    border-top: 1px dotted var(--border);
+  }
+
+  .day-office-hour {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .day-office-hour dt {
+    flex: 0 0 auto;
+    width: 3.4rem;
+    font-variant-caps: small-caps;
+    letter-spacing: 0.04em;
+  }
+
+  .day-office-hour dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.6rem;
+  }
+
+  .day-office-incipit,
+  .day-office-comm,
+  .day-office-note {
+    font-style: italic;
+  }
+
+  .day-office-badge {
+    color: var(--rubric);
+    font-style: normal;
+    white-space: nowrap;
+  }
 }
 
 .day-penitential-flag {

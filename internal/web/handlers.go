@@ -11,6 +11,8 @@ import (
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/office"
+	"github.com/orthodoxwest/office/internal/output"
 	"github.com/orthodoxwest/office/internal/review"
 )
 
@@ -233,6 +235,30 @@ type dayRow struct {
 	Fast           bool
 	Abstinence     bool
 	Commemorations []string
+
+	// Desktop-only office digest (hidden on narrow viewports; see .day-office-digest
+	// in style.css). Sourced from the same composed-hour summaries as `office rubrics`
+	// and FormatDay, so per-hour commemorations (with antiphon incipits) are kept
+	// separate from the calendar-level Commemorations list above, since a
+	// commemoration can appear at one hour and not the other.
+	BenedictusAntiphon string
+	MagnificatAntiphon string
+	LaudsPreces        bool
+	LaudsSuffrage      bool
+	LaudsComms         []commemorationRow
+	HoursPreces        bool
+	VespersPreces      bool
+	VespersSuffrage    bool
+	VespersComms       []commemorationRow
+	VespersNote        string // "II Vespers of preceding" / "I Vespers of <feast>", when applicable
+}
+
+// commemorationRow pairs a commemoration's name with its antiphon incipit
+// (when the office engine is available), mirroring the ordo's
+// `Comm. Name ("incipit")` form.
+type commemorationRow struct {
+	Name    string
+	Incipit string
 }
 
 // userLocation returns the *time.Location from the "tz" cookie (set by the
@@ -639,7 +665,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		year = y
 	}
 
-	days, _, err := s.cache.get(year)
+	days, moveable, err := s.cache.get(year)
 	if err != nil {
 		s.handleError(w, r, http.StatusInternalServerError, fmt.Sprintf("error building calendar: %v", err))
 		return
@@ -649,7 +675,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		Year:       year,
 		PrevYear:   year - 1,
 		NextYear:   year + 1,
-		Months:     buildMonthData(days),
+		Months:     buildMonthData(days, s.engine, moveable),
 		Theme:      themeParam(r),
 		Page:       "calendar",
 		ShowBanner: false,
@@ -666,10 +692,34 @@ func titleCase(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func buildMonthData(days []models.CalendarDay) []monthData {
+// buildMonthData assembles the calendar's per-day rows, enriched with the
+// composed Lauds/Hours/Vespers digest (preces, suffrage, gospel-antiphon
+// incipits, per-hour commemorations) that the desktop calendar view reveals.
+// eng may be nil (falls back to the calendar-only fields, digest omitted).
+func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *calendar.MoveableDates) []monthData {
 	var months []monthData
 	currentMonthName := ""
 	currentIdx := -1
+
+	summarize := func(hourName string, day *models.CalendarDay) *output.HourSummary {
+		if eng == nil {
+			return nil
+		}
+		hour, err := eng.ComposeHour(hourName, day, moveable)
+		if err != nil {
+			return nil
+		}
+		s := output.SummarizeHour(hour)
+		return &s
+	}
+
+	commRows := func(comms []output.CommSummary) []commemorationRow {
+		var out []commemorationRow
+		for _, c := range comms {
+			out = append(out, commemorationRow{Name: c.Name, Incipit: c.Incipit})
+		}
+		return out
+	}
 
 	for i := range days {
 		d := &days[i]
@@ -698,7 +748,7 @@ func buildMonthData(days []models.CalendarDay) []monthData {
 			commemorations = append(commemorations, c.Name)
 		}
 
-		months[currentIdx].Days = append(months[currentIdx].Days, dayRow{
+		row := dayRow{
 			DayNum:         d.Date.Day(),
 			Weekday:        d.Date.Weekday().String()[:3],
 			DateSlug:       d.Date.Format("2006-01-02"),
@@ -710,7 +760,35 @@ func buildMonthData(days []models.CalendarDay) []monthData {
 			Fast:           d.Penitential.Fast,
 			Abstinence:     d.Penitential.Abstinence,
 			Commemorations: commemorations,
-		})
+		}
+
+		if lauds := summarize("lauds", d); lauds != nil {
+			row.BenedictusAntiphon = lauds.GospelAnt
+			row.LaudsPreces = lauds.Preces
+			row.LaudsSuffrage = lauds.Suffrage
+			row.LaudsComms = commRows(lauds.Comms)
+		}
+		// The minor hours share one preces disposition; Prime is representative
+		// (mirrors cmdRubrics and FormatDay).
+		if hours := summarize("prime", d); hours != nil {
+			row.HoursPreces = hours.Preces
+		}
+		if vespers := summarize("vespers", d); vespers != nil {
+			row.MagnificatAntiphon = vespers.GospelAnt
+			row.VespersPreces = vespers.Preces
+			row.VespersSuffrage = vespers.Suffrage
+			row.VespersComms = commRows(vespers.Comms)
+		}
+		switch d.Vespers.Owner {
+		case models.VespersIIOfPreceding:
+			row.VespersNote = "II Vespers of preceding"
+		case models.VespersIOfFollowing:
+			if d.Vespers.Feast != nil {
+				row.VespersNote = "I Vespers of " + d.Vespers.Feast.Name
+			}
+		}
+
+		months[currentIdx].Days = append(months[currentIdx].Days, row)
 	}
 
 	return months
