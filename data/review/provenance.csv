@@ -130,6 +130,8 @@ ordinary/prime/chapter,b9ab0498a31d,st patrick prayer book,,41,verified,bwaldrep
 ordinary/prime/chapter-ferial,ba58f15a0c32,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
 ordinary/prime/pre-collect-versicle,b3ea375a6784,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
+ordinary/prime/preces-our-help,e7ba8a0297d0,01. Monday Prime Alex edit 10-28 v.01.docx,The Preces,8,verified,codex,2026-07-20,Word-for-word; the source chant font cross is normalized to the corpus cross glyph.
+ordinary/prime/preces-vouchsafe,1756a1196e36,01. Monday Prime Alex edit 10-28 v.01.docx,After the Absolution is added,9,verified,codex,2026-07-20,Word-for-word after normalizing capitalization and punctuation.
 ordinary/prime/psalm-antiphon-1-friday,b8646181fc65,st patrick prayer book,,37,verified,bwaldrep,2026-07-15,
 ordinary/prime/psalm-antiphon-1-monday,7f6a3ac0a243,st patrick prayer book,,27,verified,bwaldrep,2026-07-15,
 ordinary/prime/psalm-antiphon-1-saturday,33a4fd84a83e,st patrick prayer book,,40,verified,bwaldrep,2026-07-15,
@@ -453,9 +455,12 @@ psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,M
 seasonal/advent/hymn-lauds,4bbf380072f5,draft archdiocesan Lauds book,The First Sunday in Advent,13,verified,codex,2026-07-18,
 seasonal/advent/hymn-vespers,e76f29dcb9b6,draft archdiocesan Vespers book,Saturday before the First Sunday in Advent,8,verified,codex,2026-07-18,
 seasonal/easter/pre-collect-versicle-prime,991eed765c77,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
+seasonal/lent/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 seasonal/lent/hymn-vespers,3a3f943ecd45,draft archdiocesan Vespers book,,138,verified,codex,2026-07-18,
+seasonal/passiontide/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word; Passiontide is within the source rubric’s through-Lent span.
 seasonal/passiontide/hymn-first-vespers,36917a89fd66,A Noted Hymnary for the Anglican Breviary,,17,verified,codex,2026-07-17,
 seasonal/passiontide/short-responsory-vespers,d5d8a4eca7ea,draft archdiocesan Vespers book,Saturdays in Passiontide,147,verified,codex,2026-07-18,
+seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/closing-peace,6dd169108046,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,

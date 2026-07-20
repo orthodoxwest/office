@@ -48,6 +48,12 @@ Ref = psalms/119-iii
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
 
+Type = psalm
+Ref = psalms/119-iv
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = psalm-antiphon-1
 

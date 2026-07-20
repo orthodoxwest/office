@@ -31,12 +31,6 @@ Type = proper-antiphon
 Ref = psalm-antiphon-5
 
 Type = psalm
-Ref = psalms/119-x
-
-Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
-
-Type = psalm
 Ref = psalms/119-xi
 
 Type = gloria-patri
@@ -44,6 +38,12 @@ Ref = ordinary/shared/gloria-patri
 
 Type = psalm
 Ref = psalms/119-xii
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/119-xiii
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -58,12 +58,6 @@ Type = proper-antiphon
 Ref = psalm-antiphon-5
 
 Type = psalm
-Ref = psalms/119-xix
-
-Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
-
-Type = psalm
 Ref = psalms/119-xx
 
 Type = gloria-patri
@@ -71,6 +65,12 @@ Ref = ordinary/shared/gloria-patri
 
 Type = psalm
 Ref = psalms/119-xxi
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/119-xxii
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
