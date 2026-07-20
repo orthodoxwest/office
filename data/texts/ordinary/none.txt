@@ -21,12 +21,21 @@ Shall live and reign eternally. Amen.
 @use shared/formulas/opening-versicle
 
 [psalm-antiphon]
-My soul waiteth only upon God; of him cometh my salvation.
+# SOURCE: 03. None Throughout the Week Alex edit 12-07 v.01.docx, pp. 3, 5
+Blessed are all they that fear the Lord.
+
+[psalm-antiphon-sunday]
+# SOURCE: 01. None Sunday Alex edit 12-07 v.01.docx, pp. 3, 5
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-monday]
+# SOURCE: 02. None Monday Alex edit 12-07 v.01.docx, pp. 3, 5
+Let thine hand help me, O Lord; * for I have chosen thy commandments.
 
 [chapter]
-!1 Pet. 1:18-19
-Knowing that you were not redeemed with corruptible things, as gold or silver,
-but with the precious blood of Christ, as of a lamb unspotted and undefiled.
+# SOURCE: 01. None Sunday Alex edit 12-07 v.01.docx, p. 5
+!1 Cor. 6:20
+For ye are bought with a price: therefore glorify God in your body, and in your spirit, which are God's.
 R. Thanks be to God.
 
 [short-responsory]

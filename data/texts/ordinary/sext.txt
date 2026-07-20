@@ -21,11 +21,21 @@ Shall live and reign eternally. Amen.
 @use shared/formulas/opening-versicle
 
 [psalm-antiphon]
-My help cometh from the Lord, who made heaven and earth.
+# SOURCE: 03. Sext Throughout the Week Alex edit 09-23 v.03.docx, pp. 3, 5
+O thou that dwellest in the heavens, * have mercy upon us.
+
+[psalm-antiphon-sunday]
+# SOURCE: 01. Sext Sunday Alex edit 11-24 v.01.docx, pp. 3, 5
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-monday]
+# SOURCE: 02. Sext Monday Alex edit 11-24 v.01.docx, pp. 3, 5
+Look thou upon me, O Lord, * and be merciful unto me.
 
 [chapter]
-!2 Cor. 6:2
-Behold, now is the acceptable time; behold, now is the day of salvation.
+# SOURCE: 03. Sext Throughout the Week Alex edit 09-23 v.03.docx, p. 5
+!Gal. 6:2
+Bear ye one another's burdens, and so fulfil the law of Christ.
 R. Thanks be to God.
 
 [short-responsory]

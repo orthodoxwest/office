@@ -21,11 +21,27 @@ Shall live and reign eternally. Amen.
 @use shared/formulas/opening-versicle
 
 [psalm-antiphon]
-Send out thy Spirit, O Lord, and they shall be created.
+# SOURCE: 03. Terce Through the Week Alex edit 11-24 v.01.docx, pp. 3, 5
+I called, * and he heard me.
+
+[psalm-antiphon-sunday]
+# SOURCE: 01. Terce Sunday Alex edit 11-24 v.01.docx, pp. 3, 5
+Alleluia, * alleluia, alleluia.
+
+[psalm-antiphon-monday]
+# SOURCE: 02. Terce Monday Alex edit 11-24 v.01.docx, pp. 3, 5
+Hold thou me up, * and I shall be safe, O Lord.
 
 [chapter]
-!Zach. 8:19
-Love ye truth and peace, saith the Lord Almighty.
+# SOURCE: 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
+!Jer. 17:14
+Heal me, O Lord, and I shall be healed; save me, and I shall be saved; for thou art my praise.
+R. Thanks be to God.
+
+[chapter-sunday]
+# SOURCE: 01. Terce Sunday Alex edit 11-24 v.01.docx, p. 5
+!1 John 4:16
+God is love; and he that dwelleth in love dwelleth in God, and God in him.
 R. Thanks be to God.
 
 [short-responsory]
