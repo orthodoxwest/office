@@ -1163,11 +1163,39 @@ footer::before {
   text-decoration: underline;
 }
 
+.year-nav .calendar-today-link {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.month-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.3rem;
+}
+
+.month-jump a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.35rem;
+}
+
+.month-jump a:hover {
+  text-decoration: underline;
+}
+
 .month {
   margin-bottom: 1.8rem;
   scroll-margin-top: 1rem;
 }
 
+/* Sticky so the month stays visible while scanning a long year. Kept under
+   the mobile site header (z-index 50). */
 .month h2 {
   font-size: 0.95rem;
   font-weight: normal;
@@ -1175,6 +1203,11 @@ footer::before {
   letter-spacing: 0.14em;
   color: var(--muted);
   margin-bottom: 0.35rem;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  padding: 0.35rem 0 0.25rem;
 }
 
 .month-table {
@@ -1200,6 +1233,36 @@ footer::before {
   border-bottom: 1px solid var(--border);
   vertical-align: top;
   line-height: 1.35;
+}
+
+/* Day-row deep links ("See this day in the ordo" → /calendar/YYYY#d-DATE).
+   :target marks the linked day; .is-today is set by app.js at view time,
+   because calendar pages are cached by the service worker and a
+   server-rendered today marker would go stale. Scroll margin clears the
+   sticky month heading. */
+.month-table tr.day {
+  scroll-margin-top: 3rem;
+}
+
+/* With JS, the whole row navigates to the day (see app.js); the hover wash
+   is a background-image so it layers over the :target/.is-today tint
+   instead of replacing it. */
+.js .month-table tr.day {
+  cursor: pointer;
+}
+
+.js .month-table tr.day:hover > td {
+  background-image: linear-gradient(rgba(143, 107, 41, 0.07), rgba(143, 107, 41, 0.07));
+}
+
+.month-table tr:target > td,
+.month-table tr.is-today > td {
+  background: rgba(143, 107, 41, 0.13);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}
+
+.month-table tr:target > td {
+  border-bottom-color: var(--gold-line);
 }
 
 .day-mobile-head {
@@ -1348,6 +1411,11 @@ footer::before {
     margin-bottom: 0.9rem;
     border: 1px solid var(--border);
     border-collapse: separate;
+  }
+
+  .month-table tr:target,
+  .month-table tr.is-today {
+    border-color: var(--gold-line);
   }
 
   .month-table td {

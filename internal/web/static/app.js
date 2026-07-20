@@ -83,6 +83,7 @@ document.documentElement.classList.add("js");
   checkOnline();
 
   updatePrayNow();
+  markCalendarToday();
 
   // The full navigation remains open in the no-JS document. On small screens,
   // collapse it once scripting is available so prayer text gets the viewport.
@@ -253,5 +254,48 @@ document.documentElement.classList.add("js");
       }
       prayNow.textContent = "Open Lauds";
     }
+  }
+
+  // markCalendarToday highlights today's row on the ordo page and reveals
+  // the header "Today" jump link. Applied client-side because calendar pages
+  // are served from the service-worker cache, so a server-rendered marker
+  // would freeze on whichever day the page was fetched. The jump link stays
+  // hidden when today's row isn't on the displayed year.
+  function markCalendarToday() {
+    var row = document.getElementById("d-" + localDateSlug(new Date()));
+    if (row && row.classList.contains("day")) {
+      row.classList.add("is-today");
+      row.setAttribute("aria-current", "date");
+      var todayLink = document.getElementById("calendar-today-link");
+      if (todayLink) {
+        todayLink.setAttribute("href", "#" + row.id);
+        todayLink.hidden = false;
+      }
+    }
+  }
+
+  // calendarRowClicks makes the whole ordo row navigate to the day's home
+  // page. The day-number link stays as the keyboard/no-JS path; clicks on
+  // links, rank tooltips, and the commemorations disclosure keep their own
+  // behavior, and selecting text never navigates.
+  var calendarEl = document.querySelector(".calendar");
+  if (calendarEl) {
+    calendarEl.addEventListener("click", function (e) {
+      if (e.target.closest("a, abbr, details")) {
+        return;
+      }
+      var selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        return;
+      }
+      var row = e.target.closest("tr.day");
+      if (!row) {
+        return;
+      }
+      var link = row.querySelector(".day-num a, .day-mobile-date");
+      if (link) {
+        window.location.href = link.getAttribute("href");
+      }
+    });
   }
 })();
