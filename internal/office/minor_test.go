@@ -221,7 +221,7 @@ func TestMinorHourOrdinariesUseParishHymnsAndSingleOpeningAlleluia(t *testing.T)
 			"Shed forth thy grace within our breast,\nAnd dwell with us, a ready guest.\n\n" +
 			"By every power, by heart and tongue,\nBy act and deed, thy praise be sung:\n" +
 			"Inflame with perfect love each sense,\nThat others’ souls may kindle thence.\n\n" +
-			"O Father, that we ask be done\nThrough Jesus Christ thine only Son,\n" +
+			"O Father, that we ask be done\nThrough Jesus Christ, thine only Son,\n" +
 			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
 		"ordinary/sext/hymn": "Rector potens, verax Deus\n\n" +
 			"O God of truth, O Lord of might,\nWho orderest time and change aright,\n" +
@@ -232,7 +232,7 @@ func TestMinorHourOrdinariesUseParishHymnsAndSingleOpeningAlleluia(t *testing.T)
 			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
 		"ordinary/none/hymn": "Rerum Deus tenax vigor\n\n" +
 			"O God, creation’s secret force,\nThyself unmoved, all motion’s source,\n" +
-			"Who from the morn till evening’s ray\nThrough all its changes guidest the day:\n\n" +
+			"Who from the morn till evening’s ray,\nThrough all its changes guidest the day:\n\n" +
 			"Grant us, when this short life is past,\nThe glorious evening that shall last;\n" +
 			"That, by a holy death attained,\nEternal glory may be gained.\n\n" +
 			"O Father, that we ask be done\nThrough Jesus Christ thine only Son,\n" +

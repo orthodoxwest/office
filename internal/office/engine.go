@@ -272,6 +272,9 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	if text == "" {
 		text = fmt.Sprintf("[Text not found: %s]", elem.Ref)
 	}
+	if elem.Type == "partly-secret-prayer" {
+		text = strings.TrimSuffix(text, " Amen.")
+	}
 
 	elemType := mapElementType(elem.Type)
 	label := formatLabel(elem.Type, elem.Ref)
@@ -401,7 +404,7 @@ func mapElementType(t string) models.ElementType {
 		return models.Versicle
 	case "response":
 		return models.Response
-	case "prayer":
+	case "prayer", "partly-secret-prayer":
 		return models.Prayer
 	case "preces":
 		return models.Preces

@@ -76,7 +76,7 @@ Ref = ordinary/shared/kyrie
 Type = rubric
 Ref = shared/formulas/our-father-partly-secret-rubric
 
-Type = prayer
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 [Chapter-Easter-Eve]
