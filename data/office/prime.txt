@@ -11,6 +11,18 @@ Ref = ordinary/session/opening-rubric
 Type = prayer
 Ref = ordinary/session/open-my-mouth
 
+Type = rubric
+Ref = ordinary/session/prime-opening-secret-prayers-rubric
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary
+
+Type = prayer
+Ref = ordinary/shared/apostles-creed
+
 [Opening]
 Label = Opening
 
@@ -249,7 +261,10 @@ Ref = pre-collect-versicle
 Type = prayer
 Ref = ordinary/shared/kyrie
 
-Type = prayer
+Type = rubric
+Ref = shared/formulas/our-father-partly-secret-rubric
+
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 [Preces]
@@ -299,3 +314,12 @@ Label = Closing Prayers
 
 Type = prayer
 Ref = ordinary/session/sacrosanctae
+
+Type = rubric
+Ref = ordinary/session/closing-rubric
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary

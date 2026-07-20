@@ -156,6 +156,7 @@ func TestMapElementType(t *testing.T) {
 		{"versicle", models.Versicle},
 		{"response", models.Response},
 		{"prayer", models.Prayer},
+		{"partly-secret-prayer", models.Prayer},
 		{"preces", models.Preces},
 		{"gloria-patri", models.Doxology},
 		{"rubric", models.Rubric},
@@ -236,6 +237,7 @@ func TestResolveElement(t *testing.T) {
 		"psalms/004":                 "Psalm 4 text",
 		"ordinary/chapter":           "!Rom 8:1\nChapter body",
 		"ordinary/preces":            "Lord have mercy.",
+		"ordinary/our-father":        "Our Father, who art in heaven,\nBut deliver us from evil. Amen.",
 	})
 
 	tests := []struct {
@@ -272,6 +274,12 @@ func TestResolveElement(t *testing.T) {
 			wantType:  models.Preces,
 			wantLabel: "Preces",
 			wantText:  "Lord have mercy.",
+		},
+		{
+			name:     "partly secret prayer omits final amen",
+			elem:     HourElement{Type: "partly-secret-prayer", Ref: "ordinary/our-father"},
+			wantType: models.Prayer,
+			wantText: "Our Father, who art in heaven,\nBut deliver us from evil.",
 		},
 		{
 			name:     "missing ref produces placeholder",

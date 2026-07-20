@@ -9,9 +9,6 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 Amen.
 
-[alleluia]
-Alleluia, alleluia, alleluia.
-
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 128
 !Rom 6:9-10

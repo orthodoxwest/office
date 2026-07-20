@@ -127,6 +127,7 @@ ordinary/marian/ave-regina-caelorum,8093c39100a2,Final Antiphons of the Blessed 
 ordinary/marian/regina-caeli,ce0c82cf2d5e,Final Antiphons of the Blessed Virgin Mary.pdf,,10-11,verified,codex,2026-07-18,
 ordinary/marian/salve-regina,e98bdf367733,Final Antiphons of the Blessed Virgin Mary.pdf,,14-16,verified,codex,2026-07-18,
 ordinary/none/chapter,c6ad9ca60ea1,01. None Sunday Alex edit 12-07 v.01.docx,The Chapter; 1 Corinthians 6:20,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/none/hymn,718978993cc2,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Hymn — Rerum Deus tenax vigor,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, ornamental initials, syllabification, and typography; all three None drafts agree."
 ordinary/none/pre-collect-versicles,f2f75ffa6d8f,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/none/psalm-antiphon,22765e57dafa,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Psalms; Antiphon Beati omnes,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/none/psalm-antiphon-monday,570c9d45b8e4,02. None Monday Alex edit 12-07 v.01.docx,The Psalms; Antiphon Adjuvet me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
@@ -149,8 +150,11 @@ ordinary/session/closing-rubric,bb4888da6f7b,diurnal,,A,verified,bwaldrep,2026-0
 ordinary/session/little-hours-opening-rubric,e5431f70ff36,01. Terce Sunday Alex edit 11-24 v.01.docx,At Terce; before the Office,2,verified,codex,2026-07-20,Word-for-word after normalizing rubric typography.
 ordinary/session/open-my-mouth,6f62e3beb617,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/opening-rubric,2c43e230f57a,diurnal,,A,verified,bwaldrep,2026-07-11,
+ordinary/session/our-father-hail-mary-rubric,fd6f4c4f7751,00. Lauds for Sundays & Major Feasts 2025 Alex edit 04-27 v.26.docx,Before the Divine Office,2,verified,codex,2026-07-20,Rubric faithfully states the printed instruction to say both prayers secretly.
+ordinary/session/prime-opening-secret-prayers-rubric,f165c82d4176,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office,2,verified,codex,2026-07-20,Rubric faithfully states the printed instruction to say all three prayers secretly.
 ordinary/session/sacrosanctae,8f75adec497d,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/sext/chapter,f2d562a633b1,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Chapter; Galatians 6:2,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/sext/hymn,511fcd7be449,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,"The Hymn — Rector potens, verax Deus",2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, ornamental initials, syllabification, and typography; all four Sext drafts agree."
 ordinary/sext/pre-collect-versicles,f2f75ffa6d8f,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/sext/psalm-antiphon,2b757ade2908,03. Sext Throughout the Week Alex edit 09-23 v.03.docx,The Psalms; Antiphon Ad te levavi,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/sext/psalm-antiphon-monday,b66e8794b961,02. Sext Monday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Aspice in me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
@@ -160,10 +164,12 @@ ordinary/shared/alleluia,0595c5c9f33e,diurnal,,2,verified,bwaldrep,2026-07-11,
 ordinary/shared/apostles-creed,01e8acad0703,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Apostles’ Creed,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, typography, and the sign-of-cross glyph."
 ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwaldrep,2026-07-16,
 ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
+ordinary/shared/hail-mary,ea3a728f1e37,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Hail Mary,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, and typography."
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
-ordinary/shared/our-father,68cc37ec0d58,diurnal,,B,verified,bwaldrep,2026-07-10,
+ordinary/shared/our-father,b66987e4e924,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Our Father,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, capitalization, and punctuation."
 ordinary/terce/chapter,e3f9b39f398a,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Chapter; Jeremiah 17:14,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/chapter-sunday,cf04763fa083,01. Terce Sunday Alex edit 11-24 v.01.docx,The Chapter; 1 John 4:16,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
+ordinary/terce/hymn,7d97c7441913,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Hymn — Nunc Sancte nobis Spiritus,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, ornamental initials, syllabification, and typography; all three Terce drafts agree."
 ordinary/terce/pre-collect-versicles,f2f75ffa6d8f,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Closing Prayers,5,verified,codex,2026-07-20,Word-for-word after normalizing chant typography and layout.
 ordinary/terce/psalm-antiphon,c7db29531e8d,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Psalms; Antiphon Clamavi,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/psalm-antiphon-monday,852f645d5b9a,02. Terce Monday Alex edit 11-24 v.01.docx,The Psalms; Antiphon Adjuva me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.

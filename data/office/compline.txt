@@ -14,6 +14,9 @@ Type = rubric
 Ref = ordinary/compline/confiteor-rubric
 
 Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
 Ref = ordinary/shared/confiteor
 
 Type = versicle
@@ -70,7 +73,10 @@ Ref = short-responsory
 Type = prayer
 Ref = ordinary/shared/kyrie
 
-Type = prayer
+Type = rubric
+Ref = shared/formulas/our-father-partly-secret-rubric
+
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 [Chapter-Easter-Eve]
@@ -78,9 +84,6 @@ Condition = feast-holy-saturday
 
 Type = prayer
 Ref = ordinary/shared/kyrie
-
-Type = prayer
-Ref = ordinary/shared/our-father
 
 [Preces]
 Condition = if-preces
@@ -122,3 +125,12 @@ Ref = ordinary/compline/conclusion
 
 Type = rubric
 Ref = ordinary/compline/concluding-rubric
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary
+
+Type = prayer
+Ref = ordinary/shared/apostles-creed

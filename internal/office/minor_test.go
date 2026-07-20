@@ -208,3 +208,46 @@ func TestMinorHourResponsorySourcesAreConvertible(t *testing.T) {
 		t.Fatal("no Little Hours responsory sources checked")
 	}
 }
+
+func TestMinorHourOrdinariesUseParishHymnsAndSingleOpeningAlleluia(t *testing.T) {
+	corpus, err := texts.LoadTexts(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+
+	wantHymns := map[string]string{
+		"ordinary/terce/hymn": "Nunc Sancte nobis Spiritus\n\n" +
+			"Come, Holy Ghost, with God the Son,\nAnd God the Father ever One:\n" +
+			"Shed forth thy grace within our breast,\nAnd dwell with us, a ready guest.\n\n" +
+			"By every power, by heart and tongue,\nBy act and deed, thy praise be sung:\n" +
+			"Inflame with perfect love each sense,\nThat others’ souls may kindle thence.\n\n" +
+			"O Father, that we ask be done\nThrough Jesus Christ, thine only Son,\n" +
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+		"ordinary/sext/hymn": "Rector potens, verax Deus\n\n" +
+			"O God of truth, O Lord of might,\nWho orderest time and change aright,\n" +
+			"And send’st the early morning ray,\nAnd light’st the glow of perfect day;\n\n" +
+			"Extinguish thou each sinful fire,\nAnd banish ev’ry ill desire:\n" +
+			"And while thou keep’st the body whole,\nShed forth thy peace upon the soul.\n\n" +
+			"O Father, that we ask be done\nThrough Jesus Christ, thine only Son,\n" +
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+		"ordinary/none/hymn": "Rerum Deus tenax vigor\n\n" +
+			"O God, creation’s secret force,\nThyself unmoved, all motion’s source,\n" +
+			"Who from the morn till evening’s ray,\nThrough all its changes guidest the day:\n\n" +
+			"Grant us, when this short life is past,\nThe glorious evening that shall last;\n" +
+			"That, by a holy death attained,\nEternal glory may be gained.\n\n" +
+			"O Father, that we ask be done\nThrough Jesus Christ thine only Son,\n" +
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+	}
+	for ref, want := range wantHymns {
+		if got := corpus.Get(ref); got != want {
+			t.Errorf("%s = %q, want parish hymn %q", ref, got, want)
+		}
+	}
+
+	if corpus.Has("seasonal/easter/alleluia") {
+		t.Fatal("Easter still overrides the single opening Alleluia")
+	}
+	if got := corpus.Get("ordinary/shared/alleluia"); got != "Alleluia" {
+		t.Fatalf("ordinary opening Alleluia = %q", got)
+	}
+}
