@@ -83,6 +83,7 @@ document.documentElement.classList.add("js");
   checkOnline();
 
   updatePrayNow();
+  markCalendarToday();
 
   // The full navigation remains open in the no-JS document. On small screens,
   // collapse it once scripting is available so prayer text gets the viewport.
@@ -252,6 +253,18 @@ document.documentElement.classList.add("js");
         prayNow.setAttribute("href", lauds.getAttribute("href"));
       }
       prayNow.textContent = "Open Lauds";
+    }
+  }
+
+  // markCalendarToday highlights today's row on the ordo page. Applied
+  // client-side because calendar pages are served from the service-worker
+  // cache, so a server-rendered marker would freeze on whichever day the
+  // page was fetched.
+  function markCalendarToday() {
+    var row = document.getElementById("d-" + localDateSlug(new Date()));
+    if (row && row.classList.contains("day")) {
+      row.classList.add("is-today");
+      row.setAttribute("aria-current", "date");
     }
   }
 })();

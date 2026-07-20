@@ -279,7 +279,7 @@ func hourLink(hour, date, theme string) string {
 func calendarLink(date, theme string) string {
 	if date != "" {
 		if parsed, err := time.Parse("2006-01-02", date); err == nil {
-			href := fmt.Sprintf("/calendar/%d#%s", parsed.Year(), strings.ToLower(parsed.Month().String()))
+			href := fmt.Sprintf("/calendar/%d#d-%s", parsed.Year(), date)
 			return appendTheme(href, theme)
 		}
 	}
@@ -621,8 +621,8 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 	now := time.Now().In(userLocation(r))
 	year := now.Year()
 	if len(parts) == 1 || parts[1] == "" {
-		// No year specified: redirect to current year anchored at current month.
-		slug := strings.ToLower(now.Month().String())
+		// No year specified: redirect to current year anchored at today's row.
+		slug := "d-" + now.Format("2006-01-02")
 		target := fmt.Sprintf("/calendar/%d#%s", year, slug)
 		if t := themeParam(r); t != "" {
 			target = fmt.Sprintf("/calendar/%d?theme=%s#%s", year, t, slug)

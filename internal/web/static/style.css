@@ -1202,6 +1202,24 @@ footer::before {
   line-height: 1.35;
 }
 
+/* Day-row deep links ("See this day in the ordo" → /calendar/YYYY#d-DATE).
+   :target marks the linked day; .is-today is set by app.js at view time,
+   because calendar pages are cached by the service worker and a
+   server-rendered today marker would go stale. */
+.month-table tr.day {
+  scroll-margin-top: 1.25rem;
+}
+
+.month-table tr:target > td,
+.month-table tr.is-today > td {
+  background: rgba(143, 107, 41, 0.13);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}
+
+.month-table tr:target > td {
+  border-bottom-color: var(--gold-line);
+}
+
 .day-mobile-head {
   display: none;
 }
@@ -1348,6 +1366,11 @@ footer::before {
     margin-bottom: 0.9rem;
     border: 1px solid var(--border);
     border-collapse: separate;
+  }
+
+  .month-table tr:target,
+  .month-table tr.is-today {
+    border-color: var(--gold-line);
   }
 
   .month-table td {

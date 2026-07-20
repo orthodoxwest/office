@@ -29,7 +29,7 @@
       </thead>
       <tbody>
         {{range .Days}}
-        <tr class="day {{.ColorClass}}">
+        <tr class="day {{.ColorClass}}" id="d-{{.DateSlug}}">
           <td class="day-num" data-label="Day"><a href="{{homeLink .DateSlug $theme}}">{{.DayNum}}</a></td>
           <td class="day-wk" data-label="Weekday">{{.Weekday}}</td>
           <td class="day-feast" data-label="Feast">
