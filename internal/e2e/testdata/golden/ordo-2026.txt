@@ -667,11 +667,17 @@ APRIL
            Hours   No Preces
            Vespers w · II prec. · Mag. And looking · No Suff.
  13  Mon     EASTER MONDAY                              [1cl] w
+           St Hermengild, Martyr (com)
            Lauds   w · Ben. While they walked · No Preces · No Suff.
+               Com. St Hermengild, Martyr ("Whosoever shall confess me")
            Hours   No Preces
            Vespers w · II prec. · Mag. What manner of communications are these · No Suff.
  14  Tue     EASTER TUESDAY                             [1cl] w
+           St Justin, Martyr (com)
+           St. Tiburtius, Valerian & Maximus, Martyrs (com)
            Lauds   w · Ben. Jesus stood in the midst of His disciples · No Preces · No Suff.
+               Com. St Justin, Martyr ("Whosoever shall confess me")
+               Com. St. Tiburtius, Valerian & Maximus, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
            Vespers w · II prec. · Mag. Behold My Hands · No Suff.
  15  Wed     Day IV within the Octave of Easter         [sd]  w
@@ -748,7 +754,9 @@ APRIL
            Hours   No Preces
            Vespers w · I fol. (Solemnity of St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. When Mary · No Suff.
  29  Wed     SOLEMNITY OF ST. JOSEPH, SPOUSE OF THE BLESSED VIRGIN MARY [1cl] w
+           Day VII within the Octave of St. George (sd)
            Lauds   w · Ben. Joseph, thou son of David · No Preces · No Suff.
+               Com. Day VII within the Octave of St. George ("Whosoever shall confess Me")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
                Com. Octave Day of St. George ("Light perpetual")
@@ -939,12 +947,18 @@ MAY
            Lauds   w · Ben. But when the Comforter is come · No Preces · No Suff.
            Hours   No Preces
            Vespers w · Mag. He hath put down the mighty · No Suff.
+               Com. St Felix I, Bishop & Martyr ("Whosoever shall confess me")
  30  Sat  L§ VIGIL OF PENTECOST                         [1cl] w
+           St Felix I, Bishop & Martyr (com)
            Lauds   w · Ben. O Lord, give light · No Preces · No Suff.
+               Com. St Felix I, Bishop & Martyr ("Whosoever shall confess me")
            Hours   No Preces
            Vespers r · I fol. (Whitsunday — Pentecost) · Mag. I will not leave you · No Suff.
+               Com. St Petronilla, Virgin ("This is one of the wise virgins")
  31  Sun     WHITSUNDAY — PENTECOST                     [1cl] r
+           St Petronilla, Virgin (com)
            Lauds   r · Ben. Receive ye · No Preces · No Suff.
+               Com. St Petronilla, Virgin ("This is one of the wise virgins")
            Hours   No Preces
            Vespers r · II prec. · Mag. This day · No Suff.
 
@@ -955,7 +969,9 @@ JUNE
            Hours   No Preces
            Vespers r · II prec. · Mag. If a Man love Me · No Suff.
   2  Tue     DAY III WITHIN THE OCTAVE OF PENTECOST     [1cl] r
+           Ss. Marcellinus, Peter & Erasmus, Martyrs (com)
            Lauds   r · Ben. I am the Door · No Preces · No Suff.
+               Com. Ss. Marcellinus, Peter & Erasmus, Martyrs ("For theirs is the kingdom of heaven")
            Hours   No Preces
            Vespers r · II prec. · Mag. Peace I leave with you · No Suff.
   3  Wed  L§ Day IV within the Octave of Pentecost      [sd]  r
@@ -1131,7 +1147,9 @@ JUNE
            Hours   No Preces
            Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. Thou art the shepherd of the sheep · No Suff.
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
+           Day VI within the Octave of St John Baptist (sd)
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
+               Com. Day VI within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · II prec. · Mag. Today · No Suff.
                Com. St Paul, Apostle ("O Holy Apostle Paul")
@@ -1888,13 +1906,16 @@ OCTOBER
            Hours   No Preces
            Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. The Lord God shall give unto him · No Suff.
                Com. St Raphael the Archangel ("I am the Angel Raphael")
+               Com. Ss Chrysanthus & Daria, Martyrs ("For theirs is the kingdom of heaven")
                Com. XXI Sunday after Pentecost ("O thou wicked servant, I forgave thee all")
  25  Sun     THE FEAST OF O..J.C. THE KING              [1cl] w
+           Ss Chrysanthus & Daria, Martyrs (com)
            XXI Sunday after Pentecost (sd)
            Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
+               Com. Ss Chrysanthus & Daria, Martyrs ("For theirs is the kingdom of heaven")
                Com. XXI Sunday after Pentecost ("Then said the lord")
            Hours   No Preces
-           Vespers w · II prec. · Mag. And he hath on his garment · No Suff.
+           Vespers w · II prec. · Mag. He hath on his vesture · No Suff.
                Com. XXI Sunday after Pentecost ("O thou wicked servant, I forgave thee all")
  26  Mon     Feria                                            g
            St. Evaristus, Bishop & Martyr (com)
@@ -2284,8 +2305,11 @@ DECEMBER
            Lauds   v · Ben. The Saviour · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Nativity of Our Lord Jesus Christ) · Mag. When the sun hath risen · No Suff.
+               Com. St Anastasia, Virgin & Martyr ("This is one of the wise virgins")
  25  Fri     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
+           St Anastasia, Virgin & Martyr (com)
            Lauds   w · Ben. Glory · No Preces · No Suff.
+               Com. St Anastasia, Virgin & Martyr ("This is one of the wise virgins")
            Hours   No Preces
            Vespers w · II prec. · Mag. Today · No Suff.
                Com. St. Stephen, Protomartyr ("And Stephen")

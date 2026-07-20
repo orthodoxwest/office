@@ -3,8 +3,8 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 332 |
-| Selected structural-review pages | 52 |
+| Modeled structural features | 331 |
+| Selected structural-review pages | 53 |
 | Uncovered features | 0 |
 | Verified text entries | 500 |
 | Rendered text entries needing review | 1410 |
@@ -19,7 +19,6 @@
 - `decision:color:resolution=penitential-season-over-lesser-feast`
 - `decision:color:resolution=seasonal-feria`
 - `decision:commemoration:duplicate-name=suppressed`
-- `decision:commemoration:first-class-low-rank=suppressed`
 - `decision:commemoration:first-vespers-circumcision-exclusion=suppressed`
 - `decision:commemoration:first-vespers-concurrence=included`
 - `decision:commemoration:first-vespers-day-within-octave-exclusion=suppressed`

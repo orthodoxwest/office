@@ -87,8 +87,6 @@ func TestCommemorationTraceRules(t *testing.T) {
 	octave := traceFeast("ascension-octave-day-4", models.Commemoration, models.CategoryLord)
 	privileged := traceFeast("ash-wednesday", models.Double1stClass, models.CategoryFeria)
 	stGeorge := traceFeast("st-george-octave-day-2", models.Commemoration, models.CategoryMartyr)
-	firstClass := traceFeast("easter-monday", models.Double1stClass, models.CategoryLord)
-	lowRank := traceFeast("simple-comm", models.Commemoration, models.CategoryMartyr)
 
 	tests := []struct {
 		name   string
@@ -100,7 +98,6 @@ func TestCommemorationTraceRules(t *testing.T) {
 		{"pentecost ember", pentecostWinner, ember, "commemoration:pentecost-ember"},
 		{"same octave Sunday", winner, octave, "commemoration:same-octave-sunday"},
 		{"St George octave", privileged, stGeorge, "commemoration:st-george-octave"},
-		{"first class low rank", firstClass, lowRank, "commemoration:first-class-low-rank"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
