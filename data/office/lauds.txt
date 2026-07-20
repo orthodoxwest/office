@@ -11,6 +11,15 @@ Ref = ordinary/session/opening-rubric
 Type = prayer
 Ref = ordinary/session/open-my-mouth
 
+Type = rubric
+Ref = ordinary/session/our-father-hail-mary-rubric
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary
+
 [Opening]
 Label = Opening
 
@@ -822,6 +831,9 @@ Ref = shared/formulas/faithful-departed
 Type = rubric
 Ref = shared/formulas/closing-our-father
 
+Type = prayer
+Ref = ordinary/shared/our-father
+
 Type = versicle
 Ref = shared/formulas/closing-peace
 
@@ -846,3 +858,9 @@ Ref = ordinary/session/sacrosanctae
 
 Type = rubric
 Ref = ordinary/session/closing-rubric
+
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary

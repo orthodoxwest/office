@@ -8,6 +8,12 @@ Label = Opening Prayers
 Type = rubric
 Ref = ordinary/session/little-hours-opening-rubric
 
+Type = prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = ordinary/shared/hail-mary
+
 [Opening]
 Label = Opening
 

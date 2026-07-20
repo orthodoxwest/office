@@ -28,6 +28,15 @@ func TestPrimeOrdinaryUsesParishOpeningAndHymnDoxology(t *testing.T) {
 	if !strings.HasSuffix(hymn, "To Father and to Paraclete. Amen.") {
 		t.Fatalf("Prime hymn has wrong parish doxology: %q", hymn)
 	}
+
+	hailMary := corpus.Get("ordinary/shared/hail-mary")
+	wantHailMary := "Hail, Mary, full of grace, the Lord is with thee.\n" +
+		"Blessed art thou among women, and blessed is the fruit of thy womb, Jesus.\n" +
+		"Holy Mary, Mother of God, pray for us sinners, now and in the hour of our death.\n" +
+		"Amen."
+	if hailMary != wantHailMary {
+		t.Fatalf("Hail Mary = %q, want parish text %q", hailMary, wantHailMary)
+	}
 }
 
 func TestPrimeWeekdayCondition(t *testing.T) {
