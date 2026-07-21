@@ -33,15 +33,15 @@
 }
 
 /* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
-   Dark theme (below): the apse sky — blue-green lime wash with gold stars. */
+   Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
-  --bg: #faf4ef;
+  --bg: #faf2ec;
   --accent: #6b3a1f;
-  --gold: #8f6b29;
+  --gold: #9a7328;
   --gold-line: #c9ac72;
-  --muted: #7d6f66;
-  --border: #e0d2c8;
+  --muted: #7a6b62;
+  --border: #dccfc3;
   --rubric: #8b1a1a;
   --white: #f8f4ec;
   --red: #fdf0f0;
@@ -50,6 +50,8 @@
   --black: #f0f0f0;
   --rose: #fdf4f8;
   --banner-bg: #f4ebe4;
+  --surface: #f6eee6;
+  --surface-edge: rgba(107, 58, 31, 0.12);
 }
 
 * {
@@ -399,9 +401,11 @@ footer::before {
   gap: 1.5rem;
 }
 
+/* Prayer card is first in the DOM (mobile stacks CTA first). On wide
+   screens it keeps the leading column so the CTA stays visually primary. */
 .home-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 1fr);
+  grid-template-columns: minmax(18rem, 1.15fr) minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -409,14 +413,27 @@ footer::before {
 .home-summary,
 .home-prayer-card {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
   padding: 1.2rem 1.25rem;
 }
 
+.home-prayer-card {
+  border-color: var(--surface-edge);
+}
+
 .home h1 {
-  font-size: 1.9rem;
+  font-size: 1.75rem;
   font-weight: normal;
   margin-bottom: 0.75rem;
+}
+
+.home-kicker {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
 }
 
 .home .feast {
@@ -520,23 +537,29 @@ footer::before {
 .pray-now {
   display: block;
   text-align: center;
-  padding: 0.8rem 1.1rem;
+  padding: 0.9rem 1.15rem;
   border: 1px solid var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 1.12rem;
+  letter-spacing: 0.02em;
   border-radius: 2px;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .pray-now:hover {
-  background: var(--accent);
+  background: #5a3019;
+  border-color: #5a3019;
   color: var(--bg);
 }
 
 .home-prayer-card h2 {
-  font-size: 1.5rem;
+  font-size: 1.15rem;
   font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--muted);
   margin-bottom: 0.85rem;
 }
 
@@ -554,7 +577,7 @@ footer::before {
   border: 1px solid var(--border);
   color: var(--text);
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.28);
   transition: border-color 0.15s, background 0.15s;
 }
 
@@ -596,8 +619,8 @@ footer::before {
 /* ── Hour page ── */
 
 .hour-header {
-  margin-bottom: 1.4rem;
-  padding: 0 0 0.6rem;
+  margin-bottom: 1.1rem;
+  padding: 0 0 0.45rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
@@ -610,8 +633,8 @@ footer::before {
   text-transform: uppercase;
   width: fit-content;
   min-width: min(100%, 24rem);
-  margin: 0 auto 0.3rem;
-  padding: 0.2rem 1.3rem 0.25rem;
+  margin: 0 auto 0.25rem;
+  padding: 0.15rem 1.3rem 0.2rem;
   border-top: 3px double var(--gold-line);
   border-bottom: 3px double var(--gold-line);
 }
@@ -619,9 +642,52 @@ footer::before {
 .hour-meta {
   color: var(--muted);
   font-size: 0.9rem;
-  margin: 0 auto 0.55rem;
+  margin: 0 auto 0.35rem;
   max-width: 34rem;
   line-height: 1.45;
+}
+
+/* Date jumping is secondary during prayer — collapsed until needed. */
+.hour-date-nav {
+  margin: 0 auto;
+  max-width: 34rem;
+  text-align: center;
+}
+
+.hour-date-nav > summary {
+  cursor: pointer;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.5rem;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.hour-date-nav > summary::-webkit-details-marker {
+  display: none;
+}
+
+.hour-date-nav > summary::after {
+  content: " ▾";
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.hour-date-nav[open] > summary::after {
+  content: " ▴";
+}
+
+.hour-date-nav[open] > summary {
+  color: var(--accent);
+}
+
+.hour-date-nav .day-nav {
+  margin-top: 0.15rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.06);
 }
 
 .day-nav {
@@ -633,6 +699,11 @@ footer::before {
   justify-content: center;
   padding-top: 0.35rem;
   border-top: 1px solid rgba(26, 26, 26, 0.06);
+}
+
+/* Home day-nav keeps a light rule under the date heading */
+.home-summary .day-nav {
+  margin-bottom: 0.55rem;
 }
 
 .day-nav a {
@@ -1048,7 +1119,7 @@ footer::before {
 
 .session-prayers {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--surface);
   padding: 0.8rem 0.95rem;
 }
 
@@ -1598,78 +1669,119 @@ footer::before {
 .color-black  { background: var(--black); }
 .color-rose   { background: var(--rose); }
 
-/* ── Dark mode (system theme or ?theme=dark) ── */
+/* ── Dark mode (system theme or ?theme=dark) ──
+   Apse night sky: cooler blue than the older teal-green wash. */
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --text: #e8e2d0;
-    --bg: #14201e;
-    --accent: #cfa85e;
-    --gold: #d3b26c;
-    --gold-line: #5e5335;
-    --muted: #99a29a;
-    --border: #2b3a36;
+    --bg: #121c28;
+    --accent: #d0b06a;
+    --gold: #d8bc74;
+    --gold-line: #6a5c3a;
+    --muted: #9aa4b0;
+    --border: #2a3648;
     --rubric: #d47070;
-    --white: #1c2624;
+    --white: #1a2430;
     --red: #261e1d;
-    --green: #14291f;
+    --green: #142028;
     --violet: #1c2030;
-    --black: #191f1e;
-    --rose: #251e24;
-    --banner-bg: #1a2a26;
+    --black: #161c24;
+    --rose: #241e28;
+    --banner-bg: #182230;
+    --surface: #172232;
+    --surface-edge: rgba(208, 176, 106, 0.18);
   }
 }
 
 :root[data-theme="dark"] {
   --text: #e8e2d0;
-  --bg: #14201e;
-  --accent: #cfa85e;
-  --gold: #d3b26c;
-  --gold-line: #5e5335;
-  --muted: #99a29a;
-  --border: #2b3a36;
+  --bg: #121c28;
+  --accent: #d0b06a;
+  --gold: #d8bc74;
+  --gold-line: #6a5c3a;
+  --muted: #9aa4b0;
+  --border: #2a3648;
   --rubric: #d47070;
-  --white: #1c2624;
+  --white: #1a2430;
   --red: #261e1d;
-  --green: #14291f;
+  --green: #142028;
   --violet: #1c2030;
-  --black: #191f1e;
-  --rose: #251e24;
-  --banner-bg: #1a2a26;
+  --black: #161c24;
+  --rose: #241e28;
+  --banner-bg: #182230;
+  --surface: #172232;
+  --surface-edge: rgba(208, 176, 106, 0.18);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .home-summary,
   :root:not([data-theme="light"]) .home-prayer-card,
-  :root:not([data-theme="light"]) .hour-header,
   :root:not([data-theme="light"]) .session-prayers,
   :root:not([data-theme="light"]) .home-hour-link {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface);
+    box-shadow: none;
   }
 
   :root:not([data-theme="light"]) .home-hour-link.is-current {
-    background: rgba(207, 168, 94, 0.12);
+    background: rgba(208, 176, 106, 0.12);
+  }
+
+  :root:not([data-theme="light"]) .pray-now {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #121c28;
+  }
+
+  :root:not([data-theme="light"]) .pray-now:hover {
+    background: #e0c684;
+    border-color: #e0c684;
+    color: #121c28;
   }
 }
 
 :root[data-theme="dark"] .home-summary,
 :root[data-theme="dark"] .home-prayer-card,
-:root[data-theme="dark"] .hour-header,
 :root[data-theme="dark"] .session-prayers,
 :root[data-theme="dark"] .home-hour-link {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface);
+  box-shadow: none;
 }
 
 :root[data-theme="dark"] .home-hour-link.is-current {
-  background: rgba(207, 168, 94, 0.12);
+  background: rgba(208, 176, 106, 0.12);
+}
+
+:root[data-theme="dark"] .pray-now {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #121c28;
+}
+
+:root[data-theme="dark"] .pray-now:hover {
+  background: #e0c684;
+  border-color: #e0c684;
+  color: #121c28;
 }
 
 /* ── Narrow screens ── */
 
 @media (max-width: 540px) {
   body {
+    font-size: 19px;
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .home-hour-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .home-hour-link {
+    justify-content: space-between;
+    min-height: 2.75rem;
   }
 
   .day-nav {
@@ -1726,7 +1838,7 @@ footer::before {
 /* ── Print ── */
 
 @media print {
-  header, footer, .day-nav, .year-nav, .report-issue, .color-band {
+  header, footer, .day-nav, .hour-date-nav, .year-nav, .report-issue, .color-band {
     display: none;
   }
 

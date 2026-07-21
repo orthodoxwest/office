@@ -2,6 +2,21 @@
 {{define "content"}}
 <div class="home">
   <div class="home-hero">
+    {{/* Prayer card first: mobile stacks CTA above day metadata; desktop grid keeps it primary. */}}
+    <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
+      <h2 id="home-pray-heading">Pray the hours</h2>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
+      <div class="home-hour-links" aria-label="Hours for the day">
+        {{range .Hours}}
+        <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="page"{{end}}>
+          <span class="home-hour-link-name">{{.Name}}</span>
+          {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+        </a>
+        {{end}}
+      </div>
+      <p class="home-calendar-link"><a href="{{.CalendarLink}}">See this day in the ordo</a></p>
+    </aside>
+
     <section class="home-summary" aria-labelledby="home-date-heading">
       <h1 id="home-date-heading">{{.DateStr}}</h1>
       <nav class="day-nav" aria-label="Date navigation">
@@ -30,20 +45,6 @@
       {{end}}
       <p class="meta"><span class="color-swatch {{printf "color-%s" .Color}}"></span>{{.Season}} &bull; {{.Color}}</p>
     </section>
-
-    <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
-      <h2 id="home-pray-heading">Choose an hour</h2>
-      <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
-      <div class="home-hour-links" aria-label="Hours for the day">
-        {{range .Hours}}
-        <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="page"{{end}}>
-          <span class="home-hour-link-name">{{.Name}}</span>
-          {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
-        </a>
-        {{end}}
-      </div>
-      <p class="home-calendar-link"><a href="{{.CalendarLink}}">See this day in the ordo</a></p>
-    </aside>
   </div>
 </div>
 {{end}}
