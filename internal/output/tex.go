@@ -555,19 +555,6 @@ func slugify(s string) string {
 	return strings.TrimRight(b.String(), "-")
 }
 
-// allDigits reports whether s consists entirely of ASCII digits.
-func allDigits(s string) bool {
-	if s == "" {
-		return false
-	}
-	for _, c := range s {
-		if c < '0' || c > '9' {
-			return false
-		}
-	}
-	return true
-}
-
 // splitLeadingVerseNumber peels a leading verse number from a psalm or canticle
 // line. Accepts "2. Text" and Benedicite-style "2 Text". Numbers are at most 3 digits.
 func splitLeadingVerseNumber(line string) (num, rest string, ok bool) {

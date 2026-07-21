@@ -12,10 +12,10 @@ import (
 
 func TestSplitLeadingVerseNumber(t *testing.T) {
 	tests := []struct {
-		line    string
-		wantNum string
+		line     string
+		wantNum  string
 		wantRest string
-		wantOK  bool
+		wantOK   bool
 	}{
 		{"2. That thy way may be known", "2", "That thy way may be known", true},
 		{"10. Make me a clean heart", "10", "Make me a clean heart", true},
