@@ -8,8 +8,8 @@
 | Uncovered features | 0 |
 | Verified text entries | 533 |
 | Rendered text entries needing review | 1390 |
-| Rendered text entries with unknown source | 227 |
-| Classified zero-occurrence entries | 76 |
+| Rendered text entries with unknown source | 226 |
+| Classified zero-occurrence entries | 77 |
 | Zeroes needing classification | 12 |
 | Stale zero-occurrence classifications | 1 |
 | Stale attestations | 0 |
