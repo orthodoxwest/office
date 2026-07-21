@@ -157,14 +157,23 @@ func TestRenderMarianAntiphonPreservesVerseAndReflowsPrayer(t *testing.T) {
 	text := "[Ave Regina Caelorum]\n\nQueen of the heavens, we hail thee,\nHail thee, Lady of all the Angels;\n\nV. Vouchsafe that I may praise thee.\nR. Give me strength.\n\nLet us pray.\n\nGrant us, O merciful God, protection in our weakness:\nthat we may rise again from our sins."
 	html := string(renderMarianAntiphon(text))
 
-	if !strings.Contains(html, `Queen of the heavens, we hail thee,<br>Hail thee, Lady of all the Angels;`) {
-		t.Fatalf("expected the opening Marian verse lines to be preserved: %s", html)
+	if !strings.Contains(html, `<p class="chant-line">Queen of the heavens, we hail thee,</p><p class="chant-line">Hail thee, Lady of all the Angels;</p>`) {
+		t.Fatalf("expected each opening Marian verse line as its own chant line: %s", html)
 	}
 	if !strings.Contains(html, `Grant us, O merciful God, protection in our weakness: that we may rise again from our sins.`) {
 		t.Fatalf("expected the concluding Marian prayer to flow: %s", html)
 	}
-	if strings.Contains(html, `weakness:<br>that`) {
-		t.Fatalf("prayer source wrapping must not produce a hard break: %s", html)
+	if strings.Contains(html, `<br>`) {
+		t.Fatalf("Marian antiphon should use per-line blocks, not hard breaks: %s", html)
+	}
+}
+
+func TestRenderMarianAntiphonStylesIncipitMediant(t *testing.T) {
+	text := "Mary we hail thee * Mother and Queen compassionate;\nMary our comfort, life, and hope, we hail thee."
+	html := string(renderMarianAntiphon(text))
+
+	if !strings.Contains(html, `<p class="chant-line">Mary we hail thee <span class="mediant">*</span> Mother and Queen compassionate;</p>`) {
+		t.Fatalf("expected the incipit mediant styled like a psalm verse: %s", html)
 	}
 }
 

@@ -452,6 +452,16 @@ func renderMarianAntiphon(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
 }
 
+// chantLineHTML renders one sung antiphon line, styling a " * " incipit
+// mediant as the muted glyph used in the psalm verses.
+func chantLineHTML(line string) string {
+	before, after, found := strings.Cut(line, " * ")
+	if !found {
+		return escCross(line)
+	}
+	return escCross(before) + ` <span class="mediant">*</span> ` + escCross(after)
+}
+
 func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {
 	lines := strings.Split(text, "\n")
 	var sb strings.Builder
@@ -473,8 +483,25 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 			return
 		}
 		emitGap()
+
+		// The sung Marian antiphon (the first preserved block) renders each
+		// source line as its own chant line, so a hanging indent can tuck a
+		// wrapped remainder under its own line while every line stays a
+		// discrete reference point for chanting. Other preserved blocks
+		// (preces, blessings, doxologies) keep the <br>-joined paragraph.
+		if mode == preserveFirstProseBlock && proseBlocks == 0 {
+			for _, l := range proseLines {
+				sb.WriteString(`<p class="chant-line">`)
+				sb.WriteString(chantLineHTML(l))
+				sb.WriteString(`</p>`)
+			}
+			proseLines = nil
+			proseBlocks++
+			return
+		}
+
 		sb.WriteString(`<p class="plain-line">`)
-		preserveLines := mode == preserveProseLines || (mode == preserveFirstProseBlock && proseBlocks == 0)
+		preserveLines := mode == preserveProseLines
 		for i, l := range proseLines {
 			if i > 0 {
 				if preserveLines {
