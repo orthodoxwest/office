@@ -10,7 +10,7 @@ var VERSION = "__VERSION__";
 var CACHE = "office-" + VERSION;
 var META_CACHE = "office-meta";
 var PRECACHE_DAYS = 14;
-var PAGE_NETWORK_TIMEOUT_MS = 1500;
+var PAGE_NETWORK_TIMEOUT_MS = 2500;
 var HOURS = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 
 var CORE_ASSETS = [
@@ -27,10 +27,29 @@ var APP_SHELL_URLS = [
   "/reminders"
 ];
 
+// networkFetch bypasses the browser HTTP cache so a deploy is not re-stored
+// from a stale disk entry under the same URL.
+function networkFetch(req) {
+  return fetch(req, { cache: "reload" });
+}
+
+function precacheCore(cache) {
+  var urls = CORE_ASSETS.concat(APP_SHELL_URLS);
+  return Promise.all(urls.map(function (u) {
+    return networkFetch(u).then(function (resp) {
+      if (resp.ok) {
+        return cache.put(u, resp);
+      }
+    }).catch(function () {
+      // Offline or transient failure during install: runtime SWR / next sync fills in.
+    });
+  }));
+}
+
 self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE).then(function (cache) {
-      return cache.addAll(CORE_ASSETS.concat(APP_SHELL_URLS));
+      return precacheCore(cache);
     }).then(function () {
       return precacheUpcoming();
     }).then(function () {
@@ -171,6 +190,28 @@ function offlineResponse() {
   );
 }
 
+// staleWhileRevalidate serves a cached static asset immediately when present,
+// then refreshes the cache from the network so the next load picks up deploys
+// even before a new service-worker version installs.
+function staleWhileRevalidate(req) {
+  return caches.open(CACHE).then(function (cache) {
+    return cache.match(req).then(function (cached) {
+      var network = networkFetch(req).then(function (resp) {
+        if (resp.ok) {
+          cache.put(req, resp.clone());
+        }
+        return resp;
+      });
+      if (cached) {
+        // Background refresh; ignore failures while serving the cache.
+        network.catch(function () {});
+        return cached;
+      }
+      return network;
+    });
+  });
+}
+
 self.addEventListener("fetch", function (event) {
   var req = event.request;
   if (req.method !== "GET") {
@@ -181,23 +222,9 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  // Static assets: cache-first.
+  // Static assets: stale-while-revalidate (not pure cache-first).
   if (url.pathname.indexOf("/static/") === 0) {
-    event.respondWith(
-      caches.open(CACHE).then(function (cache) {
-        return cache.match(req).then(function (cached) {
-          if (cached) {
-            return cached;
-          }
-          return fetch(req).then(function (resp) {
-            if (resp.ok) {
-              cache.put(req, resp.clone());
-            }
-            return resp;
-          });
-        });
-      })
-    );
+    event.respondWith(staleWhileRevalidate(req));
     return;
   }
 

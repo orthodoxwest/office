@@ -1,6 +1,7 @@
 package web
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -49,15 +50,25 @@ func TestServiceWorkerCachesOfflineNavigationTargets(t *testing.T) {
 		`"/" + HOURS[h] + "/" + slug`,
 		`return precacheUpcoming();`,
 		`plain.searchParams.delete("theme")`,
-		`PAGE_NETWORK_TIMEOUT_MS = 1500`,
+		`PAGE_NETWORK_TIMEOUT_MS = 2500`,
 		`fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS)`,
 		`class=\"offline-page\"`,
 		`/static/style.css`,
 		`Open saved home page`,
+		// Static assets must revalidate, not pure cache-first, so deploys
+		// land without waiting for a full worker reinstall.
+		`staleWhileRevalidate`,
+		`cache: "reload"`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("service worker is missing offline navigation support %q", want)
 		}
+	}
+
+	// Static /static/ requests must go through SWR, not the page network-first path.
+	if !strings.Contains(body, `url.pathname.indexOf("/static/") === 0`) ||
+		!strings.Contains(body, `event.respondWith(staleWhileRevalidate(req))`) {
+		t.Errorf("service worker should route /static/ through staleWhileRevalidate")
 	}
 }
 
@@ -117,6 +128,11 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		`window.addEventListener("offline", function ()`,
 		// Recovery polling so a false-negative offline reading self-heals.
 		`recoveryTimer`,
+		// Require consecutive failed probes so wifi↔cell handoffs do not flash the pill.
+		`failStreak`,
+		`FAIL_STREAK_TO_SHOW`,
+		// Pick up deploys while a long-lived PWA session stays open.
+		`reg.update`,
 		// "Pray now" is recomputed client-side so a cached home page is not frozen.
 		`updatePrayNow`,
 		`data-hour`,
@@ -131,6 +147,17 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 	if strings.Contains(body, "navigator.onLine === false") {
 		t.Errorf("app script should probe the network rather than trust navigator.onLine === false")
 	}
+	// Browser "offline" events fire spuriously on mobile; must not show immediately.
+	if strings.Contains(body, "setOfflineIndicator(true);\n  });") &&
+		strings.Contains(body, `window.addEventListener("offline"`) {
+		// Only fail if offline handler still sets the pill directly without probing.
+		offlineIdx := strings.Index(body, `window.addEventListener("offline"`)
+		probeIdx := strings.Index(body[offlineIdx:], "checkOnline()")
+		directShow := strings.Index(body[offlineIdx:offlineIdx+200], "setOfflineIndicator(true)")
+		if directShow >= 0 && (probeIdx < 0 || directShow < probeIdx) {
+			t.Errorf("offline event handler should probe via checkOnline rather than show the pill immediately")
+		}
+	}
 
 	for _, unwanted := range []string{
 		`siteBannerDismissed`,
@@ -140,6 +167,19 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		if strings.Contains(body, unwanted) {
 			t.Errorf("construction banner dismissal should not persist via %q", unwanted)
 		}
+	}
+}
+
+func TestStaticAssetsSendNoCache(t *testing.T) {
+	mux := http.NewServeMux()
+	mux.Handle("/static/", staticFileServer(http.FS(files)))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/static/style.css", nil))
+	if rec.Code != 200 {
+		t.Fatalf("expected 200, got %d", rec.Code)
+	}
+	if cc := rec.Header().Get("Cache-Control"); cc != "no-cache" {
+		t.Errorf("expected Cache-Control: no-cache on static assets, got %q", cc)
 	}
 }
 

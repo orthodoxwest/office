@@ -763,7 +763,10 @@ func (s *Server) ListenAndServe() error {
 	}()
 
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.FileServer(http.FS(files)))
+	// no-cache forces revalidation on each network fetch so the service
+	// worker's install/SWR paths never re-store a stale browser HTTP cache
+	// entry under the same /static/ URL after a deploy.
+	mux.Handle("/static/", staticFileServer(http.FS(files)))
 	mux.HandleFunc("/sw.js", s.handleServiceWorker)
 	mux.HandleFunc("/office.ics", s.handleICS)
 	mux.HandleFunc("/reminders", s.handleReminders)
