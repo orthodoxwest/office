@@ -1033,7 +1033,17 @@ footer::before {
 }
 
 .marian-antiphon .item-label {
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Sung antiphon lines: each source line is its own block, so a wrapped
+   remainder hangs under its own line and every line stays a discrete chant
+   reference point. Tighter leading binds a wrap to its own line. */
+.marian-antiphon .chant-line {
+  margin: 0;
+  padding-left: 1.2rem;
+  text-indent: -1.2rem;
+  line-height: 1.5;
 }
 
 .session-prayers {
