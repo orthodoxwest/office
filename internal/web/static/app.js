@@ -337,10 +337,12 @@ document.documentElement.classList.add("js");
     });
   }
 
+  var officeHour = document.querySelector(".office-hour");
+
   // Keep the screen awake on hour pages only (not home / ordo / reminders).
   // Opening an hour is the intent signal; the lock releases when the tab is
   // hidden or the user navigates away, and is re-acquired on return.
-  if (document.querySelector(".office-hour") && "wakeLock" in navigator) {
+  if (officeHour && "wakeLock" in navigator) {
     var hourWakeLock = null;
     var requestHourWakeLock = function () {
       if (document.visibilityState !== "visible") {
@@ -363,5 +365,31 @@ document.documentElement.classList.add("js");
         requestHourWakeLock();
       }
     });
+  }
+
+  // Gold hairline under the color band: progress through the hour page.
+  if (officeHour) {
+    var progress = document.querySelector(".hour-scroll-progress");
+    var progressBar = document.querySelector(".hour-scroll-progress-bar");
+    if (progress && progressBar) {
+      var progressTicking = false;
+      var updateHourScrollProgress = function () {
+        var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        var ratio = maxScroll <= 0 ? 1 : Math.min(1, Math.max(0, scrollTop / maxScroll));
+        progressBar.style.transform = "scaleX(" + ratio + ")";
+        progress.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
+        progressTicking = false;
+      };
+      var onHourScroll = function () {
+        if (!progressTicking) {
+          progressTicking = true;
+          window.requestAnimationFrame(updateHourScrollProgress);
+        }
+      };
+      window.addEventListener("scroll", onHourScroll, { passive: true });
+      window.addEventListener("resize", onHourScroll);
+      updateHourScrollProgress();
+    }
   }
 })();
