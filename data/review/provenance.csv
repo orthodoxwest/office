@@ -200,10 +200,15 @@ ordinary/vespers/blessing,946f8c64292c,00. The Commons - Vespers 2025 Jacob edit
 ordinary/vespers/chapter,209d8d16cfcd,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ash Wednesday, The Chapter",129,verified,codex,2026-07-18,Word-for-word; the printed 2 Corinthians 1:3 heading is followed by the quoted opening of verse 4.
 ordinary/vespers/chapter-saturday,9e3ce8815eed,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE CHAPTER / Romans 11:33,217,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing.
 ordinary/vespers/hymn-saturday,94d57bf391d9,office-hymns.zip,"O Trinity of Blessed Light, Thru the Year Vespers, winter and summer tunes.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and punctuation.
+ordinary/vespers/hymn-wednesday,5f7b29ff8f94,office-hymns.zip,"O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,Saturdays Throughout the Year,213-216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and accents.
+ordinary/vespers/psalm-antiphon-1-wednesday,ebc91367b526,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Whatsoever the Lord pleased,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and line-break hyphenation.
 ordinary/vespers/psalm-antiphon-2-saturday,53e9146bfec8,draft archdiocesan Vespers book,,211,verified,codex,2026-07-18,
+ordinary/vespers/psalm-antiphon-2-wednesday,efb4b43f9fdf,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. For his mercy,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/psalm-antiphon-3-saturday,3b963b10355b,draft archdiocesan Vespers book,,212,verified,codex,2026-07-18,
+ordinary/vespers/psalm-antiphon-3-wednesday,b7de46a6dd9a,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Sing us one,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/psalm-antiphon-4-saturday,12559aa40ef7,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ant. Praise the Lord, O Jerusalem",216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
+ordinary/vespers/psalm-antiphon-4-wednesday,2eedc60b0692,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Before the gods,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
 ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
 proper/advent-sunday-1/psalm-antiphon-1,7de540e90841,draft archdiocesan Vespers book,,4,verified,codex,2026-07-17,
@@ -247,6 +252,7 @@ proper/annunciation/short-responsory-vespers-easter,c4f623e07809,draft archdioce
 proper/annunciation/versicle-lauds,0e36e6e165c3,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
 proper/annunciation/versicle-lauds-easter,33417077a6ad,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
 proper/ash-wednesday/chapter-vespers,ad8fb9b1bbfd,draft archdiocesan Vespers book,,129,verified,codex,2026-07-17,
+proper/ash-wednesday/hymn-vespers,916953953972,office-hymns.zip,"O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/assumption-bvm/hymn-vespers,c89031c0b6a5,draft archdiocesan Vespers book,,464-465,verified,codex,2026-07-18,
 proper/assumption-bvm/psalm-antiphon-1,4f464a27b205,draft archdiocesan Vespers book,,460,verified,codex,2026-07-18,
 proper/assumption-bvm/psalm-antiphon-2,35724bd00a5f,draft archdiocesan Vespers book,,461,verified,codex,2026-07-18,
@@ -254,6 +260,7 @@ proper/assumption-bvm/versicle-lauds,65002c4aac6d,draft archdiocesan Lauds book,
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,3a8cdc081f9d,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
+proper/christ-the-king/hymn-vespers,66d9e40fe71b,office-hymns.zip,"O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/christmas/benedictus-antiphon,563e7d19001d,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,72,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/collect,482a33f21028,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,73,verified,codex,2026-07-18,checked word for word
 proper/christmas/hymn-lauds,fb1b35ec9c54,draft archdiocesan Lauds book,,70-71,verified,codex,2026-07-18,
@@ -265,6 +272,7 @@ proper/christmas/psalm-antiphon-4,76ac128d7ac5,draft archdiocesan Lauds book,Nat
 proper/christmas/psalm-antiphon-5,7b020cfa0f86,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,66,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/short-responsory-lauds,c314b1468146,draft archdiocesan Lauds book,Nativity and days within the Octave,68-69,verified,codex,2026-07-18,simple-tone wording checked; optional solemn tone does not change text
 proper/christmas/versicle-lauds,e2fa7635953e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,71,verified,codex,2026-07-18,checked word for word
+proper/circumcision/hymn-lauds,2a6e2d475ac3,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/circumcision/hymn-vespers,78b8dd8d9ab2,draft archdiocesan Vespers book,,94-95,verified,codex,2026-07-18,
 proper/conception-bvm/chapter-lauds,f920a86583d0,draft archdiocesan Lauds book,,365,verified,codex,2026-07-18,
 proper/conception-bvm/psalm-antiphon-1,485b67b9622f,draft archdiocesan Vespers book,,243,verified,codex,2026-07-18,
@@ -318,6 +326,7 @@ proper/trinity-sunday/psalm-antiphon-1,116ab0c2b5da,draft archdiocesan Vespers b
 proper/trinity-sunday/psalm-antiphon-2,c491b409b4d9,draft archdiocesan Vespers book,,190,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-3,f538e9d68586,draft archdiocesan Vespers book,,191,verified,codex,2026-07-17,
 proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word
+proper/vigil-epiphany/hymn-lauds,2a6e2d475ac3,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 psalms/001,e19d81a02f61,Coverdale Psalter,Psalm 1,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/002,cebfe3005251,Coverdale Psalter,Psalm 2,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/003,90dcbba6a990,Coverdale Psalter,Psalm 3,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
@@ -511,7 +520,7 @@ seasonal/easter/pre-collect-versicle-prime,991eed765c77,st patrick prayer book,,
 seasonal/lent/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 seasonal/lent/hymn-vespers,3a3f943ecd45,draft archdiocesan Vespers book,,138,verified,codex,2026-07-18,
 seasonal/passiontide/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word; Passiontide is within the source rubric’s through-Lent span.
-seasonal/passiontide/hymn-first-vespers,36917a89fd66,A Noted Hymnary for the Anglican Breviary,,17,verified,codex,2026-07-17,
+seasonal/passiontide/hymn-first-vespers,36917a89fd66,office-hymns.zip,"The Royal Banners Forward Go, Passiontide Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 seasonal/passiontide/short-responsory-vespers,d5d8a4eca7ea,draft archdiocesan Vespers book,Saturdays in Passiontide,147,verified,codex,2026-07-18,
 seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,

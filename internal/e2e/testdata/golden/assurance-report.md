@@ -6,8 +6,8 @@
 | Modeled structural features | 331 |
 | Selected structural-review pages | 53 |
 | Uncovered features | 0 |
-| Verified text entries | 524 |
-| Rendered text entries needing review | 1399 |
+| Verified text entries | 533 |
+| Rendered text entries needing review | 1390 |
 | Rendered text entries with unknown source | 227 |
 | Classified zero-occurrence entries | 76 |
 | Zeroes needing classification | 12 |
