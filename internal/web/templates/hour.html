@@ -2,6 +2,9 @@
 {{define "content"}}
 <div class="office-hour">
   <div class="color-band color-band-{{.Hour.Color}}"><span class="sr-only">Liturgical color: {{.Hour.Color}}</span></div>
+  <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through this hour">
+    <div class="hour-scroll-progress-bar"></div>
+  </div>
   <div class="hour-header">
     <h1>{{.Hour.Title}}</h1>
     <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}}</p>

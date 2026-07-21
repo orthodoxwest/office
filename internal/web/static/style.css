@@ -496,6 +496,36 @@ footer::before {
   z-index: 120;
 }
 
+/* Gold hairline under the color band: how far through the hour page. */
+.hour-scroll-progress {
+  position: fixed;
+  top: 3px;
+  top: calc(3px + env(safe-area-inset-top, 0px));
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 119;
+  pointer-events: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.hour-scroll-progress-bar {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hour-scroll-progress-bar {
+    transition: transform 0.08s linear;
+  }
+}
+
 .home .feast-rank-link {
   color: var(--muted);
   text-decoration: none;
@@ -1117,20 +1147,48 @@ footer::before {
   line-height: 1.5;
 }
 
+/* Session prayers are part of the office, not a settings card. Summary
+   matches .section-heading; open state has no panel chrome. */
 .session-prayers {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 0.8rem 0.95rem;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-top: 0.35rem;
 }
 
 .session-prayers summary {
   cursor: pointer;
-  color: var(--muted);
+  list-style: none;
+  font-size: 1.05rem;
+  font-weight: normal;
   font-variant: small-caps;
-  letter-spacing: 0.08em;
-  padding: 0.35rem 0;
-  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text);
   text-align: center;
+  margin-top: 1.45rem;
+  margin-bottom: 0.8rem;
+  padding: 0.2rem 0;
+}
+
+.session-prayers summary::-webkit-details-marker {
+  display: none;
+}
+
+.session-prayers summary::after {
+  content: " ▾";
+  color: var(--gold-line);
+  font-size: 0.75em;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.session-prayers[open] > summary::after {
+  content: " ▴";
+}
+
+.elements > .session-prayers:first-child > summary {
+  margin-top: 0;
 }
 
 /* ── Construction banner ── */
@@ -1717,7 +1775,6 @@ footer::before {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .home-summary,
   :root:not([data-theme="light"]) .home-prayer-card,
-  :root:not([data-theme="light"]) .session-prayers,
   :root:not([data-theme="light"]) .home-hour-link {
     background: var(--surface);
     box-shadow: none;
@@ -1742,7 +1799,6 @@ footer::before {
 
 :root[data-theme="dark"] .home-summary,
 :root[data-theme="dark"] .home-prayer-card,
-:root[data-theme="dark"] .session-prayers,
 :root[data-theme="dark"] .home-hour-link {
   background: var(--surface);
   box-shadow: none;
@@ -1838,7 +1894,7 @@ footer::before {
 /* ── Print ── */
 
 @media print {
-  header, footer, .day-nav, .hour-date-nav, .year-nav, .report-issue, .color-band {
+  header, footer, .day-nav, .hour-date-nav, .year-nav, .report-issue, .color-band, .hour-scroll-progress {
     display: none;
   }
 
