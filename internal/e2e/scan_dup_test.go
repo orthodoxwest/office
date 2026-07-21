@@ -14,6 +14,7 @@ import (
 // every hour must compose without leaking corpus annotations, and each
 // Vespers must contain exactly four psalms.
 func TestVespers2026PsalmodySweep(t *testing.T) {
+	t.Parallel()
 	eng, err := office.NewEngine(dataDir)
 	if err != nil {
 		t.Fatalf("NewEngine: %v", err)
@@ -56,6 +57,7 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 // than once — the symptom of the Psalmody-Sunday/Psalmody-Festal overlap bug
 // (overlapping section Conditions causing the same content to render twice).
 func TestScanDuplicateSectionLabels(t *testing.T) {
+	t.Parallel()
 	eng, err := office.NewEngine(dataDir)
 	if err != nil {
 		t.Fatalf("NewEngine: %v", err)

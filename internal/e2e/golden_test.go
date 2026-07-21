@@ -194,6 +194,7 @@ func dayFor(t *testing.T, yd *yearData, dateStr string) *models.CalendarDay {
 }
 
 func TestHourGolden(t *testing.T) {
+	t.Parallel()
 	eng, err := office.NewEngine(dataDir)
 	if err != nil {
 		t.Fatalf("NewEngine: %v", err)
@@ -227,6 +228,7 @@ func TestHourGolden(t *testing.T) {
 }
 
 func TestAuditGolden(t *testing.T) {
+	t.Parallel()
 	r, err := audit.Run(dataDir)
 	if err != nil {
 		t.Fatalf("audit.Run: %v", err)
@@ -237,6 +239,7 @@ func TestAuditGolden(t *testing.T) {
 }
 
 func TestOrdoGolden(t *testing.T) {
+	t.Parallel()
 	days, err := calendar.BuildCalendar(2026, dataDir)
 	if err != nil {
 		t.Fatalf("BuildCalendar: %v", err)
@@ -250,6 +253,7 @@ func TestOrdoGolden(t *testing.T) {
 }
 
 func TestAssuranceGolden(t *testing.T) {
+	t.Parallel()
 	baseline, err := review.LoadAssuranceBaseline(dataDir)
 	if err != nil {
 		t.Fatalf("LoadAssuranceBaseline: %v", err)
@@ -264,6 +268,7 @@ func TestAssuranceGolden(t *testing.T) {
 }
 
 func TestParityGolden(t *testing.T) {
+	t.Parallel()
 	baseline, err := review.LoadAssuranceBaseline(dataDir)
 	if err != nil {
 		t.Fatalf("LoadAssuranceBaseline: %v", err)
