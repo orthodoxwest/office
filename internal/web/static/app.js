@@ -336,4 +336,32 @@ document.documentElement.classList.add("js");
       }
     });
   }
+
+  // Keep the screen awake on hour pages only (not home / ordo / reminders).
+  // Opening an hour is the intent signal; the lock releases when the tab is
+  // hidden or the user navigates away, and is re-acquired on return.
+  if (document.querySelector(".office-hour") && "wakeLock" in navigator) {
+    var hourWakeLock = null;
+    var requestHourWakeLock = function () {
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+      navigator.wakeLock.request("screen").then(function (lock) {
+        hourWakeLock = lock;
+        lock.addEventListener("release", function () {
+          if (hourWakeLock === lock) {
+            hourWakeLock = null;
+          }
+        });
+      }).catch(function () {
+        // Unsupported, denied, or non-secure context — prayer still works.
+      });
+    };
+    requestHourWakeLock();
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "visible") {
+        requestHourWakeLock();
+      }
+    });
+  }
 })();

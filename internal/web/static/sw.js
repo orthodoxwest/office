@@ -167,7 +167,7 @@ function offlineResponse() {
     "<link rel=\"stylesheet\" href=\"/static/style.css\">" +
     "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\">" +
     "<link rel=\"manifest\" href=\"/static/manifest.webmanifest\">" +
-    "<meta name=\"theme-color\" content=\"#fdf9f2\">" +
+    "<meta name=\"theme-color\" content=\"#faf2ec\">" +
     "<script src=\"/static/app.js\" defer></script></head><body>" +
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
