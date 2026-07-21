@@ -1016,6 +1016,17 @@ footer::before {
   height: 0.5rem;
 }
 
+/* Secret prayers: spoken incipit (and optional tail) at full contrast;
+   silent body uses the secondary/muted token so the cue is obvious in
+   both light and dark themes (a mild color-mix was invisible in dark). */
+.spoken-text {
+  color: var(--text);
+}
+
+.secret-text {
+  color: var(--muted);
+}
+
 /* Marian antiphons — labelled antiphon blocks containing the full office */
 .marian-antiphon {
   margin: 1rem 0;

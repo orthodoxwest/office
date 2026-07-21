@@ -285,13 +285,20 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	if elemType == models.Preces {
 		return models.OfficeElement{Type: models.Preces, Text: text, Label: "Preces", SourceRef: elem.Ref, SourceRefs: []string{elem.Ref}}
 	}
-	return models.OfficeElement{
+	oe := models.OfficeElement{
 		Type:       elemType,
 		Text:       text,
 		Label:      label,
 		SourceRef:  elem.Ref,
 		SourceRefs: []string{elem.Ref},
 	}
+	switch elem.Type {
+	case "secret-prayer":
+		oe.Voice = buildPrayerVoice(elem.Ref, text, false)
+	case "partly-secret-prayer":
+		oe.Voice = buildPrayerVoice(elem.Ref, text, true)
+	}
+	return oe
 }
 
 // resolveMarianElement resolves the seasonal Marian antiphon (with its versicle,
@@ -404,7 +411,7 @@ func mapElementType(t string) models.ElementType {
 		return models.Versicle
 	case "response":
 		return models.Response
-	case "prayer", "partly-secret-prayer":
+	case "prayer", "secret-prayer", "partly-secret-prayer":
 		return models.Prayer
 	case "preces":
 		return models.Preces

@@ -23,17 +23,31 @@ const (
 	Preces        ElementType = "preces"
 )
 
+// VoiceSpan is a contiguous stretch of prayer text with a spoken/silent delivery.
+// Secret prayers are composed of an aloud incipit, a silent body, and optionally
+// an aloud tail (e.g. the pre-collect Our Father). Nil/empty Voice means the
+// whole Text is spoken normally.
+type VoiceSpan struct {
+	Text   string
+	Spoken bool
+}
+
 // OfficeElement represents a single element in an office hour.
 // SlotRef is set for elements that went through proper resolution. SourceRef
 // is the primary corpus key that supplied the rendered text. SourceRefs is the
 // complete dependency set when composition used more than one entry (for
 // example, a proper hymn with a seasonal doxology). These fields are excluded
 // from review hashes and never rendered.
+//
+// Voice, when non-empty, is a presentation partition of Text into spoken and
+// silent spans. The concatenation of span texts must equal Text. Plain-text
+// and golden output use Text only; HTML/TeX may style Voice.
 type OfficeElement struct {
 	Type       ElementType
 	Text       string
 	Label      string
 	Rubric     string
+	Voice      []VoiceSpan
 	SlotRef    string
 	SourceRef  string
 	SourceRefs []string

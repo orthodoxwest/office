@@ -156,6 +156,7 @@ func TestMapElementType(t *testing.T) {
 		{"versicle", models.Versicle},
 		{"response", models.Response},
 		{"prayer", models.Prayer},
+		{"secret-prayer", models.Prayer},
 		{"partly-secret-prayer", models.Prayer},
 		{"preces", models.Preces},
 		{"gloria-patri", models.Doxology},
@@ -280,6 +281,12 @@ func TestResolveElement(t *testing.T) {
 			elem:     HourElement{Type: "partly-secret-prayer", Ref: "ordinary/our-father"},
 			wantType: models.Prayer,
 			wantText: "Our Father, who art in heaven,\nBut deliver us from evil.",
+		},
+		{
+			name:     "secret prayer keeps full text",
+			elem:     HourElement{Type: "secret-prayer", Ref: "ordinary/our-father"},
+			wantType: models.Prayer,
+			wantText: "Our Father, who art in heaven,\nBut deliver us from evil. Amen.",
 		},
 		{
 			name:     "missing ref produces placeholder",

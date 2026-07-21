@@ -127,6 +127,7 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
 		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
 		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
+		// secret-prayer conversions for opening/closing are covered in TestOfficeDataExpandsModeledSecretPrayers
 	}
 
 	for _, tt := range tests {
@@ -177,7 +178,7 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 					{Type: "blessing", Ref: "ordinary/lauds/blessing"},
 					{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
 					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
-					{Type: "prayer", Ref: "ordinary/shared/our-father"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
 				}},
 				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
@@ -185,8 +186,8 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 				{Name: "Post-Office", Elements: []HourElement{
 					{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
 					{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
-					{Type: "prayer", Ref: "ordinary/shared/our-father"},
-					{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 				}},
 			},
 		},
@@ -197,7 +198,7 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 				{Name: "Closing", Elements: []HourElement{
 					{Type: "blessing", Ref: "ordinary/vespers/blessing"},
 					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
-					{Type: "prayer", Ref: "ordinary/shared/our-father"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
 				}},
 				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
@@ -205,8 +206,8 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 				{Name: "Post-Office", Elements: []HourElement{
 					{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
 					{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
-					{Type: "prayer", Ref: "ordinary/shared/our-father"},
-					{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 				}},
 			},
 		},
@@ -218,9 +219,9 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 				{Name: "Closing", Elements: []HourElement{
 					{Type: "blessing", Ref: "ordinary/compline/conclusion"},
 					{Type: "rubric", Ref: "ordinary/compline/concluding-rubric"},
-					{Type: "prayer", Ref: "ordinary/shared/our-father"},
-					{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
-					{Type: "prayer", Ref: "ordinary/shared/apostles-creed"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
+					{Type: "secret-prayer", Ref: "ordinary/shared/apostles-creed"},
 				}},
 			},
 		},
@@ -281,8 +282,8 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 
 			if got := byName["Pre-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
 				{Type: "rubric", Ref: "ordinary/session/little-hours-opening-rubric"},
-				{Type: "prayer", Ref: "ordinary/shared/our-father"},
-				{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 			}) {
 				t.Fatalf("%s Pre-Office = %+v", file, got)
 			}
@@ -301,7 +302,7 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 			}
 			if got := byName["Post-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
 				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
-				{Type: "prayer", Ref: "ordinary/shared/our-father"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 			}) {
 				t.Fatalf("%s Post-Office = %+v", file, got)
 			}
@@ -384,17 +385,17 @@ func TestPrimeUsesParishOpeningAndClosingStructure(t *testing.T) {
 		{Type: "rubric", Ref: "ordinary/session/opening-rubric"},
 		{Type: "prayer", Ref: "ordinary/session/open-my-mouth"},
 		{Type: "rubric", Ref: "ordinary/session/prime-opening-secret-prayers-rubric"},
-		{Type: "prayer", Ref: "ordinary/shared/our-father"},
-		{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
-		{Type: "prayer", Ref: "ordinary/shared/apostles-creed"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/apostles-creed"},
 	}) {
 		t.Fatalf("Prime Pre-Office = %+v", got)
 	}
 	if got := byName["Post-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
 		{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
 		{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
-		{Type: "prayer", Ref: "ordinary/shared/our-father"},
-		{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 	}) {
 		t.Fatalf("Prime Post-Office = %+v", got)
 	}
@@ -416,8 +417,8 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 				{Type: "rubric", Ref: "ordinary/session/opening-rubric"},
 				{Type: "prayer", Ref: "ordinary/session/open-my-mouth"},
 				{Type: "rubric", Ref: "ordinary/session/our-father-hail-mary-rubric"},
-				{Type: "prayer", Ref: "ordinary/shared/our-father"},
-				{Type: "prayer", Ref: "ordinary/shared/hail-mary"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 			}) {
 				t.Fatalf("%s Pre-Office = %+v", file, got)
 			}
@@ -437,7 +438,7 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 		{Type: "versicle", Ref: "ordinary/compline/opening-versicle"},
 		{Type: "chapter", Ref: "ordinary/compline/short-lesson"},
 		{Type: "rubric", Ref: "ordinary/compline/confiteor-rubric"},
-		{Type: "prayer", Ref: "ordinary/shared/our-father"},
+		{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 		{Type: "prayer", Ref: "ordinary/shared/confiteor"},
 	}) {
 		t.Fatalf("Compline Opening private prayers = %+v", got)
@@ -488,7 +489,7 @@ func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {
 				}
 				for j, ref := range want {
 					got := section.Elements[i+1+j]
-					wantType := "prayer"
+					wantType := "secret-prayer"
 					if elem.Ref == "shared/formulas/our-father-partly-secret-rubric" {
 						wantType = "partly-secret-prayer"
 					}

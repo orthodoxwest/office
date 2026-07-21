@@ -14,13 +14,13 @@ Ref = ordinary/session/open-my-mouth
 Type = rubric
 Ref = ordinary/session/prime-opening-secret-prayers-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/apostles-creed
 
 [Opening]
@@ -318,8 +318,8 @@ Ref = ordinary/session/sacrosanctae
 Type = rubric
 Ref = ordinary/session/closing-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary

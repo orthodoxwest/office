@@ -109,6 +109,16 @@ func HashHour(h *models.OfficeHour) string {
 			b.WriteString(e.Rubric)
 			b.WriteByte(0x1f)
 			b.WriteString(e.Text)
+			for _, v := range e.Voice {
+				b.WriteByte(0x1f)
+				if v.Spoken {
+					b.WriteByte('1')
+				} else {
+					b.WriteByte('0')
+				}
+				b.WriteByte(0x1f)
+				b.WriteString(v.Text)
+			}
 			b.WriteByte(0x1e)
 		}
 	}
