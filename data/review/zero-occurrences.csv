@@ -22,6 +22,7 @@ ordinary/compline/psalm-antiphon,469eaf34e4b5,shadowed-fallback,Every Compline p
 ordinary/lauds/psalm-antiphon,cf79728c6547,shadowed-fallback,Every Lauds psalm-antiphon slot has a numbered or weekday section; retain the generic safety fallback,
 ordinary/none/collect,5778aa712ca1,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
 ordinary/none/short-responsory,5e75d5065a23,shadowed-fallback,The parish Little Hours appoint a simple versicle after the chapter; the direct ordinary versicle displaces this legacy Responsory Breve fallback,
+ordinary/prime/psalm-antiphon,05d6c0d38c7f,shadowed-fallback,Prime ferias use weekday sections and feasts/Sundays take the first Lauds antiphon; retain the generic safety fallback,
 ordinary/sext/collect,587f391e4dd8,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
 ordinary/sext/short-responsory,f7c43c9d06ec,shadowed-fallback,The parish Little Hours appoint a simple versicle after the chapter; the direct ordinary versicle displaces this legacy Responsory Breve fallback,
 ordinary/terce/collect,bdf2165ee05e,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,

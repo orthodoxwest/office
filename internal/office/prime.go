@@ -70,7 +70,10 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 
 	ferial := day.Celebration == nil || day.Celebration.Category == models.CategoryFeria
 	if !ferial {
-		text, key := resolveProperText(day, "prime", slot, corpus)
+		// Resolve against Lauds so ordinary/commons fallthroughs take the
+		// first Lauds antiphon (e.g. ordinary/lauds/psalm-antiphon-1-sunday),
+		// not ordinary/prime's generic safety fallback.
+		text, key := resolveProperText(day, "lauds", slot, corpus)
 		return primePsalmAntiphonElement(slot, key, text)
 	}
 
@@ -102,7 +105,7 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 		if !day.Date.Before(moveable.HolyMonday) {
 			// The Holy Week ferias use the first antiphon from their own
 			// Lauds propers.
-			text, properKey := resolveProperText(day, "prime", slot, corpus)
+			text, properKey := resolveProperText(day, "lauds", slot, corpus)
 			return primePsalmAntiphonElement(slot, properKey, text)
 		}
 		key = "seasonal/passiontide/" + slot + "-prime"
