@@ -1887,12 +1887,3 @@ Category = martyr
 Month = 2
 Day = 14
 Source = awrv
-
-[comm-extra-07-15-st-henry-emperor-and-confessor]
-Name = St Henry, Emperor & Confessor
-Rank = commemoration
-Color = white
-Category = confessor
-Month = 7
-Day = 15
-Source = awrv
