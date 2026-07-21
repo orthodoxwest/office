@@ -39,5 +39,8 @@ Thumbs.db
 # Python
 __pycache__/
 
+# Web Push subscription store (default path; may be relocated via OFFICE_PUSH_STORE)
+/push-subscriptions.json
+
 # Misc
 /references

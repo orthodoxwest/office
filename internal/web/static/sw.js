@@ -321,3 +321,47 @@ self.addEventListener("message", function (event) {
     event.waitUntil(precacheUpcoming());
   }
 });
+
+// Web Push: render the server's JSON payload as a notification. The payload
+// shape is push.Payload (title, body, url, tag) in the Go server.
+self.addEventListener("push", function (event) {
+  var data = { title: "Divine Office", body: "Time to pray.", url: "/" };
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch (e) {
+      data.body = event.data.text();
+    }
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Divine Office", {
+      body: data.body || "",
+      icon: "/static/icons/icon-192.png",
+      badge: "/static/icons/icon-192.png",
+      tag: data.tag || "office",
+      data: { url: data.url || "/" }
+    })
+  );
+});
+
+// Focus an existing tab (navigating it to the office page) or open a new one.
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+  var target = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (clients) {
+      for (var i = 0; i < clients.length; i++) {
+        var client = clients[i];
+        if ("focus" in client) {
+          if ("navigate" in client) {
+            client.navigate(target);
+          }
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(target);
+      }
+    })
+  );
+});

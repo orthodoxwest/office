@@ -57,6 +57,27 @@
     <p><code id="reminder-url" class="reminder-url"></code></p>
   </div>
 
+  <section id="push-section" class="reminder-push" hidden aria-labelledby="push-heading">
+    <h2 id="push-heading">Push notifications <span class="reminder-beta">beta</span></h2>
+    <p class="reminder-push-intro">
+      Prefer notifications straight to this device, without a calendar
+      subscription? Enable push and this app will remind you before each hour
+      you selected above. Unlike the calendar feed, this stores your
+      subscription on the server so it can send the alerts.
+    </p>
+    <p id="push-status" class="reminder-push-status" role="status" aria-live="polite"></p>
+    <p class="reminder-push-actions">
+      <button type="button" id="push-enable" class="pray-now">Enable notifications</button>
+      <button type="button" id="push-test" class="date-submit" hidden>Send a test</button>
+      <button type="button" id="push-disable" class="date-submit" hidden>Turn off</button>
+    </p>
+    <p class="reminder-push-note">
+      Changed the hours or times above? Press <em>Enable notifications</em>
+      again to update your saved schedule. On iPhone and iPad, add this app to
+      your Home Screen first — Safari only allows push from an installed app.
+    </p>
+  </section>
+
   <div class="reminder-help">
     <h2>Setting it up</h2>
     <h3>iPhone, iPad, Mac (Apple Calendar)</h3>

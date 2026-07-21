@@ -1941,6 +1941,51 @@ footer::before {
   padding: 0.5rem 0.75rem;
 }
 
+.reminder-push {
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.reminder-beta {
+  display: inline-block;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.reminder-push-intro,
+.reminder-push-note {
+  color: var(--text);
+  max-width: 40em;
+  margin-bottom: 0.75rem;
+}
+
+.reminder-push-note {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.reminder-push-status {
+  min-height: 1.2em;
+  margin-bottom: 0.75rem;
+  color: var(--accent);
+  font-size: 0.95rem;
+}
+
+.reminder-push-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .reminder-help h3 {
   margin: 1rem 0 0.35rem;
   font-size: 1.05rem;

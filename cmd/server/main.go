@@ -16,6 +16,7 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 	"github.com/orthodoxwest/office/internal/output"
+	"github.com/orthodoxwest/office/internal/push"
 	"github.com/orthodoxwest/office/internal/review"
 	"github.com/orthodoxwest/office/internal/texts"
 	"github.com/orthodoxwest/office/internal/web"
@@ -24,7 +25,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintln(os.Stderr, "Usage: office <command> [args]")
-		fmt.Fprintln(os.Stderr, "Commands: ordo, validate, audit, review, lauds, prime, terce, sext, none, vespers, compline, tex, serve")
+		fmt.Fprintln(os.Stderr, "Commands: ordo, validate, audit, review, lauds, prime, terce, sext, none, vespers, compline, tex, vapid, serve")
 		os.Exit(1)
 	}
 
@@ -59,6 +60,8 @@ func main() {
 		cmdTeX(dataDir)
 	case "review":
 		cmdReview(dataDir)
+	case "vapid":
+		cmdVapid()
 	case "serve":
 		cmdServe(dataDir)
 	default:
@@ -591,6 +594,22 @@ Subcommands:
 		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(1)
 	}
+}
+
+// cmdVapid generates a VAPID keypair for Web Push and prints it as ready-to-use
+// environment-variable exports. The private key is a secret — set it via your
+// host's secret store (e.g. `fly secrets set`), not in source control.
+func cmdVapid() {
+	priv, pub, err := push.GenerateVAPIDKeys()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error generating VAPID keys: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("# Web Push (VAPID) configuration — set these in the server environment.")
+	fmt.Println("# Keep the private key secret; the public key is safe to expose.")
+	fmt.Printf("%s=%s\n", push.EnvPublicKey, pub)
+	fmt.Printf("%s=%s\n", push.EnvPrivateKey, priv)
+	fmt.Printf("%s=%s\n", push.EnvSubject, "mailto:you@example.com")
 }
 
 func cmdServe(dataDir string) {

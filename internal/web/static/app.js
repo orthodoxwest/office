@@ -168,6 +168,11 @@ document.documentElement.classList.add("js");
         // Clipboard unavailable (e.g. non-secure context); the URL is visible to copy by hand.
       });
     });
+
+    var pushSection = document.getElementById("push-section");
+    if (pushSection && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window) {
+      initPush(pushSection, remindersForm);
+    }
   }
 
   document.querySelectorAll(".date-jump-form").forEach(function (form) {
@@ -272,6 +277,179 @@ document.documentElement.classList.add("js");
         todayLink.hidden = false;
       }
     }
+  }
+
+  // urlB64ToUint8Array converts a base64url VAPID public key to the Uint8Array
+  // that PushManager.subscribe expects as its applicationServerKey.
+  function urlB64ToUint8Array(base64String) {
+    var padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    var base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    var raw = atob(base64);
+    var output = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) {
+      output[i] = raw.charCodeAt(i);
+    }
+    return output;
+  }
+
+  // buildSchedule reads the reminder form into the push Schedule shape the
+  // server stores (mirrors buildFeedURL, but structured rather than a URL).
+  // An all-days selection is sent as an empty list, matching the ics "every
+  // day" default.
+  function buildSchedule(form) {
+    var hours = {};
+    form.querySelectorAll("input[name=hour]:checked").forEach(function (cb) {
+      var t = form.querySelector("input[name=time-" + cb.value + "]");
+      if (t && t.value) {
+        hours[cb.value] = t.value;
+      }
+    });
+    var days = [];
+    form.querySelectorAll("input[name=day]:checked").forEach(function (cb) {
+      days.push(cb.value);
+    });
+    if (days.length === 7) {
+      days = [];
+    }
+    var alarm = form.querySelector("select[name=alarm]").value;
+    var lead = alarm === "none" ? 0 : parseInt(alarm, 10) || 0;
+    var tz = "";
+    try {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (err) {
+      // Leave tz empty; the server falls back to UTC.
+    }
+    return { hours: hours, days: days, leadMinutes: lead, tz: tz };
+  }
+
+  function postJSON(url, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+  }
+
+  // initPush wires the "Push notifications" controls on the reminders page.
+  // The section is revealed only when the server reports push is configured
+  // (the vapid-public-key endpoint returns 200); otherwise it stays hidden and
+  // the calendar-feed flow above remains the only reminder path.
+  function initPush(section, form) {
+    var statusEl = document.getElementById("push-status");
+    var enableBtn = document.getElementById("push-enable");
+    var testBtn = document.getElementById("push-test");
+    var disableBtn = document.getElementById("push-disable");
+    var publicKey = null;
+
+    var setStatus = function (msg) {
+      statusEl.textContent = msg;
+    };
+    var showSubscribed = function (subscribed) {
+      testBtn.hidden = !subscribed;
+      disableBtn.hidden = !subscribed;
+      enableBtn.textContent = subscribed ? "Update schedule" : "Enable notifications";
+    };
+
+    fetch("/push/vapid-public-key", { cache: "no-store" }).then(function (resp) {
+      if (!resp.ok) {
+        throw new Error("push not configured");
+      }
+      return resp.json();
+    }).then(function (data) {
+      publicKey = data.publicKey;
+      section.hidden = false;
+      return navigator.serviceWorker.ready;
+    }).then(function (reg) {
+      return reg.pushManager.getSubscription();
+    }).then(function (sub) {
+      if (Notification.permission === "denied") {
+        setStatus("Notifications are blocked in your browser settings.");
+        enableBtn.disabled = true;
+        return;
+      }
+      showSubscribed(!!sub);
+      setStatus(sub ? "Notifications are on for this device." : "Notifications are off.");
+    }).catch(function () {
+      // Server push disabled or unsupported: leave the section hidden.
+    });
+
+    enableBtn.addEventListener("click", function () {
+      enableBtn.disabled = true;
+      setStatus("Enabling…");
+      Notification.requestPermission().then(function (perm) {
+        if (perm !== "granted") {
+          setStatus("Permission denied. Allow notifications in your browser settings to continue.");
+          return;
+        }
+        return navigator.serviceWorker.ready.then(function (reg) {
+          return reg.pushManager.getSubscription().then(function (existing) {
+            return existing || reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlB64ToUint8Array(publicKey)
+            });
+          });
+        }).then(function (sub) {
+          return postJSON("/push/subscribe", {
+            subscription: sub.toJSON(),
+            schedule: buildSchedule(form)
+          }).then(function (resp) {
+            if (!resp.ok) {
+              throw new Error("subscribe failed");
+            }
+            showSubscribed(true);
+            setStatus("Notifications are on for this device.");
+          });
+        });
+      }).catch(function () {
+        setStatus("Could not enable notifications. Please try again.");
+      }).then(function () {
+        enableBtn.disabled = false;
+      });
+    });
+
+    testBtn.addEventListener("click", function () {
+      testBtn.disabled = true;
+      setStatus("Sending a test notification…");
+      navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription();
+      }).then(function (sub) {
+        if (!sub) {
+          throw new Error("no subscription");
+        }
+        return postJSON("/push/test", { endpoint: sub.endpoint });
+      }).then(function (resp) {
+        setStatus(resp.ok
+          ? "Test sent — you should see a notification shortly."
+          : "Test failed. Try turning notifications off and on again.");
+      }).catch(function () {
+        setStatus("Test failed. Try turning notifications off and on again.");
+      }).then(function () {
+        testBtn.disabled = false;
+      });
+    });
+
+    disableBtn.addEventListener("click", function () {
+      disableBtn.disabled = true;
+      setStatus("Turning off…");
+      navigator.serviceWorker.ready.then(function (reg) {
+        return reg.pushManager.getSubscription();
+      }).then(function (sub) {
+        if (!sub) {
+          return;
+        }
+        var endpoint = sub.endpoint;
+        return sub.unsubscribe().then(function () {
+          return postJSON("/push/unsubscribe", { endpoint: endpoint });
+        });
+      }).then(function () {
+        showSubscribed(false);
+        setStatus("Notifications are off.");
+      }).catch(function () {
+        setStatus("Could not turn off notifications.");
+      }).then(function () {
+        disableBtn.disabled = false;
+      });
+    });
   }
 
   // calendarRowClicks makes the whole ordo row navigate to the day's home

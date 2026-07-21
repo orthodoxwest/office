@@ -21,6 +21,10 @@ internal/
     office.go              Plain-text office hour formatter
     tex.go                 LaTeX booklet formatter (half-letter, lualatex)
   texts/                   Text corpus loader
+  push/                    Web Push (RFC 8291) notification support
+    push.go                Manager: VAPID config, Subscribe/Unsubscribe, encrypted Send
+    config.go              Env-driven VAPID config + subscription store path
+    filestore.go           JSON-file subscription Store (single instance + volume)
   office/                  Office composition engine
     engine.go              Engine: loads corpus, dispatches to hour composers
     hourdef.go             Hour definition file parser
@@ -38,6 +42,7 @@ internal/
     cache.go               Per-year CalendarDay + MoveableDates cache
     pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
+    webpush.go             Web Push endpoints: VAPID public key, subscribe/unsubscribe, test send
     templates/             Embedded HTML templates (layout, home, hour, calendar)
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
   e2e/                     End-to-end golden-file tests
@@ -153,6 +158,31 @@ make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to to
 make golden      # Regenerate golden test files after intentional changes
 make clean       # Remove artifacts
 ```
+
+## Web Push notifications
+
+`internal/push/` + `internal/web/webpush.go` add opt-in Web Push reminders. Push is
+the one stateful corner of an otherwise stateless server (contrast the `office.ics`
+feed, whose whole schedule lives in the URL), so subscriptions sit behind a `Store`
+interface (default: a JSON file, meant for a single instance on a persistent volume).
+
+Push is **disabled unless VAPID keys are set** — the server logs that it's off and runs
+normally, and `/reminders` hides the push UI (the client only reveals it when
+`/push/vapid-public-key` returns 200). To enable:
+
+```bash
+./office vapid            # generate a VAPID keypair as env-var exports
+# set OFFICE_VAPID_PUBLIC_KEY / _PRIVATE_KEY / _SUBJECT in the server env
+# (private key is a secret — use `fly secrets set`, not source control)
+# OFFICE_PUSH_STORE overrides the subscription file path (default push-subscriptions.json)
+```
+
+Endpoints: `GET /push/vapid-public-key`, `POST /push/{subscribe,unsubscribe,test}`. The
+service worker's `push`/`notificationclick` handlers (in `static/sw.js`) render the
+`push.Payload` JSON and route a tap to the hour page. This change ships subscription
+plumbing plus a manual test-send; the always-on scheduler that fires each hour's
+reminder on a stored `Schedule` is intentionally a follow-up (the Schedule is already
+captured and stored).
 
 ## PDF booklet pipeline
 

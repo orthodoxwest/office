@@ -12,6 +12,7 @@ import (
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
+	"github.com/orthodoxwest/office/internal/push"
 	"github.com/orthodoxwest/office/internal/review"
 )
 
@@ -461,6 +462,7 @@ type Server struct {
 	reviewed      map[string]bool
 	provenance    map[string]review.EntryProvenance
 	suspicions    map[string][]review.Suspicion
+	push          *push.Manager // nil when push is not configured
 }
 
 // New creates a new Server, loading the office engine and parsing templates.
@@ -519,6 +521,11 @@ func New(dataDir, addr string) (*Server, error) {
 		return nil, fmt.Errorf("loading review suspicions: %w", err)
 	}
 
+	pushMgr, err := newPushManager()
+	if err != nil {
+		return nil, fmt.Errorf("configuring push: %w", err)
+	}
+
 	return &Server{
 		engine:        eng,
 		cache:         newYearCache(dataDir),
@@ -533,7 +540,28 @@ func New(dataDir, addr string) (*Server, error) {
 		reviewed:      reviewed,
 		provenance:    provenanceInventory.ByKey(),
 		suspicions:    suspicions,
+		push:          pushMgr,
 	}, nil
+}
+
+// newPushManager builds the Web Push manager when VAPID keys are present in
+// the environment, otherwise returns nil so the server runs without push. A
+// present-but-unreadable subscription store is a hard error, since it would
+// silently drop every subscriber.
+func newPushManager() (*push.Manager, error) {
+	cfg, ok := push.ConfigFromEnv()
+	if !ok {
+		log.Printf("push notifications disabled (set %s, %s, %s to enable)",
+			push.EnvPublicKey, push.EnvPrivateKey, push.EnvSubject)
+		return nil, nil
+	}
+	path := push.StorePathFromEnv()
+	store, err := push.NewFileStore(path)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("push notifications enabled (subscriptions: %s)", path)
+	return push.NewManager(cfg, store), nil
 }
 
 func loadReviewedHashes(dataDir string) (map[string]bool, error) {
@@ -568,6 +596,10 @@ func (s *Server) ListenAndServe() error {
 	mux.Handle("/static/", http.FileServer(http.FS(files)))
 	mux.HandleFunc("/sw.js", s.handleServiceWorker)
 	mux.HandleFunc("/office.ics", s.handleICS)
+	mux.HandleFunc("/push/vapid-public-key", s.handleVAPIDPublicKey)
+	mux.HandleFunc("/push/subscribe", s.handlePushSubscribe)
+	mux.HandleFunc("/push/unsubscribe", s.handlePushUnsubscribe)
+	mux.HandleFunc("/push/test", s.handlePushTest)
 	mux.HandleFunc("/reminders", s.handleReminders)
 	mux.HandleFunc("/calendar/", s.handleCalendar)
 	mux.HandleFunc("/calendar", s.handleCalendar)
