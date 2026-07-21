@@ -99,7 +99,7 @@ ordinary/compline/chapter,2ca577744530,Compline Alex edit 10-24 v.08.docx,ordina
 ordinary/compline/collect,fbc69f99eeda,Compline Alex edit 10-24 v.08.docx,ordinary/compline/collect,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/concluding-rubric,c403d0cdadc7,Compline Alex edit 10-24 v.08.docx,ordinary/compline/concluding-rubric,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/conclusion,c73885541916,Compline Alex edit 10-24 v.08.docx,ordinary/compline/conclusion,,verified,grok,2026-07-20,Word-for-word after normalizing chant line breaks and typography.
-ordinary/compline/confiteor-rubric,8a833b34684d,Compline Alex edit 10-24 v.08.docx,ordinary/compline/confiteor-rubric,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
+ordinary/compline/confiteor-rubric,8a833b34684d,Compline Alex edit 10-24 v.08.docx,THE CONFESSION,,verified,grok,2026-07-20,First clause exact. Second clause is a private-recitation paraphrase of booklet 'Then the Officiant makes Confession'.
 ordinary/compline/hymn,7f109f434bb2,Compline Alex edit 10-24 v.08.docx,ordinary/compline/hymn,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/opening-versicle,362e5872104b,Compline Alex edit 10-24 v.08.docx,ordinary/compline/opening-versicle,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/post-absolution,1dbe43944332,Compline Alex edit 10-24 v.08.docx,ordinary/compline/post-absolution,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
@@ -113,13 +113,13 @@ ordinary/lauds/hymn-sunday,f944f122e2fe,office-hymns.zip,"Maker of All, Eternal 
 ordinary/lauds/hymn-sunday-summer,67c9bf0f11e0,office-hymns.zip,"Lo! the Dim Shadows, Thru the Year, Lauds Summer Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation; source has typo Radiently vs Radiantly.
 ordinary/lauds/psalm-antiphon-1-friday,46c82ae12ec3,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-friday,76,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-monday,825ecc5b313e,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-monday,7,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
-ordinary/lauds/psalm-antiphon-1-saturday,daeaca54ae58,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-saturday,95-96,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/psalm-antiphon-1-saturday,daeaca54ae58,Copy of OCP Ferial Lauds.pdf,Antiphon 1 Saturday,95-96,verified,grok,2026-07-20,Word match after normalizing pointing; house spelling favourable vs OCP favorable.
 ordinary/lauds/psalm-antiphon-1-thursday,641e7b7090b8,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-thursday,56,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-tuesday,72428d2dec72,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-tuesday,23,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-wednesday,a7722cd23c64,draft archdiocesan Lauds book,Ash Wednesday,179,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-friday,22d7cbf5c76a,Copy of OCP Ferial Lauds.pdf,,77,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-monday,8b3dee4355e5,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,8,verified,codex,2026-07-18,
-ordinary/lauds/psalm-antiphon-2-saturday,c97ae9534d12,Copy of OCP Ferial Lauds.pdf,Antiphon 2 Saturday,96-97,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
+ordinary/lauds/psalm-antiphon-2-saturday,c97ae9534d12,Copy of OCP Ferial Lauds.pdf,Antiphon 2 Saturday,96-97,verified,grok,2026-07-20,Word match after normalizing pointing; corpus has righteousness' sake vs OCP righteousness sake.
 ordinary/lauds/psalm-antiphon-2-thursday,8fdc3bb222ca,Copy of OCP Ferial Lauds.pdf,,57,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-tuesday,52fdfe287932,Copy of OCP Ferial Lauds.pdf,,24,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-wednesday,90827b691cb2,draft archdiocesan Lauds book,Ash Wednesday,180,verified,codex,2026-07-18,
