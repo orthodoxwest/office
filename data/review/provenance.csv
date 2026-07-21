@@ -98,31 +98,39 @@ ordinary/compline/blessing,7fa072c64cde,Compline Alex edit 10-24 v.08.docx,ordin
 ordinary/compline/chapter,2ca577744530,Compline Alex edit 10-24 v.08.docx,ordinary/compline/chapter,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/collect,fbc69f99eeda,Compline Alex edit 10-24 v.08.docx,ordinary/compline/collect,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/concluding-rubric,c403d0cdadc7,Compline Alex edit 10-24 v.08.docx,ordinary/compline/concluding-rubric,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
-ordinary/compline/confiteor-rubric,8a833b34684d,Compline Alex edit 10-24 v.08.docx,ordinary/compline/confiteor-rubric,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
+ordinary/compline/conclusion,c73885541916,Compline Alex edit 10-24 v.08.docx,ordinary/compline/conclusion,,verified,grok,2026-07-20,Word-for-word after normalizing chant line breaks and typography.
+ordinary/compline/confiteor-rubric,8a833b34684d,Compline Alex edit 10-24 v.08.docx,THE CONFESSION,,verified,grok,2026-07-20,First clause exact. Second clause is a private-recitation paraphrase of booklet 'Then the Officiant makes Confession'.
 ordinary/compline/hymn,7f109f434bb2,Compline Alex edit 10-24 v.08.docx,ordinary/compline/hymn,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/opening-versicle,362e5872104b,Compline Alex edit 10-24 v.08.docx,ordinary/compline/opening-versicle,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/post-absolution,1dbe43944332,Compline Alex edit 10-24 v.08.docx,ordinary/compline/post-absolution,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
+ordinary/compline/post-collect,c25abfc5c1c2,Compline Alex edit 10-24 v.08.docx,ordinary/compline/post-collect,,verified,grok,2026-07-20,Word-for-word after normalizing chant line breaks and typography.
 ordinary/compline/post-preces,f2f75ffa6d8f,Compline Alex edit 10-24 v.08.docx,ordinary/compline/post-preces,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/preces,0a409a8e33bf,Compline Alex edit 10-24 v.08.docx,ordinary/compline/preces,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/short-lesson,a069c157be80,Compline Alex edit 10-24 v.08.docx,ordinary/compline/short-lesson,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/short-responsory,0bfe891ff7c1,Compline Alex edit 10-24 v.08.docx,ordinary/compline/short-responsory,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
-ordinary/lauds/chapter,421368055f67,draft archdiocesan Lauds book,Ash Wednesday,185,verified,codex,2026-07-18,Printed citation is 2 Corinthians 6:1-2; prose is Romans 13:12-13
-ordinary/lauds/psalm-antiphon-1-friday,46c82ae12ec3,Copy of OCP Ferial Lauds.pdf,,76,verified,codex,2026-07-18,
-ordinary/lauds/psalm-antiphon-1-monday,825ecc5b313e,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,7,verified,codex,2026-07-18,
-ordinary/lauds/psalm-antiphon-1-thursday,641e7b7090b8,Copy of OCP Ferial Lauds.pdf,,56,verified,codex,2026-07-18,
-ordinary/lauds/psalm-antiphon-1-tuesday,72428d2dec72,Copy of OCP Ferial Lauds.pdf,,23,verified,codex,2026-07-18,
+ordinary/lauds/chapter,421368055f67,Copy of OCP Ferial Lauds.pdf,The Chapter PER ANNUM,14,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing; ferial chapter.
+ordinary/lauds/hymn-sunday,f944f122e2fe,office-hymns.zip,"Maker of All, Eternal King, Thru the Year, Lauds Winter Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+ordinary/lauds/hymn-sunday-summer,67c9bf0f11e0,office-hymns.zip,"Lo! the Dim Shadows, Thru the Year, Lauds Summer Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation; source has typo Radiently vs Radiantly.
+ordinary/lauds/psalm-antiphon-1-friday,46c82ae12ec3,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-friday,76,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/psalm-antiphon-1-monday,825ecc5b313e,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-monday,7,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/psalm-antiphon-1-saturday,daeaca54ae58,Copy of OCP Ferial Lauds.pdf,Antiphon 1 Saturday,95-96,verified,grok,2026-07-20,Word match after normalizing pointing; house spelling favourable vs OCP favorable.
+ordinary/lauds/psalm-antiphon-1-thursday,641e7b7090b8,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-thursday,56,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/psalm-antiphon-1-tuesday,72428d2dec72,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-tuesday,23,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-wednesday,a7722cd23c64,draft archdiocesan Lauds book,Ash Wednesday,179,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-friday,22d7cbf5c76a,Copy of OCP Ferial Lauds.pdf,,77,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-monday,8b3dee4355e5,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,8,verified,codex,2026-07-18,
+ordinary/lauds/psalm-antiphon-2-saturday,c97ae9534d12,Copy of OCP Ferial Lauds.pdf,Antiphon 2 Saturday,96-97,verified,grok,2026-07-20,Word match after normalizing pointing; corpus has righteousness' sake vs OCP righteousness sake.
 ordinary/lauds/psalm-antiphon-2-thursday,8fdc3bb222ca,Copy of OCP Ferial Lauds.pdf,,57,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-tuesday,52fdfe287932,Copy of OCP Ferial Lauds.pdf,,24,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-2-wednesday,90827b691cb2,draft archdiocesan Lauds book,Ash Wednesday,180,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-3-friday,b8c68d2e3075,Copy of OCP Ferial Lauds.pdf,,78,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-3-monday,db6b1536ca2c,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,9,verified,codex,2026-07-18,
+ordinary/lauds/psalm-antiphon-3-saturday,f6c9bd7afe7d,Copy of OCP Ferial Lauds.pdf,Antiphon 3 Saturday,97-101,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
 ordinary/lauds/psalm-antiphon-3-thursday,00886882cf15,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,58,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-3-tuesday,f7ff9ae7abf3,Copy of OCP Ferial Lauds.pdf,,25,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-friday,7689dfaa94ea,Copy of OCP Ferial Lauds.pdf,,79,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-monday,3ef87a2935a9,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,10,verified,codex,2026-07-18,
+ordinary/lauds/psalm-antiphon-4-saturday,9d5a529616d9,Copy of OCP Ferial Lauds.pdf,Antiphon 4 Saturday,103-104,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
 ordinary/lauds/psalm-antiphon-4-thursday,32f50a6946ed,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,60,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-tuesday,75e060646d75,Copy of OCP Ferial Lauds.pdf,,26,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-wednesday,d9314fe73f1e,draft archdiocesan Lauds book,Ash Wednesday,182,verified,codex,2026-07-18,
@@ -131,8 +139,8 @@ ordinary/lauds/psalm-antiphon-5-monday,01649f2ac975,Copy of OCP Ferial Lauds.pdf
 ordinary/lauds/psalm-antiphon-5-thursday,bac7bfd010c5,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,62,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-tuesday,f0edaf80ca03,Copy of OCP Ferial Lauds.pdf,,28,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-wednesday,d12bdd529e0f,draft archdiocesan Lauds book,Ash Wednesday,183,verified,codex,2026-07-18,
-ordinary/lauds/short-responsory,a7d33830d539,Copy of OCP Ferial Lauds.pdf,"Per Annum Monday-Saturday, The Short Response","14, 30, 47, 65, 85, 108",verified,codex,2026-07-18,Word-for-word in all six weekday offices after normalizing chant typography and rubric layout.
-ordinary/lauds/versicle,ac568d1bc2e1,Copy of OCP Ferial Lauds.pdf,"Per Annum Monday-Saturday, The Versicle","15, 31, 48, 66, 86, 109",verified,codex,2026-07-18,Word-for-word in all six weekday offices after normalizing chant typography.
+ordinary/lauds/short-responsory,a7d33830d539,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/short-responsory,"14, 30, 47, 65, 85, 108",verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/versicle,ac568d1bc2e1,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/versicle,"15, 31, 48, 66, 86, 109",verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/marian/alma-redemptoris-advent,03099b8ea0aa,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/alma-redemptoris-christmas,7e2a049236ad,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/ave-regina-caelorum,8093c39100a2,Final Antiphons of the Blessed Virgin Mary.pdf,,6-7,verified,codex,2026-07-18,
@@ -145,19 +153,19 @@ ordinary/none/psalm-antiphon,22765e57dafa,03. None Throughout the Week Alex edit
 ordinary/none/psalm-antiphon-monday,570c9d45b8e4,02. None Monday Alex edit 12-07 v.01.docx,The Psalms; Antiphon Adjuvet me,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/none/psalm-antiphon-sunday,d92894995670,01. None Sunday Alex edit 12-07 v.01.docx,The Psalms; Antiphon Alleluia,"3, 5",verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/none/versicle,4ad5f3a0f454,03. None Throughout the Week Alex edit 12-07 v.01.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
-ordinary/prime/chapter,b9ab0498a31d,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
-ordinary/prime/chapter-ferial,ba58f15a0c32,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
-ordinary/prime/collect,c09af24d4946,st patrick prayer book,,43,verified,bwaldrep,2026-07-15,
+ordinary/prime/chapter,b9ab0498a31d,01. Monday Prime Alex edit 10-28 v.01.docx,THE CHAPTER / I Timothy 1:17,,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing.
+ordinary/prime/chapter-ferial,ba58f15a0c32,01. Monday Prime Alex edit 10-28 v.01.docx,THE CHAPTER / Zechariah 8:19,,verified,grok,2026-07-20,Word-for-word ferial chapter.
+ordinary/prime/collect,c09af24d4946,01. Monday Prime Alex edit 10-28 v.01.docx,THE COLLECT,,verified,grok,2026-07-20,Word-for-word after normalizing line breaks; matches all weekday Prime booklets.
 ordinary/prime/hymn,4a6c2cac218b,01. Monday Prime Alex edit 10-28 v.01.docx,The Hymn — Iam lucis orto sidere,3-4,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, elisions, and typography."
-ordinary/prime/pre-collect-versicle,b3ea375a6784,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
+ordinary/prime/pre-collect-versicle,b3ea375a6784,01. Monday Prime Alex edit 10-28 v.01.docx,THE VERSICLE O Christ arise,,verified,grok,2026-07-20,Word-for-word.
 ordinary/prime/preces-our-help,e7ba8a0297d0,01. Monday Prime Alex edit 10-28 v.01.docx,The Preces,8,verified,codex,2026-07-20,Word-for-word; the source chant font cross is normalized to the corpus cross glyph.
 ordinary/prime/preces-vouchsafe,1756a1196e36,01. Monday Prime Alex edit 10-28 v.01.docx,After the Absolution is added,9,verified,codex,2026-07-20,Word-for-word after normalizing capitalization and punctuation.
-ordinary/prime/psalm-antiphon-1-friday,b8646181fc65,st patrick prayer book,,37,verified,bwaldrep,2026-07-15,
-ordinary/prime/psalm-antiphon-1-monday,7f6a3ac0a243,st patrick prayer book,,27,verified,bwaldrep,2026-07-15,
-ordinary/prime/psalm-antiphon-1-saturday,33a4fd84a83e,st patrick prayer book,,40,verified,bwaldrep,2026-07-15,
-ordinary/prime/psalm-antiphon-1-thursday,dfed6d18e1aa,st patrick prayer book,,34,verified,bwaldrep,2026-07-15,
-ordinary/prime/psalm-antiphon-1-tuesday,ce8e7af0fabc,st patrick prayer book,,30,verified,bwaldrep,2026-07-15,
-ordinary/prime/psalm-antiphon-1-wednesday,82ae73f24b17,st patrick prayer book,,32,verified,bwaldrep,2026-07-15,
+ordinary/prime/psalm-antiphon-1-friday,b8646181fc65,05. Friday Prime Alex edit 10-24 v.05.docx,Ant. My goods,,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained; booklet has comma before O God.
+ordinary/prime/psalm-antiphon-1-monday,7f6a3ac0a243,01. Monday Prime Alex edit 10-28 v.01.docx,Ant. Serve the Lord in fear,,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained from corpus convention.
+ordinary/prime/psalm-antiphon-1-saturday,33a4fd84a83e,06. Saturday Prime Alex edit 10-31 v.01.docx,Ant. The Lord liveth,,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained; booklet hyphenates bless-ed.
+ordinary/prime/psalm-antiphon-1-thursday,dfed6d18e1aa,04. Thursday Prime Alex edit 10-31 v.01.docx,Ant. I will sing,,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained from corpus convention.
+ordinary/prime/psalm-antiphon-1-tuesday,ce8e7af0fabc,02. Tuesday Prime Alex edit 10-30 v.01.docx,Ant. God is a righteous judge,,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained from corpus convention.
+ordinary/prime/psalm-antiphon-1-wednesday,82ae73f24b17,03. Wednesday Prime Alex edit 10-30 v.01.docx,"Ant. Up, Lord",,verified,grok,2026-07-20,Word-for-word; asterisk pointing retained from corpus convention.
 ordinary/session/closing-rubric,bb4888da6f7b,diurnal,,A,verified,bwaldrep,2026-07-11,
 ordinary/session/little-hours-opening-rubric,e5431f70ff36,01. Terce Sunday Alex edit 11-24 v.01.docx,At Terce; before the Office,2,verified,codex,2026-07-20,Word-for-word after normalizing rubric typography.
 ordinary/session/open-my-mouth,6f62e3beb617,diurnal,,A,verified,bwaldrep,2026-07-11,
@@ -190,10 +198,14 @@ ordinary/terce/versicle,c31662e95fb9,03. Terce Through the Week Alex edit 11-24 
 ordinary/terce/versicle-sunday,193147f3465f,01. Terce Sunday Alex edit 11-24 v.01.docx,The Versicle,5,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 ordinary/vespers/blessing,946f8c64292c,00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf,"Common of Apostles and Evangelists, The Prayers",8,verified,codex,2026-07-18,Word-for-word after normalizing print typography and rubric layout.
 ordinary/vespers/chapter,209d8d16cfcd,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ash Wednesday, The Chapter",129,verified,codex,2026-07-18,Word-for-word; the printed 2 Corinthians 1:3 heading is followed by the quoted opening of verse 4.
-ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,draft archdiocesan Vespers book,,210,verified,codex,2026-07-18,
+ordinary/vespers/chapter-saturday,9e3ce8815eed,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE CHAPTER / Romans 11:33,217,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing.
+ordinary/vespers/hymn-saturday,94d57bf391d9,office-hymns.zip,"O Trinity of Blessed Light, Thru the Year Vespers, winter and summer tunes.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and punctuation.
+ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,Saturdays Throughout the Year,213-216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and accents.
 ordinary/vespers/psalm-antiphon-2-saturday,53e9146bfec8,draft archdiocesan Vespers book,,211,verified,codex,2026-07-18,
 ordinary/vespers/psalm-antiphon-3-saturday,3b963b10355b,draft archdiocesan Vespers book,,212,verified,codex,2026-07-18,
+ordinary/vespers/psalm-antiphon-4-saturday,12559aa40ef7,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ant. Praise the Lord, O Jerusalem",216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
+ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
 proper/advent-sunday-1/psalm-antiphon-1,7de540e90841,draft archdiocesan Vespers book,,4,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-2,313b9a7eaed8,draft archdiocesan Vespers book,,5,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-3,eaf2860c47f3,draft archdiocesan Vespers book,,6,verified,codex,2026-07-17,
