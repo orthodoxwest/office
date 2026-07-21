@@ -10,6 +10,46 @@ import (
 	"github.com/orthodoxwest/office/internal/review"
 )
 
+func TestSplitLeadingVerseNumber(t *testing.T) {
+	tests := []struct {
+		line    string
+		wantNum string
+		wantRest string
+		wantOK  bool
+	}{
+		{"2. That thy way may be known", "2", "That thy way may be known", true},
+		{"10. Make me a clean heart", "10", "Make me a clean heart", true},
+		{"2 O ye Angels of the Lord", "2", "O ye Angels of the Lord", true},
+		{"20 Blessed art thou, O Lord", "20", "Blessed art thou, O Lord", true},
+		{"O ALL ye Works of the Lord", "", "O ALL ye Works of the Lord", false},
+		{"2.No space after period", "", "2.No space after period", false},
+	}
+	for _, tt := range tests {
+		num, rest, ok := splitLeadingVerseNumber(tt.line)
+		if ok != tt.wantOK || num != tt.wantNum || rest != tt.wantRest {
+			t.Errorf("splitLeadingVerseNumber(%q) = (%q, %q, %v), want (%q, %q, %v)",
+				tt.line, num, rest, ok, tt.wantNum, tt.wantRest, tt.wantOK)
+		}
+	}
+}
+
+func TestRenderBenediciteSpaceNumberedVerses(t *testing.T) {
+	html := string(renderPsalmVerses("Song of the Three Children\n\n" +
+		"O ALL ye Works of the Lord, bless ye the Lord: * praise him, and magnify him forever.\n" +
+		"2 O ye Angels of the Lord, bless ye the Lord: * O ye Heavens, bless ye the Lord.\n" +
+		"10 O let the Earth bless the Lord: * yea, let it praise him, and magnify him for ever.\n"))
+
+	if !strings.Contains(html, `<p class="verse numbered"><span class="verse-num">2</span>`) {
+		t.Fatalf("expected space-style verse 2 to use verse-num: %s", html)
+	}
+	if !strings.Contains(html, `<span class="verse-num">10</span>`) {
+		t.Fatalf("expected space-style verse 10 to use verse-num: %s", html)
+	}
+	if strings.Contains(html, `>2 O ye Angels`) {
+		t.Fatalf("verse number must not remain in the body text: %s", html)
+	}
+}
+
 func TestRenderSectionElementsMergesPsalmDoxologyIntoPsalmBlock(t *testing.T) {
 	html := string(renderSectionElements([]models.OfficeElement{
 		{Type: models.Psalm, Label: "Psalm 67", Text: "Psalm 67\n\n1. Be merciful unto us * and bless us."},
@@ -64,6 +104,52 @@ func TestRenderPrayerReflowsSourceLines(t *testing.T) {
 
 	if !strings.Contains(html, `Thy kingdom come. Thy will be done.`) {
 		t.Fatalf("expected prayer source lines to reflow: %s", html)
+	}
+}
+
+func TestRenderSecretPrayerVoiceSpans(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type: models.Prayer,
+		Text: "Our Father, who art in heaven.\nThy kingdom come.",
+		Voice: []models.VoiceSpan{
+			{Text: "Our Father", Spoken: true},
+			{Text: ", who art in heaven.\nThy kingdom come.", Spoken: false},
+		},
+	}, "")
+
+	if !strings.Contains(html, `<span class="spoken-text">Our Father</span>`) {
+		t.Fatalf("expected spoken incipit: %s", html)
+	}
+	if !strings.Contains(html, `<span class="secret-text">, who art in heaven.</span>`) {
+		t.Fatalf("expected silent body start: %s", html)
+	}
+	if !strings.Contains(html, `<span class="secret-text">Thy kingdom come.</span>`) {
+		t.Fatalf("expected silent continuation after reflow: %s", html)
+	}
+	if !strings.Contains(html, `heaven.</span> <span class="secret-text">Thy kingdom`) {
+		t.Fatalf("expected reflowed space between source lines: %s", html)
+	}
+}
+
+func TestRenderPartlySecretPrayerVoiceSpans(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type: models.Prayer,
+		Text: "Our Father, middle.\nAnd lead us not into temptation,\nBut deliver us from evil.",
+		Voice: []models.VoiceSpan{
+			{Text: "Our Father", Spoken: true},
+			{Text: ", middle.\n", Spoken: false},
+			{Text: "And lead us not into temptation,\nBut deliver us from evil.", Spoken: true},
+		},
+	}, "")
+
+	if !strings.Contains(html, `<span class="spoken-text">Our Father</span><span class="secret-text">, middle.</span>`) {
+		t.Fatalf("expected spoken incipit then silent middle: %s", html)
+	}
+	if !strings.Contains(html, `<span class="spoken-text">And lead us not into temptation,</span>`) {
+		t.Fatalf("expected spoken tail start: %s", html)
+	}
+	if !strings.Contains(html, `<span class="spoken-text">But deliver us from evil.</span>`) {
+		t.Fatalf("expected spoken tail continuation: %s", html)
 	}
 }
 

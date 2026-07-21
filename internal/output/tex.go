@@ -261,16 +261,8 @@ func formatPsalmTeX(text, dataDir, label string, elemType models.ElementType, ch
 			continue
 		}
 
-		// Numbered verse detection: "2. text" or "10. text"
-		verseNum := ""
-		verseText := line
-		if dotIdx := strings.Index(line, ". "); dotIdx > 0 && dotIdx < 4 {
-			numStr := line[:dotIdx]
-			if allDigits(numStr) {
-				verseNum = numStr
-				verseText = strings.TrimSpace(line[dotIdx+2:])
-			}
-		}
+		// Numbered verse detection: "2. text", "10. text", or Benedicite "2 text".
+		verseNum, verseText, _ := splitLeadingVerseNumber(line)
 
 		parts := strings.SplitN(verseText, " * ", 2)
 		first := texLine(parts[0])
@@ -574,4 +566,24 @@ func allDigits(s string) bool {
 		}
 	}
 	return true
+}
+
+// splitLeadingVerseNumber peels a leading verse number from a psalm or canticle
+// line. Accepts "2. Text" and Benedicite-style "2 Text". Numbers are at most 3 digits.
+func splitLeadingVerseNumber(line string) (num, rest string, ok bool) {
+	i := 0
+	for i < len(line) && line[i] >= '0' && line[i] <= '9' {
+		i++
+	}
+	if i == 0 || i > 3 {
+		return "", line, false
+	}
+	switch {
+	case i+1 < len(line) && line[i] == '.' && line[i+1] == ' ':
+		return line[:i], strings.TrimSpace(line[i+2:]), true
+	case i < len(line) && line[i] == ' ':
+		return line[:i], strings.TrimSpace(line[i+1:]), true
+	default:
+		return "", line, false
+	}
 }

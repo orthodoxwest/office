@@ -13,7 +13,7 @@ Ref = ordinary/compline/short-lesson
 Type = rubric
 Ref = ordinary/compline/confiteor-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer
@@ -126,11 +126,11 @@ Ref = ordinary/compline/conclusion
 Type = rubric
 Ref = ordinary/compline/concluding-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/apostles-creed

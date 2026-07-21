@@ -120,7 +120,11 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 	case models.Versicle, models.Response, models.Blessing, models.Doxology:
 		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
 	case models.Collect, models.Prayer:
-		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
+		if len(elem.Voice) > 0 {
+			sb.WriteString(string(renderVoiceLiturgicalBlock(elem.Voice, flowProseLines)))
+		} else {
+			sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
+		}
 	case models.Chapter:
 		sb.WriteString(`<div class="chapter"><h2 class="section-heading">Chapter</h2>`)
 		if elem.Label != "" {
@@ -143,6 +147,27 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 	}
 
 	return sb.String()
+}
+
+// splitLeadingVerseNumber peels a leading verse number from a psalm or canticle
+// line. Accepts the usual "2. Text" form and Benedicite-style "2 Text" (digits
+// then a single space, no period). Numbers are at most 3 digits.
+func splitLeadingVerseNumber(line string) (num, rest string, ok bool) {
+	i := 0
+	for i < len(line) && line[i] >= '0' && line[i] <= '9' {
+		i++
+	}
+	if i == 0 || i > 3 {
+		return "", line, false
+	}
+	switch {
+	case i+1 < len(line) && line[i] == '.' && line[i+1] == ' ':
+		return line[:i], strings.TrimSpace(line[i+2:]), true
+	case i < len(line) && line[i] == ' ':
+		return line[:i], strings.TrimSpace(line[i+1:]), true
+	default:
+		return "", line, false
+	}
 }
 
 // renderPsalmVerses parses a raw psalm or canticle text (title/scripture-ref line,
@@ -208,22 +233,7 @@ func renderPsalmVerses(text string) template.HTML {
 			continue
 		}
 
-		verseNum := ""
-		verseText := line
-		if dotIdx := strings.Index(line, ". "); dotIdx > 0 && dotIdx < 4 {
-			numStr := line[:dotIdx]
-			allDigits := true
-			for _, c := range numStr {
-				if c < '0' || c > '9' {
-					allDigits = false
-					break
-				}
-			}
-			if allDigits {
-				verseNum = numStr
-				verseText = strings.TrimSpace(line[dotIdx+2:])
-			}
-		}
+		verseNum, verseText, _ := splitLeadingVerseNumber(line)
 
 		parts := strings.SplitN(verseText, " * ", 2)
 
@@ -267,6 +277,167 @@ const (
 // line breaks, as required by blessings, doxologies, and preces.
 func renderLiturgicalBlock(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, preserveProseLines)
+}
+
+// renderVoiceLiturgicalBlock renders a prayer partitioned into spoken/silent spans.
+// Span texts are concatenated in order; presentation follows the same prose-line
+// rules as renderLiturgicalBlockWithMode, with each run of spoken or silent text
+// wrapped in a CSS class.
+func renderVoiceLiturgicalBlock(spans []models.VoiceSpan, mode proseLineMode) template.HTML {
+	var full strings.Builder
+	for _, sp := range spans {
+		full.WriteString(sp.Text)
+	}
+	text := full.String()
+	spokenAt := make([]bool, len(text))
+	off := 0
+	for _, sp := range spans {
+		for i := 0; i < len(sp.Text); i++ {
+			spokenAt[off+i] = sp.Spoken
+		}
+		off += len(sp.Text)
+	}
+	return renderLiturgicalBlockWithVoice(text, spokenAt, mode)
+}
+
+// emitVoicedHTML writes text[0:] as one or more <span class="spoken-text|secret-text">
+// runs according to spokenAt[offset:offset+len(text)].
+func emitVoicedHTML(sb *strings.Builder, text string, offset int, spokenAt []bool) {
+	if text == "" {
+		return
+	}
+	i := 0
+	for i < len(text) {
+		sp := spokenAt[offset+i]
+		j := i + 1
+		for j < len(text) && spokenAt[offset+j] == sp {
+			j++
+		}
+		class := "secret-text"
+		if sp {
+			class = "spoken-text"
+		}
+		sb.WriteString(`<span class="`)
+		sb.WriteString(class)
+		sb.WriteString(`">`)
+		sb.WriteString(escCross(text[i:j]))
+		sb.WriteString(`</span>`)
+		i = j
+	}
+}
+
+func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLineMode) template.HTML {
+	lines := strings.Split(text, "\n")
+	var sb strings.Builder
+	sb.WriteString(`<div class="liturgical-block">`)
+
+	type proseLine struct {
+		text   string
+		offset int
+	}
+	var proseLines []proseLine
+	proseBlocks := 0
+	pendingGap := false
+	// Byte offset of the start of the current line within text (accounting for '\n').
+	lineOffset := 0
+
+	emitGap := func() {
+		if pendingGap {
+			sb.WriteString(`<div class="liturgical-gap"></div>`)
+			pendingGap = false
+		}
+	}
+
+	flushProse := func() {
+		if len(proseLines) == 0 {
+			return
+		}
+		emitGap()
+		sb.WriteString(`<p class="plain-line">`)
+		preserveLines := mode == preserveProseLines || (mode == preserveFirstProseBlock && proseBlocks == 0)
+		for i, l := range proseLines {
+			if i > 0 {
+				if preserveLines {
+					sb.WriteString(`<br>`)
+				} else {
+					sb.WriteByte(' ')
+				}
+			}
+			emitVoicedHTML(&sb, l.text, l.offset, spokenAt)
+		}
+		sb.WriteString(`</p>`)
+		proseLines = nil
+		proseBlocks++
+	}
+
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		// Offset of trimmed content within text (line may have leading spaces).
+		contentOffset := lineOffset
+		if pad := strings.Index(line, trimmed); pad > 0 && trimmed != "" {
+			contentOffset = lineOffset + pad
+		}
+
+		if trimmed == "" {
+			flushProse()
+			pendingGap = true
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") &&
+			strings.Contains(trimmed[1:len(trimmed)-1], " ") {
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "!") {
+			flushProse()
+			emitGap()
+			sb.WriteString(`<p class="scripture-ref">`)
+			sb.WriteString(template.HTMLEscapeString(trimmed[1:]))
+			sb.WriteString(`</p>`)
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "V. ") {
+			flushProse()
+			emitGap()
+			sb.WriteString(`<p class="versicle-line"><span class="sigil">℣.</span><span class="sigil-text">`)
+			emitVoicedHTML(&sb, trimmed[3:], contentOffset+3, spokenAt)
+			sb.WriteString(`</span></p>`)
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "R. ") {
+			flushProse()
+			emitGap()
+			sb.WriteString(`<p class="response-line"><span class="sigil">℟.</span><span class="sigil-text">`)
+			emitVoicedHTML(&sb, trimmed[3:], contentOffset+3, spokenAt)
+			sb.WriteString(`</span></p>`)
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		if strings.HasPrefix(trimmed, "Blessing. ") {
+			flushProse()
+			emitGap()
+			sb.WriteString(`<p class="versicle-line"><span class="sigil">Blessing.</span><span class="sigil-text">`)
+			emitVoicedHTML(&sb, trimmed[10:], contentOffset+10, spokenAt)
+			sb.WriteString(`</span></p>`)
+			lineOffset += len(line) + 1
+			continue
+		}
+
+		proseLines = append(proseLines, proseLine{text: trimmed, offset: contentOffset})
+		lineOffset += len(line) + 1
+	}
+
+	flushProse()
+	sb.WriteString(`</div>`)
+	return template.HTML(sb.String())
 }
 
 // renderFlowingLiturgicalBlock renders collects, chapters, and prayers with soft

@@ -8,10 +8,10 @@ Label = Opening Prayers
 Type = rubric
 Ref = ordinary/session/little-hours-opening-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
@@ -258,5 +258,5 @@ Label = Closing Prayers
 Type = rubric
 Ref = shared/formulas/closing-our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father

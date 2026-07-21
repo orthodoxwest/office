@@ -26,6 +26,7 @@ var validElementTypes = map[string]bool{
 	"versicle":             true,
 	"response":             true,
 	"prayer":               true,
+	"secret-prayer":        true,
 	"partly-secret-prayer": true,
 	"preces":               true,
 	"rubric":               true,

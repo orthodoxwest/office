@@ -14,10 +14,10 @@ Ref = ordinary/session/open-my-mouth
 Type = rubric
 Ref = ordinary/session/our-father-hail-mary-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
@@ -474,7 +474,7 @@ Ref = ordinary/vespers/blessing
 Type = rubric
 Ref = shared/formulas/closing-our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
 Type = versicle
@@ -502,8 +502,8 @@ Ref = ordinary/session/sacrosanctae
 Type = rubric
 Ref = ordinary/session/closing-rubric
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = secret-prayer
 Ref = ordinary/shared/hail-mary
