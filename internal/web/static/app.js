@@ -24,12 +24,19 @@ document.documentElement.classList.add("js");
   // While the indicator is showing "Offline" we poll to detect recovery,
   // since the browser's "online" event does not fire when navigator.onLine
   // was a false negative to begin with. Polling stops once we're back online.
+  //
+  // The browser "offline" event is *not* treated as definitive: mobile
+  // browsers fire it during wifi↔cell handoffs and brief radio blips while
+  // still online. We only show the pill after consecutive failed probes.
   var recoveryTimer = null;
+  var failStreak = 0;
+  var FAIL_STREAK_TO_SHOW = 2;
+  var ONLINE_CHECK_TIMEOUT_MS = 4000;
 
   var setOfflineIndicator = function (offline) {
     offlineIndicator.hidden = !offline;
     if (offline && !recoveryTimer) {
-      recoveryTimer = setInterval(checkOnline, 5000);
+      recoveryTimer = setInterval(checkOnline, 4000);
     } else if (!offline && recoveryTimer) {
       clearInterval(recoveryTimer);
       recoveryTimer = null;
@@ -52,7 +59,7 @@ document.documentElement.classList.add("js");
       options.signal = controller.signal;
       timer = setTimeout(function () {
         controller.abort();
-      }, 2500);
+      }, ONLINE_CHECK_TIMEOUT_MS);
     }
 
     var done = function () {
@@ -63,17 +70,33 @@ document.documentElement.classList.add("js");
 
     fetch(url, options).then(function (resp) {
       done();
-      setOfflineIndicator(!resp.ok);
+      if (resp.ok) {
+        failStreak = 0;
+        setOfflineIndicator(false);
+      } else {
+        failStreak += 1;
+        if (failStreak >= FAIL_STREAK_TO_SHOW) {
+          setOfflineIndicator(true);
+        }
+      }
     }).catch(function () {
       done();
-      setOfflineIndicator(true);
+      failStreak += 1;
+      if (failStreak >= FAIL_STREAK_TO_SHOW) {
+        setOfflineIndicator(true);
+      } else if (!recoveryTimer) {
+        // First failure while looking online: re-probe soon without flashing
+        // the pill for a transient blip.
+        setTimeout(checkOnline, 1500);
+      }
     });
   }
 
   window.addEventListener("online", checkOnline);
   window.addEventListener("offline", function () {
-    // A definite offline signal: show immediately, then poll for recovery.
-    setOfflineIndicator(true);
+    // Probe rather than trusting the event — wifi/cell handoffs fire this
+    // spuriously. A real outage will fail the probe and show the pill.
+    checkOnline();
   });
   document.addEventListener("visibilitychange", function () {
     if (!document.hidden) {
@@ -104,12 +127,27 @@ document.documentElement.classList.add("js");
   }
 
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").then(function () {
-      return navigator.serviceWorker.ready;
-    }).then(function (reg) {
-      if (reg.active) {
-        reg.active.postMessage({ type: "precache" });
-      }
+    navigator.serviceWorker.register("/sw.js").then(function (reg) {
+      // Pick up deploys while the PWA stays open across days.
+      var askUpdate = function () {
+        if (reg.update) {
+          reg.update().catch(function () {});
+        }
+      };
+      document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+          askUpdate();
+        }
+      });
+      // Periodic check in case the tab stays foregrounded all day.
+      setInterval(askUpdate, 60 * 60 * 1000);
+
+      return navigator.serviceWorker.ready.then(function (ready) {
+        if (ready.active) {
+          ready.active.postMessage({ type: "precache" });
+        }
+        return ready;
+      });
     }).catch(function (err) {
       // Offline reading is an enhancement; the site works without it.
       console.warn("service worker registration failed:", err);

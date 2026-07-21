@@ -53,6 +53,19 @@ func computeVersion(dataDir string) string {
 	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
+// staticFileServer serves embedded static assets with Cache-Control:
+// no-cache so browsers and the service worker revalidate on every network
+// fetch. The service worker still caches copies for offline use; this only
+// prevents the browser HTTP cache from replaying a pre-deploy response under
+// the same /static/ URL when the SW installs or does SWR.
+func staticFileServer(fsys http.FileSystem) http.Handler {
+	files := http.FileServer(fsys)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		files.ServeHTTP(w, r)
+	})
+}
+
 // handleServiceWorker serves the embedded service worker at the site root
 // (required for a "/" scope) with the build version stamped in, so any
 // deploy produces a byte-different worker and triggers a cache refresh.
