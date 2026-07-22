@@ -40,6 +40,7 @@ internal/
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
     templates/             Embedded HTML templates (layout, home, hour, calendar)
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
+                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   e2e/                     End-to-end golden-file tests
     golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests
     testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)

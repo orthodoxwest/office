@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
+  {{/* Apply stored Nave/Apse preference before CSS to avoid a flash. Key: office-theme. */}}
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("office-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        } else if (t === "system") {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="manifest" href="/static/manifest.webmanifest">
@@ -35,6 +48,12 @@
           <span class="nav-divider" aria-hidden="true"></span>
           <a href="{{navLink "/calendar" $t $d}}"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
           <a href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} class="active" aria-current="page"{{end}}>Reminders</a>
+          <span class="nav-divider" aria-hidden="true"></span>
+          <div class="theme-switch" role="group" aria-label="Appearance">
+            <button type="button" class="theme-option" data-theme-choice="system" aria-pressed="false">System</button>
+            <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false">Nave</button>
+            <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false">Apse</button>
+          </div>
         </nav>
       </details>
     </div>
