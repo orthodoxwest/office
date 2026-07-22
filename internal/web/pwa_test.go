@@ -159,13 +159,24 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		}
 	}
 
+	// Construction banner must stay unpersisted (feedback window). Appearance
+	// may use localStorage (office-theme); only ban banner-specific keys here.
 	for _, unwanted := range []string{
 		`siteBannerDismissed`,
-		`localStorage.getItem`,
-		`localStorage.setItem`,
+		`banner-dismiss`,
+		`bannerDismissed`,
 	} {
 		if strings.Contains(body, unwanted) {
 			t.Errorf("construction banner dismissal should not persist via %q", unwanted)
+		}
+	}
+	// Theme control is client-side only (keeps SW cache keys theme-free).
+	for _, want := range []string{
+		`office-theme`,
+		`data-theme-choice`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("app script is missing theme control support %q", want)
 		}
 	}
 }

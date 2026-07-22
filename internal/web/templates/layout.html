@@ -1,10 +1,23 @@
 {{define "layout"}}<!DOCTYPE html>
-<html lang="en"{{if .Theme}} data-theme="{{.Theme}}"{{end}}>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
+  {{/* Apply stored appearance before CSS to avoid a flash. Key: office-theme. */}}
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("office-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        } else if (t === "default") {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="stylesheet" href="/static/style.css">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <link rel="manifest" href="/static/manifest.webmanifest">
@@ -44,6 +57,12 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
+    {{/* Appearance preference: quiet footer control on every page including hours. */}}
+    <div class="theme-switch" role="group" aria-label="Appearance">
+      <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
+      <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
+    </div>
   </footer>
   {{if .ShowBanner}}<div class="site-banner" id="site-banner">
     <p>This site is under active development &mdash; liturgical data is incomplete and may contain errors.</p>

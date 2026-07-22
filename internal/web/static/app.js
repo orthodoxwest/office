@@ -3,6 +3,102 @@ document.documentElement.classList.add("js");
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
+  // Appearance: Default (device) / Nave (light) / Apse (dark). Persisted in
+  // localStorage so links and the service-worker cache stay theme-free. A
+  // matching pre-paint script in layout.html applies the choice before CSS.
+  // Only explicit button clicks write storage — passive load never invents a choice.
+  var THEME_KEY = "office-theme";
+  var THEME_LIGHT_COLOR = "#faf2ec";
+  var THEME_DARK_COLOR = "#121c28";
+
+  var readStoredTheme = function () {
+    try {
+      return localStorage.getItem(THEME_KEY);
+    } catch (err) {
+      return null;
+    }
+  };
+
+  var writeStoredTheme = function (value) {
+    try {
+      localStorage.setItem(THEME_KEY, value);
+    } catch (err) {
+      // Private mode / blocked storage — theme still applies for this page.
+    }
+  };
+
+  var normalizeThemeChoice = function (value) {
+    if (value === "light" || value === "dark" || value === "default") {
+      return value;
+    }
+    return null;
+  };
+
+  var effectiveThemeChoice = function () {
+    return normalizeThemeChoice(readStoredTheme()) || "default";
+  };
+
+  var syncThemeColorMeta = function () {
+    var forced = document.documentElement.getAttribute("data-theme");
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    if (!metas.length) {
+      return;
+    }
+    if (forced === "light") {
+      metas.forEach(function (m) {
+        m.setAttribute("content", THEME_LIGHT_COLOR);
+      });
+      return;
+    }
+    if (forced === "dark") {
+      metas.forEach(function (m) {
+        m.setAttribute("content", THEME_DARK_COLOR);
+      });
+      return;
+    }
+    metas.forEach(function (m) {
+      var media = m.getAttribute("media") || "";
+      if (media.indexOf("dark") !== -1) {
+        m.setAttribute("content", THEME_DARK_COLOR);
+      } else {
+        m.setAttribute("content", THEME_LIGHT_COLOR);
+      }
+    });
+  };
+
+  // Paint the DOM for a choice without writing localStorage.
+  var paintThemeChoice = function (choice) {
+    choice = normalizeThemeChoice(choice) || "default";
+    if (choice === "light" || choice === "dark") {
+      document.documentElement.setAttribute("data-theme", choice);
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    syncThemeColorMeta();
+    document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
+      var on = btn.getAttribute("data-theme-choice") === choice;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  };
+
+  // User action: paint + persist.
+  var applyThemeChoice = function (choice) {
+    choice = normalizeThemeChoice(choice) || "default";
+    paintThemeChoice(choice);
+    writeStoredTheme(choice);
+  };
+
+  paintThemeChoice(effectiveThemeChoice());
+
+  document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var choice = btn.getAttribute("data-theme-choice");
+      if (choice === "light" || choice === "dark" || choice === "default") {
+        applyThemeChoice(choice);
+      }
+    });
+  });
+
   var banner = document.getElementById("site-banner");
   if (banner) {
     var dismissButton = banner.querySelector("[data-dismiss-banner]");
