@@ -1765,7 +1765,7 @@ footer::before {
     right: 0;
     transform: none;
     white-space: normal;
-    max-width: min(10rem, calc(100vw - 2rem));
+    width: min(14rem, calc(100vw - 2rem));
   }
 
   .day-commemorations summary {
