@@ -89,6 +89,7 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 - **Do not** put theme in every link URL for the new control. Legacy `?theme=` may still work for bookmarks; migrate into localStorage on first visit when sensible.
 - Service worker precaches **unthemed** URLs — theme in query params multiplies cache keys and offline can flip theme. Keep appearance client-side.
 - Labels: **System / Nave / Apse** (words), not sun/moon icons.
+- **Placement:** footer on home / ordo / reminders (and empty-page errors) — **never** in the hour list nav, **never** on hour pages (prayer chrome stays lean).
 
 ### Hour pages
 

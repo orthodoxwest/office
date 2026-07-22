@@ -48,12 +48,6 @@
           <span class="nav-divider" aria-hidden="true"></span>
           <a href="{{navLink "/calendar" $t $d}}"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
           <a href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} class="active" aria-current="page"{{end}}>Reminders</a>
-          <span class="nav-divider" aria-hidden="true"></span>
-          <div class="theme-switch" role="group" aria-label="Appearance">
-            <button type="button" class="theme-option" data-theme-choice="system" aria-pressed="false">System</button>
-            <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false">Nave</button>
-            <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false">Apse</button>
-          </div>
         </nav>
       </details>
     </div>
@@ -63,6 +57,14 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
+    {{/* Appearance is a preference, not prayer chrome: footer only, never on hour pages. */}}
+    {{if or (eq $p "home") (eq $p "calendar") (eq $p "reminders") (eq $p "")}}
+    <div class="theme-switch" role="group" aria-label="Appearance">
+      <button type="button" class="theme-option" data-theme-choice="system" aria-pressed="false">System</button>
+      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false">Nave</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false">Apse</button>
+    </div>
+    {{end}}
   </footer>
   {{if .ShowBanner}}<div class="site-banner" id="site-banner">
     <p>This site is under active development &mdash; liturgical data is incomplete and may contain errors.</p>
