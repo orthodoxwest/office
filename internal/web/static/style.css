@@ -207,7 +207,7 @@ summary:focus-visible {
   background: var(--border);
 }
 
-/* Default / Nave / Apse — footer preference control (not primary nav; omitted on hours). */
+/* Default / Nave / Apse — quiet footer preference control (all pages). */
 footer .theme-switch {
   display: inline-flex;
   align-items: stretch;
@@ -257,11 +257,12 @@ footer .theme-switch {
     width: min(18rem, 100%);
   }
 
+  /* Match site menu / hour-chip touch floor (~44px). */
   .theme-option {
     flex: 1 1 0;
-    min-height: 2.5rem;
+    min-height: 2.75rem;
     font-size: 0.75rem;
-    padding: 0.45rem 0.35rem;
+    padding: 0.5rem 0.35rem;
   }
 }
 

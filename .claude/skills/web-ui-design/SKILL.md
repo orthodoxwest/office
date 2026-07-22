@@ -83,13 +83,13 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 
 ### Theme (Default / Nave / Apse)
 
-- **Preferred persistence:** `localStorage` key `office-theme` (`default` \| `light` \| `dark`). Treat legacy `system` as `default`.
+- **Persistence:** `localStorage` key `office-theme` (`default` \| `light` \| `dark`). Write **only** on explicit control click — never invent a choice on passive load.
 - **FOUC prevention:** tiny **inline** pre-paint script in `layout.html` `<head>` before CSS.
 - **`data-theme`** on `<html>`: set for `light`/`dark`; **remove** for default so `prefers-color-scheme` media rules apply.
-- **Do not** put theme in every link URL for the new control. Legacy `?theme=` may still work for bookmarks; migrate into localStorage on first visit when sensible.
-- Service worker precaches **unthemed** URLs — theme in query params multiplies cache keys and offline can flip theme. Keep appearance client-side.
+- **No URL theme:** do not stamp `?theme=` on nav or content links. Ignore any query param if present. Appearance is client-side only.
+- Service worker precaches unthemed URLs; keep it that way.
 - Labels: **Default / Nave / Apse** (words), not sun/moon icons. Use `title` tooltips for plain-language meaning (device setting / light plaster / night sky).
-- **Placement:** footer on home / ordo / reminders (and empty-page errors) — **never** in the hour list nav, **never** on hour pages (prayer chrome stays lean).
+- **Placement:** footer on **all** pages (including hours) — quiet, below the fold; **never** in the primary hour nav.
 
 ### Hour pages
 
@@ -126,7 +126,7 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 |------|-----|
 | Sticky collapsing hour header | New permanent chrome; fights “chrome shrinks” |
 | Always-on wake lock site-wide | Drains battery on ordo browsing |
-| Theme only via `?theme=` | Offline/SW/cache and PWA `start_url` issues |
+| Stamping `?theme=` on every link | Offline/SW cache-key bloat; use localStorage only |
 | Fixed decorative stars over body text | Collides with prayer on ~390px |
 | Assurance moved to `?debug=` | Owner wants post-hour transparency for laity too |
 

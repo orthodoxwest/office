@@ -287,11 +287,12 @@ func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
 }
 
 func TestAdjacentHoursKeepDateAndTheme(t *testing.T) {
+	// theme arg is ignored; appearance is client-side only (no ?theme= on links).
 	previousName, previousLink, nextName, nextLink := adjacentHours("sext", "2026-06-07", "dark")
-	if previousName != "Terce" || previousLink != "/terce/2026-06-07?theme=dark" {
+	if previousName != "Terce" || previousLink != "/terce/2026-06-07" {
 		t.Errorf("previous hour = %q %q", previousName, previousLink)
 	}
-	if nextName != "None" || nextLink != "/none/2026-06-07?theme=dark" {
+	if nextName != "None" || nextLink != "/none/2026-06-07" {
 		t.Errorf("next hour = %q %q", nextName, nextLink)
 	}
 

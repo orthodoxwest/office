@@ -6,6 +6,7 @@ document.documentElement.classList.add("js");
   // Appearance: Default (device) / Nave (light) / Apse (dark). Persisted in
   // localStorage so links and the service-worker cache stay theme-free. A
   // matching pre-paint script in layout.html applies the choice before CSS.
+  // Only explicit button clicks write storage — passive load never invents a choice.
   var THEME_KEY = "office-theme";
   var THEME_LIGHT_COLOR = "#faf2ec";
   var THEME_DARK_COLOR = "#121c28";
@@ -20,37 +21,21 @@ document.documentElement.classList.add("js");
 
   var writeStoredTheme = function (value) {
     try {
-      if (value === null) {
-        localStorage.removeItem(THEME_KEY);
-      } else {
-        localStorage.setItem(THEME_KEY, value);
-      }
+      localStorage.setItem(THEME_KEY, value);
     } catch (err) {
       // Private mode / blocked storage — theme still applies for this page.
     }
   };
 
-  // Normalize stored values: older builds used "system" for follow-device.
   var normalizeThemeChoice = function (value) {
     if (value === "light" || value === "dark" || value === "default") {
       return value;
-    }
-    if (value === "system") {
-      return "default";
     }
     return null;
   };
 
   var effectiveThemeChoice = function () {
-    var stored = normalizeThemeChoice(readStoredTheme());
-    if (stored) {
-      return stored;
-    }
-    var attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "light" || attr === "dark") {
-      return attr;
-    }
-    return "default";
+    return normalizeThemeChoice(readStoredTheme()) || "default";
   };
 
   var syncThemeColorMeta = function () {
@@ -81,14 +66,13 @@ document.documentElement.classList.add("js");
     });
   };
 
-  var applyThemeChoice = function (choice) {
+  // Paint the DOM for a choice without writing localStorage.
+  var paintThemeChoice = function (choice) {
     choice = normalizeThemeChoice(choice) || "default";
     if (choice === "light" || choice === "dark") {
       document.documentElement.setAttribute("data-theme", choice);
-      writeStoredTheme(choice);
     } else {
       document.documentElement.removeAttribute("data-theme");
-      writeStoredTheme("default");
     }
     syncThemeColorMeta();
     document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
@@ -97,21 +81,14 @@ document.documentElement.classList.add("js");
     });
   };
 
-  // One-time migrate of legacy ?theme= bookmarks into localStorage when the
-  // user has never chosen an appearance.
-  if (!readStoredTheme()) {
-    try {
-      var queryTheme = new URLSearchParams(window.location.search).get("theme");
-      if (queryTheme === "light" || queryTheme === "dark") {
-        writeStoredTheme(queryTheme);
-        document.documentElement.setAttribute("data-theme", queryTheme);
-      }
-    } catch (err) {
-      // URL parsing unavailable — leave server-rendered data-theme as-is.
-    }
-  }
+  // User action: paint + persist.
+  var applyThemeChoice = function (choice) {
+    choice = normalizeThemeChoice(choice) || "default";
+    paintThemeChoice(choice);
+    writeStoredTheme(choice);
+  };
 
-  applyThemeChoice(effectiveThemeChoice());
+  paintThemeChoice(effectiveThemeChoice());
 
   document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
     btn.addEventListener("click", function () {

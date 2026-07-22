@@ -276,60 +276,44 @@ func userLocation(r *http.Request) *time.Location {
 	return loc
 }
 
-// themeParam returns "dark" or "light" if the ?theme= param is one of those,
-// or "" otherwise. Used to force a color scheme for testing without JS.
+// themeParam is retained for call-site compatibility but always returns "".
+// Appearance is client-only (localStorage + data-theme); ?theme= is ignored.
 func themeParam(r *http.Request) string {
-	t := r.URL.Query().Get("theme")
-	if t == "dark" || t == "light" {
-		return t
-	}
+	_ = r
 	return ""
 }
 
 func homeLink(date, theme string) string {
+	_ = theme
 	href := "/"
 	if date != "" {
 		href = "/?date=" + date
 	}
-	return appendTheme(href, theme)
+	return href
 }
 
 func hourLink(hour, date, theme string) string {
+	_ = theme
 	href := "/" + hour
 	if date != "" {
 		href += "/" + date
 	}
-	return appendTheme(href, theme)
+	return href
 }
 
 func calendarLink(date, theme string) string {
+	_ = theme
 	if date != "" {
 		if parsed, err := time.Parse("2006-01-02", date); err == nil {
-			href := fmt.Sprintf("/calendar/%d#d-%s", parsed.Year(), date)
-			return appendTheme(href, theme)
+			return fmt.Sprintf("/calendar/%d#d-%s", parsed.Year(), date)
 		}
 	}
-	return appendTheme("/calendar", theme)
+	return "/calendar"
 }
 
 func calendarYearLink(year int, theme string) string {
-	return appendTheme(fmt.Sprintf("/calendar/%d", year), theme)
-}
-
-func appendTheme(href, theme string) string {
-	if theme == "" {
-		return href
-	}
-	fragment := ""
-	if idx := strings.Index(href, "#"); idx >= 0 {
-		fragment = href[idx:]
-		href = href[:idx]
-	}
-	sep := "?"
-	if strings.Contains(href, "?") {
-		sep = "&"
-	}
-	return href + sep + "theme=" + theme + fragment
+	_ = theme
+	return fmt.Sprintf("/calendar/%d", year)
 }
 
 func currentHourEntry(now time.Time) (string, string) {
@@ -650,9 +634,6 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		// No year specified: redirect to current year anchored at today's row.
 		slug := "d-" + now.Format("2006-01-02")
 		target := fmt.Sprintf("/calendar/%d#%s", year, slug)
-		if t := themeParam(r); t != "" {
-			target = fmt.Sprintf("/calendar/%d?theme=%s#%s", year, t, slug)
-		}
 		http.Redirect(w, r, target, http.StatusFound)
 		return
 	}

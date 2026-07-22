@@ -24,19 +24,21 @@ func escCross(s string) string {
 }
 
 var templateFuncs = template.FuncMap{
-	// navLink builds a navigation href preserving the active date and theme.
+	// navLink builds a navigation href preserving the active date.
+	// theme is ignored (appearance is client-side only; no ?theme= on links).
 	// For the home page ("/") the date is a query param (?date=…).
 	// For hour pages ("/lauds" etc.) the date is a path segment (/lauds/DATE).
 	"navLink": func(base, theme, date string) string {
+		_ = theme
 		switch base {
 		case "/":
-			return homeLink(date, theme)
+			return homeLink(date, "")
 		case "/calendar":
-			return calendarLink(date, theme)
+			return calendarLink(date, "")
 		case "/reminders":
-			return appendTheme("/reminders", theme)
+			return "/reminders"
 		default:
-			return hourLink(strings.TrimPrefix(base, "/"), date, theme)
+			return hourLink(strings.TrimPrefix(base, "/"), date, "")
 		}
 	},
 	"homeLink":              func(date, theme string) string { return homeLink(date, theme) },
