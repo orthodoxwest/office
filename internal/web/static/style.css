@@ -207,7 +207,7 @@ summary:focus-visible {
   background: var(--border);
 }
 
-/* System / Nave / Apse — footer preference control (not primary nav; omitted on hours). */
+/* Default / Nave / Apse — footer preference control (not primary nav; omitted on hours). */
 footer .theme-switch {
   display: inline-flex;
   align-items: stretch;

@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
-  {{/* Apply stored Nave/Apse preference before CSS to avoid a flash. Key: office-theme. */}}
+  {{/* Apply stored appearance before CSS to avoid a flash. Key: office-theme. */}}
   <script>
     (function () {
       try {
         var t = localStorage.getItem("office-theme");
         if (t === "light" || t === "dark") {
           document.documentElement.setAttribute("data-theme", t);
-        } else if (t === "system") {
+        } else if (t === "default" || t === "system") {
           document.documentElement.removeAttribute("data-theme");
         }
       } catch (e) {}
@@ -60,9 +60,9 @@
     {{/* Appearance is a preference, not prayer chrome: footer only, never on hour pages. */}}
     {{if or (eq $p "home") (eq $p "calendar") (eq $p "reminders") (eq $p "")}}
     <div class="theme-switch" role="group" aria-label="Appearance">
-      <button type="button" class="theme-option" data-theme-choice="system" aria-pressed="false">System</button>
-      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false">Nave</button>
-      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false">Apse</button>
+      <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
+      <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
     </div>
     {{end}}
   </footer>

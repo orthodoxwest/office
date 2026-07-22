@@ -3,9 +3,9 @@ document.documentElement.classList.add("js");
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
-  // Appearance: System / Nave (light) / Apse (dark). Persisted in localStorage
-  // so links and the service-worker cache stay theme-free. A matching pre-paint
-  // script in layout.html applies the stored choice before CSS loads.
+  // Appearance: Default (device) / Nave (light) / Apse (dark). Persisted in
+  // localStorage so links and the service-worker cache stay theme-free. A
+  // matching pre-paint script in layout.html applies the choice before CSS.
   var THEME_KEY = "office-theme";
   var THEME_LIGHT_COLOR = "#faf2ec";
   var THEME_DARK_COLOR = "#121c28";
@@ -30,16 +30,27 @@ document.documentElement.classList.add("js");
     }
   };
 
+  // Normalize stored values: older builds used "system" for follow-device.
+  var normalizeThemeChoice = function (value) {
+    if (value === "light" || value === "dark" || value === "default") {
+      return value;
+    }
+    if (value === "system") {
+      return "default";
+    }
+    return null;
+  };
+
   var effectiveThemeChoice = function () {
-    var stored = readStoredTheme();
-    if (stored === "light" || stored === "dark" || stored === "system") {
+    var stored = normalizeThemeChoice(readStoredTheme());
+    if (stored) {
       return stored;
     }
     var attr = document.documentElement.getAttribute("data-theme");
     if (attr === "light" || attr === "dark") {
       return attr;
     }
-    return "system";
+    return "default";
   };
 
   var syncThemeColorMeta = function () {
@@ -71,12 +82,13 @@ document.documentElement.classList.add("js");
   };
 
   var applyThemeChoice = function (choice) {
+    choice = normalizeThemeChoice(choice) || "default";
     if (choice === "light" || choice === "dark") {
       document.documentElement.setAttribute("data-theme", choice);
       writeStoredTheme(choice);
     } else {
       document.documentElement.removeAttribute("data-theme");
-      writeStoredTheme("system");
+      writeStoredTheme("default");
     }
     syncThemeColorMeta();
     document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
@@ -86,7 +98,7 @@ document.documentElement.classList.add("js");
   };
 
   // One-time migrate of legacy ?theme= bookmarks into localStorage when the
-  // user has never chosen an appearance in the menu.
+  // user has never chosen an appearance.
   if (!readStoredTheme()) {
     try {
       var queryTheme = new URLSearchParams(window.location.search).get("theme");
@@ -104,7 +116,7 @@ document.documentElement.classList.add("js");
   document.querySelectorAll(".theme-option[data-theme-choice]").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var choice = btn.getAttribute("data-theme-choice");
-      if (choice === "light" || choice === "dark" || choice === "system") {
+      if (choice === "light" || choice === "dark" || choice === "default") {
         applyThemeChoice(choice);
       }
     });

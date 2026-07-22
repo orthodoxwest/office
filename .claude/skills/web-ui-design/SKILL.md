@@ -81,14 +81,14 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 | PWA / offline | `internal/web/static/sw.js`, `manifest.webmanifest` |
 | Embedded assets | `//go:embed` in `internal/web/server.go` — **rebuild** after template/CSS/JS changes |
 
-### Theme (Nave / Apse / System)
+### Theme (Default / Nave / Apse)
 
-- **Preferred persistence:** `localStorage` key `office-theme` (`system` \| `light` \| `dark`).
+- **Preferred persistence:** `localStorage` key `office-theme` (`default` \| `light` \| `dark`). Treat legacy `system` as `default`.
 - **FOUC prevention:** tiny **inline** pre-paint script in `layout.html` `<head>` before CSS.
-- **`data-theme`** on `<html>`: set for `light`/`dark`; **remove** for system so `prefers-color-scheme` media rules apply.
+- **`data-theme`** on `<html>`: set for `light`/`dark`; **remove** for default so `prefers-color-scheme` media rules apply.
 - **Do not** put theme in every link URL for the new control. Legacy `?theme=` may still work for bookmarks; migrate into localStorage on first visit when sensible.
 - Service worker precaches **unthemed** URLs — theme in query params multiplies cache keys and offline can flip theme. Keep appearance client-side.
-- Labels: **System / Nave / Apse** (words), not sun/moon icons.
+- Labels: **Default / Nave / Apse** (words), not sun/moon icons. Use `title` tooltips for plain-language meaning (device setting / light plaster / night sky).
 - **Placement:** footer on home / ordo / reminders (and empty-page errors) — **never** in the hour list nav, **never** on hour pages (prayer chrome stays lean).
 
 ### Hour pages
