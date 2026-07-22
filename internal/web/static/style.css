@@ -1761,10 +1761,11 @@ footer::before {
   }
 
   .month-table abbr::after {
-    left: 0;
+    left: auto;
+    right: 0;
     transform: none;
     white-space: normal;
-    min-width: 10rem;
+    max-width: min(10rem, calc(100vw - 2rem));
   }
 
   .day-commemorations summary {
