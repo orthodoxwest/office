@@ -27,7 +27,6 @@
           <th scope="col">Feast / Observance</th>
           <th scope="col">Fast</th>
           <th scope="col">Abst.</th>
-          <th scope="col">Color</th>
           <th scope="col">Rank</th>
         </tr>
       </thead>
@@ -37,6 +36,7 @@
           <td class="day-num" data-label="Day"><a href="{{homeLink .DateSlug $theme}}">{{.DayNum}}</a></td>
           <td class="day-wk" data-label="Weekday">{{.Weekday}}</td>
           <td class="day-feast" data-label="Feast">
+            <span class="sr-only">Liturgical color: {{.Color}}. </span>
             <div class="day-mobile-head">
               <a class="day-mobile-date" href="{{homeLink .DateSlug $theme}}">
                 <span class="day-mobile-num">{{.DayNum}}</span>
@@ -86,7 +86,6 @@
           </td>
           <td class="day-penitential-flag" data-label="Fast">{{if .Fast}}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{{end}}</td>
           <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}{{template "fish"}}<span class="sr-only">Abstinence</span>{{end}}</td>
-          <td class="day-color" data-label="Color">{{.Color}}</td>
           <td class="day-rank" data-label="Rank">{{if .RankFull}}<abbr tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}{{.Rank}}{{end}}</td>
         </tr>
         {{end}}
