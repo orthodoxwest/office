@@ -201,10 +201,32 @@ summary:focus-visible {
   border-bottom: 1px solid var(--accent);
 }
 
+/* Habit setup, not an hour — quieter than Lauds…Compline / Ordo. */
+.site-menu nav a.nav-secondary {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.site-menu nav a.nav-secondary:hover {
+  color: var(--accent);
+}
+
+.site-menu nav a.nav-secondary.active {
+  color: var(--text);
+  border-bottom-color: var(--muted);
+}
+
 .nav-divider {
   width: 1px;
   margin: 0.45rem 0.15rem;
   background: var(--border);
+}
+
+/* Home keeps the same header rhythm as hour pages — avoid an empty band
+   between the nav rule and the day title. */
+.page-home .site-header {
+  margin-bottom: 1.25rem;
 }
 
 /* Default / Nave / Apse — quiet footer preference control (all pages). */
@@ -456,38 +478,87 @@ footer::before {
   }
 }
 
-/* ── Home page ── */
+/* ── Home page ──
+   One vertical composition (day identity → prayer surface). Mobile reorders
+   the prayer card above the day block so the CTA still wins the first screen.
+
+   Rhythm: tight title stack (date → feast → meta), then a quiet date control,
+   then the prayer surface — not a control wedged between date and feast. */
 
 .home {
   display: grid;
-  gap: 1.5rem;
+  gap: 0;
 }
 
-/* Prayer card is first in the DOM (mobile stacks CTA first). On wide
-   screens it keeps the leading column so the CTA stays visually primary. */
 .home-hero {
-  display: grid;
-  grid-template-columns: minmax(18rem, 1.15fr) minmax(0, 1fr);
-  gap: 1.5rem;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
 }
 
-.home-summary,
+/* Day block: editorial, not a second dashboard card. Color as top hairline
+   only (same motif as the hour color-band). White needs a warmer edge on
+   plaster so it still reads.
+
+   The hook is `day-color-*`, not `color-*`: the bare `color-*` classes are
+   full-surface row tints, and reusing them here painted the block a flat
+   liturgical color behind text that has no horizontal padding. */
+.home-summary {
+  padding: 0.7rem 0 0;
+  border: none;
+  border-top: 3px solid var(--border);
+  background: transparent;
+  box-shadow: none;
+}
+.home-summary.day-color-white  { border-top-color: #c9b896; }
+.home-summary.day-color-red    { border-top-color: #b02a24; }
+.home-summary.day-color-green  { border-top-color: #3a6b3a; }
+.home-summary.day-color-violet { border-top-color: #6a3a8a; }
+.home-summary.day-color-black  { border-top-color: #3a3a3a; }
+.home-summary.day-color-rose   { border-top-color: #c4607a; }
+
+/* Title stack: date and feast sit close; secondary lines use smaller gaps. */
+.home-day-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.55rem;
+}
+
+.home-day-head > * {
+  margin: 0;
+}
+
+/* Prayer surface: the single framed action block. */
 .home-prayer-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--surface-edge);
   background: var(--surface);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  padding: 1.2rem 1.25rem;
-}
-
-.home-prayer-card {
-  border-color: var(--surface-edge);
+  padding: 1.15rem 1.25rem 1.25rem;
 }
 
 .home h1 {
-  font-size: 1.75rem;
+  font-size: 1.55rem;
   font-weight: normal;
-  margin-bottom: 0.75rem;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+}
+
+.home-date-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.home-date-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.home-date-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 
 .home-kicker {
@@ -499,51 +570,43 @@ footer::before {
 }
 
 .home .feast {
-  font-size: 1.2rem;
-  margin-bottom: 0.35rem;
-  max-width: 24ch;
-}
-
-.home .feast-rank {
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-style: italic;
-  margin-bottom: 0.25rem;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  max-width: 32rem;
+  color: var(--accent);
 }
 
 .home .commemorations {
-  list-style: none;
+  display: flex;
+  gap: 0.4rem 0.6rem;
+  align-items: baseline;
   color: var(--muted);
   font-size: 0.9rem;
-  margin-bottom: 0.25rem;
+  margin-top: 0.2rem;
 }
 
-.home .commemorations li::before {
-  content: "Commemoration: ";
+.home .commemorations-label {
+  flex: 0 0 auto;
   font-style: italic;
 }
 
-.home .meta {
-  color: var(--muted);
-  font-size: 0.95rem;
-  margin-top: 0.6rem;
+.home .commemorations ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
 }
 
-.color-swatch {
-  display: inline-block;
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  margin-right: 0.35rem;
-  vertical-align: middle;
-  border: 1px solid rgba(0,0,0,0.15);
+.home .commemorations li + li {
+  margin-top: 0.1rem;
 }
-.color-swatch.color-white,  .color-band-white  { background: #e8e0cc; }
-.color-swatch.color-red,    .color-band-red    { background: #b02a24; }
-.color-swatch.color-green,  .color-band-green  { background: #3a6b3a; }
-.color-swatch.color-violet, .color-band-violet { background: #6a3a8a; }
-.color-swatch.color-black,  .color-band-black  { background: #3a3a3a; }
-.color-swatch.color-rose,   .color-band-rose   { background: #c4607a; }
+
+.color-band-white  { background: #e8e0cc; }
+.color-band-red    { background: #b02a24; }
+.color-band-green  { background: #3a6b3a; }
+.color-band-violet { background: #6a3a8a; }
+.color-band-black  { background: #3a3a3a; }
+.color-band-rose   { background: #c4607a; }
 
 /* Thin vestment-trim band across the top of hour pages in the day's color.
    On notched phones in standalone mode the band extends up behind the
@@ -588,48 +651,38 @@ footer::before {
   }
 }
 
-.home .feast-rank-link {
-  color: var(--muted);
-  text-decoration: none;
-  border-bottom: 1px dotted var(--muted);
-}
-
-.home .feast-rank-link:hover {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
 .home .octave-note {
   color: var(--muted);
   font-size: 0.9rem;
   font-style: italic;
-  margin-bottom: 0.25rem;
 }
 
 .home .penitential {
-  margin-bottom: 0.5rem;
+  margin-top: 0.15rem;
 }
 
 .penitential-badge {
   display: inline-block;
-  margin-right: 0.4rem;
-  margin-bottom: 0.25rem;
-  padding: 0.1rem 0.45rem;
+  margin-right: 0.35rem;
+  margin-bottom: 0.15rem;
+  padding: 0.08rem 0.4rem;
   border: 1px solid var(--rubric);
   border-radius: 999px;
   color: var(--rubric);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   letter-spacing: 0.02em;
 }
 
 .pray-now-wrap {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
+/* Fills the card at every width. It reads as a banner rather than a button
+   only when the card itself sprawls, which the desktop measure now prevents. */
 .pray-now {
   display: block;
   text-align: center;
-  padding: 0.9rem 1.15rem;
+  padding: 0.85rem 1.15rem;
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--bg);
@@ -647,30 +700,33 @@ footer::before {
 }
 
 .home-prayer-card h2 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: normal;
   font-variant: small-caps;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--muted);
-  margin-bottom: 0.85rem;
+  margin-bottom: 0.7rem;
 }
 
 .home-hour-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.5rem;
 }
 
+/* Every hour is a chip at every width. Borderless chips left the current
+   hour as the only framed item in the row, which read as a misalignment
+   rather than as emphasis. */
 .home-hour-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 0.85rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
   border: 1px solid var(--border);
   color: var(--text);
   text-decoration: none;
   background: rgba(255, 255, 255, 0.28);
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
 .home-hour-link:hover {
@@ -680,32 +736,85 @@ footer::before {
 .home-hour-link.is-current {
   border-color: var(--accent);
   background: rgba(107, 58, 31, 0.08);
+  color: var(--text);
 }
 
 .home-hour-link-name {
   font-size: 0.98rem;
+  letter-spacing: 0.02em;
 }
 
 .home-hour-link-state {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.home-calendar-link {
-  margin-top: 1rem;
-}
+/* Desktop home is a threshold, not a dashboard: little content in a tall
+   viewport. Left at the default flow it clung to the top of a large empty
+   field with the footer orphaned mid-screen. Centre the composition between
+   header and footer and hold it to a narrower measure than the 46rem body,
+   so the card frames its contents instead of stretching past them. */
+@media (min-width: 701px) {
+  .page-home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 
-.home-calendar-link a {
-  color: var(--accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
-}
+  .page-home main {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0; /* release the global 60vh floor to centre cleanly */
+    padding-bottom: 2rem;
+  }
 
-.home-calendar-link a:hover {
-  border-bottom-color: var(--accent);
+  .home-hero {
+    width: 100%;
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  /* Day identity centred beneath its colour hairline, echoing the centred
+     title under the colour band on hour pages. The prayer card below keeps
+     its own left axis — it's a framed object, not part of this stack. */
+  .home-summary {
+    text-align: center;
+  }
+
+  .home-day-head {
+    align-items: center;
+  }
+
+  /* The hero already holds the measure; a narrower cap here would centre the
+     text on an off-page axis. */
+  .home .feast {
+    max-width: none;
+  }
+
+  .home .commemorations {
+    justify-content: center;
+  }
+
+  /* NB: the date-nav half of this centring lives further down, after the
+     .home-date-nav overrides it has to beat on source order. */
+
+  /* An even grid rather than a wrapped flex row: at this measure the seven
+     chips don't fit on one line, and free wrapping stranded Compline alone
+     on a second row. Equal columns fill the card and stay tidy no matter how
+     wide the current-hour chip's "now" badge makes it. */
+  .home-hour-links {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .home-hour-link {
+    justify-content: center;
+  }
 }
 
 /* ── Hour page ── */
@@ -793,9 +902,44 @@ footer::before {
   border-top: 1px solid rgba(26, 26, 26, 0.06);
 }
 
-/* Home day-nav keeps a light rule under the date heading */
-.home-summary .day-nav {
-  margin-bottom: 0.55rem;
+/* Home reuses the hour "Change date" disclosure — after the title stack, not
+   between date and feast. Compact so it doesn't open a second band of air. */
+.home-summary .home-date-nav {
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.home-summary .home-date-nav > summary {
+  margin: 0;
+  padding: 0.2rem 0;
+  font-size: 0.7rem;
+}
+
+.home-summary .home-date-nav .day-nav {
+  justify-content: flex-start;
+  margin-top: 0.35rem;
+  margin-bottom: 0.15rem;
+  padding-top: 0.4rem;
+}
+
+/* Desktop centres the day block (see the min-width: 701px block above); the
+   date control follows it onto the centre axis. These must come after the
+   rules they override — equal specificity, and a media query adds none. */
+@media (min-width: 701px) {
+  .home-summary .home-date-nav {
+    text-align: center;
+  }
+
+  /* The summary is width: fit-content, so it needs the auto margins that the
+     home override replaced with margin: 0. */
+  .home-summary .home-date-nav > summary {
+    margin-inline: auto;
+  }
+
+  .home-summary .home-date-nav .day-nav {
+    justify-content: center;
+  }
 }
 
 .day-nav a {
@@ -1082,8 +1226,8 @@ footer::before {
   flex: 1;
 }
 
-.psalm-verses .mediant,
-.gloria-patri .mediant {
+/* Pointing mediant (*) — muted in psalms, canticles, antiphons, responsories, etc. */
+.mediant {
   color: var(--muted);
 }
 
@@ -1653,10 +1797,45 @@ footer::before {
   vertical-align: -0.05em;
 }
 
-/* Narrow screens: collapse to tap-to-expand summary */
+/* Narrow screens: prayer CTA first; day identity becomes a card again so the
+   stacked home still reads as two clear blocks (what mobile already liked). */
 @media (max-width: 700px) {
+  .page-home .site-header {
+    margin-bottom: 1rem;
+  }
+
   .home-hero {
-    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .home-prayer-card {
+    order: -1;
+    padding: 1.1rem 1.1rem 1.15rem;
+  }
+
+  .home-summary {
+    border: 1px solid var(--border);
+    border-top-width: 3px;
+    background: var(--surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    padding: 1rem 1.1rem 0.95rem;
+  }
+
+  .home-day-head {
+    margin-bottom: 0.45rem;
+  }
+
+  .home h1 {
+    font-size: 1.45rem;
+  }
+
+  .home .feast {
+    font-size: 1.12rem;
+  }
+
+  /* Chips stay easy to tap on phones. */
+  .home-hour-link {
+    padding: 0.55rem 0.85rem;
   }
 
   .calendar {
@@ -1784,14 +1963,6 @@ footer::before {
   }
 }
 
-/* liturgical color row tints */
-.color-white { background: var(--white); }
-.color-red    { background: var(--red); }
-.color-green  { background: var(--green); }
-.color-violet { background: var(--violet); }
-.color-black  { background: var(--black); }
-.color-rose   { background: var(--rose); }
-
 /* ── Dark mode (system theme or ?theme=dark) ──
    Apse night sky: cooler blue than the older teal-green wash. */
 
@@ -1838,11 +2009,23 @@ footer::before {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .home-summary,
-  :root:not([data-theme="light"]) .home-prayer-card,
-  :root:not([data-theme="light"]) .home-hour-link {
+  :root:not([data-theme="light"]) .home-prayer-card {
     background: var(--surface);
     box-shadow: none;
+  }
+
+  /* White/black hairlines need a lift on the apse night sky. */
+  :root:not([data-theme="light"]) .home-summary.day-color-white {
+    border-top-color: #d0b06a;
+  }
+  :root:not([data-theme="light"]) .home-summary.day-color-black {
+    border-top-color: #8a94a0;
+  }
+
+  /* Chips are framed at every width now, so the milky light-mode wash has
+     to give way to the apse surface at every width too. */
+  :root:not([data-theme="light"]) .home-hour-link {
+    background: var(--surface);
   }
 
   :root:not([data-theme="light"]) .home-hour-link.is-current {
@@ -1862,15 +2045,40 @@ footer::before {
   }
 }
 
-:root[data-theme="dark"] .home-summary,
-:root[data-theme="dark"] .home-prayer-card,
-:root[data-theme="dark"] .home-hour-link {
+:root[data-theme="dark"] .home-prayer-card {
   background: var(--surface);
   box-shadow: none;
 }
 
+:root[data-theme="dark"] .home-summary.day-color-white {
+  border-top-color: #d0b06a;
+}
+:root[data-theme="dark"] .home-summary.day-color-black {
+  border-top-color: #8a94a0;
+}
+
+:root[data-theme="dark"] .home-hour-link {
+  background: var(--surface);
+}
+
 :root[data-theme="dark"] .home-hour-link.is-current {
   background: rgba(208, 176, 106, 0.12);
+}
+
+/* The mobile-only day card regains a surface in apse mode (on desktop the
+   day block stays transparent/editorial, so it needs nothing here). */
+@media (max-width: 700px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .home-summary {
+    background: var(--surface);
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 700px) {
+  :root[data-theme="dark"] .home-summary {
+    background: var(--surface);
+    box-shadow: none;
+  }
 }
 
 :root[data-theme="dark"] .pray-now {
@@ -2013,20 +2221,13 @@ footer::before {
     color: #600;
   }
 
-  /* Remove liturgical color row tints */
-  .color-white, .color-red, .color-green,
-  .color-violet, .color-black, .color-rose {
-    background: none;
-  }
-
   /* Keep page breaks out of psalm blocks */
   .psalm, .canticle, .hymn {
     page-break-inside: avoid;
   }
 
 
-  .psalm-verses .mediant,
-  .gloria-patri .mediant,
+  .mediant,
   .psalm-verses .verse-num,
   .scripture-ref,
   .sigil {

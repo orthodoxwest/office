@@ -177,6 +177,33 @@ func TestRenderMarianAntiphonStylesIncipitMediant(t *testing.T) {
 	}
 }
 
+func TestRenderAntiphonStylesMediant(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type: models.Antiphon,
+		Text: "The Lord said * to my Lord: Sit thou at my right hand.",
+	}, "")
+
+	if !strings.Contains(html, `The Lord said <span class="mediant">*</span> to my Lord: Sit thou at my right hand.`) {
+		t.Fatalf("expected antiphon mediant styled like a psalm verse: %s", html)
+	}
+}
+
+func TestRenderResponseStylesMediant(t *testing.T) {
+	html := string(renderLiturgicalBlock("R. Great is our Lord * and great is his power."))
+
+	if !strings.Contains(html, `<span class="sigil-text">Great is our Lord <span class="mediant">*</span> and great is his power.</span>`) {
+		t.Fatalf("expected response mediant styled like a psalm verse: %s", html)
+	}
+}
+
+func TestRenderVersicleStylesMediant(t *testing.T) {
+	html := string(renderLiturgicalBlock("V. Serve the Lord in fear: * and rejoice unto him with reverence."))
+
+	if !strings.Contains(html, `<span class="sigil-text">Serve the Lord in fear: <span class="mediant">*</span> and rejoice unto him with reverence.</span>`) {
+		t.Fatalf("expected versicle mediant styled like a psalm verse: %s", html)
+	}
+}
+
 func TestRenderHymnStanzasPreservesVerseLines(t *testing.T) {
 	html := string(renderHymnStanzas("Latin title\n\nFirst verse line,\nSecond verse line.\n\nAnother stanza."))
 

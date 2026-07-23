@@ -47,7 +47,7 @@
           <a href="{{navLink "/compline" $t $d}}"{{if eq $p "compline"}} class="active" aria-current="page"{{end}}>Compline</a>
           <span class="nav-divider" aria-hidden="true"></span>
           <a href="{{navLink "/calendar" $t $d}}"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
-          <a href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} class="active" aria-current="page"{{end}}>Reminders</a>
+          <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
         </nav>
       </details>
     </div>

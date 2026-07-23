@@ -1,8 +1,45 @@
 {{define "title"}}Divine Office — {{.DateStr}}{{end}}
 {{define "content"}}
 <div class="home">
+  {{/* Day identity first in DOM (desktop reading order). Mobile CSS reorders
+       the prayer card above so the CTA still wins the first screen. */}}
   <div class="home-hero">
-    {{/* Prayer card first: mobile stacks CTA above day metadata; desktop grid keeps it primary. */}}
+    <section class="home-summary day-color-{{.Color}}" aria-labelledby="home-date-heading">
+      <header class="home-day-head">
+        <h1 id="home-date-heading">
+          <a class="home-date-link" href="{{.CalendarLink}}" title="See this day in the ordo">{{.DateStr}}</a>
+        </h1>
+        {{if .FeastName}}<p class="feast">{{.FeastName}}</p>{{end}}
+        {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
+        {{if .Penitential}}
+        <p class="penitential">
+          {{range .Penitential}}<span class="penitential-badge">{{.}}</span>{{end}}
+        </p>
+        {{end}}
+        {{if .Commemorations}}
+        <div class="commemorations">
+          <span class="commemorations-label">Also</span>
+          <ul>
+            {{range .Commemorations}}<li>{{.}}</li>{{end}}
+          </ul>
+        </div>
+        {{end}}
+      </header>
+      <details class="hour-date-nav home-date-nav">
+        <summary>Change date</summary>
+        <nav class="day-nav" aria-label="Date navigation">
+          <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
+          <form class="date-jump-form" action="/" method="get">
+            <label class="sr-only" for="home-date-jump">Jump to date</label>
+            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
+            <button class="date-submit" type="submit">Go</button>
+            {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
+          </form>
+          <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
+        </nav>
+      </details>
+    </section>
+
     <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
       <h2 id="home-pray-heading">Pray the hours</h2>
       <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
@@ -14,36 +51,7 @@
         </a>
         {{end}}
       </div>
-      <p class="home-calendar-link"><a href="{{.CalendarLink}}">See this day in the ordo</a></p>
     </aside>
-
-    <section class="home-summary" aria-labelledby="home-date-heading">
-      <h1 id="home-date-heading">{{.DateStr}}</h1>
-      <nav class="day-nav" aria-label="Date navigation">
-        <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
-        <form class="date-jump-form" action="/" method="get">
-          <label class="sr-only" for="home-date-jump">Jump to date</label>
-          <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
-          <button class="date-submit" type="submit">Go</button>
-          {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
-        </form>
-        <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
-      </nav>
-      {{if .FeastName}}<p class="feast">{{.FeastName}}</p>{{end}}
-      {{if .FeastRank}}<p class="feast-rank"><a href="{{.CalendarLink}}" class="feast-rank-link">{{.FeastRank}}</a></p>{{end}}
-      {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
-      {{if .Penitential}}
-      <p class="penitential">
-        {{range .Penitential}}<span class="penitential-badge">{{.}}</span>{{end}}
-      </p>
-      {{end}}
-      {{if .Commemorations}}
-      <ul class="commemorations">
-        {{range .Commemorations}}<li>{{.}}</li>{{end}}
-      </ul>
-      {{end}}
-      <p class="meta"><span class="color-swatch {{printf "color-%s" .Color}}"></span>{{.Season}} &bull; {{.Color}}</p>
-    </section>
   </div>
 </div>
 {{end}}
