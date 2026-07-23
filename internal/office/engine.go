@@ -73,7 +73,7 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 	canonicalizeSourceRefs(hour, e.corpus)
 	collapseUniformAntiphons(hour)
 	markPsalmDoxologies(hour)
-	appendContextDecisions(hour, day, hourName)
+	appendContextDecisions(hour, day, hourName, moveable)
 	return hour, nil
 }
 
@@ -104,7 +104,7 @@ func canonicalizeSourceRefs(hour *models.OfficeHour, corpus *texts.TextCorpus) {
 	}
 }
 
-func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, hourName string) {
+func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, hourName string, moveable *calendar.MoveableDates) {
 	add := func(rule, outcome, detail string) {
 		hour.Decisions = append(hour.Decisions, models.CompositionDecision{Rule: rule, Outcome: outcome, Detail: detail})
 	}
@@ -129,6 +129,17 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 	if day.FeriaCommemoration != nil {
 		add("context:feria-commemoration", "present", day.FeriaCommemoration.ProperID)
 	}
+
+	// Structural dispositions are recorded only on hours that render the
+	// corresponding element, so sign-off credit cannot cover unread sections.
+	// Preces: Prime and Compline. Suffrage: Lauds and Vespers. Marian: Lauds,
+	// Vespers, and Compline.
+	switch hourName {
+	case "prime", "compline":
+		_, precesReason := precesDisposition(day, moveable)
+		add("preces", precesReason, "")
+	}
+
 	if hourName == "vespers" {
 		owner := "not-applicable"
 		switch day.Vespers.Owner {
@@ -140,8 +151,31 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("vespers:owner", owner, "")
 		add("vespers:rule", day.Vespers.Rule, "")
 		hour.Decisions = append(hour.Decisions, day.Vespers.Decisions...)
-		appendVespersOfficeContextDecisions(hour, vespersOfficeDay(day))
+		officeDay := vespersOfficeDay(day)
+		appendVespersOfficeContextDecisions(hour, officeDay)
+		// Suffrage and Marian selection follow the office that owns Vespers.
+		_, suffrageReason := suffrageDisposition(officeDay, moveable)
+		add("suffrage", suffrageReason, "")
+		addMarianDecisions(add, officeDay, hourName)
+	} else if hourName == "lauds" {
+		_, suffrageReason := suffrageDisposition(day, moveable)
+		add("suffrage", suffrageReason, "")
+		addMarianDecisions(add, day, hourName)
+	} else if hourName == "compline" {
+		addMarianDecisions(add, day, hourName)
 	}
+}
+
+// MarianBoundary outcomes for plan features (rule "marian:boundary").
+const (
+	MarianBoundaryCivilDay                    = "civil-day"
+	MarianBoundaryPurificationVespersOverride = "purification-vespers-override"
+)
+
+func addMarianDecisions(add func(rule, outcome, detail string), day *models.CalendarDay, hourName string) {
+	key, boundary := marianAntiphonSelection(day, hourName)
+	add("marian:selection", key, "")
+	add("marian:boundary", boundary, "")
 }
 
 // appendVespersOfficeContextDecisions describes the synthetic office day that
@@ -301,20 +335,37 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	return oe
 }
 
+// marianAntiphonSelection returns the seasonal Marian antiphon corpus slug and
+// the boundary branch for the given civil/office day and hour. Alma Redemptoris
+// continues through II Vespers of the Purification; Ave Regina begins at
+// Compline on February 2.
+func marianAntiphonSelection(day *models.CalendarDay, hourName string) (key, boundary string) {
+	if day == nil {
+		return "", MarianBoundaryCivilDay
+	}
+	key = day.MarianAntiphon
+	if hourName == "vespers" && day.Date.Month() == time.February && day.Date.Day() == 2 {
+		return "alma-redemptoris-christmas", MarianBoundaryPurificationVespersOverride
+	}
+	return key, MarianBoundaryCivilDay
+}
+
+// marianAntiphonKey is the slug-only helper used by resolvers.
+func marianAntiphonKey(day *models.CalendarDay, hourName string) string {
+	key, _ := marianAntiphonSelection(day, hourName)
+	return key
+}
+
 // resolveMarianElement resolves the seasonal Marian antiphon (with its versicle,
 // response, and collect) for the given day.
 func resolveMarianElement(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus) models.OfficeElement {
-	key := day.MarianAntiphon
-	// Alma Redemptoris continues through II Vespers of the Purification;
-	// Ave Regina begins at Compline on February 2.
-	if hourName == "vespers" && day.Date.Month() == time.February && day.Date.Day() == 2 {
-		key = "alma-redemptoris-christmas"
-	}
+	key := marianAntiphonKey(day, hourName)
 	ref := "ordinary/marian/" + key
 	oe := models.OfficeElement{
 		Type:       models.Antiphon,
 		Text:       corpus.Get(ref),
 		Label:      marianLabel(key),
+		SlotRef:    "marian-antiphon",
 		SourceRef:  ref,
 		SourceRefs: []string{ref},
 	}

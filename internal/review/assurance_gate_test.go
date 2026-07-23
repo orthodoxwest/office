@@ -20,11 +20,15 @@ func TestEvaluateAssurance(t *testing.T) {
 func TestAssuranceSummaryContainsNoSourceText(t *testing.T) {
 	report := &AssuranceReport{
 		StartYear: 2026, Years: 1, CandidateCount: 2555, ModeledFeatures: 10,
-		SelectedPages: 3, Verified: 1, NeedsReview: 3, SourceUnknown: 4,
+		FullCoverPages: 5, SelectedPages: 3, Verified: 1, NeedsReview: 3, SourceUnknown: 4,
 	}
 	var out bytes.Buffer
 	WriteAssuranceSummary(report, nil, &out, true)
-	for _, want := range []string{"Office assurance summary", "Modeled structural features", "Verified text entries", "Classified zero-occurrence entries"} {
+	for _, want := range []string{
+		"Office assurance summary", "Modeled structural features",
+		"Full structural-cover pages", "Residual structural-review pages",
+		"Verified text entries", "Classified zero-occurrence entries",
+	} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("summary missing %q:\n%s", want, out.String())
 		}

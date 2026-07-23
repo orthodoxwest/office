@@ -73,7 +73,7 @@ review-zero-occurrences: build ## List unrendered atomic texts with classificati
 review-suspects: build ## Print only pre-flagged/lint-flagged texts — the findings-sprint list
 	./office review provenance-queue -suspect-only $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
-review-plan: build ## Print minimal coverage-oriented review checklist CSV
+review-plan: build ## Print residual structural checklist CSV (default 28y fan-out; START/YEARS override)
 	./office review plan $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-assurance: build ## Run release assurance coverage gates

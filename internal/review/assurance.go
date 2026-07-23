@@ -136,7 +136,7 @@ func UniqueCompositionDecisions(in []models.CompositionDecision) []models.Compos
 // ReviewCandidate is one representative composition considered by the set
 // cover planner.
 type ReviewCandidate struct {
-	Hash         string // internal composition identity; omitted from reviewer output
+	Hash         string // internal composition identity; omitted from reviewer CSV
 	Priority     string
 	Hour         string
 	Date         time.Time
@@ -145,32 +145,104 @@ type ReviewCandidate struct {
 	Context      string
 	Dependencies []string
 	Decisions    []string
-	Features     []string
+	Features     []string // tier-A (or source) features used for cover
+	SignoffState string   // current / stale / unreviewed
 }
 
 // PlannedReview records why one candidate was selected.
 type PlannedReview struct {
 	Candidate   ReviewCandidate
 	NewCoverage []string
+	NewImpact   int  // fan-out impact of NewCoverage at selection time
+	PrimaryYear bool // true when the checklist date is in StartYear
 }
 
-// ReviewPlan is a greedy coverage plan over all distinct source and decision
-// features exercised in a year sweep.
+// ReviewPlan is a fan-out-weighted coverage plan over tier-A structural
+// features (optionally including source keys), reduced by current sign-offs
+// that carry the current StructuralFeatureSchema.
 type ReviewPlan struct {
-	StartYear      int
-	Years          int
-	CandidateCount int
-	FeatureCount   int
-	Features       []string
-	RenderedKeys   []string
-	Selected       []PlannedReview
-	IncludeSources bool
-	Uncovered      []string
+	StartYear         int
+	Years             int
+	CandidateCount    int
+	FeatureCount      int // tier-A features observed in the sweep
+	Features          []string
+	FeatureFanOut     map[string]int
+	RenderedKeys      []string
+	Selected          []PlannedReview
+	IncludeSources    bool
+	Uncovered         []string // residual after cover; should be empty without bugs
+	CreditedCount     int      // features already covered by schema-current sign-offs
+	CreditedFeatures  []string
+	TotalImpact       int // sum of fan-out over all tier-A features
+	RemainingImpact   int // impact still uncovered after sign-off credit, before selection
+	CoveredImpact     int // impact newly covered by selected pages
+	FullCoverPages    int // greedy cover size ignoring sign-off credit
+	PrimaryYearPages  int // selected pages dated in StartYear
+	FutureYearPages   int // selected pages for features absent from StartYear
+	CurrentSignoffs   int // live content hashes with a matching sign-off
+	CreditingSignoffs int // subset that also carry StructuralFeatureSchema
+	StaleSignoffs     int
 }
 
-// BuildReviewPlan composes the requested years, collapses candidates with
-// identical feature sets, then greedily selects pages covering the most still
-// unseen dependencies and decision branches.
+// isTierAStructuralFeature reports whether a feature participates in the
+// default structural set-cover. Tier B (context tags, pure weekday psalmody
+// section gates, and the redundant occurrence= alias) is excluded so fan-out
+// weighting does not burn reviewer time on descriptive state.
+func isTierAStructuralFeature(feature string) bool {
+	switch {
+	case strings.HasPrefix(feature, "source:"):
+		return false
+	case strings.HasPrefix(feature, "decision:context:"):
+		return false
+	case strings.HasPrefix(feature, "decision:office-context:"):
+		return false
+	case strings.HasPrefix(feature, "decision:occurrence="):
+		// Redundant with decision:occurrence:resolution-mode=...
+		return false
+	case isWeekdayPsalmodyNoise(feature):
+		return false
+	case strings.HasPrefix(feature, "decision:"):
+		return true
+	case strings.HasPrefix(feature, "resolution:"):
+		return true
+	default:
+		return false
+	}
+}
+
+// isWeekdayPsalmodyNoise matches section conditions that exist only to pick
+// which weekday psalmody block runs. Covering all seven weekdays multiplies
+// the plan without adding rubric branches.
+func isWeekdayPsalmodyNoise(feature string) bool {
+	if !strings.HasPrefix(feature, "decision:condition:") {
+		return false
+	}
+	body := strings.TrimPrefix(feature, "decision:condition:")
+	cond, _, _ := strings.Cut(body, "=")
+	if strings.Contains(cond, "not-festal-vespers-psalmody,weekday-") {
+		return true
+	}
+	if strings.Contains(cond, "not-is-feast,weekday-") && strings.Contains(cond, "not-festal-lauds-psalmody") {
+		return true
+	}
+	if strings.HasPrefix(cond, "weekday-") && !strings.Contains(cond, ",") {
+		return true
+	}
+	return false
+}
+
+// coverFeature reports whether the feature is in the cover universe for this plan.
+func coverFeature(feature string, includeSources bool) bool {
+	if strings.HasPrefix(feature, "source:") {
+		return includeSources
+	}
+	return isTierAStructuralFeature(feature)
+}
+
+// BuildReviewPlan composes the requested years, extracts tier-A structural
+// features (and optionally every rendered source key), credits features from
+// schema-current sign-offs, then greedily selects unreviewed pages that cover
+// the most remaining date-hour fan-out.
 func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) (*ReviewPlan, error) {
 	if years < 1 {
 		return nil, fmt.Errorf("years must be at least 1")
@@ -180,10 +252,16 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 		return nil, err
 	}
 
-	bySignature := map[string]ReviewCandidate{}
 	allFeatures := map[string]bool{}
+	featureFanOut := map[string]int{}
+	featureInPrimaryYear := map[string]bool{} // features observed in startYear
 	renderedKeys := map[string]bool{}
+	// One representative candidate per content hash (same composition).
+	hashCandidate := map[string]ReviewCandidate{}
+	// Feature signature -> content hashes that carry it.
+	sigHashes := map[string][]string{}
 	rawCount := 0
+
 	for year := startYear; year < startYear+years; year++ {
 		days, err := calendar.BuildCalendar(year, dataDir)
 		if err != nil {
@@ -199,31 +277,127 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 				}
 				rawCount++
 				c := candidateFor(day, hourName, hour, includeSources)
-				for _, dependency := range c.Dependencies {
+				// Drop bulk dependency text after features are extracted unless
+				// source coverage is in play (already folded into Features).
+				if !includeSources {
+					c.Dependencies = nil
+				}
+				for _, dependency := range hourDependencies(hour) {
 					renderedKeys[dependency] = true
 				}
+				inPrimary := year == startYear
 				for _, f := range c.Features {
 					allFeatures[f] = true
+					featureFanOut[f]++
+					if inPrimary {
+						featureInPrimaryYear[f] = true
+					}
+				}
+				if old, ok := hashCandidate[c.Hash]; !ok || betterHashRepresentative(c, old, startYear) {
+					hashCandidate[c.Hash] = c
 				}
 				sig := strings.Join(c.Features, "\x1f")
-				if old, ok := bySignature[sig]; !ok || candidateLess(c, old) {
-					bySignature[sig] = c
+				seen := false
+				for _, h := range sigHashes[sig] {
+					if h == c.Hash {
+						seen = true
+						break
+					}
+				}
+				if !seen {
+					sigHashes[sig] = append(sigHashes[sig], c.Hash)
 				}
 			}
 		}
 	}
 
-	candidates := make([]ReviewCandidate, 0, len(bySignature))
-	for _, c := range bySignature {
-		candidates = append(candidates, c)
+	signoffs, err := LoadSignoffs(dataDir)
+	if err != nil {
+		return nil, err
 	}
-	sort.Slice(candidates, func(i, j int) bool { return candidateLess(candidates[i], candidates[j]) })
+	liveHashes := make(map[string]bool, len(hashCandidate))
+	for h := range hashCandidate {
+		liveHashes[h] = true
+	}
+	currentHashes := map[string]bool{}
+	creditingHashes := map[string]bool{}
+	staleSignoffs := 0
+	currentSignoffs := 0
+	creditingSignoffs := 0
+	orphanedByKey := map[string]bool{}
+	for i := range signoffs {
+		s := &signoffs[i]
+		if liveHashes[s.Hash] {
+			currentHashes[s.Hash] = true
+			currentSignoffs++
+			if s.CreditsStructuralFeatures() {
+				creditingHashes[s.Hash] = true
+				creditingSignoffs++
+			}
+			continue
+		}
+		staleSignoffs++
+		orphanedByKey[s.Hour+"\x1f"+s.UnitKey] = true
+	}
+
+	// Structural credit only from schema-current sign-offs (not every live hash).
+	credited := map[string]bool{}
+	for hash := range creditingHashes {
+		c := hashCandidate[hash]
+		for _, f := range c.Features {
+			credited[f] = true
+		}
+	}
+
+	// Collapse each feature signature to one representative, preferring
+	// unreviewed pages in the primary (start) year as the checklist link.
+	candidates := make([]ReviewCandidate, 0, len(sigHashes))
+	for _, hashes := range sigHashes {
+		var best ReviewCandidate
+		have := false
+		for _, h := range hashes {
+			c := hashCandidate[h]
+			c.SignoffState = signoffStateFor(c, currentHashes, orphanedByKey)
+			if !have || betterRepresentative(c, best, startYear) {
+				best = c
+				have = true
+			}
+		}
+		if have {
+			candidates = append(candidates, best)
+		}
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		return betterRepresentative(candidates[i], candidates[j], startYear)
+	})
 
 	uncovered := make(map[string]bool, len(allFeatures))
+	totalImpact := 0
+	remainingImpact := 0
 	for f := range allFeatures {
+		totalImpact += featureFanOut[f]
+		if credited[f] {
+			continue
+		}
 		uncovered[f] = true
+		remainingImpact += featureFanOut[f]
 	}
-	plan := &ReviewPlan{StartYear: startYear, Years: years, CandidateCount: rawCount, IncludeSources: includeSources}
+
+	// Full-cover size (ignore sign-off credit) for assurance stability.
+	fullCoverPages := greedyCoverCount(candidates, allFeatures, featureFanOut, featureInPrimaryYear, startYear)
+
+	plan := &ReviewPlan{
+		StartYear: startYear, Years: years, CandidateCount: rawCount,
+		IncludeSources: includeSources, FeatureFanOut: featureFanOut,
+		TotalImpact: totalImpact, RemainingImpact: remainingImpact,
+		FullCoverPages:  fullCoverPages,
+		CurrentSignoffs: currentSignoffs, CreditingSignoffs: creditingSignoffs,
+		StaleSignoffs: staleSignoffs, CreditedCount: len(credited),
+	}
+	for f := range credited {
+		plan.CreditedFeatures = append(plan.CreditedFeatures, f)
+	}
+	sort.Strings(plan.CreditedFeatures)
 	for key := range renderedKeys {
 		plan.RenderedKeys = append(plan.RenderedKeys, key)
 	}
@@ -233,38 +407,241 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 	}
 	sort.Strings(plan.Features)
 	plan.FeatureCount = len(plan.Features)
+
+	// Two-phase cover: (1) features observed in the primary year, using only
+	// primary-year pages; (2) remaining features that never occur in the
+	// primary year, allowing later years. Fan-out still weights the full sweep.
 	used := make([]bool, len(candidates))
-	for len(uncovered) > 0 {
-		best, bestNew := -1, []string(nil)
-		for i, c := range candidates {
-			if used[i] {
-				continue
-			}
-			var newly []string
-			for _, f := range c.Features {
-				if uncovered[f] {
+	selectPhase := func(restrictPrimary bool) {
+		for len(uncovered) > 0 {
+			restrictToUnsigned := residualHasUnsignedCover(candidates, used, uncovered, restrictPrimary, startYear)
+			best, bestNew, bestImpact := -1, []string(nil), -1
+			for i, c := range candidates {
+				if used[i] {
+					continue
+				}
+				if restrictPrimary && c.Date.Year() != startYear {
+					continue
+				}
+				if restrictToUnsigned && c.SignoffState == Current.String() {
+					continue
+				}
+				var newly []string
+				impact := 0
+				for _, f := range c.Features {
+					if !uncovered[f] {
+						continue
+					}
+					// In the primary phase, only spend picks on features that
+					// actually appear in the primary year (future-only features
+					// wait for phase 2 even if this page also has them).
+					if restrictPrimary && !featureInPrimaryYear[f] {
+						continue
+					}
 					newly = append(newly, f)
+					impact += featureFanOut[f]
+				}
+				if len(newly) == 0 {
+					continue
+				}
+				if betterCoverPick(c, impact, len(newly), best < 0, candidates, best, bestImpact, len(bestNew), startYear) {
+					best, bestNew, bestImpact = i, newly, impact
 				}
 			}
-			if len(newly) > len(bestNew) || (len(newly) == len(bestNew) && len(newly) > 0 && (best < 0 || candidateLess(c, candidates[best]))) {
-				best, bestNew = i, newly
+			if best < 0 || len(bestNew) == 0 {
+				if restrictToUnsigned {
+					// Retry allowing currently signed pages in this phase.
+					restrictToUnsigned = false
+					// Manual retry: re-run loop body once without unsigned filter
+					// by clearing the flag and continuing the outer for.
+					// Simpler: fall through to a second scan without the flag.
+					best, bestNew, bestImpact = -1, nil, -1
+					for i, c := range candidates {
+						if used[i] {
+							continue
+						}
+						if restrictPrimary && c.Date.Year() != startYear {
+							continue
+						}
+						var newly []string
+						impact := 0
+						for _, f := range c.Features {
+							if !uncovered[f] {
+								continue
+							}
+							if restrictPrimary && !featureInPrimaryYear[f] {
+								continue
+							}
+							newly = append(newly, f)
+							impact += featureFanOut[f]
+						}
+						if len(newly) == 0 {
+							continue
+						}
+						if betterCoverPick(c, impact, len(newly), best < 0, candidates, best, bestImpact, len(bestNew), startYear) {
+							best, bestNew, bestImpact = i, newly, impact
+						}
+					}
+					if best < 0 || len(bestNew) == 0 {
+						return
+					}
+				} else {
+					return
+				}
 			}
+			used[best] = true
+			for _, f := range bestNew {
+				delete(uncovered, f)
+			}
+			sort.Strings(bestNew)
+			plan.CoveredImpact += bestImpact
+			primary := candidates[best].Date.Year() == startYear
+			if primary {
+				plan.PrimaryYearPages++
+			} else {
+				plan.FutureYearPages++
+			}
+			plan.Selected = append(plan.Selected, PlannedReview{
+				Candidate: candidates[best], NewCoverage: bestNew, NewImpact: bestImpact,
+				PrimaryYear: primary,
+			})
 		}
-		if best < 0 || len(bestNew) == 0 {
-			break
-		}
-		used[best] = true
-		for _, f := range bestNew {
-			delete(uncovered, f)
-		}
-		sort.Strings(bestNew)
-		plan.Selected = append(plan.Selected, PlannedReview{Candidate: candidates[best], NewCoverage: bestNew})
 	}
+	selectPhase(true)  // primary year first
+	selectPhase(false) // future-only residual
+
 	for feature := range uncovered {
 		plan.Uncovered = append(plan.Uncovered, feature)
 	}
 	sort.Strings(plan.Uncovered)
 	return plan, nil
+}
+
+func residualHasUnsignedCover(candidates []ReviewCandidate, used []bool, uncovered map[string]bool, restrictPrimary bool, primaryYear int) bool {
+	for i, c := range candidates {
+		if used[i] || c.SignoffState == Current.String() {
+			continue
+		}
+		if restrictPrimary && c.Date.Year() != primaryYear {
+			continue
+		}
+		for _, f := range c.Features {
+			if uncovered[f] {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// greedyCoverCount returns how many pages a full (no-credit) two-phase cover needs.
+func greedyCoverCount(candidates []ReviewCandidate, allFeatures map[string]bool, fanOut map[string]int, featureInPrimaryYear map[string]bool, primaryYear int) int {
+	uncovered := make(map[string]bool, len(allFeatures))
+	for f := range allFeatures {
+		uncovered[f] = true
+	}
+	used := make([]bool, len(candidates))
+	pages := 0
+	run := func(restrictPrimary bool) {
+		for len(uncovered) > 0 {
+			best, bestNew, bestImpact := -1, []string(nil), -1
+			for i, c := range candidates {
+				if used[i] {
+					continue
+				}
+				if restrictPrimary && c.Date.Year() != primaryYear {
+					continue
+				}
+				var newly []string
+				impact := 0
+				for _, f := range c.Features {
+					if !uncovered[f] {
+						continue
+					}
+					if restrictPrimary && !featureInPrimaryYear[f] {
+						continue
+					}
+					newly = append(newly, f)
+					impact += fanOut[f]
+				}
+				if len(newly) == 0 {
+					continue
+				}
+				if betterCoverPick(c, impact, len(newly), best < 0, candidates, best, bestImpact, len(bestNew), primaryYear) {
+					best, bestNew, bestImpact = i, newly, impact
+				}
+			}
+			if best < 0 || len(bestNew) == 0 {
+				return
+			}
+			used[best] = true
+			pages++
+			for _, f := range bestNew {
+				delete(uncovered, f)
+			}
+		}
+	}
+	run(true)
+	run(false)
+	return pages
+}
+
+func signoffStateFor(c ReviewCandidate, currentHashes, orphanedByKey map[string]bool) string {
+	if currentHashes[c.Hash] {
+		return Current.String()
+	}
+	if orphanedByKey[c.Hour+"\x1f"+c.UnitKey] {
+		return Stale.String()
+	}
+	return Unreviewed.String()
+}
+
+// betterHashRepresentative picks which date to keep for a content hash.
+// Prefer the primary year so checklist links are ordo-verifiable when possible.
+func betterHashRepresentative(a, b ReviewCandidate, primaryYear int) bool {
+	aPrimary := a.Date.Year() == primaryYear
+	bPrimary := b.Date.Year() == primaryYear
+	if aPrimary != bPrimary {
+		return aPrimary
+	}
+	return candidateLess(a, b)
+}
+
+func betterRepresentative(a, b ReviewCandidate, primaryYear int) bool {
+	aDone := a.SignoffState == Current.String()
+	bDone := b.SignoffState == Current.String()
+	if aDone != bDone {
+		return !aDone
+	}
+	aPrimary := a.Date.Year() == primaryYear
+	bPrimary := b.Date.Year() == primaryYear
+	if aPrimary != bPrimary {
+		return aPrimary
+	}
+	return candidateLess(a, b)
+}
+
+func betterCoverPick(c ReviewCandidate, impact, newCount int, first bool, candidates []ReviewCandidate, best, bestImpact, bestNewCount, primaryYear int) bool {
+	if first || best < 0 {
+		return true
+	}
+	if impact != bestImpact {
+		return impact > bestImpact
+	}
+	cDone := c.SignoffState == Current.String()
+	bDone := candidates[best].SignoffState == Current.String()
+	if cDone != bDone {
+		return !cDone
+	}
+	cPrimary := c.Date.Year() == primaryYear
+	bPrimary := candidates[best].Date.Year() == primaryYear
+	if cPrimary != bPrimary {
+		return cPrimary
+	}
+	if newCount != bestNewCount {
+		return newCount > bestNewCount
+	}
+	return candidateLess(c, candidates[best])
 }
 
 func candidateFor(day *models.CalendarDay, hourName string, hour *models.OfficeHour, includeSources bool) ReviewCandidate {
@@ -284,10 +661,16 @@ func candidateFor(day *models.CalendarDay, hourName string, hour *models.OfficeH
 	for _, d := range dedupeDecisions(hour.Decisions) {
 		decision := d.Rule + "=" + d.Outcome
 		decisionSet[decision] = true
-		featureSet["decision:"+decision] = true
+		feat := "decision:" + decision
+		if coverFeature(feat, includeSources) {
+			featureSet[feat] = true
+		}
 	}
 	for decision := range decisionSet {
-		c.Decisions = append(c.Decisions, decision)
+		feat := "decision:" + decision
+		if coverFeature(feat, includeSources) {
+			c.Decisions = append(c.Decisions, decision)
+		}
 	}
 	for _, section := range hour.Sections {
 		for _, elem := range section.Elements {
@@ -295,7 +678,10 @@ func candidateFor(day *models.CalendarDay, hourName string, hour *models.OfficeH
 				continue
 			}
 			tier, _, _ := strings.Cut(elem.SourceRef, "/")
-			featureSet["resolution:"+elem.SlotRef+"="+tier] = true
+			feat := "resolution:" + elem.SlotRef + "=" + tier
+			if coverFeature(feat, includeSources) {
+				featureSet[feat] = true
+			}
 		}
 	}
 	sort.Strings(c.Decisions)
@@ -322,27 +708,46 @@ func candidateLess(a, b ReviewCandidate) bool {
 // PrintReviewPlanSummary writes compact generated coverage counts.
 func PrintReviewPlanSummary(p *ReviewPlan, w io.Writer) {
 	fmt.Fprintf(w, "=== Coverage-oriented review plan: %d-%d ===\n", p.StartYear, p.StartYear+p.Years-1)
-	fmt.Fprintf(w, "  composed candidates: %d\n", p.CandidateCount)
-	fmt.Fprintf(w, "  coverage features:   %d\n", p.FeatureCount)
-	fmt.Fprintf(w, "  selected pages:      %d\n", len(p.Selected))
-	fmt.Fprintf(w, "  source-key coverage: %t\n", p.IncludeSources)
-	fmt.Fprintf(w, "  uncovered features:  %d\n", len(p.Uncovered))
+	fmt.Fprintf(w, "  composed candidates:   %d\n", p.CandidateCount)
+	fmt.Fprintf(w, "  structural features:   %d\n", p.FeatureCount)
+	fmt.Fprintf(w, "  credited by sign-off:  %d\n", p.CreditedCount)
+	fmt.Fprintf(w, "  total feature impact:  %d\n", p.TotalImpact)
+	fmt.Fprintf(w, "  residual impact:       %d\n", p.RemainingImpact)
+	fmt.Fprintf(w, "  full-cover pages:      %d\n", p.FullCoverPages)
+	fmt.Fprintf(w, "  residual pages:        %d\n", len(p.Selected))
+	fmt.Fprintf(w, "  primary-year pages:    %d\n", p.PrimaryYearPages)
+	fmt.Fprintf(w, "  future-year pages:     %d\n", p.FutureYearPages)
+	fmt.Fprintf(w, "  impact covered:        %d\n", p.CoveredImpact)
+	fmt.Fprintf(w, "  current sign-offs:     %d\n", p.CurrentSignoffs)
+	fmt.Fprintf(w, "  crediting sign-offs:   %d\n", p.CreditingSignoffs)
+	fmt.Fprintf(w, "  stale sign-offs:       %d\n", p.StaleSignoffs)
+	fmt.Fprintf(w, "  source-key coverage:   %t\n", p.IncludeSources)
+	fmt.Fprintf(w, "  uncovered features:    %d\n", len(p.Uncovered))
 }
 
-// WriteReviewPlanCSV writes the selected review pages in greedy order.
+// WriteReviewPlanCSV writes the selected review pages in impact order.
+// Columns stay reviewer-facing: no bulk dependency dumps or internal hashes.
 func WriteReviewPlanCSV(p *ReviewPlan, w io.Writer, baseURL string) error {
 	if baseURL == "" {
 		baseURL = DefaultBaseURL
 	}
 	baseURL = strings.TrimRight(baseURL, "/")
 	cw := csv.NewWriter(w)
-	_ = cw.Write([]string{"order", "priority", "hour", "date", "unit_key", "celebration", "context", "new_coverage", "dependencies", "decisions", "url"})
+	_ = cw.Write([]string{
+		"order", "priority", "hour", "date", "unit_key", "celebration", "context",
+		"signoff_status", "primary_year", "new_impact", "new_features", "url",
+	})
 	for i, selected := range p.Selected {
 		c := selected.Candidate
+		primary := "no"
+		if selected.PrimaryYear {
+			primary = "yes"
+		}
 		_ = cw.Write([]string{
 			fmt.Sprint(i + 1), c.Priority, c.Hour, c.Date.Format("2006-01-02"),
-			c.UnitKey, c.Celebration, c.Context, fmt.Sprint(len(selected.NewCoverage)),
-			strings.Join(c.Dependencies, "; "), strings.Join(c.Decisions, "; "),
+			c.UnitKey, c.Celebration, c.Context, c.SignoffState, primary,
+			fmt.Sprint(selected.NewImpact),
+			strings.Join(selected.NewCoverage, "; "),
 			baseURL + "/" + c.Hour + "/" + c.Date.Format("2006-01-02"),
 		})
 	}

@@ -784,7 +784,7 @@ func TestVespersDecisionsExposeCivilAndOfficeContexts(t *testing.T) {
 		},
 	}
 	hour := &models.OfficeHour{}
-	appendContextDecisions(hour, day, "vespers")
+	appendContextDecisions(hour, day, "vespers", nil)
 
 	assertDecision(t, hour.Decisions, "context:weekday", "saturday", "")
 	assertDecision(t, hour.Decisions, "context:office", "celebration", "st-anthony-egypt")
@@ -793,6 +793,16 @@ func TestVespersDecisionsExposeCivilAndOfficeContexts(t *testing.T) {
 	assertDecision(t, hour.Decisions, "office-context:office", "celebration", "epiphany-sunday-2")
 	assertDecision(t, hour.Decisions, "office-context:commemorations", "4", "")
 	assertDecision(t, hour.Decisions, "office-context:first-vespers", "yes", "")
+	// Preces are not recorded on Vespers (only Prime/Compline render them).
+	for _, d := range hour.Decisions {
+		if d.Rule == "preces" {
+			t.Errorf("vespers must not record preces disposition: %#v", d)
+		}
+	}
+	// Suffrage follows the office that owns Vespers (Sunday), not the civil feast.
+	assertDecision(t, hour.Decisions, "suffrage", SuffrageSaid, "")
+	assertDecision(t, hour.Decisions, "marian:selection", "", "")
+	assertDecision(t, hour.Decisions, "marian:boundary", MarianBoundaryCivilDay, "")
 }
 
 func assertDecision(t *testing.T, decisions []models.CompositionDecision, rule, outcome, detail string) {

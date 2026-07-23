@@ -428,3 +428,29 @@ func TestEvaluateConditionIsFerialAndSeason(t *testing.T) {
 		})
 	}
 }
+
+func TestPrecesDispositionOctaveCommemoration(t *testing.T) {
+	// A day outside an octave can still suppress preces when a commemorated
+	// office carries an -octave- id without itself being a double.
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 7, 1, 0, 0, 0, 0, time.UTC),
+		Season: models.Pentecost,
+		Celebration: &models.Feast{
+			ID: "feria", Category: models.CategoryFeria, Rank: models.Simple,
+		},
+		Commemorations: []*models.Feast{
+			{ID: "ss-peter-paul-octave-day-3", Rank: models.Simple},
+		},
+	}
+	said, reason := precesDisposition(day, nil)
+	if said || reason != PrecesSuppressedOctaveCommemoration {
+		t.Fatalf("precesDisposition = (%v, %q), want (false, %q)", said, reason, PrecesSuppressedOctaveCommemoration)
+	}
+}
+
+func TestSuffrageDispositionNilDay(t *testing.T) {
+	said, reason := suffrageDisposition(nil, nil)
+	if said || reason != SuffrageSuppressedOutOfSeason {
+		t.Fatalf("suffrageDisposition(nil) = (%v, %q)", said, reason)
+	}
+}

@@ -26,7 +26,8 @@ type AssuranceReport struct {
 	CandidateCount     int
 	ModeledFeatures    int
 	ModeledFeatureIDs  []string
-	SelectedPages      int
+	FullCoverPages     int // greedy cover ignoring sign-off credit
+	SelectedPages      int // residual pages after schema-current sign-off credit
 	UncoveredFeatures  []string
 	Verified           int
 	NeedsReview        int
@@ -57,7 +58,8 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 	}
 	report := &AssuranceReport{
 		StartYear: startYear, Years: years, CandidateCount: plan.CandidateCount,
-		ModeledFeatures: plan.FeatureCount, SelectedPages: len(plan.Selected),
+		ModeledFeatures: plan.FeatureCount,
+		FullCoverPages:  plan.FullCoverPages, SelectedPages: len(plan.Selected),
 		ModeledFeatureIDs: append([]string(nil), plan.Features...),
 		UncoveredFeatures: append([]string(nil), plan.Uncovered...),
 	}
@@ -152,7 +154,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintln(w, "|---|---:|")
 		fmt.Fprintf(w, "| Candidate date-hours (%d–%d) | %d |\n", report.StartYear, report.StartYear+report.Years-1, report.CandidateCount)
 		fmt.Fprintf(w, "| Modeled structural features | %d |\n", report.ModeledFeatures)
-		fmt.Fprintf(w, "| Selected structural-review pages | %d |\n", report.SelectedPages)
+		fmt.Fprintf(w, "| Full structural-cover pages | %d |\n", report.FullCoverPages)
+		fmt.Fprintf(w, "| Residual structural-review pages | %d |\n", report.SelectedPages)
 		fmt.Fprintf(w, "| Uncovered features | %d |\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "| Verified text entries | %d |\n", report.Verified)
 		fmt.Fprintf(w, "| Rendered text entries needing review | %d |\n", report.NeedsReview)
@@ -165,7 +168,8 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
 		fmt.Fprintf(w, "  candidate date-hours: %d\n", report.CandidateCount)
 		fmt.Fprintf(w, "  modeled features:     %d\n", report.ModeledFeatures)
-		fmt.Fprintf(w, "  selected pages:       %d\n", report.SelectedPages)
+		fmt.Fprintf(w, "  full-cover pages:     %d\n", report.FullCoverPages)
+		fmt.Fprintf(w, "  residual pages:       %d\n", report.SelectedPages)
 		fmt.Fprintf(w, "  uncovered features:   %d\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "  verified:             %d\n", report.Verified)
 		fmt.Fprintf(w, "  rendered needs review:%5d\n", report.NeedsReview)

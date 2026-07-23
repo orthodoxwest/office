@@ -99,7 +99,7 @@ make verify-psalms                  # machine-check all Coverdale Psalm files
 ./office review provenance-queue   # dependency-weighted atomic text review queue
 ./office review attest [flags] KEY REVIEWER # verify one text against its source
 ./office review explain HOUR DATE  # JSON dependencies and decisions for one hour
-./office review plan               # minimal structural-review checklist CSV
+./office review plan               # residual structural-review checklist CSV (default 28y fan-out)
 ./office review sign HOUR DATE REVIEWER # sign off one reviewed hour page
 ./office review assurance          # release assurance gates and summary
 ```
@@ -136,7 +136,7 @@ make review-manifest   # human-review checklist CSV (START=2026 YEARS=1)
 make review-status     # review coverage vs data/review/signoffs.txt
 make review-provenance # generated corpus provenance counts
 make review-provenance-queue # prioritize atomic text verification
-make review-plan       # minimal structural-review checklist
+make review-plan       # residual structural-review checklist
 make review-assurance  # release assurance gates
 ```
 
@@ -176,11 +176,18 @@ Text verification and structural verification are tracked separately:
   corpus entry by distinct composition fan-out, priority-A use, principal-hour
   use, and total occurrences. Verified entries are excluded unless
   `-include-verified` is supplied.
-- `./office review plan -start 2026 -years 1` uses greedy set cover to select a
-  small checklist exercising every structural decision and fallback tier. Text
-  entries are verified independently through provenance. Add
-  `-include-sources` only when a checklist that also renders every used corpus
-  key is desired.
+- `./office review plan` builds a residual structural checklist over **28 years**
+  by default (aligned with the assurance window): tier-A composition features
+  (occurrence/concurrence, preces and suffrage *reasons*, Marian
+  selection/boundary, resolution tiers), reduced by features present on
+  sign-offs recorded under the current structural feature schema, ordered by
+  date-hour fan-out so high-impact branches come first. Checklist **dates
+  prefer the start year**; later years appear only for features that never
+  occur in the start year (CSV `primary_year=yes|no`). Override with
+  `-years 1` for a single-year residual. Legacy sign-offs without `schema=N`
+  do not credit structural residual. Text entries stay on the provenance track.
+  Add `-include-sources` only when a checklist that also covers every used
+  corpus key is desired (maintainer use).
 
 Record a completed source check without editing CSV manually:
 
@@ -199,8 +206,10 @@ Record a completed structural review by the hour and date that was checked:
 ./office review sign lauds 2026-06-07 reviewer
 ```
 
-The command resolves the page's internal version identity automatically; no
-identifier needs to be copied from a checklist.
+The command resolves the page's internal version identity automatically and
+records the current structural feature schema. Schema-current sign-offs credit
+that composition's structural features so the next `review plan` shrinks;
+content status (current/stale) still works for legacy rows.
 
 `./office review assurance` runs the representative multi-year structural
 plan, validates provenance, and enforces the reviewable floors in
