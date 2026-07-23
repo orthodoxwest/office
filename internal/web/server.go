@@ -92,7 +92,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			sb.WriteString(`</div>`)
 		} else {
 			sb.WriteString(`<p class="antiphon"><em>Ant.</em> `)
-			sb.WriteString(escCross(elem.Text))
+			sb.WriteString(chantLineHTML(elem.Text))
 			sb.WriteString(`</p>`)
 		}
 	case models.Psalm, models.Canticle:
@@ -454,8 +454,9 @@ func renderMarianAntiphon(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
 }
 
-// chantLineHTML renders one sung antiphon line, styling a " * " incipit
-// mediant as the muted glyph used in the psalm verses.
+// chantLineHTML renders a line of liturgical text, styling a " * " pointing
+// mediant as the muted glyph used in psalm verses (antiphons, responsories,
+// versicles, plain prose in liturgical blocks, Marian chant lines, etc.).
 func chantLineHTML(line string) string {
 	before, after, found := strings.Cut(line, " * ")
 	if !found {
@@ -512,7 +513,7 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 					sb.WriteByte(' ')
 				}
 			}
-			sb.WriteString(escCross(l))
+			sb.WriteString(chantLineHTML(l))
 		}
 		sb.WriteString(`</p>`)
 		proseLines = nil
@@ -546,7 +547,7 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="versicle-line"><span class="sigil">℣.</span><span class="sigil-text">`)
-			sb.WriteString(escCross(line[3:]))
+			sb.WriteString(chantLineHTML(line[3:]))
 			sb.WriteString(`</span></p>`)
 			continue
 		}
@@ -555,7 +556,7 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="response-line"><span class="sigil">℟.</span><span class="sigil-text">`)
-			sb.WriteString(escCross(line[3:]))
+			sb.WriteString(chantLineHTML(line[3:]))
 			sb.WriteString(`</span></p>`)
 			continue
 		}
@@ -564,7 +565,7 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="versicle-line"><span class="sigil">Blessing.</span><span class="sigil-text">`)
-			sb.WriteString(escCross(line[10:]))
+			sb.WriteString(chantLineHTML(line[10:]))
 			sb.WriteString(`</span></p>`)
 			continue
 		}

@@ -36,9 +36,7 @@ type homeData struct {
 	TodayLink      string
 	ShowToday      bool
 	FeastName      string
-	FeastRank      string
 	Commemorations []string
-	Season         string
 	Color          string
 	OctaveNote     string
 	Penitential    []string
@@ -486,11 +484,9 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	day := &days[dayIndex]
 
 	feastName := ""
-	feastRank := ""
 	var commemorations []string
 	if day.Celebration != nil {
 		feastName = day.Celebration.Name
-		feastRank = day.Celebration.Rank.DisplayName()
 	} else if day.Tempora != "" {
 		feastName = day.Tempora
 	}
@@ -498,9 +494,10 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		commemorations = append(commemorations, c.Name)
 	}
 
+	// Short home-facing note; full wording lives in the ordo.
 	octaveNote := ""
 	if day.WithinOctaveOf != "" && !strings.Contains(strings.ToLower(feastName), "octave") {
-		octaveNote = "Within the Octave of " + calendar.OctaveDisplayName(day.WithinOctaveOf)
+		octaveNote = "Octave of " + calendar.OctaveDisplayName(day.WithinOctaveOf)
 	}
 
 	theme := themeParam(r)
@@ -522,9 +519,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		TodayLink:      homeLink("", theme),
 		ShowToday:      dateSlug != nowSlug,
 		FeastName:      feastName,
-		FeastRank:      feastRank,
 		Commemorations: commemorations,
-		Season:         titleCase(string(day.Season)),
 		Color:          string(day.Color),
 		OctaveNote:     octaveNote,
 		Penitential:    day.Penitential.Labels(),

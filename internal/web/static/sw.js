@@ -177,7 +177,7 @@ function offlineResponse() {
     "<a href=\"/terce\">Terce</a><a href=\"/sext\">Sext</a><a href=\"/none\">None</a>" +
     "<a href=\"/vespers\">Vespers</a><a href=\"/compline\">Compline</a>" +
     "<span class=\"nav-divider\" aria-hidden=\"true\"></span>" +
-    "<a href=\"/calendar\">Ordo</a><a href=\"/reminders\">Reminders</a>" +
+    "<a href=\"/calendar\">Ordo</a><a class=\"nav-secondary\" href=\"/reminders\">Reminders</a>" +
     "</nav></details></div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
     "<p class=\"home-kicker\">Offline</p>" +
