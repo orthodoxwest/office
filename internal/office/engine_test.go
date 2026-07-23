@@ -470,9 +470,44 @@ func TestResolveMarianElementUsesFebruarySecondOfficeBoundary(t *testing.T) {
 	if vespers.Text != "Alma" || vespers.Label != "Alma Redemptoris Mater" {
 		t.Fatalf("Vespers Marian antiphon = (%q, %q), want Alma Redemptoris", vespers.Text, vespers.Label)
 	}
+	if vespers.SlotRef != "marian-antiphon" {
+		t.Fatalf("Vespers Marian SlotRef = %q, want marian-antiphon", vespers.SlotRef)
+	}
+	vKey, vBoundary := marianAntiphonSelection(day, "vespers")
+	if vKey != "alma-redemptoris-christmas" || vBoundary != MarianBoundaryPurificationVespersOverride {
+		t.Fatalf("vespers selection = (%q, %q)", vKey, vBoundary)
+	}
 
 	compline := resolveMarianElement(day, "compline", corpus)
 	if compline.Text != "Ave" || compline.Label != "Ave Regina Caelorum" {
 		t.Fatalf("Compline Marian antiphon = (%q, %q), want Ave Regina", compline.Text, compline.Label)
 	}
+	if compline.SlotRef != "marian-antiphon" || !strings.HasPrefix(compline.SourceRef, "ordinary/marian/") {
+		t.Fatalf("Compline Marian metadata = slot %q ref %q", compline.SlotRef, compline.SourceRef)
+	}
+	cKey, cBoundary := marianAntiphonSelection(day, "compline")
+	if cKey != "ave-regina-caelorum" || cBoundary != MarianBoundaryCivilDay {
+		t.Fatalf("compline selection = (%q, %q)", cKey, cBoundary)
+	}
+
+	// Decision traces must diverge for the Feb 2 boundary.
+	vHour := &models.OfficeHour{}
+	appendContextDecisions(vHour, day, "vespers", nil)
+	assertDecisionPresent(t, vHour.Decisions, "marian:selection", "alma-redemptoris-christmas")
+	assertDecisionPresent(t, vHour.Decisions, "marian:boundary", MarianBoundaryPurificationVespersOverride)
+
+	cHour := &models.OfficeHour{}
+	appendContextDecisions(cHour, day, "compline", nil)
+	assertDecisionPresent(t, cHour.Decisions, "marian:selection", "ave-regina-caelorum")
+	assertDecisionPresent(t, cHour.Decisions, "marian:boundary", MarianBoundaryCivilDay)
+}
+
+func assertDecisionPresent(t *testing.T, decisions []models.CompositionDecision, rule, outcome string) {
+	t.Helper()
+	for _, d := range decisions {
+		if d.Rule == rule && d.Outcome == outcome {
+			return
+		}
+	}
+	t.Errorf("missing decision %s=%s in %#v", rule, outcome, decisions)
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,20 +16,34 @@ import (
 	"github.com/orthodoxwest/office/internal/office"
 )
 
+// StructuralFeatureSchema is the tier-A decision/resolution feature universe
+// version. Bump when new structural decision or resolution feature IDs are
+// introduced so legacy sign-offs do not auto-credit branches that did not
+// exist (or were not plan features) when the page was reviewed.
+//
+// Schema history:
+//
+//	0 — pre-schema sign-offs (no structural credit for residual planning)
+//	1 — tier-A residual plan with preces/suffrage reasons, Marian selection
+//	2 — hour-scoped dispositions, Marian boundary feature, credit gating
+const StructuralFeatureSchema = 2
+
 // Signoff records that a human reviewed one unit against the source books.
 // File format (data/review/signoffs.txt), whitespace-separated:
 //
-//	hash hour unit-key reviewer date [note...]
+//	hash hour unit-key reviewer date [schema=N] [note...]
 //
 // The hash binds the sign-off to the exact composition the reviewer saw; the
 // hour and unit-key let a later sweep recognise the sign-off as stale (rather
-// than orphaned) after the underlying texts change.
+// than orphaned) after the underlying texts change. schema=N gates structural
+// feature credit in the residual review plan (see StructuralFeatureSchema).
 type Signoff struct {
 	Hash     string
 	Hour     string
 	UnitKey  string
 	Reviewer string
 	Date     string // YYYY-MM-DD
+	Schema   int    // 0 = absent / legacy; see StructuralFeatureSchema
 	Note     string
 }
 
@@ -72,16 +87,44 @@ func ParseSignoffs(r io.Reader) ([]Signoff, error) {
 			Reviewer: fields[3],
 			Date:     fields[4],
 		}
-		if len(fields) > 5 {
-			s.Note = strings.Join(fields[5:], " ")
+		rest := fields[5:]
+		if len(rest) > 0 {
+			if n, ok := parseSchemaToken(rest[0]); ok {
+				s.Schema = n
+				rest = rest[1:]
+			}
+		}
+		if len(rest) > 0 {
+			s.Note = strings.Join(rest, " ")
 		}
 		signoffs = append(signoffs, s)
 	}
 	return signoffs, scanner.Err()
 }
 
+func parseSchemaToken(tok string) (int, bool) {
+	const prefix = "schema="
+	if !strings.HasPrefix(tok, prefix) {
+		return 0, false
+	}
+	n, err := strconv.Atoi(tok[len(prefix):])
+	if err != nil || n < 0 {
+		return 0, false
+	}
+	return n, true
+}
+
+// CreditsStructuralFeatures reports whether this sign-off may credit tier-A
+// structural features in the residual plan. Legacy rows (schema 0) and rows
+// recorded under an older feature universe do not credit, so observability
+// expansions cannot silently cover unreviewed branches.
+func (s Signoff) CreditsStructuralFeatures() bool {
+	return s.Schema == StructuralFeatureSchema
+}
+
 // AppendSignoff appends one record to data/review/signoffs.txt, creating the
-// file (and directory) if needed.
+// file (and directory) if needed. New sign-offs always record the current
+// StructuralFeatureSchema so residual planning can credit their features.
 func AppendSignoff(dataDir string, s Signoff) error {
 	path := SignoffPath(dataDir)
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
@@ -92,7 +135,10 @@ func AppendSignoff(dataDir string, s Signoff) error {
 		return err
 	}
 	defer f.Close()
-	line := fmt.Sprintf("%s %s %s %s %s", s.Hash, s.Hour, s.UnitKey, s.Reviewer, s.Date)
+	if s.Schema == 0 {
+		s.Schema = StructuralFeatureSchema
+	}
+	line := fmt.Sprintf("%s %s %s %s %s schema=%d", s.Hash, s.Hour, s.UnitKey, s.Reviewer, s.Date, s.Schema)
 	if s.Note != "" {
 		line += " " + s.Note
 	}
@@ -128,7 +174,8 @@ func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note str
 	}
 	signoff := &Signoff{
 		Hash: unit.Hash, Hour: hourName, UnitKey: unit.UnitKey,
-		Reviewer: reviewer, Date: time.Now().Format("2006-01-02"), Note: note,
+		Reviewer: reviewer, Date: time.Now().Format("2006-01-02"),
+		Schema: StructuralFeatureSchema, Note: note,
 	}
 	return signoff, unit, nil
 }

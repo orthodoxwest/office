@@ -1,10 +1,13 @@
 # Human review sign-offs. One line per reviewed unit:
 #
-#   hash hour unit-key reviewer date [note...]
+#   hash hour unit-key reviewer date [schema=N] [note...]
 #
-# Record with: ./office review sign HASH REVIEWER [note...]
-# Hashes come from `make review-manifest`. Editing the texts behind a
-# signed-off unit changes its hash; `make review-status` then reports the
-# unit as stale until it is re-reviewed. See REVIEWING.md.
+# Record with: ./office review sign HOUR YYYY-MM-DD REVIEWER [note...]
+# schema=N gates structural residual-plan credit (must match the current
+# StructuralFeatureSchema in code). Absent schema= means legacy: content
+# status still works, but structural features are not credited.
+# Hashes come from composed pages. Editing the texts behind a signed-off
+# unit changes its hash; `make review-status` then reports the unit as
+# stale until it is re-reviewed. See REVIEWING.md.
 c14ea4b39fd9 vespers ss-fabian-sebastian-1v codex 2026-07-18 2026 ordo Jan. 19; General Rubrics XX.1 and XXV.4; local Commons Vespers and weekday Psalter verified
 4630b2bbbc37 vespers chair-peter-antioch codex 2026-07-18 2026 ordo Feb. 23; General Rubrics XI.6, XIII.9, XIV.5, XIV.7-9, and XIV.14; local Sanctoral and Commons Vespers verified

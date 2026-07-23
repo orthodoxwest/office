@@ -34,7 +34,21 @@ func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 		day.Celebration.Category != models.CategorySunday
 }
 
-// shouldSayPreces determines whether preces should be said at the Little Hours and Compline.
+// PrecesDisposition is the structural reason preces are said or omitted.
+// Values are stable review-plan feature outcomes (rule "preces").
+const (
+	PrecesSaid                           = "said"
+	PrecesSuppressedDoubleOffice         = "suppressed:double-office"
+	PrecesSuppressedWithinOctave         = "suppressed:within-octave"
+	PrecesSuppressedOctaveDay            = "suppressed:octave-day"
+	PrecesSuppressedDoubleCommemoration  = "suppressed:double-commemoration"
+	PrecesSuppressedOctaveCommemoration  = "suppressed:octave-commemoration"
+	PrecesSuppressedFridayAfterAscension = "suppressed:friday-after-ascension-octave"
+	PrecesSuppressedVigilEpiphany        = "suppressed:vigil-epiphany"
+	PrecesSuppressedEasterSunday         = "suppressed:easter-sunday"
+)
+
+// precesDisposition determines whether preces should be said and why.
 //
 // Preces are NOT said when:
 //   - The celebration has a Double office
@@ -47,29 +61,33 @@ func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 //     No Preces on every such Sunday while retaining Preces on the ferias
 //     of the same weeks; this is parish practice beyond the bare diurnal
 //     §XXXVII list (see #15).
-func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+func precesDisposition(day *models.CalendarDay, moveable *calendar.MoveableDates) (said bool, reason string) {
+	if day == nil {
+		// Match historical shouldSayPreces(nil): no celebration → preces said.
+		return true, PrecesSaid
+	}
 	if celebrationHasDoubleOffice(day.Celebration) {
-		return false
+		return false, PrecesSuppressedDoubleOffice
 	}
 
 	// Within an octave
 	if day.WithinOctaveOf != "" {
-		return false
+		return false, PrecesSuppressedWithinOctave
 	}
 
 	// Octave-day offices: preces are not said within octaves (General Rubrics
 	// §XXXVII.2), and the parish treats the octave day itself as covered (#15).
 	if day.Celebration != nil && strings.Contains(day.Celebration.ID, "octave-day") {
-		return false
+		return false, PrecesSuppressedOctaveDay
 	}
 
 	// Check commemorations
 	for _, comm := range day.Commemorations {
 		if comm.Rank.Weight() >= models.Double.Weight() {
-			return false
+			return false, PrecesSuppressedDoubleCommemoration
 		}
 		if strings.Contains(comm.ID, "-octave-") {
-			return false
+			return false, PrecesSuppressedOctaveCommemoration
 		}
 	}
 
@@ -77,23 +95,29 @@ func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) 
 	if moveable != nil {
 		fridayAfterAscensionOctave := moveable.Easter.AddDate(0, 0, 47)
 		if day.Date.Equal(fridayAfterAscensionOctave) {
-			return false
+			return false, PrecesSuppressedFridayAfterAscension
 		}
 	}
 
 	// Vigil of Epiphany (Jan 5)
 	if day.Date.Month() == 1 && day.Date.Day() == 5 {
-		return false
+		return false, PrecesSuppressedVigilEpiphany
 	}
 
 	// Eastertide Sundays (2026 ordo: No Preces on every Sunday of season
 	// Easter, including II–V after Easter and the Sunday in the Ascension
 	// octave, while ferias of those weeks keep Preces).
 	if day.Season == models.Easter && day.Date.Weekday() == time.Sunday {
-		return false
+		return false, PrecesSuppressedEasterSunday
 	}
 
-	return true
+	return true, PrecesSaid
+}
+
+// shouldSayPreces reports whether preces should be said at the Little Hours and Compline.
+func shouldSayPreces(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+	said, _ := precesDisposition(day, moveable)
+	return said
 }
 
 // celebrationHasDoubleOffice distinguishes office form from occurrence
@@ -163,33 +187,53 @@ func commemorationSuppressesSuffrage(comm *models.Feast) bool {
 	return strings.Contains(comm.ID, "octave")
 }
 
-// shouldSaySuffrage determines whether the Suffrage of All Saints should be said.
+// SuffrageDisposition is the structural reason the Suffrage of All Saints is
+// said or omitted. Values are stable review-plan feature outcomes (rule "suffrage").
+const (
+	SuffrageSaid                    = "said"
+	SuffrageSuppressedNonCustomary  = "suppressed:non-customary-office"
+	SuffrageSuppressedWithinOctave  = "suppressed:within-octave"
+	SuffrageSuppressedOutOfSeason   = "suppressed:out-of-season"
+	SuffrageSuppressedCommemoration = "suppressed:commemoration"
+)
+
+// suffrageDisposition determines whether the Suffrage of All Saints is said and why.
 //
 // The Suffrage is said in its customary seasons on Sundays, ferias, vigils,
 // and the Saturday Office of the B.V.M., unless an octave or a
 // simplified-double commemoration suppresses it.
-func shouldSaySuffrage(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+func suffrageDisposition(day *models.CalendarDay, moveable *calendar.MoveableDates) (said bool, reason string) {
 	_ = moveable
+	if day == nil {
+		// Preserve prior shouldSaySuffrage(nil) → false (out of season).
+		return false, SuffrageSuppressedOutOfSeason
+	}
 
 	if !officeAllowsCustomarySuffrage(day) {
-		return false
+		return false, SuffrageSuppressedNonCustomary
 	}
 
 	if day.WithinOctaveOf != "" {
-		return false
+		return false, SuffrageSuppressedWithinOctave
 	}
 
 	if !withinSuffrageSeason(day) {
-		return false
+		return false, SuffrageSuppressedOutOfSeason
 	}
 
 	for _, comm := range day.Commemorations {
 		if commemorationSuppressesSuffrage(comm) {
-			return false
+			return false, SuffrageSuppressedCommemoration
 		}
 	}
 
-	return true
+	return true, SuffrageSaid
+}
+
+// shouldSaySuffrage reports whether the Suffrage of All Saints should be said.
+func shouldSaySuffrage(day *models.CalendarDay, moveable *calendar.MoveableDates) bool {
+	said, _ := suffrageDisposition(day, moveable)
+	return said
 }
 
 // shouldSayCrossCommemoration determines whether the Commemoration of the Cross

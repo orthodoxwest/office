@@ -341,7 +341,7 @@ Subcommands:
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
-                                         Select a minimal coverage-oriented review set
+                                         Fan-out-weighted structural plan (default 28y; credits sign-offs)
   sign HOUR YYYY-MM-DD REVIEWER [note...] Record a structural sign-off for one page`
 
 	if len(os.Args) < 3 {
@@ -547,7 +547,9 @@ Subcommands:
 	case "plan":
 		fs := flag.NewFlagSet("review plan", flag.ExitOnError)
 		start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
-		years := fs.Int("years", 1, "number of calendar years to sweep")
+		// Default 28 years matches data/review/assurance-baseline.json so fan-out
+		// ranks include rare concurrence/octave edges that miss a single year.
+		years := fs.Int("years", 28, "number of calendar years to sweep")
 		base := fs.String("base", review.DefaultBaseURL, "base URL prefixed to checklist links")
 		summary := fs.Bool("summary", false, "print counts instead of the selected-page CSV")
 		includeSources := fs.Bool("include-sources", false, "also cover every rendered corpus key; text provenance is separate by default")
@@ -562,6 +564,12 @@ Subcommands:
 		} else if err := review.WriteReviewPlanCSV(plan, os.Stdout, *base); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing review plan: %v\n", err)
 			os.Exit(1)
+		}
+		// When writing CSV, print residual summary on stderr so
+		// `make review-plan > plan.csv` keeps the spreadsheet clean.
+		if !*summary {
+			fmt.Fprintf(os.Stderr, "structural plan: residual %d pages (full cover %d); features %d (%d credited); residual impact %d; uncovered %d\n",
+				len(plan.Selected), plan.FullCoverPages, plan.FeatureCount, plan.CreditedCount, plan.RemainingImpact, len(plan.Uncovered))
 		}
 
 	case "sign":

@@ -54,7 +54,7 @@ internal/
     provenance.go          Structured per-entry source inventory and attestations
     provenance_queue.go    Dependency-weighted atomic text review ordering (suspect tier first)
     prescreen.go           Durable prescreen-flag ledger + suspicion map (flags ∪ advisory lints)
-    assurance.go           Composition explanations and minimal structural-review planning
+    assurance.go           Composition explanations and fan-out-weighted structural-review planning
     assurance_gate.go      Release assurance baseline, gates, and CI summary
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
@@ -139,7 +139,7 @@ make review-provenance # Report generated corpus source coverage
 make review-provenance-queue # Rank atomic text review by dependency fan-out (suspect tier first)
 make review-zero-occurrences # List unrendered corpus entries with classification heuristics
 make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-sprint list
-make review-plan      # Print minimal structural-review checklist CSV
+make review-plan      # Print residual fan-out-weighted structural checklist CSV (default 28y)
 make review-assurance # Run release assurance gates and summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text

@@ -10,31 +10,44 @@ your assigned rows from the review checklist.
 There are two complementary review tracks:
 
 1. **Text provenance** certifies an individual corpus entry once against a
-   named source and page/section locator.
+   named source and page/section locator. Queue: fan-out × suspicion
+   (`make review-provenance-queue` / `make review-suspects`).
 2. **Structural review** checks that the engine selected and assembled the
-   right elements. A generated set-cover plan selects representative pages
-   that exercise every known condition branch, occurrence/concurrence rule,
-   and fallback tier.
+   right elements — occurrence/concurrence, commemorations, preces/suffrage
+   *reasons*, Marian selection, and proper/common/ordinary resolution tiers.
+   Queue: a fan-out-weighted set-cover plan over those structural features
+   (`make review-plan`), reduced by pages already signed off.
 
 This distinction prevents a wording check from being repeated merely because
-the same text appears in several calendar contexts.
+the same text appears in several calendar contexts, and prevents structural
+review from expanding into a full re-read of every calendar day.
 
-The unit of review is **one hour of one celebration**, not one calendar date.
-The same composition recurs year after year, so checking "Trinity Sunday
-Lauds" once covers every year it recurs. Some celebrations have more than one
-variant (a year with a commemoration attached, a feast falling inside an
-octave) — each variant is its own row in the checklist with its own link.
+You do **not** need to proofread every hour of every day. The structural plan
+selects a small ordered set of representative pages so that every observed
+structural branch is exercised, preferring pages whose branches affect the
+most real date-hours first. After you sign a page off, those branches are
+credited and drop out of the next plan.
 
-Each row in the checklist has:
+Each row in the structural plan has:
 
 - a **link** — the exact page to open (e.g. `/lauds/2026-06-07`)
 - a **priority** — A (Sundays and 1st/2nd class feasts), B (greater doubles
-  and doubles), C (everything else). Work top down.
-- a **context** note — commemorations or octave the page should reflect.
+  and doubles), C (everything else)
+- a **context** note — commemorations or octave the page should reflect
+- **new_impact** — how many date-hours the newly covered branches touch
+- **new_features** — the structural branches this page is meant to check
+- **primary_year** — `yes` if the date is in the plan’s start year (prefer
+  these; you can check them against that year’s printed ordo). `no` means the
+  branch never occurs in the start year, so the plan had to use a later date.
+- **signoff_status** — unreviewed / stale / current
 
-The link's hour and date identify the page for sign-off. If its contents later
-change, the sign-off is automatically marked stale and the page returns to the
-queue; reviewers do not need to copy or manage a version identifier.
+Work top down. The link's hour and date identify the page for sign-off. If its
+contents later change, the sign-off is automatically marked stale. Signing a
+page records a structural feature schema so residual planning can credit the
+decision/resolution branches present on that composition **when signed under
+the current schema**. Legacy sign-offs (no `schema=N`) still mark content
+status but do not shrink the structural residual until re-signed. Reviewers
+do not need to manage hashes or schema numbers.
 
 ## What to look for
 
@@ -98,11 +111,22 @@ make review-provenance                # generated text-provenance coverage
 make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
 make review-zero-occurrences START=2026 YEARS=30 > zero-occurrences.csv  # classification worklist
 make review-suspects > suspects.csv   # only pre-flagged texts — the findings-sprint list
-make review-plan > review-plan.csv    # minimal structural checklist
+make review-plan > review-plan.csv    # residual structural checklist (default 28y fan-out)
+./office review plan -summary         # residual impact / credited features
+make review-plan YEARS=1              # single-year residual only
 make review-assurance                 # release coverage gates and summary
 ./office review explain lauds 2026-06-07  # one page's assurance JSON
 ./office review sign lauds 2026-06-07 REVIEWER [note...] # record a sign-off
 ```
+
+Structural plan features are **tier A** only: calendar and hour decisions that
+change composition, plus resolution tiers for proper slots. Preces reasons are
+credited only from Prime/Compline pages; suffrage reasons only from
+Lauds/Vespers; Marian selection/boundary from Lauds/Vespers/Compline.
+Descriptive context tags (season/weekday/category labels) and pure weekday
+psalmody section gates are excluded so the queue stays rubric-shaped. Text
+provenance remains a separate track (`-include-sources` on `review plan` is for
+maintainers only).
 
 Explicit text attestations live in `data/review/provenance.csv`. The file
 records only citations, review metadata, the corpus key, and internal version

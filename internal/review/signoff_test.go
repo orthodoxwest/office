@@ -22,7 +22,8 @@ fff000fff000 vespers all-saints john.d 2026-06-09
 	}
 	want := Signoff{
 		Hash: "abc123def456", Hour: "lauds", UnitKey: "trinity-sunday",
-		Reviewer: "mary.k", Date: "2026-06-08", Note: "checked against diurnal + supplement",
+		Reviewer: "mary.k", Date: "2026-06-08", Schema: 0,
+		Note: "checked against diurnal + supplement",
 	}
 	if signoffs[0] != want {
 		t.Errorf("signoffs[0] = %+v, want %+v", signoffs[0], want)
