@@ -50,10 +50,27 @@ For theirs is the kingdom of heaven, * who despised worldly living: who have won
 # SOURCE: lauds-commons-manual-noted.pdf (Istorum est enim) — parish noted manual
 For theirs is the kingdom of heaven, * who despised worldly living: who have won the rewards of the kingdom, and have washed their robes in the blood of the Lamb.
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/martyrs/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/martyrs/magnificat-antiphon
+
 [commemoration-versicle]
 # SOURCE: divinum-officium Commune/C3 [Versum 2] — check against diurnal
 V. The saints shall rejoice in glory:
 R. They shall be joyful in their beds.
+
+[commemoration-versicle-lauds]
+@use commons/martyrs/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/martyrs/versicle-vespers
+
+[commemoration-collect]
+@use commons/martyrs/collect
 
 [collect]
 Grant, we beseech thee, almighty God, that the venerable feast of blessed N. thy Martyr may both increase our devotion and promote our salvation.

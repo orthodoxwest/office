@@ -70,9 +70,23 @@ They will deliver you up * to the councils, and they will scourge you in their s
 [commemoration-antiphon]
 @use commons/apostle/psalm-antiphon-1
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/apostle/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/apostle/magnificat-antiphon
+
 [commemoration-versicle]
 V. Their sound hath gone forth into all the earth:
 R. And their words unto the ends of the world.
+
+[commemoration-versicle-lauds]
+@use commons/apostle/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/apostle/versicle-vespers
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 608 (Common of Apostles and Evangelists out of Paschaltide)

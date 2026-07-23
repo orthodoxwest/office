@@ -790,6 +790,7 @@ func TestLaudsSaturdayUsesPsalm143(t *testing.T) {
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
 		{Type: "canticle", Ref: "canticles/deuteronomy-32"},
+		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
 	}
 

@@ -55,9 +55,26 @@ O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of t
 [commemoration-antiphon]
 @use commons/confessor-bishop/psalm-antiphon-1
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/confessor-bishop/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/confessor-bishop/magnificat-antiphon
+
 [commemoration-versicle]
 V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.
+
+[commemoration-versicle-lauds]
+@use commons/confessor-bishop/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/confessor-bishop/versicle-vespers
+
+[commemoration-collect]
+@use commons/confessor-bishop/collect
 
 [collect]
 Grant, we beseech thee, Almighty God: that the venerable solemnity of blessed N., thy Confessor and Bishop, may both increase our devotion and set forward our salvation.
