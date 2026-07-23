@@ -59,6 +59,9 @@ Ref = nunc-dimittis-antiphon
 Type = canticle
 Ref = canticles/nunc-dimittis
 
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
 

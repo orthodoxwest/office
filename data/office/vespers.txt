@@ -414,6 +414,9 @@ Ref = magnificat-antiphon
 Type = canticle
 Ref = canticles/magnificat
 
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = magnificat-antiphon
 

@@ -65,6 +65,12 @@ O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the 
 V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.
 
+[commemoration-versicle-lauds]
+@use commons/confessor-doctor/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/confessor-doctor/versicle-vespers
+
 [commemoration-collect]
 @use commons/confessor-doctor/collect
 

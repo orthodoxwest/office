@@ -391,6 +391,37 @@ func TestSubstituteProperName(t *testing.T) {
 	}
 }
 
+func TestDeriveProperNameFromTitle(t *testing.T) {
+	tests := []struct {
+		title, want string
+	}{
+		{"St Apollinaris of Ravenna, Bishop & Martyr", "Apollinaris of Ravenna"},
+		{"St John Cassian, Abbot", "John Cassian"},
+		{"St Liborius, Bishop & Confessor", "Liborius"},
+		{"Ss. Marius, Martha, Audifax, & Abachum, Martyrs", "Marius, Martha, Audifax, & Abachum"},
+		{"Commemoration of St Paul", "Paul"},
+		{"The Second Feast of St. Agnes, Virgin Martyr", "Agnes"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.title, func(t *testing.T) {
+			if got := deriveProperNameFromTitle(tt.title); got != tt.want {
+				t.Fatalf("deriveProperNameFromTitle(%q) = %q, want %q", tt.title, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFeastProperNamePrefersExplicit(t *testing.T) {
+	f := &models.Feast{Name: "St. Ambrose, Bishop & Doctor", ProperName: "Ambrose"}
+	if got := feastProperName(f); got != "Ambrose" {
+		t.Fatalf("feastProperName = %q, want Ambrose", got)
+	}
+	f.ProperName = ""
+	if got := feastProperName(f); got != "Ambrose" {
+		t.Fatalf("derived feastProperName = %q, want Ambrose", got)
+	}
+}
+
 func TestResolveProperTextNSubstitution(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"commons/confessor/collect": "O God, bless N. thy confessor",
@@ -811,7 +842,7 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 		}
 	})
 
-	t.Run("commemoration collect fallback remains generic", func(t *testing.T) {
+	t.Run("commemoration collect falls back to the feast collect", func(t *testing.T) {
 		commemoration := &models.Feast{
 			ID:       "corpus-christi",
 			Category: models.CategoryLord,
@@ -823,9 +854,15 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 			"commemoration-collect",
 			corpus,
 		)
-		want := corpus.Get("proper/corpus-christi/collect")
-		if got != want || ref != "proper/corpus-christi/collect" {
-			t.Fatalf("collect = %q (%s), want generic commemoration form %q", got, ref, want)
+		// Prefer the hour-qualified collect when present (collect-lauds).
+		want := corpus.Get("proper/corpus-christi/collect-lauds")
+		wantRef := "proper/corpus-christi/collect-lauds"
+		if want == "" {
+			want = corpus.Get("proper/corpus-christi/collect")
+			wantRef = "proper/corpus-christi/collect"
+		}
+		if got != want || ref != wantRef {
+			t.Fatalf("collect = %q (%s), want feast collect %q (%s)", got, ref, want, wantRef)
 		}
 	})
 

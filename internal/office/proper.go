@@ -139,6 +139,71 @@ func substituteProperName(text, name string) string {
 	return strings.ReplaceAll(text, "N.", name)
 }
 
+// feastProperName returns the liturgical given name used for "N." substitution.
+// Explicit ProperName wins; otherwise a conservative derivation from the feast
+// title is used so commemorations (which often omit ProperName in the data)
+// still fill common collects and antiphons.
+func feastProperName(feast *models.Feast) string {
+	if feast == nil {
+		return ""
+	}
+	if feast.ProperName != "" {
+		return feast.ProperName
+	}
+	return deriveProperNameFromTitle(feast.Name)
+}
+
+// deriveProperNameFromTitle extracts a liturgical proper name from a feast
+// display title such as "St Apollinaris of Ravenna, Bishop & Martyr" →
+// "Apollinaris of Ravenna", or "Ss. Marius, Martha, Audifax, & Abachum, Martyrs"
+// → "Marius, Martha, Audifax, & Abachum".
+func deriveProperNameFromTitle(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return ""
+	}
+	for _, prefix := range []string{
+		"Commemoration of ",
+		"The Second Feast of ",
+		"The Feast of ",
+	} {
+		if rest, ok := strings.CutPrefix(name, prefix); ok {
+			name = rest
+			break
+		}
+	}
+	for _, prefix := range []string{
+		"Ss. ", "Ss ", "SS. ", "SS ",
+		"St. ", "St ",
+		"Saints ", "Saint ",
+	} {
+		if rest, ok := strings.CutPrefix(name, prefix); ok {
+			name = rest
+			break
+		}
+	}
+	// Drop a trailing rank/title clause (", Bishop & Martyr", ", Abbot", …)
+	// while preserving multi-saint lists that use internal commas.
+	rankMarkers := []string{
+		", Bishop", ", Abbot", ", Priest", ", Virgin", ", Martyr",
+		", Confessor", ", Pope", ", Doctor", ", Apostle", ", Evangelist",
+		", Widow", ", King", ", Queen", ", Hermit", ", Deacon",
+		", Monk", ", Nun",
+	}
+	cut := -1
+	for _, marker := range rankMarkers {
+		if i := strings.Index(name, marker); i >= 0 {
+			if cut < 0 || i < cut {
+				cut = i
+			}
+		}
+	}
+	if cut >= 0 {
+		name = name[:cut]
+	}
+	return strings.TrimSpace(name)
+}
+
 // lookupCommonsText checks the commons tier for a text reference, trying
 // paschal variant first (during Easter), then regular commons. For each,
 // it tries hour-qualified ref before generic ref. Returns the text and

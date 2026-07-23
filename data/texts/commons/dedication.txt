@@ -35,9 +35,26 @@ O how dreadful is this place! * this is none other but the house of God, and thi
 [commemoration-antiphon]
 This is none other but the house of God, * and this is the gate of heaven.
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/dedication/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/dedication/magnificat-antiphon
+
 [commemoration-versicle]
 V. My house shall be called a house of prayer.
 R. For all nations.
+
+[commemoration-versicle-lauds]
+@use commons/dedication/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/dedication/versicle-vespers
+
+[commemoration-collect]
+@use commons/dedication/collect
 
 [collect]
 O God, who dost invisibly contain all things, and yet for the salvation of mankind dost visibly manifest thy signs; enlighten thy people who resort to this holy place, and grant that they may worthily and devoutly celebrate thy holy mysteries, and when they depart hence receive the fulness of thy blessing.

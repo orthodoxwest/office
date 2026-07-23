@@ -37,9 +37,26 @@ Come, thou Bride of Christ, * receive the crown which the Lord hath prepared for
 [commemoration-antiphon]
 This is one of the wise virgins, * whom the Lord found watching.
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/virgin-martyr/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/virgin-martyr/magnificat-antiphon
+
 [commemoration-versicle]
 V. In thy comeliness and thy beauty.
 R. Go forward, fare prosperously, and reign.
+
+[commemoration-versicle-lauds]
+@use commons/virgin-martyr/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/virgin-martyr/versicle-vespers
+
+[commemoration-collect]
+@use commons/virgin-martyr/collect
 
 [collect]
 O God, who among the other miracles of thy power hast bestowed the victory of martyrdom even upon the weaker sex, graciously grant that we who celebrate the feast of blessed N., thy Virgin and Martyr, may come to thee by the path of her example.

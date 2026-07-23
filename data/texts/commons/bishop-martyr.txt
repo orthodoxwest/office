@@ -51,9 +51,26 @@ Father * I will that where I am, there may also my servant be.
 [commemoration-antiphon]
 @use commons/martyr/commemoration-antiphon
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/bishop-martyr/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/bishop-martyr/magnificat-antiphon
+
 [commemoration-versicle]
 V. Thou hast crowned him with glory and honour, O Lord.
 R. And madest him to have dominion over the works of thy hands.
+
+[commemoration-versicle-lauds]
+@use commons/bishop-martyr/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/bishop-martyr/versicle-vespers
+
+[commemoration-collect]
+@use commons/bishop-martyr/collect
 
 [collect]
 # SOURCE: draft archdiocesan Commons Lauds/Vespers books, pp. 28, 40, 48 (primary Martyr Bishop collect)

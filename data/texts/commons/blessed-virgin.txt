@@ -32,9 +32,26 @@ All generations shall call me blessed, * for he that is mighty hath done to me g
 [commemoration-antiphon]
 Holy Mary, succour the miserable, * help the fainthearted, comfort the sorrowful, pray for the people, plead for the clergy, intercede for all women vowed to God.
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/blessed-virgin/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/blessed-virgin/magnificat-antiphon
+
 [commemoration-versicle]
 V. After childbirth thou remainest a Virgin undefiled.
 R. O Mother of God, intercede for us.
+
+[commemoration-versicle-lauds]
+@use commons/blessed-virgin/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/blessed-virgin/versicle-vespers
+
+[commemoration-collect]
+@use commons/blessed-virgin/collect
 
 [collect]
 Grant, we beseech thee, O Lord God, unto all thy servants, that they may remain continually in the enjoyment of soundness both of mind and body, and by the glorious intercession of the Blessed Mary, always a Virgin, may be delivered from present sadness, and enter into the joy of thine eternal gladness.

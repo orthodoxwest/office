@@ -54,9 +54,26 @@ This is a Martyr * who strove for his Master's precepts, even unto death: and fe
 [commemoration-antiphon]
 Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
 
+[commemoration-antiphon-lauds]
+# Rubric: commemorations use the gospel-canticle antiphon of the common
+@use commons/martyr/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# Rubric: Vespers commemorations use the Magnificat antiphon of the common
+@use commons/martyr/magnificat-antiphon
+
 [commemoration-versicle]
 V. The righteous shall flourish like the palm-tree.
 R. He shall grow like a cedar in Lebanon.
+
+[commemoration-versicle-lauds]
+@use commons/martyr/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/martyr/versicle-vespers
+
+[commemoration-collect]
+@use commons/martyr/collect
 
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 638, 589, 596 (Common of One Martyr out of Paschaltide, non-bishop collect)

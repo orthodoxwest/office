@@ -199,6 +199,30 @@ func lookupTemporalCommemoration(feast *models.Feast, hourName, ref string, corp
 	return fmt.Sprintf("[%s: %s]", ref, feast.ID), ref
 }
 
+// commemorationFallbackSlots returns the hour-appropriate content slots that
+// a sanctoral commemoration uses when a dedicated commemoration-* section is
+// missing. Per the ferial office books, each commemoration is the proper
+// gospel-canticle antiphon, the hour's little versicle, and the collect of
+// the feast or common.
+func commemorationFallbackSlots(hourName, ref string) []string {
+	switch ref {
+	case "commemoration-antiphon":
+		if hourName == "vespers" {
+			return []string{"magnificat-antiphon", "magnificat-antiphon-first"}
+		}
+		return []string{"benedictus-antiphon"}
+	case "commemoration-versicle":
+		if hourName == "vespers" {
+			return []string{"versicle-vespers", "versicle-lauds", "versicle"}
+		}
+		return []string{"versicle-lauds", "versicle"}
+	case "commemoration-collect":
+		return []string{"collect"}
+	default:
+		return nil
+	}
+}
+
 // lookupCommemoration looks up a commemoration text, trying in order:
 // feast-specific proper, commons (paschal then regular), ordinary fallback.
 // Applies N. substitution using the feast's ProperName.
@@ -220,33 +244,42 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 		return lookupTemporalCommemoration(feast, hourName, ref, corpus)
 	}
 
-	// 1. Feast-specific
+	properName := feastProperName(feast)
+
+	// 1. Feast-specific dedicated slot (hour-qualified first).
 	for _, feastID := range feastProperIDs(feast) {
 		prefix := "proper/" + feastID + "/"
 		if text, resolved := lookupSectionText(prefix, season, hourName, ref, corpus); text != "" {
-			return substituteProperName(text, feast.ProperName), resolved
+			return substituteProperName(text, properName), resolved
 		}
 	}
 
-	// 1b. For commemoration-collect, fall back to the feast's own collect.
-	if ref == "commemoration-collect" {
+	// 1b. Feast-specific content fallbacks (gospel antiphon / hour versicle / collect).
+	for _, fallback := range commemorationFallbackSlots(hourName, ref) {
 		for _, feastID := range feastProperIDs(feast) {
 			prefix := "proper/" + feastID + "/"
-			if text, resolved := lookupSectionText(prefix, season, "", "collect", corpus); text != "" {
-				return substituteProperName(text, feast.ProperName), resolved
+			if text, resolved := lookupSectionText(prefix, season, hourName, fallback, corpus); text != "" {
+				return substituteProperName(text, properName), resolved
 			}
 		}
 	}
 
-	// 2. Commons (paschal, then regular)
+	// 2. Commons dedicated slot (paschal, then regular).
 	if text, resolved := lookupCommonsText(feast.Category, season, hourName, ref, corpus); text != "" {
-		return substituteProperName(text, feast.ProperName), resolved
+		return substituteProperName(text, properName), resolved
+	}
+
+	// 2b. Commons content fallbacks.
+	for _, fallback := range commemorationFallbackSlots(hourName, ref) {
+		if text, resolved := lookupCommonsText(feast.Category, season, hourName, fallback, corpus); text != "" {
+			return substituteProperName(text, properName), resolved
+		}
 	}
 
 	// 3. Ordinary fallback (hour-specific)
 	ordinaryRef := "ordinary/" + hourName + "/" + ref
 	if text := corpus.Get(ordinaryRef); text != "" {
-		return substituteProperName(text, feast.ProperName), ordinaryRef
+		return substituteProperName(text, properName), ordinaryRef
 	}
 
 	return fmt.Sprintf("[%s: %s]", ref, feast.ID), ref

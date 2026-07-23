@@ -347,6 +347,9 @@ Ref = psalm-antiphon-4
 Type = canticle
 Ref = canticles/isaiah-12
 
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -401,6 +404,9 @@ Ref = psalm-antiphon-4
 
 Type = canticle
 Ref = canticles/isaiah-38
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = psalm-antiphon-4
@@ -457,6 +463,9 @@ Ref = psalm-antiphon-4
 Type = canticle
 Ref = canticles/hannah
 
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -511,6 +520,9 @@ Ref = psalm-antiphon-4
 
 Type = canticle
 Ref = canticles/exodus-15
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = psalm-antiphon-4
@@ -567,6 +579,9 @@ Ref = psalm-antiphon-4
 Type = canticle
 Ref = canticles/habakkuk-3
 
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -609,6 +624,9 @@ Ref = psalm-antiphon-3
 
 Type = canticle
 Ref = canticles/deuteronomy-32
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = psalm-antiphon-3
@@ -767,6 +785,9 @@ Ref = benedictus-antiphon
 
 Type = canticle
 Ref = canticles/benedictus
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
 
 Type = proper-antiphon
 Ref = benedictus-antiphon
