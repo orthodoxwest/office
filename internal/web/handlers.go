@@ -731,7 +731,7 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 			Rank:           rank,
 			RankFull:       rankFull,
 			Color:          string(d.Color),
-			ColorClass:     "color-" + string(d.Color),
+			ColorClass:     "day-color-" + string(d.Color),
 			FeastName:      feastName,
 			Fast:           d.Penitential.Fast,
 			Abstinence:     d.Penitential.Abstinence,

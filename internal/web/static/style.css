@@ -506,16 +506,19 @@ footer::before {
 .home-summary {
   padding: 0.7rem 0 0;
   border: none;
-  border-top: 3px solid var(--border);
+  border-top: 3px solid var(--day-color, var(--border));
   background: transparent;
   box-shadow: none;
 }
-.home-summary.day-color-white  { border-top-color: #c9b896; }
-.home-summary.day-color-red    { border-top-color: #b02a24; }
-.home-summary.day-color-green  { border-top-color: #3a6b3a; }
-.home-summary.day-color-violet { border-top-color: #6a3a8a; }
-.home-summary.day-color-black  { border-top-color: #3a3a3a; }
-.home-summary.day-color-rose   { border-top-color: #c4607a; }
+
+/* Shared liturgical-color palette. Home uses it as a top hairline; repeating
+   ordo entries use it as a side rail. */
+.day-color-white  { --day-color: #c9b896; }
+.day-color-red    { --day-color: #b02a24; }
+.day-color-green  { --day-color: #3a6b3a; }
+.day-color-violet { --day-color: #6a3a8a; }
+.day-color-black  { --day-color: #3a3a3a; }
+.day-color-rose   { --day-color: #c4607a; }
 
 /* Title stack: date and feast sit close; secondary lines use smaller gaps. */
 .home-day-head {
@@ -1610,6 +1613,22 @@ footer::before {
   scroll-margin-top: 3rem;
 }
 
+/* A short color tick replaces the former text column without joining adjacent
+   days into one continuous rail. Mobile cards use their separated outer edge. */
+.month-table tr.day > td:first-child {
+  position: relative;
+}
+
+.month-table tr.day > td:first-child::before {
+  content: "";
+  position: absolute;
+  top: 0.38rem;
+  bottom: 0.38rem;
+  left: 0.25rem;
+  width: 4px;
+  background: var(--day-color, var(--border));
+}
+
 /* With JS, the whole row navigates to the day (see app.js); the hover wash
    is a background-image so it layers over the :target/.is-today tint
    instead of replacing it. */
@@ -1644,6 +1663,10 @@ footer::before {
   width: 2.8rem;
 }
 
+.month-table td.day-num {
+  padding-left: 0.75rem;
+}
+
 .month-table th:nth-child(2),
 .month-table td.day-wk {
   width: 3rem;
@@ -1656,17 +1679,11 @@ footer::before {
 }
 
 .month-table th:nth-child(6),
-.month-table td.day-color {
-  width: 3.7rem;
-}
-
-.month-table th:nth-child(7),
 .month-table td.day-rank {
   width: 3.2rem;
 }
 
 .day-wk,
-.day-color,
 .day-rank,
 .day-penitential-flag {
   white-space: nowrap;
@@ -1861,12 +1878,14 @@ footer::before {
   .month-table tr {
     margin-bottom: 0.9rem;
     border: 1px solid var(--border);
+    border-left: 3px solid var(--day-color, var(--border));
     border-collapse: separate;
   }
 
   .month-table tr:target,
   .month-table tr.is-today {
     border-color: var(--gold-line);
+    border-left-color: var(--day-color, var(--border));
   }
 
   .month-table td {
@@ -1877,7 +1896,6 @@ footer::before {
   .month-table .day-num,
   .month-table .day-wk,
   .month-table .day-penitential-flag,
-  .month-table .day-color,
   .month-table .day-rank {
     display: none;
   }
@@ -2014,12 +2032,12 @@ footer::before {
     box-shadow: none;
   }
 
-  /* White/black hairlines need a lift on the apse night sky. */
-  :root:not([data-theme="light"]) .home-summary.day-color-white {
-    border-top-color: #d0b06a;
+  /* White/black rails need a lift on the apse night sky. */
+  :root:not([data-theme="light"]) .day-color-white {
+    --day-color: #d0b06a;
   }
-  :root:not([data-theme="light"]) .home-summary.day-color-black {
-    border-top-color: #8a94a0;
+  :root:not([data-theme="light"]) .day-color-black {
+    --day-color: #8a94a0;
   }
 
   /* Chips are framed at every width now, so the milky light-mode wash has
@@ -2050,11 +2068,11 @@ footer::before {
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .home-summary.day-color-white {
-  border-top-color: #d0b06a;
+:root[data-theme="dark"] .day-color-white {
+  --day-color: #d0b06a;
 }
-:root[data-theme="dark"] .home-summary.day-color-black {
-  border-top-color: #8a94a0;
+:root[data-theme="dark"] .day-color-black {
+  --day-color: #8a94a0;
 }
 
 :root[data-theme="dark"] .home-hour-link {
