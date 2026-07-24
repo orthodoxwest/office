@@ -203,7 +203,7 @@ jobs:
         run: npm ci --prefix .web-tools
 
       - name: Run UX regression tests
-        run: make test-ux
+        run: npm --prefix .web-tools run test:ux
 
       - name: Upload UX test report
         if: ${{ !cancelled() }}
