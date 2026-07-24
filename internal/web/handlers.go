@@ -385,10 +385,22 @@ func defaultHourSlug(hour string) string {
 	return hour
 }
 
+// setHTMLCacheHeaders marks HTML as revalidate-always so SW SWR revalidation
+// and non-SW browsers do not keep a pre-deploy body under a stable dated URL.
+func setHTMLCacheHeaders(w http.ResponseWriter) {
+	w.Header().Set("Cache-Control", "no-cache")
+}
+
+// navDateNow is local today for chrome links on pages without a liturgical day.
+func navDateNow(r *http.Request) string {
+	return time.Now().In(userLocation(r)).Format("2006-01-02")
+}
+
 // handleError renders the styled error page for 4xx/5xx conditions where the
 // response has not yet been started (i.e. not template-execution failures).
 func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int, msg string) {
 	title := http.StatusText(status)
+	setHTMLCacheHeaders(w)
 	w.WriteHeader(status)
 	data := struct {
 		Title      string
@@ -400,7 +412,7 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int,
 	}{
 		Title:      title,
 		Message:    msg,
-		NavDate:    "",
+		NavDate:    navDateNow(r),
 		Theme:      themeParam(r),
 		Page:       "",
 		ShowBanner: false,
@@ -413,6 +425,7 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int,
 
 // handle404 renders the styled 404 page.
 func (s *Server) handle404(w http.ResponseWriter, r *http.Request) {
+	setHTMLCacheHeaders(w)
 	w.WriteHeader(http.StatusNotFound)
 	data := struct {
 		NavDate    string
@@ -420,7 +433,7 @@ func (s *Server) handle404(w http.ResponseWriter, r *http.Request) {
 		Page       string
 		ShowBanner bool
 	}{
-		NavDate:    "",
+		NavDate:    navDateNow(r),
 		Theme:      themeParam(r),
 		Page:       "",
 		ShowBanner: false,
@@ -453,8 +466,9 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	loc := userLocation(r)
 
 	// Resolve the displayed date: ?date= override or today.
+	// Nav always uses the resolved date so chrome links hit the SW precache
+	// keys (/?date=…, /lauds/…) rather than undated URLs.
 	var date time.Time
-	navDate := "" // non-empty only when the user has chosen a specific date
 	if ds := r.URL.Query().Get("date"); ds != "" {
 		var err error
 		date, err = time.Parse("2006-01-02", ds)
@@ -462,7 +476,6 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 			s.handleError(w, r, http.StatusBadRequest, fmt.Sprintf("Invalid date %q — please use YYYY-MM-DD format.", ds))
 			return
 		}
-		navDate = ds
 	} else {
 		date = time.Now().In(loc)
 	}
@@ -516,7 +529,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		NextDate:       date.AddDate(0, 0, 1).Format("2006-01-02"),
 		PrevLink:       homeLink(date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
 		NextLink:       homeLink(date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
-		TodayLink:      homeLink("", theme),
+		TodayLink:      homeLink(nowSlug, theme),
 		ShowToday:      dateSlug != nowSlug,
 		FeastName:      feastName,
 		Commemorations: commemorations,
@@ -527,11 +540,12 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		PrayNowLabel:   currentHourLabel,
 		PrayNowLink:    hourLink(defaultHourSlug(currentHourSlug), dateSlug, theme),
 		Hours:          buildHomeHours(dateSlug, theme, currentHourSlug),
-		NavDate:        navDate,
+		NavDate:        dateSlug,
 		Theme:          theme,
 		Page:           "home",
 		ShowBanner:     false,
 	}
+	setHTMLCacheHeaders(w)
 	if err := s.tmplHome.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -545,7 +559,7 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 
 	var date time.Time
 	var err error
-	navDate := "" // propagate through nav only when date was explicit in the URL
+	// Nav always uses the resolved date so chrome links match SW precache keys.
 	if dateStr == "" {
 		if ds := r.URL.Query().Get("date"); ds != "" {
 			date, err = time.Parse("2006-01-02", ds)
@@ -554,7 +568,6 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 				return
 			}
 			dateStr = ds
-			navDate = ds
 		} else {
 			date = time.Now().In(userLocation(r))
 			dateStr = date.Format("2006-01-02")
@@ -565,7 +578,6 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 			s.handleError(w, r, http.StatusBadRequest, fmt.Sprintf("Invalid date %q — please use YYYY-MM-DD format.", dateStr))
 			return
 		}
-		navDate = dateStr
 	}
 
 	year := date.Year()
@@ -599,14 +611,14 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		NextDate:         date.AddDate(0, 0, 1).Format("2006-01-02"),
 		PrevLink:         hourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
 		NextLink:         hourLink(hourName, date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
-		TodayLink:        hourLink(hourName, "", theme),
+		TodayLink:        hourLink(hourName, todaySlug, theme),
 		ShowToday:        dateStr != todaySlug,
 		DayLink:          homeLink(dateStr, theme),
 		PreviousHourName: previousHourName,
 		PreviousHourLink: previousHourLink,
 		NextHourName:     nextHourName,
 		NextHourLink:     nextHourLink,
-		NavDate:          navDate,
+		NavDate:          dateStr,
 		Hour:             hour,
 		ReportURL:        reportURL(hour, hourName, dateStr),
 		Theme:            theme,
@@ -614,6 +626,7 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		ShowBanner:       s.showVettingBanner(hour),
 		Assurance:        s.hourAssurance(hour, hourName, dateStr),
 	}
+	setHTMLCacheHeaders(w)
 	if err := s.tmplHour.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -647,15 +660,19 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// NavDate is local today so chrome hour links hit dated precache keys.
+	navDate := now.Format("2006-01-02")
 	data := calendarData{
 		Year:       year,
 		PrevYear:   year - 1,
 		NextYear:   year + 1,
 		Months:     buildMonthData(days, s.engine, moveable),
+		NavDate:    navDate,
 		Theme:      themeParam(r),
 		Page:       "calendar",
 		ShowBanner: false,
 	}
+	setHTMLCacheHeaders(w)
 	if err := s.tmplCalendar.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

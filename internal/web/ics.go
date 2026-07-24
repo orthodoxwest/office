@@ -286,6 +286,8 @@ type reminderDay struct {
 
 // handleReminders renders the reminder-subscription settings page.
 func (s *Server) handleReminders(w http.ResponseWriter, r *http.Request) {
+	// Dated nav so chrome links match SW precache keys even from this page.
+	navDate := time.Now().In(userLocation(r)).Format("2006-01-02")
 	data := remindersData{
 		Hours: []reminderHour{
 			{Name: "Lauds", Slug: "lauds", Default: "06:45", Checked: true},
@@ -301,10 +303,12 @@ func (s *Server) handleReminders(w http.ResponseWriter, r *http.Request) {
 			{Name: "Thu", Slug: "thu"}, {Name: "Fri", Slug: "fri"}, {Name: "Sat", Slug: "sat"},
 			{Name: "Sun", Slug: "sun"},
 		},
+		NavDate:    navDate,
 		Theme:      themeParam(r),
 		Page:       "reminders",
 		ShowBanner: false,
 	}
+	setHTMLCacheHeaders(w)
 	if err := s.tmplReminders.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
