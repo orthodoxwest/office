@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race parity lint lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help install-hooks build test test-race parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -27,6 +27,9 @@ parity: ## Verify the 2026-2053 date-sensitive parity snapshot
 lint: ## Run staticcheck linter
 	staticcheck ./...
 
+lint-js: ## Run ESLint on browser and service-worker JavaScript
+	npm --prefix .web-tools run lint
+
 vet: ## Run go vet
 	go vet ./...
 
@@ -39,7 +42,7 @@ fmt-check: ## Check formatting without modifying files
 lint-texts: build ## Lint the text corpus (mechanical findings fail; advisory printed)
 	./office lint
 
-check: fmt-check vet lint test validate lint-texts ## Run fmt + vet + lint + test + validate + lint-texts
+check: fmt-check vet lint lint-js test validate lint-texts ## Run all formatting, static analysis, tests, and data checks
 
 serve: build ## Start the web server
 	./office serve

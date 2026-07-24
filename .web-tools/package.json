@@ -1,0 +1,15 @@
+{
+  "name": "orthodoxwest-office",
+  "private": true,
+  "scripts": {
+    "lint": "cd .. && .web-tools/node_modules/.bin/eslint --config .web-tools/eslint.config.mjs internal/web/static/*.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.7.0",
+    "globals": "17.7.0"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

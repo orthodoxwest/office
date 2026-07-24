@@ -70,10 +70,12 @@ Open http://localhost:8080 in your browser. The server loads all data files at s
 
 ## Running locally (for developers)
 
-Requires Go 1.26+. (`make test` also runs a couple of Python script tests, so
-`python3` is needed for the full test suite.)
+Requires Go 1.26+. The full check suite also requires `python3`, Node.js
+20.19+ and npm. Install the pinned JavaScript lint dependencies with
+`npm ci --prefix .web-tools`.
 
 ```bash
+npm ci --prefix .web-tools # install pinned ESLint dependencies
 make install-hooks # once per clone; pre-push runs the full check suite
 make build   # build ./office binary
 make serve   # start server on http://localhost:8080
@@ -129,7 +131,8 @@ pdfjam --booklet true --paper letter compline.pdf
 
 ```bash
 make test     # run all tests (Go + Python script tests, includes golden files)
-make check    # fmt + vet + lint + test + validate + lint-texts
+make check    # formatting + Go/JS analysis + tests + data validation/lint
+make lint-js  # run ESLint on browser and service-worker JavaScript
 make install-hooks # configure the versioned pre-push hook (once per clone)
 make golden   # regenerate golden files after intentional changes
 make audit    # show data completeness report

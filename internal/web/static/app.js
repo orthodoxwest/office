@@ -14,7 +14,7 @@ document.documentElement.classList.add("js");
   var readStoredTheme = function () {
     try {
       return localStorage.getItem(THEME_KEY);
-    } catch (err) {
+    } catch {
       return null;
     }
   };
@@ -22,7 +22,7 @@ document.documentElement.classList.add("js");
   var writeStoredTheme = function (value) {
     try {
       localStorage.setItem(THEME_KEY, value);
-    } catch (err) {
+    } catch {
       // Private mode / blocked storage — theme still applies for this page.
     }
   };
@@ -422,7 +422,7 @@ document.documentElement.classList.add("js");
       }
       try {
         params.push("tz=" + encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone));
-      } catch (err) {
+      } catch {
         // Feed falls back to UTC times if the timezone is unavailable.
       }
       return location.host + "/office.ics?" + params.join("&");
