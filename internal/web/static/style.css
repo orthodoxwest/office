@@ -1221,6 +1221,15 @@ footer::before {
   margin-bottom: 0.3rem;
 }
 
+/* Keep the opening verse at least as tall as its drop cap. Without this,
+   a short opening verse (e.g. one line) collapses below the floated
+   letter, and `.verse.numbered`'s clear: left then shoves verse 2 down
+   past the letter's full height instead of the verse's own text —
+   reading as an oversized gap above the next line. */
+.psalm-verses .verse:first-child {
+  min-height: 2.9em;
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter */
 .psalm-verses .verse.numbered {
   display: flex;
