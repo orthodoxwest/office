@@ -6,9 +6,11 @@ Praise be to thee, O Lord, King of eternal glory.
 As I live, * saith the Lord, I have no pleasure in the death of the sinner, but rather that he be converted and live.
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 124
+# SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Propers for Lauds,
+# The Chapter. Was "show" from Copy of OCP Ferial Lauds.pdf p. 124; the booklet reads
+# "shew", which also matches the corpus's usage elsewhere.
 !Isa 58:1
-Cry aloud, spare not; lift up thy voice like a trumpet, and show my people their transgression, and the house of Jacob their sins.
+Cry aloud, spare not; lift up thy voice like a trumpet, and shew my people their transgression, and the house of Jacob their sins.
 R. Thanks be to God.
 
 [hymn-lauds]

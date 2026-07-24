@@ -120,8 +120,12 @@ V. In thy resurrection, O Christ, alleluia.
 R. Let heaven and earth rejoice, alleluia.
 
 [versicle-vespers]
-V. Let my prayer be set forth in thy sight as the incense, alleluia.
-R. And let the lifting up of my hands be an evening sacrifice, alleluia.
+# SOURCE: Propers of Lauds & Vespers in Paschaltide (propers booklet), Propers for
+# Vespers, The Versicle (In Paschaltide). Was the ordinary Vespers versicle ("Let my
+# prayer be set forth") with alleluias appended; the booklet gives the paschal proper,
+# and versicle-first-vespers already carried the same text from the Vespers book p. 159.
+V. Abide with us, Lord, alleluia.
+R. For it is toward evening, alleluia.
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 159 (Saturdays in Paschaltide)

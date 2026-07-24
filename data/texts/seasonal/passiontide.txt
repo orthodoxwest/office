@@ -9,9 +9,11 @@ Praise be to thee, O Lord, King of eternal glory.
 Deliver me, O Lord, * and set me beside thee, and any man's hand may fight against me.
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 126
+# SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Propers for
+# Lauds, The Chapter. Copy of OCP Ferial Lauds.pdf p. 126 dropped "may" before "be no
+# more remembered"; restored per the booklet and Jer 11:19.
 !Jer 11:19
-Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name be no more remembered.
+Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name may be no more remembered.
 R. Thanks be to God.
 
 [short-responsory-lauds]
