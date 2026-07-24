@@ -174,3 +174,188 @@ jobs:
         with:
           name: assurance-summary
           path: assurance-summary.md
+
+  ux:
+    name: UX
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Determine whether UX tests are needed
+        id: ux_changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isIgnored = filename =>
+              filename.startsWith('data/') ||
+              filename.startsWith('internal/e2e/testdata/golden/');
+
+            let files;
+            if (context.eventName === 'pull_request') {
+              files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                per_page: 100,
+              });
+              files = files.map(file => file.filename);
+            } else if (context.eventName === 'push') {
+              const before = context.payload.before;
+              if (!before || /^0+$/.test(before)) {
+                core.notice('Running UX tests because this push has no comparison base.');
+                core.setOutput('run', 'true');
+                return;
+              }
+
+              const comparison = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: before,
+                head: context.sha,
+                per_page: 100,
+              });
+              files = (comparison.data.files || []).map(file => file.filename);
+
+              // GitHub truncates very large comparisons. Run conservatively if
+              // the result may not include every changed path.
+              if (files.length >= 300) {
+                core.notice('Running UX tests because the changed-file list may be truncated.');
+                core.setOutput('run', 'true');
+                return;
+              }
+            } else {
+              core.setOutput('run', 'true');
+              return;
+            }
+
+            const run = files.length === 0 || files.some(filename => !isIgnored(filename));
+            core.notice(run
+              ? 'Running UX tests because the change includes application or test files.'
+              : 'Skipping UX tests because only data and Go golden files changed.');
+            core.setOutput('run', run ? 'true' : 'false');
+
+      - uses: actions/checkout@v4
+        if: steps.ux_changes.outputs.run == 'true'
+
+      - name: Set up Go
+        if: steps.ux_changes.outputs.run == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set up Node
+        if: steps.ux_changes.outputs.run == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install UX test dependencies
+        if: steps.ux_changes.outputs.run == 'true'
+        run: npm ci --prefix .web-tools
+
+      - name: Run UX behavior and accessibility tests
+        if: steps.ux_changes.outputs.run == 'true'
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js
+
+      - name: Run UX visual regression tests
+        if: steps.ux_changes.outputs.run == 'true'
+        id: visual
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js
+        continue-on-error: true
+
+      - name: Upload UX test report
+        if: ${{ !cancelled() && steps.ux_changes.outputs.run == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: output/playwright/
+          retention-days: 14
+
+      - name: Post or update visual mismatch comment
+        if: >-
+          steps.visual.outcome == 'failure' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- ux-snapshot-result -->';
+            const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body =
+              '## UX snapshot mismatch detected\n\n' +
+              'The browser behavior and accessibility tests passed, but one or more visual snapshots changed. ' +
+              `Review the expected, actual, and diff images in the [Playwright report artifact](${runURL}).\n\n` +
+              '**If this change is intentional** — add the `update-ux-snapshots` label to this PR. ' +
+              'GitHub Actions will regenerate the snapshots in the pinned browser container and push them to this branch.\n\n' +
+              '**If this is unexpected** — inspect the visual diff and fix the UI before applying the label.\n\n' +
+              marker;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
+
+      - name: Resolve visual mismatch comment
+        if: >-
+          steps.visual.outcome == 'success' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- ux-snapshot-result -->';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: `## UX snapshots passing\n\nVisual baselines are up to date.\n\n${marker}`,
+              });
+            }
+
+      - name: Fail if visual snapshots differ
+        if: steps.visual.outcome == 'failure'
+        run: exit 1
+
+      - name: Record skipped UX suite
+        if: steps.ux_changes.outputs.run == 'false'
+        run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
