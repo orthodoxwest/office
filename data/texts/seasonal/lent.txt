@@ -6,9 +6,11 @@ Praise be to thee, O Lord, King of eternal glory.
 As I live, * saith the Lord, I have no pleasure in the death of the sinner, but rather that he be converted and live.
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 124
+# SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Propers for Lauds,
+# The Chapter. Was "show" from Copy of OCP Ferial Lauds.pdf p. 124; the booklet reads
+# "shew", which also matches the corpus's usage elsewhere.
 !Isa 58:1
-Cry aloud, spare not; lift up thy voice like a trumpet, and show my people their transgression, and the house of Jacob their sins.
+Cry aloud, spare not; lift up thy voice like a trumpet, and shew my people their transgression, and the house of Jacob their sins.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -85,6 +87,26 @@ Grant, O essential Unity,
 That this our fast of forty days
 May work our profit and thy praise.
 Amen.
+
+[chapter-vespers]
+# SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Vespers chapter
+!Joel 2:17
+Let the priests, the ministers of the Lord, weep between the porch and the altar, and let them say, Spare thy people, O Lord, and give not thine heritage to reproach, that the heathen should rule over them.
+R. Thanks be to God.
+
+[short-responsory-vespers]
+# SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Vespers short responsory
+R. He shall defend thee * under his wings.
+R. He shall defend thee * under his wings.
+V. And thou shalt be safe under his feathers.
+R. Under his wings.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. He shall defend thee * under his wings.
+
+[versicle-vespers]
+# SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Vespers versicle
+V. God shall give his Angels charge over thee.
+R. To keep thee in all thy ways.
 
 [versicle-first-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 139 (Saturdays in Lent)

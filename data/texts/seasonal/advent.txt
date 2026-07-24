@@ -97,6 +97,12 @@ Laud, honour, might, and glory be
 From age to age eternally.
 Amen.
 
+[chapter-vespers]
+# SOURCE: Propers of Lauds & Vespers During Advent (propers booklet), Vespers chapter
+!Gen 49:10
+The sceptre shall not depart from Judah, nor a lawgiver from between his feet, until Shiloh come; and unto him shall the gathering of the people be.
+R. Thanks be to God.
+
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 13, 24, 36, 46 (Advent Sundays I–IV)
 R. Come and save us, * O Lord God of hosts.

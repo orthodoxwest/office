@@ -9,9 +9,11 @@ Praise be to thee, O Lord, King of eternal glory.
 Deliver me, O Lord, * and set me beside thee, and any man's hand may fight against me.
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 126
+# SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Propers for
+# Lauds, The Chapter. Copy of OCP Ferial Lauds.pdf p. 126 dropped "may" before "be no
+# more remembered"; restored per the booklet and Jer 11:19.
 !Jer 11:19
-Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name be no more remembered.
+Let us destroy the tree with the fruit thereof, and let us cut him off from the land of the living, that his name may be no more remembered.
 R. Thanks be to God.
 
 [short-responsory-lauds]
@@ -73,6 +75,23 @@ Amen.
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 127
 V. Deliver me from mine enemies, O God.
 R. Defend me from them that rise up against me.
+
+[chapter-vespers]
+# SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Vespers chapter
+# SCOPE: the booklet heads both its Lauds and Vespers sections "from Monday in Passion
+# Week through Holy Wednesday", so it does NOT cover the Triduum. The season key applies
+# to Holy Thursday–Holy Saturday anyway, as short-responsory-vespers already did before
+# this entry existed. The Triduum office omits these elements entirely; correcting that
+# needs the Holy Week manual (see #125). Tracked separately — do not treat Triduum
+# chapter/versicle output as sourced.
+!Jer 11:20
+But, O Lord of hosts, that judgest righteously, that triest the reins and the heart, let me see thy vengeance on them; for unto thee have I revealed my cause, O Lord my God.
+R. Thanks be to God.
+
+[versicle-vespers]
+# SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Vespers versicle
+V. Deliver me, O Lord, from the evil man.
+R. And preserve me from the wicked man.
 
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 147 (Saturdays in Passiontide)
