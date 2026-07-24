@@ -12,6 +12,10 @@ type majorHourOptions struct {
 	hourName  string
 	title     string
 	officeDay func(*models.CalendarDay) *models.CalendarDay
+	// psalmodyDay supplies the psalms and their antiphons when they belong to a
+	// different office than the rest of the hour — a Vespers split at the
+	// Chapter. Defaults to officeDay.
+	psalmodyDay func(*models.CalendarDay) *models.CalendarDay
 }
 
 func composeMajorHour(
@@ -31,6 +35,13 @@ func composeMajorHour(
 	}
 	if officeDay == nil {
 		return nil, fmt.Errorf("major hour office day is nil")
+	}
+
+	psalmodyDay := officeDay
+	if opts.psalmodyDay != nil {
+		if pd := opts.psalmodyDay(day); pd != nil {
+			psalmodyDay = pd
+		}
 	}
 
 	hour := &models.OfficeHour{
@@ -60,11 +71,11 @@ func composeMajorHour(
 			case "commemorations":
 				elems = append(elems, addCommemorations(officeDay, opts.hourName, corpus)...)
 			case "proper-psalmody":
-				psalmody, _, err := resolveVespersPsalmody(officeDay, corpus)
+				psalmody, _, err := resolveVespersPsalmody(psalmodyDay, corpus)
 				if err != nil {
 					return nil, err
 				}
-				elems = append(elems, composeResolvedPsalmody(officeDay, opts.hourName, psalmody, corpus)...)
+				elems = append(elems, composeResolvedPsalmody(psalmodyDay, opts.hourName, psalmody, corpus)...)
 			default:
 				elems = append(elems, resolveHourElement(officeDay, opts.hourName, elem, corpus))
 			}

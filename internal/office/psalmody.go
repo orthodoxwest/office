@@ -210,7 +210,12 @@ func lookupVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (s
 	// (General Rubrics XX.1, XXV.4). This gate belongs before the Common so a
 	// Common cannot manufacture festal psalmody. An office within an octave
 	// retains that octave's psalmody context.
-	if day.Celebration.Rank == models.Double &&
+	//
+	// A Simple takes the weekday psalter on the same footing: General Rubrics
+	// III.1 defines the Simple Office as the office of the Feria, and the ordos
+	// print the ferial psalms on these evenings ("Fri. Ps." on the eve of a
+	// Simple octave day, 2022-2026).
+	if (day.Celebration.Rank == models.Double || day.Celebration.Rank == models.Simple) &&
 		day.WithinOctaveOf == "" &&
 		!hasFeastProperVespersPsalmAntiphons(day, corpus) {
 		return ferialPsalmodyWithWeekdayAntiphonsDeclaration, "rubric/plain-double-ferial-vespers"
