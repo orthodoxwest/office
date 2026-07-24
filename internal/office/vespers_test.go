@@ -207,6 +207,66 @@ func TestComposeVespersFirstVespersUsesFollowingFeastFestalPsalmody(t *testing.T
 	}
 }
 
+// When the incoming office is a Simple it begins at the Chapter (General
+// Rubrics III): the psalms stay ferial for the civil evening, while the Chapter
+// and everything after it are the Simple's. 2026 ordo, Jan 2: "Vespers R / I of
+// fol. / Fri. Ps. (136-9) / Chp. &c. (200) / Mag. Ant. 'This is the same John'".
+func TestComposeVespersSplitAtChapterKeepsFerialPsalmody(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:   time.Date(2026, 1, 2, 0, 0, 0, 0, time.UTC), // a Friday
+		Season: models.Christmas,
+		Color:  models.Red,
+		Celebration: &models.Feast{
+			ID:       "octave-day-st-stephen",
+			Rank:     models.Simple,
+			Category: models.CategoryMartyr,
+			Color:    models.Red,
+		},
+		Vespers: models.VespersDesignation{
+			Owner: models.VespersIOfFollowing,
+			Feast: &models.Feast{
+				ID:       "octave-day-st-john",
+				Rank:     models.Simple,
+				Category: models.CategoryApostle,
+				Color:    models.White,
+			},
+			Color:                 models.Red,
+			Season:                models.Christmas,
+			PsalmodyFromPreceding: true,
+		},
+	}
+
+	got := vespersPsalmLabels(t, day)
+	want := []string{"Psalm 142", "Psalm 144a", "Psalm 144b", "Psalm 145a"}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("split Vespers psalms = %v, want the Friday ferial psalms %v", got, want)
+	}
+
+	// The rest of the hour is the incoming Simple's: the apostle chapter, not
+	// the martyr chapter that the outgoing office would supply.
+	engine, err := NewEngine(filepath.Join("..", "..", "data"))
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	hour, err := engine.ComposeHour("vespers", day, calendar.ComputeMoveableDates(2026))
+	if err != nil {
+		t.Fatalf("ComposeHour(vespers): %v", err)
+	}
+	if hour.Feast != "" && !strings.Contains(hour.Feast, "John") {
+		t.Errorf("hour feast = %q, want the incoming octave day of St John", hour.Feast)
+	}
+	var refs []string
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			refs = append(refs, elem.SourceRef)
+		}
+	}
+	joined := strings.Join(refs, " ")
+	if !strings.Contains(joined, "apostle") {
+		t.Errorf("split Vespers should draw the Chapter onwards from the apostle office; refs: %s", joined)
+	}
+}
+
 func TestComposeVespersFeriaRetainsWeekdayPsalmody(t *testing.T) {
 	day := &models.CalendarDay{
 		Date:   time.Date(2026, 7, 7, 0, 0, 0, 0, time.UTC),

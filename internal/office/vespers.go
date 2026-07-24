@@ -14,15 +14,34 @@ type VespersComposer struct{}
 // Compose builds a complete Vespers hour for the given day.
 func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
 	if day != nil {
-		if _, _, err := resolveVespersPsalmody(vespersOfficeDay(day), corpus); err != nil {
+		if _, _, err := resolveVespersPsalmody(vespersPsalmodyDay(day), corpus); err != nil {
 			return nil, err
 		}
 	}
 	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
-		hourName:  "vespers",
-		title:     "Vespers",
-		officeDay: vespersOfficeDay,
+		hourName:    "vespers",
+		title:       "Vespers",
+		officeDay:   vespersOfficeDay,
+		psalmodyDay: vespersPsalmodyDay,
 	})
+}
+
+// vespersPsalmodyDay returns the office day that supplies the psalms and their
+// antiphons. It differs from vespersOfficeDay only when the incoming office
+// begins at the Chapter (General Rubrics III): the psalmody then stays with the
+// outgoing office, so resolution uses today's celebration and civil date —
+// which is what yields the weekday ferial psalms the ordo prints on those
+// evenings ("Fri. Ps." on the eve of a Simple octave day).
+func vespersPsalmodyDay(day *models.CalendarDay) *models.CalendarDay {
+	if day == nil {
+		return day
+	}
+	if !day.Vespers.PsalmodyFromPreceding {
+		return vespersOfficeDay(day)
+	}
+	psalmodyDay := *day
+	psalmodyDay.Commemorations = nil
+	return &psalmodyDay
 }
 
 func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {

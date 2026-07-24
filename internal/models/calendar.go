@@ -350,7 +350,9 @@ const (
 	VespersNotApplicable VespersOwner = iota // feria/simple with no concurrence
 	VespersIIOfPreceding                     // II Vespers of today's celebration
 	VespersIOfFollowing                      // I Vespers of tomorrow's celebration
-	// TODO(phase3): VespersSplit
+	// A Vespers split at the Chapter is not a separate owner: the incoming
+	// office owns the hour (the ordo prints it "I of fol."), and only the
+	// psalmody stays behind. See VespersDesignation.PsalmodyFromPreceding.
 )
 
 // VespersDesignation records which office owns vespers on a given evening.
@@ -374,6 +376,16 @@ type VespersDesignation struct {
 	// when its office is commemorated at II Vespers. The office composer uses
 	// this context to take its Antiphon and versicle from I Vespers (XIV.14).
 	FollowingOfficeCommemorationID string
+
+	// PsalmodyFromPreceding marks a Vespers split at the Chapter. When a Simple
+	// Office falls on the following day, the outgoing office "ends at the
+	// Chapter at Vespers, at which point the Office of the Simple begins to be
+	// said" (General Rubrics III.-, and XIII.17 on Simples concurring at I
+	// Vespers). Psalms and their antiphons stay with the outgoing office; the
+	// Chapter, hymn, short responsory, versicle, Magnificat antiphon and collect
+	// are the incoming office's. Colour follows the outgoing office, as the
+	// printed ordos do (2022-2026: Jan 3 white → Innocents red prints "Vespers W").
+	PsalmodyFromPreceding bool
 }
 
 // CalendarDay represents the resolved calendar for a single day.

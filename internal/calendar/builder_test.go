@@ -714,8 +714,10 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 	}{
 		// Jan 1 (Circumcision D2): II prec.
 		{1, 1, models.VespersIIOfPreceding, "Circumcision D2 should have II prec."},
-		// Jan 2 (Oct St Stephen S, followed by Oct St John S): both Simple, no concurrence
-		{1, 2, models.VespersNotApplicable, "Two adjacent Simples have no concurrence"},
+		// Jan 2 (Oct St Stephen S, followed by Oct St John S): the outgoing Simple
+		// has no II Vespers (XIII.17), so the incoming Simple takes the hour from
+		// the Chapter (General Rubrics III). 2026 ordo: "Vespers R / I of fol."
+		{1, 2, models.VespersIOfFollowing, "Simple octave day takes I Vespers from the Chapter"},
 		// Jan 5 (Vigil of Epiphany SD): I fol. (Epiphany D1)
 		{1, 5, models.VespersIOfFollowing, "Vigil of Epiphany yields to Epiphany D1"},
 		// Jan 6 (Epiphany D1): II prec.
@@ -734,6 +736,76 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 		if day.Vespers.Owner != tt.wantOwner {
 			t.Errorf("2026-%02d-%02d vespers: got %d, want %d (%s)",
 				tt.month, tt.day, day.Vespers.Owner, tt.wantOwner, tt.desc)
+		}
+	}
+}
+
+// A Simple's office begins only at the Chapter of Vespers (General Rubrics
+// III), so the psalmody stays with the outgoing office and the colour the ordos
+// print is the outgoing one's. Pinned across 2022-2026, where the printed ordos
+// all show "Vespers <colour of the outgoing office> / I of fol. / <weekday> Ps.
+// / Chp. &c. of the Simple".
+func TestBuildCalendarSimpleTakesVespersFromChapter(t *testing.T) {
+	// The Holy Name displaces the Christmas-octave Simples in some years, so
+	// locate the eve of St John's octave day rather than assuming a date.
+	exercised := 0
+	for year := 2022; year <= 2026; year++ {
+		days, err := BuildCalendar(year, findDataDir(t))
+		if err != nil {
+			t.Fatalf("BuildCalendar(%d): %v", year, err)
+		}
+		for i := 1; i < len(days); i++ {
+			fol := days[i].Celebration
+			prec := days[i-1].Celebration
+			if fol == nil || fol.ID != "octave-day-st-john" {
+				continue
+			}
+			if prec == nil || hasSecondVespers(prec) {
+				continue // a worthier outgoing office keeps the whole hour
+			}
+			exercised++
+			eve := days[i-1]
+			date := eve.Date.Format("2006-01-02")
+			if eve.Vespers.Owner != models.VespersIOfFollowing {
+				t.Errorf("%s vespers owner = %v, want I of following", date, eve.Vespers.Owner)
+			}
+			if !eve.Vespers.PsalmodyFromPreceding {
+				t.Errorf("%s vespers should keep the outgoing office's psalmody", date)
+			}
+			if eve.Vespers.Feast == nil || eve.Vespers.Feast.ID != "octave-day-st-john" {
+				t.Errorf("%s vespers feast = %#v, want octave-day-st-john", date, eve.Vespers.Feast)
+			}
+			// Colour follows the outgoing office (St Stephen's octave day, red),
+			// not the incoming white — as the printed ordos do.
+			if eve.Vespers.Color != models.Red {
+				t.Errorf("%s vespers colour = %s, want red (the outgoing office)", date, eve.Vespers.Color)
+			}
+		}
+	}
+	if exercised == 0 {
+		t.Fatal("no year exercised the Simple-to-Simple Vespers boundary")
+	}
+}
+
+// A Double in possession keeps the whole of its II Vespers against a following
+// Simple (XIII.12), so no split occurs.
+func TestBuildCalendarDoubleKeepsVespersAgainstFollowingSimple(t *testing.T) {
+	days, err := BuildCalendar(2026, findDataDir(t))
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	for i := 0; i < len(days)-1; i++ {
+		fol := days[i+1].Celebration
+		prec := days[i].Celebration
+		if fol == nil || fol.Rank != models.Simple || prec == nil {
+			continue
+		}
+		if !hasSecondVespers(prec) {
+			continue
+		}
+		if days[i].Vespers.PsalmodyFromPreceding {
+			t.Errorf("%s: %s (%s) has II Vespers; a following Simple must not split it",
+				days[i].Date.Format("2006-01-02"), prec.Name, prec.Rank)
 		}
 	}
 }

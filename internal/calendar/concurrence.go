@@ -48,7 +48,22 @@ func hasFirstVespers(f *models.Feast) bool {
 	if f.Category == models.CategorySunday {
 		return true // IV.7: Sundays always have both I and II Vespers
 	}
+	if f.Rank == models.Simple {
+		// XIII.17 states the converse in passing: a Simple "can never concur
+		// with another at II Vespers (although it is possible for another
+		// Office to concur with a Simple Office at I Vespers)". Its I Vespers
+		// begins only at the Chapter — see splitsVespersAtChapter.
+		return true
+	}
 	return f.Rank.Weight() >= models.Double.Weight()
+}
+
+// splitsVespersAtChapter reports whether an incoming office takes Vespers only
+// from the Chapter onwards. General Rubrics III: "when a Simple Office is to be
+// said on the following day, the Office of the Feria ends at the Chapter at
+// Vespers, at which point the Office of the Simple begins to be said".
+func splitsVespersAtChapter(fol *models.Feast) bool {
+	return fol != nil && fol.Rank == models.Simple
 }
 
 // hasSecondVespers returns true if the feast has II Vespers.
@@ -662,7 +677,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	// If preceding has no II Vespers, following wins by default
 	if !precHasII {
 		comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, preceding, following, false, sameOctave)
-		return models.VespersDesignation{
+		return applyChapterSplit(models.VespersDesignation{
 			Owner:          models.VespersIOfFollowing,
 			Feast:          folFeast,
 			Color:          following.Color,
@@ -671,7 +686,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Commemorations: comms,
 			Rule:           "concurrence:following-only",
 			Decisions:      decisions,
-		}
+		}, folFeast, preceding)
 	}
 
 	// If following has no I Vespers, preceding wins by default
@@ -710,7 +725,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		}
 	}
 	comms, decisions := boundaryCommemorationsWithDecisions(folFeast, precFeast, preceding, following, false, sameOctave)
-	return models.VespersDesignation{
+	return applyChapterSplit(models.VespersDesignation{
 		Owner:          models.VespersIOfFollowing,
 		Feast:          folFeast,
 		Color:          following.Color,
@@ -719,7 +734,34 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		Commemorations: comms,
 		Rule:           rule,
 		Decisions:      decisions,
+	}, folFeast, preceding)
+}
+
+// applyChapterSplit marks a designation whose incoming office begins only at
+// the Chapter, leaving the psalmody with the outgoing office.
+// See VespersDesignation.PsalmodyFromPreceding.
+//
+// Colour follows the outgoing office only when the day has an office of its own.
+// A bare Feria cannot concur at all — "the Office of the Feria begins whenever
+// another Office ends, and ends whenever another Office begins" (XIII.18) — so
+// the incoming office's colour governs, which is what the ordos print: green
+// Fridays before a Saturday Office of the B.V.M. are "Vespers W / I of fol.",
+// while Jan 2 (Octave Day of St Stephen, red) is "Vespers R / I of fol." even
+// though St John's octave day is white.
+func applyChapterSplit(d models.VespersDesignation, fol *models.Feast, preceding *models.CalendarDay) models.VespersDesignation {
+	if !splitsVespersAtChapter(fol) {
+		return d
 	}
+	d.PsalmodyFromPreceding = true
+	if preceding.Celebration != nil {
+		d.Color = preceding.Color
+	}
+	d.Decisions = append(d.Decisions, models.CompositionDecision{
+		Rule:    "concurrence:simple-begins-at-chapter",
+		Outcome: "split",
+		Detail:  fol.Name,
+	})
+	return d
 }
 
 // resolveVespersConcurrence iterates through the calendar days and resolves
