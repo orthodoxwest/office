@@ -1,0 +1,252 @@
+name: Update UX snapshots
+
+on:
+  # This event loads the workflow definition from the default branch. The job
+  # that executes pull-request code must remain read-only.
+  pull_request_target:
+    types: [labeled]
+
+concurrency:
+  group: update-ux-snapshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  authorize:
+    name: Authorize snapshot update
+    if: >-
+      github.event.label.name == 'update-ux-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Require a trusted label actor
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.actor === 'github-actions[bot]') {
+              core.setFailed('Workflow tokens cannot authorize snapshot updates.');
+              return;
+            }
+
+            const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor,
+            });
+            const trusted = new Set(['admin', 'maintain', 'write']);
+            if (!trusted.has(data.permission)) {
+              core.setFailed(
+                `@${context.actor} has ${data.permission} permission; write access is required.`
+              );
+              return;
+            }
+            core.notice(`Snapshot update authorized by @${context.actor}.`);
+
+  generate:
+    name: Generate snapshots without write access
+    needs: authorize
+    if: >-
+      needs.authorize.result == 'success' &&
+      github.event.label.name == 'update-ux-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install UX test dependencies
+        run: npm ci --prefix .web-tools
+
+      - name: Run UX behavior and accessibility tests
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js
+
+      - name: Regenerate UX snapshots
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --update-snapshots=all
+
+      - name: Upload untrusted snapshot candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: ux-snapshot-candidates
+          path: .web-tools/tests/visual.spec.js-snapshots/
+          if-no-files-found: error
+          retention-days: 1
+
+  commit:
+    name: Validate and commit snapshots
+    needs: generate
+    if: needs.generate.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Download untrusted snapshot candidates
+        uses: actions/download-artifact@v4
+        with:
+          name: ux-snapshot-candidates
+          path: ${{ runner.temp }}/ux-snapshot-candidates
+
+      - name: Validate and stage snapshot candidates
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/ux-snapshot-candidates
+        run: |
+          set -euo pipefail
+          SNAPSHOT_DIR=.web-tools/tests/visual.spec.js-snapshots
+
+          if [ -L "$SNAPSHOT_DIR" ] || [ ! -d "$SNAPSHOT_DIR" ]; then
+            echo "::error::$SNAPSHOT_DIR must be a real directory."
+            exit 1
+          fi
+
+          UNEXPECTED=$(find "$ARTIFACT_DIR" -mindepth 1 \
+            \( ! -type f -o ! -name '*.png' \) -print -quit)
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Snapshot artifact contains an unexpected entry: $UNEXPECTED"
+            exit 1
+          fi
+
+          mapfile -t CANDIDATES < <(
+            find "$ARTIFACT_DIR" -mindepth 1 -maxdepth 1 -type f \
+              -name '*.png' -print | LC_ALL=C sort
+          )
+          if [ "${#CANDIDATES[@]}" -lt 1 ] || [ "${#CANDIDATES[@]}" -gt 50 ]; then
+            echo "::error::Expected between 1 and 50 snapshot PNGs; found ${#CANDIDATES[@]}."
+            exit 1
+          fi
+
+          for CANDIDATE in "${CANDIDATES[@]}"; do
+            SIZE=$(stat -c '%s' "$CANDIDATE")
+            SIGNATURE=$(head -c 8 "$CANDIDATE" | od -An -tx1 | tr -d ' \n')
+            if [ "$SIZE" -gt 5242880 ] || [ "$SIGNATURE" != '89504e470d0a1a0a' ]; then
+              echo "::error::Invalid snapshot candidate: $CANDIDATE"
+              exit 1
+            fi
+          done
+
+          UNEXPECTED=$(find "$SNAPSHOT_DIR" -mindepth 1 -maxdepth 1 \
+            \( ! -type f -o ! -name '*.png' \) -print -quit)
+          if [ -n "$UNEXPECTED" ]; then
+            echo "::error::Snapshot directory contains an unexpected entry: $UNEXPECTED"
+            exit 1
+          fi
+
+          find "$SNAPSHOT_DIR" -maxdepth 1 -type f -name '*.png' -delete
+          for CANDIDATE in "${CANDIDATES[@]}"; do
+            cp -- "$CANDIDATE" "$SNAPSHOT_DIR/$(basename "$CANDIDATE")"
+          done
+
+          git reset --quiet HEAD --
+          git add -f -- "$SNAPSHOT_DIR"
+
+          while IFS= read -r -d '' STAGED_PATH; do
+            case "$STAGED_PATH" in
+              "$SNAPSHOT_DIR"/*.png) ;;
+              *)
+                echo "::error::Refusing to commit unexpected path: $STAGED_PATH"
+                exit 1
+                ;;
+            esac
+          done < <(git diff --cached --name-only -z)
+
+      - name: Commit and push
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --cached --quiet && echo "No UX snapshot changes needed." || \
+            git commit --no-verify -m "test: regenerate Playwright snapshots"
+          git push origin "HEAD:refs/heads/$HEAD_REF"
+
+  report:
+    name: Report snapshot update
+    needs: [authorize, generate, commit]
+    if: >-
+      always() &&
+      github.event.label.name == 'update-ux-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Remove label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'update-ux-snapshots',
+              });
+            } catch (_) {
+              // label may have already been removed — that's fine
+            }
+
+      - name: Comment result
+        uses: actions/github-script@v7
+        env:
+          UPDATE_SUCCEEDED: ${{ needs.generate.result == 'success' && needs.commit.result == 'success' }}
+        with:
+          script: |
+            const marker = '<!-- ux-snapshot-update -->';
+            const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const succeeded = process.env.UPDATE_SUCCEEDED === 'true';
+            const body = succeeded
+              ? `## UX snapshots updated\n\nCI regenerated and validated the visual baselines, then pushed them to this branch.\n\n${marker}`
+              : `## UX snapshot update failed\n\nThe visual baselines were not updated. Check the [workflow run](${runURL}) for details.\n\n${marker}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }

@@ -149,11 +149,13 @@ make review-assurance  # release assurance gates
 
 The Playwright suite runs separately from `make check`. Visual regression tests
 run in CI's pinned browser container so host rendering differences do not cause
-false local failures. When an intentional UI change alters the snapshots, review
-the expected, actual, and diff images in the Playwright report artifact, then
-apply the `update-ux-snapshots` label to the pull request. GitHub Actions will
-regenerate the baselines in the authoritative container and commit them to the
-branch.
+false local failures. CI skips Playwright when a change contains only files under
+`data/` and `internal/e2e/testdata/golden/`. When an intentional UI change alters
+the snapshots, review the expected, actual, and diff images in the Playwright
+report artifact, then apply the `update-ux-snapshots` label to the pull request.
+GitHub Actions regenerates candidates in a read-only job, validates that the
+artifact contains only bounded PNG snapshots, and commits them from a separate
+trusted job.
 
 Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
 rendered hours, `assurance-report.md` records the current review counts and
