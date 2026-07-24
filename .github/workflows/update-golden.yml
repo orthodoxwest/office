@@ -154,6 +154,7 @@ jobs:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           SNAPSHOT_DIR=.web-tools/tests/visual.spec.js-snapshots
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git add "$SNAPSHOT_DIR"
 
           if ! git diff --quiet; then
