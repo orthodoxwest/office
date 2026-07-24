@@ -40,8 +40,18 @@ jobs:
             go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
           fi
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install JavaScript lint dependencies
+        run: npm ci --prefix .web-tools
+
       - name: Lint and vet
-        run: make fmt-check vet lint
+        run: make fmt-check vet lint lint-js
 
       - name: Run unit tests
         run: go test -count=1 $(go list ./... | grep -v '/e2e$')

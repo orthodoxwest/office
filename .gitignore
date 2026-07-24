@@ -39,5 +39,8 @@ Thumbs.db
 # Python
 __pycache__/
 
+# Node
+/.web-tools/node_modules/
+
 # Misc
 /references
