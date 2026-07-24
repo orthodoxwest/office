@@ -1,11 +1,13 @@
 /* AWRV Divine Office — typography-focused stylesheet */
 
+/* Self-hosted EB Garamond (OFL-1.1). Paths are relative to this stylesheet
+   (/static/style.css → /static/fonts/…). No third-party font CDN. */
 @font-face {
   font-family: "EB Garamond";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RkC49_Gw.woff2") format("woff2");
+  src: url("fonts/eb-garamond-regular.woff2") format("woff2");
 }
 
 @font-face {
@@ -13,7 +15,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGFmQSNjdsmc35JDF1K5GR0SDw_ZgPJtWoGPg-poi-nfdiA.woff2") format("woff2");
+  src: url("fonts/eb-garamond-italic.woff2") format("woff2");
 }
 
 @font-face {
@@ -21,15 +23,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-2fRkC49_Gw.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "EB Garamond";
-  font-style: italic;
-  font-weight: 700;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/ebgaramond/v29/SlGFmQSNjdsmc35JDF1K5GR0SDw_ZgPJtWoGPg-poi-nB9iA.woff2") format("woff2");
+  src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
 /* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
@@ -84,7 +78,7 @@ input {
 body {
   font-family: "EB Garamond", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   color: var(--text);
@@ -95,6 +89,25 @@ body {
   padding-left: max(1.5rem, env(safe-area-inset-left));
   padding-right: max(1.5rem, env(safe-area-inset-right));
   padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+}
+
+/* Secondary / small italic: system Georgia. EB Garamond italic is hard to
+   read below ~body size in dense chrome (ordo digests, refs, rubrics).
+   Prayer-body italics (hymn titles, Latin incipits, large display quotes)
+   keep EB Garamond via the body stack. */
+.assurance-detail,
+.home .commemorations-label,
+.home .octave-note,
+.rubric,
+.canticle-section,
+.chapter-ref,
+.scripture-ref,
+.day-commemorations .day-commemoration,
+.day-commemorations summary,
+.day-office-incipit,
+.day-office-comm,
+.day-office-note {
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 main {
@@ -1807,6 +1820,14 @@ footer::before {
   font-weight: bold;
 }
 
+/* Hidden sprite host for <symbol> defs (calendar fish, etc.). */
+.svg-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 /* Size in em so the fish tracks the text under text-only scaling */
 .fish-flag {
   width: 1em;
@@ -2127,7 +2148,7 @@ footer::before {
 
 @media (max-width: 540px) {
   body {
-    font-size: 19px;
+    font-size: 20px;
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
   }

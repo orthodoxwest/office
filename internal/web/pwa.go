@@ -3,6 +3,7 @@ package web
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -18,14 +19,17 @@ func init() {
 	if err := mime.AddExtensionType(".webmanifest", "application/manifest+json"); err != nil {
 		log.Printf("warn: registering .webmanifest mime type: %v", err)
 	}
+	if err := mime.AddExtensionType(".woff2", "font/woff2"); err != nil {
+		log.Printf("warn: registering .woff2 mime type: %v", err)
+	}
 }
 
 // computeVersion derives a deterministic build identifier from the server
 // binary and the data directory. It changes exactly when a deploy changes
 // anything that can affect rendered pages, which makes it suitable for
-// service-worker cache busting; it is stable across restarts of the same
-// build. The Docker build has no git available, so a VCS hash is not an
-// option here.
+// service-worker cache busting and for ?v= stamps on static asset URLs; it is
+// stable across restarts of the same build. The Docker build has no git
+// available, so a VCS hash is not an option here.
 func computeVersion(dataDir string) string {
 	h := sha256.New()
 
@@ -53,15 +57,32 @@ func computeVersion(dataDir string) string {
 	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
-// staticFileServer serves embedded static assets with Cache-Control:
-// no-cache so browsers and the service worker revalidate on every network
-// fetch. The service worker still caches copies for offline use; this only
-// prevents the browser HTTP cache from replaying a pre-deploy response under
-// the same /static/ URL when the SW installs or does SWR.
+// staticURL returns a build-stamped static asset path.
+// HTML and the service worker always reference assets this way so a deploy
+// that changes CSS/JS produces a new URL; PWA cache entries for the previous
+// stamp stay unused instead of pairing with new HTML.
+func staticURL(name, version string) string {
+	name = strings.TrimPrefix(name, "/")
+	if version == "" {
+		return "/static/" + name
+	}
+	return fmt.Sprintf("/static/%s?v=%s", name, version)
+}
+
+// staticFileServer serves embedded static assets.
+//
+// When the request carries ?v=… (the stamp HTML and the SW put on asset URLs),
+// responses are immutable for a year: the URL changes on every deploy, so
+// long-lived browser/SW caches cannot serve a mismatched older body.
+// Unversioned requests keep no-cache so ad-hoc fetches still revalidate.
 func staticFileServer(fsys http.FileSystem) http.Handler {
 	files := http.FileServer(fsys)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Cache-Control", "no-cache")
+		if r.URL.Query().Get("v") != "" {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			w.Header().Set("Cache-Control", "no-cache")
+		}
 		files.ServeHTTP(w, r)
 	})
 }

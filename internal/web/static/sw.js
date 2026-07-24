@@ -4,6 +4,10 @@
  * below with a hash of the binary + data directory. A deploy that changes anything affecting
  * rendered pages therefore changes this file, reinstalls the worker, and
  * starts a fresh cache.
+ *
+ * Static assets are referenced with ?v=VERSION (same stamp HTML uses). That
+ * makes each deploy a new URL for CSS/JS, so cache-first cannot pair a new
+ * page with a previous stylesheet — the main risk during active development.
  */
 
 var VERSION = "__VERSION__";
@@ -12,14 +16,25 @@ var META_CACHE = "office-meta";
 var PRECACHE_DAYS = 14;
 var PAGE_NETWORK_TIMEOUT_MS = 2500;
 var HOURS = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+var ASSET_Q = "?v=" + VERSION;
+
+function assetURL(path) {
+  return path + ASSET_Q;
+}
 
 var CORE_ASSETS = [
-  "/static/style.css",
-  "/static/app.js",
-  "/static/favicon.svg",
-  "/static/manifest.webmanifest",
-  "/static/icons/icon-192.png",
-  "/static/icons/icon-512.png"
+  assetURL("/static/style.css"),
+  assetURL("/static/app.js"),
+  assetURL("/static/favicon.svg"),
+  assetURL("/static/manifest.webmanifest"),
+  assetURL("/static/icons/icon-192.png"),
+  assetURL("/static/icons/icon-512.png"),
+  // Fonts are requested by style.css without ?v= (relative @font-face URLs),
+  // so precache the bare paths. They still live in the versioned Cache bucket
+  // (office-VERSION), which is dropped on activate after a deploy.
+  "/static/fonts/eb-garamond-regular.woff2",
+  "/static/fonts/eb-garamond-italic.woff2",
+  "/static/fonts/eb-garamond-bold.woff2"
 ];
 
 var APP_SHELL_URLS = [
@@ -27,8 +42,9 @@ var APP_SHELL_URLS = [
   "/reminders"
 ];
 
-// networkFetch bypasses the browser HTTP cache so a deploy is not re-stored
-// from a stale disk entry under the same URL.
+// networkFetch bypasses the browser HTTP cache so install/precache always
+// stores the bytes the origin serves for this deploy (not a pre-deploy disk
+// entry under an unversioned URL).
 function networkFetch(req) {
   return fetch(req, { cache: "reload" });
 }
@@ -41,7 +57,7 @@ function precacheCore(cache) {
         return cache.put(u, resp);
       }
     }).catch(function () {
-      // Offline or transient failure during install: runtime SWR / next sync fills in.
+      // Offline or transient failure during install: runtime path / next sync fills in.
     });
   }));
 }
@@ -164,11 +180,11 @@ function offlineResponse() {
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
     "<meta name=\"description\" content=\"Benedictine Divine Office offline page.\">" +
     "<title>Offline - Divine Office</title>" +
-    "<link rel=\"stylesheet\" href=\"/static/style.css\">" +
-    "<link rel=\"icon\" type=\"image/svg+xml\" href=\"/static/favicon.svg\">" +
-    "<link rel=\"manifest\" href=\"/static/manifest.webmanifest\">" +
+    "<link rel=\"stylesheet\" href=\"" + assetURL("/static/style.css") + "\">" +
+    "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" + assetURL("/static/favicon.svg") + "\">" +
+    "<link rel=\"manifest\" href=\"" + assetURL("/static/manifest.webmanifest") + "\">" +
     "<meta name=\"theme-color\" content=\"#faf2ec\">" +
-    "<script src=\"/static/app.js\" defer></script></head><body>" +
+    "<script src=\"" + assetURL("/static/app.js") + "\" defer></script></head><body>" +
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
     "<a class=\"site-brand\" href=\"/\"><span aria-hidden=\"true\">✠</span> Daily Office</a>" +
@@ -190,24 +206,22 @@ function offlineResponse() {
   );
 }
 
-// staleWhileRevalidate serves a cached static asset immediately when present,
-// then refreshes the cache from the network so the next load picks up deploys
-// even before a new service-worker version installs.
-function staleWhileRevalidate(req) {
+// cacheFirst serves a cached static asset immediately when present, otherwise
+// fetches from the network and stores the result. Safe only because asset URLs
+// include ?v=VERSION: a deploy changes the URL, so a new page never reuses a
+// previous deploy's CSS/JS cache entry under the same key.
+function cacheFirst(req) {
   return caches.open(CACHE).then(function (cache) {
     return cache.match(req).then(function (cached) {
-      var network = networkFetch(req).then(function (resp) {
+      if (cached) {
+        return cached;
+      }
+      return networkFetch(req).then(function (resp) {
         if (resp.ok) {
           cache.put(req, resp.clone());
         }
         return resp;
       });
-      if (cached) {
-        // Background refresh; ignore failures while serving the cache.
-        network.catch(function () {});
-        return cached;
-      }
-      return network;
     });
   });
 }
@@ -222,9 +236,9 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  // Static assets: stale-while-revalidate (not pure cache-first).
+  // Static assets: cache-first on versioned URLs (see cacheFirst).
   if (url.pathname.indexOf("/static/") === 0) {
-    event.respondWith(staleWhileRevalidate(req));
+    event.respondWith(cacheFirst(req));
     return;
   }
 

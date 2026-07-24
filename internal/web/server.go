@@ -23,36 +23,41 @@ func escCross(s string) string {
 	return strings.ReplaceAll(template.HTMLEscapeString(s), "✠", `<span class="cross">✠</span>`)
 }
 
-var templateFuncs = template.FuncMap{
-	// navLink builds a navigation href preserving the active date.
-	// theme is ignored (appearance is client-side only; no ?theme= on links).
-	// For the home page ("/") the date is a query param (?date=…).
-	// For hour pages ("/lauds" etc.) the date is a path segment (/lauds/DATE).
-	"navLink": func(base, theme, date string) string {
-		_ = theme
-		switch base {
-		case "/":
-			return homeLink(date, "")
-		case "/calendar":
-			return calendarLink(date, "")
-		case "/reminders":
-			return "/reminders"
-		default:
-			return hourLink(strings.TrimPrefix(base, "/"), date, "")
-		}
-	},
-	"homeLink":              func(date, theme string) string { return homeLink(date, theme) },
-	"hourLink":              func(hour, date, theme string) string { return hourLink(hour, date, theme) },
-	"calendarYearLink":      func(year int, theme string) string { return calendarYearLink(year, theme) },
-	"renderSectionElements": func(elems []models.OfficeElement) template.HTML { return renderSectionElements(elems) },
-	"typeEq": func(t models.ElementType, s string) bool {
-		return string(t) == s
-	},
-	"titleCase":       func(v interface{}) string { return titleCase(fmt.Sprint(v)) },
-	"psalmVerses":     renderPsalmVerses,
-	"liturgicalBlock": renderLiturgicalBlock,
-	"hymnStanzas":     renderHymnStanzas,
-	"gloriaPatri":     renderGloriaPatri,
+// makeTemplateFuncs builds the template FuncMap, including static() which
+// stamps asset URLs with the build version so HTML and CSS/JS stay matched.
+func makeTemplateFuncs(version string) template.FuncMap {
+	return template.FuncMap{
+		// navLink builds a navigation href preserving the active date.
+		// theme is ignored (appearance is client-side only; no ?theme= on links).
+		// For the home page ("/") the date is a query param (?date=…).
+		// For hour pages ("/lauds" etc.) the date is a path segment (/lauds/DATE).
+		"navLink": func(base, theme, date string) string {
+			_ = theme
+			switch base {
+			case "/":
+				return homeLink(date, "")
+			case "/calendar":
+				return calendarLink(date, "")
+			case "/reminders":
+				return "/reminders"
+			default:
+				return hourLink(strings.TrimPrefix(base, "/"), date, "")
+			}
+		},
+		"homeLink":              func(date, theme string) string { return homeLink(date, theme) },
+		"hourLink":              func(hour, date, theme string) string { return hourLink(hour, date, theme) },
+		"calendarYearLink":      func(year int, theme string) string { return calendarYearLink(year, theme) },
+		"static":                func(name string) string { return staticURL(name, version) },
+		"renderSectionElements": func(elems []models.OfficeElement) template.HTML { return renderSectionElements(elems) },
+		"typeEq": func(t models.ElementType, s string) bool {
+			return string(t) == s
+		},
+		"titleCase":       func(v interface{}) string { return titleCase(fmt.Sprint(v)) },
+		"psalmVerses":     renderPsalmVerses,
+		"liturgicalBlock": renderLiturgicalBlock,
+		"hymnStanzas":     renderHymnStanzas,
+		"gloriaPatri":     renderGloriaPatri,
+	}
 }
 
 func renderSectionElements(elems []models.OfficeElement) template.HTML {
@@ -671,37 +676,40 @@ func New(dataDir, addr string) (*Server, error) {
 		return nil, fmt.Errorf("creating office engine: %w", err)
 	}
 
-	tmplHome, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	version := computeVersion(dataDir)
+	funcs := makeTemplateFuncs(version)
+
+	tmplHome, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/home.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing home template: %w", err)
 	}
 
-	tmplHour, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	tmplHour, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/hour.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing hour template: %w", err)
 	}
 
-	tmplCalendar, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	tmplCalendar, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/calendar.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing calendar template: %w", err)
 	}
 
-	tmpl404, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	tmpl404, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/404.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing 404 template: %w", err)
 	}
 
-	tmplError, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	tmplError, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/error.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing error template: %w", err)
 	}
 
-	tmplReminders, err := template.New("").Funcs(templateFuncs).ParseFS(files,
+	tmplReminders, err := template.New("").Funcs(funcs).ParseFS(files,
 		"templates/layout.html", "templates/reminders.html")
 	if err != nil {
 		return nil, fmt.Errorf("parsing reminders template: %w", err)
@@ -730,7 +738,7 @@ func New(dataDir, addr string) (*Server, error) {
 		tmplError:     tmplError,
 		tmplReminders: tmplReminders,
 		addr:          addr,
-		version:       computeVersion(dataDir),
+		version:       version,
 		reviewed:      reviewed,
 		provenance:    provenanceInventory.ByKey(),
 		suspicions:    suspicions,
@@ -766,9 +774,8 @@ func (s *Server) ListenAndServe() error {
 	}()
 
 	mux := http.NewServeMux()
-	// no-cache forces revalidation on each network fetch so the service
-	// worker's install/SWR paths never re-store a stale browser HTTP cache
-	// entry under the same /static/ URL after a deploy.
+	// Static assets are served with long-lived cache headers when requested
+	// with ?v=… (see staticFileServer). HTML stamps that query via static().
 	mux.Handle("/static/", staticFileServer(http.FS(files)))
 	mux.HandleFunc("/sw.js", s.handleServiceWorker)
 	mux.HandleFunc("/office.ics", s.handleICS)
