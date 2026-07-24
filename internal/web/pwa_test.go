@@ -47,15 +47,20 @@ func TestServiceWorkerCachesOfflineNavigationTargets(t *testing.T) {
 	body := string(src)
 
 	for _, want := range []string{
-		`"/"`,
 		`"/reminders"`,
 		`"/calendar/" + years[y]`,
 		`"/?date=" + slug`,
 		`"/" + HOURS[h] + "/" + slug`,
-		`return precacheUpcoming();`,
-		`plain.searchParams.delete("theme")`,
+		`todayShellURLs`,
+		`datedEquivalent`,
+		`isSWRPage`,
+		`staleWhileRevalidate`,
+		`redirectToDated`,
+		`normalizePathname`,
+		`canonicalCacheKey`,
 		`PAGE_NETWORK_TIMEOUT_MS = 2500`,
-		`fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS)`,
+		`fetchWithTimeout`,
+		`plain.searchParams.delete("theme")`,
 		`class=\"offline-page\"`,
 		`/static/style.css`,
 		`Open saved home page`,
@@ -65,21 +70,132 @@ func TestServiceWorkerCachesOfflineNavigationTargets(t *testing.T) {
 		`assetURL`,
 		`cache: "reload"`,
 		`eb-garamond-regular.woff2`,
+		// Install must not block skipWaiting on the full 14-day precache.
+		`return self.skipWaiting();`,
+		`precacheCore(cache)`,
+		// Calendar undated → year + today hash (mirrors server handleCalendar).
+		`"#d-" + today`,
+		// Bare hour with ?date=D redirects to /hour/D, not always today.
+		`return "/" + hour + "/" + qDate`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("service worker is missing offline navigation support %q", want)
 		}
 	}
 
-	// Static /static/ requests must go through cache-first, not the page network-first path.
+	// Static /static/ requests must go through cache-first, not the page SWR path.
 	if !strings.Contains(body, `url.pathname.indexOf("/static/") === 0`) ||
 		!strings.Contains(body, `event.respondWith(cacheFirst(req))`) {
 		t.Errorf("service worker should route /static/ through cacheFirst")
 	}
 
-	// SWR on unversioned URLs was the HTML/CSS desync path during deploys.
-	if strings.Contains(body, `staleWhileRevalidate`) {
-		t.Errorf("service worker should not use staleWhileRevalidate for static assets")
+	// Dated liturgical pages use SWR so the 14-day precache serves immediately.
+	if !strings.Contains(body, `event.respondWith(staleWhileRevalidate(req, url))`) {
+		t.Errorf("service worker should route dated pages through staleWhileRevalidate")
+	}
+	// Undated today-targets redirect onto dated cache keys.
+	if !strings.Contains(body, `event.respondWith(redirectToDated(url, dated))`) {
+		t.Errorf("service worker should redirect undated navigations to dated URLs")
+	}
+
+	// Install should call skipWaiting after core/today only — not after precacheUpcoming.
+	installIdx := strings.Index(body, `self.addEventListener("install"`)
+	activateIdx := strings.Index(body, `self.addEventListener("activate"`)
+	if installIdx < 0 || activateIdx < 0 || activateIdx < installIdx {
+		t.Fatal("expected install and activate listeners in order")
+	}
+	installBlock := body[installIdx:activateIdx]
+	if strings.Contains(installBlock, `precacheUpcoming`) {
+		t.Errorf("install must not wait on full precacheUpcoming (blocks skipWaiting)")
+	}
+	activateBlock := body[activateIdx:]
+	// Activate must kick precache without returning it from waitUntil (no long activate).
+	if !strings.Contains(activateBlock, `precacheUpcoming()`) {
+		t.Errorf("activate should kick full precacheUpcoming in the background")
+	}
+	if strings.Contains(activateBlock, `return precacheUpcoming()`) {
+		t.Errorf("activate must not await precacheUpcoming inside waitUntil")
+	}
+}
+
+// TestServiceWorkerRoutingContract documents the URL→strategy matrix the SW
+// must implement. Pure string contracts (no JS runtime); keep in sync with sw.js.
+func TestServiceWorkerRoutingContract(t *testing.T) {
+	src, err := files.ReadFile("static/sw.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+
+	// Each case is a required behavior token cluster for a URL class.
+	type routeCase struct {
+		name string
+		want []string
+	}
+	cases := []routeCase{
+		{
+			name: "undated home redirects to /?date=today",
+			want: []string{
+				`if (path === "/")`,
+				`return "/?date=" + today`,
+			},
+		},
+		{
+			name: "bare hour with ?date= goes to /hour/date",
+			want: []string{
+				`if (qDate && DATE_RE.test(qDate))`,
+				`return "/" + hour + "/" + qDate`,
+			},
+		},
+		{
+			name: "bare hour without date goes to today",
+			want: []string{
+				`return "/" + hour + "/" + today`,
+			},
+		},
+		{
+			name: "undated calendar includes today hash",
+			want: []string{
+				`return "/calendar/" + new Date().getFullYear() + "#d-" + today`,
+			},
+		},
+		{
+			name: "SWR revalidate bypasses HTTP cache",
+			want: []string{
+				`function networkFetch(req)`,
+				`cache: "reload"`,
+				`var revalidate = networkFetch(req)`,
+			},
+		},
+		{
+			name: "SWR cold miss is time-bounded",
+			want: []string{
+				`fetchWithTimeout(req, PAGE_NETWORK_TIMEOUT_MS)`,
+			},
+		},
+		{
+			name: "static stays cacheFirst not SWR",
+			want: []string{
+				`url.pathname.indexOf("/static/") === 0`,
+				`event.respondWith(cacheFirst(req))`,
+			},
+		},
+		{
+			name: "ics and sw.js bypass page strategies",
+			want: []string{
+				`if (url.pathname === "/sw.js")`,
+				`if (url.pathname === "/office.ics")`,
+			},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			for _, w := range tc.want {
+				if !strings.Contains(body, w) {
+					t.Errorf("missing %q", w)
+				}
+			}
+		})
 	}
 }
 
@@ -120,6 +236,11 @@ func TestLayoutIncludesConstructionBanner(t *testing.T) {
 		// Build-stamped static URLs.
 		`{{static "style.css"}}`,
 		`{{static "app.js"}}`,
+		// data-nav markers for client-side dated href stamping.
+		`data-nav="home"`,
+		`data-nav="hour"`,
+		`data-hour="lauds"`,
+		`data-nav="calendar"`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("layout is missing construction banner markup %q", want)
@@ -150,6 +271,15 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		// "Pray now" is recomputed client-side so a cached home page is not frozen.
 		`updatePrayNow`,
 		`data-hour`,
+		// Dated chrome links so the typical prayer path hits SW precache keys.
+		`syncDatedNavigation`,
+		`pageDateSlug`,
+		`documentDateSlug`,
+		`ensureTodayControl`,
+		`data-nav`,
+		// Re-stamp after midnight when a long-lived tab returns to the foreground.
+		`lastSyncedDay`,
+		`visibilitychange`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("app script is missing offline indicator support %q", want)

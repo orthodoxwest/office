@@ -31,6 +31,9 @@ func makeTemplateFuncs(version string) template.FuncMap {
 		// theme is ignored (appearance is client-side only; no ?theme= on links).
 		// For the home page ("/") the date is a query param (?date=…).
 		// For hour pages ("/lauds" etc.) the date is a path segment (/lauds/DATE).
+		// navLink builds a navigation href. Date should be the page's liturgical
+		// day (YYYY-MM-DD) so chrome hits SW precache keys; empty falls back to
+		// undated paths (still redirected client/SW-side to today when possible).
 		"navLink": func(base, theme, date string) string {
 			_ = theme
 			switch base {

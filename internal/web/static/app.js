@@ -201,8 +201,152 @@ document.documentElement.classList.add("js");
   });
   checkOnline();
 
-  updatePrayNow();
-  markCalendarToday();
+  // localDateSlug formats a date as YYYY-MM-DD in the device's local timezone.
+  function localDateSlug(d) {
+    var m = String(d.getMonth() + 1);
+    var day = String(d.getDate());
+    return d.getFullYear() + "-" + (m.length < 2 ? "0" + m : m) + "-" + (day.length < 2 ? "0" + day : day);
+  }
+
+  // documentDateSlug is the liturgical day this document is about (URL or
+  // home card only). Returns null when the page has no day identity (error,
+  // reminders, bare calendar year) so callers can fall back to local today
+  // for chrome without treating unknown pages as "stale yesterday".
+  function documentDateSlug() {
+    var pathMatch = location.pathname.match(
+      /^\/(?:lauds|prime|terce|sext|none|vespers|compline)\/(\d{4}-\d{2}-\d{2})\/?$/
+    );
+    if (pathMatch) {
+      return pathMatch[1];
+    }
+    var params = new URLSearchParams(location.search);
+    var q = params.get("date");
+    if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) {
+      return q;
+    }
+    var card = document.querySelector(".home-prayer-card[data-date-slug]");
+    if (card) {
+      var slug = card.getAttribute("data-date-slug");
+      if (slug && /^\d{4}-\d{2}-\d{2}$/.test(slug)) {
+        return slug;
+      }
+    }
+    return null;
+  }
+
+  function pageDateSlug() {
+    return documentDateSlug() || localDateSlug(new Date());
+  }
+
+  function todayHrefForPage(today) {
+    var path = location.pathname.replace(/\/$/, "");
+    var hourMatch = path.match(/^\/(lauds|prime|terce|sext|none|vespers|compline)/);
+    if (hourMatch) {
+      return "/" + hourMatch[1] + "/" + today;
+    }
+    return "/?date=" + today;
+  }
+
+  // ensureTodayControl injects or rewrites a Today link when the open document
+  // is not local today (SWR can leave a "today" page frozen past midnight with
+  // ShowToday=false and no server-rendered Today control).
+  function ensureTodayControl(today) {
+    var docDate = documentDateSlug();
+    if (!docDate || docDate === today) {
+      return;
+    }
+    var href = todayHrefForPage(today);
+    var existing = document.querySelectorAll("a.today-link");
+    if (existing.length) {
+      existing.forEach(function (link) {
+        link.setAttribute("href", href);
+        link.hidden = false;
+      });
+      return;
+    }
+    var form = document.querySelector(".date-jump-form");
+    if (!form) {
+      return;
+    }
+    var link = document.createElement("a");
+    link.className = "today-link";
+    link.setAttribute("href", href);
+    link.textContent = "Today";
+    form.appendChild(link);
+  }
+
+  // syncDatedNavigation stamps the top banner (and home prayer card when
+  // present) with dated URLs so navigation hits the service-worker precache
+  // keys rather than undated /lauds shells. Safe to run on every load: server
+  // already emits dated hrefs when NavDate is set; this corrects cached pages
+  // and timezone-edge undated markup. Also re-run on visibilitychange after
+  // midnight so long-lived tabs regain a Today control.
+  function syncDatedNavigation() {
+    var today = localDateSlug(new Date());
+    var navDate = pageDateSlug();
+    var year = navDate.slice(0, 4);
+
+    var brand = document.querySelector('[data-nav="home"]');
+    if (brand) {
+      brand.setAttribute("href", "/?date=" + navDate);
+    }
+
+    document.querySelectorAll('[data-nav="hour"][data-hour]').forEach(function (link) {
+      var hour = link.getAttribute("data-hour");
+      if (hour) {
+        link.setAttribute("href", "/" + hour + "/" + navDate);
+      }
+    });
+
+    var ordo = document.querySelector('[data-nav="calendar"]');
+    if (ordo) {
+      // Always use navDate's year so #d-DATE exists on that year's table.
+      ordo.setAttribute("href", "/calendar/" + year + "#d-" + navDate);
+    }
+
+    ensureTodayControl(today);
+
+    // "Today" shortcuts always mean local today, not the page's selected day.
+    document.querySelectorAll("a.today-link").forEach(function (link) {
+      link.setAttribute("href", todayHrefForPage(today));
+    });
+
+    // Home prayer card: re-stamp hour links for the card's day (or today).
+    var card = document.querySelector(".home-prayer-card[data-date-slug]");
+    if (card) {
+      var cardDate = card.getAttribute("data-date-slug") || today;
+      card.querySelectorAll(".home-hour-link[data-hour]").forEach(function (link) {
+        var hour = link.getAttribute("data-hour");
+        if (hour) {
+          link.setAttribute("href", "/" + hour + "/" + cardDate);
+        }
+      });
+    }
+  }
+
+  var lastSyncedDay = localDateSlug(new Date());
+  function syncChromeIfNeeded() {
+    syncDatedNavigation();
+    updatePrayNow();
+    markCalendarToday();
+  }
+  syncChromeIfNeeded();
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      return;
+    }
+    var day = localDateSlug(new Date());
+    if (day !== lastSyncedDay) {
+      lastSyncedDay = day;
+      syncChromeIfNeeded();
+    } else {
+      // Still re-stamp Today hrefs / pray-now on return (clock may have moved
+      // within the day; cheap and keeps long-lived tabs honest).
+      syncDatedNavigation();
+      updatePrayNow();
+    }
+  });
 
   // The full navigation remains open in the no-JS document. On small screens,
   // collapse it once scripting is available so prayer text gets the viewport.
@@ -315,13 +459,6 @@ document.documentElement.classList.add("js");
       }
     });
   });
-
-  // localDateSlug formats a date as YYYY-MM-DD in the device's local timezone.
-  function localDateSlug(d) {
-    var m = String(d.getMonth() + 1);
-    var day = String(d.getDate());
-    return d.getFullYear() + "-" + (m.length < 2 ? "0" + m : m) + "-" + (day.length < 2 ? "0" + day : day);
-  }
 
   // currentHourSlug returns the office most likely being prayed at the given
   // local time. Boundaries mirror currentHourEntry in handlers.go.

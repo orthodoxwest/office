@@ -35,20 +35,21 @@
       {{- $t := .Theme}}
       {{- $d := .NavDate}}
       {{- $p := .Page}}
-      <a class="site-brand{{if eq $p "home"}} active{{end}}" href="{{navLink "/" $t $d}}"{{if eq $p "home"}} aria-current="page"{{end}}><span aria-hidden="true">✠</span> Daily Office</a>
+      {{/* data-nav-* lets app.js re-stamp dates on load so cached chrome hits SW keys. */}}
+      <a class="site-brand{{if eq $p "home"}} active{{end}}" href="{{navLink "/" $t $d}}" data-nav="home"{{if eq $p "home"}} aria-current="page"{{end}}><span aria-hidden="true">✠</span> Daily Office</a>
       <details class="site-menu" open>
         <summary>Menu</summary>
         <nav aria-label="Primary">
-          <a href="{{navLink "/lauds" $t $d}}"{{if eq $p "lauds"}} class="active" aria-current="page"{{end}}>Lauds</a>
-          <a href="{{navLink "/prime" $t $d}}"{{if eq $p "prime"}} class="active" aria-current="page"{{end}}>Prime</a>
-          <a href="{{navLink "/terce" $t $d}}"{{if eq $p "terce"}} class="active" aria-current="page"{{end}}>Terce</a>
-          <a href="{{navLink "/sext" $t $d}}"{{if eq $p "sext"}} class="active" aria-current="page"{{end}}>Sext</a>
-          <a href="{{navLink "/none" $t $d}}"{{if eq $p "none"}} class="active" aria-current="page"{{end}}>None</a>
-          <a href="{{navLink "/vespers" $t $d}}"{{if eq $p "vespers"}} class="active" aria-current="page"{{end}}>Vespers</a>
-          <a href="{{navLink "/compline" $t $d}}"{{if eq $p "compline"}} class="active" aria-current="page"{{end}}>Compline</a>
+          <a href="{{navLink "/lauds" $t $d}}" data-nav="hour" data-hour="lauds"{{if eq $p "lauds"}} class="active" aria-current="page"{{end}}>Lauds</a>
+          <a href="{{navLink "/prime" $t $d}}" data-nav="hour" data-hour="prime"{{if eq $p "prime"}} class="active" aria-current="page"{{end}}>Prime</a>
+          <a href="{{navLink "/terce" $t $d}}" data-nav="hour" data-hour="terce"{{if eq $p "terce"}} class="active" aria-current="page"{{end}}>Terce</a>
+          <a href="{{navLink "/sext" $t $d}}" data-nav="hour" data-hour="sext"{{if eq $p "sext"}} class="active" aria-current="page"{{end}}>Sext</a>
+          <a href="{{navLink "/none" $t $d}}" data-nav="hour" data-hour="none"{{if eq $p "none"}} class="active" aria-current="page"{{end}}>None</a>
+          <a href="{{navLink "/vespers" $t $d}}" data-nav="hour" data-hour="vespers"{{if eq $p "vespers"}} class="active" aria-current="page"{{end}}>Vespers</a>
+          <a href="{{navLink "/compline" $t $d}}" data-nav="hour" data-hour="compline"{{if eq $p "compline"}} class="active" aria-current="page"{{end}}>Compline</a>
           <span class="nav-divider" aria-hidden="true"></span>
-          <a href="{{navLink "/calendar" $t $d}}"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
-          <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
+          <a href="{{navLink "/calendar" $t $d}}" data-nav="calendar"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
+          <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}" data-nav="reminders"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
         </nav>
       </details>
     </div>
