@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const testDate = "2026-03-15";
 
-test.skip(process.platform !== "linux", "Visual baselines use the pinned Linux CI image.");
+test.skip(!process.env.CI, "Visual baselines run in the pinned CI browser container.");
 
 async function openForSnapshot(page, path, theme) {
   await page.addInitScript((storedTheme) => {

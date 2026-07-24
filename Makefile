@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux test-ux-update parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
 
 YEAR ?= 2026
 
@@ -23,9 +23,6 @@ test-race: ## Run Go tests with the race detector
 
 test-ux: ## Run Playwright UX regression tests
 	npm --prefix .web-tools run test:ux
-
-test-ux-update: ## Update Playwright visual baselines
-	npm --prefix .web-tools run test:ux:update
 
 parity: ## Verify the 2026-2053 date-sensitive parity snapshot
 	go test ./internal/e2e -run TestParityGolden -count=1

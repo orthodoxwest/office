@@ -1,8 +1,12 @@
-name: Update golden files
+name: Update generated files
 
 on:
   pull_request:
     types: [labeled]
+
+concurrency:
+  group: update-generated-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
   update-golden:
@@ -105,4 +109,130 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
               body: `## Golden file update failed\n\nThe attempt to regenerate golden files failed. Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`,
+            });
+
+  update-ux-snapshots:
+    if: >-
+      github.event.label.name == 'update-ux-snapshots' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install UX test dependencies
+        run: npm ci --prefix .web-tools
+
+      - name: Run UX behavior and accessibility tests
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js
+
+      - name: Regenerate UX snapshots
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --update-snapshots=all
+
+      - name: Commit and push
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          SNAPSHOT_DIR=.web-tools/tests/visual.spec.js-snapshots
+          git add "$SNAPSHOT_DIR"
+
+          if ! git diff --quiet; then
+            echo "::error::Snapshot regeneration modified tracked files outside $SNAPSHOT_DIR."
+            git diff --name-only
+            exit 1
+          fi
+
+          UNTRACKED=$(git ls-files --others --exclude-standard)
+          if [ -n "$UNTRACKED" ]; then
+            echo "::error::Snapshot regeneration created unexpected untracked files."
+            printf '%s\n' "$UNTRACKED"
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git diff --cached --quiet && echo "No UX snapshot changes needed." || \
+            git commit -m "test: regenerate Playwright snapshots"
+          git push origin "HEAD:$HEAD_REF"
+
+      - name: Remove label
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                name: 'update-ux-snapshots',
+              });
+            } catch (_) {
+              // label may have already been removed — that's fine
+            }
+
+      - name: Comment success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- ux-snapshot-update -->';
+            const body = `## UX snapshots updated\n\nCI regenerated the visual baselines in the pinned Playwright container and pushed the result to this branch.\n\n${marker}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
+
+      - name: Comment failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `## UX snapshot update failed\n\nThe attempt to regenerate visual baselines failed. Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`,
             });

@@ -132,8 +132,7 @@ pdfjam --booklet true --paper letter compline.pdf
 
 ```bash
 make test     # run all tests (Go + Python script tests, includes golden files)
-make test-ux  # run mobile-first Playwright behavior, accessibility, and visual tests
-make test-ux-update # intentionally update Linux visual baselines
+make test-ux  # run mobile-first Playwright behavior and accessibility tests
 make check    # formatting + Go/JS analysis + tests + data validation/lint
 make lint-js  # run ESLint on browser and service-worker JavaScript
 make install-hooks # configure the versioned pre-push hook (once per clone)
@@ -148,8 +147,13 @@ make review-plan       # residual structural-review checklist
 make review-assurance  # release assurance gates
 ```
 
-The Playwright suite runs separately from `make check`. Visual baselines are
-generated on Linux to match the pinned browser environment used in CI.
+The Playwright suite runs separately from `make check`. Visual regression tests
+run in CI's pinned browser container so host rendering differences do not cause
+false local failures. When an intentional UI change alters the snapshots, review
+the expected, actual, and diff images in the Playwright report artifact, then
+apply the `update-ux-snapshots` label to the pull request. GitHub Actions will
+regenerate the baselines in the authoritative container and commit them to the
+branch.
 
 Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
 rendered hours, `assurance-report.md` records the current review counts and

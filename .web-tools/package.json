@@ -4,8 +4,7 @@
   "scripts": {
     "install:browser": "playwright install --with-deps chromium",
     "lint": "cd .. && .web-tools/node_modules/.bin/eslint --config .web-tools/eslint.config.mjs .web-tools/*.mjs .web-tools/tests/*.js internal/web/static/*.js",
-    "test:ux": "playwright test",
-    "test:ux:update": "playwright test --update-snapshots=all"
+    "test:ux": "playwright test"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
