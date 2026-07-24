@@ -71,11 +71,12 @@ Open http://localhost:8080 in your browser. The server loads all data files at s
 ## Running locally (for developers)
 
 Requires Go 1.26+. The full check suite also requires `python3`, Node.js
-20.19+ and npm. Install the pinned JavaScript lint dependencies with
+20.19+ and npm. Install the pinned JavaScript tooling dependencies with
 `npm ci --prefix .web-tools`.
 
 ```bash
-npm ci --prefix .web-tools # install pinned ESLint dependencies
+npm ci --prefix .web-tools # install pinned JavaScript tooling dependencies
+npm --prefix .web-tools run install:browser # install Chromium for UX tests
 make install-hooks # once per clone; pre-push runs the full check suite
 make build   # build ./office binary
 make serve   # start server on http://localhost:8080
@@ -131,6 +132,7 @@ pdfjam --booklet true --paper letter compline.pdf
 
 ```bash
 make test     # run all tests (Go + Python script tests, includes golden files)
+make test-ux  # run mobile-first Playwright behavior and accessibility tests
 make check    # formatting + Go/JS analysis + tests + data validation/lint
 make lint-js  # run ESLint on browser and service-worker JavaScript
 make install-hooks # configure the versioned pre-push hook (once per clone)
@@ -144,6 +146,14 @@ make review-provenance-queue # prioritize atomic text verification
 make review-plan       # residual structural-review checklist
 make review-assurance  # release assurance gates
 ```
+
+The Playwright suite runs separately from `make check`. Visual regression tests
+run in CI's pinned browser container so host rendering differences do not cause
+false local failures. When an intentional UI change alters the snapshots, review
+the expected, actual, and diff images in the Playwright report artifact, then
+apply the `update-ux-snapshots` label to the pull request. GitHub Actions will
+regenerate the baselines in the authoritative container and commit them to the
+branch.
 
 Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
 rendered hours, `assurance-report.md` records the current review counts and
