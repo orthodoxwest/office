@@ -1268,23 +1268,35 @@ footer::before {
   margin: 0.8rem 0 0;
 }
 
-/* Drop cap on the unnumbered opening verse of each psalm/canticle */
+/* Drop cap on the unnumbered opening verse of each psalm/canticle.
+   Sized for EB Garamond: line-height 1 + a small top margin seats the cap top
+   on the first line's cap-height and its foot on the second line's baseline
+   (a clean two-line cap); the small right margin closes EB Garamond's wide
+   capital side-bearing so the following text tucks in. */
 .psalm-verses .verse:first-child::first-letter {
-  font-size: 3.4em;
-  line-height: 0.8;
+  font-size: 3.05em;
+  line-height: 1;
   float: left;
-  padding-right: 0.08em;
+  margin: 0.05em 0.1em -0.1em 0;
   color: var(--gold);
 }
 
-/* Drop cap on chapter and hymn opening text */
+/* Drop cap on chapter and hymn opening text (same metrics as the psalm cap) */
 .chapter .liturgical-block .plain-line:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
-  font-size: 3.4em;
-  line-height: 0.8;
+  font-size: 3.05em;
+  line-height: 1;
   float: left;
-  padding-right: 0.08em;
+  margin: 0.05em 0.1em -0.1em 0;
   color: var(--gold);
+}
+
+/* On a one-line chapter reading the two-line drop cap still reserves a second
+   line; keep the ℟ response at the margin rather than letting it wrap in beside
+   the cap. Mirrors the numbered-verse `clear` that protects the psalm cap.
+   No-op once the reading itself wraps and the float has already ended. */
+.chapter .liturgical-block .response-line {
+  clear: left;
 }
 
 .chapter-ref {
