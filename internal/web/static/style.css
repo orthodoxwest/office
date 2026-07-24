@@ -510,7 +510,7 @@ footer::before {
 }
 
 /* Day block: editorial, not a second dashboard card. Color as top hairline
-   only (same motif as the hour color-band). White needs a warmer edge on
+   (echo of the fixed viewport color-band). White needs a warmer edge on
    plaster so it still reads.
 
    The hook is `day-color-*`, not `color-*`: the bare `color-*` classes are
@@ -624,8 +624,8 @@ footer::before {
 .color-band-black  { background: #3a3a3a; }
 .color-band-rose   { background: #c4607a; }
 
-/* Thin vestment-trim band across the top of hour pages in the day's color.
-   On notched phones in standalone mode the band extends up behind the
+/* Thin vestment-trim band across the top of home and hour pages in the day's
+   color. On notched phones in standalone mode the band extends up behind the
    status bar so it isn't clipped by the safe-area inset. */
 .color-band {
   position: fixed;
