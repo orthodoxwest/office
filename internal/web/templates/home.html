@@ -1,6 +1,7 @@
 {{define "title"}}Divine Office — {{.DateStr}}{{end}}
 {{define "content"}}
 <div class="home">
+  <div class="color-band color-band-{{.Color}}"><span class="sr-only">Liturgical color: {{.Color}}</span></div>
   {{/* Day identity first in DOM (desktop reading order). Mobile CSS reorders
        the prayer card above so the CTA still wins the first screen. */}}
   <div class="home-hero">
