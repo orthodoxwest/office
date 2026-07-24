@@ -15,6 +15,11 @@ Amen.
 Christ being raised from the dead dieth no more; death hath no more dominion over him. For in that he died, he died unto sin once: but in that he liveth, he liveth unto God.
 R. Thanks be to God.
 
+[chapter-vespers]
+# SOURCE: Propers of Lauds & Vespers in Paschaltide (propers booklet) — Lauds and Vespers
+# print the same chapter. NB the booklet cites this text "I Corinthians 5:7"; it is Rom 6:9-10.
+@use seasonal/easter/chapter-lauds
+
 [short-responsory-lauds]
 R. The Lord is risen from the tomb, alleluia, alleluia.
 The Lord is risen from the tomb, alleluia, alleluia.
