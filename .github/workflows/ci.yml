@@ -174,3 +174,41 @@ jobs:
         with:
           name: assurance-summary
           path: assurance-summary.md
+
+  ux:
+    name: UX
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install UX test dependencies
+        run: npm ci --prefix .web-tools
+
+      - name: Run UX regression tests
+        run: make test-ux
+
+      - name: Upload UX test report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: output/playwright/
+          retention-days: 14
