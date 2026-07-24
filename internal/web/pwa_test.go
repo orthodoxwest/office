@@ -33,6 +33,10 @@ func TestHandleServiceWorkerInjectsVersion(t *testing.T) {
 	if strings.Contains(body, "__VERSION__") {
 		t.Errorf("expected __VERSION__ placeholder to be replaced")
 	}
+	// Injected version must also stamp static asset URLs so SW and HTML share keys.
+	if !strings.Contains(body, `"?v=" + VERSION`) && !strings.Contains(body, `var ASSET_Q = "?v=" + VERSION`) {
+		t.Errorf("expected asset version query construction in service worker")
+	}
 }
 
 func TestServiceWorkerCachesOfflineNavigationTargets(t *testing.T) {
@@ -55,20 +59,27 @@ func TestServiceWorkerCachesOfflineNavigationTargets(t *testing.T) {
 		`class=\"offline-page\"`,
 		`/static/style.css`,
 		`Open saved home page`,
-		// Static assets must revalidate, not pure cache-first, so deploys
-		// land without waiting for a full worker reinstall.
-		`staleWhileRevalidate`,
+		// Versioned static URLs + cache-first keep HTML/CSS matched across deploys.
+		`cacheFirst`,
+		`ASSET_Q`,
+		`assetURL`,
 		`cache: "reload"`,
+		`eb-garamond-regular.woff2`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("service worker is missing offline navigation support %q", want)
 		}
 	}
 
-	// Static /static/ requests must go through SWR, not the page network-first path.
+	// Static /static/ requests must go through cache-first, not the page network-first path.
 	if !strings.Contains(body, `url.pathname.indexOf("/static/") === 0`) ||
-		!strings.Contains(body, `event.respondWith(staleWhileRevalidate(req))`) {
-		t.Errorf("service worker should route /static/ through staleWhileRevalidate")
+		!strings.Contains(body, `event.respondWith(cacheFirst(req))`) {
+		t.Errorf("service worker should route /static/ through cacheFirst")
+	}
+
+	// SWR on unversioned URLs was the HTML/CSS desync path during deploys.
+	if strings.Contains(body, `staleWhileRevalidate`) {
+		t.Errorf("service worker should not use staleWhileRevalidate for static assets")
 	}
 }
 
@@ -106,6 +117,9 @@ func TestLayoutIncludesConstructionBanner(t *testing.T) {
 		`id="site-banner"`,
 		`data-dismiss-banner`,
 		`under active development`,
+		// Build-stamped static URLs.
+		`{{static "style.css"}}`,
+		`{{static "app.js"}}`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("layout is missing construction banner markup %q", want)
@@ -181,16 +195,82 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 	}
 }
 
-func TestStaticAssetsSendNoCache(t *testing.T) {
+func TestStaticAssetsCacheHeaders(t *testing.T) {
 	mux := http.NewServeMux()
 	mux.Handle("/static/", staticFileServer(http.FS(files)))
+
+	// Versioned requests: long-lived immutable (HTML always stamps ?v=).
 	rec := httptest.NewRecorder()
-	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/static/style.css", nil))
+	mux.ServeHTTP(rec, httptest.NewRequest("GET", "/static/style.css?v=testhash12", nil))
 	if rec.Code != 200 {
 		t.Fatalf("expected 200, got %d", rec.Code)
 	}
-	if cc := rec.Header().Get("Cache-Control"); cc != "no-cache" {
-		t.Errorf("expected Cache-Control: no-cache on static assets, got %q", cc)
+	if cc := rec.Header().Get("Cache-Control"); cc != "public, max-age=31536000, immutable" {
+		t.Errorf("expected immutable cache on versioned static asset, got %q", cc)
+	}
+
+	// Unversioned: revalidate (dev / ad-hoc fetches).
+	rec2 := httptest.NewRecorder()
+	mux.ServeHTTP(rec2, httptest.NewRequest("GET", "/static/style.css", nil))
+	if rec2.Code != 200 {
+		t.Fatalf("expected 200, got %d", rec2.Code)
+	}
+	if cc := rec2.Header().Get("Cache-Control"); cc != "no-cache" {
+		t.Errorf("expected Cache-Control: no-cache on unversioned static assets, got %q", cc)
+	}
+}
+
+func TestStaticURL(t *testing.T) {
+	if got := staticURL("style.css", "abc"); got != "/static/style.css?v=abc" {
+		t.Errorf("staticURL = %q", got)
+	}
+	if got := staticURL("/fonts/x.woff2", "v1"); got != "/static/fonts/x.woff2?v=v1" {
+		t.Errorf("staticURL = %q", got)
+	}
+	if got := staticURL("app.js", ""); got != "/static/app.js" {
+		t.Errorf("empty version should omit query, got %q", got)
+	}
+}
+
+func TestSelfHostedFontsPresent(t *testing.T) {
+	for _, name := range []string{
+		"static/fonts/eb-garamond-regular.woff2",
+		"static/fonts/eb-garamond-italic.woff2",
+		"static/fonts/eb-garamond-bold.woff2",
+		"static/fonts/OFL-1.1.txt",
+	} {
+		if _, err := files.ReadFile(name); err != nil {
+			t.Errorf("missing embedded font asset %s: %v", name, err)
+		}
+	}
+	css, err := files.ReadFile("static/style.css")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(css)
+	if strings.Contains(body, "fonts.gstatic.com") {
+		t.Errorf("style.css should not reference fonts.gstatic.com")
+	}
+	if !strings.Contains(body, `url("fonts/eb-garamond-regular.woff2")`) {
+		t.Errorf("style.css should self-host EB Garamond")
+	}
+}
+
+func TestCalendarFishUsesSprite(t *testing.T) {
+	src, err := files.ReadFile("templates/calendar.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+	if !strings.Contains(body, `id="icon-fish"`) {
+		t.Errorf("calendar should define a single fish symbol")
+	}
+	if !strings.Contains(body, `href="#icon-fish"`) {
+		t.Errorf("calendar fish instances should use <use href=\"#icon-fish\">")
+	}
+	// Path data should appear once (in the symbol), not in the fish template body.
+	if strings.Count(body, `M1 6 C5 1.2`) != 1 {
+		t.Errorf("fish path data should appear once in the sprite, not per instance")
 	}
 }
 

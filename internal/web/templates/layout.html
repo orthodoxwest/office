@@ -18,14 +18,15 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="/static/style.css">
-  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <link rel="manifest" href="/static/manifest.webmanifest">
-  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+  {{/* static stamps ?v=build so HTML and CSS/JS never desync across deploys. */}}
+  <link rel="stylesheet" href="{{static "style.css"}}">
+  <link rel="icon" type="image/svg+xml" href="{{static "favicon.svg"}}">
+  <link rel="manifest" href="{{static "manifest.webmanifest"}}">
+  <link rel="apple-touch-icon" href="{{static "icons/apple-touch-icon.png"}}">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#faf2ec" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
-  <script src="/static/app.js" defer></script>
+  <script src="{{static "app.js"}}" defer></script>
 </head>
 <body class="page-{{.Page}}">
   <a class="skip-link" href="#main-content">Skip to content</a>
