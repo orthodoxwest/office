@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/render"
 )
 
 // hourOrder is the canonical liturgical order of the hours, used so events
@@ -172,7 +173,7 @@ func celebrationName(day *models.CalendarDay) string {
 	if day.Tempora != "" {
 		return day.Tempora
 	}
-	return titleCase(string(day.Season)) + " feria"
+	return render.TitleCase(string(day.Season)) + " feria"
 }
 
 // buildICS renders the iCalendar document for the configured schedule,
@@ -217,7 +218,7 @@ func (s *Server) buildICS(cfg *icsConfig, baseURL string, now time.Time) (string
 		if day.Celebration != nil {
 			descParts = append(descParts, day.Celebration.Rank.DisplayName())
 		}
-		descParts = append(descParts, titleCase(string(day.Season)), string(day.Color))
+		descParts = append(descParts, render.TitleCase(string(day.Season)), string(day.Color))
 		for _, c := range day.Commemorations {
 			descParts = append(descParts, "Comm. "+c.Name)
 		}
@@ -225,7 +226,7 @@ func (s *Server) buildICS(cfg *icsConfig, baseURL string, now time.Time) (string
 
 		for _, h := range cfg.hours {
 			begin := time.Date(date.Year(), date.Month(), date.Day(), h.hh, h.mm, 0, 0, cfg.loc)
-			summary := titleCase(h.name) + " — " + feast
+			summary := render.TitleCase(h.name) + " — " + feast
 
 			write("BEGIN:VEVENT")
 			write("UID:" + h.name + "-" + slug + "@awrv-office")
@@ -268,28 +269,12 @@ func requestBaseURL(r *http.Request) string {
 	return scheme + "://" + r.Host
 }
 
-type remindersData struct {
-	Hours                []reminderHour
-	Days                 []reminderDay
-	NavDate, Theme, Page string
-	ShowBanner           bool
-}
-
-type reminderHour struct {
-	Name, Slug, Default string
-	Checked             bool
-}
-
-type reminderDay struct {
-	Name, Slug string
-}
-
 // handleReminders renders the reminder-subscription settings page.
 func (s *Server) handleReminders(w http.ResponseWriter, r *http.Request) {
 	// Dated nav so chrome links match SW precache keys even from this page.
 	navDate := time.Now().In(userLocation(r)).Format("2006-01-02")
-	data := remindersData{
-		Hours: []reminderHour{
+	data := render.RemindersData{
+		Hours: []render.ReminderHour{
 			{Name: "Lauds", Slug: "lauds", Default: "06:45", Checked: true},
 			{Name: "Prime", Slug: "prime", Default: "07:30"},
 			{Name: "Terce", Slug: "terce", Default: "09:00"},
@@ -298,7 +283,7 @@ func (s *Server) handleReminders(w http.ResponseWriter, r *http.Request) {
 			{Name: "Vespers", Slug: "vespers", Default: "18:00", Checked: true},
 			{Name: "Compline", Slug: "compline", Default: "21:00", Checked: true},
 		},
-		Days: []reminderDay{
+		Days: []render.ReminderDay{
 			{Name: "Mon", Slug: "mon"}, {Name: "Tue", Slug: "tue"}, {Name: "Wed", Slug: "wed"},
 			{Name: "Thu", Slug: "thu"}, {Name: "Fri", Slug: "fri"}, {Name: "Sat", Slug: "sat"},
 			{Name: "Sun", Slug: "sun"},
@@ -309,7 +294,7 @@ func (s *Server) handleReminders(w http.ResponseWriter, r *http.Request) {
 		ShowBanner: false,
 	}
 	setHTMLCacheHeaders(w)
-	if err := s.tmplReminders.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.Reminders(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

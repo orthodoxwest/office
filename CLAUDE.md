@@ -32,15 +32,20 @@ internal/
     proper.go              Proper antiphon resolution
     marian.go              Marian antiphon selection
     preces.go              Preces condition logic
+  render/                  HTML presentation layer (no calendar/office engine imports)
+    render.go              Embedded templates, Pages type + per-page render methods, FuncMap
+    view.go                View models the templates read (HomeData, HourData, CalendarData, …)
+    html.go                Text-to-HTML conversion (psalm verses, liturgical blocks, hymns)
+    links.go               Nav/asset URL construction (navLink, hourLink, static stamping)
+    templates/             Embedded HTML templates (layout, home, hour, calendar)
+                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   web/                     HTTP server
-    server.go              Server struct, route registration, embedded templates
-    handlers.go            Handlers: home, hour, calendar
+    server.go              Server struct, route registration, embedded static assets
+    handlers.go            Handlers: home, hour, calendar — resolve the day, fill render view models
     cache.go               Per-year CalendarDay + MoveableDates cache
     pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
-    templates/             Embedded HTML templates (layout, home, hour, calendar)
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
-                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   e2e/                     End-to-end golden-file tests
     golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests
     testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)
