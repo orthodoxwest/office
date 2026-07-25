@@ -26,19 +26,24 @@
         </div>
         {{end}}
       </header>
-      <details class="hour-date-nav home-date-nav">
-        <summary>Change date</summary>
-        <nav class="day-nav" aria-label="Date navigation">
-          <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
-          <form class="date-jump-form" action="/" method="get">
-            <label class="sr-only" for="home-date-jump">Jump to date</label>
-            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
-            <button class="date-submit" type="submit">Go</button>
-            {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
-          </form>
-          <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
-        </nav>
-      </details>
+      {{/* Season rides the existing control row: context without a new line
+           of text in the title stack. */}}
+      <div class="home-day-meta">
+        {{if .Season}}<p class="home-season">{{.Season}}</p>{{end}}
+        <details class="hour-date-nav home-date-nav">
+          <summary>Change date</summary>
+          <nav class="day-nav" aria-label="Date navigation">
+            <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
+            <form class="date-jump-form" action="/" method="get">
+              <label class="sr-only" for="home-date-jump">Jump to date</label>
+              <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
+              <button class="date-submit" type="submit">Go</button>
+              {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
+            </form>
+            <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
+          </nav>
+        </details>
+      </div>
     </section>
 
     <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">

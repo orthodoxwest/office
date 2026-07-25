@@ -11,7 +11,7 @@
     </symbol>
   </svg>
   {{$theme := .Theme}}
-  <div class="calendar-header">
+  <div class="calendar-header" id="calendar-top">
     <h1>{{.Year}} Ordo</h1>
     <nav class="year-nav">
       <a href="{{calendarYearLink .PrevYear $theme}}">&laquo; {{.PrevYear}}</a>
@@ -22,10 +22,11 @@
   <nav class="month-jump" aria-label="Jump to month">
     {{range .Months}}<a href="#{{.Slug}}">{{printf "%.3s" .Name}}</a>{{end}}
   </nav>
-  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{template "fish"}} Abstinence <span aria-hidden="true">·</span> Liturgical rank abbreviations expand on focus.</p>
+  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{template "fish"}} Abstinence</p>
   {{range .Months}}
   <section class="month" id="{{.Slug}}">
-    <h2>{{.Name}}</h2>
+    {{/* The heading is sticky, so its jump link stays reachable all year. */}}
+    <h2>{{.Name}}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
     <table class="month-table">
       <caption class="sr-only">{{.Name}} {{$.Year}} ordo with feast, penitential observances, liturgical color, and rank.</caption>
       <thead>
@@ -51,15 +52,21 @@
                 <span class="day-mobile-weekday">{{.Weekday}}</span>
               </a>
               <span class="day-mobile-flags">
-                {{if .Fast}}<span class="day-mobile-flag" aria-label="Fasting">§</span>{{end}}
-                {{if .Abstinence}}<span class="day-mobile-flag" aria-label="Abstinence">{{template "fish"}}</span>{{end}}
+                {{/* aria-label is not allowed on a bare span; name these the
+                     way the wide-table cells below do. */}}
+                {{if .Fast}}<span class="day-mobile-flag"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></span>{{end}}
+                {{if .Abstinence}}<span class="day-mobile-flag">{{template "fish"}}<span class="sr-only">Abstinence</span></span>{{end}}
                 {{if .Rank}}{{if .RankFull}}<abbr class="day-mobile-rank" tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}<span class="day-mobile-rank">{{.Rank}}</span>{{end}}{{end}}
               </span>
             </div>
             <span class="day-feast-name">{{.FeastName}}</span>
-            {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
+            {{/* On cards both disclosures share one line; see .day-disclosures. */}}
+            <div class="day-disclosures">
+            {{if .Commemorations}}<details class="day-commemorations" open><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
             {{if or .BenedictusAntiphon .MagnificatAntiphon .LaudsPreces .LaudsSuffrage .HoursPreces .VespersPreces .VespersSuffrage .VespersNote}}
-            <dl class="day-office-digest">
+            <details class="day-office-details" open>
+              <summary>Office details</summary>
+              <dl class="day-office-digest">
               {{if or .BenedictusAntiphon .LaudsPreces .LaudsSuffrage .LaudsComms}}
               <div class="day-office-hour">
                 <dt>Lauds</dt>
@@ -89,8 +96,10 @@
                 </dd>
               </div>
               {{end}}
-            </dl>
+              </dl>
+            </details>
             {{end}}
+            </div>
           </td>
           <td class="day-penitential-flag" data-label="Fast">{{if .Fast}}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{{end}}</td>
           <td class="day-penitential-flag" data-label="Abstinence">{{if .Abstinence}}{{template "fish"}}<span class="sr-only">Abstinence</span>{{end}}</td>

@@ -66,6 +66,26 @@ test("dated hour navigation keeps the selected liturgical day", async ({ page })
   await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
 });
 
+test("ordo day details collapse on a phone and stay open on a wide screen", async ({ page }) => {
+  await openDatedPage(page, "/calendar/2026");
+
+  const digest = page.locator("#d-2026-03-01 details.day-office-details");
+  await expect(digest).not.toHaveAttribute("open", "");
+  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeHidden();
+
+  await digest.getByText("Office details", { exact: true }).click();
+  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeVisible();
+
+  // A closed <details> contributes no height, so the wide layout has to open
+  // them rather than reveal the contents with CSS.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, "/calendar/2026");
+
+  await expect(digest).toHaveAttribute("open", "");
+  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeVisible();
+  await expect(page.locator("#d-2026-03-01 .day-commemoration").first()).toBeVisible();
+});
+
 test("reminder choices update the subscription URL", async ({ page }) => {
   await page.goto("/reminders");
 
@@ -86,10 +106,7 @@ for (const { name, path, theme, knownViolations } of [
     name: "home in the Nave theme",
     path: `/?date=${testDate}`,
     theme: "light",
-    knownViolations: [
-      { rule: "color-contrast", target: ".hour-date-nav > summary" },
-      { rule: "color-contrast", target: "#home-pray-heading" },
-    ],
+    knownViolations: [],
   },
   {
     name: "Lauds in the Apse theme",

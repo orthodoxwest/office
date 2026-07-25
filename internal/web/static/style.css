@@ -34,7 +34,11 @@
   --accent: #6b3a1f;
   --gold: #9a7328;
   --gold-line: #c9ac72;
-  --muted: #7a6b62;
+  /* Darker than plaster alone would need. Muted text also sits on --surface
+     and on the gold/oak washes (today's ordo row, the current hour chip),
+     where the old value fell to 4.05–4.47:1 — under AA at the small sizes it
+     is used at. This value clears 4.5:1 on all four backgrounds. */
+  --muted: #6b5d54;
   --border: #dccfc3;
   --rubric: #8b1a1a;
   --white: #f8f4ec;
@@ -778,6 +782,11 @@ footer::before {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* Home never shows the fixed banner, so it does not need the deep bottom
+       padding that reserves room for it. Reclaiming that space lets the
+       footer settle near the foot of the viewport instead of floating well
+       above it, and gives the centred composition an even field to sit in. */
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
   }
 
   .page-home main {
@@ -786,7 +795,6 @@ footer::before {
     flex-direction: column;
     justify-content: center;
     min-height: 0; /* release the global 60vh floor to centre cleanly */
-    padding-bottom: 2rem;
   }
 
   .home-hero {
@@ -918,6 +926,28 @@ footer::before {
   border-top: 1px solid rgba(26, 26, 26, 0.06);
 }
 
+/* Season and date control share one baseline, so naming the season costs no
+   extra line in the title stack. Once the disclosure is open it claims the
+   whole row and the date picker keeps its full width. */
+.home-day-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 1rem;
+}
+
+.home-day-meta .home-date-nav[open] {
+  flex: 1 0 100%;
+}
+
+.home-season {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 /* Home reuses the hour "Change date" disclosure — after the title stack, not
    between date and feast. Compact so it doesn't open a second band of air. */
 .home-summary .home-date-nav {
@@ -943,6 +973,10 @@ footer::before {
    date control follows it onto the centre axis. These must come after the
    rules they override — equal specificity, and a media query adds none. */
 @media (min-width: 701px) {
+  .home-day-meta {
+    justify-content: center;
+  }
+
   .home-summary .home-date-nav {
     text-align: center;
   }
@@ -1484,6 +1518,17 @@ footer::before {
   box-shadow: 0 0.15rem 0.4rem rgba(26, 26, 26, 0.08);
 }
 
+/* The compact header parks the Menu control in the top-right corner, so a
+   right-aligned pill covers it. The middle of that bar is empty on every
+   page — brand left, menu right — so the pill goes there instead. */
+@media (max-width: 700px) {
+  .offline-indicator {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .offline-page {
   text-align: center;
   padding: 3rem 0 4rem;
@@ -1602,6 +1647,26 @@ footer::before {
   z-index: 5;
   background: var(--bg);
   padding: 0.35rem 0 0.25rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Return to the year head (and its month list) from anywhere in a 365-row
+   page. Padding gives it a tappable area; the matching negative margin keeps
+   that area from making the sticky heading taller. */
+.month-top {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 0.75rem;
+  margin: -0.75rem 0;
+}
+
+.month-top:hover {
+  color: var(--accent);
 }
 
 .month-table {
@@ -1775,53 +1840,79 @@ footer::before {
   content: "Com. ";
 }
 
-/* Desktop-only office digest (Lauds/Hours/Vespers preces, suffrage, and
+/* Composed-office digest (Lauds/Hours/Vespers preces, suffrage, and
    gospel-antiphon incipits) — the same fields `office rubrics` prints,
-   surfaced for cross-checking the ordo without opening each hour. Hidden by
-   default; the mobile card view stays as sparse as it is today. */
-.day-office-digest {
+   surfaced for cross-checking the ordo without opening each hour. Wide
+   screens have room to show it inline under the feast; narrower ones tuck it
+   behind a tap, so day cards stay as sparse as they were until asked. */
+.day-office-details {
+  margin-top: 0.3rem;
+}
+
+.day-office-details > summary {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+  cursor: pointer;
+}
+
+.day-office-details:not([open]) .day-office-digest {
   display: none;
 }
 
+.day-office-digest {
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+  border-top: 1px dotted var(--border);
+}
+
+.day-office-hour {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.day-office-hour dt {
+  flex: 0 0 auto;
+  width: 3.4rem;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.04em;
+}
+
+.day-office-hour dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.6rem;
+}
+
+.day-office-incipit,
+.day-office-comm,
+.day-office-note {
+  font-style: italic;
+}
+
+.day-office-badge {
+  color: var(--rubric);
+  font-style: normal;
+  white-space: nowrap;
+}
+
+/* Expanded on a phone, the digest keeps the antiphon incipits and the
+   preces/suffrage marks: the per-hour commemorations are the longest lines
+   and the day's own commemoration disclosure already names them. */
+@media (max-width: 919px) {
+  .day-office-comm {
+    display: none;
+  }
+}
+
+/* Shown inline at this width (app.js holds the disclosure open), so the
+   toggle would be a control with nothing left to do. */
 @media (min-width: 920px) {
-  .day-office-digest {
-    display: block;
-    margin-top: 0.3rem;
-    padding-top: 0.25rem;
-    border-top: 1px dotted var(--border);
-  }
-
-  .day-office-hour {
-    display: flex;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.4;
-    color: var(--muted);
-  }
-
-  .day-office-hour dt {
-    flex: 0 0 auto;
-    width: 3.4rem;
-    font-variant-caps: small-caps;
-    letter-spacing: 0.04em;
-  }
-
-  .day-office-hour dd {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 0.6rem;
-  }
-
-  .day-office-incipit,
-  .day-office-comm,
-  .day-office-note {
-    font-style: italic;
-  }
-
-  .day-office-badge {
-    color: var(--rubric);
-    font-style: normal;
-    white-space: nowrap;
+  .day-office-details > summary {
+    display: none;
   }
 }
 
@@ -2006,11 +2097,27 @@ footer::before {
     color: var(--muted);
     font-style: italic;
     cursor: pointer;
-    margin-top: 0.3rem;
   }
 
   .day-commemorations:not([open]) .day-commemoration {
     display: none;
+  }
+
+  /* Both toggles share a line so a card gains one quiet row, not two. The
+     one being opened takes the full width for its contents. */
+  .day-disclosures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.1rem;
+    margin-top: 0.3rem;
+  }
+
+  .day-disclosures > details {
+    margin-top: 0;
+  }
+
+  .day-disclosures > details[open] {
+    flex: 1 0 100%;
   }
 }
 

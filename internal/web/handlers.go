@@ -38,6 +38,7 @@ type homeData struct {
 	FeastName      string
 	Commemorations []string
 	Color          string
+	Season         string
 	OctaveNote     string
 	Penitential    []string
 	CalendarLink   string
@@ -513,6 +514,14 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		octaveNote = "Octave of " + calendar.OctaveDisplayName(day.WithinOctaveOf)
 	}
 
+	// Where in the year we are, for readers orienting themselves. Suppressed
+	// when the celebration already names the season (Pentecost Sunday, the
+	// Sundays in Lent) so home never prints the same word twice.
+	season := titleCase(string(day.Season))
+	if season != "" && strings.Contains(strings.ToLower(feastName), strings.ToLower(season)) {
+		season = ""
+	}
+
 	theme := themeParam(r)
 	nowSlug := time.Now().In(loc).Format("2006-01-02")
 	currentHourSlug := ""
@@ -534,6 +543,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		FeastName:      feastName,
 		Commemorations: commemorations,
 		Color:          string(day.Color),
+		Season:         season,
 		OctaveNote:     octaveNote,
 		Penitential:    day.Penitential.Labels(),
 		CalendarLink:   calendarLink(dateSlug, theme),
