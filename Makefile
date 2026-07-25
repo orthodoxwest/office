@@ -106,26 +106,42 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 	@echo "PDF: output/$(HOUR)-$(DATE).pdf"
 
 GREMLINS_VERSION = v0.6.0
+GREMLINS_BIN = $(shell go env GOBIN)
+ifeq ($(GREMLINS_BIN),)
+GREMLINS_BIN = $(shell go env GOPATH)/bin
+endif
+GREMLINS = $(GREMLINS_BIN)/gremlins
 MUTATE_PKGS ?= ./internal/calendar/ ./internal/office/ ./internal/texts/
 MUTATE_DIFF_BASE ?= master
 
-# gremlins built via `go install` always self-reports "dev", so we can't verify
-# the version from the binary — presence is the only check. To upgrade, bump
-# GREMLINS_VERSION and `rm ~/go/bin/gremlins`.
-install-gremlins: ## Install the pinned mutation-testing tool if missing
-	@test -x ~/go/bin/gremlins || \
+# In --diff mode gremlins measures its baseline over the whole suite (~30s)
+# rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
+# would yield a ~15-minute per-mutant timeout. Override it here; the large
+# baseline already makes a small coefficient generous.
+MUTATE_DIFF_COEFFICIENT ?= 5
+
+# `gremlins version` reports "dev" for go-install builds, but the module version
+# is recorded in the binary and readable with `go version -m`. Check that rather
+# than mere presence: CI restores ~/go/bin from a prefix-matched cache, so a
+# presence-only check would silently keep running a stale version after a bump.
+install-gremlins: ## Install the pinned mutation-testing tool if missing or stale
+	@go version -m $(GREMLINS) 2>/dev/null | grep -q 'gremlins[[:space:]]*$(GREMLINS_VERSION)' || \
 		go install github.com/go-gremlins/gremlins/cmd/gremlins@$(GREMLINS_VERSION)
 
+# Note: thresholds are 0, so gremlins exits 0 regardless of efficacy. The
+# `|| exit 1` catches hard failures (compile errors, crashes), not bad scores.
 mutate: install-gremlins ## Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/); ~4 min each
 	@for pkg in $(MUTATE_PKGS); do \
 		echo "==> $$pkg"; \
-		~/go/bin/gremlins unleash $$pkg || exit 1; \
+		$(GREMLINS) unleash $$pkg || exit 1; \
 	done
 
 # Must run from the module root with no package path: passing a path alongside
-# --diff makes gremlins skip every mutant, including the changed ones.
+# --diff makes gremlins skip every mutant, including the changed ones, and
+# still exit 0.
 mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
-	~/go/bin/gremlins unleash --diff $(MUTATE_DIFF_BASE)
+	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
+		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

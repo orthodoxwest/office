@@ -14,10 +14,16 @@
 unleash:
   workers: 4
   timeout-coefficient: 30
+  # Unanchored regexps matched against paths relative to the walk root. These
+  # only take effect in root/--diff mode; with an explicit package path gremlins
+  # sees bare filenames and none of them can match.
+  #
+  # .claude/worktrees holds full checkouts of this repo, so without that entry a
+  # root run walks ~14k duplicate mutants from other branches.
   exclude-files:
+    - "\\.claude/.*"
     - "tools/.*"
     - "scripts/.*"
-    - "cmd/.*"
 
 # Thresholds are intentionally 0 (reporting only) while we establish a
 # baseline. Measured efficacy as of the initial run: calendar 79.4%,

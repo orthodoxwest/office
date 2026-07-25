@@ -27,15 +27,25 @@ Makefile and installed on demand into `~/go/bin`.
 
 ## Two traps
 
-**The timeout coefficient must stay high.** Gremlins derives each mutant's test
-timeout from the baseline test run. Per-package tests here finish in about a
-second, so the default coefficient yields a timeout shorter than a cold compile
-inside gremlins' temporary module copy. Every mutant then reports `TIMED OUT`
-and gremlins prints **`Test efficacy: 100.00%`** — a perfect score from a run
-that verified nothing. The first calendar run failed exactly this way: 638 of
-643 mutants "timed out". At `timeout-coefficient: 30` the same run reports its
-true 79.4%. If you see a wall of `TIMED OUT`, raise the coefficient and ignore
-the efficacy figure printed alongside it.
+**The timeout coefficient must match the baseline.** Gremlins derives each
+mutant's timeout as `coefficient × baseline test run`, and the baseline differs
+sharply between the two modes:
+
+- `make mutate` (one package) measures ~1s, so the *default* coefficient yields
+  a timeout shorter than a cold compile inside gremlins' temporary module copy.
+  Every mutant then reports `TIMED OUT` and gremlins prints
+  **`Test efficacy: 100.00%`** — a perfect score from a run that verified
+  nothing. The first calendar run failed exactly this way: 638 of 643 mutants
+  "timed out". Hence `timeout-coefficient: 30` in `.gremlins.yaml`, where the
+  same run reports its true 79.4%.
+- `make mutate-diff` measures the *whole suite* (~30s), so that same
+  coefficient would mean a ~15-minute timeout per mutant. The target overrides
+  it to `MUTATE_DIFF_COEFFICIENT` (5), and the CI job carries a
+  `timeout-minutes` bound in case a loop-counter mutant spins.
+
+If you see a wall of `TIMED OUT`, raise the coefficient and ignore the efficacy
+figure printed alongside it. Note also that gremlins does not pass `-count=1`,
+so a warm test cache shrinks the baseline and therefore the timeout.
 
 **`--diff` only works from the module root.** Passing a package path together
 with `--diff` makes gremlins skip every mutant, including the changed ones, and
