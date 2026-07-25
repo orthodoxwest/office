@@ -109,6 +109,12 @@ st-scholastica *
 
 # Holy Women — antiphons from commons/holy-woman
 st-martha-bethany *
+# St Anne is said "as in the Com. of Holy Women (51*), except / Col. (575)"
+# (ordo, 26 July), so only her collect is proper. She is never commemorated as
+# an occurring feast — St James wins 25 July in every year — so her
+# commemoration at his II Vespers resolves through the following-office rule
+# to commons/holy-woman. See data/texts/proper/st-anne.txt.
+st-anne benedictus-antiphon commemoration-antiphon commemoration-versicle
 
 # Blessed Virgin Mary — antiphons from commons/blessed-virgin
 motherhood-bvm *
