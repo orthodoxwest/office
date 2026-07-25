@@ -14,6 +14,13 @@ import (
 type TextCorpus struct {
 	texts   map[string]string
 	aliases map[string]string
+
+	// collectConclusions maps a collect's corpus key to the name of the
+	// conclusion form it takes. It is loaded from data/collect-conclusions.txt
+	// rather than from data/texts/, because it records a property of a text
+	// rather than being one — keeping it out of texts also keeps it out of the
+	// rendered-entry and zero-occurrence sweeps.
+	collectConclusions map[string]string
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -27,8 +34,9 @@ type TextCorpus struct {
 func LoadTexts(dataDir string) (*TextCorpus, error) {
 	textsDir := filepath.Join(dataDir, "texts")
 	corpus := &TextCorpus{
-		texts:   make(map[string]string),
-		aliases: make(map[string]string),
+		texts:              make(map[string]string),
+		aliases:            make(map[string]string),
+		collectConclusions: make(map[string]string),
 	}
 
 	err := filepath.Walk(textsDir, func(path string, info os.FileInfo, err error) error {
@@ -69,8 +77,53 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	if err := corpus.extractAndValidateAliases(); err != nil {
 		return nil, err
 	}
+	if err := corpus.loadCollectConclusions(dataDir); err != nil {
+		return nil, err
+	}
 
 	return corpus, nil
+}
+
+// loadCollectConclusions reads data/collect-conclusions.txt, whose lines pair a
+// collect's corpus key with the name of its conclusion form. A missing file is
+// not an error: every collect then takes the default form.
+func (c *TextCorpus) loadCollectConclusions(dataDir string) error {
+	path := filepath.Join(dataDir, "collect-conclusions.txt")
+	content, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("reading %s: %w", path, err)
+	}
+	for i, line := range strings.Split(string(content), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		fields := strings.Fields(trimmed)
+		if len(fields) != 2 {
+			return fmt.Errorf("%s:%d: expected \"<corpus-key> <form>\", got %q", path, i+1, trimmed)
+		}
+		c.collectConclusions[fields[0]] = fields[1]
+	}
+	return nil
+}
+
+// CollectConclusionForm returns the conclusion form recorded for a collect's
+// corpus key, and whether one was recorded. Collects with no entry take the
+// default form.
+func (c *TextCorpus) CollectConclusionForm(key string) (string, bool) {
+	form, ok := c.collectConclusions[key]
+	return form, ok
+}
+
+// SetCollectConclusionForm records a conclusion form, for use in tests.
+func (c *TextCorpus) SetCollectConclusionForm(key, form string) {
+	if c.collectConclusions == nil {
+		c.collectConclusions = make(map[string]string)
+	}
+	c.collectConclusions[key] = form
 }
 
 // stripCommentLines removes corpus annotations from plain-text files using

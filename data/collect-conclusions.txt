@@ -1,0 +1,87 @@
+# Collect conclusion forms, per the General Rubrics of the Monastic Breviary
+# XXXIII.4 (diurnal-rubrics.pdf). See data/texts/shared/formulas.txt for the
+# formula texts and the quoted rule.
+#
+# Format:  <corpus-key> <form>
+#
+# Forms (suffixes of shared/formulas/collect-conclusion-*):
+#   through              addressed to the Father, the Son not mentioned (DEFAULT)
+#   through-same         the Son is mentioned in the body, but not at the end
+#   who-liveth           the Son is mentioned at the very end of the collect
+#   ...-spirit           any of the above, when the Holy Spirit is also mentioned
+#                        ("in the unity of the SAME Holy Ghost")
+#
+# "through" is the default and is NOT listed here; only departures are recorded.
+# Every collect not named below takes shared/formulas/collect-conclusion-through.
+#
+# The rubric's fourth form, "Who livest and reignest" (second person, for a
+# collect ADDRESSED to the Son), is not represented: no collect in this corpus
+# is addressed to the Son. All 151 open by addressing the Father ("O God",
+# "O Lord", "Almighty God", "Grant", "Look down"). If one is ever added, the
+# formula must be sourced from the diurnal first — it is not in the parish books.
+#
+# Cross-checked against the printed conclusions in the parish Lauds/Vespers
+# books wherever a collect matches one closely enough to inherit its verdict
+# (12 of 151). Those agree with the classification below in every case except
+# proper/st-anne/collect, where the draft Sanctoral Vespers book prints
+# "Through &c." while the Sanctoral Lauds book and the diurnal (p. 575) print
+# "Through the same &c." — the Vespers book is in error there.
+
+# --- Ordinary-tier collects ---
+# These are the last-resort fallbacks behind proper-collect, reached on days
+# with no proper of their own. They are not referenced directly by any hour
+# definition; ordinary/prime/collect, ordinary/compline/collect and the
+# suffrage and cross collects are, so those keep their conclusions inline and
+# must NOT be listed here.
+# none: "...through the death of thy Son upon the Cross..."
+ordinary/none/collect through-same
+# terce: "...the descent of the Holy Spirit... the fire of the same Spirit..."
+ordinary/terce/collect through-spirit
+
+# --- The Son is mentioned in the body, but not at the end ---
+proper/advent-sunday-2/collect through-same
+proper/annunciation/collect through-same
+proper/ascension/collect through-same
+proper/assumption-bvm/collect through-same
+proper/christ-the-king/collect through-same
+proper/christmas/collect through-same
+proper/easter-sunday/collect through-same
+proper/easter-sunday-2/collect through-same
+proper/epiphany/collect through-same
+proper/holy-name-jesus/collect through-same
+proper/holy-saturday/collect through-same
+proper/motherhood-bvm/collect through-same
+proper/nativity-sunday-within-octave/collect through-same
+proper/palm-sunday/collect through-same
+proper/purification-bvm/collect through-same
+proper/st-anne/collect through-same
+proper/st-joachim/collect through-same
+proper/transfiguration/collect through-same
+proper/vigil-epiphany/collect through-same
+
+# These two end on the Son in our English, but the Latin they translate ends on
+# the verb ("...respiremus", "...liberemur") and takes Per eundem. Classified by
+# the Latin. Worth a second opinion.
+proper/holy-monday/collect through-same
+proper/holy-wednesday/collect through-same
+
+# --- The Son is mentioned at the very end ---
+# circumcision: "...to receive the Author of Life, Jesus Christ, thy Son, our Lord."
+# st-stephen:   "...to pray even for his persecutors to our Lord Jesus Christ thy Son."
+# Both correspond to Latin collects that take Qui tecum vivit et regnat.
+proper/circumcision/collect who-liveth
+proper/good-friday/collect who-liveth
+proper/holy-thursday/collect who-liveth
+proper/st-stephen/collect who-liveth
+# vigil-nativity: our translation drops the trailing "Dominum nostrum Jesum
+# Christum Filium tuum" that the Latin ends on, but the final clause is still
+# about the Son ("...behold him when he shall come to be our Judge").
+proper/vigil-nativity/collect who-liveth
+
+# --- The Holy Spirit is mentioned: "in the unity of the same Holy Ghost" ---
+proper/pentecost/collect through-spirit
+proper/presentation-bvm/collect through-spirit
+proper/whit-ember-friday/collect through-spirit
+proper/whit-ember-saturday/collect through-spirit
+# Names both the Comforter and, at the end, the Son.
+proper/whit-ember-wednesday/collect who-liveth-spirit
