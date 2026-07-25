@@ -107,20 +107,17 @@ Most recent trustworthy full-package results:
 | `internal/office` | 450 | 100 | 81.82% |
 | `internal/texts` | 92 | 22 | 80.7% |
 
-## Current focus
+## Focused follow-up status
 
-Counts are triage candidates, not a test quota: equivalent mutants must still
-be removed from the queue by reasoning about reachable states.
+The initial high-value mutation queue is complete. The full-package table above
+remains the most recent directly measured package baseline; the focused
+file-level runs below verify their target clusters but do not replace a full
+package measurement.
 
-| Package and area | Surviving mutants | Next question |
-|---|---:|---|
-| `calendar/builder.go` octave generation | 16 | Do generated day numbers, ranks, and proper-set indices hold at Sunday boundaries? |
-| `office/proper.go` Greater Antiphons | 11 | Are December 17/23 and first-Vespers date shifts pinned on both sides? |
-
-The anticipated/resumed Sunday arithmetic is no longer in this table. Concrete
-years now cover zero, one, and two autumn resumptions; equality at the
-anticipation cutoff; Epiphany falling on Sunday; and rejection of a seventh
-displaced Sunday. Those tests killed 29 of 32 surviving mutants in the cluster.
+For anticipated/resumed Sunday arithmetic, concrete years now cover zero, one,
+and two autumn resumptions; equality at the anticipation cutoff; Epiphany
+falling on Sunday; and rejection of a seventh displaced Sunday. Those tests
+killed 29 of 32 surviving mutants in the cluster.
 Two remaining mutations replace `6-surplus` with a larger cutoff; valid
 computed years in the supported 2026–2053 parity range never distinguish that
 expression because anticipatable cases land on or below the equality boundary
@@ -138,3 +135,17 @@ both in its psalmody classifier. The two remaining live mutations change
 `len(drop) > 0` to `>= 0` for an extra no-op filtering pass. Both preserve the
 result. Three loop-control mutations time out because they prevent their loops
 from advancing; they are not silent survivors.
+
+Direct octave-generation tests now cover the Easter Monday/Tuesday/Low Sunday
+and Pentecost/Trinity exclusions; special and generic octave names; a Sunday
+immediately after the parent feast; non-Sunday proper-set numbering; fixed and
+moveable dates; and intermediate versus octave-day ranks. They killed all 16
+previously living mutants in that cluster. Mutating the proper-set loop from
+incrementing to decrementing still times out, as expected for a loop that no
+longer advances toward its bound.
+
+Greater Antiphon tests now pin December 17 and 23, reject December 16 and 24,
+shift I Vespers to the preceding civil evening, reject the wrong hour, season,
+and month, and verify that the date-fixed antiphon replaces Sunday, feria, and
+commons texts while yielding to a feast's own proper. They killed all 11
+previously living mutants in that cluster.
