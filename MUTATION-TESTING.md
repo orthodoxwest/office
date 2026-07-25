@@ -23,9 +23,9 @@ thresholds in `.gremlins.yaml` are 0, so it never fails the build. It posts a
 comment listing surviving mutants on lines the PR touched.
 
 The tool is [gremlins](https://github.com/go-gremlins/gremlins), pinned in the
-Makefile and installed on demand into `~/go/bin`.
+Makefile and installed on demand into the configured `GOBIN` or `GOPATH/bin`.
 
-## Two traps
+## Three traps
 
 **The timeout coefficient must match the baseline.** Gremlins derives each
 mutant's timeout as `coefficient × baseline test run`, and the baseline differs
@@ -37,7 +37,7 @@ sharply between the two modes:
   **`Test efficacy: 100.00%`** — a perfect score from a run that verified
   nothing. The first calendar run failed exactly this way: 638 of 643 mutants
   "timed out". Hence `timeout-coefficient: 30` in `.gremlins.yaml`, where the
-  same run reports its true 79.4%.
+  initial corrected run reported the credible 79.4% baseline recorded below.
 - `make mutate-diff` measures the *whole suite* (~30s), so that same
   coefficient would mean a ~15-minute timeout per mutant. The target overrides
   it to `MUTATE_DIFF_COEFFICIENT` (5), and the CI job carries a
@@ -50,6 +50,19 @@ so a warm test cache shrinks the baseline and therefore the timeout.
 **`--diff` only works from the module root.** Passing a package path together
 with `--diff` makes gremlins skip every mutant, including the changed ones, and
 report `0.00%` with no error. `make mutate-diff` deliberately passes no path.
+
+**The Go build cache must be writable.** Gremlins treats any test exit status 1
+as a killed mutant, including failures caused by the execution environment. In
+a managed sandbox where the default cache is read-only, this produced a false
+`99.84%` calendar result. Point `GOCACHE` at a writable location for the run:
+
+```bash
+GOCACHE=/tmp/office-gremlins-cache make mutate MUTATE_PKGS=./internal/calendar/
+```
+
+If efficacy changes implausibly without corresponding test changes, run the
+package tests with the same environment and inspect infrastructure failures
+before trusting the mutation report.
 
 ## Reading the results
 
@@ -71,9 +84,9 @@ The mutants worth acting on are the ones where you can state the bug in rubric
 terms: "if this boundary were off by one, the suffrage would be wrong on
 January 13."
 
-## Baseline
+## Original baseline
 
-First full run, for reference when we discuss ratcheting:
+First full run, retained as the historical ratchet point:
 
 | Package | Mutants | Killed | Lived | Efficacy |
 |---|---|---|---|---|
@@ -81,15 +94,37 @@ First full run, for reference when we discuss ratcheting:
 | `internal/office` | 588 | 446 | 104 | 81.1% |
 | `internal/texts` | 114 | 92 | 22 | 80.7% |
 
-Gaps this run surfaced that 88–90% line coverage had hidden:
+The first follow-up closed the Epiphany-octave suffrage, Easter octave-parent,
+Circumcision concurrence, and malformed `DateRule` gaps that were originally
+listed here. The feria concurrence finding proved to be unreachable code and
+was removed. Do not use an old copy of that list as the current work queue.
 
-- `office/preces.go:170` — the Epiphany-octave suffrage window
-  (`day >= 7 && day <= 13`). Both boundary mutants lived; no test anywhere
-  references January 7 or January 13.
-- `calendar/concurrence.go:235` — the Easter Monday/Tuesday octave-parent
-  special case. `easter-monday` and `easter-tuesday` appear in no calendar test.
-- `calendar/concurrence.go:300–308` — the Circumcision, within-octave, and
-  feria first-Vespers commemoration exclusions. `circumcision` is tested only
-  for Dec 31 Vespers precedence, never for these branches.
-- `calendar/validate.go:176` — nothing asserts that a malformed `DateRule` is
-  rejected, though `make validate` is a gate the project relies on.
+Most recent trustworthy full-package results:
+
+| Package | Killed | Lived | Efficacy |
+|---|---:|---:|---:|
+| `internal/calendar` | 559 | 92 | 85.87% |
+| `internal/office` | 450 | 100 | 81.82% |
+| `internal/texts` | 92 | 22 | 80.7% |
+
+## Current focus
+
+Counts are triage candidates, not a test quota: equivalent mutants must still
+be removed from the queue by reasoning about reachable states.
+
+| Package and area | Surviving mutants | Next question |
+|---|---:|---|
+| `calendar/builder.go` octave generation | 16 | Do generated day numbers, ranks, and proper-set indices hold at Sunday boundaries? |
+| `office/engine.go` uniform-antiphon collapse | 18 | Do groups of two, three, and multiple adjacent psalm sections retain exactly the framing antiphons? |
+| `office/proper.go` Greater Antiphons | 11 | Are December 17/23 and first-Vespers date shifts pinned on both sides? |
+
+The anticipated/resumed Sunday arithmetic is no longer in this table. Concrete
+years now cover zero, one, and two autumn resumptions; equality at the
+anticipation cutoff; Epiphany falling on Sunday; and rejection of a seventh
+displaced Sunday. Those tests killed 29 of 32 surviving mutants in the cluster.
+Two remaining mutations replace `6-surplus` with a larger cutoff; valid
+computed years in the supported 2026–2053 parity range never distinguish that
+expression because anticipatable cases land on or below the equality boundary
+and all later cases already exceed six. The third changes `len(feasts) > 0` to
+`>= 0` before rewriting the final Sunday; every valid computed year produces a
+non-empty series, so that boundary is likewise equivalent.
