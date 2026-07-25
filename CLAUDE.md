@@ -29,8 +29,9 @@ internal/
     tex.go                 LaTeX booklet formatter (half-letter, lualatex)
   texts/                   Text corpus loader
     loader.go              Corpus loading (INI-style sections + plain files)
-    lines.go               Corpus line grammar: ParsePsalm / ParseBlock, shared by
-                           every renderer so HTML and LaTeX cannot drift apart
+    lines.go               Corpus line grammar: ParsePsalm / ParseBlock / ParseHymn,
+                           shared by every renderer (and by the engine's hymn-title
+                           split) so HTML and LaTeX cannot drift apart
   office/                  Office composition engine
     engine.go              Engine: loads corpus, dispatches to hour composers
     summary.go             HourSummary/SummarizeHour: rubric digest of a composed hour

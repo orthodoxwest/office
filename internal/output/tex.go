@@ -246,52 +246,34 @@ func formatPsalmTeX(text, dataDir, label string, elemType models.ElementType, ch
 	return b.String()
 }
 
-// formatHymnTeX renders a hymn element.
-// Hymn text: first line is Latin title, blank line, then stanzas separated by blank lines.
+// formatHymnTeX renders a hymn element as stanza paragraphs.
+//
+// The composed element usually arrives with its Latin incipit already in the
+// label (the engine peels it), so this must parse with the shared rule rather
+// than dropping everything above the first blank line — that dropped the
+// opening stanza of every hymn.
 func formatHymnTeX(text, dataDir, label string, chant bool) string {
 	slug := labelToSlug(label, models.Hymn)
 	if chant && hasGABC(dataDir, "hymns", slug) {
 		return fmt.Sprintf("\\gregorioscore{%s}\n\n", gabcBase(dataDir, "hymns", slug))
 	}
 
-	lines := strings.Split(text, "\n")
-
-	// First non-blank line is the Latin title; skip it.
-	contentStart := 0
-	for i, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			contentStart = i + 1
-			break
-		}
-	}
+	hymn := texts.ParseHymn(text)
 
 	var b strings.Builder
-	var stanzaLines []string
-
-	flushStanza := func() {
-		if len(stanzaLines) == 0 {
-			return
-		}
+	if hymn.Title != "" {
+		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
+	}
+	for _, stanza := range hymn.Stanzas {
 		b.WriteString("\\noindent ")
-		for i, l := range stanzaLines {
+		for i, line := range stanza {
 			if i > 0 {
 				b.WriteString("\\\\\n")
 			}
-			b.WriteString(texLine(l))
+			b.WriteString(texLine(line))
 		}
 		b.WriteString("\\par\\smallskip\n")
-		stanzaLines = nil
 	}
-
-	for _, line := range lines[contentStart:] {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			flushStanza()
-		} else {
-			stanzaLines = append(stanzaLines, trimmed)
-		}
-	}
-	flushStanza()
 
 	b.WriteString("\n")
 	return b.String()

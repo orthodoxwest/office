@@ -164,11 +164,18 @@ func SweepYear(dataDir string, year int) (*SweepReport, error) {
 	for _, f := range notFound {
 		r.NotFound = append(r.NotFound, *f)
 	}
+	// Both orderings below must be total: the rows come out of a map, so any
+	// pair the comparator calls equal lands in an arbitrary, run-to-run order,
+	// and the report stops being diffable.
 	sort.Slice(r.NotFound, func(i, j int) bool {
-		if r.NotFound[i].Marker != r.NotFound[j].Marker {
-			return r.NotFound[i].Marker < r.NotFound[j].Marker
+		a, b := &r.NotFound[i], &r.NotFound[j]
+		if a.Marker != b.Marker {
+			return a.Marker < b.Marker
 		}
-		return r.NotFound[i].Hour < r.NotFound[j].Hour
+		if a.Hour != b.Hour {
+			return a.Hour < b.Hour
+		}
+		return a.FirstDate.Before(b.FirstDate)
 	})
 	for _, f := range fallbacks {
 		r.OrdinaryFallbacks = append(r.OrdinaryFallbacks, *f)
@@ -184,7 +191,16 @@ func SweepYear(dataDir string, year int) (*SweepReport, error) {
 		if a.Hour != b.Hour {
 			return a.Hour < b.Hour
 		}
-		return a.Slot < b.Slot
+		if a.Slot != b.Slot {
+			return a.Slot < b.Slot
+		}
+		// One slot can fall back to different ordinary texts on different days
+		// (a Saturday hymn and a Sunday one); SourceRef is part of the map key,
+		// so it must be part of the ordering too.
+		if a.SourceRef != b.SourceRef {
+			return a.SourceRef < b.SourceRef
+		}
+		return a.FirstDate.Before(b.FirstDate)
 	})
 	return r, nil
 }

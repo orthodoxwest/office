@@ -134,3 +134,34 @@ func TestParseBlockOffsetsPointAtTheirText(t *testing.T) {
 		}
 	}
 }
+
+func TestParseHymnTitleOnlyWhenItStandsAlone(t *testing.T) {
+	titled := ParseHymn("Te lucis ante terminum\n\nTo thee, before the close of day,\nCreator of the world, we pray.\n\nFrom all ill dreams defend our eyes.\n")
+	if titled.Title != "Te lucis ante terminum" {
+		t.Errorf("Title = %q", titled.Title)
+	}
+	if len(titled.Stanzas) != 2 {
+		t.Fatalf("Stanzas = %#v, want 2", titled.Stanzas)
+	}
+	if len(titled.Stanzas[0]) != 2 || titled.Stanzas[0][0] != "To thee, before the close of day," {
+		t.Errorf("first stanza = %#v", titled.Stanzas[0])
+	}
+
+	// A multi-line first block is a stanza, not a title. The engine peels the
+	// incipit before rendering, so this is what a renderer normally sees —
+	// treating it as a title would drop the hymn's opening stanza.
+	peeled := ParseHymn("To thee, before the close of day,\nCreator of the world, we pray.\n\nFrom all ill dreams defend our eyes.\n")
+	if peeled.Title != "" {
+		t.Errorf("Title = %q, want empty", peeled.Title)
+	}
+	if len(peeled.Stanzas) != 2 || peeled.Stanzas[0][0] != "To thee, before the close of day," {
+		t.Fatalf("Stanzas = %#v, want the opening stanza kept", peeled.Stanzas)
+	}
+}
+
+func TestParseHymnSingleStanza(t *testing.T) {
+	hymn := ParseHymn("O Trinity of blessed light.\n")
+	if hymn.Title != "" || len(hymn.Stanzas) != 1 || len(hymn.Stanzas[0]) != 1 {
+		t.Errorf("hymn = %#v", hymn)
+	}
+}

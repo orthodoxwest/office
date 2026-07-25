@@ -248,3 +248,57 @@ func ParseBlock(text string) []BlockLine {
 
 	return parsed
 }
+
+// Hymn is a parsed hymn: its Latin incipit, when the source carries one, and
+// its stanzas, each a slice of lines.
+type Hymn struct {
+	Title   string
+	Stanzas [][]string
+}
+
+// SplitHymnTitle peels a hymn's Latin incipit from its body. A title is a
+// single line standing alone above a blank line ("Te lucis ante terminum");
+// a multi-line first block is a stanza, not a title, and is left in the body.
+//
+// The office engine applies this when composing a hymn element, so a composed
+// hymn usually arrives at a renderer with its title already in the element
+// label and its body starting at the first stanza. Renderers must therefore
+// parse with the same rule rather than assuming a title is still there —
+// peeling a second time would eat the opening stanza.
+func SplitHymnTitle(text string) (title, body string) {
+	firstBlock, rest, found := strings.Cut(text, "\n\n")
+	if !found {
+		return "", text
+	}
+	firstBlock = strings.TrimSpace(firstBlock)
+	if strings.ContainsRune(firstBlock, '\n') {
+		return "", text
+	}
+	return firstBlock, strings.TrimSpace(rest)
+}
+
+// ParseHymn parses a hymn into its title and stanzas. Stanzas are separated by
+// blank lines; each stanza keeps its own lines, since renderers break them
+// differently.
+func ParseHymn(text string) Hymn {
+	title, body := SplitHymnTitle(strings.TrimSpace(text))
+	parsed := Hymn{Title: title}
+
+	var stanza []string
+	flush := func() {
+		if len(stanza) > 0 {
+			parsed.Stanzas = append(parsed.Stanzas, stanza)
+			stanza = nil
+		}
+	}
+	for _, line := range strings.Split(body, "\n") {
+		if trimmed := strings.TrimSpace(line); trimmed == "" {
+			flush()
+		} else {
+			stanza = append(stanza, trimmed)
+		}
+	}
+	flush()
+
+	return parsed
+}

@@ -265,11 +265,19 @@ func lintNearDuplicates(r *LintReport, entries map[string]string, keys []string)
 			}
 		}
 	}
+	// Total ordering: one key can carry several findings of the same class
+	// (a text near-duplicating more than one other), and the findings are
+	// collected by ranging over maps, so Detail has to break the tie or the
+	// advisory list reshuffles between runs.
 	sort.Slice(r.Advisory, func(i, j int) bool {
-		if r.Advisory[i].Class != r.Advisory[j].Class {
-			return r.Advisory[i].Class < r.Advisory[j].Class
+		a, b := &r.Advisory[i], &r.Advisory[j]
+		if a.Class != b.Class {
+			return a.Class < b.Class
 		}
-		return r.Advisory[i].Key < r.Advisory[j].Key
+		if a.Key != b.Key {
+			return a.Key < b.Key
+		}
+		return a.Detail < b.Detail
 	})
 }
 

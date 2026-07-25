@@ -414,49 +414,28 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 	return template.HTML(sb.String())
 }
 
-// renderHymnStanzas parses a hymn text into structured HTML with per-stanza <p> elements.
+// renderHymnStanzas renders a hymn as structured HTML, one <p> per stanza.
 func renderHymnStanzas(text string) template.HTML {
+	hymn := texts.ParseHymn(text)
 	var sb strings.Builder
 
-	title := ""
-	body := strings.TrimSpace(text)
-	if firstBlock, rest, found := strings.Cut(body, "\n\n"); found {
-		if !strings.ContainsRune(strings.TrimSpace(firstBlock), '\n') {
-			title = strings.TrimSpace(firstBlock)
-			body = strings.TrimSpace(rest)
-		}
-	}
-
 	sb.WriteString(`<div class="hymn-verses">`)
-	if title != "" {
+	if hymn.Title != "" {
 		sb.WriteString(`<p class="hymn-latin">`)
-		sb.WriteString(template.HTMLEscapeString(title))
+		sb.WriteString(template.HTMLEscapeString(hymn.Title))
 		sb.WriteString(`</p>`)
 	}
 
-	var stanza []string
-	emitStanza := func() {
-		if len(stanza) == 0 {
-			return
-		}
+	for _, stanza := range hymn.Stanzas {
 		sb.WriteString(`<p class="hymn-stanza">`)
-		for i, l := range stanza {
+		for i, line := range stanza {
 			if i > 0 {
 				sb.WriteString(`<br>`)
 			}
-			sb.WriteString(escCross(l))
+			sb.WriteString(escCross(line))
 		}
 		sb.WriteString(`</p>`)
-		stanza = nil
 	}
-	for _, line := range strings.Split(body, "\n") {
-		if trimmed := strings.TrimSpace(line); trimmed == "" {
-			emitStanza()
-		} else {
-			stanza = append(stanza, trimmed)
-		}
-	}
-	emitStanza()
 
 	sb.WriteString(`</div>`)
 	return template.HTML(sb.String())
