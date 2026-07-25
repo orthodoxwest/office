@@ -9,10 +9,10 @@
 | Uncovered features | 0 |
 | Verified text entries | 572 |
 | Rendered text entries needing review | 1362 |
-| Rendered text entries with unknown source | 215 |
-| Classified zero-occurrence entries | 74 |
-| Zeroes needing classification | 18 |
-| Stale zero-occurrence classifications | 1 |
+| Rendered text entries with unknown source | 219 |
+| Classified zero-occurrence entries | 73 |
+| Zeroes needing classification | 21 |
+| Stale zero-occurrence classifications | 4 |
 | Stale attestations | 0 |
 
 ### Modeled structural features
