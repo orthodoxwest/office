@@ -52,6 +52,20 @@
           <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}" data-nav="reminders"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
         </nav>
       </details>
+      {{/* Ships open so no-JS visitors keep full navigation. Collapse it here,
+           inline and un-deferred, before app.js (loaded with defer) gets a
+           chance to run, so it never paints open first — a flash otherwise
+           especially visible on a PWA cold launch. Unconditional: on wide
+           screens CSS shows .site-menu > nav regardless of [open], so closing
+           it here is a no-op there; app.js's resize listener re-opens it for
+           wide viewports and keeps both in sync afterward. */}}
+      <script>
+        (function () {
+          try {
+            document.currentScript.previousElementSibling.removeAttribute("open");
+          } catch (e) {}
+        })();
+      </script>
     </div>
   </header>
   <main id="main-content">
