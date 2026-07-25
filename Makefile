@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff
 
 YEAR ?= 2026
 
@@ -104,6 +104,44 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 	./office tex $(CHANT_FLAG) $(HOUR) $(DATE) > output/$(HOUR)-$(DATE).tex
 	lualatex --shell-escape --interaction=nonstopmode --output-directory=output output/$(HOUR)-$(DATE).tex
 	@echo "PDF: output/$(HOUR)-$(DATE).pdf"
+
+GREMLINS_VERSION = v0.6.0
+GREMLINS_BIN = $(shell go env GOBIN)
+ifeq ($(GREMLINS_BIN),)
+GREMLINS_BIN = $(shell go env GOPATH)/bin
+endif
+GREMLINS = $(GREMLINS_BIN)/gremlins
+MUTATE_PKGS ?= ./internal/calendar/ ./internal/office/ ./internal/texts/
+MUTATE_DIFF_BASE ?= master
+
+# In --diff mode gremlins measures its baseline over the whole suite (~30s)
+# rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
+# would yield a ~15-minute per-mutant timeout. Override it here; the large
+# baseline already makes a small coefficient generous.
+MUTATE_DIFF_COEFFICIENT ?= 5
+
+# `gremlins version` reports "dev" for go-install builds, but the module version
+# is recorded in the binary and readable with `go version -m`. Check that rather
+# than mere presence: CI restores ~/go/bin from a prefix-matched cache, so a
+# presence-only check would silently keep running a stale version after a bump.
+install-gremlins: ## Install the pinned mutation-testing tool if missing or stale
+	@go version -m $(GREMLINS) 2>/dev/null | grep -q 'gremlins[[:space:]]*$(GREMLINS_VERSION)' || \
+		go install github.com/go-gremlins/gremlins/cmd/gremlins@$(GREMLINS_VERSION)
+
+# Note: thresholds are 0, so gremlins exits 0 regardless of efficacy. The
+# `|| exit 1` catches hard failures (compile errors, crashes), not bad scores.
+mutate: install-gremlins ## Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/); ~4 min each
+	@for pkg in $(MUTATE_PKGS); do \
+		echo "==> $$pkg"; \
+		$(GREMLINS) unleash $$pkg || exit 1; \
+	done
+
+# Must run from the module root with no package path: passing a path alongside
+# --diff makes gremlins skip every mutant, including the changed ones, and
+# still exit 0.
+mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
+	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
+		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

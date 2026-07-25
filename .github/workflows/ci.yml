@@ -359,3 +359,159 @@ jobs:
       - name: Record skipped UX suite
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
+
+  mutation:
+    name: Mutation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    # Mutants that alter loop counters can spin until their per-mutant timeout,
+    # which is derived from the baseline test run and can reach several minutes
+    # in --diff mode. Bound the job so a pathological PR can't burn the 6-hour
+    # default; without this, a timed-out job would fail the workflow and break
+    # the reporting-only contract.
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # --diff needs the base commit present locally, so fetch full history.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and module cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/go/bin
+          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-gremlins-v0.6.0
+          restore-keys: |
+            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
+
+      - name: Install gremlins
+        continue-on-error: true
+        run: make install-gremlins
+
+      # Reporting only: thresholds are 0 in .gremlins.yaml, so this step is not
+      # a gate. It surfaces mutants that survive on lines this PR touches.
+      #
+      # `shell: bash` is required, not cosmetic. The default run shell is
+      # `bash -e` WITHOUT pipefail, so `make ... | tee` would exit 0 even when
+      # make fails, and the summary below would report "No surviving mutants"
+      # for a run that never happened. `shell: bash` supplies -o pipefail.
+      - name: Run mutation testing on changed lines
+        id: mutate
+        shell: bash
+        continue-on-error: true
+        run: |
+          git fetch --no-tags origin '${{ github.event.pull_request.base.sha }}'
+          make mutate-diff MUTATE_DIFF_BASE='${{ github.event.pull_request.base.sha }}' \
+            2>&1 | tee mutation.log
+
+      - name: Report failed mutation run
+        if: steps.mutate.outcome != 'success'
+        run: |
+          {
+            echo "## Mutation testing did not complete"
+            echo
+            echo "The mutation run failed, so no conclusion can be drawn about"
+            echo "surviving mutants. Last output:"
+            echo
+            echo '```'
+            tail -20 mutation.log 2>/dev/null || echo "(no output captured)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summarize surviving mutants
+        id: summary
+        if: steps.mutate.outcome == 'success'
+        continue-on-error: true
+        run: |
+          # gremlins prints one line per mutant; LIVED means no test failed when
+          # that line's logic was altered.
+          grep -E '^\s+LIVED ' mutation.log | sed 's/^[[:space:]]*//' > lived.txt || true
+          COUNT=$(wc -l < lived.txt | tr -d ' ')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Mutation testing (changed lines)"
+            echo
+            tail -5 mutation.log | sed 's/^/    /'
+            echo
+            if [ "$COUNT" -gt 0 ]; then
+              echo "### $COUNT surviving mutant(s)"
+              echo '```'
+              cat lived.txt
+              echo '```'
+            else
+              echo "No surviving mutants on changed lines."
+            fi
+          } > mutation-summary.md
+          cat mutation-summary.md >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'body<<MUTATION_EOF'
+            cat mutation-summary.md
+            echo 'MUTATION_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload mutation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-results
+          path: |
+            mutation.log
+            mutation-summary.md
+
+      # An unset count means the summary step failed or was skipped; '' != '0'
+      # would otherwise post a comment with no findings in it. Fork PRs get a
+      # read-only token and the API call 403s, so this must not fail the job.
+      - name: Post or update mutation comment
+        if: steps.summary.outputs.count != '' && steps.summary.outputs.count != '0'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          MUTATION_BODY: ${{ steps.summary.outputs.body }}
+        with:
+          script: |
+            const marker = '<!-- mutation-test-result -->';
+            const body =
+              process.env.MUTATION_BODY +
+              '\n\nA surviving mutant means this line\'s logic can be changed without ' +
+              'failing any test. Some are equivalent mutants that cannot be killed — ' +
+              'see `MUTATION-TESTING.md`. This check never fails the build.\n\n' +
+              marker;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }

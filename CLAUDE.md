@@ -170,6 +170,8 @@ source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,
 and review links are allowed; local paths and inaccessible PDF links are not.
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
+make mutate      # Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/) — see MUTATION-TESTING.md
+make mutate-diff # Mutation-test only lines changed vs master (what CI runs per-PR; reporting only)
 make golden      # Regenerate golden test files after intentional changes
 make clean       # Remove artifacts
 ```
