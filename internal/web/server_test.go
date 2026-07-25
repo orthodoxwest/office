@@ -285,7 +285,7 @@ func TestHourPageAssuranceDisclosureIsCollapsedAndSourceSafe(t *testing.T) {
 	body := rec.Body.String()
 	for _, want := range []string{
 		`<details class="assurance-panel">`,
-		`<details class="site-menu" open>`,
+		`<details class="site-menu">`,
 		`class="today-link"`,
 		`class="hour-continuation"`,
 		`href="/prime/2026-06-07"`,

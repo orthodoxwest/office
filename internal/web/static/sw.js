@@ -297,7 +297,7 @@ function offlineResponse() {
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +
     "<a class=\"site-brand\" href=\"/\" data-nav=\"home\"><span aria-hidden=\"true\">✠</span> Daily Office</a>" +
-    "<details class=\"site-menu\" open><summary>Menu</summary><nav aria-label=\"Primary\">" +
+    "<details class=\"site-menu\"><summary>Menu</summary><nav aria-label=\"Primary\">" +
     "<a href=\"/lauds\" data-nav=\"hour\" data-hour=\"lauds\">Lauds</a>" +
     "<a href=\"/prime\" data-nav=\"hour\" data-hour=\"prime\">Prime</a>" +
     "<a href=\"/terce\" data-nav=\"hour\" data-hour=\"terce\">Terce</a>" +
@@ -309,9 +309,6 @@ function offlineResponse() {
     "<a href=\"/calendar\" data-nav=\"calendar\">Ordo</a>" +
     "<a class=\"nav-secondary\" href=\"/reminders\" data-nav=\"reminders\">Reminders</a>" +
     "</nav></details>" +
-    "<script>(function(){try{" +
-    "document.currentScript.previousElementSibling.removeAttribute(\"open\");" +
-    "}catch(e){}})();</script>" +
     "</div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
     "<p class=\"home-kicker\">Offline</p>" +

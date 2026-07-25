@@ -348,8 +348,10 @@ document.documentElement.classList.add("js");
     }
   });
 
-  // The full navigation remains open in the no-JS document. On small screens,
-  // collapse it once scripting is available so prayer text gets the viewport.
+  // Ships closed; desktop CSS shows the nav regardless of [open]. Once
+  // scripting is available, keep [open] set on wide screens too (harmless
+  // cosmetically, but matches disclosure semantics) and re-collapse on any
+  // live resize back to narrow after a tap had opened it.
   var siteMenu = document.querySelector(".site-menu");
   if (siteMenu && "matchMedia" in window) {
     var narrowMenu = window.matchMedia("(max-width: 700px)");
