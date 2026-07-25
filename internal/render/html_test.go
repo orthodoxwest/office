@@ -7,29 +7,6 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 )
 
-func TestSplitLeadingVerseNumber(t *testing.T) {
-	tests := []struct {
-		line     string
-		wantNum  string
-		wantRest string
-		wantOK   bool
-	}{
-		{"2. That thy way may be known", "2", "That thy way may be known", true},
-		{"10. Make me a clean heart", "10", "Make me a clean heart", true},
-		{"2 O ye Angels of the Lord", "2", "O ye Angels of the Lord", true},
-		{"20 Blessed art thou, O Lord", "20", "Blessed art thou, O Lord", true},
-		{"O ALL ye Works of the Lord", "", "O ALL ye Works of the Lord", false},
-		{"2.No space after period", "", "2.No space after period", false},
-	}
-	for _, tt := range tests {
-		num, rest, ok := splitLeadingVerseNumber(tt.line)
-		if ok != tt.wantOK || num != tt.wantNum || rest != tt.wantRest {
-			t.Errorf("splitLeadingVerseNumber(%q) = (%q, %q, %v), want (%q, %q, %v)",
-				tt.line, num, rest, ok, tt.wantNum, tt.wantRest, tt.wantOK)
-		}
-	}
-}
-
 func TestRenderBenediciteSpaceNumberedVerses(t *testing.T) {
 	html := string(renderPsalmVerses("Song of the Three Children\n\n" +
 		"O ALL ye Works of the Lord, bless ye the Lord: * praise him, and magnify him forever.\n" +

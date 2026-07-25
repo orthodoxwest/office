@@ -12,7 +12,6 @@ import (
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
-	"github.com/orthodoxwest/office/internal/output"
 	"github.com/orthodoxwest/office/internal/render"
 	"github.com/orthodoxwest/office/internal/review"
 )
@@ -533,7 +532,7 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 	currentMonthName := ""
 	currentIdx := -1
 
-	summarize := func(hourName string, day *models.CalendarDay) *output.HourSummary {
+	summarize := func(hourName string, day *models.CalendarDay) *office.HourSummary {
 		if eng == nil {
 			return nil
 		}
@@ -541,11 +540,11 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 		if err != nil {
 			return nil
 		}
-		s := output.SummarizeHour(hour)
+		s := office.SummarizeHour(hour)
 		return &s
 	}
 
-	commRows := func(comms []output.CommSummary) []render.CommemorationRow {
+	commRows := func(comms []office.CommSummary) []render.CommemorationRow {
 		var out []render.CommemorationRow
 		for _, c := range comms {
 			out = append(out, render.CommemorationRow{Name: c.Name, Incipit: c.Incipit})

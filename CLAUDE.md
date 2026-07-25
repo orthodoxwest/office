@@ -5,8 +5,15 @@ Go web application that renders the hours of the Benedictine Office, as used by 
 ## Architecture
 
 ```
-cmd/server/main.go        CLI entry point (ordo, validate, tex, serve subcommands)
+cmd/server/main.go        Binary entry point; a shim over internal/cli
 internal/
+  cli/                     Command implementations (testable: io.Writer in, error out)
+    cli.go                 Run dispatch, data-dir discovery, shared arg parsing
+    ordo.go                ordo + rubrics (the ordo cross-check TSV; column order is a contract)
+    hours.go               Per-hour text and TeX commands
+    checks.go              validate, audit, lint
+    review.go              review subcommands (manifest, status, provenance, assurance, …)
+    serve.go               serve
   models/                  Shared types (Feast, CalendarDay, Rank, Color, Season, OfficeHour)
   calendar/                Calendar engine (ported from Python reference at ../calendar/)
     paschalion.go          Julian Easter calculation
@@ -16,13 +23,19 @@ internal/
     builder.go             Main pipeline: feasts → dates → resolve → CalendarDay list
     occurrence.go          Conflict resolution (which feast wins each day)
     validate.go            Three-layer data validation
-  output/                  Output formatters
+  output/                  Output formatters (presentation only — see office/summary.go)
     ordo.go                Text ordo formatter
     office.go              Plain-text office hour formatter
     tex.go                 LaTeX booklet formatter (half-letter, lualatex)
   texts/                   Text corpus loader
+    loader.go              Corpus loading (INI-style sections + plain files)
+    lines.go               Corpus line grammar: ParsePsalm / ParseBlock, shared by
+                           every renderer so HTML and LaTeX cannot drift apart
   office/                  Office composition engine
     engine.go              Engine: loads corpus, dispatches to hour composers
+    summary.go             HourSummary/SummarizeHour: rubric digest of a composed hour
+                           (preces, suffrage, commemorations, gospel antiphon) shared by
+                           the ordo, the calendar view, and `office rubrics`
     hourdef.go             Hour definition file parser
     lauds.go               Lauds composer
     vespers.go             Vespers composer

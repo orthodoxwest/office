@@ -53,84 +53,6 @@ func ordoSubtitle(feast *models.Feast) string {
 	return ""
 }
 
-// CommSummary is one commemoration extracted from a composed hour: its name and
-// the incipit of its gospel-canticle antiphon, mirroring the ordo's
-// `Comm. Name ("incipit")` form.
-type CommSummary struct {
-	Name    string
-	Incipit string
-}
-
-// HourSummary is the ordo-relevant digest of a single composed hour. Exported
-// so both the text ordo (FormatDay) and the web calendar view can share the
-// same extraction logic (SummarizeHour) instead of re-walking composed hours.
-type HourSummary struct {
-	Color     models.Color
-	GospelAnt string
-	Preces    bool
-	Suffrage  bool
-	Comms     []CommSummary
-}
-
-// SummarizeHour walks a composed hour and pulls out the fields the ordo prints:
-// the Benedictus/Magnificat antiphon incipit, whether preces and the Suffrage
-// are said, and each commemoration with its antiphon incipit.
-func SummarizeHour(hour *models.OfficeHour) HourSummary {
-	s := HourSummary{Color: hour.Color}
-	for _, sec := range hour.Sections {
-		if strings.Contains(sec.Label, "Suffrage") {
-			s.Suffrage = true
-		}
-		for i, el := range sec.Elements {
-			switch {
-			case el.Type == models.Preces:
-				s.Preces = true
-			case el.Type == models.Heading && strings.HasPrefix(el.Text, "Commemoration of "):
-				c := CommSummary{Name: strings.TrimPrefix(el.Text, "Commemoration of ")}
-				// The commemoration antiphon is the next Antiphon element.
-				for _, next := range sec.Elements[i+1:] {
-					if next.Type == models.Antiphon {
-						c.Incipit = incipit(next.Text)
-						break
-					}
-					if next.Type == models.Heading {
-						break
-					}
-				}
-				s.Comms = append(s.Comms, c)
-			case s.GospelAnt == "" && (el.SlotRef == "benedictus-antiphon" || el.SlotRef == "magnificat-antiphon"):
-				s.GospelAnt = incipit(el.Text)
-			}
-		}
-	}
-	return s
-}
-
-// incipit reduces an antiphon text to a short opening phrase for cross-checking
-// against the ordo: it takes the text up to the mediant asterisk (or the first
-// nine words) and strips trailing punctuation.
-func incipit(text string) string {
-	s := strings.ReplaceAll(text, "\n", " ")
-	s = strings.TrimSpace(s)
-	if s == "" {
-		return ""
-	}
-	if i := strings.Index(s, "*"); i > 0 {
-		s = strings.TrimSpace(s[:i])
-	}
-	words := strings.Fields(s)
-	truncated := false
-	if len(words) > 9 {
-		words = words[:9]
-		truncated = true
-	}
-	s = strings.TrimRight(strings.Join(words, " "), " ,;:.")
-	if truncated {
-		s += "…"
-	}
-	return s
-}
-
 func precesLabel(b bool) string {
 	if b {
 		return "Preces"
@@ -191,7 +113,7 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 
 	const indent = "           "
 
-	compose := func(hourName string) *HourSummary {
+	compose := func(hourName string) *office.HourSummary {
 		if eng == nil {
 			return nil
 		}
@@ -199,11 +121,11 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 		if err != nil {
 			return nil
 		}
-		s := SummarizeHour(hour)
+		s := office.SummarizeHour(hour)
 		return &s
 	}
 
-	commLines := func(comms []CommSummary) []string {
+	commLines := func(comms []office.CommSummary) []string {
 		var out []string
 		for _, c := range comms {
 			if c.Incipit != "" {

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/texts"
 )
 
 // escCross replaces the ✠ cross character with a styled HTML span.
@@ -108,118 +109,62 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 	return sb.String()
 }
 
-// splitLeadingVerseNumber peels a leading verse number from a psalm or canticle
-// line. Accepts the usual "2. Text" form and Benedicite-style "2 Text" (digits
-// then a single space, no period). Numbers are at most 3 digits.
-func splitLeadingVerseNumber(line string) (num, rest string, ok bool) {
-	i := 0
-	for i < len(line) && line[i] >= '0' && line[i] <= '9' {
-		i++
-	}
-	if i == 0 || i > 3 {
-		return "", line, false
-	}
-	switch {
-	case i+1 < len(line) && line[i] == '.' && line[i+1] == ' ':
-		return line[:i], strings.TrimSpace(line[i+2:]), true
-	case i < len(line) && line[i] == ' ':
-		return line[:i], strings.TrimSpace(line[i+1:]), true
-	default:
-		return "", line, false
-	}
-}
-
-// renderPsalmVerses parses a raw psalm or canticle text (title/scripture-ref line,
-// numbered verses with " * " mediants, Gloria Patri) into structured HTML.
+// renderPsalmVerses renders a parsed psalm or canticle as structured HTML.
 //
-// Scripture references (lines beginning with "!") are emitted as a
-// <p class="scripture-ref"> BEFORE the psalm-verses div, so that the first
-// verse is always the first child of .psalm-verses and receives the drop cap.
+// Scripture references are emitted as a <p class="scripture-ref"> BEFORE the
+// psalm-verses div, so that the first verse is always the first child of
+// .psalm-verses and receives the drop cap.
 func renderPsalmVerses(text string) template.HTML {
-	lines := strings.Split(text, "\n")
+	psalm := texts.ParsePsalm(text)
 	var sb strings.Builder
 
-	scriptureRef := ""
-	contentStart := len(lines)
-	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			contentStart = i + 1
-			break
-		}
-		if strings.HasPrefix(trimmed, "!") {
-			scriptureRef = trimmed[1:]
-		}
-	}
-
-	if scriptureRef != "" {
+	if psalm.ScriptureRef != "" {
 		sb.WriteString(`<p class="scripture-ref">`)
-		sb.WriteString(template.HTMLEscapeString(scriptureRef))
+		sb.WriteString(template.HTMLEscapeString(psalm.ScriptureRef))
 		sb.WriteString(`</p>`)
 	}
 
 	sb.WriteString(`<div class="psalm-verses">`)
 
-	gloriaOpen := false
-	for _, line := range lines[contentStart:] {
-		line = strings.TrimSpace(line)
-
-		if line == "" {
-			continue
-		}
-
-		if strings.HasPrefix(line, "[section:") && strings.HasSuffix(line, "]") {
-			heading := strings.TrimSpace(line[9 : len(line)-1])
+	for _, item := range psalm.Items {
+		switch item.Kind {
+		case texts.PsalmSection:
 			sb.WriteString(`</div>`)
 			sb.WriteString(`<p class="canticle-section">`)
-			sb.WriteString(template.HTMLEscapeString(heading))
+			sb.WriteString(template.HTMLEscapeString(item.Heading))
 			sb.WriteString(`</p>`)
 			sb.WriteString(`<div class="psalm-verses">`)
-			continue
-		}
 
-		if strings.HasPrefix(line, "Glory be") {
+		case texts.PsalmGloria:
+			// Pointed as a pair: the break falls between the two lines.
 			sb.WriteString(`<p class="verse">`)
-			sb.WriteString(template.HTMLEscapeString(line))
-			gloriaOpen = true
-			continue
-		}
-		if (strings.HasPrefix(line, "as it was") || strings.HasPrefix(line, "As it was")) && gloriaOpen {
-			sb.WriteString(` <span class="mediant">*</span> `)
-			sb.WriteString(template.HTMLEscapeString(line))
-			sb.WriteString(`</p>`)
-			gloriaOpen = false
-			continue
-		}
-
-		verseNum, verseText, _ := splitLeadingVerseNumber(line)
-
-		parts := strings.SplitN(verseText, " * ", 2)
-
-		if verseNum != "" {
-			sb.WriteString(`<p class="verse numbered"><span class="verse-num">`)
-			sb.WriteString(template.HTMLEscapeString(verseNum))
-			sb.WriteString(`</span><span class="verse-body">`)
-			sb.WriteString(escCross(parts[0]))
-			if len(parts) == 2 {
+			sb.WriteString(template.HTMLEscapeString(item.First))
+			if item.Second != "" {
 				sb.WriteString(` <span class="mediant">*</span> `)
-				sb.WriteString(escCross(parts[1]))
+				sb.WriteString(template.HTMLEscapeString(item.Second))
 			}
-			sb.WriteString(`</span></p>`)
-		} else {
-			sb.WriteString(`<p class="verse">`)
-			sb.WriteString(escCross(parts[0]))
-			if len(parts) == 2 {
+			sb.WriteString(`</p>`)
+
+		default:
+			if item.Number != "" {
+				sb.WriteString(`<p class="verse numbered"><span class="verse-num">`)
+				sb.WriteString(template.HTMLEscapeString(item.Number))
+				sb.WriteString(`</span><span class="verse-body">`)
+			} else {
+				sb.WriteString(`<p class="verse">`)
+			}
+			sb.WriteString(escCross(item.First))
+			if item.Second != "" {
 				sb.WriteString(` <span class="mediant">*</span> `)
-				sb.WriteString(escCross(parts[1]))
+				sb.WriteString(escCross(item.Second))
+			}
+			if item.Number != "" {
+				sb.WriteString(`</span>`)
 			}
 			sb.WriteString(`</p>`)
 		}
 	}
 
-	if gloriaOpen {
-		sb.WriteString(`</p>`)
-	}
 	sb.WriteString(`</div>`)
 	return template.HTML(sb.String())
 }
@@ -286,19 +231,12 @@ func emitVoicedHTML(sb *strings.Builder, text string, offset int, spokenAt []boo
 }
 
 func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLineMode) template.HTML {
-	lines := strings.Split(text, "\n")
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
 
-	type proseLine struct {
-		text   string
-		offset int
-	}
-	var proseLines []proseLine
+	var proseLines []texts.BlockLine
 	proseBlocks := 0
 	pendingGap := false
-	// Byte offset of the start of the current line within text (accounting for '\n').
-	lineOffset := 0
 
 	emitGap := func() {
 		if pendingGap {
@@ -322,76 +260,41 @@ func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLine
 					sb.WriteByte(' ')
 				}
 			}
-			emitVoicedHTML(&sb, l.text, l.offset, spokenAt)
+			emitVoicedHTML(&sb, l.Text, l.Offset, spokenAt)
 		}
 		sb.WriteString(`</p>`)
 		proseLines = nil
 		proseBlocks++
 	}
 
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		// Offset of trimmed content within text (line may have leading spaces).
-		contentOffset := lineOffset
-		if pad := strings.Index(line, trimmed); pad > 0 && trimmed != "" {
-			contentOffset = lineOffset + pad
-		}
+	sigilLine := func(class, sigil string, line texts.BlockLine) {
+		flushProse()
+		emitGap()
+		sb.WriteString(`<p class="` + class + `"><span class="sigil">` + sigil + `</span><span class="sigil-text">`)
+		emitVoicedHTML(&sb, line.Text, line.Offset, spokenAt)
+		sb.WriteString(`</span></p>`)
+	}
 
-		if trimmed == "" {
+	for _, line := range texts.ParseBlock(text) {
+		switch line.Kind {
+		case texts.BlockGap:
 			flushProse()
 			pendingGap = true
-			lineOffset += len(line) + 1
-			continue
-		}
-
-		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") &&
-			strings.Contains(trimmed[1:len(trimmed)-1], " ") {
-			lineOffset += len(line) + 1
-			continue
-		}
-
-		if strings.HasPrefix(trimmed, "!") {
+		case texts.BlockScriptureRef:
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="scripture-ref">`)
-			sb.WriteString(template.HTMLEscapeString(trimmed[1:]))
+			sb.WriteString(template.HTMLEscapeString(line.Text))
 			sb.WriteString(`</p>`)
-			lineOffset += len(line) + 1
-			continue
+		case texts.BlockVersicle:
+			sigilLine("versicle-line", "℣.", line)
+		case texts.BlockResponse:
+			sigilLine("response-line", "℟.", line)
+		case texts.BlockBlessing:
+			sigilLine("versicle-line", "Blessing.", line)
+		default:
+			proseLines = append(proseLines, line)
 		}
-
-		if strings.HasPrefix(trimmed, "V. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="versicle-line"><span class="sigil">℣.</span><span class="sigil-text">`)
-			emitVoicedHTML(&sb, trimmed[3:], contentOffset+3, spokenAt)
-			sb.WriteString(`</span></p>`)
-			lineOffset += len(line) + 1
-			continue
-		}
-
-		if strings.HasPrefix(trimmed, "R. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="response-line"><span class="sigil">℟.</span><span class="sigil-text">`)
-			emitVoicedHTML(&sb, trimmed[3:], contentOffset+3, spokenAt)
-			sb.WriteString(`</span></p>`)
-			lineOffset += len(line) + 1
-			continue
-		}
-
-		if strings.HasPrefix(trimmed, "Blessing. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="versicle-line"><span class="sigil">Blessing.</span><span class="sigil-text">`)
-			emitVoicedHTML(&sb, trimmed[10:], contentOffset+10, spokenAt)
-			sb.WriteString(`</span></p>`)
-			lineOffset += len(line) + 1
-			continue
-		}
-
-		proseLines = append(proseLines, proseLine{text: trimmed, offset: contentOffset})
-		lineOffset += len(line) + 1
 	}
 
 	flushProse()
@@ -423,7 +326,6 @@ func chantLineHTML(line string) string {
 }
 
 func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {
-	lines := strings.Split(text, "\n")
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
 
@@ -477,57 +379,34 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 		proseBlocks++
 	}
 
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
+	sigilLine := func(class, sigil, text string) {
+		flushProse()
+		emitGap()
+		sb.WriteString(`<p class="` + class + `"><span class="sigil">` + sigil + `</span><span class="sigil-text">`)
+		sb.WriteString(chantLineHTML(text))
+		sb.WriteString(`</span></p>`)
+	}
 
-		if line == "" {
+	for _, line := range texts.ParseBlock(text) {
+		switch line.Kind {
+		case texts.BlockGap:
 			flushProse()
 			pendingGap = true
-			continue
-		}
-
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") &&
-			strings.Contains(line[1:len(line)-1], " ") {
-			continue
-		}
-
-		if strings.HasPrefix(line, "!") {
+		case texts.BlockScriptureRef:
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="scripture-ref">`)
-			sb.WriteString(template.HTMLEscapeString(line[1:]))
+			sb.WriteString(template.HTMLEscapeString(line.Text))
 			sb.WriteString(`</p>`)
-			continue
+		case texts.BlockVersicle:
+			sigilLine("versicle-line", "℣.", line.Text)
+		case texts.BlockResponse:
+			sigilLine("response-line", "℟.", line.Text)
+		case texts.BlockBlessing:
+			sigilLine("versicle-line", "Blessing.", line.Text)
+		default:
+			proseLines = append(proseLines, line.Text)
 		}
-
-		if strings.HasPrefix(line, "V. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="versicle-line"><span class="sigil">℣.</span><span class="sigil-text">`)
-			sb.WriteString(chantLineHTML(line[3:]))
-			sb.WriteString(`</span></p>`)
-			continue
-		}
-
-		if strings.HasPrefix(line, "R. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="response-line"><span class="sigil">℟.</span><span class="sigil-text">`)
-			sb.WriteString(chantLineHTML(line[3:]))
-			sb.WriteString(`</span></p>`)
-			continue
-		}
-
-		if strings.HasPrefix(line, "Blessing. ") {
-			flushProse()
-			emitGap()
-			sb.WriteString(`<p class="versicle-line"><span class="sigil">Blessing.</span><span class="sigil-text">`)
-			sb.WriteString(chantLineHTML(line[10:]))
-			sb.WriteString(`</span></p>`)
-			continue
-		}
-
-		proseLines = append(proseLines, line)
 	}
 
 	flushProse()
