@@ -309,8 +309,9 @@ function offlineResponse() {
     "<a href=\"/calendar\" data-nav=\"calendar\">Ordo</a>" +
     "<a class=\"nav-secondary\" href=\"/reminders\" data-nav=\"reminders\">Reminders</a>" +
     "</nav></details>" +
-    "<script>(function(){try{if(window.matchMedia&&window.matchMedia(\"(max-width: 700px)\").matches){" +
-    "document.currentScript.previousElementSibling.removeAttribute(\"open\");}}catch(e){}})();</script>" +
+    "<script>(function(){try{" +
+    "document.currentScript.previousElementSibling.removeAttribute(\"open\");" +
+    "}catch(e){}})();</script>" +
     "</div></header><main id=\"main-content\">" +
     "<section class=\"offline-page\" aria-labelledby=\"offline-heading\">" +
     "<p class=\"home-kicker\">Offline</p>" +

@@ -53,16 +53,16 @@
         </nav>
       </details>
       {{/* Ships open so no-JS visitors keep full navigation. Collapse it here,
-           inline and un-deferred, so a narrow screen never paints it open first
-           — app.js (loaded with defer) runs too late to avoid that flash,
-           especially on a PWA cold launch. app.js still owns the live resize
-           listener that keeps this in sync afterward. */}}
+           inline and un-deferred, before app.js (loaded with defer) gets a
+           chance to run, so it never paints open first — a flash otherwise
+           especially visible on a PWA cold launch. Unconditional: on wide
+           screens CSS shows .site-menu > nav regardless of [open], so closing
+           it here is a no-op there; app.js's resize listener re-opens it for
+           wide viewports and keeps both in sync afterward. */}}
       <script>
         (function () {
           try {
-            if (window.matchMedia && window.matchMedia("(max-width: 700px)").matches) {
-              document.currentScript.previousElementSibling.removeAttribute("open");
-            }
+            document.currentScript.previousElementSibling.removeAttribute("open");
           } catch (e) {}
         })();
       </script>
