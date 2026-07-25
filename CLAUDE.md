@@ -5,8 +5,15 @@ Go web application that renders the hours of the Benedictine Office, as used by 
 ## Architecture
 
 ```
-cmd/server/main.go        CLI entry point (ordo, validate, tex, serve subcommands)
+cmd/server/main.go        Binary entry point; a shim over internal/cli
 internal/
+  cli/                     Command implementations (testable: io.Writer in, error out)
+    cli.go                 Run dispatch, data-dir discovery, shared arg parsing
+    ordo.go                ordo + rubrics (the ordo cross-check TSV; column order is a contract)
+    hours.go               Per-hour text and TeX commands
+    checks.go              validate, audit, lint
+    review.go              review subcommands (manifest, status, provenance, assurance, …)
+    serve.go               serve
   models/                  Shared types (Feast, CalendarDay, Rank, Color, Season, OfficeHour)
   calendar/                Calendar engine (ported from Python reference at ../calendar/)
     paschalion.go          Julian Easter calculation
@@ -16,13 +23,20 @@ internal/
     builder.go             Main pipeline: feasts → dates → resolve → CalendarDay list
     occurrence.go          Conflict resolution (which feast wins each day)
     validate.go            Three-layer data validation
-  output/                  Output formatters
+  output/                  Output formatters (presentation only — see office/summary.go)
     ordo.go                Text ordo formatter
     office.go              Plain-text office hour formatter
     tex.go                 LaTeX booklet formatter (half-letter, lualatex)
   texts/                   Text corpus loader
+    loader.go              Corpus loading (INI-style sections + plain files)
+    lines.go               Corpus line grammar: ParsePsalm / ParseBlock / ParseHymn,
+                           shared by every renderer (and by the engine's hymn-title
+                           split) so HTML and LaTeX cannot drift apart
   office/                  Office composition engine
     engine.go              Engine: loads corpus, dispatches to hour composers
+    summary.go             HourSummary/SummarizeHour: rubric digest of a composed hour
+                           (preces, suffrage, commemorations, gospel antiphon) shared by
+                           the ordo, the calendar view, and `office rubrics`
     hourdef.go             Hour definition file parser
     lauds.go               Lauds composer
     vespers.go             Vespers composer
@@ -32,15 +46,20 @@ internal/
     proper.go              Proper antiphon resolution
     marian.go              Marian antiphon selection
     preces.go              Preces condition logic
+  render/                  HTML presentation layer (no calendar/office engine imports)
+    render.go              Embedded templates, Pages type + per-page render methods, FuncMap
+    view.go                View models the templates read (HomeData, HourData, CalendarData, …)
+    html.go                Text-to-HTML conversion (psalm verses, liturgical blocks, hymns)
+    links.go               Nav/asset URL construction (navLink, hourLink, static stamping)
+    templates/             Embedded HTML templates (layout, home, hour, calendar)
+                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   web/                     HTTP server
-    server.go              Server struct, route registration, embedded templates
-    handlers.go            Handlers: home, hour, calendar
+    server.go              Server struct, route registration, embedded static assets
+    handlers.go            Handlers: home, hour, calendar — resolve the day, fill render view models
     cache.go               Per-year CalendarDay + MoveableDates cache
     pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
-    templates/             Embedded HTML templates (layout, home, hour, calendar)
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
-                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   e2e/                     End-to-end golden-file tests
     golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests
     testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)

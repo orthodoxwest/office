@@ -3,7 +3,6 @@ package web
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"io/fs"
 	"log"
@@ -55,18 +54,6 @@ func computeVersion(dataDir string) string {
 	})
 
 	return hex.EncodeToString(h.Sum(nil))[:12]
-}
-
-// staticURL returns a build-stamped static asset path.
-// HTML and the service worker always reference assets this way so a deploy
-// that changes CSS/JS produces a new URL; PWA cache entries for the previous
-// stamp stay unused instead of pairing with new HTML.
-func staticURL(name, version string) string {
-	name = strings.TrimPrefix(name, "/")
-	if version == "" {
-		return "/static/" + name
-	}
-	return fmt.Sprintf("/static/%s?v=%s", name, version)
 }
 
 // staticFileServer serves embedded static assets.

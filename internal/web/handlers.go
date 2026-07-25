@@ -12,7 +12,7 @@ import (
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
-	"github.com/orthodoxwest/office/internal/output"
+	"github.com/orthodoxwest/office/internal/render"
 	"github.com/orthodoxwest/office/internal/review"
 )
 
@@ -26,85 +26,6 @@ var validHours = map[string]bool{
 	"compline": true,
 }
 
-type homeData struct {
-	DateStr        string
-	DateSlug       string
-	PrevDate       string
-	NextDate       string
-	PrevLink       string
-	NextLink       string
-	TodayLink      string
-	ShowToday      bool
-	FeastName      string
-	Commemorations []string
-	Color          string
-	Season         string
-	OctaveNote     string
-	Penitential    []string
-	CalendarLink   string
-	PrayNowLabel   string
-	PrayNowLink    string
-	Hours          []homeHourLink
-	NavDate        string
-	Theme          string
-	Page           string
-	ShowBanner     bool
-}
-
-type homeHourLink struct {
-	Name      string
-	Slug      string
-	URL       string
-	IsCurrent bool
-}
-
-type hourData struct {
-	HourName         string
-	DateStr          string
-	DateSlug         string
-	PrevDate         string
-	NextDate         string
-	PrevLink         string
-	NextLink         string
-	TodayLink        string
-	ShowToday        bool
-	DayLink          string
-	PreviousHourName string
-	PreviousHourLink string
-	NextHourName     string
-	NextHourLink     string
-	NavDate          string
-	Hour             *models.OfficeHour
-	ReportURL        string
-	Theme            string
-	Page             string
-	ShowBanner       bool
-	Assurance        hourAssuranceData
-}
-
-type hourAssuranceData struct {
-	Verified      int
-	NeedsReview   int
-	SourceUnknown int
-	Flagged       int
-	Dependencies  []assuranceDependency
-	Resolutions   []assuranceResolution
-	Decisions     []models.CompositionDecision
-}
-
-type assuranceDependency struct {
-	Key       string
-	Status    review.ProvenanceStatus
-	Flags     []review.Suspicion
-	ReportURL string
-}
-
-type assuranceResolution struct {
-	Slot   string
-	Tier   string
-	Source string
-}
-
 // repoIssuesURL is the GitHub new-issue endpoint used by the per-hour
 // "Report a problem" link.
 const repoIssuesURL = "https://github.com/orthodoxwest/office/issues/new"
@@ -114,7 +35,7 @@ const repoIssuesURL = "https://github.com/orthodoxwest/office/issues/new"
 func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 	celebration := hour.Feast
 	if celebration == "" {
-		celebration = titleCase(string(hour.Season)) + " feria"
+		celebration = render.TitleCase(string(hour.Season)) + " feria"
 	}
 	title := fmt.Sprintf("[review] %s — %s (%s)", hour.Title, dateSlug, celebration)
 	body := fmt.Sprintf(`**Page:** /%s/%s
@@ -131,7 +52,7 @@ func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 
 **What the app shows:**
 
-`, hourName, dateSlug, celebration, titleCase(string(hour.Season)))
+`, hourName, dateSlug, celebration, render.TitleCase(string(hour.Season)))
 
 	q := url.Values{}
 	q.Set("title", title)
@@ -143,7 +64,7 @@ func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string, status review.ProvenanceStatus) string {
 	celebration := hour.Feast
 	if celebration == "" {
-		celebration = titleCase(string(hour.Season)) + " feria"
+		celebration = render.TitleCase(string(hour.Season)) + " feria"
 	}
 	title := fmt.Sprintf("[review] Source verification — %s", key)
 	body := fmt.Sprintf(`**Page:** /%s/%s
@@ -164,8 +85,8 @@ func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string
 	return repoIssuesURL + "?" + q.Encode()
 }
 
-func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug string) hourAssuranceData {
-	data := hourAssuranceData{Decisions: review.UniqueCompositionDecisions(hour.Decisions)}
+func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug string) render.HourAssurance {
+	data := render.HourAssurance{Decisions: review.UniqueCompositionDecisions(hour.Decisions)}
 	for _, key := range review.HourDependencies(hour) {
 		status := review.ProvenanceSourceUnknown
 		if entry, ok := s.provenance[key]; ok {
@@ -182,7 +103,7 @@ func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug strin
 		if len(s.suspicions[key]) > 0 {
 			data.Flagged++
 		}
-		data.Dependencies = append(data.Dependencies, assuranceDependency{
+		data.Dependencies = append(data.Dependencies, render.AssuranceDependency{
 			Key: key, Status: status, Flags: s.suspicions[key],
 			ReportURL: dependencyReportURL(hour, hourName, dateSlug, key, status),
 		})
@@ -199,65 +120,10 @@ func (s *Server) hourAssurance(hour *models.OfficeHour, hourName, dateSlug strin
 				continue
 			}
 			seenResolutions[key] = true
-			data.Resolutions = append(data.Resolutions, assuranceResolution{Slot: element.SlotRef, Tier: tier, Source: element.SourceRef})
+			data.Resolutions = append(data.Resolutions, render.AssuranceResolution{Slot: element.SlotRef, Tier: tier, Source: element.SourceRef})
 		}
 	}
 	return data
-}
-
-type calendarData struct {
-	Year       int
-	PrevYear   int
-	NextYear   int
-	Months     []monthData
-	NavDate    string
-	Theme      string
-	Page       string
-	ShowBanner bool
-}
-
-type monthData struct {
-	Name string
-	Slug string
-	Days []dayRow
-}
-
-type dayRow struct {
-	DayNum         int
-	Weekday        string
-	DateSlug       string
-	Rank           string
-	RankFull       string
-	Color          string
-	ColorClass     string
-	FeastName      string
-	Fast           bool
-	Abstinence     bool
-	Commemorations []string
-
-	// Desktop-only office digest (hidden on narrow viewports; see .day-office-digest
-	// in style.css). Sourced from the same composed-hour summaries as `office rubrics`
-	// and FormatDay, so per-hour commemorations (with antiphon incipits) are kept
-	// separate from the calendar-level Commemorations list above, since a
-	// commemoration can appear at one hour and not the other.
-	BenedictusAntiphon string
-	MagnificatAntiphon string
-	LaudsPreces        bool
-	LaudsSuffrage      bool
-	LaudsComms         []commemorationRow
-	HoursPreces        bool
-	VespersPreces      bool
-	VespersSuffrage    bool
-	VespersComms       []commemorationRow
-	VespersNote        string // "II Vespers of preceding" / "I Vespers of <feast>", when applicable
-}
-
-// commemorationRow pairs a commemoration's name with its antiphon incipit
-// (when the office engine is available), mirroring the ordo's
-// `Comm. Name ("incipit")` form.
-type commemorationRow struct {
-	Name    string
-	Incipit string
 }
 
 // userLocation returns the *time.Location from the "tz" cookie (set by the
@@ -280,39 +146,6 @@ func userLocation(r *http.Request) *time.Location {
 func themeParam(r *http.Request) string {
 	_ = r
 	return ""
-}
-
-func homeLink(date, theme string) string {
-	_ = theme
-	href := "/"
-	if date != "" {
-		href = "/?date=" + date
-	}
-	return href
-}
-
-func hourLink(hour, date, theme string) string {
-	_ = theme
-	href := "/" + hour
-	if date != "" {
-		href += "/" + date
-	}
-	return href
-}
-
-func calendarLink(date, theme string) string {
-	_ = theme
-	if date != "" {
-		if parsed, err := time.Parse("2006-01-02", date); err == nil {
-			return fmt.Sprintf("/calendar/%d#d-%s", parsed.Year(), date)
-		}
-	}
-	return "/calendar"
-}
-
-func calendarYearLink(year int, theme string) string {
-	_ = theme
-	return fmt.Sprintf("/calendar/%d", year)
 }
 
 // currentHourEntry returns the office most likely being prayed at now, its
@@ -341,13 +174,13 @@ func currentHourEntry(now time.Time) (slug string, label string, dayOffset int) 
 	}
 }
 
-func buildHomeHours(dateSlug, theme, current string) []homeHourLink {
-	links := make([]homeHourLink, 0, len(orderedHours))
+func buildHomeHours(dateSlug, theme, current string) []render.HomeHourLink {
+	links := make([]render.HomeHourLink, 0, len(orderedHours))
 	for _, hour := range orderedHours {
-		links = append(links, homeHourLink{
+		links = append(links, render.HomeHourLink{
 			Name:      hour.Name,
 			Slug:      hour.Slug,
-			URL:       hourLink(hour.Slug, dateSlug, theme),
+			URL:       render.HourLink(hour.Slug, dateSlug, theme),
 			IsCurrent: hour.Slug == current,
 		})
 	}
@@ -374,11 +207,11 @@ func adjacentHours(hour, date, theme string) (previousName, previousLink, nextNa
 		}
 		if i > 0 {
 			previousName = orderedHours[i-1].Name
-			previousLink = hourLink(orderedHours[i-1].Slug, date, theme)
+			previousLink = render.HourLink(orderedHours[i-1].Slug, date, theme)
 		}
 		if i+1 < len(orderedHours) {
 			nextName = orderedHours[i+1].Name
-			nextLink = hourLink(orderedHours[i+1].Slug, date, theme)
+			nextLink = render.HourLink(orderedHours[i+1].Slug, date, theme)
 		}
 		break
 	}
@@ -409,14 +242,7 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int,
 	title := http.StatusText(status)
 	setHTMLCacheHeaders(w)
 	w.WriteHeader(status)
-	data := struct {
-		Title      string
-		Message    string
-		NavDate    string
-		Theme      string
-		Page       string
-		ShowBanner bool
-	}{
+	data := render.ErrorData{
 		Title:      title,
 		Message:    msg,
 		NavDate:    navDateNow(r),
@@ -424,7 +250,7 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int,
 		Page:       "",
 		ShowBanner: false,
 	}
-	if err := s.tmplError.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.ErrorPage(w, data); err != nil {
 		// Template itself failed — fall back to plain text (header already sent).
 		log.Printf("error rendering error template: %v", err)
 	}
@@ -434,18 +260,13 @@ func (s *Server) handleError(w http.ResponseWriter, r *http.Request, status int,
 func (s *Server) handle404(w http.ResponseWriter, r *http.Request) {
 	setHTMLCacheHeaders(w)
 	w.WriteHeader(http.StatusNotFound)
-	data := struct {
-		NavDate    string
-		Theme      string
-		Page       string
-		ShowBanner bool
-	}{
+	data := render.NotFoundData{
 		NavDate:    navDateNow(r),
 		Theme:      themeParam(r),
 		Page:       "",
 		ShowBanner: false,
 	}
-	if err := s.tmpl404.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.NotFound(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -523,7 +344,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	// Where in the year we are, for readers orienting themselves. Suppressed
 	// when the celebration already names the season (Pentecost Sunday, the
 	// Sundays in Lent) so home never prints the same word twice.
-	season := titleCase(string(day.Season))
+	season := render.TitleCase(string(day.Season))
 	if season != "" && strings.Contains(strings.ToLower(feastName), strings.ToLower(season)) {
 		season = ""
 	}
@@ -545,14 +366,14 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data := homeData{
+	data := render.HomeData{
 		DateStr:        date.Format("Monday, January 2, 2006"),
 		DateSlug:       dateSlug,
 		PrevDate:       date.AddDate(0, 0, -1).Format("2006-01-02"),
 		NextDate:       date.AddDate(0, 0, 1).Format("2006-01-02"),
-		PrevLink:       homeLink(date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
-		NextLink:       homeLink(date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
-		TodayLink:      homeLink(nowSlug, theme),
+		PrevLink:       render.HomeLink(date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
+		NextLink:       render.HomeLink(date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
+		TodayLink:      render.HomeLink(nowSlug, theme),
 		ShowToday:      dateSlug != nowSlug,
 		FeastName:      feastName,
 		Commemorations: commemorations,
@@ -560,9 +381,9 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		Season:         season,
 		OctaveNote:     octaveNote,
 		Penitential:    day.Penitential.Labels(),
-		CalendarLink:   calendarLink(dateSlug, theme),
+		CalendarLink:   render.CalendarLink(dateSlug, theme),
 		PrayNowLabel:   currentHourLabel,
-		PrayNowLink:    hourLink(defaultHourSlug(currentHourSlug), prayNowDateSlug, theme),
+		PrayNowLink:    render.HourLink(defaultHourSlug(currentHourSlug), prayNowDateSlug, theme),
 		Hours:          buildHomeHours(dateSlug, theme, gridCurrentSlug),
 		NavDate:        dateSlug,
 		Theme:          theme,
@@ -570,7 +391,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		ShowBanner:     false,
 	}
 	setHTMLCacheHeaders(w)
-	if err := s.tmplHome.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.Home(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -627,17 +448,17 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 
 	previousHourName, previousHourLink, nextHourName, nextHourLink := adjacentHours(hourName, dateStr, theme)
 	todaySlug := time.Now().In(userLocation(r)).Format("2006-01-02")
-	data := hourData{
+	data := render.HourData{
 		HourName:         hourName,
 		DateStr:          date.Format("Monday, January 2, 2006"),
 		DateSlug:         dateStr,
 		PrevDate:         date.AddDate(0, 0, -1).Format("2006-01-02"),
 		NextDate:         date.AddDate(0, 0, 1).Format("2006-01-02"),
-		PrevLink:         hourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
-		NextLink:         hourLink(hourName, date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
-		TodayLink:        hourLink(hourName, todaySlug, theme),
+		PrevLink:         render.HourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
+		NextLink:         render.HourLink(hourName, date.AddDate(0, 0, 1).Format("2006-01-02"), theme),
+		TodayLink:        render.HourLink(hourName, todaySlug, theme),
 		ShowToday:        dateStr != todaySlug,
-		DayLink:          homeLink(dateStr, theme),
+		DayLink:          render.HomeLink(dateStr, theme),
 		PreviousHourName: previousHourName,
 		PreviousHourLink: previousHourLink,
 		NextHourName:     nextHourName,
@@ -651,7 +472,7 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		Assurance:        s.hourAssurance(hour, hourName, dateStr),
 	}
 	setHTMLCacheHeaders(w)
-	if err := s.tmplHour.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.Hour(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -686,7 +507,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 
 	// NavDate is local today so chrome hour links hit dated precache keys.
 	navDate := now.Format("2006-01-02")
-	data := calendarData{
+	data := render.CalendarData{
 		Year:       year,
 		PrevYear:   year - 1,
 		NextYear:   year + 1,
@@ -697,28 +518,21 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		ShowBanner: false,
 	}
 	setHTMLCacheHeaders(w)
-	if err := s.tmplCalendar.ExecuteTemplate(w, "layout", data); err != nil {
+	if err := s.pages.Calendar(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-}
-
-func titleCase(s string) string {
-	if len(s) == 0 {
-		return s
-	}
-	return strings.ToUpper(s[:1]) + s[1:]
 }
 
 // buildMonthData assembles the calendar's per-day rows, enriched with the
 // composed Lauds/Hours/Vespers digest (preces, suffrage, gospel-antiphon
 // incipits, per-hour commemorations) that the desktop calendar view reveals.
 // eng may be nil (falls back to the calendar-only fields, digest omitted).
-func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *calendar.MoveableDates) []monthData {
-	var months []monthData
+func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *calendar.MoveableDates) []render.MonthData {
+	var months []render.MonthData
 	currentMonthName := ""
 	currentIdx := -1
 
-	summarize := func(hourName string, day *models.CalendarDay) *output.HourSummary {
+	summarize := func(hourName string, day *models.CalendarDay) *office.HourSummary {
 		if eng == nil {
 			return nil
 		}
@@ -726,14 +540,14 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 		if err != nil {
 			return nil
 		}
-		s := output.SummarizeHour(hour)
+		s := office.SummarizeHour(hour)
 		return &s
 	}
 
-	commRows := func(comms []output.CommSummary) []commemorationRow {
-		var out []commemorationRow
+	commRows := func(comms []office.CommSummary) []render.CommemorationRow {
+		var out []render.CommemorationRow
 		for _, c := range comms {
-			out = append(out, commemorationRow{Name: c.Name, Incipit: c.Incipit})
+			out = append(out, render.CommemorationRow{Name: c.Name, Incipit: c.Incipit})
 		}
 		return out
 	}
@@ -742,7 +556,7 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 		d := &days[i]
 		mName := d.Date.Month().String()
 		if mName != currentMonthName {
-			months = append(months, monthData{Name: mName, Slug: strings.ToLower(mName)})
+			months = append(months, render.MonthData{Name: mName, Slug: strings.ToLower(mName)})
 			currentIdx = len(months) - 1
 			currentMonthName = mName
 		}
@@ -757,7 +571,7 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 		} else if d.Tempora != "" {
 			feastName = d.Tempora
 		} else {
-			feastName = titleCase(string(d.Season)) + " feria"
+			feastName = render.TitleCase(string(d.Season)) + " feria"
 		}
 
 		var commemorations []string
@@ -765,7 +579,7 @@ func buildMonthData(days []models.CalendarDay, eng *office.Engine, moveable *cal
 			commemorations = append(commemorations, c.Name)
 		}
 
-		row := dayRow{
+		row := render.DayRow{
 			DayNum:         d.Date.Day(),
 			Weekday:        d.Date.Weekday().String()[:3],
 			DateSlug:       d.Date.Format("2006-01-02"),

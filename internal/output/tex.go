@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/texts"
 )
 
 // FormatOfficeHourTeX formats a composed office hour as a LaTeX document.
@@ -206,130 +207,73 @@ func formatPsalmTeX(text, dataDir, label string, elemType models.ElementType, ch
 		return fmt.Sprintf("\\gregorioscore{%s}\n\n", gabcBase(dataDir, category, slug))
 	}
 
-	lines := strings.Split(text, "\n")
-
-	// Title block: find first blank line; extract scripture ref if present.
-	scriptureRef := ""
-	contentStart := len(lines)
-	for i, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			contentStart = i + 1
-			break
-		}
-		if strings.HasPrefix(trimmed, "!") {
-			scriptureRef = trimmed[1:]
-		}
-	}
+	psalm := texts.ParsePsalm(text)
 
 	var b strings.Builder
 
-	if scriptureRef != "" {
-		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(scriptureRef))
+	if psalm.ScriptureRef != "" {
+		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(psalm.ScriptureRef))
 	}
 
 	b.WriteString("\\begin{psalmverses}\n")
 
-	gloriaOpen := false
-	gloriaLine1 := ""
-
-	for _, line := range lines[contentStart:] {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			continue
-		}
-
-		// Section break (canticles)
-		if strings.HasPrefix(line, "[section:") && strings.HasSuffix(line, "]") {
-			heading := strings.TrimSpace(line[9 : len(line)-1])
+	for _, item := range psalm.Items {
+		switch item.Kind {
+		case texts.PsalmSection:
 			b.WriteString("\\end{psalmverses}\n")
-			fmt.Fprintf(&b, "\\sectionheading{%s}\n", escapeTeX(heading))
+			fmt.Fprintf(&b, "\\sectionheading{%s}\n", escapeTeX(item.Heading))
 			b.WriteString("\\begin{psalmverses}\n")
-			continue
+
+		case texts.PsalmGloria:
+			if item.Second == "" {
+				// Malformed Gloria (missing second line) — emit what we have.
+				fmt.Fprintf(&b, "\\psalmverse{}{%s}\n", texLine(item.First))
+				continue
+			}
+			fmt.Fprintf(&b, "\\gloriapatri{%s}{%s}\n", texLine(item.First), texLine(item.Second))
+
+		default:
+			if item.Second == "" {
+				fmt.Fprintf(&b, "\\psalmverse{%s}{%s}\n", item.Number, texLine(item.First))
+				continue
+			}
+			fmt.Fprintf(&b, "\\psalmverse{%s}{%s\\mediant{}%s}\n",
+				item.Number, texLine(item.First), texLine(item.Second))
 		}
-
-		// Gloria Patri — two-line rendering
-		if strings.HasPrefix(line, "Glory be") {
-			gloriaLine1 = texLine(line)
-			gloriaOpen = true
-			continue
-		}
-		if gloriaOpen && (strings.HasPrefix(line, "as it was") || strings.HasPrefix(line, "As it was")) {
-			fmt.Fprintf(&b, "\\gloriapatri{%s}{%s}\n", gloriaLine1, texLine(line))
-			gloriaOpen = false
-			gloriaLine1 = ""
-			continue
-		}
-
-		// Numbered verse detection: "2. text", "10. text", or Benedicite "2 text".
-		verseNum, verseText, _ := splitLeadingVerseNumber(line)
-
-		parts := strings.SplitN(verseText, " * ", 2)
-		first := texLine(parts[0])
-
-		if len(parts) == 2 {
-			second := texLine(parts[1])
-			fmt.Fprintf(&b, "\\psalmverse{%s}{%s\\mediant{}%s}\n", verseNum, first, second)
-		} else {
-			fmt.Fprintf(&b, "\\psalmverse{%s}{%s}\n", verseNum, first)
-		}
-	}
-
-	if gloriaOpen {
-		// Malformed Gloria (missing second line) — emit what we have
-		fmt.Fprintf(&b, "\\psalmverse{}{%s}\n", gloriaLine1)
 	}
 
 	b.WriteString("\\end{psalmverses}\n\n")
 	return b.String()
 }
 
-// formatHymnTeX renders a hymn element.
-// Hymn text: first line is Latin title, blank line, then stanzas separated by blank lines.
+// formatHymnTeX renders a hymn element as stanza paragraphs.
+//
+// The composed element usually arrives with its Latin incipit already in the
+// label (the engine peels it), so this must parse with the shared rule rather
+// than dropping everything above the first blank line — that dropped the
+// opening stanza of every hymn.
 func formatHymnTeX(text, dataDir, label string, chant bool) string {
 	slug := labelToSlug(label, models.Hymn)
 	if chant && hasGABC(dataDir, "hymns", slug) {
 		return fmt.Sprintf("\\gregorioscore{%s}\n\n", gabcBase(dataDir, "hymns", slug))
 	}
 
-	lines := strings.Split(text, "\n")
-
-	// First non-blank line is the Latin title; skip it.
-	contentStart := 0
-	for i, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			contentStart = i + 1
-			break
-		}
-	}
+	hymn := texts.ParseHymn(text)
 
 	var b strings.Builder
-	var stanzaLines []string
-
-	flushStanza := func() {
-		if len(stanzaLines) == 0 {
-			return
-		}
+	if hymn.Title != "" {
+		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
+	}
+	for _, stanza := range hymn.Stanzas {
 		b.WriteString("\\noindent ")
-		for i, l := range stanzaLines {
+		for i, line := range stanza {
 			if i > 0 {
 				b.WriteString("\\\\\n")
 			}
-			b.WriteString(texLine(l))
+			b.WriteString(texLine(line))
 		}
 		b.WriteString("\\par\\smallskip\n")
-		stanzaLines = nil
 	}
-
-	for _, line := range lines[contentStart:] {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			flushStanza()
-		} else {
-			stanzaLines = append(stanzaLines, trimmed)
-		}
-	}
-	flushStanza()
 
 	b.WriteString("\n")
 	return b.String()
@@ -369,11 +313,9 @@ func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
 // lines are hard-wrapped sense-lines in the corpus, so they are joined into
 // a flowing paragraph; blank lines mark paragraph breaks.
 func formatLiturgicalBlockTeX(text string) string {
-	lines := strings.Split(text, "\n")
 	var b strings.Builder
 
 	var proseLines []string
-
 	flushProse := func() {
 		if len(proseLines) == 0 {
 			return
@@ -384,50 +326,26 @@ func formatLiturgicalBlockTeX(text string) string {
 		proseLines = nil
 	}
 
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-
-		if line == "" {
+	for _, line := range texts.ParseBlock(text) {
+		switch line.Kind {
+		case texts.BlockGap:
 			flushProse()
 			b.WriteString("\\smallskip\n")
-			continue
-		}
-
-		// Bracket title artifact — skip silently
-		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") &&
-			strings.Contains(line[1:len(line)-1], " ") {
-			continue
-		}
-
-		// Scripture reference
-		if strings.HasPrefix(line, "!") {
+		case texts.BlockScriptureRef:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent{\\small\\itshape %s}\\par\n", escapeTeX(line[1:]))
-			continue
-		}
-
-		// Versicle
-		if strings.HasPrefix(line, "V. ") {
+			fmt.Fprintf(&b, "\\noindent{\\small\\itshape %s}\\par\n", escapeTeX(line.Text))
+		case texts.BlockVersicle:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texLine(line[3:]))
-			continue
-		}
-
-		// Response
-		if strings.HasPrefix(line, "R. ") {
+			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texLine(line.Text))
+		case texts.BlockResponse:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\Rbar{}%s\\par\n", texLine(line[3:]))
-			continue
-		}
-
-		// Blessing sigil
-		if strings.HasPrefix(line, "Blessing. ") {
+			fmt.Fprintf(&b, "\\noindent\\Rbar{}%s\\par\n", texLine(line.Text))
+		case texts.BlockBlessing:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texLine(line[10:]))
-			continue
+			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texLine(line.Text))
+		default:
+			proseLines = append(proseLines, texLine(line.Text))
 		}
-
-		proseLines = append(proseLines, texLine(line))
 	}
 
 	flushProse()
@@ -553,24 +471,4 @@ func slugify(s string) string {
 		}
 	}
 	return strings.TrimRight(b.String(), "-")
-}
-
-// splitLeadingVerseNumber peels a leading verse number from a psalm or canticle
-// line. Accepts "2. Text" and Benedicite-style "2 Text". Numbers are at most 3 digits.
-func splitLeadingVerseNumber(line string) (num, rest string, ok bool) {
-	i := 0
-	for i < len(line) && line[i] >= '0' && line[i] <= '9' {
-		i++
-	}
-	if i == 0 || i > 3 {
-		return "", line, false
-	}
-	switch {
-	case i+1 < len(line) && line[i] == '.' && line[i+1] == ' ':
-		return line[:i], strings.TrimSpace(line[i+2:]), true
-	case i < len(line) && line[i] == ' ':
-		return line[:i], strings.TrimSpace(line[i+1:]), true
-	default:
-		return "", line, false
-	}
 }

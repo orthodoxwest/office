@@ -76,10 +76,11 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 | Concern | Location |
 |---------|----------|
 | Tokens, layout, print | `internal/web/static/style.css` |
-| Templates | `internal/web/templates/` (`layout`, `home`, `hour`, …) |
+| Templates | `internal/render/templates/` (`layout`, `home`, `hour`, …) |
 | Client behavior | `internal/web/static/app.js` |
 | PWA / offline | `internal/web/static/sw.js`, `manifest.webmanifest` |
-| Embedded assets | `//go:embed` in `internal/web/server.go` — **rebuild** after template/CSS/JS changes |
+| Template rendering | `internal/render/` (view models, FuncMap, text-to-HTML) |
+| Embedded assets | `//go:embed` in `internal/render/render.go` (templates) and `internal/web/server.go` (static) — **rebuild** after template/CSS/JS changes |
 
 ### Theme (Default / Nave / Apse)
 
@@ -116,7 +117,7 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 1. Confirm the change serves **prayer focus** or **quiet beauty** — cut chrome that does not.
 2. Touch the smallest surface: tokens/CSS first; DOM only if hierarchy requires it.
 3. Test light + dark + narrow (≤540px) + one hour page + home.
-4. `go test ./internal/web/`; rebuild (`make build`) if templates/static are embedded.
+4. `go test ./internal/render/ ./internal/web/`; rebuild (`make build`) if templates/static are embedded.
 5. Golden files are composition output, not HTML — only regenerate when office text changes.
 6. PR against `master` (no direct push); describe visual intent in the PR body.
 

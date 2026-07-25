@@ -525,16 +525,7 @@ func formatLabel(elemType, ref string) string {
 // If the text begins with a single-line block followed by a blank line,
 // that line is the title; the remainder is the body. Otherwise title is empty.
 func extractHymnTitle(text string) (title, body string) {
-	firstBlock, rest, found := strings.Cut(text, "\n\n")
-	if !found {
-		return "", text
-	}
-	firstBlock = strings.TrimSpace(firstBlock)
-	if strings.ContainsRune(firstBlock, '\n') {
-		// Multi-line first block — not a title
-		return "", text
-	}
-	return firstBlock, strings.TrimSpace(rest)
+	return texts.SplitHymnTitle(text)
 }
 
 // extractChapterRef splits a chapter text into a scripture reference and body.

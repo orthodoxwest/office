@@ -262,27 +262,48 @@ func TestFormatGloriaPatriTeX(t *testing.T) {
 }
 
 func TestFormatHymnTeX(t *testing.T) {
-	text := `Aeterne rerum conditor
+	// A composed hymn arrives with its Latin incipit already in the label and
+	// its body starting at the first stanza (the engine peels it). The opening
+	// stanza must survive: peeling a second time used to drop it.
+	body := `To thee, before the close of day,
+Creator of the world, we pray
+That with thy wonted favour, thou
+Wouldst be our guard and keeper now.
 
-O Framer of the earth and sky,
-Ruler of all things high and low,
-Who, clothing time with mystery,
-Dost make the seasons ebb and flow;
+From all ill dreams defend our eyes,
+From nightly fears and fantasies. Amen.`
 
-Herald of day, the bird doth raise
-His voice in strains of varied tone. Amen.`
+	got := formatHymnTeX(body, "", "Te Lucis Ante Terminum", false)
 
-	got := formatHymnTeX(text, "", "Aeterne Rerum Conditor", false)
-
-	if !strings.Contains(got, "O Framer of the earth") {
-		t.Error("expected first stanza content")
+	if !strings.Contains(got, "To thee, before the close of day") {
+		t.Errorf("opening stanza was dropped: %s", got)
+	}
+	if !strings.Contains(got, "From all ill dreams defend our eyes") {
+		t.Error("expected the remaining stanza")
+	}
+	if strings.Count(got, `\noindent `) != 2 {
+		t.Errorf("expected one paragraph per stanza: %s", got)
 	}
 	if !strings.Contains(got, `\\`) {
 		t.Error("expected line breaks within stanza")
 	}
-	// Latin title should not appear (skipped as first line)
-	if strings.Contains(got, "Aeterne rerum conditor") {
-		t.Error("Latin title from text body should be skipped (label used separately)")
+}
+
+func TestFormatHymnTeXRendersTitleStillInTheBody(t *testing.T) {
+	// Text that has not been through the engine keeps its incipit; render it
+	// rather than silently dropping it, as the HTML renderer does.
+	text := `Aeterne rerum conditor
+
+O Framer of the earth and sky,
+Ruler of all things high and low.`
+
+	got := formatHymnTeX(text, "", "", false)
+
+	if !strings.Contains(got, "Aeterne rerum conditor") {
+		t.Errorf("Latin incipit should be rendered: %s", got)
+	}
+	if !strings.Contains(got, "O Framer of the earth") {
+		t.Error("expected stanza content")
 	}
 }
 
