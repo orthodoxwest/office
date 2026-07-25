@@ -1,16 +1,23 @@
-[benedictus-antiphon]
-Give her of the fruit of her hands, * and let her own works praise her in the gates.
+# St Anne is kept alone on 26 July; St Joachim stands alone on 16 August.
+# The diurnal prints two forms of 26 July back to back: the joint feast "Sts
+# Joachim and Anne, Parents of the B.V.M." (D2, full propers, the hymn Gaude
+# mater Anna, and a plural commemoration antiphon "The Lord gave them the
+# blessing of all nations"), and, following it, "St Anne, Mother of the B.V.M."
+# — "all as in the Common, p. 51*, except" a proper collect. The ordo uses the
+# latter: "Lauds W / As in Com. of Holy Women (51*), except / Col. (575)".
+# So the joint feast's propers are deliberately NOT entered here, and this
+# feast has no proper Benedictus antiphon — Lauds is the common throughout.
+#
+# The commemoration at II Vespers of St James (25 July) is resolved by the
+# engine's following-office rule (XIV.14) from commons/holy-woman, giving
+# "The kingdom of heaven" — matching the ordo's "Comm. Anne ('The kingdom of
+# heaven' 5*; Col. 575)". Ordos 2017-2022 instead used a supplement antiphon,
+# "Rejoice, O glorious matron"; 2023-2026 consistently use the common.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 674 (St. Anne said as in the Common of a Holy Woman not a Virgin; Manum suam, II Vespers)
+# Ordo 26 July Vespers: "Mag. Ant. 'She stretcheth out' (55*)".
 @use commons/holy-woman/magnificat-antiphon
-
-[commemoration-antiphon]
-While the King sitteth at his table, * my spikenard sendeth forth the smell thereof.
-
-[commemoration-versicle]
-V. Many daughters have done virtuously.
-R. But thou excellest them all.
 
 [collect]
 # SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 151
