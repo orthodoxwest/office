@@ -1,10 +1,13 @@
 package office
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
@@ -132,17 +135,16 @@ func TestCollectConclusionDataIsConsistent(t *testing.T) {
 		}
 		recorded++
 		key, form := fields[0], fields[1]
-		if corpus.Get(key) == "" {
-			t.Errorf("collect-conclusions names %q, which is not in the corpus", key)
-		}
-		if !strings.HasSuffix(key, "/collect") {
-			t.Errorf("collect-conclusions names %q, which is not a collect", key)
+		// Unknown keys, unknown forms and duplicates are rejected by the loader
+		// itself, so LoadTexts above would already have failed. What is left to
+		// check here is that the key really names a collect — "commemoration-collect"
+		// is a collect too, so match on the segment, not a "/collect" suffix.
+		section := key[strings.LastIndex(key, "/")+1:]
+		if !strings.Contains(section, "collect") {
+			t.Errorf("collect-conclusions names %q, whose section %q is not a collect", key, section)
 		}
 		if got, ok := corpus.CollectConclusionForm(key); !ok || got != form {
 			t.Errorf("corpus did not load %q -> %q (got %q, %v)", key, form, got, ok)
-		}
-		if ref := conclusionFormRef + form; corpus.Get(ref) == "" {
-			t.Errorf("%s uses form %q, but %s is not in the corpus", key, form, ref)
 		}
 	}
 	if recorded == 0 {
@@ -182,6 +184,120 @@ func TestNoProperCollectCarriesInlineConclusion(t *testing.T) {
 				t.Errorf("%s carries an inline conclusion (%q); the engine appends one, "+
 					"so this would print twice", key, marker)
 			}
+		}
+	}
+}
+
+// --- XXXIII.5 sequencing ---
+//
+// "When several Collects are to be said, only the first is said with the
+// conclusion. The other Collects are not concluded, except the last Collect."
+// The collect of the day always takes the first conclusion (engine.go), so
+// addCommemorations must conclude the last commemoration and no other.
+//
+// These cases previously had no unit coverage at all: every mutation of the
+// `i == len(comms)-1` guard survived.
+
+func sequencingTestCorpus() *texts.TextCorpus {
+	// The commemoration lookup chain ends at the commons content fallback
+	// (commemorationFallbackSlots -> "collect"), so the collect must be reachable
+	// as commons/<category>/collect for these feasts to resolve.
+	return texts.NewTestCorpus(map[string]string{
+		"shared/formulas/collect-conclusion-through": "CONCLUSION.\nR. Amen.",
+		"commons/confessor/benedictus-antiphon":      "Ant. N.",
+		"commons/confessor/versicle-lauds":           "V. N.\nR. N.",
+		"commons/confessor/collect":                  "Collect of N.",
+	})
+}
+
+func commemorationFeasts(n int) []*models.Feast {
+	feasts := make([]*models.Feast, n)
+	for i := range feasts {
+		feasts[i] = &models.Feast{
+			ID:         fmt.Sprintf("comm-%d", i),
+			Name:       fmt.Sprintf("Commemorated Saint %d", i),
+			Rank:       models.Simple,
+			Category:   models.CategoryConfessor,
+			ProperName: fmt.Sprintf("Saint%d", i),
+		}
+	}
+	return feasts
+}
+
+// collectTexts returns the text of each Collect element, in order.
+func collectTexts(elems []models.OfficeElement) []string {
+	var out []string
+	for _, e := range elems {
+		if e.Type == models.Collect {
+			out = append(out, e.Text)
+		}
+	}
+	return out
+}
+
+func TestCommemorationSequencingConcludesOnlyTheLast(t *testing.T) {
+	corpus := sequencingTestCorpus()
+
+	tests := []struct {
+		name  string
+		count int
+		// want[i] reports whether collect i should carry a conclusion.
+		want []bool
+	}{
+		{"single commemoration is the last, so concluded", 1, []bool{true}},
+		{"of two, only the second", 2, []bool{false, true}},
+		{"of three, only the third", 3, []bool{false, false, true}},
+		{"of five, only the fifth", 5, []bool{false, false, false, false, true}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := makeDay(2026, time.July, 26, nil, commemorationFeasts(tt.count), "")
+			got := collectTexts(addCommemorations(day, "lauds", corpus))
+			if len(got) != tt.count {
+				t.Fatalf("got %d collects, want %d", len(got), tt.count)
+			}
+			for i, wantConcluded := range tt.want {
+				concluded := strings.Contains(got[i], "CONCLUSION.")
+				if concluded != wantConcluded {
+					t.Errorf("collect %d of %d: concluded=%v, want %v (XXXIII.5)\n  text: %q",
+						i, tt.count, concluded, wantConcluded, got[i])
+				}
+			}
+		})
+	}
+}
+
+func TestCommemorationSequencingWithNoCommemorations(t *testing.T) {
+	day := makeDay(2026, time.July, 26, nil, nil, "")
+	if elems := addCommemorations(day, "lauds", sequencingTestCorpus()); len(elems) != 0 {
+		t.Errorf("addCommemorations with no commemorations returned %d elements, want 0", len(elems))
+	}
+}
+
+// The conclusion ref must be recorded on the concluded collect and absent from
+// the others, so review tooling attributes the text correctly.
+func TestCommemorationSequencingRecordsConclusionRef(t *testing.T) {
+	day := makeDay(2026, time.July, 26, nil, commemorationFeasts(3), "")
+	elems := addCommemorations(day, "lauds", sequencingTestCorpus())
+
+	var collects []models.OfficeElement
+	for _, e := range elems {
+		if e.Type == models.Collect {
+			collects = append(collects, e)
+		}
+	}
+	if len(collects) != 3 {
+		t.Fatalf("got %d collects, want 3", len(collects))
+	}
+	for i, c := range collects {
+		hasRef := false
+		for _, r := range c.SourceRefs {
+			if strings.HasPrefix(r, conclusionFormRef) {
+				hasRef = true
+			}
+		}
+		if want := i == 2; hasRef != want {
+			t.Errorf("collect %d: conclusion ref present=%v, want %v (refs=%v)", i, hasRef, want, c.SourceRefs)
 		}
 	}
 }

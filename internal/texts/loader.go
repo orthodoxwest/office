@@ -84,9 +84,15 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	return corpus, nil
 }
 
+// collectConclusionPrefix is the corpus-key prefix under which the conclusion
+// formulas live. Kept here so the loader can validate forms as it reads them.
+const collectConclusionPrefix = "shared/formulas/collect-conclusion-"
+
 // loadCollectConclusions reads data/collect-conclusions.txt, whose lines pair a
 // collect's corpus key with the name of its conclusion form. A missing file is
-// not an error: every collect then takes the default form.
+// not an error: every collect then takes the default form. A malformed line, an
+// unknown key, an unknown form, or a duplicate key is an error — each would
+// otherwise silently produce a collect with the wrong ending or none at all.
 func (c *TextCorpus) loadCollectConclusions(dataDir string) error {
 	path := filepath.Join(dataDir, "collect-conclusions.txt")
 	content, err := os.ReadFile(path)
@@ -105,7 +111,21 @@ func (c *TextCorpus) loadCollectConclusions(dataDir string) error {
 		if len(fields) != 2 {
 			return fmt.Errorf("%s:%d: expected \"<corpus-key> <form>\", got %q", path, i+1, trimmed)
 		}
-		c.collectConclusions[fields[0]] = fields[1]
+		key, form := fields[0], fields[1]
+		// Fail loudly rather than let a typo silently drop the conclusion: an
+		// unresolvable form would leave the collect ending mid-prayer, which is
+		// exactly the defect this data exists to fix.
+		if c.Get(collectConclusionPrefix+form) == "" {
+			return fmt.Errorf("%s:%d: %s names conclusion form %q, but %s%s is not in the corpus",
+				path, i+1, key, form, collectConclusionPrefix, form)
+		}
+		if c.Get(key) == "" {
+			return fmt.Errorf("%s:%d: %q is not in the corpus", path, i+1, key)
+		}
+		if prior, dup := c.collectConclusions[key]; dup {
+			return fmt.Errorf("%s:%d: %q listed twice (%q then %q)", path, i+1, key, prior, form)
+		}
+		c.collectConclusions[key] = form
 	}
 	return nil
 }
@@ -118,11 +138,9 @@ func (c *TextCorpus) CollectConclusionForm(key string) (string, bool) {
 	return form, ok
 }
 
-// SetCollectConclusionForm records a conclusion form, for use in tests.
+// SetCollectConclusionForm records a conclusion form, for use in tests. Both
+// constructors initialize the map, so there is no nil case to guard.
 func (c *TextCorpus) SetCollectConclusionForm(key, form string) {
-	if c.collectConclusions == nil {
-		c.collectConclusions = make(map[string]string)
-	}
 	c.collectConclusions[key] = form
 }
 
@@ -141,9 +159,15 @@ func stripCommentLines(text string) string {
 	return strings.Join(kept, "\n")
 }
 
-// NewTestCorpus creates a TextCorpus from a map, for use in tests.
+// NewTestCorpus creates a TextCorpus from a map, for use in tests. Conclusion
+// forms start empty, so every collect takes the default; use
+// SetCollectConclusionForm to record one.
 func NewTestCorpus(texts map[string]string) *TextCorpus {
-	return &TextCorpus{texts: texts, aliases: make(map[string]string)}
+	return &TextCorpus{
+		texts:              texts,
+		aliases:            make(map[string]string),
+		collectConclusions: make(map[string]string),
+	}
 }
 
 // Get returns the text for the given reference path, resolving @use aliases, or

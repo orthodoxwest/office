@@ -96,6 +96,22 @@ Who with thee liveth and reigneth in the unity of the Holy Ghost, God, world
 without end.
 R. Amen.
 
+# Second person, for a collect addressed to the Son. The parish books print this
+# one expanded in at least one place (All Souls): "Who with God the Father in the
+# unity of the Holy Spirit livest and reignest God, world without end." We keep
+# "Holy Ghost" so all six forms read alike in the same office; the books and the
+# diurnal differ on that word throughout, and the rest of this set follows the
+# diurnal.
+[collect-conclusion-who-livest]
+Who with God the Father in the unity of the Holy Ghost livest and reignest God,
+world without end.
+R. Amen.
+
+[collect-conclusion-who-livest-spirit]
+Who with God the Father in the unity of the same Holy Ghost livest and reignest
+God, world without end.
+R. Amen.
+
 [collect-conclusion-who-liveth-spirit]
 Who with thee liveth and reigneth in the unity of the same Holy Ghost, God,
 world without end.
