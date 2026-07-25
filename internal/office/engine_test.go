@@ -181,6 +181,208 @@ func TestMapElementType(t *testing.T) {
 	}
 }
 
+// --- collapseUniformAntiphons ---
+
+func TestCollapseUniformAntiphonsLengthBoundary(t *testing.T) {
+	t.Run("two identical antiphons remain", func(t *testing.T) {
+		hour := &models.OfficeHour{Sections: []models.OfficeSection{{
+			Elements: []models.OfficeElement{
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 1"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+			},
+		}}}
+
+		collapseUniformAntiphons(hour)
+
+		assertSectionElements(t, hour, 0,
+			"antiphon:Alleluia",
+			"psalm:Psalm 1",
+			"antiphon:Alleluia",
+		)
+	})
+
+	t.Run("three identical antiphons collapse to a framing pair", func(t *testing.T) {
+		hour := &models.OfficeHour{Sections: []models.OfficeSection{{
+			Elements: []models.OfficeElement{
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 1"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 2"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+			},
+		}}}
+
+		collapseUniformAntiphons(hour)
+
+		assertSectionElements(t, hour, 0,
+			"antiphon:Alleluia",
+			"psalm:Psalm 1",
+			"psalm:Psalm 2",
+			"antiphon:Alleluia",
+		)
+	})
+}
+
+func TestCollapseUniformAntiphonsAcrossAdjacentPsalmSections(t *testing.T) {
+	hour := &models.OfficeHour{Sections: []models.OfficeSection{
+		{
+			Elements: []models.OfficeElement{
+				{Type: models.Rubric, Text: "Before"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 1"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+			},
+		},
+		{
+			Elements: []models.OfficeElement{
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Canticle, Text: "Canticle"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Rubric, Text: "After"},
+			},
+		},
+	}}
+
+	collapseUniformAntiphons(hour)
+
+	assertSectionElements(t, hour, 0,
+		"rubric:Before",
+		"antiphon:Alleluia",
+		"psalm:Psalm 1",
+	)
+	assertSectionElements(t, hour, 1,
+		"canticle:Canticle",
+		"antiphon:Alleluia",
+		"rubric:After",
+	)
+}
+
+func TestCollapseUniformAntiphonsStopsAtNonPsalmSection(t *testing.T) {
+	hour := &models.OfficeHour{Sections: []models.OfficeSection{
+		{
+			Elements: []models.OfficeElement{
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 1"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+			},
+		},
+		{
+			Elements: []models.OfficeElement{
+				{Type: models.Rubric, Text: "A separate ceremony"},
+			},
+		},
+		{
+			Elements: []models.OfficeElement{
+				{Type: models.Antiphon, Text: "Alleluia"},
+				{Type: models.Psalm, Text: "Psalm 2"},
+				{Type: models.Antiphon, Text: "Alleluia"},
+			},
+		},
+	}}
+
+	collapseUniformAntiphons(hour)
+
+	assertSectionElements(t, hour, 0,
+		"antiphon:Alleluia",
+		"psalm:Psalm 1",
+		"antiphon:Alleluia",
+	)
+	assertSectionElements(t, hour, 1, "rubric:A separate ceremony")
+	assertSectionElements(t, hour, 2,
+		"antiphon:Alleluia",
+		"psalm:Psalm 2",
+		"antiphon:Alleluia",
+	)
+}
+
+func TestCollapseUniformAntiphonsTreatsTextsAsMaximalGroups(t *testing.T) {
+	hour := &models.OfficeHour{Sections: []models.OfficeSection{{
+		Elements: []models.OfficeElement{
+			{Type: models.Antiphon, Text: "A"},
+			{Type: models.Psalm, Text: "Psalm 1"},
+			{Type: models.Antiphon, Text: "A"},
+			{Type: models.Psalm, Text: "Psalm 2"},
+			{Type: models.Antiphon, Text: "A"},
+			{Type: models.Antiphon, Text: "B"},
+			{Type: models.Psalm, Text: "Psalm 3"},
+			{Type: models.Antiphon, Text: "B"},
+			{Type: models.Psalm, Text: "Psalm 4"},
+			{Type: models.Antiphon, Text: "B"},
+			{Type: models.Antiphon, Text: "C"},
+		},
+	}}}
+
+	collapseUniformAntiphons(hour)
+
+	assertSectionElements(t, hour, 0,
+		"antiphon:A",
+		"psalm:Psalm 1",
+		"psalm:Psalm 2",
+		"antiphon:A",
+		"antiphon:B",
+		"psalm:Psalm 3",
+		"psalm:Psalm 4",
+		"antiphon:B",
+		"antiphon:C",
+	)
+}
+
+func TestCollapseUniformAntiphonsIgnoresNonAntiphonTextMatches(t *testing.T) {
+	hour := &models.OfficeHour{Sections: []models.OfficeSection{{
+		Elements: []models.OfficeElement{
+			{Type: models.Antiphon, Text: "Same text"},
+			{Type: models.Psalm, Text: "Same text"},
+			{Type: models.Rubric, Text: "Same text"},
+			{Type: models.Heading, Text: "Same text"},
+			{Type: models.Antiphon, Text: "Same text"},
+		},
+	}}}
+
+	collapseUniformAntiphons(hour)
+
+	assertSectionElements(t, hour, 0,
+		"antiphon:Same text",
+		"psalm:Same text",
+		"rubric:Same text",
+		"heading:Same text",
+		"antiphon:Same text",
+	)
+}
+
+func TestSectionHasPsalmody(t *testing.T) {
+	tests := []struct {
+		name     string
+		elements []models.OfficeElement
+		want     bool
+	}{
+		{"psalm", []models.OfficeElement{{Type: models.Psalm}}, true},
+		{"canticle", []models.OfficeElement{{Type: models.Canticle}}, true},
+		{"non-psalm elements", []models.OfficeElement{{Type: models.Antiphon}, {Type: models.Rubric}}, false},
+		{"empty section", nil, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := sectionHasPsalmody(models.OfficeSection{Elements: tt.elements})
+			if got != tt.want {
+				t.Fatalf("sectionHasPsalmody() = %t, want %t", got, tt.want)
+			}
+		})
+	}
+}
+
+func assertSectionElements(t *testing.T, hour *models.OfficeHour, section int, want ...string) {
+	t.Helper()
+	got := make([]string, 0, len(hour.Sections[section].Elements))
+	for _, element := range hour.Sections[section].Elements {
+		got = append(got, string(element.Type)+":"+element.Text)
+	}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("section %d elements = %v, want %v", section, got, want)
+	}
+}
+
 // --- markPsalmDoxologies ---
 
 func TestMarkPsalmDoxologies(t *testing.T) {
