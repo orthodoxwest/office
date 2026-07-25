@@ -366,6 +366,37 @@ document.documentElement.classList.add("js");
     }
   }
 
+  // Ordo day details are disclosures only where the layout has no room to
+  // show them outright. They ship open — a closed <details> contributes no
+  // height, so CSS alone cannot re-reveal the contents on a wide screen, and
+  // the no-JS document should show the day in full. Collapse them where the
+  // toggle is visible, same trade as the site menu above.
+  if ("matchMedia" in window) {
+    [
+      { selector: "details.day-commemorations", collapseBelow: "(max-width: 700px)" },
+      { selector: "details.day-office-details", collapseBelow: "(max-width: 919px)" },
+    ].forEach(function (spec) {
+      var items = document.querySelectorAll(spec.selector);
+      if (!items.length) {
+        return;
+      }
+      var narrow = window.matchMedia(spec.collapseBelow);
+      var sync = function () {
+        items.forEach(function (item) {
+          if (narrow.matches) {
+            item.removeAttribute("open");
+          } else {
+            item.setAttribute("open", "");
+          }
+        });
+      };
+      sync();
+      if (narrow.addEventListener) {
+        narrow.addEventListener("change", sync);
+      }
+    });
+  }
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").then(function (reg) {
       // Pick up deploys while the PWA stays open across days.
