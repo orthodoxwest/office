@@ -315,23 +315,29 @@ func calendarYearLink(year int, theme string) string {
 	return fmt.Sprintf("/calendar/%d", year)
 }
 
-func currentHourEntry(now time.Time) (string, string) {
+// currentHourEntry returns the office most likely being prayed at now, its
+// display name, and a day offset (0 or -1) locating which calendar day it
+// belongs to. Midnight-2am belongs to the previous day's Compline, not the
+// day that has just begun.
+func currentHourEntry(now time.Time) (slug string, label string, dayOffset int) {
 	h := now.Hour()
 	switch {
-	case h >= 5 && h < 7:
-		return "lauds", "Lauds"
+	case h < 2:
+		return "compline", "Compline", -1
+	case h >= 2 && h < 7:
+		return "lauds", "Lauds", 0
 	case h >= 7 && h < 9:
-		return "prime", "Prime"
+		return "prime", "Prime", 0
 	case h >= 9 && h < 11:
-		return "terce", "Terce"
+		return "terce", "Terce", 0
 	case h >= 11 && h < 13:
-		return "sext", "Sext"
+		return "sext", "Sext", 0
 	case h >= 13 && h < 17:
-		return "none", "None"
+		return "none", "None", 0
 	case h >= 17 && h < 20:
-		return "vespers", "Vespers"
+		return "vespers", "Vespers", 0
 	default:
-		return "compline", "Compline"
+		return "compline", "Compline", 0
 	}
 }
 
@@ -526,9 +532,17 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	nowSlug := time.Now().In(loc).Format("2006-01-02")
 	currentHourSlug := ""
 	currentHourLabel := "Open Lauds"
+	prayNowDateSlug := dateSlug
+	gridCurrentSlug := ""
 	if dateSlug == nowSlug {
-		currentHourSlug, currentHourLabel = currentHourEntry(time.Now().In(loc))
+		var offset int
+		currentHourSlug, currentHourLabel, offset = currentHourEntry(time.Now().In(loc))
 		currentHourLabel = "Pray " + currentHourLabel
+		if offset != 0 {
+			prayNowDateSlug = time.Now().In(loc).AddDate(0, 0, offset).Format("2006-01-02")
+		} else {
+			gridCurrentSlug = currentHourSlug
+		}
 	}
 
 	data := homeData{
@@ -548,8 +562,8 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		Penitential:    day.Penitential.Labels(),
 		CalendarLink:   calendarLink(dateSlug, theme),
 		PrayNowLabel:   currentHourLabel,
-		PrayNowLink:    hourLink(defaultHourSlug(currentHourSlug), dateSlug, theme),
-		Hours:          buildHomeHours(dateSlug, theme, currentHourSlug),
+		PrayNowLink:    hourLink(defaultHourSlug(currentHourSlug), prayNowDateSlug, theme),
+		Hours:          buildHomeHours(dateSlug, theme, gridCurrentSlug),
 		NavDate:        dateSlug,
 		Theme:          theme,
 		Page:           "home",
