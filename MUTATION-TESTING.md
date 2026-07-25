@@ -115,7 +115,6 @@ be removed from the queue by reasoning about reachable states.
 | Package and area | Surviving mutants | Next question |
 |---|---:|---|
 | `calendar/builder.go` octave generation | 16 | Do generated day numbers, ranks, and proper-set indices hold at Sunday boundaries? |
-| `office/engine.go` uniform-antiphon collapse | 18 | Do groups of two, three, and multiple adjacent psalm sections retain exactly the framing antiphons? |
 | `office/proper.go` Greater Antiphons | 11 | Are December 17/23 and first-Vespers date shifts pinned on both sides? |
 
 The anticipated/resumed Sunday arithmetic is no longer in this table. Concrete
@@ -128,3 +127,14 @@ expression because anticipatable cases land on or below the equality boundary
 and all later cases already exceed six. The third changes `len(feasts) > 0` to
 `>= 0` before rewriting the final Sunday; every valid computed year produces a
 non-empty series, so that boundary is likewise equivalent.
+
+The uniform-antiphon collapse is also complete. Direct tests now cover the
+two-versus-three threshold, adjacent psalm-bearing sections, non-psalm section
+boundaries, multiple maximal text groups, a later singleton group, element-type
+filtering, and both psalms and canticles. In a focused `engine.go` mutation run,
+these cases killed 18 previously living mutants: 16 in the collapse loop and
+both in its psalmody classifier. The two remaining live mutations change
+`lo < len(ants)` to `<=` for an extra no-op loop iteration and
+`len(drop) > 0` to `>= 0` for an extra no-op filtering pass. Both preserve the
+result. Three loop-control mutations time out because they prevent their loops
+from advancing; they are not silent survivors.
