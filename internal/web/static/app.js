@@ -491,17 +491,29 @@ document.documentElement.classList.add("js");
     });
   });
 
-  // currentHourSlug returns the office most likely being prayed at the given
-  // local time. Boundaries mirror currentHourEntry in handlers.go.
-  function currentHourSlug(d) {
+  // currentHourInfo returns the office most likely being prayed at the given
+  // local time, plus a day offset (0 or -1) locating which calendar day it
+  // belongs to. Boundaries mirror currentHourEntry in handlers.go: midnight-2am
+  // belongs to the previous day's Compline, not the day that has just begun.
+  var HOUR_NAMES = {
+    lauds: "Lauds",
+    prime: "Prime",
+    terce: "Terce",
+    sext: "Sext",
+    none: "None",
+    vespers: "Vespers",
+    compline: "Compline",
+  };
+  function currentHourInfo(d) {
     var h = d.getHours();
-    if (h >= 5 && h < 7) return "lauds";
-    if (h >= 7 && h < 9) return "prime";
-    if (h >= 9 && h < 11) return "terce";
-    if (h >= 11 && h < 13) return "sext";
-    if (h >= 13 && h < 17) return "none";
-    if (h >= 17 && h < 20) return "vespers";
-    return "compline";
+    if (h < 2) return { slug: "compline", offset: -1 };
+    if (h >= 2 && h < 7) return { slug: "lauds", offset: 0 };
+    if (h >= 7 && h < 9) return { slug: "prime", offset: 0 };
+    if (h >= 9 && h < 11) return { slug: "terce", offset: 0 };
+    if (h >= 11 && h < 13) return { slug: "sext", offset: 0 };
+    if (h >= 13 && h < 17) return { slug: "none", offset: 0 };
+    if (h >= 17 && h < 20) return { slug: "vespers", offset: 0 };
+    return { slug: "compline", offset: 0 };
   }
 
   function setHourCurrent(link, isCurrent) {
@@ -534,12 +546,13 @@ document.documentElement.classList.add("js");
       return;
     }
     var dateSlug = card.getAttribute("data-date-slug");
-    var current = dateSlug === localDateSlug(new Date()) ? currentHourSlug(new Date()) : null;
+    var now = new Date();
+    var info = dateSlug === localDateSlug(now) ? currentHourInfo(now) : null;
     var prayNow = card.querySelector(".pray-now");
     var matched = false;
 
     card.querySelectorAll(".home-hour-link").forEach(function (link) {
-      var isCurrent = current !== null && link.getAttribute("data-hour") === current;
+      var isCurrent = info !== null && info.offset === 0 && link.getAttribute("data-hour") === info.slug;
       setHourCurrent(link, isCurrent);
       if (isCurrent && prayNow) {
         var name = link.querySelector(".home-hour-link-name");
@@ -548,6 +561,14 @@ document.documentElement.classList.add("js");
         matched = true;
       }
     });
+
+    if (!matched && info !== null && info.offset !== 0 && prayNow) {
+      var offsetDate = new Date(now.getTime());
+      offsetDate.setDate(offsetDate.getDate() + info.offset);
+      prayNow.setAttribute("href", "/" + info.slug + "/" + localDateSlug(offsetDate));
+      prayNow.textContent = "Pray " + (HOUR_NAMES[info.slug] || info.slug);
+      matched = true;
+    }
 
     if (!matched && prayNow) {
       var lauds = card.querySelector('.home-hour-link[data-hour="lauds"]');
