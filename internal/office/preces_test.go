@@ -276,6 +276,31 @@ func TestShouldSaySuffrage(t *testing.T) {
 	}
 }
 
+func TestWithinSuffrageSeasonEpiphanyOctaveBoundaries(t *testing.T) {
+	tests := []struct {
+		name string
+		day  int
+		want bool
+	}{
+		{"Epiphany itself", 6, true},
+		{"first day within octave", 7, false},
+		{"last day within octave", 13, false},
+		{"first day after octave", 14, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{
+				Date:   time.Date(2026, time.January, tt.day, 0, 0, 0, 0, time.UTC),
+				Season: models.Epiphany,
+			}
+			if got := withinSuffrageSeason(day); got != tt.want {
+				t.Fatalf("withinSuffrageSeason(January %d) = %t, want %t", tt.day, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestShouldSayCrossCommemoration(t *testing.T) {
 	moveable := calendar.ComputeMoveableDates(2026)
 
