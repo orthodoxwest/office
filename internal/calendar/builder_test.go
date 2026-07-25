@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -74,6 +75,44 @@ func TestBuildCalendarEpiphanySundays(t *testing.T) {
 	}
 	if feb1.Celebration.ID != "epiphany-sunday-4" {
 		t.Errorf("Feb 1 = %v, want epiphany-sunday-4", feb1.Celebration.ID)
+	}
+}
+
+func TestAnticipatedEpiphanySundayFeastBoundaries(t *testing.T) {
+	tests := []struct {
+		year   int
+		wantID string
+	}{
+		{2026, "epiphany-sunday-5-anticipated"}, // equality with one autumn resumption
+		{2036, "epiphany-sunday-6-anticipated"}, // latest boundary; Epiphany itself is Sunday
+		{2037, "epiphany-sunday-4-anticipated"}, // equality with two autumn resumptions
+		{2038, ""},                              // the seventh displaced Sunday is not anticipated
+	}
+
+	for _, tt := range tests {
+		t.Run(strconv.Itoa(tt.year), func(t *testing.T) {
+			got := anticipatedEpiphanySundayFeast(ComputeMoveableDates(tt.year))
+			if tt.wantID == "" {
+				if len(got) != 0 {
+					t.Fatalf("anticipated feast = %v, want none", got)
+				}
+				return
+			}
+			if len(got) != 1 {
+				t.Fatalf("anticipated feasts = %v, want exactly one", got)
+			}
+			feast := got[0]
+			if feast.ID != tt.wantID {
+				t.Fatalf("anticipated feast ID = %q, want %q", feast.ID, tt.wantID)
+			}
+			wantProperID := strings.TrimSuffix(tt.wantID, "-anticipated")
+			if feast.ProperID != wantProperID {
+				t.Fatalf("anticipated feast ProperID = %q, want %q", feast.ProperID, wantProperID)
+			}
+			if feast.DateRule != "easter-64" {
+				t.Fatalf("anticipated feast DateRule = %q, want easter-64", feast.DateRule)
+			}
+		})
 	}
 }
 
@@ -185,6 +224,61 @@ func TestBuildCalendarPentecostSundays(t *testing.T) {
 	}
 	if got := jun14.Celebration.Name; got != "Sunday within the Octave of Corpus Christi" {
 		t.Errorf("Jun 14 name = %q, want Corpus Christi octave title first", got)
+	}
+}
+
+func TestPentecostSundayFeastsResumedBoundaries(t *testing.T) {
+	tests := []struct {
+		year      int
+		wantCount int
+		wantTail  []string
+	}{
+		{
+			year:      2036,
+			wantCount: 23,
+			wantTail: []string{
+				"pentecost-sunday-21||easter+196",
+				"pentecost-sunday-22||easter+203",
+				"pentecost-sunday-23||easter+210",
+				"pentecost-sunday-24||easter+217",
+			},
+		},
+		{
+			year:      2026,
+			wantCount: 24,
+			wantTail: []string{
+				"pentecost-sunday-23||easter+210",
+				"epiphany-sunday-6-resumed|epiphany-sunday-6|easter+217",
+				"pentecost-sunday-24||easter+224",
+			},
+		},
+		{
+			year:      2037,
+			wantCount: 25,
+			wantTail: []string{
+				"pentecost-sunday-23||easter+210",
+				"epiphany-sunday-5-resumed|epiphany-sunday-5|easter+217",
+				"epiphany-sunday-6-resumed|epiphany-sunday-6|easter+224",
+				"pentecost-sunday-24||easter+231",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(strconv.Itoa(tt.year), func(t *testing.T) {
+			moveable := ComputeMoveableDates(tt.year)
+			got := pentecostSundayFeasts(moveable.Easter, moveable.Advent1)
+			if len(got) != tt.wantCount {
+				t.Fatalf("generated %d Pentecost-series Sundays, want %d", len(got), tt.wantCount)
+			}
+			tail := got[len(got)-len(tt.wantTail):]
+			for i, feast := range tail {
+				gotKey := feast.ID + "|" + feast.ProperID + "|" + feast.DateRule
+				if gotKey != tt.wantTail[i] {
+					t.Fatalf("tail feast %d = %q, want %q", i, gotKey, tt.wantTail[i])
+				}
+			}
+		})
 	}
 }
 
