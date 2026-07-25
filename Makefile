@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff
 
 YEAR ?= 2026
 
@@ -104,6 +104,28 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 	./office tex $(CHANT_FLAG) $(HOUR) $(DATE) > output/$(HOUR)-$(DATE).tex
 	lualatex --shell-escape --interaction=nonstopmode --output-directory=output output/$(HOUR)-$(DATE).tex
 	@echo "PDF: output/$(HOUR)-$(DATE).pdf"
+
+GREMLINS_VERSION = v0.6.0
+MUTATE_PKGS ?= ./internal/calendar/ ./internal/office/ ./internal/texts/
+MUTATE_DIFF_BASE ?= master
+
+# gremlins built via `go install` always self-reports "dev", so we can't verify
+# the version from the binary — presence is the only check. To upgrade, bump
+# GREMLINS_VERSION and `rm ~/go/bin/gremlins`.
+install-gremlins: ## Install the pinned mutation-testing tool if missing
+	@test -x ~/go/bin/gremlins || \
+		go install github.com/go-gremlins/gremlins/cmd/gremlins@$(GREMLINS_VERSION)
+
+mutate: install-gremlins ## Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/); ~4 min each
+	@for pkg in $(MUTATE_PKGS); do \
+		echo "==> $$pkg"; \
+		~/go/bin/gremlins unleash $$pkg || exit 1; \
+	done
+
+# Must run from the module root with no package path: passing a path alongside
+# --diff makes gremlins skip every mutant, including the changed ones.
+mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
+	~/go/bin/gremlins unleash --diff $(MUTATE_DIFF_BASE)
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

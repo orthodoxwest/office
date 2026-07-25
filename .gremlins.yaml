@@ -1,0 +1,27 @@
+# Mutation testing configuration (github.com/go-gremlins/gremlins).
+#
+# Run locally with `make mutate` (whole packages) or `make mutate-diff`
+# (only lines your branch changes, which is what CI runs per-PR).
+#
+# IMPORTANT — timeout-coefficient must stay high.
+# Gremlins derives each mutant's test timeout from the baseline test run. This
+# repo's per-package tests finish in ~1s, so the default coefficient produces a
+# timeout shorter than a cold compile in gremlins' temp module copy. Every
+# mutant then reports TIMED OUT, and gremlins prints "Test efficacy: 100.00%" —
+# a green result from a run that tested nothing. At 30 the same calendar run
+# reports its true 79.4%. If you see a wall of TIMED OUT, raise this; do not
+# trust the efficacy number that comes with it.
+unleash:
+  workers: 4
+  timeout-coefficient: 30
+  exclude-files:
+    - "tools/.*"
+    - "scripts/.*"
+    - "cmd/.*"
+
+# Thresholds are intentionally 0 (reporting only) while we establish a
+# baseline. Measured efficacy as of the initial run: calendar 79.4%,
+# office 81.1%. See MUTATION-TESTING.md before turning these into gates.
+thresholds:
+  efficacy: 0
+  mutant-coverage: 0

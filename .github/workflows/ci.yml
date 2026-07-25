@@ -359,3 +359,126 @@ jobs:
       - name: Record skipped UX suite
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
+
+  mutation:
+    name: Mutation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # --diff needs the base commit present locally, so fetch full history.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and module cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/go/bin
+          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-gremlins-v0.6.0
+          restore-keys: |
+            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
+
+      - name: Install gremlins
+        run: make install-gremlins
+
+      # Reporting only: thresholds are 0 in .gremlins.yaml, so this step is not
+      # a gate. It surfaces mutants that survive on lines this PR touches.
+      - name: Run mutation testing on changed lines
+        id: mutate
+        continue-on-error: true
+        run: |
+          git fetch --no-tags origin '${{ github.event.pull_request.base.sha }}' || true
+          make mutate-diff MUTATE_DIFF_BASE='${{ github.event.pull_request.base.sha }}' \
+            2>&1 | tee mutation.log
+
+      - name: Summarize surviving mutants
+        id: summary
+        run: |
+          # gremlins prints one line per mutant; LIVED means no test failed when
+          # that line's logic was altered.
+          grep -E '^\s+LIVED ' mutation.log | sed 's/^[[:space:]]*//' > lived.txt || true
+          COUNT=$(wc -l < lived.txt | tr -d ' ')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Mutation testing (changed lines)"
+            echo
+            tail -5 mutation.log | sed 's/^/    /'
+            echo
+            if [ "$COUNT" -gt 0 ]; then
+              echo "### $COUNT surviving mutant(s)"
+              echo '```'
+              cat lived.txt
+              echo '```'
+            else
+              echo "No surviving mutants on changed lines."
+            fi
+          } > mutation-summary.md
+          cat mutation-summary.md >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'body<<MUTATION_EOF'
+            cat mutation-summary.md
+            echo 'MUTATION_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload mutation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-results
+          path: |
+            mutation.log
+            mutation-summary.md
+
+      - name: Post or update mutation comment
+        if: steps.summary.outputs.count != '0'
+        uses: actions/github-script@v7
+        env:
+          MUTATION_BODY: ${{ steps.summary.outputs.body }}
+        with:
+          script: |
+            const marker = '<!-- mutation-test-result -->';
+            const body =
+              process.env.MUTATION_BODY +
+              '\n\nA surviving mutant means this line\'s logic can be changed without ' +
+              'failing any test. Some are equivalent mutants that cannot be killed — ' +
+              'see `MUTATION-TESTING.md`. This check never fails the build.\n\n' +
+              marker;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body,
+              });
+            }
