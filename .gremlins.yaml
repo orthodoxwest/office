@@ -25,9 +25,13 @@ unleash:
     - "tools/.*"
     - "scripts/.*"
 
-# Thresholds are intentionally 0 (reporting only) while we establish a
-# baseline. Measured efficacy as of the initial run: calendar 79.4%,
-# office 81.1%. See MUTATION-TESTING.md before turning these into gates.
-thresholds:
-  efficacy: 0
-  mutant-coverage: 0
+  # Thresholds are intentionally 0 (reporting only) while we establish a
+  # baseline. Measured efficacy as of the initial run: calendar 79.4%,
+  # office 81.1%. See MUTATION-TESTING.md before turning these into gates.
+  #
+  # Note the nesting: these live under `unleash.threshold`, NOT a top-level
+  # `thresholds:` block. Gremlins ignores unknown keys silently, so the wrong
+  # shape reads as "no gate" rather than erroring. A violated threshold exits 10.
+  threshold:
+    efficacy: 0
+    mutant-coverage: 0
