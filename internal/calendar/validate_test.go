@@ -79,3 +79,51 @@ func TestValidateSemanticsRejectsVigilTarget(t *testing.T) {
 		t.Fatalf("validateSemantics errors = %q, want vigil-target error", got)
 	}
 }
+
+func TestValidateSemanticsRejectsMalformedDateRule(t *testing.T) {
+	feast := &models.Feast{
+		ID:       "bad-moveable-feast",
+		DateRule: "easter++1",
+	}
+
+	errs := validateSemantics([]*models.Feast{feast})
+	if got := strings.Join(errs, "\n"); !strings.Contains(got, `Feast 'bad-moveable-feast' has unrecognized DateRule: "easter++1"`) {
+		t.Fatalf("validateSemantics errors = %q, want malformed DateRule error", got)
+	}
+}
+
+func TestIsValidDateRule(t *testing.T) {
+	tests := []struct {
+		rule string
+		want bool
+	}{
+		{"easter+0", true},
+		{"easter-3", true},
+		{"epiphany-sunday-1", true},
+		{"epiphany-sunday-8", true},
+		{"advent-sunday-1", true},
+		{"advent-sunday-4", true},
+		{"pentecost-sunday-1", true},
+		{"holy-name", true},
+		{"last-sunday-october", true},
+		{"", false},
+		{"easter", false},
+		{"easter+", false},
+		{"epiphany-sunday-0", false},
+		{"epiphany-sunday-x", false},
+		{"advent-sunday-0", false},
+		{"advent-sunday-5", false},
+		{"advent-sunday-x", false},
+		{"pentecost-sunday-0", false},
+		{"pentecost-sunday-x", false},
+		{"holy-name-extra", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.rule, func(t *testing.T) {
+			if got := isValidDateRule(tt.rule); got != tt.want {
+				t.Fatalf("isValidDateRule(%q) = %t, want %t", tt.rule, got, tt.want)
+			}
+		})
+	}
+}

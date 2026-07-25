@@ -636,9 +636,58 @@ func TestResolveConcurrenceDoesNotConflateOccurrenceWithinOctaveWithOctaveOffice
 	}
 }
 
+func TestOctaveCelebrationParentEasterWeek(t *testing.T) {
+	tests := []struct {
+		name string
+		day  *models.CalendarDay
+		want string
+	}{
+		{
+			name: "Easter Sunday owns its octave",
+			day: &models.CalendarDay{
+				Celebration: &models.Feast{ID: "easter-sunday", HasOctave: true},
+			},
+			want: "easter-sunday",
+		},
+		{
+			name: "Easter Monday continues the Easter octave office",
+			day: &models.CalendarDay{
+				Celebration:    &models.Feast{ID: "easter-monday"},
+				WithinOctaveOf: "easter-sunday",
+			},
+			want: "easter-sunday",
+		},
+		{
+			name: "Easter Tuesday continues the Easter octave office",
+			day: &models.CalendarDay{
+				Celebration:    &models.Feast{ID: "easter-tuesday"},
+				WithinOctaveOf: "easter-sunday",
+			},
+			want: "easter-sunday",
+		},
+		{
+			name: "an occurring feast during the octave is a distinct office",
+			day: &models.CalendarDay{
+				Celebration:    &models.Feast{ID: "annunciation-bvm"},
+				WithinOctaveOf: "easter-sunday",
+			},
+			want: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := octaveCelebrationParent(tt.day); got != tt.want {
+				t.Fatalf("octaveCelebrationParent() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestOutgoingCommemoratedAtFirstVespers(t *testing.T) {
 	firstClass := &models.Feast{ID: "first-class", Rank: models.Double1stClass, Category: models.CategoryLord}
 	secondClass := &models.Feast{ID: "second-class", Rank: models.Double2ndClass, Category: models.CategoryApostle}
+	circumcision := &models.Feast{ID: "circumcision", Rank: models.Double2ndClass, Category: models.CategoryLord}
 	double := &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}
 
 	tests := []struct {
@@ -651,11 +700,16 @@ func TestOutgoingCommemoratedAtFirstVespers(t *testing.T) {
 		{"ordinary feria does not concur", double, &models.Feast{ID: "feria", Rank: models.SemiDouble, Category: models.CategoryFeria}, false},
 		{"day within octave under ordinary Double", double, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, true},
 		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
+		{"privileged day within octave excluded by second class", secondClass, &models.Feast{ID: "easter-sunday-octave-day-4", Rank: models.Double1stClass, Category: models.CategoryLord}, false},
+		{"ordinary feria does not concur under second class", secondClass, &models.Feast{ID: "feria", Rank: models.SemiDouble, Category: models.CategoryFeria}, false},
 		{"seasonal privileged feria retained", double, &models.Feast{ID: "privileged-lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, true},
 		{"seasonal privileged feria excluded by first class", firstClass, &models.Feast{ID: "privileged-advent-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
 		{"second class outgoing excluded by first class", firstClass, secondClass, false},
 		{"Sunday outgoing excluded by first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, false},
 		{"Christmas commemorates outgoing Sunday", &models.Feast{ID: "christmas", Rank: models.Double1stClass, Category: models.CategoryLord}, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
+		{"Circumcision excludes outgoing Sunday", circumcision, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, false},
+		{"Circumcision excludes outgoing Greater Double", circumcision, &models.Feast{ID: "greater-double", Rank: models.GreaterDouble, Category: models.CategoryMartyr}, false},
+		{"Circumcision commemorates outgoing ordinary Double", circumcision, double, true},
 		{"ordinary Double outgoing under second class", secondClass, double, true},
 	}
 

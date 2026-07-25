@@ -305,9 +305,6 @@ func outgoingCommemoratedAtFirstVespers(winner, loser *models.Feast) (bool, stri
 		if isDayWithinOctave(loser) {
 			return false, "commemoration:first-vespers-second-class-octave-exclusion"
 		}
-		if loser.Category == models.CategoryFeria && loser.Rank != models.PrivilegedFeria {
-			return false, "commemoration:first-vespers-second-class-feria-exclusion"
-		}
 	}
 	return true, "commemoration:first-vespers-concurrence"
 }
