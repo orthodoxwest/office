@@ -282,6 +282,199 @@ func TestPentecostSundayFeastsResumedBoundaries(t *testing.T) {
 	}
 }
 
+func TestOctaveFeastsPrivilegedExclusions(t *testing.T) {
+	easter := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
+	tests := []struct {
+		name     string
+		feast    *models.Feast
+		wantKeys []string
+	}{
+		{
+			name: "Easter excludes explicit Monday Tuesday and Low Sunday",
+			feast: &models.Feast{
+				ID:        "easter-sunday",
+				DateRule:  "easter+0",
+				HasOctave: true,
+			},
+			wantKeys: []string{
+				"easter-sunday-octave-day-4|easter+3",
+				"easter-sunday-octave-day-5|easter+4",
+				"easter-sunday-octave-day-6|easter+5",
+				"easter-sunday-octave-day-7|easter+6",
+			},
+		},
+		{
+			name: "Pentecost excludes Trinity Sunday",
+			feast: &models.Feast{
+				ID:        "pentecost",
+				DateRule:  "easter+49",
+				HasOctave: true,
+			},
+			wantKeys: []string{
+				"pentecost-octave-day-2|easter+50",
+				"pentecost-octave-day-3|easter+51",
+				"pentecost-octave-day-4|easter+52",
+				"pentecost-octave-day-5|easter+53",
+				"pentecost-octave-day-6|easter+54",
+				"pentecost-octave-day-7|easter+55",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := octaveFeasts([]*models.Feast{tt.feast}, 2026, easter, nil)
+			if len(got) != len(tt.wantKeys) {
+				t.Fatalf("generated %d octave feasts, want %d: %v", len(got), len(tt.wantKeys), got)
+			}
+			for i, feast := range got {
+				gotKey := feast.ID + "|" + feast.DateRule
+				if gotKey != tt.wantKeys[i] {
+					t.Errorf("octave feast %d = %q, want %q", i, gotKey, tt.wantKeys[i])
+				}
+				if feast.Rank != models.Double1stClass {
+					t.Errorf("%s rank = %q, want double-1st-class", feast.ID, feast.Rank)
+				}
+			}
+		})
+	}
+}
+
+func TestOctaveFeastsSpecialNames(t *testing.T) {
+	feasts := []*models.Feast{
+		{
+			ID:        "nativity-john-baptist",
+			Name:      "Nativity of St. John the Baptist",
+			Month:     6,
+			Day:       24,
+			HasOctave: true,
+		},
+		{
+			ID:        "ss-peter-paul",
+			Name:      "Ss. Peter and Paul, Apostles",
+			Month:     6,
+			Day:       29,
+			HasOctave: true,
+		},
+		{
+			ID:        "st-george",
+			Name:      "St George",
+			Month:     4,
+			Day:       23,
+			HasOctave: true,
+		},
+	}
+
+	got := octaveFeasts(feasts, 2026, time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC), nil)
+	tests := []struct {
+		id       string
+		wantName string
+	}{
+		{"nativity-john-baptist-octave-day-2", "Day II within the Octave of St John Baptist"},
+		{"ss-peter-paul-octave-day-2", "Day II within the Octave of Ss Peter & Paul"},
+		{"st-george-octave-day-2", "Day II within the Octave of St George"},
+	}
+	for _, tt := range tests {
+		feast := mustFindOctaveFeast(t, got, tt.id)
+		if feast.Name != tt.wantName {
+			t.Errorf("%s name = %q, want %q", tt.id, feast.Name, tt.wantName)
+		}
+	}
+}
+
+func TestOctaveFeastsSundaySetIndexing(t *testing.T) {
+	parentDate := time.Date(2026, 6, 6, 0, 0, 0, 0, time.UTC)
+	if parentDate.Weekday() != time.Saturday {
+		t.Fatalf("test parent date is %s, want Saturday", parentDate.Weekday())
+	}
+	parent := &models.Feast{
+		ID:        "test-octave",
+		Name:      "Test Feast",
+		Month:     int(parentDate.Month()),
+		Day:       parentDate.Day(),
+		HasOctave: true,
+	}
+
+	got := octaveFeasts(
+		[]*models.Feast{parent},
+		parentDate.Year(),
+		time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC),
+		nil,
+	)
+	tests := []struct {
+		id       string
+		month    int
+		day      int
+		properID string
+		rank     models.Rank
+	}{
+		{"test-octave-octave-day-2", 6, 7, "test-octave", models.SemiDouble},
+		{"test-octave-octave-day-3", 6, 8, "test-octave-octave-set-1", models.SemiDouble},
+		{"test-octave-octave-day-4", 6, 9, "test-octave-octave-set-2", models.SemiDouble},
+		{"test-octave-octave-day-5", 6, 10, "test-octave-octave-set-3", models.SemiDouble},
+		{"test-octave-octave-day-6", 6, 11, "test-octave-octave-set-4", models.SemiDouble},
+		{"test-octave-octave-day-7", 6, 12, "test-octave-octave-set-5", models.SemiDouble},
+		{"test-octave-octave-day", 6, 13, "test-octave", models.GreaterDouble},
+	}
+	if len(got) != len(tests) {
+		t.Fatalf("generated %d octave feasts, want %d", len(got), len(tests))
+	}
+	for _, tt := range tests {
+		feast := mustFindOctaveFeast(t, got, tt.id)
+		if feast.Month != tt.month || feast.Day != tt.day {
+			t.Errorf("%s date = %02d-%02d, want %02d-%02d", tt.id, feast.Month, feast.Day, tt.month, tt.day)
+		}
+		if feast.ProperID != tt.properID {
+			t.Errorf("%s ProperID = %q, want %q", tt.id, feast.ProperID, tt.properID)
+		}
+		if feast.Rank != tt.rank {
+			t.Errorf("%s rank = %q, want %q", tt.id, feast.Rank, tt.rank)
+		}
+	}
+}
+
+func TestOctaveFeastsMoveableDateRules(t *testing.T) {
+	easter := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
+	parent := &models.Feast{
+		ID:        "moveable-test",
+		Name:      "Moveable Test Feast",
+		DateRule:  "easter+10",
+		HasOctave: true,
+	}
+
+	got := octaveFeasts([]*models.Feast{parent}, 2026, easter, nil)
+	if len(got) != 7 {
+		t.Fatalf("generated %d octave feasts, want 7", len(got))
+	}
+	tests := []struct {
+		id           string
+		wantDateRule string
+	}{
+		{"moveable-test-octave-day-2", "easter+11"},
+		{"moveable-test-octave-day", "easter+17"},
+	}
+	for _, tt := range tests {
+		feast := mustFindOctaveFeast(t, got, tt.id)
+		if feast.DateRule != tt.wantDateRule {
+			t.Errorf("%s DateRule = %q, want %q", tt.id, feast.DateRule, tt.wantDateRule)
+		}
+		if feast.Month != 0 || feast.Day != 0 {
+			t.Errorf("%s fixed date = %02d-%02d, want no fixed date", tt.id, feast.Month, feast.Day)
+		}
+	}
+}
+
+func mustFindOctaveFeast(t *testing.T, feasts []*models.Feast, id string) *models.Feast {
+	t.Helper()
+	for _, feast := range feasts {
+		if feast.ID == id {
+			return feast
+		}
+	}
+	t.Fatalf("octave feast %q not found in %v", id, feasts)
+	return nil
+}
+
 func TestBuildCalendarLastSundayAfterPentecostUses24thPropers(t *testing.T) {
 	days, err := BuildCalendar(2024, findDataDir(t))
 	if err != nil {

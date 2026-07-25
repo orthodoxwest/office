@@ -64,6 +64,186 @@ func TestResolveProperTextHourQualified(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextGreaterAntiphonBoundaries(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"seasonal/advent/magnificat-antiphon-december-16": "Out-of-range December 16 antiphon",
+		"seasonal/advent/magnificat-antiphon-december-17": "O Wisdom",
+		"seasonal/advent/magnificat-antiphon-december-18": "O Adonai",
+		"seasonal/advent/magnificat-antiphon-december-19": "O Root of Jesse",
+		"seasonal/advent/magnificat-antiphon-december-23": "O Emmanuel",
+		"seasonal/advent/magnificat-antiphon-december-24": "Out-of-range December 24 antiphon",
+		"ordinary/vespers/magnificat-antiphon":            "Ordinary Vespers antiphon",
+		"ordinary/lauds/magnificat-antiphon":              "Ordinary Lauds antiphon",
+	})
+
+	tests := []struct {
+		name         string
+		date         time.Time
+		season       models.Season
+		hour         string
+		firstVespers bool
+		wantText     string
+		wantRef      string
+	}{
+		{
+			name:     "December 17 included",
+			date:     time.Date(2026, 12, 17, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "vespers",
+			wantText: "O Wisdom",
+			wantRef:  "seasonal/advent/magnificat-antiphon-december-17",
+		},
+		{
+			name:     "December 23 included",
+			date:     time.Date(2026, 12, 23, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "vespers",
+			wantText: "O Emmanuel",
+			wantRef:  "seasonal/advent/magnificat-antiphon-december-23",
+		},
+		{
+			name:     "December 16 excluded",
+			date:     time.Date(2026, 12, 16, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "vespers",
+			wantText: "Ordinary Vespers antiphon",
+			wantRef:  "ordinary/vespers/magnificat-antiphon",
+		},
+		{
+			name:     "December 24 excluded",
+			date:     time.Date(2026, 12, 24, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "vespers",
+			wantText: "Ordinary Vespers antiphon",
+			wantRef:  "ordinary/vespers/magnificat-antiphon",
+		},
+		{
+			name:         "first Vespers uses preceding civil evening",
+			date:         time.Date(2026, 12, 18, 0, 0, 0, 0, time.UTC),
+			season:       models.Advent,
+			hour:         "vespers",
+			firstVespers: true,
+			wantText:     "O Wisdom",
+			wantRef:      "seasonal/advent/magnificat-antiphon-december-17",
+		},
+		{
+			name:         "first Vespers can shift outside the window",
+			date:         time.Date(2026, 12, 17, 0, 0, 0, 0, time.UTC),
+			season:       models.Advent,
+			hour:         "vespers",
+			firstVespers: true,
+			wantText:     "Ordinary Vespers antiphon",
+			wantRef:      "ordinary/vespers/magnificat-antiphon",
+		},
+		{
+			name:     "Lauds excluded",
+			date:     time.Date(2026, 12, 17, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "lauds",
+			wantText: "Ordinary Lauds antiphon",
+			wantRef:  "ordinary/lauds/magnificat-antiphon",
+		},
+		{
+			name:     "non-Advent season excluded",
+			date:     time.Date(2026, 12, 17, 0, 0, 0, 0, time.UTC),
+			season:   models.Christmas,
+			hour:     "vespers",
+			wantText: "Ordinary Vespers antiphon",
+			wantRef:  "ordinary/vespers/magnificat-antiphon",
+		},
+		{
+			name:     "non-December month excluded",
+			date:     time.Date(2026, 11, 17, 0, 0, 0, 0, time.UTC),
+			season:   models.Advent,
+			hour:     "vespers",
+			wantText: "Ordinary Vespers antiphon",
+			wantRef:  "ordinary/vespers/magnificat-antiphon",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{
+				Date:         tt.date,
+				Season:       tt.season,
+				FirstVespers: tt.firstVespers,
+			}
+			got, ref := resolveProperText(day, tt.hour, "magnificat-antiphon", corpus)
+			if got != tt.wantText || ref != tt.wantRef {
+				t.Fatalf("antiphon = %q (%s), want %q (%s)", got, ref, tt.wantText, tt.wantRef)
+			}
+		})
+	}
+}
+
+func TestResolveProperTextGreaterAntiphonPrecedence(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"seasonal/advent/magnificat-antiphon-december-18": "O Adonai",
+		"proper/test-sunday/magnificat-antiphon":          "Sunday proper antiphon",
+		"proper/test-feria/magnificat-antiphon":           "Feria proper antiphon",
+		"proper/test-saint/magnificat-antiphon":           "Saint proper antiphon",
+		"commons/martyr/magnificat-antiphon":              "Martyr common antiphon",
+	})
+
+	tests := []struct {
+		name        string
+		celebration *models.Feast
+		wantText    string
+		wantRef     string
+	}{
+		{
+			name: "Greater Antiphon replaces Sunday proper",
+			celebration: &models.Feast{
+				ID:       "test-sunday",
+				Category: models.CategorySunday,
+			},
+			wantText: "O Adonai",
+			wantRef:  "seasonal/advent/magnificat-antiphon-december-18",
+		},
+		{
+			name: "Greater Antiphon replaces feria proper",
+			celebration: &models.Feast{
+				ID:       "test-feria",
+				Category: models.CategoryFeria,
+			},
+			wantText: "O Adonai",
+			wantRef:  "seasonal/advent/magnificat-antiphon-december-18",
+		},
+		{
+			name: "feast proper outranks Greater Antiphon",
+			celebration: &models.Feast{
+				ID:       "test-saint",
+				Category: models.CategoryMartyr,
+			},
+			wantText: "Saint proper antiphon",
+			wantRef:  "proper/test-saint/magnificat-antiphon",
+		},
+		{
+			name: "Greater Antiphon outranks feast common",
+			celebration: &models.Feast{
+				ID:       "common-only-saint",
+				Category: models.CategoryMartyr,
+			},
+			wantText: "O Adonai",
+			wantRef:  "seasonal/advent/magnificat-antiphon-december-18",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{
+				Date:        time.Date(2026, 12, 18, 0, 0, 0, 0, time.UTC),
+				Season:      models.Advent,
+				Celebration: tt.celebration,
+			}
+			got, ref := resolveProperText(day, "vespers", "magnificat-antiphon", corpus)
+			if got != tt.wantText || ref != tt.wantRef {
+				t.Fatalf("antiphon = %q (%s), want %q (%s)", got, ref, tt.wantText, tt.wantRef)
+			}
+		})
+	}
+}
+
 func TestResolveProperTextUsesProperIDAlias(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/pentecost-sunday-23/collect": "XXIII Pentecost collect",
