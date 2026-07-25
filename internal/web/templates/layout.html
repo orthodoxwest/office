@@ -37,7 +37,10 @@
       {{- $p := .Page}}
       {{/* data-nav-* lets app.js re-stamp dates on load so cached chrome hits SW keys. */}}
       <a class="site-brand{{if eq $p "home"}} active{{end}}" href="{{navLink "/" $t $d}}" data-nav="home"{{if eq $p "home"}} aria-current="page"{{end}}><span aria-hidden="true">✠</span> Daily Office</a>
-      <details class="site-menu" open>
+      {{/* Closed by default: desktop CSS shows .site-menu > nav regardless of
+           [open], and the native <details>/<summary> toggle lets no-JS mobile
+           visitors expand it with a tap — no script needed either way. */}}
+      <details class="site-menu">
         <summary>Menu</summary>
         <nav aria-label="Primary">
           <a href="{{navLink "/lauds" $t $d}}" data-nav="hour" data-hour="lauds"{{if eq $p "lauds"}} class="active" aria-current="page"{{end}}>Lauds</a>
@@ -52,20 +55,6 @@
           <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}" data-nav="reminders"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
         </nav>
       </details>
-      {{/* Ships open so no-JS visitors keep full navigation. Collapse it here,
-           inline and un-deferred, before app.js (loaded with defer) gets a
-           chance to run, so it never paints open first — a flash otherwise
-           especially visible on a PWA cold launch. Unconditional: on wide
-           screens CSS shows .site-menu > nav regardless of [open], so closing
-           it here is a no-op there; app.js's resize listener re-opens it for
-           wide viewports and keeps both in sync afterward. */}}
-      <script>
-        (function () {
-          try {
-            document.currentScript.previousElementSibling.removeAttribute("open");
-          } catch (e) {}
-        })();
-      </script>
     </div>
   </header>
   <main id="main-content">
