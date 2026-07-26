@@ -28,7 +28,10 @@
   <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{static "app.js"}}" defer></script>
 </head>
-<body class="page-{{.Page}}">
+{{/* SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
+     render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
+     that do not stand on a single day. */}}
+<body class="page-{{.Page}}{{with .SeasonClass}} {{.}}{{end}}">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
     <div class="site-nav-shell">

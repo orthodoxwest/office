@@ -32,6 +32,7 @@ type HomeData struct {
 	NavDate        string
 	Theme          string
 	Page           string
+	SeasonClass    string
 	ShowBanner     bool
 }
 
@@ -64,6 +65,7 @@ type HourData struct {
 	ReportURL        string
 	Theme            string
 	Page             string
+	SeasonClass      string
 	ShowBanner       bool
 	Assurance        HourAssurance
 }
@@ -98,14 +100,18 @@ type AssuranceResolution struct {
 
 // CalendarData is the year calendar.
 type CalendarData struct {
-	Year       int
-	PrevYear   int
-	NextYear   int
-	Months     []MonthData
-	NavDate    string
-	Theme      string
-	Page       string
-	ShowBanner bool
+	Year     int
+	PrevYear int
+	NextYear int
+	Months   []MonthData
+	NavDate  string
+	Theme    string
+	Page     string
+	// SeasonClass is always empty here: a year of calendar spans every season
+	// at once, so the ornaments stay neutral gold. The field exists because the
+	// shared layout template reads it on every page.
+	SeasonClass string
+	ShowBanner  bool
 }
 
 // MonthData groups a month's day rows.
@@ -156,10 +162,10 @@ type CommemorationRow struct {
 
 // RemindersData is the reminder-subscription settings page.
 type RemindersData struct {
-	Hours                []ReminderHour
-	Days                 []ReminderDay
-	NavDate, Theme, Page string
-	ShowBanner           bool
+	Hours                             []ReminderHour
+	Days                              []ReminderDay
+	NavDate, Theme, Page, SeasonClass string
+	ShowBanner                        bool
 }
 
 // ReminderHour is one hour's row in the reminder schedule form.
@@ -175,18 +181,20 @@ type ReminderDay struct {
 
 // NotFoundData is the styled 404 page.
 type NotFoundData struct {
-	NavDate    string
-	Theme      string
-	Page       string
-	ShowBanner bool
+	NavDate     string
+	Theme       string
+	Page        string
+	SeasonClass string
+	ShowBanner  bool
 }
 
 // ErrorData is the styled error page for other 4xx/5xx conditions.
 type ErrorData struct {
-	Title      string
-	Message    string
-	NavDate    string
-	Theme      string
-	Page       string
-	ShowBanner bool
+	Title       string
+	Message     string
+	NavDate     string
+	Theme       string
+	Page        string
+	SeasonClass string
+	ShowBanner  bool
 }

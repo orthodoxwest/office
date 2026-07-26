@@ -34,6 +34,15 @@
   --accent: #6b3a1f;
   --gold: #9a7328;
   --gold-line: #c9ac72;
+  /* Ornament tokens: gold leaf by default, in both themes (the var() resolves
+     against whichever --gold won the cascade on :root). Only the gilding reads
+     these — drop caps, the double hairlines around the hour title, the ✦
+     diamonds, the ✠ cross, the scroll-progress hairline — so a season can
+     retint the ornaments without disturbing anything functional that also
+     happens to be gold: focus rings, disclosure markers, today's ordo row.
+     See "Seasonal ornament" at the foot of this file. */
+  --ornament: var(--gold);
+  --ornament-line: var(--gold-line);
   /* Darker than plaster alone would need. Muted text also sits on --surface
      and on the gold/oak washes (today's ordo row, the current hour chip),
      where the old value fell to 4.05–4.47:1 — under AA at the small sizes it
@@ -181,7 +190,7 @@ summary:focus-visible {
 }
 
 .site-brand span {
-  color: var(--gold);
+  color: var(--ornament);
   margin-right: 0.2rem;
 }
 
@@ -407,7 +416,7 @@ footer {
 footer::before {
   content: "\2726";
   display: block;
-  color: var(--gold-line);
+  color: var(--ornament-line);
   font-size: 0.8rem;
   line-height: 1;
   margin-bottom: 0.85rem;
@@ -659,7 +668,7 @@ footer::before {
   display: block;
   height: 100%;
   width: 100%;
-  background: var(--gold);
+  background: var(--ornament);
   transform: scaleX(0);
   transform-origin: left center;
   will-change: transform;
@@ -860,8 +869,8 @@ footer::before {
   min-width: min(100%, 24rem);
   margin: 0 auto 0.25rem;
   padding: 0.15rem 1.3rem 0.2rem;
-  border-top: 3px double var(--gold-line);
-  border-bottom: 3px double var(--gold-line);
+  border-top: 3px double var(--ornament-line);
+  border-bottom: 3px double var(--ornament-line);
 }
 
 .hour-meta {
@@ -1085,7 +1094,7 @@ footer::before {
   content: "\2726";
   grid-column: 1 / -1;
   text-align: center;
-  color: var(--gold-line);
+  color: var(--ornament-line);
   font-size: 0.8rem;
   line-height: 1;
   margin-bottom: 0.5rem;
@@ -1165,7 +1174,7 @@ footer::before {
 }
 
 .cross {
-  color: var(--gold);
+  color: var(--ornament);
 }
 
 .elements > :is(.psalm, .canticle, .hymn, .chapter, .preces, .marian-antiphon, .liturgical-block) {
@@ -1312,7 +1321,7 @@ footer::before {
   line-height: 1;
   float: left;
   margin: 0.05em 0.1em -0.1em 0;
-  color: var(--gold);
+  color: var(--ornament);
 }
 
 /* Drop cap on chapter and hymn opening text (same metrics as the psalm cap) */
@@ -1322,7 +1331,7 @@ footer::before {
   line-height: 1;
   float: left;
   margin: 0.05em 0.1em -0.1em 0;
-  color: var(--gold);
+  color: var(--ornament);
 }
 
 /* On a one-line chapter reading the two-line drop cap still reserves a second
@@ -2261,6 +2270,60 @@ footer::before {
 :root[data-theme="dark"] .theme-option[aria-pressed="true"] {
   background: rgba(208, 176, 106, 0.14);
   color: var(--accent);
+}
+
+/* ── Seasonal ornament ──
+   The gilding keeps the season with the church it belongs to.
+
+   Passiontide (Passion Sunday through Holy Saturday): the church veils its
+   images, and so does the page — the ornaments go from gold to a muted
+   violet-gray. Paschaltide (Easter Sunday through the eve of Pentecost): the
+   gold runs a shade warmer and more luminous, as gold leaf does in the light.
+
+   Only --ornament / --ornament-line move. The liturgical color band still
+   carries the day's color untouched, and every functional use of gold — focus
+   rings, disclosure markers, today's ordo row, the Pray-now button — reads
+   --gold directly and is unaffected.
+
+   The season class is stamped on <body> server-side per date
+   (render.SeasonClass), so it varies per URL and stays service-worker safe.
+
+   Contrast, worst case (small text-adjacent use is the ✠ cross glyph):
+   nave    veiled  #756a7e on #faf2ec = 4.6:1  (gold baseline 3.9:1)
+   nave    paschal #a4731a on #faf2ec = 3.8:1  (same lightness as gold, more chroma)
+   apse    veiled  #b0a4c2 on #121c28 = 7.3:1  (gold baseline 9.3:1)
+   apse    paschal #e6cf8c on #121c28 = 11.2:1 */
+
+body.season-passiontide {
+  --ornament: #756a7e;
+  --ornament-line: #b5aabd;
+}
+
+body.season-eastertide {
+  --ornament: #a4731a;
+  --ornament-line: #d0b06c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.season-passiontide {
+    --ornament: #b0a4c2;
+    --ornament-line: #565070;
+  }
+
+  :root:not([data-theme="light"]) body.season-eastertide {
+    --ornament: #e6cf8c;
+    --ornament-line: #7a6a44;
+  }
+}
+
+:root[data-theme="dark"] body.season-passiontide {
+  --ornament: #b0a4c2;
+  --ornament-line: #565070;
+}
+
+:root[data-theme="dark"] body.season-eastertide {
+  --ornament: #e6cf8c;
+  --ornament-line: #7a6a44;
 }
 
 /* ── Narrow screens ── */
