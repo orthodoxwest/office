@@ -277,7 +277,8 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 	}
 
 	// Construction banner must stay unpersisted (feedback window). Appearance
-	// may use localStorage (office-theme); only ban banner-specific keys here.
+	// may use localStorage (office-theme, office-text-size); only ban
+	// banner-specific keys here.
 	for _, unwanted := range []string{
 		`siteBannerDismissed`,
 		`banner-dismiss`,
@@ -295,6 +296,24 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("app script is missing theme control support %q", want)
 		}
+	}
+	// Text size follows the same client-side-only contract.
+	for _, want := range []string{
+		`office-text-size`,
+		`data-text-size-choice`,
+		`data-text-size`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("app script is missing text size control support %q", want)
+		}
+	}
+	// Passive load must not invent a stored choice: the only setItem for the
+	// text size key belongs to writeStoredTextSize, called from the click path.
+	if strings.Count(body, "localStorage.setItem(TEXT_SIZE_KEY") != 1 {
+		t.Errorf("text size should be persisted from exactly one place (explicit click)")
+	}
+	if !strings.Contains(body, "paintTextSizeChoice(effectiveTextSizeChoice())") {
+		t.Errorf("text size load path should paint without persisting")
 	}
 }
 
