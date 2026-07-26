@@ -56,6 +56,58 @@ test("appearance choice persists across prayer navigation", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
 });
 
+test("text size choice persists across prayer navigation", async ({ page }) => {
+  await page.goto(`/?date=${testDate}`);
+
+  // A passive visit must not invent a stored preference.
+  expect(await page.evaluate(() => localStorage.getItem("office-text-size"))).toBeNull();
+  await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
+
+  await page.getByRole("button", { name: "Larger text", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+
+  await page.goto(`/lauds/${testDate}`);
+  await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
+  await expect(page.getByRole("button", { name: "Larger text", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+
+test("larger text grows the prayer without breaking the phone layout", async ({ page }) => {
+  await openDatedPage(page, `/lauds/${testDate}`);
+
+  const prayerSize = () =>
+    page.evaluate(() =>
+      parseFloat(getComputedStyle(document.querySelector(".elements") || document.body).fontSize),
+    );
+  const overflows = () =>
+    page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+
+  const base = await prayerSize();
+  expect(await overflows()).toBe(false);
+
+  await page.getByRole("button", { name: "Larger text", exact: true }).click();
+  expect(await prayerSize()).toBeGreaterThan(base);
+  expect(await overflows()).toBe(false);
+
+  // Every footer control keeps a thumb-sized target at the largest setting.
+  const heights = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".text-size-option, .theme-option")).map(
+      (el) => el.getBoundingClientRect().height,
+    ),
+  );
+  expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+
+  await page.getByRole("button", { name: "Smaller text", exact: true }).click();
+  expect(await prayerSize()).toBeLessThan(base);
+  expect(await overflows()).toBe(false);
+
+  await page.getByRole("button", { name: "Default text size", exact: true }).click();
+  expect(await prayerSize()).toBeCloseTo(base, 1);
+  await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 

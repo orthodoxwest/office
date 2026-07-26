@@ -79,10 +79,32 @@ input {
   border: 0;
 }
 
+/* Reader text size (footer control, localStorage key office-text-size).
+   Scaled at the root rather than on body: nearly every font-size, gap, and
+   touch target in this sheet is rem-based, so only a root change moves the
+   whole composition together — prayer text, hour chips, nav, and footer keep
+   their designed proportions instead of the body text growing away from its
+   chrome. Breakpoints stay in px, so a phone never changes layout mode
+   because someone chose Larger. */
+html {
+  font-size: 100%;
+}
+
+html[data-text-size="small"] {
+  font-size: 93%;
+}
+
+html[data-text-size="large"] {
+  font-size: 110%;
+}
+
 body {
   font-family: "EB Garamond", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
-  font-size: 19px;
+  /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
+     browser font-size preference reaches the prayer text too, exactly as it
+     already reaches every rem-sized heading around it. */
+  font-size: 1.1875rem;
   line-height: 1.6;
   text-rendering: optimizeLegibility;
   color: var(--text);
@@ -246,8 +268,11 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Default / Nave / Apse — quiet footer preference control (all pages). */
-footer .theme-switch {
+/* Quiet footer preference controls (all pages): Default / Nave / Apse above,
+   Smaller / Default / Larger text below. Same hairline group, same weight —
+   neither should read louder than the other. */
+footer .theme-switch,
+footer .text-size-switch {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
@@ -257,7 +282,13 @@ footer .theme-switch {
   margin: 0.85rem auto 0;
 }
 
-.theme-option {
+/* Sits directly under its sibling: one preference cluster, not two bands. */
+footer .text-size-switch {
+  margin-top: 0.5rem;
+}
+
+.theme-option,
+.text-size-option {
   appearance: none;
   border: none;
   border-right: 1px solid var(--border);
@@ -272,36 +303,71 @@ footer .theme-switch {
   line-height: 1.2;
 }
 
-.theme-option:last-child {
+/* Glyph options, not words: no tracking, and the button centres a single A. */
+.text-size-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 0.35rem 0.8rem;
+  line-height: 1;
+}
+
+/* The size ladder is the label — em-relative so it holds at any root scale. */
+.text-size-option[data-text-size-choice="small"] .text-size-glyph {
+  font-size: 0.72em;
+}
+
+.text-size-option[data-text-size-choice="default"] .text-size-glyph {
+  font-size: 0.95em;
+}
+
+.text-size-option[data-text-size-choice="large"] .text-size-glyph {
+  font-size: 1.3em;
+}
+
+.theme-option:last-child,
+.text-size-option:last-child {
   border-right: none;
 }
 
-.theme-option:hover {
+.theme-option:hover,
+.text-size-option:hover {
   color: var(--accent);
 }
 
-.theme-option[aria-pressed="true"] {
+.theme-option[aria-pressed="true"],
+.text-size-option[aria-pressed="true"] {
   background: rgba(107, 58, 31, 0.1);
   color: var(--accent);
 }
 
-.theme-option:focus-visible {
+.theme-option:focus-visible,
+.text-size-option:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
   z-index: 1;
 }
 
 @media (max-width: 700px) {
-  footer .theme-switch {
+  footer .theme-switch,
+  footer .text-size-switch {
     width: min(18rem, 100%);
   }
 
   /* Match site menu / hour-chip touch floor (~44px). */
-  .theme-option {
+  .theme-option,
+  .text-size-option {
     flex: 1 1 0;
     min-height: 2.75rem;
     font-size: 0.75rem;
     padding: 0.5rem 0.35rem;
+  }
+
+  .text-size-option {
+    font-size: 1rem;
   }
 }
 
@@ -2252,13 +2318,15 @@ footer::before {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .theme-option[aria-pressed="true"] {
+  :root:not([data-theme="light"]) .theme-option[aria-pressed="true"],
+  :root:not([data-theme="light"]) .text-size-option[aria-pressed="true"] {
     background: rgba(208, 176, 106, 0.14);
     color: var(--accent);
   }
 }
 
-:root[data-theme="dark"] .theme-option[aria-pressed="true"] {
+:root[data-theme="dark"] .theme-option[aria-pressed="true"],
+:root[data-theme="dark"] .text-size-option[aria-pressed="true"] {
   background: rgba(208, 176, 106, 0.14);
   color: var(--accent);
 }
@@ -2267,7 +2335,9 @@ footer::before {
 
 @media (max-width: 540px) {
   body {
-    font-size: 20px;
+    /* 1.25rem = the historical 20px at a 16px root; see the html rules above —
+       both breakpoints scale from the same root factor. */
+    font-size: 1.25rem;
     padding-left: max(1rem, env(safe-area-inset-left));
     padding-right: max(1rem, env(safe-area-inset-right));
   }
@@ -2339,6 +2409,14 @@ footer::before {
 @media print {
   header, footer, .day-nav, .hour-date-nav, .year-nav, .report-issue, .color-band, .hour-scroll-progress {
     display: none;
+  }
+
+  /* Paper has its own measure: print from the designed root, not the reader's
+     on-screen size choice. */
+  html,
+  html[data-text-size="small"],
+  html[data-text-size="large"] {
+    font-size: 100%;
   }
 
   /* Gold reads as pale gray on B&W printers — darken decorative elements */

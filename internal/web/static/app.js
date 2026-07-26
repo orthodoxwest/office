@@ -99,6 +99,70 @@ document.documentElement.classList.add("js");
     });
   });
 
+  // Text size: Smaller / Default / Larger. Same contract as the theme control —
+  // localStorage only (no URL params, no server), a matching pre-paint script in
+  // layout.html, and storage written only on an explicit click.
+  var TEXT_SIZE_KEY = "office-text-size";
+
+  var readStoredTextSize = function () {
+    try {
+      return localStorage.getItem(TEXT_SIZE_KEY);
+    } catch {
+      return null;
+    }
+  };
+
+  var writeStoredTextSize = function (value) {
+    try {
+      localStorage.setItem(TEXT_SIZE_KEY, value);
+    } catch {
+      // Private mode / blocked storage — the size still applies for this page.
+    }
+  };
+
+  var normalizeTextSizeChoice = function (value) {
+    if (value === "small" || value === "large" || value === "default") {
+      return value;
+    }
+    return null;
+  };
+
+  var effectiveTextSizeChoice = function () {
+    return normalizeTextSizeChoice(readStoredTextSize()) || "default";
+  };
+
+  // Paint the DOM for a choice without writing localStorage.
+  var paintTextSizeChoice = function (choice) {
+    choice = normalizeTextSizeChoice(choice) || "default";
+    if (choice === "small" || choice === "large") {
+      document.documentElement.setAttribute("data-text-size", choice);
+    } else {
+      document.documentElement.removeAttribute("data-text-size");
+    }
+    document.querySelectorAll(".text-size-option[data-text-size-choice]").forEach(function (btn) {
+      var on = btn.getAttribute("data-text-size-choice") === choice;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  };
+
+  // User action: paint + persist.
+  var applyTextSizeChoice = function (choice) {
+    choice = normalizeTextSizeChoice(choice) || "default";
+    paintTextSizeChoice(choice);
+    writeStoredTextSize(choice);
+  };
+
+  paintTextSizeChoice(effectiveTextSizeChoice());
+
+  document.querySelectorAll(".text-size-option[data-text-size-choice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var choice = normalizeTextSizeChoice(btn.getAttribute("data-text-size-choice"));
+      if (choice) {
+        applyTextSizeChoice(choice);
+      }
+    });
+  });
+
   var banner = document.getElementById("site-banner");
   if (banner) {
     var dismissButton = banner.querySelector("[data-dismiss-banner]");

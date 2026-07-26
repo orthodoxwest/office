@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
-  {{/* Apply stored appearance before CSS to avoid a flash. Key: office-theme. */}}
+  {{/* Apply stored appearance before CSS to avoid a flash.
+       Keys: office-theme, office-text-size. */}}
   <script>
     (function () {
       try {
@@ -14,6 +15,12 @@
           document.documentElement.setAttribute("data-theme", t);
         } else if (t === "default") {
           document.documentElement.removeAttribute("data-theme");
+        }
+        var s = localStorage.getItem("office-text-size");
+        if (s === "small" || s === "large") {
+          document.documentElement.setAttribute("data-text-size", s);
+        } else if (s === "default") {
+          document.documentElement.removeAttribute("data-text-size");
         }
       } catch (e) {}
     })();
@@ -67,6 +74,13 @@
       <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
       <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
       <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
+    </div>
+    {{/* Text size: sibling of the appearance control, same quiet language.
+         Glyphs carry the meaning visually; aria-label/title carry the words. */}}
+    <div class="text-size-switch" role="group" aria-label="Text size">
+      <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
     </div>
   </footer>
   {{if .ShowBanner}}<div class="site-banner" id="site-banner">
