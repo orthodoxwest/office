@@ -1,0 +1,262 @@
+# Latin incipits for the psalter and the canticles.
+#
+# Printed diurnals label each psalm with its Latin incipit as well as its
+# number ("Psalm 67 · Deus misereatur"), and the parish prints them on its
+# Lauds and Vespers handouts. This file supplies that subtitle; the office
+# engine attaches it to the composed psalm or canticle element and every
+# renderer shows it beside the label.
+#
+# Format:  <corpus-key> = <incipit>
+#
+# The key is a psalms/ or canticles/ corpus key. Every such entry must have a
+# line here; `office validate` fails if one is missing or names a key that is
+# not in the corpus.
+#
+# This file records a property of a text rather than being one, so — like
+# data/collect-conclusions.txt — it lives outside data/texts/. That keeps the
+# incipits out of the rendered-entry, provenance and zero-occurrence sweeps,
+# and keeps 189 Latin labels from being flagged by the corpus Latin lint.
+#
+# NUMBERING
+#
+# The psalter is Coverdale (Book of Common Prayer), which uses HEBREW psalm
+# numbering. The Latin tradition — and Divinum Officium — uses VULGATE
+# (Septuagint) numbering, which runs one behind through most of the psalter
+# and divides several psalms differently. The incipit on each line below is
+# the incipit of the SAME psalm as the key, expressed in Latin; it is NOT the
+# incipit of the Vulgate psalm that happens to share the number. So
+# "psalms/067 = Deus misereatur nostri" pairs our Psalm 67 (Coverdale "God be
+# merciful unto us") with Vulgate 66, which is the same psalm. The joins and
+# splits were mapped individually:
+#
+#   Coverdale 1-8     = Vulgate 1-8
+#   Coverdale 9       = Vulgate 9:2-21     (Vulgate 9 carries a title verse)
+#   Coverdale 10      = Vulgate 9:22-39
+#   Coverdale 11-113  = Vulgate 10-112
+#   Coverdale 114     = Vulgate 113:1-8
+#   Coverdale 115     = Vulgate 113:9-26
+#   Coverdale 116     = Vulgate 114 + 115
+#   Coverdale 117-146 = Vulgate 116-145
+#   Coverdale 147     = Vulgate 146 + 147
+#   Coverdale 148-150 = Vulgate 148-150
+#
+# Within a psalm, Coverdale verse n is Vulgate verse n plus the psalm's title
+# verses (one for most psalms, two for Coverdale 51 = Vulgate 50). Our split
+# psalms (009a/009b, 018a/018b, 119-i…119-xxii, 148a/148b, and the rest) take
+# the incipit of the Latin verse that opens THAT part, not of the whole psalm.
+#
+# SOURCE: divinum-officium web/www/horas/Latin/Psalterium/Psalmorum — check
+# against diurnal. Each incipit is the opening words of the Latin verse that
+# begins the entry, mapped as above; the number of words kept is an editorial
+# choice, trimmed to the conventional length and lengthened where two psalms
+# would otherwise carry the same subtitle (Ad te, In te, Miserere mei, Dominus
+# regnavit). Incipits that are genuinely identical in Latin are left identical
+# (Psalms 6 and 38, 14 and 53, 96/98/149, 103 and 104, 107/118/136).
+# Accents are dropped, since these are labels rather than pointed chant text;
+# the Æ/æ and diaeresis spellings of the source are kept.
+#
+# Canticle incipits come from the same Divinum Officium psalter directory
+# (Psalm210 Benedicite, Psalm216 Sirach, Psalm221-226 the ferial Old-Testament
+# canticles, Psalm231-233 Benedictus/Magnificat/Nunc dimittis).
+
+canticles/benedicite     = Benedicite, omnia opera Domini
+canticles/benedictus     = Benedictus Dominus, Deus Israël
+canticles/deuteronomy-32 = Audite, cæli, quæ loquor
+canticles/exodus-15      = Cantemus Domino
+canticles/habakkuk-3     = Domine, audivi auditionem tuam
+canticles/hannah         = Exsultavit cor meum in Domino
+canticles/isaiah-12      = Confitebor tibi, Domine
+canticles/isaiah-38      = Ego dixi: In dimidio dierum meorum
+canticles/magnificat     = Magnificat anima mea Dominum
+canticles/nunc-dimittis  = Nunc dimittis servum tuum
+canticles/sirach-36      = Miserere nostri, Deus omnium
+
+psalms/001       = Beatus vir, qui non abiit
+psalms/002       = Quare fremuerunt gentes
+psalms/003       = Domine, quid multiplicati sunt
+psalms/004       = Cum invocarem exaudivit me
+psalms/005       = Verba mea auribus percipe
+psalms/006       = Domine, ne in furore
+psalms/007       = Domine, Deus meus
+psalms/008       = Domine, Dominus noster
+psalms/009       = Confitebor tibi, Domine
+psalms/009a      = Confitebor tibi, Domine
+psalms/009b      = Exsurge, Domine
+psalms/010       = Ut quid, Domine, recessisti
+psalms/011       = In Domino confido
+psalms/012       = Salvum me fac, Domine
+psalms/013       = Usquequo, Domine
+psalms/014       = Dixit insipiens in corde
+psalms/015       = Domine, quis habitabit
+psalms/016       = Conserva me, Domine
+psalms/017       = Exaudi, Domine, justitiam meam
+psalms/018       = Diligam te, Domine
+psalms/018a      = Diligam te, Domine
+psalms/018b      = Cum sancto sanctus eris
+psalms/019       = Cæli enarrant gloriam Dei
+psalms/020       = Exaudiat te Dominus
+psalms/021       = Domine, in virtute tua
+psalms/022       = Deus, Deus meus, respice
+psalms/023       = Dominus regit me
+psalms/024       = Domini est terra
+psalms/025       = Ad te, Domine, levavi
+psalms/026       = Judica me, Domine
+psalms/027       = Dominus illuminatio mea
+psalms/028       = Ad te, Domine, clamabo
+psalms/029       = Afferte Domino, filii Dei
+psalms/030       = Exaltabo te, Domine
+psalms/031       = In te, Domine, speravi
+psalms/032       = Beati quorum remissæ sunt
+psalms/033       = Exsultate, justi, in Domino
+psalms/034       = Benedicam Dominum in omni tempore
+psalms/035       = Judica, Domine, nocentes me
+psalms/036       = Dixit injustus ut delinquat
+psalms/037       = Noli æmulari in malignantibus
+psalms/038       = Domine, ne in furore
+psalms/039       = Dixi: Custodiam vias meas
+psalms/040       = Exspectans exspectavi Dominum
+psalms/041       = Beatus qui intellegit
+psalms/042       = Quemadmodum desiderat cervus
+psalms/043       = Judica me, Deus
+psalms/044       = Deus auribus nostris audivimus
+psalms/045       = Eructavit cor meum verbum
+psalms/046       = Deus noster refugium
+psalms/047       = Omnes gentes, plaudite manibus
+psalms/048       = Magnus Dominus, et laudabilis
+psalms/049       = Audite hæc, omnes gentes
+psalms/050       = Deus deorum, Dominus locutus est
+psalms/051       = Miserere mei, Deus
+psalms/052       = Quid gloriaris in malitia
+psalms/053       = Dixit insipiens in corde
+psalms/054       = Deus, in nomine tuo
+psalms/055       = Exaudi, Deus, orationem meam
+psalms/056       = Miserere mei, Deus, quoniam conculcavit
+psalms/057       = Miserere mei, Deus, miserere mei
+psalms/058       = Si vere utique justitiam
+psalms/059       = Eripe me de inimicis
+psalms/060       = Deus, repulisti nos
+psalms/061       = Exaudi, Deus, deprecationem meam
+psalms/062       = Nonne Deo subjecta erit
+psalms/063       = Deus, Deus meus, ad te
+psalms/064       = Exaudi, Deus, orationem meam
+psalms/065       = Te decet hymnus
+psalms/066       = Jubilate Deo, omnis terra
+psalms/067       = Deus misereatur nostri
+psalms/068       = Exsurgat Deus
+psalms/069       = Salvum me fac, Deus
+psalms/070       = Deus, in adjutorium meum
+psalms/071       = In te, Domine, speravi
+psalms/072       = Deus, judicium tuum regi
+psalms/073       = Quam bonus Israël Deus
+psalms/074       = Ut quid, Deus, repulisti
+psalms/075       = Confitebimur tibi, Deus
+psalms/076       = Notus in Judæa Deus
+psalms/077       = Voce mea ad Dominum
+psalms/078       = Attendite, popule meus
+psalms/079       = Deus, venerunt gentes
+psalms/080       = Qui regis Israël
+psalms/081       = Exsultate Deo, adjutori nostro
+psalms/082       = Deus stetit in synagoga
+psalms/083       = Deus, quis similis erit
+psalms/084       = Quam dilecta tabernacula tua
+psalms/085       = Benedixisti, Domine, terram tuam
+psalms/086       = Inclina, Domine, aurem tuam
+psalms/087       = Fundamenta ejus in montibus
+psalms/088       = Domine, Deus salutis meæ
+psalms/089       = Misericordias Domini in æternum
+psalms/090       = Domine, refugium factus es
+psalms/091       = Qui habitat in adjutorio
+psalms/092       = Bonum est confiteri Domino
+psalms/093       = Dominus regnavit, decorem indutus est
+psalms/094       = Deus ultionum Dominus
+psalms/095       = Venite, exsultemus Domino
+psalms/096       = Cantate Domino canticum novum
+psalms/097       = Dominus regnavit, exsultet terra
+psalms/098       = Cantate Domino canticum novum
+psalms/099       = Dominus regnavit, irascantur populi
+psalms/100       = Jubilate Deo, omnis terra
+psalms/101       = Misericordiam, et judicium cantabo
+psalms/102       = Domine, exaudi orationem meam
+psalms/103       = Benedic, anima mea, Domino
+psalms/104       = Benedic, anima mea, Domino
+psalms/105       = Confitemini Domino, et invocate
+psalms/106       = Confitemini Domino, quoniam bonus
+psalms/107       = Confitemini Domino quoniam bonus
+psalms/108       = Paratum cor meum
+psalms/109       = Deus, laudem meam
+psalms/110       = Dixit Dominus Domino meo
+psalms/111       = Confitebor tibi, Domine
+psalms/112       = Beatus vir, qui timet Dominum
+psalms/113       = Laudate, pueri, Dominum
+psalms/114       = In exitu Israël
+psalms/115       = Non nobis, Domine
+psalms/116       = Dilexi, quoniam exaudiet Dominus
+psalms/116b      = Credidi, propter quod locutus sum
+psalms/117       = Laudate Dominum, omnes gentes
+psalms/118       = Confitemini Domino quoniam bonus
+psalms/119-i     = Beati immaculati in via
+psalms/119-ii    = In quo corrigit adolescentior
+psalms/119-iii   = Retribue servo tuo
+psalms/119-iv    = Adhæsit pavimento anima mea
+psalms/119-ix    = Bonitatem fecisti cum servo
+psalms/119-v     = Legem pone mihi
+psalms/119-vi    = Et veniat super me
+psalms/119-vii   = Memor esto verbi tui
+psalms/119-viii  = Portio mea, Domine
+psalms/119-x     = Manus tuæ fecerunt me
+psalms/119-xi    = Defecit in salutare tuum
+psalms/119-xii   = In æternum, Domine
+psalms/119-xiii  = Quomodo dilexi legem tuam
+psalms/119-xiv   = Lucerna pedibus meis verbum
+psalms/119-xix   = Clamavi in toto corde
+psalms/119-xv    = Iniquos odio habui
+psalms/119-xvi   = Feci judicium et justitiam
+psalms/119-xvii  = Mirabilia testimonia tua
+psalms/119-xviii = Justus es, Domine
+psalms/119-xx    = Vide humilitatem meam
+psalms/119-xxi   = Principes persecuti sunt me
+psalms/119-xxii  = Appropinquet deprecatio mea
+psalms/119       = Beati immaculati in via
+psalms/120       = Ad Dominum cum tribularer
+psalms/121       = Levavi oculos meos
+psalms/122       = Lætatus sum in his
+psalms/123       = Ad te levavi oculos
+psalms/124       = Nisi quia Dominus erat
+psalms/125       = Qui confidunt in Domino
+psalms/126       = In convertendo Dominus captivitatem
+psalms/127       = Nisi Dominus ædificaverit domum
+psalms/128       = Beati, omnes, qui timent Dominum
+psalms/129       = Sæpe expugnaverunt me
+psalms/130       = De profundis clamavi
+psalms/131       = Domine, non est exaltatum
+psalms/132       = Memento, Domine, David
+psalms/133       = Ecce quam bonum
+psalms/134       = Ecce nunc benedicite Dominum
+psalms/135       = Laudate nomen Domini
+psalms/136       = Confitemini Domino quoniam bonus
+psalms/137       = Super flumina Babylonis
+psalms/138       = Confitebor tibi, Domine
+psalms/139       = Domine, probasti me
+psalms/139a      = Domine, probasti me
+psalms/139b      = Quia tenebræ non obscurabuntur
+psalms/140       = Eripe me, Domine
+psalms/141       = Domine, clamavi ad te
+psalms/142       = Voce mea ad Dominum
+psalms/143       = Domine, exaudi orationem meam
+psalms/143a      = Domine, exaudi orationem meam
+psalms/143b      = Auditam fac mihi mane
+psalms/144       = Benedictus Dominus, Deus meus
+psalms/144a      = Benedictus Dominus, Deus meus
+psalms/144b      = Deus, canticum novum cantabo
+psalms/145       = Exaltabo te, Deus meus
+psalms/145a      = Exaltabo te, Deus meus
+psalms/145b      = Confiteantur tibi, Domine
+psalms/146       = Lauda, anima mea, Dominum
+psalms/147       = Laudate Dominum quoniam bonus
+psalms/147a      = Laudate Dominum quoniam bonus
+psalms/147b      = Lauda, Jerusalem, Dominum
+psalms/148       = Laudate Dominum de cælis
+psalms/148a      = Laudate Dominum de cælis
+psalms/148b      = Laudate Dominum de terra
+psalms/149       = Cantate Domino canticum novum
+psalms/150       = Laudate Dominum in sanctis

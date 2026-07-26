@@ -21,6 +21,14 @@ type TextCorpus struct {
 	// rather than being one — keeping it out of texts also keeps it out of the
 	// rendered-entry and zero-occurrence sweeps.
 	collectConclusions map[string]string
+
+	// incipits maps a psalm or canticle corpus key to its Latin incipit, the
+	// subtitle a printed diurnal sets beside the psalm number. Loaded from
+	// data/latin-incipits.txt for the same reason as collectConclusions: it
+	// describes a text without being one, so it stays out of the corpus
+	// sweeps — and out of the Latin lint, which would otherwise flag every
+	// entry.
+	incipits map[string]string
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -37,6 +45,7 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 		texts:              make(map[string]string),
 		aliases:            make(map[string]string),
 		collectConclusions: make(map[string]string),
+		incipits:           make(map[string]string),
 	}
 
 	err := filepath.Walk(textsDir, func(path string, info os.FileInfo, err error) error {
@@ -78,6 +87,9 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 		return nil, err
 	}
 	if err := corpus.loadCollectConclusions(dataDir); err != nil {
+		return nil, err
+	}
+	if err := corpus.loadIncipits(dataDir); err != nil {
 		return nil, err
 	}
 
@@ -130,6 +142,90 @@ func (c *TextCorpus) loadCollectConclusions(dataDir string) error {
 	return nil
 }
 
+// IncipitPrefixes are the corpus-key prefixes whose entries carry a Latin
+// incipit. Everything under them must appear in data/latin-incipits.txt.
+var IncipitPrefixes = []string{"psalms/", "canticles/"}
+
+// loadIncipits reads data/latin-incipits.txt, whose lines pair a psalm or
+// canticle corpus key with the Latin incipit printed beside its label. A
+// missing file is not an error: no psalm then carries a subtitle. A malformed
+// line, an unknown key, a duplicate key, or a key outside IncipitPrefixes is
+// an error — an incipit attached to the wrong psalm is exactly the defect the
+// Hebrew/Vulgate numbering split invites, so it must not pass silently.
+func (c *TextCorpus) loadIncipits(dataDir string) error {
+	path := filepath.Join(dataDir, "latin-incipits.txt")
+	content, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("reading %s: %w", path, err)
+	}
+	for i, line := range strings.Split(string(content), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		rawKey, rawIncipit, found := strings.Cut(trimmed, "=")
+		if !found {
+			return fmt.Errorf("%s:%d: expected \"<corpus-key> = <incipit>\", got %q", path, i+1, trimmed)
+		}
+		key, incipit := strings.TrimSpace(rawKey), strings.TrimSpace(rawIncipit)
+		if incipit == "" {
+			return fmt.Errorf("%s:%d: %q has an empty incipit", path, i+1, key)
+		}
+		if !hasAnyPrefix(key, IncipitPrefixes) {
+			return fmt.Errorf("%s:%d: %q is not a psalm or canticle key", path, i+1, key)
+		}
+		if c.Get(key) == "" {
+			return fmt.Errorf("%s:%d: %q is not in the corpus", path, i+1, key)
+		}
+		if prior, dup := c.incipits[key]; dup {
+			return fmt.Errorf("%s:%d: %q listed twice (%q then %q)", path, i+1, key, prior, incipit)
+		}
+		c.incipits[key] = incipit
+	}
+	return nil
+}
+
+// hasAnyPrefix reports whether key starts with one of the given prefixes.
+func hasAnyPrefix(key string, prefixes []string) bool {
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(key, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+// Incipit returns the Latin incipit recorded for a psalm or canticle corpus
+// key, resolving aliases, or the empty string when none is recorded.
+func (c *TextCorpus) Incipit(ref string) string {
+	if incipit, ok := c.incipits[ref]; ok {
+		return incipit
+	}
+	return c.incipits[c.CanonicalRef(ref)]
+}
+
+// SetIncipit records a Latin incipit, for use in tests. Both constructors
+// initialize the map, so there is no nil case to guard.
+func (c *TextCorpus) SetIncipit(key, incipit string) {
+	c.incipits[key] = incipit
+}
+
+// MissingIncipits returns the psalm and canticle corpus keys that have no
+// recorded incipit, sorted alphabetically.
+func (c *TextCorpus) MissingIncipits() []string {
+	var keys []string
+	for key := range c.texts {
+		if hasAnyPrefix(key, IncipitPrefixes) && c.incipits[key] == "" {
+			keys = append(keys, key)
+		}
+	}
+	sort.Strings(keys)
+	return keys
+}
+
 // CollectConclusionForm returns the conclusion form recorded for a collect's
 // corpus key, and whether one was recorded. Collects with no entry take the
 // default form.
@@ -167,6 +263,7 @@ func NewTestCorpus(texts map[string]string) *TextCorpus {
 		texts:              texts,
 		aliases:            make(map[string]string),
 		collectConclusions: make(map[string]string),
+		incipits:           make(map[string]string),
 	}
 }
 

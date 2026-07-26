@@ -48,6 +48,9 @@ func ValidateAll(dataDir string) []string {
 	for _, key := range corpus.FindPlaceholders() {
 		errs = append(errs, fmt.Sprintf("placeholder text remains in corpus: %s", key))
 	}
+	for _, key := range corpus.MissingIncipits() {
+		errs = append(errs, fmt.Sprintf("no Latin incipit in data/latin-incipits.txt for: %s", key))
+	}
 
 	sort.Strings(errs)
 	return errs
