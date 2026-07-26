@@ -388,7 +388,10 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		NavDate:        dateSlug,
 		Theme:          theme,
 		Page:           "home",
-		ShowBanner:     false,
+		// Ornament tint follows the day itself; `season` above is the
+		// display string and is blanked when the feast already names it.
+		SeasonClass: render.SeasonClass(day.Season),
+		ShowBanner:  false,
 	}
 	setHTMLCacheHeaders(w)
 	if err := s.pages.Home(w, data); err != nil {
@@ -468,8 +471,12 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		ReportURL:        reportURL(hour, hourName, dateStr),
 		Theme:            theme,
 		Page:             hourName,
-		ShowBanner:       s.showVettingBanner(hour),
-		Assurance:        s.hourAssurance(hour, hourName, dateStr),
+		// The hour's own season, not the day's: Vespers takes the season of
+		// the office that owns the evening, so I Vespers of Easter on Holy
+		// Saturday is unveiled while that day's Lauds is still veiled.
+		SeasonClass: render.SeasonClass(hour.Season),
+		ShowBanner:  s.showVettingBanner(hour),
+		Assurance:   s.hourAssurance(hour, hourName, dateStr),
 	}
 	setHTMLCacheHeaders(w)
 	if err := s.pages.Hour(w, data); err != nil {
