@@ -82,6 +82,11 @@ data/
   texts/                   Liturgical texts
   office/                  Hour structure definitions (one file per hour)
   audit-ok.txt             Feasts that intentionally use ordinary/common texts (suppress audit warnings)
+  latin-incipits.txt       Latin incipit printed beside each psalm/canticle label. Our psalter is
+                           Coverdale = HEBREW numbering; incipits come from the Vulgate, which runs
+                           one behind — the file header records the join/split mapping. Sits outside
+                           data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
+                           provenance, zero-occurrence and Latin-lint sweeps.
   review/signoffs.txt      Human review sign-offs with internal version binding (see REVIEWING.md)
   review/provenance.csv    Source/page attestations; citations only, never book contents
   review/prescreen.csv     Read-through suspicion flags bound to text versions (see REVIEWING.md)

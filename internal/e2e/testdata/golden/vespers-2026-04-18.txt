@@ -40,7 +40,7 @@ Alleluia
 
 Alleluia, * alleluia, alleluia.
 
---- Psalm 145b ---
+--- Psalm 145b · Confiteantur tibi, Domine ---
 Psalm 145:10-21
 
 ALL thy works praise thee, O Lord * and thy saints give thanks unto thee.
@@ -59,7 +59,7 @@ ALL thy works praise thee, O Lord * and thy saints give thanks unto thee.
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 146 ---
+--- Psalm 146 · Lauda, anima mea, Dominum ---
 Psalm 146
 
 PRAISE the Lord, O my soul; while I live will I praise the Lord * yea, as long as I have any being, I will sing praises unto my God.
@@ -76,7 +76,7 @@ PRAISE the Lord, O my soul; while I live will I praise the Lord * yea, as long a
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 147a ---
+--- Psalm 147a · Laudate Dominum quoniam bonus ---
 Psalm 147:1-11
 
 O PRAISE the Lord, for it is a good thing to sing praises unto our God * yea, a joyful and pleasant thing it is to be thankful.
@@ -94,7 +94,7 @@ O PRAISE the Lord, for it is a good thing to sing praises unto our God * yea, a 
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 147b ---
+--- Psalm 147b · Lauda, Jerusalem, Dominum ---
 Psalm 147:12-20
 
 PRAISE the Lord, O Jerusalem * praise thy God, O Sion.
@@ -170,7 +170,7 @@ R. For it is toward evening, alleluia.
 
 The same day * at evening, being the first day of the week, when the doors were shut where the disciples were assembled, came Jesus and stood in the midst, and saith unto them, Peace be unto you, alleluia.
 
---- Magnificat ---
+--- Magnificat · Magnificat anima mea Dominum ---
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.

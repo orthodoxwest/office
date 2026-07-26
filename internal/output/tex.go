@@ -87,6 +87,15 @@ func texPreamble(hour *models.OfficeHour) string {
   \bigskip\noindent{\small\scshape #1}\par\smallskip\noindent%
 }
 
+% Psalm/canticle label: the number in small caps, the Latin incipit in italic
+% beside it, as a printed diurnal sets them. #2 is empty when no incipit is
+% recorded, in which case the label stands alone.
+\newcommand{\psalmlabel}[2]{%
+  \noindent{\small\scshape #1}%
+  \if\relax\detokenize{#2}\relax\else{\small\itshape\enspace$\cdot$\enspace #2}\fi%
+  \par\smallskip%
+}
+
 % Psalm mediant marker
 \newcommand{\mediant}{\,{\small *}\,}
 
@@ -173,7 +182,8 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 
 	case models.Psalm, models.Canticle:
 		if elem.Label != "" {
-			fmt.Fprintf(&b, "\n{\\small\\itshape %s}\n\n", escapeTeX(elem.Label))
+			fmt.Fprintf(&b, "\n\\psalmlabel{%s}{%s}\n\n",
+				escapeTeX(elem.Label), escapeTeX(elem.Incipit))
 		}
 		b.WriteString(formatPsalmTeX(elem.Text, dataDir, elem.Label, elem.Type, chant))
 

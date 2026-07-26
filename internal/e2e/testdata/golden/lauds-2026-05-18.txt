@@ -38,7 +38,7 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.
 
 Alleluia
 
---- Psalm 67 ---
+--- Psalm 67 · Deus misereatur nostri ---
 Psalm 67
 
 GOD be merciful unto us, and bless us * and shew us the light of his countenance, and be merciful unto us:
@@ -54,7 +54,7 @@ As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
 Alleluia, * alleluia, alleluia.
 
---- Psalm 51 ---
+--- Psalm 51 · Miserere mei, Deus ---
 Psalm 51
 
 HAVE mercy upon me, O God, after thy great goodness * according to the multitude of thy mercies do away mine offences.
@@ -80,7 +80,7 @@ HAVE mercy upon me, O God, after thy great goodness * according to the multitude
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 5 ---
+--- Psalm 5 · Verba mea auribus percipe ---
 Psalm 5
 
 PONDER my words, O Lord * consider my meditation
@@ -100,7 +100,7 @@ PONDER my words, O Lord * consider my meditation
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 36 ---
+--- Psalm 36 · Dixit injustus ut delinquat ---
 Psalm 36
 
 MY HEART sheweth me the wickedness of the ungodly * that there is no fear of God before his eyes.
@@ -119,7 +119,7 @@ MY HEART sheweth me the wickedness of the ungodly * that there is no fear of God
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Isaiah 12 ---
+--- Isaiah 12 · Confitebor tibi, Domine ---
 !Isaiah 12:1-6
 
 I will praise thee, O Lord; although thou wast angry with me, * thine anger is turned away, and thou comfortedst me.
@@ -133,7 +133,7 @@ I will praise thee, O Lord; although thou wast angry with me, * thine anger is t
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 148 ---
+--- Psalm 148 · Laudate Dominum de cælis ---
 Psalm 148
 
 O PRAISE the Lord of heaven * praise him in the height.
@@ -150,7 +150,7 @@ O PRAISE the Lord of heaven * praise him in the height.
 12. Young men and maidens, old men and children, praise the Name of the Lord * for his Name only is excellent, and his praise above heaven and earth.
 13. He shall exalt the horn of his people; all his saints shall praise him * even the children of Israel, even the people that serveth him.
 
---- Psalm 149 ---
+--- Psalm 149 · Cantate Domino canticum novum ---
 Psalm 149
 
 O SING unto the Lord a new song * let the congregation of saints praise him.
@@ -163,7 +163,7 @@ O SING unto the Lord a new song * let the congregation of saints praise him.
 8. To bind their kings in chains * and their nobles with links of iron.
 9. That they may be avenged of them, as it is written * Such honour have all his saints.
 
---- Psalm 150 ---
+--- Psalm 150 · Laudate Dominum in sanctis ---
 Psalm 150
 
 O PRAISE God in his holiness * praise him in the firmament of his power.
@@ -226,7 +226,7 @@ R. Let heaven and earth rejoice, alleluia.
 
 Ask, and ye shall receive; * seek, and ye shall find; knock, and it shall be opened unto you. Alleluia.
 
---- Benedictus ---
+--- Benedictus · Benedictus Dominus, Deus Israël ---
 !Luke 1:68-79
 
 Blessed be the Lord God of Israel; * for he hath visited, and redeemed his people;

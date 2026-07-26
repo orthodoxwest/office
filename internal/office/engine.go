@@ -326,6 +326,9 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 		SourceRef:  elem.Ref,
 		SourceRefs: []string{elem.Ref},
 	}
+	if elemType == models.Psalm || elemType == models.Canticle {
+		oe.Incipit = corpus.Incipit(elem.Ref)
+	}
 	switch elem.Type {
 	case "secret-prayer":
 		oe.Voice = buildPrayerVoice(elem.Ref, text, false)

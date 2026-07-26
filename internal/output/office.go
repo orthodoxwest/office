@@ -24,7 +24,14 @@ func FormatOfficeHour(hour *models.OfficeHour) string {
 	for _, section := range hour.Sections {
 		for _, elem := range section.Elements {
 			if elem.Label != "" {
-				fmt.Fprintf(&b, "--- %s ---\n", elem.Label)
+				// The Latin incipit rides on the label line rather than taking
+				// a line of its own: this format is a flat stream of labelled
+				// blocks, and a second header line would read as an element.
+				label := elem.Label
+				if elem.Incipit != "" {
+					label += " · " + elem.Incipit
+				}
+				fmt.Fprintf(&b, "--- %s ---\n", label)
 			}
 			if elem.Text != "" {
 				b.WriteString(elem.Text)
