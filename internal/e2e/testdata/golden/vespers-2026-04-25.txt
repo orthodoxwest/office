@@ -40,7 +40,7 @@ Alleluia
 
 Alleluia, * alleluia, alleluia.
 
---- Psalm 110 ---
+--- Psalm 110 · Dixit Dominus Domino meo ---
 Psalm 110
 
 THE Lord said unto my Lord * Sit thou on my right hand, until I make thine enemies thy footstool.
@@ -54,7 +54,7 @@ THE Lord said unto my Lord * Sit thou on my right hand, until I make thine enemi
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 113 ---
+--- Psalm 113 · Laudate, pueri, Dominum ---
 Psalm 113
 
 PRAISE the Lord, ye servants * O praise the Name of the Lord.
@@ -69,7 +69,7 @@ PRAISE the Lord, ye servants * O praise the Name of the Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 116b ---
+--- Psalm 116b · Credidi, propter quod locutus sum ---
 Psalm 116:10-16
 
 I BELIEVED, and therefore will I speak; but I was sore troubled * I said in my haste, All men are liars.
@@ -83,7 +83,7 @@ I BELIEVED, and therefore will I speak; but I was sore troubled * I said in my h
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 139 ---
+--- Psalm 139 · Domine, probasti me ---
 Psalm 139
 
 O LORD, thou hast searched me out and known me * thou knowest my down-sitting and mine up-rising, thou understandest my thoughts long before.
@@ -163,7 +163,7 @@ R. For it is toward evening, alleluia.
 
 O ye holy and righteous, * rejoice in the Lord, alleluia: God hath chosen you to him to be his inheritance, alleluia.
 
---- Magnificat ---
+--- Magnificat · Magnificat anima mea Dominum ---
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.

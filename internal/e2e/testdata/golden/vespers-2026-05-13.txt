@@ -39,7 +39,7 @@ Alleluia
 
 Alleluia, * alleluia, alleluia.
 
---- Psalm 135 ---
+--- Psalm 135 · Laudate nomen Domini ---
 Psalm 135
 
 O PRAISE the Lord, laud ye the Name of the Lord * praise it, O ye servants of the Lord;
@@ -67,7 +67,7 @@ O PRAISE the Lord, laud ye the Name of the Lord * praise it, O ye servants of th
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 136 ---
+--- Psalm 136 · Confitemini Domino quoniam bonus ---
 Psalm 136
 
 O GIVE thanks unto the LORD, for he is gracious * and his mercy endureth for ever.
@@ -101,7 +101,7 @@ O GIVE thanks unto the LORD, for he is gracious * and his mercy endureth for eve
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 137 ---
+--- Psalm 137 · Super flumina Babylonis ---
 Psalm 137
 
 BY THE waters of Babylon we sat down and wept * when we remembered thee, O Sion.
@@ -117,7 +117,7 @@ BY THE waters of Babylon we sat down and wept * when we remembered thee, O Sion.
 Glory be to the Father, and to the Son, and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, world without end. Amen.
 
---- Psalm 138 ---
+--- Psalm 138 · Confitebor tibi, Domine ---
 Psalm 138
 
 I WILL give thanks unto thee, O Lord, with my whole heart * even before the gods will I sing praise unto thee.
@@ -192,7 +192,7 @@ R. For it is toward evening, alleluia.
 
 I have yet many things to say unto you, but ye cannot bear them now. * Howbeit, when He, the Spirit of truth, is come, He will guide you into all truth. Alleluia.
 
---- Magnificat ---
+--- Magnificat · Magnificat anima mea Dominum ---
 !Luke 1:46-55
 
 My soul doth magnify the Lord, * and my spirit hath rejoiced in God my Saviour.
