@@ -2456,6 +2456,122 @@ body.season-eastertide {
   }
 }
 
+/* ── Quiet motion ──
+
+   Motion exists here only to remove hard cuts — a page swap that flashes, a
+   disclosure that pops, a room that snaps from plaster to night sky. Nothing
+   below moves to attract attention: no slides, no zooms, no entrance effects
+   on prayer text. Everything is gated on prefers-reduced-motion: no-preference
+   (the reduce block below is a second belt), and every piece degrades to the
+   current instant behaviour in browsers that lack the feature. */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Cross-document view transitions. Same-origin navigations (hour → hour,
+     home → hour, ordo → hour) crossfade rather than flashing between paints.
+     This is the browser's default root crossfade — the pseudo-element rule
+     only pins the duration a hair under the UA default so it stays a blink
+     and not a fade the reader waits on. Unsupporting browsers ignore both
+     rules and navigate exactly as before. */
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: ease;
+  }
+
+  /* interpolate-size lets a 0 → auto height animate, which is what makes the
+     disclosure unfold possible at all. Chrome/Edge 129+; other engines keep
+     the instant native toggle. */
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  /* Disclosures unfold instead of popping open.
+
+     Gated on .motion-ready, which app.js sets one frame after load: several
+     disclosures ship [open] and are collapsed by script at load (ordo day
+     cards on narrow screens, the site menu), and that first sync must not
+     animate. No-JS documents keep the instant toggle. */
+  :root.motion-ready details.hour-date-nav::details-content,
+  :root.motion-ready details.session-prayers::details-content,
+  :root.motion-ready details.assurance-panel::details-content,
+  :root.motion-ready details.day-commemorations::details-content,
+  :root.motion-ready details.day-office-details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 200ms ease-out,
+      content-visibility 200ms allow-discrete;
+  }
+
+  :root.motion-ready details.hour-date-nav[open]::details-content,
+  :root.motion-ready details.session-prayers[open]::details-content,
+  :root.motion-ready details.assurance-panel[open]::details-content,
+  :root.motion-ready details.day-commemorations[open]::details-content,
+  :root.motion-ready details.day-office-details[open]::details-content {
+    block-size: auto;
+  }
+
+  /* The digest is display:none while closed, which would collapse the closing
+     height animation to 0 instantly. ::details-content already hides it
+     natively when closed, so reverting the rule costs nothing. */
+  :root.motion-ready details.day-office-details:not([open]) .day-office-digest {
+    display: revert;
+  }
+
+  /* Theme crossfade. app.js adds .theme-anim to <html> around an explicit
+     Default/Nave/Apse click and removes it ~320ms later, so only that swap
+     transitions: first paint (the pre-paint script in layout.html) and a
+     system light/dark flip stay instant. Scoped to every element on purpose —
+     a theme change repaints text, hairlines, cards and washes together — but
+     only inside that short window, and !important so an element's own hover
+     transition cannot opt itself out of the dimming. */
+  :root.theme-anim,
+  :root.theme-anim *,
+  :root.theme-anim *::before,
+  :root.theme-anim *::after {
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease,
+      box-shadow 200ms ease !important;
+  }
+}
+
+/* The mobile site menu is an absolutely positioned dropdown, so it has no
+   in-flow height to unfold; it fades and settles the last few pixels instead.
+   Desktop shows the nav regardless of [open] (and app.js force-opens it), and
+   this block never applies there. */
+@media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
+  :root.motion-ready .site-menu > nav {
+    transition:
+      opacity 160ms ease-out,
+      transform 160ms ease-out,
+      display 160ms allow-discrete;
+  }
+
+  :root.motion-ready .site-menu:not([open]) > nav {
+    opacity: 0;
+    transform: translateY(-0.3rem);
+  }
+
+  :root.motion-ready .site-menu[open] > nav {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Without @starting-style the menu simply appears at full opacity. */
+  @starting-style {
+    :root.motion-ready .site-menu[open] > nav {
+      opacity: 0;
+      transform: translateY(-0.3rem);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

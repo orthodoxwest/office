@@ -81,9 +81,27 @@ document.documentElement.classList.add("js");
     });
   };
 
+  // Let the room dim rather than snap when someone picks an appearance. The
+  // transitions live behind .theme-anim in style.css, added only around an
+  // explicit click, so the pre-paint script and any system light/dark flip
+  // still repaint instantly and no load ever animates.
+  var themeAnimTimer = null;
+  var flashThemeTransition = function () {
+    var root = document.documentElement;
+    root.classList.add("theme-anim");
+    if (themeAnimTimer) {
+      clearTimeout(themeAnimTimer);
+    }
+    themeAnimTimer = setTimeout(function () {
+      themeAnimTimer = null;
+      root.classList.remove("theme-anim");
+    }, 320);
+  };
+
   // User action: paint + persist.
   var applyThemeChoice = function (choice) {
     choice = normalizeThemeChoice(choice) || "default";
+    flashThemeTransition();
     paintThemeChoice(choice);
     writeStoredTheme(choice);
   };
@@ -461,6 +479,20 @@ document.documentElement.classList.add("js");
         narrow.addEventListener("change", sync);
       }
     });
+  }
+
+  // Disclosure transitions are scoped to .motion-ready in CSS. Setting it a
+  // frame after the load-time [open] syncing above means nothing unfolds or
+  // collapses while the page is still settling; only later taps animate.
+  var markMotionReady = function () {
+    document.documentElement.classList.add("motion-ready");
+  };
+  if (typeof window.requestAnimationFrame === "function") {
+    window.requestAnimationFrame(function () {
+      window.requestAnimationFrame(markMotionReady);
+    });
+  } else {
+    markMotionReady();
   }
 
   if ("serviceWorker" in navigator) {
