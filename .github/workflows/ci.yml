@@ -360,6 +360,43 @@ jobs:
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
 
+  mutation-ratchet:
+    name: Mutation ratchet (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - models
+          - calendar
+          - office
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and module cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/go/bin
+          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-gremlins-v0.6.0
+          restore-keys: |
+            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
+
+      - name: Enforce mutation ratchet
+        run: make mutate-ratchet MUTATE_RATCHET=${{ matrix.package }}
+
   mutation:
     name: Mutation
     runs-on: ubuntu-latest

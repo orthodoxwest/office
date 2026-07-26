@@ -13,14 +13,18 @@ but incorrect office rather than a crash.
 ## Running it
 
 ```bash
-make mutate                              # calendar, office, texts (~4 min per package)
+make mutate                              # models, calendar, office, texts; report only
+make mutate-ratchet                      # enforce models/calendar/office floors
+make mutate-ratchet MUTATE_RATCHET=models     # enforce one package's floors
 make mutate MUTATE_PKGS=./internal/calendar/   # one package
 make mutate-diff                         # only lines your branch changes vs master
 ```
 
-`make mutate-diff` is what CI runs on every PR. It is **reporting only** — the
-thresholds in `.gremlins.yaml` are 0, so it never fails the build. It posts a
-comment listing surviving mutants on lines the PR touched.
+CI runs full-package ratchets for `models`, `calendar`, and `office` in parallel
+on every PR and push to `master`. It also runs `make mutate-diff` on every PR.
+The changed-line run is **reporting only** — the global thresholds in
+`.gremlins.yaml` are 0 — and posts a comment listing surviving mutants on lines
+the PR touched.
 
 The tool is [gremlins](https://github.com/go-gremlins/gremlins), pinned in the
 Makefile and installed on demand into the configured `GOBIN` or `GOPATH/bin`.
@@ -84,6 +88,31 @@ The mutants worth acting on are the ones where you can state the bug in rubric
 terms: "if this boundary were off by one, the suffrage would be wrong on
 January 13."
 
+## Ratchet gates
+
+Both mutation efficacy and mutant coverage are gated. Efficacy measures whether
+tests notice changes to logic they execute; mutant coverage measures how much
+mutable logic the tests execute at all. Gating only efficacy would allow new
+untested logic to be classified as `NOT COVERED` without lowering the score.
+
+| Package | Minimum efficacy | Minimum mutant coverage |
+|---|---:|---:|
+| `internal/models` | 100% | 100% |
+| `internal/calendar` | 86% | 92% |
+| `internal/office` | 86% | 92% |
+
+For the three mutable predicates currently in `models`, this requires every
+mutant to be both covered and killed. Calendar and office start roughly one
+percentage point below their fresh baselines to avoid making small timing
+variations into CI flakes.
+
+The package paths and floors live in the Makefile's `MUTATE_RATCHETS` entries.
+Raise them after tests improve the full-package result. The Make target checks
+Gremlins' JSON output with `scripts/check_mutation_threshold.py`; Gremlins
+v0.6.0 does not reliably apply its nested threshold CLI flags. Do not put these
+floors in `.gremlins.yaml`: its global values also apply to the reporting-only,
+changed-line subset, whose score is not comparable to a whole package.
+
 ## Original baseline
 
 First full run, retained as the historical ratchet point:
@@ -99,13 +128,15 @@ Circumcision concurrence, and malformed `DateRule` gaps that were originally
 listed here. The feria concurrence finding proved to be unreachable code and
 was removed. Do not use an old copy of that list as the current work queue.
 
-Most recent trustworthy full-package results:
+Most recent trustworthy full-package results, measured before introducing the
+CI ratchets:
 
-| Package | Killed | Lived | Efficacy |
-|---|---:|---:|---:|
-| `internal/calendar` | 559 | 92 | 85.87% |
-| `internal/office` | 450 | 100 | 81.82% |
-| `internal/texts` | 92 | 22 | 80.7% |
+| Package | Killed | Lived | Not covered | Timed out | Efficacy | Mutant coverage |
+|---|---:|---:|---:|---:|---:|---:|
+| `internal/models` | 3 | 0 | 0 | 0 | 100.00% | 100.00% |
+| `internal/calendar` | 572 | 79 | 42 | 3 | 87.86% | 93.94% |
+| `internal/office` | 488 | 70 | 38 | 3 | 87.46% | 93.62% |
+| `internal/texts` | 92 | 22 | 0 | 0 | 80.70% | 100.00% |
 
 ## Focused follow-up status
 

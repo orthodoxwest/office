@@ -1,7 +1,8 @@
 # Mutation testing configuration (github.com/go-gremlins/gremlins).
 #
-# Run locally with `make mutate` (whole packages) or `make mutate-diff`
-# (only lines your branch changes, which is what CI runs per-PR).
+# Run locally with `make mutate` (whole packages), `make mutate-ratchet`
+# (enforced core-package floors), or `make mutate-diff` (only lines your branch
+# changes, which CI also reports per PR).
 #
 # IMPORTANT — timeout-coefficient must stay high.
 # Gremlins derives each mutant's test timeout from the baseline test run. This
@@ -25,9 +26,9 @@ unleash:
     - "tools/.*"
     - "scripts/.*"
 
-  # Thresholds are intentionally 0 (reporting only) while we establish a
-  # baseline. Measured efficacy as of the initial run: calendar 79.4%,
-  # office 81.1%. See MUTATION-TESTING.md before turning these into gates.
+  # Global thresholds stay at 0 so `make mutate` and the changed-line PR report
+  # remain informational. The core-package CI ratchets check each package's JSON
+  # report against the floors in the Makefile; see MUTATION-TESTING.md.
   #
   # Note the nesting: these live under `unleash.threshold`, NOT a top-level
   # `thresholds:` block. Gremlins ignores unknown keys silently, so the wrong
