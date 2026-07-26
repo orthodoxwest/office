@@ -24,6 +24,15 @@ for (const theme of ["light", "dark"]) {
     await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
     await expect(page).toHaveScreenshot(`lauds-${theme}.png`);
   });
+
+  test(`desktop home — ${theme}`, async ({ page }) => {
+    // The project stays in its pinned touch-emulated Chromium profile; this
+    // guards desktop responsive composition, not mouse/pointer behavior.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openForSnapshot(page, `/?date=${testDate}`, theme);
+    await expect(page.locator(".home")).toBeVisible();
+    await expect(page).toHaveScreenshot(`home-desktop-${theme}.png`, { fullPage: true });
+  });
 }
 
 test("mobile Ordo — light", async ({ page }) => {
