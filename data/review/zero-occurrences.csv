@@ -110,3 +110,6 @@ seasonal/advent/magnificat-antiphon-december-21,c31da4331f75,displaced,St Thomas
 seasonal/pentecost,659c6848395e,dead,The sectionless comment-only placeholder is loaded as an atomic entry but can never render,
 shared/formulas/commemoration-antiphon,0d0bdd94e513,shadowed-fallback,Feast propers and category commons cover every selected saint commemoration; retain the shared safety formula,
 shared/formulas/commemoration-versicle,c938aef4987d,shadowed-fallback,Feast propers and category commons cover every selected saint commemoration; retain the shared safety formula,
+shared/formulas/collect-conclusion-through-same-spirit,c3e8144202c8,dormant-policy,No collect currently names the Son mid-text and the Holy Spirit together; the form is kept so XXXIII.4 is representable without a code change,
+shared/formulas/collect-conclusion-who-liveth-spirit,20ba82cf9a8d,suppressed,Reached only by the Whit Ember Wednesday collect; the Pentecost octave office suppresses the coincident Whit Ember proper under current local policy,
+shared/formulas/collect-conclusion-who-livest-spirit,d7048b38bdf8,dormant-policy,No collect addressed to the Son also names the Holy Spirit; the form is kept so XXXIII.4 is representable without a code change,

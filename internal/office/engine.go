@@ -389,7 +389,12 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return sourcedElement(models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-collect":
 		text, src := resolveProperCollectText(day, hourName, corpus)
-		return sourcedElement(models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}, src)
+		// The collect of the day is always the first of the hour's run, so it
+		// is always concluded (XXXIII.5).
+		text, refs := applyConclusion(text, src, corpus)
+		elem := sourcedElement(models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}, src)
+		elem.SourceRefs = compactRefs(refs)
+		return elem
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		refs := []string{src}

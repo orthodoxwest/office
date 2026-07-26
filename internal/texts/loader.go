@@ -14,6 +14,13 @@ import (
 type TextCorpus struct {
 	texts   map[string]string
 	aliases map[string]string
+
+	// collectConclusions maps a collect's corpus key to the name of the
+	// conclusion form it takes. It is loaded from data/collect-conclusions.txt
+	// rather than from data/texts/, because it records a property of a text
+	// rather than being one — keeping it out of texts also keeps it out of the
+	// rendered-entry and zero-occurrence sweeps.
+	collectConclusions map[string]string
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -27,8 +34,9 @@ type TextCorpus struct {
 func LoadTexts(dataDir string) (*TextCorpus, error) {
 	textsDir := filepath.Join(dataDir, "texts")
 	corpus := &TextCorpus{
-		texts:   make(map[string]string),
-		aliases: make(map[string]string),
+		texts:              make(map[string]string),
+		aliases:            make(map[string]string),
+		collectConclusions: make(map[string]string),
 	}
 
 	err := filepath.Walk(textsDir, func(path string, info os.FileInfo, err error) error {
@@ -69,8 +77,71 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 	if err := corpus.extractAndValidateAliases(); err != nil {
 		return nil, err
 	}
+	if err := corpus.loadCollectConclusions(dataDir); err != nil {
+		return nil, err
+	}
 
 	return corpus, nil
+}
+
+// collectConclusionPrefix is the corpus-key prefix under which the conclusion
+// formulas live. Kept here so the loader can validate forms as it reads them.
+const collectConclusionPrefix = "shared/formulas/collect-conclusion-"
+
+// loadCollectConclusions reads data/collect-conclusions.txt, whose lines pair a
+// collect's corpus key with the name of its conclusion form. A missing file is
+// not an error: every collect then takes the default form. A malformed line, an
+// unknown key, an unknown form, or a duplicate key is an error — each would
+// otherwise silently produce a collect with the wrong ending or none at all.
+func (c *TextCorpus) loadCollectConclusions(dataDir string) error {
+	path := filepath.Join(dataDir, "collect-conclusions.txt")
+	content, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("reading %s: %w", path, err)
+	}
+	for i, line := range strings.Split(string(content), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		fields := strings.Fields(trimmed)
+		if len(fields) != 2 {
+			return fmt.Errorf("%s:%d: expected \"<corpus-key> <form>\", got %q", path, i+1, trimmed)
+		}
+		key, form := fields[0], fields[1]
+		// Fail loudly rather than let a typo silently drop the conclusion: an
+		// unresolvable form would leave the collect ending mid-prayer, which is
+		// exactly the defect this data exists to fix.
+		if c.Get(collectConclusionPrefix+form) == "" {
+			return fmt.Errorf("%s:%d: %s names conclusion form %q, but %s%s is not in the corpus",
+				path, i+1, key, form, collectConclusionPrefix, form)
+		}
+		if c.Get(key) == "" {
+			return fmt.Errorf("%s:%d: %q is not in the corpus", path, i+1, key)
+		}
+		if prior, dup := c.collectConclusions[key]; dup {
+			return fmt.Errorf("%s:%d: %q listed twice (%q then %q)", path, i+1, key, prior, form)
+		}
+		c.collectConclusions[key] = form
+	}
+	return nil
+}
+
+// CollectConclusionForm returns the conclusion form recorded for a collect's
+// corpus key, and whether one was recorded. Collects with no entry take the
+// default form.
+func (c *TextCorpus) CollectConclusionForm(key string) (string, bool) {
+	form, ok := c.collectConclusions[key]
+	return form, ok
+}
+
+// SetCollectConclusionForm records a conclusion form, for use in tests. Both
+// constructors initialize the map, so there is no nil case to guard.
+func (c *TextCorpus) SetCollectConclusionForm(key, form string) {
+	c.collectConclusions[key] = form
 }
 
 // stripCommentLines removes corpus annotations from plain-text files using
@@ -88,9 +159,15 @@ func stripCommentLines(text string) string {
 	return strings.Join(kept, "\n")
 }
 
-// NewTestCorpus creates a TextCorpus from a map, for use in tests.
+// NewTestCorpus creates a TextCorpus from a map, for use in tests. Conclusion
+// forms start empty, so every collect takes the default; use
+// SetCollectConclusionForm to record one.
 func NewTestCorpus(texts map[string]string) *TextCorpus {
-	return &TextCorpus{texts: texts, aliases: make(map[string]string)}
+	return &TextCorpus{
+		texts:              texts,
+		aliases:            make(map[string]string),
+		collectConclusions: make(map[string]string),
+	}
 }
 
 // Get returns the text for the given reference path, resolving @use aliases, or

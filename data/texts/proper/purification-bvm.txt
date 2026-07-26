@@ -60,8 +60,11 @@ The ancient * carried the Infant, but the Infant governed the ancient: he whom a
 @use proper/purification-bvm/versicle-vespers
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 389, 277, 285 (Purification BVM)
-Almighty and everliving God, we humbly beseech thy Majesty; that, as thy only-begotten Son was this day presented in the temple in substance of our flesh, so we may be presented unto thee with pure and clean hearts.
+# SOURCE: diurnal, p. 470. Restores the trailing "by the same thy Son Jesus
+# Christ our Lord", which the previous text dropped; that clause is what names
+# the Son at the very end, and so what makes this collect take the "Who with
+# thee liveth and reigneth" conclusion (XXXIII.4) rather than "Through the same".
+Almighty and everliving God, we humbly beseech thy Majesty; that, as thy only-begotten Son was this day presented in the temple in substance of our flesh, so we may be presented unto thee with pure and clean hearts, by the same thy Son Jesus Christ our Lord.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 386 (Purification BVM)

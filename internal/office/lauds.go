@@ -32,7 +32,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	}
 
 	var elems []models.OfficeElement
-	for _, comm := range comms {
+	for i, comm := range comms {
 		lookup := func(ref string) (string, string) {
 			if isSynthesizedFeria(comm) {
 				return lookupFeriaCommemoration(day, comm, hourName, ref, corpus)
@@ -67,14 +67,27 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 			SourceRefs: compactRefs([]string{versSrc}),
 		})
 
-		// Collect
+		// Collect. Of a run of collects only the first and the last are
+		// concluded (XXXIII.5); the collect of the day has already taken the
+		// first, so here only the final commemoration is concluded.
+		//
+		// The Suffrage and the Commemoration of the Cross that may follow are
+		// treated as separate devotions with their own conclusions, not as part
+		// of this run — so the last commemoration is the run's last collect.
+		// The hour definitions put those sections after this one and before the
+		// "Lord be with you" that XXXIII.3 says follows the last Collect, which
+		// can be read the other way; see issue #181.
 		collectText, collectSrc := lookup("commemoration-collect")
+		collectRefs := []string{collectSrc}
+		if i == len(comms)-1 {
+			collectText, collectRefs = applyConclusion(collectText, collectSrc, corpus)
+		}
 		elems = append(elems, models.OfficeElement{
 			Type:       models.Collect,
 			Text:       collectText,
 			SlotRef:    "commemoration-collect",
 			SourceRef:  collectSrc,
-			SourceRefs: compactRefs([]string{collectSrc}),
+			SourceRefs: compactRefs(collectRefs),
 		})
 	}
 	return elems

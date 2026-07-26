@@ -62,9 +62,6 @@ Let us pray.
 O God, who didst at this hour give salvation to the world through the death
 of thy Son upon the Cross: grant, we beseech thee, that we, by the memory of
 his most holy Passion, may ever have strength to resist the assaults of sin.
-Through our Lord Jesus Christ thy Son, who with thee and the Holy Spirit
-liveth and reigneth, God, for ever and ever.
-R. Amen.
 
 [blessing]
 @use shared/formulas/daily-blessing

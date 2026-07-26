@@ -49,8 +49,70 @@ V. The Lord hath chosen him for himself.
 R. As his treasure for ever.
 
 [commemoration-collect]
+# The conclusion is appended by the engine per XXXIII.4-5, as for every other
+# proper collect; it is not carried inline here.
 Grant, O Lord, we beseech thee, the prayers of thy holy servant, that we who
 cannot by our own merits attain to thy grace may be helped by his intercession.
-Through our Lord Jesus Christ thy Son, who with thee and the Holy Spirit liveth
-and reigneth, God, for ever and ever.
+
+# Collect conclusions, per the General Rubrics of the Monastic Breviary
+# XXXIII.4 (diurnal-rubrics.pdf):
+#
+#   If the Collect is addressed to God the Father, the conclusion is Through
+#   Jesus Christ; if addressed to the God the Son, the conclusion is Who livest
+#   and reignest.
+#   If, in the beginning of the Collect, the Son is mentioned, Through the same
+#   Jesus Christ is said; but if the Son is mentioned at the end of the Collect,
+#   Who liveth and reigneth is said.
+#   If mention is made of the Holy Spirit in the Collect, there is said In the
+#   unity of the same Holy Ghost, etc.
+#
+# Which form each collect takes is recorded in shared/collect-conclusions.
+# Wording follows the diurnal. The books print these abbreviated ("Through
+# &c."); we expand them, as we do the secret prayers, because the ink and space
+# constraints that justify abbreviating in print do not apply here.
+
+[collect-conclusion-through]
+Through Jesus Christ thy Son, our Lord, who with thee in the unity of the Holy
+Ghost, liveth and reigneth God, world without end.
+R. Amen.
+
+[collect-conclusion-through-spirit]
+Through Jesus Christ thy Son, our Lord, who with thee in the unity of the same
+Holy Ghost, liveth and reigneth God, world without end.
+R. Amen.
+
+[collect-conclusion-through-same]
+Through the same Jesus Christ thy Son, our Lord, who with thee in the unity of
+the Holy Ghost, liveth and reigneth God, world without end.
+R. Amen.
+
+[collect-conclusion-through-same-spirit]
+Through the same Jesus Christ thy Son, our Lord, who with thee in the unity of
+the same Holy Ghost, liveth and reigneth God, world without end.
+R. Amen.
+
+[collect-conclusion-who-liveth]
+Who with thee liveth and reigneth in the unity of the Holy Ghost, God, world
+without end.
+R. Amen.
+
+# Second person, for a collect addressed to the Son. The parish books print this
+# one expanded in at least one place (All Souls): "Who with God the Father in the
+# unity of the Holy Spirit livest and reignest God, world without end." We keep
+# "Holy Ghost" so all six forms read alike in the same office; the books and the
+# diurnal differ on that word throughout, and the rest of this set follows the
+# diurnal.
+[collect-conclusion-who-livest]
+Who with God the Father in the unity of the Holy Ghost livest and reignest God,
+world without end.
+R. Amen.
+
+[collect-conclusion-who-livest-spirit]
+Who with God the Father in the unity of the same Holy Ghost livest and reignest
+God, world without end.
+R. Amen.
+
+[collect-conclusion-who-liveth-spirit]
+Who with thee liveth and reigneth in the unity of the same Holy Ghost, God,
+world without end.
 R. Amen.
