@@ -129,11 +129,26 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
         targetHeights: Array.from(document.querySelectorAll(".home-hour-link")).map(
           (link) => link.getBoundingClientRect().height,
         ),
+        directoryFrame: (() => {
+          const style = getComputedStyle(document.querySelector(".home-hour-links"));
+          return {
+            left: [style.borderLeftWidth, style.borderLeftStyle],
+            right: [style.borderRightWidth, style.borderRightStyle],
+          };
+        })(),
+        labelAlignment: getComputedStyle(
+          document.querySelector(".home-hour-group-label"),
+        ).justifyContent,
       }));
       expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
       expect(Math.min(...geometry.targetHeights), `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(
         44,
       );
+      expect(geometry.directoryFrame, `${width}px/${size} directory frame`).toEqual({
+        left: ["1px", "solid"],
+        right: ["1px", "solid"],
+      });
+      expect(geometry.labelAlignment, `${width}px/${size} label alignment`).toBe("center");
 
       if (size === "large") {
         await page.getByRole("button", { name: "Default text size" }).click();

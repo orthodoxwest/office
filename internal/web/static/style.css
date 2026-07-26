@@ -2775,6 +2775,10 @@ body.season-eastertide {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
+  /* The tinted period labels form a quiet index column. Complete the outer
+     frame at every width so that column reads as deliberate table structure,
+     rather than three highlighted tabs left open to the page. */
+  border-inline: 1px solid var(--frontispiece-rule);
 }
 
 .page-home .home-hour-group {
@@ -2791,6 +2795,7 @@ body.season-eastertide {
 .page-home .home-hour-group-label {
   display: flex;
   align-items: center;
+  justify-content: center;
   border-right: 1px solid var(--frontispiece-rule);
   background: var(--frontispiece-band);
   color: var(--muted);
@@ -2799,7 +2804,7 @@ body.season-eastertide {
   font-variant-caps: all-small-caps;
   letter-spacing: 0.08em;
   line-height: 1.2;
-  padding: 0 0.5rem 0 0.1rem;
+  padding: 0 0.4rem;
 }
 
 .page-home .home-hour-group-links {
@@ -2923,14 +2928,7 @@ body.season-eastertide {
     grid-template-columns: 5.25rem minmax(0, 1fr);
   }
 
-  .page-home .home-hour-links {
-    /* Complete the table frame. Previously the internal dividers ended at an
-       open left and right edge, which was conspicuous at desktop scale. */
-    border-inline: 1px solid var(--frontispiece-rule);
-  }
-
   .page-home .home-hour-group-label {
-    justify-content: center;
     padding-inline: 0.5rem;
     color: var(--accent);
   }
