@@ -129,11 +129,26 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
         targetHeights: Array.from(document.querySelectorAll(".home-hour-link")).map(
           (link) => link.getBoundingClientRect().height,
         ),
+        directoryFrame: (() => {
+          const style = getComputedStyle(document.querySelector(".home-hour-links"));
+          return {
+            left: [style.borderLeftWidth, style.borderLeftStyle],
+            right: [style.borderRightWidth, style.borderRightStyle],
+          };
+        })(),
+        labelAlignment: getComputedStyle(
+          document.querySelector(".home-hour-group-label"),
+        ).justifyContent,
       }));
       expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
       expect(Math.min(...geometry.targetHeights), `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(
         44,
       );
+      expect(geometry.directoryFrame, `${width}px/${size} directory frame`).toEqual({
+        left: ["1px", "solid"],
+        right: ["1px", "solid"],
+      });
+      expect(geometry.labelAlignment, `${width}px/${size} label alignment`).toBe("center");
 
       if (size === "large") {
         await page.getByRole("button", { name: "Default text size" }).click();
@@ -169,6 +184,44 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   }));
   expect(apseState.background).toBe("rgba(0, 0, 0, 0)");
   expect(apseState.borderStyle).toBe("double");
+});
+
+test("parish material stays in non-liturgical rooms and off the prayer page", async ({
+  page,
+}) => {
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  const naveMaterial = await page.evaluate(() => ({
+    page: getComputedStyle(document.body).backgroundImage,
+    inscriptionBand: getComputedStyle(
+      document.querySelector(".home-hour-group-label"),
+    ).backgroundColor,
+  }));
+  expect(naveMaterial.page).not.toBe("none");
+  expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  const apseMaterial = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  expect(apseMaterial).not.toBe("none");
+  expect(apseMaterial).not.toBe(naveMaterial.page);
+
+  await page.goto(`/lauds/${testDate}`);
+  const prayerMaterial = await page.evaluate(() => ({
+    page: getComputedStyle(document.body).backgroundImage,
+    prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
+  }));
+  expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
+    "none",
+  );
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
+    "none",
+  );
 });
 
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
