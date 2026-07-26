@@ -750,16 +750,25 @@ document.documentElement.classList.add("js");
     });
   }
 
-  // Gold hairline under the color band: progress through the hour page.
+  // Gold hairline under the color band: progress through the prayer itself.
+  // The page continues into hour navigation, assurance, issue reporting, and
+  // appearance controls after .elements. Reaching those administrative rooms
+  // should not make a completed office look unfinished, so the line reaches
+  // 100% when the end of .elements reaches the bottom of the viewport and then
+  // remains complete for the rest of the document.
   if (officeHour) {
     var progress = document.querySelector(".hour-scroll-progress");
     var progressBar = document.querySelector(".hour-scroll-progress-bar");
-    if (progress && progressBar) {
+    var prayerContent = officeHour.querySelector(".elements");
+    if (progress && progressBar && prayerContent) {
       var progressTicking = false;
       var updateHourScrollProgress = function () {
         var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-        var maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-        var ratio = maxScroll <= 0 ? 1 : Math.min(1, Math.max(0, scrollTop / maxScroll));
+        var prayerRect = prayerContent.getBoundingClientRect();
+        var prayerEnd = scrollTop + prayerRect.bottom;
+        var completionScroll = Math.max(0, prayerEnd - window.innerHeight);
+        var ratio =
+          completionScroll <= 0 ? 1 : Math.min(1, Math.max(0, scrollTop / completionScroll));
         progressBar.style.transform = "scaleX(" + ratio + ")";
         progress.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
         progressTicking = false;
@@ -772,6 +781,14 @@ document.documentElement.classList.add("js");
       };
       window.addEventListener("scroll", onHourScroll, { passive: true });
       window.addEventListener("resize", onHourScroll);
+      // Opening session prayers changes the prayer boundary without necessarily
+      // producing a window resize or scroll event. ResizeObserver keeps the
+      // semantic endpoint honest; older browsers still update on the next
+      // scroll, and the native disclosure remains fully usable.
+      if ("ResizeObserver" in window) {
+        var prayerResizeObserver = new ResizeObserver(onHourScroll);
+        prayerResizeObserver.observe(prayerContent);
+      }
       updateHourScrollProgress();
     }
   }
