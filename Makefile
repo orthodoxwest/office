@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet mutate-ratchet-models mutate-ratchet-calendar mutate-ratchet-office
 
 YEAR ?= 2026
 
@@ -14,6 +14,7 @@ build: ## Build the binary
 
 test: ## Run all tests
 	go test ./...
+	python3 scripts/test_mutation_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_source_reconcile.py
@@ -111,8 +112,14 @@ ifeq ($(GREMLINS_BIN),)
 GREMLINS_BIN = $(shell go env GOPATH)/bin
 endif
 GREMLINS = $(GREMLINS_BIN)/gremlins
-MUTATE_PKGS ?= ./internal/calendar/ ./internal/office/ ./internal/texts/
+MUTATE_PKGS ?= ./internal/models/ ./internal/calendar/ ./internal/office/ ./internal/texts/
 MUTATE_DIFF_BASE ?= master
+MUTATE_MODELS_EFFICACY_MIN ?= 100
+MUTATE_MODELS_MCOVER_MIN ?= 100
+MUTATE_CALENDAR_EFFICACY_MIN ?= 86
+MUTATE_CALENDAR_MCOVER_MIN ?= 92
+MUTATE_OFFICE_EFFICACY_MIN ?= 86
+MUTATE_OFFICE_MCOVER_MIN ?= 92
 
 # In --diff mode gremlins measures its baseline over the whole suite (~30s)
 # rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
@@ -130,7 +137,7 @@ install-gremlins: ## Install the pinned mutation-testing tool if missing or stal
 
 # Note: thresholds are 0, so gremlins exits 0 regardless of efficacy. The
 # `|| exit 1` catches hard failures (compile errors, crashes), not bad scores.
-mutate: install-gremlins ## Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/); ~4 min each
+mutate: install-gremlins ## Mutation-test whole packages without enforcing the CI ratchets
 	@for pkg in $(MUTATE_PKGS); do \
 		echo "==> $$pkg"; \
 		$(GREMLINS) unleash $$pkg || exit 1; \
@@ -142,6 +149,26 @@ mutate: install-gremlins ## Mutation-test whole packages (MUTATE_PKGS=./internal
 mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
 	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
 		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
+
+mutate-ratchet: mutate-ratchet-models mutate-ratchet-calendar mutate-ratchet-office ## Enforce core package mutation-score floors
+
+define run-mutation-ratchet
+	@report=$$(mktemp); \
+	trap 'rm -f "$$report"' EXIT; \
+	$(GREMLINS) unleash $(1) --output "$$report" || exit 1; \
+	python3 scripts/check_mutation_threshold.py "$$report" \
+		--min-efficacy $(2) \
+		--min-mutant-coverage $(3)
+endef
+
+mutate-ratchet-models: install-gremlins
+	$(call run-mutation-ratchet,./internal/models/,$(MUTATE_MODELS_EFFICACY_MIN),$(MUTATE_MODELS_MCOVER_MIN))
+
+mutate-ratchet-calendar: install-gremlins
+	$(call run-mutation-ratchet,./internal/calendar/,$(MUTATE_CALENDAR_EFFICACY_MIN),$(MUTATE_CALENDAR_MCOVER_MIN))
+
+mutate-ratchet-office: install-gremlins
+	$(call run-mutation-ratchet,./internal/office/,$(MUTATE_OFFICE_EFFICACY_MIN),$(MUTATE_OFFICE_MCOVER_MIN))
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1
