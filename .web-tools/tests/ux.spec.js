@@ -35,7 +35,119 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("desktop navigation remains expanded", async ({ page }) => {
+test("home frontispiece keeps source, focus, and visual order aligned", async ({ page }) => {
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Day", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+
+  const order = await page.evaluate(() => {
+    const day = document.querySelector(".home-summary");
+    const prayer = document.querySelector(".home-prayer-card");
+    const dateControl = document.querySelector(".home-day-meta");
+    const top = (selector) => document.querySelector(selector).getBoundingClientRect().top;
+    return {
+      source:
+        Boolean(day.compareDocumentPosition(prayer) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+        Boolean(prayer.compareDocumentPosition(dateControl) & Node.DOCUMENT_POSITION_FOLLOWING),
+      positions: {
+        day: top(".home-day-head"),
+        prayer: top(".home-prayer-card"),
+        dateControl: top(".home-day-meta"),
+      },
+      focusables: Array.from(
+        document.querySelectorAll(
+          ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
+        ),
+      )
+        .slice(0, 10)
+        .map((element) => {
+          if (element.matches(".home-date-link")) return "date";
+          if (element.matches(".pray-now")) return "pray";
+          if (element.matches(".home-hour-link")) return element.getAttribute("data-hour");
+          if (element.matches("summary")) return "change-date";
+          return "unexpected";
+        }),
+    };
+  });
+  expect(order.source).toBe(true);
+  expect(order.positions.day).toBeLessThan(order.positions.prayer);
+  expect(order.positions.prayer).toBeLessThan(order.positions.dateControl);
+  expect(order.focusables).toEqual([
+    "date",
+    "pray",
+    "lauds",
+    "prime",
+    "terce",
+    "sext",
+    "none",
+    "vespers",
+    "compline",
+    "change-date",
+  ]);
+});
+
+test("home hour directory fits thumb targets across phone widths and text sizes", async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem("office-text-size"));
+
+  for (const width of [320, 390, 540]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, `/?date=${testDate}`);
+
+    for (const size of ["default", "large", "small"]) {
+      if (size !== "default") {
+        await page.getByRole("button", { name: size === "large" ? "Larger text" : "Smaller text" }).click();
+      }
+
+      const geometry = await page.evaluate(() => ({
+        overflows: document.documentElement.scrollWidth > window.innerWidth + 1,
+        targetHeights: Array.from(document.querySelectorAll(".home-hour-link")).map(
+          (link) => link.getBoundingClientRect().height,
+        ),
+      }));
+      expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
+      expect(Math.min(...geometry.targetHeights), `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(
+        44,
+      );
+
+      if (size === "large") {
+        await page.getByRole("button", { name: "Default text size" }).click();
+      }
+    }
+  }
+});
+
+test("current hour and frontispiece invitation update in Nave and Apse", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T10:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  const invitation = page.locator(".pray-now");
+  const current = page.locator('.home-hour-link[aria-current="time"]');
+  await expect(invitation).toHaveText("Pray Terce");
+  await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
+  await expect(current).toHaveAttribute("data-hour", "terce");
+  await expect(current.getByText("Now", { exact: true })).toBeVisible();
+  await expect(current.locator("xpath=ancestor::section[1]")).toContainText("Day");
+
+  const naveState = await invitation.evaluate((element) => ({
+    background: getComputedStyle(element).backgroundColor,
+    borderStyle: getComputedStyle(element).borderTopStyle,
+  }));
+  expect(naveState.background).toBe("rgba(0, 0, 0, 0)");
+  expect(naveState.borderStyle).toBe("double");
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const apseState = await invitation.evaluate((element) => ({
+    background: getComputedStyle(element).backgroundColor,
+    borderStyle: getComputedStyle(element).borderTopStyle,
+  }));
+  expect(apseState.background).toBe("rgba(0, 0, 0, 0)");
+  expect(apseState.borderStyle).toBe("double");
+});
+
+test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
 
@@ -43,6 +155,11 @@ test("desktop navigation remains expanded", async ({ page }) => {
   await expect(
     page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Vespers", exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
+  ).toBe(false);
 });
 
 test("appearance choice persists across prayer navigation", async ({ page }) => {

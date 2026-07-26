@@ -128,10 +128,10 @@ body {
   background: var(--bg);
   max-width: 46rem;
   margin: 0 auto;
-  padding: 0 1.5rem 4.5rem;
+  padding: 0 1.5rem 1.5rem;
   padding-left: max(1.5rem, env(safe-area-inset-left));
   padding-right: max(1.5rem, env(safe-area-inset-right));
-  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
 }
 
 /* Secondary / small italic: system Georgia. EB Garamond italic is hard to
@@ -581,11 +581,8 @@ footer::before {
 }
 
 /* ── Home page ──
-   One vertical composition (day identity → prayer surface). Mobile reorders
-   the prayer card above the day block so the CTA still wins the first screen.
-
-   Rhythm: tight title stack (date → feast → meta), then a quiet date control,
-   then the prayer surface — not a control wedged between date and feast. */
+   One vertical composition with the same source and visual order at every
+   width: day identity → prayer invitation → secondary date control. */
 
 .home {
   display: grid;
@@ -1035,19 +1032,19 @@ footer::before {
 
 /* Home reuses the hour "Change date" disclosure — after the title stack, not
    between date and feast. Compact so it doesn't open a second band of air. */
-.home-summary .home-date-nav {
+.home-day-meta .home-date-nav {
   margin: 0;
   max-width: none;
   text-align: left;
 }
 
-.home-summary .home-date-nav > summary {
+.home-day-meta .home-date-nav > summary {
   margin: 0;
   padding: 0.2rem 0;
   font-size: 0.7rem;
 }
 
-.home-summary .home-date-nav .day-nav {
+.home-day-meta .home-date-nav .day-nav {
   justify-content: flex-start;
   margin-top: 0.35rem;
   margin-bottom: 0.15rem;
@@ -1062,17 +1059,15 @@ footer::before {
     justify-content: center;
   }
 
-  .home-summary .home-date-nav {
+  .home-day-meta .home-date-nav {
     text-align: center;
   }
 
-  /* The summary is width: fit-content, so it needs the auto margins that the
-     home override replaced with margin: 0. */
-  .home-summary .home-date-nav > summary {
+  .home-day-meta .home-date-nav > summary {
     margin-inline: auto;
   }
 
-  .home-summary .home-date-nav .day-nav {
+  .home-day-meta .home-date-nav .day-nav {
     justify-content: center;
   }
 }
@@ -1562,25 +1557,29 @@ footer::before {
   margin-top: 0;
 }
 
-/* ── Construction banner ── */
+/* ── Construction notice ──
+   This belongs to the opening flow of an unvetted hour. It used to be fixed
+   to the bottom of the viewport, where it covered several lines of prayer on
+   a phone and forced every page to reserve a deep bottom gutter. Inline, it
+   is encountered before prayer begins and then scrolls away naturally. */
 
 .site-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  width: 100%;
+  max-width: 38rem;
+  margin: -0.2rem auto 0;
   background: var(--banner-bg);
-  border-top: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--rubric);
   color: var(--muted);
-  font-size: 0.85rem;
-  padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom));
+  font-size: 0.82rem;
+  line-height: 1.45;
+  padding: 0.65rem 0.8rem;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  z-index: 100;
-  text-align: center;
+  gap: 0.8rem;
+  text-align: left;
 }
 
 .site-banner p {
@@ -1592,8 +1591,11 @@ footer::before {
   border: none;
   color: var(--muted);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.7rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
   line-height: 1;
+  min-height: max(2.75rem, 44px);
   padding: 0 0.25rem;
   flex-shrink: 0;
 }
@@ -2041,8 +2043,8 @@ footer::before {
   vertical-align: -0.05em;
 }
 
-/* Narrow screens: prayer CTA first; day identity becomes a card again so the
-   stacked home still reads as two clear blocks (what mobile already liked). */
+/* Narrow screens keep the same semantic order and reduce the surrounding
+   chrome before the later frontispiece rules form one ceremonial object. */
 @media (max-width: 700px) {
   .page-home .site-header {
     margin-bottom: 1rem;
@@ -2053,7 +2055,6 @@ footer::before {
   }
 
   .home-prayer-card {
-    order: -1;
     padding: 1.1rem 1.1rem 1.15rem;
   }
 
@@ -2624,6 +2625,297 @@ body.season-eastertide {
       opacity: 0;
       transform: translateY(-0.3rem);
     }
+  }
+}
+
+/* ── Home frontispiece ──
+   The day and its appointed prayer form one ceremonial object at every width:
+   day identity → invitation → compact hours index → secondary date control.
+   The restrained service-book table scales from phone to desktop without
+   becoming a different interaction or reading order. */
+.page-home .home-hero {
+  width: 100%;
+  max-width: 36rem;
+  margin-inline: auto;
+  gap: 0;
+  padding: 0.95rem 1rem 1rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--day-color, var(--border));
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.page-home .home-summary {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.page-home .home-day-head {
+  align-items: center;
+  gap: 0.12rem;
+  margin: 0 0 0.8rem;
+}
+
+.page-home .home h1 {
+  font-size: 1.38rem;
+  line-height: 1.2;
+}
+
+.page-home .home .feast {
+  max-width: none;
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.page-home .home .commemorations {
+  justify-content: center;
+}
+
+.page-home .home .penitential {
+  margin-top: 0.3rem;
+}
+
+/* In a service-book composition fasting discipline is red work, not a UI
+   chip. The words retain their rubric colour and remain distinct without
+   a rounded outline or extra box padding. */
+.page-home .penitential-badge {
+  margin: 0 0.3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+}
+
+.page-home .home-prayer-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.page-home .home-prayer-card h2 {
+  margin-bottom: 0.45rem;
+  text-align: center;
+}
+
+.page-home .pray-now-wrap {
+  margin-bottom: 0.8rem;
+}
+
+.page-home .pray-now,
+.page-home .pray-now:hover {
+  padding: 0.68rem 0.8rem 0.72rem;
+  border: 3px double var(--ornament-line);
+  background: transparent;
+  color: var(--accent);
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+.page-home .pray-now:active {
+  border-color: var(--accent);
+  background: rgba(107, 58, 31, 0.1);
+}
+
+@media (hover: hover) {
+  .page-home .pray-now:hover {
+    border-color: var(--accent);
+    background: rgba(107, 58, 31, 0.07);
+  }
+}
+
+.page-home .home-hour-links {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.page-home .home-hour-group {
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr);
+  align-items: stretch;
+  border-top: 1px solid var(--border);
+}
+
+.page-home .home-hour-group:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.page-home .home-hour-group-label {
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  padding: 0 0.5rem 0 0.1rem;
+}
+
+.page-home .home-hour-group-links {
+  display: grid;
+  min-width: 0;
+}
+
+.page-home .home-hour-group-morning .home-hour-group-links,
+.page-home .home-hour-group-evening .home-hour-group-links {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.page-home .home-hour-group-day .home-hour-group-links {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.page-home .home-hour-link {
+  justify-content: center;
+  min-width: 0;
+  min-height: max(2.75rem, 44px);
+  gap: 0.25rem;
+  padding: 0.35rem 0.2rem;
+  border: 0;
+  background: transparent;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.page-home .home-hour-link + .home-hour-link {
+  border-left: 1px solid var(--border);
+}
+
+.page-home .home-hour-link.is-current {
+  background: rgba(107, 58, 31, 0.08);
+  box-shadow: inset 0 -1px 0 var(--ornament);
+}
+
+.page-home .home-hour-link-state {
+  margin-left: 0;
+}
+
+.page-home .home-day-meta {
+  justify-content: center;
+  margin-top: 0.7rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--border);
+}
+
+.page-home .home-day-meta .home-date-nav {
+  text-align: center;
+}
+
+.page-home .home-day-meta .home-date-nav > summary {
+  display: flex;
+  align-items: center;
+  min-height: max(2.75rem, 44px);
+  margin-inline: auto;
+  padding: 0.35rem;
+}
+
+.page-home .home-day-meta .home-date-nav .day-nav {
+  justify-content: center;
+}
+
+@media (min-width: 701px) {
+  .page-home .home-hero {
+    padding: 1.25rem 1.5rem 1.15rem;
+  }
+
+  .page-home .home h1 {
+    font-size: 1.55rem;
+  }
+
+  .page-home .home .feast {
+    font-size: 1.15rem;
+  }
+
+  .page-home .home-day-head {
+    margin-bottom: 0.95rem;
+  }
+
+  .page-home .home-hour-group {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 350px) {
+  .page-home .home-hour-group {
+    grid-template-columns: 1fr;
+  }
+
+  .page-home .home-hour-group-label {
+    justify-content: center;
+    min-height: 1.8rem;
+    border-right: 0;
+    padding: 0.25rem;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-hero {
+    box-shadow: none;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hour-link {
+    background: transparent;
+  }
+
+  :root:not([data-theme="light"]) .page-home .home-hour-link.is-current {
+    background: rgba(208, 176, 106, 0.12);
+  }
+
+  :root:not([data-theme="light"]) .page-home .pray-now,
+  :root:not([data-theme="light"]) .page-home .pray-now:hover {
+    border-color: var(--ornament-line);
+    background: transparent;
+    color: var(--accent);
+  }
+
+  :root:not([data-theme="light"]) .page-home .pray-now:active {
+    border-color: var(--accent);
+    background: rgba(208, 176, 106, 0.14);
+  }
+}
+
+:root[data-theme="dark"] .page-home .home-hero {
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .page-home .home-hour-link {
+  background: transparent;
+}
+
+:root[data-theme="dark"] .page-home .home-hour-link.is-current {
+  background: rgba(208, 176, 106, 0.12);
+}
+
+:root[data-theme="dark"] .page-home .pray-now,
+:root[data-theme="dark"] .page-home .pray-now:hover {
+  border-color: var(--ornament-line);
+  background: transparent;
+  color: var(--accent);
+}
+
+:root[data-theme="dark"] .page-home .pray-now:active {
+  border-color: var(--accent);
+  background: rgba(208, 176, 106, 0.14);
+}
+
+@media (hover: hover) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .pray-now:hover {
+    border-color: var(--accent);
+    background: rgba(208, 176, 106, 0.1);
+  }
+}
+
+@media (hover: hover) {
+  :root[data-theme="dark"] .page-home .pray-now:hover {
+    border-color: var(--accent);
+    background: rgba(208, 176, 106, 0.1);
   }
 }
 

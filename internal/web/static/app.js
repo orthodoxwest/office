@@ -618,7 +618,7 @@ document.documentElement.classList.add("js");
     link.classList.toggle("is-current", isCurrent);
     var state = link.querySelector(".home-hour-link-state");
     if (isCurrent) {
-      link.setAttribute("aria-current", "page");
+      link.setAttribute("aria-current", "time");
       if (!state) {
         state = document.createElement("span");
         state.className = "home-hour-link-state";
