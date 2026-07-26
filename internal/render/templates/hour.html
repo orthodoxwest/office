@@ -22,6 +22,12 @@
       </nav>
     </details>
   </div>
+  {{if .ShowBanner}}
+  <aside class="site-banner" id="site-banner" aria-label="Development notice">
+    <p>This site is under active development &mdash; liturgical data is incomplete and may contain errors.</p>
+    <button type="button" data-dismiss-banner aria-label="Dismiss development notice">Dismiss</button>
+  </aside>
+  {{end}}
   <div class="elements">
     {{range .Hour.Sections}}
       {{if .Collapsible}}

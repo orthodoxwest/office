@@ -2,9 +2,11 @@
 {{define "content"}}
 <div class="home">
   <div class="color-band color-band-{{.Color}}"><span class="sr-only">Liturgical color: {{.Color}}</span></div>
-  {{/* Day identity first in DOM (desktop reading order). Mobile CSS reorders
-       the prayer card above so the CTA still wins the first screen. */}}
-  <div class="home-hero">
+  {{/* The source order is the frontispiece order at every width: day identity,
+       prayer invitation, then the secondary date control. Keeping the visual
+       and focus orders aligned makes the threshold equally clear by keyboard
+       and screen reader. */}}
+  <div class="home-hero day-color-{{.Color}}">
     <section class="home-summary day-color-{{.Color}}" aria-labelledby="home-date-heading">
       <header class="home-day-head">
         <h1 id="home-date-heading">
@@ -26,38 +28,66 @@
         </div>
         {{end}}
       </header>
-      {{/* Season rides the existing control row: context without a new line
-           of text in the title stack. */}}
-      <div class="home-day-meta">
-        {{if .Season}}<p class="home-season">{{.Season}}</p>{{end}}
-        <details class="hour-date-nav home-date-nav">
-          <summary>Change date</summary>
-          <nav class="day-nav" aria-label="Date navigation">
-            <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
-            <form class="date-jump-form" action="/" method="get">
-              <label class="sr-only" for="home-date-jump">Jump to date</label>
-              <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
-              <button class="date-submit" type="submit">Go</button>
-              {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
-            </form>
-            <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
-          </nav>
-        </details>
-      </div>
     </section>
 
-    <aside class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
+    <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{.DateSlug}}">
       <h2 id="home-pray-heading">Pray the hours</h2>
       <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
-      <div class="home-hour-links" aria-label="Hours for the day">
-        {{range .Hours}}
-        <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="page"{{end}}>
-          <span class="home-hour-link-name">{{.Name}}</span>
-          {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
-        </a>
-        {{end}}
-      </div>
-    </aside>
+      <nav class="home-hour-links" aria-label="Hours for the day">
+        <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
+          <h3 class="home-hour-group-label" id="home-hours-morning">Morning</h3>
+          <div class="home-hour-group-links">
+            {{range .Hours}}{{if or (eq .Slug "lauds") (eq .Slug "prime")}}
+            <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
+              <span class="home-hour-link-name">{{.Name}}</span>
+              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+            </a>
+            {{end}}{{end}}
+          </div>
+        </section>
+        <section class="home-hour-group home-hour-group-day" aria-labelledby="home-hours-day">
+          <h3 class="home-hour-group-label" id="home-hours-day">Day</h3>
+          <div class="home-hour-group-links">
+            {{range .Hours}}{{if or (eq .Slug "terce") (eq .Slug "sext") (eq .Slug "none")}}
+            <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
+              <span class="home-hour-link-name">{{.Name}}</span>
+              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+            </a>
+            {{end}}{{end}}
+          </div>
+        </section>
+        <section class="home-hour-group home-hour-group-evening" aria-labelledby="home-hours-evening">
+          <h3 class="home-hour-group-label" id="home-hours-evening">Evening</h3>
+          <div class="home-hour-group-links">
+            {{range .Hours}}{{if or (eq .Slug "vespers") (eq .Slug "compline")}}
+            <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
+              <span class="home-hour-link-name">{{.Name}}</span>
+              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+            </a>
+            {{end}}{{end}}
+          </div>
+        </section>
+      </nav>
+    </section>
+
+    {{/* Season rides the secondary control row: context without interrupting
+         the date → prayer invitation reading order. */}}
+    <div class="home-day-meta">
+      {{if .Season}}<p class="home-season">{{.Season}}</p>{{end}}
+      <details class="hour-date-nav home-date-nav">
+        <summary>Change date</summary>
+        <nav class="day-nav" aria-label="Date navigation">
+          <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
+          <form class="date-jump-form" action="/" method="get">
+            <label class="sr-only" for="home-date-jump">Jump to date</label>
+            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
+            <button class="date-submit" type="submit">Go</button>
+            {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
+          </form>
+          <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
+        </nav>
+      </details>
+    </div>
   </div>
 </div>
 {{end}}

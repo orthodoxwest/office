@@ -79,6 +79,17 @@ func TestHomeAndHourEmitDatedNavLinks(t *testing.T) {
 		if !strings.Contains(body, wantToday) {
 			t.Errorf("today link should be %s", wantToday)
 		}
+		for _, slug := range []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"} {
+			hourLink := `href="/` + slug + `/2026-01-15" data-hour="` + slug + `"`
+			if got := strings.Count(body, hourLink); got != 1 {
+				t.Errorf("home prayer directory has %d %s links, want exactly 1", got, slug)
+			}
+		}
+		for _, daypart := range []string{"Morning", "Day", "Evening"} {
+			if !strings.Contains(body, `>`+daypart+`</h3>`) {
+				t.Errorf("home prayer directory is missing %s heading", daypart)
+			}
+		}
 	})
 
 	t.Run("calendar chrome is dated", func(t *testing.T) {
