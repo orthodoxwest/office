@@ -3487,6 +3487,19 @@ body.page-reminders {
   background-size: 72rem 64rem;
 }
 
+/* At desktop scale both themes read best as still fields. The broad tonal
+   tiles remain useful on a phone, where only one small portion is visible; on
+   a wide canvas their radial pools become recognizable spotlights and compete
+   with the framed content. Rose plaster or apse blue carries the atmosphere
+   here, while localized surfaces and rules retain the material detail. */
+@media (min-width: 701px) {
+  body.page-home,
+  body.page-calendar,
+  body.page-reminders {
+    background-image: none;
+  }
+}
+
 /* Framed objects catch a little more light than the surrounding plaster.
    These remain matte surfaces: no photograph, noise, gloss, or animation. */
 .page-reminders fieldset,

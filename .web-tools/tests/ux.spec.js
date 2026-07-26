@@ -196,6 +196,17 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
     prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
   }));
   expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
+    "none",
+  );
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
+    "none",
+  );
 });
 
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
