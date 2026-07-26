@@ -157,9 +157,95 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
+  const rules = await page.evaluate(() => {
+    const isVisibleRule = (width, style, color) => {
+      const alpha = color.match(/^rgba?\([^,]+,[^,]+,[^,]+(?:,\s*([^)]+))?\)$/)?.[1];
+      const alphaValue = alpha === undefined ? 1 : Number.parseFloat(alpha);
+      return (
+        parseFloat(width) >= 1 &&
+        style === "solid" &&
+        color !== "transparent" &&
+        alphaValue > 0
+      );
+    };
+    const directory = getComputedStyle(document.querySelector(".home-hour-links"));
+    const label = getComputedStyle(document.querySelector(".home-hour-group-label"));
+    const dividedHour = getComputedStyle(
+      document.querySelector(".home-hour-group-morning .home-hour-link + .home-hour-link"),
+    );
+    const finalGroup = getComputedStyle(document.querySelector(".home-hour-group:last-child"));
+    return {
+      directoryLeft: isVisibleRule(
+        directory.borderLeftWidth,
+        directory.borderLeftStyle,
+        directory.borderLeftColor,
+      ),
+      directoryRight: isVisibleRule(
+        directory.borderRightWidth,
+        directory.borderRightStyle,
+        directory.borderRightColor,
+      ),
+      labelRight: isVisibleRule(
+        label.borderRightWidth,
+        label.borderRightStyle,
+        label.borderRightColor,
+      ),
+      dividedHourLeft: isVisibleRule(
+        dividedHour.borderLeftWidth,
+        dividedHour.borderLeftStyle,
+        dividedHour.borderLeftColor,
+      ),
+      finalGroupBottom: isVisibleRule(
+        finalGroup.borderBottomWidth,
+        finalGroup.borderBottomStyle,
+        finalGroup.borderBottomColor,
+      ),
+    };
+  });
+  expect(rules).toEqual({
+    directoryLeft: true,
+    directoryRight: true,
+    labelRight: true,
+    dividedHourLeft: true,
+    finalGroupBottom: true,
+  });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1),
   ).toBe(false);
+});
+
+test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem("office-text-size"));
+
+  for (const width of [701, 1024, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, `/?date=${testDate}`);
+
+    for (const size of ["default", "large", "small"]) {
+      if (size !== "default") {
+        await page.getByRole("button", { name: size === "large" ? "Larger text" : "Smaller text" }).click();
+      }
+
+      const geometry = await page.evaluate(() => {
+        const hero = document.querySelector(".home-hero").getBoundingClientRect();
+        const targetHeights = Array.from(document.querySelectorAll(".home-hour-link")).map(
+          (link) => link.getBoundingClientRect().height,
+        );
+        return {
+          overflows: document.documentElement.scrollWidth > window.innerWidth + 1,
+          heroContained: hero.left >= 0 && hero.right <= window.innerWidth,
+          shortestTarget: Math.min(...targetHeights),
+        };
+      });
+      expect(geometry.overflows, `${width}px/${size} should not overflow`).toBe(false);
+      expect(geometry.heroContained, `${width}px/${size} should contain the frame`).toBe(true);
+      expect(geometry.shortestTarget, `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(44);
+
+      if (size === "large") {
+        await page.getByRole("button", { name: "Default text size" }).click();
+      }
+    }
+  }
 });
 
 test("appearance choice persists across prayer navigation", async ({ page }) => {

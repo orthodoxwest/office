@@ -2634,12 +2634,18 @@ body.season-eastertide {
    The restrained service-book table scales from phone to desktop without
    becoming a different interaction or reading order. */
 .page-home .home-hero {
+  /* Parish vocabulary in miniature: rose plaster held by oak uprights, with
+     a very quiet sage inscription band. These remain flat colour and rules,
+     not a photographic or simulated-material texture. */
+  --frontispiece-frame: var(--border);
+  --frontispiece-rule: var(--border);
+  --frontispiece-band: transparent;
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
   gap: 0;
   padding: 0.95rem 1rem 1rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--frontispiece-frame);
   border-top: 3px solid var(--day-color, var(--border));
   background: var(--surface);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
@@ -2738,17 +2744,18 @@ body.season-eastertide {
   display: grid;
   grid-template-columns: 4.4rem minmax(0, 1fr);
   align-items: stretch;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--frontispiece-rule);
 }
 
 .page-home .home-hour-group:last-child {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--frontispiece-rule);
 }
 
 .page-home .home-hour-group-label {
   display: flex;
   align-items: center;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--frontispiece-rule);
+  background: var(--frontispiece-band);
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: normal;
@@ -2785,7 +2792,7 @@ body.season-eastertide {
 }
 
 .page-home .home-hour-link + .home-hour-link {
-  border-left: 1px solid var(--border);
+  border-left: 1px solid var(--frontispiece-rule);
 }
 
 .page-home .home-hour-link.is-current {
@@ -2801,7 +2808,7 @@ body.season-eastertide {
   justify-content: center;
   margin-top: 0.7rem;
   padding-top: 0.3rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--frontispiece-rule);
 }
 
 .page-home .home-day-meta .home-date-nav {
@@ -2822,23 +2829,87 @@ body.season-eastertide {
 
 @media (min-width: 701px) {
   .page-home .home-hero {
-    padding: 1.25rem 1.5rem 1.15rem;
+    --frontispiece-frame: rgba(87, 52, 33, 0.3);
+    --frontispiece-rule: rgba(107, 58, 31, 0.22);
+    --frontispiece-band: rgba(87, 94, 65, 0.055);
+    max-width: 38rem;
+    padding: 1.45rem 1.75rem 1.25rem;
+    border-inline-width: 2px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 32%),
+      var(--surface);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      0 0.3rem 1.25rem rgba(54, 31, 20, 0.045);
   }
 
   .page-home .home h1 {
-    font-size: 1.55rem;
+    font-size: 1.62rem;
+    letter-spacing: 0.015em;
   }
 
   .page-home .home .feast {
-    font-size: 1.15rem;
+    font-size: 1.17rem;
   }
 
   .page-home .home-day-head {
+    margin-bottom: 1.1rem;
+  }
+
+  .page-home .home-prayer-card h2 {
+    display: grid;
+    grid-template-columns: minmax(1.5rem, 1fr) auto minmax(1.5rem, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.55rem;
+    color: var(--accent);
+    letter-spacing: 0.115em;
+  }
+
+  .page-home .home-prayer-card h2::before,
+  .page-home .home-prayer-card h2::after {
+    content: "";
+    border-top: 1px solid var(--frontispiece-rule);
+  }
+
+  .page-home .pray-now-wrap {
     margin-bottom: 0.95rem;
   }
 
+  .page-home .pray-now,
+  .page-home .pray-now:hover {
+    padding-block: 0.75rem 0.78rem;
+    font-size: 1.25rem;
+  }
+
   .page-home .home-hour-group {
-    grid-template-columns: 5rem minmax(0, 1fr);
+    grid-template-columns: 5.25rem minmax(0, 1fr);
+  }
+
+  .page-home .home-hour-links {
+    /* Complete the table frame. Previously the internal dividers ended at an
+       open left and right edge, which was conspicuous at desktop scale. */
+    border-inline: 1px solid var(--frontispiece-rule);
+  }
+
+  .page-home .home-hour-group-label {
+    justify-content: center;
+    padding-inline: 0.5rem;
+    color: var(--accent);
+  }
+
+  .page-home .home-hour-link {
+    min-height: max(2.9rem, 46px);
+    padding-block: 0.45rem;
+  }
+
+  .page-home .home-hour-link-name {
+    font-size: 1rem;
+  }
+
+  .page-home .home-day-meta {
+    margin-top: 0.9rem;
+    padding-top: 0.45rem;
   }
 }
 
@@ -2857,6 +2928,7 @@ body.season-eastertide {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
+    background: var(--surface);
     box-shadow: none;
   }
 
@@ -2882,7 +2954,24 @@ body.season-eastertide {
 }
 
 :root[data-theme="dark"] .page-home .home-hero {
+  background: var(--surface);
   box-shadow: none;
+}
+
+@media (min-width: 701px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .page-home .home-hero {
+    --frontispiece-frame: rgba(208, 176, 106, 0.34);
+    --frontispiece-rule: rgba(208, 176, 106, 0.24);
+    --frontispiece-band: rgba(208, 176, 106, 0.045);
+  }
+}
+
+@media (min-width: 701px) {
+  :root[data-theme="dark"] .page-home .home-hero {
+    --frontispiece-frame: rgba(208, 176, 106, 0.34);
+    --frontispiece-rule: rgba(208, 176, 106, 0.24);
+    --frontispiece-band: rgba(208, 176, 106, 0.045);
+  }
 }
 
 :root[data-theme="dark"] .page-home .home-hour-link {
