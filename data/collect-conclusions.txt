@@ -75,6 +75,9 @@ proper/good-friday/collect who-liveth
 proper/holy-thursday/collect who-liveth
 proper/nativity-sunday-within-octave/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth
+# Diurnal p. 470 prints the body ending "...by the same thy Son Jesus Christ our
+# Lord. Who with thee..." — our text had dropped that trailing clause, which is
+# what makes this Son-at-the-end; restored with the collect.
 proper/purification-bvm/collect who-liveth
 proper/st-stephen/collect who-liveth
 proper/st-stephen/commemoration-collect who-liveth
