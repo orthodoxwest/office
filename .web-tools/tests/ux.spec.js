@@ -35,6 +35,30 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("hour progress completes with the prayer, before the administrative epilogue", async ({
+  page,
+}) => {
+  await openDatedPage(page, `/lauds/${testDate}`);
+
+  const progress = page.getByRole("progressbar", { name: "Progress through the prayer text" });
+  await expect(progress).toHaveAttribute("aria-valuenow", "0");
+
+  const boundary = await page.evaluate(() => {
+    const prayer = document.querySelector(".elements");
+    const prayerEnd = prayer.getBoundingClientRect().bottom + window.scrollY;
+    return {
+      completionScroll: Math.max(0, prayerEnd - window.innerHeight),
+      documentEnd: document.documentElement.scrollHeight - window.innerHeight,
+    };
+  });
+  expect(boundary.completionScroll).toBeLessThan(boundary.documentEnd);
+
+  await page.evaluate((scrollTop) => window.scrollTo(0, scrollTop), boundary.completionScroll);
+  await expect.poll(async () => Number(await progress.getAttribute("aria-valuenow"))).toBeGreaterThanOrEqual(
+    99,
+  );
+});
+
 test("home frontispiece keeps source, focus, and visual order aligned", async ({ page }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 

@@ -67,6 +67,7 @@
   --banner-bg: #f4ebe4;
   --surface: #f6eee6;
   --surface-edge: rgba(107, 58, 31, 0.12);
+  --pressed-wash: rgba(107, 58, 31, 0.09);
 }
 
 * {
@@ -443,9 +444,12 @@ footer .text-size-switch {
     width: min(21rem, calc(100vw - 2rem));
     padding: 0.65rem;
     gap: 0.15rem;
-    background: var(--bg);
+    background: var(--surface);
     border: 1px solid var(--border);
-    box-shadow: 0 0.65rem 1.5rem rgba(26, 26, 26, 0.12);
+    border-top: 2px solid var(--ornament-line);
+    box-shadow:
+      inset 0 1px 0 var(--surface-edge),
+      0 0.45rem 1rem rgba(36, 28, 23, 0.09);
   }
 
   .site-menu:not([open]) > nav {
@@ -1157,7 +1161,7 @@ footer::before {
   gap: 0.8rem;
   max-width: 38rem;
   width: 100%;
-  margin: 1.5rem auto 0;
+  margin: 2.75rem auto 0;
 }
 
 /* Diamond separator, after the lorica boards lining the nave roof */
@@ -2249,6 +2253,7 @@ footer::before {
     --banner-bg: #182230;
     --surface: #172232;
     --surface-edge: rgba(208, 176, 106, 0.18);
+    --pressed-wash: rgba(208, 176, 106, 0.12);
   }
 }
 
@@ -2272,6 +2277,7 @@ footer::before {
   --banner-bg: #182230;
   --surface: #172232;
   --surface-edge: rgba(208, 176, 106, 0.18);
+  --pressed-wash: rgba(208, 176, 106, 0.12);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -3401,6 +3407,35 @@ body.season-eastertide {
 .continuation-label,
 .home-hour-link-state {
   user-select: none;
+}
+
+/* Pressed controls darken inward like a thumb settling on a page edge.
+   Background only: no bounce, scale, glow, or delayed animation, and no
+   effect on selectable prayer text. Individual controls keep their own
+   borders and typography while sharing one material response. */
+.site-menu > summary:active,
+.site-menu nav a:active,
+.theme-option:active,
+.text-size-option:active,
+.hour-date-nav > summary:active,
+.day-nav a:active,
+.home-hour-link:active,
+.hour-continuation a:active,
+.month-jump a:active,
+.month-top:active,
+.year-nav a:active,
+.site-banner button:active {
+  background-color: var(--pressed-wash);
+  box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+@media (max-width: 540px) {
+  .hour-continuation a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: max(2.75rem, 44px);
+  }
 }
 
 /* ── Print ──
