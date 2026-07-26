@@ -43,7 +43,9 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(`</p>`)
 	case models.Antiphon:
 		if elem.Label != "" {
-			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label">`)
+			// The label is the antiphon's Latin title ("Salve Regina"); the
+			// body beneath it is English.
+			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label" lang="la">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</h3>`)
 			sb.WriteString(string(renderMarianAntiphon(elem.Text)))
@@ -71,7 +73,9 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 	case models.Hymn:
 		sb.WriteString(`<div class="hymn"><h2 class="section-heading">Hymn</h2>`)
 		if elem.Label != "" {
-			sb.WriteString(`<p class="hymn-title">`)
+			// A composed hymn's label is its Latin incipit (see
+			// texts.SplitHymnTitle); the stanzas below are English.
+			sb.WriteString(`<p class="hymn-title" lang="la">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</p>`)
 		}
@@ -421,7 +425,8 @@ func renderHymnStanzas(text string) template.HTML {
 
 	sb.WriteString(`<div class="hymn-verses">`)
 	if hymn.Title != "" {
-		sb.WriteString(`<p class="hymn-latin">`)
+		// Latin incipit standing above English stanzas.
+		sb.WriteString(`<p class="hymn-latin" lang="la">`)
 		sb.WriteString(template.HTMLEscapeString(hymn.Title))
 		sb.WriteString(`</p>`)
 	}

@@ -43,6 +43,14 @@
      See "Seasonal ornament" at the foot of this file. */
   --ornament: var(--gold);
   --ornament-line: var(--gold-line);
+  /* The two stops of the gilded caps, about 18% apart in lightness so gold
+     reads as leaf catching light rather than flat paint. Stated as literal
+     colours rather than derived from --ornament, because a gradient needs a
+     pair and no season wants the same pair: the veil is near-neutral and must
+     not simply be gold made grey. Every season that moves --ornament moves
+     these with it. See "Seasonal ornament" at the foot of this file. */
+  --ornament-hi: #b98d3c;
+  --ornament-lo: #7d5c1c;
   /* Darker than plaster alone would need. Muted text also sits on --surface
      and on the gold/oak washes (today's ordo row, the current hour chip),
      where the old value fell to 4.05–4.47:1 — under AA at the small sizes it
@@ -514,10 +522,12 @@ footer::before {
   font-size: 0.82rem;
 }
 
+/* A sentence with counts, not a label: lowercase goes to small caps and the
+   leading capital stays, which is the running-text setting. */
 .assurance-panel > summary {
   cursor: pointer;
   color: var(--accent);
-  font-variant: small-caps;
+  font-variant-caps: small-caps;
   letter-spacing: 0.04em;
 }
 
@@ -795,10 +805,10 @@ footer::before {
 }
 
 .home-prayer-card h2 {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: normal;
-  font-variant: small-caps;
-  letter-spacing: 0.12em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 0.7rem;
 }
@@ -1215,12 +1225,18 @@ footer::before {
   margin-bottom: 0;
 }
 
+/* Real small caps from EB Garamond's own smcp/c2sc glyphs. `text-transform:
+   uppercase` used to sit alongside `font-variant: small-caps` and silently
+   defeated it — the shaper only ever saw capitals, so nothing was left to
+   shrink and the heading rendered as full caps. `all-small-caps` engages both
+   features, so a mixed-case label sets as one even small-cap line. Real small
+   caps are drawn wider than synthesised ones, so the tracking comes in a
+   little. */
 .section-heading {
-  font-size: 1.05rem;
+  font-size: 1.12rem;
   font-weight: normal;
-  font-variant: small-caps;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.13em;
   color: var(--text);
   text-align: center;
   margin-top: 1.45rem;
@@ -1260,11 +1276,13 @@ footer::before {
   text-align: center;
 }
 
+/* Rubrical sigil "Ant." — an abbreviation, so it sets entirely in small caps
+   rather than a full-size A leading three small letters. */
 .antiphon em {
   font-style: normal;
   color: var(--rubric);
-  font-variant: small-caps;
-  letter-spacing: 0.08em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
   margin-right: 0.3rem;
 }
 
@@ -1274,12 +1292,14 @@ footer::before {
   border: none;
 }
 
+/* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
+   and the line reads as one even band rather than a cap followed by a dip. */
 .item-label {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: normal;
-  font-variant: small-caps;
+  font-variant-caps: all-small-caps;
   text-align: center;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   color: var(--muted);
   margin-bottom: 0.35rem;
 }
@@ -1499,14 +1519,14 @@ footer::before {
   margin-top: 0.35rem;
 }
 
+/* Matches .section-heading, including its real small caps. */
 .session-prayers summary {
   cursor: pointer;
   list-style: none;
-  font-size: 1.05rem;
+  font-size: 1.12rem;
   font-weight: normal;
-  font-variant: small-caps;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.13em;
   color: var(--text);
   text-align: center;
   margin-top: 1.45rem;
@@ -1523,7 +1543,6 @@ footer::before {
   color: var(--gold-line);
   font-size: 0.75em;
   letter-spacing: 0;
-  text-transform: none;
 }
 
 .session-prayers[open] > summary::after {
@@ -2206,6 +2225,8 @@ footer::before {
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
+    --ornament-hi: #e7d295;
+    --ornament-lo: #c0a25a;
     --muted: #9aa4b0;
     --border: #2a3648;
     --rubric: #d47070;
@@ -2227,6 +2248,8 @@ footer::before {
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
+  --ornament-hi: #e7d295;
+  --ornament-lo: #c0a25a;
   --muted: #9aa4b0;
   --border: #2a3648;
   --rubric: #d47070;
@@ -2362,36 +2385,59 @@ footer::before {
    apse    veiled  #b0a4c2 on #121c28 = 7.3:1  (gold baseline 9.3:1)
    apse    paschal #e6cf8c on #121c28 = 11.2:1 */
 
+/* The gilded caps take a gradient, so each season also carries a stop pair
+   (--ornament-hi / --ornament-lo) alongside its flat --ornament. Each pair
+   keeps the default's ~18% lightness spread and straddles that season's own
+   --ornament, so the drop caps and the ✠ are veiled or brightened with
+   everything else instead of staying gold through Passiontide.
+
+   Veiled: the pair is built from #756a7e / #b0a4c2 at the same hue and low
+   chroma, so the caps read as a grey-violet cloth with a fold in it, not as
+   gold seen through a filter. Paschal: light gains chroma at the same
+   lightness and dark gains lightness, matching how --ornament itself moves. */
+
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;
+  --ornament-hi: #8d8395;
+  --ornament-lo: #605469;
 }
 
 body.season-eastertide {
   --ornament: #a4731a;
   --ornament-line: #d0b06c;
+  --ornament-hi: #c8922d;
+  --ornament-lo: #886011;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body.season-passiontide {
     --ornament: #b0a4c2;
     --ornament-line: #565070;
+    --ornament-hi: #cac1d7;
+    --ornament-lo: #988aad;
   }
 
   :root:not([data-theme="light"]) body.season-eastertide {
     --ornament: #e6cf8c;
     --ornament-line: #7a6a44;
+    --ornament-hi: #f2e2b1;
+    --ornament-lo: #d3b86f;
   }
 }
 
 :root[data-theme="dark"] body.season-passiontide {
   --ornament: #b0a4c2;
   --ornament-line: #565070;
+  --ornament-hi: #cac1d7;
+  --ornament-lo: #988aad;
 }
 
 :root[data-theme="dark"] body.season-eastertide {
   --ornament: #e6cf8c;
   --ornament-line: #7a6a44;
+  --ornament-hi: #f2e2b1;
+  --ornament-lo: #d3b86f;
 }
 
 /* ── Narrow screens ── */
@@ -2740,8 +2786,8 @@ body.season-eastertide {
 .reminders legend {
   padding: 0 0.5em;
   color: var(--accent);
-  font-variant: small-caps;
-  letter-spacing: 0.06em;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.05em;
 }
 
 .reminder-hour-row {
@@ -2836,4 +2882,150 @@ body.season-eastertide {
 
 .reminder-help a {
   color: var(--accent);
+}
+
+/* ===== Typographic polish =====
+   Appended as one block so the rules that need to win on source order (the
+   print flattening of the gilded caps) stay next to what they undo. */
+
+/* ── Old-style figures ──
+   Text figures sit on the baseline with ascenders and descenders, so numbers
+   set beside prayer text read as part of the line instead of interrupting it
+   with a row of full-height slabs. Only where numbers meet text: form
+   controls (date picker, time inputs, the reminder select) keep lining
+   figures, which is what a control is expected to show.
+
+   The bold face is subset without OpenType features, so bold numerals — the
+   calendar's day numbers — keep lining figures regardless. */
+.hour-meta,
+.item-label,
+.chapter-ref,
+.scripture-ref,
+.psalm-verses .verse-num,
+.gloria-patri,
+.home h1,
+.calendar-header h1,
+.year-nav a,
+.month-table,
+.day-office-hour {
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* ── Selection ──
+   A gold wash rather than the browser's blue: selecting a verse to copy
+   should look like light falling on the page, not like a form field. Text
+   colour is left at the theme's own so the selected words stay legible. */
+::selection {
+  background: rgba(201, 172, 114, 0.45);
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) ::selection {
+    background: rgba(216, 188, 116, 0.3);
+  }
+}
+
+:root[data-theme="dark"] ::selection {
+  background: rgba(216, 188, 116, 0.3);
+}
+
+/* ── Gilded caps ──
+   Gold leaf is never one flat tone: it catches light across the stroke. Two
+   stops about 18% apart in lightness, raked at 145°, give the drop caps and
+   the ✠ that shift without turning them into an effect. Gated on
+   background-clip so a browser that cannot clip the gradient to the glyph
+   never gets `color: transparent` and an invisible letter.
+
+   The stops are the --ornament-hi / --ornament-lo tokens, so this one rule
+   covers both appearances and every season: dark mode redeclares the pair on
+   :root, and Passiontide and Paschaltide redeclare it on <body>. Hard-coding
+   gold here would have left the caps gilt while the rest of the page was
+   veiled. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .cross,
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+    background-image: linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* ── Desktop scrollbar ──
+   A thin oak thumb on an unpainted track, so the browser's grey slab does not
+   sit beside the plaster. Desktop only: touch scrollbars are transient
+   overlays and mobile is left exactly as it was. */
+@media (min-width: 701px) {
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(107, 58, 31, 0.32) transparent;
+  }
+}
+
+@media (min-width: 701px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    scrollbar-color: rgba(208, 176, 106, 0.26) transparent;
+  }
+}
+
+@media (min-width: 701px) {
+  :root[data-theme="dark"] {
+    scrollbar-color: rgba(208, 176, 106, 0.26) transparent;
+  }
+}
+
+/* ── Touch chrome ──
+   Tapping navigation should not flash a grey box over the page, and a
+   long-press on a menu item should not begin a selection. Strictly limited to
+   navigation chrome: every word of the office itself stays selectable and
+   copyable, as do dates, feast names and the assurance panel. */
+.site-brand,
+.site-menu > summary,
+.site-menu nav a,
+.theme-option,
+.hour-date-nav > summary,
+.session-prayers > summary,
+.day-nav a,
+.home-hour-link,
+.hour-continuation a,
+.month-jump a,
+.month-top,
+.year-nav a,
+.site-banner button,
+.skip-link {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.site-brand,
+.site-menu > summary,
+.site-menu nav a,
+.theme-option,
+.hour-date-nav > summary,
+.day-nav a,
+.home-hour-link,
+.month-jump a,
+.month-top,
+.continuation-label,
+.home-hour-link-state {
+  user-select: none;
+}
+
+/* ── Print ──
+   Gold prints as pale grey, so the printed caps go back to the flat dark ink
+   the print sheet already asks for. These must undo the gradient, not just
+   restyle it: without clearing the background image the glyph would print as
+   an empty outline. */
+@media print {
+  .cross,
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+    background-image: none;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #444;
+  }
 }

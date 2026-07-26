@@ -139,6 +139,10 @@ func TestOnlyOrnamentsAreSeasonallyRetinted(t *testing.T) {
 		// The ornaments themselves.
 		".cross {\n  color: var(--ornament);",
 		"border-top: 3px double var(--ornament-line);",
+		// The gilded caps are a gradient, so they read the stop pair rather
+		// than --ornament. Hard-coded stops here would leave the drop caps and
+		// the ✠ gilt while every other ornament was veiled.
+		"linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%)",
 	} {
 		if !strings.Contains(style, want) {
 			t.Errorf("style.css is missing %q", want)
@@ -162,5 +166,42 @@ func TestOnlyOrnamentsAreSeasonallyRetinted(t *testing.T) {
 		if n := strings.Count(style, "body."+season+" {"); n != 3 {
 			t.Errorf("body.%s is declared %d times, want 3 (default, prefers-dark, data-theme=dark)", season, n)
 		}
+	}
+
+	// A season that retinted the flat ornament but left the gradient stops
+	// behind would veil every ornament except the drop caps and the ✠, which
+	// would stay gilt. Every season block must carry the whole set.
+	for _, decl := range seasonBlocks(style) {
+		for _, token := range []string{"--ornament:", "--ornament-line:", "--ornament-hi:", "--ornament-lo:"} {
+			if !strings.Contains(decl.body, token) {
+				t.Errorf("%s does not declare %s; every season must retint the whole ornament set, gradient stops included", decl.selector, token)
+			}
+		}
+	}
+}
+
+// seasonBlocks returns each `…body.season-… { … }` rule in the stylesheet.
+type cssBlock struct {
+	selector string
+	body     string
+}
+
+func seasonBlocks(style string) []cssBlock {
+	var blocks []cssBlock
+	for rest := style; ; {
+		i := strings.Index(rest, "body.season-")
+		if i < 0 {
+			return blocks
+		}
+		open := strings.Index(rest[i:], "{")
+		close := strings.Index(rest[i:], "}")
+		if open < 0 || close < 0 {
+			return blocks
+		}
+		blocks = append(blocks, cssBlock{
+			selector: strings.TrimSpace(rest[i : i+open]),
+			body:     rest[i+open : i+close],
+		})
+		rest = rest[i+close:]
 	}
 }
