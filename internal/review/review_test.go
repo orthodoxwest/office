@@ -63,6 +63,14 @@ func TestHashHourIncludesContent(t *testing.T) {
 	if HashHour(a) == HashHour(c) {
 		t.Error("compositions with different rubrics should hash differently")
 	}
+
+	// A Latin incipit is printed on the page, and only a reader can catch one
+	// paired with the wrong psalm, so changing it must stale the sign-off.
+	d := sampleHour(date, "Almighty and everlasting God...")
+	d.Sections[0].Elements[0].Incipit = "Deus misereatur nostri"
+	if HashHour(a) == HashHour(d) {
+		t.Error("compositions with different incipits should hash differently")
+	}
 }
 
 func TestHashHourExcludesAssuranceMetadata(t *testing.T) {

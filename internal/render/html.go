@@ -59,8 +59,18 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(className)
 		sb.WriteString(`">`)
 		if elem.Label != "" {
+			// Diurnal convention: the Latin incipit identifies the psalm
+			// beside its number. It shares the label line so it costs no
+			// vertical space on a phone; the separator is hidden from
+			// assistive technology, which reads label then incipit.
 			sb.WriteString(`<h3 class="item-label">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
+			if elem.Incipit != "" {
+				sb.WriteString(`<span class="label-sep" aria-hidden="true"> · </span>`)
+				sb.WriteString(`<span class="psalm-incipit" lang="la">`)
+				sb.WriteString(template.HTMLEscapeString(elem.Incipit))
+				sb.WriteString(`</span>`)
+			}
 			sb.WriteString(`</h3>`)
 		}
 		sb.WriteString(string(renderPsalmVerses(elem.Text)))

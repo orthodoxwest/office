@@ -33,6 +33,11 @@ type VoiceSpan struct {
 }
 
 // OfficeElement represents a single element in an office hour.
+// Incipit is the Latin incipit a printed diurnal sets beside a psalm or
+// canticle label ("Psalm 67 · Deus misereatur"); it is empty for every other
+// element type. Unlike SourceRef it is displayed text, so it takes part in
+// review hashes.
+//
 // SlotRef is set for elements that went through proper resolution. SourceRef
 // is the primary corpus key that supplied the rendered text. SourceRefs is the
 // complete dependency set when composition used more than one entry (for
@@ -46,6 +51,7 @@ type OfficeElement struct {
 	Type       ElementType
 	Text       string
 	Label      string
+	Incipit    string
 	Rubric     string
 	Voice      []VoiceSpan
 	SlotRef    string

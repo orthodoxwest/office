@@ -1209,6 +1209,15 @@ footer::before {
   margin-bottom: 0.35rem;
 }
 
+/* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
+   it. Italic and un-small-capped so it reads as the Latin title rather than
+   as more of the label; it wraps with the label on narrow screens. */
+.psalm-incipit {
+  font-variant: normal;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
 .hymn-title {
   font-style: italic;
   color: var(--muted);

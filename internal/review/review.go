@@ -84,6 +84,10 @@ type Manifest struct {
 // hash the same. Liturgical content is included; assurance metadata such as
 // source keys and decision traces is excluded so observability changes do not
 // invalidate a sign-off on an otherwise unchanged office.
+//
+// Psalm incipits count as content: they are printed on the page, and pairing
+// one with the wrong psalm is a mistake only a reader can catch, so changing
+// one must make the affected units stale.
 func HashHour(h *models.OfficeHour) string {
 	var b strings.Builder
 	b.WriteString(h.Hour)
@@ -105,6 +109,8 @@ func HashHour(h *models.OfficeHour) string {
 			b.WriteString(string(e.Type))
 			b.WriteByte(0x1f)
 			b.WriteString(e.Label)
+			b.WriteByte(0x1f)
+			b.WriteString(e.Incipit)
 			b.WriteByte(0x1f)
 			b.WriteString(e.Rubric)
 			b.WriteByte(0x1f)
