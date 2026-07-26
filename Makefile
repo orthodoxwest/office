@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet mutate-ratchet-models mutate-ratchet-calendar mutate-ratchet-office
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -114,12 +114,11 @@ endif
 GREMLINS = $(GREMLINS_BIN)/gremlins
 MUTATE_PKGS ?= ./internal/models/ ./internal/calendar/ ./internal/office/ ./internal/texts/
 MUTATE_DIFF_BASE ?= master
-MUTATE_MODELS_EFFICACY_MIN ?= 100
-MUTATE_MODELS_MCOVER_MIN ?= 100
-MUTATE_CALENDAR_EFFICACY_MIN ?= 86
-MUTATE_CALENDAR_MCOVER_MIN ?= 92
-MUTATE_OFFICE_EFFICACY_MIN ?= 86
-MUTATE_OFFICE_MCOVER_MIN ?= 92
+MUTATE_RATCHET ?=
+MUTATE_RATCHETS ?= \
+	models:./internal/models/:100:100 \
+	calendar:./internal/calendar/:86:92 \
+	office:./internal/office/:86:92
 
 # In --diff mode gremlins measures its baseline over the whole suite (~30s)
 # rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
@@ -150,25 +149,35 @@ mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF
 	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
 		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
 
-mutate-ratchet: mutate-ratchet-models mutate-ratchet-calendar mutate-ratchet-office ## Enforce core package mutation-score floors
-
-define run-mutation-ratchet
-	@report=$$(mktemp); \
-	trap 'rm -f "$$report"' EXIT; \
-	$(GREMLINS) unleash $(1) --output "$$report" || exit 1; \
-	python3 scripts/check_mutation_threshold.py "$$report" \
-		--min-efficacy $(2) \
-		--min-mutant-coverage $(3)
-endef
-
-mutate-ratchet-models: install-gremlins
-	$(call run-mutation-ratchet,./internal/models/,$(MUTATE_MODELS_EFFICACY_MIN),$(MUTATE_MODELS_MCOVER_MIN))
-
-mutate-ratchet-calendar: install-gremlins
-	$(call run-mutation-ratchet,./internal/calendar/,$(MUTATE_CALENDAR_EFFICACY_MIN),$(MUTATE_CALENDAR_MCOVER_MIN))
-
-mutate-ratchet-office: install-gremlins
-	$(call run-mutation-ratchet,./internal/office/,$(MUTATE_OFFICE_EFFICACY_MIN),$(MUTATE_OFFICE_MCOVER_MIN))
+mutate-ratchet: install-gremlins ## Enforce core mutation floors (MUTATE_RATCHET=models selects one package)
+	@selected='$(MUTATE_RATCHET)'; \
+	found=0; \
+	report=''; \
+	trap 'test -z "$$report" || rm -f "$$report"' EXIT HUP INT TERM; \
+	for spec in $(MUTATE_RATCHETS); do \
+		package=$${spec%%:*}; \
+		values=$${spec#*:}; \
+		path=$${values%%:*}; \
+		values=$${values#*:}; \
+		efficacy=$${values%%:*}; \
+		mcover=$${values#*:}; \
+		if test -n "$$selected" && test "$$selected" != "$$package"; then \
+			continue; \
+		fi; \
+		found=1; \
+		echo "==> mutation ratchet: $$package"; \
+		report=$$(mktemp); \
+		$(GREMLINS) unleash "$$path" --output "$$report" || exit 1; \
+		python3 scripts/check_mutation_threshold.py "$$report" \
+			--min-efficacy "$$efficacy" \
+			--min-mutant-coverage "$$mcover" || exit 1; \
+		rm -f "$$report"; \
+		report=''; \
+	done; \
+	if test "$$found" -eq 0; then \
+		echo "Unknown mutation ratchet: $$selected" >&2; \
+		exit 2; \
+	fi
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

@@ -15,6 +15,7 @@ but incorrect office rather than a crash.
 ```bash
 make mutate                              # models, calendar, office, texts; report only
 make mutate-ratchet                      # enforce models/calendar/office floors
+make mutate-ratchet MUTATE_RATCHET=models     # enforce one package's floors
 make mutate MUTATE_PKGS=./internal/calendar/   # one package
 make mutate-diff                         # only lines your branch changes vs master
 ```
@@ -105,12 +106,11 @@ mutant to be both covered and killed. Calendar and office start roughly one
 percentage point below their fresh baselines to avoid making small timing
 variations into CI flakes.
 
-The package-specific values live in the Makefile as
-`MUTATE_<PACKAGE>_EFFICACY_MIN` and `MUTATE_<PACKAGE>_MCOVER_MIN`. Raise them
-after tests improve the full-package result. The Make targets check Gremlins'
-JSON output with `scripts/check_mutation_threshold.py`; Gremlins v0.6.0 does
-not reliably apply its nested threshold CLI flags. Do not put these floors in
-`.gremlins.yaml`: its global values also apply to the reporting-only,
+The package paths and floors live in the Makefile's `MUTATE_RATCHETS` entries.
+Raise them after tests improve the full-package result. The Make target checks
+Gremlins' JSON output with `scripts/check_mutation_threshold.py`; Gremlins
+v0.6.0 does not reliably apply its nested threshold CLI flags. Do not put these
+floors in `.gremlins.yaml`: its global values also apply to the reporting-only,
 changed-line subset, whose score is not comparable to a whole package.
 
 ## Original baseline

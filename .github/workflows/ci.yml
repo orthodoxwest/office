@@ -395,7 +395,7 @@ jobs:
             go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
 
       - name: Enforce mutation ratchet
-        run: make mutate-ratchet-${{ matrix.package }}
+        run: make mutate-ratchet MUTATE_RATCHET=${{ matrix.package }}
 
   mutation:
     name: Mutation
