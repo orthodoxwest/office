@@ -171,6 +171,33 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   expect(apseState.borderStyle).toBe("double");
 });
 
+test("parish material stays in non-liturgical rooms and off the prayer page", async ({
+  page,
+}) => {
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  const naveMaterial = await page.evaluate(() => ({
+    page: getComputedStyle(document.body).backgroundImage,
+    inscriptionBand: getComputedStyle(
+      document.querySelector(".home-hour-group-label"),
+    ).backgroundColor,
+  }));
+  expect(naveMaterial.page).not.toBe("none");
+  expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  const apseMaterial = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  expect(apseMaterial).not.toBe("none");
+  expect(apseMaterial).not.toBe(naveMaterial.page);
+
+  await page.goto(`/lauds/${testDate}`);
+  const prayerMaterial = await page.evaluate(() => ({
+    page: getComputedStyle(document.body).backgroundImage,
+    prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
+  }));
+  expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);

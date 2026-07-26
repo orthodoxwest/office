@@ -68,6 +68,19 @@
   --surface: #f6eee6;
   --surface-edge: rgba(107, 58, 31, 0.12);
   --pressed-wash: rgba(107, 58, 31, 0.09);
+  /* Broad tonal fields, not grain: these translate the hand-worked parish
+     plaster without putting a bitmap or a repeating noise texture behind
+     text. They are applied only to non-liturgical rooms near the foot of this
+     file; hour pages retain the still, flat --bg field. */
+  --page-material:
+    radial-gradient(ellipse at 14% 2%, rgba(139, 80, 61, 0.038), transparent 43%),
+    radial-gradient(ellipse at 88% 27%, rgba(190, 127, 104, 0.026), transparent 46%),
+    linear-gradient(103deg, transparent 0 43%, rgba(126, 74, 57, 0.012) 51%, transparent 60%);
+  --surface-material:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.23), transparent 36%),
+    radial-gradient(ellipse at 100% 100%, rgba(139, 80, 61, 0.026), transparent 58%);
+  --material-highlight: rgba(255, 255, 255, 0.38);
+  --inscription-wash: rgba(87, 94, 65, 0.055);
 }
 
 * {
@@ -2254,6 +2267,15 @@ footer::before {
     --surface: #172232;
     --surface-edge: rgba(208, 176, 106, 0.18);
     --pressed-wash: rgba(208, 176, 106, 0.12);
+    --page-material:
+      radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
+      radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
+      radial-gradient(ellipse at 45% 88%, rgba(5, 12, 20, 0.09), transparent 52%);
+    --surface-material:
+      radial-gradient(ellipse at 18% 0%, rgba(103, 132, 155, 0.075), transparent 48%),
+      linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
+    --material-highlight: rgba(208, 176, 106, 0.065);
+    --inscription-wash: rgba(208, 176, 106, 0.04);
   }
 }
 
@@ -2278,6 +2300,15 @@ footer::before {
   --surface: #172232;
   --surface-edge: rgba(208, 176, 106, 0.18);
   --pressed-wash: rgba(208, 176, 106, 0.12);
+  --page-material:
+    radial-gradient(ellipse at 12% 0%, rgba(104, 133, 156, 0.12), transparent 42%),
+    radial-gradient(ellipse at 86% 31%, rgba(55, 82, 106, 0.1), transparent 48%),
+    radial-gradient(ellipse at 45% 88%, rgba(5, 12, 20, 0.09), transparent 52%);
+  --surface-material:
+    radial-gradient(ellipse at 18% 0%, rgba(103, 132, 155, 0.075), transparent 48%),
+    linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
+  --material-highlight: rgba(208, 176, 106, 0.065);
+  --inscription-wash: rgba(208, 176, 106, 0.04);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2645,7 +2676,7 @@ body.season-eastertide {
      not a photographic or simulated-material texture. */
   --frontispiece-frame: var(--border);
   --frontispiece-rule: var(--border);
-  --frontispiece-band: transparent;
+  --frontispiece-band: var(--inscription-wash);
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
@@ -2837,7 +2868,7 @@ body.season-eastertide {
   .page-home .home-hero {
     --frontispiece-frame: rgba(87, 52, 33, 0.3);
     --frontispiece-rule: rgba(107, 58, 31, 0.22);
-    --frontispiece-band: rgba(87, 94, 65, 0.055);
+    --frontispiece-band: var(--inscription-wash);
     max-width: 38rem;
     padding: 1.45rem 1.75rem 1.25rem;
     border-inline-width: 2px;
@@ -3438,12 +3469,71 @@ body.season-eastertide {
   }
 }
 
+/* ── Parish material prototype ──
+   The church appears here as material and structure, not illustration.
+
+   Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
+   because they are thresholds and working rooms. The hour body is omitted
+   deliberately: prayer remains a flat diurnal page with no texture under its
+   words. The gradients have transparent edges and repeat only at a very large
+   scale, avoiding both visible seams and a simulated-paper grain. */
+body.page-home,
+body.page-calendar,
+body.page-reminders {
+  background-color: var(--bg);
+  background-image: var(--page-material);
+  background-position: top center;
+  background-repeat: repeat;
+  background-size: 72rem 64rem;
+}
+
+/* Framed objects catch a little more light than the surrounding plaster.
+   These remain matte surfaces: no photograph, noise, gloss, or animation. */
+.page-reminders fieldset,
+.page-reminders .reminder-url {
+  background-color: var(--surface);
+  background-image: var(--surface-material);
+}
+
+.page-reminders fieldset,
+.page-reminders .reminder-url {
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 var(--material-highlight);
+}
+
+/* Ordo is a non-liturgical inspection room, so its year heading can carry a
+   stronger architectural threshold than an hour page's surrounding chrome. */
+.page-calendar .calendar-header {
+  padding-top: 0.65rem;
+  border-top: 3px double var(--ornament-line);
+}
+
+@media (max-width: 700px) {
+  .page-calendar .month-table tr {
+    background-color: var(--surface);
+    background-image: var(--surface-material);
+    box-shadow: inset 0 1px 0 var(--material-highlight);
+  }
+}
+
 /* ── Print ──
    Gold prints as pale grey, so the printed caps go back to the flat dark ink
    the print sheet already asks for. These must undo the gradient, not just
    restyle it: without clearing the background image the glyph would print as
    an empty outline. */
 @media print {
+  body.page-home,
+  body.page-calendar,
+  body.page-reminders,
+  .page-home .home-hero,
+  .page-calendar .month-table tr,
+  .page-reminders fieldset,
+  .page-reminders .reminder-url {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+  }
+
   .cross,
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
