@@ -294,6 +294,39 @@ test("the inscription band carries the frontispiece heading in both themes", asy
   expect(await page.locator(".elements .home-prayer-card").count()).toBe(0);
 });
 
+test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
+  // Leaf lettering is gilding, so it veils in Passiontide and warms in
+  // Paschaltide like the ✦, the drop caps and the ✠. The timber course under
+  // it does not move — the church veils its images, not its beams. Both themes
+  // read one pair of leaf colours, because the ground is dark in each.
+  for (const theme of ["light", "dark"]) {
+    const ink = {};
+    const ground = {};
+    for (const [season, date] of [
+      ["ordinary", testDate],
+      ["passiontide", "2026-04-08"],
+      ["eastertide", "2026-04-20"],
+    ]) {
+      const context = await page.context().browser().newContext();
+      const sheet = await context.newPage();
+      await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+      await sheet.goto(`/?date=${date}`);
+      const band = await sheet.evaluate(() => {
+        const style = getComputedStyle(document.querySelector(".home-prayer-card h2"));
+        return { ink: style.color, ground: style.backgroundColor };
+      });
+      ink[season] = band.ink;
+      ground[season] = band.ground;
+      await context.close();
+    }
+    expect(ink.passiontide).not.toBe(ink.ordinary);
+    expect(ink.eastertide).not.toBe(ink.ordinary);
+    expect(ink.eastertide).not.toBe(ink.passiontide);
+    expect(ground.passiontide).toBe(ground.ordinary);
+    expect(ground.eastertide).toBe(ground.ordinary);
+  }
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);

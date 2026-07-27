@@ -2367,10 +2367,11 @@ footer::before {
     --inscription-wash: rgba(208, 176, 106, 0.04);
     /* Apse lifts the band off the night rather than darkening it: oak brown on
        a blue surface reads as a stain, but a lifted slate course carrying the
-       same gold reads as the same timber under a different light. */
+       same gold reads as the same timber under a different light. The ink is
+       not restated here: the ground is dark in both themes, so one set of leaf
+       colours serves both — see "Seasonal ornament". */
     --oak-line: rgba(208, 176, 106, 0.16);
     --inscription-ground: #262f3d;
-    --inscription-ink: #d8bc74;
   }
 }
 
@@ -2404,10 +2405,11 @@ footer::before {
     linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
   --material-highlight: rgba(208, 176, 106, 0.065);
   --inscription-wash: rgba(208, 176, 106, 0.04);
-  /* See the prefers-color-scheme block above for why Apse lifts the band. */
+  /* See the prefers-color-scheme block above for why Apse lifts the band.
+     The ink is not restated: the band's ground is dark in both themes, so one
+     set of leaf colours serves both — see "Seasonal ornament". */
   --oak-line: rgba(208, 176, 106, 0.16);
   --inscription-ground: #262f3d;
-  --inscription-ink: #d8bc74;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2542,11 +2544,24 @@ footer::before {
    gold seen through a filter. Paschal: light gains chroma at the same
    lightness and dark gains lightness, matching how --ornament itself moves. */
 
+/* The inscription band is gilding too — leaf lettering on a timber course —
+   so its ink keeps the season with everything else. It takes one pair of
+   values rather than two, because unlike the rest of the gilding it always
+   sits on a dark ground: the course is oak in Nave and lifted slate in Apse,
+   never plaster. That makes the Apse leaf colours the right ones in both
+   themes, which is why these match the veiled/paschal --ornament in the dark
+   blocks below. The oak of the course itself does not move — the church veils
+   its images, not its timber.
+
+   Contrast on the band, worst case:
+   nave ground #3f372f  veiled #b0a4c2 = 5.3:1   paschal #e6cf8c = 7.3:1
+   apse ground #262f3d  veiled #b0a4c2 = 6.4:1   paschal #e6cf8c = 8.9:1 */
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;
   --ornament-hi: #8d8395;
   --ornament-lo: #605469;
+  --inscription-ink: #b0a4c2;
 }
 
 body.season-eastertide {
@@ -2554,6 +2569,7 @@ body.season-eastertide {
   --ornament-line: #d0b06c;
   --ornament-hi: #c8922d;
   --ornament-lo: #886011;
+  --inscription-ink: #e6cf8c;
 }
 
 @media (prefers-color-scheme: dark) {
