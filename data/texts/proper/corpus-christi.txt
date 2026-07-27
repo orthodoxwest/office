@@ -149,8 +149,8 @@ All praise and thanks to thee ascend
 For evermore, blest One in Three;
 O grant us life that shall not end
 In our true native land with thee.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 205-207 (Corpus Christi)
 Pange lingua gloriosi
@@ -196,8 +196,8 @@ Honour, might, and praise addressing,
 While unending ages run;
 Ever too his love confessing
 Who from One with both is One.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 328 (Corpus Christi)
 V. He maketh peace in thy borders, alleluia.

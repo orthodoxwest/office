@@ -111,8 +111,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Of All Thy Warrior Saints, O Lord, One Martyr out of Paschaltide Vespers.docx); draft archdiocesan Vespers book, p. 65
 Deus, tuorum militum
@@ -141,8 +141,8 @@ Enduring laud and praise be done
 To God the Father, and the Son,
 And to the Holy Paraclete,
 For endless ages as is meet.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 78 (Saint Stephen, Protomartyr)
 V. Devout men carried Stephen to his burial.

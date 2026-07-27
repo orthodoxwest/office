@@ -84,8 +84,8 @@ All glory, Lord, to thee we pay,
 Transfigured on the mount to-day;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 441 (The Transfiguration of Our Lord Jesus Christ)
 Quicumque Christum, quæritis
@@ -114,8 +114,8 @@ All glory, Lord, to thee we pay,
 Transfigured on the mount to-day;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
 V. A crown of gold is upon his head.

@@ -102,8 +102,8 @@ To God the Father, God the Son,
 And God the Spirit, Three in One,
 Laud, honour, might, and glory be
 From age to age eternally.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 528–529, 534–535 (The Feast of All Saints)
 Christe, Redemptor Omnium, conserva
@@ -142,8 +142,8 @@ To thee, O Father, born of none,
 And thee, O sole-begotten Son,
 One with the Holy Paraclete,
 Be glory ever, as is meet.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 @use commons/martyrs/short-responsory-lauds
 

@@ -104,8 +104,8 @@ To the Son and to the Father,
 And th'eternal Paraclete,
 Whose is boundless praise and power
 Through the ages infinite.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (The Royal Banners Forward Go, Passiontide Vespers.docx); draft archdiocesan Vespers book, pp. 482–483
 Vexilla Regis prodeunt
@@ -148,8 +148,8 @@ To thee, eternal Three in One,
 Let homage meet by all be done:
 Whom by the Cross thou dost restore,
 Preserve and govern evermore.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 547 (Exaltation of the Holy Cross)
 R. This sign of the Cross * shall be in heaven.

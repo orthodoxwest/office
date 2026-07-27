@@ -32,8 +32,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx)
 # SOURCE: draft archdiocesan Vespers book, pp. 430–431, 510–511, 473–474, 275, 282–283, 352 (Visitation, Motherhood, Nativity, Purification, and Annunciation)
@@ -75,8 +75,8 @@ Father, Son eternal,
 Holy Ghost supernal,
 With one praise we bless thee,
 Three in One confess thee.
-Amen.
 
+Amen.
 [versicle-blessed-art-thou]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107 (Saturday Office of the B.V.M.)
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 499, 431, 511 (Visitation and Motherhood of the B.V.M.)

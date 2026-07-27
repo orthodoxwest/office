@@ -72,8 +72,8 @@ To God the Father, praise be done,
 Who doth redeem us by his Son,
 Anoint us by his Holy Ghost,
 And guard us by his Angel-host.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: divinum-officium Sancti/10-24 [Hymnus Vespera] — check against diurnal
 Christe, sanctorum decus Angelorum
@@ -97,8 +97,8 @@ O May the Godhead, endless bliss possessing,
 Father, Son, Spirit, grant to us this blessing;
 All His creation joins His praise confessing,
 Now and forever.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: divinum-officium Sancti/10-24 [Versum 2] — check against diurnal
 V. Before the Angels will I sing praise unto thee, O my God.

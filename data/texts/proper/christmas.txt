@@ -159,8 +159,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 47–48, 58–59 (I and II Vespers of Christmas)
 Christe, Redemptor omnium, ex Patre
@@ -199,8 +199,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 71 (Nativity; the Sunday-within-the-Octave versicle differs)
 V. The Lord declared, alleluia.

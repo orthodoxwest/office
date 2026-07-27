@@ -102,8 +102,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [chapter-lauds]
 @use commons/bishop-martyr/chapter-lauds
 
@@ -171,4 +171,5 @@ Enduring laud and praise be done
 To God the Father, and the Son,
 And to the Holy Paraclete,
 For endless ages as is meet.
+
 Amen.

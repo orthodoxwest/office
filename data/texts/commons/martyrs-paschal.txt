@@ -58,8 +58,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 611-612, 620-621 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
 @use commons/martyrs-paschal/hymn-lauds

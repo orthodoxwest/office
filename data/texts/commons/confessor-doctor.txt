@@ -112,8 +112,8 @@ To thee, O Christ, our loving King,
 All glory, praise, and thanks we bring:
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 @use commons/confessor-bishop/short-responsory-lauds
 

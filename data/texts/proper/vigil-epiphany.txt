@@ -136,8 +136,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 111-112 (Vigil of the Epiphany; dormant at the January 5 Epiphany boundary)
 Christe, Redemptor omnium, ex Patre
@@ -176,8 +176,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 129 (Vigil of the Epiphany)
 V. The Word was made flesh, alleluia.

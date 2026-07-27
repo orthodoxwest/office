@@ -116,8 +116,8 @@ All glory, Lord, to thee, whose sway
 The world's dominion doth obey;
 All glory as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx); draft archdiocesan Vespers book, pp. 520–521
 Te saeculorum Principem
@@ -161,8 +161,8 @@ All glory, Lord, to thee, whose sway
 The world's dominion doth obey;
 All glory as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 590 (Christ the King)
 V. His kingdom shall be increased.

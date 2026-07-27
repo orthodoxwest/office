@@ -25,8 +25,9 @@ Shall praise his name for victory gained.
 All laud to God the Father be;
 All praise, Eternal Son, to thee;
 All glory, as is ever meet,
-To Father and to Paraclete. Amen.
+To Father and to Paraclete.
 
+Amen.
 [opening-versicle]
 # SOURCE: 01. Monday Prime Alex edit 10-28 v.01.docx, p. 3
 @use shared/formulas/opening-versicle

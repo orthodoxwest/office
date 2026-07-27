@@ -102,8 +102,8 @@ Glory to thee, O Lord, we give,
 Who died to make thy servants live;
 Whom with the Father we adore
 And Holy Spirit evermore.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 490–492 (The Seven Sorrows of the B.V.M.)
 Jam toto subitus
@@ -155,8 +155,8 @@ The while my spirit prays:
 When evil comes to me,
 The strength do thou impart
 That erst upheld the Virgin's heart!
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
 V. O Virgin Mary, by thy sorrow's might.

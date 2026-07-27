@@ -90,8 +90,8 @@ Be thou our joy and thou our Guard,
 Who art to be our great reward;
 Our glory and our boast in thee
 For ever and for ever be.
-Amen.
 
+Amen.
 [hymn-vespers]
 @use proper/ascension/hymn-lauds
 

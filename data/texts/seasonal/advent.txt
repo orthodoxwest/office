@@ -60,8 +60,8 @@ To God the Father, God the Son,
 And God the Spirit, Three in One,
 Laud, honour, might, and glory be
 From age to age eternally.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Creator of the Stars of Night, Advent Vespers.docx); draft archdiocesan Vespers book, pp. 8, 16, 24, 32
 Conditor alme siderum
@@ -95,8 +95,8 @@ To God the Father, God the Son,
 And God the Spirit, Three in One,
 Laud, honour, might, and glory be
 From age to age eternally.
-Amen.
 
+Amen.
 [chapter-vespers]
 # SOURCE: Propers of Lauds & Vespers During Advent (propers booklet), Vespers chapter
 !Gen 49:10

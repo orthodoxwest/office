@@ -87,8 +87,8 @@ Glory eternal to the blessed Trinity,
 With laud and honour, virtue and supremacy,
 Trinal yet Onely, reigning in his majesty
 Both now and ever, through the ages infinite.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 404–405, 413–414 (I and II Vespers for Saints Peter and Paul)
 Aurea luce et decore roseo
@@ -112,8 +112,8 @@ Glory eternal to the Blessed Trinity,
 With laud and honour, virtue and supremacy,
 Trinal yet Onely, reigning in his majesty
 Both now and ever, through the ages infinite.
-Amen.
 
+Amen.
 [chapter-vespers]
 @use proper/ss-peter-paul/chapter-lauds
 

@@ -78,8 +78,8 @@ Glory and praise to thee, blest Trinity!
 One only God and Lord,
 Who to thy faithful ones unfailingly
 Their aureoles dost award.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (O Joseph Heav_nly Host, St. Joseph Vespers.docx); draft archdiocesan Vespers book, pp. 325–326, 334–335
 Te, Joseph, celebrent
@@ -108,8 +108,8 @@ O Holy Trinity, thy suppliant servants spare;
 Grant us to rise to heaven, for Joseph's sake and prayer,
 And so our grateful hearts to thee shall ever raise
 Exulting canticles of praise.
-Amen.
 
+Amen.
 [versicle-vespers]
 # SOURCE: divinum-officium Sancti/03-19 [Versum 1] — check against diurnal
 V. He made him lord of His house.
