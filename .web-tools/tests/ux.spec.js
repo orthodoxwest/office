@@ -251,16 +251,142 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   }));
   expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
 
+  // Desktop. The theme persists in localStorage, so each half sets its own
+  // explicitly rather than inheriting whatever the previous step left behind.
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
+
+  // Nave keeps the still, flat field: the broad wash reads as spotlighting on
+  // a wide canvas, and the nave ceiling is plaster, so there is nothing else
+  // for it to carry.
+  await page.getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
     "none",
   );
 
+  // Apse gets the vault instead — stars only, never the broad wash.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
-  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
-    "none",
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const vault = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  expect(vault).not.toBe("none");
+  expect((vault.match(/radial-gradient/g) || []).length).toBeGreaterThan(20);
+});
+
+test("the apse vault appears only over the night, and veils with the season", async ({
+  page,
+}) => {
+  const vault = async ({ width, theme, scheme, path }) => {
+    const context = await page.context().browser().newContext({
+      viewport: { width, height: 900 },
+      colorScheme: scheme,
+      isMobile: width < 700,
+    });
+    const sheet = await context.newPage();
+    if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+    await sheet.goto(path);
+    const read = await sheet.evaluate(() => {
+      const style = getComputedStyle(document.body);
+      const ink = style.backgroundImage.match(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/);
+      const rgb = style.backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
+      return {
+        // Count only the stars: they are the sole body-background layers built
+        // with color-mix, so this does not also pick up --page-material's
+        // three broad radials, which legitimately remain on the phone.
+        stars: (style.backgroundImage.match(/color\(srgb/g) || []).length,
+        pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
+        ink: ink ? ink.slice(1).join(",") : null,
+      };
+    });
+    await context.close();
+    return read;
+  };
+
+  const home = `/?date=${testDate}`;
+  // Gold stars must never land on plaster. The Default-theme/light-device case
+  // is the one that bites: :root:not([data-theme="light"]) matches when no
+  // choice has been stored, so without a prefers-color-scheme guard the vault
+  // would light up over the Nave.
+  for (const scheme of ["light", "dark"]) {
+    const seen = await vault({ width: 1280, theme: null, scheme, path: home });
+    if (!seen.pageIsDark) expect(seen.stars).toBe(0);
+  }
+  expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
+
+  // Present on desktop Apse, absent on the phone and in the working rooms.
+  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars)
+    .toBeGreaterThan(20);
+  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(0);
+  for (const path of ["/calendar/2026", "/reminders"]) {
+    expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
+  }
+
+  // Gold leaf is gilding, so the vault keeps the season. This only holds while
+  // --apse-vault is declared where the seasonal --ornament lands; hoisting it
+  // to :root freezes the stars gold through Passiontide.
+  const ink = {};
+  for (const [season, date] of [
+    ["ordinary", testDate],
+    ["passiontide", "2026-04-08"],
+    ["eastertide", "2026-04-20"],
+  ]) {
+    ink[season] = (
+      await vault({ width: 1280, theme: "dark", scheme: "dark", path: `/?date=${date}` })
+    ).ink;
+  }
+  expect(ink.ordinary).toBeTruthy();
+  expect(ink.passiontide).not.toBe(ink.ordinary);
+  expect(ink.eastertide).not.toBe(ink.ordinary);
+  expect(ink.eastertide).not.toBe(ink.passiontide);
+
+  // The stars must actually light pixels. Declaring the layers is not enough:
+  // `circle 0.6px` is a *radius*, so with the colour stop at 50% the solid core
+  // was 0.3px and antialiasing ate nearly all of it — 58 declared stars lit 13
+  // pixels across half the viewport and the vault was invisible. Measured on
+  // the clean field beside the frontispiece, where nothing else paints.
+  const context = await page.context().browser().newContext({
+    viewport: { width: 1280, height: 900 },
+    colorScheme: "dark",
+    deviceScaleFactor: 1,
+  });
+  const sheet = await context.newPage();
+  await sheet.addInitScript(() => localStorage.setItem("office-theme", "dark"));
+  await sheet.goto(home);
+  const cardLeft = await sheet.evaluate(() =>
+    Math.round(document.querySelector(".home-hero").getBoundingClientRect().left),
   );
+  const shot = await sheet.screenshot({
+    clip: { x: 10, y: 110, width: cardLeft - 30, height: 500 },
+  });
+  const lit = await sheet.evaluate(async (data) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + data;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx2d = canvas.getContext("2d");
+    ctx2d.drawImage(img, 0, 0);
+    const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
+    const counts = {};
+    for (let i = 0; i < px.length; i += 4) {
+      const key = `${px[i]},${px[i + 1]},${px[i + 2]}`;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+    const bg = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])[0][0]
+      .split(",")
+      .map(Number);
+    let n = 0;
+    for (let i = 0; i < px.length; i += 4) {
+      const dev =
+        Math.abs(px[i] - bg[0]) + Math.abs(px[i + 1] - bg[1]) + Math.abs(px[i + 2] - bg[2]);
+      if (dev > 20) n += 1;
+    }
+    return n;
+  }, shot.toString("base64"));
+  await context.close();
+  expect(lit).toBeGreaterThan(30);
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
