@@ -552,7 +552,10 @@ footer .text-size-switch {
 /* ── Footer ── */
 
 footer {
-  margin-top: 2.5rem;
+  /* The mobile Apse vault extends through this gap. Keep its reach coupled to
+     the spacing so the two painted halves cannot drift out of phase again. */
+  --footer-gap: 2.5rem;
+  margin-top: var(--footer-gap);
   padding: 0.85rem 0;
   font-size: 0.78rem;
   color: var(--muted);
@@ -654,6 +657,20 @@ footer::before {
     padding: 0.65rem 0.7rem;
     font-size: 0.78rem;
   }
+}
+
+/* In an Apse hour the vault rises around the post-office material, but the
+   expanded provenance list is still a reading surface. Nearly opaque slate
+   quiets the ribs beneath the panel while leaving the field visible around
+   its edges. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.page-hour .assurance-panel {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+  }
+}
+
+:root[data-theme="dark"] body.page-hour .assurance-panel {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 /* ── Home page ──
@@ -1227,6 +1244,11 @@ footer::before {
 /* ── Office elements ── */
 
 .office-hour {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hour-epilogue {
   display: grid;
   gap: 1.25rem;
 }
@@ -3742,32 +3764,46 @@ body.page-reminders {
    than on structure. Here that field is the page around the frontispiece: the
    card is the lit altar, the night stands behind it.
 
-   Geometric rather than naturalistic. Painted vaults — Sainte-Chapelle,
-   Giotto's Scrovegni, Salisbury — set gold stars in a regular offset diaper,
-   and that ordered geometry is what the rest of this app is made of: courses,
-   aligned frames, banded groups. Four-pointed stars sit on a quincunx lattice
-   with fainter points in the interstices, as real vaults do.
+   Geometric rather than naturalistic, and structured, not sprinkled. A first
+   pass set identical sparkles on a bare quincunx and it read as polka-dot
+   textile: ordered-but-undifferentiated is exactly what makes wallpaper. What
+   the painted vaults this leans on — St. Mary's Kraków, Carlisle, Salisbury —
+   all add is hierarchy and a visible armature: gilded rib lines dividing the
+   blue into diamond panels, a boss where ribs cross, lesser stars floating in
+   the panels. So this field is that diaper: two faint diagonal hairline
+   families quilt the night, a principal star sits at every crossing, and a
+   smaller star floats at the centre of every panel.
 
-   Drawn as ONE REPEATING CELL, which is the whole reason a lattice is the
-   right form here: a quincunx is periodic, so two stars and two points tile
-   into the entire field. Hand-placing every star instead cost 172 background
-   layers and pushed first contentful paint from 88ms to 696ms — six hundred
-   milliseconds before anything appeared on screen, for decoration. Eight
-   gradients tile to the same picture. Keep it a tile.
+   Drawn as ONE REPEATING CELL. A quincunx diaper is periodic, so two stars,
+   two panel-stars and three rib stripes tile into the entire field.
+   Hand-placing every star instead cost 172 background layers and pushed first
+   contentful paint from 88ms to 696ms. Twelve gradients tile to the same
+   picture (measured against a bare page: ~24ms of FCP; the secondary stars'
+   core dots were cut because they cost a layer each and vanish under the
+   rays). Keep it a tile.
+
+   The cell geometry is exact, not eyeballed. In a square tile, the 45deg
+   stripe at 50% of its gradient axis is the corner-to-corner diagonal, and
+   the 135deg stripes at 25% and 75% are the anti-diagonals through the
+   quarter points — so every rib intersection lands on (25%,25%) or (75%,75%),
+   which is where the principal stars sit, and the panel centres land on
+   (75%,25%) and (25%,75%), which is where the lesser stars sit. Do not move
+   stars onto tile edges or corners to "simplify" this: a gradient at 0% paints
+   only the half of the star inside its own tile, and the neighbouring tile
+   has no matching layer at 100% to complete it, so edge stars render sheared
+   in half. Every feature stays interior to the cell.
 
    Stars are crossed elliptical gradients rather than an SVG data URI on
    purpose: an SVG cannot read var(--ornament), so it would silently break the
-   seasonal veil. Each star reads --ornament through color-mix, so the vault
-   veils in Passiontide and warms in Paschaltide with the rest of the gilding.
+   seasonal veil. Every layer — ribs included — reads --ornament through
+   color-mix, so the vault veils in Passiontide and warms in Paschaltide with
+   the rest of the gilding.
 
-   Sized from the parish, which sets its stars at ~0.7% of the vault's width.
-
-   Desktop Apse home only. At 390px the frontispiece leaves 16px side gutters,
-   where stars read as debris pinned against the frame rather than as a border;
-   a page-level field is occluded by the card, and stars on the card itself
-   become specks on paper. All three were built and looked at. The vault goes
-   where there is open field to hold it, and the phone is unchanged. Nave gets
-   nothing: the nave ceiling is plaster.
+   Desktop Apse home carries the full-page field. At 390px the frontispiece
+   leaves 16px side gutters where a page-level field reads as debris pinned
+   against the frame; the phone instead lets the vault rise in the open ground
+   below the card (see the mobile block). Nave gets nothing: the nave ceiling
+   is plaster.
 
    Static, never animated: a twinkling vault would be the opposite of
    stillness. */
@@ -3785,75 +3821,199 @@ body {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
-    --apse-star: color-mix(in srgb, var(--ornament) 72%, transparent);
-    --apse-point: color-mix(in srgb, var(--ornament) 30%, transparent);
+    --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
+    --apse-star2: color-mix(in srgb, var(--ornament) 59%, transparent);
+    --apse-line: color-mix(in srgb, var(--ornament) 14%, transparent);
     --apse-vault:
-      radial-gradient(ellipse 1.5px 4.6px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
-      radial-gradient(ellipse 4.6px 1.5px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
-      radial-gradient(circle 1.4px at 25% 25%, var(--apse-star) 0 60%, transparent 100%),
-      radial-gradient(ellipse 1.5px 4.6px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
-      radial-gradient(ellipse 4.6px 1.5px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
-      radial-gradient(circle 1.4px at 75% 75%, var(--apse-star) 0 60%, transparent 100%),
-      radial-gradient(circle 1.5px at 75% 25%, var(--apse-point) 0 55%, transparent 100%),
-      radial-gradient(circle 1.5px at 25% 75%, var(--apse-point) 0 55%, transparent 100%);
+      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
+      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
+      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
+      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
+      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+      linear-gradient(45deg,
+        transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
+      linear-gradient(135deg,
+        transparent calc(25% - 0.6px), var(--apse-line) calc(25% - 0.6px) calc(25% + 0.6px), transparent calc(25% + 0.6px) calc(75% - 0.6px),
+        var(--apse-line) calc(75% - 0.6px) calc(75% + 0.6px), transparent calc(75% + 0.6px));
   }
 }
 
 :root[data-theme="dark"] body {
-  --apse-star: color-mix(in srgb, var(--ornament) 72%, transparent);
-  --apse-point: color-mix(in srgb, var(--ornament) 30%, transparent);
+  --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
+  --apse-star2: color-mix(in srgb, var(--ornament) 59%, transparent);
+  --apse-line: color-mix(in srgb, var(--ornament) 14%, transparent);
   --apse-vault:
-    radial-gradient(ellipse 1.5px 4.6px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
-    radial-gradient(ellipse 4.6px 1.5px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
-    radial-gradient(circle 1.4px at 25% 25%, var(--apse-star) 0 60%, transparent 100%),
-    radial-gradient(ellipse 1.5px 4.6px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
-    radial-gradient(ellipse 4.6px 1.5px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
-    radial-gradient(circle 1.4px at 75% 75%, var(--apse-star) 0 60%, transparent 100%),
-    radial-gradient(circle 1.5px at 75% 25%, var(--apse-point) 0 55%, transparent 100%),
-    radial-gradient(circle 1.5px at 25% 75%, var(--apse-point) 0 55%, transparent 100%);
+    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
+    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
+    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
+    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
+    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+    linear-gradient(45deg,
+      transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
+    linear-gradient(135deg,
+      transparent calc(25% - 0.6px), var(--apse-line) calc(25% - 0.6px) calc(25% + 0.6px), transparent calc(25% + 0.6px) calc(75% - 0.6px),
+      var(--apse-line) calc(75% - 0.6px) calc(75% + 0.6px), transparent calc(75% + 0.6px));
 }
 
-/* On a phone there is no room for a field: the frontispiece leaves 16px side
-   gutters, where stars read as debris pinned against the frame. But there is
-   open ground below the card, and a course of stars sits in it the way a
-   painted band sits under a vault.
+/* An hour remains a flat prayer page until the office has ended. The vault
+   begins only in the post-prayer epilogue: transparent through the hour
+   continuation, emerging around Assurance, then continuing through the
+   footer. Both layers share main's bottom as their tile origin, exactly as
+   the two mobile-home layers do.
 
-   Anchored to the .home grid so it follows the card rather than a fixed offset
-   into the viewport, and positioned out of flow so it fills the gap that is
-   already there instead of adding to it — laid out in flow it pushed the page
-   past a 844px phone's viewport and made home scroll for the sake of an
-   ornament. Apse only, and gated on the theme rather than on --apse-vault,
-   because an empty block still takes space in Nave.
+   The negative inline reach restores the full main/footer measure around the
+   narrower content box. On a phone that is edge-to-edge; on desktop it is the
+   46rem architectural frame rather than stars spread behind the prayer page. */
+body.page-hour {
+  --apse-epilogue-tile: 132px;
+}
 
-   The min-height guard is not cosmetic: the gap the course sits in is created
-   by main's min-height and so scales with the viewport. On a short phone it
-   narrows to about 40px and the course lands on top of the footer. Below this
-   threshold there is no open ground, so there is no course. */
+body.page-hour .hour-epilogue,
+body.page-hour footer {
+  position: relative;
+  isolation: isolate;
+}
+
+body.page-hour .hour-epilogue::before,
+body.page-hour footer::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--apse-vault);
+  background-repeat: repeat;
+  background-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile);
+}
+
+body.page-hour .hour-epilogue::before {
+  inset: 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-right))) 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
+  background-position: bottom center;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+  mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+}
+
+body.page-hour footer::after {
+  inset: calc(-1 * var(--footer-gap)) 0 0;
+  background-position: top center;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+  mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+@media (min-width: 701px) {
+  body.page-hour {
+    --apse-epilogue-tile: 176px;
+  }
+}
+
+/* The footer diamond still provides a structural threshold on Nave plaster.
+   Where the Apse vault is present it becomes a second boss floating over a
+   field already full of them, so the starfield takes over that work. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+    content: none;
+  }
+}
+
+:root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
+  content: none;
+}
+
+/* On a phone the field cannot stand behind the card: the frontispiece leaves
+   16px side gutters where clipped rib stubs and half-stars read as debris
+   pinned against the frame (built and looked at, again, after the lattice
+   redesign — the ribs made the gutters worse, not better, and the field also
+   speckled the footer controls). But there is open ground below the card, and
+   the vault rises in it instead: the same diaper, filling whatever gap the
+   phone actually has.
+
+   Two cooperating layers. main::after is a flex-grown gap-filler — main
+   becomes a column flex so the pseudo-element sizes itself to the ground
+   main's min-height already leaves, adding no scroll on any height (a
+   fixed-height course laid out in flow once pushed an 844px phone past its
+   viewport). footer::after then continues the night behind the footer and
+   thins it to the foot of the screen, as the desktop mask does. The two join
+   without a visible seam because both anchor their tile to the boundary they
+   share: the fill is bottom-anchored and the footer layer top-anchored, so
+   the diaper crosses main's bottom edge mid-pattern, in phase. Anchor either
+   layer anywhere else and the lattice visibly breaks at the footer line. The
+   masks meet at the same 0.4 alpha for the same reason.
+
+   Negative gutter margins bleed the fill wall to wall. The footer layer
+   reaches upward through footer's margin so its painted top is the actual
+   bottom of main; anchoring at the footer border box instead leaves a 2.5rem
+   unpainted phase jump between the two tiles. Apse only, and gated on the
+   theme rather than on --apse-vault, because an empty flex item still takes
+   space in Nave.
+
+   The min-height guard survives the redesign for the top edge's sake: below
+   ~800px the gap collapses and all that would render is a sliver of sheared
+   rib stubs under the card. No ground, no vault. */
 @media (max-width: 700px) and (min-height: 800px) {
-  body.page-home .home {
+  :root[data-theme="dark"] body.page-home main,
+  :root:not([data-theme="light"]) body.page-home main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  :root[data-theme="dark"] body.page-home main::after,
+  :root:not([data-theme="light"]) body.page-home main::after {
+    content: "";
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 1.15rem;
+    margin-left: calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
+    margin-right: calc(-1 * max(var(--page-gutter), env(safe-area-inset-right)));
+    pointer-events: none;
+    background-image: var(--apse-vault);
+    background-repeat: repeat;
+    background-size: 132px 132px;
+    background-position: bottom center;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 1.5rem 60%, rgba(0, 0, 0, 0.4) 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 1.5rem 60%, rgba(0, 0, 0, 0.4) 100%);
+  }
+
+  :root[data-theme="dark"] body.page-home footer,
+  :root:not([data-theme="light"]) body.page-home footer {
     position: relative;
   }
 
-  :root[data-theme="dark"] body.page-home .home::after,
-  :root:not([data-theme="light"]) body.page-home .home::after {
+  /* ::after, not ::before — footer::before is the ✦ diamond separator on
+     every page, and the first cut of this rule silently replaced it (and the
+     Nave cancel below deleted it). The night goes on the pseudo-element the
+     footer is not already using. */
+  :root[data-theme="dark"] body.page-home footer::after,
+  :root:not([data-theme="light"]) body.page-home footer::after {
     content: "";
     position: absolute;
-    top: calc(100% + 1.15rem);
-    left: 0;
-    right: 0;
-    height: 3.25rem;
+    inset: calc(-1 * var(--footer-gap)) 0 0;
+    z-index: -1;
     pointer-events: none;
     background-image: var(--apse-vault);
-    background-repeat: repeat-x;
-    background-size: 92px 92px;
+    background-repeat: repeat;
+    background-size: 132px 132px;
     background-position: top center;
-    -webkit-mask-image: linear-gradient(to bottom, #000 0 40%, transparent 95%);
-    mask-image: linear-gradient(to bottom, #000 0 40%, transparent 95%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0, transparent 92%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0, transparent 92%);
   }
 }
 
 @media (max-width: 700px) and (min-height: 800px) and (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) body.page-home .home::after {
+  :root:not([data-theme="dark"]) body.page-home main {
+    display: block;
+  }
+
+  :root:not([data-theme="dark"]) body.page-home main::after,
+  :root:not([data-theme="dark"]) body.page-home footer::after {
     content: none;
   }
 }
@@ -3867,7 +4027,7 @@ body {
     pointer-events: none;
     background-image: var(--apse-vault);
     background-repeat: repeat;
-    background-size: 160px 226px;
+    background-size: 176px 176px;
     background-position: top center;
     /* The vault fills the page. An earlier window opened at 17% and closed by
        74%, which left the field sitting as a band across the middle with bare
@@ -3911,4 +4071,3 @@ body {
     color: #444;
   }
 }
-

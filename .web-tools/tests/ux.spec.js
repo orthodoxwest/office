@@ -272,8 +272,12 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
     () => getComputedStyle(document.body, "::before").backgroundImage,
   );
   expect(vault).not.toBe("none");
-  // One quincunx cell: two stars (three gradients each) plus two points.
-  expect((vault.match(/radial-gradient/g) || []).length).toBe(8);
+  // One diaper cell: a principal star (three gradients) at each rib crossing,
+  // a lesser star (two — its core dot drowned under the rays and cost a paint
+  // layer) in each panel. The two rib families are linear gradients, counted
+  // separately below.
+  expect((vault.match(/radial-gradient/g) || []).length).toBe(10);
+  expect((vault.match(/linear-gradient/g) || []).length).toBe(2);
 });
 
 test("the apse vault appears only over the night, and veils with the season", async ({
@@ -295,7 +299,7 @@ test("the apse vault appears only over the night, and veils with the season", as
       return {
         // The vault has its own layer, so this cannot pick up
         // --page-material's broad radials, which live on body and legitimately
-        // remain on the phone. One quincunx cell is exactly eight gradients.
+        // remain on the phone. One diaper cell is exactly ten radials.
         stars: (style.backgroundImage.match(/radial-gradient/g) || []).length,
         pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
         ink: ink ? ink.slice(1).join(",") : null,
@@ -317,7 +321,7 @@ test("the apse vault appears only over the night, and veils with the season", as
   expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
 
   // Present on desktop Apse, absent on the phone and in the working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(8);
+  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
   expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(0);
   for (const path of ["/calendar/2026", "/reminders"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
@@ -419,7 +423,9 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
   }
 });
 
-test("the mobile star course fills the gap without making home scroll", async ({ page }) => {
+test("the mobile vault fills the gap and continues behind the footer without scroll", async ({
+  page,
+}) => {
   const read = async ({ height, theme, scheme }) => {
     const context = await page.context().browser().newContext({
       viewport: { width: 390, height },
@@ -431,52 +437,142 @@ test("the mobile star course fills the gap without making home scroll", async ({
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(`/?date=${testDate}`);
     const seen = await sheet.evaluate(() => {
-      const home = document.querySelector(".home");
-      const after = getComputedStyle(home, "::after");
-      const box = home.getBoundingClientRect();
-      const footerTop = document.querySelector("footer").getBoundingClientRect().top;
-      const present = after.content !== "none";
-      const courseEnd = present
-        ? box.bottom + parseFloat(after.top) - box.height + parseFloat(after.height)
-        : null;
+      const main = document.querySelector("main");
+      const fill = getComputedStyle(main, "::after");
+      // The continuation lives on footer::after; footer::before is the ✦
+      // diamond separator retained in Nave and replaced by the vault in Apse.
+      const footerElement = document.querySelector("footer");
+      const footer = getComputedStyle(footerElement, "::after");
+      const diamond = getComputedStyle(footerElement, "::before");
+      const mainBox = main.getBoundingClientRect();
+      const footerBox = footerElement.getBoundingClientRect();
       return {
-        present,
+        fillPresent: fill.content !== "none",
+        footerPresent: footer.content !== "none",
+        diamondKept: diamond.content.includes("✦"),
+        // footer has a 2.5rem top margin. Its painted continuation must reach
+        // through that margin to main's bottom or the tile restarts 40px out
+        // of phase even though its background-position still says "top".
+        joinsFill: Math.abs(footerBox.top + parseFloat(footer.top) - mainBox.bottom) < 0.5,
+        // The fill is a flex-grown gap-filler, so it must add no height of its
+        // own: a fixed-height course laid out in flow once pushed an 844px
+        // phone past its viewport and made home scroll for an ornament.
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
-        clearsFooter: present ? courseEnd <= footerTop : true,
+        scrollHeight: document.documentElement.scrollHeight,
+        // The seam only stays invisible while both layers anchor their tile
+        // to the boundary they share — the fill bottom-anchored, the footer
+        // continuation top-anchored. Re-anchoring either breaks the diaper
+        // mid-lattice at the footer line.
+        phase: [fill.backgroundPosition, footer.backgroundPosition],
       };
     });
     await context.close();
     return seen;
   };
 
-  // Out of flow: the course fills the gap that main's min-height already
-  // leaves. Laid out in flow it pushed an 844px phone past its viewport and
-  // made home scroll for an ornament.
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
-  expect(apse.present).toBe(true);
+  expect(apse.fillPresent).toBe(true);
+  expect(apse.footerPresent).toBe(true);
+  expect(apse.diamondKept).toBe(false);
+  expect(apse.joinsFill).toBe(true);
   expect(apse.scrolls).toBe(false);
-  expect(apse.clearsFooter).toBe(true);
+  expect(apse.phase[0]).toContain("100%");
+  expect(apse.phase[1]).toContain("0%");
 
-  // Nave has no vault, and an empty block would still take space.
+  // Nave has no vault, and an empty flex item would still take space.
   for (const [theme, scheme] of [
     ["light", "light"],
     [null, "light"],
   ]) {
     const nave = await read({ height: 844, theme, scheme });
-    expect(nave.present).toBe(false);
+    expect(nave.fillPresent).toBe(false);
+    expect(nave.footerPresent).toBe(false);
+    expect(nave.diamondKept).toBe(true);
     expect(nave.scrolls).toBe(false);
   }
 
-  // That gap scales with the viewport; on a short phone there is no open
-  // ground and the course would land on the footer.
+  // The gap scales with the viewport; on a short phone it collapses and all
+  // that would render is a sliver of sheared rib stubs under the card, so the
+  // min-height gate removes the vault entirely — footer continuation included,
+  // or the night would hang under the footer with nothing above it.
   for (const height of [667, 740]) {
-    expect((await read({ height, theme: "dark", scheme: "dark" })).present).toBe(false);
+    const short = await read({ height, theme: "dark", scheme: "dark" });
+    expect(short.fillPresent).toBe(false);
+    expect(short.footerPresent).toBe(false);
   }
+  // At exactly 800px Nave already scrolls a few pixels, so "does not scroll"
+  // is not the invariant — "the vault adds no scroll" is. Apse may be shorter
+  // because its starfield replaces the footer diamond and the diamond's
+  // margin.
   for (const height of [800, 932]) {
     const tall = await read({ height, theme: "dark", scheme: "dark" });
-    expect(tall.present).toBe(true);
-    expect(tall.clearsFooter).toBe(true);
+    const bare = await read({ height, theme: "light", scheme: "light" });
+    expect(tall.fillPresent).toBe(true);
+    expect(tall.footerPresent).toBe(true);
+    expect(tall.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
   }
+});
+
+test("the hour vault begins after prayer and replaces the Apse footer diamond", async ({ page }) => {
+  const read = async (theme) => {
+    const context = await page.context().browser().newContext({
+      viewport: { width: 390, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: theme,
+    });
+    const sheet = await context.newPage();
+    await sheet.addInitScript((storedTheme) => localStorage.setItem("office-theme", storedTheme), theme);
+    await sheet.goto(`/lauds/${testDate}`);
+    const seen = await sheet.evaluate(() => {
+      const main = document.querySelector("main");
+      const prayer = document.querySelector(".elements");
+      const epilogue = document.querySelector(".hour-epilogue");
+      const assurance = document.querySelector(".assurance-panel");
+      const footerElement = document.querySelector("footer");
+      const field = getComputedStyle(epilogue, "::before");
+      const footerField = getComputedStyle(footerElement, "::after");
+      const diamond = getComputedStyle(footerElement, "::before");
+      const mainBox = main.getBoundingClientRect();
+      const prayerBox = prayer.getBoundingClientRect();
+      const epilogueBox = epilogue.getBoundingClientRect();
+      const footerBox = footerElement.getBoundingClientRect();
+      return {
+        pageClass: document.body.classList.contains("page-hour"),
+        prayerField: getComputedStyle(prayer).backgroundImage,
+        fieldLayers: (field.backgroundImage.match(/radial-gradient/g) || []).length,
+        footerLayers: (footerField.backgroundImage.match(/radial-gradient/g) || []).length,
+        startsAfterPrayer: epilogueBox.top >= prayerBox.bottom,
+        endsWithMain: Math.abs(epilogueBox.bottom - mainBox.bottom) < 0.5,
+        joinsFooter:
+          Math.abs(footerBox.top + parseFloat(footerField.top) - epilogueBox.bottom) < 0.5,
+        phase: [field.backgroundPosition, footerField.backgroundPosition],
+        diamond: diamond.content,
+        assuranceBackground: getComputedStyle(assurance).backgroundColor,
+      };
+    });
+    await context.close();
+    return seen;
+  };
+
+  const apse = await read("dark");
+  expect(apse.pageClass).toBe(true);
+  expect(apse.prayerField).toBe("none");
+  expect(apse.fieldLayers).toBe(10);
+  expect(apse.footerLayers).toBe(10);
+  expect(apse.startsAfterPrayer).toBe(true);
+  expect(apse.endsWithMain).toBe(true);
+  expect(apse.joinsFooter).toBe(true);
+  expect(apse.phase[0]).toContain("100%");
+  expect(apse.phase[1]).toContain("0%");
+  expect(apse.diamond).toBe("none");
+
+  const nave = await read("light");
+  expect(nave.prayerField).toBe("none");
+  expect(nave.fieldLayers).toBe(0);
+  expect(nave.footerLayers).toBe(0);
+  expect(nave.diamond).toContain("✦");
+  expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
@@ -535,6 +631,10 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  // data-theme changes synchronously, but the painted course deliberately
+  // crossfades for 200ms. Wait for the rendered colour rather than sampling
+  // the Nave end of that transition on a fast single-worker CI run.
+  await expect.poll(async () => (await read()).ground).not.toBe(nave.ground);
   const apse = await read();
   expect(apse.ground).not.toBe("rgba(0, 0, 0, 0)");
   expect(apse.ground).not.toBe(nave.ground);

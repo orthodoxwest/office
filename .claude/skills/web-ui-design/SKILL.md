@@ -52,14 +52,14 @@ Read this before changing visual design or prayer-page chrome.
 |-------|-----|
 | ✠ | Brand |
 | Double gold hairline | Hour titles, major breaks |
-| ✦ diamond | Footer / major separators; the raised points either side of an inscription |
+| ✦ diamond | Nave footer / major separators; the raised points either side of an inscription. Suppress the footer diamond where the Apse starfield takes over |
 | Inscription band | Dark oak course, full-bleed, gold small-caps between ✦ points. Section heads in a framed object — the parish's most distinctive mark, so spend it rarely |
 | Liturgical color band | Top of hour pages (+ safe-area) |
 | Gold drop caps | Psalm/chapter openings |
 | Gold scroll progress hairline | Under color band on hour pages only |
 | Gold underline (`inset 0 -1px 0`) | **The** marker for "this is the chosen one" — current hour, selected control. Never a filled cell |
 | Gold caret `▾` / `▴` | **The** disclosure marker, everywhere. Never the native `▶`, never `+` / `−` |
-| Apse starfield | **Desktop Apse home only** — the page field around the frontispiece, never the phone, never a prayer page, never Nave. See below |
+| Apse starfield | **Apse home and post-office epilogue only** — the diapered field around the frontispiece on desktop, the ground below the card on the phone, and a fade beginning around Assurance after an hour; never behind prayer text, never Nave. See below |
 
 Two weights of line, and they mean different things: **oak** (`--oak`, near-charcoal warm brown) is structure — the header beam, an inscription course. **Pale tan hairlines** (`--border`, `--surface-edge`) are surfaces and separators. The building is emphatically structural; if a page feels boneless, it is usually missing oak, not missing more hairlines.
 
@@ -69,23 +69,33 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 
 The half-dome over the altar is a slate vault of gold stars — the one place in
 the building where ornament sits on **open field** rather than on structure.
-The app's version is **geometric, not naturalistic**: four-pointed stars on a
-quincunx lattice with fainter points between, as painted vaults do
-(Sainte-Chapelle, Giotto's Scrovegni, Salisbury). Ordered geometry also matches
-what the rest of the app is made of — courses, aligned frames, banded groups.
+The app's version is **geometric, not naturalistic, and structured, not
+sprinkled**: a quilted diaper after the painted vaults (St. Mary's Kraków,
+Carlisle, Salisbury) — two families of faint diagonal rib hairlines dividing
+the night into diamond panels, a principal four-point star at every rib
+crossing (the medieval boss), a lesser star at the centre of every panel.
+The hierarchy is the point: an earlier field of identical sparkles on a bare
+quincunx read as polka-dot textile, because ordered-but-undifferentiated is
+what wallpaper is.
 
-- **Draw it as one repeating cell.** A quincunx is periodic, so two stars and
-  two points tile the whole field in eight gradients. Hand-placing every star
-  cost 172 background layers and pushed first contentful paint from 88ms to
-  **696ms** — six hundred milliseconds of blank screen for decoration. A fixed
-  px tile also holds its geometry at any width, where percentage positions
-  stretch. Keep it a tile.
-- **Size it from the parish**, which sets its stars at ~0.7% of the vault's
-  width and packs them densely. A first pass at 2–4× smaller was not subtle,
-  it was invisible: measure lit pixels, do not judge from a downscaled
-  screenshot.
+- **Draw it as one repeating cell.** The diaper is periodic: two principal
+  stars, two panel stars and three rib stripes tile the whole field in twelve
+  gradients. Hand-placing every star cost 172 background layers and pushed
+  first contentful paint from 88ms to **696ms**. Decoration budget: measure
+  FCP against a bare page; the shipped cell costs ~24ms, and the panel stars
+  gave up their core dots because each cost a layer and drowned under the rays
+  anyway. A fixed px tile also holds its geometry at any width.
+- **The cell geometry is derived, not eyeballed.** In a square tile the 45°
+  stripe at 50% of its axis is the corner diagonal; the 135° stripes at 25%
+  and 75% are the anti-diagonals through the quarter points. Every crossing
+  then lands exactly on (25%,25%)/(75%,75%) — the principal stars — and every
+  panel centre on (75%,25%)/(25%,75%) — the lesser stars. **Never place a star
+  on a tile edge or corner**: a gradient at 0% paints only its own tile's half
+  and no neighbouring layer completes it, so edge stars render sheared in
+  half. Keep every feature interior to the cell.
 - **Crossed elliptical gradients, not an SVG data URI.** An SVG cannot read
-  `var(--ornament)`, so it would silently break the seasonal veil.
+  `var(--ornament)`, so it would silently break the seasonal veil. Ribs
+  included: every layer goes through `color-mix` on `--ornament`.
 - **Declare the field on `body`, not `:root`** — twice-bitten. A `none` default
   on `body` beats an inherited `:root` value outright (the vault never
   appears), and a custom property's `var()` resolves against the element it is
@@ -93,17 +103,29 @@ what the rest of the app is made of — courses, aligned frames, banded groups.
 - **Guard with `prefers-color-scheme: dark`.** `:root:not([data-theme="light"])`
   matches when no choice is stored, so without it a Default-theme reader on a
   light device gets gold stars across the plaster.
-- **The field is desktop Apse home only; the phone gets a course instead.**
-  Three mobile treatments were built and rejected — a page-level field is
-  occluded by the card, stars on the card become specks on paper, and a
-  *border* in the 16px side gutters reads as debris pinned against the frame.
-  What works is a single course of stars in the open ground **below** the card.
-  Position it **out of flow**: laid out in flow it pushes an 844px phone past
-  its viewport and makes home scroll for an ornament. Gate it on the theme
-  rather than on `--apse-vault`, since an empty block still takes space in
-  Nave, and on a `min-height` — the gap it sits in comes from `main`'s
-  `min-height` and narrows to ~40px on a short phone, where the course would
-  land on the footer.
+- **Desktop carries the full-page field; the phone lets the vault rise below
+  the card.** A page-level field behind the card was rejected twice — before
+  the lattice for gutter debris, and again after it, because clipped rib stubs
+  in the 16px gutters are worse and the field speckles the footer controls.
+  What works on the phone is two cooperating layers: a **flex-grown gap
+  filler** (`main` becomes a column flex; the pseudo-element sizes itself to
+  whatever ground `main`'s `min-height` leaves, adding no scroll on any phone
+  height) and a **footer continuation** that thins the night to the foot of
+  the screen as the desktop mask does. The continuation must reach upward
+  through footer's top margin: its painted top, not the footer border box, is
+  the boundary shared with `main`. They join seamlessly only because the fill
+  is bottom-anchored there, the footer layer is top-anchored there, and their
+  masks meet at the same alpha; re-anchor either and the diaper breaks
+  mid-lattice at the footer line. Gate on the theme rather than on
+  `--apse-vault` (an empty flex item still takes space in Nave) and keep the
+  `min-height` gate: below it the gap collapses and all that renders is a
+  sliver of sheared ribs under the card.
+- **An hour admits the vault only after the prayer.** `.elements` and all
+  liturgical text remain on a flat field. A separate `.hour-epilogue` begins
+  after the office, stays transparent through the hour-continuation links,
+  fades the diaper in around Assurance, and phase-locks its bottom to a footer
+  continuation. The footer diamond remains in Nave but disappears in Apse,
+  where the bosses already supply that ornament.
 - **Let the field reach the edges.** A mask window that opens and closes inside
   the viewport leaves the stars as a band across the middle with bare ground
   above and below, which reads as a mistake rather than restraint. Clear the
@@ -173,7 +195,9 @@ nav has **one geometry on every page**.
   background propagates to the canvas and is positioned against the *root* box,
   so a tile wider than the screen shows only its middle slice — and which slice
   shifts with device width, so what you tuned is not what ships.
-- Non-liturgical rooms only. Prayer pages stay a flat diurnal field.
+- Non-liturgical rooms may carry the wash. Prayer text stays on a flat
+  diurnal field; an hour's post-office epilogue may carry the Apse vault only
+  after `.elements` has ended.
 
 ### Theme (Default / Nave / Apse)
 
@@ -191,6 +215,8 @@ nav has **one geometry on every page**.
 - Demote day switching (collapsed “Change date”); do not add sticky title chrome without measuring mobile pixels.
 - **Wake Lock:** default on for `.office-hour` only; never home/ordo/reminders; graceful no-op if unsupported.
 - Session prayers: collapsible, styled as **section headings**, not settings cards.
+- The Apse vault may fade in around the post-office Assurance panel and
+  continue through the footer, but never behind `.elements`.
 - Print: hide nav, progress, date-nav, banners; expand session prayers.
 
 ### Home
