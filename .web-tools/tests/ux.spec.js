@@ -440,13 +440,20 @@ test("the mobile vault fills the gap and continues behind the footer without scr
       const main = document.querySelector("main");
       const fill = getComputedStyle(main, "::after");
       // The continuation lives on footer::after; footer::before is the ✦
-      // diamond separator, which the vault must never displace.
-      const footer = getComputedStyle(document.querySelector("footer"), "::after");
-      const diamond = getComputedStyle(document.querySelector("footer"), "::before");
+      // diamond separator retained in Nave and replaced by the vault in Apse.
+      const footerElement = document.querySelector("footer");
+      const footer = getComputedStyle(footerElement, "::after");
+      const diamond = getComputedStyle(footerElement, "::before");
+      const mainBox = main.getBoundingClientRect();
+      const footerBox = footerElement.getBoundingClientRect();
       return {
         fillPresent: fill.content !== "none",
         footerPresent: footer.content !== "none",
         diamondKept: diamond.content.includes("✦"),
+        // footer has a 2.5rem top margin. Its painted continuation must reach
+        // through that margin to main's bottom or the tile restarts 40px out
+        // of phase even though its background-position still says "top".
+        joinsFill: Math.abs(footerBox.top + parseFloat(footer.top) - mainBox.bottom) < 0.5,
         // The fill is a flex-grown gap-filler, so it must add no height of its
         // own: a fixed-height course laid out in flow once pushed an 844px
         // phone past its viewport and made home scroll for an ornament.
@@ -466,7 +473,8 @@ test("the mobile vault fills the gap and continues behind the footer without scr
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
   expect(apse.fillPresent).toBe(true);
   expect(apse.footerPresent).toBe(true);
-  expect(apse.diamondKept).toBe(true);
+  expect(apse.diamondKept).toBe(false);
+  expect(apse.joinsFill).toBe(true);
   expect(apse.scrolls).toBe(false);
   expect(apse.phase[0]).toContain("100%");
   expect(apse.phase[1]).toContain("0%");
@@ -492,16 +500,79 @@ test("the mobile vault fills the gap and continues behind the footer without scr
     expect(short.fillPresent).toBe(false);
     expect(short.footerPresent).toBe(false);
   }
-  // At exactly 800px the page already scrolls a few pixels with no ornament
-  // at all, so "does not scroll" is not the invariant — "the vault adds no
-  // scroll" is. Nave is the ornament-free control for the same height.
+  // At exactly 800px Nave already scrolls a few pixels, so "does not scroll"
+  // is not the invariant — "the vault adds no scroll" is. Apse may be shorter
+  // because its starfield replaces the footer diamond and the diamond's
+  // margin.
   for (const height of [800, 932]) {
     const tall = await read({ height, theme: "dark", scheme: "dark" });
     const bare = await read({ height, theme: "light", scheme: "light" });
     expect(tall.fillPresent).toBe(true);
     expect(tall.footerPresent).toBe(true);
-    expect(tall.scrollHeight).toBe(bare.scrollHeight);
+    expect(tall.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
   }
+});
+
+test("the hour vault begins after prayer and replaces the Apse footer diamond", async ({ page }) => {
+  const read = async (theme) => {
+    const context = await page.context().browser().newContext({
+      viewport: { width: 390, height: 844 },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: theme,
+    });
+    const sheet = await context.newPage();
+    await sheet.addInitScript((storedTheme) => localStorage.setItem("office-theme", storedTheme), theme);
+    await sheet.goto(`/lauds/${testDate}`);
+    const seen = await sheet.evaluate(() => {
+      const main = document.querySelector("main");
+      const prayer = document.querySelector(".elements");
+      const epilogue = document.querySelector(".hour-epilogue");
+      const assurance = document.querySelector(".assurance-panel");
+      const footerElement = document.querySelector("footer");
+      const field = getComputedStyle(epilogue, "::before");
+      const footerField = getComputedStyle(footerElement, "::after");
+      const diamond = getComputedStyle(footerElement, "::before");
+      const mainBox = main.getBoundingClientRect();
+      const prayerBox = prayer.getBoundingClientRect();
+      const epilogueBox = epilogue.getBoundingClientRect();
+      const footerBox = footerElement.getBoundingClientRect();
+      return {
+        pageClass: document.body.classList.contains("page-hour"),
+        prayerField: getComputedStyle(prayer).backgroundImage,
+        fieldLayers: (field.backgroundImage.match(/radial-gradient/g) || []).length,
+        footerLayers: (footerField.backgroundImage.match(/radial-gradient/g) || []).length,
+        startsAfterPrayer: epilogueBox.top >= prayerBox.bottom,
+        endsWithMain: Math.abs(epilogueBox.bottom - mainBox.bottom) < 0.5,
+        joinsFooter:
+          Math.abs(footerBox.top + parseFloat(footerField.top) - epilogueBox.bottom) < 0.5,
+        phase: [field.backgroundPosition, footerField.backgroundPosition],
+        diamond: diamond.content,
+        assuranceBackground: getComputedStyle(assurance).backgroundColor,
+      };
+    });
+    await context.close();
+    return seen;
+  };
+
+  const apse = await read("dark");
+  expect(apse.pageClass).toBe(true);
+  expect(apse.prayerField).toBe("none");
+  expect(apse.fieldLayers).toBe(10);
+  expect(apse.footerLayers).toBe(10);
+  expect(apse.startsAfterPrayer).toBe(true);
+  expect(apse.endsWithMain).toBe(true);
+  expect(apse.joinsFooter).toBe(true);
+  expect(apse.phase[0]).toContain("100%");
+  expect(apse.phase[1]).toContain("0%");
+  expect(apse.diamond).toBe("none");
+
+  const nave = await read("light");
+  expect(nave.prayerField).toBe("none");
+  expect(nave.fieldLayers).toBe(0);
+  expect(nave.footerLayers).toBe(0);
+  expect(nave.diamond).toContain("✦");
+  expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {

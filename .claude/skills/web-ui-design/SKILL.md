@@ -52,14 +52,14 @@ Read this before changing visual design or prayer-page chrome.
 |-------|-----|
 | ✠ | Brand |
 | Double gold hairline | Hour titles, major breaks |
-| ✦ diamond | Footer / major separators; the raised points either side of an inscription |
+| ✦ diamond | Nave footer / major separators; the raised points either side of an inscription. Suppress the footer diamond where the Apse starfield takes over |
 | Inscription band | Dark oak course, full-bleed, gold small-caps between ✦ points. Section heads in a framed object — the parish's most distinctive mark, so spend it rarely |
 | Liturgical color band | Top of hour pages (+ safe-area) |
 | Gold drop caps | Psalm/chapter openings |
 | Gold scroll progress hairline | Under color band on hour pages only |
 | Gold underline (`inset 0 -1px 0`) | **The** marker for "this is the chosen one" — current hour, selected control. Never a filled cell |
 | Gold caret `▾` / `▴` | **The** disclosure marker, everywhere. Never the native `▶`, never `+` / `−` |
-| Apse starfield | **Apse home only** — the diapered field around the frontispiece on desktop, the ground below the card on the phone; never a prayer page, never Nave. See below |
+| Apse starfield | **Apse home and post-office epilogue only** — the diapered field around the frontispiece on desktop, the ground below the card on the phone, and a fade beginning around Assurance after an hour; never behind prayer text, never Nave. See below |
 
 Two weights of line, and they mean different things: **oak** (`--oak`, near-charcoal warm brown) is structure — the header beam, an inscription course. **Pale tan hairlines** (`--border`, `--surface-edge`) are surfaces and separators. The building is emphatically structural; if a page feels boneless, it is usually missing oak, not missing more hairlines.
 
@@ -111,13 +111,21 @@ what wallpaper is.
   filler** (`main` becomes a column flex; the pseudo-element sizes itself to
   whatever ground `main`'s `min-height` leaves, adding no scroll on any phone
   height) and a **footer continuation** that thins the night to the foot of
-  the screen as the desktop mask does. They join seamlessly only because both
-  anchor their tile to the boundary they share — fill bottom-anchored, footer
-  layer top-anchored — and their masks meet at the same alpha; re-anchor
-  either and the diaper breaks mid-lattice at the footer line. Gate on the
-  theme rather than on `--apse-vault` (an empty flex item still takes space in
-  Nave) and keep the `min-height` gate: below it the gap collapses and all
-  that renders is a sliver of sheared ribs under the card.
+  the screen as the desktop mask does. The continuation must reach upward
+  through footer's top margin: its painted top, not the footer border box, is
+  the boundary shared with `main`. They join seamlessly only because the fill
+  is bottom-anchored there, the footer layer is top-anchored there, and their
+  masks meet at the same alpha; re-anchor either and the diaper breaks
+  mid-lattice at the footer line. Gate on the theme rather than on
+  `--apse-vault` (an empty flex item still takes space in Nave) and keep the
+  `min-height` gate: below it the gap collapses and all that renders is a
+  sliver of sheared ribs under the card.
+- **An hour admits the vault only after the prayer.** `.elements` and all
+  liturgical text remain on a flat field. A separate `.hour-epilogue` begins
+  after the office, stays transparent through the hour-continuation links,
+  fades the diaper in around Assurance, and phase-locks its bottom to a footer
+  continuation. The footer diamond remains in Nave but disappears in Apse,
+  where the bosses already supply that ornament.
 - **Let the field reach the edges.** A mask window that opens and closes inside
   the viewport leaves the stars as a band across the middle with bare ground
   above and below, which reads as a mistake rather than restraint. Clear the
@@ -187,7 +195,9 @@ nav has **one geometry on every page**.
   background propagates to the canvas and is positioned against the *root* box,
   so a tile wider than the screen shows only its middle slice — and which slice
   shifts with device width, so what you tuned is not what ships.
-- Non-liturgical rooms only. Prayer pages stay a flat diurnal field.
+- Non-liturgical rooms may carry the wash. Prayer text stays on a flat
+  diurnal field; an hour's post-office epilogue may carry the Apse vault only
+  after `.elements` has ended.
 
 ### Theme (Default / Nave / Apse)
 
@@ -205,6 +215,8 @@ nav has **one geometry on every page**.
 - Demote day switching (collapsed “Change date”); do not add sticky title chrome without measuring mobile pixels.
 - **Wake Lock:** default on for `.office-hour` only; never home/ordo/reminders; graceful no-op if unsupported.
 - Session prayers: collapsible, styled as **section headings**, not settings cards.
+- The Apse vault may fade in around the post-office Assurance panel and
+  continue through the footer, but never behind `.elements`.
 - Print: hide nav, progress, date-nav, banners; expand session prayers.
 
 ### Home

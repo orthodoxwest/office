@@ -552,7 +552,10 @@ footer .text-size-switch {
 /* ── Footer ── */
 
 footer {
-  margin-top: 2.5rem;
+  /* The mobile Apse vault extends through this gap. Keep its reach coupled to
+     the spacing so the two painted halves cannot drift out of phase again. */
+  --footer-gap: 2.5rem;
+  margin-top: var(--footer-gap);
   padding: 0.85rem 0;
   font-size: 0.78rem;
   color: var(--muted);
@@ -654,6 +657,20 @@ footer::before {
     padding: 0.65rem 0.7rem;
     font-size: 0.78rem;
   }
+}
+
+/* In an Apse hour the vault rises around the post-office material, but the
+   expanded provenance list is still a reading surface. Nearly opaque slate
+   quiets the ribs beneath the panel while leaving the field visible around
+   its edges. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.page-hour .assurance-panel {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+  }
+}
+
+:root[data-theme="dark"] body.page-hour .assurance-panel {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 /* ── Home page ──
@@ -1227,6 +1244,11 @@ footer::before {
 /* ── Office elements ── */
 
 .office-hour {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hour-epilogue {
   display: grid;
   gap: 1.25rem;
 }
@@ -3843,6 +3865,69 @@ body {
       var(--apse-line) calc(75% - 0.6px) calc(75% + 0.6px), transparent calc(75% + 0.6px));
 }
 
+/* An hour remains a flat prayer page until the office has ended. The vault
+   begins only in the post-prayer epilogue: transparent through the hour
+   continuation, emerging around Assurance, then continuing through the
+   footer. Both layers share main's bottom as their tile origin, exactly as
+   the two mobile-home layers do.
+
+   The negative inline reach restores the full main/footer measure around the
+   narrower content box. On a phone that is edge-to-edge; on desktop it is the
+   46rem architectural frame rather than stars spread behind the prayer page. */
+body.page-hour {
+  --apse-epilogue-tile: 132px;
+}
+
+body.page-hour .hour-epilogue,
+body.page-hour footer {
+  position: relative;
+  isolation: isolate;
+}
+
+body.page-hour .hour-epilogue::before,
+body.page-hour footer::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--apse-vault);
+  background-repeat: repeat;
+  background-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile);
+}
+
+body.page-hour .hour-epilogue::before {
+  inset: 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-right))) 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
+  background-position: bottom center;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+  mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+}
+
+body.page-hour footer::after {
+  inset: calc(-1 * var(--footer-gap)) 0 0;
+  background-position: top center;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+  mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+@media (min-width: 701px) {
+  body.page-hour {
+    --apse-epilogue-tile: 176px;
+  }
+}
+
+/* The footer diamond still provides a structural threshold on Nave plaster.
+   Where the Apse vault is present it becomes a second boss floating over a
+   field already full of them, so the starfield takes over that work. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+    content: none;
+  }
+}
+
+:root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
+  content: none;
+}
+
 /* On a phone the field cannot stand behind the card: the frontispiece leaves
    16px side gutters where clipped rib stubs and half-stars read as debris
    pinned against the frame (built and looked at, again, after the lattice
@@ -3863,10 +3948,12 @@ body {
    layer anywhere else and the lattice visibly breaks at the footer line. The
    masks meet at the same 0.4 alpha for the same reason.
 
-   Negative gutter margins bleed the fill wall to wall; the footer layer needs
-   none because inset: 0 already covers the footer's padding box. Apse only,
-   and gated on the theme rather than on --apse-vault, because an empty flex
-   item still takes space in Nave.
+   Negative gutter margins bleed the fill wall to wall. The footer layer
+   reaches upward through footer's margin so its painted top is the actual
+   bottom of main; anchoring at the footer border box instead leaves a 2.5rem
+   unpainted phase jump between the two tiles. Apse only, and gated on the
+   theme rather than on --apse-vault, because an empty flex item still takes
+   space in Nave.
 
    The min-height guard survives the redesign for the top edge's sake: below
    ~800px the gap collapses and all that would render is a sliver of sheared
@@ -3908,7 +3995,7 @@ body {
   :root:not([data-theme="light"]) body.page-home footer::after {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: calc(-1 * var(--footer-gap)) 0 0;
     z-index: -1;
     pointer-events: none;
     background-image: var(--apse-vault);
@@ -3984,4 +4071,3 @@ body {
     color: #444;
   }
 }
-
