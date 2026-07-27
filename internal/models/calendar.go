@@ -51,6 +51,19 @@ func (r Rank) Weight() int {
 	return 0
 }
 
+// IsDouble reports whether the rank is any of the Double grades (I Class,
+// II Class, Greater, or ordinary). In a Double office, psalm and canticle
+// antiphons at Vespers and Lauds are said entire both before and after; in a
+// lower-rank office they are only announced before (General Rubrics I.4, XXIV.8).
+func (r Rank) IsDouble() bool {
+	switch r {
+	case Double1stClass, Double2ndClass, GreaterDouble, Double:
+		return true
+	default:
+		return false
+	}
+}
+
 // Abbrev returns the short abbreviation for display.
 func (r Rank) Abbrev() string {
 	if a, ok := rankAbbreviations[r]; ok {

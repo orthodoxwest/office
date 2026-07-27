@@ -8,6 +8,8 @@ import (
 )
 
 // FormatOfficeHour formats a composed office hour as plain text for CLI output.
+// Announced antiphons (the opening half of a psalm/canticle frame when the
+// office does not double them) print only through the mediant asterisk.
 func FormatOfficeHour(hour *models.OfficeHour) string {
 	var b strings.Builder
 
@@ -33,8 +35,8 @@ func FormatOfficeHour(hour *models.OfficeHour) string {
 				}
 				fmt.Fprintf(&b, "--- %s ---\n", label)
 			}
-			if elem.Text != "" {
-				b.WriteString(elem.Text)
+			if text := elem.DisplayText(); text != "" {
+				b.WriteString(text)
 				b.WriteString("\n\n")
 			}
 		}

@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // ElementType identifies the kind of liturgical element.
 type ElementType string
@@ -47,6 +50,13 @@ type VoiceSpan struct {
 // Voice, when non-empty, is a presentation partition of Text into spoken and
 // silent spans. The concatenation of span texts must equal Text. Plain-text
 // and golden output use Text only; HTML/TeX may style Voice.
+//
+// Announce, on an Antiphon, means the element is the opening half of a
+// psalm/canticle frame and the office is not Double at this hour: print only
+// the announcement form (DisplayText), not the full Text. Text itself always
+// holds the complete antiphon so review hashes, provenance, and the matching
+// after-antiphon stay whole. Announce is presentation-only and is not part of
+// the review content hash.
 type OfficeElement struct {
 	Type       ElementType
 	Text       string
@@ -57,6 +67,41 @@ type OfficeElement struct {
 	SlotRef    string
 	SourceRef  string
 	SourceRefs []string
+	Announce   bool
+}
+
+// DisplayText is the string a renderer should print for this element. For an
+// announced antiphon it is the text through the mediant asterisk or dagger;
+// otherwise it is Text.
+func (e OfficeElement) DisplayText() string {
+	if e.Type == Antiphon && e.Announce {
+		return AntiphonAnnouncement(e.Text)
+	}
+	return e.Text
+}
+
+// AntiphonAnnouncement returns the form said when an antiphon is merely
+// announced before a psalm: the words through the first mediant asterisk (*)
+// or dagger (†). When the corpus text has no such mark, the full text is
+// returned — there is no safe partial cut without a pointing cue.
+func AntiphonAnnouncement(text string) string {
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return ""
+	}
+	// Prefer the earliest of the mediant marks used in the corpus.
+	cut := -1
+	markLen := 0
+	for _, m := range []string{"*", "†", "‡"} {
+		if i := strings.Index(text, m); i >= 0 && (cut < 0 || i < cut) {
+			cut = i
+			markLen = len(m)
+		}
+	}
+	if cut < 0 {
+		return text
+	}
+	return strings.TrimRight(text[:cut+markLen], " \t")
 }
 
 // CompositionDecision records one machine-readable choice made while an hour

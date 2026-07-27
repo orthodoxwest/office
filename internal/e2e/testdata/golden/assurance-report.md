@@ -3,7 +3,7 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 207 |
+| Modeled structural features | 209 |
 | Full structural-cover pages | 56 |
 | Residual structural-review pages | 56 |
 | Uncovered features | 0 |
@@ -16,6 +16,8 @@
 | Stale attestations | 0 |
 
 ### Modeled structural features
+- `decision:antiphon:doubling=announced`
+- `decision:antiphon:doubling=doubled`
 - `decision:color:resolution=celebration-color`
 - `decision:color:resolution=penitential-season-over-lesser-feast`
 - `decision:color:resolution=seasonal-feria`

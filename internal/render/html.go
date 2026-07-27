@@ -129,15 +129,24 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 	case models.Antiphon:
 		if elem.Label != "" {
 			// The label is the antiphon's Latin title ("Salve Regina"); the
-			// body beneath it is English.
+			// body beneath it is English. Marian antiphons are never announced.
 			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label" lang="la">`)
 			sb.WriteString(template.HTMLEscapeString(elem.Label))
 			sb.WriteString(`</h3>`)
 			sb.WriteString(string(renderMarianAntiphon(elem.Text)))
 			sb.WriteString(`</div>`)
 		} else {
-			sb.WriteString(`<p class="antiphon"><em>Ant.</em> `)
-			sb.WriteString(chantLineHTML(elem.Text))
+			// DisplayText shortens the opening half of a psalm/canticle frame
+			// when the office only announces the antiphon (semi-double and
+			// below, or any hour other than Lauds/Vespers of a Double).
+			class := "antiphon"
+			if elem.Announce {
+				class = "antiphon antiphon-announce"
+			}
+			sb.WriteString(`<p class="`)
+			sb.WriteString(class)
+			sb.WriteString(`"><em>Ant.</em> `)
+			sb.WriteString(chantLineHTML(elem.DisplayText()))
 			sb.WriteString(`</p>`)
 		}
 	case models.Psalm, models.Canticle:
@@ -430,10 +439,14 @@ func renderMarianAntiphon(text string) template.HTML {
 // versicles, plain prose in liturgical blocks, Marian chant lines, etc.).
 func chantLineHTML(line string) string {
 	before, after, found := strings.Cut(line, " * ")
-	if !found {
-		return escCross(line)
+	if found {
+		return escCross(before) + ` <span class="mediant">*</span> ` + escCross(after)
 	}
-	return escCross(before) + ` <span class="mediant">*</span> ` + escCross(after)
+	// Announced antiphons end at the mediant ("words *") with no trailing half.
+	if before, ok := strings.CutSuffix(line, " *"); ok {
+		return escCross(before) + ` <span class="mediant">*</span>`
+	}
+	return escCross(line)
 }
 
 func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {

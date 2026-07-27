@@ -37,7 +37,7 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.
 
 Alleluia
 
-Alleluia, * alleluia, alleluia.
+Alleluia, *
 
 --- Psalm 135 · Laudate nomen Domini ---
 Psalm 135
@@ -191,7 +191,7 @@ Amen.
 V. Abide with us, Lord, alleluia.
 R. For it is toward evening, alleluia.
 
-I have yet many things to say unto you, but ye cannot bear them now. * Howbeit, when He, the Spirit of truth, is come, He will guide you into all truth. Alleluia.
+I have yet many things to say unto you, but ye cannot bear them now. *
 
 --- Magnificat · Magnificat anima mea Dominum ---
 !Luke 1:46-55
