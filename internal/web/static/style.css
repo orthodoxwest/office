@@ -3955,10 +3955,12 @@ body.page-hour footer::after {
    theme rather than on --apse-vault, because an empty flex item still takes
    space in Nave.
 
-   The min-height guard survives the redesign for the top edge's sake: below
-   ~800px the gap collapses and all that would render is a sliver of sheared
-   rib stubs under the card. No ground, no vault. */
-@media (max-width: 700px) and (min-height: 800px) {
+   There is deliberately no viewport-height gate. The browser chrome on a
+   phone can move the effective height across a breakpoint during history
+   navigation, making a restored home page lose its vault. On a short screen
+   the flex-grown gap simply collapses; the footer continuation still gives
+   the field a complete, intentional place to appear. */
+@media (max-width: 700px) {
   :root[data-theme="dark"] body.page-home main,
   :root:not([data-theme="light"]) body.page-home main {
     display: flex;
@@ -4007,7 +4009,7 @@ body.page-hour footer::after {
   }
 }
 
-@media (max-width: 700px) and (min-height: 800px) and (prefers-color-scheme: light) {
+@media (max-width: 700px) and (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) body.page-home main {
     display: block;
   }

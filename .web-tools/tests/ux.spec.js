@@ -491,14 +491,21 @@ test("the mobile vault fills the gap and continues behind the footer without scr
     expect(nave.scrolls).toBe(false);
   }
 
-  // The gap scales with the viewport; on a short phone it collapses and all
-  // that would render is a sliver of sheared rib stubs under the card, so the
-  // min-height gate removes the vault entirely — footer continuation included,
-  // or the night would hang under the footer with nothing above it.
+  // The gap scales with the viewport and may collapse on a short phone, but
+  // the footer continuation is now a complete home for the field in its own
+  // right. Keep both layers eligible at every phone height: mobile browser
+  // chrome can move the effective viewport across an arbitrary height
+  // breakpoint during history navigation.
   for (const height of [667, 740]) {
     const short = await read({ height, theme: "dark", scheme: "dark" });
-    expect(short.fillPresent).toBe(false);
-    expect(short.footerPresent).toBe(false);
+    const bare = await read({ height, theme: "light", scheme: "light" });
+    expect(short.fillPresent).toBe(true);
+    expect(short.footerPresent).toBe(true);
+    expect(short.diamondKept).toBe(false);
+    expect(short.joinsFill).toBe(true);
+    expect(short.phase[0]).toContain("100%");
+    expect(short.phase[1]).toContain("0%");
+    expect(short.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
   }
   // At exactly 800px Nave already scrolls a few pixels, so "does not scroll"
   // is not the invariant — "the vault adds no scroll" is. Apse may be shorter
@@ -511,6 +518,32 @@ test("the mobile vault fills the gap and continues behind the footer without scr
     expect(tall.footerPresent).toBe(true);
     expect(tall.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
   }
+});
+
+test("the mobile home vault survives browser-back viewport changes", async ({ page }) => {
+  await openDatedPage(page, `/?date=${testDate}`, "dark");
+  await page.locator(".pray-now").click();
+  await expect(page.locator("body")).toHaveClass(/page-hour/);
+
+  // Mobile browser chrome can shorten the effective viewport before restoring
+  // a history entry. The vault must not be conditional on the 800px height the
+  // home page happened to have when it was first painted.
+  await page.setViewportSize({ width: 390, height: 740 });
+  await page.goBack();
+  await expect(page.locator("body")).toHaveClass(/page-home/);
+
+  const field = await page.evaluate(() => {
+    const main = getComputedStyle(document.querySelector("main"), "::after");
+    const footer = getComputedStyle(document.querySelector("footer"), "::after");
+    return {
+      main: [main.content, main.backgroundImage],
+      footer: [footer.content, footer.backgroundImage],
+    };
+  });
+  expect(field.main[0]).not.toBe("none");
+  expect(field.main[1]).not.toBe("none");
+  expect(field.footer[0]).not.toBe("none");
+  expect(field.footer[1]).not.toBe("none");
 });
 
 test("the hour vault begins after prayer and replaces the Apse footer diamond", async ({ page }) => {
