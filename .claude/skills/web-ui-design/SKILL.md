@@ -59,11 +59,34 @@ Read this before changing visual design or prayer-page chrome.
 | Gold scroll progress hairline | Under color band on hour pages only |
 | Gold underline (`inset 0 -1px 0`) | **The** marker for "this is the chosen one" — current hour, selected control. Never a filled cell |
 | Gold caret `▾` / `▴` | **The** disclosure marker, everywhere. Never the native `▶`, never `+` / `−` |
-| Sparse stars | Only if proven; prefer **not** on mobile margins |
+| Apse starfield | **Desktop Apse home only** — the page field around the frontispiece, never the phone, never a prayer page, never Nave. See below |
 
 Two weights of line, and they mean different things: **oak** (`--oak`, near-charcoal warm brown) is structure — the header beam, an inscription course. **Pale tan hairlines** (`--border`, `--surface-edge`) are surfaces and separators. The building is emphatically structural; if a page feels boneless, it is usually missing oak, not missing more hairlines.
 
 Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, fitness-style progress rings, sun/moon icon toggles that read as SaaS.
+
+### The Apse starfield (settled — do not relitigate)
+
+The half-dome over the altar is a slate vault of small gold stars, and it is
+the one place in the building where ornament sits on **open field** rather than
+on structure. Rules that came out of building it:
+
+- **A vault is a field, not a handful of points.** Roughly 60 stars under
+  1.5px, denser toward the crown, alpha fading to nothing before the field
+  ends. A dozen big dots reads as dust or dead pixels — this was tried.
+- **Desktop Apse home only.** At 390px the frontispiece fills nearly the whole
+  width and occludes a page-level field; moving the stars onto the card puts
+  them on a lighter surface behind the date, where they read as specks on
+  paper. The vault goes where there is open field to hold it.
+- **Stars over plaster is the failure mode to guard.** `:root:not([data-theme="light"])`
+  matches when no choice is stored, so the rule needs a
+  `prefers-color-scheme: dark` guard or a Default-theme reader on a light
+  device gets gold stars across the Nave.
+- **Declare the field on `body`, not `:root`.** A custom property's `var()`
+  resolves against the element it is declared on, and the seasonal `--ornament`
+  overrides land on `body` — hoisting it freezes the stars gold through
+  Passiontide while everything else veils.
+- Static. A twinkling vault is the opposite of stillness.
 
 ### Gilding vs functional gold
 

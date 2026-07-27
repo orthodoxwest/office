@@ -186,9 +186,30 @@ type cssBlock struct {
 	body     string
 }
 
+// stripComments removes /* … */ so that prose mentioning a selector — a
+// comment explaining why the apse vault must be declared where the seasonal
+// --ornament lands, say — is not scanned as if it were a rule. Without this a
+// comment naming a season block fails the check with a baffling message.
+func stripComments(style string) string {
+	var b strings.Builder
+	for {
+		i := strings.Index(style, "/*")
+		if i < 0 {
+			b.WriteString(style)
+			return b.String()
+		}
+		b.WriteString(style[:i])
+		j := strings.Index(style[i:], "*/")
+		if j < 0 {
+			return b.String()
+		}
+		style = style[i+j+2:]
+	}
+}
+
 func seasonBlocks(style string) []cssBlock {
 	var blocks []cssBlock
-	for rest := style; ; {
+	for rest := stripComments(style); ; {
 		i := strings.Index(rest, "body.season-")
 		if i < 0 {
 			return blocks
