@@ -3,6 +3,8 @@ package render
 import (
 	"html/template"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
@@ -11,6 +13,89 @@ import (
 // escCross replaces the ✠ cross character with a styled HTML span.
 func escCross(s string) string {
 	return strings.ReplaceAll(template.HTMLEscapeString(s), "✠", `<span class="cross">✠</span>`)
+}
+
+// softenDropCapOpening title-cases a run of leading ALL-CAPS words so a CSS
+// drop cap takes only the initial and the rest of the word reads as prose.
+// Without this, Coverdale openings like "GOD be merciful" render as a gilt
+// "G" beside "OD" in full caps. Single-letter words (O, I) are left alone;
+// multi-letter ALL-CAPS words are title-cased until a mixed-case word stops
+// the run: "MY SOUL cleaveth" → "My Soul cleaveth", "O GIVE thanks" → "O Give thanks".
+func softenDropCapOpening(s string) string {
+	if s == "" {
+		return s
+	}
+	var b strings.Builder
+	b.Grow(len(s))
+	i := 0
+	changed := false
+	for i < len(s) {
+		// Preserve leading / inter-word spaces exactly.
+		for i < len(s) {
+			r, size := utf8.DecodeRuneInString(s[i:])
+			if !unicode.IsSpace(r) {
+				break
+			}
+			b.WriteRune(r)
+			i += size
+		}
+		if i >= len(s) {
+			break
+		}
+		// Collect the next word (letters + trailing non-space punctuation).
+		wordStart := i
+		for i < len(s) {
+			r, size := utf8.DecodeRuneInString(s[i:])
+			if unicode.IsSpace(r) {
+				break
+			}
+			i += size
+		}
+		word := s[wordStart:i]
+		// Split trailing punctuation from the letter run.
+		letterEnd := len(word)
+		for letterEnd > 0 {
+			r, size := utf8.DecodeLastRuneInString(word[:letterEnd])
+			if unicode.IsLetter(r) {
+				break
+			}
+			letterEnd -= size
+		}
+		if letterEnd == 0 {
+			// No letters — not an ALL-CAPS opening word; stop the run.
+			b.WriteString(s[wordStart:])
+			return b.String()
+		}
+		letters := word[:letterEnd]
+		trail := word[letterEnd:]
+		runes := []rune(letters)
+		allCaps := true
+		for _, r := range runes {
+			if !unicode.IsLetter(r) || !unicode.IsUpper(r) {
+				allCaps = false
+				break
+			}
+		}
+		if !allCaps {
+			b.WriteString(s[wordStart:])
+			return b.String()
+		}
+		if len(runes) >= 2 {
+			b.WriteRune(runes[0])
+			for _, r := range runes[1:] {
+				b.WriteRune(unicode.ToLower(r))
+			}
+			b.WriteString(trail)
+			changed = true
+		} else {
+			// Single capital (O, I) — keep, continue scanning the run.
+			b.WriteString(word)
+		}
+	}
+	if !changed {
+		return s
+	}
+	return b.String()
 }
 
 func renderSectionElements(elems []models.OfficeElement) template.HTML {
@@ -139,6 +224,10 @@ func renderPsalmVerses(text string) template.HTML {
 	}
 
 	sb.WriteString(`<div class="psalm-verses">`)
+	// The first verse of each .psalm-verses block carries the drop cap
+	// (::first-letter). Soften its ALL-CAPS Coverdale opening so the gilt
+	// initial does not leave the rest of the word in full caps.
+	dropCapNext := true
 
 	for _, item := range psalm.Items {
 		switch item.Kind {
@@ -148,9 +237,11 @@ func renderPsalmVerses(text string) template.HTML {
 			sb.WriteString(template.HTMLEscapeString(item.Heading))
 			sb.WriteString(`</p>`)
 			sb.WriteString(`<div class="psalm-verses">`)
+			dropCapNext = true
 
 		case texts.PsalmGloria:
 			// Pointed as a pair: the break falls between the two lines.
+			// Gloria is never the drop-cap verse (it follows real verses).
 			sb.WriteString(`<p class="verse">`)
 			sb.WriteString(template.HTMLEscapeString(item.First))
 			if item.Second != "" {
@@ -158,8 +249,14 @@ func renderPsalmVerses(text string) template.HTML {
 				sb.WriteString(template.HTMLEscapeString(item.Second))
 			}
 			sb.WriteString(`</p>`)
+			dropCapNext = false
 
 		default:
+			first := item.First
+			if dropCapNext {
+				first = softenDropCapOpening(first)
+				dropCapNext = false
+			}
 			if item.Number != "" {
 				sb.WriteString(`<p class="verse numbered"><span class="verse-num">`)
 				sb.WriteString(template.HTMLEscapeString(item.Number))
@@ -167,7 +264,7 @@ func renderPsalmVerses(text string) template.HTML {
 			} else {
 				sb.WriteString(`<p class="verse">`)
 			}
-			sb.WriteString(escCross(item.First))
+			sb.WriteString(escCross(first))
 			if item.Second != "" {
 				sb.WriteString(` <span class="mediant">*</span> `)
 				sb.WriteString(escCross(item.Second))
@@ -442,7 +539,15 @@ func renderHymnStanzas(text string) template.HTML {
 	}
 
 	for _, stanza := range hymn.Stanzas {
-		sb.WriteString(`<p class="hymn-stanza">`)
+		// A lone Amen is the coda, not another verse stanza — mark it so
+		// type can set it apart (italic, a little air above).
+		class := "hymn-stanza"
+		if isHymnAmen(stanza) {
+			class = "hymn-stanza hymn-amen"
+		}
+		sb.WriteString(`<p class="`)
+		sb.WriteString(class)
+		sb.WriteString(`">`)
 		for i, line := range stanza {
 			if i > 0 {
 				sb.WriteString(`<br>`)
@@ -454,6 +559,17 @@ func renderHymnStanzas(text string) template.HTML {
 
 	sb.WriteString(`</div>`)
 	return template.HTML(sb.String())
+}
+
+// isHymnAmen reports whether a stanza is a single Amen line (with optional
+// trailing punctuation), the traditional hymn coda.
+func isHymnAmen(stanza []string) bool {
+	if len(stanza) != 1 {
+		return false
+	}
+	s := strings.TrimSpace(stanza[0])
+	s = strings.TrimRight(s, ".! ")
+	return strings.EqualFold(s, "Amen")
 }
 
 // renderGloriaPatri renders the two-line Gloria Patri text with a * mediant break.

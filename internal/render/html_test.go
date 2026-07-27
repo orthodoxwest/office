@@ -22,6 +22,52 @@ func TestRenderBenediciteSpaceNumberedVerses(t *testing.T) {
 	if strings.Contains(html, `>2 O ye Angels`) {
 		t.Fatalf("verse number must not remain in the body text: %s", html)
 	}
+	// Drop-cap opening: single-letter O kept; multi-letter ALL softened.
+	if !strings.Contains(html, `O All ye Works of the Lord`) {
+		t.Fatalf("expected ALL-CAPS opening softened for drop cap: %s", html)
+	}
+	if strings.Contains(html, `O ALL ye`) {
+		t.Fatalf("ALL-CAPS opening must not remain beside the drop cap: %s", html)
+	}
+}
+
+func TestSoftenDropCapOpening(t *testing.T) {
+	cases := []struct {
+		in, want string
+	}{
+		{"GOD be merciful unto us", "God be merciful unto us"},
+		{"HAVE mercy upon me, O God", "Have mercy upon me, O God"},
+		{"BLESSED are those", "Blessed are those"},
+		{"WHEREWITHAL shall a young man", "Wherewithal shall a young man"},
+		{"MY SOUL cleaveth to the dust", "My Soul cleaveth to the dust"},
+		{"O GIVE thanks unto the Lord", "O Give thanks unto the Lord"},
+		{"O ALL ye Works of the Lord", "O All ye Works of the Lord"},
+		{"Blessed be the Lord God of Israel", "Blessed be the Lord God of Israel"},
+		{"That thy way may be known", "That thy way may be known"},
+		{"", ""},
+	}
+	for _, tt := range cases {
+		if got := softenDropCapOpening(tt.in); got != tt.want {
+			t.Errorf("softenDropCapOpening(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
+func TestRenderPsalmSoftensDropCapOpeningOnly(t *testing.T) {
+	html := string(renderPsalmVerses("Psalm 67\n\n" +
+		"GOD be merciful unto us, and bless us * and shew us the light of his countenance.\n" +
+		"2. That thy way may be known upon earth * thy saving health among all nations.\n"))
+
+	if !strings.Contains(html, `>God be merciful unto us`) {
+		t.Fatalf("expected drop-cap verse opening softened: %s", html)
+	}
+	if strings.Contains(html, `>GOD be merciful`) {
+		t.Fatalf("ALL-CAPS opening must not remain on the drop-cap verse: %s", html)
+	}
+	// Numbered verses keep their source capitalisation.
+	if !strings.Contains(html, `That thy way may be known upon earth`) {
+		t.Fatalf("expected numbered verse body preserved: %s", html)
+	}
 }
 
 func TestRenderSectionElementsMergesPsalmDoxologyIntoPsalmBlock(t *testing.T) {
@@ -183,5 +229,27 @@ func TestRenderHymnStanzasPreservesVerseLines(t *testing.T) {
 
 	if !strings.Contains(html, `<p class="hymn-stanza">First verse line,<br>Second verse line.</p>`) {
 		t.Fatalf("expected hymn verse lines to remain hard-wrapped: %s", html)
+	}
+}
+
+func TestRenderHymnMarksAmenCoda(t *testing.T) {
+	html := string(renderHymnStanzas("Title\n\nFirst line,\nSecond line.\n\nAmen."))
+
+	if !strings.Contains(html, `<p class="hymn-stanza hymn-amen">Amen.</p>`) {
+		t.Fatalf("expected lone Amen stanza marked as coda: %s", html)
+	}
+	if !strings.Contains(html, `<p class="hymn-stanza">First line,<br>Second line.</p>`) {
+		t.Fatalf("expected ordinary stanzas unmarked: %s", html)
+	}
+}
+
+func TestRenderBlessingUsesVersicleLine(t *testing.T) {
+	html := string(renderLiturgicalBlock("Blessing. May the Almighty and merciful Lord grant us a quiet night."))
+
+	if !strings.Contains(html, `<span class="sigil">Blessing.</span>`) {
+		t.Fatalf("expected Blessing. sigil: %s", html)
+	}
+	if !strings.Contains(html, `class="versicle-line"`) {
+		t.Fatalf("expected Blessing on a versicle-line for the shared sigil column: %s", html)
 	}
 }

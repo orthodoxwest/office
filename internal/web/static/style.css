@@ -1363,15 +1363,20 @@ footer::before {
   background: none;
 }
 
+/* Body antiphons hang left, like Marian chant lines: multi-line centre-rag
+   is hard to track while praying (gospel antiphons run to half a dozen lines
+   on a phone). The hanging indent tucks a wrap under the line after "Ant.";
+   side padding is kept so the block does not kiss the column edge. */
 .antiphon {
   display: block;
   font-style: normal;
   color: var(--text);
   max-width: 34rem;
   margin: 0.25rem auto 0.95rem;
-  padding: 0 1.2rem;
-  line-height: 1.5;
-  text-align: center;
+  padding: 0 0.25rem 0 1.35rem;
+  text-indent: -1.35rem;
+  line-height: 1.6;
+  text-align: left;
 }
 
 /* Rubrical sigil "Ant." — an abbreviation, so it sets entirely in small caps
@@ -1385,7 +1390,6 @@ footer::before {
 }
 
 .elements > .antiphon {
-  padding: 0;
   background: none;
   border: none;
 }
@@ -1443,8 +1447,13 @@ footer::before {
   margin-bottom: 0.5rem;
 }
 
+/* Hymn lines are short (~30–40 characters). Holding them to a tighter
+   measure than the psalm column keeps the verse from looking like a
+   left-heavy strip of prose in a wide field. */
 .hymn-verses {
   line-height: 1.75;
+  max-width: 28rem;
+  margin-inline: auto;
 }
 
 .hymn-latin {
@@ -1457,6 +1466,14 @@ footer::before {
 
 .hymn-stanza {
   margin-bottom: 0.75rem;
+}
+
+/* Amen is the coda, not another verse: italic, a little air above the
+   last stanza, no trailing stanza gap. */
+.hymn-amen {
+  font-style: italic;
+  margin-top: 0.35rem;
+  margin-bottom: 0;
 }
 
 .psalm-text {
@@ -1547,7 +1564,8 @@ footer::before {
   color: var(--ornament);
 }
 
-/* Drop cap on chapter and hymn opening text (same metrics as the psalm cap) */
+/* Drop cap on chapter openings (same metrics as the psalm cap). Hymns are
+   stanza form and deliberately do not take a drop cap. */
 .chapter .liturgical-block .plain-line:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
   font-size: 3.05em;
@@ -1592,9 +1610,16 @@ footer::before {
   font-style: normal;
 }
 
+/* Fixed sigil column so short marks (℣. / ℟.) and the longer "Blessing."
+   leave the spoken text on one left edge. Sized to the measured width of
+   "Blessing." in body type (~4.25rem). Sigils are right-aligned in the
+   column so short marks sit against the text rather than leaving a
+   hollow gap after ℣. */
 .sigil {
-  flex: 0 0 auto;
-  margin-right: 0.35rem;
+  flex: 0 0 4.25rem;
+  width: 4.25rem;
+  margin-right: 0.4rem;
+  text-align: right;
   font-weight: normal;
   color: var(--rubric);
   user-select: none;
@@ -1602,6 +1627,7 @@ footer::before {
 
 .sigil-text {
   flex: 1;
+  min-width: 0;
 }
 
 .scripture-ref {
