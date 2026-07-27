@@ -73,8 +73,8 @@ Glory eternal to the blessed Trinity,
 With laud and honour, virtue and supremacy,
 Trinal yet Onely, reigning in his majesty
 Both now and ever, through the ages infinite.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 290–291, 299–300 (The Chair of St Peter at Antioch)
 Quodcumque vinclis super terram
@@ -89,8 +89,8 @@ Glory, O Father, be to thee eternally;
 Grace and dominion to the Son adorable;
 Unto the Spirit, honour and authority;
 Praise everlasting through the ages infinite.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 397 (Chair of St Peter at Antioch)
 V. Let them exalt him in the congregation of the people.

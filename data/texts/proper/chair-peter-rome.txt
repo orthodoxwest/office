@@ -22,8 +22,8 @@ Praise, blessing, majesty, through endless days,
 Be to the Trinity immortal given;
 Who in pure unity profoundly sways
 Eternally alike all things in earth and heaven.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: divinum-officium SanctiM/01-18 [Hymnus Vespera] — check against diurnal
 Quodcumque in orbe nexibus revinxeris
@@ -39,8 +39,8 @@ Praise to the consubstantial sovereign Son,
 And Holy Ghost, one glorious Trinity;
 To whom all majesty and might belong;
 So sing we now, and such be our eternal song.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: divinum-officium SanctiM/01-18 [Versum 2] — check against diurnal
 V. Let them exalt Him in the congregation of the people.

@@ -87,8 +87,8 @@ Praise to the Triune Godhead everlasting,
 Who hath caused thee, O Virgin, to be crowned,
 And providently willed our queen thou shouldst be
 Also our Mother.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 464–465 (The Assumption of the B.V.M.)
 Ave, maris stella
@@ -129,8 +129,8 @@ Father, Son eternal,
 Holy Ghost supernal,
 With one praise we bless thee,
 Three in One confess thee.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 528 (The Assumption of the B.V.M.)
 V. The holy Mother of God is exalted.

@@ -49,8 +49,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [hymn-sunday-summer]
 # The Summer Hymn — said from the II Sunday after Trinity until the Sunday
 # nearest the first of October (see internal/office/hymn.go).
@@ -70,8 +70,9 @@ Mansions in heaven.
 This he vouchsafe us, God for ever blessèd,
 Father eternal, Son, and Holy Spirit,
 Whose is the glory which through all creation
-Ever resoundeth. Amen.
+Ever resoundeth.
 
+Amen.
 [hymn-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 15 (Monday)
 Splendor paternae gloriae
@@ -119,8 +120,9 @@ The Father wholly in the Son.
 All laud to God the Father be,
 All praise, eternal Son, to Thee;
 All glory, as is ever meet,
-To God the holy Paraclete. Amen.
+To God the holy Paraclete.
 
+Amen.
 [hymn-tuesday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 31 (Tuesday)
 Ales diei nuntius
@@ -148,8 +150,9 @@ And in our souls new light display.
 All laud to God the Father be,
 All praise, eternal Son, to Thee;
 All glory, as is ever meet,
-To God the holy Paraclete. Amen.
+To God the holy Paraclete.
 
+Amen.
 [hymn-wednesday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 48 (Wednesday)
 Nox et tenebrae et nubila
@@ -177,8 +180,9 @@ Serenely shining, all our gloom.
 All laud to God the Father be;
 All laud, Eternal Son, to Thee;
 All laud, as is for ever meet,
-To God the Holy Paraclete. Amen.
+To God the Holy Paraclete.
 
+Amen.
 [hymn-thursday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 66 (Thursday)
 Lux ecce surgit aurea
@@ -206,8 +210,9 @@ From early dawn to evening's close.
 All laud to God the Father be,
 All praise, eternal Son, to Thee;
 All glory, as is ever meet,
-To God the holy Paraclete. Amen.
+To God the holy Paraclete.
 
+Amen.
 [hymn-friday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 86 (Friday)
 Aeterna caeli gloria
@@ -240,8 +245,9 @@ Then Charity, Thy greatest grace.
 All laud to God the Father be,
 All praise, eternal Son, to Thee;
 All glory, as is ever meet,
-To God the holy Paraclete. Amen.
+To God the holy Paraclete.
 
+Amen.
 [hymn-saturday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 109 (Saturday)
 Aurora iam spargit polum
@@ -264,8 +270,9 @@ Who chant the song we sang below.
 All laud to God the Father be,
 All praise, eternal Son, to Thee;
 All glory, as is ever meet,
-To God the holy Paraclete. Amen.
+To God the holy Paraclete.
 
+Amen.
 [opening-versicle]
 @use shared/formulas/opening-versicle
 

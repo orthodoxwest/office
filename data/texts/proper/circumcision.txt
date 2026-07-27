@@ -98,8 +98,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 108 (Circumcision)
 R. The Lord declared, * alleluia, alleluia.
@@ -157,8 +157,8 @@ All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 93 (Circumcision)
 R. The Word was made flesh, * alleluia, alleluia.

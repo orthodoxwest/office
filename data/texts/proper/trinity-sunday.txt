@@ -97,8 +97,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 194 (The Feast of the Most Holy Trinity)
 O lux beata Trinitas
@@ -117,8 +117,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 316 (The Feast of the Most Holy Trinity)
 V. Let us bless the Father, and the Son, and the Holy Ghost.

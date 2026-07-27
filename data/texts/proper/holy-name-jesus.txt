@@ -103,8 +103,8 @@ Jesu, the Virgin Mother's Flower,
 Thou love alone of sweetest power,
 All honour to thy Name divine,
 The realm of endless bliss be thine.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 103–104 (Holy Name of Jesus)
 Jesu, dulcis memoria
@@ -133,24 +133,24 @@ Be thou our joy, and thou our guard,
 Who art to be our great reward:
 Our glory and our boast in thee
 For ever and for ever be.
-Amen.
 
+Amen.
 [hymn-doxology-lauds]
 # The feast's proper final stanza supersedes the Christmas seasonal doxology.
 Jesu, the Virgin Mother's Flower,
 Thou love alone of sweetest power,
 All honour to thy Name divine,
 The realm of endless bliss be thine.
-Amen.
 
+Amen.
 [hymn-doxology-vespers]
 # The feast's proper final stanza supersedes the Christmas seasonal doxology.
 Be thou our joy, and thou our guard,
 Who art to be our great reward:
 Our glory and our boast in thee
 For ever and for ever be.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 119 (Holy Name of Jesus)
 V. Our help standeth in the Name of the Lord, alleluia.

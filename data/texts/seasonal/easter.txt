@@ -7,8 +7,8 @@ All glory, Lord, to thee we pay,
 Ascending o'er the stars today;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 128
 !Rom 6:9-10
@@ -80,8 +80,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [pre-collect-versicle-prime]
 V. O Christ, arise, help us, alleluia.
 R. And deliver us for thy Name's sake, alleluia.

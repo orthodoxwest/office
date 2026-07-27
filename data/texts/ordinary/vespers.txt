@@ -25,8 +25,9 @@ And purge away each error past.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-monday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 31
 Immense caeli Conditor
@@ -54,8 +55,9 @@ And never give to falsehood place.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-tuesday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 34
 Telluris ingens Conditor
@@ -83,8 +85,9 @@ And flee from every mortal sin.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-wednesday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 37
 Caeli Deus sanctissime
@@ -112,8 +115,9 @@ Remove the burden of our sin.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-thursday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 40
 Magnae Deus potentiae
@@ -141,8 +145,9 @@ Nor haughty souls in ruin laid.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-friday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 43
 Plasmator hominis, Deus
@@ -170,8 +175,9 @@ Bind fast the gentle bands of peace.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [hymn-saturday]
 # SOURCE: office-hymns.zip (O Trinity of Blessed Light, Thru the Year Vespers, winter and summer tunes.docx); draft archdiocesan Vespers book, p. 215
 O lux beata Trinitas
@@ -190,8 +196,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [opening-versicle]
 @use shared/formulas/opening-versicle
 

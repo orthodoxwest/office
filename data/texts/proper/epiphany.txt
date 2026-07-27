@@ -81,8 +81,8 @@ All glory, Lord, to thee we pay
 For thine Epiphany today;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Why, Impious Herod, Vainly Fear, Sat in oct of Epiphany Vespers.docx)
 Hostis Herodes impie
@@ -111,8 +111,8 @@ All glory, Lord, to thee we pay
 For thine Epiphany to-day:
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: divinum-officium Sancti/01-06 [Versum 2] — check against diurnal
 V. Worship God. Alleluia.

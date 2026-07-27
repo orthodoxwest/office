@@ -112,8 +112,8 @@ This he vouchsafe us, God for ever blessed,
 Father eternal, Son, and Holy Spirit,
 Whose is the glory which through all creation
 Ever resoundeth.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 501–503; older Sanctoral Vespers
 Tibi, Christe, splendor Patris
@@ -145,8 +145,8 @@ Glory unto Christ our Saviour,
 Glory to the Paraclete:
 Standing forth, One God and Trinal,
 Ere the ages; as is meet.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
 V. An Angel stood at the altar of the temple.

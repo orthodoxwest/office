@@ -85,8 +85,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Th_Apostles Hearts Were Full of Pain, Apost and Evang in Paschaltide Vespers.docx); draft archdiocesan Vespers book, pp. 560–561, 568–570
 Tristes erant Apostoli
@@ -120,8 +120,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 619 (Common of Apostles and Evangelists in Paschaltide)
 V. Right dear in the sight of the Lord, alleluia.

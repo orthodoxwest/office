@@ -132,8 +132,8 @@ Glory to thee, O Father, Lord,
 And to thy Sole-Begotten Word,
 Both with the Holy Spirit One
 While everlasting ages run.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 @use commons/confessor-bishop/short-responsory-lauds
 
@@ -186,8 +186,8 @@ His be the glory, power and salvation
 Who, o'er the heavens, dwelling in the highest,
 Earth's mighty fabric ruleth and directeth,
 Only and Trinal.
-Amen.
 
+Amen.
 [chapter-vespers]
 @use commons/confessor/chapter-lauds
 

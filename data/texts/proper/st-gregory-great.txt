@@ -79,8 +79,8 @@ Praise to the unbegotten One,
 And glory to his only Son;
 And thine, O Spirit, Breath of God,
 Be equal majesty and laud.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 308, 317 (St Gregory the Great)
 Anglorum jam Apostolus
@@ -114,8 +114,8 @@ Praise to the unbegotten One,
 And glory to his only Son;
 And thine, O Spirit, breath of God,
 Be equal majesty and laud.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 @use commons/confessor-bishop/short-responsory-lauds
 

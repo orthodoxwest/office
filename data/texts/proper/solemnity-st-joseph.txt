@@ -102,8 +102,8 @@ Praise we with fervour God the One and Trinal,
 Who thee hath given grace and honour wondrous;
 O may he grant us, hearing thy petition,
 Joys everlasting!
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 168 (The Solemnity of Saint Joseph, I and II Vespers)
 Te, Joseph, celebrent
@@ -132,8 +132,8 @@ O Holy Trinity, thy suppliant servants spare;
 Grant us to rise to heav'n, for Joseph's sake and prayer,
 And so our grateful hearts to thee shall ever raise
 Exulting canticles of praise.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 287 (The Solemnity of Saint Joseph, Paschaltide)
 V. Thou hast given me the protection of thy salvation, alleluia.

@@ -47,8 +47,8 @@ All laud to God the Father be;
 All praise, eternal Son, to thee;
 All glory, as is ever meet,
 To God the Holy Paraclete.
-Amen.
 
+Amen.
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 185; Copy of OCP Ferial Lauds.pdf
 R. Heal my soul * for I have sinned against thee.
@@ -96,8 +96,8 @@ O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
 Shall live and reign eternally.
-Amen.
 
+Amen.
 [short-responsory-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 129 (Ash Wednesday)
 R. I will bless the Lord * at all times.

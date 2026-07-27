@@ -76,8 +76,8 @@ The Father Unbegot we laud,
 We praise the sole-begotten Son,
 And Holy Spirit, with them God,
 Now, and while endless ages run.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: divinum-officium Sancti/03-24 [Hymnus Vespera] — check against diurnal
 Christe, sanctorum decus Angelorum
@@ -101,8 +101,8 @@ O may the Godhead, endless bliss possessing,
 Father, Son, Spirit, grant to us this blessing;
 All his creation joins his praise confessing,
 Now and forever.
-Amen.
 
+Amen.
 [chapter-vespers]
 @use proper/st-gabriel-archangel/chapter-lauds
 

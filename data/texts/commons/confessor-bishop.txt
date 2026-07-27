@@ -119,8 +119,8 @@ To thee, O Christ, our loving King,
 All glory, praise, and thanks we bring:
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (This the Confessor, Conf and Bishop Vespers.docx)
 # NOTE: source provides an m.t.v. alternate first-stanza ending for feasts not kept on the saint's death-day; the current resolver has no per-feast hymn-stanza selector.
@@ -150,8 +150,8 @@ His be the glory, power and salvation
 Who, o'er the heavens, dwelling in the highest,
 Earth's mighty fabric ruleth and directeth,
 Onely and Trinal.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 659 (Common of a Confessor and Bishop)
 V. The Lord guided the righteous in right paths.

@@ -67,8 +67,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 610-611, 619-620 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
 Deus, tuorum militum
@@ -97,8 +97,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 649 (Common of One or Many Martyrs in Paschaltide)
 V. Right dear in the sight of the Lord, alleluia.

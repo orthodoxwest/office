@@ -222,21 +222,21 @@ func TestMinorHourOrdinariesUseParishHymnsAndSingleOpeningAlleluia(t *testing.T)
 			"By every power, by heart and tongue,\nBy act and deed, thy praise be sung:\n" +
 			"Inflame with perfect love each sense,\nThat others’ souls may kindle thence.\n\n" +
 			"O Father, that we ask be done\nThrough Jesus Christ, thine only Son,\n" +
-			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally.\n\nAmen.",
 		"ordinary/sext/hymn": "Rector potens, verax Deus\n\n" +
 			"O God of truth, O Lord of might,\nWho orderest time and change aright,\n" +
 			"And send’st the early morning ray,\nAnd light’st the glow of perfect day;\n\n" +
 			"Extinguish thou each sinful fire,\nAnd banish ev’ry ill desire:\n" +
 			"And while thou keep’st the body whole,\nShed forth thy peace upon the soul.\n\n" +
 			"O Father, that we ask be done\nThrough Jesus Christ, thine only Son,\n" +
-			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally.\n\nAmen.",
 		"ordinary/none/hymn": "Rerum Deus tenax vigor\n\n" +
 			"O God, creation’s secret force,\nThyself unmoved, all motion’s source,\n" +
 			"Who from the morn till evening’s ray,\nThrough all its changes guidest the day:\n\n" +
 			"Grant us, when this short life is past,\nThe glorious evening that shall last;\n" +
 			"That, by a holy death attained,\nEternal glory may be gained.\n\n" +
 			"O Father, that we ask be done\nThrough Jesus Christ thine only Son,\n" +
-			"Who, with the Holy Ghost and thee,\nShall live and reign eternally. Amen.",
+			"Who, with the Holy Ghost and thee,\nShall live and reign eternally.\n\nAmen.",
 	}
 	for ref, want := range wantHymns {
 		if got := corpus.Get(ref); got != want {

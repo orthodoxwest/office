@@ -80,8 +80,8 @@ O may the Godhead, endless bliss possessing,
 Father, Son, Spirit, grant to us this blessing;
 All his creation joins his praise confessing,
 Now and forever.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: divinum-officium Sancti/05-08 [HymnusM Vespera] — check against diurnal
 Tibi Christe splendor Patris
@@ -113,8 +113,8 @@ Laud and honour to the Spirit,
 Ever Three, and ever One,
 Consubstantial, co-eternal,
 While unending ages run.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: divinum-officium Sancti/05-08 [Versum 2] — check against diurnal
 V. An Angel stood at the Altar of the Temple. (Alleluia.)

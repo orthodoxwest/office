@@ -25,7 +25,8 @@ func TestPrimeOrdinaryUsesParishOpeningAndHymnDoxology(t *testing.T) {
 	}
 
 	hymn := corpus.Get("ordinary/prime/hymn")
-	if !strings.HasSuffix(hymn, "To Father and to Paraclete. Amen.") {
+	// Amen is its own blank-line stanza so HTML can style it as a coda.
+	if !strings.HasSuffix(hymn, "To Father and to Paraclete.\n\nAmen.") {
 		t.Fatalf("Prime hymn has wrong parish doxology: %q", hymn)
 	}
 

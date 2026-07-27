@@ -101,8 +101,8 @@ To God the Father, God the Son,
 And God the Spirit, Three in One,
 Laud, honor, might, and glory be
 From age to age eternally.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: divinum-officium Commune/C6 [Hymnus Vespera] — check against diurnal
 Jesu, corona Virginum
@@ -131,8 +131,8 @@ From taint of all corruption pure.
 All praise, eternal Son, to thee;
 All glory as is ever meet,
 To God, the holy Paraclete.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
 V. Full of grace are thy lips.

@@ -85,8 +85,8 @@ To thee who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (The Lamb_s High Banquet We Await, Paschaltide Vespers.docx); draft archdiocesan Vespers book, p. 157
 Ad cenam Agni providi
@@ -130,4 +130,5 @@ To thee, who, dead, again dost live,
 All glory, Lord, thy people give;
 All glory, as is ever meet,
 To Father and to Paraclete.
+
 Amen.

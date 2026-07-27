@@ -15,8 +15,9 @@ Shed forth thy peace upon the soul.
 O Father, that we ask be done
 Through Jesus Christ, thine only Son,
 Who, with the Holy Ghost and thee,
-Shall live and reign eternally. Amen.
+Shall live and reign eternally.
 
+Amen.
 [opening-versicle]
 @use shared/formulas/opening-versicle
 

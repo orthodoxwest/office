@@ -74,8 +74,8 @@ Glory eternal to the blessed Trinity,
 With laud and honour, virtue and supremacy;
 Trinal yet Onely, reigning in his majesty
 Both now and ever, through the ages infinite.
-Amen.
 
+Amen.
 [hymn-lauds]
 @use commons/apostle/hymn-lauds
 

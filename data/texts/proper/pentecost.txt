@@ -111,8 +111,8 @@ To God the Father and the Son,
 From death arisen praise be done:
 With God the holy Paraclete
 Henceforth to all eternity.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 186–187; office-hymns.zip (Come, Holy Ghost Creator Blest.docx, stanzas 1–6)
 Veni, Creator Spiritus
@@ -151,8 +151,8 @@ To God the Father and the Son,
 From death arisen, praise be done:
 With God the holy Paraclete,
 Henceforth to all eternity.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 306 (The Feast of Pentecost)
 V. They were all filled with the Holy Ghost, alleluia.

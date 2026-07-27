@@ -109,8 +109,8 @@ To the Son and to the Father,
 And th'eternal Paraclete,
 Whose is boundless praise and power
 Through the ages infinite.
-Amen.
 
+Amen.
 [hymn-vespers]
 # SOURCE: office-hymns.zip (Blessed City, Heav_nly Salem, Church Dedication Vespers.docx)
 Urbs Jerusalem beata
@@ -149,8 +149,8 @@ To the Son and to the Father,
 And th'eternal Paraclete,
 Whose is boundless praise and power
 Through the ages infinite.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: divinum-officium CommuneM/C8 [Versum 2] — check against diurnal
 V. This is the house of God, stoutly builded.

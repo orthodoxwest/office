@@ -89,8 +89,8 @@ Prepared from all eternity.
 And Holy Spirit, Three in One;
 As ever was in ages past,
 And so shall be while ages last.
-Amen.
 
+Amen.
 [chapter-vespers]
 @use commons/evangelist/chapter-lauds
 

@@ -69,8 +69,8 @@ To the Son and to the Father,
 And the eternal Paraclete,
 Whose is boundless praise and power
 Through the ages infinite.
-Amen.
 
+Amen.
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 127
 V. Deliver me from mine enemies, O God.
@@ -139,8 +139,8 @@ To thee, eternal Three in One,
 Let homage meet by all be done:
 Whom by the Cross thou dost restore,
 Preserve and govern evermore.
-Amen.
 
+Amen.
 [hymn-vespers]
 @use seasonal/passiontide/hymn-first-vespers
 
