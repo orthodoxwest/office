@@ -42,9 +42,34 @@ func TestSoftenDropCapOpening(t *testing.T) {
 		{"MY SOUL cleaveth to the dust", "My Soul cleaveth to the dust"},
 		{"O GIVE thanks unto the Lord", "O Give thanks unto the Lord"},
 		{"O ALL ye Works of the Lord", "O All ye Works of the Lord"},
+		// Single-letter capitals are left alone (not title-cased to themselves via the multi-letter path).
+		{"O God", "O God"},
+		{"I will magnify thee", "I will magnify thee"},
+		// Trailing punctuation is stripped from the letter run, then restored:
+		// without the letterEnd > 0 loop, "GOD," would fail the all-caps check.
+		{"GOD, be merciful", "God, be merciful"},
+		{"BLESSED!", "Blessed!"},
+		{"MY SOUL,", "My Soul,"},
+		// Leading / trailing whitespace is preserved exactly (including when the
+		// only content is spaces, and when softening stops after the run).
+		{"  GOD be merciful", "  God be merciful"},
+		{"GOD be merciful  ", "God be merciful  "},
+		{"  GOD  ", "  God  "},
+		{"\tGOD be", "\tGod be"},
+		// A pure-punctuation token ends the opening run without rewriting it.
+		{"... GOD be", "... GOD be"},
+		{"— GOD be", "— GOD be"},
+		// Already mixed / sentence case: unchanged.
 		{"Blessed be the Lord God of Israel", "Blessed be the Lord God of Israel"},
 		{"That thy way may be known", "That thy way may be known"},
+		{"God be merciful", "God be merciful"},
+		// A non-letter inside the letter run (not only trailing) fails all-caps.
+		{"PSA6LM is", "PSA6LM is"},
+		// Trailing digits are treated like trailing punctuation and kept after
+		// the title-cased letter run (same path as "GOD,").
+		{"PSALM67 is", "Psalm67 is"},
 		{"", ""},
+		{"   ", "   "},
 	}
 	for _, tt := range cases {
 		if got := softenDropCapOpening(tt.in); got != tt.want {
@@ -67,6 +92,31 @@ func TestRenderPsalmSoftensDropCapOpeningOnly(t *testing.T) {
 	// Numbered verses keep their source capitalisation.
 	if !strings.Contains(html, `That thy way may be known upon earth`) {
 		t.Fatalf("expected numbered verse body preserved: %s", html)
+	}
+}
+
+// Softening applies to the first verse of each .psalm-verses block — including
+// the first verse after a mid-canticle section break — and never to later verses.
+func TestRenderPsalmSoftensDropCapAfterSectionBreak(t *testing.T) {
+	html := string(renderPsalmVerses("Benedicite\n\n" +
+		"O ALL ye Works of the Lord, bless ye the Lord: * praise him forever.\n" +
+		"2 O ye Angels of the Lord, bless ye the Lord: * O ye Heavens, bless ye the Lord.\n" +
+		"[section: Part II]\n" +
+		"O LET the Earth bless the Lord: * yea, let it praise him forever.\n" +
+		"10 O ye Mountains and Hills, bless ye the Lord: * praise him forever.\n"))
+
+	if !strings.Contains(html, `O All ye Works of the Lord`) {
+		t.Fatalf("expected opening block drop-cap softened: %s", html)
+	}
+	if !strings.Contains(html, `O Let the Earth bless the Lord`) {
+		t.Fatalf("expected post-section drop-cap softened: %s", html)
+	}
+	if strings.Contains(html, `O LET the Earth`) || strings.Contains(html, `O ALL ye Works`) {
+		t.Fatalf("ALL-CAPS openings must not survive on drop-cap verses: %s", html)
+	}
+	// Numbered verse after a section is not a drop-cap verse.
+	if !strings.Contains(html, `O ye Mountains and Hills`) {
+		t.Fatalf("expected numbered post-section verse preserved: %s", html)
 	}
 }
 
@@ -243,6 +293,39 @@ func TestRenderHymnMarksAmenCoda(t *testing.T) {
 	}
 }
 
+func TestIsHymnAmen(t *testing.T) {
+	cases := []struct {
+		stanza []string
+		want   bool
+	}{
+		{[]string{"Amen."}, true},
+		{[]string{"Amen"}, true},
+		{[]string{"amen!"}, true},
+		{[]string{"AMEN."}, true},
+		{[]string{"  Amen.  "}, true},
+		{[]string{"Amen.", "Again."}, false}, // multi-line stanza
+		{[]string{"Amen, amen."}, false},
+		{[]string{"So be it. Amen."}, false},
+		{[]string{"First line,"}, false},
+		{nil, false},
+		{[]string{}, false},
+	}
+	for _, tt := range cases {
+		if got := isHymnAmen(tt.stanza); got != tt.want {
+			t.Errorf("isHymnAmen(%q) = %v, want %v", tt.stanza, got, tt.want)
+		}
+	}
+}
+
+func TestRenderHymnDoesNotMarkNonCodaAmen(t *testing.T) {
+	// Amen glued to the last verse line is not a coda stanza — that is a data
+	// problem fixed in the corpus; the renderer must not invent the class.
+	html := string(renderHymnStanzas("Title\n\nLast line ends with Amen."))
+	if strings.Contains(html, "hymn-amen") {
+		t.Fatalf("inline Amen must not mark the stanza as coda: %s", html)
+	}
+}
+
 func TestRenderBlessingUsesVersicleLine(t *testing.T) {
 	html := string(renderLiturgicalBlock("Blessing. May the Almighty and merciful Lord grant us a quiet night."))
 
@@ -251,5 +334,8 @@ func TestRenderBlessingUsesVersicleLine(t *testing.T) {
 	}
 	if !strings.Contains(html, `class="versicle-line"`) {
 		t.Fatalf("expected Blessing on a versicle-line for the shared sigil column: %s", html)
+	}
+	if !strings.Contains(html, `<span class="sigil-text">May the Almighty and merciful Lord grant us a quiet night.</span>`) {
+		t.Fatalf("expected blessing body in sigil-text: %s", html)
 	}
 }
