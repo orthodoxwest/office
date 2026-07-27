@@ -3,6 +3,7 @@ package models
 import (
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // ElementType identifies the kind of liturgical element.
@@ -84,24 +85,23 @@ func (e OfficeElement) DisplayText() string {
 // announced before a psalm: the words through the first mediant asterisk (*)
 // or dagger (†). When the corpus text has no such mark, the full text is
 // returned — there is no safe partial cut without a pointing cue.
+//
+// A single left-to-right scan picks the earliest mark. Comparing Index results
+// across marker strings left an equivalent boundary mutant (i < cut vs i <= cut)
+// that no test can kill for distinct one-rune markers.
 func AntiphonAnnouncement(text string) string {
 	text = strings.TrimSpace(text)
 	if text == "" {
 		return ""
 	}
-	// Prefer the earliest of the mediant marks used in the corpus.
-	cut := -1
-	markLen := 0
-	for _, m := range []string{"*", "†", "‡"} {
-		if i := strings.Index(text, m); i >= 0 && (cut < 0 || i < cut) {
-			cut = i
-			markLen = len(m)
+	for i, r := range text {
+		switch r {
+		case '*', '†', '‡':
+			end := i + utf8.RuneLen(r)
+			return strings.TrimRight(text[:end], " \t")
 		}
 	}
-	if cut < 0 {
-		return text
-	}
-	return strings.TrimRight(text[:cut+markLen], " \t")
+	return text
 }
 
 // CompositionDecision records one machine-readable choice made while an hour
