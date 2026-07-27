@@ -631,6 +631,10 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  // data-theme changes synchronously, but the painted course deliberately
+  // crossfades for 200ms. Wait for the rendered colour rather than sampling
+  // the Nave end of that transition on a fast single-worker CI run.
+  await expect.poll(async () => (await read()).ground).not.toBe(nave.ground);
   const apse = await read();
   expect(apse.ground).not.toBe("rgba(0, 0, 0, 0)");
   expect(apse.ground).not.toBe(nave.ground);
