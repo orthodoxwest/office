@@ -117,9 +117,11 @@ what wallpaper is.
   is bottom-anchored there, the footer layer is top-anchored there, and their
   masks meet at the same alpha; re-anchor either and the diaper breaks
   mid-lattice at the footer line. Gate on the theme rather than on
-  `--apse-vault` (an empty flex item still takes space in Nave) and keep the
-  `min-height` gate: below it the gap collapses and all that renders is a
-  sliver of sheared ribs under the card.
+  `--apse-vault` (an empty flex item still takes space in Nave), but **never
+  gate it on viewport height**: mobile browser chrome can move the effective
+  height across that boundary during history restoration and make the vault
+  disappear on Back. On short phones the flex gap may collapse; the footer
+  continuation is now a complete, intentional home for the field by itself.
 - **An hour admits the vault only after the prayer.** `.elements` and all
   liturgical text remain on a flat field. A separate `.hour-epilogue` begins
   after the office, stays transparent through the hour-continuation links,
