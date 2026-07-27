@@ -35,6 +35,41 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("psalm spacing groups each antiphon with its own psalm", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`/lauds/${testDate}`);
+
+  const spacing = await page.evaluate(() => {
+    const kids = [...document.querySelector(".elements").children];
+    const gap = (a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().bottom;
+    const isPsalm = (el) => el.classList.contains("psalm") || el.classList.contains("canticle");
+    const isAnt = (el) => el.classList.contains("antiphon");
+    const withinGroup = [];
+    const betweenGroups = [];
+    for (let i = 0; i < kids.length - 1; i++) {
+      const [a, b] = [kids[i], kids[i + 1]];
+      if ((isAnt(a) && isPsalm(b)) || (isPsalm(a) && isAnt(b))) withinGroup.push(gap(a, b));
+      if (isAnt(a) && isAnt(b)) betweenGroups.push(gap(a, b));
+    }
+    // The doxology is not the last verse and must not sit at verse spacing.
+    const psalm = document.querySelector(".psalm");
+    const verses = [...psalm.querySelectorAll(".verse.numbered")];
+    const gloria = psalm.querySelector(".gloria-patri");
+    return {
+      within: Math.max(...withinGroup),
+      between: Math.min(...betweenGroups),
+      verseGap: gap(verses[0], verses[1]),
+      gloriaGap: gap(verses[verses.length - 1], gloria),
+    };
+  });
+
+  // An antiphon belongs to its psalm: the join inside a group must be clearly
+  // tighter than the space between one psalm's closing antiphon and the next
+  // psalm's opening one, or two ANT. lines in a row read as a stutter.
+  expect(spacing.between).toBeGreaterThan(spacing.within * 2);
+  expect(spacing.gloriaGap).toBeGreaterThan(spacing.verseGap * 1.5);
+});
+
 test("hour progress completes with the prayer, before the administrative epilogue", async ({
   page,
 }) => {
