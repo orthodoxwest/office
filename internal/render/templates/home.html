@@ -40,7 +40,7 @@
             {{range .Hours}}{{if or (eq .Slug "lauds") (eq .Slug "prime")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
               <span class="home-hour-link-name">{{.Name}}</span>
-              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+              {{if .IsCurrent}}<span class="home-hour-link-state sr-only">Now</span>{{end}}
             </a>
             {{end}}{{end}}
           </div>
@@ -51,7 +51,7 @@
             {{range .Hours}}{{if or (eq .Slug "terce") (eq .Slug "sext") (eq .Slug "none")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
               <span class="home-hour-link-name">{{.Name}}</span>
-              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+              {{if .IsCurrent}}<span class="home-hour-link-state sr-only">Now</span>{{end}}
             </a>
             {{end}}{{end}}
           </div>
@@ -62,7 +62,7 @@
             {{range .Hours}}{{if or (eq .Slug "vespers") (eq .Slug "compline")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
               <span class="home-hour-link-name">{{.Name}}</span>
-              {{if .IsCurrent}}<span class="home-hour-link-state">Now</span>{{end}}
+              {{if .IsCurrent}}<span class="home-hour-link-state sr-only">Now</span>{{end}}
             </a>
             {{end}}{{end}}
           </div>
