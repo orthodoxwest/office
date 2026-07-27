@@ -292,7 +292,7 @@ function offlineResponse() {
     "<link rel=\"stylesheet\" href=\"" + assetURL("/static/style.css") + "\">" +
     "<link rel=\"icon\" type=\"image/svg+xml\" href=\"" + assetURL("/static/favicon.svg") + "\">" +
     "<link rel=\"manifest\" href=\"" + assetURL("/static/manifest.webmanifest") + "\">" +
-    "<meta name=\"theme-color\" content=\"#faf2ec\">" +
+    "<meta name=\"theme-color\" content=\"#fdf1e6\">" +
     "<script src=\"" + assetURL("/static/app.js") + "\" defer></script></head><body>" +
     "<a class=\"skip-link\" href=\"#main-content\">Skip to content</a>" +
     "<header class=\"site-header\"><div class=\"site-nav-shell\">" +

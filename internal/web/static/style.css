@@ -30,7 +30,13 @@
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
-  --bg: #faf2ec;
+  /* Limewash, measured off the parish walls rather than guessed. The hue was
+     already right — the photographs sit at 22–29° and this sat at 26° — but
+     the chroma was less than half of theirs (0.055 against ~0.12 of channel
+     spread), so Nave read as warm grey where the plaster reads as rose. This
+     carries the wall's chroma at very nearly the old lightness, so every
+     contrast pair holds. */
+  --bg: #fdf1e6;
   --accent: #6b3a1f;
   --gold: #9a7328;
   --gold-line: #c9ac72;
@@ -64,8 +70,11 @@
   --violet: #f4f0f8;
   --black: #f0f0f0;
   --rose: #fdf4f8;
-  --banner-bg: #f4ebe4;
-  --surface: #f6eee6;
+  /* Both follow --bg's warming so the plaster, the framed card and the notice
+     stay one family; the surface keeps its previous ~5/255 step below the
+     page so cards still separate from the wall without a border doing it. */
+  --banner-bg: #f6e9dd;
+  --surface: #f9ece0;
   --surface-edge: rgba(107, 58, 31, 0.12);
   --pressed-wash: rgba(107, 58, 31, 0.09);
   /* Broad tonal fields, not grain: these translate the hand-worked parish
@@ -1352,6 +1361,31 @@ footer::before {
   border: none;
 }
 
+/* ── Antiphon grouping ──
+   An antiphon belongs to the psalm it frames, and spacing has to say so. The
+   .elements grid gives every child the same 0.9rem gap, so a psalm's closing
+   antiphon and the next psalm's opening antiphon sat the same distance apart
+   as each antiphon sat from its own psalm — two ANT. lines in a row then read
+   as a stutter rather than as the end of one psalm and the start of the next.
+
+   Each antiphon is pulled toward its own psalm and the slack is left between
+   groups. Negative margins because the grid gap, not the margin, is the
+   baseline rhythm here; :has() degrades to the old even spacing where it is
+   unsupported, which is merely the previous behaviour. */
+/* The opening antiphon keeps a little more air than the closing one: below it
+   sits a centred small-caps heading rather than body text, and at the closing
+   antiphon's distance the two collided. */
+.elements > .antiphon:has(+ .psalm),
+.elements > .antiphon:has(+ .canticle) {
+  margin-top: 0.45rem;
+  margin-bottom: -0.25rem;
+}
+
+.elements > .psalm + .antiphon,
+.elements > .canticle + .antiphon {
+  margin-top: -0.5rem;
+}
+
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
    and the line reads as one even band rather than a cap followed by a dip. */
 .item-label {
@@ -1452,9 +1486,14 @@ footer::before {
   padding-right: 0;
 }
 
+/* The doxology is sung to the psalm tone, so it keeps the verse's type and
+   indent — but it is not the last verse, and at the verse spacing it read as
+   an unnumbered continuation of it. Adjacent margins collapse here, so this
+   is the whole gap: enough to make the Gloria its own stanza, not so much
+   that it detaches from the psalm it closes. */
 .psalm > .gloria-patri,
 .canticle > .gloria-patri {
-  margin-top: 0.3rem;
+  margin-top: 0.85rem;
 }
 
 /* Mid-canticle section break heading (e.g. the two-part structure of Deut 32) */
@@ -2534,8 +2573,8 @@ footer::before {
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
 
    Contrast, worst case (small text-adjacent use is the ✠ cross glyph):
-   nave    veiled  #756a7e on #faf2ec = 4.6:1  (gold baseline 3.9:1)
-   nave    paschal #a4731a on #faf2ec = 3.8:1  (same lightness as gold, more chroma)
+   nave    veiled  #756a7e on #fdf1e6 = 4.6:1  (gold baseline 3.9:1)
+   nave    paschal #a4731a on #fdf1e6 = 3.7:1  (same lightness as gold, more chroma)
    apse    veiled  #b0a4c2 on #121c28 = 7.3:1  (gold baseline 9.3:1)
    apse    paschal #e6cf8c on #121c28 = 11.2:1 */
 

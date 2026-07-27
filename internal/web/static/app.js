@@ -8,7 +8,7 @@ document.documentElement.classList.add("js");
   // matching pre-paint script in layout.html applies the choice before CSS.
   // Only explicit button clicks write storage — passive load never invents a choice.
   var THEME_KEY = "office-theme";
-  var THEME_LIGHT_COLOR = "#faf2ec";
+  var THEME_LIGHT_COLOR = "#fdf1e6";
   var THEME_DARK_COLOR = "#121c28";
 
   var readStoredTheme = function () {
