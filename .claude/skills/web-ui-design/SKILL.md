@@ -93,11 +93,21 @@ what the rest of the app is made of — courses, aligned frames, banded groups.
 - **Guard with `prefers-color-scheme: dark`.** `:root:not([data-theme="light"])`
   matches when no choice is stored, so without it a Default-theme reader on a
   light device gets gold stars across the plaster.
-- **Desktop Apse home only.** Three mobile treatments were built and rejected:
-  a page-level field is occluded by the card; stars on the card become specks
-  on paper; and a *border* in the 16px side gutters reads as debris pinned
-  against the frame. (A course of stars in the open field **below** the card
-  did read well — it remains the one unexplored mobile option.)
+- **The field is desktop Apse home only; the phone gets a course instead.**
+  Three mobile treatments were built and rejected — a page-level field is
+  occluded by the card, stars on the card become specks on paper, and a
+  *border* in the 16px side gutters reads as debris pinned against the frame.
+  What works is a single course of stars in the open ground **below** the card.
+  Position it **out of flow**: laid out in flow it pushes an 844px phone past
+  its viewport and makes home scroll for an ornament. Gate it on the theme
+  rather than on `--apse-vault`, since an empty block still takes space in
+  Nave, and on a `min-height` — the gap it sits in comes from `main`'s
+  `min-height` and narrows to ~40px on a short phone, where the course would
+  land on the footer.
+- **Let the field reach the edges.** A mask window that opens and closes inside
+  the viewport leaves the stars as a band across the middle with bare ground
+  above and below, which reads as a mistake rather than restraint. Clear the
+  header at the top, thin toward the footer at the foot.
 - Static. A twinkling vault is the opposite of stillness.
 
 ### Gilding vs functional gold

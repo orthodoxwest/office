@@ -3813,6 +3813,51 @@ body {
     radial-gradient(circle 1.5px at 25% 75%, var(--apse-point) 0 55%, transparent 100%);
 }
 
+/* On a phone there is no room for a field: the frontispiece leaves 16px side
+   gutters, where stars read as debris pinned against the frame. But there is
+   open ground below the card, and a course of stars sits in it the way a
+   painted band sits under a vault.
+
+   Anchored to the .home grid so it follows the card rather than a fixed offset
+   into the viewport, and positioned out of flow so it fills the gap that is
+   already there instead of adding to it — laid out in flow it pushed the page
+   past a 844px phone's viewport and made home scroll for the sake of an
+   ornament. Apse only, and gated on the theme rather than on --apse-vault,
+   because an empty block still takes space in Nave.
+
+   The min-height guard is not cosmetic: the gap the course sits in is created
+   by main's min-height and so scales with the viewport. On a short phone it
+   narrows to about 40px and the course lands on top of the footer. Below this
+   threshold there is no open ground, so there is no course. */
+@media (max-width: 700px) and (min-height: 800px) {
+  body.page-home .home {
+    position: relative;
+  }
+
+  :root[data-theme="dark"] body.page-home .home::after,
+  :root:not([data-theme="light"]) body.page-home .home::after {
+    content: "";
+    position: absolute;
+    top: calc(100% + 1.15rem);
+    left: 0;
+    right: 0;
+    height: 3.25rem;
+    pointer-events: none;
+    background-image: var(--apse-vault);
+    background-repeat: repeat-x;
+    background-size: 92px 92px;
+    background-position: top center;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0 40%, transparent 95%);
+    mask-image: linear-gradient(to bottom, #000 0 40%, transparent 95%);
+  }
+}
+
+@media (max-width: 700px) and (min-height: 800px) and (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) body.page-home .home::after {
+    content: none;
+  }
+}
+
 @media (min-width: 701px) {
   body.page-home::before {
     content: "";
@@ -3824,11 +3869,17 @@ body {
     background-repeat: repeat;
     background-size: 160px 226px;
     background-position: top center;
-    /* Dense at the crown, gone before the foot of the page, and clear of the
-       header beam. A mask rather than a painted fade: fading the background
-       itself would tint the page instead of thinning the stars. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0 7%, #000 17% 42%, transparent 74%);
-    mask-image: linear-gradient(to bottom, transparent 0 7%, #000 17% 42%, transparent 74%);
+    /* The vault fills the page. An earlier window opened at 17% and closed by
+       74%, which left the field sitting as a band across the middle with bare
+       blue above and below it — a vault that stops short of the walls reads as
+       a mistake rather than as restraint. It now clears only the header beam
+       at the top and thins toward the footer at the foot, so the night runs
+       the height of the page and the stars simply grow sparser as they fall.
+
+       A mask rather than a painted fade: fading the background itself would
+       tint the page instead of thinning the stars. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+    mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
   }
 }
 

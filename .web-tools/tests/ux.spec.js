@@ -419,6 +419,66 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
   }
 });
 
+test("the mobile star course fills the gap without making home scroll", async ({ page }) => {
+  const read = async ({ height, theme, scheme }) => {
+    const context = await page.context().browser().newContext({
+      viewport: { width: 390, height },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: scheme,
+    });
+    const sheet = await context.newPage();
+    if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+    await sheet.goto(`/?date=${testDate}`);
+    const seen = await sheet.evaluate(() => {
+      const home = document.querySelector(".home");
+      const after = getComputedStyle(home, "::after");
+      const box = home.getBoundingClientRect();
+      const footerTop = document.querySelector("footer").getBoundingClientRect().top;
+      const present = after.content !== "none";
+      const courseEnd = present
+        ? box.bottom + parseFloat(after.top) - box.height + parseFloat(after.height)
+        : null;
+      return {
+        present,
+        scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+        clearsFooter: present ? courseEnd <= footerTop : true,
+      };
+    });
+    await context.close();
+    return seen;
+  };
+
+  // Out of flow: the course fills the gap that main's min-height already
+  // leaves. Laid out in flow it pushed an 844px phone past its viewport and
+  // made home scroll for an ornament.
+  const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
+  expect(apse.present).toBe(true);
+  expect(apse.scrolls).toBe(false);
+  expect(apse.clearsFooter).toBe(true);
+
+  // Nave has no vault, and an empty block would still take space.
+  for (const [theme, scheme] of [
+    ["light", "light"],
+    [null, "light"],
+  ]) {
+    const nave = await read({ height: 844, theme, scheme });
+    expect(nave.present).toBe(false);
+    expect(nave.scrolls).toBe(false);
+  }
+
+  // That gap scales with the viewport; on a short phone there is no open
+  // ground and the course would land on the footer.
+  for (const height of [667, 740]) {
+    expect((await read({ height, theme: "dark", scheme: "dark" })).present).toBe(false);
+  }
+  for (const height of [800, 932]) {
+    const tall = await read({ height, theme: "dark", scheme: "dark" });
+    expect(tall.present).toBe(true);
+    expect(tall.clearsFooter).toBe(true);
+  }
+});
+
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
   // The nav used to inherit the 46rem prose column, which fits the brand and
   // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so
