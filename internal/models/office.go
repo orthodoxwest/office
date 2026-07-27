@@ -85,23 +85,17 @@ func (e OfficeElement) DisplayText() string {
 // announced before a psalm: the words through the first mediant asterisk (*)
 // or dagger (†). When the corpus text has no such mark, the full text is
 // returned — there is no safe partial cut without a pointing cue.
-//
-// A single left-to-right scan picks the earliest mark. Comparing Index results
-// across marker strings left an equivalent boundary mutant (i < cut vs i <= cut)
-// that no test can kill for distinct one-rune markers.
 func AntiphonAnnouncement(text string) string {
 	text = strings.TrimSpace(text)
 	if text == "" {
 		return ""
 	}
-	for i, r := range text {
-		switch r {
-		case '*', '†', '‡':
-			end := i + utf8.RuneLen(r)
-			return strings.TrimRight(text[:end], " \t")
-		}
+	i := strings.IndexAny(text, "*†‡")
+	if i < 0 {
+		return text
 	}
-	return text
+	_, size := utf8.DecodeRuneInString(text[i:])
+	return strings.TrimRight(text[:i+size], " \t")
 }
 
 // CompositionDecision records one machine-readable choice made while an hour
