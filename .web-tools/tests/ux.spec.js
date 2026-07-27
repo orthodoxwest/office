@@ -268,9 +268,12 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   // Apse gets the vault instead — stars only, never the broad wash.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const vault = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  const vault = await page.evaluate(
+    () => getComputedStyle(document.body, "::before").backgroundImage,
+  );
   expect(vault).not.toBe("none");
-  expect((vault.match(/radial-gradient/g) || []).length).toBeGreaterThan(20);
+  // One quincunx cell: two stars (three gradients each) plus two points.
+  expect((vault.match(/radial-gradient/g) || []).length).toBe(8);
 });
 
 test("the apse vault appears only over the night, and veils with the season", async ({
@@ -286,14 +289,14 @@ test("the apse vault appears only over the night, and veils with the season", as
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(path);
     const read = await sheet.evaluate(() => {
-      const style = getComputedStyle(document.body);
+      const style = getComputedStyle(document.body, "::before");
       const ink = style.backgroundImage.match(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/);
       const rgb = style.backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
       return {
-        // Count only the stars: they are the sole body-background layers built
-        // with color-mix, so this does not also pick up --page-material's
-        // three broad radials, which legitimately remain on the phone.
-        stars: (style.backgroundImage.match(/color\(srgb/g) || []).length,
+        // The vault has its own layer, so this cannot pick up
+        // --page-material's broad radials, which live on body and legitimately
+        // remain on the phone. One quincunx cell is exactly eight gradients.
+        stars: (style.backgroundImage.match(/radial-gradient/g) || []).length,
         pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
         ink: ink ? ink.slice(1).join(",") : null,
       };
@@ -314,8 +317,7 @@ test("the apse vault appears only over the night, and veils with the season", as
   expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
 
   // Present on desktop Apse, absent on the phone and in the working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars)
-    .toBeGreaterThan(20);
+  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(8);
   expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(0);
   for (const path of ["/calendar/2026", "/reminders"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
@@ -387,6 +389,94 @@ test("the apse vault appears only over the night, and veils with the season", as
   }, shot.toString("base64"));
   await context.close();
   expect(lit).toBeGreaterThan(30);
+});
+
+test("the frontispiece holds its width whatever the day is called", async ({ page }) => {
+  // body is a column flex container, and an auto cross-axis margin suppresses
+  // flex stretch — so main needs an explicit width:100% or it becomes
+  // shrink-to-fit and the measure caps nothing. Prose hides that (a
+  // paragraph's max-content exceeds the cap anyway); the frontispiece does
+  // not, and the card collapsed to the width of the day's feast name.
+  const days = [
+    "2026-08-10", // "St. Lawrence, Martyr"
+    "2026-07-13", // no feast name at all
+    "2026-11-03", // "Day III within the Octave of All Saints"
+  ];
+  for (const width of [1280, 1920]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const widths = [];
+    for (const date of days) {
+      await openDatedPage(page, `/?date=${date}`);
+      widths.push(
+        await page.evaluate(() =>
+          Math.round(document.querySelector(".home-hero").getBoundingClientRect().width),
+        ),
+      );
+    }
+    expect(new Set(widths).size).toBe(1);
+    // And it is the declared measure, not whatever the content happened to need.
+    expect(widths[0]).toBe(38 * 16);
+  }
+});
+
+test("the mobile star course fills the gap without making home scroll", async ({ page }) => {
+  const read = async ({ height, theme, scheme }) => {
+    const context = await page.context().browser().newContext({
+      viewport: { width: 390, height },
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: scheme,
+    });
+    const sheet = await context.newPage();
+    if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
+    await sheet.goto(`/?date=${testDate}`);
+    const seen = await sheet.evaluate(() => {
+      const home = document.querySelector(".home");
+      const after = getComputedStyle(home, "::after");
+      const box = home.getBoundingClientRect();
+      const footerTop = document.querySelector("footer").getBoundingClientRect().top;
+      const present = after.content !== "none";
+      const courseEnd = present
+        ? box.bottom + parseFloat(after.top) - box.height + parseFloat(after.height)
+        : null;
+      return {
+        present,
+        scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
+        clearsFooter: present ? courseEnd <= footerTop : true,
+      };
+    });
+    await context.close();
+    return seen;
+  };
+
+  // Out of flow: the course fills the gap that main's min-height already
+  // leaves. Laid out in flow it pushed an 844px phone past its viewport and
+  // made home scroll for an ornament.
+  const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
+  expect(apse.present).toBe(true);
+  expect(apse.scrolls).toBe(false);
+  expect(apse.clearsFooter).toBe(true);
+
+  // Nave has no vault, and an empty block would still take space.
+  for (const [theme, scheme] of [
+    ["light", "light"],
+    [null, "light"],
+  ]) {
+    const nave = await read({ height: 844, theme, scheme });
+    expect(nave.present).toBe(false);
+    expect(nave.scrolls).toBe(false);
+  }
+
+  // That gap scales with the viewport; on a short phone there is no open
+  // ground and the course would land on the footer.
+  for (const height of [667, 740]) {
+    expect((await read({ height, theme: "dark", scheme: "dark" })).present).toBe(false);
+  }
+  for (const height of [800, 932]) {
+    const tall = await read({ height, theme: "dark", scheme: "dark" });
+    expect(tall.present).toBe(true);
+    expect(tall.clearsFooter).toBe(true);
+  }
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
