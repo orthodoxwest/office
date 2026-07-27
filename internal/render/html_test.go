@@ -258,6 +258,24 @@ func TestRenderAntiphonStylesMediant(t *testing.T) {
 	}
 }
 
+func TestRenderAnnouncedAntiphonPrintsIncipitOnly(t *testing.T) {
+	html := renderOfficeElement(models.OfficeElement{
+		Type:     models.Antiphon,
+		Text:     "Do away, O Lord, * mine offenses.",
+		Announce: true,
+	}, "")
+
+	if !strings.Contains(html, `class="antiphon antiphon-announce"`) {
+		t.Fatalf("expected antiphon-announce class: %s", html)
+	}
+	if !strings.Contains(html, `Do away, O Lord, <span class="mediant">*</span>`) {
+		t.Fatalf("expected announced form through the mediant: %s", html)
+	}
+	if strings.Contains(html, "mine offenses") {
+		t.Fatalf("announced antiphon must not print the rest of the text: %s", html)
+	}
+}
+
 func TestRenderResponseStylesMediant(t *testing.T) {
 	html := string(renderLiturgicalBlock("R. Great is our Lord * and great is his power."))
 

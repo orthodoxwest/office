@@ -713,3 +713,147 @@ func assertDecisionPresent(t *testing.T, decisions []models.CompositionDecision,
 	}
 	t.Errorf("missing decision %s=%s in %#v", rule, outcome, decisions)
 }
+
+func TestAntiphonsDoubled(t *testing.T) {
+	double := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "st-joseph", Rank: models.Double1stClass},
+	}
+	semi := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "epiphany-sunday-3", Rank: models.SemiDouble},
+	}
+	feria := &models.CalendarDay{}
+
+	if !antiphonsDoubled(double, "lauds") {
+		t.Error("Double feast Lauds should double antiphons")
+	}
+	if !antiphonsDoubled(double, "vespers") {
+		t.Error("Double feast Vespers should double antiphons")
+	}
+	// Even on a Double feast, the Little Hours and Compline only announce.
+	for _, hour := range []string{"prime", "terce", "sext", "none", "compline"} {
+		if antiphonsDoubled(double, hour) {
+			t.Errorf("%s should never double antiphons", hour)
+		}
+	}
+	if antiphonsDoubled(semi, "lauds") {
+		t.Error("Semi-double Lauds should only announce")
+	}
+	if antiphonsDoubled(feria, "lauds") {
+		t.Error("ferial Lauds should only announce")
+	}
+
+	// I Vespers of a following Double on a ferial civil day: the Vespers
+	// office (not the civil celebration) decides doubling. Negating the
+	// hourName == "vespers" branch would consult today's nil celebration and
+	// wrongly refuse to double.
+	iVespersOfDouble := &models.CalendarDay{
+		Celebration: nil,
+		Vespers: models.VespersDesignation{
+			Owner: models.VespersIOfFollowing,
+			Feast: &models.Feast{ID: "st-joseph", Rank: models.Double1stClass},
+		},
+	}
+	if !antiphonsDoubled(iVespersOfDouble, "vespers") {
+		t.Error("I Vespers of a Double must double antiphons even when today is a feria")
+	}
+	if antiphonsDoubled(iVespersOfDouble, "lauds") {
+		t.Error("ferial Lauds on the civil day must not double just because Vespers is Double")
+	}
+
+	// Symmetrically: II Vespers stays with today's Double, not tomorrow.
+	iiVespers := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "st-joseph", Rank: models.Double},
+		Vespers: models.VespersDesignation{
+			Owner: models.VespersIIOfPreceding,
+			Feast: &models.Feast{ID: "st-joseph", Rank: models.Double},
+		},
+	}
+	if !antiphonsDoubled(iiVespers, "vespers") {
+		t.Error("II Vespers of a Double should double")
+	}
+}
+
+func TestMarkAnnouncedAntiphons(t *testing.T) {
+	full := "Do away, O Lord, * mine offenses."
+	hour := &models.OfficeHour{Sections: []models.OfficeSection{{
+		Elements: []models.OfficeElement{
+			{Type: models.Antiphon, Text: "Alleluia"}, // opening — not a psalm frame
+			{Type: models.Antiphon, Text: full},
+			{Type: models.Psalm, Text: "Psalm 51"},
+			{Type: models.PsalmDoxology, Text: "Glory be"},
+			{Type: models.Antiphon, Text: full},
+			{Type: models.Heading, Text: "Commemoration of N."},
+			{Type: models.Antiphon, Text: "Pray for us, O holy N. *"},
+			{Type: models.Versicle, Text: "V. The Lord hath chosen him."},
+		},
+	}}}
+
+	// Feria: announce before-psalmody only.
+	markAnnouncedAntiphons(hour, &models.CalendarDay{}, "lauds")
+	els := hour.Sections[0].Elements
+	if els[0].Announce {
+		t.Error("opening Alleluia must not be announced")
+	}
+	if !els[1].Announce {
+		t.Error("opening psalm antiphon must be announced on a feria")
+	}
+	if els[4].Announce {
+		t.Error("closing psalm antiphon must stay full")
+	}
+	if els[6].Announce {
+		t.Error("commemoration antiphon must stay full")
+	}
+
+	// Reset and mark as Double Lauds: nothing announced.
+	for i := range els {
+		els[i].Announce = false
+	}
+	day := &models.CalendarDay{Celebration: &models.Feast{Rank: models.Double}}
+	markAnnouncedAntiphons(hour, day, "lauds")
+	for i, el := range hour.Sections[0].Elements {
+		if el.Announce {
+			t.Errorf("element %d should not be announced on Double Lauds", i)
+		}
+	}
+
+	// Double feast at Prime still announces.
+	for i := range els {
+		els[i].Announce = false
+	}
+	markAnnouncedAntiphons(hour, day, "prime")
+	if !hour.Sections[0].Elements[1].Announce {
+		t.Error("Prime on a Double feast still only announces the opening antiphon")
+	}
+}
+
+func TestIsBeforePsalmodyAntiphon(t *testing.T) {
+	elems := []models.OfficeElement{
+		{Type: models.Antiphon, Text: "A"},
+		{Type: models.Psalm, Text: "p"},
+		{Type: models.PsalmDoxology, Text: "g"},
+		{Type: models.Antiphon, Text: "A"},
+		{Type: models.Antiphon, Text: "B"},
+		{Type: models.Canticle, Text: "c"},
+		{Type: models.Antiphon, Text: "B"},
+	}
+	want := map[int]bool{0: true, 3: false, 4: true, 6: false}
+	for i, w := range want {
+		if got := isBeforePsalmodyAntiphon(elems, i); got != w {
+			t.Errorf("index %d: got %v, want %v", i, got, w)
+		}
+	}
+	// Out-of-range and non-antiphon indices must be false (boundary on i >= len).
+	for _, i := range []int{-1, len(elems), len(elems) + 1} {
+		if isBeforePsalmodyAntiphon(elems, i) {
+			t.Errorf("index %d should be false", i)
+		}
+	}
+	if isBeforePsalmodyAntiphon(elems, 1) { // psalm, not antiphon
+		t.Error("psalm index must not count as a before-antiphon")
+	}
+	// Trailing antiphon with nothing after is a closer, not an opener.
+	trailing := []models.OfficeElement{{Type: models.Antiphon, Text: "only"}}
+	if isBeforePsalmodyAntiphon(trailing, 0) {
+		t.Error("sole antiphon with no following psalm is not a before-antiphon")
+	}
+}

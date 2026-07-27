@@ -1389,6 +1389,14 @@ footer::before {
   margin-right: 0.3rem;
 }
 
+/* Opening half of a psalm/canticle frame when the office only announces the
+   antiphon (semi-double and below, or any hour other than Lauds/Vespers of a
+   Double): the printed line is the mediant-cut only, so it needs less trailing
+   air than a full closing antiphon. */
+.antiphon-announce {
+  margin-bottom: 0.55rem;
+}
+
 .elements > .antiphon {
   background: none;
   border: none;

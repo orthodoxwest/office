@@ -428,3 +428,24 @@ func TestFormatOfficeHourTeXSmoke(t *testing.T) {
 		t.Error("expected psalm verses")
 	}
 }
+
+func TestTexAnnouncedAntiphonUsesDisplayText(t *testing.T) {
+	got := texElement(models.OfficeElement{
+		Type:     models.Antiphon,
+		Text:     "Do away, O Lord, * mine offenses.",
+		Announce: true,
+	}, "", false)
+	if !strings.Contains(got, `Do away, O Lord, *`) {
+		t.Fatalf("expected announced form in TeX:\n%s", got)
+	}
+	if strings.Contains(got, "mine offenses") {
+		t.Fatalf("announced TeX antiphon must not include the rest:\n%s", got)
+	}
+}
+
+func TestTexEmptyAntiphonEmitsNothing(t *testing.T) {
+	got := texElement(models.OfficeElement{Type: models.Antiphon, Text: ""}, "", false)
+	if got != "" {
+		t.Fatalf("empty antiphon should emit no TeX, got %q", got)
+	}
+}

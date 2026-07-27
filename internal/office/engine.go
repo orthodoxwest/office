@@ -73,6 +73,7 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 	canonicalizeSourceRefs(hour, e.corpus)
 	collapseUniformAntiphons(hour)
 	markPsalmDoxologies(hour)
+	markAnnouncedAntiphons(hour, day, hourName)
 	appendContextDecisions(hour, day, hourName, moveable)
 	return hour, nil
 }
@@ -163,6 +164,14 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		addMarianDecisions(add, day, hourName)
 	} else if hourName == "compline" {
 		addMarianDecisions(add, day, hourName)
+	}
+
+	// Record whether psalm/canticle antiphons are doubled at this hour so the
+	// decision is visible in review explain / assurance traces.
+	if antiphonsDoubled(day, hourName) {
+		add("antiphon:doubling", "doubled", "")
+	} else {
+		add("antiphon:doubling", "announced", "")
 	}
 }
 
@@ -277,6 +286,67 @@ func sectionHasPsalmody(s models.OfficeSection) bool {
 		}
 	}
 	return false
+}
+
+// antiphonsDoubled reports whether psalm and canticle antiphons are said
+// entire both before and after at this hour. General Rubrics I.4 / XXIV.8:
+// only Vespers, Matins, and Lauds of a Double office double the antiphons;
+// at every other hour, and in a non-Double office, the antiphon is merely
+// begun before and said entire after.
+func antiphonsDoubled(day *models.CalendarDay, hourName string) bool {
+	if hourName != "lauds" && hourName != "vespers" {
+		return false
+	}
+	officeDay := day
+	if hourName == "vespers" {
+		officeDay = vespersOfficeDay(day)
+	}
+	if officeDay == nil || officeDay.Celebration == nil {
+		return false
+	}
+	return officeDay.Celebration.Rank.IsDouble()
+}
+
+// markAnnouncedAntiphons flags the opening half of each psalm/canticle
+// antiphon frame when the office does not double antiphons at this hour.
+// Text stays whole; renderers print models.AntiphonAnnouncement via DisplayText.
+func markAnnouncedAntiphons(hour *models.OfficeHour, day *models.CalendarDay, hourName string) {
+	if hour == nil || antiphonsDoubled(day, hourName) {
+		return
+	}
+	for si := range hour.Sections {
+		elems := hour.Sections[si].Elements
+		for i := range elems {
+			if elems[i].Type != models.Antiphon {
+				continue
+			}
+			if isBeforePsalmodyAntiphon(elems, i) {
+				elems[i].Announce = true
+			}
+		}
+	}
+}
+
+// isBeforePsalmodyAntiphon reports whether elems[i] is the antiphon said
+// immediately before a psalm or canticle (as opposed to the full repeat after
+// the Gloria, a commemoration antiphon, the Marian antiphon, or the opening
+// Alleluia). Composition always places the opening antiphon directly before
+// the psalm/canticle, so only the next element is considered.
+func isBeforePsalmodyAntiphon(elems []models.OfficeElement, i int) bool {
+	if i < 0 || i >= len(elems) || elems[i].Type != models.Antiphon {
+		return false
+	}
+	if i+1 >= len(elems) {
+		return false
+	}
+	switch elems[i+1].Type {
+	case models.Psalm, models.Canticle:
+		return true
+	default:
+		// Closing antiphon (next is another ant, heading, etc.), Gloria, or
+		// non-psalmody material such as a commemoration versicle.
+		return false
+	}
 }
 
 // markPsalmDoxologies promotes any Doxology element that immediately follows

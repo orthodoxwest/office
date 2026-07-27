@@ -172,11 +172,13 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 		fmt.Fprintf(&b, "\\sectionheading{%s}\n\n", escapeTeX(elem.Text))
 
 	case models.Antiphon:
-		if elem.Text != "" {
-			if strings.Contains(elem.Text, "\n") {
+		if text := elem.DisplayText(); text != "" {
+			if strings.Contains(text, "\n") {
+				// Multiline (e.g. Marian) always uses the full Text path via
+				// formatMultilineAntiphonTeX; announced forms are single-line.
 				b.WriteString(formatMultilineAntiphonTeX(elem))
 			} else {
-				fmt.Fprintf(&b, "\\ant{%s}\n\n", texLine(elem.Text))
+				fmt.Fprintf(&b, "\\ant{%s}\n\n", texLine(text))
 			}
 		}
 

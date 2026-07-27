@@ -19,3 +19,18 @@ func TestFeastDateClassification(t *testing.T) {
 		t.Fatal("moveable Easter feast should report IsMoveable")
 	}
 }
+
+func TestRankIsDouble(t *testing.T) {
+	doubles := []Rank{Double1stClass, Double2ndClass, GreaterDouble, Double}
+	for _, r := range doubles {
+		if !r.IsDouble() {
+			t.Errorf("%s should be Double", r)
+		}
+	}
+	not := []Rank{SemiDouble, PrivilegedFeria, Simple, Commemoration, ""}
+	for _, r := range not {
+		if r.IsDouble() {
+			t.Errorf("%q should not be Double", r)
+		}
+	}
+}
