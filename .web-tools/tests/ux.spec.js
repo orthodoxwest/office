@@ -391,6 +391,34 @@ test("the apse vault appears only over the night, and veils with the season", as
   expect(lit).toBeGreaterThan(30);
 });
 
+test("the frontispiece holds its width whatever the day is called", async ({ page }) => {
+  // body is a column flex container, and an auto cross-axis margin suppresses
+  // flex stretch — so main needs an explicit width:100% or it becomes
+  // shrink-to-fit and the measure caps nothing. Prose hides that (a
+  // paragraph's max-content exceeds the cap anyway); the frontispiece does
+  // not, and the card collapsed to the width of the day's feast name.
+  const days = [
+    "2026-08-10", // "St. Lawrence, Martyr"
+    "2026-07-13", // no feast name at all
+    "2026-11-03", // "Day III within the Octave of All Saints"
+  ];
+  for (const width of [1280, 1920]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const widths = [];
+    for (const date of days) {
+      await openDatedPage(page, `/?date=${date}`);
+      widths.push(
+        await page.evaluate(() =>
+          Math.round(document.querySelector(".home-hero").getBoundingClientRect().width),
+        ),
+      );
+    }
+    expect(new Set(widths).size).toBe(1);
+    // And it is the declared measure, not whatever the content happened to need.
+    expect(widths[0]).toBe(38 * 16);
+  }
+});
+
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
   // The nav used to inherit the 46rem prose column, which fits the brand and
   // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so

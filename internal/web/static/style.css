@@ -173,6 +173,13 @@ body {
    wrapped onto two lines on home and the hours and onto one line on the ordo. */
 main,
 footer {
+  /* width:100% is load-bearing. body is a column flex container, and an auto
+     cross-axis margin suppresses flex stretch — so with margin-inline:auto
+     alone these become shrink-to-fit and the measure caps nothing. Prose hides
+     it (a paragraph's max-content exceeds the cap either way), but the home
+     frontispiece is short content, so the card collapsed to the width of the
+     day's feast name and changed size from one day to the next. */
+  width: 100%;
   max-width: 46rem;
   margin-inline: auto;
   padding-left: max(var(--page-gutter), env(safe-area-inset-left));
