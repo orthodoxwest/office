@@ -97,7 +97,7 @@ func sectionToPenitentialRule(m map[string]string, sourceFile string) (penitenti
 
 func parseWeekdays(raw string) (map[time.Weekday]bool, error) {
 	weekdays := make(map[time.Weekday]bool)
-	for _, part := range strings.Split(raw, ",") {
+	for part := range strings.SplitSeq(raw, ",") {
 		name := strings.TrimSpace(strings.ToLower(part))
 		if name == "" {
 			continue

@@ -36,8 +36,8 @@ func ordoDisplayRank(feast *models.Feast) models.Rank {
 		return ""
 	}
 	for _, prefix := range []string{"easter-sunday-octave-day-", "pentecost-octave-day-"} {
-		if strings.HasPrefix(feast.ID, prefix) {
-			switch strings.TrimPrefix(feast.ID, prefix) {
+		if after, ok := strings.CutPrefix(feast.ID, prefix); ok {
+			switch after {
 			case "4", "5", "6", "7":
 				return models.SemiDouble
 			}

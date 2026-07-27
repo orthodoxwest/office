@@ -3,6 +3,7 @@ package calendar
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -304,13 +305,7 @@ func excludeSeasonalVigils(
 	candidates []*models.Feast,
 	season models.Season,
 ) ([]*models.Feast, []models.CompositionDecision) {
-	emberDay := false
-	for _, candidate := range candidates {
-		if isEmberDay(candidate) {
-			emberDay = true
-			break
-		}
-	}
+	emberDay := slices.ContainsFunc(candidates, isEmberDay)
 	excluded := season == models.Advent ||
 		season == models.Lent ||
 		season == models.Passiontide ||

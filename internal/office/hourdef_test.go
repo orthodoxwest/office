@@ -708,8 +708,8 @@ func TestLaudsAndVespersUseIndexedPsalmAntiphons(t *testing.T) {
 					if strings.HasPrefix(elem.Ref, "ordinary/") && strings.Contains(elem.Ref, "psalm-antiphon") {
 						t.Fatalf("%s %s still uses ordinary psalm-antiphon ref %q", tt.file, section.Name, elem.Ref)
 					}
-					if strings.HasPrefix(elem.Ref, "psalm-antiphon-") {
-						suffix := strings.TrimPrefix(elem.Ref, "psalm-antiphon-")
+					if after, ok := strings.CutPrefix(elem.Ref, "psalm-antiphon-"); ok {
+						suffix := after
 						if suffix < "1" || suffix > tt.maxRefNum {
 							t.Fatalf("%s %s antiphon ref %q out of expected range", tt.file, section.Name, elem.Ref)
 						}
@@ -894,7 +894,7 @@ func TestEasterTuesdayTextDoesNotContainRawDivinumOfficiumDirectives(t *testing.
 	if err != nil {
 		t.Fatalf("ReadFile(%s): %v", path, err)
 	}
-	for _, line := range strings.Split(string(content), "\n") {
+	for line := range strings.SplitSeq(string(content), "\n") {
 		if strings.HasPrefix(strings.TrimSpace(line), "@Tempora/") || strings.HasPrefix(strings.TrimSpace(line), "ex ") {
 			t.Fatalf("%s contains raw Divinum Officium directive %q", path, strings.TrimSpace(line))
 		}

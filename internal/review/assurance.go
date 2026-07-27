@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -297,13 +298,7 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 					hashCandidate[c.Hash] = c
 				}
 				sig := strings.Join(c.Features, "\x1f")
-				seen := false
-				for _, h := range sigHashes[sig] {
-					if h == c.Hash {
-						seen = true
-						break
-					}
-				}
+				seen := slices.Contains(sigHashes[sig], c.Hash)
 				if !seen {
 					sigHashes[sig] = append(sigHashes[sig], c.Hash)
 				}

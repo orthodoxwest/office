@@ -82,7 +82,7 @@ func parsePsalmodyDeclaration(body string) ([]psalmodyItem, bool, error) {
 					return nil, false, fmt.Errorf("line %d: expected a non-empty dates=MM-DD list", lineNumber)
 				}
 				dates = make(map[string]bool)
-				for _, date := range strings.Split(value, ",") {
+				for date := range strings.SplitSeq(value, ",") {
 					parsed, err := time.Parse("01-02", date)
 					if err != nil || parsed.Format("01-02") != date {
 						return nil, false, fmt.Errorf("line %d: invalid declaration date %q (expected MM-DD)", lineNumber, date)

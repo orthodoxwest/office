@@ -183,9 +183,9 @@ func scanProvenanceFile(textsDir, path string, entries map[string]*EntryProvenan
 			}
 			continue
 		}
-		if strings.HasPrefix(trimmed, "# SOURCE:") {
+		if after, ok := strings.CutPrefix(trimmed, "# SOURCE:"); ok {
 			if e := entries[currentKey]; e != nil {
-				e.Sources = append(e.Sources, parseCitation(strings.TrimSpace(strings.TrimPrefix(trimmed, "# SOURCE:")), lineNum))
+				e.Sources = append(e.Sources, parseCitation(strings.TrimSpace(after), lineNum))
 			}
 		}
 		if strings.Contains(trimmed, "TODO(diurnal)") {

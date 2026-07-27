@@ -55,7 +55,7 @@ func parseDays(spec string) ([7]bool, error) {
 		}
 		return days, nil
 	}
-	for _, token := range strings.Split(spec, ",") {
+	for token := range strings.SplitSeq(spec, ",") {
 		token = strings.ToLower(strings.TrimSpace(token))
 		if from, to, isRange := strings.Cut(token, "-"); isRange {
 			start, ok1 := dayNames[from]

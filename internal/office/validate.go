@@ -3,6 +3,7 @@ package office
 import (
 	"fmt"
 	"path/filepath"
+	"slices"
 	"sort"
 
 	"github.com/orthodoxwest/office/internal/texts"
@@ -56,12 +57,7 @@ func validationHours(hour, elemType, ref string) []string {
 }
 
 func hasAnyKeySuffix(corpus *texts.TextCorpus, refs []string) bool {
-	for _, ref := range refs {
-		if corpus.HasKeySuffix(ref) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(refs, corpus.HasKeySuffix)
 }
 
 // ValidateHourDefinitions parses all hour definition files in dataDir/office/,

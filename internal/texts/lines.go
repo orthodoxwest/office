@@ -201,7 +201,7 @@ func ParseBlock(text string) []BlockLine {
 	var parsed []BlockLine
 
 	offset := 0
-	for _, raw := range strings.Split(text, "\n") {
+	for raw := range strings.SplitSeq(text, "\n") {
 		lineStart := offset
 		offset += len(raw) + 1 // + the '\n' that Split consumed
 
@@ -291,7 +291,7 @@ func ParseHymn(text string) Hymn {
 			stanza = nil
 		}
 	}
-	for _, line := range strings.Split(body, "\n") {
+	for line := range strings.SplitSeq(body, "\n") {
 		if trimmed := strings.TrimSpace(line); trimmed == "" {
 			flush()
 		} else {

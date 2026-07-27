@@ -126,7 +126,7 @@ func stripTrailingAlleluias(text string) string {
 
 func shortResponsoryVersicle(responsory string) (string, bool) {
 	var versicle, response string
-	for _, line := range strings.Split(responsory, "\n") {
+	for line := range strings.SplitSeq(responsory, "\n") {
 		line = strings.TrimSpace(line)
 		switch {
 		case versicle == "" && strings.HasPrefix(line, "R. "):
