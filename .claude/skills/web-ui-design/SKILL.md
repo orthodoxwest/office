@@ -67,25 +67,37 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 
 ### The Apse starfield (settled — do not relitigate)
 
-The half-dome over the altar is a slate vault of small gold stars, and it is
-the one place in the building where ornament sits on **open field** rather than
-on structure. Rules that came out of building it:
+The half-dome over the altar is a slate vault of gold stars — the one place in
+the building where ornament sits on **open field** rather than on structure.
+The app's version is **geometric, not naturalistic**: four-pointed stars on a
+quincunx lattice with fainter points between, as painted vaults do
+(Sainte-Chapelle, Giotto's Scrovegni, Salisbury). Ordered geometry also matches
+what the rest of the app is made of — courses, aligned frames, banded groups.
 
-- **A vault is a field, not a handful of points.** Roughly 60 stars under
-  1.5px, denser toward the crown, alpha fading to nothing before the field
-  ends. A dozen big dots reads as dust or dead pixels — this was tried.
-- **Desktop Apse home only.** At 390px the frontispiece fills nearly the whole
-  width and occludes a page-level field; moving the stars onto the card puts
-  them on a lighter surface behind the date, where they read as specks on
-  paper. The vault goes where there is open field to hold it.
-- **Stars over plaster is the failure mode to guard.** `:root:not([data-theme="light"])`
-  matches when no choice is stored, so the rule needs a
-  `prefers-color-scheme: dark` guard or a Default-theme reader on a light
-  device gets gold stars across the Nave.
-- **Declare the field on `body`, not `:root`.** A custom property's `var()`
-  resolves against the element it is declared on, and the seasonal `--ornament`
-  overrides land on `body` — hoisting it freezes the stars gold through
-  Passiontide while everything else veils.
+- **Draw it as one repeating cell.** A quincunx is periodic, so two stars and
+  two points tile the whole field in eight gradients. Hand-placing every star
+  cost 172 background layers and pushed first contentful paint from 88ms to
+  **696ms** — six hundred milliseconds of blank screen for decoration. A fixed
+  px tile also holds its geometry at any width, where percentage positions
+  stretch. Keep it a tile.
+- **Size it from the parish**, which sets its stars at ~0.7% of the vault's
+  width and packs them densely. A first pass at 2–4× smaller was not subtle,
+  it was invisible: measure lit pixels, do not judge from a downscaled
+  screenshot.
+- **Crossed elliptical gradients, not an SVG data URI.** An SVG cannot read
+  `var(--ornament)`, so it would silently break the seasonal veil.
+- **Declare the field on `body`, not `:root`** — twice-bitten. A `none` default
+  on `body` beats an inherited `:root` value outright (the vault never
+  appears), and a custom property's `var()` resolves against the element it is
+  declared on, while the seasonal `--ornament` lands on `body`.
+- **Guard with `prefers-color-scheme: dark`.** `:root:not([data-theme="light"])`
+  matches when no choice is stored, so without it a Default-theme reader on a
+  light device gets gold stars across the plaster.
+- **Desktop Apse home only.** Three mobile treatments were built and rejected:
+  a page-level field is occluded by the card; stars on the card become specks
+  on paper; and a *border* in the 16px side gutters reads as debris pinned
+  against the frame. (A course of stars in the open field **below** the card
+  did read well — it remains the one unexplored mobile option.)
 - Static. A twinkling vault is the opposite of stillness.
 
 ### Gilding vs functional gold
@@ -231,6 +243,14 @@ and the answer is usually a number worth putting in the commit message.
   should align actually share an edge? does a label overflow its box? does a
   background tile repeat over the page's true height? does a gold accent move
   across the three seasons?
+- **Decoration has a paint cost — measure it.** Compare median first
+  contentful paint with the ornament present and absent, and again under CPU
+  throttling. Many CSS gradient layers are cheap to write and expensive to
+  rasterize; 172 of them cost 600ms of blank screen. Anything above ~30ms of
+  added FCP wants a cheaper form.
+- **Count lit pixels, not declared layers.** CSS that parses is not CSS that
+  renders: sub-pixel radii and low alpha can leave an effect entirely
+  invisible while every layer is present in the computed style.
 
 ## Anti-patterns (reject or prototype first)
 

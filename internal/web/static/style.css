@@ -3730,117 +3730,99 @@ body.page-reminders {
 }
 
 /* ── Apse starfield ──
-   The half-dome over the altar is a deep slate vault scattered with small gold
-   stars, and it is the one place in the building where ornament sits on open
-   field rather than on structure. Here that field is the page around the
-   frontispiece: the card is the lit altar, the night stands behind it.
+   The half-dome over the altar is a slate vault scattered with gold stars, and
+   it is the one place in the building where ornament sits on open field rather
+   than on structure. Here that field is the page around the frontispiece: the
+   card is the lit altar, the night stands behind it.
 
-   Apse only — the nave ceiling is plaster, so Nave gets nothing.
+   Geometric rather than naturalistic. Painted vaults — Sainte-Chapelle,
+   Giotto's Scrovegni, Salisbury — set gold stars in a regular offset diaper,
+   and that ordered geometry is what the rest of this app is made of: courses,
+   aligned frames, banded groups. Four-pointed stars sit on a quincunx lattice
+   with fainter points in the interstices, as real vaults do.
 
-   Desktop only, and not as a compromise. At 390px the frontispiece fills very
-   nearly the whole width, so a page-level field is almost entirely occluded by
-   the card; moving the stars onto the card instead puts them on a lighter
-   surface directly behind the date, where they stop reading as a vault and
-   start reading as specks on paper. Stars in a phone's margins are a known
-   anti-pattern here. So the vault appears exactly where there is open field to
-   hold it, and the mobile page is unchanged.
+   Drawn as ONE REPEATING CELL, which is the whole reason a lattice is the
+   right form here: a quincunx is periodic, so two stars and two points tile
+   into the entire field. Hand-placing every star instead cost 172 background
+   layers and pushed first contentful paint from 88ms to 696ms — six hundred
+   milliseconds before anything appeared on screen, for decoration. Eight
+   gradients tile to the same picture. Keep it a tile.
 
-   Static, never animated: a twinkling vault would be the opposite of stillness.
-   Each star reads --ornament through color-mix, so the vault veils in
-   Passiontide and warms in Paschaltide with the rest of the gilding. */
-@media (min-width: 701px) and (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.page-home {
-    /* The vault alone, over the flat --bg. The broad --page-material wash
-       stays off desktop, as it has since it was found to read as spotlights
-       on a wide canvas; the stars are what this width gets instead. */
-    background-image: var(--apse-vault);
-    background-repeat: no-repeat;
-    background-size: 100% 70rem;
-    background-position: top center;
-  }
-}
+   Stars are crossed elliptical gradients rather than an SVG data URI on
+   purpose: an SVG cannot read var(--ornament), so it would silently break the
+   seasonal veil. Each star reads --ornament through color-mix, so the vault
+   veils in Passiontide and warms in Paschaltide with the rest of the gilding.
 
-/* The vault is stored rather than repeated so the two selectors that need it —
-   device preference above, explicit choice below — cannot drift apart. The
-   media guard on the first is load-bearing: without it a reader on Default
-   with a light device gets a gold starfield across the plaster. */
-@media (min-width: 701px) {
-  :root[data-theme="dark"] body.page-home {
-    /* The vault alone, over the flat --bg. The broad --page-material wash
-       stays off desktop, as it has since it was found to read as spotlights
-       on a wide canvas; the stars are what this width gets instead. */
-    background-image: var(--apse-vault);
-    background-repeat: no-repeat;
-    background-size: 100% 70rem;
-    background-position: top center;
-  }
-}
+   Sized from the parish, which sets its stars at ~0.7% of the vault's width.
 
-/* Declared on body, not :root. A custom property's var() references resolve
-   against the element the property is declared on, and the seasonal --ornament
-   overrides land on body (body.season-passiontide) — hoisting the vault to
-   :root would freeze it at the root's gold and the stars would keep their
-   gilding through Passiontide while every other ornament veiled. */
+   Desktop Apse home only. At 390px the frontispiece leaves 16px side gutters,
+   where stars read as debris pinned against the frame rather than as a border;
+   a page-level field is occluded by the card, and stars on the card itself
+   become specks on paper. All three were built and looked at. The vault goes
+   where there is open field to hold it, and the phone is unchanged. Nave gets
+   nothing: the nave ceiling is plaster.
+
+   Static, never animated: a twinkling vault would be the opposite of
+   stillness. */
+/* Nave has no vault: the token stays `none` and the field paints nothing, so
+   the rule below can exist once instead of once per theme.
+
+   Declared on body, not :root, for two reasons. The default here would beat an
+   inherited :root value outright, so the vault would never appear. And a
+   custom property's var() resolves against the element it is declared on,
+   while the seasonal --ornament lands on body — declaring it higher freezes
+   the stars gold through Passiontide while every other ornament veils. */
 body {
+  --apse-vault: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body {
+    --apse-star: color-mix(in srgb, var(--ornament) 72%, transparent);
+    --apse-point: color-mix(in srgb, var(--ornament) 30%, transparent);
+    --apse-vault:
+      radial-gradient(ellipse 1.5px 4.6px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
+      radial-gradient(ellipse 4.6px 1.5px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
+      radial-gradient(circle 1.4px at 25% 25%, var(--apse-star) 0 60%, transparent 100%),
+      radial-gradient(ellipse 1.5px 4.6px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
+      radial-gradient(ellipse 4.6px 1.5px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
+      radial-gradient(circle 1.4px at 75% 75%, var(--apse-star) 0 60%, transparent 100%),
+      radial-gradient(circle 1.5px at 75% 25%, var(--apse-point) 0 55%, transparent 100%),
+      radial-gradient(circle 1.5px at 25% 75%, var(--apse-point) 0 55%, transparent 100%);
+  }
+}
+
+:root[data-theme="dark"] body {
+  --apse-star: color-mix(in srgb, var(--ornament) 72%, transparent);
+  --apse-point: color-mix(in srgb, var(--ornament) 30%, transparent);
   --apse-vault:
-radial-gradient(circle 1.1px at 25.1% 15.5%, color-mix(in srgb, var(--ornament) 58%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 70.7% 49.1%, color-mix(in srgb, var(--ornament) 25%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 11.9% 12.7%, color-mix(in srgb, var(--ornament) 70%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 36.5% 19.3%, color-mix(in srgb, var(--ornament) 57%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 39.7% 26.0%, color-mix(in srgb, var(--ornament) 54%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 14.2% 41.5%, color-mix(in srgb, var(--ornament) 40%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 31.2% 9.3%, color-mix(in srgb, var(--ornament) 68%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 36.7% 54.5%, color-mix(in srgb, var(--ornament) 26%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 94.9% 6.9%, color-mix(in srgb, var(--ornament) 66%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 5.1% 12.8%, color-mix(in srgb, var(--ornament) 71%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 2.2px at 29.1% 50.8%, color-mix(in srgb, var(--ornament) 30%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 71.6% 10.3%, color-mix(in srgb, var(--ornament) 65%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 56.8% 22.3%, color-mix(in srgb, var(--ornament) 50%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 45.7% 6.9%, color-mix(in srgb, var(--ornament) 75%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 5.4% 38.9%, color-mix(in srgb, var(--ornament) 37%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 28.8% 59.6%, color-mix(in srgb, var(--ornament) 17%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 5.9% 28.1%, color-mix(in srgb, var(--ornament) 45%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 72.3% 27.9%, color-mix(in srgb, var(--ornament) 44%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 20.7% 34.2%, color-mix(in srgb, var(--ornament) 41%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 26.7% 20.0%, color-mix(in srgb, var(--ornament) 62%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 54.9% 39.6%, color-mix(in srgb, var(--ornament) 43%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 64.1% 20.7%, color-mix(in srgb, var(--ornament) 49%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 88.0% 26.4%, color-mix(in srgb, var(--ornament) 59%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 89.5% 13.3%, color-mix(in srgb, var(--ornament) 65%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 33.5% 13.7%, color-mix(in srgb, var(--ornament) 63%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 47.9% 33.8%, color-mix(in srgb, var(--ornament) 50%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 55.1% 8.4%, color-mix(in srgb, var(--ornament) 74%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 43.6% 19.6%, color-mix(in srgb, var(--ornament) 48%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 2.2px at 7.8% 8.2%, color-mix(in srgb, var(--ornament) 70%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 90.9% 22.6%, color-mix(in srgb, var(--ornament) 62%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 40.4% 10.2%, color-mix(in srgb, var(--ornament) 69%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 33.2% 28.1%, color-mix(in srgb, var(--ornament) 49%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 62.7% 32.9%, color-mix(in srgb, var(--ornament) 41%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 66.6% 40.0%, color-mix(in srgb, var(--ornament) 41%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 26.2% 7.9%, color-mix(in srgb, var(--ornament) 73%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 55.0% 17.0%, color-mix(in srgb, var(--ornament) 63%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 2.2px at 83.4% 9.8%, color-mix(in srgb, var(--ornament) 71%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 96.2% 49.3%, color-mix(in srgb, var(--ornament) 26%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 14.9% 27.6%, color-mix(in srgb, var(--ornament) 43%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 87.6% 32.9%, color-mix(in srgb, var(--ornament) 38%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 97.4% 29.2%, color-mix(in srgb, var(--ornament) 42%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 48.2% 11.2%, color-mix(in srgb, var(--ornament) 61%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 96.2% 40.7%, color-mix(in srgb, var(--ornament) 33%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 75.3% 53.7%, color-mix(in srgb, var(--ornament) 26%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 51.0% 56.2%, color-mix(in srgb, var(--ornament) 19%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 85.8% 19.6%, color-mix(in srgb, var(--ornament) 47%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 97.7% 55.7%, color-mix(in srgb, var(--ornament) 26%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 46.2% 42.5%, color-mix(in srgb, var(--ornament) 36%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 80.3% 13.6%, color-mix(in srgb, var(--ornament) 69%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 28.6% 24.9%, color-mix(in srgb, var(--ornament) 61%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.1px at 60.4% 29.0%, color-mix(in srgb, var(--ornament) 54%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 46.9% 59.1%, color-mix(in srgb, var(--ornament) 23%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.6px at 84.7% 45.5%, color-mix(in srgb, var(--ornament) 31%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 53.5% 48.5%, color-mix(in srgb, var(--ornament) 32%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 13.5% 55.1%, color-mix(in srgb, var(--ornament) 26%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 2.2px at 66.2% 6.7%, color-mix(in srgb, var(--ornament) 79%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 1.3px at 68.2% 35.0%, color-mix(in srgb, var(--ornament) 48%, transparent) 0 55%, transparent 100%),
-    radial-gradient(circle 2.2px at 38.5% 35.3%, color-mix(in srgb, var(--ornament) 47%, transparent) 0 55%, transparent 100%);
+    radial-gradient(ellipse 1.5px 4.6px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
+    radial-gradient(ellipse 4.6px 1.5px at 25% 25%, var(--apse-star) 0 18%, transparent 100%),
+    radial-gradient(circle 1.4px at 25% 25%, var(--apse-star) 0 60%, transparent 100%),
+    radial-gradient(ellipse 1.5px 4.6px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
+    radial-gradient(ellipse 4.6px 1.5px at 75% 75%, var(--apse-star) 0 18%, transparent 100%),
+    radial-gradient(circle 1.4px at 75% 75%, var(--apse-star) 0 60%, transparent 100%),
+    radial-gradient(circle 1.5px at 75% 25%, var(--apse-point) 0 55%, transparent 100%),
+    radial-gradient(circle 1.5px at 25% 75%, var(--apse-point) 0 55%, transparent 100%);
+}
+
+@media (min-width: 701px) {
+  body.page-home::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--apse-vault);
+    background-repeat: repeat;
+    background-size: 160px 226px;
+    background-position: top center;
+    /* Dense at the crown, gone before the foot of the page, and clear of the
+       header beam. A mask rather than a painted fade: fading the background
+       itself would tint the page instead of thinning the stars. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0 7%, #000 17% 42%, transparent 74%);
+    mask-image: linear-gradient(to bottom, transparent 0 7%, #000 17% 42%, transparent 74%);
+  }
 }
 
 /* ── Print ──
@@ -3871,3 +3853,4 @@ radial-gradient(circle 1.1px at 25.1% 15.5%, color-mix(in srgb, var(--ornament) 
     color: #444;
   }
 }
+

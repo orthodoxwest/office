@@ -268,9 +268,12 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   // Apse gets the vault instead — stars only, never the broad wash.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const vault = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  const vault = await page.evaluate(
+    () => getComputedStyle(document.body, "::before").backgroundImage,
+  );
   expect(vault).not.toBe("none");
-  expect((vault.match(/radial-gradient/g) || []).length).toBeGreaterThan(20);
+  // One quincunx cell: two stars (three gradients each) plus two points.
+  expect((vault.match(/radial-gradient/g) || []).length).toBe(8);
 });
 
 test("the apse vault appears only over the night, and veils with the season", async ({
@@ -286,14 +289,14 @@ test("the apse vault appears only over the night, and veils with the season", as
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(path);
     const read = await sheet.evaluate(() => {
-      const style = getComputedStyle(document.body);
+      const style = getComputedStyle(document.body, "::before");
       const ink = style.backgroundImage.match(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/);
       const rgb = style.backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
       return {
-        // Count only the stars: they are the sole body-background layers built
-        // with color-mix, so this does not also pick up --page-material's
-        // three broad radials, which legitimately remain on the phone.
-        stars: (style.backgroundImage.match(/color\(srgb/g) || []).length,
+        // The vault has its own layer, so this cannot pick up
+        // --page-material's broad radials, which live on body and legitimately
+        // remain on the phone. One quincunx cell is exactly eight gradients.
+        stars: (style.backgroundImage.match(/radial-gradient/g) || []).length,
         pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
         ink: ink ? ink.slice(1).join(",") : null,
       };
@@ -314,8 +317,7 @@ test("the apse vault appears only over the night, and veils with the season", as
   expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
 
   // Present on desktop Apse, absent on the phone and in the working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars)
-    .toBeGreaterThan(20);
+  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(8);
   expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(0);
   for (const path of ["/calendar/2026", "/reminders"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
