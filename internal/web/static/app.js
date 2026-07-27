@@ -621,7 +621,9 @@ document.documentElement.classList.add("js");
       link.setAttribute("aria-current", "time");
       if (!state) {
         state = document.createElement("span");
-        state.className = "home-hour-link-state";
+        // sr-only to match the server-rendered marker in home.html: the tinted
+        // cell and the "Pray {hour}" invitation carry "now" visually.
+        state.className = "home-hour-link-state sr-only";
         state.textContent = "Now";
         link.appendChild(state);
       }

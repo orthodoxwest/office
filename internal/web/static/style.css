@@ -81,6 +81,19 @@
     radial-gradient(ellipse at 100% 100%, rgba(139, 80, 61, 0.026), transparent 58%);
   --material-highlight: rgba(255, 255, 255, 0.38);
   --inscription-wash: rgba(87, 94, 65, 0.055);
+  /* Stained oak, the parish's structural line: every frame, post and panel
+     edge in the building is this near-charcoal warm brown, and it is what
+     carries the architecture. Pale tan hairlines mark surfaces; oak marks
+     structure. Used sparingly — the header beam and the inscription band. */
+  --oak: #3f372f;
+  --oak-line: rgba(63, 55, 47, 0.34);
+  /* Gold as it appears on the arch band and the wall inscription: leaf on a
+     dark ground, never a bright bar on a light one. */
+  --inscription-ground: #3f372f;
+  --inscription-ink: #d7b878;
+  /* Side gutter for the reading column. The measure lives on main/footer so
+     the header beam can span the full width (see .site-header). */
+  --page-gutter: 1.5rem;
 }
 
 * {
@@ -140,12 +153,21 @@ body {
   text-rendering: optimizeLegibility;
   color: var(--text);
   background: var(--bg);
+  margin: 0;
+  padding: 0 0 calc(1.5rem + env(safe-area-inset-bottom));
+}
+
+/* The reading measure sits on the page copy, not on <body>. The header keeps
+   its own wider shell so the beam and its hairline run wall to wall and hold
+   one geometry on every page — previously the nav inherited the 46rem prose
+   column everywhere except the ordo, which widens to 68rem, so the same nav
+   wrapped onto two lines on home and the hours and onto one line on the ordo. */
+main,
+footer {
   max-width: 46rem;
-  margin: 0 auto;
-  padding: 0 1.5rem 1.5rem;
-  padding-left: max(1.5rem, env(safe-area-inset-left));
-  padding-right: max(1.5rem, env(safe-area-inset-right));
-  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  margin-inline: auto;
+  padding-left: max(var(--page-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--page-gutter), env(safe-area-inset-right));
 }
 
 /* Secondary / small italic: system Georgia. EB Garamond italic is hard to
@@ -210,17 +232,28 @@ summary:focus-visible {
 
 /* ── Header / Nav ── */
 
+/* The beam: in the parish every wall is crossed by a timber that runs its full
+   width, and the nav is this app's equivalent. Full-bleed rule, content held
+   to a shell wider than the prose column so the whole link list fits on one
+   line at every desktop width. */
 .site-header {
-  border-bottom: 1px solid rgba(26, 26, 26, 0.08);
+  border-bottom: 1px solid var(--oak-line);
   padding: 0.85rem 0 0.7rem;
   margin-bottom: 1.5rem;
 }
 
 .site-nav-shell {
+  /* Anchors the mobile menu panel to the content column rather than the
+     viewport edge, now that the header itself is full-bleed. */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  max-width: 68rem;
+  margin-inline: auto;
+  padding-left: max(var(--page-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--page-gutter), env(safe-area-inset-right));
 }
 
 .site-brand {
@@ -307,9 +340,11 @@ footer .text-size-switch {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  overflow: hidden;
+  /* Hairline courses above and below rather than a boxed group. These are the
+     quietest thing on the page and were reading as the loudest — two outlined
+     segmented controls stacked under the day is the one piece of chrome in the
+     app that looked like a settings panel. */
+  border-block: 1px solid var(--surface-edge);
   margin: 0.85rem auto 0;
 }
 
@@ -322,7 +357,7 @@ footer .text-size-switch {
 .text-size-option {
   appearance: none;
   border: none;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--surface-edge);
   background: transparent;
   color: var(--muted);
   font: inherit;
@@ -369,10 +404,13 @@ footer .text-size-switch {
   color: var(--accent);
 }
 
+/* Chosen is marked the way the current hour is marked on home: a gold
+   underline, not a filled cell. One vocabulary for "this is the one". */
 .theme-option[aria-pressed="true"],
 .text-size-option[aria-pressed="true"] {
-  background: rgba(107, 58, 31, 0.1);
+  background: transparent;
   color: var(--accent);
+  box-shadow: inset 0 -1px 0 var(--ornament);
 }
 
 .theme-option:focus-visible,
@@ -437,21 +475,26 @@ footer .text-size-switch {
     display: none;
   }
 
+  /* Same disclosure mark as "Change date" on home and the hours: the app has
+     one caret in gold, not a caret here and a math sign there. */
   .site-menu > summary::after {
-    content: "+";
+    content: "▾";
     margin-left: 0.4rem;
-    color: var(--muted);
-    font-size: 1rem;
+    color: var(--gold-line);
+    font-size: 0.85em;
   }
 
   .site-menu[open] > summary::after {
-    content: "−";
+    content: "▴";
   }
 
   .site-menu > nav {
     position: absolute;
     top: calc(100% + 0.1rem);
-    right: 0;
+    /* The shell is padded now that the header is full-bleed, so `right: 0`
+       would put the panel against the screen edge instead of the gutter the
+       page copy uses. */
+    right: max(var(--page-gutter), env(safe-area-inset-right));
     display: grid;
     grid-template-columns: repeat(2, minmax(7rem, 1fr));
     width: min(21rem, calc(100vw - 2rem));
@@ -863,6 +906,11 @@ footer::before {
   letter-spacing: 0.02em;
 }
 
+/* "Now" is carried by .sr-only in the template and by aria-current="time" on
+   the link. Sighted readers already have the tinted cell, the gold underline
+   beneath it, and "Pray {hour}" naming the same hour directly above — a fourth
+   marker only added a small upright word beside a serif name. The rule stays
+   so the label keeps its typography wherever it is not visually hidden. */
 .home-hour-link-state {
   color: var(--muted);
   font-size: 0.68rem;
@@ -1684,9 +1732,13 @@ footer::before {
    reading-width cap so the office digest (below) has room to sit beside the
    feast name instead of stacking into a much taller page. Other pages keep
    the narrower, prose-friendly width. */
+/* 62rem, not 68rem: the fast/abstinence/rank columns are empty on most days,
+   so the extra width opened a bare gutter between the feast and three lonely
+   flags at the far right. This still clears the digest beside the feast name
+   without stranding the right-hand columns. */
 @media (min-width: 920px) {
-  body.page-calendar {
-    max-width: 68rem;
+  .page-calendar main {
+    max-width: 62rem;
   }
 }
 
@@ -1911,9 +1963,13 @@ footer::before {
   text-decoration: underline;
 }
 
+/* A gold hairline, not `underline dotted`: the dotted rule is the browser's
+   spell-check idiom, so in a serif setting "2cl" and "sd" read as flagged
+   typos — and on a mobile card the rank is the most eye-catching mark on the
+   row. The hairline still says "this abbreviation explains itself on hover". */
 .month-table abbr {
-  text-decoration: underline dotted;
-  text-underline-offset: 0.14em;
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold-line);
   cursor: default;
   position: relative;
 }
@@ -1978,6 +2034,33 @@ footer::before {
   cursor: pointer;
 }
 
+/* The ordo's two disclosures were the last place still showing the native
+   ▶ marker: a solid black triangle heavier than any type on the card, and two
+   of them side by side read as a toolbar. Same gold caret as every other
+   disclosure in the app. */
+.day-office-details > summary,
+.day-commemorations > summary {
+  list-style: none;
+}
+
+.day-office-details > summary::-webkit-details-marker,
+.day-commemorations > summary::-webkit-details-marker {
+  display: none;
+}
+
+.day-office-details > summary::after,
+.day-commemorations > summary::after {
+  content: " ▾";
+  color: var(--gold-line);
+  font-size: 0.85em;
+  font-style: normal;
+}
+
+.day-office-details[open] > summary::after,
+.day-commemorations[open] > summary::after {
+  content: " ▴";
+}
+
 .day-office-details:not([open]) .day-office-digest {
   display: none;
 }
@@ -2003,10 +2086,16 @@ footer::before {
   letter-spacing: 0.04em;
 }
 
+/* The ordo widens to 68rem so the digest can sit beside the feast name rather
+   than stacking, but the digest is prose: unchecked it ran to ~800px, about
+   110 characters of italic, the one place the app stretched running text to
+   fill the window. Capped at the reading measure the table keeps its width
+   and the antiphons keep theirs. */
 .day-office-hour dd {
   display: flex;
   flex-wrap: wrap;
   gap: 0 0.6rem;
+  max-width: 38rem;
 }
 
 .day-office-incipit,
@@ -2213,7 +2302,7 @@ footer::before {
   }
 
   .day-commemorations summary {
-    display: list-item;
+    display: block;
     font-size: 0.75rem;
     color: var(--muted);
     font-style: italic;
@@ -2276,6 +2365,12 @@ footer::before {
       linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
     --material-highlight: rgba(208, 176, 106, 0.065);
     --inscription-wash: rgba(208, 176, 106, 0.04);
+    /* Apse lifts the band off the night rather than darkening it: oak brown on
+       a blue surface reads as a stain, but a lifted slate course carrying the
+       same gold reads as the same timber under a different light. */
+    --oak-line: rgba(208, 176, 106, 0.16);
+    --inscription-ground: #262f3d;
+    --inscription-ink: #d8bc74;
   }
 }
 
@@ -2309,6 +2404,10 @@ footer::before {
     linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
   --material-highlight: rgba(208, 176, 106, 0.065);
   --inscription-wash: rgba(208, 176, 106, 0.04);
+  /* See the prefers-color-scheme block above for why Apse lifts the band. */
+  --oak-line: rgba(208, 176, 106, 0.16);
+  --inscription-ground: #262f3d;
+  --inscription-ink: #d8bc74;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2396,17 +2495,17 @@ footer::before {
   color: #121c28;
 }
 
+/* Apse marks the chosen option the same way Nave does — gold underline, no
+   fill. Only the ink needs lifting against the night. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .theme-option[aria-pressed="true"],
   :root:not([data-theme="light"]) .text-size-option[aria-pressed="true"] {
-    background: rgba(208, 176, 106, 0.14);
     color: var(--accent);
   }
 }
 
 :root[data-theme="dark"] .theme-option[aria-pressed="true"],
 :root[data-theme="dark"] .text-size-option[aria-pressed="true"] {
-  background: rgba(208, 176, 106, 0.14);
   color: var(--accent);
 }
 
@@ -2494,8 +2593,9 @@ body.season-eastertide {
     /* 1.25rem = the historical 20px at a 16px root; see the html rules above —
        both breakpoints scale from the same root factor. */
     font-size: 1.25rem;
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
+    /* Header, main and footer all read this, so one value narrows the gutter
+       for the whole page. */
+    --page-gutter: 1rem;
   }
 
   .home-hour-links {
@@ -2740,9 +2840,34 @@ body.season-eastertide {
   box-shadow: none;
 }
 
+/* The inscription band. In the parish a dark timber course runs the full width
+   of the wall carrying gold uncial small-caps between raised points — it is the
+   building's most distinctive mark, and this heading is the one piece of
+   content that wants it. Full-bleed inside the frontispiece (hence the
+   negative inline margin against the card's 1rem padding), because a band that
+   stops short of the frame is a label, not a course. */
 .page-home .home-prayer-card h2 {
-  margin-bottom: 0.45rem;
+  display: block;
+  margin: 0.15rem -1rem 0.85rem;
+  /* Proportionally thin, as the course is on the wall. A taller band would
+     out-shout "Pray {hour}", and the invitation has to lead the page. */
+  padding: 0.2rem 1rem 0.16rem;
+  background: var(--inscription-ground);
+  color: var(--inscription-ink);
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
   text-align: center;
+}
+
+/* Raised points either side, as on the wall. Dimmed so the words lead. */
+.page-home .home-prayer-card h2::before,
+.page-home .home-prayer-card h2::after {
+  content: "✦";
+  margin-inline: 0.85em;
+  font-size: 0.62em;
+  letter-spacing: 0;
+  opacity: 0.62;
+  vertical-align: 0.12em;
 }
 
 .page-home .pray-now-wrap {
@@ -2781,9 +2906,12 @@ body.season-eastertide {
   border-inline: 1px solid var(--frontispiece-rule);
 }
 
+/* 5.2rem, not 4.4rem: "Morning" is the longest label and at 4.4rem it filled
+   its box to within a pixel on each side, so the word appeared to be clipped
+   by its own frame. */
 .page-home .home-hour-group {
   display: grid;
-  grid-template-columns: 4.4rem minmax(0, 1fr);
+  grid-template-columns: 5.2rem minmax(0, 1fr);
   align-items: stretch;
   border-top: 1px solid var(--frontispiece-rule);
 }
@@ -2833,9 +2961,12 @@ body.season-eastertide {
   text-align: center;
 }
 
-.page-home .home-hour-link + .home-hour-link {
-  border-left: 1px solid var(--frontispiece-rule);
-}
+/* No rule between the hours themselves. The three periods hold 2, 3 and 2
+   hours, so vertical rules imply columns that cannot line up — at 390px the
+   divisions fall at 230, then 188 and 272, then 230 again, and the block reads
+   as a mis-set table. Banded horizontally it reads as what it is: Morning,
+   Day, Evening. That is also the building's grammar, where the structure runs
+   in horizontal courses. */
 
 .page-home .home-hour-link.is-current {
   background: rgba(107, 58, 31, 0.08);
@@ -2898,20 +3029,13 @@ body.season-eastertide {
     margin-bottom: 1.1rem;
   }
 
+  /* The band carries the heading at every width; desktop only widens the
+     bleed to match the frontispiece's larger side padding. */
   .page-home .home-prayer-card h2 {
-    display: grid;
-    grid-template-columns: minmax(1.5rem, 1fr) auto minmax(1.5rem, 1fr);
-    align-items: center;
-    gap: 0.7rem;
-    margin-bottom: 0.55rem;
-    color: var(--accent);
-    letter-spacing: 0.115em;
-  }
-
-  .page-home .home-prayer-card h2::before,
-  .page-home .home-prayer-card h2::after {
-    content: "";
-    border-top: 1px solid var(--frontispiece-rule);
+    margin-inline: -1.75rem;
+    padding-inline: 1.75rem;
+    margin-bottom: 0.95rem;
+    letter-spacing: 0.185em;
   }
 
   .page-home .pray-now-wrap {
@@ -3091,6 +3215,12 @@ body.season-eastertide {
     font-size: 11pt;
     color: #000;
     background: #fff;
+  }
+
+  main,
+  footer {
+    max-width: none;
+    padding: 0;
   }
 
   .elements {
@@ -3473,16 +3603,27 @@ body.season-eastertide {
    Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
    because they are thresholds and working rooms. The hour body is omitted
    deliberately: prayer remains a flat diurnal page with no texture under its
-   words. The gradients have transparent edges and repeat only at a very large
-   scale, avoiding both visible seams and a simulated-paper grain. */
+   words.
+
+   The field is laid once and never tiled. A repeating tile is fine on a short
+   page and wrong on a long one: the ordo runs to roughly 39,000px at 390px
+   wide, so a 64rem tile recurred about thirty-nine times and its diagonal
+   band became a visible periodic stripe down the months — the same artifact
+   that took these washes off the desktop. `no-repeat` over the flat --bg
+   keeps the wash where the eye actually lands, at the head of the page. */
 body.page-home,
 body.page-calendar,
 body.page-reminders {
   background-color: var(--bg);
   background-image: var(--page-material);
   background-position: top center;
-  background-repeat: repeat;
-  background-size: 72rem 64rem;
+  background-repeat: no-repeat;
+  /* Width-relative so the composition is the one that was authored. At a fixed
+     72rem the tile was far wider than a phone, and since a propagated body
+     background is positioned against the root box, a 390px screen only ever
+     showed the middle third of it — the pools at 14% and 88% fell off both
+     edges, and the slice shifted with device width. */
+  background-size: 100% 64rem;
 }
 
 /* At desktop scale both themes read best as still fields. The broad tonal

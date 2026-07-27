@@ -166,7 +166,11 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   await expect(invitation).toHaveText("Pray Terce");
   await expect(invitation).toHaveAttribute("href", `/terce/${testDate}`);
   await expect(current).toHaveAttribute("data-hour", "terce");
-  await expect(current.getByText("Now", { exact: true })).toBeVisible();
+  // "Now" is announced, not drawn: the tinted cell and the invitation above
+  // carry it visually, so the word is sr-only rather than a chip beside the
+  // hour name. Assert it is in the accessibility tree and out of the picture.
+  await expect(current.getByText("Now", { exact: true })).toBeAttached();
+  await expect(current.getByText("Now", { exact: true })).not.toBeInViewport();
   await expect(current.locator("xpath=ancestor::section[1]")).toContainText("Day");
 
   const naveState = await invitation.evaluate((element) => ({
@@ -224,6 +228,72 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   );
 });
 
+test("the header beam holds one line and one geometry on every page", async ({ page }) => {
+  // The nav used to inherit the 46rem prose column, which fits the brand and
+  // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so
+  // the same header sat on two lines everywhere except there. Both the single
+  // line and the shared shell width are the point.
+  const shellWidths = [];
+  for (const [width, path] of [
+    [1024, `/?date=${testDate}`],
+    [1280, `/?date=${testDate}`],
+    [1280, `/lauds/${testDate}`],
+    [1280, "/calendar/2026"],
+    [1600, "/calendar/2026"],
+  ]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(path);
+    const header = await page.evaluate(() => {
+      const links = [...document.querySelectorAll('nav[aria-label="Primary"] a')];
+      return {
+        links: links.length,
+        rows: new Set(links.map((a) => Math.round(a.getBoundingClientRect().top))).size,
+        shell: Math.round(document.querySelector(".site-nav-shell").getBoundingClientRect().width),
+      };
+    });
+    expect(header.links).toBe(9);
+    expect(header.rows).toBe(1);
+    shellWidths.push(`${width}:${header.shell}`);
+  }
+  // Same viewport ⇒ same header, whichever room you are in.
+  expect(shellWidths[1]).toBe(shellWidths[2]);
+  expect(shellWidths[2]).toBe(shellWidths[3]);
+});
+
+test("the inscription band carries the frontispiece heading in both themes", async ({ page }) => {
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  const read = () =>
+    page.evaluate(() => {
+      const h = document.querySelector(".home-prayer-card h2");
+      const card = document.querySelector(".home-hero");
+      const hs = getComputedStyle(h);
+      const hr = h.getBoundingClientRect();
+      const cr = card.getBoundingClientRect();
+      return {
+        ground: hs.backgroundColor,
+        ink: hs.color,
+        // Full-bleed: the course reaches the frame, minus the card's border.
+        bleed: Math.round(cr.width - hr.width) <= 4,
+      };
+    });
+
+  const nave = await read();
+  expect(nave.ground).not.toBe("rgba(0, 0, 0, 0)");
+  expect(nave.bleed).toBe(true);
+
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const apse = await read();
+  expect(apse.ground).not.toBe("rgba(0, 0, 0, 0)");
+  expect(apse.ground).not.toBe(nave.ground);
+  expect(apse.bleed).toBe(true);
+
+  // The band must never appear on a prayer page.
+  await page.goto(`/lauds/${testDate}`);
+  expect(await page.locator(".elements .home-prayer-card").count()).toBe(0);
+});
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
@@ -267,6 +337,10 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         label.borderRightStyle,
         label.borderRightColor,
       ),
+      // Deliberately absent. The periods hold 2, 3 and 2 hours, so a rule
+      // between hours implies columns that cannot line up across the rows and
+      // the directory reads as a mis-set table. The frame, the label column
+      // and the band rules carry the structure instead.
       dividedHourLeft: isVisibleRule(
         dividedHour.borderLeftWidth,
         dividedHour.borderLeftStyle,
@@ -283,7 +357,7 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
     directoryLeft: true,
     directoryRight: true,
     labelRight: true,
-    dividedHourLeft: true,
+    dividedHourLeft: false,
     finalGroupBottom: true,
   });
   expect(
