@@ -1,6 +1,7 @@
 package office
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -221,10 +222,8 @@ func suffrageDisposition(day *models.CalendarDay, moveable *calendar.MoveableDat
 		return false, SuffrageSuppressedOutOfSeason
 	}
 
-	for _, comm := range day.Commemorations {
-		if commemorationSuppressesSuffrage(comm) {
-			return false, SuffrageSuppressedCommemoration
-		}
+	if slices.ContainsFunc(day.Commemorations, commemorationSuppressesSuffrage) {
+		return false, SuffrageSuppressedCommemoration
 	}
 
 	return true, SuffrageSaid

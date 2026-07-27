@@ -84,12 +84,9 @@ func TestEngineConcurrentCompositionIsDeterministicAndDoesNotMutateDays(t *testi
 
 	errCh := make(chan error, len(cases)*8)
 	var wg sync.WaitGroup
-	for i := 0; i < 8; i++ {
+	for range 8 {
 		for _, tc := range cases {
-			tc := tc
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				for range 10 {
 					hour, err := eng.ComposeHour(tc.hour, tc.day, tc.moveable)
 					if err != nil {
@@ -101,7 +98,7 @@ func TestEngineConcurrentCompositionIsDeterministicAndDoesNotMutateDays(t *testi
 						return
 					}
 				}
-			}()
+			})
 		}
 	}
 	wg.Wait()

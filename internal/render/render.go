@@ -111,7 +111,7 @@ func templateFuncs(version string) template.FuncMap {
 		"typeEq": func(t models.ElementType, s string) bool {
 			return string(t) == s
 		},
-		"titleCase":       func(v interface{}) string { return TitleCase(fmt.Sprint(v)) },
+		"titleCase":       func(v any) string { return TitleCase(fmt.Sprint(v)) },
 		"psalmVerses":     renderPsalmVerses,
 		"liturgicalBlock": renderLiturgicalBlock,
 		"hymnStanzas":     renderHymnStanzas,

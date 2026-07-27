@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -21,25 +22,19 @@ func bodyClasses(t *testing.T, s *Server, path string) string {
 	}
 	body := rec.Body.String()
 	const open = `<body class="`
-	i := strings.Index(body, open)
-	if i < 0 {
+	_, after, ok := strings.Cut(body, open)
+	if !ok {
 		t.Fatalf("GET %s: no <body class=...> in response", path)
 	}
-	rest := body[i+len(open):]
-	j := strings.Index(rest, `"`)
+	j := strings.Index(after, `"`)
 	if j < 0 {
 		t.Fatalf("GET %s: unterminated body class attribute", path)
 	}
-	return rest[:j]
+	return after[:j]
 }
 
 func hasClass(classes, want string) bool {
-	for _, c := range strings.Fields(classes) {
-		if c == want {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Fields(classes), want)
 }
 
 // Dates are derived from the Julian paschalion rather than hardcoded: Julian

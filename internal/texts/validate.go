@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -100,10 +101,8 @@ func nearPsalmodySectionName(relPath, section string) string {
 		return ""
 	}
 	reserved := []string{"vespers-psalmody", "vespers-psalmody-first"}
-	for _, name := range reserved {
-		if section == name {
-			return ""
-		}
+	if slices.Contains(reserved, section) {
+		return ""
 	}
 	best := ""
 	bestDistance := 3

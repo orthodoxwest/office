@@ -38,7 +38,7 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 					if elem.Type == models.Psalm {
 						psalms++
 					}
-					for _, line := range strings.Split(elem.Text, "\n") {
+					for line := range strings.SplitSeq(elem.Text, "\n") {
 						if strings.HasPrefix(strings.TrimSpace(line), "#") {
 							t.Errorf("%s on %s leaked corpus comment %q", hourName, day.Date.Format(time.DateOnly), line)
 						}
