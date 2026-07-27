@@ -2520,9 +2520,15 @@ footer::before {
    gold runs a shade warmer and more luminous, as gold leaf does in the light.
 
    Only --ornament / --ornament-line move. The liturgical color band still
-   carries the day's color untouched, and every functional use of gold — focus
-   rings, disclosure markers, today's ordo row, the Pray-now button — reads
-   --gold directly and is unaffected.
+   carries the day's color untouched, and the functional uses of gold —
+   disclosure carets, the ordo rank hairlines, today's ordo row — read --gold /
+   --gold-line directly and are unaffected.
+
+   The frontispiece invitation is the opposite case, and deliberately so: its
+   double border reads --ornament-line, so "Pray {hour}" veils and brightens
+   with the rest of the gilding. The plain .pray-now button outside the
+   frontispiece is bordered in --accent and never was gold; nor are the focus
+   rings, which are --accent too.
 
    The season class is stamped on <body> server-side per date
    (render.SeasonClass), so it varies per URL and stays service-worker safe.

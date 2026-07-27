@@ -52,13 +52,33 @@ Read this before changing visual design or prayer-page chrome.
 |-------|-----|
 | ✠ | Brand |
 | Double gold hairline | Hour titles, major breaks |
-| ✦ diamond | Footer / major separators |
+| ✦ diamond | Footer / major separators; the raised points either side of an inscription |
+| Inscription band | Dark oak course, full-bleed, gold small-caps between ✦ points. Section heads in a framed object — the parish's most distinctive mark, so spend it rarely |
 | Liturgical color band | Top of hour pages (+ safe-area) |
 | Gold drop caps | Psalm/chapter openings |
 | Gold scroll progress hairline | Under color band on hour pages only |
+| Gold underline (`inset 0 -1px 0`) | **The** marker for "this is the chosen one" — current hour, selected control. Never a filled cell |
+| Gold caret `▾` / `▴` | **The** disclosure marker, everywhere. Never the native `▶`, never `+` / `−` |
 | Sparse stars | Only if proven; prefer **not** on mobile margins |
 
+Two weights of line, and they mean different things: **oak** (`--oak`, near-charcoal warm brown) is structure — the header beam, an inscription course. **Pale tan hairlines** (`--border`, `--surface-edge`) are surfaces and separators. The building is emphatically structural; if a page feels boneless, it is usually missing oak, not missing more hairlines.
+
 Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, fitness-style progress rings, sun/moon icon toggles that read as SaaS.
+
+### Gilding vs functional gold
+
+Two gold families, and picking the wrong one is silent — it only shows up in Passiontide.
+
+| Family | Tokens | Moves with the season? | For |
+|--------|--------|------------------------|-----|
+| **Gilding** | `--ornament`, `--ornament-line`, `--ornament-hi/lo` | **Yes** — veils grey-violet in Passiontide, warms in Paschaltide | Ornament: ✠, ✦, drop caps, hour-title hairlines, inscription ink, the frontispiece invitation's border |
+| **Functional** | `--gold`, `--gold-line` | No | Chrome that happens to be gold: disclosure carets, ordo rank hairlines, today's ordo row |
+
+Ask "is this ornament, or is it a control that happens to be gold?" Ornament veils; controls do not. Never write a literal gold hex into a rule — that is how something ends up gold on Good Friday.
+
+**Gold on a dark ground takes the Apse leaf colours in *both* themes.** An inscription band's course is dark in Nave and Apse alike, so its ink needs one seasonal pair, not two, and the dark token block should not restate it. Check contrast against both grounds.
+
+Verify by probing, not by reading tokens: load an ordinary day, a Passiontide day and a Paschaltide day and compare computed styles. `body` carries `season-passiontide` / `season-eastertide` (server-stamped per date, so it is service-worker safe).
 
 ## Page roles
 
@@ -82,6 +102,34 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 | Template rendering | `internal/render/` (view models, FuncMap, text-to-HTML) |
 | Embedded assets | `//go:embed` in `internal/render/render.go` (templates) and `internal/web/server.go` (static) — **rebuild** after template/CSS/JS changes |
 
+### Page frame (do not move the measure back onto `body`)
+
+The reading measure lives on `main` and `footer` (46rem; the ordo widens its
+`main` only). `body` is full width. The header is deliberately outside that
+column: `.site-header` is full-bleed so its hairline runs wall to wall like the
+timber it echoes, and `.site-nav-shell` holds its own wider max-width so the
+nav has **one geometry on every page**.
+
+- Putting the measure on `body` again wraps the nav — the brand plus nine links
+  do not fit a 46rem column — and, because the ordo widens, wraps it on *some*
+  pages only, so the header changes shape as you navigate.
+- Gutters come from `--page-gutter` (narrowed once at ≤540px), read by header,
+  `main` and `footer` alike. Do not hard-code side padding on `body`.
+- `.site-nav-shell` is the positioning ancestor for the mobile menu panel;
+  offset the panel by the gutter, not `right: 0`, or it sits on the screen edge.
+- Print resets `main`/`footer` alongside `body`.
+
+### Page-scale material (washes)
+
+- **Lay the field once — never tile it.** The ordo runs tens of thousands of
+  pixels on a phone; any repeating tile becomes a visible periodic stripe. Use
+  `no-repeat` over the flat `--bg`.
+- **Size it to the viewport** (`100%` width), not a fixed `rem` tile. A `body`
+  background propagates to the canvas and is positioned against the *root* box,
+  so a tile wider than the screen shows only its middle slice — and which slice
+  shifts with device width, so what you tuned is not what ships.
+- Non-liturgical rooms only. Prayer pages stay a flat diurnal field.
+
 ### Theme (Default / Nave / Apse)
 
 - **Persistence:** `localStorage` key `office-theme` (`default` \| `light` \| `dark`). Write **only** on explicit control click — never invent a choice on passive load.
@@ -102,8 +150,28 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 
 ### Home
 
-- Prayer card / **Pray now** leads (especially mobile).
+- Prayer card / **Pray now** leads (especially mobile). Nothing else in the
+  frontispiece may out-shout it — keep an inscription band thin, keep markers quiet.
 - Preserve selectors used by `updatePrayNow()`: `.home-prayer-card[data-date-slug]`, `.pray-now`, `.home-hour-link[data-hour]`, `.home-hour-link-name`.
+- **The current-hour marker exists twice** — server-rendered in `home.html` and
+  rebuilt client-side by `setHourCurrent()` in `app.js`. Change both, or the
+  marker silently reverts once JS runs. (Same trap for anything app.js recreates.)
+- The hour directory is **banded, not gridded**: the periods hold 2, 3 and 2
+  hours, so rules between hours imply columns that cannot align across rows and
+  it reads as a mis-set table. Horizontal band separators only.
+- Period labels are a fixed index column — size it to the longest word
+  (“Morning”) with real breathing room, not to within a pixel of its box.
+
+### Ordo
+
+- A working room, but still the parish's: it gets the same carets, hairlines
+  and underlines as everywhere else, not browser defaults.
+- Keep the table near the content. Most days have no fast/abstinence/rank
+  value, so extra width opens a bare gutter with three lonely flags in it.
+- The office digest is prose — cap it at the reading measure even though the
+  table around it is wider.
+- Never `text-decoration: underline dotted` on abbreviations: it is the
+  browser's spell-check idiom and makes `2cl` / `sd` read as flagged typos.
 
 ### Accessibility
 
@@ -119,7 +187,27 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 3. Test light + dark + narrow (≤540px) + one hour page + home.
 4. `go test ./internal/render/ ./internal/web/`; rebuild (`make build`) if templates/static are embedded.
 5. Golden files are composition output, not HTML — only regenerate when office text changes.
-6. PR against `master` (no direct push); describe visual intent in the PR body.
+6. `make test-ux` (Playwright). It carries axe baselines and structural
+   assertions; a test asserting the thing you just deliberately removed should
+   be **updated to the new intent with the reasoning inline**, not deleted.
+7. PR against `master` (no direct push); describe visual intent in the PR body.
+
+### Measure it; do not eyeball it
+
+Screenshots show that something is off. Driving the page tells you what and why,
+and the answer is usually a number worth putting in the commit message.
+
+- Serve locally and drive with the Playwright browser already in `.web-tools/`:
+  read `getComputedStyle`, `getBoundingClientRect`, `scrollHeight`.
+- **Kill the old server before re-measuring.** CSS and templates are `go:embed`ed,
+  and Playwright reuses an existing listener, so a stale process happily serves
+  the previous build and you will "verify" a change that never applied.
+- Sweep a real width ladder (≈320 → 1920), not one phone and one desktop.
+  Assert no horizontal overflow at each.
+- Checks that repay the effort: does the nav wrap at any width? do elements that
+  should align actually share an edge? does a label overflow its box? does a
+  background tile repeat over the page's true height? does a gold accent move
+  across the three seasons?
 
 ## Anti-patterns (reject or prototype first)
 
@@ -130,6 +218,11 @@ Avoid: grain overlays in shipping PRs without a prototype, heavy wood textures, 
 | Stamping `?theme=` on every link | Offline/SW cache-key bloat; use localStorage only |
 | Fixed decorative stars over body text | Collides with prayer on ~390px |
 | Assurance moved to `?debug=` | Owner wants post-hour transparency for laity too |
+| Reading measure back on `body` | Wraps the nav, and wraps it on some pages only |
+| Repeating background tile | Periodic stripe down the ordo's tens of thousands of pixels |
+| Native `▶` / `+` / `−` disclosure marks | The app has one caret, in gold |
+| Filled cell for a selected control | Selection is a gold underline; a fill reads as a settings panel |
+| A literal gold hex in a rule | Bypasses the seasons — it will still be gold on Good Friday |
 
 ## Related docs
 
