@@ -1536,9 +1536,22 @@ footer::before {
   flex: 1;
 }
 
-/* Pointing mediant (*) — muted in psalms, canticles, antiphons, responsories, etc. */
+/* Pointing mediant (*) — muted in psalms, canticles, antiphons, responsories, etc.
+   EB Garamond draws an "upper" asterisk: its ink runs from 0.35em to 0.70em
+   above the baseline, so its centre of mass sits at 0.525em — higher than even
+   cap height's centre (0.325em). Undropped it hangs level with the ascenders
+   and reads as a footnote mark rather than a pointing mark in the middle of
+   the verse.
+
+   0.25em lands the ink centre at 0.275em, between the x-height centre (0.2em)
+   and the cap-height centre — the optical middle of a mixed-case line. A full
+   drop to the x-height centre (0.325em) sits too low against a line this full
+   of ascenders. Shifted with position, not vertical-align, so the mediant
+   cannot grow the line box and disturb the psalm's rhythm. */
 .mediant {
   color: var(--muted);
+  position: relative;
+  top: 0.25em;
 }
 
 /* Gloria Patri doxology rendered with * mediant like a psalm verse */
