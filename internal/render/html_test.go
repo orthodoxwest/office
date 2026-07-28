@@ -347,8 +347,11 @@ func TestRenderHymnDoesNotMarkNonCodaAmen(t *testing.T) {
 func TestRenderBlessingUsesVersicleLine(t *testing.T) {
 	html := string(renderLiturgicalBlock("Blessing. May the Almighty and merciful Lord grant us a quiet night."))
 
-	if !strings.Contains(html, `<span class="sigil">Blessing.</span>`) {
-		t.Fatalf("expected Blessing. sigil: %s", html)
+	// The spelled-out label carries sigil-word so CSS can widen its column —
+	// and, via :has(), the columns of the ℣./℟. lines beside it. A plain
+	// "sigil" here would set it in the narrow ℣./℟. gutter and overrun it.
+	if !strings.Contains(html, `<span class="sigil sigil-word">Blessing.</span>`) {
+		t.Fatalf("expected Blessing. sigil with the wide-column class: %s", html)
 	}
 	if !strings.Contains(html, `class="versicle-line"`) {
 		t.Fatalf("expected Blessing on a versicle-line for the shared sigil column: %s", html)

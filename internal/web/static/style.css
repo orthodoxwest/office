@@ -1455,11 +1455,19 @@ footer::before {
   margin-bottom: 0.5rem;
 }
 
-/* Hymn lines are short (~30–40 characters). Holding them to a tighter
-   measure than the psalm column keeps the verse from looking like a
-   left-heavy strip of prose in a wide field. */
+/* Hymn lines are short (~30–40 characters) and break where the metre says,
+   not where the column ends, so the right edge is ragged by design. Centring
+   a 28rem box only helped on wide screens: on a phone the box filled the
+   measure, the verse sat flush against the left margin, and the rag then read
+   as text squashed into the corner.
+
+   Centring the block on its own longest line instead (`fit-content`) gives
+   the stanza an indent on both sides at every width — the standard setting
+   for verse in a prose column — so the rag is balanced rather than stranded.
+   It clamps back to the full measure if a line ever outruns it. */
 .hymn-verses {
   line-height: 1.75;
+  width: fit-content;
   max-width: 28rem;
   margin-inline: auto;
 }
@@ -1618,19 +1626,35 @@ footer::before {
   font-style: normal;
 }
 
-/* Fixed sigil column so short marks (℣. / ℟.) and the longer "Blessing."
-   leave the spoken text on one left edge. Sized to the measured width of
-   "Blessing." in body type (~4.25rem). Sigils are right-aligned in the
-   column so short marks sit against the text rather than leaving a
-   hollow gap after ℣. */
+/* Fixed sigil column so ℣. and ℟. leave the spoken text on one left edge.
+   1.4rem + the 0.4rem gap puts that edge at 1.8rem — the same column the
+   psalm verse body sits in, so every spoken line in an hour shares one
+   margin. Sigils are right-aligned in the column so the mark sits against
+   its text rather than leaving a hollow gap after ℣.
+
+   Sizing this column to the corpus's one spelled-out label ("Blessing.",
+   ~4.25rem) instead pushed *every* versicle in the app 4.65rem off the
+   margin — a fifth of the measure on a phone, and three-quarters of it
+   empty air. The wide label now pays for its own width below. */
 .sigil {
-  flex: 0 0 4.25rem;
-  width: 4.25rem;
+  flex: 0 0 1.4rem;
+  width: 1.4rem;
   margin-right: 0.4rem;
   text-align: right;
   font-weight: normal;
   color: var(--rubric);
   user-select: none;
+}
+
+/* A spelled-out rubric word needs the wide column, and the lines around it
+   have to follow or the little block loses its text edge (Compline's opening
+   ℣. / Blessing. / ℟.). Scoped with :has() so it costs nothing anywhere else;
+   without :has() support the wide line simply keeps its own hanging indent,
+   which is how a printed diurnal sets it anyway. */
+.sigil-word,
+.liturgical-block:has(.sigil-word) .sigil {
+  flex-basis: 4.25rem;
+  width: 4.25rem;
 }
 
 .sigil-text {
