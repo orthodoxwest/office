@@ -128,6 +128,9 @@ func TestHomeGroupsHoursWithoutBreakingClientSelectors(t *testing.T) {
 		`data-hour="{{.Slug}}"`,
 		`aria-current="time"`,
 		`home-hour-link-name`,
+		// Stale-day recovery: always-visible path, not only under Change date.
+		`class="not-today-notice"`,
+		`Go to today`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("home is missing grouped-hour prototype markup %q", want)
@@ -139,6 +142,60 @@ func TestHomeGroupsHoursWithoutBreakingClientSelectors(t *testing.T) {
 	metaAt := strings.Index(body, `class="home-day-meta"`)
 	if dayAt < 0 || prayerAt < 0 || metaAt < 0 || !(dayAt < prayerAt && prayerAt < metaAt) {
 		t.Error("home source order should be day identity, prayer invitation, then date control")
+	}
+
+	// Prominent notice must sit in the day identity, before the prayer card —
+	// not only inside the collapsed date control.
+	noticeAt := strings.Index(body, `class="not-today-notice"`)
+	dateNavAt := strings.Index(body, `class="hour-date-nav home-date-nav"`)
+	if noticeAt < 0 || dateNavAt < 0 || !(noticeAt < prayerAt && noticeAt < dateNavAt) {
+		t.Error("not-today notice should be in the day head, before the prayer card and Change date")
+	}
+}
+
+func TestLayoutBrandIsTodayHome(t *testing.T) {
+	src, err := TemplateSource("layout.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+	// Brand must not carry the page's NavDate — that pins overnight PWAs to yesterday.
+	if !strings.Contains(body, `data-nav-home="today"`) {
+		t.Error(`brand should mark data-nav-home="today"`)
+	}
+	if !strings.Contains(body, `navLink "/" $t ""`) {
+		t.Error(`brand should call navLink with empty date so it lands on undated today-home`)
+	}
+	if strings.Contains(body, `navLink "/" $t $d`) {
+		t.Error("brand must not use page NavDate ($d)")
+	}
+	// Current-state only when home AND not a historical day.
+	if !strings.Contains(body, `(not .ShowToday)`) {
+		t.Error("brand active/aria-current should be gated on not .ShowToday")
+	}
+	if strings.Contains(body, `{{if eq $p "home"}} active{{end}}`) {
+		t.Error("brand must not treat every home page as current")
+	}
+}
+
+func TestHourNotTodayNoticeIsOutsideDateNav(t *testing.T) {
+	src, err := TemplateSource("hour.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+	for _, want := range []string{
+		`class="not-today-notice"`,
+		`Go to today`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("hour is missing stale-day recovery markup %q", want)
+		}
+	}
+	noticeAt := strings.Index(body, `class="not-today-notice"`)
+	dateNavAt := strings.Index(body, `class="hour-date-nav"`)
+	if noticeAt < 0 || dateNavAt < 0 || noticeAt > dateNavAt {
+		t.Error("not-today notice should appear before the Change date disclosure")
 	}
 }
 
