@@ -10,6 +10,16 @@ import (
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
+// Sigil column classes. Nearly every sigil is a single mark (℣. / ℟.) and takes
+// a narrow gutter, so the spoken text keeps the same left edge as psalm verses.
+// A spelled-out rubric word ("Blessing.", the corpus's only one) is four times
+// as wide and takes its own class; CSS widens the whole surrounding block to
+// match, so the few lines beside it still share one text edge.
+const (
+	sigilClass     = "sigil"
+	sigilWordClass = "sigil sigil-word"
+)
+
 // escCross replaces the ✠ cross character with a styled HTML span.
 func escCross(s string) string {
 	return strings.ReplaceAll(template.HTMLEscapeString(s), "✠", `<span class="cross">✠</span>`)
@@ -387,10 +397,10 @@ func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLine
 		proseBlocks++
 	}
 
-	sigilLine := func(class, sigil string, line texts.BlockLine) {
+	sigilLine := func(lineClass, markClass, sigil string, line texts.BlockLine) {
 		flushProse()
 		emitGap()
-		sb.WriteString(`<p class="` + class + `"><span class="sigil">` + sigil + `</span><span class="sigil-text">`)
+		sb.WriteString(`<p class="` + lineClass + `"><span class="` + markClass + `">` + sigil + `</span><span class="sigil-text">`)
 		emitVoicedHTML(&sb, line.Text, line.Offset, spokenAt)
 		sb.WriteString(`</span></p>`)
 	}
@@ -407,11 +417,11 @@ func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLine
 			sb.WriteString(template.HTMLEscapeString(line.Text))
 			sb.WriteString(`</p>`)
 		case texts.BlockVersicle:
-			sigilLine("versicle-line", "℣.", line)
+			sigilLine("versicle-line", sigilClass, "℣.", line)
 		case texts.BlockResponse:
-			sigilLine("response-line", "℟.", line)
+			sigilLine("response-line", sigilClass, "℟.", line)
 		case texts.BlockBlessing:
-			sigilLine("versicle-line", "Blessing.", line)
+			sigilLine("versicle-line", sigilWordClass, "Blessing.", line)
 		default:
 			proseLines = append(proseLines, line)
 		}
@@ -503,10 +513,10 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 		proseBlocks++
 	}
 
-	sigilLine := func(class, sigil, text string) {
+	sigilLine := func(lineClass, markClass, sigil, text string) {
 		flushProse()
 		emitGap()
-		sb.WriteString(`<p class="` + class + `"><span class="sigil">` + sigil + `</span><span class="sigil-text">`)
+		sb.WriteString(`<p class="` + lineClass + `"><span class="` + markClass + `">` + sigil + `</span><span class="sigil-text">`)
 		sb.WriteString(chantLineHTML(text))
 		sb.WriteString(`</span></p>`)
 	}
@@ -523,11 +533,11 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 			sb.WriteString(template.HTMLEscapeString(line.Text))
 			sb.WriteString(`</p>`)
 		case texts.BlockVersicle:
-			sigilLine("versicle-line", "℣.", line.Text)
+			sigilLine("versicle-line", sigilClass, "℣.", line.Text)
 		case texts.BlockResponse:
-			sigilLine("response-line", "℟.", line.Text)
+			sigilLine("response-line", sigilClass, "℟.", line.Text)
 		case texts.BlockBlessing:
-			sigilLine("versicle-line", "Blessing.", line.Text)
+			sigilLine("versicle-line", sigilWordClass, "Blessing.", line.Text)
 		default:
 			proseLines = append(proseLines, line.Text)
 		}
