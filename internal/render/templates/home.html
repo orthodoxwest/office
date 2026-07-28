@@ -12,6 +12,16 @@
         <h1 id="home-date-heading">
           <a class="home-date-link" href="{{.CalendarLink}}" title="See this day in the ordo">{{.DateStr}}</a>
         </h1>
+        {{/* Always visible when not local today — "Change date" keeps a secondary
+             Today control, but overnight PWA resume must not require opening it. */}}
+        {{/* No role=status here: intentional archive browsing should not
+             announce on every load. Client-injected notices (midnight freeze)
+             use a live region because those appear without a navigation. */}}
+        {{if .ShowToday}}
+        <p class="not-today-notice">
+          <a class="today-link not-today-link" href="{{.TodayLink}}">Go to today</a>
+        </p>
+        {{end}}
         {{if .FeastName}}<p class="feast">{{.FeastName}}</p>{{end}}
         {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
         {{if .Penitential}}

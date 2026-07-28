@@ -250,9 +250,25 @@ func TestAppScriptShowsOfflineIndicator(t *testing.T) {
 		`documentDateSlug`,
 		`ensureTodayControl`,
 		`data-nav`,
+		// Brand always lands on local today (stale-day recovery from overnight PWA).
+		`data-nav="home"`,
+		`/?date=" + today`,
+		`not-today-notice`,
+		`Go to today`,
+		// Brand current-state tracks local today, not mere page-home.
+		`brandIsCurrent`,
+		`aria-current`,
+		// Form Today is ensured even when the prominent notice already has a today-link.
+		`.date-jump-form`,
+		`form.querySelector("a.today-link")`,
 		// Re-stamp after midnight when a long-lived tab returns to the foreground.
 		`lastSyncedDay`,
 		`visibilitychange`,
+		// bfcache restore (common PWA resume path) re-evaluates the day.
+		`pageshow`,
+		`e.persisted`,
+		// Day-tracking state restored after bfcache (not left empty).
+		`lastSyncedDay = localDateSlug(new Date())`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("app script is missing offline indicator support %q", want)

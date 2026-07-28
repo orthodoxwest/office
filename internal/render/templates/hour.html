@@ -8,6 +8,14 @@
   <div class="hour-header">
     <h1>{{.Hour.Title}}</h1>
     <p class="hour-meta">{{.DateStr}}{{if .Hour.Feast}} &bull; {{.Hour.Feast}}{{end}} &bull; {{.Hour.Season | titleCase}}</p>
+    {{/* Always visible when not local today — recovery from an overnight tab
+         must not require opening "Change date". Secondary Today stays in the form. */}}
+    {{/* No role=status on server markup — see home.html. Client inject uses a live region. */}}
+    {{if .ShowToday}}
+    <p class="not-today-notice">
+      <a class="today-link not-today-link" href="{{.TodayLink}}">Go to today</a>
+    </p>
+    {{end}}
     <details class="hour-date-nav">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
