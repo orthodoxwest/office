@@ -548,7 +548,9 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 	return template.HTML(sb.String())
 }
 
-// renderHymnStanzas renders a hymn as structured HTML, one <p> per stanza.
+// renderHymnStanzas renders a hymn as structured HTML, one <p> per stanza and
+// one span per metrical line. The line spans let CSS preserve the verse shape
+// while giving any narrow-screen continuation a hanging indent.
 func renderHymnStanzas(text string) template.HTML {
 	hymn := texts.ParseHymn(text)
 	var sb strings.Builder
@@ -571,11 +573,10 @@ func renderHymnStanzas(text string) template.HTML {
 		sb.WriteString(`<p class="`)
 		sb.WriteString(class)
 		sb.WriteString(`">`)
-		for i, line := range stanza {
-			if i > 0 {
-				sb.WriteString(`<br>`)
-			}
+		for _, line := range stanza {
+			sb.WriteString(`<span class="hymn-line">`)
 			sb.WriteString(escCross(line))
+			sb.WriteString(`</span>`)
 		}
 		sb.WriteString(`</p>`)
 	}

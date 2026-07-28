@@ -754,10 +754,10 @@ document.documentElement.classList.add("js");
 
   // Gold hairline under the color band: progress through the prayer itself.
   // The page continues into hour navigation, assurance, issue reporting, and
-  // appearance controls after .elements. Reaching those administrative rooms
-  // should not make a completed office look unfinished, so the line reaches
-  // 100% when the end of .elements reaches the bottom of the viewport and then
-  // remains complete for the rest of the document.
+  // appearance controls after .elements. The line remains at zero through the
+  // page header and banner, starts when the prayer reaches the top of the
+  // viewport, and reaches 100% when its end reaches the bottom. It then remains
+  // complete for the rest of the document.
   if (officeHour) {
     var progress = document.querySelector(".hour-scroll-progress");
     var progressBar = document.querySelector(".hour-scroll-progress-bar");
@@ -767,10 +767,17 @@ document.documentElement.classList.add("js");
       var updateHourScrollProgress = function () {
         var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
         var prayerRect = prayerContent.getBoundingClientRect();
+        var prayerStart = scrollTop + prayerRect.top;
         var prayerEnd = scrollTop + prayerRect.bottom;
-        var completionScroll = Math.max(0, prayerEnd - window.innerHeight);
+        var startScroll = Math.max(0, prayerStart);
+        var completionScroll = Math.max(startScroll, prayerEnd - window.innerHeight);
+        var progressRange = completionScroll - startScroll;
         var ratio =
-          completionScroll <= 0 ? 1 : Math.min(1, Math.max(0, scrollTop / completionScroll));
+          progressRange <= 0
+            ? scrollTop >= completionScroll
+              ? 1
+              : 0
+            : Math.min(1, Math.max(0, (scrollTop - startScroll) / progressRange));
         progressBar.style.transform = "scaleX(" + ratio + ")";
         progress.setAttribute("aria-valuenow", String(Math.round(ratio * 100)));
         progressTicking = false;
