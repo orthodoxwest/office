@@ -295,18 +295,21 @@ func TestRenderVersicleStylesMediant(t *testing.T) {
 func TestRenderHymnStanzasPreservesVerseLines(t *testing.T) {
 	html := string(renderHymnStanzas("Latin title\n\nFirst verse line,\nSecond verse line.\n\nAnother stanza."))
 
-	if !strings.Contains(html, `<p class="hymn-stanza">First verse line,<br>Second verse line.</p>`) {
-		t.Fatalf("expected hymn verse lines to remain hard-wrapped: %s", html)
+	if !strings.Contains(html, `<p class="hymn-stanza"><span class="hymn-line">First verse line,</span><span class="hymn-line">Second verse line.</span></p>`) {
+		t.Fatalf("expected hymn verse lines to have their own layout spans: %s", html)
+	}
+	if strings.Contains(html, "<br>") {
+		t.Fatalf("expected hymn line structure instead of presentational breaks: %s", html)
 	}
 }
 
 func TestRenderHymnMarksAmenCoda(t *testing.T) {
 	html := string(renderHymnStanzas("Title\n\nFirst line,\nSecond line.\n\nAmen."))
 
-	if !strings.Contains(html, `<p class="hymn-stanza hymn-amen">Amen.</p>`) {
+	if !strings.Contains(html, `<p class="hymn-stanza hymn-amen"><span class="hymn-line">Amen.</span></p>`) {
 		t.Fatalf("expected lone Amen stanza marked as coda: %s", html)
 	}
-	if !strings.Contains(html, `<p class="hymn-stanza">First line,<br>Second line.</p>`) {
+	if !strings.Contains(html, `<p class="hymn-stanza"><span class="hymn-line">First line,</span><span class="hymn-line">Second line.</span></p>`) {
 		t.Fatalf("expected ordinary stanzas unmarked: %s", html)
 	}
 }

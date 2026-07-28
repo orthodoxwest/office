@@ -80,13 +80,26 @@ test("hour progress completes with the prayer, before the administrative epilogu
 
   const boundary = await page.evaluate(() => {
     const prayer = document.querySelector(".elements");
+    const prayerStart = prayer.getBoundingClientRect().top + window.scrollY;
     const prayerEnd = prayer.getBoundingClientRect().bottom + window.scrollY;
     return {
-      completionScroll: Math.max(0, prayerEnd - window.innerHeight),
+      prayerStart,
+      completionScroll: Math.max(prayerStart, prayerEnd - window.innerHeight),
       documentEnd: document.documentElement.scrollHeight - window.innerHeight,
     };
   });
+  expect(boundary.prayerStart).toBeGreaterThan(0);
   expect(boundary.completionScroll).toBeLessThan(boundary.documentEnd);
+
+  // Reading progress does not accrue while moving through the page header.
+  await page.evaluate((scrollTop) => window.scrollTo(0, scrollTop), boundary.prayerStart - 1);
+  await expect.poll(async () => Number(await progress.getAttribute("aria-valuenow"))).toBe(0);
+
+  const withinPrayer = boundary.prayerStart + (boundary.completionScroll - boundary.prayerStart) / 4;
+  await page.evaluate((scrollTop) => window.scrollTo(0, scrollTop), withinPrayer);
+  await expect.poll(async () => Number(await progress.getAttribute("aria-valuenow"))).toBeGreaterThan(
+    0,
+  );
 
   await page.evaluate((scrollTop) => window.scrollTo(0, scrollTop), boundary.completionScroll);
   await expect.poll(async () => Number(await progress.getAttribute("aria-valuenow"))).toBeGreaterThanOrEqual(
@@ -877,6 +890,75 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   await page.getByRole("button", { name: "Default text size", exact: true }).click();
   expect(await prayerSize()).toBeCloseTo(base, 1);
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
+});
+
+test("hour typography keeps a clear hierarchy across narrow phone widths", async ({ page }) => {
+  const bodySizes = [];
+
+  for (const width of [320, 390, 540]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-06-18");
+
+    const metrics = await page.evaluate(() => {
+      const px = (selector, property) =>
+        parseFloat(getComputedStyle(document.querySelector(selector))[property]);
+      return {
+        prayer: px(".elements", "fontSize"),
+        heading: px(".section-heading", "fontSize"),
+        item: px(".item-label", "fontSize"),
+        rubric: px(".rubric", "fontSize"),
+        chapterRef: px(".chapter-ref", "fontSize"),
+        psalmLeading: px(".psalm-verses", "lineHeight"),
+        hymnLine: (() => {
+          const style = getComputedStyle(document.querySelector(".hymn-line"));
+          return {
+            display: style.display,
+            padding: parseFloat(style.paddingLeft),
+            indent: parseFloat(style.textIndent),
+          };
+        })(),
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
+    });
+
+    bodySizes.push(metrics.prayer);
+    expect(metrics.overflow, `${width}px horizontal overflow`).toBe(false);
+    expect(metrics.heading, `${width}px section heading`).toBeGreaterThanOrEqual(
+      metrics.prayer * 0.9,
+    );
+    expect(metrics.heading, `${width}px section heading`).toBeLessThanOrEqual(metrics.prayer);
+    expect(metrics.item, `${width}px item label`).toBeGreaterThanOrEqual(metrics.prayer * 0.8);
+    expect(metrics.item, `${width}px item label`).toBeLessThan(metrics.heading);
+    expect(metrics.rubric, `${width}px rubric`).toBeGreaterThanOrEqual(metrics.prayer * 0.81);
+    expect(metrics.rubric, `${width}px rubric`).toBeLessThan(metrics.prayer);
+    expect(metrics.chapterRef, `${width}px chapter reference`).toBeLessThan(metrics.heading);
+    expect(metrics.psalmLeading / metrics.prayer, `${width}px psalm leading`).toBeCloseTo(
+      1.65,
+      2,
+    );
+    expect(metrics.hymnLine.display, `${width}px hymn line flow`).toBe("block");
+    expect(metrics.hymnLine.padding, `${width}px hymn continuation inset`).toBeGreaterThan(0);
+    expect(metrics.hymnLine.indent, `${width}px hymn first-line offset`).toBeLessThan(0);
+    expect(
+      metrics.hymnLine.padding + metrics.hymnLine.indent,
+      `${width}px hymn stanza edge`,
+    ).toBeCloseTo(0, 1);
+  }
+
+  // The default eases from 19px on the smallest supported phones to the
+  // historical 20px prayer size at the primary 390px design width.
+  expect(bodySizes[0]).toBeLessThan(bodySizes[1]);
+  expect(bodySizes[1]).toBeCloseTo(bodySizes[2], 1);
+
+  // Individual commemoration headings already name the section. The generic
+  // heading was a redundant equal-tier interruption immediately before them.
+  await expect(page.getByRole("heading", { name: "Commemorations", exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", {
+      name: "Commemoration of St Ephrem the Syrian, Deacon, Confessor & Doctor",
+      exact: true,
+    }),
+  ).toBeVisible();
 });
 
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {

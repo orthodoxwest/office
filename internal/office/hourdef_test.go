@@ -115,6 +115,28 @@ func TestParseHourDefinitionErrors(t *testing.T) {
 	}
 }
 
+func TestMajorHourCommemorationsDoNotHaveGenericSectionLabel(t *testing.T) {
+	for _, file := range []string{"lauds.txt", "vespers.txt"} {
+		t.Run(file, func(t *testing.T) {
+			path := filepath.Join("..", "..", "data", "office", file)
+			sections, err := ParseHourDefinition(path)
+			if err != nil {
+				t.Fatalf("ParseHourDefinition(%s): %v", file, err)
+			}
+
+			for _, section := range sections {
+				if section.Name == "Commemorations" {
+					if section.Label != "" {
+						t.Fatalf("%s Commemorations label = %q, want empty", file, section.Label)
+					}
+					return
+				}
+			}
+			t.Fatalf("%s has no Commemorations section", file)
+		})
+	}
+}
+
 func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	tests := []struct {
 		file     string

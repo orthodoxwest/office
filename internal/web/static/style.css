@@ -211,7 +211,10 @@ main {
 
 h1,
 h2,
-h3,
+h3 {
+  text-wrap: balance;
+}
+
 p,
 li {
   text-wrap: pretty;
@@ -1330,15 +1333,23 @@ footer::before {
    features, so a mixed-case label sets as one even small-cap line. Real small
    caps are drawn wider than synthesised ones, so the tracking comes in a
    little. */
-.section-heading {
-  font-size: 1.12rem;
+.section-heading,
+.session-prayers summary {
+  /* Scale with the prayer text rather than the root. On phones the prayer
+     grows from 19px toward 20px, and a fixed rem value left these real small
+     caps optically too small to anchor a long office. */
+  font-size: 0.96em;
   font-weight: normal;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.11em;
   color: var(--text);
   text-align: center;
+  text-wrap: balance;
   margin-top: 1.45rem;
   margin-bottom: 0.8rem;
+}
+
+.section-heading {
   padding-top: 0;
   border-top: none;
 }
@@ -1350,7 +1361,10 @@ footer::before {
 .rubric {
   color: var(--rubric);
   font-style: italic;
-  font-size: 0.9rem;
+  /* Rubrics are instructions within the prayer, not miniature chrome. An em
+     keeps them subordinate while allowing the mobile body-size increase and
+     the reader's text-size choice to carry them along. */
+  font-size: 0.82em;
 }
 
 .cross {
@@ -1430,7 +1444,7 @@ footer::before {
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
    and the line reads as one even band rather than a cap followed by a dip. */
 .item-label {
-  font-size: 0.95rem;
+  font-size: 0.82em;
   font-weight: normal;
   font-variant-caps: all-small-caps;
   text-align: center;
@@ -1482,6 +1496,16 @@ footer::before {
 
 .hymn-stanza {
   margin-bottom: 0.75rem;
+}
+
+/* Each source line remains a metrical line. If one must wrap on a narrow
+   screen, its continuation steps inward instead of looking like a new line
+   of the verse. Equal padding and negative first-line indent preserve the
+   stanza's original left edge. */
+.hymn-line {
+  display: block;
+  padding-left: 0.9rem;
+  text-indent: -0.9rem;
 }
 
 /* Amen is the coda, not another verse: italic, a little air above the
@@ -1614,6 +1638,9 @@ footer::before {
 
 .chapter-ref {
   font-style: italic;
+  /* A scripture reference identifies the reading; it must not out-rank the
+     small-cap "Chapter" heading or equal the reading itself. */
+  font-size: 0.85em;
   color: var(--muted);
   text-align: center;
   margin-top: -0.2rem;
@@ -1727,18 +1754,9 @@ footer::before {
   margin-top: 0.35rem;
 }
 
-/* Matches .section-heading, including its real small caps. */
 .session-prayers summary {
   cursor: pointer;
   list-style: none;
-  font-size: 1.12rem;
-  font-weight: normal;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.13em;
-  color: var(--text);
-  text-align: center;
-  margin-top: 1.45rem;
-  margin-bottom: 0.8rem;
   padding: 0.2rem 0;
 }
 
@@ -2751,12 +2769,28 @@ body.season-eastertide {
 
 @media (max-width: 540px) {
   body {
-    /* 1.25rem = the historical 20px at a 16px root; see the html rules above —
-       both breakpoints scale from the same root factor. */
-    font-size: 1.25rem;
+    /* Preserve the historical 20px prayer text at the primary ~390px phone
+       width, but ease toward the 19px desktop base on a 320px display. A
+       blanket 20px left only 259px for a numbered verse after its gutter,
+       forcing many verses into four to six lines. The rem bounds preserve
+       the reader's Small/Large choice; the viewport term only shapes the
+       narrow-phone transition. */
+    font-size: clamp(1.1875rem, calc(0.9rem + 1.45vw), 1.25rem);
     /* Header, main and footer all read this, so one value narrows the gutter
        for the whole page. */
     --page-gutter: 1rem;
+  }
+
+  /* A narrow measure needs less leading than a wide one. Keeping the psalms
+     and hymns slightly more open than the 1.6 prose rhythm preserves their
+     sung lineation without turning each verse into a ladder of isolated
+     lines. The verse-number gutter must share the exact line box. */
+  .hymn-verses,
+  .psalm-text,
+  .psalm-verses,
+  .psalm-verses .verse-num,
+  .gloria-patri {
+    line-height: 1.65;
   }
 
   .home-hour-links {

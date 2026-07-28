@@ -437,8 +437,6 @@ Type = proper-collect
 Ref = collect
 
 [Commemorations]
-Label = Commemorations
-
 Type = commemorations
 Ref = commemorations
 
