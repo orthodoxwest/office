@@ -995,6 +995,57 @@ test("hour typography keeps a clear hierarchy across narrow phone widths", async
   ).toBeVisible();
 });
 
+test("desktop prayer text keeps a centred book measure and crisp section rhythm", async ({
+  page,
+}) => {
+  for (const width of [920, 1280, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, `/lauds/${testDate}`);
+
+    const geometry = await page.evaluate(() => {
+      const elements = document.querySelector(".elements");
+      const elementsRect = elements.getBoundingClientRect();
+      const heading = [...document.querySelectorAll(".section-heading")].find(
+        (node) => node.textContent.trim() === "The Short Responsory",
+      );
+      const headingRect = heading.getBoundingClientRect();
+      const beforeRect = heading.previousElementSibling.getBoundingClientRect();
+      const afterRect = heading.nextElementSibling.getBoundingClientRect();
+      const headingStyle = getComputedStyle(heading);
+      return {
+        elementsWidth: elementsRect.width,
+        centreOffset: Math.abs(elementsRect.left + elementsRect.width / 2 - window.innerWidth / 2),
+        prayerFont: parseFloat(getComputedStyle(elements).fontSize),
+        headingLeading:
+          parseFloat(headingStyle.lineHeight) / parseFloat(headingStyle.fontSize),
+        beforeGap: headingRect.top - beforeRect.bottom,
+        afterGap: afterRect.top - headingRect.bottom,
+        overflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+
+    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeGreaterThanOrEqual(580);
+    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeLessThanOrEqual(600);
+    expect(geometry.centreOffset, `${width}px prayer centring`).toBeLessThanOrEqual(1);
+    expect(geometry.prayerFont, `${width}px prayer face`).toBeCloseTo(20, 1);
+    expect(geometry.headingLeading, `${width}px heading leading`).toBeCloseTo(1.3, 1);
+    expect(geometry.beforeGap, `${width}px space before heading`).toBeGreaterThanOrEqual(36);
+    expect(geometry.afterGap, `${width}px space after heading`).toBeGreaterThanOrEqual(24);
+    expect(geometry.overflow, `${width}px horizontal overflow`).toBe(0);
+  }
+
+  // A tablet keeps the denser setting until there is enough open field to
+  // frame the larger desktop page.
+  await page.setViewportSize({ width: 768, height: 900 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await expect
+    .poll(() =>
+      page.locator(".elements").evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
+    )
+    .toBeCloseTo(19, 1);
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 

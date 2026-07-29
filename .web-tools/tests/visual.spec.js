@@ -25,6 +25,13 @@ for (const theme of ["light", "dark"]) {
     await expect(page).toHaveScreenshot(`lauds-${theme}.png`);
   });
 
+  test(`desktop Lauds — ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openForSnapshot(page, `/lauds/${testDate}`, theme);
+    await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
+    await expect(page).toHaveScreenshot(`lauds-desktop-${theme}.png`);
+  });
+
   test(`desktop home — ${theme}`, async ({ page }) => {
     // The project stays in its pinned touch-emulated Chromium profile; this
     // guards desktop responsive composition, not mouse/pointer behavior.
@@ -59,4 +66,13 @@ test("mobile hour ending — dark", async ({ page }) => {
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect(page.locator(".hour-epilogue")).toBeVisible();
   await expect(page).toHaveScreenshot("hour-ending-dark.png");
+});
+
+test("desktop prayer transition — light", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openForSnapshot(page, `/lauds/${testDate}`, "light");
+  await page
+    .getByRole("heading", { name: "The Short Responsory", exact: true })
+    .scrollIntoViewIfNeeded();
+  await expect(page).toHaveScreenshot("lauds-transition-desktop-light.png");
 });
