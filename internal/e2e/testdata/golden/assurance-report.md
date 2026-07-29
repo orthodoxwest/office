@@ -4,8 +4,8 @@
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
 | Modeled structural features | 209 |
-| Full structural-cover pages | 56 |
-| Residual structural-review pages | 56 |
+| Full structural-cover pages | 58 |
+| Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 573 |
 | Rendered text entries needing review | 1361 |
