@@ -251,7 +251,7 @@ func TestFormatGloriaPatriTeX(t *testing.T) {
 	if !strings.Contains(got, `\gloriapatri{`) {
 		t.Error("expected gloriapatri command")
 	}
-	// The mediant is inside the \gloriapatri LaTeX macro definition, not the call site.
+	// The line break is inside the \gloriapatri LaTeX macro definition, not the call site.
 	// Just verify both lines are present as arguments.
 	if !strings.Contains(got, "Glory be") {
 		t.Error("expected first Gloria line")

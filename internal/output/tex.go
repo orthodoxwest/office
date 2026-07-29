@@ -114,8 +114,8 @@ func texPreamble(hour *models.OfficeHour) string {
   \fi%
 }
 
-% Gloria Patri
-\newcommand{\gloriapatri}[2]{\noindent #1 \mediant{} #2\par}
+% Gloria Patri: two verses, each pointed at its own mediant, on their own lines
+\newcommand{\gloriapatri}[2]{\noindent #1\\#2\par}
 
 % Antiphon
 \newcommand{\ant}[1]{\noindent\textit{Ant.}\enspace\textit{#1}\par}
@@ -365,7 +365,8 @@ func formatLiturgicalBlockTeX(text string) string {
 	return b.String()
 }
 
-// formatGloriaPatriTeX renders a two-line psalm-doxology (Gloria Patri).
+// formatGloriaPatriTeX renders a two-line psalm-doxology (Gloria Patri), each
+// line pointed at its own mediant.
 func formatGloriaPatriTeX(text string) string {
 	lines := strings.Split(text, "\n")
 	var line1, line2 string
@@ -376,9 +377,19 @@ func formatGloriaPatriTeX(text string) string {
 		line1 = strings.TrimSpace(text)
 	}
 	if line2 != "" {
-		return fmt.Sprintf("\\gloriapatri{%s}{%s}\n\n", texLine(line1), texLine(line2))
+		return fmt.Sprintf("\\gloriapatri{%s}{%s}\n\n", texMediantLine(line1), texMediantLine(line2))
 	}
-	return fmt.Sprintf("\\noindent %s\\par\n\n", texLine(line1))
+	return fmt.Sprintf("\\noindent %s\\par\n\n", texMediantLine(line1))
+}
+
+// texMediantLine escapes a line for TeX, rendering an embedded " * " pointing
+// mediant as \mediant{} rather than a literal asterisk.
+func texMediantLine(s string) string {
+	before, after, found := strings.Cut(s, " * ")
+	if !found {
+		return texLine(s)
+	}
+	return texLine(before) + `\mediant{}` + texLine(after)
 }
 
 // escapeTeX escapes LaTeX special characters in plain text.
