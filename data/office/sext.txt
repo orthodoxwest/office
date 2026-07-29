@@ -3,7 +3,7 @@
 
 [Pre-Office]
 Collapsible = true
-Label = Opening Prayers
+Label = Before the Office
 
 Type = rubric
 Ref = ordinary/session/little-hours-opening-rubric
@@ -15,7 +15,7 @@ Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
-Label = Opening
+Label = Opening Versicles
 
 Type = versicle
 Ref = ordinary/sext/opening-versicle
@@ -224,7 +224,7 @@ Type = proper-versicle
 Ref = versicle
 
 [Pre-Collect]
-Label = Collect
+Label = Closing Prayers
 
 Type = prayer
 Ref = ordinary/shared/kyrie
@@ -243,7 +243,6 @@ Type = proper-collect
 Ref = collect
 
 [Closing]
-Label = Closing
 
 Type = blessing
 Ref = ordinary/sext/blessing
@@ -253,7 +252,7 @@ Ref = shared/formulas/faithful-departed
 
 [Post-Office]
 Collapsible = true
-Label = Closing Prayers
+Label = Our Father
 
 Type = rubric
 Ref = shared/formulas/closing-our-father

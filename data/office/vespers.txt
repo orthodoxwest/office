@@ -3,7 +3,7 @@
 
 [Pre-Office]
 Collapsible = true
-Label = Opening Prayers
+Label = Prayers Before the Office
 
 Type = rubric
 Ref = ordinary/session/opening-rubric
@@ -21,7 +21,7 @@ Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
-Label = Opening
+Label = Opening Versicles
 
 Type = versicle
 Ref = ordinary/vespers/opening-versicle
@@ -421,7 +421,7 @@ Type = proper-antiphon
 Ref = magnificat-antiphon
 
 [Pre-Collect]
-Label = Collect
+Label = The Prayers
 
 Type = prayer
 Ref = ordinary/shared/kyrie
@@ -467,7 +467,6 @@ Type = collect
 Ref = ordinary/shared/cross-collect
 
 [Closing]
-Label = Closing
 
 Type = blessing
 Ref = ordinary/vespers/blessing
@@ -482,20 +481,18 @@ Type = versicle
 Ref = shared/formulas/closing-peace
 
 [Marian]
-Label = Marian
 
 Type = marian
 Ref = seasonal
 
 [Conclusion]
-Label = Conclusion
 
 Type = versicle
 Ref = shared/formulas/divine-help
 
 [Post-Office]
 Collapsible = true
-Label = Closing Prayers
+Label = Prayers After the Office
 
 Type = prayer
 Ref = ordinary/session/sacrosanctae

@@ -3,7 +3,7 @@
 
 [Pre-Office]
 Collapsible = true
-Label = Opening Prayers
+Label = Prayers Before the Office
 
 Type = rubric
 Ref = ordinary/session/opening-rubric
@@ -24,7 +24,7 @@ Type = secret-prayer
 Ref = ordinary/shared/apostles-creed
 
 [Opening]
-Label = Opening
+Label = Opening Versicles
 
 Type = versicle
 Ref = ordinary/prime/opening-versicle
@@ -253,7 +253,7 @@ Type = proper-chapter
 Ref = chapter
 
 [Pre-Collect]
-Label = Collect
+Label = Litany & Lord's Prayer
 
 Type = proper-versicle
 Ref = pre-collect-versicle
@@ -288,6 +288,8 @@ Type = prayer
 Ref = ordinary/prime/collect-intro
 
 [Collect]
+Label = Collect
+
 Type = collect
 Ref = ordinary/prime/collect
 
@@ -300,7 +302,7 @@ Type = rubric
 Ref = ordinary/prime/athanasian-rubric
 
 [Closing]
-Label = Closing
+Label = Blessing
 
 Type = blessing
 Ref = ordinary/prime/blessing
@@ -310,7 +312,7 @@ Ref = shared/formulas/faithful-departed
 
 [Post-Office]
 Collapsible = true
-Label = Closing Prayers
+Label = Prayers After the Office
 
 Type = prayer
 Ref = ordinary/session/sacrosanctae

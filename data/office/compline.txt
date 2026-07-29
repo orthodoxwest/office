@@ -2,7 +2,6 @@
 # Same structure every day; only preces and Marian antiphon vary.
 
 [Opening]
-Label = Opening
 
 Type = versicle
 Ref = ordinary/compline/opening-versicle
@@ -115,13 +114,12 @@ Ref = ordinary/compline/blessing
 
 
 [Marian]
-Label = Marian
+Label = Final Antiphon of the Blessed Virgin Mary
 
 Type = marian
 Ref = seasonal
 
 [Closing]
-Label = Closing
 
 Type = blessing
 Ref = ordinary/compline/conclusion

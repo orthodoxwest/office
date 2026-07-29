@@ -137,6 +137,98 @@ func TestMajorHourCommemorationsDoNotHaveGenericSectionLabel(t *testing.T) {
 	}
 }
 
+func TestOfficeDataUsesSourceBookSectionLabels(t *testing.T) {
+	tests := []struct {
+		file   string
+		labels map[string]string
+	}{
+		{
+			file: "lauds.txt",
+			labels: map[string]string{
+				"Pre-Office":  "Prayers Before the Office",
+				"Opening":     "Opening Versicles",
+				"Pre-Collect": "The Prayers",
+				"Closing":     "",
+				"Marian":      "",
+				"Conclusion":  "",
+				"Post-Office": "Prayers After the Office",
+			},
+		},
+		{
+			file: "vespers.txt",
+			labels: map[string]string{
+				"Pre-Office":  "Prayers Before the Office",
+				"Opening":     "Opening Versicles",
+				"Pre-Collect": "The Prayers",
+				"Closing":     "",
+				"Marian":      "",
+				"Conclusion":  "",
+				"Post-Office": "Prayers After the Office",
+			},
+		},
+		{
+			file: "prime.txt",
+			labels: map[string]string{
+				"Pre-Office":  "Prayers Before the Office",
+				"Opening":     "Opening Versicles",
+				"Pre-Collect": "Litany & Lord's Prayer",
+				"Collect":     "Collect",
+				"Closing":     "Blessing",
+				"Post-Office": "Prayers After the Office",
+			},
+		},
+		{
+			file: "compline.txt",
+			labels: map[string]string{
+				"Opening": "",
+				"Marian":  "Final Antiphon of the Blessed Virgin Mary",
+				"Closing": "",
+			},
+		},
+	}
+
+	for _, file := range []string{"terce.txt", "sext.txt", "none.txt"} {
+		tests = append(tests, struct {
+			file   string
+			labels map[string]string
+		}{
+			file: file,
+			labels: map[string]string{
+				"Pre-Office":  "Before the Office",
+				"Opening":     "Opening Versicles",
+				"Pre-Collect": "Closing Prayers",
+				"Closing":     "",
+				"Post-Office": "Our Father",
+			},
+		})
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.file, func(t *testing.T) {
+			path := filepath.Join("..", "..", "data", "office", tt.file)
+			sections, err := ParseHourDefinition(path)
+			if err != nil {
+				t.Fatalf("ParseHourDefinition(%s): %v", tt.file, err)
+			}
+
+			byName := make(map[string]HourSection, len(sections))
+			for _, section := range sections {
+				byName[section.Name] = section
+			}
+			for name, want := range tt.labels {
+				section, ok := byName[name]
+				if !ok {
+					t.Errorf("%s missing section %s", tt.file, name)
+					continue
+				}
+				if section.Label != want {
+					t.Errorf("%s %s label = %q, want %q", tt.file, name, section.Label, want)
+				}
+			}
+		})
+	}
+}
+
 func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	tests := []struct {
 		file     string
