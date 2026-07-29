@@ -148,30 +148,39 @@ func themeParam(r *http.Request) string {
 	return ""
 }
 
+type currentHourBoundary struct {
+	Start  int
+	Slug   string
+	Label  string
+	Offset int
+}
+
+// currentHourSchedule is mirrored in app.js so a cached home page can update
+// itself from the device clock. schedule_contract_test.go keeps both copies
+// byte-for-value aligned at every boundary.
+var currentHourSchedule = []currentHourBoundary{
+	{Start: 0, Slug: "compline", Label: "Compline", Offset: -1},
+	{Start: 2, Slug: "lauds", Label: "Lauds", Offset: 0},
+	{Start: 7, Slug: "prime", Label: "Prime", Offset: 0},
+	{Start: 9, Slug: "terce", Label: "Terce", Offset: 0},
+	{Start: 11, Slug: "sext", Label: "Sext", Offset: 0},
+	{Start: 13, Slug: "none", Label: "None", Offset: 0},
+	{Start: 17, Slug: "vespers", Label: "Vespers", Offset: 0},
+	{Start: 20, Slug: "compline", Label: "Compline", Offset: 0},
+}
+
 // currentHourEntry returns the office most likely being prayed at now, its
 // display name, and a day offset (0 or -1) locating which calendar day it
 // belongs to. Midnight-2am belongs to the previous day's Compline, not the
 // day that has just begun.
 func currentHourEntry(now time.Time) (slug string, label string, dayOffset int) {
-	h := now.Hour()
-	switch {
-	case h < 2:
-		return "compline", "Compline", -1
-	case h >= 2 && h < 7:
-		return "lauds", "Lauds", 0
-	case h >= 7 && h < 9:
-		return "prime", "Prime", 0
-	case h >= 9 && h < 11:
-		return "terce", "Terce", 0
-	case h >= 11 && h < 13:
-		return "sext", "Sext", 0
-	case h >= 13 && h < 17:
-		return "none", "None", 0
-	case h >= 17 && h < 20:
-		return "vespers", "Vespers", 0
-	default:
-		return "compline", "Compline", 0
+	for i := len(currentHourSchedule) - 1; i >= 0; i-- {
+		boundary := currentHourSchedule[i]
+		if now.Hour() >= boundary.Start {
+			return boundary.Slug, boundary.Label, boundary.Offset
+		}
 	}
+	return "compline", "Compline", -1
 }
 
 func buildHomeHours(dateSlug, theme, current string) []render.HomeHourLink {

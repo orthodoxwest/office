@@ -272,6 +272,28 @@ test("the foreground home invitation advances at the next office boundary", asyn
   );
 });
 
+test("the foreground home keeps previous-day Compline current across midnight", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/?date=2026-07-29");
+
+  const invitation = page.locator(".pray-now");
+  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "compline",
+  );
+
+  await page.clock.fastForward("02:00");
+
+  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
+});
+
 test("parish material stays in non-liturgical rooms and off the prayer page", async ({
   page,
 }) => {
@@ -1046,6 +1068,36 @@ test("desktop prayer text keeps a centred book measure and crisp section rhythm"
     .toBeCloseTo(19, 1);
 });
 
+test("print keeps the designed 11pt prayer size at a desktop viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ media: "print" });
+  await openDatedPage(page, `/lauds/${testDate}`);
+
+  const printStyles = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const elements = getComputedStyle(document.querySelector(".elements"));
+    return {
+      bodyFont: parseFloat(body.fontSize),
+      prayerFont: parseFloat(elements.fontSize),
+      prayerMaxWidth: elements.maxWidth,
+      headerDisplay: getComputedStyle(document.querySelector("header")).display,
+      bannerDisplay: getComputedStyle(document.querySelector(".site-banner")).display,
+      sessionSummaryDisplay: getComputedStyle(
+        document.querySelector(".session-prayers > summary"),
+      ).display,
+    };
+  });
+
+  // CSS px are 96/in; 11pt therefore computes to 14.666…px.
+  expect(printStyles.bodyFont).toBeCloseTo(44 / 3, 1);
+  expect(printStyles.prayerFont).toBeCloseTo(printStyles.bodyFont, 1);
+  expect(printStyles.prayerMaxWidth).toBe("none");
+  expect(printStyles.headerDisplay).toBe("none");
+  expect(printStyles.bannerDisplay).toBe("none");
+  expect(printStyles.sessionSummaryDisplay).toBe("none");
+  await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
@@ -1120,7 +1172,9 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(copy).toBeVisible();
   await expect(subscribe).toHaveAttribute("href", /^webcal:/);
   await expect(page.getByLabel("Time for Lauds")).toBeEnabled();
+  await expect(page.getByLabel("Time for Lauds")).toHaveAttribute("required", "");
   await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await expect(page.getByLabel("Time for Prime")).not.toHaveAttribute("required");
 
   for (const checkbox of await page.locator('input[name="hour"]').all()) {
     await checkbox.uncheck();
@@ -1130,6 +1184,8 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   await expect(subscribe).not.toHaveAttribute("href");
   await expect(subscribe).toHaveAttribute("tabindex", "-1");
   await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
+  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
+  await expect(page.locator("#reminder-copied")).toBeVisible();
 
   await page.locator('input[name="hour"][value="lauds"]').check();
   await expect(copy).toBeEnabled();
@@ -1143,6 +1199,32 @@ test("reminder choices update the subscription URL", async ({ page }) => {
   const feedURL = page.locator("#reminder-url");
   await expect(feedURL).toContainText("lauds=07%3A30");
   await expect(feedURL).toContainText("tz=America%2FNew_York");
+
+  await page.getByLabel("Time for Lauds").fill("");
+  await page.getByLabel("Time for Lauds").press("Tab");
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
+  await expect(page.locator("#reminder-copied")).toHaveText(
+    "Choose a time for each selected hour.",
+  );
+
+  await page.getByLabel("Time for Lauds").fill("07:30");
+  await page.getByLabel("Time for Lauds").press("Tab");
+  await expect(copy).toBeEnabled();
+
+  for (const checkbox of await page.locator('input[name="day"]').all()) {
+    await checkbox.uncheck();
+  }
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(feedURL).toHaveText("Select at least one day above.");
+  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+
+  await page.locator('input[name="day"][value="sun"]').check();
+  await expect(copy).toBeEnabled();
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(feedURL).toContainText("days=sun");
 });
 
 test("reminder copy failure reveals the calendar address", async ({ page }) => {

@@ -636,27 +636,42 @@ document.documentElement.classList.add("js");
         row.classList.toggle("is-selected", selected);
         if (time) {
           time.disabled = !selected;
+          time.required = selected;
         }
       });
     };
 
     var update = function () {
-      var feed = buildFeedURL();
-      var none = remindersForm.querySelectorAll("input[name=hour]:checked").length === 0;
       syncReminderHourRows();
-      urlEl.textContent = none ? "Select at least one hour above." : "https://" + feed;
-      webcalEl.classList.toggle("is-disabled", none);
-      webcalEl.setAttribute("aria-disabled", none ? "true" : "false");
-      if (none) {
+      var selectedHours = remindersForm.querySelectorAll("input[name=hour]:checked");
+      var selectedDays = remindersForm.querySelectorAll("input[name=day]:checked");
+      var invalidTime = Array.from(selectedHours).some(function (checkbox) {
+        var time = remindersForm.querySelector("input[name=time-" + checkbox.value + "]");
+        return !time || !time.validity.valid;
+      });
+      var message = "";
+      if (selectedHours.length === 0) {
+        message = "Select at least one hour above.";
+      } else if (invalidTime) {
+        message = "Choose a time for each selected hour.";
+      } else if (selectedDays.length === 0) {
+        message = "Select at least one day above.";
+      }
+      var valid = message === "";
+      var feed = valid ? buildFeedURL() : "";
+      urlEl.textContent = valid ? "https://" + feed : message;
+      webcalEl.classList.toggle("is-disabled", !valid);
+      webcalEl.setAttribute("aria-disabled", valid ? "false" : "true");
+      if (!valid) {
         webcalEl.removeAttribute("href");
         webcalEl.setAttribute("tabindex", "-1");
       } else {
         webcalEl.href = "webcal://" + feed;
         webcalEl.removeAttribute("tabindex");
       }
-      copyBtn.disabled = none;
-      copiedEl.textContent = "Copied.";
-      copiedEl.hidden = true;
+      copyBtn.disabled = !valid;
+      copiedEl.textContent = valid ? "Copied." : message;
+      copiedEl.hidden = valid;
     };
 
     remindersForm.addEventListener("change", update);
@@ -784,7 +799,13 @@ document.documentElement.classList.add("js");
     }
     var dateSlug = card.getAttribute("data-date-slug");
     var now = new Date();
-    var info = dateSlug === localDateSlug(now) ? currentHourInfo(now) : null;
+    var currentInfo = currentHourInfo(now);
+    var officeDate = new Date(now.getTime());
+    officeDate.setDate(officeDate.getDate() + currentInfo.offset);
+    var info =
+      dateSlug === localDateSlug(now) || dateSlug === localDateSlug(officeDate)
+        ? currentInfo
+        : null;
     var prayNow = card.querySelector(".pray-now");
     var matched = false;
 
