@@ -105,6 +105,14 @@
   --page-gutter: 1.5rem;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -240,12 +248,16 @@ li {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 summary:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-.js .date-submit {
+/* The date picker submits itself on change when JavaScript is available.
+   Scope this narrowly: Reminders also has secondary buttons, and a generic
+   utility class once hid its Copy action along with these Go fallbacks. */
+.js .date-jump-form .date-submit {
   display: none;
 }
 
@@ -607,10 +619,31 @@ footer::before {
 /* A sentence with counts, not a label: lowercase goes to small caps and the
    leading capital stays, which is the running-text setting. */
 .assurance-panel > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
   cursor: pointer;
   color: var(--accent);
   font-variant-caps: small-caps;
   letter-spacing: 0.04em;
+  list-style: none;
+}
+
+.assurance-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.assurance-panel > summary::after {
+  content: " ▾";
+  margin-left: 0.3em;
+  color: var(--gold-line);
+  font-size: 0.85em;
+  font-variant-caps: normal;
+  letter-spacing: 0;
+}
+
+.assurance-panel[open] > summary::after {
+  content: " ▴";
 }
 
 .assurance-panel h2 {
@@ -659,6 +692,10 @@ footer::before {
   .assurance-panel {
     padding: 0.65rem 0.7rem;
     font-size: 0.78rem;
+  }
+
+  .assurance-panel > summary {
+    min-height: max(2.75rem, 44px);
   }
 }
 
@@ -1262,18 +1299,6 @@ footer::before {
   text-transform: uppercase;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .date-jump::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.6;
-  }
-}
-
-:root[data-theme="dark"] .date-jump::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.6;
-}
-
 /* ── Office elements ── */
 
 .office-hour {
@@ -1809,7 +1834,7 @@ footer::before {
   margin-top: 0;
 }
 
-/* ── Construction notice ──
+/* ── Review notice ──
    This belongs to the opening flow of an unvetted hour. It used to be fixed
    to the bottom of the viewport, where it covered several lines of prayer on
    a phone and forced every page to reserve a deep bottom gutter. Inline, it
@@ -2469,8 +2494,11 @@ footer::before {
   .day-mobile-flag,
   .day-mobile-rank {
     color: inherit;
-    text-decoration: underline dotted;
-    text-underline-offset: 0.14em;
+    text-decoration: none;
+  }
+
+  .day-mobile-rank {
+    border-bottom: 1px solid var(--gold-line);
   }
 
   .day-feast-name {
@@ -2523,6 +2551,7 @@ footer::before {
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --text: #e8e2d0;
     --bg: #121c28;
     --accent: #d0b06a;
@@ -2917,7 +2946,9 @@ body.season-eastertide {
   :root.motion-ready details.session-prayers::details-content,
   :root.motion-ready details.assurance-panel::details-content,
   :root.motion-ready details.day-commemorations::details-content,
-  :root.motion-ready details.day-office-details::details-content {
+  :root.motion-ready details.day-office-details::details-content,
+  :root.motion-ready details.reminder-address::details-content,
+  :root.motion-ready details.reminder-help::details-content {
     block-size: 0;
     overflow: clip;
     transition:
@@ -2929,7 +2960,9 @@ body.season-eastertide {
   :root.motion-ready details.session-prayers[open]::details-content,
   :root.motion-ready details.assurance-panel[open]::details-content,
   :root.motion-ready details.day-commemorations[open]::details-content,
-  :root.motion-ready details.day-office-details[open]::details-content {
+  :root.motion-ready details.day-office-details[open]::details-content,
+  :root.motion-ready details.reminder-address[open]::details-content,
+  :root.motion-ready details.reminder-help[open]::details-content {
     block-size: auto;
   }
 
@@ -3539,129 +3572,270 @@ body.season-eastertide {
   border-bottom-color: var(--accent);
 }
 
-/* ===== Reminders page ===== */
+/* ── Reminders page ──
+   A habit-setting room, but still a service-book composition: matte fields,
+   hairlines and clear text rather than a stack of rounded settings cards. */
 
 .reminders {
-  max-width: 44em;
+  max-width: 38rem;
   margin: 0 auto;
 }
 
 .reminders h1 {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.55rem;
+  color: var(--text);
+  font-size: 1.8rem;
+  font-weight: normal;
+  line-height: 1.2;
 }
 
 .reminders-intro {
-  color: var(--muted);
+  max-width: 36rem;
   margin-bottom: 1.5rem;
-  max-width: 38em;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .reminders fieldset {
+  margin-bottom: 1.1rem;
+  padding: 0.55rem 0.85rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 0.75rem 1rem 1rem;
-  margin-bottom: 1.25rem;
+  border-radius: 2px;
 }
 
 .reminders legend {
-  padding: 0 0.5em;
+  padding: 0 0.45em;
   color: var(--accent);
+  font-size: 0.82rem;
   font-variant-caps: all-small-caps;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .reminder-hour-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  max-width: 22em;
-  padding: 0.2rem 0;
+  gap: 0.75rem;
+  max-width: 24rem;
+  min-height: max(2.75rem, 44px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+}
+
+.reminder-hour-row:last-child {
+  border-bottom: 0;
+}
+
+.reminder-hour-name,
+.reminder-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: max(2.75rem, 44px);
+  cursor: pointer;
 }
 
 .reminder-hour-name {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
+  color: var(--muted);
+  transition: color 140ms ease;
+}
+
+.reminder-hour-row.is-selected .reminder-hour-name {
+  color: var(--text);
+}
+
+.reminder-hour-row input[type="time"],
+.reminder-alarm select {
+  min-height: max(2.75rem, 44px);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--surface) 70%, var(--bg));
+  color: var(--text);
 }
 
 .reminder-hour-row input[type="time"] {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.45);
-  color: var(--text);
-  padding: 0.15rem 0.4rem;
+  width: 8.4rem;
+  padding: 0.3rem 0.5rem;
+  transition:
+    border-color 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+.reminder-hour-row input[type="time"]:disabled {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0.48;
 }
 
 .reminder-days {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-}
-
-.reminder-day {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
+  gap: 0 1rem;
 }
 
 .reminder-alarm select {
+  width: min(100%, 14rem);
+  padding: 0.35rem 0.55rem;
   font: inherit;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.45);
-  color: var(--text);
-  padding: 0.25rem 0.5rem;
 }
 
 .reminder-result {
-  border-top: 1px solid var(--border);
-  padding-top: 1.25rem;
-  margin-bottom: 1.5rem;
+  margin: 1.45rem 0 1.2rem;
+  padding-top: 1.15rem;
+  border-top: 3px double var(--ornament-line);
 }
 
-.reminder-result h2,
-.reminder-help h2 {
-  margin-bottom: 0.75rem;
+.reminder-result h2 {
+  margin-bottom: 0.7rem;
+  font-size: 1.25rem;
+  font-weight: normal;
 }
 
 .reminder-links {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 0.65rem;
+  margin-bottom: 0.55rem;
+}
+
+.reminder-subscribe,
+.reminder-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: max(2.75rem, 44px);
+  border-radius: 2px;
+  padding: 0.55rem 0.8rem;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.reminder-subscribe {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.reminder-copy {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+}
+
+.reminder-subscribe:hover:not(.is-disabled),
+.reminder-copy:hover:not(:disabled) {
+  border-color: var(--text);
+}
+
+.reminder-subscribe.is-disabled,
+.reminder-copy:disabled {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.58;
 }
 
 #reminder-copied {
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+}
+
+.reminder-address,
+.reminder-help {
+  color: var(--muted);
+}
+
+.reminder-address > summary,
+.reminder-help > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: max(2.75rem, 44px);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
+  list-style: none;
+}
+
+.reminder-address > summary::-webkit-details-marker,
+.reminder-help > summary::-webkit-details-marker {
+  display: none;
+}
+
+.reminder-address > summary::after,
+.reminder-help > summary::after {
+  content: " ▾";
+  margin-left: 0.3em;
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.reminder-address[open] > summary::after,
+.reminder-help[open] > summary::after {
+  content: " ▴";
 }
 
 .reminder-url {
   display: block;
-  word-break: break-all;
-  font-size: 0.85rem;
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.35);
+  padding: 0.55rem 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.5rem 0.75rem;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--surface) 72%, var(--bg));
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.reminder-help {
+  border-top: 1px solid var(--border);
+}
+
+.reminder-help-content {
+  padding-bottom: 0.4rem;
 }
 
 .reminder-help h3 {
-  margin: 1rem 0 0.35rem;
-  font-size: 1.05rem;
+  margin: 0.85rem 0 0.25rem;
+  color: var(--text);
+  font-size: 1rem;
 }
 
 .reminder-help p {
-  color: var(--text);
-  max-width: 40em;
+  max-width: 38em;
   margin-bottom: 0.5rem;
+  color: var(--text);
+  line-height: 1.5;
 }
 
 .reminder-help a {
   color: var(--accent);
+}
+
+@media (max-width: 540px) {
+  .reminders h1 {
+    font-size: 1.6rem;
+  }
+
+  .reminder-hour-row input[type="time"] {
+    width: 7.8rem;
+  }
+
+  .reminder-subscribe {
+    flex: 1 1 13rem;
+  }
+
+  .reminder-copy {
+    flex: 0 0 auto;
+  }
 }
 
 /* ===== Typographic polish =====
@@ -3820,6 +3994,75 @@ body.season-eastertide {
     align-items: center;
     justify-content: center;
     min-height: max(2.75rem, 44px);
+  }
+}
+
+/* Quiet controls still need a full thumb target on the phone. The added block
+   size is carried by padding and alignment, not larger type or heavier rules,
+   so secondary chrome remains secondary while becoming dependable to tap. */
+@media (max-width: 700px) {
+  .site-brand,
+  .home-date-link,
+  .not-today-notice .not-today-link,
+  .hour-date-nav > summary,
+  .session-prayers > summary,
+  .day-nav a,
+  .year-nav a,
+  .month-jump a,
+  .report-issue a {
+    display: inline-flex;
+    align-items: center;
+    min-height: max(2.75rem, 44px);
+  }
+
+  .home-date-link,
+  .not-today-notice .not-today-link {
+    justify-content: center;
+  }
+
+  .hour-date-nav > summary,
+  .session-prayers > summary {
+    justify-content: center;
+  }
+
+  .date-jump {
+    min-height: max(2.75rem, 44px);
+  }
+
+  .year-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .year-nav a {
+    margin-right: 0.45rem;
+    padding-inline: 0.25rem;
+  }
+
+  .month-jump {
+    gap: 0 0.15rem;
+  }
+
+  .month-jump a {
+    justify-content: center;
+    min-width: 2.75rem;
+    padding: 0.45rem 0.35rem;
+  }
+
+  .day-disclosures {
+    align-items: stretch;
+  }
+
+  .day-disclosures > details > summary {
+    display: flex;
+    align-items: center;
+    min-height: max(2.75rem, 44px);
+  }
+
+  .report-issue a {
+    justify-content: center;
+    margin-inline: -0.35rem;
+    padding-inline: 0.35rem;
   }
 }
 

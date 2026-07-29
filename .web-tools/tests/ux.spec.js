@@ -244,6 +244,34 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   expect(apseState.borderStyle).toBe("double");
 });
 
+test("the early-morning invitation opens the previous day's Compline", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now")).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
+});
+
+test("the foreground home invitation advances at the next office boundary", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "terce",
+  );
+
+  await page.clock.fastForward("02:00");
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "sext",
+  );
+});
+
 test("parish material stays in non-liturgical rooms and off the prayer page", async ({
   page,
 }) => {
@@ -997,19 +1025,140 @@ test("ordo day details collapse on a phone and stay open on a wide screen", asyn
   await expect(page.locator("#d-2026-03-01 .day-commemoration").first()).toBeVisible();
 });
 
+test("the foreground Ordo moves rather than duplicates its today marker at midnight", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/calendar/2026");
+
+  const oldToday = page.locator("#d-2026-07-29");
+  const newToday = page.locator("#d-2026-07-30");
+  await expect(oldToday).toHaveClass(/is-today/);
+  await expect(oldToday).toHaveAttribute("aria-current", "date");
+
+  await page.clock.fastForward("02:00");
+
+  await expect(oldToday).not.toHaveClass(/is-today/);
+  await expect(oldToday).not.toHaveAttribute("aria-current", "date");
+  await expect(newToday).toHaveClass(/is-today/);
+  await expect(newToday).toHaveAttribute("aria-current", "date");
+  await expect(page.locator(".month-table tr.is-today")).toHaveCount(1);
+});
+
+test("an office left open in the foreground offers today after midnight", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/lauds/2026-07-29");
+
+  await expect(page.locator(".not-today-notice")).toHaveCount(0);
+  await page.clock.fastForward("02:00");
+
+  const notice = page.locator(".not-today-notice");
+  await expect(notice).toBeVisible();
+  await expect(notice).toHaveAttribute("role", "status");
+  await expect(notice.getByRole("link", { name: "Go to today" })).toHaveAttribute(
+    "href",
+    "/lauds/2026-07-30",
+  );
+});
+
 test("reminder choices update the subscription URL", async ({ page }) => {
   await page.goto("/reminders");
+
+  const copy = page.getByRole("button", { name: "Copy link" });
+  const subscribe = page.locator("#reminder-webcal");
+  await expect(copy).toBeVisible();
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(page.getByLabel("Time for Lauds")).toBeEnabled();
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
 
   for (const checkbox of await page.locator('input[name="hour"]').all()) {
     await checkbox.uncheck();
   }
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).toHaveAttribute("aria-disabled", "true");
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(subscribe).toHaveAttribute("tabindex", "-1");
+  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
+
   await page.locator('input[name="hour"][value="lauds"]').check();
+  await expect(copy).toBeEnabled();
+  await expect(subscribe).toHaveAttribute("aria-disabled", "false");
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(subscribe).not.toHaveAttribute("tabindex");
+  await expect(page.getByLabel("Time for Lauds")).toBeEnabled();
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
 
   const feedURL = page.locator("#reminder-url");
   await expect(feedURL).toContainText("lauds=07%3A30");
   await expect(feedURL).toContainText("tz=America%2FNew_York");
+});
+
+test("reminder copy failure reveals the calendar address", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+  await page.goto("/reminders");
+
+  await page.getByRole("button", { name: "Copy link" }).click();
+
+  await expect(page.locator("#reminder-copied")).toHaveText(
+    "Copy unavailable. The calendar address is shown below.",
+  );
+  await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
+  await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+test("quiet mobile controls retain full thumb targets", async ({ page }) => {
+  for (const [path, selectors] of [
+    [
+      `/?date=${testDate}`,
+      [".site-brand", ".home-date-link", ".not-today-link", ".home-date-nav > summary"],
+    ],
+    [
+      `/lauds/${testDate}`,
+      [
+        ".site-brand",
+        ".hour-date-nav > summary",
+        ".session-prayers > summary",
+        ".assurance-panel > summary",
+        ".report-issue a",
+      ],
+    ],
+    [
+      "/calendar/2026",
+      [".year-nav a:not([hidden])", ".month-jump a", ".day-disclosures summary"],
+    ],
+    [
+      "/reminders",
+      [
+        ".reminder-hour-name",
+        '.reminder-hour-row input[type="time"]',
+        ".reminder-day",
+        ".reminder-alarm select",
+        ".reminder-subscribe",
+        ".reminder-copy",
+        ".reminder-address > summary",
+        ".reminder-help > summary",
+      ],
+    ],
+  ]) {
+    await openDatedPage(page, path);
+    for (const selector of selectors) {
+      const targets = page.locator(selector);
+      const count = await targets.count();
+      expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
+      for (let i = 0; i < Math.min(count, 12); i++) {
+        const box = await targets.nth(i).boundingBox();
+        expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
+        expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
+        expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  }
 });
 
 for (const { name, path, theme, knownViolations } of [
@@ -1022,6 +1171,12 @@ for (const { name, path, theme, knownViolations } of [
   {
     name: "Lauds in the Apse theme",
     path: `/lauds/${testDate}`,
+    theme: "dark",
+    knownViolations: [],
+  },
+  {
+    name: "Reminders in the Apse theme",
+    path: "/reminders",
     theme: "dark",
     knownViolations: [],
   },

@@ -2,24 +2,23 @@
 {{define "content"}}
 <div class="reminders">
   <p class="home-kicker">Prayer Reminders</p>
-  <h1>Subscribe to a reminder calendar</h1>
+  <h1>Set prayer reminders</h1>
   <p class="reminders-intro">
-    Choose the hours you pray and when, and subscribe to the generated
-    calendar feed. Your calendar app will show each day's office — with the
-    feast of the day — and remind you before each hour. The schedule lives
-    entirely in the link: nothing is stored on this site.
+    Choose the hours you pray and their times. Each calendar event names the
+    office and feast of the day. Your schedule lives entirely in the private
+    calendar link below; nothing is stored on this site.
   </p>
 
   <form id="reminders-form">
     <fieldset class="reminder-hours">
       <legend>Hours</legend>
       {{range .Hours}}
-      <div class="reminder-hour-row">
+      <div class="reminder-hour-row{{if .Checked}} is-selected{{end}}" data-reminder-hour="{{.Slug}}">
         <label class="reminder-hour-name">
           <input type="checkbox" name="hour" value="{{.Slug}}"{{if .Checked}} checked{{end}}>
           {{.Name}}
         </label>
-        <input type="time" name="time-{{.Slug}}" value="{{.Default}}" aria-label="Time for {{.Name}}">
+        <input type="time" name="time-{{.Slug}}" value="{{.Default}}" aria-label="Time for {{.Name}}"{{if not .Checked}} disabled{{end}}>
       </div>
       {{end}}
     </fieldset>
@@ -48,23 +47,27 @@
   </form>
 
   <div class="reminder-result">
-    <h2>Your calendar feed</h2>
+    <h2>Your calendar link</h2>
     <p class="reminder-links">
-      <a id="reminder-webcal" class="pray-now" href="#">Subscribe (Apple&nbsp;Calendar)</a>
-      <button type="button" id="reminder-copy" class="date-submit">Copy feed URL</button>
-      <span id="reminder-copied" hidden>Copied!</span>
+      <a id="reminder-webcal" class="reminder-subscribe" href="#">Subscribe in calendar app</a>
+      <button type="button" id="reminder-copy" class="reminder-copy">Copy link</button>
+      <span id="reminder-copied" role="status" aria-live="polite" hidden>Copied.</span>
     </p>
-    <p><code id="reminder-url" class="reminder-url"></code></p>
+    <details class="reminder-address">
+      <summary>View calendar address</summary>
+      <p><code id="reminder-url" class="reminder-url"></code></p>
+    </details>
   </div>
 
-  <div class="reminder-help">
-    <h2>Setting it up</h2>
+  <details class="reminder-help">
+    <summary>Setting it up</summary>
+    <div class="reminder-help-content">
     <h3>iPhone, iPad, Mac (Apple Calendar)</h3>
-    <p>Tap <em>Subscribe</em> above and confirm. Reminders work as configured.
+    <p>Tap <em>Subscribe in calendar app</em> above and confirm. Reminders work as configured.
       If alerts don't appear, check that <em>Remove Alerts</em> is off for the
       subscription (Settings &rsaquo; Calendar &rsaquo; Accounts).</p>
     <h3>Google Calendar</h3>
-    <p>Copy the feed URL, then in Google Calendar choose
+    <p>Copy the calendar link, then in Google Calendar choose
       <em>Other calendars &rsaquo; + &rsaquo; From URL</em> and paste it.
       <strong>Google ignores the alerts inside subscribed feeds</strong> — after
       subscribing, open the calendar's settings and add a default
@@ -74,6 +77,7 @@
     <p>Install <a href="https://icsx5.bitfire.at/" rel="noopener">ICSx⁵</a>
       (free, F-Droid or Play Store), add the feed URL, and its alerts work
       as configured.</p>
-  </div>
+    </div>
+  </details>
 </div>
 {{end}}
