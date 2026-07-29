@@ -45,8 +45,15 @@
       {{- $t := .Theme}}
       {{- $d := .NavDate}}
       {{- $p := .Page}}
-      {{/* data-nav-* lets app.js re-stamp dates on load so cached chrome hits SW keys. */}}
-      <a class="site-brand{{if eq $p "home"}} active{{end}}" href="{{navLink "/" $t $d}}" data-nav="home"{{if eq $p "home"}} aria-current="page"{{end}}><span aria-hidden="true">✠</span> Daily Office</a>
+      {{/* data-nav-* lets app.js re-stamp dates on load so cached chrome hits SW keys.
+           Brand is always undated home (→ local today): a long-lived PWA/tab left
+           on yesterday should not keep "Daily Office" pinned to that day. Hour
+           and ordo links still carry $d so hopping hours on a chosen day works.
+           app.js rewrites brand to /?date=today for SW cache keys. */}}
+      {{/* Brand is current only on *today's* home. Historical home still has
+           Page=home but brand navigates to today, so aria-current would lie.
+           app.js re-syncs active/aria-current after midnight SWR freezes. */}}
+      <a class="site-brand{{if and (eq $p "home") (not .ShowToday)}} active{{end}}" href="{{navLink "/" $t ""}}" data-nav="home" data-nav-home="today"{{if and (eq $p "home") (not .ShowToday)}} aria-current="page"{{end}}><span aria-hidden="true">✠</span> Daily Office</a>
       {{/* Closed by default: desktop CSS shows .site-menu > nav regardless of
            [open], and the native <details>/<summary> toggle lets no-JS mobile
            visitors expand it with a tap — no script needed either way. */}}

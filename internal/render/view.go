@@ -112,6 +112,8 @@ type CalendarData struct {
 	// shared layout template reads it on every page.
 	SeasonClass string
 	ShowBanner  bool
+	// ShowToday is always false here (layout brand current-state reads it).
+	ShowToday bool
 }
 
 // MonthData groups a month's day rows.
@@ -166,6 +168,8 @@ type RemindersData struct {
 	Days                              []ReminderDay
 	NavDate, Theme, Page, SeasonClass string
 	ShowBanner                        bool
+	// ShowToday is always false here (layout brand current-state reads it).
+	ShowToday bool
 }
 
 // ReminderHour is one hour's row in the reminder schedule form.
@@ -186,6 +190,8 @@ type NotFoundData struct {
 	Page        string
 	SeasonClass string
 	ShowBanner  bool
+	// ShowToday is always false here (layout brand current-state reads it).
+	ShowToday bool
 }
 
 // ErrorData is the styled error page for other 4xx/5xx conditions.
@@ -197,4 +203,6 @@ type ErrorData struct {
 	Page        string
 	SeasonClass string
 	ShowBanner  bool
+	// ShowToday is always false here (layout brand current-state reads it).
+	ShowToday bool
 }

@@ -329,32 +329,76 @@ document.documentElement.classList.add("js");
     return "/?date=" + today;
   }
 
-  // ensureTodayControl injects or rewrites a Today link when the open document
-  // is not local today (SWR can leave a "today" page frozen past midnight with
-  // ShowToday=false and no server-rendered Today control).
+  // ensureTodayControl keeps recovery chrome honest when the open document is
+  // not local today. SWR can leave a page that was "today" at render time
+  // frozen past midnight with ShowToday=false and no server-rendered control;
+  // a long-lived PWA also needs a one-tap path that is not buried under
+  // "Change date".
   function ensureTodayControl(today) {
     var docDate = documentDateSlug();
-    if (!docDate || docDate === today) {
-      return;
-    }
+    var onToday = !docDate || docDate === today;
     var href = todayHrefForPage(today);
-    var existing = document.querySelectorAll("a.today-link");
-    if (existing.length) {
-      existing.forEach(function (link) {
-        link.setAttribute("href", href);
-        link.hidden = false;
+
+    // Prominent notice (outside the date disclosure).
+    var notices = document.querySelectorAll(".not-today-notice");
+    if (onToday) {
+      notices.forEach(function (n) {
+        n.hidden = true;
       });
+    } else if (notices.length) {
+      notices.forEach(function (n) {
+        n.hidden = false;
+        var a = n.querySelector("a.today-link");
+        if (a) {
+          a.setAttribute("href", href);
+        }
+      });
+    } else {
+      var anchor =
+        document.querySelector(".hour-meta") ||
+        document.querySelector(".home-day-head h1") ||
+        document.querySelector(".home-day-head");
+      if (anchor) {
+        var p = document.createElement("p");
+        p.className = "not-today-notice";
+        // Live region only for inject: appears without a navigation after
+        // midnight. Server-rendered historical notices stay quiet.
+        p.setAttribute("role", "status");
+        var a = document.createElement("a");
+        a.className = "today-link not-today-link";
+        a.setAttribute("href", href);
+        a.textContent = "Go to today";
+        p.appendChild(a);
+        anchor.insertAdjacentElement("afterend", p);
+      }
+    }
+
+    if (onToday) {
       return;
     }
+
+    // Secondary Today inside the date-jump form — always, even when the
+    // prominent notice already supplied a .today-link (overnight inject).
     var form = document.querySelector(".date-jump-form");
-    if (!form) {
-      return;
+    if (form) {
+      var formToday = form.querySelector("a.today-link");
+      if (formToday) {
+        formToday.setAttribute("href", href);
+        formToday.hidden = false;
+      } else {
+        var formLink = document.createElement("a");
+        formLink.className = "today-link";
+        formLink.setAttribute("href", href);
+        formLink.textContent = "Today";
+        form.appendChild(formLink);
+      }
     }
-    var link = document.createElement("a");
-    link.className = "today-link";
-    link.setAttribute("href", href);
-    link.textContent = "Today";
-    form.appendChild(link);
+
+    // Any other today-links (prominent notice, etc.) keep the same target.
+    document.querySelectorAll("a.today-link").forEach(function (link) {
+      link.setAttribute("href", href);
+      link.hidden = false;
+    });
   }
 
   // syncDatedNavigation stamps the top banner (and home prayer card when
@@ -363,6 +407,10 @@ document.documentElement.classList.add("js");
   // already emits dated hrefs when NavDate is set; this corrects cached pages
   // and timezone-edge undated markup. Also re-run on visibilitychange after
   // midnight so long-lived tabs regain a Today control.
+  //
+  // Brand is special: it always means "home for local today", not the page's
+  // selected day. Hour/ordo links keep the page day so intentional historical
+  // browsing still hops within that day.
   function syncDatedNavigation() {
     var today = localDateSlug(new Date());
     var navDate = pageDateSlug();
@@ -370,7 +418,20 @@ document.documentElement.classList.add("js");
 
     var brand = document.querySelector('[data-nav="home"]');
     if (brand) {
-      brand.setAttribute("href", "/?date=" + navDate);
+      brand.setAttribute("href", "/?date=" + today);
+      // Brand is "current" only on today's home. Historical home and SWR pages
+      // frozen past midnight still have page-home but brand leaves the day.
+      var docDate = documentDateSlug();
+      var brandIsCurrent =
+        document.body.classList.contains("page-home") &&
+        (!docDate || docDate === today);
+      if (brandIsCurrent) {
+        brand.classList.add("active");
+        brand.setAttribute("aria-current", "page");
+      } else {
+        brand.classList.remove("active");
+        brand.removeAttribute("aria-current");
+      }
     }
 
     document.querySelectorAll('[data-nav="hour"][data-hour]').forEach(function (link) {
@@ -428,6 +489,16 @@ document.documentElement.classList.add("js");
       syncDatedNavigation();
       updatePrayNow();
     }
+  });
+
+  // bfcache restore (mobile Safari / Android often freezes a PWA this way)
+  // must re-evaluate the day the same way a foreground return does.
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) {
+      return;
+    }
+    lastSyncedDay = localDateSlug(new Date());
+    syncChromeIfNeeded();
   });
 
   // Ships closed; desktop CSS shows the nav regardless of [open]. Once
