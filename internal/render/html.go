@@ -596,7 +596,8 @@ func isHymnAmen(stanza []string) bool {
 	return strings.EqualFold(s, "Amen")
 }
 
-// renderGloriaPatri renders the two-line Gloria Patri text with a * mediant break.
+// renderGloriaPatri renders the Gloria Patri as two verses, each pointed at
+// its own mediant, with a plain line break between them.
 func renderGloriaPatri(text string) template.HTML {
 	lines := strings.Split(strings.TrimSpace(text), "\n")
 	var line1, line2 string
@@ -608,10 +609,10 @@ func renderGloriaPatri(text string) template.HTML {
 	}
 	var sb strings.Builder
 	sb.WriteString(`<p class="gloria-patri">`)
-	sb.WriteString(template.HTMLEscapeString(line1))
+	sb.WriteString(chantLineHTML(line1))
 	if line2 != "" {
-		sb.WriteString(` <span class="mediant">*</span> `)
-		sb.WriteString(template.HTMLEscapeString(line2))
+		sb.WriteString(`<br>`)
+		sb.WriteString(chantLineHTML(line2))
 	}
 	sb.WriteString(`</p>`)
 	return template.HTML(sb.String())
