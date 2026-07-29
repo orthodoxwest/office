@@ -136,8 +136,11 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 	// Preces: Prime and Compline. Suffrage: Lauds and Vespers. Marian: Lauds,
 	// Vespers, and Compline.
 	switch hourName {
-	case "prime", "compline":
+	case "prime":
 		_, precesReason := precesDisposition(day, moveable)
+		add("preces", precesReason, "")
+	case "compline":
+		_, precesReason := precesDisposition(complineOfficeDay(day), moveable)
 		add("preces", precesReason, "")
 	}
 
@@ -153,7 +156,7 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("vespers:rule", day.Vespers.Rule, "")
 		hour.Decisions = append(hour.Decisions, day.Vespers.Decisions...)
 		officeDay := vespersOfficeDay(day)
-		appendVespersOfficeContextDecisions(hour, officeDay)
+		appendEveningOfficeContextDecisions(hour, officeDay)
 		// Suffrage and Marian selection follow the office that owns Vespers.
 		_, suffrageReason := suffrageDisposition(officeDay, moveable)
 		add("suffrage", suffrageReason, "")
@@ -163,7 +166,9 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("suffrage", suffrageReason, "")
 		addMarianDecisions(add, day, hourName)
 	} else if hourName == "compline" {
-		addMarianDecisions(add, day, hourName)
+		officeDay := complineOfficeDay(day)
+		appendEveningOfficeContextDecisions(hour, officeDay)
+		addMarianDecisions(add, officeDay, hourName)
 	}
 
 	// Record whether psalm/canticle antiphons are doubled at this hour so the
@@ -187,11 +192,12 @@ func addMarianDecisions(add func(rule, outcome, detail string), day *models.Cale
 	add("marian:boundary", boundary, "")
 }
 
-// appendVespersOfficeContextDecisions describes the synthetic office day that
-// actually drove Vespers composition. The existing context:* and occurrence
-// decisions remain civil-day provenance; these distinct rule IDs make the two
-// frames explicit without changing the meaning of the review-facing API.
-func appendVespersOfficeContextDecisions(hour *models.OfficeHour, officeDay *models.CalendarDay) {
+// appendEveningOfficeContextDecisions describes the synthetic office day that
+// actually drove Vespers or Compline composition. The existing context:* and
+// occurrence decisions remain civil-day provenance; these distinct rule IDs
+// make the two frames explicit without changing the meaning of the
+// review-facing API.
+func appendEveningOfficeContextDecisions(hour *models.OfficeHour, officeDay *models.CalendarDay) {
 	add := func(rule, outcome, detail string) {
 		hour.Decisions = append(hour.Decisions, models.CompositionDecision{Rule: rule, Outcome: outcome, Detail: detail})
 	}
