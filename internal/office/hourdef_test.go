@@ -194,11 +194,11 @@ func TestOfficeDataUsesSourceBookSectionLabels(t *testing.T) {
 		}{
 			file: file,
 			labels: map[string]string{
-				"Pre-Office":  "Before the Office",
+				"Pre-Office":  "Prayers Before the Office",
 				"Opening":     "Opening Versicles",
 				"Pre-Collect": "Closing Prayers",
 				"Closing":     "",
-				"Post-Office": "Our Father",
+				"Post-Office": "Prayers After the Office",
 			},
 		})
 	}
@@ -275,6 +275,20 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 				t.Fatalf("%s missing Pre-Collect section", tt.file)
 			}
 		})
+	}
+}
+
+func TestComplineOmitsBeforeAndAfterOfficePrayers(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "compline.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(compline.txt): %v", err)
+	}
+
+	for _, section := range sections {
+		if section.Name == "Pre-Office" || section.Name == "Post-Office" {
+			t.Errorf("Compline unexpectedly contains %s", section.Name)
+		}
 	}
 }
 
@@ -395,6 +409,8 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 			}
 
 			if got := byName["Pre-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
+				{Type: "rubric", Ref: "ordinary/session/opening-rubric"},
+				{Type: "prayer", Ref: "ordinary/session/open-my-mouth"},
 				{Type: "rubric", Ref: "ordinary/session/little-hours-opening-rubric"},
 				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 				{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
@@ -411,12 +427,16 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 			if got := byName["Closing"].Elements; !reflect.DeepEqual(got, []HourElement{
 				{Type: "blessing", Ref: "ordinary/" + hour + "/blessing"},
 				{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
+				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 			}) {
 				t.Fatalf("%s Closing = %+v", file, got)
 			}
 			if got := byName["Post-Office"].Elements; !reflect.DeepEqual(got, []HourElement{
-				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
+				{Type: "prayer", Ref: "ordinary/session/sacrosanctae"},
+				{Type: "rubric", Ref: "ordinary/session/closing-rubric"},
 				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+				{Type: "secret-prayer", Ref: "ordinary/shared/hail-mary"},
 			}) {
 				t.Fatalf("%s Post-Office = %+v", file, got)
 			}
