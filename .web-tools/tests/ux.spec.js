@@ -133,9 +133,13 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
           ".home-hero a[href], .home-hero summary, .home-hero input, .home-hero button",
         ),
       )
-        .slice(0, 10)
+        // date + go-to-today (historical days) + pray + 7 hours + change-date.
+        .slice(0, 11)
         .map((element) => {
           if (element.matches(".home-date-link")) return "date";
+          // Recovery chrome when the landing day is not local today — intentional
+          // after the stale-day fix; sits in the day identity, before Pray now.
+          if (element.matches(".not-today-link")) return "go-to-today";
           if (element.matches(".pray-now")) return "pray";
           if (element.matches(".home-hour-link")) return element.getAttribute("data-hour");
           if (element.matches("summary")) return "change-date";
@@ -146,8 +150,10 @@ test("home frontispiece keeps source, focus, and visual order aligned", async ({
   expect(order.source).toBe(true);
   expect(order.positions.day).toBeLessThan(order.positions.prayer);
   expect(order.positions.prayer).toBeLessThan(order.positions.dateControl);
+  // testDate is fixed in the past relative to "today", so Go to today is present.
   expect(order.focusables).toEqual([
     "date",
+    "go-to-today",
     "pray",
     "lauds",
     "prime",
