@@ -17,9 +17,9 @@ func TestHourIncludesInlineConstructionBanner(t *testing.T) {
 		`<aside class="site-banner"`,
 		`class="site-banner"`,
 		`id="site-banner"`,
-		`aria-label="Development notice"`,
+		`aria-label="Review notice"`,
 		`data-dismiss-banner`,
-		`under active development`,
+		`not yet been fully checked against the printed books`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hour is missing inline construction banner markup %q", want)
@@ -104,6 +104,51 @@ func TestLayoutIncludesTextSizeControl(t *testing.T) {
 	// Appearance stays client-side: no query parameter, no server round trip.
 	if strings.Contains(body, "text-size=") && !strings.Contains(body, `data-text-size=`) {
 		t.Errorf("text size must not be stamped onto URLs")
+	}
+}
+
+func TestRemindersExposeQuietSubscriptionActions(t *testing.T) {
+	src, err := TemplateSource("reminders.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+
+	for _, want := range []string{
+		`data-reminder-hour="{{.Slug}}"`,
+		`id="reminder-webcal" class="reminder-subscribe"`,
+		`Subscribe in calendar app`,
+		`id="reminder-copy" class="reminder-copy"`,
+		`role="status" aria-live="polite"`,
+		`class="reminder-address"`,
+		`class="reminder-help"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("reminders are missing polished subscription markup %q", want)
+		}
+	}
+	if strings.Contains(body, `id="reminder-copy" class="date-submit"`) {
+		t.Error("reminder copy action must not share the JavaScript-hidden date fallback class")
+	}
+}
+
+func TestHourReviewBannerUsesConsistentAccessibleNames(t *testing.T) {
+	src, err := TemplateSource("hour.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	body := string(src)
+
+	for _, want := range []string{
+		`aria-label="Review notice"`,
+		`aria-label="Dismiss review notice"`,
+	} {
+		if !strings.Contains(body, want) {
+			t.Errorf("hour review banner is missing accessible markup %q", want)
+		}
+	}
+	if strings.Contains(body, "development notice") {
+		t.Error("hour review banner should not retain its former development framing")
 	}
 }
 

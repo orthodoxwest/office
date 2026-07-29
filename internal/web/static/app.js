@@ -473,7 +473,6 @@ document.documentElement.classList.add("js");
     updatePrayNow();
     markCalendarToday();
   }
-  syncChromeIfNeeded();
 
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) {
@@ -600,6 +599,7 @@ document.documentElement.classList.add("js");
     var webcalEl = document.getElementById("reminder-webcal");
     var copyBtn = document.getElementById("reminder-copy");
     var copiedEl = document.getElementById("reminder-copied");
+    var addressEl = document.querySelector(".reminder-address");
 
     var buildFeedURL = function () {
       var params = [];
@@ -628,23 +628,80 @@ document.documentElement.classList.add("js");
       return location.host + "/office.ics?" + params.join("&");
     };
 
+    var syncReminderHourRows = function () {
+      remindersForm.querySelectorAll(".reminder-hour-row").forEach(function (row) {
+        var checkbox = row.querySelector('input[name="hour"]');
+        var time = row.querySelector('input[type="time"]');
+        var selected = Boolean(checkbox && checkbox.checked);
+        row.classList.toggle("is-selected", selected);
+        if (time) {
+          time.disabled = !selected;
+          time.required = selected;
+        }
+      });
+    };
+
     var update = function () {
-      var feed = buildFeedURL();
-      var none = remindersForm.querySelectorAll("input[name=hour]:checked").length === 0;
-      urlEl.textContent = none ? "Select at least one hour above." : "https://" + feed;
-      webcalEl.href = "webcal://" + feed;
-      copiedEl.hidden = true;
+      syncReminderHourRows();
+      var selectedHours = remindersForm.querySelectorAll("input[name=hour]:checked");
+      var selectedDays = remindersForm.querySelectorAll("input[name=day]:checked");
+      var invalidTime = Array.from(selectedHours).some(function (checkbox) {
+        var time = remindersForm.querySelector("input[name=time-" + checkbox.value + "]");
+        return !time || !time.validity.valid;
+      });
+      var message = "";
+      if (selectedHours.length === 0) {
+        message = "Select at least one hour above.";
+      } else if (invalidTime) {
+        message = "Choose a time for each selected hour.";
+      } else if (selectedDays.length === 0) {
+        message = "Select at least one day above.";
+      }
+      var valid = message === "";
+      var feed = valid ? buildFeedURL() : "";
+      urlEl.textContent = valid ? "https://" + feed : message;
+      webcalEl.classList.toggle("is-disabled", !valid);
+      webcalEl.setAttribute("aria-disabled", valid ? "false" : "true");
+      if (!valid) {
+        webcalEl.removeAttribute("href");
+        webcalEl.setAttribute("tabindex", "-1");
+      } else {
+        webcalEl.href = "webcal://" + feed;
+        webcalEl.removeAttribute("tabindex");
+      }
+      copyBtn.disabled = !valid;
+      copiedEl.textContent = valid ? "Copied." : message;
+      copiedEl.hidden = valid;
     };
 
     remindersForm.addEventListener("change", update);
     update();
 
+    webcalEl.addEventListener("click", function (event) {
+      if (webcalEl.getAttribute("aria-disabled") === "true") {
+        event.preventDefault();
+      }
+    });
+
     copyBtn.addEventListener("click", function () {
-      navigator.clipboard.writeText(urlEl.textContent).then(function () {
+      if (copyBtn.disabled) {
+        return;
+      }
+      var showCopyFallback = function () {
+        copiedEl.textContent = "Copy unavailable. The calendar address is shown below.";
         copiedEl.hidden = false;
-      }).catch(function () {
-        // Clipboard unavailable (e.g. non-secure context); the URL is visible to copy by hand.
-      });
+        if (addressEl) {
+          addressEl.open = true;
+        }
+      };
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== "function") {
+        showCopyFallback();
+        return;
+      }
+      navigator.clipboard.writeText(urlEl.textContent).then(function () {
+        copiedEl.textContent = "Copied.";
+        copiedEl.hidden = false;
+      }).catch(showCopyFallback);
     });
   }
 
@@ -664,25 +721,49 @@ document.documentElement.classList.add("js");
   // local time, plus a day offset (0 or -1) locating which calendar day it
   // belongs to. Boundaries mirror currentHourEntry in handlers.go: midnight-2am
   // belongs to the previous day's Compline, not the day that has just begun.
-  var HOUR_NAMES = {
-    lauds: "Lauds",
-    prime: "Prime",
-    terce: "Terce",
-    sext: "Sext",
-    none: "None",
-    vespers: "Vespers",
-    compline: "Compline",
-  };
+  // One ordered table drives both the current-office choice and its next
+  // refresh boundary. Keep it aligned with currentHourEntry in handlers.go;
+  // midnight Compline belongs to the preceding calendar day.
+  var OFFICE_SCHEDULE = [
+    { start: 0, slug: "compline", label: "Compline", offset: -1 },
+    { start: 2, slug: "lauds", label: "Lauds", offset: 0 },
+    { start: 7, slug: "prime", label: "Prime", offset: 0 },
+    { start: 9, slug: "terce", label: "Terce", offset: 0 },
+    { start: 11, slug: "sext", label: "Sext", offset: 0 },
+    { start: 13, slug: "none", label: "None", offset: 0 },
+    { start: 17, slug: "vespers", label: "Vespers", offset: 0 },
+    { start: 20, slug: "compline", label: "Compline", offset: 0 },
+  ];
+  var HOUR_NAMES = OFFICE_SCHEDULE.reduce(function (names, entry) {
+    names[entry.slug] = entry.label;
+    return names;
+  }, {});
+
   function currentHourInfo(d) {
     var h = d.getHours();
-    if (h < 2) return { slug: "compline", offset: -1 };
-    if (h >= 2 && h < 7) return { slug: "lauds", offset: 0 };
-    if (h >= 7 && h < 9) return { slug: "prime", offset: 0 };
-    if (h >= 9 && h < 11) return { slug: "terce", offset: 0 };
-    if (h >= 11 && h < 13) return { slug: "sext", offset: 0 };
-    if (h >= 13 && h < 17) return { slug: "none", offset: 0 };
-    if (h >= 17 && h < 20) return { slug: "vespers", offset: 0 };
-    return { slug: "compline", offset: 0 };
+    for (var i = OFFICE_SCHEDULE.length - 1; i >= 0; i -= 1) {
+      if (h >= OFFICE_SCHEDULE[i].start) {
+        return {
+          slug: OFFICE_SCHEDULE[i].slug,
+          offset: OFFICE_SCHEDULE[i].offset,
+        };
+      }
+    }
+    return { slug: "compline", offset: -1 };
+  }
+
+  function nextOfficeBoundary(d) {
+    for (var i = 0; i < OFFICE_SCHEDULE.length; i += 1) {
+      var candidate = new Date(d.getTime());
+      candidate.setHours(OFFICE_SCHEDULE[i].start, 0, 0, 0);
+      if (candidate.getTime() > d.getTime()) {
+        return candidate;
+      }
+    }
+    var midnight = new Date(d.getTime());
+    midnight.setDate(midnight.getDate() + 1);
+    midnight.setHours(0, 0, 0, 0);
+    return midnight;
   }
 
   function setHourCurrent(link, isCurrent) {
@@ -718,7 +799,13 @@ document.documentElement.classList.add("js");
     }
     var dateSlug = card.getAttribute("data-date-slug");
     var now = new Date();
-    var info = dateSlug === localDateSlug(now) ? currentHourInfo(now) : null;
+    var currentInfo = currentHourInfo(now);
+    var officeDate = new Date(now.getTime());
+    officeDate.setDate(officeDate.getDate() + currentInfo.offset);
+    var info =
+      dateSlug === localDateSlug(now) || dateSlug === localDateSlug(officeDate)
+        ? currentInfo
+        : null;
     var prayNow = card.querySelector(".pray-now");
     var matched = false;
 
@@ -750,17 +837,57 @@ document.documentElement.classList.add("js");
     }
   }
 
+  // Home, Ordo, and an open office may remain visible across a time boundary
+  // without producing a visibility event. Schedule one refresh rather than
+  // polling: home uses the next office boundary; Ordo and an office only need
+  // midnight. Midnight is also a home boundary because Compline before 2am
+  // belongs to the previous liturgical day.
+  var timedChromeRefreshTimer = null;
+  function scheduleTimedChromeRefresh() {
+    var hasHomeCard = Boolean(document.querySelector(".home-prayer-card[data-date-slug]"));
+    var hasCalendar = Boolean(document.querySelector(".calendar"));
+    var hasOfficeHour = Boolean(document.querySelector(".office-hour"));
+    if (!hasHomeCard && !hasCalendar && !hasOfficeHour) {
+      return;
+    }
+    if (timedChromeRefreshTimer) {
+      clearTimeout(timedChromeRefreshTimer);
+    }
+    var now = new Date();
+    var next = hasHomeCard ? nextOfficeBoundary(now) : null;
+    if (next === null) {
+      next = new Date(now.getTime());
+      next.setDate(next.getDate() + 1);
+      next.setHours(0, 0, 0, 0);
+    }
+    timedChromeRefreshTimer = setTimeout(function () {
+      timedChromeRefreshTimer = null;
+      syncChromeIfNeeded();
+      scheduleTimedChromeRefresh();
+    }, Math.max(0, next.getTime() - now.getTime()) + 250);
+  }
+  syncChromeIfNeeded();
+  scheduleTimedChromeRefresh();
+
   // markCalendarToday highlights today's row on the ordo page and reveals
   // the header "Today" jump link. Applied client-side because calendar pages
   // are served from the service-worker cache, so a server-rendered marker
   // would freeze on whichever day the page was fetched. The jump link stays
   // hidden when today's row isn't on the displayed year.
   function markCalendarToday() {
+    document.querySelectorAll(".calendar tr.day.is-today").forEach(function (previous) {
+      previous.classList.remove("is-today");
+      previous.removeAttribute("aria-current");
+    });
+    var todayLink = document.getElementById("calendar-today-link");
+    if (todayLink) {
+      todayLink.hidden = true;
+      todayLink.removeAttribute("href");
+    }
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
       row.classList.add("is-today");
       row.setAttribute("aria-current", "date");
-      var todayLink = document.getElementById("calendar-today-link");
       if (todayLink) {
         todayLink.setAttribute("href", "#" + row.id);
         todayLink.hidden = false;

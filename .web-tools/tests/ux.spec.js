@@ -244,6 +244,56 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   expect(apseState.borderStyle).toBe("double");
 });
 
+test("the early-morning invitation opens the previous day's Compline", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-03-15T01:00:00-04:00"));
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Compline");
+  await expect(page.locator(".pray-now")).toHaveAttribute("href", "/compline/2026-03-14");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
+});
+
+test("the foreground home invitation advances at the next office boundary", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-03-15T10:59:00-04:00") });
+  await openDatedPage(page, `/?date=${testDate}`);
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Terce");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "terce",
+  );
+
+  await page.clock.fastForward("02:00");
+
+  await expect(page.locator(".pray-now")).toHaveText("Pray Sext");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "sext",
+  );
+});
+
+test("the foreground home keeps previous-day Compline current across midnight", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/?date=2026-07-29");
+
+  const invitation = page.locator(".pray-now");
+  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveAttribute(
+    "data-hour",
+    "compline",
+  );
+
+  await page.clock.fastForward("02:00");
+
+  await expect(invitation).toHaveText("Pray Compline");
+  await expect(invitation).toHaveAttribute("href", "/compline/2026-07-29");
+  await expect(page.locator('.home-hour-link[aria-current="time"]')).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
+});
+
 test("parish material stays in non-liturgical rooms and off the prayer page", async ({
   page,
 }) => {
@@ -967,6 +1017,87 @@ test("hour typography keeps a clear hierarchy across narrow phone widths", async
   ).toBeVisible();
 });
 
+test("desktop prayer text keeps a centred book measure and crisp section rhythm", async ({
+  page,
+}) => {
+  for (const width of [920, 1280, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, `/lauds/${testDate}`);
+
+    const geometry = await page.evaluate(() => {
+      const elements = document.querySelector(".elements");
+      const elementsRect = elements.getBoundingClientRect();
+      const heading = [...document.querySelectorAll(".section-heading")].find(
+        (node) => node.textContent.trim() === "The Short Responsory",
+      );
+      const headingRect = heading.getBoundingClientRect();
+      const beforeRect = heading.previousElementSibling.getBoundingClientRect();
+      const afterRect = heading.nextElementSibling.getBoundingClientRect();
+      const headingStyle = getComputedStyle(heading);
+      return {
+        elementsWidth: elementsRect.width,
+        centreOffset: Math.abs(elementsRect.left + elementsRect.width / 2 - window.innerWidth / 2),
+        prayerFont: parseFloat(getComputedStyle(elements).fontSize),
+        headingLeading:
+          parseFloat(headingStyle.lineHeight) / parseFloat(headingStyle.fontSize),
+        beforeGap: headingRect.top - beforeRect.bottom,
+        afterGap: afterRect.top - headingRect.bottom,
+        overflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+
+    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeGreaterThanOrEqual(580);
+    expect(geometry.elementsWidth, `${width}px prayer measure`).toBeLessThanOrEqual(600);
+    expect(geometry.centreOffset, `${width}px prayer centring`).toBeLessThanOrEqual(1);
+    expect(geometry.prayerFont, `${width}px prayer face`).toBeCloseTo(20, 1);
+    expect(geometry.headingLeading, `${width}px heading leading`).toBeCloseTo(1.3, 1);
+    expect(geometry.beforeGap, `${width}px space before heading`).toBeGreaterThanOrEqual(36);
+    expect(geometry.afterGap, `${width}px space after heading`).toBeGreaterThanOrEqual(24);
+    expect(geometry.overflow, `${width}px horizontal overflow`).toBe(0);
+  }
+
+  // A tablet keeps the denser setting until there is enough open field to
+  // frame the larger desktop page.
+  await page.setViewportSize({ width: 768, height: 900 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await expect
+    .poll(() =>
+      page.locator(".elements").evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
+    )
+    .toBeCloseTo(19, 1);
+});
+
+test("print keeps the designed 11pt prayer size at a desktop viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ media: "print" });
+  await openDatedPage(page, `/lauds/${testDate}`);
+
+  const printStyles = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const elements = getComputedStyle(document.querySelector(".elements"));
+    return {
+      bodyFont: parseFloat(body.fontSize),
+      prayerFont: parseFloat(elements.fontSize),
+      prayerMaxWidth: elements.maxWidth,
+      headerDisplay: getComputedStyle(document.querySelector("header")).display,
+      bannerDisplay: getComputedStyle(document.querySelector(".site-banner")).display,
+      sessionSummaryDisplay: getComputedStyle(
+        document.querySelector(".session-prayers > summary"),
+      ).display,
+    };
+  });
+
+  // CSS px are 96/in; 11pt therefore computes to 14.666…px.
+  expect(printStyles.bodyFont).toBeCloseTo(44 / 3, 1);
+  expect(printStyles.prayerFont).toBeCloseTo(printStyles.bodyFont, 1);
+  expect(printStyles.prayerMaxWidth).toBe("none");
+  expect(printStyles.headerDisplay).toBe("none");
+  expect(printStyles.bannerDisplay).toBe("none");
+  expect(printStyles.sessionSummaryDisplay).toBe("none");
+  await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
+});
+
 test("dated hour navigation keeps the selected liturgical day", async ({ page }) => {
   await openDatedPage(page, `/lauds/${testDate}`);
 
@@ -997,19 +1128,170 @@ test("ordo day details collapse on a phone and stay open on a wide screen", asyn
   await expect(page.locator("#d-2026-03-01 .day-commemoration").first()).toBeVisible();
 });
 
+test("the foreground Ordo moves rather than duplicates its today marker at midnight", async ({
+  page,
+}) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/calendar/2026");
+
+  const oldToday = page.locator("#d-2026-07-29");
+  const newToday = page.locator("#d-2026-07-30");
+  await expect(oldToday).toHaveClass(/is-today/);
+  await expect(oldToday).toHaveAttribute("aria-current", "date");
+
+  await page.clock.fastForward("02:00");
+
+  await expect(oldToday).not.toHaveClass(/is-today/);
+  await expect(oldToday).not.toHaveAttribute("aria-current", "date");
+  await expect(newToday).toHaveClass(/is-today/);
+  await expect(newToday).toHaveAttribute("aria-current", "date");
+  await expect(page.locator(".month-table tr.is-today")).toHaveCount(1);
+});
+
+test("an office left open in the foreground offers today after midnight", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/lauds/2026-07-29");
+
+  await expect(page.locator(".not-today-notice")).toHaveCount(0);
+  await page.clock.fastForward("02:00");
+
+  const notice = page.locator(".not-today-notice");
+  await expect(notice).toBeVisible();
+  await expect(notice).toHaveAttribute("role", "status");
+  await expect(notice.getByRole("link", { name: "Go to today" })).toHaveAttribute(
+    "href",
+    "/lauds/2026-07-30",
+  );
+});
+
 test("reminder choices update the subscription URL", async ({ page }) => {
   await page.goto("/reminders");
+
+  const copy = page.getByRole("button", { name: "Copy link" });
+  const subscribe = page.locator("#reminder-webcal");
+  await expect(copy).toBeVisible();
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(page.getByLabel("Time for Lauds")).toBeEnabled();
+  await expect(page.getByLabel("Time for Lauds")).toHaveAttribute("required", "");
+  await expect(page.getByLabel("Time for Prime")).toBeDisabled();
+  await expect(page.getByLabel("Time for Prime")).not.toHaveAttribute("required");
 
   for (const checkbox of await page.locator('input[name="hour"]').all()) {
     await checkbox.uncheck();
   }
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).toHaveAttribute("aria-disabled", "true");
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(subscribe).toHaveAttribute("tabindex", "-1");
+  await expect(page.locator("#reminder-url")).toHaveText("Select at least one hour above.");
+  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one hour above.");
+  await expect(page.locator("#reminder-copied")).toBeVisible();
+
   await page.locator('input[name="hour"][value="lauds"]').check();
+  await expect(copy).toBeEnabled();
+  await expect(subscribe).toHaveAttribute("aria-disabled", "false");
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(subscribe).not.toHaveAttribute("tabindex");
+  await expect(page.getByLabel("Time for Lauds")).toBeEnabled();
   await page.getByLabel("Time for Lauds").fill("07:30");
   await page.getByLabel("Time for Lauds").press("Tab");
 
   const feedURL = page.locator("#reminder-url");
   await expect(feedURL).toContainText("lauds=07%3A30");
   await expect(feedURL).toContainText("tz=America%2FNew_York");
+
+  await page.getByLabel("Time for Lauds").fill("");
+  await page.getByLabel("Time for Lauds").press("Tab");
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(feedURL).toHaveText("Choose a time for each selected hour.");
+  await expect(page.locator("#reminder-copied")).toHaveText(
+    "Choose a time for each selected hour.",
+  );
+
+  await page.getByLabel("Time for Lauds").fill("07:30");
+  await page.getByLabel("Time for Lauds").press("Tab");
+  await expect(copy).toBeEnabled();
+
+  for (const checkbox of await page.locator('input[name="day"]').all()) {
+    await checkbox.uncheck();
+  }
+  await expect(copy).toBeDisabled();
+  await expect(subscribe).not.toHaveAttribute("href");
+  await expect(feedURL).toHaveText("Select at least one day above.");
+  await expect(page.locator("#reminder-copied")).toHaveText("Select at least one day above.");
+
+  await page.locator('input[name="day"][value="sun"]').check();
+  await expect(copy).toBeEnabled();
+  await expect(subscribe).toHaveAttribute("href", /^webcal:/);
+  await expect(feedURL).toContainText("days=sun");
+});
+
+test("reminder copy failure reveals the calendar address", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+  await page.goto("/reminders");
+
+  await page.getByRole("button", { name: "Copy link" }).click();
+
+  await expect(page.locator("#reminder-copied")).toHaveText(
+    "Copy unavailable. The calendar address is shown below.",
+  );
+  await expect(page.locator(".reminder-address")).toHaveAttribute("open", "");
+  await expect(page.locator("#reminder-url")).toBeVisible();
+});
+
+test("quiet mobile controls retain full thumb targets", async ({ page }) => {
+  for (const [path, selectors] of [
+    [
+      `/?date=${testDate}`,
+      [".site-brand", ".home-date-link", ".not-today-link", ".home-date-nav > summary"],
+    ],
+    [
+      `/lauds/${testDate}`,
+      [
+        ".site-brand",
+        ".hour-date-nav > summary",
+        ".session-prayers > summary",
+        ".assurance-panel > summary",
+        ".report-issue a",
+      ],
+    ],
+    [
+      "/calendar/2026",
+      [".year-nav a:not([hidden])", ".month-jump a", ".day-disclosures summary"],
+    ],
+    [
+      "/reminders",
+      [
+        ".reminder-hour-name",
+        '.reminder-hour-row input[type="time"]',
+        ".reminder-day",
+        ".reminder-alarm select",
+        ".reminder-subscribe",
+        ".reminder-copy",
+        ".reminder-address > summary",
+        ".reminder-help > summary",
+      ],
+    ],
+  ]) {
+    await openDatedPage(page, path);
+    for (const selector of selectors) {
+      const targets = page.locator(selector);
+      const count = await targets.count();
+      expect(count, `${path} should expose ${selector}`).toBeGreaterThan(0);
+      for (let i = 0; i < Math.min(count, 12); i++) {
+        const box = await targets.nth(i).boundingBox();
+        expect(box, `${path} ${selector} should be laid out`).not.toBeNull();
+        expect(box.height, `${path} ${selector} target height`).toBeGreaterThanOrEqual(44);
+        expect(box.width, `${path} ${selector} target width`).toBeGreaterThanOrEqual(44);
+      }
+    }
+  }
 });
 
 for (const { name, path, theme, knownViolations } of [
@@ -1022,6 +1304,12 @@ for (const { name, path, theme, knownViolations } of [
   {
     name: "Lauds in the Apse theme",
     path: `/lauds/${testDate}`,
+    theme: "dark",
+    knownViolations: [],
+  },
+  {
+    name: "Reminders in the Apse theme",
+    path: "/reminders",
     theme: "dark",
     knownViolations: [],
   },

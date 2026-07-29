@@ -25,6 +25,13 @@ for (const theme of ["light", "dark"]) {
     await expect(page).toHaveScreenshot(`lauds-${theme}.png`);
   });
 
+  test(`desktop Lauds — ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openForSnapshot(page, `/lauds/${testDate}`, theme);
+    await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
+    await expect(page).toHaveScreenshot(`lauds-desktop-${theme}.png`);
+  });
+
   test(`desktop home — ${theme}`, async ({ page }) => {
     // The project stays in its pinned touch-emulated Chromium profile; this
     // guards desktop responsive composition, not mouse/pointer behavior.
@@ -33,10 +40,39 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator(".home")).toBeVisible();
     await expect(page).toHaveScreenshot(`home-desktop-${theme}.png`, { fullPage: true });
   });
+
+  test(`mobile Reminders — ${theme}`, async ({ page }) => {
+    await openForSnapshot(page, "/reminders", theme);
+    await expect(page.getByRole("heading", { name: "Set prayer reminders", exact: true })).toBeVisible();
+    await expect(page).toHaveScreenshot(`reminders-${theme}.png`, { fullPage: true });
+  });
 }
 
 test("mobile Ordo — light", async ({ page }) => {
   await openForSnapshot(page, "/calendar/2026", "light");
   await expect(page.getByRole("heading", { name: "2026 Ordo", exact: true })).toBeVisible();
   await expect(page).toHaveScreenshot("ordo-light.png");
+});
+
+test("mobile menu — light", async ({ page }) => {
+  await openForSnapshot(page, `/?date=${testDate}`, "light");
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible();
+  await expect(page).toHaveScreenshot("menu-open-light.png");
+});
+
+test("mobile hour ending — dark", async ({ page }) => {
+  await openForSnapshot(page, `/lauds/${testDate}`, "dark");
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect(page.locator(".hour-epilogue")).toBeVisible();
+  await expect(page).toHaveScreenshot("hour-ending-dark.png");
+});
+
+test("desktop prayer transition — light", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openForSnapshot(page, `/lauds/${testDate}`, "light");
+  await page
+    .getByRole("heading", { name: "The Short Responsory", exact: true })
+    .scrollIntoViewIfNeeded();
+  await expect(page).toHaveScreenshot("lauds-transition-desktop-light.png");
 });

@@ -209,7 +209,7 @@ func TestOfflineFallbackDoesNotIncludeConstructionBanner(t *testing.T) {
 	for _, unwanted := range []string{
 		`class=\"site-banner\"`,
 		`data-dismiss-banner`,
-		`under active development`,
+		`not yet been fully checked against the printed books`,
 		// Pages must be network-first whenever reachable; trusting
 		// navigator.onLine here served stale pages while online.
 		`isKnownOffline`,
