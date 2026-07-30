@@ -180,3 +180,24 @@ R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 390 (I Vespers for The Nativity of St John Baptist)
 When Zacharias * went into the temple, there appeared unto him the Angel Gabriel, standing on the right side of the altar of incense.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [short-responsory-lauds]
+# Short responsory at Lauds.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.

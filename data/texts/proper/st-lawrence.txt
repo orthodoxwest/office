@@ -87,3 +87,36 @@ R. And madest him to have dominion of the works of thy hands.
 # SOURCE: draft archdiocesan Vespers book, p. 457 (II Vespers, Saint Laurence, Martyr)
 V. Laurence the Deacon hath wrought a pious work.
 R. Who by the sign of the Cross enlightened the blind.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [hymn-lauds]
+# Hymn at Lauds. First line may be a Latin incipit title.
+#
+# [hymn-vespers]
+# Hymn at Vespers.
+#
+# [short-responsory-lauds]
+# Short responsory at Lauds.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

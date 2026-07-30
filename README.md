@@ -351,7 +351,17 @@ the pattern of his godly conversation.
 
 ### Adding missing propers
 
-Run `make audit` to see which feasts still need proper texts. For each feast listed, create or edit the corresponding file in `data/texts/proper/`. The filename must match the feast's `[section-id]` in the feasts file (e.g. feast `[st-andrew]` → `data/texts/proper/st-andrew.txt`).
+Run `make scaffold-propers` first: it creates a proper file for every non-commemoration feast that lacks one, and appends any missing section keys as comments to sparse existing files. Live (uncommented) sections are never rewritten. Each commented key has a one-line explanation — uncomment the header and put text (or `@use …`) beneath it to activate.
+
+```bash
+make scaffold-propers                          # create/append scaffolds
+./office scaffold propers -dry-run             # plan only
+./office scaffold propers -check               # CI: fail if any feast still needs a scaffold
+./office scaffold propers -feast st-ambrose    # one feast
+./office scaffold propers -include-commemorations  # thin catalog for rank=commemoration
+```
+
+Then run `make audit` to see which feasts still need real proper *text*. For each feast listed, edit `data/texts/proper/{feast-id}.txt` (e.g. feast `[st-andrew]` → `data/texts/proper/st-andrew.txt`).
 
 If a feast should intentionally fall back to ordinary/common texts (e.g. a feria or a minor feast without a unique proper), add its ID to `data/audit-ok.txt` to suppress the warning:
 

@@ -118,3 +118,54 @@ Jesus stooped down, * and wrote on the ground: He that is without sin, let him c
 But the father said * to his servants: Bring forth quickly the first robe, and put it on him, and put a ring on his hand, and shoes on his feet.
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [hymn-lauds]
+# Hymn at Lauds. First line may be a Latin incipit title.
+#
+# [hymn-vespers]
+# Hymn at Vespers.
+#
+# [versicle-vespers]
+# Versicle after the hymn at Vespers.
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-lauds]
+# Short responsory at Lauds.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-vespers]
+# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

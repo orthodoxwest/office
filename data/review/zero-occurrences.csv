@@ -107,7 +107,6 @@ proper/whit-ember-friday/psalm-antiphon-4,d64ac91c1bae,suppressed,The Pentecost 
 proper/whit-ember-saturday/collect,23adae8f8a68,suppressed,The Pentecost octave office suppresses the coincident Whit Ember proper under current local policy,
 proper/whit-ember-wednesday/collect,eb15f5b0e89e,suppressed,The Pentecost octave office suppresses the coincident Whit Ember proper under current local policy,
 seasonal/advent/magnificat-antiphon-december-21,c31da4331f75,displaced,St Thomas has a feast-specific Magnificat antiphon and always displaces O Oriens on December 21,
-seasonal/pentecost,659c6848395e,dead,The sectionless comment-only placeholder is loaded as an atomic entry but can never render,
 shared/formulas/commemoration-antiphon,0d0bdd94e513,shadowed-fallback,Feast propers and category commons cover every selected saint commemoration; retain the shared safety formula,
 shared/formulas/commemoration-versicle,c938aef4987d,shadowed-fallback,Feast propers and category commons cover every selected saint commemoration; retain the shared safety formula,
 shared/formulas/collect-conclusion-through-same-spirit,c3e8144202c8,dormant-policy,No collect currently names the Son mid-text and the Holy Spirit together; the form is kept so XXXIII.4 is representable without a code change,

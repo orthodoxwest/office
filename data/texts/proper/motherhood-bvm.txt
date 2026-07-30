@@ -115,3 +115,18 @@ R. The Virgin hath borne the Saviour: we praise thee, O our God.
 
 [versicle-vespers]
 @use shared/blessed-virgin/versicle-blessed-art-thou
+
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.

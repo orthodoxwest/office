@@ -35,3 +35,63 @@ R. Which did eat of my bread, hath lifted up his heel against me.
 
 [collect]
 O God, from whom Judas received the punishment of his guilt, and the thief the reward of his confession: grant unto us the full effect of thy clemency; that as in his Passion our Lord Jesus Christ gave to each a recompense meet for his deserts, so having taken away our old sins, he may bestow on us the grace of his resurrection.
+
+# [magnificat-antiphon-first]
+# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [chapter-lauds]
+# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
+#
+# [chapter-vespers]
+# Chapter at Vespers (often @use of chapter-lauds).
+#
+# [hymn-lauds]
+# Hymn at Lauds. First line may be a Latin incipit title.
+#
+# [hymn-vespers]
+# Hymn at Vespers.
+#
+# [versicle-lauds]
+# Versicle after the hymn at Lauds (V. … / R. …).
+#
+# [versicle-vespers]
+# Versicle after the hymn at Vespers.
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-lauds]
+# Short responsory at Lauds.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-vespers]
+# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

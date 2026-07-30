@@ -1,0 +1,109 @@
+# Proper scaffold for [st-romuald]
+# Name: St Romuald, Abbot
+# Rank: double  Category: confessor
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [collect]
+# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
+#
+# [benedictus-antiphon]
+# Antiphon on the Benedictus at Lauds.
+#
+# [magnificat-antiphon]
+# Antiphon on the Magnificat at II Vespers.
+#
+# [magnificat-antiphon-first]
+# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
+#
+# [psalm-antiphon]
+# Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
+#
+# [psalm-antiphon-1]
+# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
+#
+# [psalm-antiphon-2]
+# Second psalm antiphon at Lauds.
+#
+# [psalm-antiphon-3]
+# Third psalm antiphon at Lauds.
+#
+# [psalm-antiphon-4]
+# Fourth psalm antiphon at Lauds (often the canticle antiphon).
+#
+# [psalm-antiphon-5]
+# Fifth psalm antiphon at Lauds (Laudate psalms).
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is only commemorated (not the day's celebration).
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+
+# --- optional ---
+#
+# [chapter-lauds]
+# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
+#
+# [chapter-vespers]
+# Chapter at Vespers (often @use of chapter-lauds).
+#
+# [hymn-lauds]
+# Hymn at Lauds. First line may be a Latin incipit title.
+#
+# [hymn-vespers]
+# Hymn at Vespers.
+#
+# [versicle-lauds]
+# Versicle after the hymn at Lauds (V. … / R. …).
+#
+# [versicle-vespers]
+# Versicle after the hymn at Vespers.
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-lauds]
+# Short responsory at Lauds.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-vespers]
+# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

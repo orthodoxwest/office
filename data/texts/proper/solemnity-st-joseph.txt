@@ -148,3 +148,30 @@ R. For thou art my defender and helper, alleluia.
 # SOURCE: draft archdiocesan Vespers book, p. 169 (The Solemnity of Saint Joseph, II Vespers)
 V. I sat down under his shadow, whom I desired, alleluia.
 R. And his fruit was sweet to my palate, alleluia.
+
+# [commemoration-antiphon]
+# Antiphon when this feast is only commemorated (not the day's celebration).
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

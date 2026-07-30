@@ -67,6 +67,9 @@ internal/
     audit.go               Placeholder scanner + missing-propers reporter
     sweep.go               Composition sweep: not-found markers + ordinary fallbacks on Double+ days
     lint.go                Text-corpus lints (mechanical fail make check; advisory for triage)
+  scaffold/                Proper-file scaffolds (commented key catalogs for missing/sparse propers)
+    keys.go                Core + optional section key catalog with one-line blurbs
+    propers.go             EnsurePropers: create missing files, append missing keys, never rewrite live sections
   review/                  Human review coverage tracking
     review.go              Manifest sweep: dedupe identical composed hours into review units
     signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
@@ -156,6 +159,7 @@ make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
 make validate    # Validate data files
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
+make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt

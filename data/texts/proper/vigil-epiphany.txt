@@ -192,3 +192,27 @@ R. His salvation, alleluia.
 # concurrence gives the evening to I Vespers of Epiphany, so the draft's
 # Vigil Vespers texts above are retained as source data but do not replace
 # the feast office on any actual calendar date.
+
+# [magnificat-antiphon-first]
+# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

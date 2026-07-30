@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-suspects review-plan review-assurance review-sources tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -59,6 +59,9 @@ validate: build ## Validate data files
 
 audit: build ## Report placeholder texts and missing feast propers
 	./office audit
+
+scaffold-propers: build ## Ensure proper text files exist with commented key catalogs (never overwrites live sections)
+	./office scaffold propers
 
 project-status: build ## Generate clergy-facing proper, assurance, and YEAR ordo status
 	python3 scripts/project-status.py --year $(YEAR)

@@ -166,3 +166,33 @@ R. Make us rejoice in heaven's kingdom bright.
 # SOURCE: draft archdiocesan Vespers book, p. 492 (The Seven Sorrows of the B.V.M.)
 V. Pray for us, O Queen of Martyrs.
 R. Who didst stand by the Cross of Jesus.
+
+# [commemoration-antiphon]
+# Antiphon when this feast is only commemorated (not the day's celebration).
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.
