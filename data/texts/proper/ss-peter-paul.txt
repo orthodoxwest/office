@@ -128,3 +128,27 @@ Amen.
 
 [short-responsory-vespers]
 @use commons/apostle/short-responsory-vespers
+
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-lauds]
+# Versicle after the hymn at Lauds (V. … / R. …).
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.

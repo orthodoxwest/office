@@ -214,3 +214,21 @@ R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
 !Acts 2:1-2
 When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
 R. Thanks be to God.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

@@ -130,3 +130,36 @@ Amen.
 
 [versicle-vespers]
 @use commons/confessor-bishop/versicle-lauds
+
+# [magnificat-antiphon-first]
+# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is only commemorated (not the day's celebration).
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration of this feast.
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

@@ -171,3 +171,18 @@ Amen.
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 530 (The Feast of All Saints, I Vespers)
 O ye Angels and Archangels, * O ye Thrones and Dominions, Principalities and Powers, Virtues of the heavens, Cherubim and Seraphim, O ye Patriarchs and Prophets, ye holy Doctors of the law, O all ye Apostles, ye Martyrs of Christ, ye holy Confessors, ye Virgins of the Lord, ye holy Hermits, and all Saints: offer for us your intercessions.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

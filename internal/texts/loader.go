@@ -73,10 +73,17 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 			return corpus.loadINIFile(relPath, text)
 		}
 
-		// Plain text file: key is path without .txt extension
+		// Plain text file: key is path without .txt extension.
+		// Comment-only files (e.g. proper scaffolds awaiting fill-in) strip to
+		// empty and are not corpus entries — nothing would look them up, and
+		// they would only pollute zero-occurrence / placeholder sweeps.
 		key := strings.TrimSuffix(relPath, ".txt")
 		key = filepath.ToSlash(key)
-		corpus.texts[key] = strings.TrimSpace(stripCommentLines(text))
+		body := strings.TrimSpace(stripCommentLines(text))
+		if body == "" {
+			return nil
+		}
+		corpus.texts[key] = body
 		return nil
 	})
 

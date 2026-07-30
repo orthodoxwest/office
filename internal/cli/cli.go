@@ -34,7 +34,7 @@ type env struct {
 var errReported = errors.New("findings reported")
 
 const usage = `Usage: office <command> [args]
-Commands: ordo, rubrics, validate, audit, lint, review, lauds, prime, terce, sext, none, vespers, compline, tex, serve`
+Commands: ordo, rubrics, validate, audit, lint, review, scaffold, lauds, prime, terce, sext, none, vespers, compline, tex, serve`
 
 // Run executes one command. args excludes the program name. It returns the
 // process exit status: 0 on success, 1 on any failure.
@@ -91,6 +91,8 @@ func lookup(name string) (func(env, []string) error, bool) {
 		return cmdTeX, true
 	case "review":
 		return cmdReview, true
+	case "scaffold":
+		return cmdScaffold, true
 	case "serve":
 		return cmdServe, true
 	default:

@@ -130,3 +130,24 @@ R. Let the righteous rejoice before God.
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/12-28.txt [Ant 1] — check against diurnal
 These are they * who were not defiled with women; for they are virgins, and follow the Lamb whithersoever he goeth.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.

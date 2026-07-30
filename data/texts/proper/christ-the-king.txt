@@ -235,3 +235,21 @@ R. And there shall be no end of peace.
 !Col 1:12-13
 Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
 R. Thanks be to God.
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-vespers]
+# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).

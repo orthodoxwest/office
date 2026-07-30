@@ -264,3 +264,6 @@ R. Ye shall know this day * that the Lord will come.
 
 [chapter-terce]
 @use proper/christmas/chapter-lauds
+
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).

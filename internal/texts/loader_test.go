@@ -62,6 +62,38 @@ Have mercy upon me, O Lord.
 	}
 }
 
+func TestLoadTextsSkipsCommentOnlyPlainFiles(t *testing.T) {
+	dir := t.TempDir()
+	properDir := filepath.Join(dir, "texts", "proper")
+	if err := os.MkdirAll(properDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	// Proper scaffolds are comment-only until a live section is filled in.
+	if err := os.WriteFile(filepath.Join(properDir, "st-ambrose.txt"), []byte(`# Proper scaffold for [st-ambrose]
+# Name: St. Ambrose
+#
+# [collect]
+# Collect of the feast.
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// Empty body after strip (comments + blank lines only).
+	if err := os.WriteFile(filepath.Join(properDir, "empty.txt"), []byte("\n\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	corpus, err := LoadTexts(dir)
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+	if corpus.Has("proper/st-ambrose") {
+		t.Fatal("comment-only scaffold must not register as a corpus entry")
+	}
+	if corpus.Has("proper/empty") {
+		t.Fatal("empty plain file must not register as a corpus entry")
+	}
+}
+
 func TestLoadTextsStripsComments(t *testing.T) {
 	dir := t.TempDir()
 	ordinaryDir := filepath.Join(dir, "texts", "ordinary")

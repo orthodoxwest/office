@@ -98,3 +98,57 @@ R. Thanks be to God.
 
 # No Magnificat antiphon: vespers of Dec 24 belong to I Vespers of Christmas.
 # See data/audit-ok.txt.
+
+# [magnificat-antiphon]
+# Antiphon on the Magnificat at II Vespers.
+#
+# [magnificat-antiphon-first]
+# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
+#
+# [commemoration-collect]
+# Collect for the commemoration (defaults to [collect] when omitted).
+#
+# [hymn-lauds]
+# Hymn at Lauds. First line may be a Latin incipit title.
+#
+# [hymn-vespers]
+# Hymn at Vespers.
+#
+# [versicle-vespers]
+# Versicle after the hymn at Vespers.
+#
+# [versicle-first-vespers]
+# Versicle at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-vespers]
+# Short responsory at Vespers.
+#
+# [vespers-psalmody]
+# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
+#
+# [vespers-psalmody-first]
+# I Vespers psalmody table when it differs from II Vespers.
+#
+# [psalm-antiphon-1-vespers]
+# Vespers-only override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-vespers]
+# Vespers-only override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-vespers]
+# Vespers-only override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-vespers]
+# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
+#
+# [psalm-antiphon-1-first-vespers]
+# I Vespers override for psalm antiphon 1.
+#
+# [psalm-antiphon-2-first-vespers]
+# I Vespers override for psalm antiphon 2.
+#
+# [psalm-antiphon-3-first-vespers]
+# I Vespers override for psalm antiphon 3.
+#
+# [psalm-antiphon-4-first-vespers]
+# I Vespers override for psalm antiphon 4.
