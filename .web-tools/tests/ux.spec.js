@@ -22,6 +22,16 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// The server renders an undated home request for its own current local day.
+// Read that rendered value before installing a browser clock, so tests of a
+// foreground page crossing midnight do not assume a particular CI date.
+async function serverTodaySlug(page) {
+  await page.goto("/");
+  const slug = await page.locator(".home-prayer-card").getAttribute("data-date-slug");
+  expect(slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  return slug;
+}
+
 test("mobile navigation stays quiet until opened", async ({ page }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 
@@ -749,12 +759,14 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 
 test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
   // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦, the drop caps and the ✠. The timber course under
-  // it does not move — the church veils its images, not its beams. Both themes
-  // read one pair of leaf colours, because the ground is dark in each.
+  // Paschaltide like the ✦ and the drop caps. The timber course and the
+  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
+  // Both themes read one pair of leaf colours, because the ground is dark in
+  // each.
   for (const theme of ["light", "dark"]) {
     const ink = {};
     const ground = {};
+    const cross = {};
     for (const [season, date] of [
       ["ordinary", testDate],
       ["passiontide", "2026-04-08"],
@@ -770,6 +782,8 @@ test("the inscription band keeps the season with the rest of the gilding", async
       });
       ink[season] = band.ink;
       ground[season] = band.ground;
+      await sheet.goto(`/vespers/${date}`);
+      cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
     expect(ink.passiontide).not.toBe(ink.ordinary);
@@ -777,6 +791,8 @@ test("the inscription band keeps the season with the rest of the gilding", async
     expect(ink.eastertide).not.toBe(ink.passiontide);
     expect(ground.passiontide).toBe(ground.ordinary);
     expect(ground.eastertide).toBe(ground.ordinary);
+    expect(cross.passiontide).toBe(cross.ordinary);
+    expect(cross.eastertide).toBe(cross.ordinary);
   }
 });
 
@@ -948,57 +964,114 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
 });
 
-test("hour typography keeps a clear hierarchy across narrow phone widths", async ({ page }) => {
+test("hour typography keeps the liturgical hierarchy across themes and narrow phone widths", async ({
+  page,
+}) => {
   const bodySizes = [];
 
-  for (const width of [320, 390, 540]) {
-    await page.setViewportSize({ width, height: 844 });
-    await openDatedPage(page, "/vespers/2026-06-18");
+  for (const theme of ["light", "dark"]) {
+    for (const width of [320, 390, 540]) {
+      await page.setViewportSize({ width, height: 844 });
+      await openDatedPage(page, "/vespers/2026-06-18", theme);
 
-    const metrics = await page.evaluate(() => {
-      const px = (selector, property) =>
-        parseFloat(getComputedStyle(document.querySelector(selector))[property]);
-      return {
-        prayer: px(".elements", "fontSize"),
-        heading: px(".section-heading", "fontSize"),
-        item: px(".item-label", "fontSize"),
-        rubric: px(".rubric", "fontSize"),
-        chapterRef: px(".chapter-ref", "fontSize"),
-        psalmLeading: px(".psalm-verses", "lineHeight"),
-        hymnLine: (() => {
-          const style = getComputedStyle(document.querySelector(".hymn-line"));
-          return {
-            display: style.display,
-            padding: parseFloat(style.paddingLeft),
-            indent: parseFloat(style.textIndent),
-          };
-        })(),
-        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-      };
-    });
+      const metrics = await page.evaluate(() => {
+        const style = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo);
+        const px = (selector, property) => parseFloat(style(selector)[property]);
+        const firstLetter = (selector) => {
+          const cap = style(selector, "::first-letter");
+          return { float: cap.float, size: parseFloat(cap.fontSize) };
+        };
+        const hymnLine = style(".hymn-stanza-opening .hymn-line:nth-child(3)");
+        return {
+          prayer: px(".elements", "fontSize"),
+          heading: px(".section-heading", "fontSize"),
+          psalmItem: px(".psalm > .item-label", "fontSize"),
+          marianItem: px(".marian-antiphon > .item-label", "fontSize"),
+          rubric: px(".rubric", "fontSize"),
+          chapterRef: px(".chapter-ref", "fontSize"),
+          scriptureRef: px(".scripture-ref", "fontSize"),
+          rubricStyle: style(".rubric").fontStyle,
+          chapterRefStyle: style(".chapter-ref").fontStyle,
+          scriptureRefStyle: style(".scripture-ref").fontStyle,
+          rubricColor: style(".rubric").color,
+          chapterRefColor: style(".chapter-ref").color,
+          scriptureRefColor: style(".scripture-ref").color,
+          crossColor: style(".cross").color,
+          psalmLeading: px(".psalm-verses", "lineHeight"),
+          hymnLine: {
+            display: hymnLine.display,
+            padding: parseFloat(hymnLine.paddingLeft),
+            indent: parseFloat(hymnLine.textIndent),
+          },
+          hymnOpening: (() => {
+            const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
+            const text = opening.firstChild;
+            const glyph = (start, end) => {
+              const range = document.createRange();
+              range.setStart(text, start);
+              range.setEnd(text, end);
+              const { left, right } = range.getBoundingClientRect();
+              return { left, right };
+            };
+            return {
+              cap: glyph(0, 1),
+              following: glyph(1, 2),
+              padding: parseFloat(getComputedStyle(opening).paddingLeft),
+              indent: parseFloat(getComputedStyle(opening).textIndent),
+            };
+          })(),
+          caps: [
+            ".collect .plain-line",
+            ".hymn-stanza-opening .hymn-line",
+            ".marian-antiphon .chant-line-opening",
+            ".corporate-lord-prayer-officiant",
+            ".short-responsory-opening .sigil-text",
+          ].map(firstLetter),
+          secretCap: firstLetter(".secret-text"),
+          overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        };
+      });
 
-    bodySizes.push(metrics.prayer);
-    expect(metrics.overflow, `${width}px horizontal overflow`).toBe(false);
-    expect(metrics.heading, `${width}px section heading`).toBeGreaterThanOrEqual(
-      metrics.prayer * 0.9,
-    );
-    expect(metrics.heading, `${width}px section heading`).toBeLessThanOrEqual(metrics.prayer);
-    expect(metrics.item, `${width}px item label`).toBeGreaterThanOrEqual(metrics.prayer * 0.8);
-    expect(metrics.item, `${width}px item label`).toBeLessThan(metrics.heading);
-    expect(metrics.rubric, `${width}px rubric`).toBeGreaterThanOrEqual(metrics.prayer * 0.81);
-    expect(metrics.rubric, `${width}px rubric`).toBeLessThan(metrics.prayer);
-    expect(metrics.chapterRef, `${width}px chapter reference`).toBeLessThan(metrics.heading);
-    expect(metrics.psalmLeading / metrics.prayer, `${width}px psalm leading`).toBeCloseTo(
-      1.65,
-      2,
-    );
-    expect(metrics.hymnLine.display, `${width}px hymn line flow`).toBe("block");
-    expect(metrics.hymnLine.padding, `${width}px hymn continuation inset`).toBeGreaterThan(0);
-    expect(metrics.hymnLine.indent, `${width}px hymn first-line offset`).toBeLessThan(0);
-    expect(
-      metrics.hymnLine.padding + metrics.hymnLine.indent,
-      `${width}px hymn stanza edge`,
-    ).toBeCloseTo(0, 1);
+      if (theme === "light") bodySizes.push(metrics.prayer);
+      const label = `${theme}/${width}px`;
+      expect(metrics.overflow, `${label} horizontal overflow`).toBe(false);
+      expect(metrics.heading, `${label} section heading`).toBeGreaterThanOrEqual(metrics.prayer * 0.9);
+      expect(metrics.heading, `${label} section heading`).toBeLessThanOrEqual(metrics.prayer);
+      expect(metrics.psalmItem, `${label} psalm label`).toBeCloseTo(metrics.prayer, 1);
+      expect(metrics.marianItem, `${label} unrelated item label`).toBeLessThan(metrics.prayer);
+      expect(metrics.rubric, `${label} rubric`).toBeGreaterThanOrEqual(metrics.prayer * 0.84);
+      expect(metrics.rubric, `${label} rubric`).toBeLessThan(metrics.prayer);
+      expect(metrics.chapterRef, `${label} chapter reference`).toBeLessThan(metrics.prayer);
+      expect(metrics.scriptureRef, `${label} scripture reference`).toBeLessThan(metrics.prayer);
+      expect(metrics.rubricStyle, `${label} rubric face`).toBe("normal");
+      expect(metrics.chapterRefStyle, `${label} chapter reference face`).toBe("normal");
+      expect(metrics.scriptureRefStyle, `${label} scripture reference face`).toBe("normal");
+      expect(metrics.chapterRefColor, `${label} chapter reference color`).toBe(metrics.rubricColor);
+      expect(metrics.scriptureRefColor, `${label} scripture reference color`).toBe(metrics.rubricColor);
+      expect(metrics.crossColor, `${label} cross color`).toBe(metrics.rubricColor);
+      expect(metrics.psalmLeading / metrics.prayer, `${label} psalm leading`).toBeCloseTo(1.65, 2);
+      expect(metrics.hymnLine.display, `${label} hymn line flow`).toBe("block");
+      expect(metrics.hymnLine.padding, `${label} hymn continuation inset`).toBeGreaterThan(0);
+      expect(metrics.hymnLine.indent, `${label} hymn first-line offset`).toBeLessThan(0);
+      expect(metrics.hymnLine.padding + metrics.hymnLine.indent, `${label} hymn stanza edge`).toBeCloseTo(
+        0,
+        1,
+      );
+      // The opening cap is floated at the stanza edge, so it must not also
+      // take the normal hanging indent. That indentation both offsets the cap
+      // from the metrical edge and moves the next glyph beneath it on phones.
+      expect(metrics.hymnOpening.padding, `${label} hymn opening padding`).toBe(0);
+      expect(metrics.hymnOpening.indent, `${label} hymn opening indent`).toBe(0);
+      expect(
+        metrics.hymnOpening.following.left,
+        `${label} hymn opening glyph clears the drop cap`,
+      ).toBeGreaterThanOrEqual(metrics.hymnOpening.cap.right - 0.5);
+      for (const cap of metrics.caps) {
+        expect(cap.float, `${label} approved opening drop cap`).toBe("left");
+        expect(cap.size, `${label} approved opening drop cap size`).toBeGreaterThan(metrics.prayer * 2);
+      }
+      expect(metrics.secretCap.float, `${label} secret prayer never gets a drop cap`).not.toBe("left");
+    }
   }
 
   // The default eases from 19px on the smallest supported phones to the
@@ -1015,6 +1088,210 @@ test("hour typography keeps a clear hierarchy across narrow phone widths", async
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("Prime hymn initial clears its second metrical line on narrow pages", async ({ page }) => {
+  const primeHours = [
+    { date: "2026-03-15", label: "Sunday" },
+    { date: "2026-06-18", label: "feria" },
+  ];
+
+  for (const { date, label: hymn } of primeHours) {
+    for (const theme of ["light", "dark"]) {
+      for (const width of [320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await openDatedPage(page, `/prime/${date}`, theme);
+
+        const geometry = await page.evaluate(() => {
+          const [opening, secondLine] = document.querySelectorAll(
+            ".hymn-stanza-opening .hymn-line",
+          );
+          const firstGlyph = (line) => {
+            const node = [...line.childNodes].find(
+              (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+            );
+            const range = document.createRange();
+            range.setStart(node, 0);
+            range.setEnd(node, 1);
+            const { left, right, top, bottom } = range.getBoundingClientRect();
+            return { left, right, top, bottom };
+          };
+          return {
+            cap: firstGlyph(opening),
+            secondLine: firstGlyph(secondLine),
+            openingLeft: opening.getBoundingClientRect().left,
+            secondLineIndent: parseFloat(getComputedStyle(secondLine).textIndent),
+            secondLinePadding: parseFloat(getComputedStyle(secondLine).paddingLeft),
+          };
+        });
+
+        const label = `${hymn}/${theme}/${width}px`;
+        expect(geometry.secondLineIndent, `${label} second-line outdent`).toBe(0);
+        expect(geometry.secondLinePadding, `${label} second-line hang padding`).toBe(0);
+        const yOverlap =
+          geometry.secondLine.top < geometry.cap.bottom - 0.5 &&
+          geometry.secondLine.bottom > geometry.cap.top + 0.5;
+        if (yOverlap) {
+          // Cap still occupies this row; the glyph must sit to its right.
+          expect(
+            geometry.secondLine.left,
+            `${label} second-line glyph clears cap`,
+          ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+        } else {
+          // First metrical line wrapped through both drop-cap rows; line 2
+          // returns to the stanza edge, not the ordinary hang inset.
+          expect(geometry.secondLine.left, `${label} second line at stanza edge`).toBeCloseTo(
+            geometry.openingLeft,
+            0,
+          );
+        }
+      }
+    }
+  }
+});
+
+test("Marian antiphon initial clears its second chant line", async ({ page }) => {
+  // Salve Regina (Ordinary Time) is the long English form. The opening pair
+  // shares one block so a two-line drop cap can float beside both source
+  // lines; hanging indent on that block used to clip the gilt M and pull
+  // the second line under it.
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/vespers/2026-07-31", "light");
+
+    const geometry = await page.evaluate(() => {
+      const opening = document.querySelector(".marian-antiphon .chant-line-opening");
+      const later = document.querySelector(
+        ".marian-antiphon .liturgical-block > .chant-line:not(.chant-line-opening)",
+      );
+      // First source line text is before the <br>; second is after it.
+      const br = [...opening.childNodes].find((n) => n.nodeName === "BR");
+      const firstText = [...opening.childNodes].find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+      );
+      let secondText = null;
+      if (br) {
+        for (let n = br.nextSibling; n; n = n.nextSibling) {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+            secondText = n;
+            break;
+          }
+        }
+      }
+      const glyph = (node, start = 0, end = 1) => {
+        if (!node) return null;
+        const range = document.createRange();
+        range.setStart(node, start);
+        range.setEnd(node, Math.min(end, node.textContent.length));
+        const { left, right, top, bottom } = range.getBoundingClientRect();
+        return { left, right, top, bottom };
+      };
+      return {
+        cap: glyph(firstText, 0, 1),
+        following: glyph(firstText, 1, 2),
+        second: glyph(secondText, 0, 1),
+        secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
+        openingLeft: opening.getBoundingClientRect().left,
+        openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
+        openingIndent: parseFloat(getComputedStyle(opening).textIndent),
+        laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
+        laterIndent: later ? parseFloat(getComputedStyle(later).textIndent) : 0,
+        label: document.querySelector(".marian-antiphon .item-label")?.textContent ?? "",
+        float: getComputedStyle(opening, "::first-letter").float,
+      };
+    });
+
+    const label = `${width}px`;
+    expect(geometry.label, `${label} seasonal Marian`).toMatch(/Salve Regina/i);
+    expect(geometry.float, `${label} opening drop cap float`).toBe("left");
+    expect(geometry.openingPadding, `${label} opening padding`).toBe(0);
+    expect(geometry.openingIndent, `${label} opening indent`).toBe(0);
+    // Later discrete chant lines keep the hanging indent for wraps.
+    expect(geometry.laterPadding, `${label} later continuation inset`).toBeGreaterThan(0);
+    expect(geometry.laterIndent, `${label} later first-line offset`).toBeLessThan(0);
+    expect(geometry.cap, `${label} drop cap glyph`).not.toBeNull();
+    expect(geometry.following, `${label} rest of first word`).not.toBeNull();
+    expect(geometry.second, `${label} second source line`).not.toBeNull();
+    expect(geometry.secondSnippet, `${label} second source text`).toMatch(/Mary our comfort/i);
+    expect(
+      geometry.following.left,
+      `${label} first-line rest clears the drop cap`,
+    ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+    // On a wide measure the second source line sits beside the cap. On a
+    // phone the first source line may wrap through both drop-cap line boxes,
+    // so the second source line starts below at the opening block's left edge.
+    const yOverlap =
+      geometry.second.top < geometry.cap.bottom - 0.5 &&
+      geometry.second.bottom > geometry.cap.top + 0.5;
+    if (yOverlap) {
+      expect(
+        geometry.second.left,
+        `${label} second-line glyph clears the drop cap`,
+      ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+    } else {
+      expect(geometry.second.left, `${label} second line at opening edge`).toBeCloseTo(
+        geometry.openingLeft,
+        0,
+      );
+    }
+    // A clipped gilt initial paints a short box; a full two-line M is taller
+    // than one body line.
+    expect(
+      geometry.cap.bottom - geometry.cap.top,
+      `${label} drop cap not clipped mid-glyph`,
+    ).toBeGreaterThan((geometry.second.bottom - geometry.second.top) * 1.5);
+  }
+});
+
+test("Litany speaker marks share one spoken-text edge across All lines", async ({ page }) => {
+  // "All:" is wider than ℣./℟. It must hang into the margin rather than
+  // widen every sigil in its liturgical-block — otherwise the Kyrie triad
+  // sits further in than the preceding O Christ exchange (and the ℟. of
+  // the corporate Lord's Prayer below).
+  for (const width of [320, 390, 920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/prime/2026-03-15", "light");
+
+    const geometry = await page.evaluate(() => {
+      const section = [...document.querySelectorAll("h2")].find((h) =>
+        h.textContent.includes("Litany"),
+      );
+      const rows = [];
+      let allSigilLeft = null;
+      for (let el = section.nextElementSibling; el && el.tagName !== "H2"; el = el.nextElementSibling) {
+        for (const line of el.querySelectorAll?.(".versicle-line, .response-line, .all-line") ?? []) {
+          const sigil = line.querySelector(".sigil");
+          const text = line.querySelector(".sigil-text");
+          rows.push({
+            sigil: sigil?.textContent ?? "",
+            textLeft: text.getBoundingClientRect().left,
+            text: (text.textContent || "").slice(0, 36),
+          });
+          if (sigil?.classList.contains("sigil-all")) {
+            allSigilLeft = sigil.getBoundingClientRect().left;
+          }
+        }
+      }
+      return {
+        rows,
+        allSigilLeft,
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
+    });
+
+    expect(geometry.rows.length, `${width}px litany dialogue lines`).toBeGreaterThanOrEqual(5);
+    expect(
+      geometry.rows.some((row) => row.sigil === "All:"),
+      `${width}px includes All speaker mark`,
+    ).toBe(true);
+    expect(geometry.overflow, `${width}px horizontal overflow`).toBe(false);
+    expect(geometry.allSigilLeft, `${width}px All: stays on-screen`).toBeGreaterThanOrEqual(0);
+
+    const edge = geometry.rows[0].textLeft;
+    for (const row of geometry.rows) {
+      expect(row.textLeft, `${width}px ${row.sigil} ${row.text}`).toBeCloseTo(edge, 0);
+    }
+  }
 });
 
 test("desktop prayer text keeps a centred book measure and crisp section rhythm", async ({
@@ -1149,8 +1426,20 @@ test("the foreground Ordo moves rather than duplicates its today marker at midni
 });
 
 test("an office left open in the foreground offers today after midnight", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
-  await openDatedPage(page, "/lauds/2026-07-29");
+  const today = await serverTodaySlug(page);
+  const midnight = await page.evaluate((slug) => {
+    // This executes in Playwright's configured America/New_York timezone, so
+    // local midnight and the next date stay correct in EST, EDT, and at a
+    // year boundary without baking in an offset.
+    const before = new Date(`${slug}T23:59:00`);
+    const after = new Date(before.getTime() + 2 * 60 * 1000);
+    const dateSlug = (d) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    return { before: before.getTime(), tomorrow: dateSlug(after) };
+  }, today);
+
+  await page.clock.install({ time: new Date(midnight.before) });
+  await openDatedPage(page, `/lauds/${today}`);
 
   await expect(page.locator(".not-today-notice")).toHaveCount(0);
   await page.clock.fastForward("02:00");
@@ -1160,7 +1449,7 @@ test("an office left open in the foreground offers today after midnight", async 
   await expect(notice).toHaveAttribute("role", "status");
   await expect(notice.getByRole("link", { name: "Go to today" })).toHaveAttribute(
     "href",
-    "/lauds/2026-07-30",
+    `/lauds/${midnight.tomorrow}`,
   );
 });
 

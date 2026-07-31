@@ -80,7 +80,9 @@ Glory be to the Father, and to the Son, * and to the Holy Ghost;
 As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
 [kyrie]
-Kyrie eleison. Christe eleison. Kyrie eleison.
+V. Kyrie, eleison.
+R. Christe, eleison.
+All: Kyrie, eleison.
 
 [apostles-creed]
 I believe in God the Father Almighty, Maker of heaven and earth:

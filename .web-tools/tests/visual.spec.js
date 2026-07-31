@@ -74,5 +74,8 @@ test("desktop prayer transition — light", async ({ page }) => {
   await page
     .getByRole("heading", { name: "The Short Responsory", exact: true })
     .scrollIntoViewIfNeeded();
+  // Keep the responsory-to-hymn transition in frame without cutting the
+  // hymn's two-line opening initial off at the bottom of the viewport.
+  await page.evaluate(() => window.scrollBy(0, 120));
   await expect(page).toHaveScreenshot("lauds-transition-desktop-light.png");
 });

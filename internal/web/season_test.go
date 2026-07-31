@@ -131,12 +131,14 @@ func TestOnlyOrnamentsAreSeasonallyRetinted(t *testing.T) {
 		"--ornament-line: var(--gold-line);",
 		"body.season-passiontide {",
 		"body.season-eastertide {",
-		// The ornaments themselves.
-		".cross {\n  color: var(--ornament);",
+		// The ornaments themselves. Crosses are rubric red rather than
+		// seasonal gilding, so they remain available as liturgical marks in
+		// Passiontide as well as Paschaltide.
+		".cross {\n  color: var(--rubric);",
 		"border-top: 3px double var(--ornament-line);",
 		// The gilded caps are a gradient, so they read the stop pair rather
-		// than --ornament. Hard-coded stops here would leave the drop caps and
-		// the ✠ gilt while every other ornament was veiled.
+		// than --ornament. Hard-coded stops here would leave the drop caps gilt
+		// while every other ornament was veiled.
 		"linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%)",
 	} {
 		if !strings.Contains(style, want) {
@@ -164,8 +166,8 @@ func TestOnlyOrnamentsAreSeasonallyRetinted(t *testing.T) {
 	}
 
 	// A season that retinted the flat ornament but left the gradient stops
-	// behind would veil every ornament except the drop caps and the ✠, which
-	// would stay gilt. Every season block must carry the whole set.
+	// behind would veil every ornament except the drop caps, which would stay
+	// gilt. Every season block must carry the whole set.
 	for _, decl := range seasonBlocks(style) {
 		for _, token := range []string{"--ornament:", "--ornament-line:", "--ornament-hi:", "--ornament-lo:"} {
 			if !strings.Contains(decl.body, token) {

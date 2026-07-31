@@ -13,7 +13,8 @@ var prayerIncipits = map[string]string{
 	"ordinary/shared/apostles-creed": "I believe",
 }
 
-// Seam where the partly-secret Our Father resumes aloud.
+// Seam where the corporate Lord's Prayer passes from the officiant to the
+// people's response.
 const ourFatherAloudSeam = "And lead us not into temptation"
 
 // buildPrayerVoice partitions a full prayer text into spoken/silent spans.
@@ -54,4 +55,41 @@ func buildPrayerVoice(ref, text string, partly bool) []models.VoiceSpan {
 		spans = append(spans, models.VoiceSpan{Text: tail, Spoken: true})
 	}
 	return spans
+}
+
+// buildCorporateLordPrayerVoice identifies the two participants in the
+// corporate Lord's Prayer. The shared corpus text remains the complete prayer
+// without speaker notation, so its private and secret uses stay unchanged.
+//
+// The officiant says through the appointed versicle; the congregation answers
+// the final response, including Amen. Nil makes a malformed source visible as
+// an ordinary prayer instead of guessing a boundary.
+func buildCorporateLordPrayerVoice(ref, text string) []models.VoiceSpan {
+	if ref != "ordinary/shared/our-father" {
+		return nil
+	}
+	seam := strings.Index(text, ourFatherAloudSeam)
+	if seam < 0 {
+		return nil
+	}
+	end := seam + len(ourFatherAloudSeam)
+	// Keep terminal punctuation with the officiant, rather than presenting it
+	// as an orphan before the response.
+	for end < len(text) {
+		r := text[end]
+		if r != ',' && r != '.' && r != ';' && r != ':' {
+			break
+		}
+		end++
+	}
+	response := strings.TrimLeft(text[end:], " \t\n")
+	if response == "" {
+		return nil
+	}
+	// Preserve the exact corpus text by keeping its separator with the
+	// officiant span. Renderers reflow it naturally before the response line.
+	return []models.VoiceSpan{
+		{Text: text[:len(text)-len(response)], Spoken: true, Role: models.VoiceOfficiant},
+		{Text: response, Spoken: true, Role: models.VoiceResponse},
+	}
 }

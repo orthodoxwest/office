@@ -26,7 +26,7 @@ Label = Opening Versicles
 Type = versicle
 Ref = ordinary/terce/opening-versicle
 
-Type = proper-antiphon
+Type = proper-opening-acclamation
 Ref = alleluia
 
 [Hymn]
@@ -232,13 +232,13 @@ Ref = versicle
 [Pre-Collect]
 Label = Closing Prayers
 
-Type = prayer
+Type = dialogue
 Ref = ordinary/shared/kyrie
 
 Type = rubric
 Ref = shared/formulas/our-father-partly-secret-rubric
 
-Type = partly-secret-prayer
+Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer

@@ -382,10 +382,12 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	if text == "" {
 		text = fmt.Sprintf("[Text not found: %s]", elem.Ref)
 	}
+	// Retain the legacy partly-secret form for callers outside the office
+	// definitions. The corporate form owns its complete response, including
+	// Amen, and is intentionally not trimmed.
 	if elem.Type == "partly-secret-prayer" {
 		text = strings.TrimSuffix(text, " Amen.")
 	}
-
 	elemType := mapElementType(elem.Type)
 	label := formatLabel(elem.Type, elem.Ref)
 	if elemType == models.Chapter {
@@ -410,6 +412,10 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 		oe.Voice = buildPrayerVoice(elem.Ref, text, false)
 	case "partly-secret-prayer":
 		oe.Voice = buildPrayerVoice(elem.Ref, text, true)
+	case "corporate-lord-prayer":
+		oe.Voice = buildCorporateLordPrayerVoice(elem.Ref, text)
+	case "rubric":
+		oe.RubricSpans = buildRubricSpans(elem.Ref, text)
 	}
 	return oe
 }
@@ -466,6 +472,9 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	case "proper-antiphon":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		return sourcedElement(models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
+	case "proper-opening-acclamation":
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		return sourcedElement(models.OfficeElement{Type: models.OpeningAcclamation, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-collect":
 		text, src := resolveProperCollectText(day, hourName, corpus)
 		// The collect of the day is always the first of the hour's run, so it
@@ -490,6 +499,9 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	case "proper-responsory":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		return sourcedElement(models.OfficeElement{Type: models.Response, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
+	case "proper-short-responsory":
+		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		return sourcedElement(models.OfficeElement{Type: models.ShortResponsory, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-versicle":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		return sourcedElement(models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
@@ -548,6 +560,8 @@ func mapElementType(t string) models.ElementType {
 		return models.Response
 	case "prayer", "secret-prayer", "partly-secret-prayer":
 		return models.Prayer
+	case "corporate-lord-prayer":
+		return models.CorporateLordPrayer
 	case "preces":
 		return models.Preces
 	case "gloria-patri":
@@ -564,12 +578,18 @@ func mapElementType(t string) models.ElementType {
 		return models.Antiphon
 	case "proper-antiphon":
 		return models.Antiphon
+	case "proper-opening-acclamation":
+		return models.OpeningAcclamation
 	case "proper-collect":
 		return models.Collect
 	case "proper-hymn":
 		return models.Hymn
 	case "proper-responsory":
 		return models.Response
+	case "proper-short-responsory":
+		return models.ShortResponsory
+	case "dialogue":
+		return models.Dialogue
 	case "proper-versicle":
 		return models.Versicle
 	case "proper-chapter":

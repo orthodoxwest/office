@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
@@ -65,6 +66,7 @@ func texPreamble(hour *models.OfficeHour) string {
 \usepackage{gregoriotex}
 \gresetcompilegabc{auto}
 \usepackage{xcolor}
+\usepackage{lettrine}
 \usepackage{microtype}
 \microtypesetup{verbose=silent}
 
@@ -74,25 +76,34 @@ func texPreamble(hour *models.OfficeHour) string {
 
 % Colors
 \definecolor{rubricred}{rgb}{0.65,0.08,0.08}
+\definecolor{ornamentgold}{rgb}{0.60,0.45,0.15}
 
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
 \newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
 
-% Rubric (red italic)
-\newcommand{\rubric}[1]{{\color{rubricred}\small\itshape #1}}
+% Rubrics are smaller red roman; quoted prayer remains ordinary black roman.
+\newcommand{\rubric}[1]{{\color{rubricred}\small\normalfont #1}}
+% A prayer quoted inside a rubric remains ordinary black text.
+\newcommand{\rubricprayed}[1]{{\color{black}\normalfont #1}}
+% Scripture references share the rubric treatment without becoming instructions.
+\newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}
+
+% Gilded two-line initials. All call sites are semantic spoken openings, never
+% private/secret prayer text.
+\newcommand{\dropcap}[2]{\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
 
 % Section heading (small caps)
 \newcommand{\sectionheading}[1]{%
   \bigskip\noindent{\small\scshape #1}\par\smallskip\noindent%
 }
 
-% Psalm/canticle label: the number in small caps, the Latin incipit in italic
+% Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone.
 \newcommand{\psalmlabel}[2]{%
-  \noindent{\small\scshape #1}%
-  \if\relax\detokenize{#2}\relax\else{\small\itshape\enspace$\cdot$\enspace #2}\fi%
+  \noindent{\scshape #1}%
+  \if\relax\detokenize{#2}\relax\else{\itshape\enspace$\cdot$\enspace #2}\fi%
   \par\smallskip%
 }
 
@@ -119,6 +130,11 @@ func texPreamble(hour *models.OfficeHour) string {
 
 % Antiphon
 \newcommand{\ant}[1]{\noindent\textit{Ant.}\enspace\textit{#1}\par}
+% Opening acclamation (not an antiphon)
+\newcommand{\acclamation}[1]{\noindent #1\par}
+% Initial response of a Short Responsory. No \par here — call sites append the
+% rest of the response (and a single trailing \par) so lettrine can wrap line 2.
+\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}
 
 \setlength{\parskip}{4pt}
 \setlength{\parindent}{0pt}
@@ -166,7 +182,7 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 
 	switch elem.Type {
 	case models.Rubric:
-		fmt.Fprintf(&b, "\\rubric{%s}\n\n", escapeTeX(elem.Text))
+		b.WriteString(formatRubricTeX(elem))
 
 	case models.Heading:
 		fmt.Fprintf(&b, "\\sectionheading{%s}\n\n", escapeTeX(elem.Text))
@@ -181,6 +197,8 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 				fmt.Fprintf(&b, "\\ant{%s}\n\n", texLine(text))
 			}
 		}
+	case models.OpeningAcclamation:
+		fmt.Fprintf(&b, "\\acclamation{%s}\n\n", texMediantLine(elem.Text))
 
 	case models.Psalm, models.Canticle:
 		if elem.Label != "" {
@@ -198,12 +216,35 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 	case models.PsalmDoxology:
 		b.WriteString(formatGloriaPatriTeX(elem.Text))
 
-	case models.Doxology, models.Versicle, models.Response,
-		models.Prayer, models.Collect, models.Chapter,
+	case models.Doxology, models.Versicle, models.Response, models.Dialogue,
+		models.Prayer, models.Chapter,
 		models.Blessing, models.Preces:
 		b.WriteString(formatLiturgicalBlockTeX(elem.Text))
+	case models.Collect:
+		b.WriteString(formatCollectTeX(elem.Text))
+	case models.ShortResponsory:
+		b.WriteString(formatShortResponsoryTeX(elem.Text))
+	case models.CorporateLordPrayer:
+		b.WriteString(formatCorporateLordPrayerTeX(elem))
 	}
 
+	return b.String()
+}
+
+func formatRubricTeX(elem models.OfficeElement) string {
+	if len(elem.RubricSpans) == 0 {
+		return fmt.Sprintf("\\rubric{%s}\n\n", escapeTeX(elem.Text))
+	}
+	var b strings.Builder
+	b.WriteString("\\rubric{")
+	for _, span := range elem.RubricSpans {
+		if span.Prayed {
+			fmt.Fprintf(&b, "\\rubricprayed{%s}", texLine(span.Text))
+		} else {
+			b.WriteString(escapeTeX(span.Text))
+		}
+	}
+	b.WriteString("}\n\n")
 	return b.String()
 }
 
@@ -224,7 +265,7 @@ func formatPsalmTeX(text, dataDir, label string, elemType models.ElementType, ch
 	var b strings.Builder
 
 	if psalm.ScriptureRef != "" {
-		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(psalm.ScriptureRef))
+		fmt.Fprintf(&b, "\\scriptureref{%s}\n\n", escapeTeX(psalm.ScriptureRef))
 	}
 
 	b.WriteString("\\begin{psalmverses}\n")
@@ -276,13 +317,19 @@ func formatHymnTeX(text, dataDir, label string, chant bool) string {
 	if hymn.Title != "" {
 		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
 	}
-	for _, stanza := range hymn.Stanzas {
-		b.WriteString("\\noindent ")
+	for stanzaIndex, stanza := range hymn.Stanzas {
+		if stanzaIndex > 0 {
+			b.WriteString("\\noindent ")
+		}
 		for i, line := range stanza {
 			if i > 0 {
 				b.WriteString("\\\\\n")
 			}
-			b.WriteString(texLine(line))
+			if stanzaIndex == 0 && i == 0 {
+				b.WriteString(texDropCap(line))
+			} else {
+				b.WriteString(texLine(line))
+			}
 		}
 		b.WriteString("\\par\\smallskip\n")
 	}
@@ -305,11 +352,17 @@ func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
 	var anthemLines []string
 	for line := range strings.SplitSeq(anthem, "\n") {
 		if line = strings.TrimSpace(line); line != "" {
-			anthemLines = append(anthemLines, texLine(line))
+			anthemLines = append(anthemLines, line)
 		}
 	}
 	if len(anthemLines) > 0 {
-		fmt.Fprintf(&b, "\\noindent{\\itshape %s}\\par\n", strings.Join(anthemLines, " "))
+		b.WriteString("{\\itshape ")
+		b.WriteString(texDropCap(anthemLines[0]))
+		if len(anthemLines) > 1 {
+			b.WriteByte(' ')
+			b.WriteString(strings.Join(texLines(anthemLines[1:]), " "))
+		}
+		b.WriteString("}\\par\n")
 	}
 	if rest = strings.TrimSpace(rest); rest != "" {
 		b.WriteString("\\smallskip\n")
@@ -320,20 +373,143 @@ func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
 	return b.String()
 }
 
-// formatLiturgicalBlockTeX renders versicles, responses, prayers, chapters,
-// blessings, and preces with appropriate LaTeX markup. Consecutive prose
-// lines are hard-wrapped sense-lines in the corpus, so they are joined into
-// a flowing paragraph; blank lines mark paragraph breaks.
-func formatLiturgicalBlockTeX(text string) string {
+func formatShortResponsoryTeX(text string) string {
 	var b strings.Builder
-
+	firstResponse := true
 	var proseLines []string
 	flushProse := func() {
 		if len(proseLines) == 0 {
 			return
 		}
-		b.WriteString("\\noindent ")
-		b.WriteString(strings.Join(proseLines, " "))
+		fmt.Fprintf(&b, "\\noindent %s\\par\n", strings.Join(proseLines, " "))
+		proseLines = nil
+	}
+	for _, line := range texts.ParseBlock(text) {
+		switch line.Kind {
+		case texts.BlockGap:
+			flushProse()
+			b.WriteString("\\smallskip\n")
+		case texts.BlockResponse:
+			flushProse()
+			if firstResponse {
+				initial, firstWordRest, tail := splitDropCap(line.Text)
+				fmt.Fprintf(&b, "\\shortresponse{%s}{%s}%s\\par\n", texLine(initial), texLine(firstWordRest), texMediantLine(tail))
+				firstResponse = false
+			} else {
+				fmt.Fprintf(&b, "\\noindent\\Rbar{}%s\\par\n", texMediantLine(line.Text))
+			}
+		case texts.BlockVersicle:
+			flushProse()
+			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texMediantLine(line.Text))
+		case texts.BlockAll:
+			flushProse()
+			fmt.Fprintf(&b, "\\noindent\\textsc{All:}\\kern0.3em{}%s\\par\n", texMediantLine(line.Text))
+		case texts.BlockBlessing:
+			flushProse()
+			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texMediantLine(line.Text))
+		case texts.BlockScriptureRef:
+			flushProse()
+			fmt.Fprintf(&b, "\\noindent\\scriptureref{%s}\\par\n", escapeTeX(line.Text))
+		default:
+			proseLines = append(proseLines, texMediantLine(line.Text))
+		}
+	}
+	flushProse()
+	b.WriteString("\n")
+	return b.String()
+}
+
+func splitInitial(text string) (initial, rest string) {
+	if text == "" {
+		return "", ""
+	}
+	r, n := utf8.DecodeRuneInString(text)
+	return string(r), text[n:]
+}
+
+func texDropCap(text string) string {
+	initial, firstWordRest, tail := splitDropCap(text)
+	if initial == "" {
+		return texLine(text)
+	}
+	return fmt.Sprintf("\\dropcap{%s}{%s}%s", texLine(initial), texLine(firstWordRest), texMediantLine(tail))
+}
+
+// splitDropCap gives lettrine only the remainder of the opening word; its
+// second argument is boxed internally, so passing a whole paragraph prevents
+// normal line wrapping. The tail remains ordinary flowing text after it.
+func splitDropCap(text string) (initial, firstWordRest, tail string) {
+	initial, rest := splitInitial(text)
+	if initial == "" || rest == "" {
+		return initial, rest, ""
+	}
+	i := strings.IndexFunc(rest, unicode.IsSpace)
+	if i < 0 {
+		return initial, rest, ""
+	}
+	return initial, rest[:i], rest[i:]
+}
+
+func texLines(lines []string) []string {
+	formatted := make([]string, len(lines))
+	for i, line := range lines {
+		formatted[i] = texLine(line)
+	}
+	return formatted
+}
+
+func formatCorporateLordPrayerTeX(elem models.OfficeElement) string {
+	var officiant, response strings.Builder
+	for _, span := range elem.Voice {
+		switch span.Role {
+		case models.VoiceOfficiant:
+			officiant.WriteString(span.Text)
+		case models.VoiceResponse:
+			response.WriteString(span.Text)
+		}
+	}
+	if officiant.Len() == 0 || response.Len() == 0 {
+		return formatLiturgicalBlockTeX(elem.Text)
+	}
+	flow := func(s string) string { return strings.Join(strings.Fields(s), " ") }
+	return fmt.Sprintf("%s\\par\n\\noindent\\Rbar{}%s\\par\n\n",
+		texDropCap(flow(officiant.String())), texMediantLine(flow(response.String())))
+}
+
+// formatCollectTeX gives the first spoken prose paragraph of a collect its
+// traditional initial without applying that treatment to generic prayers.
+func formatCollectTeX(text string) string {
+	return formatLiturgicalBlockTeXWithOpeningDropCap(text, true)
+}
+
+// formatLiturgicalBlockTeX renders versicles, responses, prayers, chapters,
+// blessings, and preces with appropriate LaTeX markup. Consecutive prose
+// lines are hard-wrapped sense-lines in the corpus, so they are joined into
+// a flowing paragraph; blank lines mark paragraph breaks.
+func formatLiturgicalBlockTeX(text string) string {
+	return formatLiturgicalBlockTeXWithOpeningDropCap(text, false)
+}
+
+func formatLiturgicalBlockTeXWithOpeningDropCap(text string, openingDropCap bool) string {
+	var b strings.Builder
+
+	var proseLines []string
+	droppedOpening := false
+	flushProse := func() {
+		if len(proseLines) == 0 {
+			return
+		}
+		if openingDropCap && !droppedOpening {
+			b.WriteString(texDropCap(proseLines[0]))
+			if len(proseLines) > 1 {
+				b.WriteByte(' ')
+				b.WriteString(strings.Join(texLines(proseLines[1:]), " "))
+			}
+			droppedOpening = true
+		} else {
+			b.WriteString("\\noindent ")
+			b.WriteString(strings.Join(texLines(proseLines), " "))
+		}
 		b.WriteString("\\par\n")
 		proseLines = nil
 	}
@@ -345,7 +521,7 @@ func formatLiturgicalBlockTeX(text string) string {
 			b.WriteString("\\smallskip\n")
 		case texts.BlockScriptureRef:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent{\\small\\itshape %s}\\par\n", escapeTeX(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\scriptureref{%s}\\par\n", escapeTeX(line.Text))
 		case texts.BlockVersicle:
 			flushProse()
 			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texLine(line.Text))
@@ -355,8 +531,11 @@ func formatLiturgicalBlockTeX(text string) string {
 		case texts.BlockBlessing:
 			flushProse()
 			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texLine(line.Text))
+		case texts.BlockAll:
+			flushProse()
+			fmt.Fprintf(&b, "\\noindent\\textsc{All:}\\kern0.3em{}%s\\par\n", texLine(line.Text))
 		default:
-			proseLines = append(proseLines, texLine(line.Text))
+			proseLines = append(proseLines, line.Text)
 		}
 	}
 

@@ -235,12 +235,12 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 		elements []HourElement
 		noIfPre  bool
 	}{
-		{file: "lauds.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
-		{file: "vespers.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
-		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "prayer", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
+		{file: "lauds.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
+		{file: "vespers.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 		// secret-prayer conversions for opening/closing are covered in TestOfficeDataExpandsModeledSecretPrayers
 	}
 
@@ -505,7 +505,7 @@ func TestPrimeUsesParishOpeningAndClosingStructure(t *testing.T) {
 
 	if got := byName["Opening"].Elements; !reflect.DeepEqual(got, []HourElement{
 		{Type: "versicle", Ref: "ordinary/prime/opening-versicle"},
-		{Type: "proper-antiphon", Ref: "alleluia"},
+		{Type: "proper-opening-acclamation", Ref: "alleluia"},
 	}) {
 		t.Fatalf("Prime Opening = %+v", got)
 	}
@@ -578,9 +578,9 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 		t.Fatalf("Compline Opening private prayers = %+v", got)
 	}
 	if got := byName["Chapter"].Elements; !reflect.DeepEqual(got[len(got)-3:], []HourElement{
-		{Type: "prayer", Ref: "ordinary/shared/kyrie"},
+		{Type: "dialogue", Ref: "ordinary/shared/kyrie"},
 		{Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"},
-		{Type: "partly-secret-prayer", Ref: "ordinary/shared/our-father"},
+		{Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"},
 	}) {
 		t.Fatalf("Compline Chapter private prayers = %+v", got)
 	}
@@ -625,7 +625,7 @@ func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {
 					got := section.Elements[i+1+j]
 					wantType := "secret-prayer"
 					if elem.Ref == "shared/formulas/our-father-partly-secret-rubric" {
-						wantType = "partly-secret-prayer"
+						wantType = "corporate-lord-prayer"
 					}
 					if got.Type != wantType || got.Ref != ref {
 						t.Errorf("%s %s after %q[%d] = %+v, want %s %q", file, section.Name, elem.Ref, j, got, wantType, ref)
@@ -660,8 +660,8 @@ func TestOfficeDataUsesOpeningAlleluia(t *testing.T) {
 				if len(section.Elements) != 2 {
 					t.Fatalf("%s Opening elements = %d, want 2", file, len(section.Elements))
 				}
-				if section.Elements[1].Type != "proper-antiphon" || section.Elements[1].Ref != "alleluia" {
-					t.Fatalf("%s Opening[1] = %+v, want proper-antiphon alleluia", file, section.Elements[1])
+				if section.Elements[1].Type != "proper-opening-acclamation" || section.Elements[1].Ref != "alleluia" {
+					t.Fatalf("%s Opening[1] = %+v, want proper-opening-acclamation alleluia", file, section.Elements[1])
 				}
 				found = true
 			}

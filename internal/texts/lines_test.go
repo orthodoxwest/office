@@ -91,6 +91,7 @@ func TestParseBlockClassifiesLines(t *testing.T) {
 		"Prose one,\nprose two.\n\n" +
 		"V. O Lord, hear my prayer.\n" +
 		"R. And let my cry come unto thee.\n" +
+		"All: Kyrie, eleison.\n" +
 		"Blessing. May the Lord bless us.\n")
 
 	var got []BlockKind
@@ -99,7 +100,7 @@ func TestParseBlockClassifiesLines(t *testing.T) {
 	}
 	want := []BlockKind{
 		BlockScriptureRef, BlockProse, BlockProse, BlockGap,
-		BlockVersicle, BlockResponse, BlockBlessing, BlockGap,
+		BlockVersicle, BlockResponse, BlockAll, BlockBlessing, BlockGap,
 	}
 	if len(got) != len(want) {
 		t.Fatalf("kinds = %v, want %v", got, want)
@@ -116,8 +117,11 @@ func TestParseBlockClassifiesLines(t *testing.T) {
 	if block[4].Text != "O Lord, hear my prayer." {
 		t.Errorf("versicle text = %q (sigil should be stripped)", block[4].Text)
 	}
-	if block[6].Text != "May the Lord bless us." {
-		t.Errorf("blessing text = %q", block[6].Text)
+	if block[6].Text != "Kyrie, eleison." {
+		t.Errorf("all text = %q (speaker label should be stripped)", block[6].Text)
+	}
+	if block[7].Text != "May the Lord bless us." {
+		t.Errorf("blessing text = %q", block[7].Text)
 	}
 }
 
