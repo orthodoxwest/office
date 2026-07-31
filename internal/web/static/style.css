@@ -1595,6 +1595,13 @@ footer::before {
   text-indent: -0.9rem;
 }
 
+/* A floated opening initial is already at the stanza edge. The ordinary
+   hanging indent would inset the cap and pull the following glyph beneath it. */
+.hymn-stanza-opening .hymn-line:first-child {
+  padding-left: 0;
+  text-indent: 0;
+}
+
 /* Amen is the coda of the preceding hymn line; it remains roman like the
    prayer itself, while a small gap keeps its conventional visual separation. */
 .hymn-amen {

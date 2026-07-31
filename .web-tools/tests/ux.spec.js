@@ -981,7 +981,7 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
           const cap = style(selector, "::first-letter");
           return { float: cap.float, size: parseFloat(cap.fontSize) };
         };
-        const hymnLine = style(".hymn-line");
+        const hymnLine = style(".hymn-stanza-opening .hymn-line + .hymn-line");
         return {
           prayer: px(".elements", "fontSize"),
           heading: px(".section-heading", "fontSize"),
@@ -1003,6 +1003,23 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
             padding: parseFloat(hymnLine.paddingLeft),
             indent: parseFloat(hymnLine.textIndent),
           },
+          hymnOpening: (() => {
+            const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
+            const text = opening.firstChild;
+            const glyph = (start, end) => {
+              const range = document.createRange();
+              range.setStart(text, start);
+              range.setEnd(text, end);
+              const { left, right } = range.getBoundingClientRect();
+              return { left, right };
+            };
+            return {
+              cap: glyph(0, 1),
+              following: glyph(1, 2),
+              padding: parseFloat(getComputedStyle(opening).paddingLeft),
+              indent: parseFloat(getComputedStyle(opening).textIndent),
+            };
+          })(),
           caps: [
             ".collect .plain-line",
             ".hymn-stanza-opening .hymn-line",
@@ -1039,6 +1056,15 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
         0,
         1,
       );
+      // The opening cap is floated at the stanza edge, so it must not also
+      // take the normal hanging indent. That indentation both offsets the cap
+      // from the metrical edge and moves the next glyph beneath it on phones.
+      expect(metrics.hymnOpening.padding, `${label} hymn opening padding`).toBe(0);
+      expect(metrics.hymnOpening.indent, `${label} hymn opening indent`).toBe(0);
+      expect(
+        metrics.hymnOpening.following.left,
+        `${label} hymn opening glyph clears the drop cap`,
+      ).toBeGreaterThanOrEqual(metrics.hymnOpening.cap.right - 0.5);
       for (const cap of metrics.caps) {
         expect(cap.float, `${label} approved opening drop cap`).toBe("left");
         expect(cap.size, `${label} approved opening drop cap size`).toBeGreaterThan(metrics.prayer * 2);
