@@ -981,7 +981,7 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
           const cap = style(selector, "::first-letter");
           return { float: cap.float, size: parseFloat(cap.fontSize) };
         };
-        const hymnLine = style(".hymn-stanza-opening .hymn-line + .hymn-line");
+        const hymnLine = style(".hymn-stanza-opening .hymn-line:nth-child(3)");
         return {
           prayer: px(".elements", "fontSize"),
           heading: px(".section-heading", "fontSize"),
@@ -1023,7 +1023,7 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
           caps: [
             ".collect .plain-line",
             ".hymn-stanza-opening .hymn-line",
-            ".marian-antiphon .chant-line",
+            ".marian-antiphon .chant-line-opening",
             ".corporate-lord-prayer-officiant",
           ].map(firstLetter),
           secretCap: firstLetter(".secret-text"),
@@ -1087,6 +1087,182 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("Prime hymn initial clears its second metrical line on narrow pages", async ({ page }) => {
+  const primeHours = [
+    { date: "2026-03-15", label: "Sunday" },
+    { date: "2026-06-18", label: "feria" },
+  ];
+
+  for (const { date, label: hymn } of primeHours) {
+    for (const theme of ["light", "dark"]) {
+      for (const width of [320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        await openDatedPage(page, `/prime/${date}`, theme);
+
+        const geometry = await page.evaluate(() => {
+          const [opening, secondLine] = document.querySelectorAll(
+            ".hymn-stanza-opening .hymn-line",
+          );
+          const firstGlyph = (line) => {
+            const range = document.createRange();
+            range.setStart(line.firstChild, 0);
+            range.setEnd(line.firstChild, 1);
+            const { left, right, top, bottom } = range.getBoundingClientRect();
+            return { left, right, top, bottom };
+          };
+          return {
+            cap: firstGlyph(opening),
+            secondLine: firstGlyph(secondLine),
+            secondLineIndent: parseFloat(getComputedStyle(secondLine).textIndent),
+            secondLinePadding: parseFloat(getComputedStyle(secondLine).paddingLeft),
+          };
+        });
+
+        const label = `${hymn}/${theme}/${width}px`;
+        // The cap deliberately occupies both source lines vertically; its
+        // neighbour must therefore start to its right rather than beneath it.
+        expect(geometry.secondLine.top, `${label} second line reaches the cap`).toBeLessThan(
+          geometry.cap.bottom,
+        );
+        expect(geometry.secondLineIndent, `${label} second-line outdent`).toBe(0);
+        expect(geometry.secondLinePadding, `${label} second-line continuation inset`).toBeGreaterThan(0);
+        expect(geometry.secondLine.left, `${label} second-line glyph clears cap`).toBeGreaterThanOrEqual(
+          geometry.cap.right - 0.5,
+        );
+      }
+    }
+  }
+});
+
+test("Marian antiphon initial clears its second chant line", async ({ page }) => {
+  // Salve Regina (Ordinary Time) is the long English form. The opening pair
+  // shares one block so a two-line drop cap can float beside both source
+  // lines; hanging indent on that block used to clip the gilt M and pull
+  // the second line under it.
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/vespers/2026-07-31", "light");
+
+    const geometry = await page.evaluate(() => {
+      const opening = document.querySelector(".marian-antiphon .chant-line-opening");
+      const later = document.querySelector(
+        ".marian-antiphon .liturgical-block > .chant-line:not(.chant-line-opening)",
+      );
+      // First source line text is before the <br>; second is after it.
+      const br = [...opening.childNodes].find((n) => n.nodeName === "BR");
+      const firstText = [...opening.childNodes].find(
+        (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+      );
+      let secondText = null;
+      if (br) {
+        for (let n = br.nextSibling; n; n = n.nextSibling) {
+          if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+            secondText = n;
+            break;
+          }
+        }
+      }
+      const glyph = (node, start = 0, end = 1) => {
+        if (!node) return null;
+        const range = document.createRange();
+        range.setStart(node, start);
+        range.setEnd(node, Math.min(end, node.textContent.length));
+        const { left, right, top, bottom } = range.getBoundingClientRect();
+        return { left, right, top, bottom };
+      };
+      return {
+        cap: glyph(firstText, 0, 1),
+        following: glyph(firstText, 1, 2),
+        second: glyph(secondText, 0, 1),
+        secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
+        openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
+        openingIndent: parseFloat(getComputedStyle(opening).textIndent),
+        laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
+        laterIndent: later ? parseFloat(getComputedStyle(later).textIndent) : 0,
+        label: document.querySelector(".marian-antiphon .item-label")?.textContent ?? "",
+        float: getComputedStyle(opening, "::first-letter").float,
+      };
+    });
+
+    const label = `${width}px`;
+    expect(geometry.label, `${label} seasonal Marian`).toMatch(/Salve Regina/i);
+    expect(geometry.float, `${label} opening drop cap float`).toBe("left");
+    expect(geometry.openingPadding, `${label} opening padding`).toBe(0);
+    expect(geometry.openingIndent, `${label} opening indent`).toBe(0);
+    // Later discrete chant lines keep the hanging indent for wraps.
+    expect(geometry.laterPadding, `${label} later continuation inset`).toBeGreaterThan(0);
+    expect(geometry.laterIndent, `${label} later first-line offset`).toBeLessThan(0);
+    expect(geometry.cap, `${label} drop cap glyph`).not.toBeNull();
+    expect(geometry.following, `${label} rest of first word`).not.toBeNull();
+    expect(geometry.second, `${label} second source line`).not.toBeNull();
+    expect(geometry.secondSnippet, `${label} second source text`).toMatch(/Mary our comfort/i);
+    expect(
+      geometry.following.left,
+      `${label} first-line rest clears the drop cap`,
+    ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+    // On a wide measure the second source line sits beside the cap. On a
+    // phone the first source line already wraps through both drop-cap line
+    // boxes, so the second source line starts below — only require horizontal
+    // clearance when the lines still share vertical space.
+    const yOverlap =
+      geometry.second.top < geometry.cap.bottom - 0.5 &&
+      geometry.second.bottom > geometry.cap.top + 0.5;
+    if (yOverlap) {
+      expect(
+        geometry.second.left,
+        `${label} second-line glyph clears the drop cap`,
+      ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+    }
+    // A clipped gilt initial paints a short box; a full two-line M is taller
+    // than one body line.
+    expect(
+      geometry.cap.bottom - geometry.cap.top,
+      `${label} drop cap not clipped mid-glyph`,
+    ).toBeGreaterThan((geometry.second.bottom - geometry.second.top) * 1.5);
+  }
+});
+
+test("Litany speaker marks share one spoken-text edge across All lines", async ({ page }) => {
+  // "All:" is wider than ℣./℟. It must hang into the margin rather than
+  // widen every sigil in its liturgical-block — otherwise the Kyrie triad
+  // sits further in than the preceding O Christ exchange (and the ℟. of
+  // the corporate Lord's Prayer below).
+  for (const width of [320, 390, 920]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/prime/2026-03-15", "light");
+
+    const geometry = await page.evaluate(() => {
+      const section = [...document.querySelectorAll("h2")].find((h) =>
+        h.textContent.includes("Litany"),
+      );
+      const rows = [];
+      for (let el = section.nextElementSibling; el && el.tagName !== "H2"; el = el.nextElementSibling) {
+        for (const line of el.querySelectorAll?.(".versicle-line, .response-line, .all-line") ?? []) {
+          const sigil = line.querySelector(".sigil");
+          const text = line.querySelector(".sigil-text");
+          rows.push({
+            sigil: sigil?.textContent ?? "",
+            textLeft: text.getBoundingClientRect().left,
+            text: (text.textContent || "").slice(0, 36),
+          });
+        }
+      }
+      return rows;
+    });
+
+    expect(geometry.length, `${width}px litany dialogue lines`).toBeGreaterThanOrEqual(5);
+    expect(
+      geometry.some((row) => row.sigil === "All:"),
+      `${width}px includes All speaker mark`,
+    ).toBe(true);
+
+    const edge = geometry[0].textLeft;
+    for (const row of geometry) {
+      expect(row.textLeft, `${width}px ${row.sigil} ${row.text}`).toBeCloseTo(edge, 0);
+    }
+  }
 });
 
 test("desktop prayer text keeps a centred book measure and crisp section rhythm", async ({

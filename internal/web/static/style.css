@@ -1602,6 +1602,13 @@ footer::before {
   text-indent: 0;
 }
 
+/* The initial's float reaches into the next metrical source line. Keep that
+   line's continuation padding, but remove the outdent that tucks its first
+   glyph beneath the cap. */
+.hymn-stanza-opening .hymn-line:first-child + .hymn-line {
+  text-indent: 0;
+}
+
 /* Amen is the coda of the preceding hymn line; it remains roman like the
    prayer itself, while a small gap keeps its conventional visual separation. */
 .hymn-amen {
@@ -1711,12 +1718,13 @@ footer::before {
 
 /* Opening initials share the psalm's two-line metrics. The semantic opening
    hooks deliberately include only spoken forms: secret prayer markup never
-   receives a dropped initial. */
+   receives a dropped initial. Marian uses .chant-line-opening (the first two
+   source lines in one block) so the float has a real two-line home. */
 .chapter .liturgical-block .plain-line:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
 .collect .liturgical-block .plain-line:first-child::first-letter,
 .hymn-stanza-opening .hymn-line:first-child::first-letter,
-.marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+.marian-antiphon .chant-line-opening::first-letter,
 .corporate-lord-prayer-officiant::first-letter {
   font-size: 3.05em;
   line-height: 1;
@@ -1796,12 +1804,16 @@ footer::before {
   width: 4.25rem;
 }
 
-/* "All:" is a speaker label rather than a compact sigil; give dialogue
-   lines their own modest gutter without widening unrelated exchanges. */
-.sigil-all,
-.liturgical-block:has(.sigil-all) .sigil {
+/* "All:" is wider than ℣./℟. Hang the extra width into the left margin so
+   spoken text stays on the common 1.8rem edge — both inside this dialogue
+   and against neighbouring ℣/℟-only exchanges (Prime's litany: O Christ…
+   then Kyrie…). Widening every .sigil via :has() was shifting whole blocks
+   that happen to contain an All line, so the Kyrie triad sat further in
+   than the versicle above it. */
+.sigil-all {
   flex-basis: 2.25rem;
   width: 2.25rem;
+  margin-left: calc(1.4rem - 2.25rem);
 }
 
 .sigil-text {
@@ -1876,6 +1888,17 @@ footer::before {
   padding-left: 1.2rem;
   text-indent: -1.2rem;
   line-height: 1.5;
+}
+
+/* Opening pair (two source lines, one block): the floated initial lives
+   here. No hanging indent — it would inset the cap, pull the next glyph
+   under it, and with background-clip:text gilding clip the glyph mid-stroke
+   (Salve Regina's M on desktop). Match psalm leading so the two-line cap
+   seats on real baselines rather than the tighter chant rhythm. */
+.marian-antiphon .chant-line-opening {
+  padding-left: 0;
+  text-indent: 0;
+  line-height: 1.75;
 }
 
 /* Session prayers are part of the office, not a settings card. Summary
@@ -3890,7 +3913,7 @@ body.season-eastertide {
   .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
   .collect .liturgical-block .plain-line:first-child::first-letter,
   .hymn-stanza-opening .hymn-line:first-child::first-letter,
-  .marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+  .marian-antiphon .chant-line-opening::first-letter,
   .corporate-lord-prayer-officiant::first-letter,
   .short-responsory-opening .sigil-text::first-letter {
     background-image: linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%);
@@ -4522,7 +4545,7 @@ body.page-hour footer::after {
   .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
   .collect .liturgical-block .plain-line:first-child::first-letter,
   .hymn-stanza-opening .hymn-line:first-child::first-letter,
-  .marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+  .marian-antiphon .chant-line-opening::first-letter,
   .corporate-lord-prayer-officiant::first-letter,
   .short-responsory-opening .sigil-text::first-letter {
     background-image: none;

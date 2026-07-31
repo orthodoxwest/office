@@ -557,13 +557,32 @@ func renderLiturgicalBlockWithOptions(text string, mode proseLineMode, shortResp
 		}
 		emitGap()
 
-		// The sung Marian antiphon (the first preserved block) renders each
-		// source line as its own chant line, so a hanging indent can tuck a
-		// wrapped remainder under its own line while every line stays a
-		// discrete reference point for chanting. Other preserved blocks
-		// (preces, blessings, doxologies) keep the <br>-joined paragraph.
+		// The sung Marian antiphon (the first preserved block) needs a
+		// two-line drop cap. The opening pair therefore shares one block
+		// with a hard break between source lines so the floated initial
+		// can sit beside both of them at every width. Later source lines
+		// stay separate chant lines: a hanging indent can tuck a wrapped
+		// remainder under its own line while each remains a discrete
+		// reference point for chanting. Other preserved blocks (preces,
+		// blessings, doxologies) keep the <br>-joined paragraph without
+		// the opening-pair split.
 		if mode == preserveFirstProseBlock && proseBlocks == 0 {
-			for _, l := range proseLines {
+			const openingDropLines = 2
+			openN := openingDropLines
+			if openN > len(proseLines) {
+				openN = len(proseLines)
+			}
+			if openN > 0 {
+				sb.WriteString(`<p class="chant-line chant-line-opening">`)
+				for i := 0; i < openN; i++ {
+					if i > 0 {
+						sb.WriteString(`<br>`)
+					}
+					sb.WriteString(chantLineHTML(proseLines[i]))
+				}
+				sb.WriteString(`</p>`)
+			}
+			for _, l := range proseLines[openN:] {
 				sb.WriteString(`<p class="chant-line">`)
 				sb.WriteString(chantLineHTML(l))
 				sb.WriteString(`</p>`)
