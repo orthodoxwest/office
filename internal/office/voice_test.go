@@ -82,6 +82,28 @@ func TestBuildCorporateLordPrayerVoiceKeepsAmenWithResponse(t *testing.T) {
 	}
 }
 
+func TestBuildCorporateLordPrayerVoiceSeamBoundaries(t *testing.T) {
+	t.Run("seam at start", func(t *testing.T) {
+		text := ourFatherAloudSeam + ",\nBut deliver us from evil. Amen."
+		got := buildCorporateLordPrayerVoice("ordinary/shared/our-father", text)
+		want := []models.VoiceSpan{
+			{Text: ourFatherAloudSeam + ",\n", Spoken: true, Role: models.VoiceOfficiant},
+			{Text: "But deliver us from evil. Amen.", Spoken: true, Role: models.VoiceResponse},
+		}
+		assertVoice(t, got, want)
+	})
+
+	for _, text := range []string{
+		"Our Father, who art in heaven.",
+		"Our Father. " + ourFatherAloudSeam,
+		"Our Father. " + ourFatherAloudSeam + ",\n\t ",
+	} {
+		if got := buildCorporateLordPrayerVoice("ordinary/shared/our-father", text); got != nil {
+			t.Errorf("malformed corporate prayer %q = %+v, want nil", text, got)
+		}
+	}
+}
+
 func assertVoice(t *testing.T, got, want []models.VoiceSpan) {
 	t.Helper()
 	if len(got) != len(want) {

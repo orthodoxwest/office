@@ -60,6 +60,12 @@ func TestAntiphonAnnouncement(t *testing.T) {
 			want: "* first half † rest of antiphon.",
 		},
 		{
+			name: "mark after one-character incipit",
+			// The first safe boundary is index one; only a leading mark is whole.
+			in:   "A* later words.",
+			want: "A.",
+		},
+		{
 			name: "no mark keeps full text",
 			in:   "Alleluia",
 			want: "Alleluia",

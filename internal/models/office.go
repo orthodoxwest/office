@@ -125,19 +125,15 @@ func AntiphonAnnouncement(text string) string {
 	if text == "" {
 		return ""
 	}
-	i := strings.IndexAny(text, "*†‡")
-	if i < 0 {
-		return text
+	if i := strings.IndexAny(text, "*†‡"); i > 0 {
+		incipit := strings.TrimRight(strings.TrimSpace(text[:i]), ",;:")
+		if incipit != "" && strings.ContainsAny(incipit[len(incipit)-1:], ".?!") {
+			return incipit
+		}
+		return incipit + "."
 	}
-	if i == 0 {
-		// There is no incipit before a leading pointing mark to announce.
-		return text
-	}
-	incipit := strings.TrimRight(strings.TrimSpace(text[:i]), ",;:")
-	if incipit != "" && strings.ContainsAny(incipit[len(incipit)-1:], ".?!") {
-		return incipit
-	}
-	return incipit + "."
+	// No mark, or no incipit before a leading mark, leaves the full text intact.
+	return text
 }
 
 // CompositionDecision records one machine-readable choice made while an hour

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/orthodoxwest/office/internal/models"
 )
@@ -237,6 +238,81 @@ func TestTeXDropCapsAreSemanticAndExcludeSecretPrayer(t *testing.T) {
 	fallback := formatCorporateLordPrayerTeX(models.OfficeElement{Type: models.CorporateLordPrayer, Text: "Our Father, who art in heaven."})
 	if strings.Contains(fallback, `\dropcap`) {
 		t.Fatalf("invalid corporate prayer must not get a drop cap:\n%s", fallback)
+	}
+}
+
+func TestTeXDropCapSplittingKeepsOnlyTheFirstWordBoxed(t *testing.T) {
+	for _, tc := range []struct {
+		name                              string
+		text                              string
+		initial, firstWordRest, tail, tex string
+	}{
+		{"empty", "", "", "", "", ""},
+		{"single rune", "O", "O", "", "", `\dropcap{O}{}`},
+		{"ordinary word", "Almighty God", "A", "lmighty", " God", `\dropcap{A}{lmighty} God`},
+		{"standalone initial", "O God", "O", "", " God", `\dropcap{O}{} God`},
+		{"unicode whitespace", "O\u00a0God", "O", "", "\u00a0God", `\dropcap{O}{} God`},
+		{"mediant tail", "God * save us", "G", "od", " * save us", `\dropcap{G}{od}\mediant{}save us`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			initial, firstWordRest, tail := splitDropCap(tc.text)
+			if initial != tc.initial || firstWordRest != tc.firstWordRest || tail != tc.tail {
+				t.Fatalf("splitDropCap(%q) = (%q, %q, %q), want (%q, %q, %q)", tc.text, initial, firstWordRest, tail, tc.initial, tc.firstWordRest, tc.tail)
+			}
+			if got := texDropCap(tc.text); got != tc.tex {
+				t.Fatalf("texDropCap(%q) = %q, want %q", tc.text, got, tc.tex)
+			}
+		})
+	}
+
+	invalid := string([]byte{0xff, 'x'})
+	initial, rest := splitInitial(invalid)
+	if initial != string(utf8.RuneError) || rest != "x" {
+		t.Fatalf("splitInitial malformed UTF-8 = (%q, %q), want RuneError then x", initial, rest)
+	}
+}
+
+func TestTeXOpeningDropCapsAreLimitedToTheFirstHymnStanza(t *testing.T) {
+	hymn := formatHymnTeX("Latin title\n\nFirst hymn stanza.\n\nSecond hymn stanza.", "", "", false)
+	if strings.Count(hymn, `\dropcap{`) != 1 || !strings.Contains(hymn, `\dropcap{F}{irst} hymn stanza.`) {
+		t.Fatalf("first hymn stanza must be the only drop-cap stanza:\n%s", hymn)
+	}
+	if !strings.Contains(hymn, `\noindent Second hymn stanza.`) || strings.Contains(hymn, `\dropcap{S}{econd}`) {
+		t.Fatalf("later hymn stanza must remain ordinary text:\n%s", hymn)
+	}
+	if strings.Count(hymn, `\noindent `) != 1 || strings.Contains(hymn, `\noindent \dropcap{F}{irst}`) {
+		t.Fatalf("only later hymn stanzas should be marked no-indent:\n%s", hymn)
+	}
+}
+
+func TestFormatMultilineAntiphonTeXAnthemLineBoundaries(t *testing.T) {
+	if got := formatMultilineAntiphonTeX(models.OfficeElement{}); got != "\n" {
+		t.Fatalf("empty multiline antiphon = %q, want newline", got)
+	}
+	if got := formatMultilineAntiphonTeX(models.OfficeElement{Text: "Hail"}); got != "{\\itshape \\dropcap{H}{ail}}\\par\n\n" {
+		t.Fatalf("one-line multiline antiphon = %q", got)
+	}
+}
+
+func TestTeXMarianAndShortResponsoryOpeningBranches(t *testing.T) {
+	marian := formatMultilineAntiphonTeX(models.OfficeElement{Type: models.Antiphon, Text: "Hail, holy Queen.\nOur life and sweetness.\n\nV. Pray for us.\nR. That we may be worthy."})
+	if strings.Count(marian, `\dropcap{`) != 1 || !strings.Contains(marian, `\dropcap{H}{ail,} holy Queen. Our life and sweetness.`) {
+		t.Fatalf("only the Marian anthem opening should be dropped:\n%s", marian)
+	}
+	if !strings.Contains(marian, `\Vbar{}Pray for us.`) || !strings.Contains(marian, `\Rbar{}That we may be worthy.`) {
+		t.Fatalf("Marian antiphon's remaining liturgical block must be retained:\n%s", marian)
+	}
+
+	short := formatShortResponsoryTeX("Opening prose.\nR. Alpha * beta.\nV. A versicle.\nR. A later response.")
+	if !strings.Contains(short, `\noindent Opening prose.\par`) || !strings.Contains(short, `\shortresponse{A}{lpha}\mediant{}beta.\par`) {
+		t.Fatalf("first response must receive the only dropped opening:\n%s", short)
+	}
+	if strings.Count(short, `\shortresponse{`) != 1 || !strings.Contains(short, `\Rbar{}A later response.`) {
+		t.Fatalf("later short-responsory response must retain its sigil:\n%s", short)
+	}
+	noResponse := formatShortResponsoryTeX("Opening prose.\nV. A versicle.")
+	if strings.Contains(noResponse, `\shortresponse{`) || !strings.Contains(noResponse, `\Vbar{}A versicle.`) {
+		t.Fatalf("a block without a response must not invent a dropped initial:\n%s", noResponse)
 	}
 }
 

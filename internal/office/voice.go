@@ -82,9 +82,6 @@ func buildCorporateLordPrayerVoice(ref, text string) []models.VoiceSpan {
 		}
 		end++
 	}
-	if end >= len(text) {
-		return nil
-	}
 	response := strings.TrimLeft(text[end:], " \t\n")
 	if response == "" {
 		return nil

@@ -396,6 +396,19 @@ func TestRenderHymnJoinsAmenCodaToFinalLine(t *testing.T) {
 	}
 }
 
+func TestRenderHymnKeepsAnOpeningAmenAndAttachesOnlyLaterCoda(t *testing.T) {
+	html := string(renderHymnStanzas("Title\n\nAmen.\n\nSecond stanza.\n\nAmen."))
+	if !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">Amen.</span></p>`) {
+		t.Fatalf("an opening Amen is a real first stanza, not a coda to discard: %s", html)
+	}
+	if !strings.Contains(html, `<p class="hymn-stanza"><span class="hymn-line">Second stanza.</span> <span class="hymn-amen">Amen.</span></p>`) {
+		t.Fatalf("only a later standalone Amen should join the preceding stanza: %s", html)
+	}
+	if strings.Count(html, `class="hymn-amen"`) != 1 {
+		t.Fatalf("exactly one later Amen should be marked as a coda: %s", html)
+	}
+}
+
 func TestIsHymnAmen(t *testing.T) {
 	cases := []struct {
 		stanza []string

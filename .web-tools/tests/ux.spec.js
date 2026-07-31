@@ -22,6 +22,16 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// The server renders an undated home request for its own current local day.
+// Read that rendered value before installing a browser clock, so tests of a
+// foreground page crossing midnight do not assume a particular CI date.
+async function serverTodaySlug(page) {
+  await page.goto("/");
+  const slug = await page.locator(".home-prayer-card").getAttribute("data-date-slug");
+  expect(slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  return slug;
+}
+
 test("mobile navigation stays quiet until opened", async ({ page }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 
@@ -1185,8 +1195,20 @@ test("the foreground Ordo moves rather than duplicates its today marker at midni
 });
 
 test("an office left open in the foreground offers today after midnight", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
-  await openDatedPage(page, "/lauds/2026-07-29");
+  const today = await serverTodaySlug(page);
+  const midnight = await page.evaluate((slug) => {
+    // This executes in Playwright's configured America/New_York timezone, so
+    // local midnight and the next date stay correct in EST, EDT, and at a
+    // year boundary without baking in an offset.
+    const before = new Date(`${slug}T23:59:00`);
+    const after = new Date(before.getTime() + 2 * 60 * 1000);
+    const dateSlug = (d) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    return { before: before.getTime(), tomorrow: dateSlug(after) };
+  }, today);
+
+  await page.clock.install({ time: new Date(midnight.before) });
+  await openDatedPage(page, `/lauds/${today}`);
 
   await expect(page.locator(".not-today-notice")).toHaveCount(0);
   await page.clock.fastForward("02:00");
@@ -1196,7 +1218,7 @@ test("an office left open in the foreground offers today after midnight", async 
   await expect(notice).toHaveAttribute("role", "status");
   await expect(notice.getByRole("link", { name: "Go to today" })).toHaveAttribute(
     "href",
-    "/lauds/2026-07-30",
+    `/lauds/${midnight.tomorrow}`,
   );
 });
 

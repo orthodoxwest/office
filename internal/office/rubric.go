@@ -32,7 +32,7 @@ func buildRubricSpans(ref, text string) []models.RubricSpan {
 		return nil
 	}
 
-	spans := make([]models.RubricSpan, 0, len(phrases)*2+1)
+	var spans []models.RubricSpan
 	pos := 0
 	for _, phrase := range phrases {
 		i := rubricPhraseIndex(text, phrase, pos)

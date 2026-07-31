@@ -423,9 +423,6 @@ func splitInitial(text string) (initial, rest string) {
 		return "", ""
 	}
 	r, n := utf8.DecodeRuneInString(text)
-	if r == utf8.RuneError && n == 0 {
-		return "", text
-	}
 	return string(r), text[n:]
 }
 
@@ -445,13 +442,11 @@ func splitDropCap(text string) (initial, firstWordRest, tail string) {
 	if initial == "" || rest == "" {
 		return initial, rest, ""
 	}
-	if unicode.IsSpace(rune(rest[0])) {
-		return initial, "", rest
+	i := strings.IndexFunc(rest, unicode.IsSpace)
+	if i < 0 {
+		return initial, rest, ""
 	}
-	if i := strings.IndexFunc(rest, unicode.IsSpace); i >= 0 {
-		return initial, rest[:i], rest[i:]
-	}
-	return initial, rest, ""
+	return initial, rest[:i], rest[i:]
 }
 
 func texLines(lines []string) []string {
