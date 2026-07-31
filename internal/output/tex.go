@@ -132,8 +132,9 @@ func texPreamble(hour *models.OfficeHour) string {
 \newcommand{\ant}[1]{\noindent\textit{Ant.}\enspace\textit{#1}\par}
 % Opening acclamation (not an antiphon)
 \newcommand{\acclamation}[1]{\noindent #1\par}
-% Initial response of a Short Responsory
-\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}\par}
+% Initial response of a Short Responsory. No \par here — call sites append the
+% rest of the response (and a single trailing \par) so lettrine can wrap line 2.
+\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}
 
 \setlength{\parskip}{4pt}
 \setlength{\parindent}{0pt}

@@ -177,7 +177,7 @@ func TestTeXTypographyParity(t *testing.T) {
 		`\newcommand{\rubricprayed}[1]{{\color{black}\normalfont #1}}`,
 		`\newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}`,
 		`\newcommand{\dropcap}[2]{\lettrine`,
-		`\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}\par}`,
+		`\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}`,
 	} {
 		if !strings.Contains(preamble, want) {
 			t.Errorf("preamble is missing %q", want)
@@ -304,8 +304,13 @@ func TestTeXMarianAndShortResponsoryOpeningBranches(t *testing.T) {
 	}
 
 	short := formatShortResponsoryTeX("Opening prose.\nR. Alpha * beta.\nV. A versicle.\nR. A later response.")
+	// Expansion must keep the rest of the response in the same paragraph as
+	// the lettrine: \shortresponse has no internal \par, then tail, then one \par.
 	if !strings.Contains(short, `\noindent Opening prose.\par`) || !strings.Contains(short, `\shortresponse{A}{lpha}\mediant{}beta.\par`) {
 		t.Fatalf("first response must receive the only dropped opening:\n%s", short)
+	}
+	if strings.Contains(short, `\shortresponse{A}{lpha}\par`) {
+		t.Fatalf("shortresponse must not end the paragraph after the first word:\n%s", short)
 	}
 	if strings.Count(short, `\shortresponse{`) != 1 || !strings.Contains(short, `\Rbar{}A later response.`) {
 		t.Fatalf("later short-responsory response must retain its sigil:\n%s", short)

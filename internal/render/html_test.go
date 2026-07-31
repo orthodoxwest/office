@@ -387,13 +387,13 @@ func TestRenderHymnStanzasPreservesVerseLines(t *testing.T) {
 func TestRenderHymnJoinsAmenCodaToFinalLine(t *testing.T) {
 	html := string(renderHymnStanzas("Title\n\nFirst line,\nSecond line.\n\nAmen."))
 
-	if !strings.Contains(html, `<span class="hymn-line">Second line.</span> <span class="hymn-amen">Amen.</span>`) {
-		t.Fatalf("expected lone Amen joined to final hymn line: %s", html)
+	if !strings.Contains(html, `<span class="hymn-line">Second line.<span class="hymn-amen">Amen.</span></span>`) {
+		t.Fatalf("expected lone Amen nested in the final hymn line: %s", html)
 	}
 	if strings.Contains(html, `<p class="hymn-stanza hymn-amen">`) {
 		t.Fatalf("Amen must not render as a separate hymn stanza: %s", html)
 	}
-	if !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">First line,</span><span class="hymn-line">Second line.</span> <span class="hymn-amen">Amen.</span></p>`) {
+	if !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">First line,</span><span class="hymn-line">Second line.<span class="hymn-amen">Amen.</span></span></p>`) {
 		t.Fatalf("expected semantic opening-stanza hook: %s", html)
 	}
 }
@@ -403,7 +403,7 @@ func TestRenderHymnKeepsAnOpeningAmenAndAttachesOnlyLaterCoda(t *testing.T) {
 	if !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">Amen.</span></p>`) {
 		t.Fatalf("an opening Amen is a real first stanza, not a coda to discard: %s", html)
 	}
-	if !strings.Contains(html, `<p class="hymn-stanza"><span class="hymn-line">Second stanza.</span> <span class="hymn-amen">Amen.</span></p>`) {
+	if !strings.Contains(html, `<p class="hymn-stanza"><span class="hymn-line">Second stanza.<span class="hymn-amen">Amen.</span></span></p>`) {
 		t.Fatalf("only a later standalone Amen should join the preceding stanza: %s", html)
 	}
 	if strings.Count(html, `class="hymn-amen"`) != 1 {

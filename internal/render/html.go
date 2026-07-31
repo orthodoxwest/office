@@ -686,14 +686,17 @@ func renderHymnStanzas(text string) template.HTML {
 		sb.WriteString(`<p class="`)
 		sb.WriteString(class)
 		sb.WriteString(`">`)
-		for _, line := range stanza {
+		joinAmen := i+1 < len(hymn.Stanzas) && isHymnAmen(hymn.Stanzas[i+1])
+		for j, line := range stanza {
 			sb.WriteString(`<span class="hymn-line">`)
 			sb.WriteString(escCross(line))
-			sb.WriteString(`</span>`)
-		}
-		if i+1 < len(hymn.Stanzas) && isHymnAmen(hymn.Stanzas[i+1]) {
-			sb.WriteString(` <span class="hymn-amen">`)
-			sb.WriteString(escCross(hymn.Stanzas[i+1][0]))
+			// Nest the coda inside the last metrical line so display:block on
+			// .hymn-line does not push Amen onto its own visual row.
+			if joinAmen && j == len(stanza)-1 {
+				sb.WriteString(`<span class="hymn-amen">`)
+				sb.WriteString(escCross(hymn.Stanzas[i+1][0]))
+				sb.WriteString(`</span>`)
+			}
 			sb.WriteString(`</span>`)
 		}
 		sb.WriteString(`</p>`)

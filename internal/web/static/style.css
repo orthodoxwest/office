@@ -1602,17 +1602,20 @@ footer::before {
   text-indent: 0;
 }
 
-/* The initial's float reaches into the next metrical source line. Keep that
-   line's continuation padding, but remove the outdent that tucks its first
-   glyph beneath the cap. */
+/* Second metrical line of the opening stanza: no hang. While the float still
+   intersects this line, clearance comes from the float; if the first metrical
+   line wraps through both drop-cap rows, this line starts below at the stanza
+   edge rather than inset by the ordinary continuation padding. */
 .hymn-stanza-opening .hymn-line:first-child + .hymn-line {
+  padding-left: 0;
   text-indent: 0;
 }
 
-/* Amen is the coda of the preceding hymn line; it remains roman like the
-   prayer itself, while a small gap keeps its conventional visual separation. */
+/* Amen is nested in the last hymn-line span; a thin leading gap separates it
+   from the verse as printed diurnals do, and it stays roman like the prayer. */
 .hymn-amen {
   font-style: normal;
+  margin-left: 0.35em;
 }
 
 .psalm-text {

@@ -1025,6 +1025,7 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
             ".hymn-stanza-opening .hymn-line",
             ".marian-antiphon .chant-line-opening",
             ".corporate-lord-prayer-officiant",
+            ".short-responsory-opening .sigil-text",
           ].map(firstLetter),
           secretCap: firstLetter(".secret-text"),
           overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
@@ -1106,31 +1107,44 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
             ".hymn-stanza-opening .hymn-line",
           );
           const firstGlyph = (line) => {
+            const node = [...line.childNodes].find(
+              (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim(),
+            );
             const range = document.createRange();
-            range.setStart(line.firstChild, 0);
-            range.setEnd(line.firstChild, 1);
+            range.setStart(node, 0);
+            range.setEnd(node, 1);
             const { left, right, top, bottom } = range.getBoundingClientRect();
             return { left, right, top, bottom };
           };
           return {
             cap: firstGlyph(opening),
             secondLine: firstGlyph(secondLine),
+            openingLeft: opening.getBoundingClientRect().left,
             secondLineIndent: parseFloat(getComputedStyle(secondLine).textIndent),
             secondLinePadding: parseFloat(getComputedStyle(secondLine).paddingLeft),
           };
         });
 
         const label = `${hymn}/${theme}/${width}px`;
-        // The cap deliberately occupies both source lines vertically; its
-        // neighbour must therefore start to its right rather than beneath it.
-        expect(geometry.secondLine.top, `${label} second line reaches the cap`).toBeLessThan(
-          geometry.cap.bottom,
-        );
         expect(geometry.secondLineIndent, `${label} second-line outdent`).toBe(0);
-        expect(geometry.secondLinePadding, `${label} second-line continuation inset`).toBeGreaterThan(0);
-        expect(geometry.secondLine.left, `${label} second-line glyph clears cap`).toBeGreaterThanOrEqual(
-          geometry.cap.right - 0.5,
-        );
+        expect(geometry.secondLinePadding, `${label} second-line hang padding`).toBe(0);
+        const yOverlap =
+          geometry.secondLine.top < geometry.cap.bottom - 0.5 &&
+          geometry.secondLine.bottom > geometry.cap.top + 0.5;
+        if (yOverlap) {
+          // Cap still occupies this row; the glyph must sit to its right.
+          expect(
+            geometry.secondLine.left,
+            `${label} second-line glyph clears cap`,
+          ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+        } else {
+          // First metrical line wrapped through both drop-cap rows; line 2
+          // returns to the stanza edge, not the ordinary hang inset.
+          expect(geometry.secondLine.left, `${label} second line at stanza edge`).toBeCloseTo(
+            geometry.openingLeft,
+            0,
+          );
+        }
       }
     }
   }
@@ -1141,7 +1155,7 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
   // shares one block so a two-line drop cap can float beside both source
   // lines; hanging indent on that block used to clip the gilt M and pull
   // the second line under it.
-  for (const width of [390, 1280]) {
+  for (const width of [320, 390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/vespers/2026-07-31", "light");
 
@@ -1177,6 +1191,7 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         following: glyph(firstText, 1, 2),
         second: glyph(secondText, 0, 1),
         secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
+        openingLeft: opening.getBoundingClientRect().left,
         openingPadding: parseFloat(getComputedStyle(opening).paddingLeft),
         openingIndent: parseFloat(getComputedStyle(opening).textIndent),
         laterPadding: later ? parseFloat(getComputedStyle(later).paddingLeft) : 0,
@@ -1203,9 +1218,8 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
       `${label} first-line rest clears the drop cap`,
     ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
     // On a wide measure the second source line sits beside the cap. On a
-    // phone the first source line already wraps through both drop-cap line
-    // boxes, so the second source line starts below — only require horizontal
-    // clearance when the lines still share vertical space.
+    // phone the first source line may wrap through both drop-cap line boxes,
+    // so the second source line starts below at the opening block's left edge.
     const yOverlap =
       geometry.second.top < geometry.cap.bottom - 0.5 &&
       geometry.second.bottom > geometry.cap.top + 0.5;
@@ -1214,6 +1228,11 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
         geometry.second.left,
         `${label} second-line glyph clears the drop cap`,
       ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+    } else {
+      expect(geometry.second.left, `${label} second line at opening edge`).toBeCloseTo(
+        geometry.openingLeft,
+        0,
+      );
     }
     // A clipped gilt initial paints a short box; a full two-line M is taller
     // than one body line.
@@ -1238,6 +1257,7 @@ test("Litany speaker marks share one spoken-text edge across All lines", async (
         h.textContent.includes("Litany"),
       );
       const rows = [];
+      let allSigilLeft = null;
       for (let el = section.nextElementSibling; el && el.tagName !== "H2"; el = el.nextElementSibling) {
         for (const line of el.querySelectorAll?.(".versicle-line, .response-line, .all-line") ?? []) {
           const sigil = line.querySelector(".sigil");
@@ -1247,19 +1267,28 @@ test("Litany speaker marks share one spoken-text edge across All lines", async (
             textLeft: text.getBoundingClientRect().left,
             text: (text.textContent || "").slice(0, 36),
           });
+          if (sigil?.classList.contains("sigil-all")) {
+            allSigilLeft = sigil.getBoundingClientRect().left;
+          }
         }
       }
-      return rows;
+      return {
+        rows,
+        allSigilLeft,
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
     });
 
-    expect(geometry.length, `${width}px litany dialogue lines`).toBeGreaterThanOrEqual(5);
+    expect(geometry.rows.length, `${width}px litany dialogue lines`).toBeGreaterThanOrEqual(5);
     expect(
-      geometry.some((row) => row.sigil === "All:"),
+      geometry.rows.some((row) => row.sigil === "All:"),
       `${width}px includes All speaker mark`,
     ).toBe(true);
+    expect(geometry.overflow, `${width}px horizontal overflow`).toBe(false);
+    expect(geometry.allSigilLeft, `${width}px All: stays on-screen`).toBeGreaterThanOrEqual(0);
 
-    const edge = geometry[0].textLeft;
-    for (const row of geometry) {
+    const edge = geometry.rows[0].textLeft;
+    for (const row of geometry.rows) {
       expect(row.textLeft, `${width}px ${row.sigil} ${row.text}`).toBeCloseTo(edge, 0);
     }
   }
