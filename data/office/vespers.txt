@@ -26,7 +26,7 @@ Label = Opening Versicles
 Type = versicle
 Ref = ordinary/vespers/opening-versicle
 
-Type = proper-antiphon
+Type = proper-opening-acclamation
 Ref = alleluia
 
 [Psalmody-Festal]
@@ -396,7 +396,7 @@ Ref = psalm-antiphon-4
 Type = proper-chapter
 Ref = chapter
 
-Type = proper-responsory
+Type = proper-short-responsory
 Ref = short-responsory
 
 [Hymn]
@@ -423,10 +423,10 @@ Ref = magnificat-antiphon
 [Pre-Collect]
 Label = The Prayers
 
-Type = prayer
+Type = dialogue
 Ref = ordinary/shared/kyrie
 
-Type = prayer
+Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer

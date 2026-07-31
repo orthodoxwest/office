@@ -167,6 +167,8 @@ const (
 	BlockResponse
 	// BlockBlessing is a "Blessing. " line.
 	BlockBlessing
+	// BlockAll is an "All: " line, spoken by everyone together.
+	BlockAll
 )
 
 // BlockLine is one parsed line of a liturgical block.
@@ -192,6 +194,7 @@ var blockSigils = []struct {
 	{"V. ", BlockVersicle},
 	{"R. ", BlockResponse},
 	{"Blessing. ", BlockBlessing},
+	{"All: ", BlockAll},
 }
 
 // ParseBlock parses a liturgical block into classified lines. Bracketed title

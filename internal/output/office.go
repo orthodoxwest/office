@@ -35,7 +35,11 @@ func FormatOfficeHour(hour *models.OfficeHour) string {
 				}
 				fmt.Fprintf(&b, "--- %s ---\n", label)
 			}
-			if text := elem.DisplayText(); text != "" {
+			text := elem.DisplayText()
+			if elem.Type == models.CorporateLordPrayer {
+				text = formatCorporateLordPrayerText(elem)
+			}
+			if text != "" {
 				b.WriteString(text)
 				b.WriteString("\n\n")
 			}
@@ -43,4 +47,23 @@ func FormatOfficeHour(hour *models.OfficeHour) string {
 	}
 
 	return b.String()
+}
+
+// formatCorporateLordPrayerText adds only the response sigil required by the
+// corporate form. The underlying shared text stays suitable for private and
+// secret prayer elsewhere in the office.
+func formatCorporateLordPrayerText(elem models.OfficeElement) string {
+	var officiant, response strings.Builder
+	for _, span := range elem.Voice {
+		switch span.Role {
+		case models.VoiceOfficiant:
+			officiant.WriteString(span.Text)
+		case models.VoiceResponse:
+			response.WriteString(span.Text)
+		}
+	}
+	if officiant.Len() == 0 || response.Len() == 0 {
+		return elem.Text
+	}
+	return strings.TrimRight(officiant.String(), " \t\n") + "\nR. " + strings.TrimSpace(response.String())
 }

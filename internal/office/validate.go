@@ -20,30 +20,34 @@ func isValidCondition(condition string) bool {
 // validElementTypes is the set of Type values recognised by mapElementType.
 // Unknown values map silently to "rubric".
 var validElementTypes = map[string]bool{
-	"psalm":                true,
-	"canticle":             true,
-	"hymn":                 true,
-	"antiphon":             true,
-	"versicle":             true,
-	"response":             true,
-	"prayer":               true,
-	"secret-prayer":        true,
-	"partly-secret-prayer": true,
-	"preces":               true,
-	"rubric":               true,
-	"chapter":              true,
-	"collect":              true,
-	"blessing":             true,
-	"marian":               true,
-	"proper-antiphon":      true,
-	"proper-collect":       true,
-	"proper-hymn":          true,
-	"proper-responsory":    true,
-	"proper-versicle":      true,
-	"proper-chapter":       true,
-	"proper-psalmody":      true,
-	"commemorations":       true,
-	"gloria-patri":         true,
+	"psalm":                      true,
+	"canticle":                   true,
+	"hymn":                       true,
+	"antiphon":                   true,
+	"versicle":                   true,
+	"response":                   true,
+	"prayer":                     true,
+	"secret-prayer":              true,
+	"partly-secret-prayer":       true,
+	"corporate-lord-prayer":      true,
+	"dialogue":                   true,
+	"preces":                     true,
+	"rubric":                     true,
+	"chapter":                    true,
+	"collect":                    true,
+	"blessing":                   true,
+	"marian":                     true,
+	"proper-antiphon":            true,
+	"proper-opening-acclamation": true,
+	"proper-collect":             true,
+	"proper-hymn":                true,
+	"proper-responsory":          true,
+	"proper-short-responsory":    true,
+	"proper-versicle":            true,
+	"proper-chapter":             true,
+	"proper-psalmody":            true,
+	"commemorations":             true,
+	"gloria-patri":               true,
 }
 
 func validationHours(hour, elemType, ref string) []string {
@@ -111,7 +115,7 @@ func ValidateHourDefinitions(dataDir string) []string {
 							"%s: proper-psalmody must use Ref %q in Vespers", src, vespersPsalmodyRef,
 						))
 					}
-				case "proper-antiphon", "proper-collect", "proper-hymn", "proper-responsory", "proper-versicle", "proper-chapter":
+				case "proper-antiphon", "proper-opening-acclamation", "proper-collect", "proper-hymn", "proper-responsory", "proper-short-responsory", "proper-versicle", "proper-chapter":
 					// Symbolic ref; validate that the ordinary fallback exists.
 					// The engine tries (mirroring resolveProperText / resolveProperCollectText):
 					//   1. hour-specific   ordinary/<hour>/<ref>

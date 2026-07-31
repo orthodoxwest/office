@@ -7,7 +7,7 @@ V. O God, ✠ make speed to save me.
 R. O Lord, make haste to help me.
 
 Glory be to the Father, and to the Son, * and to the Holy Ghost;
-as it was in the beginning, is now, and ever shall be, * world without end. Amen.
+As it was in the beginning, is now, and ever shall be, * world without end. Amen.
 
 [pre-collect-versicles]
 V. O Lord, hear my prayer.
@@ -26,9 +26,9 @@ V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
 
 [our-father-partly-secret-rubric]
-# SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2;
+# SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2 (corporate form);
 # 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
-The Our Father is said secretly until And lead us not into temptation, which is said aloud; the response But deliver us from evil is also said aloud.
+The Our Father is said by the officiant through And lead us not into temptation; ℟. But deliver us from evil. Amen.
 
 [closing-our-father]
 Our Father is said secretly.

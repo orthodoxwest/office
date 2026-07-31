@@ -42,8 +42,8 @@
   --gold-line: #c9ac72;
   /* Ornament tokens: gold leaf by default, in both themes (the var() resolves
      against whichever --gold won the cascade on :root). Only the gilding reads
-     these — drop caps, the double hairlines around the hour title, the ✦
-     diamonds, the ✠ cross, the scroll-progress hairline — so a season can
+     these — drop caps, the double hairlines around the hour title, and the ✦
+     diamonds — so a season can
      retint the ornaments without disturbing anything functional that also
      happens to be gold: focus rings, disclosure markers, today's ordo row.
      See "Seasonal ornament" at the foot of this file. */
@@ -191,8 +191,8 @@ footer {
   padding-right: max(var(--page-gutter), env(safe-area-inset-right));
 }
 
-/* Secondary / small italic: system Georgia. EB Garamond italic is hard to
-   read below ~body size in dense chrome (ordo digests, refs, rubrics).
+/* Compact supporting text uses system Georgia, which remains legible at the
+   smaller sizes used by ordo details, rubrics, and scripture references.
    Prayer-body italics (hymn titles, Latin incipits, large display quotes)
    keep EB Garamond via the body stack. */
 .assurance-detail,
@@ -1419,16 +1419,23 @@ footer::before {
 
 .rubric {
   color: var(--rubric);
-  font-style: italic;
-  /* Rubrics are instructions within the prayer, not miniature chrome. An em
-     keeps them subordinate while allowing the mobile body-size increase and
-     the reader's text-size choice to carry them along. */
-  font-size: 0.82em;
+  font-style: normal;
+  /* Rubrics are instructions within the prayer, not miniature chrome. This
+     follows the printed convention of red roman type, while the em sizing
+     keeps the instruction subordinate and honors reader text-size choices. */
+  font-size: 0.85em;
   line-height: 1.5;
 }
 
+/* Rubrics may quote a prayer-name or an actual spoken response. The composed
+   element, not a text-matching rule, marks those small runs as prayer. */
+.rubric-prayed {
+  color: var(--text);
+  font-style: normal;
+}
+
 .cross {
-  color: var(--ornament);
+  color: var(--rubric);
 }
 
 .elements > :is(.psalm, .canticle, .hymn, .chapter, .preces, .marian-antiphon, .liturgical-block) {
@@ -1469,6 +1476,16 @@ footer::before {
    air than a full closing antiphon. */
 .antiphon-announce {
   margin-bottom: 0.55rem;
+}
+
+/* The seasonal opening Alleluia (or its penitential replacement) belongs to
+   the opening rite, not a psalm frame, so it has no Ant. sigil or hanging
+   antiphon indent. */
+.opening-acclamation {
+  max-width: 34rem;
+  margin: 0.25rem auto 0.7rem;
+  line-height: 1.6;
+  text-align: left;
 }
 
 .elements > .antiphon {
@@ -1512,6 +1529,15 @@ footer::before {
   letter-spacing: 0.07em;
   color: var(--muted);
   margin-bottom: 0.35rem;
+}
+
+/* Psalm and canticle titles are the reader's immediate wayfinding within the
+   prayer, so their number and Latin incipit meet the prayer text at its own
+   size. Other labels (including Marian titles) remain compact service-book
+   furniture. */
+.psalm > .item-label,
+.canticle > .item-label {
+  font-size: 1em;
 }
 
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
@@ -1569,12 +1595,10 @@ footer::before {
   text-indent: -0.9rem;
 }
 
-/* Amen is the coda, not another verse: italic, a little air above the
-   last stanza, no trailing stanza gap. */
+/* Amen is the coda of the preceding hymn line; it remains roman like the
+   prayer itself, while a small gap keeps its conventional visual separation. */
 .hymn-amen {
-  font-style: italic;
-  margin-top: 0.35rem;
-  margin-bottom: 0;
+  font-style: normal;
 }
 
 .psalm-text {
@@ -1678,10 +1702,15 @@ footer::before {
   color: var(--ornament);
 }
 
-/* Drop cap on chapter openings (same metrics as the psalm cap). Hymns are
-   stanza form and deliberately do not take a drop cap. */
+/* Opening initials share the psalm's two-line metrics. The semantic opening
+   hooks deliberately include only spoken forms: secret prayer markup never
+   receives a dropped initial. */
 .chapter .liturgical-block .plain-line:first-child::first-letter,
-.chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+.chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+.collect .liturgical-block .plain-line:first-child::first-letter,
+.hymn-stanza-opening .hymn-line:first-child::first-letter,
+.marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+.corporate-lord-prayer-officiant::first-letter {
   font-size: 3.05em;
   line-height: 1;
   float: left;
@@ -1698,12 +1727,12 @@ footer::before {
 }
 
 .chapter-ref {
-  font-style: italic;
+  font-style: normal;
   /* A scripture reference identifies the reading; it must not out-rank the
      small-cap "Chapter" heading or equal the reading itself. */
   font-size: 0.85em;
   line-height: 1.4;
-  color: var(--muted);
+  color: var(--rubric);
   text-align: center;
   margin-top: -0.2rem;
   margin-bottom: 0.5rem;
@@ -1722,7 +1751,8 @@ footer::before {
 }
 
 .versicle-line,
-.response-line {
+.response-line,
+.all-line {
   display: flex;
   align-items: baseline;
   font-style: normal;
@@ -1759,14 +1789,32 @@ footer::before {
   width: 4.25rem;
 }
 
+/* "All:" is a speaker label rather than a compact sigil; give dialogue
+   lines their own modest gutter without widening unrelated exchanges. */
+.sigil-all,
+.liturgical-block:has(.sigil-all) .sigil {
+  flex-basis: 2.25rem;
+  width: 2.25rem;
+}
+
 .sigil-text {
   flex: 1;
   min-width: 0;
 }
 
+/* Only the opening response of an explicitly modelled Short Responsory takes
+   this dropped initial. Later ℟. lines remain ordinary response lines. */
+.short-responsory-opening .sigil-text::first-letter {
+  font-size: 3.05em;
+  line-height: 1;
+  float: left;
+  margin: 0.05em 0.1em -0.1em 0;
+  color: var(--ornament);
+}
+
 .scripture-ref {
-  color: var(--muted);
-  font-style: italic;
+  color: var(--rubric);
+  font-style: normal;
   font-size: 0.85em;
   line-height: 1.4;
   margin-bottom: 0.4rem;
@@ -2773,7 +2821,7 @@ footer::before {
    The season class is stamped on <body> server-side per date
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
 
-   Contrast, worst case (small text-adjacent use is the ✠ cross glyph):
+   Contrast, worst case (a drop cap sits immediately beside body text):
    nave    veiled  #756a7e on #fdf1e6 = 4.6:1  (gold baseline 3.9:1)
    nave    paschal #a4731a on #fdf1e6 = 3.7:1  (same lightness as gold, more chroma)
    apse    veiled  #b0a4c2 on #121c28 = 7.3:1  (gold baseline 9.3:1)
@@ -2782,8 +2830,8 @@ footer::before {
 /* The gilded caps take a gradient, so each season also carries a stop pair
    (--ornament-hi / --ornament-lo) alongside its flat --ornament. Each pair
    keeps the default's ~18% lightness spread and straddles that season's own
-   --ornament, so the drop caps and the ✠ are veiled or brightened with
-   everything else instead of staying gold through Passiontide.
+   --ornament, so the drop caps veil or brighten with the rest of the
+   ornament instead of staying gold through Passiontide.
 
    Veiled: the pair is built from #756a7e / #b0a4c2 at the same hue and low
    chroma, so the caps read as a grey-violet cloth with a fold in it, not as
@@ -3819,8 +3867,8 @@ body.season-eastertide {
 
 /* ── Gilded caps ──
    Gold leaf is never one flat tone: it catches light across the stroke. Two
-   stops about 18% apart in lightness, raked at 145°, give the drop caps and
-   the ✠ that shift without turning them into an effect. Gated on
+   stops about 18% apart in lightness, raked at 145°, give the drop caps a
+   shift without turning them into an effect. Gated on
    background-clip so a browser that cannot clip the gradient to the glyph
    never gets `color: transparent` and an invisible letter.
 
@@ -3830,10 +3878,14 @@ body.season-eastertide {
    gold here would have left the caps gilt while the rest of the page was
    veiled. */
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .cross,
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
-  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+  .collect .liturgical-block .plain-line:first-child::first-letter,
+  .hymn-stanza-opening .hymn-line:first-child::first-letter,
+  .marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+  .corporate-lord-prayer-officiant::first-letter,
+  .short-responsory-opening .sigil-text::first-letter {
     background-image: linear-gradient(145deg, var(--ornament-hi) 0%, var(--ornament-lo) 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -4413,7 +4465,10 @@ body.page-hour footer::after {
     color: #888;
   }
 
-  .rubric {
+  .rubric,
+  .cross,
+  .chapter-ref,
+  .scripture-ref {
     color: #600;
   }
 
@@ -4426,7 +4481,6 @@ body.page-hour footer::after {
 
   .mediant,
   .psalm-verses .verse-num,
-  .scripture-ref,
   .sigil {
     color: #555;
   }
@@ -4456,10 +4510,14 @@ body.page-hour footer::after {
     box-shadow: none;
   }
 
-  .cross,
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
-  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter {
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+  .collect .liturgical-block .plain-line:first-child::first-letter,
+  .hymn-stanza-opening .hymn-line:first-child::first-letter,
+  .marian-antiphon .liturgical-block > .chant-line:first-child::first-letter,
+  .corporate-lord-prayer-officiant::first-letter,
+  .short-responsory-opening .sigil-text::first-letter {
     background-image: none;
     -webkit-background-clip: border-box;
     background-clip: border-box;

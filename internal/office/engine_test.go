@@ -628,9 +628,11 @@ func TestResolveHourElement(t *testing.T) {
 		wantLabel string
 	}{
 		{"proper-antiphon", HourElement{Type: "proper-antiphon", Ref: "antiphon"}, models.Antiphon, ""},
+		{"proper opening acclamation", HourElement{Type: "proper-opening-acclamation", Ref: "antiphon"}, models.OpeningAcclamation, ""},
 		{"proper-collect", HourElement{Type: "proper-collect", Ref: "collect"}, models.Collect, ""},
 		{"proper-hymn extracts title", HourElement{Type: "proper-hymn", Ref: "hymn"}, models.Hymn, "Hymn Title"},
 		{"proper-responsory", HourElement{Type: "proper-responsory", Ref: "responsory"}, models.Response, ""},
+		{"proper short responsory", HourElement{Type: "proper-short-responsory", Ref: "responsory"}, models.ShortResponsory, ""},
 		{"proper-chapter extracts ref", HourElement{Type: "proper-chapter", Ref: "chapter"}, models.Chapter, "Isa 1:1"},
 		{"fallthrough versicle", HourElement{Type: "versicle", Ref: "ordinary/compline/versicle"}, models.Versicle, ""},
 	}

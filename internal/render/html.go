@@ -18,6 +18,7 @@ import (
 const (
 	sigilClass     = "sigil"
 	sigilWordClass = "sigil sigil-word"
+	sigilAllClass  = "sigil sigil-all"
 )
 
 // escCross replaces the ✠ cross character with a styled HTML span.
@@ -133,8 +134,10 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(template.HTMLEscapeString(elem.Text))
 		sb.WriteString(`</h2>`)
 	case models.Rubric:
-		sb.WriteString(`<p class="rubric">`)
-		sb.WriteString(template.HTMLEscapeString(elem.Text))
+		sb.WriteString(string(renderRubric(elem)))
+	case models.OpeningAcclamation:
+		sb.WriteString(`<p class="opening-acclamation">`)
+		sb.WriteString(chantLineHTML(elem.Text))
 		sb.WriteString(`</p>`)
 	case models.Antiphon:
 		if elem.Label != "" {
@@ -195,9 +198,17 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		}
 		sb.WriteString(string(renderHymnStanzas(elem.Text)))
 		sb.WriteString(`</div>`)
-	case models.Versicle, models.Response, models.Blessing, models.Doxology:
+	case models.Versicle, models.Response, models.Blessing, models.Doxology, models.Dialogue:
 		sb.WriteString(string(renderLiturgicalBlock(elem.Text)))
-	case models.Collect, models.Prayer:
+	case models.ShortResponsory:
+		sb.WriteString(string(renderShortResponsory(elem.Text)))
+	case models.CorporateLordPrayer:
+		sb.WriteString(string(renderCorporateLordPrayer(elem)))
+	case models.Collect:
+		sb.WriteString(`<div class="collect">`)
+		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
+		sb.WriteString(`</div>`)
+	case models.Prayer:
 		if len(elem.Voice) > 0 {
 			sb.WriteString(string(renderVoiceLiturgicalBlock(elem.Voice, flowProseLines)))
 		} else {
@@ -311,6 +322,68 @@ const (
 // line breaks, as required by blessings, doxologies, and preces.
 func renderLiturgicalBlock(text string) template.HTML {
 	return renderLiturgicalBlockWithMode(text, preserveProseLines)
+}
+
+// renderShortResponsory is intentionally separate from ordinary response
+// blocks: the opening ℟. in a Responsory Breve is replaced by its dropped
+// initial, while every later response retains its spoken-role sigil.
+func renderShortResponsory(text string) template.HTML {
+	return renderLiturgicalBlockWithOptions(text, preserveProseLines, true)
+}
+
+func renderRubric(elem models.OfficeElement) template.HTML {
+	var sb strings.Builder
+	sb.WriteString(`<p class="rubric">`)
+	if len(elem.RubricSpans) == 0 {
+		sb.WriteString(template.HTMLEscapeString(elem.Text))
+	} else {
+		for _, span := range elem.RubricSpans {
+			if span.Prayed {
+				sb.WriteString(`<span class="rubric-prayed">`)
+				sb.WriteString(escCross(span.Text))
+				sb.WriteString(`</span>`)
+			} else {
+				sb.WriteString(template.HTMLEscapeString(span.Text))
+			}
+		}
+	}
+	sb.WriteString(`</p>`)
+	return template.HTML(sb.String())
+}
+
+// renderCorporateLordPrayer presents the role partition held on the composed
+// element without putting response syntax into the shared, private prayer
+// corpus. Any invalid/missing role partition falls back to a normal prayer.
+func renderCorporateLordPrayer(elem models.OfficeElement) template.HTML {
+	var officiant, response strings.Builder
+	for _, span := range elem.Voice {
+		switch span.Role {
+		case models.VoiceOfficiant:
+			officiant.WriteString(span.Text)
+		case models.VoiceResponse:
+			response.WriteString(span.Text)
+		}
+	}
+	if officiant.Len() == 0 || response.Len() == 0 {
+		return renderFlowingLiturgicalBlock(elem.Text)
+	}
+	flow := func(s string) string {
+		var lines []string
+		for _, line := range strings.Split(s, "\n") {
+			if line = strings.TrimSpace(line); line != "" {
+				lines = append(lines, line)
+			}
+		}
+		return strings.Join(lines, " ")
+	}
+	var sb strings.Builder
+	sb.WriteString(`<div class="liturgical-block corporate-lord-prayer">`)
+	sb.WriteString(`<p class="plain-line corporate-lord-prayer-officiant">`)
+	sb.WriteString(chantLineHTML(flow(officiant.String())))
+	sb.WriteString(`</p><p class="response-line corporate-lord-prayer-response"><span class="` + sigilClass + `">℟.</span><span class="sigil-text">`)
+	sb.WriteString(chantLineHTML(flow(response.String())))
+	sb.WriteString(`</span></p></div>`)
+	return template.HTML(sb.String())
 }
 
 // renderVoiceLiturgicalBlock renders a prayer partitioned into spoken/silent spans.
@@ -460,6 +533,10 @@ func chantLineHTML(line string) string {
 }
 
 func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTML {
+	return renderLiturgicalBlockWithOptions(text, mode, false)
+}
+
+func renderLiturgicalBlockWithOptions(text string, mode proseLineMode, shortResponsory bool) template.HTML {
 	var sb strings.Builder
 	sb.WriteString(`<div class="liturgical-block">`)
 
@@ -521,6 +598,7 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 		sb.WriteString(`</span></p>`)
 	}
 
+	firstResponse := true
 	for _, line := range texts.ParseBlock(text) {
 		switch line.Kind {
 		case texts.BlockGap:
@@ -535,9 +613,20 @@ func renderLiturgicalBlockWithMode(text string, mode proseLineMode) template.HTM
 		case texts.BlockVersicle:
 			sigilLine("versicle-line", sigilClass, "℣.", line.Text)
 		case texts.BlockResponse:
-			sigilLine("response-line", sigilClass, "℟.", line.Text)
+			if shortResponsory && firstResponse {
+				flushProse()
+				emitGap()
+				sb.WriteString(`<p class="response-line short-responsory-opening"><span class="sigil-text">`)
+				sb.WriteString(chantLineHTML(line.Text))
+				sb.WriteString(`</span></p>`)
+			} else {
+				sigilLine("response-line", sigilClass, "℟.", line.Text)
+			}
+			firstResponse = false
 		case texts.BlockBlessing:
 			sigilLine("versicle-line", sigilWordClass, "Blessing.", line.Text)
+		case texts.BlockAll:
+			sigilLine("all-line", sigilAllClass, "All:", line.Text)
 		default:
 			proseLines = append(proseLines, line.Text)
 		}
@@ -563,12 +652,17 @@ func renderHymnStanzas(text string) template.HTML {
 		sb.WriteString(`</p>`)
 	}
 
-	for _, stanza := range hymn.Stanzas {
-		// A lone Amen is the coda, not another verse stanza — mark it so
-		// type can set it apart (italic, a little air above).
+	for i, stanza := range hymn.Stanzas {
+		// A standalone Amen is a hymn coda, but it is prayed as the close of
+		// the preceding verse rather than as an italic stanza of its own.
+		if isHymnAmen(stanza) && i > 0 {
+			continue
+		}
 		class := "hymn-stanza"
-		if isHymnAmen(stanza) {
-			class = "hymn-stanza hymn-amen"
+		if i == 0 {
+			// This hook names the opening English stanza even when the source
+			// carries a Latin incipit above it, avoiding a positional CSS guess.
+			class += " hymn-stanza-opening"
 		}
 		sb.WriteString(`<p class="`)
 		sb.WriteString(class)
@@ -576,6 +670,11 @@ func renderHymnStanzas(text string) template.HTML {
 		for _, line := range stanza {
 			sb.WriteString(`<span class="hymn-line">`)
 			sb.WriteString(escCross(line))
+			sb.WriteString(`</span>`)
+		}
+		if i+1 < len(hymn.Stanzas) && isHymnAmen(hymn.Stanzas[i+1]) {
+			sb.WriteString(` <span class="hymn-amen">`)
+			sb.WriteString(escCross(hymn.Stanzas[i+1][0]))
 			sb.WriteString(`</span>`)
 		}
 		sb.WriteString(`</p>`)

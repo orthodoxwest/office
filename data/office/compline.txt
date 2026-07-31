@@ -21,7 +21,7 @@ Ref = ordinary/shared/confiteor
 Type = versicle
 Ref = ordinary/compline/post-absolution
 
-Type = proper-antiphon
+Type = proper-opening-acclamation
 Ref = alleluia
 
 [Psalmody]
@@ -69,16 +69,16 @@ Condition = not-feast-holy-saturday
 Type = proper-chapter
 Ref = chapter
 
-Type = proper-responsory
+Type = proper-short-responsory
 Ref = short-responsory
 
-Type = prayer
+Type = dialogue
 Ref = ordinary/shared/kyrie
 
 Type = rubric
 Ref = shared/formulas/our-father-partly-secret-rubric
 
-Type = partly-secret-prayer
+Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
 [Chapter-Easter-Eve]

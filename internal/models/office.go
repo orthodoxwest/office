@@ -3,7 +3,6 @@ package models
 import (
 	"strings"
 	"time"
-	"unicode/utf8"
 )
 
 // ElementType identifies the kind of liturgical element.
@@ -25,6 +24,21 @@ const (
 	Doxology      ElementType = "doxology"
 	PsalmDoxology ElementType = "psalm-doxology"
 	Preces        ElementType = "preces"
+	// OpeningAcclamation is the seasonal Alleluia (or its Septuagesima
+	// replacement) which follows the opening versicle. It is not an antiphon
+	// and therefore never takes the rubrical "Ant." sigil or psalm-frame
+	// presentation rules.
+	OpeningAcclamation ElementType = "opening-acclamation"
+	// ShortResponsory is the Responsory Breve after a chapter. Its opening
+	// response is conventionally marked by a dropped initial, while later
+	// responses retain their ℟. sigils.
+	ShortResponsory ElementType = "short-responsory"
+	// Dialogue is a short exchange with named speakers, such as the Kyrie.
+	Dialogue ElementType = "dialogue"
+	// CorporateLordPrayer identifies the office's corporate form of the Lord's
+	// Prayer, whose officiant and response portions must not leak into the
+	// private/secret use of the shared prayer text.
+	CorporateLordPrayer ElementType = "corporate-lord-prayer"
 )
 
 // VoiceSpan is a contiguous stretch of prayer text with a spoken/silent delivery.
@@ -34,6 +48,25 @@ const (
 type VoiceSpan struct {
 	Text   string
 	Spoken bool
+	Role   VoiceRole
+}
+
+// VoiceRole identifies a participant when a spoken span belongs to a
+// structured corporate prayer. The empty role preserves ordinary/private
+// spoken and secret prayer behaviour.
+type VoiceRole string
+
+const (
+	VoiceOfficiant VoiceRole = "officiant"
+	VoiceResponse  VoiceRole = "response"
+)
+
+// RubricSpan is one semantically distinct run in a rubric. Prayed is limited
+// to words which the rubric quotes for recitation; the surrounding instruction
+// remains rubricated. It deliberately does not try to parse arbitrary prose.
+type RubricSpan struct {
+	Text   string
+	Prayed bool
 }
 
 // OfficeElement represents a single element in an office hour.
@@ -59,20 +92,21 @@ type VoiceSpan struct {
 // after-antiphon stay whole. Announce is presentation-only and is not part of
 // the review content hash.
 type OfficeElement struct {
-	Type       ElementType
-	Text       string
-	Label      string
-	Incipit    string
-	Rubric     string
-	Voice      []VoiceSpan
-	SlotRef    string
-	SourceRef  string
-	SourceRefs []string
-	Announce   bool
+	Type        ElementType
+	Text        string
+	Label       string
+	Incipit     string
+	Rubric      string
+	Voice       []VoiceSpan
+	RubricSpans []RubricSpan
+	SlotRef     string
+	SourceRef   string
+	SourceRefs  []string
+	Announce    bool
 }
 
 // DisplayText is the string a renderer should print for this element. For an
-// announced antiphon it is the text through the mediant asterisk or dagger;
+// announced antiphon it is the words before the mediant, closed as a sentence;
 // otherwise it is Text.
 func (e OfficeElement) DisplayText() string {
 	if e.Type == Antiphon && e.Announce {
@@ -82,9 +116,10 @@ func (e OfficeElement) DisplayText() string {
 }
 
 // AntiphonAnnouncement returns the form said when an antiphon is merely
-// announced before a psalm: the words through the first mediant asterisk (*)
-// or dagger (†). When the corpus text has no such mark, the full text is
-// returned — there is no safe partial cut without a pointing cue.
+// announced before a psalm: the words before the first mediant asterisk (*)
+// or dagger (†), closed with a period. When the corpus text has no such mark,
+// the full text is returned — there is no safe partial cut without a pointing
+// cue.
 func AntiphonAnnouncement(text string) string {
 	text = strings.TrimSpace(text)
 	if text == "" {
@@ -94,8 +129,15 @@ func AntiphonAnnouncement(text string) string {
 	if i < 0 {
 		return text
 	}
-	_, size := utf8.DecodeRuneInString(text[i:])
-	return strings.TrimRight(text[:i+size], " \t")
+	if i == 0 {
+		// There is no incipit before a leading pointing mark to announce.
+		return text
+	}
+	incipit := strings.TrimRight(strings.TrimSpace(text[:i]), ",;:")
+	if incipit != "" && strings.ContainsAny(incipit[len(incipit)-1:], ".?!") {
+		return incipit
+	}
+	return incipit + "."
 }
 
 // CompositionDecision records one machine-readable choice made while an hour

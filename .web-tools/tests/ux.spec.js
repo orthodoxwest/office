@@ -749,12 +749,14 @@ test("the inscription band carries the frontispiece heading in both themes", asy
 
 test("the inscription band keeps the season with the rest of the gilding", async ({ page }) => {
   // Leaf lettering is gilding, so it veils in Passiontide and warms in
-  // Paschaltide like the ✦, the drop caps and the ✠. The timber course under
-  // it does not move — the church veils its images, not its beams. Both themes
-  // read one pair of leaf colours, because the ground is dark in each.
+  // Paschaltide like the ✦ and the drop caps. The timber course and the
+  // rubric-red ✠ do not move — the church veils its images, not its rubrics.
+  // Both themes read one pair of leaf colours, because the ground is dark in
+  // each.
   for (const theme of ["light", "dark"]) {
     const ink = {};
     const ground = {};
+    const cross = {};
     for (const [season, date] of [
       ["ordinary", testDate],
       ["passiontide", "2026-04-08"],
@@ -770,6 +772,8 @@ test("the inscription band keeps the season with the rest of the gilding", async
       });
       ink[season] = band.ink;
       ground[season] = band.ground;
+      await sheet.goto(`/vespers/${date}`);
+      cross[season] = await sheet.locator(".cross").first().evaluate((node) => getComputedStyle(node).color);
       await context.close();
     }
     expect(ink.passiontide).not.toBe(ink.ordinary);
@@ -777,6 +781,8 @@ test("the inscription band keeps the season with the rest of the gilding", async
     expect(ink.eastertide).not.toBe(ink.passiontide);
     expect(ground.passiontide).toBe(ground.ordinary);
     expect(ground.eastertide).toBe(ground.ordinary);
+    expect(cross.passiontide).toBe(cross.ordinary);
+    expect(cross.eastertide).toBe(cross.ordinary);
   }
 });
 
@@ -948,57 +954,87 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
 });
 
-test("hour typography keeps a clear hierarchy across narrow phone widths", async ({ page }) => {
+test("hour typography keeps the liturgical hierarchy across themes and narrow phone widths", async ({
+  page,
+}) => {
   const bodySizes = [];
 
-  for (const width of [320, 390, 540]) {
-    await page.setViewportSize({ width, height: 844 });
-    await openDatedPage(page, "/vespers/2026-06-18");
+  for (const theme of ["light", "dark"]) {
+    for (const width of [320, 390, 540]) {
+      await page.setViewportSize({ width, height: 844 });
+      await openDatedPage(page, "/vespers/2026-06-18", theme);
 
-    const metrics = await page.evaluate(() => {
-      const px = (selector, property) =>
-        parseFloat(getComputedStyle(document.querySelector(selector))[property]);
-      return {
-        prayer: px(".elements", "fontSize"),
-        heading: px(".section-heading", "fontSize"),
-        item: px(".item-label", "fontSize"),
-        rubric: px(".rubric", "fontSize"),
-        chapterRef: px(".chapter-ref", "fontSize"),
-        psalmLeading: px(".psalm-verses", "lineHeight"),
-        hymnLine: (() => {
-          const style = getComputedStyle(document.querySelector(".hymn-line"));
-          return {
-            display: style.display,
-            padding: parseFloat(style.paddingLeft),
-            indent: parseFloat(style.textIndent),
-          };
-        })(),
-        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-      };
-    });
+      const metrics = await page.evaluate(() => {
+        const style = (selector, pseudo) => getComputedStyle(document.querySelector(selector), pseudo);
+        const px = (selector, property) => parseFloat(style(selector)[property]);
+        const firstLetter = (selector) => {
+          const cap = style(selector, "::first-letter");
+          return { float: cap.float, size: parseFloat(cap.fontSize) };
+        };
+        const hymnLine = style(".hymn-line");
+        return {
+          prayer: px(".elements", "fontSize"),
+          heading: px(".section-heading", "fontSize"),
+          psalmItem: px(".psalm > .item-label", "fontSize"),
+          marianItem: px(".marian-antiphon > .item-label", "fontSize"),
+          rubric: px(".rubric", "fontSize"),
+          chapterRef: px(".chapter-ref", "fontSize"),
+          scriptureRef: px(".scripture-ref", "fontSize"),
+          rubricStyle: style(".rubric").fontStyle,
+          chapterRefStyle: style(".chapter-ref").fontStyle,
+          scriptureRefStyle: style(".scripture-ref").fontStyle,
+          rubricColor: style(".rubric").color,
+          chapterRefColor: style(".chapter-ref").color,
+          scriptureRefColor: style(".scripture-ref").color,
+          crossColor: style(".cross").color,
+          psalmLeading: px(".psalm-verses", "lineHeight"),
+          hymnLine: {
+            display: hymnLine.display,
+            padding: parseFloat(hymnLine.paddingLeft),
+            indent: parseFloat(hymnLine.textIndent),
+          },
+          caps: [
+            ".collect .plain-line",
+            ".hymn-stanza-opening .hymn-line",
+            ".marian-antiphon .chant-line",
+            ".corporate-lord-prayer-officiant",
+          ].map(firstLetter),
+          secretCap: firstLetter(".secret-text"),
+          overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        };
+      });
 
-    bodySizes.push(metrics.prayer);
-    expect(metrics.overflow, `${width}px horizontal overflow`).toBe(false);
-    expect(metrics.heading, `${width}px section heading`).toBeGreaterThanOrEqual(
-      metrics.prayer * 0.9,
-    );
-    expect(metrics.heading, `${width}px section heading`).toBeLessThanOrEqual(metrics.prayer);
-    expect(metrics.item, `${width}px item label`).toBeGreaterThanOrEqual(metrics.prayer * 0.8);
-    expect(metrics.item, `${width}px item label`).toBeLessThan(metrics.heading);
-    expect(metrics.rubric, `${width}px rubric`).toBeGreaterThanOrEqual(metrics.prayer * 0.81);
-    expect(metrics.rubric, `${width}px rubric`).toBeLessThan(metrics.prayer);
-    expect(metrics.chapterRef, `${width}px chapter reference`).toBeLessThan(metrics.heading);
-    expect(metrics.psalmLeading / metrics.prayer, `${width}px psalm leading`).toBeCloseTo(
-      1.65,
-      2,
-    );
-    expect(metrics.hymnLine.display, `${width}px hymn line flow`).toBe("block");
-    expect(metrics.hymnLine.padding, `${width}px hymn continuation inset`).toBeGreaterThan(0);
-    expect(metrics.hymnLine.indent, `${width}px hymn first-line offset`).toBeLessThan(0);
-    expect(
-      metrics.hymnLine.padding + metrics.hymnLine.indent,
-      `${width}px hymn stanza edge`,
-    ).toBeCloseTo(0, 1);
+      if (theme === "light") bodySizes.push(metrics.prayer);
+      const label = `${theme}/${width}px`;
+      expect(metrics.overflow, `${label} horizontal overflow`).toBe(false);
+      expect(metrics.heading, `${label} section heading`).toBeGreaterThanOrEqual(metrics.prayer * 0.9);
+      expect(metrics.heading, `${label} section heading`).toBeLessThanOrEqual(metrics.prayer);
+      expect(metrics.psalmItem, `${label} psalm label`).toBeCloseTo(metrics.prayer, 1);
+      expect(metrics.marianItem, `${label} unrelated item label`).toBeLessThan(metrics.prayer);
+      expect(metrics.rubric, `${label} rubric`).toBeGreaterThanOrEqual(metrics.prayer * 0.84);
+      expect(metrics.rubric, `${label} rubric`).toBeLessThan(metrics.prayer);
+      expect(metrics.chapterRef, `${label} chapter reference`).toBeLessThan(metrics.prayer);
+      expect(metrics.scriptureRef, `${label} scripture reference`).toBeLessThan(metrics.prayer);
+      expect(metrics.rubricStyle, `${label} rubric face`).toBe("normal");
+      expect(metrics.chapterRefStyle, `${label} chapter reference face`).toBe("normal");
+      expect(metrics.scriptureRefStyle, `${label} scripture reference face`).toBe("normal");
+      expect(metrics.chapterRefColor, `${label} chapter reference color`).toBe(metrics.rubricColor);
+      expect(metrics.scriptureRefColor, `${label} scripture reference color`).toBe(metrics.rubricColor);
+      expect(metrics.crossColor, `${label} cross color`).toBe(metrics.rubricColor);
+      expect(metrics.psalmLeading / metrics.prayer, `${label} psalm leading`).toBeCloseTo(1.65, 2);
+      expect(metrics.hymnLine.display, `${label} hymn line flow`).toBe("block");
+      expect(metrics.hymnLine.padding, `${label} hymn continuation inset`).toBeGreaterThan(0);
+      expect(metrics.hymnLine.indent, `${label} hymn first-line offset`).toBeLessThan(0);
+      expect(metrics.hymnLine.padding + metrics.hymnLine.indent, `${label} hymn stanza edge`).toBeCloseTo(
+        0,
+        1,
+      );
+      for (const cap of metrics.caps) {
+        expect(cap.float, `${label} approved opening drop cap`).toBe("left");
+        expect(cap.size, `${label} approved opening drop cap size`).toBeGreaterThan(metrics.prayer * 2);
+      }
+      expect(metrics.secretCap.float, `${label} secret prayer never gets a drop cap`).not.toBe("left");
+    }
   }
 
   // The default eases from 19px on the smallest supported phones to the
