@@ -4310,15 +4310,19 @@ body.page-hour footer::after {
 
 /* The footer diamond still provides a structural threshold on Nave plaster.
    Where the Apse vault is present it becomes a second boss floating over a
-   field already full of them, so the starfield takes over that work. */
+   field already full of them, so the starfield takes over that work. Hidden
+   via visibility rather than content: none — the latter drops the glyph's
+   box entirely, pulling the rest of the footer up by its margin-bottom and
+   jumping the layout when toggling Nave/Apse. Visibility keeps the same
+   reserved space in both modes. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
-    content: none;
+    visibility: hidden;
   }
 }
 
 :root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
-  content: none;
+  visibility: hidden;
 }
 
 /* On a phone the field cannot stand behind the card: the frontispiece leaves
