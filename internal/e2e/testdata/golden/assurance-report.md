@@ -8,8 +8,8 @@
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 568 |
-| Rendered text entries needing review | 1366 |
-| Rendered text entries with unknown source | 220 |
+| Rendered text entries needing review | 1358 |
+| Rendered text entries with unknown source | 233 |
 | Classified zero-occurrence entries | 69 |
 | Zeroes needing classification | 25 |
 | Stale zero-occurrence classifications | 8 |

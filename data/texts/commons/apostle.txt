@@ -188,13 +188,14 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou shalt make them princes * over all the earth.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C1 [Responsory Breve Nona] — check against diurnal
-R. Thy friends, O God * are made exceedingly honourable.
-R. Thy friends, O God * are made exceedingly honourable.
-V. Their principality is exceedingly strengthened.
-R. O God, thy friends.
+# SOURCE: draft archdiocesan / diurnal Common of Apostles (None; reduced form is
+# V. Exceedingly honoured are thy friends, O God. / R. Firmly stablished is their princedom.)
+R. Exceedingly honoured are * thy friends, O God.
+R. Exceedingly honoured are * thy friends, O God.
+V. Firmly stablished is their princedom.
+R. Thy friends, O God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thy friends, O God * are made exceedingly honourable.
+R. Exceedingly honoured are * thy friends, O God.
 
 [chapter-vespers]
 @use commons/apostle/chapter-lauds
