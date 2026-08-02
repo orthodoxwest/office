@@ -25,8 +25,18 @@ async function openDatedPage(page, path, theme = "light") {
 // The server renders an undated home request for its own current local day.
 // Read that rendered value before installing a browser clock, so tests of a
 // foreground page crossing midnight do not assume a particular CI date.
+//
+// The first load of any fresh context has no tz cookie yet — app.js sets
+// one from the browser's own timezone, but only after that first response
+// already rendered using the server's time.Local fallback (the CI
+// container's clock, not the browser's configured America/New_York).
+// Reload once that cookie is in place so the slug we read — and that every
+// later request in the test will also see — is computed in the one
+// timezone the whole test actually runs in, rather than racing the
+// container's clock across the day boundary for several hours a day.
 async function serverTodaySlug(page) {
   await page.goto("/");
+  await page.reload();
   const slug = await page.locator(".home-prayer-card").getAttribute("data-date-slug");
   expect(slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   return slug;
