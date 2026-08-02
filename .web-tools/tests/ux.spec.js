@@ -635,7 +635,7 @@ test("the mobile home vault survives browser-back viewport changes", async ({ pa
   expect(field.footer[1]).not.toBe("none");
 });
 
-test("the hour vault begins after prayer and replaces the Apse footer diamond", async ({ page }) => {
+test("the hour vault begins after prayer and hides the Apse footer diamond without moving the footer", async ({ page }) => {
   const read = async (theme) => {
     const context = await page.context().browser().newContext({
       viewport: { width: 390, height: 844 },
@@ -670,6 +670,7 @@ test("the hour vault begins after prayer and replaces the Apse footer diamond", 
           Math.abs(footerBox.top + parseFloat(footerField.top) - epilogueBox.bottom) < 0.5,
         phase: [field.backgroundPosition, footerField.backgroundPosition],
         diamond: diamond.content,
+        diamondVisibility: diamond.visibility,
         assuranceBackground: getComputedStyle(assurance).backgroundColor,
       };
     });
@@ -687,13 +688,20 @@ test("the hour vault begins after prayer and replaces the Apse footer diamond", 
   expect(apse.joinsFooter).toBe(true);
   expect(apse.phase[0]).toContain("100%");
   expect(apse.phase[1]).toContain("0%");
-  expect(apse.diamond).toBe("none");
+  // Kept, not dropped: the diamond's box stays (visibility: hidden) so the
+  // footer's own height — and everything below the glyph — never moves
+  // when Nave/Apse toggles. Only mobile home drops the box outright, since
+  // its vault relies on the freed height (see "the mobile vault fills the
+  // gap" above); hour pages have no such stake in footer height.
+  expect(apse.diamond).toContain("✦");
+  expect(apse.diamondVisibility).toBe("hidden");
 
   const nave = await read("light");
   expect(nave.prayerField).toBe("none");
   expect(nave.fieldLayers).toBe(0);
   expect(nave.footerLayers).toBe(0);
   expect(nave.diamond).toContain("✦");
+  expect(nave.diamondVisibility).toBe("visible");
   expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
 });
 

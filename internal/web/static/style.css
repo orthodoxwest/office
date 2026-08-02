@@ -4312,28 +4312,40 @@ body.page-hour footer::after {
    Where the Apse vault is present it becomes a second boss floating over a
    field already full of them, so the starfield takes over that work.
 
-   Mobile drops the pseudo-element outright (content: none) — the vault
-   behind the footer (see the max-width: 700px block below) depends on the
-   diamond's box actually being gone to free the height its flex-grown fill
-   needs on a short phone. Desktop instead keeps the box and just hides the
-   glyph (visibility: hidden): its vault is a fixed full-viewport layer with
-   no stake in footer height, but the home page's own layout does —
-   `.page-home` goes flex column with `min-height: 100vh` and a flex-grown
-   `main` that vertically centres the composition (see "Desktop home is a
-   threshold" below), so any change in footer's natural height reflows that
-   centring and the card visibly jumps when toggling Nave/Apse. Hour pages
-   are plain document flow and would have tolerated content: none same as
-   mobile, but there is no reason to give the two breakpoints different
-   rules for the same glyph. */
+   Everywhere but mobile home, hiding it keeps the box (visibility: hidden)
+   rather than dropping it (content: none), so the rest of the footer never
+   has to reflow around the missing 1.65rem and nothing jumps when toggling
+   Nave/Apse. That is safe for hour pages at every width — their vault (see
+   body.page-hour footer::after above) is an absolutely-positioned overlay
+   sized off footer's own rendered box, not a participant in a height
+   budget, so it simply repaints a hair taller when the box is. Desktop
+   home's vault is a fixed full-viewport layer with the same non-stake in
+   footer height.
+
+   Mobile home is the one real exception: `main` there gets a flex-grown
+   fill (see the max-width: 700px block below) sized against the page's
+   total available height, and restoring the diamond's box pushes that
+   total past a short phone's viewport — confirmed by hand, at 844px the
+   fill test's "no added scroll" assertion breaks the moment the box comes
+   back. So mobile home keeps content: none, trading a footer-text jump for
+   the no-scroll guarantee the fill depends on. */
 @media (max-width: 700px) {
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+    :root:not([data-theme="light"]) body.page-home footer::before {
       content: none;
+    }
+
+    :root:not([data-theme="light"]) body.page-hour footer::before {
+      visibility: hidden;
     }
   }
 
-  :root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
+  :root[data-theme="dark"] body.page-home footer::before {
     content: none;
+  }
+
+  :root[data-theme="dark"] body.page-hour footer::before {
+    visibility: hidden;
   }
 }
 
