@@ -252,6 +252,20 @@ func TestOrdoGolden(t *testing.T) {
 	checkGolden(t, "ordo-2026.txt", output.FormatCalendar(days, engine, moveable))
 }
 
+func TestOrdo2027Golden(t *testing.T) {
+	t.Parallel()
+	days, err := calendar.BuildCalendar(2027, dataDir)
+	if err != nil {
+		t.Fatalf("BuildCalendar: %v", err)
+	}
+	moveable := calendar.ComputeMoveableDates(2027)
+	engine, err := office.NewEngine(dataDir)
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	checkGolden(t, "ordo-2027.txt", output.FormatCalendar(days, engine, moveable))
+}
+
 func TestAssuranceGolden(t *testing.T) {
 	t.Parallel()
 	baseline, err := review.LoadAssuranceBaseline(dataDir)
