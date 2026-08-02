@@ -4310,37 +4310,42 @@ body.page-hour footer::after {
 
 /* The footer diamond still provides a structural threshold on Nave plaster.
    Where the Apse vault is present it becomes a second boss floating over a
-   field already full of them, so the starfield takes over that work. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+   field already full of them, so the starfield takes over that work.
+
+   Mobile drops the pseudo-element outright (content: none) — the vault
+   behind the footer (see the max-width: 700px block below) depends on the
+   diamond's box actually being gone to free the height its flex-grown fill
+   needs on a short phone. Desktop instead keeps the box and just hides the
+   glyph (visibility: hidden): its vault is a fixed full-viewport layer with
+   no stake in footer height, but the home page's own layout does —
+   `.page-home` goes flex column with `min-height: 100vh` and a flex-grown
+   `main` that vertically centres the composition (see "Desktop home is a
+   threshold" below), so any change in footer's natural height reflows that
+   centring and the card visibly jumps when toggling Nave/Apse. Hour pages
+   are plain document flow and would have tolerated content: none same as
+   mobile, but there is no reason to give the two breakpoints different
+   rules for the same glyph. */
+@media (max-width: 700px) {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+      content: none;
+    }
+  }
+
+  :root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
     content: none;
   }
 }
 
-:root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
-  content: none;
-}
-
-/* Desktop only: dropping the pseudo-element (content: none, above) removes
-   its box — the 0.8rem glyph line plus its 0.85rem margin-bottom — so the
-   rest of the footer rises by that 1.65rem and jumps when toggling
-   Nave/Apse. Restore the same amount as footer padding-top so the controls
-   below land in the same spot whether the threshold is a diamond or open
-   plaster. Not on mobile: there the vault behind the footer (see the
-   max-width: 700px block below) depends on the diamond's box actually
-   being gone to free the height its flex-grown fill needs, and compensating
-   here would starve it and reintroduce scroll on short phones. Desktop's
-   vault is a fixed full-viewport layer instead, so it has no such stake in
-   the footer's height. */
 @media (min-width: 701px) {
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer {
-      padding-top: calc(0.85rem + 0.8rem + 0.85rem);
+    :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
+      visibility: hidden;
     }
   }
 
-  :root[data-theme="dark"] body:is(.page-home, .page-hour) footer {
-    padding-top: calc(0.85rem + 0.8rem + 0.85rem);
+  :root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
+    visibility: hidden;
   }
 }
 
