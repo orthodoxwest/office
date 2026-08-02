@@ -238,32 +238,25 @@ func TestAuditGolden(t *testing.T) {
 	checkGolden(t, "audit-report.txt", buf.String())
 }
 
+var ordoYears = []int{2026, 2027}
+
 func TestOrdoGolden(t *testing.T) {
 	t.Parallel()
-	days, err := calendar.BuildCalendar(2026, dataDir)
-	if err != nil {
-		t.Fatalf("BuildCalendar: %v", err)
+	for _, year := range ordoYears {
+		t.Run(fmt.Sprint(year), func(t *testing.T) {
+			t.Parallel()
+			days, err := calendar.BuildCalendar(year, dataDir)
+			if err != nil {
+				t.Fatalf("BuildCalendar: %v", err)
+			}
+			moveable := calendar.ComputeMoveableDates(year)
+			engine, err := office.NewEngine(dataDir)
+			if err != nil {
+				t.Fatalf("NewEngine: %v", err)
+			}
+			checkGolden(t, fmt.Sprintf("ordo-%d.txt", year), output.FormatCalendar(days, engine, moveable))
+		})
 	}
-	moveable := calendar.ComputeMoveableDates(2026)
-	engine, err := office.NewEngine(dataDir)
-	if err != nil {
-		t.Fatalf("NewEngine: %v", err)
-	}
-	checkGolden(t, "ordo-2026.txt", output.FormatCalendar(days, engine, moveable))
-}
-
-func TestOrdo2027Golden(t *testing.T) {
-	t.Parallel()
-	days, err := calendar.BuildCalendar(2027, dataDir)
-	if err != nil {
-		t.Fatalf("BuildCalendar: %v", err)
-	}
-	moveable := calendar.ComputeMoveableDates(2027)
-	engine, err := office.NewEngine(dataDir)
-	if err != nil {
-		t.Fatalf("NewEngine: %v", err)
-	}
-	checkGolden(t, "ordo-2027.txt", output.FormatCalendar(days, engine, moveable))
 }
 
 func TestAssuranceGolden(t *testing.T) {
