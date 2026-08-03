@@ -56,9 +56,8 @@ We look for the Saviour, the Lord Jesus Christ, who shall change the body of our
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium SanctiM/08-06 [Capitulum Sexta] — check against diurnal
 !2 Cor 3:18
-Ye all, with open face beholding as in a glass the glory of the Lord, are changed into the same image, from glory to glory, even as by the Spirit of the Lord.
+But we all, with open face beholding as in a glass the glory of the Lord, are changed into the same image from glory to glory, * even as by the Spirit of the Lord.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -144,32 +143,14 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou hast crowned him with glory and honour, O Lord, * alleluia, alleluia.
 
-[short-responsory-terce]
-# SOURCE: divinum-officium Sancti/08-06 [Responsory Breve Tertia] — check against diurnal
-R. Thou wast manifested in thy glory in the Presence of the Lord. * Alleluia, Alleluia.
-R. Thou wast manifested in thy glory in the Presence of the Lord. * Alleluia, Alleluia.
-V. Wherefore the Lord hath clothed thee with majesty.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou wast manifested in thy glory in the Presence of the Lord. * Alleluia, Alleluia.
-
-[short-responsory-sext]
-# SOURCE: divinum-officium Sancti/08-06 [Responsory Breve Sexta] — check against diurnal
-R. Thou hast crowned him with glory and honour, O Lord. * Alleluia, Alleluia.
-R. Thou hast crowned him with glory and honour, O Lord. * Alleluia, Alleluia.
-V. And madest him to have dominion over the works of thy hands.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast crowned him with glory and honour, O Lord. * Alleluia, Alleluia.
-
 [short-responsory-none]
 # SOURCE: divinum-officium Sancti/08-06 [Responsory Breve Nona] — check against diurnal
-R. His glory is great in thy salvation. * Alleluia, Alleluia.
-R. His glory is great in thy salvation. * Alleluia, Alleluia.
-V. Honour and great majesty shalt Thou lay upon him.
+R. His honour is great in thy salvation. * Alleluia, Alleluia.
+R. His honour is great in thy salvation. * Alleluia, Alleluia.
+V. Glory and great worship shalt Thou lay upon him.
 R. Alleluia, Alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His glory is great in thy salvation. * Alleluia, Alleluia.
+R. His honour is great in thy salvation. * Alleluia, Alleluia.
 
 [chapter-vespers]
 @use proper/transfiguration/chapter-lauds
