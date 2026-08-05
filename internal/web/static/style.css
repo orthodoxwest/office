@@ -564,8 +564,9 @@ footer .text-size-switch {
 /* ── Footer ── */
 
 footer {
-  /* The mobile Apse vault extends through this gap. Keep its reach coupled to
-     the spacing so the two painted halves cannot drift out of phase again. */
+  /* Hour-page vault continuations reach upward through this gap to phase-lock
+     with the epilogue. Keep the reach coupled to the spacing so the painted
+     join cannot drift. (Home uses a single fixed page field — no footer lattice.) */
   --footer-gap: 2.5rem;
   margin-top: var(--footer-gap);
   padding: 0.85rem 0;
@@ -3451,7 +3452,11 @@ body.season-eastertide {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .page-home .home-hero {
     background: var(--surface);
-    box-shadow: none;
+    /* Soft erase only on phones: a solid 0.5rem ring of --bg eats half a
+       ~16px gutter and reads as a matte disc against the graded night wash.
+       Desktop restores a firmer ring below. Unlike masking the page field,
+       this follows the card without changing the vault's fixed tile origin. */
+    box-shadow: 0 0 1.25rem 0.35rem var(--bg);
   }
 
   :root:not([data-theme="light"]) .page-home .home-hour-link {
@@ -3477,7 +3482,7 @@ body.season-eastertide {
 
 :root[data-theme="dark"] .page-home .home-hero {
   background: var(--surface);
-  box-shadow: none;
+  box-shadow: 0 0 1.25rem 0.35rem var(--bg);
 }
 
 @media (min-width: 701px) and (prefers-color-scheme: dark) {
@@ -3485,6 +3490,9 @@ body.season-eastertide {
     --frontispiece-frame: rgba(208, 176, 106, 0.34);
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
+    box-shadow:
+      0 0 0 0.5rem var(--bg),
+      0 0 1.6rem 0.55rem var(--bg);
   }
 }
 
@@ -3493,6 +3501,9 @@ body.season-eastertide {
     --frontispiece-frame: rgba(208, 176, 106, 0.34);
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
+    box-shadow:
+      0 0 0 0.5rem var(--bg),
+      0 0 1.6rem 0.55rem var(--bg);
   }
 }
 
@@ -4192,11 +4203,12 @@ body.page-reminders {
    color-mix, so the vault veils in Passiontide and warms in Paschaltide with
    the rest of the gilding.
 
-   Desktop Apse home carries the full-page field. At 390px the frontispiece
-   leaves 16px side gutters where a page-level field reads as debris pinned
-   against the frame; the phone instead lets the vault rise in the open ground
-   below the card (see the mobile block). Nave gets nothing: the nave ceiling
-   is plaster.
+   Apse home carries one full-page field at every width. The frontispiece is
+   the opaque lit surface above it; on a phone the narrow gutters reveal only
+   a hint of the vault, while wider phones give the diaper more room to read.
+   Keeping that field fixed and top-centred gives every render the same tile
+   origin instead of deriving its phase from a flex-grown gap below the card.
+   Nave gets nothing: the nave ceiling is plaster.
 
    Static, never animated: a twinkling vault would be the opposite of
    stillness. */
@@ -4261,12 +4273,12 @@ body {
 /* An hour remains a flat prayer page until the office has ended. The vault
    begins only in the post-prayer epilogue: transparent through the hour
    continuation, emerging around Assurance, then continuing through the
-   footer. Both layers share main's bottom as their tile origin, exactly as
-   the two mobile-home layers do.
+   footer. Both layers share main's bottom as their tile origin.
 
    The negative inline reach restores the full main/footer measure around the
-   narrower content box. On a phone that is edge-to-edge; on desktop it is the
-   46rem architectural frame rather than stars spread behind the prayer page. */
+   narrower content box on a phone. On desktop the same post-prayer field
+   bleeds to the viewport edges so the footer reads as one continuous vault,
+   while the prayer above remains on its flat 38rem measure. */
 body.page-hour {
   --apse-epilogue-tile: 132px;
 }
@@ -4305,6 +4317,14 @@ body.page-hour footer::after {
 @media (min-width: 701px) {
   body.page-hour {
     --apse-epilogue-tile: 176px;
+    /* Full-bleed pseudo-elements use viewport units; clip the mathematical
+       scrollbar sliver without hiding legitimate vertical overflow. */
+    overflow-x: clip;
+  }
+
+  body.page-hour .hour-epilogue::before,
+  body.page-hour footer::after {
+    inset-inline: calc(50% - 50vw);
   }
 }
 
@@ -4312,169 +4332,44 @@ body.page-hour footer::after {
    Where the Apse vault is present it becomes a second boss floating over a
    field already full of them, so the starfield takes over that work.
 
-   Everywhere but mobile home, hiding it keeps the box (visibility: hidden)
-   rather than dropping it (content: none), so the rest of the footer never
-   has to reflow around the missing 1.65rem and nothing jumps when toggling
-   Nave/Apse. That is safe for hour pages at every width — their vault (see
-   body.page-hour footer::after above) is an absolutely-positioned overlay
-   sized off footer's own rendered box, not a participant in a height
-   budget, so it simply repaints a hair taller when the box is. Desktop
-   home's vault is a fixed full-viewport layer with the same non-stake in
-   footer height.
-
-   Mobile home is the one real exception: `main` there gets a flex-grown
-   fill (see the max-width: 700px block below) sized against the page's
-   total available height, and restoring the diamond's box pushes that
-   total past a short phone's viewport — confirmed by hand, at 844px the
-   fill test's "no added scroll" assertion breaks the moment the box comes
-   back. So mobile home keeps content: none, trading a footer-text jump for
-   the no-scroll guarantee the fill depends on. */
-@media (max-width: 700px) {
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) body.page-home footer::before {
-      content: none;
-    }
-
-    :root:not([data-theme="light"]) body.page-hour footer::before {
-      visibility: hidden;
-    }
-  }
-
-  :root[data-theme="dark"] body.page-home footer::before {
-    content: none;
-  }
-
-  :root[data-theme="dark"] body.page-hour footer::before {
+   Hiding it keeps the box (visibility: hidden) rather than dropping it, so
+   switching Nave/Apse never moves the footer. The vault layers are out of
+   flow and have no stake in the footer's height. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
     visibility: hidden;
   }
 }
 
-@media (min-width: 701px) {
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) body:is(.page-home, .page-hour) footer::before {
-      visibility: hidden;
-    }
-  }
-
-  :root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
-    visibility: hidden;
-  }
+:root[data-theme="dark"] body:is(.page-home, .page-hour) footer::before {
+  visibility: hidden;
 }
 
-/* On a phone the field cannot stand behind the card: the frontispiece leaves
-   16px side gutters where clipped rib stubs and half-stars read as debris
-   pinned against the frame (built and looked at, again, after the lattice
-   redesign — the ribs made the gutters worse, not better, and the field also
-   speckled the footer controls). But there is open ground below the card, and
-   the vault rises in it instead: the same diaper, filling whatever gap the
-   phone actually has.
-
-   Two cooperating layers. main::after is a flex-grown gap-filler — main
-   becomes a column flex so the pseudo-element sizes itself to the ground
-   main's min-height already leaves, adding no scroll on any height (a
-   fixed-height course laid out in flow once pushed an 844px phone past its
-   viewport). footer::after then continues the night behind the footer and
-   thins it to the foot of the screen, as the desktop mask does. The two join
-   without a visible seam because both anchor their tile to the boundary they
-   share: the fill is bottom-anchored and the footer layer top-anchored, so
-   the diaper crosses main's bottom edge mid-pattern, in phase. Anchor either
-   layer anywhere else and the lattice visibly breaks at the footer line. The
-   masks meet at the same 0.4 alpha for the same reason.
-
-   Negative gutter margins bleed the fill wall to wall. The footer layer
-   reaches upward through footer's margin so its painted top is the actual
-   bottom of main; anchoring at the footer border box instead leaves a 2.5rem
-   unpainted phase jump between the two tiles. Apse only, and gated on the
-   theme rather than on --apse-vault, because an empty flex item still takes
-   space in Nave.
-
-   There is deliberately no viewport-height gate. The browser chrome on a
-   phone can move the effective height across a breakpoint during history
-   navigation, making a restored home page lose its vault. On a short screen
-   the flex-grown gap simply collapses; the footer continuation still gives
-   the field a complete, intentional place to appear. */
-@media (max-width: 700px) {
-  :root[data-theme="dark"] body.page-home main,
-  :root:not([data-theme="light"]) body.page-home main {
-    display: flex;
-    flex-direction: column;
-  }
-
-  :root[data-theme="dark"] body.page-home main::after,
-  :root:not([data-theme="light"]) body.page-home main::after {
-    content: "";
-    flex: 1 1 auto;
-    min-height: 0;
-    margin-top: 1.15rem;
-    margin-left: calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
-    margin-right: calc(-1 * max(var(--page-gutter), env(safe-area-inset-right)));
-    pointer-events: none;
-    background-image: var(--apse-vault);
-    background-repeat: repeat;
-    background-size: 132px 132px;
-    background-position: bottom center;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 1.5rem 60%, rgba(0, 0, 0, 0.4) 100%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 1.5rem 60%, rgba(0, 0, 0, 0.4) 100%);
-  }
-
-  :root[data-theme="dark"] body.page-home footer,
-  :root:not([data-theme="light"]) body.page-home footer {
-    position: relative;
-  }
-
-  /* ::after, not ::before — footer::before is the ✦ diamond separator on
-     every page, and the first cut of this rule silently replaced it (and the
-     Nave cancel below deleted it). The night goes on the pseudo-element the
-     footer is not already using. */
-  :root[data-theme="dark"] body.page-home footer::after,
-  :root:not([data-theme="light"]) body.page-home footer::after {
-    content: "";
-    position: absolute;
-    inset: calc(-1 * var(--footer-gap)) 0 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image: var(--apse-vault);
-    background-repeat: repeat;
-    background-size: 132px 132px;
-    background-position: top center;
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0, transparent 92%);
-    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0, transparent 92%);
-  }
-}
-
-@media (max-width: 700px) and (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) body.page-home main {
-    display: block;
-  }
-
-  :root:not([data-theme="dark"]) body.page-home main::after,
-  :root:not([data-theme="dark"]) body.page-home footer::after {
-    content: none;
-  }
+/* One viewport-anchored homepage vault at every width. A single fixed layer
+   makes the diaper's phase independent of content height, footer geometry and
+   mobile browser chrome; top centre is therefore the same origin on every
+   render. The frontispiece's opaque surface keeps prayer controls clear while
+   the page gutters reveal the field around it. */
+body.page-home::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: var(--apse-vault);
+  background-repeat: repeat;
+  background-size: 132px 132px;
+  background-position: top center;
+  /* Clear the header beam, carry the field behind the frontispiece, then thin
+     the ornament toward the controls at the foot of the page. A mask thins
+     stars and ribs without tinting the night itself. */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+  mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
 }
 
 @media (min-width: 701px) {
   body.page-home::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image: var(--apse-vault);
-    background-repeat: repeat;
     background-size: 176px 176px;
-    background-position: top center;
-    /* The vault fills the page. An earlier window opened at 17% and closed by
-       74%, which left the field sitting as a band across the middle with bare
-       blue above and below it — a vault that stops short of the walls reads as
-       a mistake rather than as restraint. It now clears only the header beam
-       at the top and thins toward the footer at the foot, so the night runs
-       the height of the page and the stars simply grow sparser as they fall.
-
-       A mask rather than a painted fade: fading the background itself would
-       tint the page instead of thinning the stars. */
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-    mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
   }
 }
 
@@ -4581,6 +4476,10 @@ body.page-hour footer::after {
     background-color: transparent;
     background-image: none;
     box-shadow: none;
+  }
+
+  body.page-home::before {
+    content: none;
   }
 
   .psalm-verses .verse:first-child::first-letter,
