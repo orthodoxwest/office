@@ -59,7 +59,7 @@ Read this before changing visual design or prayer-page chrome.
 | Gold scroll progress hairline | Under color band on hour pages only |
 | Gold underline (`inset 0 -1px 0`) | **The** marker for "this is the chosen one" — current hour, selected control. Never a filled cell |
 | Gold caret `▾` / `▴` | **The** disclosure marker, everywhere. Never the native `▶`, never `+` / `−` |
-| Apse starfield | **Apse home and post-office epilogue only** — the diapered field around the frontispiece on desktop, the ground below the card on the phone, and a fade beginning around Assurance after an hour; never behind prayer text, never Nave. See below |
+| Apse starfield | **Apse home and post-office epilogue only** — one fixed full-page field at every width (phone gutters show a hint; the frontispiece soft-erases approaching stars), and a fade beginning around Assurance after an hour; never behind prayer text, never Nave. See below |
 
 Two weights of line, and they mean different things: **oak** (`--oak`, near-charcoal warm brown) is structure — the header beam, an inscription course. **Pale tan hairlines** (`--border`, `--surface-edge`) are surfaces and separators. The building is emphatically structural; if a page feels boneless, it is usually missing oak, not missing more hairlines.
 
@@ -103,31 +103,25 @@ what wallpaper is.
 - **Guard with `prefers-color-scheme: dark`.** `:root:not([data-theme="light"])`
   matches when no choice is stored, so without it a Default-theme reader on a
   light device gets gold stars across the plaster.
-- **Desktop carries the full-page field; the phone lets the vault rise below
-  the card.** A page-level field behind the card was rejected twice — before
-  the lattice for gutter debris, and again after it, because clipped rib stubs
-  in the 16px gutters are worse and the field speckles the footer controls.
-  What works on the phone is two cooperating layers: a **flex-grown gap
-  filler** (`main` becomes a column flex; the pseudo-element sizes itself to
-  whatever ground `main`'s `min-height` leaves, adding no scroll on any phone
-  height) and a **footer continuation** that thins the night to the foot of
-  the screen as the desktop mask does. The continuation must reach upward
-  through footer's top margin: its painted top, not the footer border box, is
-  the boundary shared with `main`. They join seamlessly only because the fill
-  is bottom-anchored there, the footer layer is top-anchored there, and their
-  masks meet at the same alpha; re-anchor either and the diaper breaks
-  mid-lattice at the footer line. Gate on the theme rather than on
-  `--apse-vault` (an empty flex item still takes space in Nave), but **never
-  gate it on viewport height**: mobile browser chrome can move the effective
-  height across that boundary during history restoration and make the vault
-  disappear on Back. On short phones the flex gap may collapse; the footer
-  continuation is now a complete, intentional home for the field by itself.
+- **Home carries one full-page field at every width.** The fixed pseudo-layer
+  sits behind the opaque frontispiece and is anchored `top center`, so mobile
+  browser chrome, content height and footer geometry cannot change the tile
+  phase. Narrow-phone gutters show only a hint; wider phones reveal more of
+  the diaper at the card's sides. A soft `--bg`-coloured box-shadow on the
+  opaque frontispiece erases stars approaching its edges without moving or
+  masking the page layer (blur only on phones — a solid ring eats the gutter;
+  firmer ring on desktop). Keep this as one layer rather than rebuilding a
+  flex-grown gap and footer continuation: anchoring separate pieces to content
+  boundaries made the visible ranks vary between renders. The page mask clears
+  the header and thins the ornament toward footer controls. Do not gate it on
+  viewport height; theme gating already happens through `--apse-vault`.
 - **An hour admits the vault only after the prayer.** `.elements` and all
   liturgical text remain on a flat field. A separate `.hour-epilogue` begins
   after the office, stays transparent through the hour-continuation links,
   fades the diaper in around Assurance, and phase-locks its bottom to a footer
-  continuation. The footer diamond remains in Nave but disappears in Apse,
-  where the bosses already supply that ornament.
+  continuation. On desktop both post-prayer layers bleed to the viewport
+  edges; never widen the prayer measure with them. The footer diamond remains
+  in Nave but disappears in Apse, where the bosses already supply that ornament.
 - **Let the field reach the edges.** A mask window that opens and closes inside
   the viewport leaves the stars as a band across the middle with bare ground
   above and below, which reads as a mistake rather than restraint. Clear the

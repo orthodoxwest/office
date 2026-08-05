@@ -409,9 +409,9 @@ test("the apse vault appears only over the night, and veils with the season", as
   }
   expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
 
-  // Present on desktop Apse, absent on the phone and in the working rooms.
+  // Present behind the Apse home at every width, absent in working rooms.
   expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
-  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(0);
+  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
   for (const path of ["/calendar/2026", "/reminders"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
   }
@@ -512,12 +512,68 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
   }
 });
 
-test("the mobile vault fills the gap and continues behind the footer without scroll", async ({
+// Multi-layer backgrounds serialize each layer's position/size (Chromium:
+// "50% 0%, 50% 0%, …"). Engines also differ on keywords vs percentages.
+// Compare every layer's components rather than the full string.
+function phaseLayers(phase) {
+  return String(phase)
+    .split(",")
+    .map((s) => s.replace(/\s+/g, " ").trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isTopCenterLayer(p) {
+  return (
+    p === "50% 0%" ||
+    p === "50% 0" ||
+    p === "center top" ||
+    p === "top center" ||
+    p === "50% top" ||
+    p === "center 0%" ||
+    p === "center 0"
+  );
+}
+
+function isBottomCenterLayer(p) {
+  return (
+    p === "50% 100%" ||
+    p === "50% 100" ||
+    p === "center bottom" ||
+    p === "bottom center" ||
+    p === "50% bottom" ||
+    p === "center 100%" ||
+    p === "center 100"
+  );
+}
+
+function isTopCenterPhase(phase) {
+  const layers = phaseLayers(phase);
+  return layers.length > 0 && layers.every(isTopCenterLayer);
+}
+
+function isBottomCenterPhase(phase) {
+  const layers = phaseLayers(phase);
+  return layers.length > 0 && layers.every(isBottomCenterLayer);
+}
+
+function tileEdgePx(size) {
+  // Take the first layer; all vault layers share one tile.
+  const first = String(size).split(",")[0].trim();
+  const m = first.match(/([\d.]+)px(?:\s+([\d.]+)px)?/);
+  if (!m) return null;
+  return { w: parseFloat(m[1]), h: parseFloat(m[2] || m[1]) };
+}
+
+function nearViewportEdge(value, expected, tol = 2) {
+  return Math.abs(value - expected) <= tol;
+}
+
+test("the mobile home vault is one stable full-page layer without scroll", async ({
   page,
 }) => {
-  const read = async ({ height, theme, scheme }) => {
+  const read = async ({ width = 390, height, theme, scheme }) => {
     const context = await page.context().browser().newContext({
-      viewport: { width: 390, height },
+      viewport: { width, height },
       isMobile: true,
       hasTouch: true,
       colorScheme: scheme,
@@ -526,33 +582,22 @@ test("the mobile vault fills the gap and continues behind the footer without scr
     if (theme) await sheet.addInitScript((t) => localStorage.setItem("office-theme", t), theme);
     await sheet.goto(`/?date=${testDate}`);
     const seen = await sheet.evaluate(() => {
-      const main = document.querySelector("main");
-      const fill = getComputedStyle(main, "::after");
-      // The continuation lives on footer::after; footer::before is the ✦
-      // diamond separator retained in Nave and replaced by the vault in Apse.
+      const field = getComputedStyle(document.body, "::before");
       const footerElement = document.querySelector("footer");
-      const footer = getComputedStyle(footerElement, "::after");
       const diamond = getComputedStyle(footerElement, "::before");
-      const mainBox = main.getBoundingClientRect();
-      const footerBox = footerElement.getBoundingClientRect();
+      const card = getComputedStyle(document.querySelector(".home-hero"));
       return {
-        fillPresent: fill.content !== "none",
-        footerPresent: footer.content !== "none",
-        diamondKept: diamond.content.includes("✦"),
-        // footer has a 2.5rem top margin. Its painted continuation must reach
-        // through that margin to main's bottom or the tile restarts 40px out
-        // of phase even though its background-position still says "top".
-        joinsFill: Math.abs(footerBox.top + parseFloat(footer.top) - mainBox.bottom) < 0.5,
-        // The fill is a flex-grown gap-filler, so it must add no height of its
-        // own: a fixed-height course laid out in flow once pushed an 844px
-        // phone past its viewport and made home scroll for an ornament.
+        stars: (field.backgroundImage.match(/radial-gradient/g) || []).length,
+        position: field.position,
+        tileSize: field.backgroundSize,
+        phase: field.backgroundPosition,
+        diamondVisible: diamond.visibility !== "hidden",
+        // Probe the night token rather than hard-coding #121c28 — the halo must
+        // use whatever --bg is, not a particular hex.
+        pageBg: getComputedStyle(document.body).backgroundColor,
+        cardShadow: card.boxShadow,
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,
-        // The seam only stays invisible while both layers anchor their tile
-        // to the boundary they share — the fill bottom-anchored, the footer
-        // continuation top-anchored. Re-anchoring either breaks the diaper
-        // mid-lattice at the footer line.
-        phase: [fill.backgroundPosition, footer.backgroundPosition],
       };
     });
     await context.close();
@@ -560,52 +605,41 @@ test("the mobile vault fills the gap and continues behind the footer without scr
   };
 
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
-  expect(apse.fillPresent).toBe(true);
-  expect(apse.footerPresent).toBe(true);
-  expect(apse.diamondKept).toBe(false);
-  expect(apse.joinsFill).toBe(true);
+  expect(apse.stars).toBe(10);
+  expect(apse.position).toBe("fixed");
+  expect(tileEdgePx(apse.tileSize)).toEqual({ w: 132, h: 132 });
+  expect(isTopCenterPhase(apse.phase)).toBe(true);
+  expect(apse.diamondVisible).toBe(false);
+  expect(apse.cardShadow).toContain(apse.pageBg);
   expect(apse.scrolls).toBe(false);
-  expect(apse.phase[0]).toContain("100%");
-  expect(apse.phase[1]).toContain("0%");
 
-  // Nave has no vault, and an empty flex item would still take space.
+  // Nave keeps the same page geometry but paints no vault.
   for (const [theme, scheme] of [
     ["light", "light"],
     [null, "light"],
   ]) {
     const nave = await read({ height: 844, theme, scheme });
-    expect(nave.fillPresent).toBe(false);
-    expect(nave.footerPresent).toBe(false);
-    expect(nave.diamondKept).toBe(true);
+    expect(nave.stars).toBe(0);
+    expect(nave.diamondVisible).toBe(true);
     expect(nave.scrolls).toBe(false);
+    expect(nave.scrollHeight).toBe(apse.scrollHeight);
   }
 
-  // The gap scales with the viewport and may collapse on a short phone, but
-  // the footer continuation is now a complete home for the field in its own
-  // right. Keep both layers eligible at every phone height: mobile browser
-  // chrome can move the effective viewport across an arbitrary height
-  // breakpoint during history navigation.
-  for (const height of [667, 740]) {
-    const short = await read({ height, theme: "dark", scheme: "dark" });
-    const bare = await read({ height, theme: "light", scheme: "light" });
-    expect(short.fillPresent).toBe(true);
-    expect(short.footerPresent).toBe(true);
-    expect(short.diamondKept).toBe(false);
-    expect(short.joinsFill).toBe(true);
-    expect(short.phase[0]).toContain("100%");
-    expect(short.phase[1]).toContain("0%");
-    expect(short.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
-  }
-  // At exactly 800px Nave already scrolls a few pixels, so "does not scroll"
-  // is not the invariant — "the vault adds no scroll" is. Apse may be shorter
-  // because its starfield replaces the footer diamond and the diamond's
-  // margin.
-  for (const height of [800, 932]) {
-    const tall = await read({ height, theme: "dark", scheme: "dark" });
-    const bare = await read({ height, theme: "light", scheme: "light" });
-    expect(tall.fillPresent).toBe(true);
-    expect(tall.footerPresent).toBe(true);
-    expect(tall.scrollHeight).toBeLessThanOrEqual(bare.scrollHeight);
+  // Representative phone corners (short, mid, tall). Tile size and top-centre
+  // origin must not depend on viewport; a full width×height matrix is CI cost
+  // without extra signal once those two invariants hold.
+  for (const [width, height] of [
+    [320, 667],
+    [390, 844],
+    [430, 932],
+  ]) {
+    const field = await read({ width, height, theme: "dark", scheme: "dark" });
+    const bare = await read({ width, height, theme: "light", scheme: "light" });
+    expect(field.stars).toBe(10);
+    expect(field.position).toBe("fixed");
+    expect(tileEdgePx(field.tileSize)).toEqual({ w: 132, h: 132 });
+    expect(isTopCenterPhase(field.phase)).toBe(true);
+    expect(field.scrollHeight).toBe(bare.scrollHeight);
   }
 });
 
@@ -622,25 +656,20 @@ test("the mobile home vault survives browser-back viewport changes", async ({ pa
   await expect(page.locator("body")).toHaveClass(/page-home/);
 
   const field = await page.evaluate(() => {
-    const main = getComputedStyle(document.querySelector("main"), "::after");
-    const footer = getComputedStyle(document.querySelector("footer"), "::after");
-    return {
-      main: [main.content, main.backgroundImage],
-      footer: [footer.content, footer.backgroundImage],
-    };
+    const style = getComputedStyle(document.body, "::before");
+    return [style.content, style.backgroundImage, style.backgroundPosition];
   });
-  expect(field.main[0]).not.toBe("none");
-  expect(field.main[1]).not.toBe("none");
-  expect(field.footer[0]).not.toBe("none");
-  expect(field.footer[1]).not.toBe("none");
+  expect(field[0]).not.toBe("none");
+  expect(field[1]).not.toBe("none");
+  expect(isTopCenterPhase(field[2])).toBe(true);
 });
 
-test("the hour vault begins after prayer and hides the Apse footer diamond without moving the footer", async ({ page }) => {
-  const read = async (theme) => {
+test("the hour vault begins after prayer, spans the footer, and does not move it", async ({ page }) => {
+  const read = async (theme, width = 390) => {
     const context = await page.context().browser().newContext({
-      viewport: { width: 390, height: 844 },
-      isMobile: true,
-      hasTouch: true,
+      viewport: { width, height: 844 },
+      isMobile: width <= 700,
+      hasTouch: width <= 700,
       colorScheme: theme,
     });
     const sheet = await context.newPage();
@@ -668,6 +697,15 @@ test("the hour vault begins after prayer and hides the Apse footer diamond witho
         endsWithMain: Math.abs(epilogueBox.bottom - mainBox.bottom) < 0.5,
         joinsFooter:
           Math.abs(footerBox.top + parseFloat(footerField.top) - epilogueBox.bottom) < 0.5,
+        fieldEdges: [
+          Math.round(epilogueBox.left + parseFloat(field.left)),
+          Math.round(epilogueBox.right - parseFloat(field.right)),
+        ],
+        footerEdges: [
+          Math.round(footerBox.left + parseFloat(footerField.left)),
+          Math.round(footerBox.right - parseFloat(footerField.right)),
+        ],
+        horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
         phase: [field.backgroundPosition, footerField.backgroundPosition],
         diamond: diamond.content,
         diamondVisibility: diamond.visibility,
@@ -686,13 +724,17 @@ test("the hour vault begins after prayer and hides the Apse footer diamond witho
   expect(apse.startsAfterPrayer).toBe(true);
   expect(apse.endsWithMain).toBe(true);
   expect(apse.joinsFooter).toBe(true);
-  expect(apse.phase[0]).toContain("100%");
-  expect(apse.phase[1]).toContain("0%");
+  // 50vw full-bleed can be a hair off with classic scrollbars; allow 2px.
+  expect(nearViewportEdge(apse.fieldEdges[0], 0)).toBe(true);
+  expect(nearViewportEdge(apse.fieldEdges[1], 390)).toBe(true);
+  expect(nearViewportEdge(apse.footerEdges[0], 0)).toBe(true);
+  expect(nearViewportEdge(apse.footerEdges[1], 390)).toBe(true);
+  expect(apse.horizontalOverflow).toBe(false);
+  expect(isBottomCenterPhase(apse.phase[0])).toBe(true);
+  expect(isTopCenterPhase(apse.phase[1])).toBe(true);
   // Kept, not dropped: the diamond's box stays (visibility: hidden) so the
-  // footer's own height — and everything below the glyph — never moves
-  // when Nave/Apse toggles. Only mobile home drops the box outright, since
-  // its vault relies on the freed height (see "the mobile vault fills the
-  // gap" above); hour pages have no such stake in footer height.
+  // footer's own height — and everything below the glyph — never moves when
+  // Nave/Apse toggles.
   expect(apse.diamond).toContain("✦");
   expect(apse.diamondVisibility).toBe("hidden");
 
@@ -703,6 +745,17 @@ test("the hour vault begins after prayer and hides the Apse footer diamond witho
   expect(nave.diamond).toContain("✦");
   expect(nave.diamondVisibility).toBe("visible");
   expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
+
+  const desktop = await read("dark", 1280);
+  expect(desktop.prayerField).toBe("none");
+  expect(nearViewportEdge(desktop.fieldEdges[0], 0)).toBe(true);
+  expect(nearViewportEdge(desktop.fieldEdges[1], 1280)).toBe(true);
+  expect(nearViewportEdge(desktop.footerEdges[0], 0)).toBe(true);
+  expect(nearViewportEdge(desktop.footerEdges[1], 1280)).toBe(true);
+  expect(desktop.joinsFooter).toBe(true);
+  expect(isBottomCenterPhase(desktop.phase[0])).toBe(true);
+  expect(isTopCenterPhase(desktop.phase[1])).toBe(true);
+  expect(desktop.horizontalOverflow).toBe(false);
 });
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
