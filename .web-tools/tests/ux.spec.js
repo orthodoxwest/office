@@ -329,9 +329,14 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
-  const apseMaterial = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  // The Apse vault is a background-image, which can only snap rather than
+  // crossfade, so app.js dips it invisible and applies the theme (and swaps
+  // this image) only once that dip completes — poll instead of reading the
+  // pre-swap Nave material on a fast single-worker CI run.
+  const readMaterial = () => page.evaluate(() => getComputedStyle(document.body).backgroundImage);
+  await expect.poll(readMaterial).not.toBe(naveMaterial.page);
+  const apseMaterial = await readMaterial();
   expect(apseMaterial).not.toBe("none");
-  expect(apseMaterial).not.toBe(naveMaterial.page);
 
   await page.goto(`/lauds/${testDate}`);
   const prayerMaterial = await page.evaluate(() => ({
@@ -813,10 +818,14 @@ test("the inscription band carries the frontispiece heading in both themes", asy
   expect(nave.bleed).toBe(true);
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
+  // app.js dips the Apse vault invisible before it applies data-theme (so the
+  // vault's background-image swaps while unseen instead of popping), which
+  // holds this attribute back by ~100ms; the painted course then separately
+  // crossfades for 200ms once it lands. toHaveAttribute retries, so it
+  // covers the first wait; poll for the rendered colour below rather than
+  // sampling the Nave end of that second transition on a fast single-worker
+  // CI run.
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  // data-theme changes synchronously, but the painted course deliberately
-  // crossfades for 200ms. Wait for the rendered colour rather than sampling
-  // the Nave end of that transition on a fast single-worker CI run.
   await expect.poll(async () => (await read()).ground).not.toBe(nave.ground);
   const apse = await read();
   expect(apse.ground).not.toBe("rgba(0, 0, 0, 0)");

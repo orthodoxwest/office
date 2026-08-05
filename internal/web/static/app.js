@@ -98,12 +98,34 @@ document.documentElement.classList.add("js");
     }, 320);
   };
 
+  // The Apse starfield is a background-image, so it cannot ease alongside
+  // the color crossfade above — it can only snap. Dip it to transparent,
+  // swap the theme (and so the underlying image) while it's invisible, then
+  // let style.css's opacity transition climb it back to full: the swap
+  // itself never renders, so the vault fades rather than flashing on or off.
+  var VAULT_FADE_MS = 100;
+  var vaultFadeTimer = null;
+
   // User action: paint + persist.
   var applyThemeChoice = function (choice) {
     choice = normalizeThemeChoice(choice) || "default";
     flashThemeTransition();
-    paintThemeChoice(choice);
-    writeStoredTheme(choice);
+    var root = document.documentElement;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      paintThemeChoice(choice);
+      writeStoredTheme(choice);
+      return;
+    }
+    root.classList.add("vault-hidden");
+    if (vaultFadeTimer) {
+      clearTimeout(vaultFadeTimer);
+    }
+    vaultFadeTimer = setTimeout(function () {
+      vaultFadeTimer = null;
+      paintThemeChoice(choice);
+      writeStoredTheme(choice);
+      root.classList.remove("vault-hidden");
+    }, VAULT_FADE_MS);
   };
 
   paintThemeChoice(effectiveThemeChoice());

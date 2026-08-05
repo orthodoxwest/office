@@ -3085,7 +3085,14 @@ body.season-eastertide {
      system light/dark flip stay instant. Scoped to every element on purpose —
      a theme change repaints text, hairlines, cards and washes together — but
      only inside that short window, and !important so an element's own hover
-     transition cannot opt itself out of the dimming. */
+     transition cannot opt itself out of the dimming.
+
+     opacity rides along for the Apse vault's sake (see below): it has to live
+     in this same !important declaration, not a separate rule, because a
+     second `transition` shorthand on the same *::before/*::after selectors
+     would just overwrite this one instead of adding to it — the property is
+     shorthand for all four longhands at once, so whichever rule wins the
+     cascade wins outright, not per-property. */
   :root.theme-anim,
   :root.theme-anim *,
   :root.theme-anim *::before,
@@ -3094,7 +3101,24 @@ body.season-eastertide {
       background-color 200ms ease,
       border-color 200ms ease,
       color 200ms ease,
-      box-shadow 200ms ease !important;
+      box-shadow 200ms ease,
+      opacity 100ms ease !important;
+  }
+
+  /* The Apse vault (page-home's fixed starfield, and the hour-epilogue/footer
+     bands) is a background-image, which the crossfade above cannot ease the
+     way it eases background-color: two different gradient stacks, nothing to
+     interpolate between. Left alone it pops in or out whole the instant the
+     theme swaps — the one part of the room that still snapped instead of
+     dimming. app.js dips it to transparent first, swaps the underlying image
+     while it's invisible, then lets the opacity transition above climb it
+     back to full — so what's visible is a soft fade rather than the stars
+     slamming on. Only reachable inside .theme-anim, since app.js only ever
+     toggles this alongside it. */
+  :root.theme-anim.vault-hidden body.page-home::before,
+  :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
+  :root.theme-anim.vault-hidden body.page-hour footer::after {
+    opacity: 0 !important;
   }
 }
 
