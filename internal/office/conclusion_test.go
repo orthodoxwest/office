@@ -163,13 +163,17 @@ func TestCollectConclusionDataIsConsistent(t *testing.T) {
 // plain "collect" element. Those never pass through applyConclusion, so they
 // keep their conclusions in the text. Any other /collect entry — including the
 // ordinary-tier fallbacks behind proper-collect — must not.
+// directlyReferenced are the collects named by an hour definition as a plain
+// "collect" element. They bypass applyConclusion and so carry their conclusions
+// inline; every other collect must not.
+var directlyReferenced = map[string]bool{
+	"ordinary/prime/collect":           true,
+	"ordinary/compline/collect":        true,
+	"ordinary/shared/suffrage-collect": true,
+	"ordinary/shared/cross-collect":    true,
+}
+
 func TestNoProperCollectCarriesInlineConclusion(t *testing.T) {
-	directlyReferenced := map[string]bool{
-		"ordinary/prime/collect":           true,
-		"ordinary/compline/collect":        true,
-		"ordinary/shared/suffrage-collect": true,
-		"ordinary/shared/cross-collect":    true,
-	}
 	corpus, err := texts.LoadTexts("../../data")
 	if err != nil {
 		t.Fatalf("loading corpus: %v", err)
@@ -186,6 +190,52 @@ func TestNoProperCollectCarriesInlineConclusion(t *testing.T) {
 			}
 		}
 	}
+}
+
+// An inline conclusion is the only kind written by hand rather than drawn from
+// shared/formulas/collect-conclusion-*, so it is the only kind that can drift
+// from the rest of the office — as the suffrage and cross collects did, ending
+// "for ever and ever" where every other collect ends "world without end".
+//
+// Prime and Compline are attested word-for-word against parish booklets and keep
+// that booklet wording, which differs from the formulas in word order and in
+// Ghost/Spirit. What all four owe each other is the doxology's last clause, which
+// the diurnal gives as "world without end" throughout.
+func TestInlineConclusionsEndLikeTheFormulas(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("loading corpus: %v", err)
+	}
+	const ending = "world without end. R. Amen."
+	for key := range directlyReferenced {
+		body := corpus.Get(key)
+		if body == "" {
+			t.Errorf("%s is missing from the corpus", key)
+			continue
+		}
+		if got := flattenWhitespace(body); !strings.HasSuffix(got, ending) {
+			t.Errorf("%s does not end %q:\n%s", key, ending, got)
+		}
+	}
+
+	// The suffrage and cross collects are not attested to any book — their
+	// conclusions are the shared formula verbatim (see data/texts/ordinary/
+	// shared.txt), so they can be held to the stronger check.
+	formula := flattenWhitespace(corpus.Get(conclusionFormRef + "through-same"))
+	if formula == "" {
+		t.Fatal("the through-same conclusion formula is missing")
+	}
+	for _, key := range []string{"ordinary/shared/suffrage-collect", "ordinary/shared/cross-collect"} {
+		if got := flattenWhitespace(corpus.Get(key)); !strings.HasSuffix(got, formula) {
+			t.Errorf("%s does not conclude with the through-same formula %q:\n%s", key, formula, got)
+		}
+	}
+}
+
+// flattenWhitespace collapses the corpus's source line wrapping so that a
+// conclusion can be compared by its words rather than by where its lines break.
+func flattenWhitespace(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 // --- XXXIII.5 sequencing ---

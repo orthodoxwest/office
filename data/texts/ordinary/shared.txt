@@ -7,6 +7,11 @@
 # diurnal-tutorial.pdf (titular N. omitted when unknown; Father Benedict kept
 # for this Benedictine office). When the Office is of the B.V.M., omit her
 # name from the antiphon and collect (rubrics XXXVIII.4).
+# The collect is named directly by the hour definitions as a plain "collect"
+# element, so it never passes through applyConclusion and carries its conclusion
+# inline. The wording of that conclusion is not the booklet's; it is
+# shared/formulas/collect-conclusion-through-same verbatim, so that every collect
+# in the same office concludes alike. Keep the two in step.
 [suffrage-antiphon]
 May the blessed Mother of God, * the Virgin Mary, and all the Saints, intercede for us to the Lord.
 
@@ -20,8 +25,8 @@ intercession of the blessed and glorious ever Virgin Mary, Mother of God, of
 blessed Joseph, of thy blessed Apostles Peter and Paul, of our blessed Father
 Benedict, and of all Saints, graciously bestow upon us both peace and safety;
 that all adversity and error being done away, thy Church may serve thee in
-untroubled freedom. Through the same our Lord Jesus Christ thy Son, who with
-thee and the Holy Spirit liveth and reigneth, God, world without end.
+untroubled freedom. Through the same Jesus Christ thy Son, our Lord, who with
+thee in the unity of the Holy Ghost, liveth and reigneth God, world without end.
 R. Amen.
 
 [cross-antiphon]
@@ -31,12 +36,14 @@ We adore thy Cross, O Lord; * we praise and glorify thy holy Resurrection: for b
 V. We adore thee, O Christ, and we bless thee, alleluia.
 R. For by thy holy Cross thou hast redeemed the world, alleluia.
 
+# Conclusion as above: shared/formulas/collect-conclusion-through-same verbatim,
+# the Son being named in the body.
 [cross-collect]
 O God, who for our sake didst will thine only-begotten Son to undergo the gibbet
 of the Cross, that thou mightest drive thence from us the power of the enemy:
 grant unto us, thy servants, that we may attain the grace of his Resurrection.
-Through the same our Lord Jesus Christ thy Son, who with thee and the Holy Spirit
-liveth and reigneth, God, world without end.
+Through the same Jesus Christ thy Son, our Lord, who with thee in the unity of
+the Holy Ghost, liveth and reigneth God, world without end.
 R. Amen.
 
 [our-father]
