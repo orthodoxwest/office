@@ -1136,3 +1136,85 @@ func TestResolveProperTextSectionSeasonalVariants(t *testing.T) {
 		}
 	})
 }
+
+func TestTraceProperTextReportsFallbackAndDirectCandidates(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"commons/martyr/antiphon": "Common antiphon",
+	})
+	day := &models.CalendarDay{Date: time.Date(2026, 3, 16, 0, 0, 0, 0, time.UTC), Celebration: &models.Feast{ID: "trace-martyr", Category: models.CategoryMartyr}}
+	trace := traceProperResolution(day, "lauds", "antiphon", "commons/martyr/antiphon", corpus)
+	if trace.SelectedTier != "common" || trace.SelectedRef != "commons/martyr/antiphon" {
+		t.Fatalf("trace = %#v", trace)
+	}
+	if len(trace.DirectCandidates) == 0 || trace.DirectCandidates[0] != "proper/trace-martyr/antiphon-lauds" {
+		t.Fatalf("direct candidates = %#v", trace.DirectCandidates)
+	}
+}
+
+func TestTraceProperResolutionReportsExistingDirectProper(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/trace-feast/collect-lauds": "Direct collect",
+	})
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "trace-feast"}}
+	trace := traceProperResolution(day, "lauds", "collect", "proper/trace-feast/collect-lauds", corpus)
+	if trace.RequestedSlot != "collect" || trace.CanonicalOwner != "trace-feast" || trace.SelectedTier != "proper" {
+		t.Fatalf("trace = %#v", trace)
+	}
+	if len(trace.DirectExisting) != 1 || trace.DirectExisting[0] != "proper/trace-feast/collect-lauds" {
+		t.Fatalf("direct existing = %#v", trace.DirectExisting)
+	}
+}
+
+func TestEngineTraceProperResolutionUsesEveningVespersOwner(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/following-feast/collect-vespers": "Following collect",
+	})
+	engine := &Engine{corpus: corpus}
+	day := &models.CalendarDay{
+		Date:        time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC),
+		Celebration: &models.Feast{ID: "outgoing-feast"},
+		Vespers: models.VespersDesignation{
+			Owner: models.VespersIOfFollowing,
+			Feast: &models.Feast{ID: "following-feast"},
+		},
+	}
+	trace := engine.TraceProperResolution(day, "vespers", "collect", "proper/following-feast/collect-vespers")
+	if trace.OwnerID != "following-feast" || !trace.FirstVespers || trace.Reason != "first-vespers" {
+		t.Fatalf("trace = %#v", trace)
+	}
+}
+
+func TestTraceProperResolutionUsesPrimeFestalLaudsCoordinates(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/trace-feast/psalm-antiphon-1-lauds": "Festal antiphon",
+	})
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "trace-feast", Category: models.CategoryMartyr}}
+	trace := traceProperResolution(day, "prime", "psalm-antiphon-1", "proper/trace-feast/psalm-antiphon-1-lauds", corpus)
+	if trace.ResolverHour != "lauds" || trace.ResolverSlot != "psalm-antiphon-1" {
+		t.Fatalf("resolver coordinates = %s/%s", trace.ResolverHour, trace.ResolverSlot)
+	}
+	if len(trace.DirectExisting) != 1 || trace.DirectExisting[0] != "proper/trace-feast/psalm-antiphon-1-lauds" {
+		t.Fatalf("direct existing = %#v", trace.DirectExisting)
+	}
+}
+
+func TestTraceProperResolutionUsesLaudsCollectForMinorHours(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/trace-feast/collect-lauds": "Festal collect",
+	})
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "trace-feast"}}
+	for _, hourName := range []string{"terce", "sext", "none"} {
+		trace := traceProperResolution(day, hourName, "collect", "proper/trace-feast/collect-lauds", corpus)
+		if trace.ResolverHour != "lauds" || len(trace.DirectExisting) != 1 || trace.DirectExisting[0] != "proper/trace-feast/collect-lauds" {
+			t.Fatalf("%s trace = %#v", hourName, trace)
+		}
+	}
+}
+
+func TestTraceProperResolutionClassifiesMissingSelection(t *testing.T) {
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "trace-feast"}}
+	trace := traceProperResolution(day, "lauds", "collect", "collect", texts.NewTestCorpus(nil))
+	if trace.SelectedTier != "not-found" {
+		t.Fatalf("selected tier = %q, want not-found", trace.SelectedTier)
+	}
+}

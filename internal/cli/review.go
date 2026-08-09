@@ -21,6 +21,8 @@ Subcommands:
                                          suspect (pre-flagged) entries first
   zero-occurrences [-start YEAR] [-years N] [-summary]
                                          List unverified entries never selected in a sweep
+  resolution-inventory [-start YEAR] [-years N] [-json] [-fallback-only] [-summary]
+                                         List effective dynamic-proper resolutions and fallbacks
   attest [flags] KEY REVIEWER            Record a source attestation for one text
   flag [flags] KEY                       Record a prescreen suspicion for one text
   assurance [-markdown] [-update-baseline] Run release assurance gates and summary
@@ -47,6 +49,8 @@ func cmdReview(e env, args []string) error {
 		return e.reviewProvenanceQueue(rest)
 	case "zero-occurrences":
 		return e.reviewZeroOccurrences(rest)
+	case "resolution-inventory":
+		return e.reviewResolutionInventory(rest)
 	case "attest":
 		return e.reviewAttest(rest)
 	case "flag":
@@ -345,5 +349,42 @@ func (e env) reviewSign(args []string) error {
 		return fmt.Errorf("writing sign-off: %w", err)
 	}
 	fmt.Fprintf(e.out, "Signed off: %s %s on %s by %s\n", unit.Hour, unit.Name, date.Format("2006-01-02"), reviewer)
+	return nil
+}
+
+func (e env) reviewResolutionInventory(args []string) error {
+	fs := e.newFlagSet("review resolution-inventory")
+	start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
+	years := fs.Int("years", 28, "number of calendar years to sweep")
+	jsonOutput := fs.Bool("json", false, "write the machine-readable inventory JSON")
+	fallbackOnly := fs.Bool("fallback-only", false, "keep rows not resolved by the owning proper")
+	summary := fs.Bool("summary", false, "print fallback-tier counts instead of rows")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	inventory, err := review.BuildResolutionInventory(e.dataDir, *start, *years)
+	if err != nil {
+		return fmt.Errorf("building resolution inventory: %w", err)
+	}
+	if *fallbackOnly {
+		inventory.FilterFallbacks()
+	}
+	if *jsonOutput {
+		enc := json.NewEncoder(e.out)
+		enc.SetIndent("", "  ")
+		return enc.Encode(inventory)
+	}
+	if *summary {
+		fmt.Fprintf(e.out, "resolution inventory: %d rows\n", len(inventory.Rows))
+		for _, tier := range []string{"proper", "proper-inherited", "temporal-week", "special", "common", "seasonal", "ordinary-weekday", "ordinary", "shared", "not-found"} {
+			if n := review.ResolutionInventorySummary(inventory)[tier]; n != 0 {
+				fmt.Fprintf(e.out, "%s: %d\n", tier, n)
+			}
+		}
+		return nil
+	}
+	for _, row := range inventory.Rows {
+		fmt.Fprintf(e.out, "%s\t%s\t%s\t%s\t%s\t%s\t%s\n", row.Date, row.OwnerID, row.Hour, row.SlotRef, row.SelectedTier, row.SelectedRef, row.Reason)
+	}
 	return nil
 }

@@ -34,8 +34,20 @@ from dataclasses import asdict, dataclass
 
 
 W_NS = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = pathlib.Path("output/source-reconcile")
 DECISION_FIELDS = ("candidate_id", "decision", "note")
+
+
+def require_output_path(path: pathlib.Path) -> pathlib.Path:
+    """Confine source-derived artifacts to the repository's ignored output."""
+    resolved = path.resolve()
+    allowed = (ROOT / "output").resolve()
+    try:
+        resolved.relative_to(allowed)
+    except ValueError as exc:
+        raise ValueError(f"source reconciliation artifacts must stay below {allowed}") from exc
+    return resolved
 
 MASTER_BOOKS = (
     ("lauds", "00. Lauds for Sundays & Major Feasts*.docx"),
@@ -227,6 +239,24 @@ class SourceCandidate:
     review_flags: str = ""
     leverage_score: int = 0
     provenance_status: str = ""
+    # Diurnal-ingest witness and runtime-resolution fields.  They default to
+    # empty values so the established SR packet format and its stable IDs keep
+    # their exact meaning for the existing book workflows.
+    source_sha256: str = ""
+    printed_page: str = ""
+    source_bbox: str = ""
+    source_offset: str = ""
+    extractor: str = ""
+    extraction_confidence: str = ""
+    raw_text_sha256: str = ""
+    canonical_owner: str = ""
+    runtime_slot: str = ""
+    runtime_target: str = ""
+    resolution_tier: str = ""
+    resolution_reason: str = ""
+    discovery_classification: str = ""
+    mapping_confidence: str = ""
+    discovery_note: str = ""
 
 
 @dataclass(frozen=True)
@@ -1528,6 +1558,622 @@ def write_outputs(
         (batches_dir / f"batch-{number:02d}.md").write_text("\n".join(header) + body)
 
 
+DISCOVERY_CLASSES = (
+    "verify-existing",
+    "missing-override",
+    "fallback-equal",
+    "existing-different",
+    "unmodeled-slot",
+    "known-owner-unobserved",
+    "unknown-feast",
+    "ambiguous-owner/context",
+    "rubrical-complex",
+)
+
+
+def load_json(path: pathlib.Path) -> object:
+    """Read a JSON artifact with an error that names the artifact."""
+    try:
+        return json.loads(path.read_text())
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def intake_text(intake_dir: pathlib.Path, record: dict) -> str:
+    """Read the selected intake witness safely, falling back to embedded text."""
+    embedded = record.get("canonical_text", record.get("selected_text", record.get("text", "")))
+    for field in ("text_path", "ocr_path", "native_path"):
+        value = record.get(field)
+        if not isinstance(value, str) or not value:
+            continue
+        path = (intake_dir / value).resolve()
+        try:
+            path.relative_to(intake_dir.resolve())
+        except ValueError:
+            continue
+        if path.is_file():
+            return path.read_text(encoding="utf-8", errors="replace")
+    return str(embedded)
+
+
+def load_diurnal_profile(path: pathlib.Path | None) -> dict:
+    """Load the deliberately small edition-specific mapping profile.
+
+    Profiles only suggest headings, owners, and slots; uncertain material is
+    emitted for review rather than becoming a corpus edit.
+    """
+    if path is None:
+        return {}
+    payload = load_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path}: profile must be a JSON object")
+    return payload
+
+
+def intake_page_records(intake_dir: pathlib.Path) -> list[dict]:
+    """Return normalized page records from a diurnal-intake run.
+
+    The intake command writes one JSON artifact per page.  This reader is
+    intentionally tolerant of the two useful layouts (a manifest ``pages``
+    list or individual ``page*.json`` records) so a later extractor revision
+    does not invalidate review evidence already on disk.
+    """
+    records: list[dict] = []
+    manifest = intake_dir / "manifest.json"
+    if manifest.exists():
+        payload = load_json(manifest)
+        if not isinstance(payload, dict):
+            raise ValueError(f"{manifest}: manifest must be a JSON object")
+        pages = payload.get("pages", [])
+        if isinstance(pages, list):
+            records.extend(item for item in pages if isinstance(item, dict))
+        elif isinstance(pages, dict):
+            records.extend(item for item in pages.values() if isinstance(item, dict))
+        else:
+            raise ValueError(f"{manifest}: pages must be a list or object")
+
+        declared_pages = {
+            int(record.get("page", record.get("page_number", 0)) or 0): record
+            for record in records
+        }
+        source_hashes = {
+            str(record.get("source_sha256", record.get("document_sha256", "")))
+            for record in records
+            if record.get("source_sha256", record.get("document_sha256", ""))
+        }
+        manifest_source = str(payload.get("source_sha256", ""))
+        if manifest_source:
+            source_hashes.add(manifest_source)
+        if len(source_hashes) > 1:
+            raise ValueError(f"{manifest}: page records mix source documents")
+        expected_source = next(iter(source_hashes), "")
+        run_id = str(payload.get("run_id", ""))
+        for record in records:
+            record_source = str(record.get("source_sha256", record.get("document_sha256", "")))
+            if expected_source and record_source != expected_source:
+                raise ValueError(f"{manifest}: page record has a foreign source hash")
+            record_id = str(record.get("id", ""))
+            if run_id and record_id and not record_id.startswith(run_id + "-P"):
+                raise ValueError(f"{manifest}: page record has a foreign witness ID")
+
+        # A run manifest is authoritative. Page artifacts are redundant
+        # evidence, so validate them rather than merging arbitrary JSON found
+        # below the run directory into the same review packet.
+        for path in sorted((intake_dir / "pages").glob("*/page.json")):
+            artifact = load_json(path)
+            if not isinstance(artifact, dict):
+                raise ValueError(f"{path}: page artifact must be a JSON object")
+            page_number = int(artifact.get("page", artifact.get("page_number", 0)) or 0)
+            if page_number not in declared_pages:
+                raise ValueError(f"{path}: page is not declared by the run manifest")
+            artifact_source = str(artifact.get("source_sha256", artifact.get("document_sha256", "")))
+            if expected_source and artifact_source != expected_source:
+                raise ValueError(f"{path}: page artifact belongs to a foreign source document")
+            artifact_id = str(artifact.get("id", ""))
+            if run_id and artifact_id and not artifact_id.startswith(run_id + "-P"):
+                raise ValueError(f"{path}: page artifact has a foreign witness ID")
+            declared_hash = str(declared_pages[page_number].get("raw_text_sha256", ""))
+            artifact_hash = str(artifact.get("raw_text_sha256", ""))
+            if declared_hash and artifact_hash and artifact_hash != declared_hash:
+                raise ValueError(f"{path}: page artifact disagrees with the run manifest")
+    else:
+        # Legacy/synthetic runs without a manifest remain readable, but each
+        # page.json is still the sole accepted record type.
+        for path in sorted((intake_dir / "pages").glob("*/page.json")):
+            payload = load_json(path)
+            if isinstance(payload, dict):
+                records.append(payload)
+    # A manifest may also point to page artifacts; retain only one record per
+    # page/text witness deterministically.
+    unique: dict[tuple[str, str, str], dict] = {}
+    for record in records:
+        page = str(record.get("page", record.get("page_number", "")))
+        text = str(record.get("canonical_text", record.get("selected_text", record.get("text", ""))))
+        witness = str(record.get("raw_text_sha256", record.get("text_sha256", "")))
+        unique[(page, witness, text)] = record
+    def record_sort_key(record: dict) -> tuple[int, str, str]:
+        value = record.get("page", record.get("page_number", 0))
+        try:
+            page = int(value)
+        except (TypeError, ValueError):
+            page = 0
+        return page, str(record.get("source_sha256", "")), str(record.get("source_key", ""))
+
+    return sorted(unique.values(), key=record_sort_key)
+
+
+def profile_match(text: str, mappings: object) -> tuple[str, str]:
+    """Return a mapped value and confidence from profile regex mappings."""
+    if not isinstance(mappings, list):
+        return "", ""
+    matches = []
+    for mapping in mappings:
+        if not isinstance(mapping, dict):
+            continue
+        pattern = mapping.get("pattern")
+        value = mapping.get("owner", mapping.get("slot", mapping.get("value", "")))
+        if isinstance(pattern, str) and isinstance(value, str) and re.search(pattern, text, re.I | re.M):
+            matches.append((value, str(mapping.get("confidence", "profile"))))
+    if len({item[0] for item in matches}) == 1 and matches:
+        return matches[0]
+    if len(matches) > 1:
+        return "", "ambiguous"
+    return "", ""
+
+
+@dataclass(frozen=True)
+class ProfileBoundary:
+    """A profile match with its source span retained for page segmentation."""
+
+    start: int
+    end: int
+    mapping: dict
+    text: str
+
+
+def profile_boundaries(text: str, mappings: object, value_field: str) -> list[ProfileBoundary]:
+    """Return every usable profile-regex match in deterministic source order.
+
+    ``profile_match`` remains the deliberately conservative page-level helper
+    used by older callers.  Diurnal pages, however, often contain several
+    offices and slots, so the discovery path needs every occurrence and its
+    offset rather than a single whole-page answer.
+    """
+    if not isinstance(mappings, list):
+        return []
+    boundaries: list[ProfileBoundary] = []
+    for order, raw_mapping in enumerate(mappings):
+        if not isinstance(raw_mapping, dict):
+            continue
+        pattern = raw_mapping.get("pattern")
+        value = raw_mapping.get(value_field)
+        if not isinstance(pattern, str) or not isinstance(value, str) or not value:
+            continue
+        try:
+            matches = re.finditer(pattern, text, re.I | re.M)
+        except re.error as exc:
+            raise ValueError(f"invalid profile {value_field} pattern {pattern!r}: {exc}") from exc
+        mapping = dict(raw_mapping)
+        mapping["_profile_order"] = order
+        for match in matches:
+            # Empty regexes would otherwise manufacture zero-width witnesses.
+            if match.start() == match.end():
+                continue
+            boundaries.append(ProfileBoundary(match.start(), match.end(), mapping, match.group(0)))
+    return sorted(
+        boundaries,
+        key=lambda item: (item.start, item.end, item.mapping["_profile_order"], item.mapping[value_field]),
+    )
+
+
+def boundary_groups(boundaries: list[ProfileBoundary], value_field: str) -> list[tuple[int, int, list[ProfileBoundary]]]:
+    """Coalesce aliases beginning at the same position into one boundary.
+
+    A specific and a general alias frequently begin at the same heading.  They
+    are one physical boundary, not two zero-length candidates.  Different
+    mapped values at that position remain explicitly ambiguous instead of
+    being chosen by profile ordering.
+    """
+    grouped: dict[int, list[ProfileBoundary]] = {}
+    for boundary in boundaries:
+        grouped.setdefault(boundary.start, []).append(boundary)
+    result = []
+    for start in sorted(grouped):
+        members = grouped[start]
+        # The longest match is the natural body start for synonymous aliases.
+        end = max(member.end for member in members)
+        result.append((start, end, sorted(members, key=lambda item: (item.mapping[value_field], item.mapping["_profile_order"]))))
+    return result
+
+
+def mapping_context(mapping: dict, default_hour: str) -> tuple[str, str, str]:
+    """Read optional contextual fields without making them corpus assertions."""
+    hour = str(mapping.get("hour", default_hour) or "")
+    variant = str(mapping.get("variant", "") or "")
+    confidence = str(mapping.get("confidence", "profile") or "profile")
+    return hour, variant, confidence
+
+
+def segment_witness_hash(raw_witness: str, start: int, end: int, body: str) -> str:
+    """Hash one immutable page slice, including offsets to avoid collisions."""
+    material = "\x1f".join((raw_witness, str(start), str(end), body))
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()
+
+
+def profile_page_alias(page: object, mappings: object) -> str:
+    """Return an edition's printed folio for an extracted PDF page, if known."""
+    value = str(page)
+    if not isinstance(mappings, list):
+        return ""
+    for mapping in mappings:
+        if not isinstance(mapping, dict) or not isinstance(mapping.get("pattern"), str):
+            continue
+        match = re.search(mapping["pattern"], value)
+        printed = mapping.get("printed_page")
+        if match and isinstance(printed, str):
+            return match.expand(printed)
+    return ""
+
+
+def diurnal_candidate_id(candidate: SourceCandidate) -> str:
+    source_hash = (candidate.source_sha256 or hashlib.sha256(candidate.source.encode()).hexdigest())[:12]
+    witness = candidate.raw_text_sha256 or hashlib.sha256(candidate.source_text.encode()).hexdigest()
+    page = candidate.source_page or 0
+    return f"DI-{source_hash}-P{page}-{witness[:12]}"
+
+
+def candidates_from_intake(
+    intake_dir: pathlib.Path, profile: dict, corpus: dict[str, CorpusEntry], feast_names: dict[str, str]
+) -> list[SourceCandidate]:
+    """Create page-slice witnesses from intake artifacts, never touching data/.
+
+    Each slot alias starts a new witness.  Heading aliases establish the owner
+    context for following slots and, when unambiguous, may continue onto the
+    next PDF page.  No text is stitched across pages: a page break is itself
+    useful review evidence and prevents unrelated facing-page material from
+    becoming one apparently authoritative witness.
+    """
+    candidates: list[SourceCandidate] = []
+    carried_owner = ""
+    carried_title = ""
+    carried_hour = ""
+    carried_variant = ""
+    carried_confidence = ""
+    carried_source_sha256 = ""
+
+    def normalized_owner(value: str) -> str:
+        return value.removeprefix("proper/") if value.startswith("proper/") else value
+
+    def emit(
+        record: dict,
+        page: int,
+        full_text: str,
+        start: int,
+        end: int,
+        slot: str,
+        slot_confidence: str,
+        owner: str,
+        owner_title: str,
+        owner_confidence: str,
+        hour: str,
+        variant: str,
+        segment_hash: str,
+    ) -> None:
+        # Whitespace does not belong to the witness body, but preserve source
+        # offsets relative to the original extracted page for review tooling.
+        body = full_text[start:end]
+        left = len(body) - len(body.lstrip())
+        right = len(body.rstrip())
+        body_start, body_end = start + left, start + right
+        body = body.strip()
+        if not body:
+            return
+        title = str(record.get("heading", record.get("title", ""))).strip() or owner_title or "Unidentified office"
+        ambiguous = "ambiguous" in (owner_confidence, slot_confidence)
+        candidate = SourceCandidate(
+            source=str(record.get("source", record.get("source_key", intake_dir.name))),
+            source_page=page,
+            hour=hour or str(record.get("hour", profile.get("default_hour", ""))),
+            office_title=title,
+            office_variant=variant or str(record.get("variant", "")),
+            slot=slot,
+            latin_incipit=str(record.get("latin_incipit", "")),
+            source_text=body,
+            source_sha256=str(record.get("source_sha256", record.get("document_sha256", ""))),
+            printed_page=str(record.get("printed_page", record.get("folio", ""))) or profile_page_alias(page, profile.get("page_aliases")),
+            source_bbox=json.dumps(record.get("bbox", ""), sort_keys=True) if record.get("bbox") else "",
+            source_offset=f"{body_start}:{body_end}",
+            extractor=str(record.get("extractor", record.get("route", ""))),
+            extraction_confidence=str(record.get("confidence", record.get("route", ""))),
+            raw_text_sha256=segment_hash,
+            canonical_owner=normalized_owner(owner),
+            mapping_confidence="ambiguous" if ambiguous else (owner_confidence or slot_confidence or "unmapped"),
+        )
+        candidate.candidate_id = diurnal_candidate_id(candidate)
+        candidates.append(candidate)
+
+    for record in intake_page_records(intake_dir):
+        source_sha256 = str(record.get("source_sha256", record.get("document_sha256", "")))
+        if carried_source_sha256 and source_sha256 != carried_source_sha256:
+            carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
+        carried_source_sha256 = source_sha256
+        text = intake_text(intake_dir, record)
+        if not text.strip():
+            continue
+        page = int(record.get("page", record.get("page_number", 0)) or 0)
+        default_hour = str(record.get("hour", profile.get("default_hour", "")) or "")
+        title = str(record.get("heading", record.get("title", ""))).strip()
+        raw_witness = str(record.get("raw_text_sha256", record.get("text_sha256", ""))) or hashlib.sha256(text.encode()).hexdigest()
+
+        heading_groups = boundary_groups(
+            profile_boundaries(text, profile.get("heading_aliases"), "owner"), "owner"
+        )
+        slot_groups = boundary_groups(
+            profile_boundaries(text, profile.get("slot_aliases"), "slot"), "slot"
+        )
+
+        # A profile with no slot aliases retains the old one-page witness
+        # behavior.  Keep its supplied raw hash so pre-existing DI packets do
+        # not need to be regenerated solely by this segmentation enhancement.
+        if not slot_groups:
+            owner, owner_confidence = profile_match(text, profile.get("heading_aliases"))
+            if not owner:
+                owner, inferred = infer_owner(title or text.splitlines()[0], corpus, feast_names)
+                owner_confidence = owner_confidence or ("inferred" if owner else ("ambiguous" if inferred else ""))
+            slot = str(record.get("slot", "")).strip()
+            emit(record, page, text, 0, len(text), slot, "", owner, title, owner_confidence, default_hour, str(record.get("variant", "")), raw_witness)
+            # A page with an explicit ambiguous owner must terminate context.
+            if owner_confidence == "ambiguous":
+                carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
+            elif owner:
+                carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = normalized_owner(owner), title, default_hour, str(record.get("variant", "")), owner_confidence
+            continue
+
+        # Build a state timeline from heading events.  An ambiguous event
+        # clears context, rather than allowing a preceding feast to leak into
+        # a later page or slot.
+        timeline: list[tuple[int, str, str, str, str, str]] = []
+        for start, _end, members in heading_groups:
+            values = {str(member.mapping["owner"]) for member in members}
+            if len(values) != 1:
+                timeline.append((start, "", "", "", "", "ambiguous"))
+                continue
+            selected = max(members, key=lambda member: (member.end - member.start, -member.mapping["_profile_order"]))
+            heading_hour, heading_variant, heading_confidence = mapping_context(selected.mapping, default_hour)
+            heading_title = str(selected.mapping.get("title", "") or selected.text).strip()
+            timeline.append((start, normalized_owner(next(iter(values))), heading_title, heading_hour, heading_variant, heading_confidence))
+
+        context = (carried_owner, carried_title, carried_hour, carried_variant, carried_confidence)
+        timeline_index = 0
+        for index, (start, end, members) in enumerate(slot_groups):
+            while timeline_index < len(timeline) and timeline[timeline_index][0] <= start:
+                _at, context_owner, context_title, context_hour, context_variant, context_confidence = timeline[timeline_index]
+                context = (context_owner, context_title, context_hour, context_variant, context_confidence)
+                timeline_index += 1
+            values = {str(member.mapping["slot"]) for member in members}
+            if len(values) == 1:
+                selected = max(members, key=lambda member: (member.end - member.start, -member.mapping["_profile_order"]))
+                slot = next(iter(values))
+                slot_hour, slot_variant, slot_confidence = mapping_context(selected.mapping, default_hour)
+            else:
+                slot, slot_hour, slot_variant, slot_confidence = "", default_hour, "", "ambiguous"
+            next_start = slot_groups[index + 1][0] if index + 1 < len(slot_groups) else len(text)
+            # A new office heading terminates the preceding slot even when the
+            # next mapped slot occurs later. This prevents the next feast's
+            # title/rubrics from contaminating the prior witness body.
+            following_headings = [event[0] for event in timeline if event[0] > end]
+            if following_headings:
+                next_start = min(next_start, following_headings[0])
+            owner, owner_title, owner_hour, owner_variant, owner_confidence = context
+            emit(
+                record, page, text, end, next_start, slot, slot_confidence,
+                owner, owner_title or title, owner_confidence,
+                slot_hour or owner_hour or default_hour,
+                slot_variant or owner_variant,
+                segment_witness_hash(raw_witness, end, next_start, text[end:next_start]),
+            )
+
+        # Apply headings after the final slot so their context may continue to
+        # the next page.  An explicit ambiguous heading always wins and clears
+        # any prior context.
+        while timeline_index < len(timeline):
+            _at, context_owner, context_title, context_hour, context_variant, context_confidence = timeline[timeline_index]
+            context = (context_owner, context_title, context_hour, context_variant, context_confidence)
+            timeline_index += 1
+        carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = context
+
+    return sorted(candidates, key=lambda item: (item.source, item.source_page, item.source_offset, item.slot, item.candidate_id))
+
+
+def load_resolution_inventory(path: pathlib.Path | None) -> list[dict]:
+    if path is None or not path.exists():
+        return []
+    payload = load_json(path)
+    if isinstance(payload, dict):
+        payload = payload.get("rows", payload.get("entries", []))
+    if not isinstance(payload, list):
+        raise ValueError(f"{path}: resolution inventory must contain a rows list")
+    return [item for item in payload if isinstance(item, dict)]
+
+
+def inventory_index(rows: list[dict]) -> dict[tuple[str, str], list[dict]]:
+    indexed: dict[tuple[str, str], list[dict]] = {}
+    for row in rows:
+        owner = str(row.get("owner_id", row.get("owner", ""))).removeprefix("proper/")
+        slot = str(row.get("slot_ref", row.get("slot", row.get("runtime_slot", ""))))
+        if owner and slot:
+            indexed.setdefault((owner, slot), []).append(row)
+    return indexed
+
+
+def proper_target(owner: str, slot: str) -> str:
+    if not owner or not re.fullmatch(r"[a-z0-9][a-z0-9-]*", owner):
+        return ""
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", slot):
+        return ""
+    return f"proper/{owner}/{slot}"
+
+
+def classify_discovery(
+    candidates: list[SourceCandidate], corpus: dict[str, CorpusEntry], feast_names: dict[str, str], inventory: list[dict]
+) -> None:
+    """Classify printed witnesses against traced runtime resolution.
+
+    This deliberately treats the printed source as authoritative evidence even
+    where the selected inventory span has not observed the owner yet.
+    """
+    indexed = inventory_index(inventory)
+    known_owners = set(feast_names) | {
+        key.split("/")[1] for key in corpus if key.startswith("proper/") and key.count("/") >= 2
+    }
+    for candidate in candidates:
+        owner, slot = candidate.canonical_owner, candidate.slot
+        if candidate.mapping_confidence == "ambiguous":
+            candidate.discovery_classification = "ambiguous-owner/context"
+            candidate.discovery_note = "profile or heading mapping had multiple matches"
+            continue
+        if source_requires_modeling(source_review_flags(candidate)):
+            candidate.discovery_classification = "rubrical-complex"
+            candidate.discovery_note = "printed block contains alternatives or rubrics"
+            continue
+        if not slot:
+            candidate.discovery_classification = "unmodeled-slot"
+            candidate.discovery_note = "no slot mapping; add an edition profile alias"
+            continue
+        if not owner or owner not in known_owners:
+            candidate.discovery_classification = "unknown-feast"
+            candidate.discovery_note = "printed heading did not map to a known calendar owner"
+            continue
+        target = proper_target(owner, slot)
+        if not target:
+            candidate.discovery_classification = "unmodeled-slot"
+            candidate.discovery_note = "slot is not a safe corpus section name"
+            continue
+        candidate.runtime_slot = slot
+        rows = indexed.get((owner, slot), [])
+        if not rows:
+            candidate.discovery_classification = "known-owner-unobserved"
+            candidate.discovery_note = "known calendar owner was not observed in the selected inventory span"
+            candidate.runtime_target = target if target in corpus else ""
+            continue
+        row = sorted(rows, key=lambda item: json.dumps(item, sort_keys=True))[0]
+        selected = str(row.get("selected_ref", row.get("selected_key", row.get("runtime_target", row.get("source_ref", "")))))
+        candidate.runtime_target = selected
+        candidate.resolution_tier = str(row.get("selected_tier", row.get("tier", "")))
+        candidate.resolution_reason = str(row.get("reason", ""))
+        current = corpus.get(selected) or corpus.get(target)
+        similarity = anchored_text_similarity(candidate.source_text, current.text) if current else 0.0
+        candidate.text_similarity = round(similarity, 3)
+        direct_existing = row.get("direct_existing", [])
+        if isinstance(direct_existing, str):
+            direct_existing = [direct_existing]
+        direct_exists = target in corpus or bool(direct_existing)
+        if direct_exists:
+            candidate.discovery_classification = "verify-existing" if similarity >= 0.985 else "existing-different"
+        elif selected:
+            candidate.discovery_classification = "fallback-equal" if similarity >= 0.985 else "missing-override"
+        else:
+            candidate.discovery_classification = "missing-override"
+        candidate.discovery_note = f"runtime selected {selected or 'no text'}"
+
+
+def write_proper_discovery(
+    output_dir: pathlib.Path,
+    candidates: list[SourceCandidate],
+    inventory: list[dict],
+    dependencies: dict[str, dict[str, str]] | None = None,
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    ordered = sorted(candidates, key=lambda item: (item.discovery_classification, item.candidate_id))
+    payload = {
+        "schema_version": 1,
+        "dependencies": dependencies or {},
+        "candidates": [asdict(item) for item in ordered],
+    }
+    (output_dir / "proper-discovery.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
+    fields = tuple(SourceCandidate.__dataclass_fields__)
+    with (output_dir / "proper-discovery.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for candidate in ordered:
+            writer.writerow(asdict(candidate))
+    unmapped = [item for item in ordered if item.discovery_classification in {"unknown-feast", "unmodeled-slot", "ambiguous-owner/context", "rubrical-complex"}]
+    with (output_dir / "printed-unmapped.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for candidate in unmapped:
+            writer.writerow(asdict(candidate))
+    witnessed = {(item.canonical_owner, item.runtime_slot or item.slot) for item in candidates if item.canonical_owner and (item.runtime_slot or item.slot)}
+    unwitnessed = []
+    for row in inventory:
+        owner = str(row.get("owner_id", row.get("owner", ""))).removeprefix("proper/")
+        slot = str(row.get("slot_ref", row.get("slot", row.get("runtime_slot", ""))))
+        if owner and slot and (owner, slot) not in witnessed:
+            unwitnessed.append(row)
+    unwitnessed.sort(key=lambda row: (str(row.get("owner_id", row.get("owner", ""))), str(row.get("slot", ""))))
+    (output_dir / "runtime-unwitnessed.csv").write_text(
+        "\n".join(
+            ["owner_id,slot,selected_key,selected_tier,reason"]
+            + [
+                ",".join(csv_quote(str(row.get(key, ""))) for key in ("owner_id", "slot", "selected_key", "selected_tier", "reason"))
+                for row in unwitnessed
+            ]
+        ) + "\n"
+    )
+    counts: dict[str, int] = {}
+    for candidate in candidates:
+        counts[candidate.discovery_classification] = counts.get(candidate.discovery_classification, 0) + 1
+    (output_dir / "proper-discovery-summary.json").write_text(json.dumps({"total": len(candidates), "classes": dict(sorted(counts.items())), "runtime_unwitnessed": len(unwitnessed)}, indent=2) + "\n")
+
+
+def csv_quote(value: str) -> str:
+    return '"' + value.replace('"', '""') + '"' if any(char in value for char in ',"\n') else value
+
+
+def load_discovery(output_dir: pathlib.Path) -> list[SourceCandidate]:
+    path = output_dir / "proper-discovery.json"
+    if not path.exists():
+        raise FileNotFoundError(f"{path} does not exist; run discovery first")
+    payload = load_json(path)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path}: expected an object")
+    return [SourceCandidate(**item) for item in payload.get("candidates", [])]
+
+
+def write_advisory_proposals(output_dir: pathlib.Path, proposal_dir: pathlib.Path) -> None:
+    """Write review-only proposal artifacts; this function never writes data/."""
+    candidates = load_discovery(output_dir)
+    decisions = load_decisions(output_dir)
+    proposal_dir.mkdir(parents=True, exist_ok=True)
+    proposals = []
+    diff = ["# Advisory-only diurnal proposals", "# No corpus or provenance files were changed."]
+    for candidate in sorted(candidates, key=lambda item: item.candidate_id):
+        if candidate.discovery_classification not in {"missing-override", "existing-different", "known-owner-unobserved"}:
+            continue
+        target = proper_target(candidate.canonical_owner, candidate.runtime_slot or candidate.slot)
+        if not target:
+            continue
+        decision = decisions.get(candidate.candidate_id, {}).get("decision", "")
+        accepted = decision == "accept"
+        proposal = {
+            "candidate_id": candidate.candidate_id,
+            "target": target,
+            "classification": candidate.discovery_classification,
+            "decision": decision,
+            "advisory": not accepted,
+            "source": {"page": candidate.source_page, "printed_page": candidate.printed_page, "sha256": candidate.source_sha256},
+        }
+        if accepted:
+            proposal["replacement_text"] = candidate.source_text
+            diff.extend((f"--- a/data/texts/{target.rsplit('/', 1)[0]}.txt", f"+++ b/data/texts/{target.rsplit('/', 1)[0]}.txt", f"# Add or review [{target.rsplit('/', 1)[1]}] from {candidate.candidate_id}"))
+        else:
+            proposal["note"] = "Awaiting an explicit accepted source decision; content intentionally omitted."
+            diff.append(f"# {candidate.candidate_id}: {target} (awaiting accepted decision)")
+        proposals.append(proposal)
+    (proposal_dir / "proposals.json").write_text(json.dumps({"proposals": proposals}, indent=2, ensure_ascii=False) + "\n")
+    (proposal_dir / "proposals.diff").write_text("\n".join(diff) + "\n")
+
+
 def choose_master(resources: pathlib.Path, pattern: str) -> pathlib.Path:
     matches = sorted(resources.glob(pattern))
     if not matches:
@@ -1592,10 +2238,29 @@ def load_generated(output_dir: pathlib.Path) -> list[SourceCandidate]:
     return [SourceCandidate(**item) for item in payload["candidates"]]
 
 
+def load_review_candidates(output_dir: pathlib.Path) -> list[SourceCandidate]:
+    """Load legacy reconciliation and diurnal-discovery candidates together."""
+    candidates = []
+    if (output_dir / "candidates.json").exists():
+        candidates.extend(load_generated(output_dir))
+    if (output_dir / "proper-discovery.json").exists():
+        candidates.extend(load_discovery(output_dir))
+    if not candidates:
+        raise FileNotFoundError(
+            f"{output_dir}: no candidates.json or proper-discovery.json; run build or discover first"
+        )
+    by_id = {}
+    for candidate in candidates:
+        if candidate.candidate_id in by_id:
+            raise ValueError(f"duplicate candidate ID across review artifacts: {candidate.candidate_id}")
+        by_id[candidate.candidate_id] = candidate
+    return list(by_id.values())
+
+
 def cmd_show(args: argparse.Namespace) -> int:
     candidates = {
         candidate.candidate_id: candidate
-        for candidate in load_generated(pathlib.Path(args.output))
+        for candidate in load_review_candidates(pathlib.Path(args.output))
     }
     missing = [identifier for identifier in args.ids if identifier not in candidates]
     if missing:
@@ -1608,7 +2273,7 @@ def cmd_show(args: argparse.Namespace) -> int:
 def cmd_decide(args: argparse.Namespace) -> int:
     output_dir = pathlib.Path(args.output)
     candidates = {
-        candidate.candidate_id: candidate for candidate in load_generated(output_dir)
+        candidate.candidate_id: candidate for candidate in load_review_candidates(output_dir)
     }
     missing = [identifier for identifier in args.ids if identifier not in candidates]
     if missing:
@@ -1628,8 +2293,47 @@ def cmd_decide(args: argparse.Namespace) -> int:
     write_decisions(output_dir, decisions)
     print(
         f"Recorded {args.decision!r} for {len(args.ids)} candidate(s). "
-        "Re-run `make review-sources` to refresh the batches."
+        "Re-run the relevant build or discover command to refresh reports."
     )
+    return 0
+
+
+def cmd_discover(args: argparse.Namespace) -> int:
+    data_dir = pathlib.Path(args.data)
+    output_dir = pathlib.Path(args.output)
+    corpus = load_corpus(data_dir)
+    feast_names = load_feast_names(data_dir)
+    profile = load_diurnal_profile(pathlib.Path(args.profile) if args.profile else None)
+    inventory = load_resolution_inventory(
+        pathlib.Path(args.inventory) if args.inventory else None
+    )
+    intake_dir = pathlib.Path(args.intake)
+    candidates = candidates_from_intake(intake_dir, profile, corpus, feast_names)
+    classify_discovery(candidates, corpus, feast_names, inventory)
+    dependency_paths = {
+        "intake_manifest": intake_dir / "manifest.json",
+        "inventory": pathlib.Path(args.inventory) if args.inventory else None,
+        "profile": pathlib.Path(args.profile) if args.profile else None,
+    }
+    dependencies = {}
+    for name, path in dependency_paths.items():
+        if path is not None and path.is_file():
+            resolved = path.resolve()
+            dependencies[name] = {
+                "path": str(resolved),
+                "sha256": hashlib.sha256(resolved.read_bytes()).hexdigest(),
+            }
+    write_proper_discovery(output_dir, candidates, inventory, dependencies)
+    print(f"Classified {len(candidates)} printed diurnal witnesses.")
+    print(f"Discovery reports: {output_dir / 'proper-discovery.json'}")
+    return 0
+
+
+def cmd_proposals(args: argparse.Namespace) -> int:
+    output_dir = pathlib.Path(args.output)
+    proposal_dir = pathlib.Path(args.proposal_output)
+    write_advisory_proposals(output_dir, proposal_dir)
+    print(f"Advisory proposals: {proposal_dir / 'proposals.json'}")
     return 0
 
 
@@ -1660,18 +2364,39 @@ def build_parser() -> argparse.ArgumentParser:
         "decide", help="record a local scratch decision for generated candidates"
     )
     decide.add_argument(
-        "decision", choices=("retain", "applied", "manual", "defer", "pending")
+        "decision", choices=("retain", "accept", "applied", "manual", "defer", "pending")
     )
     decide.add_argument("ids", nargs="+")
     decide.add_argument("--note", default="")
     decide.add_argument("--output", default=str(DEFAULT_OUTPUT))
     decide.set_defaults(func=cmd_decide)
+
+    discover = subparsers.add_parser(
+        "discover", help="compare diurnal intake witnesses with runtime resolution inventory"
+    )
+    discover.add_argument("--intake", required=True, help="diurnal-intake run directory")
+    discover.add_argument("--inventory", help="JSON from review resolution-inventory")
+    discover.add_argument("--profile", help="edition-specific JSON heading/slot aliases")
+    discover.add_argument("--data", default="data")
+    discover.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    discover.set_defaults(func=cmd_discover)
+
+    proposals = subparsers.add_parser(
+        "proposals", help="write advisory-only proposal JSON and diff from discovery output"
+    )
+    proposals.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    proposals.add_argument("--proposal-output", default=str(DEFAULT_OUTPUT / "proposals"))
+    proposals.set_defaults(func=cmd_proposals)
     return parser
 
 
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        for name in ("output", "proposal_output"):
+            value = getattr(args, name, None)
+            if value:
+                setattr(args, name, str(require_output_path(pathlib.Path(value))))
         return args.func(args)
     except (
         FileNotFoundError,

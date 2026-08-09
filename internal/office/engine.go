@@ -667,3 +667,13 @@ func titleCase(s string) string {
 	}
 	return strings.Join(words, " ")
 }
+
+// TraceProperResolution describes a dynamic slot selected by ComposeHour.
+// Vespers is evaluated against its liturgical owner, just as ComposeHour does.
+// It does not perform a second resolution and cannot affect composed output.
+func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, selectedRef string) ProperResolutionTrace {
+	if hourName == "vespers" {
+		day = vespersOfficeDay(day)
+	}
+	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
+}

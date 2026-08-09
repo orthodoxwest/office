@@ -35,6 +35,24 @@ type CompositionAssurance struct {
 	Color        models.Color                 `json:"color"`
 	Decisions    []models.CompositionDecision `json:"decisions"`
 	Dependencies []DependencyEvidence         `json:"dependencies"`
+	Resolutions  []ResolutionEvidence         `json:"resolutions,omitempty"`
+}
+
+// ResolutionEvidence explains a rendered dynamic slot without carrying its
+// text. It is derived after composition and deliberately remains outside the
+// OfficeElement/hash model.
+type ResolutionEvidence struct {
+	RequestedSlot    string   `json:"requested_slot"`
+	ResolverHour     string   `json:"resolver_hour"`
+	ResolverSlot     string   `json:"resolver_slot"`
+	CanonicalOwner   string   `json:"canonical_owner,omitempty"`
+	ProperIDs        []string `json:"proper_ids,omitempty"`
+	DirectCandidates []string `json:"direct_candidates,omitempty"`
+	DirectExisting   []string `json:"direct_existing,omitempty"`
+	SelectedRef      string   `json:"selected_ref"`
+	SelectedTier     string   `json:"selected_tier"`
+	Reason           string   `json:"reason"`
+	FirstVespers     bool     `json:"first_vespers,omitempty"`
 }
 
 // ExplainComposition composes one hour and joins its complete dependency set
@@ -82,7 +100,31 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 			File: e.File, Section: e.Section, Sources: e.Sources,
 		})
 	}
+	for _, section := range hour.Sections {
+		for _, elem := range section.Elements {
+			if elem.SlotRef == "" {
+				continue
+			}
+			trace := eng.TraceProperResolution(&days[idx], hourName, elem.SlotRef, elem.SourceRef)
+			if !isResolutionSource(elem.SourceRef) && trace.SelectedTier != "not-found" {
+				continue
+			}
+			a.Resolutions = append(a.Resolutions, ResolutionEvidence{
+				RequestedSlot: trace.RequestedSlot, CanonicalOwner: trace.CanonicalOwner,
+				ResolverHour: trace.ResolverHour, ResolverSlot: trace.ResolverSlot,
+				ProperIDs: trace.ProperIDs, DirectCandidates: trace.DirectCandidates,
+				DirectExisting: trace.DirectExisting, SelectedRef: trace.SelectedRef,
+				SelectedTier: trace.SelectedTier, Reason: trace.Reason,
+				FirstVespers: trace.FirstVespers,
+			})
+		}
+	}
 	return a, nil
+}
+
+func isResolutionSource(ref string) bool {
+	return strings.HasPrefix(ref, "proper/") || strings.HasPrefix(ref, "commons/") ||
+		strings.HasPrefix(ref, "seasonal/") || strings.HasPrefix(ref, "ordinary/")
 }
 
 func hourDependencies(hour *models.OfficeHour) []string {

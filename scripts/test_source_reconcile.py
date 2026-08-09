@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Focused tests for the disposable source reconciliation workflow."""
 
+import argparse
 import importlib.util
 import pathlib
 import sys
@@ -549,6 +550,368 @@ class SourceReconcileTest(unittest.TestCase):
         )
         self.assertEqual(candidate.confidence, "missing")
 
+    def test_diurnal_discovery_marks_different_fallback_as_missing_override(self):
+        corpus = {
+            "ordinary/lauds/collect": SOURCE_RECONCILE.CorpusEntry(
+                "ordinary/lauds/collect", "ordinary/lauds.txt", "collect", "Old fallback."
+            )
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal.pdf", source_page=42, hour="lauds",
+            office_title="Example Feast", office_variant="", slot="collect",
+            latin_incipit="", source_text="Printed proper collect.",
+            canonical_owner="example-feast", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64,
+        )
+        SOURCE_RECONCILE.classify_discovery(
+            [candidate], corpus, {"example-feast": "Example Feast"},
+            [{"owner_id": "example-feast", "slot": "collect",
+              "selected_key": "ordinary/lauds/collect", "selected_tier": "ordinary"}],
+        )
+        self.assertEqual(candidate.discovery_classification, "missing-override")
+        self.assertEqual(candidate.runtime_target, "ordinary/lauds/collect")
+
+    def test_diurnal_discovery_recognizes_hour_specific_direct_proper(self):
+        corpus = {
+            "proper/example-feast/collect-lauds": SOURCE_RECONCILE.CorpusEntry(
+                "proper/example-feast/collect-lauds",
+                "proper/example-feast.txt",
+                "collect-lauds",
+                "Existing direct collect.",
+            )
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal.pdf",
+            source_page=42,
+            hour="lauds",
+            office_title="Example Feast",
+            office_variant="",
+            slot="collect",
+            latin_incipit="",
+            source_text="Existing direct collect.",
+            canonical_owner="example-feast",
+        )
+        SOURCE_RECONCILE.classify_discovery(
+            [candidate],
+            corpus,
+            {"example-feast": "Example Feast"},
+            [{
+                "owner_id": "example-feast",
+                "slot_ref": "collect",
+                "selected_ref": "proper/example-feast/collect-lauds",
+                "selected_tier": "proper",
+                "direct_existing": ["proper/example-feast/collect-lauds"],
+            }],
+        )
+        self.assertEqual(candidate.discovery_classification, "verify-existing")
+
+    def test_diurnal_discovery_keeps_known_unobserved_owner_source_first(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal.pdf", source_page=7, hour="lauds",
+            office_title="Example Feast", office_variant="", slot="hymn-lauds",
+            latin_incipit="", source_text="A printed hymn.", canonical_owner="example-feast",
+        )
+        SOURCE_RECONCILE.classify_discovery(
+            [candidate], {}, {"example-feast": "Example Feast"}, []
+        )
+        self.assertEqual(candidate.discovery_classification, "known-owner-unobserved")
+
+    def test_diurnal_discovery_outputs_and_proposals_are_advisory(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = pathlib.Path(tmp) / "output"
+            proposal_output = output / "proposals"
+            candidate = SOURCE_RECONCILE.SourceCandidate(
+                source="diurnal.pdf", source_page=7, hour="lauds",
+                office_title="Example Feast", office_variant="", slot="collect",
+                latin_incipit="", source_text="Reviewed printed collect.",
+                canonical_owner="example-feast", source_sha256="a" * 64,
+                raw_text_sha256="b" * 64, discovery_classification="missing-override",
+            )
+            candidate.candidate_id = SOURCE_RECONCILE.diurnal_candidate_id(candidate)
+            SOURCE_RECONCILE.write_proper_discovery(output, [candidate], [])
+            SOURCE_RECONCILE.write_decisions(output, {
+                candidate.candidate_id: {
+                    "candidate_id": candidate.candidate_id, "decision": "accept", "note": "accepted source witness"
+                }
+            })
+            SOURCE_RECONCILE.write_advisory_proposals(output, proposal_output)
+            proposal = SOURCE_RECONCILE.load_json(proposal_output / "proposals.json")["proposals"][0]
+            self.assertEqual(proposal["target"], "proper/example-feast/collect")
+            self.assertFalse(proposal["advisory"])
+            self.assertEqual(proposal["replacement_text"], "Reviewed printed collect.")
+            self.assertFalse((pathlib.Path(tmp) / "data").exists())
+
+    def test_decide_accepts_diurnal_discovery_candidate(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = pathlib.Path(tmp)
+            candidate = SOURCE_RECONCILE.SourceCandidate(
+                source="diurnal.pdf",
+                source_page=7,
+                hour="lauds",
+                office_title="Example Feast",
+                office_variant="",
+                slot="collect",
+                latin_incipit="",
+                source_text="Reviewed collect.",
+                canonical_owner="example-feast",
+                raw_text_sha256="b" * 64,
+            )
+            candidate.candidate_id = SOURCE_RECONCILE.diurnal_candidate_id(candidate)
+            SOURCE_RECONCILE.write_proper_discovery(output, [candidate], [])
+            args = argparse.Namespace(
+                output=str(output),
+                ids=[candidate.candidate_id],
+                decision="accept",
+                note="printed page reviewed",
+            )
+            self.assertEqual(SOURCE_RECONCILE.cmd_decide(args), 0)
+            decisions = SOURCE_RECONCILE.load_decisions(output)
+            self.assertEqual(decisions[candidate.candidate_id]["decision"], "accept")
+
+    def test_intake_page_text_path_discovers_missing_override(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            page = intake / "pages" / "0001"
+            page.mkdir(parents=True)
+            text = "Example Feast\nPrinted proper collect."
+            (page / "native.layout.txt").write_text(text)
+            (page / "page.json").write_text(__import__("json").dumps({
+                "page": 1, "source_key": "synthetic", "source_sha256": "a" * 64,
+                "native_path": "pages/0001/native.layout.txt", "text_path": "pages/0001/native.layout.txt",
+                "raw_text_sha256": "b" * 64, "slot": "collect", "hour": "lauds",
+            }))
+            (intake / "manifest.json").write_text(__import__("json").dumps({"pages": {"1": {
+                "page": 1, "source_key": "synthetic", "source_sha256": "a" * 64,
+                "native_path": "pages/0001/native.layout.txt", "text_path": "pages/0001/native.layout.txt",
+                "raw_text_sha256": "b" * 64, "slot": "collect", "hour": "lauds",
+            }}}))
+            corpus = {"ordinary/lauds/collect": SOURCE_RECONCILE.CorpusEntry("ordinary/lauds/collect", "x", "collect", "Old fallback.")}
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, {"heading_aliases": [{"pattern": "Example Feast", "owner": "example-feast"}]}, corpus, {"example-feast": "Example Feast"})
+            SOURCE_RECONCILE.classify_discovery(candidates, corpus, {"example-feast": "Example Feast"}, [{"owner_id": "example-feast", "slot_ref": "collect", "selected_ref": "ordinary/lauds/collect", "selected_tier": "ordinary", "direct_candidates": ["proper/example-feast/collect"]}])
+            self.assertEqual(len(candidates), 1)
+            self.assertEqual(candidates[0].source_text, text)
+            self.assertEqual(candidates[0].discovery_classification, "missing-override")
+
+    def test_intake_segments_multiple_slots_on_one_page(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            page = intake / "pages" / "0001"
+            page.mkdir(parents=True)
+            text = (
+                "Example Feast\n"
+                "THE CHAPTER\n"
+                "First printed body.\n"
+                "THE PRAYERS\n"
+                "Second printed body.\n"
+            )
+            (page / "native.layout.txt").write_text(text)
+            (page / "page.json").write_text(__import__("json").dumps({
+                "page": 1, "source_key": "synthetic", "source_sha256": "a" * 64,
+                "text_path": "pages/0001/native.layout.txt", "raw_text_sha256": "b" * 64,
+            }))
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds", "hour": "lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect", "hour": "lauds"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            self.assertEqual(len(candidates), 2)
+            self.assertEqual([candidate.slot for candidate in candidates], ["chapter-lauds", "collect"])
+            self.assertEqual([candidate.source_text for candidate in candidates], ["First printed body.", "Second printed body."])
+            self.assertNotEqual(candidates[0].candidate_id, candidates[1].candidate_id)
+            self.assertNotEqual(candidates[0].raw_text_sha256, candidates[1].raw_text_sha256)
+            self.assertEqual(candidates[0].canonical_owner, "example-feast")
+            self.assertEqual(candidates[1].hour, "lauds")
+
+    def test_new_office_heading_terminates_previous_slot_body(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            page = intake / "pages" / "0001"
+            page.mkdir(parents=True)
+            text = (
+                "First Feast\nTHE CHAPTER\nFirst body.\n"
+                "Second Feast\nTHE PRAYERS\nSecond body.\n"
+            )
+            (page / "native.layout.txt").write_text(text)
+            (page / "page.json").write_text(__import__("json").dumps({
+                "page": 1,
+                "source_key": "synthetic",
+                "source_sha256": "a" * 64,
+                "text_path": "pages/0001/native.layout.txt",
+                "raw_text_sha256": "b" * 64,
+            }))
+            profile = {
+                "heading_aliases": [
+                    {"pattern": "^First Feast$", "owner": "first-feast"},
+                    {"pattern": "^Second Feast$", "owner": "second-feast"},
+                ],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            self.assertEqual([item.source_text for item in candidates], ["First body.", "Second body."])
+            self.assertEqual(
+                [item.canonical_owner for item in candidates],
+                ["first-feast", "second-feast"],
+            )
+
+    def test_intake_carries_unambiguous_owner_across_page_boundary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            for number, text in ((1, "Example Feast\nTHE CHAPTER\nFirst body."), (2, "THE PRAYERS\nContinued body.")):
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "native.layout.txt").write_text(text)
+                (page / "page.json").write_text(__import__("json").dumps({
+                    "page": number, "source_key": "synthetic", "source_sha256": "a" * 64,
+                    "text_path": f"pages/{number:04d}/native.layout.txt", "raw_text_sha256": str(number) * 64,
+                }))
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast", "hour": "lauds", "variant": "first"}],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            self.assertEqual(len(candidates), 2)
+            continued = next(candidate for candidate in candidates if candidate.source_page == 2)
+            self.assertEqual(continued.canonical_owner, "example-feast")
+            self.assertEqual(continued.hour, "lauds")
+            self.assertEqual(continued.office_variant, "first")
+            self.assertEqual(continued.source_text, "Continued body.")
+
+    def test_intake_ambiguous_heading_clears_carried_owner(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            pages = (
+                (1, "First Feast\nTHE CHAPTER\nFirst body."),
+                (2, "AMBIGUOUS HEADING\nTHE PRAYERS\nUnknown body."),
+                (3, "THE HYMN\nStill unknown."),
+            )
+            for number, text in pages:
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "native.layout.txt").write_text(text)
+                (page / "page.json").write_text(__import__("json").dumps({
+                    "page": number, "source_key": "synthetic", "source_sha256": "a" * 64,
+                    "text_path": f"pages/{number:04d}/native.layout.txt", "raw_text_sha256": str(number) * 64,
+                }))
+            profile = {
+                "heading_aliases": [
+                    {"pattern": "^First Feast$", "owner": "first-feast"},
+                    {"pattern": "^AMBIGUOUS HEADING$", "owner": "second-feast"},
+                    {"pattern": "^AMBIGUOUS HEADING$", "owner": "third-feast"},
+                ],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect"},
+                    {"pattern": "^THE HYMN$", "slot": "hymn-lauds"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            by_page = {candidate.source_page: candidate for candidate in candidates}
+            self.assertEqual(by_page[1].canonical_owner, "first-feast")
+            self.assertEqual(by_page[2].canonical_owner, "")
+            self.assertEqual(by_page[2].mapping_confidence, "ambiguous")
+            self.assertEqual(by_page[3].canonical_owner, "")
+
+    def test_legacy_sr_candidate_ids_remain_unchanged(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="legacy.docx", source_page=7, hour="lauds",
+            office_title="Legacy Office", office_variant="", slot="collect",
+            latin_incipit="", source_text="A legacy source witness.",
+        )
+        SOURCE_RECONCILE.assign_candidate_ids([candidate])
+        self.assertEqual(candidate.candidate_id, "SR-0001-d28755be")
+
+    def test_discovery_output_records_declared_dependency_hashes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = pathlib.Path(tmp)
+            profile = directory / "profile.json"
+            profile.write_text('{"default_hour": "lauds"}')
+            output = directory / "output"
+            SOURCE_RECONCILE.write_proper_discovery(
+                output,
+                [],
+                [],
+                {
+                    "profile": {
+                        "path": str(profile),
+                        "sha256": __import__("hashlib").sha256(profile.read_bytes()).hexdigest(),
+                    }
+                },
+            )
+            payload = SOURCE_RECONCILE.load_json(output / "proper-discovery.json")
+            self.assertEqual(payload["schema_version"], 1)
+            self.assertEqual(payload["dependencies"]["profile"]["path"], str(profile))
+
+    def test_profile_page_alias_uses_python_capture_expansion(self):
+        self.assertEqual(
+            SOURCE_RECONCILE.profile_page_alias(
+                42,
+                [{"pattern": "^([0-9]+)$", "printed_page": "\\1"}],
+            ),
+            "42",
+        )
+
+    def test_manifest_rejects_foreign_page_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            page = intake / "pages" / "0001"
+            page.mkdir(parents=True)
+            declared = {
+                "page": 1,
+                "id": "DI-aaaaaaaaaaaa-P0001-bbbbbbbbbbbb",
+                "source_sha256": "a" * 64,
+                "raw_text_sha256": "b" * 64,
+            }
+            (intake / "manifest.json").write_text(__import__("json").dumps({
+                "run_id": "DI-aaaaaaaaaaaa",
+                "source_sha256": "a" * 64,
+                "pages": {"1": declared},
+            }))
+            foreign = dict(declared, source_sha256="c" * 64)
+            (page / "page.json").write_text(__import__("json").dumps(foreign))
+            with self.assertRaisesRegex(ValueError, "foreign source document"):
+                SOURCE_RECONCILE.intake_page_records(intake)
+
+    def test_source_reconcile_output_is_confined(self):
+        with self.assertRaisesRegex(ValueError, "must stay below"):
+            SOURCE_RECONCILE.require_output_path(SOURCE_RECONCILE.ROOT / "data" / "texts")
+
+    def test_source_document_change_clears_carried_heading_context(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            pages = (
+                (1, "a" * 64, "First Feast\nTHE CHAPTER\nFirst body."),
+                (2, "c" * 64, "THE PRAYERS\nForeign body."),
+            )
+            for number, source_hash, text in pages:
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "native.layout.txt").write_text(text)
+                (page / "page.json").write_text(__import__("json").dumps({
+                    "page": number,
+                    "source_sha256": source_hash,
+                    "text_path": f"pages/{number:04d}/native.layout.txt",
+                    "raw_text_sha256": str(number) * 64,
+                }))
+            profile = {
+                "heading_aliases": [{"pattern": "^First Feast$", "owner": "first-feast"}],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            by_page = {candidate.source_page: candidate for candidate in candidates}
+            self.assertEqual(by_page[1].canonical_owner, "first-feast")
+            self.assertEqual(by_page[2].canonical_owner, "")
 
 if __name__ == "__main__":
     unittest.main()

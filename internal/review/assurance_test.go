@@ -18,6 +18,14 @@ func TestExplainCompositionIncludesDependenciesAndDecisions(t *testing.T) {
 	if len(a.Dependencies) == 0 {
 		t.Fatal("no composition dependencies")
 	}
+	if len(a.Resolutions) == 0 {
+		t.Fatal("no resolution metadata")
+	}
+	for _, resolution := range a.Resolutions {
+		if resolution.RequestedSlot == "" || resolution.SelectedRef == "" || resolution.SelectedTier == "" {
+			t.Fatalf("incomplete resolution metadata: %#v", resolution)
+		}
+	}
 	if len(a.Decisions) == 0 {
 		t.Fatal("no composition decisions")
 	}

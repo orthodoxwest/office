@@ -1,0 +1,16 @@
+{
+  "$schema": "schema.json",
+  "title": "Monastic diurnal extraction profile (template)",
+  "description": "Copy per edition. Patterns are case-insensitive regexes. They only map evidence for review; they never alter data/.",
+  "default_hour": "",
+  "page_aliases": [
+    { "pattern": "^([0-9]+)$", "printed_page": "\\1" }
+  ],
+  "heading_aliases": [
+    { "pattern": "^THE FEAST OF EXAMPLE$", "owner": "example-feast", "hour": "lauds", "variant": "", "confidence": "edition-confirmed" }
+  ],
+  "slot_aliases": [
+    { "pattern": "THE GOSPEL CANTICLE: BENEDICTUS", "slot": "benedictus-antiphon", "hour": "lauds", "confidence": "edition-confirmed" },
+    { "pattern": "THE PRAYERS", "slot": "collect", "confidence": "edition-confirmed" }
+  ]
+}

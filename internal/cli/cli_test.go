@@ -109,6 +109,35 @@ func TestReviewExplainEmitsJSON(t *testing.T) {
 	}
 }
 
+func TestReviewResolutionInventoryEmitsJSONSummaryAndFallbacks(t *testing.T) {
+	e, out, _ := testEnv(t)
+	if err := cmdReview(e, []string{"resolution-inventory", "-start", "2026", "-years", "1", "-json"}); err != nil {
+		t.Fatalf("resolution inventory JSON: %v", err)
+	}
+	var payload struct {
+		Rows []struct {
+			RequestedSlot  string   `json:"requested_slot"`
+			CanonicalOwner string   `json:"canonical_owner"`
+			SelectedRef    string   `json:"selected_ref"`
+			DirectExisting []string `json:"direct_existing"`
+		}
+	}
+	if err := json.Unmarshal(out.Bytes(), &payload); err != nil {
+		t.Fatalf("resolution inventory is not JSON: %v", err)
+	}
+	if len(payload.Rows) == 0 || payload.Rows[0].CanonicalOwner == "" || payload.Rows[0].RequestedSlot == "" || payload.Rows[0].SelectedRef == "" {
+		t.Fatalf("inventory rows lack resolution metadata: %#v", payload.Rows)
+	}
+
+	out.Reset()
+	if err := cmdReview(e, []string{"resolution-inventory", "-start", "2026", "-years", "1", "-fallback-only", "-summary"}); err != nil {
+		t.Fatalf("resolution inventory fallback summary: %v", err)
+	}
+	if !strings.Contains(out.String(), "resolution inventory:") {
+		t.Fatalf("summary = %q", out.String())
+	}
+}
+
 func TestValidatePassesOnRepositoryData(t *testing.T) {
 	e, out, _ := testEnv(t)
 	if err := cmdValidate(e, nil); err != nil {
