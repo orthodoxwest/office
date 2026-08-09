@@ -206,6 +206,34 @@ class DiurnalAgentTest(unittest.TestCase):
             self.assertEqual(agent.cmd_reap(args), 0)
             self.assertFalse(planned_lease.exists())
 
+            (run / "leases").rmdir()
+            outside = base / "outside-leases"
+            outside.mkdir()
+            external_lease = outside / "external.json"
+            external_lease.write_text('{"expires_at": 0}')
+            (run / "leases").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "leases directory must not be a symlink"):
+                agent.cmd_reap(args)
+            self.assertTrue(external_lease.is_file())
+
+    def test_collection_rejects_external_results_symlink(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            run, _, _ = self.make_plan(directory)
+            outside = directory / "outside-results"
+            outside.mkdir()
+            sentinel = outside / "sentinel.json"
+            sentinel.write_text('{"private": true}')
+            (run / "results").symlink_to(outside, target_is_directory=True)
+            args = argparse.Namespace(
+                run=run, output=directory / "output", repo=directory,
+                include_stale=False,
+            )
+            with patch.object(agent, "run_is_stale", return_value=False):
+                with self.assertRaisesRegex(ValueError, "results directory must not be a symlink"):
+                    agent.cmd_collect(args)
+            self.assertEqual(sentinel.read_text(), '{"private": true}')
+
     def test_replica_results_run_separately_and_disagreement_is_collected(self):
         with tempfile.TemporaryDirectory() as temporary:
             run, _, policy_path = self.make_plan(Path(temporary), "ambiguous-owner/context")
@@ -304,6 +332,128 @@ class DiurnalAgentTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "agent run must stay"):
                 agent.resolve_run(args)
 
+    def test_output_symlink_escape_is_rejected_before_any_write(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            outside = directory / "outside"
+            outside.mkdir()
+            (directory / "output").mkdir()
+            (directory / "output" / "escape").symlink_to(outside, target_is_directory=True)
+            input_path = directory / "candidates.json"
+            input_path.write_text(json.dumps({"candidates": [{
+                "candidate_id": "safe", "source": "diurnal", "source_sha256": "a" * 64,
+                "source_page": 1, "extractor": "native", "raw_text_sha256": "b" * 64,
+            }]}))
+            policy_path = directory / "policy.json"
+            policy_path.write_bytes(agent.DEFAULT_POLICY.read_bytes())
+            with self.assertRaisesRegex(ValueError, "must stay below"):
+                agent.cmd_plan(argparse.Namespace(
+                    input=input_path, policy=policy_path, repo=directory,
+                    output=directory / "output" / "escape" / "agent", run_id="safe-run",
+                ))
+            self.assertEqual(list(outside.iterdir()), [])
+
+    def test_invalid_policy_fails_before_plan_or_lease_writes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            input_path = directory / "candidates.json"
+            input_path.write_text(json.dumps({"candidates": [{
+                "candidate_id": "safe", "source": "diurnal", "source_sha256": "a" * 64,
+                "source_page": 1, "extractor": "native", "raw_text_sha256": "b" * 64,
+            }]}))
+            policy_path = directory / "policy.json"
+            policy = json.loads(agent.DEFAULT_POLICY.read_text())
+            policy["providers"]["grok"]["max_turns"] = 0
+            policy_path.write_text(json.dumps(policy))
+            output = directory / "output" / "agents"
+            with self.assertRaisesRegex(ValueError, "max_turns"):
+                agent.cmd_plan(argparse.Namespace(
+                    input=input_path, policy=policy_path, repo=directory, output=output, run_id="safe-run",
+                ))
+            self.assertFalse(output.exists())
+            policy = json.loads(agent.DEFAULT_POLICY.read_text())
+            policy["max_attempts"] = "2"
+            policy_path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "max_attempts"):
+                agent.load_policy(policy_path)
+            policy = json.loads(agent.DEFAULT_POLICY.read_text())
+            policy["schema_version"] = True
+            policy_path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "schema_version"):
+                agent.load_policy(policy_path)
+            policy["schema_version"] = 1.0
+            policy_path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "schema_version"):
+                agent.load_policy(policy_path)
+            policy = json.loads(agent.DEFAULT_POLICY.read_text())
+            policy["providers"]["codex"]["reasoning_effort"] = []
+            policy_path.write_text(json.dumps(policy))
+            with self.assertRaisesRegex(ValueError, "reasoning_effort"):
+                agent.load_policy(policy_path)
+
+    def test_persisted_traversal_job_is_rejected_before_lease_write(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            run, _, policy_path = self.make_plan(directory)
+            job_file = next((run / "jobs").glob("*.json"))
+            job = agent.store.read_json(job_file)
+            job["job_id"] = "../outside"
+            agent.store.atomic_json(job_file, job)
+            with self.assertRaisesRegex(ValueError, "job ID"):
+                agent.cmd_run(argparse.Namespace(
+                    run=run, output=directory / "output", repo=directory, execute=True,
+                ))
+            self.assertFalse((run / "leases").exists())
+            self.assertFalse((directory / "outside").exists())
+
+    def test_persisted_run_paths_are_rejected_before_external_read_or_provider(self):
+        with tempfile.TemporaryDirectory() as temporary, tempfile.TemporaryDirectory() as foreign:
+            repo = Path(temporary) / "repo"
+            run, _, _ = self.make_plan(repo)
+            run_path = run / "run.json"
+            original = agent.store.read_json(run_path)
+            foreign_policy = Path(foreign) / "policy.json"
+            foreign_policy.write_bytes(agent.DEFAULT_POLICY.read_bytes())
+            args = argparse.Namespace(
+                run=run, output=repo / "output", repo=repo, execute=True,
+            )
+
+            tampered = json.loads(json.dumps(original))
+            tampered["policy_path"] = str(foreign_policy)
+            agent.store.atomic_json(run_path, tampered)
+            with patch.object(agent.providers, "execute") as execute:
+                with self.assertRaisesRegex(ValueError, "policy_path must stay"):
+                    agent.cmd_run(args)
+            execute.assert_not_called()
+            self.assertFalse((run / "leases").exists())
+
+            tampered = json.loads(json.dumps(original))
+            tampered["repo"] = str(Path(foreign))
+            agent.store.atomic_json(run_path, tampered)
+            with patch.object(agent.providers, "execute") as execute:
+                with self.assertRaisesRegex(ValueError, "repository does not match"):
+                    agent.cmd_run(args)
+            execute.assert_not_called()
+            self.assertFalse((run / "leases").exists())
+
+    def test_job_directory_symlink_escape_is_rejected_before_result_write(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            run, _, policy_path = self.make_plan(directory)
+            job = agent.store.jobs(run)[0]
+            job_file = next((run / "jobs").glob("*.json"))
+            job_file.unlink()
+            (run / "jobs").rmdir()
+            outside = directory / "outside"
+            outside.mkdir()
+            (run / "jobs").symlink_to(outside, target_is_directory=True)
+            run_record = agent.store.read_json(run / "run.json")
+            policy = agent.load_policy(policy_path)
+            with patch.object(agent, "run_is_stale", return_value=True):
+                with self.assertRaisesRegex(ValueError, "job file must stay below"):
+                    agent.execute_job(run, job, run_record, policy)
+            self.assertEqual(list(outside.iterdir()), [])
+
     def test_collection_retains_local_witness_identity(self):
         candidate = {
             "source": "diurnal",
@@ -317,6 +467,35 @@ class DiurnalAgentTest(unittest.TestCase):
         self.assertEqual(witness["source_page"], 42)
         self.assertEqual(witness["printed_page"], "37")
         self.assertEqual(witness["raw_text_sha256"], "b" * 64)
+
+    def test_result_and_collection_keep_immutable_local_witness(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            run, _, policy_path = self.make_plan(directory)
+            run_record = agent.store.read_json(run / "run.json")
+            policy = agent.load_policy(policy_path)
+            original = agent.store.jobs(run)[0]
+            with patch.object(agent, "run_is_stale", return_value=False), patch.object(
+                agent.providers, "execute", return_value=agent.providers.Execution(0, json.dumps(proposal()), "")
+            ):
+                self.assertEqual(agent.execute_job(run, original, run_record, policy), "complete")
+                self.assertEqual(agent.cmd_collect(argparse.Namespace(
+                    run=run, output=directory / "output", repo=directory, include_stale=False,
+                )), 0)
+            result = agent.successful_results(run)[0]
+            self.assertEqual(result["candidate_sha256"], original["candidate_sha256"])
+            self.assertEqual(result["witness"], original["witness"])
+            self.assertEqual(result["witness"]["sha256"], agent.model.digest(result["witness"]["identity"]))
+            collection = agent.store.read_json(run / "collection.json")
+            self.assertEqual(collection["results"][0]["witness"], original["witness"])
+            result_path = next((run / "results").glob("*/*/result.json"))
+            result["candidate_sha256"] = "c" * 64
+            agent.store.atomic_json(result_path, result)
+            with patch.object(agent, "run_is_stale", return_value=False):
+                with self.assertRaisesRegex(ValueError, "does not match its planned job"):
+                    agent.cmd_collect(argparse.Namespace(
+                        run=run, output=directory / "output", repo=directory, include_stale=False,
+                    ))
 
     def test_plan_rejects_candidate_without_immutable_witness(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -346,7 +525,7 @@ class DiurnalAgentTest(unittest.TestCase):
                 after = agent.git_worktree_digest(directory)
             self.assertNotEqual(before, after)
 
-    def test_declared_dependency_change_makes_snapshot_change(self):
+    def test_declared_dependency_change_invalidates_snapshot(self):
         with tempfile.TemporaryDirectory() as temporary:
             directory = Path(temporary)
             dependency = directory / "profile.json"
@@ -360,11 +539,128 @@ class DiurnalAgentTest(unittest.TestCase):
             }))
             policy = directory / "policy.json"
             policy.write_bytes(agent.DEFAULT_POLICY.read_bytes())
+            original_hash = agent.file_sha256(dependency)
             with patch.object(agent, "git_head", return_value="head"):
                 before = agent.snapshot(candidates, policy, directory)
                 dependency.write_text('{"version": 2}')
-                after = agent.snapshot(candidates, policy, directory)
-            self.assertNotEqual(before["dependencies"], after["dependencies"])
+                with self.assertRaisesRegex(ValueError, "hash does not match"):
+                    agent.snapshot(candidates, policy, directory)
+            self.assertEqual(before["dependencies"]["profile"], original_hash)
+
+    def test_manifest_tree_change_marks_job_stale_without_provider_call(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            intake = directory / "output" / "intake"
+            intake.mkdir(parents=True)
+            (intake / "manifest.json").write_text('{"pages": []}')
+            texts = directory / "data" / "texts"
+            feasts = directory / "data" / "feasts"
+            texts.mkdir(parents=True)
+            feasts.mkdir(parents=True)
+            discovery = directory / "output" / "discovery" / "proper-discovery.json"
+            discovery.parent.mkdir(parents=True)
+            discovery.write_text(json.dumps({
+                "schema_version": 2,
+                "dependency_manifest": {
+                    "schema_version": 1,
+                    "roots": {"repository": ".", "intake": "output/intake"},
+                    "entries": [
+                        {
+                            "kind": "tree", "role": "intake-tree",
+                            "root": "intake", "path": ".",
+                            "sha256": agent.tree_sha256(intake),
+                        },
+                        {
+                            "kind": "tree", "role": "corpus-tree",
+                            "root": "repository", "path": "data/texts",
+                            "sha256": agent.tree_sha256(texts),
+                        },
+                        {
+                            "kind": "tree", "role": "feast-metadata-tree",
+                            "root": "repository", "path": "data/feasts",
+                            "sha256": agent.tree_sha256(feasts),
+                        },
+                    ],
+                },
+                "candidates": [{
+                    "candidate_id": "DI/example/42",
+                    "discovery_classification": "verify-existing",
+                    "source_text": "Bounded witness",
+                    "source": "diurnal",
+                    "source_sha256": "a" * 64,
+                    "source_page": 42,
+                    "extractor": "pdftotext-layout",
+                    "raw_text_sha256": "b" * 64,
+                }],
+            }))
+            policy_path = directory / "policy.json"
+            policy_path.write_bytes(agent.DEFAULT_POLICY.read_bytes())
+            args = argparse.Namespace(
+                input=discovery,
+                policy=policy_path,
+                repo=directory,
+                output=directory / "output" / "agent",
+                run_id="manifest-stale",
+            )
+            with patch.object(agent, "git_head", return_value="head"):
+                self.assertEqual(agent.cmd_plan(args), 0)
+            run = agent.store.active_run(args.output)
+            (intake / "later-page.json").write_text('{}')
+            run_record = agent.store.read_json(run / "run.json")
+            policy = agent.load_policy(policy_path)
+            with patch.object(agent.providers, "execute") as execute:
+                self.assertEqual(
+                    agent.execute_job(
+                        run, agent.store.jobs(run)[0], run_record, policy
+                    ),
+                    "stale",
+                )
+            execute.assert_not_called()
+
+    def test_unsafe_manifest_root_is_rejected_before_run_write(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            outside = directory / "outside"
+            outside.mkdir()
+            discovery = directory / "candidates.json"
+            discovery.write_text(json.dumps({
+                "dependency_manifest": {
+                    "schema_version": 1,
+                    "roots": {"repository": ".", "intake": "../outside"},
+                    "entries": [{
+                        "kind": "tree", "role": "intake-tree",
+                        "root": "intake", "path": ".",
+                        "sha256": agent.tree_sha256(outside),
+                    }],
+                },
+                "candidates": [{
+                    "candidate_id": "DI/example/42", "source": "diurnal",
+                    "source_sha256": "a" * 64, "source_page": 42,
+                    "extractor": "native", "raw_text_sha256": "b" * 64,
+                }],
+            }))
+            policy_path = directory / "policy.json"
+            policy_path.write_bytes(agent.DEFAULT_POLICY.read_bytes())
+            output = directory / "output" / "agent"
+            with self.assertRaisesRegex(ValueError, "repository-relative"):
+                agent.cmd_plan(argparse.Namespace(
+                    input=discovery, policy=policy_path, repo=directory,
+                    output=output, run_id="unsafe-manifest",
+                ))
+            self.assertFalse((output / "runs").exists())
+
+            intake = directory / "output" / "intake"
+            intake.mkdir(parents=True)
+            payload = json.loads(discovery.read_text())
+            payload["dependency_manifest"]["roots"]["intake"] = "output/intake"
+            payload["dependency_manifest"]["entries"][0]["sha256"] = agent.tree_sha256(intake)
+            discovery.write_text(json.dumps(payload))
+            with self.assertRaisesRegex(ValueError, "exactly one intake, corpus"):
+                agent.cmd_plan(argparse.Namespace(
+                    input=discovery, policy=policy_path, repo=directory,
+                    output=output, run_id="incomplete-manifest",
+                ))
+            self.assertFalse((output / "runs").exists())
 
     def test_adjudicate_does_not_plan_without_replica_disagreement(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -394,6 +690,10 @@ class DiurnalAgentTest(unittest.TestCase):
             self.assertEqual(adjudication["candidate_id"], original["candidate_id"])
             self.assertEqual(adjudication["candidate_sha256"], original["candidate_sha256"])
             packet = adjudication["candidate"]
+            self.assertEqual(
+                adjudication["adjudication"]["packet_sha256"],
+                agent.model.digest(packet),
+            )
             self.assertEqual(packet["original_candidate"], original["candidate"])
             self.assertEqual(packet["witness"], agent.witness_from_candidate(original["candidate"]))
             self.assertEqual(len(packet["replica_proposals"]), 2)
@@ -401,6 +701,17 @@ class DiurnalAgentTest(unittest.TestCase):
                 self.assertTrue(replica["result_id"])
                 self.assertEqual(replica["proposal_sha256"], agent.model.digest(replica["proposal"]))
                 self.assertTrue(replica["result_sha256"])
+
+            tampered = json.loads(json.dumps(adjudication))
+            tampered["candidate"]["adjudication"] = "altered after planning"
+            run_record = agent.store.read_json(run / "run.json")
+            policy = agent.load_policy(policy_path)
+            with patch.object(agent, "run_is_stale", return_value=False), patch.object(
+                agent.providers, "execute"
+            ) as execute:
+                with self.assertRaisesRegex(ValueError, "packet_sha256"):
+                    agent.execute_job(run, tampered, run_record, policy)
+            execute.assert_not_called()
 
     def test_adjudicate_is_idempotent_for_an_existing_disagreement_job(self):
         with tempfile.TemporaryDirectory() as temporary:
