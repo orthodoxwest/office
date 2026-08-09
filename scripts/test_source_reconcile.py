@@ -565,7 +565,7 @@ class SourceReconcileTest(unittest.TestCase):
         )
         SOURCE_RECONCILE.classify_discovery(
             [candidate], corpus, {"example-feast": "Example Feast"},
-            [{"owner_id": "example-feast", "slot": "collect",
+            [{"owner_id": "example-feast", "hour": "lauds", "slot": "collect",
               "selected_key": "ordinary/lauds/collect", "selected_tier": "ordinary"}],
         )
         self.assertEqual(candidate.discovery_classification, "missing-override")
@@ -597,6 +597,7 @@ class SourceReconcileTest(unittest.TestCase):
             {"example-feast": "Example Feast"},
             [{
                 "owner_id": "example-feast",
+                "hour": "lauds",
                 "slot_ref": "collect",
                 "selected_ref": "proper/example-feast/collect-lauds",
                 "selected_tier": "proper",
@@ -604,6 +605,59 @@ class SourceReconcileTest(unittest.TestCase):
             }],
         )
         self.assertEqual(candidate.discovery_classification, "verify-existing")
+
+    def test_diurnal_discovery_does_not_cross_office_hours(self):
+        corpus = {
+            "proper/example-feast/chapter-vespers": SOURCE_RECONCILE.CorpusEntry(
+                "proper/example-feast/chapter-vespers",
+                "proper/example-feast.txt",
+                "chapter-vespers",
+                "Vespers chapter.",
+            ),
+            "ordinary/lauds/chapter": SOURCE_RECONCILE.CorpusEntry(
+                "ordinary/lauds/chapter",
+                "ordinary/lauds.txt",
+                "chapter",
+                "Lauds fallback.",
+            ),
+        }
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal.pdf",
+            source_page=42,
+            hour="lauds",
+            office_title="Example Feast",
+            office_variant="",
+            slot="chapter",
+            latin_incipit="",
+            source_text="Printed Lauds chapter.",
+            canonical_owner="example-feast",
+        )
+        SOURCE_RECONCILE.classify_discovery(
+            [candidate],
+            corpus,
+            {"example-feast": "Example Feast"},
+            [
+                {
+                    "owner_id": "example-feast",
+                    "hour": "vespers",
+                    "slot_ref": "chapter",
+                    "selected_ref": "proper/example-feast/chapter-vespers",
+                    "selected_tier": "proper",
+                    "direct_existing": ["proper/example-feast/chapter-vespers"],
+                },
+                {
+                    "owner_id": "example-feast",
+                    "hour": "lauds",
+                    "slot_ref": "chapter",
+                    "selected_ref": "ordinary/lauds/chapter",
+                    "selected_tier": "ordinary",
+                    "direct_existing": [],
+                },
+            ],
+        )
+        self.assertEqual(candidate.runtime_target, "ordinary/lauds/chapter")
+        self.assertEqual(candidate.resolution_tier, "ordinary")
+        self.assertEqual(candidate.discovery_classification, "missing-override")
 
     def test_diurnal_discovery_keeps_known_unobserved_owner_source_first(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
@@ -687,7 +741,7 @@ class SourceReconcileTest(unittest.TestCase):
             }}}))
             corpus = {"ordinary/lauds/collect": SOURCE_RECONCILE.CorpusEntry("ordinary/lauds/collect", "x", "collect", "Old fallback.")}
             candidates = SOURCE_RECONCILE.candidates_from_intake(intake, {"heading_aliases": [{"pattern": "Example Feast", "owner": "example-feast"}]}, corpus, {"example-feast": "Example Feast"})
-            SOURCE_RECONCILE.classify_discovery(candidates, corpus, {"example-feast": "Example Feast"}, [{"owner_id": "example-feast", "slot_ref": "collect", "selected_ref": "ordinary/lauds/collect", "selected_tier": "ordinary", "direct_candidates": ["proper/example-feast/collect"]}])
+            SOURCE_RECONCILE.classify_discovery(candidates, corpus, {"example-feast": "Example Feast"}, [{"owner_id": "example-feast", "hour": "lauds", "slot_ref": "collect", "selected_ref": "ordinary/lauds/collect", "selected_tier": "ordinary", "direct_candidates": ["proper/example-feast/collect"]}])
             self.assertEqual(len(candidates), 1)
             self.assertEqual(candidates[0].source_text, text)
             self.assertEqual(candidates[0].discovery_classification, "missing-override")
@@ -784,6 +838,81 @@ class SourceReconcileTest(unittest.TestCase):
             self.assertEqual(continued.hour, "lauds")
             self.assertEqual(continued.office_variant, "first")
             self.assertEqual(continued.source_text, "Continued body.")
+
+    def test_intake_continuation_page_does_not_clear_carried_owner(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            pages = (
+                (1, "Example Feast\nIntroductory matter."),
+                (2, "Continuation text with no mapped boundary."),
+                (3, "THE CHAPTER\nContinued chapter."),
+            )
+            for number, text in pages:
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "native.layout.txt").write_text(text)
+                (page / "page.json").write_text(__import__("json").dumps({
+                    "page": number,
+                    "source_key": "synthetic",
+                    "source_sha256": "a" * 64,
+                    "text_path": f"pages/{number:04d}/native.layout.txt",
+                    "raw_text_sha256": str(number) * 64,
+                }))
+            profile = {
+                "default_hour": "lauds",
+                "heading_aliases": [
+                    {"pattern": "^Example Feast$", "owner": "example-feast"},
+                ],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(
+                intake, profile, {}, {}
+            )
+            continued = next(
+                candidate for candidate in candidates if candidate.source_page == 3
+            )
+            self.assertEqual(continued.canonical_owner, "example-feast")
+            self.assertEqual(continued.slot, "chapter")
+
+    def test_intake_carries_final_heading_from_multi_office_page(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            pages = (
+                (1, "First Feast\nIntroductory matter.\nSecond Feast\nMore introductory matter."),
+                (2, "THE CHAPTER\nSecond feast chapter."),
+            )
+            for number, text in pages:
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "native.layout.txt").write_text(text)
+                (page / "page.json").write_text(__import__("json").dumps({
+                    "page": number,
+                    "source_key": "synthetic",
+                    "source_sha256": "a" * 64,
+                    "text_path": f"pages/{number:04d}/native.layout.txt",
+                    "raw_text_sha256": str(number) * 64,
+                }))
+            profile = {
+                "default_hour": "lauds",
+                "heading_aliases": [
+                    {"pattern": "^First Feast$", "owner": "first-feast"},
+                    {"pattern": "^Second Feast$", "owner": "second-feast"},
+                ],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(
+                intake, profile, {}, {}
+            )
+            by_page = {candidate.source_page: candidate for candidate in candidates}
+            self.assertEqual(by_page[1].canonical_owner, "")
+            self.assertEqual(by_page[1].mapping_confidence, "ambiguous")
+            self.assertEqual(by_page[2].canonical_owner, "second-feast")
+            self.assertEqual(by_page[2].slot, "chapter")
+            self.assertEqual(by_page[2].source_text, "Second feast chapter.")
 
     def test_intake_ambiguous_heading_clears_carried_owner(self):
         with tempfile.TemporaryDirectory() as tmp:
