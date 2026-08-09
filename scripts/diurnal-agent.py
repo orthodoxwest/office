@@ -32,10 +32,32 @@ DEFAULT_POLICY = ROOT / "scripts" / "diurnal-agent-policy.json"
 SCHEMA_FILE = ROOT / "scripts" / "diurnal_agent" / "result.schema.json"
 PROMPT_FILE = ROOT / "scripts" / "diurnal_agent" / "reconcile.md"
 AMBIGUOUS_CLASSES = {"ambiguous-owner/context", "ambiguous", "rubrical-complex"}
+KNOWN_PROVIDERS = {"codex", "grok", "claude"}
+ROUTING_ROLES = {"primary", "ambiguous_replica", "adjudicator"}
+LEASE_CUSHION_SECONDS = 30
+IDENTIFIER_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,159}")
 
 
 def file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def tree_sha256(path: Path) -> str:
+    """Hash a directory's relative file names and contents."""
+    root = path.resolve()
+    if not root.is_dir():
+        raise ValueError(f"dependency is not a directory: {path}")
+    digest = hashlib.sha256()
+    for child in sorted(item for item in root.rglob("*") if item.is_file()):
+        resolved = child.resolve()
+        try:
+            relative = resolved.relative_to(root)
+        except ValueError as exc:
+            raise ValueError(f"dependency tree escapes its root: {child}") from exc
+        digest.update(relative.as_posix().encode())
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(file_sha256(resolved)))
+    return digest.hexdigest()
 
 
 def git_head(repo: Path) -> str:
@@ -77,10 +99,17 @@ def git_worktree_digest(repo: Path) -> str:
 
 def load_policy(path: Path) -> dict[str, Any]:
     policy = store.read_json(path)
-    required = {"schema_version", "max_attempts", "providers", "routing"}
-    if not isinstance(policy, dict) or not required <= set(policy):
+    required = {
+        "schema_version", "lease_seconds", "max_attempts", "max_prompt_bytes",
+        "max_output_bytes", "wall_timeout_seconds", "providers", "routing",
+    }
+    if not isinstance(policy, dict) or set(policy) != required:
         raise ValueError(f"{path}: invalid agent policy")
-    if not 1 <= policy["max_attempts"] <= 5:
+    policy_schema = policy.get("schema_version")
+    if isinstance(policy_schema, bool) or not isinstance(policy_schema, int) or policy_schema != 1:
+        raise ValueError("agent policy schema_version must be 1")
+    attempts = policy["max_attempts"]
+    if isinstance(attempts, bool) or not isinstance(attempts, int) or not 1 <= attempts <= 5:
         raise ValueError("max_attempts must be between one and five")
     numeric = {
         "lease_seconds": (60, 86400),
@@ -92,23 +121,47 @@ def load_policy(path: Path) -> dict[str, Any]:
         value = policy.get(name)
         if isinstance(value, bool) or not isinstance(value, int) or not minimum <= value <= maximum:
             raise ValueError(f"{name} must be an integer from {minimum} to {maximum}")
-    if policy["lease_seconds"] < policy["wall_timeout_seconds"] + 30:
-        raise ValueError("lease_seconds must exceed wall_timeout_seconds by at least 30 seconds")
-    known = {"codex", "grok", "claude"}
-    if set(policy["providers"]) - known:
-        raise ValueError("policy contains an unknown provider")
+    # The lease must outlast a provider invocation and leave time to persist its
+    # bounded result and release the lease.  This prevents a second runner from
+    # acquiring the same job while the first is still writing durable state.
+    if policy["lease_seconds"] < policy["wall_timeout_seconds"] + LEASE_CUSHION_SECONDS:
+        raise ValueError(
+            "lease_seconds must be wall_timeout_seconds plus at least "
+            f"{LEASE_CUSHION_SECONDS} seconds for result persistence"
+        )
+    if not isinstance(policy["providers"], dict) or set(policy["providers"]) != KNOWN_PROVIDERS:
+        raise ValueError("policy providers must contain exactly codex, grok, and claude")
     for name, settings in policy["providers"].items():
+        expected = {
+            "codex": {"enabled", "model", "reasoning_effort"},
+            "grok": {"enabled", "model", "max_turns"},
+            "claude": {"enabled", "model", "max_budget_usd"},
+        }[name]
+        if not isinstance(settings, dict) or set(settings) != expected:
+            raise ValueError(f"{name}: policy settings must contain exactly {', '.join(sorted(expected))}")
         if not isinstance(settings, dict) or not isinstance(settings.get("enabled"), bool):
             raise ValueError(f"{name}: enabled must be boolean")
         if not isinstance(settings.get("model"), str) or not settings["model"].strip():
             raise ValueError(f"{name}: model must be a non-empty string")
-        if name == "codex" and settings.get("reasoning_effort") not in {
-            "low", "medium", "high", "xhigh", "max", "ultra"
-        }:
-            raise ValueError("codex: reasoning_effort must be a supported level")
+        if name == "codex":
+            effort = settings.get("reasoning_effort")
+            if not isinstance(effort, str) or effort not in {
+                "low", "medium", "high", "xhigh", "max", "ultra"
+            }:
+                raise ValueError("codex: reasoning_effort must be a supported level")
+        if name == "grok":
+            value = settings.get("max_turns")
+            if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 10:
+                raise ValueError("grok: max_turns must be an integer from 1 to 10")
+        if name == "claude":
+            value = settings.get("max_budget_usd")
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0.01 <= value <= 10:
+                raise ValueError("claude: max_budget_usd must be a number from 0.01 to 10")
+    if not isinstance(policy["routing"], dict) or set(policy["routing"]) != ROUTING_ROLES:
+        raise ValueError("policy routing must contain exactly primary, ambiguous_replica, and adjudicator")
     for name, provider in policy["routing"].items():
-        if name not in {"primary", "ambiguous_replica", "adjudicator"} or provider not in known:
-            raise ValueError("policy routing contains an unknown role or provider")
+        if not isinstance(provider, str) or provider not in KNOWN_PROVIDERS:
+            raise ValueError(f"policy routing {name} must name a known provider")
     return policy
 
 
@@ -137,6 +190,29 @@ def validate_witness(candidate: dict[str, Any]) -> None:
     page = candidate.get("source_page")
     if isinstance(page, bool) or not isinstance(page, int) or page < 1:
         raise ValueError("candidate witness requires a positive source_page")
+    for name in ("canonical_text_sha256", "text_sha256"):
+        value = candidate.get(name)
+        if value is not None and (not isinstance(value, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", value)):
+            raise ValueError(f"candidate witness {name} must be a full SHA-256 when present")
+
+
+def validate_identifier(value: Any, label: str) -> str:
+    """Reject traversal and ambiguous names before they are used in paths."""
+    if not isinstance(value, str) or not IDENTIFIER_RE.fullmatch(value):
+        raise ValueError(f"{label} must contain only letters, numbers, dot, underscore, and hyphen")
+    return value
+
+
+def confined_child(base: Path, child: str, label: str, containment_root: Path | None = None) -> Path:
+    """Resolve a generated child and reject existing symlink escapes."""
+    validate_identifier(child, label)
+    root = (containment_root or base).resolve()
+    path = (base / child).resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"{label} must stay below {root}") from exc
+    return path
 
 
 def prompt_for(candidate: dict[str, Any]) -> str:
@@ -144,8 +220,98 @@ def prompt_for(candidate: dict[str, Any]) -> str:
     return f"{instructions.rstrip()}\n\nCandidate packet:\n{json.dumps(candidate, indent=2, sort_keys=True, ensure_ascii=False)}\n"
 
 
-def declared_dependencies(input_path: Path) -> dict[str, str]:
+def manifest_dependencies(
+    manifest: dict[str, Any], repo: Path
+) -> dict[str, str]:
+    """Resolve and verify the portable discovery dependency manifest."""
+    manifest_schema = manifest.get("schema_version")
+    if isinstance(manifest_schema, bool) or not isinstance(manifest_schema, int) or manifest_schema != 1:
+        raise ValueError("dependency manifest schema_version must be 1")
+    roots = manifest.get("roots")
+    if not isinstance(roots, dict) or set(roots) != {"repository", "intake"}:
+        raise ValueError("dependency manifest requires repository and intake roots")
+    if roots["repository"] != "." or not isinstance(roots["intake"], str):
+        raise ValueError("dependency manifest roots are malformed")
+    intake_locator = Path(roots["intake"])
+    if intake_locator.is_absolute() or ".." in intake_locator.parts:
+        raise ValueError("dependency intake root must be repository-relative")
+    repository = repo.resolve()
+    intake = (repository / intake_locator).resolve()
+    try:
+        intake.relative_to((repository / "output").resolve())
+    except ValueError as exc:
+        raise ValueError("dependency intake root must stay below repository output") from exc
+    if not intake.is_dir():
+        raise FileNotFoundError(f"dependency intake root no longer exists: {intake}")
+    resolved_roots = {"repository": repository, "intake": intake}
+
+    entries = manifest.get("entries")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("dependency manifest entries must be a non-empty list")
+    hashes: dict[str, str] = {}
+    tree_roles: dict[str, list[tuple[str, str]]] = {}
+    for record in entries:
+        required = {"kind", "role", "root", "path", "sha256"}
+        if not isinstance(record, dict) or set(record) != required:
+            raise ValueError("dependency manifest entry is malformed")
+        kind, role, root_name = record["kind"], record["role"], record["root"]
+        path_value, declared_hash = record["path"], record["sha256"]
+        if kind not in {"file", "tree"} or root_name not in resolved_roots:
+            raise ValueError("dependency manifest entry has an unknown kind or root")
+        if (
+            not isinstance(role, str)
+            or not re.fullmatch(r"[a-z][a-z0-9-]{0,63}", role)
+            or not isinstance(path_value, str)
+            or not path_value
+        ):
+            raise ValueError("dependency manifest entry role and path are required")
+        if not isinstance(declared_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", declared_hash):
+            raise ValueError("dependency manifest entry requires a full SHA-256")
+        relative = Path(path_value)
+        if relative.is_absolute() or ".." in relative.parts or (path_value == "." and kind != "tree"):
+            raise ValueError("dependency manifest entry path is unsafe")
+        base = resolved_roots[root_name]
+        path = (base / relative).resolve()
+        try:
+            path.relative_to(base)
+        except ValueError as exc:
+            raise ValueError("dependency manifest entry escapes its root") from exc
+        if kind == "file" and not path.is_file():
+            raise FileNotFoundError(f"dependency file no longer exists: {path}")
+        if kind == "tree" and not path.is_dir():
+            raise FileNotFoundError(f"dependency tree no longer exists: {path}")
+        actual_hash = file_sha256(path) if kind == "file" else tree_sha256(path)
+        if actual_hash != declared_hash:
+            raise ValueError(f"dependency {role} hash does not match its manifest")
+        key = f"{kind}:{root_name}:{relative.as_posix()}"
+        if key in hashes:
+            raise ValueError(f"duplicate dependency manifest entry: {key}")
+        hashes[key] = actual_hash
+        if kind == "tree":
+            tree_roles.setdefault(role, []).append((root_name, relative.as_posix()))
+    required_trees = {"intake-tree", "corpus-tree", "feast-metadata-tree"}
+    if any(len(tree_roles.get(role, [])) != 1 for role in required_trees):
+        raise ValueError(
+            "dependency manifest requires exactly one intake, corpus, and feast-metadata tree"
+        )
+    if tree_roles["intake-tree"] != [("intake", ".")]:
+        raise ValueError("dependency intake tree must describe the complete intake root")
+    corpus_root, corpus_path = tree_roles["corpus-tree"][0]
+    feast_root, feast_path = tree_roles["feast-metadata-tree"][0]
+    if corpus_root != "repository" or Path(corpus_path).name != "texts":
+        raise ValueError("dependency corpus tree must be a repository texts directory")
+    if feast_root != "repository" or Path(feast_path).name != "feasts":
+        raise ValueError("dependency feast-metadata tree must be a repository feasts directory")
+    return hashes
+
+
+def declared_dependencies(input_path: Path, repo: Path) -> dict[str, str]:
     payload = store.read_json(input_path)
+    if isinstance(payload, dict) and "dependency_manifest" in payload:
+        manifest = payload["dependency_manifest"]
+        if not isinstance(manifest, dict):
+            raise ValueError("dependency_manifest must be an object")
+        return manifest_dependencies(manifest, repo)
     declared = payload.get("dependencies", {}) if isinstance(payload, dict) else {}
     if not isinstance(declared, dict):
         raise ValueError("input dependencies must be an object")
@@ -159,9 +325,19 @@ def declared_dependencies(input_path: Path) -> dict[str, str]:
         path = Path(path_value)
         if not path.is_absolute():
             path = (input_path.parent / path).resolve()
+        try:
+            path.resolve().relative_to(repo.resolve())
+        except ValueError as exc:
+            raise ValueError(f"dependency {name}: path must stay below the repository") from exc
         if not path.is_file():
             raise FileNotFoundError(f"dependency {name} no longer exists: {path}")
-        hashes[name] = file_sha256(path)
+        actual_hash = file_sha256(path)
+        declared_hash = record.get("sha256")
+        if not isinstance(declared_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", declared_hash):
+            raise ValueError(f"dependency {name}: a full SHA-256 is required")
+        if actual_hash != declared_hash:
+            raise ValueError(f"dependency {name} hash does not match its manifest")
+        hashes[name] = actual_hash
     return hashes
 
 
@@ -173,7 +349,7 @@ def snapshot(input_path: Path, policy_path: Path, repo: Path) -> dict[str, Any]:
         "schema_sha256": file_sha256(SCHEMA_FILE),
         "git_head": git_head(repo),
         "git_worktree_sha256": git_worktree_digest(repo),
-        "dependencies": declared_dependencies(input_path),
+        "dependencies": declared_dependencies(input_path, repo),
     }
     return values
 
@@ -205,22 +381,124 @@ def confined_output(output: Path, repo: Path) -> Path:
 
 def resolve_run(args: argparse.Namespace) -> Path:
     base = confined_output(args.output, args.repo)
-    run = args.run.resolve() if getattr(args, "run", None) else store.active_run(base)
+    if getattr(args, "run", None):
+        run = args.run.resolve()
+    else:
+        pointer = base / "current.json"
+        if not pointer.is_file():
+            raise FileNotFoundError("no planned agent run; run plan first")
+        value = store.read_json(pointer)
+        if not isinstance(value, dict) or not isinstance(value.get("run"), str):
+            raise ValueError("active agent run pointer is malformed")
+        run = Path(value["run"]).resolve()
     try:
-        run.relative_to(base / "runs")
+        relative = run.relative_to((base / "runs").resolve())
     except ValueError as exc:
         raise ValueError(f"agent run must stay below {base / 'runs'}") from exc
+    if len(relative.parts) != 1:
+        raise ValueError("agent run must be a direct run directory")
+    validate_identifier(relative.name, "run ID")
     if not (run / "run.json").is_file():
         raise FileNotFoundError(f"not an agent run: {run}")
     return run
 
 
+def validated_run_record(
+    run: Path, args: argparse.Namespace
+) -> dict[str, Any]:
+    """Validate persisted run paths before any dependent read or provider call."""
+    record = store.read_json(run / "run.json")
+    required = {"schema_version", "run_id", "input_path", "policy_path", "repo", "snapshot"}
+    if not isinstance(record, dict) or not required <= set(record):
+        raise ValueError("agent run record is malformed")
+    run_schema = record.get("schema_version")
+    if isinstance(run_schema, bool) or not isinstance(run_schema, int) or run_schema != 1:
+        raise ValueError("agent run record schema_version must be 1")
+    if record.get("run_id") != run.name:
+        raise ValueError("agent run record ID does not match its directory")
+    expected_repo = args.repo.resolve()
+    repo_value = record.get("repo")
+    if not isinstance(repo_value, str) or Path(repo_value).resolve() != expected_repo:
+        raise ValueError("agent run repository does not match the requested repository")
+    for name in ("input_path", "policy_path"):
+        value = record.get(name)
+        if not isinstance(value, str):
+            raise ValueError(f"agent run {name} must be a path string")
+        path = Path(value).resolve()
+        try:
+            path.relative_to(expected_repo)
+        except ValueError as exc:
+            raise ValueError(f"agent run {name} must stay below the repository") from exc
+        if not path.is_file():
+            raise FileNotFoundError(f"agent run {name} no longer exists: {path}")
+    if not isinstance(record.get("snapshot"), dict):
+        raise ValueError("agent run snapshot must be an object")
+    return record
+
+
 def job_path(run: Path, job_id: str) -> Path:
-    return run / "jobs" / f"{job_id}.json"
+    validate_identifier(job_id, "job ID")
+    return confined_child(run / "jobs", f"{job_id}.json", "job file", run)
 
 
 def lease_path(run: Path, job_id: str) -> Path:
-    return run / "leases" / f"{job_id}.json"
+    validate_identifier(job_id, "job ID")
+    return confined_child(run / "leases", f"{job_id}.json", "lease file", run)
+
+
+def confined_state_directory(
+    run: Path, name: str, label: str, *, required: bool = False
+) -> Path | None:
+    """Return an existing run-state directory without following symlinks."""
+    requested = run / name
+    if not requested.exists() and not requested.is_symlink():
+        if required:
+            raise FileNotFoundError(f"agent {label} directory does not exist")
+        return None
+    if requested.is_symlink():
+        raise ValueError(f"agent {label} directory must not be a symlink")
+    resolved = requested.resolve()
+    try:
+        resolved.relative_to(run.resolve())
+    except ValueError as exc:
+        raise ValueError(f"agent {label} directory must stay below the run") from exc
+    if not resolved.is_dir():
+        raise ValueError(f"agent {label} path is not a directory")
+    return resolved
+
+
+def load_jobs(run: Path) -> list[dict[str, Any]]:
+    directory = confined_state_directory(run, "jobs", "jobs", required=True)
+    jobs = []
+    for entry in sorted(directory.iterdir()):
+        if entry.suffix != ".json":
+            continue
+        if entry.is_symlink():
+            raise ValueError("agent job file must not be a symlink")
+        validate_identifier(entry.stem, "job ID")
+        resolved = entry.resolve()
+        try:
+            relative = resolved.relative_to(directory)
+        except ValueError as exc:
+            raise ValueError("agent job file must stay below the jobs directory") from exc
+        if len(relative.parts) != 1 or not resolved.is_file():
+            raise ValueError("agent job entry is not a direct file")
+        job = store.read_json(resolved)
+        if not isinstance(job, dict) or job.get("job_id") != entry.stem:
+            raise ValueError("agent job ID does not match its file")
+        jobs.append(job)
+    return jobs
+
+
+def attempt_directory(run: Path, job_id: str, provider: str, attempt: int) -> Path:
+    validate_identifier(job_id, "job ID")
+    if provider not in KNOWN_PROVIDERS:
+        raise ValueError("result provider is unknown")
+    if isinstance(attempt, bool) or not isinstance(attempt, int) or attempt < 1:
+        raise ValueError("result attempt must be positive")
+    return confined_child(
+        run / "results" / job_id, f"{provider}-{attempt}", "result directory", run,
+    )
 
 
 def current_snapshot(run_record: dict[str, Any]) -> dict[str, Any]:
@@ -236,6 +514,17 @@ def run_is_stale(run_record: dict[str, Any]) -> bool:
         return current_snapshot(run_record) != run_record["snapshot"]
     except (FileNotFoundError, ValueError):
         return True
+
+
+def confined_repo_input(path: Path, repo: Path, label: str) -> Path:
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(repo.resolve())
+    except ValueError as exc:
+        raise ValueError(f"{label} must stay below the repository") from exc
+    if not resolved.is_file():
+        raise FileNotFoundError(f"{label} does not exist: {resolved}")
+    return resolved
 
 
 def cmd_doctor(args: argparse.Namespace) -> int:
@@ -265,19 +554,39 @@ def cmd_doctor(args: argparse.Namespace) -> int:
 
 
 def cmd_plan(args: argparse.Namespace) -> int:
-    input_path = args.input.resolve()
-    policy_path = args.policy.resolve()
     repo = args.repo.resolve()
+    input_path = confined_repo_input(args.input, repo, "agent input")
+    policy_path = confined_repo_input(args.policy, repo, "agent policy")
     policy = load_policy(policy_path)
     candidates = load_candidates(input_path)
     for candidate in candidates:
         validate_witness(candidate)
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-    run_id = args.run_id or f"dar-{stamp}-{uuid.uuid4().hex[:8]}"
-    if not all(char.isalnum() or char in "._-" for char in run_id):
-        raise ValueError("run ID may contain only letters, numbers, dot, underscore, and hyphen")
+    run_id = validate_identifier(args.run_id or f"dar-{stamp}-{uuid.uuid4().hex[:8]}", "run ID")
     output = confined_output(args.output, repo)
-    run = output / "runs" / run_id
+    # Validate every configuration and candidate before creating the run
+    # directory.  A malformed policy must never leave a lease or partial run.
+    planned_candidates = []
+    job_ids = set()
+    for candidate in candidates:
+        identifier = candidate_identifier(candidate)
+        identifier_on_disk = model.safe_job_id(identifier, candidate)
+        validate_identifier(identifier_on_disk, "job ID")
+        if identifier_on_disk in job_ids:
+            raise ValueError(f"duplicate candidate packet: {identifier}")
+        job_ids.add(identifier_on_disk)
+        prompt = prompt_for(candidate)
+        if len(prompt.encode()) > policy["max_prompt_bytes"]:
+            raise ValueError(f"{identifier}: prompt exceeds policy limit")
+        planned_candidates.append((
+            candidate,
+            identifier,
+            identifier_on_disk,
+            immutable_witness(candidate),
+            selected_providers(candidate, policy),
+        ))
+    input_snapshot = snapshot(input_path, policy_path, repo)
+    run = confined_child(output / "runs", run_id, "run ID", output)
     if run.exists():
         raise FileExistsError(f"agent run already exists: {run}")
     run.mkdir(parents=True, mode=0o700)
@@ -288,29 +597,23 @@ def cmd_plan(args: argparse.Namespace) -> int:
         "input_path": str(input_path),
         "policy_path": str(policy_path),
         "repo": str(repo),
-        "snapshot": snapshot(input_path, policy_path, repo),
+        "snapshot": input_snapshot,
         "status": "planned",
         "jobs_total": len(candidates),
     }
     store.atomic_json(run / "run.json", run_record)
     planned = []
-    job_ids = set()
-    for candidate in candidates:
-        identifier = candidate_identifier(candidate)
-        identifier_on_disk = model.safe_job_id(identifier, candidate)
-        if identifier_on_disk in job_ids:
-            raise ValueError(f"duplicate candidate packet: {identifier}")
-        job_ids.add(identifier_on_disk)
-        prompt = prompt_for(candidate)
-        if len(prompt.encode()) > policy.get("max_prompt_bytes", 24576):
-            raise ValueError(f"{identifier}: prompt exceeds policy limit")
+    for candidate, identifier, identifier_on_disk, witness, provider_names in planned_candidates:
         job = {
             "schema_version": 1,
             "job_id": identifier_on_disk,
             "candidate_id": identifier,
             "candidate_sha256": model.digest(candidate),
+            # This is derived locally while planning and never taken from a
+            # provider proposal.  Results retain this exact object.
+            "witness": witness,
             "candidate": candidate,
-            "providers": selected_providers(candidate, policy),
+            "providers": provider_names,
             "completed_providers": [],
             "provider_attempts": {},
             "result_ids": [],
@@ -349,7 +652,7 @@ def bounded_output(text: str, maximum: int) -> tuple[str, bool]:
 
 
 def persist_attempt(
-    run: Path,
+    directory: Path,
     job: dict[str, Any],
     provider: str,
     attempt: int,
@@ -357,7 +660,6 @@ def persist_attempt(
     result: dict[str, Any],
     maximum: int,
 ) -> None:
-    directory = run / "results" / job["job_id"] / f"{provider}-{attempt}"
     stdout, stdout_truncated = bounded_output(redact_environment(execution.stdout), maximum)
     stderr, stderr_truncated = bounded_output(redact_environment(execution.stderr), maximum)
     store.atomic_bytes(directory / "native.stdout.txt", stdout.encode())
@@ -367,21 +669,72 @@ def persist_attempt(
 
 
 def witness_from_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
+    """Make the bounded printed-witness identity retained with every result.
+
+    It deliberately excludes candidate prose and model output.  Optional
+    fields are retained verbatim when the intake supplied them, so a reviewer
+    can locate the exact document/page/folio and extraction route without
+    merging witnesses.
+    """
+    validate_witness(candidate)
     fields = (
-        "source",
-        "source_sha256",
-        "source_page",
-        "printed_page",
-        "source_bbox",
-        "source_offset",
-        "extractor",
-        "extraction_confidence",
-        "raw_text_sha256",
+        "source", "source_sha256", "source_page", "printed_page", "printed_folio",
+        "source_bbox", "source_offset", "extractor", "ocr_route",
+        "extraction_confidence", "raw_text_sha256", "canonical_text_sha256", "text_sha256",
     )
-    return {name: candidate.get(name) for name in fields if candidate.get(name) not in (None, "")}
+    witness = {name: candidate[name] for name in fields if candidate.get(name) not in (None, "")}
+    # A canonical serialization prevents a provider or later in-process change
+    # to the candidate dictionary from changing the durable identity.
+    return json.loads(model.canonical_json(witness))
+
+
+def immutable_witness(candidate: dict[str, Any]) -> dict[str, Any]:
+    witness = witness_from_candidate(candidate)
+    return {"identity": witness, "sha256": model.digest(witness)}
+
+
+def validate_job_identity(job: dict[str, Any]) -> None:
+    """Validate persisted, potentially hand-edited state before path writes."""
+    validate_identifier(job.get("job_id"), "job ID")
+    candidate_sha = job.get("candidate_sha256")
+    if not isinstance(candidate_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", candidate_sha):
+        raise ValueError("job candidate_sha256 must be a full SHA-256")
+    adjudication = job.get("adjudication")
+    if adjudication:
+        if not isinstance(adjudication, dict):
+            raise ValueError("job adjudication metadata must be an object")
+        packet_sha = adjudication.get("packet_sha256")
+        if not isinstance(packet_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", packet_sha):
+            raise ValueError("adjudication job requires packet_sha256")
+        if model.digest(job.get("candidate")) != packet_sha:
+            raise ValueError("adjudication packet_sha256 does not match its candidate")
+        if adjudication.get("original_candidate_sha256") != candidate_sha:
+            raise ValueError("adjudication original candidate hash does not match its job")
+    elif model.digest(job.get("candidate")) != candidate_sha:
+        raise ValueError("job candidate_sha256 does not match its candidate")
+    witness = job.get("witness")
+    if not isinstance(witness, dict) or set(witness) != {"identity", "sha256"}:
+        raise ValueError("job requires an immutable witness object")
+    if not isinstance(witness["identity"], dict) or not isinstance(witness["sha256"], str):
+        raise ValueError("job immutable witness is malformed")
+    if model.digest(witness["identity"]) != witness["sha256"]:
+        raise ValueError("job immutable witness hash does not match")
+    # Validate the actual required source identity, not merely its hash.
+    validate_witness(witness["identity"])
+    if adjudication and job.get("candidate", {}).get("witness") != witness["identity"]:
+        raise ValueError("adjudication packet witness does not match its job")
+    providers_for_job = job.get("providers")
+    if not isinstance(providers_for_job, list) or not providers_for_job:
+        raise ValueError("job providers must be a non-empty list")
+    for provider_name in providers_for_job:
+        if not isinstance(provider_name, str) or provider_name not in KNOWN_PROVIDERS:
+            raise ValueError("job contains an unknown provider")
 
 
 def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], policy: dict[str, Any]) -> str:
+    # Do this before consulting or creating a lease: persisted state is input,
+    # not trusted path material.
+    validate_job_identity(job)
     if run_is_stale(run_record):
         job["status"] = "stale"
         store.atomic_json(job_path(run, job["job_id"]), job)
@@ -391,6 +744,10 @@ def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], poli
         job["status"] = "complete" if set(job["completed_providers"]) == set(job["providers"]) else "terminal-failed"
         store.atomic_json(job_path(run, job["job_id"]), job)
         return job["status"]
+    if provider not in KNOWN_PROVIDERS or provider not in job["providers"]:
+        raise ValueError("selected provider is not valid for this job")
+    attempt = job["provider_attempts"].get(provider, 0) + 1
+    result_directory = attempt_directory(run, job["job_id"], provider, attempt)
     lease = lease_path(run, job["job_id"])
     if lease.exists():
         current = store.read_json(lease)
@@ -408,7 +765,6 @@ def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], poli
     }
     if not store.create_lease(lease, lease_record):
         return "leased"
-    attempt = job["provider_attempts"].get(provider, 0) + 1
     job["provider_attempts"][provider] = attempt
     job["status"] = "running"
     store.atomic_json(job_path(run, job["job_id"]), job)
@@ -437,7 +793,7 @@ def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], poli
         "job_id": job["job_id"],
         "candidate_id": job["candidate_id"],
         "candidate_sha256": job["candidate_sha256"],
-        "witness": witness_from_candidate(job["candidate"]),
+        "witness": job["witness"],
         "provider": provider,
         "attempt": attempt,
         "input_snapshot": run_record["snapshot"],
@@ -451,7 +807,7 @@ def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], poli
         "finished_at": store.now(),
     }
     persist_attempt(
-        run, job, provider, attempt, execution, result,
+        result_directory, job, provider, attempt, execution, result,
         policy.get("max_output_bytes", 131072),
     )
     if proposal is not None:
@@ -472,14 +828,14 @@ def execute_job(run: Path, job: dict[str, Any], run_record: dict[str, Any], poli
 
 def cmd_run(args: argparse.Namespace) -> int:
     run = resolve_run(args)
-    run_record = store.read_json(run / "run.json")
+    run_record = validated_run_record(run, args)
     policy = load_policy(Path(run_record["policy_path"]))
     if not args.execute:
-        ready = [job["job_id"] for job in store.jobs(run) if job["status"] in {"queued", "transient-failed"}]
+        ready = [job["job_id"] for job in load_jobs(run) if job["status"] in {"queued", "transient-failed"}]
         print(json.dumps({"run": str(run), "dry_run": True, "ready": ready}, indent=2))
         return 0
     outcomes = {}
-    for job in store.jobs(run):
+    for job in load_jobs(run):
         if job["status"] in {"complete", "stale", "terminal-failed"}:
             continue
         outcomes[job["job_id"]] = execute_job(run, job, run_record, policy)
@@ -489,17 +845,31 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 def cmd_status(args: argparse.Namespace) -> int:
     run = resolve_run(args)
+    run_record = validated_run_record(run, args)
     counts: dict[str, int] = {}
-    for job in store.jobs(run):
+    for job in load_jobs(run):
         counts[job["status"]] = counts.get(job["status"], 0) + 1
-    print(json.dumps({"run": str(run), "stale": run_is_stale(store.read_json(run / "run.json")), "jobs": counts}, indent=2))
+    print(json.dumps({"run": str(run), "stale": run_is_stale(run_record), "jobs": counts}, indent=2))
     return 0
 
 
 def cmd_reap(args: argparse.Namespace) -> int:
     run = resolve_run(args)
     reaped = 0
-    for path in sorted((run / "leases").glob("*.json")):
+    directory = confined_state_directory(run, "leases", "leases")
+    for entry in sorted(directory.iterdir()) if directory is not None else []:
+        if entry.suffix != ".json":
+            continue
+        if entry.is_symlink():
+            raise ValueError("agent lease file must not be a symlink")
+        validate_identifier(entry.stem, "job ID")
+        path = entry.resolve()
+        try:
+            relative = path.relative_to(directory)
+        except ValueError as exc:
+            raise ValueError("agent lease file must stay below the leases directory") from exc
+        if len(relative.parts) != 1 or not path.is_file():
+            raise ValueError("agent lease entry is not a direct file")
         if store.read_json(path).get("expires_at", 0) <= store.now():
             path.unlink()
             reaped += 1
@@ -509,22 +879,77 @@ def cmd_reap(args: argparse.Namespace) -> int:
 
 def successful_results(run: Path) -> list[dict[str, Any]]:
     results = []
-    for path in sorted((run / "results").glob("*/*/result.json")):
-        result = store.read_json(path)
-        if result.get("status") == "complete":
-            results.append(result)
+    root = confined_state_directory(run, "results", "results")
+    for job_dir in sorted(root.iterdir()) if root is not None else []:
+        if job_dir.is_symlink():
+            raise ValueError("agent result job directory must not be a symlink")
+        validate_identifier(job_dir.name, "job ID")
+        resolved_job = job_dir.resolve()
+        try:
+            resolved_job.relative_to(root)
+        except ValueError as exc:
+            raise ValueError("agent result job directory must stay below results") from exc
+        if not resolved_job.is_dir():
+            raise ValueError("agent result job entry is not a directory")
+        for attempt_dir in sorted(resolved_job.iterdir()):
+            if attempt_dir.is_symlink():
+                raise ValueError("agent result attempt directory must not be a symlink")
+            match = re.fullmatch(r"(codex|grok|claude)-([1-9][0-9]*)", attempt_dir.name)
+            if not match:
+                raise ValueError("agent result attempt directory has an invalid name")
+            resolved_attempt = attempt_dir.resolve()
+            try:
+                resolved_attempt.relative_to(resolved_job)
+            except ValueError as exc:
+                raise ValueError("agent result attempt must stay below its job") from exc
+            path = resolved_attempt / "result.json"
+            if path.is_symlink():
+                raise ValueError("agent result file must not be a symlink")
+            if not path.is_file():
+                continue
+            result = store.read_json(path)
+            if result.get("status") == "complete":
+                candidate_sha = result.get("candidate_sha256")
+                witness = result.get("witness")
+                if not isinstance(candidate_sha, str) or not re.fullmatch(r"[0-9a-f]{64}", candidate_sha):
+                    raise ValueError(f"{path}: result is missing candidate_sha256")
+                if not isinstance(witness, dict) or set(witness) != {"identity", "sha256"}:
+                    raise ValueError(f"{path}: result is missing immutable witness")
+                if model.digest(witness.get("identity")) != witness.get("sha256"):
+                    raise ValueError(f"{path}: immutable witness hash does not match")
+                validate_witness(witness["identity"])
+                results.append(result)
     return results
+
+
+def validate_result_bindings(run: Path, results: list[dict[str, Any]]) -> None:
+    """Require collection entries to retain the exact planned identity.
+
+    A structurally valid witness is insufficient: a hand-edited result must
+    not be able to attach one candidate's proposal to another candidate's
+    printed witness.
+    """
+    jobs_by_id = {str(job.get("job_id", "")): job for job in load_jobs(run)}
+    for result in results:
+        job = jobs_by_id.get(str(result.get("job_id", "")))
+        if job is None:
+            raise ValueError("result does not belong to a planned job")
+        validate_job_identity(job)
+        for field in ("candidate_id", "candidate_sha256", "witness"):
+            if result.get(field) != job.get(field):
+                raise ValueError(f"result {field} does not match its planned job")
 
 
 def cmd_collect(args: argparse.Namespace) -> int:
     run = resolve_run(args)
-    run_record = store.read_json(run / "run.json")
+    run_record = validated_run_record(run, args)
     if run_is_stale(run_record) and not args.include_stale:
         raise RuntimeError("agent run is stale; re-plan or pass --include-stale for display only")
     results = sorted(
         successful_results(run),
         key=lambda item: (item["candidate_id"], item["provider"], item["attempt"]),
     )
+    validate_result_bindings(run, results)
     grouped: dict[str, set[str]] = {}
     for result in results:
         grouped.setdefault(result["candidate_id"], set()).add(result["proposal"]["verdict"])
@@ -534,6 +959,8 @@ def cmd_collect(args: argparse.Namespace) -> int:
         "run_id": run_record["run_id"],
         "stale": run_is_stale(run_record),
         "results": results,
+        # Collection entries retain each result's locally-derived witness and
+        # candidate hash; no provider-controlled field is used as identity.
         "replica_disagreements": disagreements,
         "created_at": store.now(),
     }
@@ -560,10 +987,11 @@ def complete_replica_collection(run: Path, run_record: dict[str, Any]) -> tuple[
     results = collection.get("results")
     if not isinstance(results, list) or any(not isinstance(item, dict) for item in results):
         raise ValueError("collection is incomplete: results must be a list")
+    validate_result_bindings(run, results)
 
     # Ignore adjudication jobs when the command is re-run.  Their existence
     # must not make a completed replica collection look incomplete.
-    replicas = [job for job in store.jobs(run) if not job.get("adjudication")]
+    replicas = [job for job in load_jobs(run) if not job.get("adjudication")]
     if any(job.get("status") != "complete" for job in replicas):
         raise RuntimeError("collection is incomplete: all replica jobs must complete before adjudication")
     expected_ids = {
@@ -625,7 +1053,7 @@ def adjudication_packet(candidate: dict[str, Any], results: list[dict[str, Any]]
 
 def cmd_adjudicate(args: argparse.Namespace) -> int:
     run = resolve_run(args)
-    run_record = store.read_json(run / "run.json")
+    run_record = validated_run_record(run, args)
     collection, results = complete_replica_collection(run, run_record)
     disagreements = [str(item) for item in collection["replica_disagreements"]]
     if not disagreements:
@@ -637,12 +1065,12 @@ def cmd_adjudicate(args: argparse.Namespace) -> int:
 
     originals = {
         job["candidate_id"]: job
-        for job in store.jobs(run)
+        for job in load_jobs(run)
         if not job.get("adjudication")
     }
     existing = {
         str(job.get("adjudication", {}).get("original_candidate_id", "")): job
-        for job in store.jobs(run)
+        for job in load_jobs(run)
         if isinstance(job.get("adjudication"), dict)
     }
     planned = []
@@ -671,6 +1099,7 @@ def cmd_adjudicate(args: argparse.Namespace) -> int:
             "job_id": job_id,
             "candidate_id": candidate_id,
             "candidate_sha256": original["candidate_sha256"],
+            "witness": original["witness"],
             "candidate": packet,
             "providers": ["claude"],
             "completed_providers": [],
@@ -682,6 +1111,7 @@ def cmd_adjudicate(args: argparse.Namespace) -> int:
             "adjudication": {
                 "original_candidate_id": candidate_id,
                 "original_candidate_sha256": original["candidate_sha256"],
+                "packet_sha256": model.digest(packet),
                 "collection_sha256": model.digest(collection),
                 "replica_result_ids": [item["result_id"] for item in packet["replica_proposals"]],
                 "replica_proposal_sha256": [item["proposal_sha256"] for item in packet["replica_proposals"]],
@@ -695,7 +1125,7 @@ def cmd_adjudicate(args: argparse.Namespace) -> int:
 
 def cmd_show(args: argparse.Namespace) -> int:
     run = resolve_run(args)
-    matches = [job for job in store.jobs(run) if job["job_id"] == args.job or job["candidate_id"] == args.job]
+    matches = [job for job in load_jobs(run) if job["job_id"] == args.job or job["candidate_id"] == args.job]
     if len(matches) != 1:
         raise ValueError(f"expected one job matching {args.job!r}, found {len(matches)}")
     print(json.dumps(matches[0], indent=2, ensure_ascii=False))

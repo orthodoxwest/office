@@ -1579,6 +1579,174 @@ def load_json(path: pathlib.Path) -> object:
         raise ValueError(f"invalid JSON in {path}: {exc}") from exc
 
 
+def sha256_file(path: pathlib.Path) -> str:
+    """Return the full digest for a materialized, non-directory input."""
+    if not path.is_file():
+        raise ValueError(f"dependency is not a file: {path}")
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def sha256_tree(path: pathlib.Path) -> str:
+    """Hash a directory's file names and contents, including an empty tree."""
+    root = path.resolve()
+    if not root.is_dir():
+        raise ValueError(f"dependency is not a directory: {path}")
+    digest = hashlib.sha256()
+    for child in sorted(item for item in root.rglob("*") if item.is_file()):
+        relative = confined_dependency_path(child, root, "dependency tree entry")
+        digest.update(relative.encode())
+        digest.update(b"\0")
+        digest.update(bytes.fromhex(sha256_file(child)))
+    return digest.hexdigest()
+
+
+def confined_dependency_path(
+    path: pathlib.Path, root: pathlib.Path, label: str
+) -> str:
+    """Return a stable relative locator, rejecting traversal and symlinks.
+
+    Discovery reports can move between worktrees, so host-absolute paths are
+    both non-portable and an unnecessary disclosure.  The only paths that may
+    be declared are files genuinely below either the repository or the intake
+    run supplied to this invocation.
+    """
+    resolved_root = root.resolve()
+    resolved_path = path.resolve()
+    try:
+        relative = resolved_path.relative_to(resolved_root)
+    except ValueError as exc:
+        raise ValueError(f"{label}: dependency lies outside its allowed root") from exc
+    if not relative.parts or any(part in {"", ".", ".."} for part in relative.parts):
+        raise ValueError(f"{label}: malformed dependency path")
+    if not resolved_path.is_file():
+        raise ValueError(f"{label}: dependency is not a file")
+    return relative.as_posix()
+
+
+def declared_intake_artifact_paths(
+    intake_dir: pathlib.Path, records: list[dict]
+) -> list[pathlib.Path]:
+    """Return every canonical file declared by the intake run.
+
+    The report never copies extracted text.  Hashing the manifest/page records
+    and their declared text artifacts instead lets a later process prove the
+    exact materialized inputs have not changed.
+    """
+    paths: set[pathlib.Path] = set()
+    manifest = intake_dir / "manifest.json"
+    if manifest.exists():
+        confined_dependency_path(manifest, intake_dir, "intake manifest")
+        paths.add(manifest.resolve())
+
+    for page_record in sorted((intake_dir / "pages").glob("*/page.json")):
+        confined_dependency_path(page_record, intake_dir, "intake page record")
+        paths.add(page_record.resolve())
+
+    for record in records:
+        for field in ("text_path", "ocr_path", "native_path"):
+            value = record.get(field)
+            if value in (None, ""):
+                continue
+            if not isinstance(value, str):
+                raise ValueError(f"intake {field}: dependency path must be a string")
+            declared = pathlib.PurePosixPath(value)
+            if declared.is_absolute() or ".." in declared.parts or not declared.parts:
+                raise ValueError(f"intake {field}: dependency lies outside its allowed root")
+            artifact = intake_dir.joinpath(*declared.parts)
+            confined_dependency_path(artifact, intake_dir, f"intake {field}")
+            paths.add(artifact.resolve())
+    return sorted(paths, key=lambda path: confined_dependency_path(path, intake_dir, "intake artifact"))
+
+
+def discovery_dependency_manifest(
+    *,
+    intake_dir: pathlib.Path,
+    intake_records: list[dict],
+    profile_path: pathlib.Path | None,
+    inventory_path: pathlib.Path | None,
+    data_dir: pathlib.Path,
+) -> dict:
+    """Build the complete, portable dependency contract for discovery.
+
+    Entries contain only structural metadata, root-relative artifact locators,
+    and full SHA-256s. Locators may retain intake page-directory names, but the
+    manifest omits source identifiers, bounding boxes, and extracted book text.
+    """
+    entries: list[dict[str, str]] = []
+
+    if not intake_dir.is_dir():
+        raise ValueError("intake root: dependency root is not a directory")
+    if not data_dir.is_dir():
+        raise ValueError("data root: dependency root is not a directory")
+    try:
+        data_dir.resolve().relative_to(ROOT.resolve())
+    except ValueError as exc:
+        raise ValueError("data root: dependency lies outside its allowed root") from exc
+    try:
+        intake_locator = intake_dir.resolve().relative_to((ROOT / "output").resolve())
+    except ValueError as exc:
+        raise ValueError("intake root: dependency lies outside repository output") from exc
+
+    def add(role: str, path: pathlib.Path, root: pathlib.Path) -> None:
+        entries.append({
+            "kind": "file",
+            "role": role,
+            "root": "intake" if root.resolve() == intake_dir.resolve() else "repository",
+            "path": confined_dependency_path(path, root, role),
+            "sha256": sha256_file(path.resolve()),
+        })
+
+    def add_tree(role: str, path: pathlib.Path, root: pathlib.Path) -> None:
+        resolved = path.resolve()
+        try:
+            relative = resolved.relative_to(root.resolve())
+        except ValueError as exc:
+            raise ValueError(f"{role}: dependency lies outside its allowed root") from exc
+        entries.append({
+            "kind": "tree",
+            "role": role,
+            "root": "intake" if root.resolve() == intake_dir.resolve() else "repository",
+            "path": relative.as_posix() or ".",
+            "sha256": sha256_tree(resolved),
+        })
+
+    if profile_path is not None:
+        add("profile", profile_path, ROOT)
+    if inventory_path is not None:
+        add("resolution-inventory", inventory_path, ROOT)
+
+    for path in declared_intake_artifact_paths(intake_dir, intake_records):
+        add("intake-artifact", path, intake_dir)
+
+    text_root = data_dir / "texts"
+    feasts_root = data_dir / "feasts"
+    for path in sorted(text_root.rglob("*.txt")):
+        add("corpus-text", path, ROOT)
+    for path in sorted(feasts_root.glob("*.txt")):
+        add("feast-metadata", path, ROOT)
+
+    # Individual hashes identify the exact materialized inputs. Tree hashes
+    # additionally detect a later file addition or deletion that is absent
+    # from this frozen list.
+    add_tree("intake-tree", intake_dir, intake_dir)
+    add_tree("corpus-tree", text_root, ROOT)
+    add_tree("feast-metadata-tree", feasts_root, ROOT)
+
+    entries.sort(
+        key=lambda entry: (
+            entry["root"], entry["role"], entry["kind"], entry["path"]
+        )
+    )
+    return {
+        "schema_version": 1,
+        "roots": {
+            "repository": ".",
+            "intake": (pathlib.PurePosixPath("output") / intake_locator).as_posix(),
+        },
+        "entries": entries,
+    }
+
+
 def intake_text(intake_dir: pathlib.Path, record: dict) -> str:
     """Read the selected intake witness safely, falling back to embedded text."""
     embedded = record.get("canonical_text", record.get("selected_text", record.get("text", "")))
@@ -2156,14 +2324,17 @@ def write_proper_discovery(
     candidates: list[SourceCandidate],
     inventory: list[dict],
     dependencies: dict[str, dict[str, str]] | None = None,
+    dependency_manifest: dict | None = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     ordered = sorted(candidates, key=lambda item: (item.discovery_classification, item.candidate_id))
     payload = {
-        "schema_version": 1,
+        "schema_version": 2 if dependency_manifest is not None else 1,
         "dependencies": dependencies or {},
         "candidates": [asdict(item) for item in ordered],
     }
+    if dependency_manifest is not None:
+        payload["dependency_manifest"] = dependency_manifest
     (output_dir / "proper-discovery.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     fields = tuple(SourceCandidate.__dataclass_fields__)
     with (output_dir / "proper-discovery.csv").open("w", newline="") as handle:
@@ -2374,30 +2545,39 @@ def cmd_decide(args: argparse.Namespace) -> int:
 
 def cmd_discover(args: argparse.Namespace) -> int:
     data_dir = pathlib.Path(args.data)
-    output_dir = pathlib.Path(args.output)
+    output_dir = require_output_path(pathlib.Path(args.output))
+    profile_path = pathlib.Path(args.profile) if args.profile else None
+    inventory_path = pathlib.Path(args.inventory) if args.inventory else None
+    # Validate declared external inputs before parsing any of them.  This
+    # keeps the discovery contract fail-closed rather than merely noticing an
+    # unsafe path after it has influenced candidate classification.
+    if profile_path is not None:
+        confined_dependency_path(profile_path, ROOT, "profile")
+    if inventory_path is not None:
+        confined_dependency_path(inventory_path, ROOT, "resolution-inventory")
     corpus = load_corpus(data_dir)
     feast_names = load_feast_names(data_dir)
-    profile = load_diurnal_profile(pathlib.Path(args.profile) if args.profile else None)
-    inventory = load_resolution_inventory(
-        pathlib.Path(args.inventory) if args.inventory else None
-    )
-    intake_dir = pathlib.Path(args.intake)
+    profile = load_diurnal_profile(profile_path)
+    inventory = load_resolution_inventory(inventory_path)
+    intake_dir = require_output_path(pathlib.Path(args.intake))
+    try:
+        output_dir.relative_to(intake_dir)
+    except ValueError:
+        pass
+    else:
+        raise ValueError("discovery output must not be inside the intake dependency tree")
     candidates = candidates_from_intake(intake_dir, profile, corpus, feast_names)
     classify_discovery(candidates, corpus, feast_names, inventory)
-    dependency_paths = {
-        "intake_manifest": intake_dir / "manifest.json",
-        "inventory": pathlib.Path(args.inventory) if args.inventory else None,
-        "profile": pathlib.Path(args.profile) if args.profile else None,
-    }
-    dependencies = {}
-    for name, path in dependency_paths.items():
-        if path is not None and path.is_file():
-            resolved = path.resolve()
-            dependencies[name] = {
-                "path": str(resolved),
-                "sha256": hashlib.sha256(resolved.read_bytes()).hexdigest(),
-            }
-    write_proper_discovery(output_dir, candidates, inventory, dependencies)
+    dependency_manifest = discovery_dependency_manifest(
+        intake_dir=intake_dir,
+        intake_records=intake_page_records(intake_dir),
+        profile_path=profile_path,
+        inventory_path=inventory_path,
+        data_dir=data_dir,
+    )
+    write_proper_discovery(
+        output_dir, candidates, inventory, dependency_manifest=dependency_manifest
+    )
     print(f"Classified {len(candidates)} printed diurnal witnesses.")
     print(f"Discovery reports: {output_dir / 'proper-discovery.json'}")
     return 0

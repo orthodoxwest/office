@@ -3,6 +3,7 @@
 
 import argparse
 import importlib.util
+import json
 import pathlib
 import sys
 import tempfile
@@ -977,7 +978,152 @@ class SourceReconcileTest(unittest.TestCase):
             )
             payload = SOURCE_RECONCILE.load_json(output / "proper-discovery.json")
             self.assertEqual(payload["schema_version"], 1)
+            self.assertNotIn("dependency_manifest", payload)
             self.assertEqual(payload["dependencies"]["profile"]["path"], str(profile))
+
+    def test_discovery_dependency_manifest_is_complete_and_deterministic(self):
+        with tempfile.TemporaryDirectory(dir=SOURCE_RECONCILE.ROOT / "output") as repo_tmp:
+            intake = pathlib.Path(repo_tmp) / "intake"
+            page = intake / "pages" / "0001"
+            page.mkdir(parents=True)
+            text = page / "native.layout.txt"
+            text.write_text("Copyrighted printed witness must not be copied into the manifest.")
+            page_record = {
+                "page": 1,
+                "source_sha256": "a" * 64,
+                "raw_text_sha256": "b" * 64,
+                "text_path": "pages/0001/native.layout.txt",
+            }
+            (page / "page.json").write_text(json.dumps(page_record))
+            (intake / "manifest.json").write_text(json.dumps({"pages": {"1": page_record}}))
+            repo_tmp = pathlib.Path(repo_tmp)
+            profile = repo_tmp / "profile.json"
+            inventory = repo_tmp / "inventory.json"
+            profile.write_text('{"default_hour":"lauds"}')
+            inventory.write_text('{"rows":[]}')
+
+            first = SOURCE_RECONCILE.discovery_dependency_manifest(
+                intake_dir=intake,
+                intake_records=SOURCE_RECONCILE.intake_page_records(intake),
+                profile_path=profile,
+                inventory_path=inventory,
+                data_dir=SOURCE_RECONCILE.ROOT / "data",
+            )
+            second = SOURCE_RECONCILE.discovery_dependency_manifest(
+                intake_dir=intake,
+                intake_records=SOURCE_RECONCILE.intake_page_records(intake),
+                profile_path=profile,
+                inventory_path=inventory,
+                data_dir=SOURCE_RECONCILE.ROOT / "data",
+            )
+            self.assertEqual(first, second)
+            output = pathlib.Path(repo_tmp) / "discovery-output"
+            SOURCE_RECONCILE.write_proper_discovery(
+                output, [], [], dependency_manifest=first
+            )
+            written = SOURCE_RECONCILE.load_json(output / "proper-discovery.json")
+            self.assertEqual(written["dependency_manifest"], first)
+            entries = first["entries"]
+            self.assertEqual(first["schema_version"], 1)
+            self.assertEqual(first["roots"]["repository"], ".")
+            self.assertTrue(first["roots"]["intake"].startswith("output/"))
+            self.assertEqual(entries, sorted(entries, key=lambda item: (item["root"], item["role"], item["kind"], item["path"])))
+            self.assertTrue(any(item["role"] == "profile" for item in entries))
+            self.assertTrue(any(item["role"] == "resolution-inventory" for item in entries))
+            self.assertTrue(any(item["role"] == "intake-artifact" and item["path"] == "manifest.json" for item in entries))
+            self.assertTrue(any(item["role"] == "intake-artifact" and item["path"] == "pages/0001/native.layout.txt" for item in entries))
+            self.assertTrue(any(item["role"] == "corpus-text" for item in entries))
+            self.assertTrue(any(item["role"] == "feast-metadata" for item in entries))
+            self.assertTrue(any(item["role"] == "intake-tree" and item["kind"] == "tree" for item in entries))
+            self.assertTrue(any(item["role"] == "corpus-tree" and item["kind"] == "tree" for item in entries))
+            for entry in entries:
+                self.assertFalse(pathlib.PurePosixPath(entry["path"]).is_absolute())
+                self.assertRegex(entry["sha256"], r"^[0-9a-f]{64}$")
+            self.assertNotIn("Copyrighted printed witness", json.dumps(first))
+
+            (intake / "new-artifact.txt").write_text("later input")
+            changed = SOURCE_RECONCILE.discovery_dependency_manifest(
+                intake_dir=intake,
+                intake_records=SOURCE_RECONCILE.intake_page_records(intake),
+                profile_path=profile,
+                inventory_path=inventory,
+                data_dir=SOURCE_RECONCILE.ROOT / "data",
+            )
+            tree_digest = lambda payload: next(
+                item["sha256"] for item in payload["entries"]
+                if item["role"] == "intake-tree"
+            )
+            self.assertNotEqual(tree_digest(first), tree_digest(changed))
+
+    def test_discovery_dependency_manifest_detects_profile_and_inventory_changes(self):
+        with tempfile.TemporaryDirectory(dir=SOURCE_RECONCILE.ROOT / "output") as repo_tmp:
+            intake = pathlib.Path(repo_tmp) / "intake"
+            intake.mkdir()
+            (intake / "manifest.json").write_text('{"pages":[]}')
+            repo_tmp = pathlib.Path(repo_tmp)
+            profile = repo_tmp / "profile.json"
+            inventory = repo_tmp / "inventory.json"
+            profile.write_text('{"version":1}')
+            inventory.write_text('{"rows":[]}')
+            def build():
+                return SOURCE_RECONCILE.discovery_dependency_manifest(
+                    intake_dir=intake, intake_records=[], profile_path=profile,
+                    inventory_path=inventory, data_dir=SOURCE_RECONCILE.ROOT / "data",
+                )
+            before = build()
+            profile.write_text('{"version":2}')
+            after_profile = build()
+            inventory.write_text('{"rows":[{"owner_id":"example"}]}')
+            after_inventory = build()
+            def digest(payload, role):
+                return next(item["sha256"] for item in payload["entries"] if item["role"] == role)
+            self.assertNotEqual(digest(before, "profile"), digest(after_profile, "profile"))
+            self.assertNotEqual(digest(after_profile, "resolution-inventory"), digest(after_inventory, "resolution-inventory"))
+
+    def test_discovery_dependency_manifest_rejects_outside_root_artifacts(self):
+        with tempfile.TemporaryDirectory(dir=SOURCE_RECONCILE.ROOT / "output") as tmp, tempfile.TemporaryDirectory() as foreign:
+            intake = pathlib.Path(tmp) / "intake"
+            intake.mkdir()
+            (intake / "manifest.json").write_text('{"pages":[]}')
+            foreign_profile = pathlib.Path(foreign) / "profile.json"
+            foreign_profile.write_text('{}')
+            with self.assertRaisesRegex(ValueError, "outside its allowed root"):
+                SOURCE_RECONCILE.discovery_dependency_manifest(
+                    intake_dir=intake, intake_records=[], profile_path=foreign_profile,
+                    inventory_path=None, data_dir=SOURCE_RECONCILE.ROOT / "data",
+                )
+            outside = pathlib.Path(foreign) / "witness.txt"
+            outside.write_text("outside")
+            with self.assertRaisesRegex(ValueError, "outside its allowed root"):
+                SOURCE_RECONCILE.declared_intake_artifact_paths(
+                    intake, [{"text_path": "../witness.txt"}]
+                )
+
+    def test_legacy_intake_dependency_manifest_is_deterministic(self):
+        with tempfile.TemporaryDirectory(dir=SOURCE_RECONCILE.ROOT / "output") as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            for number in (2, 1):
+                page = intake / "pages" / f"{number:04d}"
+                page.mkdir(parents=True)
+                (page / "page.json").write_text(json.dumps({
+                    "page": number, "source_sha256": "a" * 64,
+                    "raw_text_sha256": str(number) * 64,
+                }))
+            records = SOURCE_RECONCILE.intake_page_records(intake)
+            first = SOURCE_RECONCILE.discovery_dependency_manifest(
+                intake_dir=intake, intake_records=records, profile_path=None,
+                inventory_path=None, data_dir=SOURCE_RECONCILE.ROOT / "data",
+            )
+            second = SOURCE_RECONCILE.discovery_dependency_manifest(
+                intake_dir=intake, intake_records=list(reversed(records)), profile_path=None,
+                inventory_path=None, data_dir=SOURCE_RECONCILE.ROOT / "data",
+            )
+            self.assertEqual(first, second)
+            intake_paths = [
+                item["path"] for item in first["entries"]
+                if item["root"] == "intake" and item["kind"] == "file"
+            ]
+            self.assertEqual(intake_paths, ["pages/0001/page.json", "pages/0002/page.json"])
 
     def test_profile_page_alias_uses_python_capture_expansion(self):
         self.assertEqual(
