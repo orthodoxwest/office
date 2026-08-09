@@ -22,7 +22,14 @@ SAFE_VERDICTS = {
 RESULT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["verdict", "confidence", "rationale", "evidence"],
+    "required": [
+        "verdict",
+        "confidence",
+        "rationale",
+        "target_key",
+        "evidence",
+        "review_questions",
+    ],
     "properties": {
         "verdict": {"type": "string", "enum": sorted(SAFE_VERDICTS)},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},

@@ -1916,17 +1916,90 @@ def candidates_from_intake(
         # behavior.  Keep its supplied raw hash so pre-existing DI packets do
         # not need to be regenerated solely by this segmentation enhancement.
         if not slot_groups:
-            owner, owner_confidence = profile_match(text, profile.get("heading_aliases"))
-            if not owner:
-                owner, inferred = infer_owner(title or text.splitlines()[0], corpus, feast_names)
-                owner_confidence = owner_confidence or ("inferred" if owner else ("ambiguous" if inferred else ""))
+            owner = ""
+            owner_title = title
+            owner_hour = default_hour
+            owner_variant = str(record.get("variant", ""))
+            owner_confidence = ""
+            final_context = None
+            for _start, _end, members in heading_groups:
+                values = {str(member.mapping["owner"]) for member in members}
+                if len(values) != 1:
+                    final_context = ("", "", "", "", "ambiguous")
+                    continue
+                selected = max(
+                    members,
+                    key=lambda member: (
+                        member.end - member.start,
+                        -member.mapping["_profile_order"],
+                    ),
+                )
+                heading_hour, heading_variant, heading_confidence = mapping_context(
+                    selected.mapping, default_hour
+                )
+                heading_title = str(
+                    selected.mapping.get("title", "") or selected.text
+                ).strip()
+                final_context = (
+                    normalized_owner(next(iter(values))),
+                    heading_title,
+                    heading_hour,
+                    heading_variant,
+                    heading_confidence,
+                )
+
+            if len(heading_groups) == 1 and final_context is not None:
+                (
+                    owner,
+                    owner_title,
+                    owner_hour,
+                    owner_variant,
+                    owner_confidence,
+                ) = final_context
+            elif len(heading_groups) > 1:
+                # The whole page spans several offices and is not a safe
+                # single-owner witness. The final heading may still provide
+                # unambiguous carry-over context for the next page.
+                owner_confidence = "ambiguous"
+            else:
+                owner, _score = infer_owner(
+                    title or text.splitlines()[0], corpus, feast_names
+                )
+                owner_confidence = "inferred" if owner else ""
             slot = str(record.get("slot", "")).strip()
-            emit(record, page, text, 0, len(text), slot, "", owner, title, owner_confidence, default_hour, str(record.get("variant", "")), raw_witness)
-            # A page with an explicit ambiguous owner must terminate context.
-            if owner_confidence == "ambiguous":
+            emit(
+                record,
+                page,
+                text,
+                0,
+                len(text),
+                slot,
+                "",
+                owner,
+                owner_title,
+                owner_confidence,
+                owner_hour,
+                owner_variant,
+                raw_witness,
+            )
+            if final_context is not None:
+                (
+                    carried_owner,
+                    carried_title,
+                    carried_hour,
+                    carried_variant,
+                    carried_confidence,
+                ) = final_context
+            elif owner_confidence == "ambiguous":
                 carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
             elif owner:
-                carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = normalized_owner(owner), title, default_hour, str(record.get("variant", "")), owner_confidence
+                carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = (
+                    normalized_owner(owner),
+                    owner_title,
+                    owner_hour,
+                    owner_variant,
+                    owner_confidence,
+                )
             continue
 
         # Build a state timeline from heading events.  An ambiguous event
@@ -1996,13 +2069,14 @@ def load_resolution_inventory(path: pathlib.Path | None) -> list[dict]:
     return [item for item in payload if isinstance(item, dict)]
 
 
-def inventory_index(rows: list[dict]) -> dict[tuple[str, str], list[dict]]:
-    indexed: dict[tuple[str, str], list[dict]] = {}
+def inventory_index(rows: list[dict]) -> dict[tuple[str, str, str], list[dict]]:
+    indexed: dict[tuple[str, str, str], list[dict]] = {}
     for row in rows:
         owner = str(row.get("owner_id", row.get("owner", ""))).removeprefix("proper/")
+        hour = str(row.get("hour", ""))
         slot = str(row.get("slot_ref", row.get("slot", row.get("runtime_slot", ""))))
-        if owner and slot:
-            indexed.setdefault((owner, slot), []).append(row)
+        if owner and hour and slot:
+            indexed.setdefault((owner, hour, slot), []).append(row)
     return indexed
 
 
@@ -2050,7 +2124,7 @@ def classify_discovery(
             candidate.discovery_note = "slot is not a safe corpus section name"
             continue
         candidate.runtime_slot = slot
-        rows = indexed.get((owner, slot), [])
+        rows = indexed.get((owner, candidate.hour, slot), [])
         if not rows:
             candidate.discovery_classification = "known-owner-unobserved"
             candidate.discovery_note = "known calendar owner was not observed in the selected inventory span"

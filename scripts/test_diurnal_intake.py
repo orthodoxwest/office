@@ -198,8 +198,8 @@ class DiurnalIntakeTest(unittest.TestCase):
             with patch.object(intake, "cmd", side_effect=extract_command):
                 intake.extract(run)
             corpus = {"ordinary/lauds/collect": reconcile.CorpusEntry("ordinary/lauds/collect", "x", "collect", "Old fallback.")}
-            candidates = reconcile.candidates_from_intake(run, {"heading_aliases": [{"pattern": "Example Feast", "owner": "example-feast"}], "slot_aliases": [{"pattern": "Printed proper", "slot": "collect"}]}, corpus, {"example-feast": "Example Feast"})
-            reconcile.classify_discovery(candidates, corpus, {"example-feast": "Example Feast"}, [{"owner_id": "example-feast", "slot_ref": "collect", "selected_ref": "ordinary/lauds/collect", "selected_tier": "ordinary"}])
+            candidates = reconcile.candidates_from_intake(run, {"default_hour": "lauds", "heading_aliases": [{"pattern": "Example Feast", "owner": "example-feast"}], "slot_aliases": [{"pattern": "Printed proper", "slot": "collect"}]}, corpus, {"example-feast": "Example Feast"})
+            reconcile.classify_discovery(candidates, corpus, {"example-feast": "Example Feast"}, [{"owner_id": "example-feast", "hour": "lauds", "slot_ref": "collect", "selected_ref": "ordinary/lauds/collect", "selected_tier": "ordinary"}])
             self.assertEqual(candidates[0].discovery_classification, "missing-override")
             self.assertEqual(reconcile.intake_text(run, {"text_path": "../../outside.txt"}), "")
 
