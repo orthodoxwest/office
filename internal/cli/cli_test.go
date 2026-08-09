@@ -136,6 +136,12 @@ func TestReviewResolutionInventoryEmitsJSONSummaryAndFallbacks(t *testing.T) {
 	if !strings.Contains(out.String(), "resolution inventory:") {
 		t.Fatalf("summary = %q", out.String())
 	}
+	if !strings.Contains(out.String(), "common:") || !strings.Contains(out.String(), "ordinary:") {
+		t.Fatalf("summary omits populated fallback tiers: %q", out.String())
+	}
+	if strings.Contains(out.String(), "proper:") {
+		t.Fatalf("fallback-only summary includes direct propers: %q", out.String())
+	}
 }
 
 func TestValidatePassesOnRepositoryData(t *testing.T) {

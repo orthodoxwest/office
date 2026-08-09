@@ -1,6 +1,7 @@
 package office
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -1216,5 +1217,165 @@ func TestTraceProperResolutionClassifiesMissingSelection(t *testing.T) {
 	trace := traceProperResolution(day, "lauds", "collect", "collect", texts.NewTestCorpus(nil))
 	if trace.SelectedTier != "not-found" {
 		t.Fatalf("selected tier = %q, want not-found", trace.SelectedTier)
+	}
+}
+
+func TestProperResolutionCoordinates(t *testing.T) {
+	feast := &models.CalendarDay{Celebration: &models.Feast{Category: models.CategoryMartyr}}
+	feria := &models.CalendarDay{Celebration: &models.Feast{Category: models.CategoryFeria}}
+	noCelebration := &models.CalendarDay{}
+	tests := []struct {
+		name, hour, slot, selected, wantHour, wantSlot string
+		day                                            *models.CalendarDay
+	}{
+		{"terce collect", "terce", "collect", "collect", "lauds", "collect", nil},
+		{"sext collect", "sext", "collect", "collect", "lauds", "collect", nil},
+		{"none collect", "none", "collect", "collect", "lauds", "collect", nil},
+		{"minor non-collect", "terce", "chapter", "chapter", "terce", "chapter", nil},
+		{"festal prime missing selection", "prime", "psalm-antiphon-1", "psalm-antiphon-1", "lauds", "psalm-antiphon-1", feast},
+		{"nil day prime", "prime", "psalm-antiphon-1", "psalm-antiphon-1", "prime", "psalm-antiphon-1", nil},
+		{"nil celebration prime", "prime", "psalm-antiphon-1", "psalm-antiphon-1", "prime", "psalm-antiphon-1", noCelebration},
+		{"ferial prime", "prime", "psalm-antiphon-1", "psalm-antiphon-1", "prime", "psalm-antiphon-1", feria},
+		{"proper-selected prime", "prime", "psalm-antiphon-1", "proper/feast/psalm-antiphon-1", "lauds", "psalm-antiphon-1", feria},
+		{"common-selected prime", "prime", "psalm-antiphon-1", "commons/martyr/psalm-antiphon-1", "lauds", "psalm-antiphon-1", feria},
+		{"lauds-ordinary prime", "prime", "psalm-antiphon-1", "ordinary/lauds/psalm-antiphon-1-monday", "lauds", "psalm-antiphon-1", feria},
+		{"prime ordinary stays prime", "prime", "psalm-antiphon-1", "ordinary/prime/psalm-antiphon-1-monday", "prime", "psalm-antiphon-1", feria},
+		{"wrong prime slot", "prime", "collect", "proper/feast/collect", "prime", "collect", feast},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			hour, slot := properResolutionCoordinates(tt.day, tt.hour, tt.slot, tt.selected)
+			if hour != tt.wantHour || slot != tt.wantSlot {
+				t.Fatalf("coordinates = %s/%s, want %s/%s", hour, slot, tt.wantHour, tt.wantSlot)
+			}
+		})
+	}
+}
+
+func TestDirectProperCandidatesFirstVespersAndSeasons(t *testing.T) {
+	firstVespers := &models.CalendarDay{FirstVespers: true}
+	candidates := directProperCandidates(firstVespers, "vespers", "collect", []string{"feast"})
+	for _, want := range []string{
+		"proper/feast/collect-first-vespers",
+		"proper/feast/collect-first",
+		"proper/feast/collect-vespers",
+		"proper/feast/collect",
+	} {
+		if !slices.Contains(candidates, want) {
+			t.Fatalf("first-Vespers candidates omit %q: %#v", want, candidates)
+		}
+	}
+	if candidates[0] != "proper/feast/collect-first-vespers" {
+		t.Fatalf("first candidate = %q", candidates[0])
+	}
+
+	for name, day := range map[string]*models.CalendarDay{
+		"ordinary vespers": {},
+		"nil day":          nil,
+	} {
+		t.Run(name, func(t *testing.T) {
+			got := directProperCandidates(day, "vespers", "collect", []string{"feast"})
+			if slices.Contains(got, "proper/feast/collect-first-vespers") || slices.Contains(got, "proper/feast/collect-first") {
+				t.Fatalf("ordinary candidates contain first-Vespers keys: %#v", got)
+			}
+		})
+	}
+	alreadyFirst := directProperCandidates(firstVespers, "vespers", "collect-first", []string{"feast"})
+	for _, candidate := range alreadyFirst {
+		if strings.Contains(candidate, "first-first") {
+			t.Fatalf("already-first slot was duplicated: %#v", alreadyFirst)
+		}
+	}
+
+	easter := directProperCandidates(&models.CalendarDay{Season: models.Easter}, "lauds", "collect", []string{"feast", "feast"})
+	for _, want := range []string{
+		"proper/feast-paschal/collect-lauds-easter",
+		"proper/feast/collect-lauds-easter",
+		"proper/feast-paschal/collect-lauds",
+		"proper/feast/collect",
+	} {
+		if !slices.Contains(easter, want) {
+			t.Fatalf("Easter candidates omit %q: %#v", want, easter)
+		}
+	}
+	seen := make(map[string]bool)
+	for _, candidate := range easter {
+		if seen[candidate] {
+			t.Fatalf("duplicate candidate %q in %#v", candidate, easter)
+		}
+		seen[candidate] = true
+	}
+	ordinary := directProperCandidates(&models.CalendarDay{Season: models.Advent}, "lauds", "collect", []string{"feast"})
+	for _, candidate := range ordinary {
+		if strings.Contains(candidate, "-paschal/") {
+			t.Fatalf("non-Easter candidates contain paschal proper: %#v", ordinary)
+		}
+	}
+	seasonless := directProperCandidates(nil, "lauds", "collect", []string{"feast"})
+	for _, candidate := range seasonless {
+		if strings.HasSuffix(candidate, "-easter") || strings.HasSuffix(candidate, "-advent") {
+			t.Fatalf("nil day produced seasonal candidate: %#v", seasonless)
+		}
+	}
+}
+
+func TestProperResolutionTierMatrix(t *testing.T) {
+	temporal := &models.CalendarDay{TemporalWeekID: "advent-sunday-2"}
+	tests := []struct {
+		name, selected, want string
+		properIDs            []string
+		day                  *models.CalendarDay
+	}{
+		{"direct proper", "proper/feast/collect", "proper", []string{"feast"}, temporal},
+		{"direct paschal proper", "proper/feast-paschal/collect", "proper", []string{"feast"}, temporal},
+		{"temporal week", "proper/advent-sunday-2/collect", "temporal-week", nil, temporal},
+		{"nil-day temporal key", "proper/advent-sunday-2/collect", "proper-inherited", nil, nil},
+		{"empty temporal owner", "proper/advent-sunday-2/collect", "proper-inherited", nil, &models.CalendarDay{}},
+		{"different temporal owner", "proper/advent-sunday-3/collect", "proper-inherited", nil, temporal},
+		{"historia", "proper/historia-august-1/collect", "special", nil, temporal},
+		{"inherited proper", "proper/other/collect", "proper-inherited", nil, temporal},
+		{"common", "commons/martyr/collect", "common", nil, temporal},
+		{"seasonal", "seasonal/lent/collect", "seasonal", nil, temporal},
+		{"shared", "ordinary/shared/collect", "shared", nil, temporal},
+		{"weekday ordinary", "ordinary/lauds/collect-monday", "ordinary-weekday", nil, temporal},
+		{"ordinary", "ordinary/lauds/collect", "ordinary", nil, temporal},
+		{"missing", "collect", "not-found", nil, temporal},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := properResolutionTier(tt.selected, tt.properIDs, tt.day); got != tt.want {
+				t.Fatalf("tier = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestProperResolutionReasonMatrix(t *testing.T) {
+	temporal := &models.CalendarDay{TemporalWeekID: "advent-sunday-2"}
+	firstVespers := &models.CalendarDay{FirstVespers: true}
+	tests := []struct {
+		name, hour, selected, want string
+		day                        *models.CalendarDay
+	}{
+		{"greater antiphon", "lauds", "seasonal/advent/benedictus-antiphon-december-17", "greater-antiphon", nil},
+		{"advent without December date", "lauds", "seasonal/advent/collect", "normal", nil},
+		{"December outside Advent", "lauds", "proper/feast/collect-december-17", "normal", nil},
+		{"historia", "vespers", "proper/historia-august-1/magnificat-antiphon", "historia-first-vespers", nil},
+		{"temporal week", "lauds", "proper/advent-sunday-2/collect", "weekday-temporal", temporal},
+		{"nil-day temporal key", "lauds", "proper/advent-sunday-2/collect", "normal", nil},
+		{"empty temporal owner", "lauds", "proper/advent-sunday-2/collect", "normal", &models.CalendarDay{}},
+		{"different temporal owner", "lauds", "proper/advent-sunday-3/collect", "normal", temporal},
+		{"paschal proper", "lauds", "proper/feast-paschal/collect", "paschal-proper", nil},
+		{"first Vespers", "vespers", "commons/martyr/collect", "first-vespers", firstVespers},
+		{"wrong first-Vespers hour", "lauds", "commons/martyr/collect", "normal", firstVespers},
+		{"nil day Vespers", "vespers", "commons/martyr/collect", "normal", nil},
+		{"ordinary Vespers", "vespers", "commons/martyr/collect", "normal", &models.CalendarDay{}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := properResolutionReason(tt.day, tt.hour, "collect", tt.selected); got != tt.want {
+				t.Fatalf("reason = %q, want %q", got, tt.want)
+			}
+		})
 	}
 }

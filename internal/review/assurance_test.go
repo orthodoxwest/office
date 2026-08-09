@@ -67,6 +67,29 @@ func TestExplainCompositionIncludesDependenciesAndDecisions(t *testing.T) {
 	}
 }
 
+func TestShouldIncludeResolution(t *testing.T) {
+	tests := []struct {
+		name, source, tier string
+		want               bool
+	}{
+		{"proper", "proper/feast/collect", "proper", true},
+		{"common", "commons/martyr/collect", "common", true},
+		{"seasonal", "seasonal/lent/collect", "seasonal", true},
+		{"ordinary", "ordinary/lauds/collect", "ordinary", true},
+		{"missing bare slot", "collect", "not-found", true},
+		{"static source", "psalms/1", "not-found", true},
+		{"static resolved source", "psalms/1", "ordinary", false},
+		{"empty resolved source", "", "proper", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldIncludeResolution(tt.source, tt.tier); got != tt.want {
+				t.Fatalf("include = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestBuildReviewPlanReducesStructuralChecklist(t *testing.T) {
 	p, err := BuildReviewPlan("../../data", 2026, 1, false)
 	if err != nil {

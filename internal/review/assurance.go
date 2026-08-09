@@ -106,7 +106,7 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 				continue
 			}
 			trace := eng.TraceProperResolution(&days[idx], hourName, elem.SlotRef, elem.SourceRef)
-			if !isResolutionSource(elem.SourceRef) && trace.SelectedTier != "not-found" {
+			if !shouldIncludeResolution(elem.SourceRef, trace.SelectedTier) {
 				continue
 			}
 			a.Resolutions = append(a.Resolutions, ResolutionEvidence{
@@ -125,6 +125,10 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 func isResolutionSource(ref string) bool {
 	return strings.HasPrefix(ref, "proper/") || strings.HasPrefix(ref, "commons/") ||
 		strings.HasPrefix(ref, "seasonal/") || strings.HasPrefix(ref, "ordinary/")
+}
+
+func shouldIncludeResolution(sourceRef, selectedTier string) bool {
+	return isResolutionSource(sourceRef) || selectedTier == "not-found"
 }
 
 func hourDependencies(hour *models.OfficeHour) []string {
