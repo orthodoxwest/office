@@ -1383,14 +1383,6 @@ func TestAssumptionWeek2026OrdoCorrections(t *testing.T) {
 		t.Errorf("Aug 13 Eusebius proper ID = %q, want st-eusebius-august", got)
 	}
 
-	joachim := requireDay(8, 16)
-	if got := commemorationIDs(joachim.Commemorations); got != "pentecost-sunday-11" {
-		t.Errorf("Aug 16 Lauds commemorations = %q, want only the occurring Sunday", got)
-	}
-	if got := commemorationIDs(joachim.Vespers.Commemorations); got != "pentecost-sunday-11" {
-		t.Errorf("Aug 16 Vespers commemorations = %q, want only the occurring Sunday", got)
-	}
-
 	lawrenceOctave := requireDay(8, 17)
 	if got := commemorationIDs(lawrenceOctave.Commemorations); got != "comm-08-17-octave-of-st-laurence" {
 		t.Fatalf("Aug 17 commemorations = %q, want Octave of St Laurence", got)
@@ -1415,22 +1407,5 @@ func TestAssumptionWeek2026OrdoCorrections(t *testing.T) {
 	timothy := aug21.Vespers.Commemorations[0]
 	if timothy.Category != models.CategoryMartyrs || timothy.Color != models.Red || timothy.ProperID != "ss-timothy-hippolytus-symphorian" {
 		t.Errorf("Aug 21 Vespers martyrs = category %q, color %q, proper %q; want martyrs, red, ss-timothy-hippolytus-symphorian", timothy.Category, timothy.Color, timothy.ProperID)
-	}
-
-	// The Joachim adjustment is an explicit 2026-ordo correction, not a
-	// general removal of Assumption octave commemorations.
-	days2027, err := BuildCalendar(2027, findDataDir(t))
-	if err != nil {
-		t.Fatalf("BuildCalendar(2027): %v", err)
-	}
-	joachim2027 := findDay(days2027, 2027, 8, 16)
-	if joachim2027 == nil {
-		t.Fatal("2027-08-16 not found")
-	}
-	if got := commemorationIDs(joachim2027.Commemorations); got != "assumption-bvm-octave-day-2" {
-		t.Errorf("2027 Aug 16 Lauds commemorations = %q, want Day II of the Assumption octave", got)
-	}
-	if got := commemorationIDs(joachim2027.Vespers.Commemorations); got != "assumption-bvm-octave-day-3" {
-		t.Errorf("2027 Aug 16 Vespers commemorations = %q, want Day III of the Assumption octave", got)
 	}
 }

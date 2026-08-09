@@ -3,9 +3,9 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 211 |
-| Full structural-cover pages | 59 |
-| Residual structural-review pages | 59 |
+| Modeled structural features | 210 |
+| Full structural-cover pages | 58 |
+| Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 568 |
 | Rendered text entries needing review | 1360 |
@@ -40,7 +40,6 @@
 - `decision:commemoration:incoming-at-second-vespers=suppressed`
 - `decision:commemoration:incoming-at-unowned-vespers=included`
 - `decision:commemoration:incoming-feria-not-at-vespers-boundary=suppressed`
-- `decision:commemoration:joachim-assumption-octave=suppressed`
 - `decision:commemoration:matches-winner=suppressed`
 - `decision:commemoration:only-with=suppressed`
 - `decision:commemoration:outgoing-apostolic-companion=included`
