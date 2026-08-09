@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 223 (X Sunday after Pentecost)
-O God, who declarest thy almighty power most chiefly in showing mercy and pity; multiply upon us thy loving-kindness; that we, running toward thy promises, may by thee be made partakers of thy heavenly gifts.
+# SOURCE: diurnal pp435
+O God, who declarest thy almighty power most chiefly in showing mercy and pity; Mercifully grant unto us such a measure of thy grace, that we, running the way of thy commandments, may obtain thy gracious promises, and be made partakers of thy heavenly treasure.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Stans a longe)
