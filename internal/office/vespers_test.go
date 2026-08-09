@@ -678,6 +678,89 @@ func TestFollowingOfficeCommemorationUsesFirstVespersTexts(t *testing.T) {
 	}
 }
 
+func TestSaturdaySecondVespersSundayCommemorationUsesFirstVespersAntiphon(t *testing.T) {
+	tests := []struct {
+		name     string
+		date     time.Time
+		properID string
+		corpus   map[string]string
+		wantText string
+		wantRef  string
+	}{
+		{
+			name:     "August historia begins with the following Sunday",
+			date:     time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC),
+			properID: "pentecost-sunday-9",
+			corpus: map[string]string{
+				"proper/historia-august-1/magnificat-antiphon-first":  "Wisdom hath builded her house",
+				"proper/pentecost-sunday-9/magnificat-antiphon":       "Sunday II Vespers antiphon",
+				"proper/pentecost-sunday-9/magnificat-antiphon-first": "Sunday I Vespers antiphon",
+			},
+			wantText: "Wisdom hath builded her house",
+			wantRef:  "proper/historia-august-1/magnificat-antiphon-first",
+		},
+		{
+			name:     "August third historia at Assumption II Vespers",
+			date:     time.Date(2026, 8, 15, 0, 0, 0, 0, time.UTC),
+			properID: "pentecost-sunday-11",
+			corpus: map[string]string{
+				"proper/historia-august-3/magnificat-antiphon-first":   "All wisdom",
+				"proper/pentecost-sunday-11/magnificat-antiphon":       "He hath done all things well",
+				"proper/pentecost-sunday-11/magnificat-antiphon-first": "I beseech thee, O Lord",
+			},
+			wantText: "All wisdom",
+			wantRef:  "proper/historia-august-3/magnificat-antiphon-first",
+		},
+		{
+			name:     "August fourth historia at Assumption octave II Vespers",
+			date:     time.Date(2026, 8, 22, 0, 0, 0, 0, time.UTC),
+			properID: "pentecost-sunday-12",
+			corpus: map[string]string{
+				"proper/historia-august-4/magnificat-antiphon-first": "Wisdom crieth",
+				"proper/pentecost-sunday-12/magnificat-antiphon":     "A certain man went down",
+			},
+			wantText: "Wisdom crieth",
+			wantRef:  "proper/historia-august-4/magnificat-antiphon-first",
+		},
+		{
+			name:     "non historia Sunday uses its own first Vespers proper",
+			date:     time.Date(2026, 7, 18, 0, 0, 0, 0, time.UTC),
+			properID: "pentecost-sunday-7",
+			corpus: map[string]string{
+				"proper/pentecost-sunday-7/magnificat-antiphon":       "A good tree cannot bring forth evil fruit",
+				"proper/pentecost-sunday-7/magnificat-antiphon-first": "Zadok the priest",
+			},
+			wantText: "Zadok the priest",
+			wantRef:  "proper/pentecost-sunday-7/magnificat-antiphon-first",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			day := &models.CalendarDay{
+				Date:   tt.date,
+				Season: models.Pentecost,
+				Vespers: models.VespersDesignation{
+					Owner: models.VespersIIOfPreceding,
+				},
+				Commemorations: []*models.Feast{{
+					ID:       tt.properID,
+					ProperID: tt.properID,
+					Category: models.CategorySunday,
+				}},
+			}
+
+			elems := addCommemorations(day, "vespers", texts.NewTestCorpus(tt.corpus))
+			if len(elems) < 2 {
+				t.Fatalf("commemoration elements = %#v, want antiphon", elems)
+			}
+			if got := elems[1]; got.Text != tt.wantText || got.SourceRef != tt.wantRef {
+				t.Fatalf("antiphon = %q (%s), want %q (%s)", got.Text, got.SourceRef, tt.wantText, tt.wantRef)
+			}
+		})
+	}
+}
+
 func TestParsePsalmodyDeclarationRejectsMalformedData(t *testing.T) {
 	tests := []string{
 		"",

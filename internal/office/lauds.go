@@ -3,6 +3,7 @@ package office
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -36,6 +37,9 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		lookup := func(ref string) (string, string) {
 			if isSynthesizedFeria(comm) {
 				return lookupFeriaCommemoration(day, comm, hourName, ref, corpus)
+			}
+			if isSaturdaySecondVespersSundayCommemoration(day, comm, hourName, ref) {
+				return lookupSundayFirstVespersCommemoration(day, comm, corpus)
 			}
 			if hourName == "vespers" && comm.ID == day.FollowingOfficeCommemorationID {
 				return lookupFollowingOfficeCommemoration(comm, day.Season, ref, corpus)
@@ -91,6 +95,36 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		})
 	}
 	return elems
+}
+
+// isSaturdaySecondVespersSundayCommemoration identifies a Sunday which is
+// commemorated while a Saturday feast retains II Vespers. Although that Sunday
+// does not own the office, its commemoration begins with its I-Vespers
+// Magnificat antiphon (XIV.14). In the historia months this is selected by the
+// Sunday beginning that evening, rather than by the Saturday feast's ordinary
+// or the Sunday's II-Vespers gospel antiphon.
+func isSaturdaySecondVespersSundayCommemoration(day *models.CalendarDay, feast *models.Feast, hourName, ref string) bool {
+	return day != nil &&
+		hourName == "vespers" &&
+		ref == "commemoration-antiphon" &&
+		day.Date.Weekday() == time.Saturday &&
+		day.Vespers.Owner == models.VespersIIOfPreceding &&
+		feast != nil && feast.Category == models.CategorySunday
+}
+
+// lookupSundayFirstVespersCommemoration supplies the Antiphon for a Sunday
+// commemorated at Saturday II Vespers. The Sunday is liturgically beginning,
+// so use its Saturday/I-Vespers antiphon: the month historia where it applies,
+// then the Sunday's own -first proper. This mirrors resolveProperText's
+// Saturday I-Vespers path without changing the feast that owns the office.
+func lookupSundayFirstVespersCommemoration(day *models.CalendarDay, feast *models.Feast, corpus *texts.TextCorpus) (string, string) {
+	if id := calendar.HistoriaWeekID(day.Date.AddDate(0, 0, 1)); id != "" {
+		key := "proper/historia-" + id + "/magnificat-antiphon-first"
+		if text := corpus.Get(key); text != "" {
+			return text, key
+		}
+	}
+	return lookupCommemoration(feast, day.Season, "vespers", "magnificat-antiphon-first", corpus)
 }
 
 // lookupFollowingOfficeCommemoration resolves a following celebration

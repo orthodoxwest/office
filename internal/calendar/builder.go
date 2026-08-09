@@ -820,6 +820,31 @@ func saturdayOfficeBVMFeast(date time.Time, season models.Season) *models.Feast 
 	}
 }
 
+// apply2026AssumptionWeekOrdoAdjustments records a particular current-ordo
+// occurrence. On Aug. 16, the printed 2026 ordo gives St Joachim only the
+// occurring Sunday at Lauds, not Day II of the Assumption octave. This must
+// not become a general Assumption-octave suppression in later calendar years.
+func apply2026AssumptionWeekOrdoAdjustments(day *models.CalendarDay) {
+	if day == nil || day.Date.Year() != 2026 || day.Date.Month() != time.August || day.Date.Day() != 16 ||
+		day.Celebration == nil || day.Celebration.ID != "st-joachim" {
+		return
+	}
+
+	comms := make([]*models.Feast, 0, len(day.Commemorations))
+	for _, comm := range day.Commemorations {
+		if comm != nil && comm.ID == "assumption-bvm-octave-day-2" {
+			day.OccurrenceDecisions = append(day.OccurrenceDecisions, models.CompositionDecision{
+				Rule:    "commemoration:joachim-assumption-octave",
+				Outcome: "suppressed",
+				Detail:  comm.ID,
+			})
+			continue
+		}
+		comms = append(comms, comm)
+	}
+	day.Commemorations = comms
+}
+
 // BuildCalendar builds the complete liturgical calendar for a year. Adjacent
 // years are computed as padding so occurrence transfers can cross Jan 1 and
 // Dec 31 Vespers can resolve against the fully modeled following day. Only the
@@ -952,6 +977,7 @@ func buildCalendarYear(year int, feasts []*models.Feast, penitentialRules []peni
 		calDay, transfersOut := ResolveDay(current, dayCandidates, season, seasonColor, moveable, transferredIn)
 		pendingTransfers = append(pendingTransfers, transfersOut...)
 		calDay.TemporalWeekID = weekID
+		apply2026AssumptionWeekOrdoAdjustments(calDay)
 
 		if calDay.Celebration == nil {
 			calDay.Tempora = lentenFeriaName(current, moveable.Easter, season)

@@ -471,6 +471,12 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	if loser != nil {
 		if sameOctave {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: loser.ID})
+		} else if secondVespers && preceding != nil && preceding.Date.Year() == 2026 &&
+			winner != nil && winner.ID == "st-joachim" &&
+			loser.ID == "assumption-bvm-octave-day-3" {
+			// The 2026 ordo keeps St Joachim's II Vespers with the Sunday
+			// alone, not Day III of the coincident Assumption octave.
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:joachim-assumption-octave", Outcome: "suppressed", Detail: loser.ID})
 		} else if !secondVespers {
 			if included, rule := outgoingCommemoratedAtFirstVespers(winner, loser); included {
 				comms = append(comms, loser)

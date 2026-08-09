@@ -1386,7 +1386,7 @@ func TestParishLaudsProperCorpusRegression(t *testing.T) {
 		t.Fatalf("LoadTexts: %v", err)
 	}
 
-	resolve := func(t *testing.T, feastID, slot, wantKey, wantText string) {
+	resolve := func(t *testing.T, feastID, slot, wantKey, wantText string, exact bool) {
 		t.Helper()
 		day := &models.CalendarDay{
 			Date:        time.Date(2026, time.July, 11, 0, 0, 0, 0, time.UTC),
@@ -1396,30 +1396,37 @@ func TestParishLaudsProperCorpusRegression(t *testing.T) {
 		if key != wantKey {
 			t.Fatalf("%s %s key = %q, want %q", feastID, slot, key, wantKey)
 		}
-		if !strings.Contains(got, wantText) {
+		if exact && got != wantText {
+			t.Fatalf("%s %s text = %q, want %q", feastID, slot, got, wantText)
+		}
+		if !exact && !strings.Contains(got, wantText) {
 			t.Fatalf("%s %s text = %q, want identifying text %q", feastID, slot, got, wantText)
 		}
 	}
 
 	for _, test := range []struct {
 		feastID, slot, key, text string
+		exact                    bool
 	}{
-		{"st-benedict", "chapter", "proper/st-benedict/chapter-lauds", "Behold a great Confessor"},
-		{"st-benedict", "hymn", "proper/st-benedict/hymn-lauds", "Laudibus cives resonent canoris"},
-		{"st-benedict", "benedictus-antiphon", "proper/st-benedict/benedictus-antiphon", "thou father and guide of monks"},
-		{"st-benedict", "collect", "proper/st-benedict/collect", "venerable Confessor Benedict"},
-		{"assumption-bvm", "chapter", "proper/assumption-bvm/chapter-lauds", "In all things I sought rest"},
-		{"assumption-bvm", "hymn", "proper/assumption-bvm/hymn-lauds", "O glorious Lady"},
-		{"assumption-bvm", "benedictus-antiphon", "proper/assumption-bvm/benedictus-antiphon", "Who is she"},
-		{"assumption-bvm", "collect", "proper/assumption-bvm/collect", "Forgive, we beseech thee"},
-		{"st-joseph", "hymn", "proper/st-joseph/hymn-lauds", "He, whom the faithful"},
-		{"st-joseph", "short-responsory", "proper/st-joseph/short-responsory-lauds", "He made him * lord of His house"},
-		{"st-joseph", "versicle", "proper/st-joseph/versicle-lauds", "mouth of the righteous"},
-		{"st-joseph", "collect", "proper/st-joseph/collect", "for the worth of him"},
-		{"nativity-john-baptist", "short-responsory", "proper/nativity-john-baptist/short-responsory-lauds", "There was a man"},
+		{"st-benedict", "chapter", "proper/st-benedict/chapter-lauds", "Behold a great Confessor", false},
+		{"st-benedict", "hymn", "proper/st-benedict/hymn-lauds", "Laudibus cives resonent canoris", false},
+		{"st-benedict", "benedictus-antiphon", "proper/st-benedict/benedictus-antiphon", "thou father and guide of monks", false},
+		{"st-benedict", "collect", "proper/st-benedict/collect", "venerable Confessor Benedict", false},
+		{"assumption-bvm", "chapter", "proper/assumption-bvm/chapter-lauds", "In all things I sought rest", false},
+		{"assumption-bvm", "hymn", "proper/assumption-bvm/hymn-lauds", "O glorious Lady", false},
+		{"assumption-bvm", "benedictus-antiphon", "proper/assumption-bvm/benedictus-antiphon", "Who is she", false},
+		{"assumption-bvm", "collect", "proper/assumption-bvm/collect", "Forgive, we beseech thee", false},
+		{"assumption-bvm", "psalm-antiphon-3", "proper/assumption-bvm/psalm-antiphon-3", "We will run after thee, * because of the savour of thine ointments: exceedingly do the virgins love thee.", true},
+		{"assumption-bvm", "psalm-antiphon-4", "proper/assumption-bvm/psalm-antiphon-4", "Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.", true},
+		{"assumption-bvm", "psalm-antiphon-5", "proper/assumption-bvm/psalm-antiphon-5", "Thou art fair and comely, O daughter of Jerusalem: * thou art terrible as an army with banners.", true},
+		{"st-joseph", "hymn", "proper/st-joseph/hymn-lauds", "He, whom the faithful", false},
+		{"st-joseph", "short-responsory", "proper/st-joseph/short-responsory-lauds", "He made him * lord of His house", false},
+		{"st-joseph", "versicle", "proper/st-joseph/versicle-lauds", "mouth of the righteous", false},
+		{"st-joseph", "collect", "proper/st-joseph/collect", "for the worth of him", false},
+		{"nativity-john-baptist", "short-responsory", "proper/nativity-john-baptist/short-responsory-lauds", "There was a man", false},
 	} {
 		t.Run(test.feastID+"/"+test.slot, func(t *testing.T) {
-			resolve(t, test.feastID, test.slot, test.key, test.text)
+			resolve(t, test.feastID, test.slot, test.key, test.text, test.exact)
 		})
 	}
 }

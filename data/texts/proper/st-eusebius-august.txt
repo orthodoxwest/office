@@ -1,0 +1,5 @@
+# Proper commemoration routing for St Eusebius, Priest & Confessor (Aug. 14).
+# SOURCE: 2026 archdiocesan ordo, p. 88 (Aug. 13 Vespers)
+
+[commemoration-antiphon-vespers]
+@use commons/confessor/magnificat-antiphon-first

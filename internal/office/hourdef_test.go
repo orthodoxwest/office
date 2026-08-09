@@ -863,7 +863,6 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 
 	for _, sectionName := range []string{
 		"Psalmody-Sunday",
-		"Psalmody-Festal",
 		"Psalmody-Monday",
 		"Psalmody-Tuesday",
 		"Psalmody-Wednesday",
@@ -889,6 +888,55 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 		}
 		if section.Elements[2].Type != "proper-antiphon" || section.Elements[2].Ref != "psalm-antiphon-1" {
 			t.Fatalf("%s third element = %+v, want first indexed antiphon after Psalm 67", sectionName, section.Elements[2])
+		}
+	}
+}
+
+func TestLaudsFestalPsalmodyStartsWithFirstAntiphon(t *testing.T) {
+	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
+	sections, err := ParseHourDefinition(path)
+	if err != nil {
+		t.Fatalf("ParseHourDefinition(lauds.txt): %v", err)
+	}
+
+	var festal *HourSection
+	for i := range sections {
+		if sections[i].Name == "Psalmody-Festal" {
+			festal = &sections[i]
+			break
+		}
+	}
+	if festal == nil {
+		t.Fatal("missing Psalmody-Festal section")
+	}
+
+	want := []HourElement{
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
+		{Type: "psalm", Ref: "psalms/093"},
+		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
+		{Type: "psalm", Ref: "psalms/100"},
+		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-2"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
+		{Type: "psalm", Ref: "psalms/063"},
+		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-3"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
+		{Type: "canticle", Ref: "canticles/benedicite"},
+		{Type: "proper-antiphon", Ref: "psalm-antiphon-4"},
+	}
+
+	if len(festal.Elements) != len(want) {
+		t.Fatalf("Psalmody-Festal elements = %d, want %d", len(festal.Elements), len(want))
+	}
+	for i, wantElem := range want {
+		if festal.Elements[i] != wantElem {
+			t.Fatalf("Psalmody-Festal[%d] = %+v, want %+v", i, festal.Elements[i], wantElem)
+		}
+		if festal.Elements[i].Ref == "psalms/067" {
+			t.Fatalf("Psalmody-Festal[%d] unexpectedly includes Psalm 67", i)
 		}
 	}
 }

@@ -1,0 +1,8 @@
+# Proper commemoration routing for St Agapitus, Martyr.
+# SOURCE: 2026 archdiocesan ordo, Aug. 17-18
+
+[commemoration-antiphon-lauds]
+@use commons/martyrs/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+@use commons/martyr/magnificat-antiphon-first

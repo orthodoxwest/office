@@ -42,7 +42,8 @@ On the iron grate, * O God, I denied thee not; and when fire was kindled beneath
 Blessed Laurence * when laid and burning on the iron grating spake to the impious tyrant, saying: The feast is ready, turn and eat; but the Church's treasures, which thou claimest, have been garnered up in heaven, by the hands of the poor and needy.
 
 [commemoration-antiphon]
-@use proper/st-lawrence/psalm-antiphon-1
+# The 2026 ordo directs the proper Benedictus antiphon when Laurence is commemorated.
+@use proper/st-lawrence/benedictus-antiphon
 
 [commemoration-versicle]
 @use proper/st-lawrence/versicle-lauds
