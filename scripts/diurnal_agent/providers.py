@@ -31,6 +31,7 @@ def argv(provider: str, policy: dict[str, Any], repo: Path, schema_file: Path, p
         return [
             "codex", "exec", "--ephemeral", "--json", "--output-schema", str(schema_file),
             "--color", "never", "--sandbox", "read-only", "-C", str(repo),
+            "-c", f'model_reasoning_effort="{settings["reasoning_effort"]}"',
             "-m", settings["model"], prompt,
         ]
     if provider == "grok":

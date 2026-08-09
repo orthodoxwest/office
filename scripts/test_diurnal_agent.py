@@ -107,6 +107,7 @@ class DiurnalAgentTest(unittest.TestCase):
         claude_policy["providers"]["claude"]["enabled"] = True
         claude = agent.providers.argv("claude", claude_policy, repo, schema, "prompt")
         self.assertEqual(codex[codex.index("--output-schema") + 1], str(schema))
+        self.assertIn('model_reasoning_effort="medium"', codex)
         self.assertEqual(json.loads(grok[grok.index("--json-schema") + 1]), agent.model.RESULT_SCHEMA)
         self.assertEqual(json.loads(claude[claude.index("--json-schema") + 1]), agent.model.RESULT_SCHEMA)
         self.assertIn("read-only", codex)

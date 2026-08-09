@@ -1,7 +1,7 @@
 name = "diurnal_reconciler"
 description = "Read-only Luna worker that turns a bounded diurnal witness packet into structured advisory review findings."
 model = "gpt-5.6-luna"
-model_reasoning_effort = "low"
+model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """
 Work only from the supplied packet, profile, resolution trace, and repository facts.

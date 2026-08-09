@@ -102,6 +102,10 @@ def load_policy(path: Path) -> dict[str, Any]:
             raise ValueError(f"{name}: enabled must be boolean")
         if not isinstance(settings.get("model"), str) or not settings["model"].strip():
             raise ValueError(f"{name}: model must be a non-empty string")
+        if name == "codex" and settings.get("reasoning_effort") not in {
+            "low", "medium", "high", "xhigh", "max", "ultra"
+        }:
+            raise ValueError("codex: reasoning_effort must be a supported level")
     for name, provider in policy["routing"].items():
         if name not in {"primary", "ambiguous_replica", "adjudicator"} or provider not in known:
             raise ValueError("policy routing contains an unknown role or provider")

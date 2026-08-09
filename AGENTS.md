@@ -24,7 +24,7 @@ reviewed it against the printed page.
 
 ## Agent roles and provider context
 
-- Use the project `diurnal_reconciler` role (Luna, low reasoning) for bounded,
+- Use the project `diurnal_reconciler` role (Luna, medium reasoning) for bounded,
   repeatable packet classification. Its output is advisory JSON, never a patch.
 - Use Grok for inexpensive independent replicas only where ambiguity warrants
   comparison. Invoke its authenticated `grok` CLI in the host context; do not
