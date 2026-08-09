@@ -535,7 +535,7 @@ MARCH
                Com. Friday after Lent III ("Sir, I perceive")
  21  Sat  L§ St. Benedict                               [2cl] w
            Saturday after Lent III (f2)
-           Lauds   w · Ben. Benedict, the man of God · No Preces · No Suff.
+           Lauds   w · Ben. Benedict · No Preces · No Suff.
                Com. Saturday after Lent III ("Jesus stooped down")
            Hours   No Preces
            Vespers w · II prec. · Mag. Today holy Benedict · No Suff.
@@ -1482,7 +1482,7 @@ AUGUST
            Hours   Preces
            Vespers w · I fol. (Assumption of the Blessed Virgin Mary) · Mag. O most prudent Virgin · No Suff.
  15  Sat     ASSUMPTION OF THE BLESSED VIRGIN MARY      [1cl] w
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. On this day · No Suff.
                Com. St Joachim, Father of the B.V.M ("Let us praise a man famous")
@@ -1499,7 +1499,7 @@ AUGUST
                Com. XI Sunday after Pentecost ("He hath done all things well")
  17  Mon     Day III within the Octave of the Assumption [sd]  w
            Octave of St Laurence (com)
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
                Com. Octave of St Laurence ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · Mag. On this day · No Suff.
@@ -1508,28 +1508,28 @@ AUGUST
  18  Tue     Day IV within the Octave of the Assumption [sd]  w
            St Agapitus, Martyr (com)
            St Helen, Empress (com)
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
                Com. St Agapitus, Martyr ("He that hateth his life")
                Com. St Helen, Empress ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · Mag. On this day · No Suff.
  19  Wed     Day V within the Octave of the Assumption  [sd]  w
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
            Hours   No Preces
            Vespers w · Mag. On this day · No Suff.
  20  Thu     Day VI within the Octave of the Assumption [sd]  w
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
            Hours   No Preces
            Vespers w · Mag. On this day · No Suff.
  21  Fri  L  Day VII within the Octave of the Assumption [sd]  w
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Octave Day of the Assumption) · Mag. O most prudent Virgin · No Suff.
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("The Lord loved him")
  22  Sat     Octave Day of the Assumption               [gd]  w
            Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
            Vigil of St. Bartholomew (s)
-           Lauds   w · Ben. Sing to the Lord · No Preces · No Suff.
+           Lauds   w · Ben. Who is she · No Preces · No Suff.
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("Well done")
                Com. Vigil of St. Bartholomew ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces

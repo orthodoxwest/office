@@ -1379,3 +1379,47 @@ func TestProperResolutionReasonMatrix(t *testing.T) {
 		})
 	}
 }
+
+func TestParishLaudsProperCorpusRegression(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+
+	resolve := func(t *testing.T, feastID, slot, wantKey, wantText string) {
+		t.Helper()
+		day := &models.CalendarDay{
+			Date:        time.Date(2026, time.July, 11, 0, 0, 0, 0, time.UTC),
+			Celebration: &models.Feast{ID: feastID},
+		}
+		got, key := resolveProperText(day, "lauds", slot, corpus)
+		if key != wantKey {
+			t.Fatalf("%s %s key = %q, want %q", feastID, slot, key, wantKey)
+		}
+		if !strings.Contains(got, wantText) {
+			t.Fatalf("%s %s text = %q, want identifying text %q", feastID, slot, got, wantText)
+		}
+	}
+
+	for _, test := range []struct {
+		feastID, slot, key, text string
+	}{
+		{"st-benedict", "chapter", "proper/st-benedict/chapter-lauds", "Behold a great Confessor"},
+		{"st-benedict", "hymn", "proper/st-benedict/hymn-lauds", "Laudibus cives resonent canoris"},
+		{"st-benedict", "benedictus-antiphon", "proper/st-benedict/benedictus-antiphon", "thou father and guide of monks"},
+		{"st-benedict", "collect", "proper/st-benedict/collect", "venerable Confessor Benedict"},
+		{"assumption-bvm", "chapter", "proper/assumption-bvm/chapter-lauds", "In all things I sought rest"},
+		{"assumption-bvm", "hymn", "proper/assumption-bvm/hymn-lauds", "O glorious Lady"},
+		{"assumption-bvm", "benedictus-antiphon", "proper/assumption-bvm/benedictus-antiphon", "Who is she"},
+		{"assumption-bvm", "collect", "proper/assumption-bvm/collect", "Forgive, we beseech thee"},
+		{"st-joseph", "hymn", "proper/st-joseph/hymn-lauds", "He, whom the faithful"},
+		{"st-joseph", "short-responsory", "proper/st-joseph/short-responsory-lauds", "He made him * lord of His house"},
+		{"st-joseph", "versicle", "proper/st-joseph/versicle-lauds", "mouth of the righteous"},
+		{"st-joseph", "collect", "proper/st-joseph/collect", "for the worth of him"},
+		{"nativity-john-baptist", "short-responsory", "proper/nativity-john-baptist/short-responsory-lauds", "There was a man"},
+	} {
+		t.Run(test.feastID+"/"+test.slot, func(t *testing.T) {
+			resolve(t, test.feastID, test.slot, test.key, test.text)
+		})
+	}
+}

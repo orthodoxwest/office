@@ -1,6 +1,6 @@
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 432 (St. Benedict; Vir Dei Benedictus)
-Benedict, the man of God, * was filled with the spirit of all the righteous: may he intercede for the whole conventual profession.
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 81 (St. Benedict; Sanctissime Confessor)
+Benedict, * thou father and guide of monks, thou most holy Confessor of the Lord, intercede for us all and for our salvation.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 351 (St. Benedict, I Vespers; Exsultet omnium)
@@ -10,9 +10,10 @@ Let all the multitude * of the faithful exult in the glory of the gracious Fathe
 # SOURCE: draft archdiocesan Vespers book, p. 351 (St. Benedict, II Vespers; Hodie sanctus Benedictus)
 Today holy Benedict, * while his disciples beheld it, ascended by way of the East on a straight pathway to heaven: today with hands uplifted he died between the words of his supplication: today he was received into glory by the Angels.
 
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 82 (St. Benedict, Collect)
+Almighty and everlasting God, who as on this day didst release thy most venerable Confessor Benedict from the prison-house of the flesh, that thou mightiest lift him up to heaven: we beseech thee, grant unto us thy servants who keep this festival the pardon of all our sins; that we, who with glad hearts rejoice in his glory, may at his intercession with thee be made partakers of his everlasting reward.
+
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
@@ -40,15 +41,46 @@ Today holy Benedict, * while his disciples beheld it, ascended by way of the Eas
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
+[chapter-lauds]
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 78 (St. Benedict, Chapter; printed Eph. 2:19-20 citation is erroneous; text is Sir 50:6-7)
+!Sir 50:6-7
+Behold a great Confessor, who was as the morning star in the midst of a cloud, and as the moon at the full: as the sun shining upon the temple of the Most High.
+R. Thanks be to God.
+
 # [chapter-vespers]
 # Chapter at Vespers (often @use of chapter-lauds).
 #
-# [hymn-lauds]
-# Hymn at Lauds. First line may be a Latin incipit title.
-#
+[hymn-lauds]
+# SOURCE: parish Sanctoral Lauds booklet, PDF pp. 80-81 (St. Benedict; Laudibus cives resonent canoris)
+Laudibus cives resonent canoris
+
+Gem of the highest, diadem immortal,
+Cherished for ever after sacred struggle,
+Thou, among many, first in lofty merit,
+Benedict, shinest.
+
+Thee in thy boyhood holy eld adorned;
+Surely of nothing hath desire despoiled thee;
+Earth's blossom whithered, to thy heart uplifted
+Unto the highest.
+
+Fleeing in secret, thou didst leave thy native
+Country and parents: then, a forest dweller,
+Into subjection unto Christ, by torment
+Broughtest thy body.
+
+Not long securely couldst thou be hidden,
+Good deeds and wonders brought thee to men's knowledge;
+Through the world widely spread the happy rumour,
+Speedily flying.
+
+Praise to the Father, to the Sole-begotten,
+And to thee, alway with the Twain co-equal,
+Fostering Spirit; one and only Godhead
+Through all the ages.
+
+Amen.
+
 # [hymn-vespers]
 # Hymn at Vespers.
 #

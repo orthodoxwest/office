@@ -36,7 +36,8 @@ And Jacob begat Joseph * the husband of Mary, of whom was born Jesus, Who is cal
 @use proper/st-joseph/versicle-vespers
 
 [collect]
-Help us, we beseech thee, O Lord, for the sake of the Husband of thy most holy Mother, that what we cannot for ourselves obtain, Thou mayest grant us at his petition.
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 71 (St. Joseph)
+Help us, we beseech thee, O Lord, for the worth of him who espoused thy most holy Mother: that those good things which we cannot obtain by our own power may be given us at his petition.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 417
@@ -51,35 +52,36 @@ Beloved of God, and men: whose memory is in benediction. He sanctified him in hi
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/03-19 [Hymnus Laudes] — check against diurnal
-Iste, quem laeti colimus, fideles
+# SOURCE: parish Sanctoral Lauds booklet, PDF pp. 69–70 (St. Joseph; Iste quem laeti)
+Iste quem laeti
 
-Worshipped throughout the Church to earth's far ends
-With prayer and solemn rite,
-Joseph this day triumphantly ascends
-Into the realms of light.
+He, whom the faithful joyously do honour,
+Singing his praises with devout affection,
+Won on this feast day, in eternal glory
+Life everlasting.
 
-O blest beyond the lot of mortal men!
-O'er whose last dying sigh
-Christ and the Virgin-Mother watched serene,
-Soothing his agony.
+Blest beyond others, and exceeding blissful,
+For, when the moment of his death was nearing,
+Jesus and Mary at his side were standing,
+Soothing his spirit.
 
-Loosed from his fleshly chain, gently he fleets,
-As in calm sleep, away;
-And diademed with light, enters the seats
-Of everlasting day.
+Death doth he conquer, laying down his burden,
+Calmly he slumbers, rest he gains eternal;
+Lo, round his forehead, bright with rays of splendour,
+Shineth a garland.
 
-There throned in power, let us his loving aid
-With fervent prayers implore;
-So may he gain us pardon in our need,
-And peace forevermore.
+Then as he reigneth, earnestly beseech we
+That he may utter fervent intercessions,
+Praying that pardon and the peace of heaven
+May be our portion.
 
-Glory and praise to thee, blest Trinity!
-One only God and Lord,
-Who to thy faithful ones unfailingly
-Their aureoles dost award.
+Glory we give thee, hymns of praise and blessing,
+One in Three Persons, who above art reigning,
+God, who hast honoured, with thy crown for ever
+This thy true servant.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: office-hymns.zip (O Joseph Heav_nly Host, St. Joseph Vespers.docx); draft archdiocesan Vespers book, pp. 325–326, 334–335
 Te, Joseph, celebrent
@@ -115,6 +117,11 @@ Amen.
 V. He made him lord of His house.
 R. And ruler of all His substance.
 
+[versicle-lauds]
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 70 (St. Joseph; ordinary form only; printed Paschaltide form deferred)
+V. The mouth of the righteous is exercised in wisdom.
+R. And his tongue will be talking of judgment.
+
 [short-responsory-first-vespers]
 @use proper/st-joseph/short-responsory-vespers
 
@@ -127,13 +134,16 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I called upon the Lord, * the Father of my Lord.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Tertia] — check against diurnal
+# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Tertia]; parish Sanctoral Lauds booklet, PDF p. 68 (ordinary form identical at Lauds; printed Paschaltide form deferred)
 R. He made him * lord of His house.
 R. He made him * lord of His house.
 V. And ruler of all His substance.
 R. Lord of His house.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. He made him * lord of His house.
+
+[short-responsory-lauds]
+@use proper/st-joseph/short-responsory-terce
 
 [short-responsory-sext]
 # SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Sexta] — check against diurnal
