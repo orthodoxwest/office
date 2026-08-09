@@ -3,15 +3,15 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 209 |
+| Modeled structural features | 210 |
 | Full structural-cover pages | 58 |
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 568 |
-| Rendered text entries needing review | 1361 |
+| Rendered text entries needing review | 1360 |
 | Rendered text entries with unknown source | 231 |
-| Classified zero-occurrence entries | 69 |
-| Zeroes needing classification | 25 |
+| Classified zero-occurrence entries | 71 |
+| Zeroes needing classification | 24 |
 | Stale zero-occurrence classifications | 8 |
 | Stale attestations | 5 |
 
@@ -167,6 +167,7 @@
 - `resolution:collect=ordinary`
 - `resolution:collect=proper`
 - `resolution:commemoration-antiphon=commons`
+- `resolution:commemoration-antiphon=magnificat-antiphon-first`
 - `resolution:commemoration-antiphon=ordinary`
 - `resolution:commemoration-antiphon=proper`
 - `resolution:commemoration-collect=commons`

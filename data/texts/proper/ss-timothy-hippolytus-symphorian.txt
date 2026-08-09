@@ -1,0 +1,8 @@
+# Proper commemoration routing for Ss. Timothy (Bishop), Hippolytus, and Symphorian.
+# SOURCE: 2026 archdiocesan ordo, Aug. 21-22
+
+[commemoration-antiphon-lauds]
+@use commons/martyrs/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+@use commons/martyrs/commemoration-antiphon

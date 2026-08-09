@@ -10,16 +10,16 @@ Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lo
 The Virgin Mary * is taken up into heavenly chambers, wherein the King of kings sitteth upon a starry throne.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-We run after thee, on the scent of thy perfumes * the virgins love thee heartily.
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 173 (The Assumption of the B.V.M.; In odorem)
+We will run after thee, * because of the savour of thine ointments: exceedingly do the virgins love thee.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Blessed of the Lord art thou, O daughter, * for by thee we have been given to eat of the fruit (of the tree) of Life.
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 174 (The Assumption of the B.V.M.; Benedicta filia)
+Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/08-15 [Ant Vespera] — check against diurnal
-Fair and comely art thou, O daughter of Jerusalem, * terrible as a fenced camp set in battle array.
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 175 (The Assumption of the B.V.M.; Pulchra es)
+Thou art fair and comely, O daughter of Jerusalem: * thou art terrible as an army with banners.
 
 [benedictus-antiphon]
 # SOURCE: parish Sanctoral Lauds booklet, PDF p. 178 (The Assumption of the B.V.M.; Quae est ista)
@@ -102,6 +102,7 @@ Three in One confess thee.
 
 Amen.
 [versicle-lauds]
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 178 (The Assumption of the B.V.M.)
 # SOURCE: draft archdiocesan Lauds book, p. 528 (The Assumption of the B.V.M.)
 V. The holy Mother of God is exalted.
 R. Above choirs of Angels to the heavenly kingdom.
@@ -110,6 +111,7 @@ R. Above choirs of Angels to the heavenly kingdom.
 @use proper/assumption-bvm/versicle-lauds
 
 [short-responsory-lauds]
+# SOURCE: parish Sanctoral Lauds booklet, PDF p. 177 (The Assumption of the B.V.M.)
 # SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
 R. The Virgin Mary is taken up * into heavenly chambers.
 R. The Virgin Mary is taken up * into heavenly chambers.

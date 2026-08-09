@@ -1353,3 +1353,59 @@ func TestVespersBoundaryCommemorations2026(t *testing.T) {
 		}
 	}
 }
+
+func TestAssumptionWeek2026OrdoCorrections(t *testing.T) {
+	days := buildCalendar2026(t)
+
+	commemorationIDs := func(comms []*models.Feast) string {
+		ids := make([]string, 0, len(comms))
+		for _, comm := range comms {
+			if comm != nil {
+				ids = append(ids, comm.ID)
+			}
+		}
+		return strings.Join(ids, ",")
+	}
+	requireDay := func(month, day int) *models.CalendarDay {
+		t.Helper()
+		got := findDay(days, 2026, month, day)
+		if got == nil {
+			t.Fatalf("2026-%02d-%02d not found", month, day)
+		}
+		return got
+	}
+
+	aug13 := requireDay(8, 13)
+	if got := commemorationIDs(aug13.Vespers.Commemorations); got != "comm-08-14-st-eusebius-priest-and-confessor" {
+		t.Fatalf("Aug 13 Vespers commemorations = %q, want St Eusebius", got)
+	}
+	if got := aug13.Vespers.Commemorations[0].ProperID; got != "st-eusebius-august" {
+		t.Errorf("Aug 13 Eusebius proper ID = %q, want st-eusebius-august", got)
+	}
+
+	lawrenceOctave := requireDay(8, 17)
+	if got := commemorationIDs(lawrenceOctave.Commemorations); got != "comm-08-17-octave-of-st-laurence" {
+		t.Fatalf("Aug 17 commemorations = %q, want Octave of St Laurence", got)
+	}
+	lawrence := lawrenceOctave.Commemorations[0]
+	if lawrence.ProperID != "st-lawrence" {
+		t.Errorf("Aug 17 Laurence proper ID = %q, want st-lawrence", lawrence.ProperID)
+	}
+
+	aug18 := requireDay(8, 18)
+	if got := commemorationIDs(aug18.Commemorations); got != "comm-08-18-st-helen-empress,comm-08-18-st-agapitus-martyr" {
+		t.Errorf("Aug 18 commemoration order = %q, want Helen then Agapitus", got)
+	}
+	if helen, agapitus := aug18.Commemorations[0], aug18.Commemorations[1]; helen.ProperID != "st-helen" || agapitus.ProperID != "st-agapitus" {
+		t.Errorf("Aug 18 proper routing = Helen %q, Agapitus %q; want st-helen, st-agapitus", helen.ProperID, agapitus.ProperID)
+	}
+
+	aug21 := requireDay(8, 21)
+	if got := commemorationIDs(aug21.Vespers.Commemorations); got != "comm-08-22-ss-timothy-bishop-hippolytus-and-symphorian-mm" {
+		t.Fatalf("Aug 21 Vespers commemorations = %q, want Timothy, Hippolytus, and Symphorian", got)
+	}
+	timothy := aug21.Vespers.Commemorations[0]
+	if timothy.Category != models.CategoryMartyrs || timothy.Color != models.Red || timothy.ProperID != "ss-timothy-hippolytus-symphorian" {
+		t.Errorf("Aug 21 Vespers martyrs = category %q, color %q, proper %q; want martyrs, red, ss-timothy-hippolytus-symphorian", timothy.Category, timothy.Color, timothy.ProperID)
+	}
+}

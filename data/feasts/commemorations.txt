@@ -630,6 +630,7 @@ Name = St Eusebius, Priest & Confessor
 Rank = commemoration
 Color = white
 Category = confessor
+ProperID = st-eusebius-august
 Month = 8
 Day = 14
 Source = awrv
@@ -639,17 +640,9 @@ Name = Octave of St Laurence
 Rank = commemoration
 Color = white
 Category = confessor
+ProperID = st-lawrence
 Month = 8
 Day = 17
-Source = awrv
-
-[comm-08-18-st-agapitus-martyr]
-Name = St Agapitus, Martyr
-Rank = commemoration
-Color = red
-Category = martyr
-Month = 8
-Day = 18
 Source = awrv
 
 [comm-08-18-st-helen-empress]
@@ -657,6 +650,17 @@ Name = St Helen, Empress
 Rank = commemoration
 Color = white
 Category = confessor
+ProperID = st-helen
+Month = 8
+Day = 18
+Source = awrv
+
+[comm-08-18-st-agapitus-martyr]
+Name = St Agapitus, Martyr
+Rank = commemoration
+Color = red
+Category = martyr
+ProperID = st-agapitus
 Month = 8
 Day = 18
 Source = awrv
@@ -664,8 +668,9 @@ Source = awrv
 [comm-08-22-ss-timothy-bishop-hippolytus-and-symphorian-mm]
 Name = Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm
 Rank = commemoration
-Color = white
-Category = confessor-bishop
+Color = red
+Category = martyrs
+ProperID = ss-timothy-hippolytus-symphorian
 Month = 8
 Day = 22
 Source = awrv

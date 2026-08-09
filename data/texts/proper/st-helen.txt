@@ -1,0 +1,8 @@
+# Proper commemoration routing for St Helen, Empress.
+# SOURCE: 2026 archdiocesan ordo, Aug. 17-18
+
+[commemoration-antiphon-lauds]
+@use commons/holy-woman/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+@use commons/holy-woman/magnificat-antiphon-first
