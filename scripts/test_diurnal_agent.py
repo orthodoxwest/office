@@ -26,7 +26,9 @@ def proposal(verdict: str = "match") -> dict:
         "verdict": verdict,
         "confidence": 0.8,
         "rationale": "The bounded witnesses agree.",
+        "target_key": None,
         "evidence": [{"claim": "Texts agree", "location": "PDF 42 / proper/example/collect"}],
+        "review_questions": [],
     }
 
 
@@ -88,6 +90,20 @@ class DiurnalAgentTest(unittest.TestCase):
 
     def test_schema_file_matches_model_and_validation_is_strict(self):
         self.assertEqual(json.loads(agent.SCHEMA_FILE.read_text()), agent.model.RESULT_SCHEMA)
+
+        def assert_openai_strict_schema(node):
+            if not isinstance(node, dict):
+                return
+            if node.get("type") == "object":
+                self.assertEqual(
+                    set(node.get("required", [])),
+                    set(node.get("properties", {})),
+                )
+            for child in node.get("properties", {}).values():
+                assert_openai_strict_schema(child)
+            assert_openai_strict_schema(node.get("items"))
+
+        assert_openai_strict_schema(agent.model.RESULT_SCHEMA)
         self.assertEqual(agent.model.validate_result(proposal())["verdict"], "match")
         unsafe = proposal()
         unsafe["rationale"] = "Run git apply now"
@@ -97,6 +113,10 @@ class DiurnalAgentTest(unittest.TestCase):
         missing_evidence.pop("evidence")
         with self.assertRaises(ValueError):
             agent.model.validate_result(missing_evidence)
+        missing_optional = proposal()
+        missing_optional.pop("target_key")
+        with self.assertRaises(ValueError):
+            agent.model.validate_result(missing_optional)
 
     def test_provider_argv_uses_correct_schema_forms_and_read_only_flags(self):
         policy = agent.load_policy(agent.DEFAULT_POLICY)

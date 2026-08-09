@@ -1,7 +1,7 @@
 {
   "type": "object",
   "additionalProperties": false,
-  "required": ["verdict", "confidence", "rationale", "evidence"],
+  "required": ["verdict", "confidence", "rationale", "target_key", "evidence", "review_questions"],
   "properties": {
     "verdict": {
       "type": "string",
