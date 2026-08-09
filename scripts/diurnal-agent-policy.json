@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "lease_seconds": 900,
+  "max_attempts": 2,
+  "max_prompt_bytes": 24576,
+  "max_output_bytes": 131072,
+  "wall_timeout_seconds": 720,
+  "providers": {
+    "codex": {"enabled": true, "model": "gpt-5.6-luna", "reasoning_effort": "medium"},
+    "grok": {"enabled": true, "model": "grok-4.5", "max_turns": 2},
+    "claude": {"enabled": false, "model": "sonnet", "max_budget_usd": 0.5}
+  },
+  "routing": {
+    "primary": "codex",
+    "ambiguous_replica": "grok",
+    "adjudicator": "claude"
+  }
+}

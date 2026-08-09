@@ -418,6 +418,7 @@ func (c *TextCorpus) loadINIFile(relPath, text string) error {
 	scanner := bufio.NewScanner(strings.NewReader(text))
 	var currentKey string
 	var lines []string
+	sections := make(map[string]int)
 
 	flush := func() {
 		if currentKey != "" {
@@ -425,7 +426,9 @@ func (c *TextCorpus) loadINIFile(relPath, text string) error {
 		}
 	}
 
+	lineNumber := 0
 	for scanner.Scan() {
+		lineNumber++
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
 
@@ -446,6 +449,10 @@ func (c *TextCorpus) loadINIFile(relPath, text string) error {
 		if strings.HasPrefix(trimmed, "[") && strings.HasSuffix(trimmed, "]") {
 			inner := trimmed[1 : len(trimmed)-1]
 			if len(inner) > 0 && !strings.ContainsAny(inner, " :\t") {
+				if firstLine, duplicate := sections[inner]; duplicate {
+					return fmt.Errorf("%s:%d: duplicate INI section [%s] (first declared at line %d)", relPath, lineNumber, inner, firstLine)
+				}
+				sections[inner] = lineNumber
 				flush()
 				if dir == "." {
 					currentKey = stem + "/" + inner
@@ -462,6 +469,9 @@ func (c *TextCorpus) loadINIFile(relPath, text string) error {
 		}
 	}
 
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("reading %s: %w", relPath, err)
+	}
 	flush()
 	return nil
 }

@@ -18,6 +18,14 @@ func TestExplainCompositionIncludesDependenciesAndDecisions(t *testing.T) {
 	if len(a.Dependencies) == 0 {
 		t.Fatal("no composition dependencies")
 	}
+	if len(a.Resolutions) == 0 {
+		t.Fatal("no resolution metadata")
+	}
+	for _, resolution := range a.Resolutions {
+		if resolution.RequestedSlot == "" || resolution.SelectedRef == "" || resolution.SelectedTier == "" {
+			t.Fatalf("incomplete resolution metadata: %#v", resolution)
+		}
+	}
 	if len(a.Decisions) == 0 {
 		t.Fatal("no composition decisions")
 	}
@@ -56,6 +64,29 @@ func TestExplainCompositionIncludesDependenciesAndDecisions(t *testing.T) {
 	}
 	if foundPreces {
 		t.Error("lauds must not record preces disposition")
+	}
+}
+
+func TestShouldIncludeResolution(t *testing.T) {
+	tests := []struct {
+		name, source, tier string
+		want               bool
+	}{
+		{"proper", "proper/feast/collect", "proper", true},
+		{"common", "commons/martyr/collect", "common", true},
+		{"seasonal", "seasonal/lent/collect", "seasonal", true},
+		{"ordinary", "ordinary/lauds/collect", "ordinary", true},
+		{"missing bare slot", "collect", "not-found", true},
+		{"static source", "psalms/1", "not-found", true},
+		{"static resolved source", "psalms/1", "ordinary", false},
+		{"empty resolved source", "", "proper", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shouldIncludeResolution(tt.source, tt.tier); got != tt.want {
+				t.Fatalf("include = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

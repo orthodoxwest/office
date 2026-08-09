@@ -464,3 +464,163 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 
 	return "[Proper text not found: " + ref + "]", ref
 }
+
+// ProperResolutionTrace describes how a dynamic proper slot was resolved. It
+// is deliberately observational: composition continues to use
+// resolveProperText, and neither rendered output nor review hashes include a
+// trace. The inventory tools use it to distinguish an actual proper from a
+// common, seasonal, or ordinary fallback.
+type ProperResolutionTrace struct {
+	// RequestedSlot is the dynamic slot passed by the composer. SlotRef is
+	// retained as a compatibility alias for early consumers of this report.
+	RequestedSlot    string   `json:"requested_slot"`
+	SlotRef          string   `json:"slot_ref"`
+	ResolverHour     string   `json:"resolver_hour"`
+	ResolverSlot     string   `json:"resolver_slot"`
+	OwnerID          string   `json:"owner_id,omitempty"`
+	CanonicalOwner   string   `json:"canonical_owner,omitempty"`
+	ProperIDs        []string `json:"proper_ids,omitempty"`
+	DirectCandidates []string `json:"direct_candidates,omitempty"`
+	DirectExisting   []string `json:"direct_existing,omitempty"`
+	SelectedRef      string   `json:"selected_ref"`
+	SelectedTier     string   `json:"selected_tier"`
+	Reason           string   `json:"reason"`
+	FirstVespers     bool     `json:"first_vespers,omitempty"`
+}
+
+// traceProperResolution records metadata for a result already selected by the
+// production composer. Keeping selection outside this function is important:
+// some composers post-process a slot, and a second resolve call can report a
+// plausible but false source key.
+func traceProperResolution(day *models.CalendarDay, hourName, ref, selected string, corpus *texts.TextCorpus) ProperResolutionTrace {
+	resolverHour, resolverSlot := properResolutionCoordinates(day, hourName, ref, selected)
+	trace := ProperResolutionTrace{
+		RequestedSlot: ref, SlotRef: ref, ResolverHour: resolverHour,
+		ResolverSlot: resolverSlot, Reason: "normal",
+	}
+	if day != nil && day.Celebration != nil {
+		trace.OwnerID = day.Celebration.ID
+		trace.CanonicalOwner = day.Celebration.ID
+		trace.ProperIDs = feastProperIDs(day.Celebration)
+	}
+	trace.FirstVespers = hourName == "vespers" && day != nil && day.FirstVespers
+	trace.DirectCandidates = directProperCandidates(day, resolverHour, resolverSlot, trace.ProperIDs)
+	for _, key := range trace.DirectCandidates {
+		if corpus.Has(key) {
+			trace.DirectExisting = append(trace.DirectExisting, key)
+		}
+	}
+	trace.SelectedRef = selected
+	if selected == "" || !corpus.Has(selected) {
+		trace.SelectedTier = "not-found"
+	} else {
+		trace.SelectedTier = properResolutionTier(selected, trace.ProperIDs, day)
+	}
+	trace.Reason = properResolutionReason(day, hourName, ref, selected)
+	return trace
+}
+
+// properResolutionCoordinates describes exceptional composers that display a
+// slot in one hour but intentionally resolve it through another. The trace
+// must report the production lookup coordinates, not merely the display hour.
+func properResolutionCoordinates(day *models.CalendarDay, hourName, ref, selected string) (string, string) {
+	if ref == "collect" && (hourName == "terce" || hourName == "sext" || hourName == "none") {
+		return "lauds", "collect"
+	}
+	if hourName == "prime" && ref == "psalm-antiphon-1" {
+		festal := day != nil && day.Celebration != nil && day.Celebration.Category != models.CategoryFeria
+		if festal || strings.HasPrefix(selected, "proper/") || strings.HasPrefix(selected, "commons/") ||
+			strings.HasPrefix(selected, "ordinary/lauds/") {
+			return "lauds", ref
+		}
+	}
+	return hourName, ref
+}
+
+func directProperCandidates(day *models.CalendarDay, hourName, ref string, properIDs []string) []string {
+	refs := []string{ref}
+	if hourName == "vespers" && day != nil && day.FirstVespers && !strings.HasSuffix(ref, "-first") {
+		refs = append([]string{ref + "-first"}, refs...)
+	}
+	seen := make(map[string]bool)
+	var out []string
+	add := func(key string) {
+		if !seen[key] {
+			seen[key] = true
+			out = append(out, key)
+		}
+	}
+	for _, id := range properIDs {
+		for _, attempt := range refs {
+			hourRefs, bareRefs := hourRefCandidates(hourName, attempt), refCandidates(attempt)
+			season := models.Season("")
+			if day != nil {
+				season = day.Season
+			}
+			candidates := append(seasonRefCandidates(hourRefs, season), seasonRefCandidates(bareRefs, season)...)
+			candidates = append(candidates, hourRefs...)
+			candidates = append(candidates, bareRefs...)
+			for _, candidate := range candidates {
+				if season == models.Easter {
+					add("proper/" + id + "-paschal/" + candidate)
+				}
+				add("proper/" + id + "/" + candidate)
+			}
+		}
+	}
+	return out
+}
+
+func properResolutionTier(selected string, properIDs []string, day *models.CalendarDay) string {
+	for _, id := range properIDs {
+		if strings.HasPrefix(selected, "proper/"+id+"/") || strings.HasPrefix(selected, "proper/"+id+"-paschal/") {
+			return "proper"
+		}
+	}
+	if day != nil && day.TemporalWeekID != "" && strings.HasPrefix(selected, "proper/"+day.TemporalWeekID+"/") {
+		return "temporal-week"
+	}
+	if strings.HasPrefix(selected, "proper/historia-") {
+		return "special"
+	}
+	if strings.HasPrefix(selected, "proper/") {
+		return "proper-inherited"
+	}
+	if strings.HasPrefix(selected, "commons/") {
+		return "common"
+	}
+	if strings.HasPrefix(selected, "seasonal/") {
+		return "seasonal"
+	}
+	if strings.HasPrefix(selected, "ordinary/shared/") {
+		return "shared"
+	}
+	if strings.HasPrefix(selected, "ordinary/") {
+		for _, weekday := range []string{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"} {
+			if strings.Contains(selected, "-"+weekday) {
+				return "ordinary-weekday"
+			}
+		}
+		return "ordinary"
+	}
+	return "not-found"
+}
+
+func properResolutionReason(day *models.CalendarDay, hourName, ref, selected string) string {
+	if strings.HasPrefix(selected, "seasonal/advent/") && strings.Contains(selected, "-december-") {
+		return "greater-antiphon"
+	}
+	if strings.HasPrefix(selected, "proper/historia-") {
+		return "historia-first-vespers"
+	}
+	if day != nil && day.TemporalWeekID != "" && strings.HasPrefix(selected, "proper/"+day.TemporalWeekID+"/") {
+		return "weekday-temporal"
+	}
+	if strings.Contains(selected, "-paschal/") {
+		return "paschal-proper"
+	}
+	if hourName == "vespers" && day != nil && day.FirstVespers {
+		return "first-vespers"
+	}
+	return "normal"
+}

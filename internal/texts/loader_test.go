@@ -3,6 +3,7 @@ package texts
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -175,6 +176,32 @@ psalm-antiphon-1 = psalms/110
 	}
 	if !corpus.Has("psalmody/vespers/festal") {
 		t.Fatal("Has(psalmody declaration) = false")
+	}
+}
+
+func TestLoadTextsRejectsDuplicateINISections(t *testing.T) {
+	dir := t.TempDir()
+	ordinaryDir := filepath.Join(dir, "texts", "ordinary")
+	if err := os.MkdirAll(ordinaryDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(ordinaryDir, "lauds.txt"), []byte(`[collect]
+First collect.
+
+[collect]
+Second collect.
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := LoadTexts(dir)
+	if err == nil {
+		t.Fatal("LoadTexts accepted duplicate INI sections")
+	}
+	for _, want := range []string{"ordinary/lauds.txt", "[collect]", "duplicate"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("LoadTexts error = %q, want it to contain %q", err, want)
+		}
 	}
 }
 
