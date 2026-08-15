@@ -343,18 +343,19 @@ func genreReasons(key, body string) []string {
 	if i := strings.LastIndex(key, "/"); i >= 0 {
 		slot = key[i+1:]
 	}
-	switch {
-	case strings.Contains(slot, "versicle") || strings.Contains(slot, "short-responsory"):
+	if strings.Contains(slot, "versicle") || strings.Contains(slot, "short-responsory") {
 		if !hasSigil(body, "V.") || !hasSigil(body, "R.") {
 			reasons = append(reasons, "versicle or responsory body must contain V. and R.")
 		}
-	case strings.Contains(slot, "collect"):
-		if chantUnderlayCount(body) >= 4 {
-			reasons = append(reasons, "collect body looks like chant underlay, not prose")
-		}
-	case strings.Contains(slot, "chapter"):
-		if chantUnderlayCount(body) >= 4 {
-			reasons = append(reasons, "chapter body looks like chant underlay, not prose")
+	}
+	if chantUnderlayCount(body) >= 4 {
+		reasons = append(reasons, "body looks like chant underlay, not corpus text")
+	}
+	lowered := strings.ToLower(body)
+	for _, leftover := range []string{"benedictus, tone", "after the canticle", "\ncollect\n", "the prayers", "the gospel canticle"} {
+		if strings.Contains(lowered, leftover) {
+			reasons = append(reasons, "body contains leftover rubric or the next office slot")
+			break
 		}
 	}
 	if hasControlBesidesNewline(body) {

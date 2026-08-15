@@ -2790,25 +2790,52 @@ def cmd_discover(args: argparse.Namespace) -> int:
 
 _PUA_RE = re.compile(r"\ufffd|[\ue000-\uf8ff]")
 _FOLIO_RE = re.compile(r"^\s*\d{1,4}\s*$")
+_RUBRIC_STOP_RE = re.compile(
+    r"^(collect|benedictus,?\s+tone|after the canticle|the prayers|august \d)\b",
+    re.I,
+)
+_SYLLABLE_DASH_RE = re.compile(r"(?<=[A-Za-z])[–](?=[A-Za-z])")
+_ASCII_UNDERLAY_RE = re.compile(r"(?<=[A-Za-z])-(?=[A-Za-z])")
 
 
 def clean_witness_body(text: str) -> str:
-    """Deterministic cleaner: drop PUA, folios, and chant-code lines."""
+    """Deterministic cleaner: drop PUA, folios, chant-code, and slot leftovers."""
     lines = []
     for line in text.splitlines():
         stripped = _PUA_RE.sub("", line).rstrip()
         stripped = re.sub(r"^([A-Za-z])\s{2,}", r"\1", stripped)
         check = stripped.strip()
+        if not check:
+            continue
+        if _RUBRIC_STOP_RE.match(check):
+            break
         if (
-            not check
-            or _FOLIO_RE.match(check)
+            _FOLIO_RE.match(check)
             or re.fullmatch(r"[ivxlcdm]+\.?", check, re.I)
             or is_artifact(check)
             or is_chant_code(check)
         ):
             continue
-        lines.append(stripped.strip())
-    return "\n".join(lines).strip()
+        lines.append(_SYLLABLE_DASH_RE.sub("", check))
+    cleaned = "\n".join(lines).strip()
+    if len(_ASCII_UNDERLAY_RE.findall(cleaned)) >= 4:
+        cleaned = _ASCII_UNDERLAY_RE.sub("", cleaned)
+    return drop_leading_latin_incipit(cleaned)
+
+
+_ENGLISH_HINT_RE = re.compile(
+    r"\b(the|and|of|to|thou|shall|who|that|for|from|with|this|his|her)\b", re.I
+)
+
+
+def drop_leading_latin_incipit(text: str) -> str:
+    lines = text.splitlines()
+    if len(lines) < 2:
+        return text
+    first = lines[0].strip()
+    if 1 <= len(first.split()) <= 3 and not _ENGLISH_HINT_RE.search(first):
+        return "\n".join(lines[1:]).strip()
+    return text
 
 
 def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
@@ -2861,13 +2888,24 @@ def candidate_to_apply_packet(
     if not body:
         return None
     similarity = candidate.text_similarity
-    if corpus and candidate.runtime_target:
-        current = corpus.get(candidate.runtime_target)
-        if current and current.text:
-            similarity = round(anchored_text_similarity(body, current.text), 3)
+    if corpus:
+        fallback = corpus.get(candidate.runtime_target) if candidate.runtime_target else None
+        if fallback and fallback.text:
+            similarity = round(anchored_text_similarity(body, fallback.text), 3)
             # A printed common on the feast page is not a proper override.
             if action == "add-section" and similarity >= 0.84:
                 return None
+        current = corpus.get(target)
+        if action == "replace-section" and current and current.text:
+            similarity = round(anchored_text_similarity(body, current.text), 3)
+            if similarity >= 0.985:
+                return None
+            if "\n\n" in current.text and "\n\n" not in body:
+                return None
+            if current.text.lstrip().startswith("!") and not body.lstrip().startswith("!"):
+                return None
+    if re.search(r"THE GOSPEL CANTICLE", body, re.I):
+        return None
     pages = apply_pages_from_candidate(candidate)
     printed = candidate.printed_page or (str(pages[0]["page"]) if pages else "")
     source = candidate.source or "monastic-diurnal"

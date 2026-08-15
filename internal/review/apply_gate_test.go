@@ -240,6 +240,21 @@ func TestGateRefusesCollectUnderlay(t *testing.T) {
 	}
 }
 
+func TestGateRefusesAntiphonWithNextSlotRubric(t *testing.T) {
+	p := validPacket()
+	p.TargetKey = "proper/st-benedict/benedictus-antiphon"
+	p.Action = ApplyReplaceSection
+	p.DiscoveryClass = ClassExistingDifferent
+	p.TextSimilarity = 0.97
+	world := validWorld()
+	world.ExistingKeys["proper/st-benedict/benedictus-antiphon"] = true
+	p.Body = "Benedict, thou father and guide of monks.\nBenedictus, tone viii.2, page .\nAfter the Canticle, the Antiphon is repeated."
+	d := Gate(p, world)
+	if d.Status != GateRefuse || !hasReason(d, "leftover rubric") {
+		t.Fatalf("rubric leftover: %s %v", d.Status, d.Reasons)
+	}
+}
+
 func TestGateRefusesPsalmFamilyAndPathEscape(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/../feasts/secret"

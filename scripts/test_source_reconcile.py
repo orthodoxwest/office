@@ -1043,6 +1043,59 @@ class SourceReconcileTest(unittest.TestCase):
             "Thou hast crowned him * with glory and honour, O Lord.",
         )
 
+    def test_clean_witness_body_stops_at_next_slot_and_dehyphenates(self):
+        raw = (
+            "Because thou hast seen me, † Thomas, thou hast be–lieved, al–le–lu–ia.\n"
+            "Collect\n"
+            "Grant, O Lord, we beseech thee, that we may glory.\n"
+        )
+        self.assertEqual(
+            SOURCE_RECONCILE.clean_witness_body(raw),
+            "Because thou hast seen me, † Thomas, thou hast believed, alleluia.",
+        )
+
+    def test_clean_witness_body_drops_latin_incipit_line(self):
+        raw = "Quodcumque ligaveris\nWhatsoever * thou shalt bind on earth shall be bound in heaven."
+        self.assertEqual(
+            SOURCE_RECONCILE.clean_witness_body(raw),
+            "Whatsoever * thou shalt bind on earth shall be bound in heaven.",
+        )
+
+    def test_apply_packet_skips_near_identical_replace(self):
+        current = "Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen, and yet have believed, alleluia."
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="sanctoral-lauds-2025", source_page=20, hour="lauds",
+            office_title="Saint Thomas", office_variant="", slot="benedictus-antiphon",
+            latin_incipit="", source_text=current,
+            canonical_owner="st-thomas-apostle", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="existing-different",
+            text_similarity=0.96,
+        )
+        key = "proper/st-thomas-apostle/benedictus-antiphon"
+        corpus = {key: SOURCE_RECONCILE.CorpusEntry(key, "proper/st-thomas-apostle.txt", "benedictus-antiphon", current)}
+        self.assertIsNone(
+            SOURCE_RECONCILE.candidate_to_apply_packet(candidate, {key}, corpus)
+        )
+
+    def test_apply_packet_skips_flattened_hymn_replace(self):
+        current = "Christe, sanctorum\n\nChrist, the fair glory of the holy Angels,\nThou who hast made us."
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="sanctoral-lauds-2025", source_page=217, hour="lauds",
+            office_title="Michael", office_variant="", slot="hymn-lauds",
+            latin_incipit="",
+            source_text="Christe, sanctorum\nChrist, the fair glory of the holy Angels, Thou who hast made us.",
+            canonical_owner="dedication-st-michael", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="existing-different",
+            text_similarity=0.96,
+        )
+        key = "proper/dedication-st-michael/hymn-lauds"
+        corpus = {key: SOURCE_RECONCILE.CorpusEntry(key, "proper/dedication-st-michael.txt", "hymn-lauds", current)}
+        self.assertIsNone(
+            SOURCE_RECONCILE.candidate_to_apply_packet(candidate, {key}, corpus)
+        )
+
     def test_apply_packet_skips_common_reprint(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
             source="sanctoral-lauds-2025", source_page=98, hour="lauds",
