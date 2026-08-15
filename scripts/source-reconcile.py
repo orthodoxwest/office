@@ -2443,6 +2443,21 @@ def proper_target(owner: str, slot: str) -> str:
     return f"proper/{owner}/{slot}"
 
 
+# Bare hour-shared names the engine also resolves. Apply targets the
+# hour-qualified corpus section (chapter-lauds, hymn-vespers, …).
+HOUR_QUALIFIED_SLOTS = frozenset({"chapter", "hymn", "short-responsory", "versicle"})
+
+
+def qualify_slot(slot: str, hour: str) -> str:
+    slot = (slot or "").strip()
+    hour = (hour or "").strip()
+    if not slot or not hour:
+        return slot
+    if slot in HOUR_QUALIFIED_SLOTS:
+        return f"{slot}-{hour}"
+    return slot
+
+
 def classify_discovery(
     candidates: list[SourceCandidate], corpus: dict[str, CorpusEntry], feast_names: dict[str, str], inventory: list[dict]
 ) -> None:
@@ -2473,13 +2488,16 @@ def classify_discovery(
             candidate.discovery_classification = "unknown-feast"
             candidate.discovery_note = "printed heading did not map to a known calendar owner"
             continue
-        target = proper_target(owner, slot)
+        qualified = qualify_slot(slot, candidate.hour)
+        target = proper_target(owner, qualified)
         if not target:
             candidate.discovery_classification = "unmodeled-slot"
             candidate.discovery_note = "slot is not a safe corpus section name"
             continue
-        candidate.runtime_slot = slot
-        rows = indexed.get((owner, candidate.hour, slot), [])
+        candidate.runtime_slot = qualified
+        rows = indexed.get((owner, candidate.hour, qualified), [])
+        if not rows and qualified != slot:
+            rows = indexed.get((owner, candidate.hour, slot), [])
         if not rows:
             candidate.discovery_classification = "known-owner-unobserved"
             candidate.discovery_note = "known calendar owner was not observed in the selected inventory span"
@@ -2775,13 +2793,21 @@ _FOLIO_RE = re.compile(r"^\s*\d{1,4}\s*$")
 
 
 def clean_witness_body(text: str) -> str:
-    """Deterministic cleaner: drop PUA/folios, keep liturgical line breaks."""
+    """Deterministic cleaner: drop PUA, folios, and chant-code lines."""
     lines = []
     for line in text.splitlines():
         stripped = _PUA_RE.sub("", line).rstrip()
-        if _FOLIO_RE.match(stripped):
+        stripped = re.sub(r"^([A-Za-z])\s{2,}", r"\1", stripped)
+        check = stripped.strip()
+        if (
+            not check
+            or _FOLIO_RE.match(check)
+            or re.fullmatch(r"[ivxlcdm]+\.?", check, re.I)
+            or is_artifact(check)
+            or is_chant_code(check)
+        ):
             continue
-        lines.append(stripped)
+        lines.append(stripped.strip())
     return "\n".join(lines).strip()
 
 
@@ -2814,21 +2840,37 @@ def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
     }]
 
 
-def candidate_to_apply_packet(candidate: SourceCandidate) -> dict | None:
-    if candidate.discovery_classification == "missing-override":
-        action = "add-section"
-    elif candidate.discovery_classification == "existing-different":
-        action = "replace-section"
-    else:
+def candidate_to_apply_packet(
+    candidate: SourceCandidate,
+    existing_keys: set[str] | None = None,
+    corpus: dict[str, CorpusEntry] | None = None,
+) -> dict | None:
+    if candidate.discovery_classification not in {"missing-override", "existing-different"}:
         return None
-    target = proper_target(candidate.canonical_owner, candidate.runtime_slot or candidate.slot)
+    slot = qualify_slot(candidate.runtime_slot or candidate.slot, candidate.hour)
+    target = proper_target(candidate.canonical_owner, slot)
     if not target:
         return None
+    if existing_keys is not None:
+        action = "replace-section" if target in existing_keys else "add-section"
+    elif candidate.discovery_classification == "missing-override":
+        action = "add-section"
+    else:
+        action = "replace-section"
     body = clean_witness_body(candidate.source_text)
     if not body:
         return None
+    similarity = candidate.text_similarity
+    if corpus and candidate.runtime_target:
+        current = corpus.get(candidate.runtime_target)
+        if current and current.text:
+            similarity = round(anchored_text_similarity(body, current.text), 3)
+            # A printed common on the feast page is not a proper override.
+            if action == "add-section" and similarity >= 0.84:
+                return None
     pages = apply_pages_from_candidate(candidate)
     printed = candidate.printed_page or (str(pages[0]["page"]) if pages else "")
+    source = candidate.source or "monastic-diurnal"
     return {
         "candidate_id": candidate.candidate_id,
         "source_sha256": candidate.source_sha256,
@@ -2838,20 +2880,29 @@ def candidate_to_apply_packet(candidate: SourceCandidate) -> dict | None:
         "action": action,
         "body": body,
         "source_comment": (
-            f"monastic-diurnal p. {printed} ({candidate.candidate_id}; "
-            f"{candidate.runtime_slot or candidate.slot}) — agent-proposed, not attested"
+            f"{source} p. {printed} ({candidate.candidate_id}; {slot}) "
+            f"— agent-proposed, not attested"
         ),
         "discovery_class": candidate.discovery_classification,
-        "text_similarity": candidate.text_similarity,
+        "text_similarity": similarity,
     }
 
 
-def write_apply_queue(output_dir: pathlib.Path, candidates: list[SourceCandidate]) -> pathlib.Path:
+def write_apply_queue(
+    output_dir: pathlib.Path,
+    candidates: list[SourceCandidate],
+    data_dir: pathlib.Path | None = None,
+) -> pathlib.Path:
     output_dir = require_output_path(output_dir)
+    existing: set[str] = set()
+    corpus: dict[str, CorpusEntry] | None = None
+    if data_dir is not None:
+        corpus = load_corpus(data_dir)
+        existing = set(corpus)
     packets = []
     skipped = 0
     for candidate in candidates:
-        packet = candidate_to_apply_packet(candidate)
+        packet = candidate_to_apply_packet(candidate, existing or None, corpus)
         if packet is None:
             skipped += 1
             continue
@@ -2864,7 +2915,7 @@ def write_apply_queue(output_dir: pathlib.Path, candidates: list[SourceCandidate
 def cmd_apply_queue(args: argparse.Namespace) -> int:
     output_dir = require_output_path(pathlib.Path(args.output))
     candidates = load_discovery(output_dir)
-    path = write_apply_queue(output_dir, candidates)
+    path = write_apply_queue(output_dir, candidates, pathlib.Path(args.data))
     payload = load_json(path)
     print(f"Wrote {len(payload.get('packets', []))} apply packet(s) to {path}")
     return 0
@@ -2927,6 +2978,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="build a gated apply-queue from proper-discovery.json (writable classes only)",
     )
     apply_queue.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    apply_queue.add_argument("--data", default="data")
     apply_queue.set_defaults(func=cmd_apply_queue)
 
     proposals = subparsers.add_parser(
