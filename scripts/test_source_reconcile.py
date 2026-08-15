@@ -659,6 +659,7 @@ class SourceReconcileTest(unittest.TestCase):
         self.assertEqual(candidate.runtime_target, "ordinary/lauds/chapter")
         self.assertEqual(candidate.resolution_tier, "ordinary")
         self.assertEqual(candidate.discovery_classification, "missing-override")
+        self.assertEqual(candidate.runtime_slot, "chapter-lauds")
 
     def test_diurnal_discovery_keeps_known_unobserved_owner_source_first(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
@@ -1031,6 +1032,39 @@ class SourceReconcileTest(unittest.TestCase):
         raw = "123\nBehold a great Confessor.\n\uf000noise\n456"
         self.assertEqual(SOURCE_RECONCILE.clean_witness_body(raw), "Behold a great Confessor.\nnoise")
 
+    def test_clean_witness_body_drops_chant_code_lines(self):
+        raw = (
+            "vi.\n"
+            "Bvz fcv vfcv vz gcv z Ghvcz yg.,c{cvgcv vFgv z gcvGhcv\n"
+            "T      hou hast crowned him * with glory and honour, O Lord.\n"
+        )
+        self.assertEqual(
+            SOURCE_RECONCILE.clean_witness_body(raw),
+            "Thou hast crowned him * with glory and honour, O Lord.",
+        )
+
+    def test_apply_packet_skips_common_reprint(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="sanctoral-lauds-2025", source_page=98, hour="lauds",
+            office_title="Saints Philip and James", office_variant="", slot="chapter",
+            latin_incipit="",
+            source_text="Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.\nR. Thanks be to God.",
+            canonical_owner="ss-philip-james", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="missing-override",
+            runtime_target="commons/apostle-paschal/chapter-lauds",
+            text_similarity=0.4,
+        )
+        corpus = {
+            "commons/apostle-paschal/chapter-lauds": SOURCE_RECONCILE.CorpusEntry(
+                "commons/apostle-paschal/chapter-lauds",
+                "commons/apostle-paschal.txt",
+                "chapter-lauds",
+                "Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.\nR. Thanks be to God.",
+            )
+        }
+        self.assertIsNone(SOURCE_RECONCILE.candidate_to_apply_packet(candidate, set(), corpus))
+
     def test_candidate_to_apply_packet_skips_unwritable_classes(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
             source="diurnal.pdf", source_page=7, hour="lauds",
@@ -1046,6 +1080,29 @@ class SourceReconcileTest(unittest.TestCase):
         self.assertEqual(packet["action"], "add-section")
         self.assertEqual(packet["target_key"], "proper/example-feast/collect")
         self.assertIn("agent-proposed, not attested", packet["source_comment"])
+
+    def test_qualify_slot_adds_hour_suffix(self):
+        self.assertEqual(SOURCE_RECONCILE.qualify_slot("hymn", "lauds"), "hymn-lauds")
+        self.assertEqual(SOURCE_RECONCILE.qualify_slot("hymn-lauds", "lauds"), "hymn-lauds")
+        self.assertEqual(SOURCE_RECONCILE.qualify_slot("collect", "lauds"), "collect")
+        self.assertEqual(SOURCE_RECONCILE.qualify_slot("chapter", "vespers"), "chapter-vespers")
+
+    def test_apply_packet_uses_hour_qualified_target_and_existing_keys(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="sanctoral-lauds-2025", source_page=80, hour="lauds",
+            office_title="Father Benedict", office_variant="", slot="hymn",
+            latin_incipit="", source_text="Gem of the highest.",
+            canonical_owner="st-benedict", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="missing-override",
+        )
+        added = SOURCE_RECONCILE.candidate_to_apply_packet(candidate, set())
+        self.assertEqual(added["target_key"], "proper/st-benedict/hymn-lauds")
+        self.assertEqual(added["action"], "add-section")
+        replaced = SOURCE_RECONCILE.candidate_to_apply_packet(
+            candidate, {"proper/st-benedict/hymn-lauds"}
+        )
+        self.assertEqual(replaced["action"], "replace-section")
 
     def test_legacy_sr_candidate_ids_remain_unchanged(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
