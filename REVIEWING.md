@@ -134,6 +134,13 @@ metadata; it does not copy or embed source-book contents. If an entry later
 changes, its attestation automatically becomes stale without requiring
 reviewers to handle version identifiers.
 
+Some corpus sections carry
+`# SOURCE: … — agent-proposed, not attested`. Those came through
+`office review apply` from a gated diurnal witness. Treat them as current
+wording awaiting a human check, not as a finished verification. A later
+`review attest` is what flips the key to `verified`. Do not delete the hedge
+until that attestation lands.
+
 Prefer the safe CLI to manual CSV editing:
 
 ```bash

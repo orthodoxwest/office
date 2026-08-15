@@ -10,9 +10,9 @@ Typical use::
     make review-sources
     scripts/source-reconcile.py show SR-0001-01234567
 
-The generated packets are suggestions, never automatic corpus edits or human
-attestations. They are intended for a maintainer and Codex to review together
-before changing ``data/``.
+Discovery packets stay under ``output/``. Writable classes can be turned
+into an apply-queue; ``office review apply`` is the only writer that
+touches ``data/texts``. That write is not a human attestation.
 """
 
 from __future__ import annotations
@@ -257,6 +257,8 @@ class SourceCandidate:
     discovery_classification: str = ""
     mapping_confidence: str = ""
     discovery_note: str = ""
+    source_page_last: int = 0
+    page_slices: str = ""
 
 
 @dataclass(frozen=True)
@@ -1987,6 +1989,9 @@ def diurnal_candidate_id(candidate: SourceCandidate) -> str:
     source_hash = (candidate.source_sha256 or hashlib.sha256(candidate.source.encode()).hexdigest())[:12]
     witness = candidate.raw_text_sha256 or hashlib.sha256(candidate.source_text.encode()).hexdigest()
     page = candidate.source_page or 0
+    last = candidate.source_page_last or page
+    if last and last != page:
+        return f"DI-{source_hash}-P{page}-P{last}-{witness[:12]}"
     return f"DI-{source_hash}-P{page}-{witness[:12]}"
 
 
@@ -1995,11 +2000,10 @@ def candidates_from_intake(
 ) -> list[SourceCandidate]:
     """Create page-slice witnesses from intake artifacts, never touching data/.
 
-    Each slot alias starts a new witness.  Heading aliases establish the owner
+    Each slot alias starts a new witness. Heading aliases establish the owner
     context for following slots and, when unambiguous, may continue onto the
-    next PDF page.  No text is stitched across pages: a page break is itself
-    useful review evidence and prevents unrelated facing-page material from
-    becoming one apparently authoritative witness.
+    next PDF page. An open mapped slot may continue across consecutive pages
+    of the same document and extractor until a new heading or slot appears.
     """
     candidates: list[SourceCandidate] = []
     carried_owner = ""
@@ -2008,9 +2012,15 @@ def candidates_from_intake(
     carried_variant = ""
     carried_confidence = ""
     carried_source_sha256 = ""
+    open_slot: dict | None = None
 
     def normalized_owner(value: str) -> str:
         return value.removeprefix("proper/") if value.startswith("proper/") else value
+
+    def span_cap(slot: str) -> int:
+        if "canticle" in (slot or "") or slot in {"benedictus", "magnificat", "nunc-dimittis", "benedicite"}:
+            return 12
+        return 3
 
     def emit(
         record: dict,
@@ -2060,15 +2070,151 @@ def candidates_from_intake(
         candidate.candidate_id = diurnal_candidate_id(candidate)
         candidates.append(candidate)
 
+    def flush_open() -> None:
+        nonlocal open_slot
+        if not open_slot:
+            return
+        slices = open_slot["slices"]
+        joined = "\n".join(item["body"] for item in slices if item["body"])
+        if not joined.strip():
+            open_slot = None
+            return
+        first = slices[0]
+        last = slices[-1]
+        candidate = SourceCandidate(
+            source=str(first["record"].get("source", first["record"].get("source_key", intake_dir.name))),
+            source_page=first["page"],
+            hour=open_slot["hour"],
+            office_title=open_slot["title"],
+            office_variant=open_slot["variant"],
+            slot=open_slot["slot"],
+            latin_incipit="",
+            source_text=joined,
+            source_sha256=open_slot["source_sha256"],
+            printed_page=str(first["record"].get("printed_page", first["record"].get("folio", "")))
+            or profile_page_alias(first["page"], profile.get("page_aliases")),
+            source_offset=";".join(item["offset"] for item in slices),
+            extractor=open_slot["extractor"],
+            extraction_confidence=str(first["record"].get("confidence", first["record"].get("route", ""))),
+            raw_text_sha256=hashlib.sha256(joined.encode()).hexdigest(),
+            canonical_owner=open_slot["owner"],
+            mapping_confidence=open_slot["confidence"],
+            source_page_last=last["page"],
+            page_slices=json.dumps(
+                [
+                    {
+                        "page": item["page"],
+                        "raw_text_sha256": item["hash"],
+                        "offset": item["offset"],
+                        "extractor": open_slot["extractor"],
+                    }
+                    for item in slices
+                ],
+                sort_keys=True,
+            ),
+        )
+        if last["page"] != first["page"]:
+            last_printed = str(last["record"].get("printed_page", last["record"].get("folio", ""))) or str(last["page"])
+            first_printed = candidate.printed_page or str(first["page"])
+            if last_printed and last_printed != first_printed:
+                candidate.printed_page = f"{first_printed}-{last_printed}"
+        candidate.candidate_id = diurnal_candidate_id(candidate)
+        candidates.append(candidate)
+        open_slot = None
+
+    def append_open(record: dict, page: int, full_text: str, start: int, end: int, raw_witness: str) -> None:
+        nonlocal open_slot
+        if not open_slot:
+            return
+        body = full_text[start:end]
+        left = len(body) - len(body.lstrip())
+        right = len(body.rstrip())
+        body_start, body_end = start + left, start + right
+        body = body.strip()
+        if not body:
+            return
+        if len(open_slot["slices"]) >= span_cap(open_slot["slot"]):
+            meta = open_slot
+            flush_open()
+            emit(
+                record,
+                page,
+                full_text,
+                start,
+                end,
+                meta["slot"],
+                meta["confidence"],
+                meta["owner"],
+                meta["title"],
+                meta["confidence"],
+                meta["hour"],
+                meta["variant"],
+                segment_witness_hash(raw_witness, start, end, full_text[start:end]),
+            )
+            return
+        open_slot["slices"].append(
+            {
+                "record": record,
+                "page": page,
+                "body": body,
+                "offset": f"{body_start}:{body_end}",
+                "hash": segment_witness_hash(raw_witness, start, end, full_text[start:end]),
+            }
+        )
+        open_slot["last_page"] = page
+
+    def begin_open(
+        record: dict,
+        page: int,
+        full_text: str,
+        start: int,
+        end: int,
+        raw_witness: str,
+        slot: str,
+        slot_confidence: str,
+        owner: str,
+        owner_title: str,
+        owner_confidence: str,
+        hour: str,
+        variant: str,
+        extractor: str,
+        source_sha256: str,
+    ) -> None:
+        nonlocal open_slot
+        flush_open()
+        open_slot = {
+            "owner": normalized_owner(owner),
+            "title": owner_title or "Unidentified office",
+            "slot": slot,
+            "hour": hour,
+            "variant": variant,
+            "confidence": "ambiguous" if "ambiguous" in (owner_confidence, slot_confidence) else (owner_confidence or slot_confidence or "unmapped"),
+            "extractor": extractor,
+            "source_sha256": source_sha256,
+            "last_page": page,
+            "slices": [],
+        }
+        append_open(record, page, full_text, start, end, raw_witness)
+        if not open_slot or not open_slot["slices"]:
+            open_slot = None
+
     for record in intake_page_records(intake_dir):
         source_sha256 = str(record.get("source_sha256", record.get("document_sha256", "")))
+        extractor = str(record.get("extractor", record.get("route", "")))
+        page = int(record.get("page", record.get("page_number", 0)) or 0)
         if carried_source_sha256 and source_sha256 != carried_source_sha256:
+            flush_open()
             carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
+        if open_slot is not None and (
+            source_sha256 != open_slot["source_sha256"]
+            or page != open_slot["last_page"] + 1
+            or extractor != open_slot["extractor"]
+        ):
+            flush_open()
         carried_source_sha256 = source_sha256
         text = intake_text(intake_dir, record)
         if not text.strip():
             continue
-        page = int(record.get("page", record.get("page_number", 0)) or 0)
         default_hour = str(record.get("hour", profile.get("default_hour", "")) or "")
         title = str(record.get("heading", record.get("title", ""))).strip()
         raw_witness = str(record.get("raw_text_sha256", record.get("text_sha256", ""))) or hashlib.sha256(text.encode()).hexdigest()
@@ -2084,6 +2230,17 @@ def candidates_from_intake(
         # behavior.  Keep its supplied raw hash so pre-existing DI packets do
         # not need to be regenerated solely by this segmentation enhancement.
         if not slot_groups:
+            first_heading_at = heading_groups[0][0] if heading_groups else None
+            emit_start = 0
+            if open_slot is not None and first_heading_at == 0:
+                flush_open()
+            elif open_slot is not None:
+                cut = first_heading_at if first_heading_at is not None else len(text)
+                append_open(record, page, text, 0, cut, raw_witness)
+                if first_heading_at is None:
+                    continue
+                flush_open()
+                emit_start = first_heading_at
             owner = ""
             owner_title = title
             owner_hour = default_hour
@@ -2139,7 +2296,7 @@ def candidates_from_intake(
                 record,
                 page,
                 text,
-                0,
+                emit_start,
                 len(text),
                 slot,
                 "",
@@ -2186,6 +2343,19 @@ def candidates_from_intake(
 
         context = (carried_owner, carried_title, carried_hour, carried_variant, carried_confidence)
         timeline_index = 0
+        if open_slot is not None:
+            first_heading = timeline[0][0] if timeline else None
+            first_slot = slot_groups[0][0] if slot_groups else None
+            event_positions = [pos for pos in (first_heading, first_slot) if pos is not None]
+            first_event = min(event_positions) if event_positions else len(text)
+            if first_event > 0:
+                append_open(record, page, text, 0, first_event, raw_witness)
+            if open_slot is not None and first_heading is not None and first_heading <= first_event:
+                heading_owner, heading_conf = timeline[0][1], timeline[0][5]
+                if heading_conf == "ambiguous" or heading_owner != open_slot["owner"]:
+                    flush_open()
+            if open_slot is not None and first_slot is not None and first_slot <= first_event:
+                flush_open()
         for index, (start, end, members) in enumerate(slot_groups):
             while timeline_index < len(timeline) and timeline[timeline_index][0] <= start:
                 _at, context_owner, context_title, context_hour, context_variant, context_confidence = timeline[timeline_index]
@@ -2206,13 +2376,29 @@ def candidates_from_intake(
             if following_headings:
                 next_start = min(next_start, following_headings[0])
             owner, owner_title, owner_hour, owner_variant, owner_confidence = context
-            emit(
-                record, page, text, end, next_start, slot, slot_confidence,
-                owner, owner_title or title, owner_confidence,
-                slot_hour or owner_hour or default_hour,
-                slot_variant or owner_variant,
-                segment_witness_hash(raw_witness, end, next_start, text[end:next_start]),
-            )
+            hour = slot_hour or owner_hour or default_hour
+            variant = slot_variant or owner_variant
+            extends_to_eof = next_start >= len(text)
+            heading_after = any(event[0] > end for event in timeline)
+            if (
+                index == len(slot_groups) - 1
+                and extends_to_eof
+                and not heading_after
+                and slot
+                and "ambiguous" not in (owner_confidence, slot_confidence)
+            ):
+                begin_open(
+                    record, page, text, end, next_start, raw_witness,
+                    slot, slot_confidence, owner, owner_title or title, owner_confidence,
+                    hour, variant, extractor, source_sha256,
+                )
+            else:
+                emit(
+                    record, page, text, end, next_start, slot, slot_confidence,
+                    owner, owner_title or title, owner_confidence,
+                    hour, variant,
+                    segment_witness_hash(raw_witness, end, next_start, text[end:next_start]),
+                )
 
         # Apply headings after the final slot so their context may continue to
         # the next page.  An explicit ambiguous heading always wins and clears
@@ -2223,6 +2409,7 @@ def candidates_from_intake(
             timeline_index += 1
         carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = context
 
+    flush_open()
     return sorted(candidates, key=lambda item: (item.source, item.source_page, item.source_offset, item.slot, item.candidate_id))
 
 
@@ -2583,6 +2770,106 @@ def cmd_discover(args: argparse.Namespace) -> int:
     return 0
 
 
+_PUA_RE = re.compile(r"\ufffd|[\ue000-\uf8ff]")
+_FOLIO_RE = re.compile(r"^\s*\d{1,4}\s*$")
+
+
+def clean_witness_body(text: str) -> str:
+    """Deterministic cleaner: drop PUA/folios, keep liturgical line breaks."""
+    lines = []
+    for line in text.splitlines():
+        stripped = _PUA_RE.sub("", line).rstrip()
+        if _FOLIO_RE.match(stripped):
+            continue
+        lines.append(stripped)
+    return "\n".join(lines).strip()
+
+
+def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
+    if candidate.page_slices:
+        try:
+            parsed = json.loads(candidate.page_slices)
+        except json.JSONDecodeError:
+            parsed = []
+        if isinstance(parsed, list) and parsed:
+            pages = []
+            for item in parsed:
+                if not isinstance(item, dict):
+                    continue
+                pages.append({
+                    "page": int(item.get("page") or 0),
+                    "printed_page": str(item.get("printed_page") or item.get("page") or ""),
+                    "raw_text_sha256": str(item.get("raw_text_sha256") or ""),
+                    "offset": str(item.get("offset") or ""),
+                    "extractor": str(item.get("extractor") or candidate.extractor),
+                })
+            if pages:
+                return pages
+    return [{
+        "page": candidate.source_page,
+        "printed_page": candidate.printed_page or str(candidate.source_page),
+        "raw_text_sha256": candidate.raw_text_sha256,
+        "offset": candidate.source_offset,
+        "extractor": candidate.extractor,
+    }]
+
+
+def candidate_to_apply_packet(candidate: SourceCandidate) -> dict | None:
+    if candidate.discovery_classification == "missing-override":
+        action = "add-section"
+    elif candidate.discovery_classification == "existing-different":
+        action = "replace-section"
+    else:
+        return None
+    target = proper_target(candidate.canonical_owner, candidate.runtime_slot or candidate.slot)
+    if not target:
+        return None
+    body = clean_witness_body(candidate.source_text)
+    if not body:
+        return None
+    pages = apply_pages_from_candidate(candidate)
+    printed = candidate.printed_page or (str(pages[0]["page"]) if pages else "")
+    return {
+        "candidate_id": candidate.candidate_id,
+        "source_sha256": candidate.source_sha256,
+        "extractor": candidate.extractor,
+        "pages": pages,
+        "target_key": target,
+        "action": action,
+        "body": body,
+        "source_comment": (
+            f"monastic-diurnal p. {printed} ({candidate.candidate_id}; "
+            f"{candidate.runtime_slot or candidate.slot}) — agent-proposed, not attested"
+        ),
+        "discovery_class": candidate.discovery_classification,
+        "text_similarity": candidate.text_similarity,
+    }
+
+
+def write_apply_queue(output_dir: pathlib.Path, candidates: list[SourceCandidate]) -> pathlib.Path:
+    output_dir = require_output_path(output_dir)
+    packets = []
+    skipped = 0
+    for candidate in candidates:
+        packet = candidate_to_apply_packet(candidate)
+        if packet is None:
+            skipped += 1
+            continue
+        packets.append(packet)
+    path = output_dir / "apply-queue.json"
+    path.write_text(json.dumps({"packets": packets, "skipped": skipped}, indent=2, ensure_ascii=False) + "\n")
+    return path
+
+
+def cmd_apply_queue(args: argparse.Namespace) -> int:
+    output_dir = require_output_path(pathlib.Path(args.output))
+    candidates = load_discovery(output_dir)
+    path = write_apply_queue(output_dir, candidates)
+    payload = load_json(path)
+    print(f"Wrote {len(payload.get('packets', []))} apply packet(s) to {path}")
+    return 0
+
+
 def cmd_proposals(args: argparse.Namespace) -> int:
     output_dir = pathlib.Path(args.output)
     proposal_dir = pathlib.Path(args.proposal_output)
@@ -2634,6 +2921,13 @@ def build_parser() -> argparse.ArgumentParser:
     discover.add_argument("--data", default="data")
     discover.add_argument("--output", default=str(DEFAULT_OUTPUT))
     discover.set_defaults(func=cmd_discover)
+
+    apply_queue = subparsers.add_parser(
+        "apply-queue",
+        help="build a gated apply-queue from proper-discovery.json (writable classes only)",
+    )
+    apply_queue.add_argument("--output", default=str(DEFAULT_OUTPUT))
+    apply_queue.set_defaults(func=cmd_apply_queue)
 
     proposals = subparsers.add_parser(
         "proposals", help="write advisory-only proposal JSON and diff from discovery output"

@@ -1,9 +1,11 @@
 # Monastic diurnal ingestion
 
-This tooling prepares evidence for reviewing a received monastic diurnal. It
-does not import the book into the corpus, attest provenance, or decide rubrics.
-Keep the PDF and all source-derived artifacts outside Git; the commands below
-write only under ignored `output/`.
+This tooling prepares evidence for reviewing a received monastic diurnal and,
+when the mechanical gate allows, writing corpus edits through
+`office review apply`. It does not attest provenance or decide rubrics.
+Keep the PDF and all source-derived artifacts outside Git; intake, discovery,
+and apply-queues live under ignored `output/`. Corpus writes happen only via
+the apply command on a reviewable branch.
 
 ## Workflow
 
@@ -88,19 +90,25 @@ write only under ignored `output/`.
    quota; enable `providers.claude.enabled` in a local policy copy beneath
    repository `output/` and pass it to `plan` before using `adjudicate`.
 
-5. **Human decision, then an advisory proposal.**
+5. **Gate, apply, then a corpus PR.**
+
+   High-confidence packets (`missing-override` or `existing-different` that
+   pass `internal/review` Gate) become an apply-queue under `output/`. The
+   only writer is:
 
    ```bash
-   scripts/source-reconcile.py decide accept DI-... --output output/source-reconcile
-   scripts/source-reconcile.py proposals --output output/source-reconcile
+   scripts/source-reconcile.py apply-queue --output output/source-reconcile
+   ./office review apply --dry-run output/source-reconcile/apply-queue.json
+   ./office review apply output/source-reconcile/apply-queue.json
    ```
 
-   Proposals are ignored JSON and commentary-style diffs. They validate only
-   `proper/<owner>/<slot>` targets and never edit `data/`, provenance, or a
-   ledger. Replacement content appears only after an explicit local accept decision;
-   otherwise the proposal deliberately omits the source text. A maintainer must
-   still create a deliberate corpus change, review the printed witness, and
-   attest provenance separately in a PR.
+   Apply never writes provenance, signoffs, psalms, or feast metadata. A
+   merged apply PR accepts wording into the corpus; it is not a printed-page
+   attestation. Record `review attest` separately after a person checks the
+   page.
+
+   Unresolved `rubrical-complex`, `needs-ruling`, ambiguous owners, and
+   ordo-vs-diurnal conflicts stay in `output/` and do not apply.
 
 ## Artifact contract
 
@@ -112,16 +120,18 @@ schema-v2 discovery packet also carries a content-free dependency manifest:
 full hashes for each materialized input and tree hashes that detect later file
 additions or deletions. Intake locators remain beneath repository `output/`;
 the manifest contains no host-absolute paths or extracted source text. A
-new diurnal candidate ID is stable per document hash, page, and witness hash:
-`DI-<source12>-P<page>-<witness12>`. Legacy `SR-*` reconciliation packets and
-their `decisions.csv` remain independent.
+new diurnal candidate ID is stable per document hash, page span, and witness
+hash: `DI-<source12>-P<page>-<witness12>` for one page, or
+`DI-<source12>-P<first>-P<last>-<witness12>` for a continuation. Legacy `SR-*`
+reconciliation packets and their `decisions.csv` remain independent.
 
 ## Recovery and safety checklist
 
 - Never delete a run to “fix” OCR; rerun or resume it and preserve the page
   witness/hash trail.
-- Resolve ambiguous headings, multi-option rubrics, and text that crosses a
-  page/office boundary manually before requesting an agent pass.
+- Resolve ambiguous headings, multi-option rubrics, and office-boundary
+  crossings manually before requesting an agent pass. Same-document
+  consecutive continuation of one mapped slot is joined automatically.
 - Do not treat a score as proof: compare the rendered image and source page.
 - If a current ordo differs from older material, flag it for a ruling; the
   newest-year ordo governs current practice.

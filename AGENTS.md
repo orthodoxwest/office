@@ -1,26 +1,34 @@
 # Diurnal ingestion guardrails
 
-The received monastic diurnal is evidence for a human review workflow, not an
-automatic source of corpus edits. Treat every extraction, OCR result, heading
-mapping, and runtime comparison as an advisory witness until a maintainer has
-reviewed it against the printed page.
+The received monastic diurnal is evidence for reviewing and, when the
+mechanical gate allows, updating the office corpus. Extraction, OCR, heading
+mapping, and model output remain witnesses — they are not printed-page
+verification.
 
 ## Non-negotiable boundaries
 
-- Agents may propose structured findings, diffs, and questions. They must not
-  modify `data/texts/`, `data/review/`, provenance records, signoffs,
-  attestations, prescreen flags, or decision files.
-- Never represent an OCR result, a match score, or an agent conclusion as a
-  human verification. Printed-book evidence requires human review.
+- Agents may change `data/texts/` **only** through `office review apply` on an
+  apply-queue packet that passed the mechanical gate. Do not `git add data/`
+  or edit corpus files with a general write tool.
+- First-wave applies may touch any liturgical text except `data/texts/psalms/`
+  (already independently validated). They must not write `data/review/`
+  ledgers, feast metadata, hour defs, signoffs, attestations, or prescreen
+  flags.
+- Never represent an OCR result, a match score, a model verdict, or a merged
+  apply PR as a human verification. `review attest` remains a separate human
+  act. Agent-written `# SOURCE:` comments must keep the hedge
+  `agent-proposed, not attested`.
 - The newest local archdiocesan ordo is the authority for the current year.
   If it conflicts with older ordos or the normative rubrics, flag the issue for
-  clergy rather than selecting a side.
+  clergy rather than selecting a side. Do not apply those packets.
 - Do not commit copyrighted book pages, extracted text, OCR text, images, or
   page coordinates. Generated intake and review artifacts belong only beneath
   the gitignored `output/` directory.
 - Preserve source witness identity (document hash, PDF page, printed folio,
-  extractor/OCR route, and text hash) in every proposal. Do not combine text
-  from different witnesses.
+  extractor/OCR route, and text hash) in every packet. Do not combine text
+  from different documents or mixed extractor routes. Same-document
+  consecutive continuation of one mapped slot is required for page-spanning
+  entries, not forbidden.
 
 ## Agent roles and provider context
 
@@ -41,8 +49,9 @@ reviewed it against the printed page.
 2. Inspect extraction/OCR QA before segmentation or matching.
 3. Compare only against a generated runtime resolution inventory; distinguish
    a printed proper from an equal fallback.
-4. Run agents with immutable packet hashes and collect their structured advice.
-5. A human records a decision, then separately prepares and reviews any corpus
-   change and provenance attestation through the normal PR workflow.
+4. Run agents with immutable packet hashes. A cleaner may emit an apply
+   packet; the gate, not the model score, decides whether it is writable.
+5. `office review apply` writes gated packets on a branch. A maintainer
+   merges the PR. Attestation is a later, separate `review attest`.
 
 Follow the operational details in `DIURNAL-INGESTION.md`.

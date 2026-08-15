@@ -915,6 +915,83 @@ class SourceReconcileTest(unittest.TestCase):
             self.assertEqual(by_page[2].slot, "chapter")
             self.assertEqual(by_page[2].source_text, "Second feast chapter.")
 
+    def _write_intake_pages(self, intake, pages, source_sha256="a" * 64, extractor="pdftotext-layout"):
+        for number, text in pages:
+            page = intake / "pages" / f"{number:04d}"
+            page.mkdir(parents=True, exist_ok=True)
+            (page / "native.layout.txt").write_text(text)
+            (page / "page.json").write_text(__import__("json").dumps({
+                "page": number,
+                "source_key": "synthetic",
+                "source_sha256": source_sha256,
+                "text_path": f"pages/{number:04d}/native.layout.txt",
+                "raw_text_sha256": str(number) * 64,
+                "extractor": extractor,
+            }))
+
+    def test_intake_joins_hymn_across_consecutive_pages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            self._write_intake_pages(intake, (
+                (80, "Example Feast\nTHE HYMN\nFirst stanza of the hymn."),
+                (81, "Second stanza of the hymn.\nTHE VERSICLE\nV. They declared the work of God.\nR. And wisely considered."),
+            ))
+            profile = {
+                "default_hour": "lauds",
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [
+                    {"pattern": "^THE HYMN$", "slot": "hymn-lauds"},
+                    {"pattern": "^THE VERSICLE$", "slot": "versicle-lauds"},
+                ],
+            }
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            hymns = [item for item in candidates if item.slot == "hymn-lauds"]
+            versicles = [item for item in candidates if item.slot == "versicle-lauds"]
+            self.assertEqual(len(hymns), 1)
+            self.assertEqual(hymns[0].source_page, 80)
+            self.assertEqual(hymns[0].source_page_last, 81)
+            self.assertIn("First stanza", hymns[0].source_text)
+            self.assertIn("Second stanza", hymns[0].source_text)
+            self.assertNotIn("They declared", hymns[0].source_text)
+            self.assertEqual(len(versicles), 1)
+            self.assertEqual(versicles[0].source_page, 81)
+            self.assertIn("They declared", versicles[0].source_text)
+            self.assertTrue(hymns[0].candidate_id.startswith("DI-"))
+            self.assertIn("-P80-P81-", hymns[0].candidate_id)
+
+    def test_intake_does_not_join_gapped_or_mixed_route_pages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            self._write_intake_pages(intake, (
+                (80, "Example Feast\nTHE HYMN\nFirst stanza."),
+                (82, "Orphan continuation."),
+            ))
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [{"pattern": "^THE HYMN$", "slot": "hymn-lauds"}],
+            }
+            gapped = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            hymns = [item for item in gapped if item.slot == "hymn-lauds"]
+            self.assertEqual(len(hymns), 1)
+            self.assertEqual(hymns[0].source_page, 80)
+            self.assertIn(hymns[0].source_page_last, (0, 80))
+            self.assertNotIn("Orphan", hymns[0].source_text)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            self._write_intake_pages(intake, ((80, "Example Feast\nTHE HYMN\nFirst stanza."),))
+            self._write_intake_pages(
+                intake, ((81, "Second stanza."),), extractor="tesseract"
+            )
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [{"pattern": "^THE HYMN$", "slot": "hymn-lauds"}],
+            }
+            mixed = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            hymns = [item for item in mixed if item.slot == "hymn-lauds"]
+            self.assertEqual(len(hymns), 1)
+            self.assertNotIn("Second stanza", hymns[0].source_text)
+
     def test_intake_ambiguous_heading_clears_carried_owner(self):
         with tempfile.TemporaryDirectory() as tmp:
             intake = pathlib.Path(tmp) / "intake"
@@ -949,6 +1026,26 @@ class SourceReconcileTest(unittest.TestCase):
             self.assertEqual(by_page[2].canonical_owner, "")
             self.assertEqual(by_page[2].mapping_confidence, "ambiguous")
             self.assertEqual(by_page[3].canonical_owner, "")
+
+    def test_clean_witness_body_drops_pua_and_folios(self):
+        raw = "123\nBehold a great Confessor.\n\uf000noise\n456"
+        self.assertEqual(SOURCE_RECONCILE.clean_witness_body(raw), "Behold a great Confessor.\nnoise")
+
+    def test_candidate_to_apply_packet_skips_unwritable_classes(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal.pdf", source_page=7, hour="lauds",
+            office_title="Example Feast", office_variant="", slot="collect",
+            latin_incipit="", source_text="O God, who didst raise up thy servant.",
+            canonical_owner="example-feast", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="rubrical-complex",
+        )
+        self.assertIsNone(SOURCE_RECONCILE.candidate_to_apply_packet(candidate))
+        candidate.discovery_classification = "missing-override"
+        packet = SOURCE_RECONCILE.candidate_to_apply_packet(candidate)
+        self.assertEqual(packet["action"], "add-section")
+        self.assertEqual(packet["target_key"], "proper/example-feast/collect")
+        self.assertIn("agent-proposed, not attested", packet["source_comment"])
 
     def test_legacy_sr_candidate_ids_remain_unchanged(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
