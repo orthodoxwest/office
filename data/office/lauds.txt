@@ -244,6 +244,12 @@ Ref = psalm-antiphon-4
 Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm
 Label = The Psalms
 
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
 Type = proper-antiphon
 Ref = psalm-antiphon-1
 

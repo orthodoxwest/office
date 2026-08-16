@@ -437,7 +437,7 @@ func TestComposeLaudsEpiphanyOctaveSundayUsesFestalPsalmody(t *testing.T) {
 		}
 	}
 
-	wantPrefix := []string{"Psalm 93", "Psalm 100", "Psalm 63"}
+	wantPrefix := []string{"Psalm 67", "Psalm 93", "Psalm 100", "Psalm 63"}
 	if len(psalmLabels) < len(wantPrefix) {
 		t.Fatalf("got %d psalms, want at least %d: %v", len(psalmLabels), len(wantPrefix), psalmLabels)
 	}
@@ -493,7 +493,7 @@ func TestComposeLaudsNativityOctaveSundayUsesPrintedProper(t *testing.T) {
 	}
 
 	wantPsalms := []string{
-		"Psalm 93", "Psalm 100", "Psalm 63",
+		"Psalm 67", "Psalm 93", "Psalm 100", "Psalm 63",
 		"Psalm 148", "Psalm 149", "Psalm 150",
 	}
 	if !slices.Equal(psalmLabels, wantPsalms) {

@@ -863,6 +863,7 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 
 	for _, sectionName := range []string{
 		"Psalmody-Sunday",
+		"Psalmody-Festal",
 		"Psalmody-Monday",
 		"Psalmody-Tuesday",
 		"Psalmody-Wednesday",
@@ -892,7 +893,7 @@ func TestLaudsPsalm67RemainsUnantiphoned(t *testing.T) {
 	}
 }
 
-func TestLaudsFestalPsalmodyStartsWithFirstAntiphon(t *testing.T) {
+func TestLaudsFestalPsalmodySequence(t *testing.T) {
 	path := filepath.Join("..", "..", "data", "office", "lauds.txt")
 	sections, err := ParseHourDefinition(path)
 	if err != nil {
@@ -911,6 +912,8 @@ func TestLaudsFestalPsalmodyStartsWithFirstAntiphon(t *testing.T) {
 	}
 
 	want := []HourElement{
+		{Type: "psalm", Ref: "psalms/067"},
+		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
 		{Type: "proper-antiphon", Ref: "psalm-antiphon-1"},
 		{Type: "psalm", Ref: "psalms/093"},
 		{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"},
@@ -934,9 +937,6 @@ func TestLaudsFestalPsalmodyStartsWithFirstAntiphon(t *testing.T) {
 	for i, wantElem := range want {
 		if festal.Elements[i] != wantElem {
 			t.Fatalf("Psalmody-Festal[%d] = %+v, want %+v", i, festal.Elements[i], wantElem)
-		}
-		if festal.Elements[i].Ref == "psalms/067" {
-			t.Fatalf("Psalmody-Festal[%d] unexpectedly includes Psalm 67", i)
 		}
 	}
 }
