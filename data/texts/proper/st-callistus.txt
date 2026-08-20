@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic-diurnal p. 668 (DI-6912d65ec4cd-Ccallistus-P668-8e8d82cff6ac; collect) — agent-proposed, not attested
+O God, who seest that we fall by reason of our infirmity: mercifully restore us to thy love by the example of thy Saints.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

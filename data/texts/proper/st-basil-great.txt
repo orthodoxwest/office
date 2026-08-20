@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic-diurnal p. 581 (DI-6912d65ec4cd-Cbasil-P581-49dc668b35b6; collect) — agent-proposed, not attested
+O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed Basil, thy Bishop and Confessor: and by the interceding merits of him who worthily attained to serve thee, absolve us from all our sins.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
