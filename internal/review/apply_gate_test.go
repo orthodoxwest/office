@@ -9,6 +9,7 @@ func validPacket() ApplyPacket {
 	return ApplyPacket{
 		CandidateID:    "DI-aaaaaaaaaaaa-P78-bbbbbbbbbbbb",
 		SourceSHA256:   strings.Repeat("ab", 32),
+		RawTextSHA256:  strings.Repeat("cd", 32),
 		Extractor:      "pdftotext-layout",
 		Pages:          []ApplyPage{{Page: 78, PrintedPage: "78", RawTextSHA256: strings.Repeat("cd", 32)}},
 		TargetKey:      "proper/st-benedict/chapter-lauds",
@@ -54,6 +55,7 @@ func TestGateAllowsTwoPageSpan(t *testing.T) {
 		{Page: 80, PrintedPage: "80", RawTextSHA256: strings.Repeat("11", 32)},
 		{Page: 81, PrintedPage: "81", RawTextSHA256: strings.Repeat("22", 32)},
 	}
+	p.RawTextSHA256 = compositeSliceHashes([]string{strings.Repeat("11", 32), strings.Repeat("22", 32)})
 	p.TargetKey = "proper/st-benedict/hymn-lauds"
 	p.Body = "Laudibus cives resonent canoris\n\nGem of the highest, diadem immortal."
 	d := Gate(p, validWorld())
@@ -69,7 +71,9 @@ func TestGateRefusesMixedColumns(t *testing.T) {
 		{Page: 81, RawTextSHA256: strings.Repeat("22", 32), SourceColumn: "right", BBox: []float64{10, 0, 20, 10}},
 	}
 	d := Gate(p, validWorld())
-	if d.Status != GateRefuse { t.Fatalf("mixed columns allowed: %v", d.Reasons) }
+	if d.Status != GateRefuse {
+		t.Fatalf("mixed columns allowed: %v", d.Reasons)
+	}
 }
 
 func TestGateRefusesInvalidColumnBBox(t *testing.T) {
@@ -77,7 +81,9 @@ func TestGateRefusesInvalidColumnBBox(t *testing.T) {
 	p.Pages[0].SourceColumn = "left"
 	p.Pages[0].BBox = []float64{0, 0, 0, 10}
 	d := Gate(p, validWorld())
-	if d.Status != GateRefuse { t.Fatalf("invalid bbox allowed: %v", d.Reasons) }
+	if d.Status != GateRefuse {
+		t.Fatalf("invalid bbox allowed: %v", d.Reasons)
+	}
 }
 
 func TestGateRefusesPrintedCrossReferenceFragment(t *testing.T) {
@@ -96,8 +102,20 @@ func TestGateAllowsSameColumnContinuationWithStructuredProvenance(t *testing.T) 
 		{Page: 1, PrintedPage: "12", RawTextSHA256: strings.Repeat("11", 32), SourceColumn: "left", BBox: []float64{0, 0, 10, 10}, Offset: "1:20", Extractor: "column"},
 		{Page: 2, PrintedPage: "13", RawTextSHA256: strings.Repeat("22", 32), SourceColumn: "left", BBox: []float64{0, 0, 10, 10}, Offset: "0:20", Extractor: "column"},
 	}
+	p.RawTextSHA256 = compositeSliceHashes([]string{strings.Repeat("11", 32), strings.Repeat("22", 32)})
 	d := Gate(p, validWorld())
-	if d.Status != GateAllow { t.Fatalf("same-column continuation refused: %v", d.Reasons) }
+	if d.Status != GateAllow {
+		t.Fatalf("same-column continuation refused: %v", d.Reasons)
+	}
+}
+
+func TestGateRefusesCandidateSliceHashMismatch(t *testing.T) {
+	p := validPacket()
+	p.RawTextSHA256 = strings.Repeat("ef", 32)
+	d := Gate(p, validWorld())
+	if d.Status != GateRefuse {
+		t.Fatalf("candidate/slice hash mismatch allowed: %v", d.Reasons)
+	}
 }
 
 func TestGateNoopFallbackEqual(t *testing.T) {
@@ -330,6 +348,11 @@ func TestGateAllowsLongCanticleSpan(t *testing.T) {
 		pages[i] = ApplyPage{Page: i + 1, RawTextSHA256: strings.Repeat("aa", 32)}
 	}
 	p.Pages = pages
+	sliceHashes := make([]string, len(pages))
+	for i := range pages {
+		sliceHashes[i] = pages[i].RawTextSHA256
+	}
+	p.RawTextSHA256 = compositeSliceHashes(sliceHashes)
 	d := Gate(p, world)
 	if d.Status != GateAllow {
 		t.Fatalf("canticle span refused: %s %v", d.Status, d.Reasons)

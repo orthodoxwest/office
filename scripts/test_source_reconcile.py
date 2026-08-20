@@ -94,7 +94,7 @@ class SourceReconcileTest(unittest.TestCase):
     def test_legacy_apply_pages_allow_non_column_slices(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
             source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="", slot="chapter",
-            latin_incipit="", source_text="Body", extractor="native", raw_text_sha256="a" * 64,
+            latin_incipit="", source_text="Body", extractor="native", raw_text_sha256="b" * 64,
             page_slices=__import__("json").dumps([{"page": 1, "printed_page": "12", "raw_text_sha256": "b" * 64, "offset": "1:4", "extractor": "native"}]),
         )
         pages = SOURCE_RECONCILE.apply_pages_from_candidate(candidate)
@@ -1057,6 +1057,41 @@ class SourceReconcileTest(unittest.TestCase):
             self.assertTrue(hymns[0].candidate_id.startswith("DI-"))
             self.assertIn("-P80-P81-", hymns[0].candidate_id)
 
+    def test_single_open_slice_hash_matches_trimmed_offset_and_body(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            text = "Example Feast\nTHE CHAPTER\n  If I be a man of God.  \n"
+            self._write_intake_pages(intake, ((1, text),))
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [{"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"}],
+            }
+            candidate = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})[0]
+            slices = json.loads(candidate.page_slices)
+            start, end = map(int, slices[0]["offset"].split(":"))
+            expected = SOURCE_RECONCILE.segment_witness_hash("1" * 64, start, end, text[start:end])
+            self.assertEqual(text[start:end], candidate.source_text)
+            self.assertEqual(slices[0]["raw_text_sha256"], expected)
+            self.assertEqual(candidate.raw_text_sha256, expected)
+
+    def test_direct_slice_hash_matches_trimmed_offset_and_body(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp) / "intake"
+            text = "Example Feast\nTHE CHAPTER\n  Direct body.  \nTHE PRAYERS\nCollect body.\n"
+            self._write_intake_pages(intake, ((1, text),))
+            profile = {
+                "heading_aliases": [{"pattern": "^Example Feast$", "owner": "example-feast"}],
+                "slot_aliases": [
+                    {"pattern": "^THE CHAPTER$", "slot": "chapter-lauds"},
+                    {"pattern": "^THE PRAYERS$", "slot": "collect"},
+                ],
+            }
+            candidate = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})[0]
+            start, end = map(int, candidate.source_offset.split(":"))
+            expected = SOURCE_RECONCILE.segment_witness_hash("1" * 64, start, end, text[start:end])
+            self.assertEqual(text[start:end], candidate.source_text)
+            self.assertEqual(candidate.raw_text_sha256, expected)
+
     def test_intake_does_not_join_gapped_or_mixed_route_pages(self):
         with tempfile.TemporaryDirectory() as tmp:
             intake = pathlib.Path(tmp) / "intake"
@@ -1128,6 +1163,31 @@ class SourceReconcileTest(unittest.TestCase):
     def test_clean_witness_body_drops_pua_and_folios(self):
         raw = "123\nBehold a great Confessor.\n\uf000noise\n456"
         self.assertEqual(SOURCE_RECONCILE.clean_witness_body(raw), "Behold a great Confessor.\nnoise")
+
+    def test_scriptural_if_antiphon_is_not_rubrical(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="",
+            slot="benedictus-antiphon", latin_incipit="", source_text="If I be a man of God, let fire come down from heaven.",
+        )
+        self.assertNotIn("rubrical or seasonal variants", SOURCE_RECONCILE.source_review_flags(candidate))
+
+    def test_instructional_if_constructions_remain_rubrical(self):
+        for text in (
+            "If not a priest, V. O Lord, hear my prayer.",
+            "If there be another commemoration, it is made here.",
+            "If this feast occurs on Sunday, use the following.",
+            "If the office is celebrated in Paschaltide, alleluia is added.",
+            "If it be omitted, continue with the collect.",
+            "If necessary, say the following collect.",
+            "If the feast be transferred, use the Common.",
+            "If the Bishop be present, the antiphon is repeated.",
+            "If another saint be commemorated, add the following.",
+        ):
+            candidate = SOURCE_RECONCILE.SourceCandidate(
+                source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="",
+                slot="collect", latin_incipit="", source_text=text,
+            )
+            self.assertIn("rubrical or seasonal variants", SOURCE_RECONCILE.source_review_flags(candidate), text)
 
     def test_clean_witness_body_drops_chant_code_lines(self):
         raw = (
@@ -1238,6 +1298,7 @@ class SourceReconcileTest(unittest.TestCase):
         packet = SOURCE_RECONCILE.candidate_to_apply_packet(candidate)
         self.assertEqual(packet["action"], "add-section")
         self.assertEqual(packet["target_key"], "proper/example-feast/collect")
+        self.assertEqual(packet["raw_text_sha256"], "b" * 64)
         self.assertIn("agent-proposed, not attested", packet["source_comment"])
 
     def test_qualify_slot_adds_hour_suffix(self):

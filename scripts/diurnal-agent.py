@@ -179,6 +179,13 @@ def candidate_identifier(candidate: dict[str, Any]) -> str:
     return str(candidate.get("candidate_id", candidate.get("id", f"DA-{model.digest(candidate)[:16]}")))
 
 
+def composite_slice_hashes(hashes: list[str]) -> str:
+    normalized = [value.lower() for value in hashes]
+    if len(normalized) == 1:
+        return normalized[0]
+    return hashlib.sha256("\x1f".join(normalized).encode("ascii")).hexdigest()
+
+
 def validate_witness(candidate: dict[str, Any]) -> None:
     """Require the immutable printed-source identity needed for safe review."""
     for name in ("source", "extractor"):
@@ -215,6 +222,7 @@ def validate_witness(candidate: dict[str, Any]) -> None:
         if not isinstance(slices, list) or not slices:
             raise ValueError("candidate page_slices must be a non-empty list")
         columns = set()
+        slice_hashes = []
         for index, item in enumerate(slices):
             if not isinstance(item, dict) or not isinstance(item.get("page"), int) or item["page"] < 1:
                 raise ValueError(f"candidate page_slices[{index}] has invalid page")
@@ -222,6 +230,7 @@ def validate_witness(candidate: dict[str, Any]) -> None:
                 raise ValueError(f"candidate page_slices[{index}] requires printed_page")
             if not isinstance(item.get("raw_text_sha256"), str) or not re.fullmatch(r"[0-9a-fA-F]{64}", item["raw_text_sha256"]):
                 raise ValueError(f"candidate page_slices[{index}] requires full slice hash")
+            slice_hashes.append(item["raw_text_sha256"])
             if not isinstance(item.get("extractor"), str) or not item["extractor"]:
                 raise ValueError(f"candidate page_slices[{index}] requires route")
             if not isinstance(item.get("offset"), str) or not item["offset"]:
@@ -236,6 +245,8 @@ def validate_witness(candidate: dict[str, Any]) -> None:
                 columns.add(slice_column)
         if column and len(columns) != 1:
             raise ValueError("candidate page_slices mix source columns")
+        if composite_slice_hashes(slice_hashes) != candidate["raw_text_sha256"].lower():
+            raise ValueError("candidate raw_text_sha256 disagrees with page_slices")
 
 
 def validate_identifier(value: Any, label: str) -> str:

@@ -1040,7 +1040,8 @@ def source_review_flags(candidate: SourceCandidate) -> list[str]:
         flags.append("long extraction")
     if "¶" in text or re.search(
         r"\b(?:in|out of) paschaltide\b|\bP\.\s*T\.|\bT\.\s*P\.|"
-        r"^(?:for (?:a|the) (?:doctor|confessor|bishop|patron)|if\b)|"
+        r"^for (?:a|the) (?:doctor|confessor|bishop|patron)|"
+        r"^if\b(?!\s+i\s+be\s+a\s+man\s+of\s+god\b)|"
         r"\bmay be (?:said|used)\b|"
         r"\blast two lines\b|\bor else\b|\bsaturday before\b",
         text,
@@ -2051,6 +2052,20 @@ def segment_witness_hash(raw_witness: str, start: int, end: int, body: str) -> s
     return hashlib.sha256(material.encode("utf-8")).hexdigest()
 
 
+def composite_slice_hashes(hashes: list[str]) -> str:
+    """Bind a continued witness to its ordered slice hashes.
+
+    A one-slice witness retains that exact hash. Multiple hashes are joined by
+    ASCII unit separator before SHA-256 so page boundaries remain unambiguous.
+    """
+    normalized = [value.lower() for value in hashes]
+    if not normalized or any(not re.fullmatch(r"[0-9a-f]{64}", value) for value in normalized):
+        raise ValueError("slice hashes must be full SHA-256 values")
+    if len(normalized) == 1:
+        return normalized[0]
+    return hashlib.sha256("\x1f".join(normalized).encode("ascii")).hexdigest()
+
+
 def profile_page_alias(page: object, mappings: object) -> str:
     """Return an edition's printed folio for an extracted PDF page, if known."""
     value = str(page)
@@ -2118,7 +2133,7 @@ def candidates_from_intake(
         owner_confidence: str,
         hour: str,
         variant: str,
-        segment_hash: str,
+        raw_witness: str,
     ) -> None:
         # Whitespace does not belong to the witness body, but preserve source
         # offsets relative to the original extracted page for review tooling.
@@ -2147,7 +2162,7 @@ def candidates_from_intake(
             source_offset=f"{body_start}:{body_end}",
             extractor=str(record.get("extractor", record.get("route", ""))),
             extraction_confidence=str(record.get("confidence", record.get("route", ""))),
-            raw_text_sha256=segment_hash,
+            raw_text_sha256=segment_witness_hash(raw_witness, body_start, body_end, body),
             canonical_owner=normalized_owner(owner),
             mapping_confidence="ambiguous" if ambiguous else (owner_confidence or slot_confidence or "unmapped"),
         )
@@ -2182,7 +2197,7 @@ def candidates_from_intake(
             source_offset=";".join(item["offset"] for item in slices),
             extractor=open_slot["extractor"],
             extraction_confidence=str(first["record"].get("confidence", first["record"].get("route", ""))),
-            raw_text_sha256=hashlib.sha256(joined.encode()).hexdigest(),
+            raw_text_sha256=composite_slice_hashes([item["hash"] for item in slices]),
             canonical_owner=open_slot["owner"],
             mapping_confidence=open_slot["confidence"],
             source_page_last=last["page"],
@@ -2238,7 +2253,7 @@ def candidates_from_intake(
                 meta["confidence"],
                 meta["hour"],
                 meta["variant"],
-                segment_witness_hash(raw_witness, start, end, full_text[start:end]),
+                raw_witness,
             )
             return
         open_slot["slices"].append(
@@ -2247,7 +2262,7 @@ def candidates_from_intake(
                 "page": page,
                 "body": body,
                 "offset": f"{body_start}:{body_end}",
-                "hash": segment_witness_hash(raw_witness, start, end, full_text[start:end]),
+                "hash": segment_witness_hash(raw_witness, body_start, body_end, body),
             }
         )
         open_slot["last_page"] = page
@@ -2493,7 +2508,7 @@ def candidates_from_intake(
                     record, page, text, end, next_start, slot, slot_confidence,
                     owner, owner_title or title, owner_confidence,
                     hour, variant,
-                    segment_witness_hash(raw_witness, end, next_start, text[end:next_start]),
+                    raw_witness,
                 )
 
         # Apply headings after the final slot so their context may continue to
@@ -2992,6 +3007,8 @@ def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
             pages.append(page_entry)
             previous_page = page
         if pages:
+            if composite_slice_hashes([item["raw_text_sha256"] for item in pages]) != candidate.raw_text_sha256.lower():
+                raise ValueError("candidate raw_text_sha256 disagrees with page_slices")
             return pages
         raise ValueError("page_slices must contain at least one entry")
     bbox = candidate.source_bbox
@@ -3060,6 +3077,7 @@ def candidate_to_apply_packet(
     return {
         "candidate_id": candidate.candidate_id,
         "source_sha256": candidate.source_sha256,
+        "raw_text_sha256": candidate.raw_text_sha256,
         "extractor": candidate.extractor,
         "pages": pages,
         "target_key": target,
