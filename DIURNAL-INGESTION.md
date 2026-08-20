@@ -17,6 +17,14 @@ the apply command on a reviewable branch.
    scripts/diurnal-intake.py qa output/diurnal-ingest/monastic-diurnal-<hash>
    ```
 
+   Two-column pages require an explicit, page-scoped map; intake never guesses
+   columns from layout. The map is JSON of the form
+   `{"pages":{"12":[{"column":"left","bbox":[x0,y0,x1,y1]}, ...]}}`.
+   Pass it to `extract --columns path.json`. Each declared column gets its own
+   flattened text artifact, hash, extractor route, and bounding box. Discovery
+   consumes only declared column witnesses, and continuations cannot cross
+   columns.
+
    Intake first tests the native text layer, then routes weak pages to rendered
    images and OCR when available. Check mixed, unavailable, and failed pages before
    trusting a segment. OCR is optional: install `tesseract` on the host for
@@ -42,6 +50,10 @@ the apply command on a reviewable branch.
    lets discovery record a portable, confined dependency rather than a private
    host-absolute path. Validate its shape with
    `scripts/diurnal-profiles/schema.json` if a JSON-schema tool is available.
+   For a partial crawl, set `include_pages` to a non-empty list of unique,
+   positive PDF page numbers. The allowlist is applied before page/column
+   normalization, so selected column witnesses keep their original PDF page
+   and document identity while all other pages remain out of discovery.
 
    ```bash
    scripts/source-reconcile.py discover \
@@ -114,7 +126,9 @@ the apply command on a reviewable branch.
 
 An intake page record carries the source/document SHA-256, PDF page, optional
 printed folio and bounding box, extractor route, confidence/QA route, raw-text
-SHA-256, and canonical text. Discovery adds the canonical owner, runtime slot,
+SHA-256, and canonical text. Explicit column records additionally carry a
+`source_column`, independent text artifact/hash/extractor route, and bbox.
+Discovery adds the canonical owner, runtime slot,
 selected target/tier/reason, mapping confidence, classification, and note. A
 schema-v2 discovery packet also carries a content-free dependency manifest:
 full hashes for each materialized input and tree hashes that detect later file
