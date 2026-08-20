@@ -95,6 +95,30 @@ func TestGateRefusesPrintedCrossReferenceFragment(t *testing.T) {
 	}
 }
 
+func TestGateAllowsPrayersInCollectProse(t *testing.T) {
+	p := validPacket()
+	p.Body = "O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity of blessed Athanasius. Through."
+	d := Gate(p, validWorld())
+	if d.Status != GateAllow {
+		t.Fatalf("legitimate collect prose refused: %v", d.Reasons)
+	}
+}
+
+func TestGateRefusesStandalonePrayersHeading(t *testing.T) {
+	for _, body := range []string{
+		"Printed antiphon.\nThe Prayers\nO Lord, hear us.",
+		"The Prayers\nO Lord, hear us.",
+		"Printed antiphon.\n  The Prayers  ",
+	} {
+		p := validPacket()
+		p.Body = body
+		d := Gate(p, validWorld())
+		if d.Status != GateRefuse {
+			t.Fatalf("standalone prayers heading allowed in %q: %v", body, d.Reasons)
+		}
+	}
+}
+
 func TestGateAllowsSameColumnContinuationWithStructuredProvenance(t *testing.T) {
 	p := validPacket()
 	p.Extractor = "column"

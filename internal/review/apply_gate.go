@@ -98,12 +98,13 @@ type GateDecision struct {
 }
 
 var (
-	ownerIDRE  = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
-	columnIDRE = regexp.MustCompile(`^[a-z][a-z0-9_-]*$`)
-	sha256RE   = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
-	underlayRE = regexp.MustCompile(`[A-Za-z][-–][A-Za-z]`)
-	puaRE      = regexp.MustCompile(`\x{FFFD}|[\x{E000}-\x{F8FF}]`)
-	crossRefRE = regexp.MustCompile(`(?is)(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)`)
+	ownerIDRE        = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+	columnIDRE       = regexp.MustCompile(`^[a-z][a-z0-9_-]*$`)
+	sha256RE         = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
+	underlayRE       = regexp.MustCompile(`[A-Za-z][-–][A-Za-z]`)
+	puaRE            = regexp.MustCompile(`\x{FFFD}|[\x{E000}-\x{F8FF}]`)
+	crossRefRE       = regexp.MustCompile(`(?is)(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)`)
+	prayersHeadingRE = regexp.MustCompile(`(?im)^[ \t]*the prayers[ \t]*$`)
 )
 
 var allowedClasses = map[string]bool{
@@ -408,11 +409,14 @@ func genreReasons(key, body string) []string {
 		reasons = append(reasons, "body looks like chant underlay, not corpus text")
 	}
 	lowered := strings.ToLower(body)
-	for _, leftover := range []string{"benedictus, tone", "after the canticle", "\ncollect\n", "the prayers", "the gospel canticle"} {
+	for _, leftover := range []string{"benedictus, tone", "after the canticle", "\ncollect\n", "the gospel canticle"} {
 		if strings.Contains(lowered, leftover) {
 			reasons = append(reasons, "body contains leftover rubric or the next office slot")
 			break
 		}
+	}
+	if prayersHeadingRE.MatchString(body) {
+		reasons = append(reasons, "body contains leftover rubric or the next office slot")
 	}
 	if hasControlBesidesNewline(body) {
 		reasons = append(reasons, "body contains a control character")
