@@ -2,6 +2,7 @@ package review
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strings"
 	"unicode"
@@ -56,6 +57,8 @@ type ApplyPage struct {
 	Page          int    `json:"page"`
 	PrintedPage   string `json:"printed_page,omitempty"`
 	RawTextSHA256 string `json:"raw_text_sha256"`
+	SourceColumn string `json:"source_column,omitempty"`
+	BBox []float64 `json:"bbox,omitempty"`
 	Offset        string `json:"offset,omitempty"`
 	Extractor     string `json:"extractor,omitempty"`
 }
@@ -97,6 +100,7 @@ var (
 	sha256RE   = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
 	underlayRE = regexp.MustCompile(`[A-Za-z][-–][A-Za-z]`)
 	puaRE      = regexp.MustCompile(`\x{FFFD}|[\x{E000}-\x{F8FF}]`)
+	crossRefRE = regexp.MustCompile(`(?is)(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)`)
 )
 
 var allowedClasses = map[string]bool{
@@ -221,6 +225,9 @@ func Gate(packet ApplyPacket, world ApplyWorld) GateDecision {
 				refuse(r)
 			}
 		}
+		if crossRefRE.MatchString(body) {
+			refuse("body contains a printed cross-reference or directive fragment")
+		}
 	}
 
 	switch packet.Action {
@@ -318,6 +325,8 @@ func checkSpan(d *GateDecision, packet ApplyPacket, parsed applyTarget) {
 	}
 	route := strings.TrimSpace(packet.Extractor)
 	prev := 0
+	column := ""
+	sawPlain := false
 	for i, page := range packet.Pages {
 		if page.Page < 1 {
 			refuse(fmt.Sprintf("pages[%d] needs a positive page number", i))
@@ -327,6 +336,20 @@ func checkSpan(d *GateDecision, packet ApplyPacket, parsed applyTarget) {
 			refuse(fmt.Sprintf("pages[%d] raw_text_sha256 must be a full SHA-256 when present", i))
 		}
 		pageRoute := strings.TrimSpace(page.Extractor)
+		if page.SourceColumn != "" {
+			if sawPlain { refuse("mixed column and non-column pages cannot form one witness") }
+			if !regexp.MustCompile(`^[a-z][a-z0-9_-]*$`).MatchString(page.SourceColumn) { refuse(fmt.Sprintf("pages[%d] source_column is unsafe", i)) }
+			if column == "" { column = page.SourceColumn } else if column != page.SourceColumn { refuse("mixed source columns cannot form one witness") }
+			if len(page.BBox) != 4 || page.BBox[2] <= page.BBox[0] || page.BBox[3] <= page.BBox[1] {
+				refuse(fmt.Sprintf("pages[%d] bbox must be four positive finite coordinates", i))
+			} else {
+				for _, value := range page.BBox { if math.IsNaN(value) || math.IsInf(value, 0) { refuse(fmt.Sprintf("pages[%d] bbox must be finite", i)); break } }
+			}
+		} else if column != "" {
+			refuse("mixed column and non-column pages cannot form one witness")
+		} else {
+			sawPlain = true
+		}
 		if pageRoute != "" && route != "" && pageRoute != route {
 			refuse("mixed extractor routes cannot form one witness")
 		}

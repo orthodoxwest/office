@@ -23,6 +23,7 @@ import difflib
 import functools
 import hashlib
 import json
+import math
 import pathlib
 import re
 import subprocess
@@ -245,6 +246,7 @@ class SourceCandidate:
     source_sha256: str = ""
     printed_page: str = ""
     source_bbox: str = ""
+    source_column: str = ""
     source_offset: str = ""
     extractor: str = ""
     extraction_confidence: str = ""
@@ -1766,6 +1768,53 @@ def intake_text(intake_dir: pathlib.Path, record: dict) -> str:
     return str(embedded)
 
 
+def normalize_column_records(intake_dir: pathlib.Path, records: list[dict]) -> list[dict]:
+    """Expand only explicitly declared column witnesses; fail closed on bad maps."""
+    normalized: list[dict] = []
+    saw_columns = any(record.get("columns") is not None for record in records)
+    for record in records:
+        columns = record.get("columns")
+        if columns is None:
+            if saw_columns:
+                raise ValueError("column intake cannot mix page and column witnesses")
+            normalized.append(record)
+            continue
+        if not isinstance(columns, list) or not columns:
+            raise ValueError("intake page declares columns but has no column witnesses")
+        for column in columns:
+            if not isinstance(column, dict) or not isinstance(column.get("column"), str):
+                raise ValueError("intake column witness must declare source_column")
+            bbox = column.get("bbox")
+            if not isinstance(bbox, list) or len(bbox) != 4:
+                raise ValueError("intake column witness must preserve bbox")
+            item = dict(record)
+            item.update({
+                "source_column": column["column"],
+                "bbox": bbox,
+                "text_path": column.get("text_path", record.get("text_path", "")),
+                "raw_text_sha256": column.get("raw_text_sha256", ""),
+                "extractor": column.get("extractor", ""),
+                "canonical_text": column.get("canonical_text", ""),
+            })
+            if not item["text_path"] or not item["raw_text_sha256"]:
+                raise ValueError("column witness requires its own text artifact and SHA-256")
+            path = (intake_dir / item["text_path"]).resolve()
+            try:
+                path.relative_to(intake_dir.resolve())
+            except ValueError as exc:
+                raise ValueError("column text artifact escapes intake root") from exc
+            if not path.is_file():
+                raise ValueError("column text artifact is missing")
+            actual = hashlib.sha256(path.read_bytes()).hexdigest()
+            if actual != str(item["raw_text_sha256"]).lower():
+                raise ValueError("column text artifact SHA-256 does not match witness")
+            item["canonical_text"] = path.read_text(encoding="utf-8", errors="replace")
+            normalized.append(item)
+    if saw_columns:
+        return sorted(normalized, key=lambda item: (str(item.get("source_column", "")), int(item.get("page", item.get("page_number", 0)) or 0)))
+    return normalized
+
+
 def load_diurnal_profile(path: pathlib.Path | None) -> dict:
     """Load the deliberately small edition-specific mapping profile.
 
@@ -1869,7 +1918,10 @@ def intake_page_records(intake_dir: pathlib.Path) -> list[dict]:
             page = 0
         return page, str(record.get("source_sha256", "")), str(record.get("source_key", ""))
 
-    return sorted(unique.values(), key=record_sort_key)
+    normalized = normalize_column_records(intake_dir, list(unique.values()))
+    if any(record.get("source_column") for record in normalized):
+        return normalized
+    return sorted(normalized, key=record_sort_key)
 
 
 def profile_match(text: str, mappings: object) -> tuple[str, str]:
@@ -1988,11 +2040,12 @@ def profile_page_alias(page: object, mappings: object) -> str:
 def diurnal_candidate_id(candidate: SourceCandidate) -> str:
     source_hash = (candidate.source_sha256 or hashlib.sha256(candidate.source.encode()).hexdigest())[:12]
     witness = candidate.raw_text_sha256 or hashlib.sha256(candidate.source_text.encode()).hexdigest()
+    column = f"-C{candidate.source_column}" if candidate.source_column else ""
     page = candidate.source_page or 0
     last = candidate.source_page_last or page
     if last and last != page:
-        return f"DI-{source_hash}-P{page}-P{last}-{witness[:12]}"
-    return f"DI-{source_hash}-P{page}-{witness[:12]}"
+        return f"DI-{source_hash}{column}-P{page}-P{last}-{witness[:12]}"
+    return f"DI-{source_hash}{column}-P{page}-{witness[:12]}"
 
 
 def candidates_from_intake(
@@ -2012,6 +2065,7 @@ def candidates_from_intake(
     carried_variant = ""
     carried_confidence = ""
     carried_source_sha256 = ""
+    carried_source_column = ""
     open_slot: dict | None = None
 
     def normalized_owner(value: str) -> str:
@@ -2060,6 +2114,7 @@ def candidates_from_intake(
             source_sha256=str(record.get("source_sha256", record.get("document_sha256", ""))),
             printed_page=str(record.get("printed_page", record.get("folio", ""))) or profile_page_alias(page, profile.get("page_aliases")),
             source_bbox=json.dumps(record.get("bbox", ""), sort_keys=True) if record.get("bbox") else "",
+            source_column=str(record.get("source_column", "")),
             source_offset=f"{body_start}:{body_end}",
             extractor=str(record.get("extractor", record.get("route", ""))),
             extraction_confidence=str(record.get("confidence", record.get("route", ""))),
@@ -2091,6 +2146,8 @@ def candidates_from_intake(
             latin_incipit="",
             source_text=joined,
             source_sha256=open_slot["source_sha256"],
+            source_column=open_slot["source_column"],
+            source_bbox=json.dumps(first["record"].get("bbox"), sort_keys=True) if first["record"].get("bbox") else "",
             printed_page=str(first["record"].get("printed_page", first["record"].get("folio", "")))
             or profile_page_alias(first["page"], profile.get("page_aliases")),
             source_offset=";".join(item["offset"] for item in slices),
@@ -2104,9 +2161,12 @@ def candidates_from_intake(
                 [
                     {
                         "page": item["page"],
+                        "printed_page": str(item["record"].get("printed_page", item["record"].get("folio", ""))) or profile_page_alias(item["page"], profile.get("page_aliases")) or str(item["page"]),
                         "raw_text_sha256": item["hash"],
                         "offset": item["offset"],
                         "extractor": open_slot["extractor"],
+                        "source_column": item["record"].get("source_column", open_slot["source_column"]),
+                        "bbox": item["record"].get("bbox", ""),
                     }
                     for item in slices
                 ],
@@ -2191,6 +2251,7 @@ def candidates_from_intake(
             "confidence": "ambiguous" if "ambiguous" in (owner_confidence, slot_confidence) else (owner_confidence or slot_confidence or "unmapped"),
             "extractor": extractor,
             "source_sha256": source_sha256,
+            "source_column": str(record.get("source_column", "")),
             "last_page": page,
             "slices": [],
         }
@@ -2205,13 +2266,19 @@ def candidates_from_intake(
         if carried_source_sha256 and source_sha256 != carried_source_sha256:
             flush_open()
             carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
+        source_column = str(record.get("source_column", ""))
+        if source_column != carried_source_column:
+            flush_open()
+            carried_owner = carried_title = carried_hour = carried_variant = carried_confidence = ""
         if open_slot is not None and (
             source_sha256 != open_slot["source_sha256"]
             or page != open_slot["last_page"] + 1
             or extractor != open_slot["extractor"]
+            or str(record.get("source_column", "")) != open_slot["source_column"]
         ):
             flush_open()
         carried_source_sha256 = source_sha256
+        carried_source_column = source_column
         text = intake_text(intake_dir, record)
         if not text.strip():
             continue
@@ -2410,7 +2477,14 @@ def candidates_from_intake(
         carried_owner, carried_title, carried_hour, carried_variant, carried_confidence = context
 
     flush_open()
-    return sorted(candidates, key=lambda item: (item.source, item.source_page, item.source_offset, item.slot, item.candidate_id))
+    ordered = sorted(candidates, key=lambda item: (item.source_column, item.source, item.source_page, item.source_offset, item.slot, item.candidate_id))
+    seen: dict[str, SourceCandidate] = {}
+    for candidate in ordered:
+        prior = seen.get(candidate.candidate_id)
+        if prior is not None and (prior.source_column, prior.source_offset, prior.slot) != (candidate.source_column, candidate.source_offset, candidate.slot):
+            raise ValueError(f"candidate ID collision: {candidate.candidate_id}")
+        seen[candidate.candidate_id] = candidate
+    return ordered
 
 
 def load_resolution_inventory(path: pathlib.Path | None) -> list[dict]:
@@ -2508,7 +2582,10 @@ def classify_discovery(
         candidate.runtime_target = selected
         candidate.resolution_tier = str(row.get("selected_tier", row.get("tier", "")))
         candidate.resolution_reason = str(row.get("reason", ""))
-        current = corpus.get(selected) or corpus.get(target)
+        comparison_key = target if target in corpus else (selected if selected in corpus else "")
+        current = corpus.get(comparison_key) if comparison_key else None
+        candidate.corpus_key = comparison_key
+        candidate.current_text = current.text if current else ""
         similarity = anchored_text_similarity(candidate.source_text, current.text) if current else 0.0
         candidate.text_similarity = round(similarity, 3)
         direct_existing = row.get("direct_existing", [])
@@ -2843,27 +2920,65 @@ def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
         try:
             parsed = json.loads(candidate.page_slices)
         except json.JSONDecodeError:
-            parsed = []
-        if isinstance(parsed, list) and parsed:
-            pages = []
-            for item in parsed:
-                if not isinstance(item, dict):
-                    continue
-                pages.append({
-                    "page": int(item.get("page") or 0),
-                    "printed_page": str(item.get("printed_page") or item.get("page") or ""),
+            raise ValueError("page_slices must be valid JSON")
+        if not isinstance(parsed, list) or not parsed:
+            raise ValueError("page_slices must be a non-empty list")
+        pages = []
+        expected_column = candidate.source_column
+        expected_extractor = candidate.extractor
+        previous_page = 0
+        for item in parsed:
+            if not isinstance(item, dict):
+                raise ValueError("page_slices entries must be objects")
+            bbox = item.get("bbox")
+            page = item.get("page")
+            column = item.get("source_column")
+            extractor = item.get("extractor")
+            if isinstance(page, bool) or not isinstance(page, int) or page < 1 or (previous_page and page != previous_page + 1):
+                raise ValueError("page_slices pages must be positive and consecutive")
+            if not isinstance(item.get("printed_page"), str) or not item["printed_page"].strip():
+                raise ValueError("page_slices requires printed_page")
+            if not isinstance(item.get("raw_text_sha256"), str) or not re.fullmatch(r"[0-9a-fA-F]{64}", item["raw_text_sha256"]):
+                raise ValueError("page_slices requires full raw_text_sha256")
+            if not isinstance(item.get("offset"), str) or not item["offset"].strip() or not isinstance(extractor, str) or not extractor.strip():
+                raise ValueError("page_slices requires offset and extractor")
+            if expected_column:
+                if not isinstance(column, str) or not re.fullmatch(r"[a-z][a-z0-9_-]*", column):
+                    raise ValueError("page_slices requires a safe source_column")
+            elif column:
+                raise ValueError("non-column page_slices cannot declare source_column")
+            if expected_column and column != expected_column or expected_extractor and extractor != expected_extractor:
+                raise ValueError("page_slices disagree with candidate witness identity")
+            if expected_column and (not isinstance(bbox, list) or len(bbox) != 4 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in bbox) or bbox[2] <= bbox[0] or bbox[3] <= bbox[1]):
+                raise ValueError("page_slices requires a finite positive bbox")
+            page_entry = {
+                    "page": page,
+                    "printed_page": str(item.get("printed_page") or ""),
                     "raw_text_sha256": str(item.get("raw_text_sha256") or ""),
                     "offset": str(item.get("offset") or ""),
                     "extractor": str(item.get("extractor") or candidate.extractor),
-                })
-            if pages:
-                return pages
+            }
+            if expected_column:
+                page_entry.update({"source_column": str(item["source_column"]), "bbox": bbox})
+            pages.append(page_entry)
+            previous_page = page
+        if pages:
+            return pages
+        raise ValueError("page_slices must contain at least one entry")
+    bbox = candidate.source_bbox
+    if isinstance(bbox, str):
+        try:
+            bbox = json.loads(bbox)
+        except json.JSONDecodeError:
+            bbox = ""
     return [{
         "page": candidate.source_page,
         "printed_page": candidate.printed_page or str(candidate.source_page),
         "raw_text_sha256": candidate.raw_text_sha256,
         "offset": candidate.source_offset,
         "extractor": candidate.extractor,
+        "source_column": candidate.source_column,
+        "bbox": bbox,
     }]
 
 
@@ -2906,7 +3021,11 @@ def candidate_to_apply_packet(
                 return None
     if re.search(r"THE GOSPEL CANTICLE", body, re.I):
         return None
+    if re.search(r"(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)", body, re.I | re.S):
+        return None
     pages = apply_pages_from_candidate(candidate)
+    if not pages:
+        return None
     printed = candidate.printed_page or (str(pages[0]["page"]) if pages else "")
     source = candidate.source or "monastic-diurnal"
     return {

@@ -462,11 +462,24 @@ class DiurnalAgentTest(unittest.TestCase):
             "printed_page": "37",
             "extractor": "ocr",
             "raw_text_sha256": "b" * 64,
+            "source_column": "left",
+            "source_bbox": [0, 0, 10, 10],
         }
         witness = agent.witness_from_candidate(candidate)
         self.assertEqual(witness["source_page"], 42)
         self.assertEqual(witness["printed_page"], "37")
         self.assertEqual(witness["raw_text_sha256"], "b" * 64)
+        self.assertEqual(witness["source_column"], "left")
+
+    def test_collection_binds_structured_page_slices(self):
+        candidate = {"source": "diurnal", "source_sha256": "a" * 64, "source_page": 1, "extractor": "column", "raw_text_sha256": "b" * 64, "source_column": "left", "source_bbox": [0, 0, 10, 10], "page_slices": [{"page": 1, "printed_page": "12", "raw_text_sha256": "c" * 64, "extractor": "column", "source_column": "left", "bbox": [0, 0, 10, 10], "offset": "1:4"}]}
+        witness = agent.witness_from_candidate(candidate)
+        self.assertEqual(witness["page_slices"][0]["printed_page"], "12")
+
+    def test_legacy_page_slices_without_columns_remain_valid(self):
+        candidate = {"source": "diurnal", "source_sha256": "a" * 64, "source_page": 1, "extractor": "native", "raw_text_sha256": "b" * 64, "page_slices": [{"page": 1, "printed_page": "12", "raw_text_sha256": "c" * 64, "extractor": "native", "offset": "1:4"}]}
+        witness = agent.witness_from_candidate(candidate)
+        self.assertNotIn("source_column", witness)
 
     def test_result_and_collection_keep_immutable_local_witness(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -22,6 +22,52 @@ OfficeSection = SOURCE_RECONCILE.OfficeSection
 
 
 class SourceReconcileTest(unittest.TestCase):
+    def test_apply_pages_rejects_malformed_later_slice_atomically(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="", slot="chapter",
+            latin_incipit="", source_text="Body", source_column="left", extractor="column",
+            page_slices=__import__("json").dumps([
+                {"page": 1, "printed_page": "12", "raw_text_sha256": "a" * 64, "offset": "1:4", "extractor": "column", "source_column": "left", "bbox": [0, 0, 10, 10]},
+                {"page": 2, "printed_page": "13", "raw_text_sha256": "bad", "offset": "", "extractor": "column", "source_column": "left", "bbox": [0, 0, 10, 10]},
+            ]),
+        )
+        with self.assertRaises(ValueError):
+            SOURCE_RECONCILE.apply_pages_from_candidate(candidate)
+
+    def test_apply_pages_never_falls_back_for_invalid_page_slices_container(self):
+        for value in ("not json", "{}", "[]"):
+            candidate = SOURCE_RECONCILE.SourceCandidate(
+                source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="", slot="chapter",
+                latin_incipit="", source_text="Body", extractor="native", raw_text_sha256="a" * 64,
+                page_slices=value,
+            )
+            with self.assertRaises(ValueError):
+                SOURCE_RECONCILE.apply_pages_from_candidate(candidate)
+
+    def test_legacy_apply_pages_allow_non_column_slices(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="", slot="chapter",
+            latin_incipit="", source_text="Body", extractor="native", raw_text_sha256="a" * 64,
+            page_slices=__import__("json").dumps([{"page": 1, "printed_page": "12", "raw_text_sha256": "b" * 64, "offset": "1:4", "extractor": "native"}]),
+        )
+        pages = SOURCE_RECONCILE.apply_pages_from_candidate(candidate)
+        self.assertNotIn("source_column", pages[0])
+
+    def test_declared_columns_normalize_and_discriminate_witness_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp)
+            (intake / "left.txt").write_text("Left")
+            (intake / "right.txt").write_text("Right")
+            page = {"page": 1, "source_sha256": "a" * 64, "columns": [
+                {"column": "left", "bbox": [0, 0, 10, 10], "text_path": "left.txt", "raw_text_sha256": SOURCE_RECONCILE.hashlib.sha256(b"Left").hexdigest(), "extractor": "column"},
+                {"column": "right", "bbox": [10, 0, 20, 10], "text_path": "right.txt", "raw_text_sha256": SOURCE_RECONCILE.hashlib.sha256(b"Right").hexdigest(), "extractor": "column"},
+            ]}
+            records = SOURCE_RECONCILE.normalize_column_records(intake, [page])
+            self.assertEqual([item["source_column"] for item in records], ["left", "right"])
+            first = SOURCE_RECONCILE.SourceCandidate(source="x", source_page=1, hour="", office_title="", office_variant="", slot="", latin_incipit="", source_text="Left", source_sha256="a" * 64, raw_text_sha256="b" * 64, source_column="left")
+            second = SOURCE_RECONCILE.SourceCandidate(**{**first.__dict__, "source_column": "right", "raw_text_sha256": "c" * 64})
+            self.assertNotEqual(SOURCE_RECONCILE.diurnal_candidate_id(first), SOURCE_RECONCILE.diurnal_candidate_id(second))
+
     def test_chant_code_detection_preserves_english(self):
         self.assertTrue(
             SOURCE_RECONCILE.is_chant_code(
@@ -571,6 +617,8 @@ class SourceReconcileTest(unittest.TestCase):
         )
         self.assertEqual(candidate.discovery_classification, "missing-override")
         self.assertEqual(candidate.runtime_target, "ordinary/lauds/collect")
+        self.assertEqual(candidate.corpus_key, "ordinary/lauds/collect")
+        self.assertEqual(candidate.current_text, "Old fallback.")
 
     def test_diurnal_discovery_recognizes_hour_specific_direct_proper(self):
         corpus = {
@@ -606,6 +654,8 @@ class SourceReconcileTest(unittest.TestCase):
             }],
         )
         self.assertEqual(candidate.discovery_classification, "verify-existing")
+        self.assertEqual(candidate.corpus_key, "proper/example-feast/collect-lauds")
+        self.assertEqual(candidate.current_text, "Existing direct collect.")
 
     def test_diurnal_discovery_does_not_cross_office_hours(self):
         corpus = {
@@ -1117,6 +1167,15 @@ class SourceReconcileTest(unittest.TestCase):
             )
         }
         self.assertIsNone(SOURCE_RECONCILE.candidate_to_apply_packet(candidate, set(), corpus))
+
+    def test_apply_packet_skips_printed_cross_reference_fragment(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="diurnal", source_page=7, hour="lauds", office_title="Example", office_variant="", slot="collect",
+            latin_incipit="", source_text='“Good and faithful servant” from Lauds\n   in Common (35*) /',
+            canonical_owner="example-feast", source_sha256="a" * 64, raw_text_sha256="b" * 64,
+            extractor="pdftotext-layout", discovery_classification="missing-override", text_similarity=0.2,
+        )
+        self.assertIsNone(SOURCE_RECONCILE.candidate_to_apply_packet(candidate, set(), {}))
 
     def test_candidate_to_apply_packet_skips_unwritable_classes(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
