@@ -1829,7 +1829,24 @@ def load_diurnal_profile(path: pathlib.Path | None) -> dict:
     return payload
 
 
-def intake_page_records(intake_dir: pathlib.Path) -> list[dict]:
+def profile_include_pages(profile: dict) -> set[int] | None:
+    """Validate the explicit PDF-page allowlist used before normalization."""
+    if "include_pages" not in profile:
+        return None
+    values = profile["include_pages"]
+    if not isinstance(values, list) or not values:
+        raise ValueError("profile include_pages must be a non-empty list")
+    pages: set[int] = set()
+    for value in values:
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ValueError("profile include_pages must contain positive integers")
+        if value in pages:
+            raise ValueError(f"profile include_pages repeats page {value}")
+        pages.add(value)
+    return pages
+
+
+def intake_page_records(intake_dir: pathlib.Path, include_pages: set[int] | None = None) -> list[dict]:
     """Return normalized page records from a diurnal-intake run.
 
     The intake command writes one JSON artifact per page.  This reader is
@@ -1902,6 +1919,18 @@ def intake_page_records(intake_dir: pathlib.Path) -> list[dict]:
             payload = load_json(path)
             if isinstance(payload, dict):
                 records.append(payload)
+    if include_pages is not None:
+        available = {
+            int(record.get("page", record.get("page_number", 0)) or 0)
+            for record in records
+        }
+        missing = sorted(include_pages - available)
+        if missing:
+            raise ValueError("profile include_pages requested absent PDF page(s): " + ", ".join(map(str, missing)))
+        records = [
+            record for record in records
+            if int(record.get("page", record.get("page_number", 0)) or 0) in include_pages
+        ]
     # A manifest may also point to page artifacts; retain only one record per
     # page/text witness deterministically.
     unique: dict[tuple[str, str, str], dict] = {}
@@ -2259,7 +2288,7 @@ def candidates_from_intake(
         if not open_slot or not open_slot["slices"]:
             open_slot = None
 
-    for record in intake_page_records(intake_dir):
+    for record in intake_page_records(intake_dir, profile_include_pages(profile)):
         source_sha256 = str(record.get("source_sha256", record.get("document_sha256", "")))
         extractor = str(record.get("extractor", record.get("route", "")))
         page = int(record.get("page", record.get("page_number", 0)) or 0)
@@ -2852,7 +2881,7 @@ def cmd_discover(args: argparse.Namespace) -> int:
     classify_discovery(candidates, corpus, feast_names, inventory)
     dependency_manifest = discovery_dependency_manifest(
         intake_dir=intake_dir,
-        intake_records=intake_page_records(intake_dir),
+        intake_records=intake_page_records(intake_dir, profile_include_pages(profile)),
         profile_path=profile_path,
         inventory_path=inventory_path,
         data_dir=data_dir,

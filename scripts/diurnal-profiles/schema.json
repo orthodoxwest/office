@@ -4,6 +4,12 @@
   "type": "object",
   "properties": {
     "default_hour": { "type": "string" },
+    "include_pages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "integer", "minimum": 1 }
+    },
     "page_aliases": { "$ref": "#/$defs/mappings" },
     "heading_aliases": { "$ref": "#/$defs/mappings" },
     "slot_aliases": { "$ref": "#/$defs/mappings" }

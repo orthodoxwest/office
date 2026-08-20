@@ -22,6 +22,53 @@ OfficeSection = SOURCE_RECONCILE.OfficeSection
 
 
 class SourceReconcileTest(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec("jsonschema"), "jsonschema is unavailable")
+    def test_profile_schema_accepts_and_rejects_include_pages(self):
+        import jsonschema
+
+        schema = json.loads((SCRIPT.parent / "diurnal-profiles" / "schema.json").read_text())
+        validator = jsonschema.Draft7Validator(schema)
+        self.assertEqual(list(validator.iter_errors({"include_pages": [1, 889]})), [])
+        for value in ([], [0], [True], [1, 1], "1"):
+            self.assertTrue(list(validator.iter_errors({"include_pages": value})), value)
+
+    def test_include_pages_selects_column_page_before_mixed_normalization(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp)
+            for number in (1, 2):
+                (intake / "pages" / f"{number:04d}").mkdir(parents=True)
+            native = intake / "pages/0001/native.txt"
+            native.write_text("Ordinary page")
+            (intake / "pages/0001/page.json").write_text(json.dumps({
+                "page": 1, "source_key": "book", "source_sha256": "a" * 64,
+                "text_path": "pages/0001/native.txt", "raw_text_sha256": SOURCE_RECONCILE.hashlib.sha256(native.read_bytes()).hexdigest(),
+            }))
+            columns = []
+            for label, text, bbox in (("left", "Left proper", [0, 0, 10, 10]), ("right", "Right proper", [10, 0, 20, 10])):
+                path = intake / f"pages/0002/{label}.txt"
+                path.write_text(text)
+                columns.append({"column": label, "bbox": bbox, "text_path": f"pages/0002/{label}.txt", "raw_text_sha256": SOURCE_RECONCILE.hashlib.sha256(path.read_bytes()).hexdigest(), "extractor": "column"})
+            (intake / "pages/0002/page.json").write_text(json.dumps({
+                "page": 2, "source_key": "book", "source_sha256": "a" * 64,
+                "raw_text_sha256": "b" * 64, "columns": columns,
+            }))
+            profile = {"include_pages": [2], "default_hour": "lauds"}
+            candidates = SOURCE_RECONCILE.candidates_from_intake(intake, profile, {}, {})
+            self.assertEqual({item.source_column for item in candidates}, {"left", "right"})
+            self.assertEqual({item.source_page for item in candidates}, {2})
+            self.assertEqual({item.source_sha256 for item in candidates}, {"a" * 64})
+
+    def test_include_pages_rejects_malformed_duplicates_and_absent_pages(self):
+        for value in ([], [0], [True], [1, 1], "1"):
+            with self.assertRaises(ValueError):
+                SOURCE_RECONCILE.profile_include_pages({"include_pages": value})
+        with tempfile.TemporaryDirectory() as tmp:
+            intake = pathlib.Path(tmp)
+            (intake / "pages/0001").mkdir(parents=True)
+            (intake / "pages/0001/page.json").write_text(json.dumps({"page": 1}))
+            with self.assertRaisesRegex(ValueError, "absent PDF page"):
+                SOURCE_RECONCILE.intake_page_records(intake, {2})
+
     def test_apply_pages_rejects_malformed_later_slice_atomically(self):
         candidate = SOURCE_RECONCILE.SourceCandidate(
             source="diurnal", source_page=1, hour="lauds", office_title="", office_variant="", slot="chapter",

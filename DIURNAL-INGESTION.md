@@ -50,6 +50,10 @@ the apply command on a reviewable branch.
    lets discovery record a portable, confined dependency rather than a private
    host-absolute path. Validate its shape with
    `scripts/diurnal-profiles/schema.json` if a JSON-schema tool is available.
+   For a partial crawl, set `include_pages` to a non-empty list of unique,
+   positive PDF page numbers. The allowlist is applied before page/column
+   normalization, so selected column witnesses keep their original PDF page
+   and document identity while all other pages remain out of discovery.
 
    ```bash
    scripts/source-reconcile.py discover \
