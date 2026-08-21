@@ -338,6 +338,17 @@ corpus entry verbatim (see the assurance notes above). `#` comment lines inside
 sections — including `# SOURCE:` provenance annotations — are stripped by the
 loader and never render.
 
+A section whose body is a bare `@omit` says the element is **not said** in this
+office. Resolution walks proper → seasonal → ordinary and returns the first
+non-empty body, so leaving a section out inherits a lower tier's text rather
+than suppressing it; `@omit` resolves like a text, ending the walk at the tier
+that declares it, and the composers drop the element (and any section left with
+no elements) instead of rendering it. Use it only where the books say an element
+is omitted — the Triduum's chapter, short responsory, hymn and Vespers versicle
+are the current cases. An omission carries no wording, so it is excluded from
+the lint, provenance and zero-occurrence inventories; it is not permitted on a
+psalm antiphon, since every psalm is sung under one.
+
 **Common texts** (`data/texts/commons/confessor.txt`) — used when a feast has no proper of its own:
 
 ```ini

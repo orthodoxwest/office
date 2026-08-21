@@ -137,7 +137,7 @@ func TestLaudsCommemorations(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 elements, got %d", len(elems))
@@ -192,7 +192,7 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 elements (feria commemoration), got %d", len(elems))
 	}
@@ -212,7 +212,7 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 	// Concurrence places the feria in Vespers.Commemorations. The raw
 	// FeriaCommemoration field is inserted here only for Lauds, avoiding a
 	// duplicate when the Vespers office day is composed.
-	if got := addCommemorations(day, "vespers", corpus); len(got) != 0 {
+	if got := addCommemorations(day, "vespers", corpus, false); len(got) != 0 {
 		t.Fatalf("raw feria field should not be inserted directly at Vespers, got %d elements", len(got))
 	}
 }
@@ -235,7 +235,7 @@ func TestLaudsPrivilegedFeriaCommemorationUsesFerialTexts(t *testing.T) {
 		}},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
 	}
@@ -268,7 +268,7 @@ func TestLaudsNamedPrivilegedFeriaCommemorationUsesOwnProper(t *testing.T) {
 		}},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
 	}
@@ -301,7 +301,7 @@ func TestAddCommemorationsStripsRedundantPrefix(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if elems[0].Text != "Commemoration of St Paul, Apostle" {
 		t.Errorf("heading = %q, want the prefix applied once", elems[0].Text)
 	}
@@ -327,7 +327,7 @@ func TestLaudsTemporalCommemorationUsesCanticleAntiphon(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 elements, got %d", len(elems))
 	}
@@ -356,7 +356,7 @@ func TestLaudsTemporalVigilFallsToPsalterAntiphon(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if elems[1].Text != "Blessed be the Lord God of Israel" {
 		t.Errorf("antiphon = %q, want the Psalter Benedictus antiphon", elems[1].Text)
 	}
@@ -650,7 +650,7 @@ func TestAddCommemorationsUsesProperIDAlias(t *testing.T) {
 		},
 	}
 
-	elems := addCommemorations(day, "lauds", corpus)
+	elems := addCommemorations(day, "lauds", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("expected 4 elements, got %d", len(elems))
 	}

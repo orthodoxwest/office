@@ -42,10 +42,10 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
 			if elem.Type == "proper-versicle" && elem.Ref == "versicle" {
-				elems = append(elems, resolveMinorHourVersicle(day, strings.ToLower(m.Name), corpus))
+				elems = appendResolved(elems, resolveMinorHourVersicle(day, strings.ToLower(m.Name), corpus))
 				continue
 			}
-			elems = append(elems, resolveHourElement(day, strings.ToLower(m.Name), elem, corpus))
+			elems = appendHourElement(elems, day, strings.ToLower(m.Name), elem, corpus)
 		}
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,
@@ -65,6 +65,16 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 // versicles because their texts differ from the seeded ordinary responsories.
 func resolveMinorHourVersicle(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus) models.OfficeElement {
 	responsory, responsoryRef := resolveProperText(day, hourName, "short-responsory", corpus)
+	// An omitted responsory carries no versicle either; pass the marker on so
+	// the caller drops the element rather than reducing a rubric to a versicle.
+	if texts.IsOmitted(responsory) {
+		return sourcedElement(models.OfficeElement{
+			Type:      models.Versicle,
+			Text:      responsory,
+			SlotRef:   "versicle",
+			SourceRef: responsoryRef,
+		}, responsoryRef)
+	}
 	ordinaryResponsory := "ordinary/" + hourName + "/short-responsory"
 	if responsoryRef == ordinaryResponsory {
 		text, ref := resolveProperText(day, hourName, "versicle", corpus)

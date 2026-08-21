@@ -252,7 +252,7 @@ func TestCommemorationSequencingConcludesOnlyTheLast(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			day := makeDay(2026, time.July, 26, nil, commemorationFeasts(tt.count), "")
-			got := collectTexts(addCommemorations(day, "lauds", corpus))
+			got := collectTexts(addCommemorations(day, "lauds", corpus, false))
 			if len(got) != tt.count {
 				t.Fatalf("got %d collects, want %d", len(got), tt.count)
 			}
@@ -269,7 +269,7 @@ func TestCommemorationSequencingConcludesOnlyTheLast(t *testing.T) {
 
 func TestCommemorationSequencingWithNoCommemorations(t *testing.T) {
 	day := makeDay(2026, time.July, 26, nil, nil, "")
-	if elems := addCommemorations(day, "lauds", sequencingTestCorpus()); len(elems) != 0 {
+	if elems := addCommemorations(day, "lauds", sequencingTestCorpus(), false); len(elems) != 0 {
 		t.Errorf("addCommemorations with no commemorations returned %d elements, want 0", len(elems))
 	}
 }
@@ -278,7 +278,7 @@ func TestCommemorationSequencingWithNoCommemorations(t *testing.T) {
 // the others, so review tooling attributes the text correctly.
 func TestCommemorationSequencingRecordsConclusionRef(t *testing.T) {
 	day := makeDay(2026, time.July, 26, nil, commemorationFeasts(3), "")
-	elems := addCommemorations(day, "lauds", sequencingTestCorpus())
+	elems := addCommemorations(day, "lauds", sequencingTestCorpus(), false)
 
 	var collects []models.OfficeElement
 	for _, e := range elems {
@@ -299,5 +299,84 @@ func TestCommemorationSequencingRecordsConclusionRef(t *testing.T) {
 		if want := i == 2; hasRef != want {
 			t.Errorf("collect %d: conclusion ref present=%v, want %v (refs=%v)", i, hasRef, want, c.SourceRefs)
 		}
+	}
+}
+
+// When a Suffrage or Commemoration of the Cross follows, it carries the run's
+// last conclusion, so no commemoration collect is concluded (XXXIII.5; see
+// collectRunContinues for the Diurnal's printed ordering at p. 144).
+func TestCommemorationSequencingWithSuffrageFollowing(t *testing.T) {
+	corpus := sequencingTestCorpus()
+
+	for _, count := range []int{1, 2, 3} {
+		day := makeDay(2026, time.July, 26, nil, commemorationFeasts(count), "")
+		got := collectTexts(addCommemorations(day, "lauds", corpus, true))
+		if len(got) != count {
+			t.Fatalf("got %d collects, want %d", len(got), count)
+		}
+		for i, text := range got {
+			if strings.Contains(text, "CONCLUSION.") {
+				t.Errorf("count=%d collect %d is concluded, want unconcluded: %q",
+					count, i, text)
+			}
+		}
+	}
+}
+
+func TestCollectFollows(t *testing.T) {
+	section := func(name string, elemTypes ...string) HourSection {
+		s := HourSection{Name: name}
+		for _, et := range elemTypes {
+			s.Elements = append(s.Elements, HourElement{Type: et})
+		}
+		return s
+	}
+	// The shape of the Lauds and Vespers definitions: the day's collect, the
+	// commemorations, the two conditional devotions, then the blessing that
+	// XXXIII.3 uses to close the run, and the Marian antiphon beyond it.
+	sections := []HourSection{
+		section("Collect", "proper-collect"),
+		section("Commemorations", "commemorations"),
+		section("Suffrage", "antiphon", "versicle", "collect"),
+		section("CrossCommemoration", "antiphon", "versicle", "collect"),
+		section("Closing", "blessing", "versicle"),
+		section("Marian", "marian", "collect"),
+	}
+
+	const commemorations = 1 // the section the answer is asked about
+
+	tests := []struct {
+		name     string
+		included []bool
+		want     bool
+	}{
+		{
+			name:     "suffrage said: commemorations are not the last collect",
+			included: []bool{true, true, true, false, true, true},
+			want:     true,
+		},
+		{
+			name:     "cross said instead of suffrage",
+			included: []bool{true, true, false, true, true, true},
+			want:     true,
+		},
+		{
+			name:     "neither said: the last commemoration closes the run",
+			included: []bool{true, true, false, false, true, true},
+			want:     false,
+		},
+		{
+			name:     "the Marian collect lies beyond the blessing and never counts",
+			included: []bool{true, true, false, false, true, true},
+			want:     false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := collectFollows(sections, tt.included, commemorations); got != tt.want {
+				t.Errorf("collectFollows after %q = %v, want %v",
+					sections[commemorations].Name, got, tt.want)
+			}
+		})
 	}
 }

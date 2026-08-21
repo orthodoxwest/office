@@ -37,6 +37,38 @@ Grant, we beseech thee, O Lord, that as we who are redeemed by the precious Bloo
 [nunc-dimittis-antiphon]
 Now Thou dost dismiss Thy servant, O Lord, * according to Thy word in peace, alleluia.
 
+# The Triduum omits these at Lauds and Vespers; see the SCOPE note on
+# seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
+# slots are hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers; the Little Hours have their own
+# Triduum rubric on p. 314, not yet modelled.
+
+[chapter-lauds]
+@omit
+
+[chapter-vespers]
+@omit
+
+[short-responsory-lauds]
+@omit
+
+[short-responsory-vespers]
+@omit
+
+[hymn-lauds]
+@omit
+
+[hymn-vespers]
+@omit
+
+[versicle-vespers]
+@omit
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 359 (Easter Even at Lauds)
+V. My flesh shall rest in hope.
+R. And thou wilt not suffer thy Holy One to see corruption.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #

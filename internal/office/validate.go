@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/orthodoxwest/office/internal/texts"
 )
@@ -205,7 +206,42 @@ func ValidateHourDefinitions(dataDir string) []string {
 	sort.Strings(refErrors)
 
 	parseErrors = append(parseErrors, declarationErrors...)
+	parseErrors = append(parseErrors, validateOmissions(corpus)...)
 	return append(parseErrors, refErrors...)
+}
+
+// validateOmissions constrains where texts.OmitMarker may appear.
+//
+// Resolution tries the hour-qualified slot before the bare one, so a bare
+// omission reaches every hour — including the Little Hours, whose versicle is
+// resolved outside the hour definitions, and whose Triduum rubric is a
+// different one from Lauds' and Vespers'. Requiring the hour keeps an omission
+// inside the rubric that licenses it. Psalm antiphons are excluded outright:
+// every psalm is sung under one, and Prime's is resolved by its own composer.
+func validateOmissions(corpus *texts.TextCorpus) []string {
+	var errs []string
+	for _, ref := range corpus.References() {
+		if !texts.IsOmitted(corpus.Get(ref)) {
+			continue
+		}
+		slot := ref[strings.LastIndex(ref, "/")+1:]
+		switch {
+		case strings.HasPrefix(slot, "psalm-antiphon"):
+			errs = append(errs, fmt.Sprintf(
+				"%s: %s is not permitted on a psalm antiphon; every psalm is sung under one",
+				ref, texts.OmitMarker,
+			))
+		case !slices.ContainsFunc(hourNames, func(h string) bool {
+			return strings.HasSuffix(slot, "-"+h)
+		}):
+			errs = append(errs, fmt.Sprintf(
+				"%s: %s must name the hour it applies to (e.g. %s-lauds); a bare slot omits the element at every hour",
+				ref, texts.OmitMarker, slot,
+			))
+		}
+	}
+	sort.Strings(errs)
+	return errs
 }
 
 // marianCorpusKeys are the five corpus keys that a "marian seasonal" element
