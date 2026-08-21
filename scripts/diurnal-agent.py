@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -178,6 +179,13 @@ def candidate_identifier(candidate: dict[str, Any]) -> str:
     return str(candidate.get("candidate_id", candidate.get("id", f"DA-{model.digest(candidate)[:16]}")))
 
 
+def composite_slice_hashes(hashes: list[str]) -> str:
+    normalized = [value.lower() for value in hashes]
+    if len(normalized) == 1:
+        return normalized[0]
+    return hashlib.sha256("\x1f".join(normalized).encode("ascii")).hexdigest()
+
+
 def validate_witness(candidate: dict[str, Any]) -> None:
     """Require the immutable printed-source identity needed for safe review."""
     for name in ("source", "extractor"):
@@ -194,6 +202,51 @@ def validate_witness(candidate: dict[str, Any]) -> None:
         value = candidate.get(name)
         if value is not None and (not isinstance(value, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", value)):
             raise ValueError(f"candidate witness {name} must be a full SHA-256 when present")
+    column = candidate.get("source_column", "")
+    if column:
+        if not isinstance(column, str) or not re.fullmatch(r"[a-z][a-z0-9_-]*", column):
+            raise ValueError("candidate source_column is not a safe column label")
+        bbox = candidate.get("source_bbox", candidate.get("bbox"))
+        if isinstance(bbox, str):
+            try: bbox = json.loads(bbox)
+            except json.JSONDecodeError: bbox = None
+        if not isinstance(bbox, list) or len(bbox) != 4 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in bbox):
+            raise ValueError("column candidate requires a finite four-coordinate bbox")
+        if bbox[2] <= bbox[0] or bbox[3] <= bbox[1]:
+            raise ValueError("column candidate bbox must have positive dimensions")
+    slices = candidate.get("page_slices")
+    if slices:
+        if isinstance(slices, str):
+            try: slices = json.loads(slices)
+            except json.JSONDecodeError: slices = None
+        if not isinstance(slices, list) or not slices:
+            raise ValueError("candidate page_slices must be a non-empty list")
+        columns = set()
+        slice_hashes = []
+        for index, item in enumerate(slices):
+            if not isinstance(item, dict) or not isinstance(item.get("page"), int) or item["page"] < 1:
+                raise ValueError(f"candidate page_slices[{index}] has invalid page")
+            if not isinstance(item.get("printed_page"), str) or not item["printed_page"]:
+                raise ValueError(f"candidate page_slices[{index}] requires printed_page")
+            if not isinstance(item.get("raw_text_sha256"), str) or not re.fullmatch(r"[0-9a-fA-F]{64}", item["raw_text_sha256"]):
+                raise ValueError(f"candidate page_slices[{index}] requires full slice hash")
+            slice_hashes.append(item["raw_text_sha256"])
+            if not isinstance(item.get("extractor"), str) or not item["extractor"]:
+                raise ValueError(f"candidate page_slices[{index}] requires route")
+            if not isinstance(item.get("offset"), str) or not item["offset"]:
+                raise ValueError(f"candidate page_slices[{index}] requires offset")
+            if column:
+                slice_column = item.get("source_column")
+                if not isinstance(slice_column, str) or slice_column != column:
+                    raise ValueError(f"candidate page_slices[{index}] disagrees with source_column")
+                box = item.get("bbox")
+                if not isinstance(box, list) or len(box) != 4 or any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) for v in box) or box[2] <= box[0] or box[3] <= box[1]:
+                    raise ValueError(f"candidate page_slices[{index}] requires valid bbox")
+                columns.add(slice_column)
+        if column and len(columns) != 1:
+            raise ValueError("candidate page_slices mix source columns")
+        if composite_slice_hashes(slice_hashes) != candidate["raw_text_sha256"].lower():
+            raise ValueError("candidate raw_text_sha256 disagrees with page_slices")
 
 
 def validate_identifier(value: Any, label: str) -> str:
@@ -679,7 +732,7 @@ def witness_from_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     validate_witness(candidate)
     fields = (
         "source", "source_sha256", "source_page", "printed_page", "printed_folio",
-        "source_bbox", "source_offset", "extractor", "ocr_route",
+        "source_column", "source_bbox", "source_offset", "page_slices", "extractor", "ocr_route",
         "extraction_confidence", "raw_text_sha256", "canonical_text_sha256", "text_sha256",
     )
     witness = {name: candidate[name] for name in fields if candidate.get(name) not in (None, "")}

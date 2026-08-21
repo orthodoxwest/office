@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic-diurnal p. 661 (DI-6912d65ec4cd-Cplacidus-P661-22333171e234; collect) — agent-proposed, not attested
+Almighty everlasting God, who makest us glad by the manifold festivity of thy Saints: grant that we may be shielded by the protection of those in whose commemoration we rejoice.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

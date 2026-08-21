@@ -29,6 +29,31 @@ class Result:
 
 
 class DiurnalIntakeTest(unittest.TestCase):
+    def test_column_labels_may_repeat_per_page_but_boxes_overlap_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            spec = root / "columns.json"
+            spec.write_text(json.dumps({"pages": {"1": [{"column": "left", "bbox": [0, 0, 10, 10]}], "2": [{"column": "left", "bbox": [0, 0, 10, 10]}]}}))
+            self.assertEqual(intake.load_column_spec(spec)["pages"]["2"][0]["column"], "left")
+            spec.write_text(json.dumps({"pages": {"1": [{"column": "left", "bbox": [0, 0, 10, 10]}, {"column": "right", "bbox": [5, 5, 15, 15]}]}}))
+            with self.assertRaises(SystemExit):
+                intake.load_column_spec(spec)
+
+    def test_explicit_column_extraction_writes_distinct_witnesses(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            spec = root / "columns.json"
+            spec.write_text(json.dumps({"pages": {"1": [{"column": "left", "bbox": [0, 0, 100, 100]}]}}))
+            self.assertEqual(intake.load_column_spec(spec)["pages"]["1"][0]["column"], "left")
+            page_dir = root / "pages" / "0001"
+            result = Result()
+            result.stdout = b"<doc><page><word xMin='10' yMin='10' xMax='30' yMax='20'>Left</word></page></doc>"
+            with patch.object(intake, "cmd", return_value=result):
+                records = intake.extract_page_columns(root / "book.pdf", 1, page_dir, intake.load_column_spec(spec)["pages"]["1"])
+            self.assertEqual(records[0]["extractor"], "pdftotext-bbox-layout-column")
+            self.assertEqual(records[0]["canonical_text"], "Left")
+            self.assertTrue((page_dir / "columns" / "left.txt").is_file())
+
     def make_registered_run(self, directory: Path, page_count: int = 2) -> tuple[Path, Path]:
         pdf = directory / "book.pdf"
         pdf.write_bytes(b"pdf")
