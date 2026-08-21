@@ -30,6 +30,15 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace and in thy beauty, * alleluia, alleluia.
 
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 47* (Common of Virgins, In Paschaltide)
+R. God shall help her with his countenance, * alleluia, alleluia.
+R. God shall help her with his countenance, * alleluia, alleluia.
+V. God is in the midst of her, therefore shall she not be removed.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God shall help her with his countenance, * alleluia, alleluia.
+
 [hymn-lauds]
 @use commons/virgin/hymn-lauds
 

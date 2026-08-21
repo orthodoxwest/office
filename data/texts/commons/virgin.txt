@@ -91,6 +91,15 @@ Amen.
 [short-responsory-lauds]
 @use commons/virgin-martyr/short-responsory-lauds
 
+[short-responsory-vespers]
+@use commons/virgin-martyr/short-responsory-vespers
+
+[versicle-first-vespers]
+@use commons/virgin-martyr/versicle-first-vespers
+
+[versicle-vespers]
+@use commons/virgin-martyr/versicle-vespers
+
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
 V. Full of grace are thy lips.

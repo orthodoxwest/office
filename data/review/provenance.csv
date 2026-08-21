@@ -23,7 +23,9 @@ commons/bishop-martyr/versicle-lauds,93ddc703c431,draft archdiocesan Commons Lau
 commons/blessed-virgin/hymn-vespers,e5ed334620b8,draft archdiocesan Vespers book,,692,verified,codex,2026-07-17,
 commons/blessed-virgin/psalm-antiphon-1,6d57cf78c709,draft archdiocesan Lauds book,,709,verified,codex,2026-07-17,
 commons/blessed-virgin/psalm-antiphon-4,61e13288e9ed,draft archdiocesan Lauds book,,711,verified,codex,2026-07-17,
+commons/blessed-virgin/short-responsory-lauds,14508eeeb35c,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,claude,2026-08-20,
 commons/blessed-virgin/versicle-lauds,c2e21ab641bb,draft archdiocesan Lauds book,,725,verified,codex,2026-07-17,
+commons/blessed-virgin/versicle-vespers,f5e74029e94f,diurnal,"Common of Feasts B.V.M., At I Vespers",64*,verified,claude,2026-08-20,
 commons/confessor-bishop-paschal/benedictus-antiphon,5602d31978b4,draft archdiocesan Lauds book,,669,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/magnificat-antiphon-first,40c77326378c,draft archdiocesan Vespers book,,641,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/psalm-antiphon-1,39ee5e2c335f,draft archdiocesan Lauds book,,660,verified,codex,2026-07-17,
@@ -93,7 +95,11 @@ commons/martyrs/short-responsory-lauds,6d3fc83fa938,draft archdiocesan Lauds boo
 commons/martyrs/short-responsory-vespers,08dd03f9d2f2,draft archdiocesan Vespers book,,600,verified,codex,2026-07-17,
 commons/martyrs/versicle-vespers,f5807562ecaa,draft archdiocesan Vespers book,,602,verified,codex,2026-07-18,
 commons/virgin-martyr-paschal/short-responsory-lauds,2f4d830cb63e,Copy of OCP Ferial Lauds.pdf,,142,verified,codex,2026-07-18,
+commons/virgin-martyr-paschal/short-responsory-vespers,9618fe06f0aa,diurnal,"Common of Virgins, In Paschaltide",47*,verified,claude,2026-08-20,
 commons/virgin-martyr/hymn-lauds,0b25026704dc,Copy of OCP Ferial Lauds.pdf,,143,verified,codex,2026-07-18,
+commons/virgin-martyr/short-responsory-vespers,f22a1754ebfa,diurnal,"Common of Virgins, At I Vespers",46*,verified,claude,2026-08-20,
+commons/virgin-martyr/versicle-first-vespers,b8f11348e186,diurnal,"Common of Virgins, At I Vespers",46*,verified,claude,2026-08-20,
+commons/virgin-martyr/versicle-vespers,c2e21ab641bb,diurnal,"Common of Virgins, At II Vespers",50*,verified,claude,2026-08-20,
 commons/virgin/hymn-lauds,8f0dd013bd63,A Noted Hymnary for the Anglican Breviary,,112,verified,codex,2026-07-17,
 ordinary/compline/blessing,7fa072c64cde,Compline Alex edit 10-24 v.08.docx,ordinary/compline/blessing,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/chapter,2ca577744530,Compline Alex edit 10-24 v.08.docx,ordinary/compline/chapter,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
@@ -317,6 +323,10 @@ proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archd
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
 proper/good-friday/versicle-lauds,c0f024283763,diurnal,Good Friday at Lauds,341,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/guardian-angels/short-responsory-lauds,1571f3a59379,diurnal,"October 2, At Lauds",614,verified,claude,2026-08-20,
+proper/guardian-angels/short-responsory-vespers,8aba3cb98a7d,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
+proper/guardian-angels/versicle-lauds,9c50d614fe3b,diurnal,"October 2, At Lauds",615,verified,claude,2026-08-20,
+proper/guardian-angels/versicle-vespers,9c50d614fe3b,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
 proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
@@ -342,6 +352,11 @@ proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026
 proper/st-joseph/hymn-vespers,6bb45b958450,draft archdiocesan Vespers book,"Saint Joseph, I Vespers",325-326,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/st-joseph/short-responsory-vespers,97970bbbbb33,draft archdiocesan Vespers book,,"324, 333",verified,codex,2026-07-17,
 proper/st-lawrence/psalm-antiphon-3,441ca5cf4bc3,draft archdiocesan Lauds book,,517,verified,codex,2026-07-17,
+proper/st-raphael-archangel/short-responsory-lauds,0a692d614a29,diurnal,"October 24, At Lauds",633,verified,claude,2026-08-20,
+proper/st-raphael-archangel/short-responsory-vespers,8aba3cb98a7d,diurnal,"October 24, At I Vespers",632,verified,claude,2026-08-20,
+proper/st-raphael-archangel/versicle-first-vespers,d0fa20313df6,diurnal,"October 24, At I Vespers",633,verified,claude,2026-08-20,
+proper/st-raphael-archangel/versicle-lauds,d0fa20313df6,diurnal,"October 24, At Lauds",634,verified,claude,2026-08-20,
+proper/st-raphael-archangel/versicle-vespers,9c50d614fe3b,diurnal,"October 24, At II Vespers",635,verified,claude,2026-08-20,
 proper/trinity-sunday/psalm-antiphon-1,116ab0c2b5da,draft archdiocesan Vespers book,,189,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-2,c491b409b4d9,draft archdiocesan Vespers book,,190,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-3,f538e9d68586,draft archdiocesan Vespers book,,191,verified,codex,2026-07-17,

@@ -107,10 +107,36 @@ Governed in wondrous wise: glory be theirs and might
 While the ages unending run.
 
 Amen.
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 614 (October 2, At Lauds)
+R. An Angel stood * at the altar of the temple.
+R. An Angel stood * at the altar of the temple.
+V. Having in his hand a golden censer.
+R. At the altar of the temple.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. An Angel stood * at the altar of the temple.
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 613 (October 2, At I Vespers)
+# II Vespers takes it unchanged: "Short R., Hymn, and V., as above at I
+# Vespers" (p. 616).
+R. The smoke of the incense ascended up * before God.
+R. The smoke of the incense ascended up * before God.
+V. Out of the Angel's hand.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense ascended up * before God.
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 615 (October 2, At Lauds)
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.
+
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/10-02 [Versum 1] — check against diurnal
-V. Before the Angels will I sing praise unto thee, O my God.
-R. I will worship toward thy holy Temple, and praise thy Name.
+# SOURCE: Monastic Diurnal.pdf, p. 613 (October 2, At I Vespers); II Vespers
+# takes it unchanged (p. 616).
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.
 
 [short-responsory-terce]
 # SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Tertia] — check against diurnal
