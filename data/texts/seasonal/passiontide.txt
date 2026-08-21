@@ -80,10 +80,13 @@ R. Defend me from them that rise up against me.
 # SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Vespers chapter
 # SCOPE: the booklet heads both its Lauds and Vespers sections "from Monday in Passion
 # Week through Holy Wednesday", so it does NOT cover the Triduum. The season key applies
-# to Holy Thursday–Holy Saturday anyway, as short-responsory-vespers already did before
-# this entry existed. The Triduum office omits these elements entirely; correcting that
-# needs the Holy Week manual (see #125). Tracked separately — do not treat Triduum
-# chapter/versicle output as sourced.
+# to Holy Thursday–Holy Saturday anyway, so each Triduum proper file suppresses this
+# element with @omit. The Monastic Diurnal prints the rule twice, in rubrics set in the
+# office itself: at Maundy Thursday Lauds, p. 311, "The Chapter, Short R., and Hymn are
+# not said during this Triduum"; at Maundy Thursday Vespers, p. 315, the same sentence
+# with the versicle added. Hence Lauds keeps a proper versicle, printed for each of the
+# three days, and Vespers has none. Both rubrics speak only for Lauds and Vespers — the
+# Little Hours have their own Triduum rubric on p. 314, which we do not model yet.
 !Jer 11:20
 But, O Lord of hosts, that judgest righteously, that triest the reins and the heart, let me see thy vengeance on them; for unto thee have I revealed my cause, O Lord my God.
 R. Thanks be to God.

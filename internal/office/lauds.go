@@ -22,7 +22,10 @@ func (l *LaudsComposer) Compose(day *models.CalendarDay, sections []HourSection,
 }
 
 // addCommemorations returns commemoration elements for each commemorated feast.
-func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus) []models.OfficeElement {
+// moreCollects reports whether a further collect of the run — a Suffrage or a
+// Commemoration of the Cross — is said after these, in which case none of these
+// collects is the last of the run.
+func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus, moreCollects bool) []models.OfficeElement {
 	comms := day.Commemorations
 
 	// The occurring privileged feria is commemorated at Lauds when a feast takes
@@ -79,17 +82,13 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 
 		// Collect. Of a run of collects only the first and the last are
 		// concluded (XXXIII.5); the collect of the day has already taken the
-		// first, so here only the final commemoration is concluded.
-		//
-		// The Suffrage and the Commemoration of the Cross that may follow are
-		// treated as separate devotions with their own conclusions, not as part
-		// of this run — so the last commemoration is the run's last collect.
-		// The hour definitions put those sections after this one and before the
-		// "Lord be with you" that XXXIII.3 says follows the last Collect, which
-		// can be read the other way; see issue #181.
+		// first, so here only the final commemoration is concluded — and only
+		// when no Suffrage or Commemoration of the Cross follows, since those
+		// belong to the same run and carry its last conclusion themselves.
+		// See collectRunContinues for the rubric and its printed witness.
 		collectText, collectSrc := lookup("commemoration-collect")
 		collectRefs := []string{collectSrc}
-		if i == len(comms)-1 {
+		if i == len(comms)-1 && !moreCollects {
 			collectText, collectRefs = applyConclusion(collectText, collectSrc, corpus)
 		}
 		elems = append(elems, models.OfficeElement{

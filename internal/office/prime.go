@@ -40,7 +40,7 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 				elems = append(elems, resolvePrimePsalmAntiphon(day, corpus, moveable))
 				continue
 			}
-			elems = append(elems, resolveHourElement(day, "prime", elem, corpus))
+			elems = appendHourElement(elems, day, "prime", elem, corpus)
 		}
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,

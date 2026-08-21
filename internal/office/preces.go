@@ -62,6 +62,14 @@ const (
 //     No Preces on every such Sunday while retaining Preces on the ferias
 //     of the same weeks; this is parish practice beyond the bare diurnal
 //     §XXXVII list (see #15).
+//
+// The suppression on a Sunday that commemorates a Double follows §XXXVII.2 and
+// is corroborated by the Diurnal's own General Rubrics §IV: "When a Double
+// Feast or an Octave is commemorated on a Sunday, the Preces and Suffrage are
+// omitted on Sunday. On other Sundays, except within Privileged or Common
+// Octaves, they are always said." The 2026 ordo prints Preces on those Sundays
+// anyway; #15 holds that contradiction open pending a ruling, and we follow the
+// two printed witnesses until it lands.
 func precesDisposition(day *models.CalendarDay, moveable *calendar.MoveableDates) (said bool, reason string) {
 	if day == nil {
 		// Match historical shouldSayPreces(nil): no celebration → preces said.
@@ -76,8 +84,14 @@ func precesDisposition(day *models.CalendarDay, moveable *calendar.MoveableDates
 		return false, PrecesSuppressedWithinOctave
 	}
 
-	// Octave-day offices: preces are not said within octaves (General Rubrics
-	// §XXXVII.2), and the parish treats the octave day itself as covered (#15).
+	// Octave-day offices. The Monastic Diurnal's General Rubrics §VII settles
+	// both halves: "Within Octaves the usual Suffrage of All Saints and the
+	// Preces at Prime and Compline are not said, even though the Office be of a
+	// Sunday or of a Greater Feria… On the Octave Day the Office is said as on
+	// the day of the Feast, unless otherwise noted; but on a Simple Octave Day
+	// the Office is Simple, the Preces and Suffrage being omitted." A festal
+	// octave day therefore takes the feast's Double office (suppressed above),
+	// and a simple one is suppressed by name. Cf. §XXXVII.2 and #15.
 	if day.Celebration != nil && strings.Contains(day.Celebration.ID, "octave-day") {
 		return false, PrecesSuppressedOctaveDay
 	}

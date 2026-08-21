@@ -38,7 +38,7 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
-			elems = append(elems, resolveHourElement(sectionDay, "compline", elem, corpus))
+			elems = appendHourElement(elems, sectionDay, "compline", elem, corpus)
 		}
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,

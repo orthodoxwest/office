@@ -333,6 +333,12 @@ func (c *TextCorpus) Entries() map[string]string {
 		if strings.HasPrefix(k, "psalmody/") {
 			continue
 		}
+		// An omission is a rubric, not a text. It has no wording to lint, no
+		// source to attest, and never renders by design, so it is not part of
+		// the corpus the review and audit tooling inventories.
+		if IsOmitted(v) {
+			continue
+		}
 		out[k] = v
 	}
 	return out
@@ -353,11 +359,30 @@ func (c *TextCorpus) References() []string {
 	return refs
 }
 
+// OmitMarker is the corpus body that suppresses an element outright. Text
+// resolution walks proper → seasonal → ordinary and returns the first
+// non-empty body, so an office that legitimately has no chapter, hymn, short
+// responsory or versicle cannot say so by leaving the section out: it would
+// simply inherit a lower tier's. A section whose whole body is @omit is that
+// statement. It resolves like any other text — stopping the walk at the tier
+// that declares it, so a lower tier cannot reinstate the element — and the
+// composers drop the element instead of rendering it.
+const OmitMarker = "@omit"
+
+// IsOmitted reports whether a resolved corpus body suppresses its element.
+func IsOmitted(text string) bool {
+	return strings.TrimSpace(text) == OmitMarker
+}
+
 // extractAndValidateAliases moves exact @use directives out of the concrete
 // text map, then verifies that every alias terminates at a real corpus entry.
+// It also rejects malformed @omit bodies, which must stand alone.
 func (c *TextCorpus) extractAndValidateAliases() error {
 	for key, body := range c.texts {
 		trimmed := strings.TrimSpace(body)
+		if strings.HasPrefix(trimmed, OmitMarker) && trimmed != OmitMarker {
+			return fmt.Errorf("invalid corpus omission %q: %s must be the whole body", key, OmitMarker)
+		}
 		if !strings.HasPrefix(trimmed, "@use") {
 			continue
 		}
