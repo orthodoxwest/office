@@ -36,6 +36,32 @@ R. Which did eat of my bread, hath lifted up his heel against me.
 [collect]
 O God, from whom Judas received the punishment of his guilt, and the thief the reward of his confession: grant unto us the full effect of thy clemency; that as in his Passion our Lord Jesus Christ gave to each a recompense meet for his deserts, so having taken away our old sins, he may bestow on us the grace of his resurrection.
 
+# The Triduum office omits these outright; without an omission the resolver
+# would fall through to the Passiontide seasonal texts, whose booklet runs only
+# "from Monday in Passion Week through Holy Wednesday". See the rubrics printed
+# in the Monastic Diurnal at Maundy Thursday Lauds, p. 311 ("The Chapter, Short
+# R., and Hymn are not said during this Triduum") and at Maundy Thursday
+# Vespers, p. 315, which adds the versicle ("The Chapter, Short R., Hymn, and V.
+# are not said during this Triduum"). Lauds keeps a proper versicle, printed for
+# each day of the Triduum; Vespers has none.
+
+[chapter]
+@omit
+
+[short-responsory]
+@omit
+
+[hymn]
+@omit
+
+[versicle-vespers]
+@omit
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 311 (Maundy Thursday at Lauds)
+V. Mine own familiar friend whom I trusted.
+R. Who did also eat of my bread, hath laid wait for me.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #

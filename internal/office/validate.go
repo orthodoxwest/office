@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/orthodoxwest/office/internal/texts"
 )
@@ -205,7 +206,30 @@ func ValidateHourDefinitions(dataDir string) []string {
 	sort.Strings(refErrors)
 
 	parseErrors = append(parseErrors, declarationErrors...)
+	parseErrors = append(parseErrors, validateOmissions(corpus)...)
 	return append(parseErrors, refErrors...)
+}
+
+// validateOmissions rejects texts.OmitMarker on slots no composer can drop.
+// The psalmody composes its own antiphons rather than going through an hour
+// definition's elements, and every psalm is sung under one, so an omission
+// there would render as the literal marker.
+func validateOmissions(corpus *texts.TextCorpus) []string {
+	var errs []string
+	for _, ref := range corpus.References() {
+		if !texts.IsOmitted(corpus.Get(ref)) {
+			continue
+		}
+		slot := ref[strings.LastIndex(ref, "/")+1:]
+		if strings.HasPrefix(slot, "psalm-antiphon") {
+			errs = append(errs, fmt.Sprintf(
+				"%s: %s is not permitted on a psalm antiphon; every psalm is sung under one",
+				ref, texts.OmitMarker,
+			))
+		}
+	}
+	sort.Strings(errs)
+	return errs
 }
 
 // marianCorpusKeys are the five corpus keys that a "marian seasonal" element

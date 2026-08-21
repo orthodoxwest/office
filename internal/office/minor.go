@@ -45,8 +45,14 @@ func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSect
 				elems = append(elems, resolveMinorHourVersicle(day, strings.ToLower(m.Name), corpus))
 				continue
 			}
-			elems = append(elems, resolveHourElement(day, strings.ToLower(m.Name), elem, corpus))
+			elems = appendHourElement(elems, day, strings.ToLower(m.Name), elem, corpus)
 		}
+		// A section whose every element the corpus omits carries no office; its
+		// label would otherwise render as an empty heading.
+		if len(elems) == 0 {
+			continue
+		}
+
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,
 			Collapsible: section.Collapsible,

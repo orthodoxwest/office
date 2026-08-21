@@ -179,6 +179,54 @@ psalm-antiphon-1 = psalms/110
 	}
 }
 
+func TestLoadTextsKeepsOmissionsResolvableButOutOfEntries(t *testing.T) {
+	dir := t.TempDir()
+	properDir := filepath.Join(dir, "texts", "proper")
+	os.MkdirAll(properDir, 0755)
+	os.WriteFile(filepath.Join(properDir, "good-friday.txt"), []byte(`[chapter]
+@omit
+
+[versicle-lauds]
+V. He hath laid me in the darkness.
+`), 0644)
+
+	corpus, err := LoadTexts(dir)
+	if err != nil {
+		t.Fatalf("LoadTexts: %v", err)
+	}
+	// An omission must resolve like a text, so the tier that declares it ends
+	// the proper → seasonal → ordinary walk and no lower tier reinstates it.
+	if got := corpus.Get("proper/good-friday/chapter"); !IsOmitted(got) {
+		t.Errorf("Get(chapter) = %q, want the omission marker", got)
+	}
+	if !corpus.Has("proper/good-friday/chapter") {
+		t.Error("Has(chapter) = false, want true")
+	}
+	if _, ok := corpus.Entries()["proper/good-friday/chapter"]; ok {
+		t.Error("Entries includes an omission")
+	}
+	if _, ok := corpus.Entries()["proper/good-friday/versicle-lauds"]; !ok {
+		t.Error("Entries omits a real text")
+	}
+}
+
+func TestLoadTextsRejectsMalformedOmission(t *testing.T) {
+	dir := t.TempDir()
+	properDir := filepath.Join(dir, "texts", "proper")
+	os.MkdirAll(properDir, 0755)
+	os.WriteFile(filepath.Join(properDir, "good-friday.txt"), []byte(`[chapter]
+@omit the chapter during the Triduum
+`), 0644)
+
+	_, err := LoadTexts(dir)
+	if err == nil {
+		t.Fatal("LoadTexts accepted @omit with trailing text")
+	}
+	if !strings.Contains(err.Error(), "@omit") {
+		t.Errorf("LoadTexts error = %q, want it to mention @omit", err)
+	}
+}
+
 func TestLoadTextsRejectsDuplicateINISections(t *testing.T) {
 	dir := t.TempDir()
 	ordinaryDir := filepath.Join(dir, "texts", "ordinary")

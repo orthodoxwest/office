@@ -460,8 +460,20 @@ func resolveMarianElement(day *models.CalendarDay, hourName string, corpus *text
 	return oe
 }
 
+// appendHourElement resolves elem and appends it, unless the corpus omits the
+// element for this office (texts.OmitMarker), in which case nothing is added.
+func appendHourElement(elems []models.OfficeElement, day *models.CalendarDay, hourName string, elem HourElement, corpus *texts.TextCorpus) []models.OfficeElement {
+	oe := resolveHourElement(day, hourName, elem, corpus)
+	if texts.IsOmitted(oe.Text) {
+		return elems
+	}
+	return append(elems, oe)
+}
+
 // resolveHourElement converts a HourElement to an OfficeElement, applying proper resolution
 // for proper-* element types and falling through to resolveElement for all others.
+// An element the corpus omits resolves with texts.OmitMarker as its text; use
+// appendHourElement to drop it rather than render it.
 func resolveHourElement(day *models.CalendarDay, hourName string, elem HourElement, corpus *texts.TextCorpus) models.OfficeElement {
 	switch elem.Type {
 	case "marian":
@@ -485,6 +497,9 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return elem
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		if texts.IsOmitted(text) {
+			return sourcedElement(models.OfficeElement{Type: models.Hymn, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
+		}
 		refs := []string{src}
 		doxologyRef := "hymn-doxology"
 		if usesAscensionHymnDoxology(day) {
@@ -507,6 +522,9 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return sourcedElement(models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-chapter":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		if texts.IsOmitted(text) {
+			return sourcedElement(models.OfficeElement{Type: models.Chapter, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
+		}
 		ref, body := extractChapterRef(text)
 		return sourcedElement(models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SlotRef: elem.Ref, SourceRef: src}, src)
 	default:

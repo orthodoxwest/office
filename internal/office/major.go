@@ -87,8 +87,14 @@ func composeMajorHour(
 				}
 				elems = append(elems, composeResolvedPsalmody(psalmodyDay, opts.hourName, psalmody, corpus)...)
 			default:
-				elems = append(elems, resolveHourElement(officeDay, opts.hourName, elem, corpus))
+				elems = appendHourElement(elems, officeDay, opts.hourName, elem, corpus)
 			}
+		}
+
+		// A section whose every element the corpus omits carries no office; its
+		// label would otherwise render as an empty heading.
+		if len(elems) == 0 {
+			continue
 		}
 
 		hour.Sections = append(hour.Sections, models.OfficeSection{

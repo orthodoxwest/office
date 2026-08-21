@@ -41,8 +41,9 @@ func conclusionRefFor(sourceRef string, corpus *texts.TextCorpus) (string, bool)
 // concluded (XXXIII.5) simply is not passed through here.
 func applyConclusion(text, sourceRef string, corpus *texts.TextCorpus) (string, []string) {
 	// An unresolved slot renders as a "[...]" marker; concluding it would
-	// disguise missing data as a complete prayer.
-	if text == "" || strings.HasPrefix(text, "[") {
+	// disguise missing data as a complete prayer. An omitted collect is about
+	// to be dropped, and must reach the composer as the bare marker.
+	if text == "" || strings.HasPrefix(text, "[") || texts.IsOmitted(text) {
 		return text, []string{sourceRef}
 	}
 	ref, ok := conclusionRefFor(sourceRef, corpus)
