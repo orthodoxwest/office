@@ -2,6 +2,7 @@ package office
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -65,8 +66,6 @@ func composeMajorHour(
 		included[i] = section.Condition == "" ||
 			evaluateHourSectionCondition(section, officeDay, moveable, corpus)
 	}
-	moreCollects := collectRunContinues(sections, included)
-
 	for i, section := range sections {
 		if section.Condition != "" {
 			recordConditionDecision(hour, section.Condition, included[i], section.Name)
@@ -79,7 +78,8 @@ func composeMajorHour(
 		for _, elem := range section.Elements {
 			switch elem.Type {
 			case "commemorations":
-				elems = append(elems, addCommemorations(officeDay, opts.hourName, corpus, moreCollects[i])...)
+				moreCollects := collectFollows(sections, included, i)
+				elems = append(elems, addCommemorations(officeDay, opts.hourName, corpus, moreCollects)...)
 			case "proper-psalmody":
 				psalmody, _, err := resolveVespersPsalmody(psalmodyDay, corpus)
 				if err != nil {
@@ -89,12 +89,6 @@ func composeMajorHour(
 			default:
 				elems = appendHourElement(elems, officeDay, opts.hourName, elem, corpus)
 			}
-		}
-
-		// A section whose every element the corpus omits carries no office; its
-		// label would otherwise render as an empty heading.
-		if len(elems) == 0 {
-			continue
 		}
 
 		hour.Sections = append(hour.Sections, models.OfficeSection{
@@ -107,8 +101,8 @@ func composeMajorHour(
 	return hour, nil
 }
 
-// collectRunContinues reports, for each section, whether a further collect of
-// the hour's run is said after it.
+// collectFollows reports whether a further collect of the hour's run is said
+// after section `after`.
 //
 // XXXIII.3 marks the end of the run with "The Lord be with you", which is the
 // blessing element; XXXIII.5 concludes only the first and the last collect of
@@ -119,30 +113,24 @@ func composeMajorHour(
 // is said as set forth below. After the last Collect is said: V. The Lord be
 // with you." So the Suffrage and the Cross are members of the run, not separate
 // devotions, and a commemoration collect they follow is a middle collect.
-func collectRunContinues(sections []HourSection, included []bool) []bool {
-	end := len(sections)
-	for i, section := range sections {
-		if included[i] && sectionHasElementType(section, "blessing") {
-			end = i
-			break
+func collectFollows(sections []HourSection, included []bool, after int) bool {
+	for i := after + 1; i < len(sections); i++ {
+		if !included[i] {
+			continue
+		}
+		if sectionHasElementType(sections[i], "blessing") {
+			return false
+		}
+		if sectionHasElementType(sections[i], "collect", "proper-collect") {
+			return true
 		}
 	}
-
-	res := make([]bool, len(sections))
-	later := false
-	for i := end - 1; i >= 0; i-- {
-		res[i] = later
-		if included[i] && (sectionHasElementType(sections[i], "collect") ||
-			sectionHasElementType(sections[i], "proper-collect")) {
-			later = true
-		}
-	}
-	return res
+	return false
 }
 
-func sectionHasElementType(section HourSection, elemType string) bool {
+func sectionHasElementType(section HourSection, elemTypes ...string) bool {
 	for _, elem := range section.Elements {
-		if elem.Type == elemType {
+		if slices.Contains(elemTypes, elem.Type) {
 			return true
 		}
 	}

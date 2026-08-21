@@ -42,12 +42,6 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 			}
 			elems = appendHourElement(elems, day, "prime", elem, corpus)
 		}
-		// A section whose every element the corpus omits carries no office; its
-		// label would otherwise render as an empty heading.
-		if len(elems) == 0 {
-			continue
-		}
-
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,
 			Collapsible: section.Collapsible,

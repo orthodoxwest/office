@@ -210,10 +210,14 @@ func ValidateHourDefinitions(dataDir string) []string {
 	return append(parseErrors, refErrors...)
 }
 
-// validateOmissions rejects texts.OmitMarker on slots no composer can drop.
-// The psalmody composes its own antiphons rather than going through an hour
-// definition's elements, and every psalm is sung under one, so an omission
-// there would render as the literal marker.
+// validateOmissions constrains where texts.OmitMarker may appear.
+//
+// Resolution tries the hour-qualified slot before the bare one, so a bare
+// omission reaches every hour — including the Little Hours, whose versicle is
+// resolved outside the hour definitions, and whose Triduum rubric is a
+// different one from Lauds' and Vespers'. Requiring the hour keeps an omission
+// inside the rubric that licenses it. Psalm antiphons are excluded outright:
+// every psalm is sung under one, and Prime's is resolved by its own composer.
 func validateOmissions(corpus *texts.TextCorpus) []string {
 	var errs []string
 	for _, ref := range corpus.References() {
@@ -221,10 +225,18 @@ func validateOmissions(corpus *texts.TextCorpus) []string {
 			continue
 		}
 		slot := ref[strings.LastIndex(ref, "/")+1:]
-		if strings.HasPrefix(slot, "psalm-antiphon") {
+		switch {
+		case strings.HasPrefix(slot, "psalm-antiphon"):
 			errs = append(errs, fmt.Sprintf(
 				"%s: %s is not permitted on a psalm antiphon; every psalm is sung under one",
 				ref, texts.OmitMarker,
+			))
+		case !slices.ContainsFunc(hourNames, func(h string) bool {
+			return strings.HasSuffix(slot, "-"+h)
+		}):
+			errs = append(errs, fmt.Sprintf(
+				"%s: %s must name the hour it applies to (e.g. %s-lauds); a bare slot omits the element at every hour",
+				ref, texts.OmitMarker, slot,
 			))
 		}
 	}

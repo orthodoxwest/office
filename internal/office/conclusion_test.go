@@ -323,7 +323,7 @@ func TestCommemorationSequencingWithSuffrageFollowing(t *testing.T) {
 	}
 }
 
-func TestCollectRunContinues(t *testing.T) {
+func TestCollectFollows(t *testing.T) {
 	section := func(name string, elemTypes ...string) HourSection {
 		s := HourSection{Name: name}
 		for _, et := range elemTypes {
@@ -343,37 +343,39 @@ func TestCollectRunContinues(t *testing.T) {
 		section("Marian", "marian", "collect"),
 	}
 
+	const commemorations = 1 // the section the answer is asked about
+
 	tests := []struct {
 		name     string
 		included []bool
-		// want is indexed by section. Only the Commemorations answer is
-		// consumed today; the whole vector is asserted to pin the scan.
-		want []bool
+		want     bool
 	}{
 		{
 			name:     "suffrage said: commemorations are not the last collect",
 			included: []bool{true, true, true, false, true, true},
-			want:     []bool{true, true, false, false, false, false},
+			want:     true,
 		},
 		{
 			name:     "cross said instead of suffrage",
 			included: []bool{true, true, false, true, true, true},
-			want:     []bool{true, true, true, false, false, false},
+			want:     true,
 		},
 		{
 			name:     "neither said: the last commemoration closes the run",
 			included: []bool{true, true, false, false, true, true},
-			want:     []bool{false, false, false, false, false, false},
+			want:     false,
+		},
+		{
+			name:     "the Marian collect lies beyond the blessing and never counts",
+			included: []bool{true, true, false, false, true, true},
+			want:     false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := collectRunContinues(sections, tt.included)
-			for i := range sections {
-				if got[i] != tt.want[i] {
-					t.Errorf("section %q: got %v, want %v (full=%v)",
-						sections[i].Name, got[i], tt.want[i], got)
-				}
+			if got := collectFollows(sections, tt.included, commemorations); got != tt.want {
+				t.Errorf("collectFollows after %q = %v, want %v",
+					sections[commemorations].Name, got, tt.want)
 			}
 		})
 	}

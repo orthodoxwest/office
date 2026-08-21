@@ -42,6 +42,26 @@ func TestOmittedElementIsDroppedInsteadOfFallingThrough(t *testing.T) {
 	}
 }
 
+// The Little Hours resolve their versicle from the short responsory outside the
+// hour definitions, so they need their own drop: without it an omitted
+// responsory reached shortResponsoryVersicle and rendered as a "[Little Hours
+// versicle not found]" marker in the office.
+func TestOmittedShortResponsoryDropsTheLittleHoursVersicle(t *testing.T) {
+	feast := &models.Feast{ID: "good-friday", Name: "Good Friday", Category: models.CategoryLord}
+	day := makeDay(2026, time.April, 10, feast, nil, "")
+	day.Season = models.Passiontide
+
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/good-friday/short-responsory-terce": texts.OmitMarker,
+		"ordinary/terce/short-responsory":           "R. Ordinary. * Responsory.",
+	})
+
+	got := appendResolved(nil, resolveMinorHourVersicle(day, "terce", corpus))
+	if len(got) != 0 {
+		t.Errorf("Little Hours versicle survived an omitted responsory: %+v", got)
+	}
+}
+
 // A section whose every element is omitted must not render as a bare heading.
 func TestSectionWithOnlyOmittedElementsIsDropped(t *testing.T) {
 	feast := &models.Feast{ID: "good-friday", Name: "Good Friday", Category: models.CategoryLord}
@@ -74,6 +94,8 @@ func TestSectionWithOnlyOmittedElementsIsDropped(t *testing.T) {
 	if err != nil {
 		t.Fatalf("composeMajorHour: %v", err)
 	}
+	dropEmptySections(hour) // as ComposeHour does for every composer
+
 	if len(hour.Sections) != 1 {
 		t.Fatalf("got %d sections, want 1: %+v", len(hour.Sections), hour.Sections)
 	}

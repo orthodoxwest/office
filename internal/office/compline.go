@@ -40,12 +40,6 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 		for _, elem := range section.Elements {
 			elems = appendHourElement(elems, sectionDay, "compline", elem, corpus)
 		}
-		// A section whose every element the corpus omits carries no office; its
-		// label would otherwise render as an empty heading.
-		if len(elems) == 0 {
-			continue
-		}
-
 		hour.Sections = append(hour.Sections, models.OfficeSection{
 			Label:       section.Label,
 			Collapsible: section.Collapsible,

@@ -37,22 +37,28 @@ Grant, we beseech thee, O Lord, that as we who are redeemed by the precious Bloo
 [nunc-dimittis-antiphon]
 Now Thou dost dismiss Thy servant, O Lord, * according to Thy word in peace, alleluia.
 
-# The Triduum office omits these outright; without an omission the resolver
-# would fall through to the Passiontide seasonal texts, whose booklet runs only
-# "from Monday in Passion Week through Holy Wednesday". See the rubrics printed
-# in the Monastic Diurnal at Maundy Thursday Lauds, p. 311 ("The Chapter, Short
-# R., and Hymn are not said during this Triduum") and at Maundy Thursday
-# Vespers, p. 315, which adds the versicle ("The Chapter, Short R., Hymn, and V.
-# are not said during this Triduum"). Lauds keeps a proper versicle, printed for
-# each day of the Triduum; Vespers has none.
+# The Triduum omits these at Lauds and Vespers; see the SCOPE note on
+# seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
+# slots are hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers; the Little Hours have their own
+# Triduum rubric on p. 314, not yet modelled.
 
-[chapter]
+[chapter-lauds]
 @omit
 
-[short-responsory]
+[chapter-vespers]
 @omit
 
-[hymn]
+[short-responsory-lauds]
+@omit
+
+[short-responsory-vespers]
+@omit
+
+[hymn-lauds]
+@omit
+
+[hymn-vespers]
 @omit
 
 [versicle-vespers]

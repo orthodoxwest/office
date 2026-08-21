@@ -70,6 +70,7 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 		return nil, fmt.Errorf("composing %s: %w", hourName, err)
 	}
 
+	dropEmptySections(hour)
 	canonicalizeSourceRefs(hour, e.corpus)
 	collapseUniformAntiphons(hour)
 	markPsalmDoxologies(hour)
@@ -463,11 +464,30 @@ func resolveMarianElement(day *models.CalendarDay, hourName string, corpus *text
 // appendHourElement resolves elem and appends it, unless the corpus omits the
 // element for this office (texts.OmitMarker), in which case nothing is added.
 func appendHourElement(elems []models.OfficeElement, day *models.CalendarDay, hourName string, elem HourElement, corpus *texts.TextCorpus) []models.OfficeElement {
-	oe := resolveHourElement(day, hourName, elem, corpus)
+	return appendResolved(elems, resolveHourElement(day, hourName, elem, corpus))
+}
+
+// appendResolved appends an already-resolved element unless the corpus omits
+// it. Every composer path that can produce an omission goes through here, so
+// the marker has one place to be dropped rather than one per composer.
+func appendResolved(elems []models.OfficeElement, oe models.OfficeElement) []models.OfficeElement {
 	if texts.IsOmitted(oe.Text) {
 		return elems
 	}
 	return append(elems, oe)
+}
+
+// dropEmptySections removes sections left with no elements, which happens when
+// the corpus omits every element a section holds. Their labels would otherwise
+// render as empty headings.
+func dropEmptySections(hour *models.OfficeHour) {
+	kept := hour.Sections[:0]
+	for _, section := range hour.Sections {
+		if len(section.Elements) > 0 {
+			kept = append(kept, section)
+		}
+	}
+	hour.Sections = kept
 }
 
 // resolveHourElement converts a HourElement to an OfficeElement, applying proper resolution
@@ -498,6 +518,9 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		if texts.IsOmitted(text) {
+			// Alone among the proper-* cases, the hymn decorates its text
+			// (the doxology substitution below), which would append wording
+			// after the marker and defeat the drop in appendResolved.
 			return sourcedElement(models.OfficeElement{Type: models.Hymn, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 		}
 		refs := []string{src}
@@ -522,9 +545,6 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return sourcedElement(models.OfficeElement{Type: models.Versicle, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-chapter":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
-		if texts.IsOmitted(text) {
-			return sourcedElement(models.OfficeElement{Type: models.Chapter, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
-		}
 		ref, body := extractChapterRef(text)
 		return sourcedElement(models.OfficeElement{Type: models.Chapter, Text: body, Label: ref, SlotRef: elem.Ref, SourceRef: src}, src)
 	default:
