@@ -105,7 +105,7 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 			if elem.SlotRef == "" {
 				continue
 			}
-			trace := eng.TraceProperResolution(&days[idx], hourName, elem.SlotRef, elem.SourceRef)
+			trace := traceInventoryElement(eng, &days[idx], hourName, elem)
 			if !shouldIncludeResolution(elem.SourceRef, trace.SelectedTier) {
 				continue
 			}

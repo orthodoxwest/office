@@ -5,6 +5,9 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/office"
 )
 
 func TestDynamicResolutionRef(t *testing.T) {
@@ -59,6 +62,19 @@ func TestBuildResolutionInventoryRejectsNonpositiveYears(t *testing.T) {
 	}
 }
 
+func TestTraceInventoryElementEmptyCommemorationOwnerFailsClosed(t *testing.T) {
+	engine, err := office.NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "principal-feast"}}
+	element := models.OfficeElement{IsCommemoration: true, SlotRef: "commemoration-collect", SourceRef: "ordinary/lauds/collect"}
+	trace := traceInventoryElement(engine, day, "lauds", element)
+	if trace.OwnerID != "" || trace.CanonicalOwner != "" {
+		t.Fatalf("empty commemoration owner attributed to principal: %#v", trace)
+	}
+}
+
 func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 	inventory, err := BuildResolutionInventory("../../data", 2026, 1)
 	if err != nil {
@@ -72,6 +88,7 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 	keys := make(map[string]bool)
 	totalOccurrences := 0
 	seenRepeated, seenMinorCollect, seenPrimeLauds := false, false, false
+	seenPriscaCollect, seenPriscaVespers := false, false
 	for _, row := range inventory.Rows {
 		if !strings.HasPrefix(row.Date, "2026-") {
 			t.Fatalf("row escaped requested year: %#v", row)
@@ -94,6 +111,17 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 		if row.Hour == "prime" && row.ResolverHour == "lauds" {
 			seenPrimeLauds = true
 		}
+		if row.OwnerID == "comm-01-18-st-prisca-of-rome-virgin-martyr" {
+			if row.Hour == "lauds" && row.RequestedSlot == "commemoration-collect" && row.Date == "2026-01-18" {
+				if row.SelectedRef != "commons/virgin-martyr/commemoration-collect" || row.SelectedTier != "common" {
+					t.Fatalf("Prisca Lauds collect = %#v", row)
+				}
+				seenPriscaCollect = true
+			}
+			if row.Hour == "vespers" && strings.HasPrefix(row.RequestedSlot, "commemoration-") {
+				seenPriscaVespers = true
+			}
+		}
 		key := fmt.Sprintf("%s\x1f%s\x1f%t\x1f%s\x1f%s\x1f%s", row.OwnerID, row.Hour, row.FirstVespers, row.SlotRef, row.SelectedRef, row.Reason)
 		if keys[key] {
 			t.Fatalf("duplicate inventory row key: %q", key)
@@ -107,6 +135,9 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 	}
 	if !seenMinorCollect || !seenPrimeLauds {
 		t.Fatalf("exceptional resolver coordinates absent: minor=%v prime=%v", seenMinorCollect, seenPrimeLauds)
+	}
+	if !seenPriscaCollect || !seenPriscaVespers {
+		t.Fatalf("Prisca commemoration inventory rows absent: collect=%v vespers=%v", seenPriscaCollect, seenPriscaVespers)
 	}
 	for _, tier := range []string{"proper", "common", "seasonal", "ordinary", "shared", "temporal-week", "special"} {
 		if !tiers[tier] {

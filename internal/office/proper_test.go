@@ -1185,6 +1185,52 @@ func TestEngineTraceProperResolutionUsesEveningVespersOwner(t *testing.T) {
 	}
 }
 
+func TestEngineTraceProperResolutionUsesTransformedVespersCommemoration(t *testing.T) {
+	engine := &Engine{corpus: texts.NewTestCorpus(map[string]string{
+		"commons/martyr/collect": "Commemoration collect",
+	})}
+	comm := &models.Feast{ID: "vespers-commemoration", ProperID: "martyr"}
+	day := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "outgoing-feast"},
+		Vespers: models.VespersDesignation{
+			Owner:          models.VespersIOfFollowing,
+			Feast:          &models.Feast{ID: "following-feast"},
+			Commemorations: []*models.Feast{comm},
+		},
+	}
+	trace := engine.TraceCommemorationResolution(day, "vespers", "commemoration-collect", "commons/martyr/collect", comm.ID)
+	if trace.OwnerID != comm.ID || trace.CanonicalOwner != comm.ID || trace.ProperIDs[0] != "martyr" {
+		t.Fatalf("trace = %#v", trace)
+	}
+}
+
+func TestEngineTraceProperResolutionUnknownCommemorationOwnerFailsClosed(t *testing.T) {
+	engine := &Engine{corpus: texts.NewTestCorpus(nil)}
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "principal-feast"}}
+	trace := engine.TraceCommemorationResolution(day, "lauds", "commemoration-collect", "ordinary/lauds/collect", "not-a-member")
+	if trace.OwnerID == "principal-feast" || trace.CanonicalOwner == "principal-feast" {
+		t.Fatalf("unknown owner attributed to principal celebration: %#v", trace)
+	}
+}
+
+func TestEngineTraceProperResolutionUsesCommemorationOwnerAndProperID(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/redirected-feast/collect-lauds": "Redirected collect",
+	})
+	engine := &Engine{corpus: corpus}
+	day := &models.CalendarDay{
+		Celebration:    &models.Feast{ID: "office-owner"},
+		Commemorations: []*models.Feast{{ID: "calendar-comm", ProperID: "redirected-feast"}},
+	}
+	trace := engine.TraceCommemorationResolution(day, "lauds", "commemoration-collect", "proper/redirected-feast/collect-lauds", "calendar-comm")
+	if trace.OwnerID != "calendar-comm" || trace.CanonicalOwner != "calendar-comm" {
+		t.Fatalf("trace owner = %#v", trace)
+	}
+	if len(trace.ProperIDs) < 2 || trace.ProperIDs[0] != "redirected-feast" || trace.ProperIDs[1] != "calendar-comm" {
+		t.Fatalf("trace proper IDs = %#v", trace.ProperIDs)
+	}
+}
+
 func TestTraceProperResolutionUsesPrimeFestalLaudsCoordinates(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/trace-feast/psalm-antiphon-1-lauds": "Festal antiphon",

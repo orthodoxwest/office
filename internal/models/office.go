@@ -102,7 +102,14 @@ type OfficeElement struct {
 	SlotRef     string
 	SourceRef   string
 	SourceRefs  []string
-	Announce    bool
+	// CommemorationOwnerID identifies the calendar feast whose non-rendered
+	// commemoration supplied this element. It is kept separate from SourceRef:
+	// fallback text must never be used to infer the owning feast.
+	CommemorationOwnerID string `json:"-"`
+	// IsCommemoration preserves generated commemoration intent even when the
+	// source Feast has no ID. It is metadata only and is never rendered.
+	IsCommemoration bool `json:"-"`
+	Announce        bool
 }
 
 // DisplayText is the string a renderer should print for this element. For an

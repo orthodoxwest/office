@@ -757,6 +757,9 @@ func TestSaturdaySecondVespersSundayCommemorationUsesFirstVespersAntiphon(t *tes
 			if got := elems[1]; got.Text != tt.wantText || got.SourceRef != tt.wantRef {
 				t.Fatalf("antiphon = %q (%s), want %q (%s)", got.Text, got.SourceRef, tt.wantText, tt.wantRef)
 			}
+			if elems[1].CommemorationOwnerID != tt.properID {
+				t.Fatalf("commemoration owner = %q, want %q", elems[1].CommemorationOwnerID, tt.properID)
+			}
 		})
 	}
 }

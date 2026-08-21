@@ -150,6 +150,11 @@ func TestLaudsCommemorations(t *testing.T) {
 	if elems[0].Text != "Commemoration of St. Andrew" {
 		t.Errorf("element 0 text = %q", elems[0].Text)
 	}
+	for i, elem := range elems {
+		if elem.CommemorationOwnerID != "st-andrew" || !elem.IsCommemoration {
+			t.Errorf("element %d commemoration owner = %q, want st-andrew", i, elem.CommemorationOwnerID)
+		}
+	}
 
 	// Antiphon — should use feast-specific
 	if elems[1].Text != "Andrew antiphon" {

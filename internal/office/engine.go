@@ -677,3 +677,41 @@ func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, s
 	}
 	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
 }
+
+// TraceCommemorationResolution traces a generated commemoration slot. An
+// empty owner ID is intentionally not allowed to fall back to the principal
+// celebration.
+func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName, ref, selectedRef, ownerID string) ProperResolutionTrace {
+	if hourName == "vespers" {
+		day = vespersOfficeDay(day)
+	}
+	day = commemorationOwnerDay(day, ownerID)
+	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
+}
+
+// commemorationOwnerDay changes only the celebration used for proper tracing.
+// Composition has already selected the text; this keeps inventory ownership
+// tied to the actual commemoration Feast, including its ProperID redirect.
+func commemorationOwnerDay(day *models.CalendarDay, ownerID string) *models.CalendarDay {
+	if day == nil {
+		return day
+	}
+	for _, feast := range day.Commemorations {
+		if feast != nil && feast.ID == ownerID {
+			copy := *day
+			copy.Celebration = feast
+			return &copy
+		}
+	}
+	if day.FeriaCommemoration != nil && day.FeriaCommemoration.ID == ownerID {
+		copy := *day
+		copy.Celebration = day.FeriaCommemoration
+		return &copy
+	}
+	// An explicit owner that is not present in the transformed commemoration
+	// list must fail closed; attributing it to the principal celebration would
+	// make inventory rows appear to belong to the wrong feast.
+	copy := *day
+	copy.Celebration = nil
+	return &copy
+}
