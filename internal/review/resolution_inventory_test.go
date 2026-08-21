@@ -113,7 +113,7 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 		}
 		if row.OwnerID == "comm-01-18-st-prisca-of-rome-virgin-martyr" {
 			if row.Hour == "lauds" && row.RequestedSlot == "commemoration-collect" && row.Date == "2026-01-18" {
-				if row.SelectedRef != "commons/virgin-martyr/commemoration-collect" || row.SelectedTier != "common" {
+				if row.SelectedRef != "proper/comm-01-18-st-prisca-of-rome-virgin-martyr/commemoration-collect" || row.SelectedTier != "proper" {
 					t.Fatalf("Prisca Lauds collect = %#v", row)
 				}
 				seenPriscaCollect = true
