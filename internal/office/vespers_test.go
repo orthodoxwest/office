@@ -664,7 +664,7 @@ func TestFollowingOfficeCommemorationUsesFirstVespersTexts(t *testing.T) {
 		"proper/st-matthias/collect":                "Matthias collect",
 	})
 
-	elems := addCommemorations(day, "vespers", corpus)
+	elems := addCommemorations(day, "vespers", corpus, false)
 	if len(elems) != 4 {
 		t.Fatalf("got %d elements, want 4", len(elems))
 	}
@@ -750,7 +750,7 @@ func TestSaturdaySecondVespersSundayCommemorationUsesFirstVespersAntiphon(t *tes
 				}},
 			}
 
-			elems := addCommemorations(day, "vespers", texts.NewTestCorpus(tt.corpus))
+			elems := addCommemorations(day, "vespers", texts.NewTestCorpus(tt.corpus), false)
 			if len(elems) < 2 {
 				t.Fatalf("commemoration elements = %#v, want antiphon", elems)
 			}
