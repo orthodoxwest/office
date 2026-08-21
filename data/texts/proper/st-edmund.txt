@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic-diurnal-edmund p. 664 (DI-6912d65ec4cd-Cedmund-P708-9b4da664c558; collect) — agent-proposed, not attested
+O God of ineffable pity, who didst grant that the blessed King Edmund should conquer his enemy by dying for thy Name: graciously bestow upon this thy family that through his intervention, they may worthily extinguish and overcome the enticements of their ancient foe.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
