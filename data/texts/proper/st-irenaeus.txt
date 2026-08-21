@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic-diurnal p. 603-604 (DI-6912d65ec4cd-Cirenaeus-P603-P604-b1d47afc5a42; collect) — agent-proposed, not attested
+O God, who gavest grace to blessed Irenaeus thy Martyr and Bishop to overcome false doctrine by the truth of his teaching, and favourably to establish peace in thy Church: give thy people, we beseech thee, constancy in holy religion, and grant us thy peace all the days of our life.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
