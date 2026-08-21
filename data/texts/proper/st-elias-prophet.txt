@@ -10,36 +10,44 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
-# [benedictus-antiphon]
-# Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
+[collect]
+# SOURCE: st-elias-prophet p. 3 (DI-8798ec36132c-Cleft_end-P3-010c6d21cc6f; collect) — agent-proposed, not attested
+Grant, we beseech thee, Almighty God: that we who believe that thou didst marvellously lift up thy Prophet Elijah in a fiery chariot, while yet in this life; at his intercession may we while still alive be raised to spiritual heights and rejoice in the resurrection of the just.
+
+[benedictus-antiphon]
+# SOURCE: st-elias-prophet p. 3 (DI-8798ec36132c-Cleft_end-P3-597bf21636e8; benedictus-antiphon) — agent-proposed, not attested
+Elias * was a man passable like unto us; and with prayer he prayed that it might not rain upon the earth, and it rained now for three years and six months. And he prayed again; and the heaven gave rain, and the earth brought forth her fruit.
+
+[magnificat-antiphon]
+# SOURCE: st-elias-prophet p. 3 (DI-8798ec36132c-Cright_end-P3-9ed2290284e2; magnificat-antiphon) — agent-proposed, not attested
+Elias took his mantle * and struck the waters, and they were divided hither and thither, and he and Eliseus passed over on dry ground; and Elias went up by a whirlwind into heaven.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
+[psalm-antiphon-1]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-e04e36931043; psalm-antiphon-1) — agent-proposed, not attested
+With zeal have I been zealous * for the Lord God of hosts; for the children of Israel have forsaken thy covenant.
+
+[psalm-antiphon-2]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-96a81266399b; psalm-antiphon-2) — agent-proposed, not attested
+How long halt ye * between two opinions? if the Lord be God, follow him.
+
+[psalm-antiphon-3]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-d3d1bdadb03b; psalm-antiphon-3) — agent-proposed, not attested
+If I be a man of God, * let fire come down from heaven, and consume thee and thy fifty.
+
+[psalm-antiphon-4]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-1f298b964894; psalm-antiphon-4) — agent-proposed, not attested
+I have not * troubled Israel; but thou, and thy father’s house, in that ye have forsaken the commandments of the Lord.
+
+[psalm-antiphon-5]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-ab959f1419ad; psalm-antiphon-5) — agent-proposed, not attested
+Thou hast slain; * moreover, thou hast taken possession: behold, I will bring evil upon thee, and I will cut down thy posterity.
+
 # [commemoration-antiphon]
 # Antiphon when this feast is only commemorated (not the day's celebration).
 #
@@ -51,9 +59,10 @@
 
 # --- optional ---
 #
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
+[chapter-lauds]
+# SOURCE: st-elias-prophet p. 2 (DI-8798ec36132c-Cright-P2-ae6babef90b8; chapter-lauds) — agent-proposed, not attested
+Then stood up Elias the prophet as fire, and his word burned like a lamp. † He brought a sore famine upon them, * and by his zeal he diminished their number.
+
 # [chapter-vespers]
 # Chapter at Vespers (often @use of chapter-lauds).
 #
