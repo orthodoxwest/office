@@ -21,6 +21,10 @@ Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
+# The Office of the Dead has no opening versicles: after the Our Father and
+# Hail Mary said secretly above, "the Office begins at once with the Antiphon"
+# (Monastic Diurnal p. 72*, and p. 99* for Lauds).
+Condition = not-feast-all-souls
 Label = Opening Versicles
 
 Type = versicle
@@ -415,7 +419,7 @@ Type = canticle
 Ref = canticles/magnificat
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = day
 
 Type = proper-antiphon
 Ref = magnificat-antiphon

@@ -3,7 +3,7 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 212 |
+| Modeled structural features | 214 |
 | Full structural-cover pages | 58 |
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
@@ -83,6 +83,8 @@
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
+- `decision:condition:not-feast-all-souls=included`
+- `decision:condition:not-feast-all-souls=omitted`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=included`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=omitted`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls=included`

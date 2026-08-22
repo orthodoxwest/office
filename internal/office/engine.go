@@ -501,6 +501,14 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 			return resolveMarianElement(day, hourName, corpus)
 		}
 		return resolveElement(elem, corpus)
+	case "gloria-patri":
+		// Ref "day" defers to the office: the Gloria Patri, or "Rest eternal"
+		// in the Office of the Dead. Sections shared across every office use
+		// it; ones that belong to a single office name their text outright.
+		if elem.Ref == "day" {
+			return resolveElement(HourElement{Type: elem.Type, Ref: psalmDoxologyRef(day)}, corpus)
+		}
+		return resolveElement(elem, corpus)
 	case "proper-antiphon":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
 		return sourcedElement(models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)

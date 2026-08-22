@@ -35,8 +35,16 @@ func isOfficeOfTheDead(day *models.CalendarDay) bool {
 	return day != nil && day.Celebration != nil && officeOfTheDeadIDs[day.Celebration.ID]
 }
 
-// psalmDoxologyRef returns the corpus key for what concludes each psalm of the
-// day's office — the Gloria Patri, or "Rest eternal" in the Office of the Dead.
+// psalmDoxologyKeys are every corpus key psalmDoxologyRef can return, so the
+// hour-definition validator can require them all.
+var psalmDoxologyKeys = []string{
+	"ordinary/shared/gloria-patri",
+	"shared/formulas/rest-eternal",
+}
+
+// psalmDoxologyRef returns the corpus key for what concludes each psalm and
+// gospel canticle of the day's office — the Gloria Patri, or "Rest eternal" in
+// the Office of the Dead.
 func psalmDoxologyRef(day *models.CalendarDay) string {
 	if isOfficeOfTheDead(day) {
 		return "shared/formulas/rest-eternal"

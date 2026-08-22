@@ -184,6 +184,20 @@ func ValidateHourDefinitions(dataDir string) []string {
 						}
 					}
 
+				case "gloria-patri":
+					if elem.Ref != "day" {
+						if _, seen := required[elem.Ref]; !seen {
+							required[elem.Ref] = src
+						}
+						continue
+					}
+					// Ref "day" is resolved at runtime to one of two keys.
+					for _, key := range psalmDoxologyKeys {
+						if _, seen := required[key]; !seen {
+							required[key] = src
+						}
+					}
+
 				case "commemorations":
 					// Resolved dynamically at runtime; nothing to validate.
 
