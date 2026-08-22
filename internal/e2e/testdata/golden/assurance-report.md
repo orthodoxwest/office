@@ -3,13 +3,13 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 210 |
-| Full structural-cover pages | 57 |
-| Residual structural-review pages | 57 |
+| Modeled structural features | 212 |
+| Full structural-cover pages | 58 |
+| Residual structural-review pages | 58 |
 | Uncovered features | 0 |
-| Verified text entries | 586 |
-| Rendered text entries needing review | 1377 |
-| Rendered text entries with unknown source | 230 |
+| Verified text entries | 601 |
+| Rendered text entries needing review | 1365 |
+| Rendered text entries with unknown source | 226 |
 | Classified zero-occurrence entries | 71 |
 | Zeroes needing classification | 24 |
 | Stale zero-occurrence classifications | 8 |
@@ -57,6 +57,8 @@
 - `decision:commemoration:st-george-octave=suppressed`
 - `decision:commemoration:vigil-seasonal-exclusion=suppressed`
 - `decision:concurrence:simple-begins-at-chapter=split`
+- `decision:condition:feast-all-souls=included`
+- `decision:condition:feast-all-souls=omitted`
 - `decision:condition:feast-easter-sunday=included`
 - `decision:condition:feast-easter-sunday=omitted`
 - `decision:condition:feast-holy-saturday=included`
@@ -65,8 +67,8 @@
 - `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
 - `decision:condition:feast-saturday-office-bvm,season-easter=included`
 - `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
-- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
-- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=included`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=omitted`
 - `decision:condition:festal-vespers-psalmody=included`
 - `decision:condition:festal-vespers-psalmody=omitted`
 - `decision:condition:if-cross-commemoration=included`
@@ -75,20 +77,20 @@
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=included`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm=omitted`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=included`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
-- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=included`
-- `decision:condition:not-feast-easter-sunday,not-weekday-saturday=omitted`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody=included`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody=omitted`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=included`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=omitted`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls=included`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
-- `decision:condition:not-is-feast,weekday-saturday=included`
-- `decision:condition:not-is-feast,weekday-saturday=omitted`
+- `decision:condition:not-is-feast,weekday-saturday,not-feast-all-souls=included`
+- `decision:condition:not-is-feast,weekday-saturday,not-feast-all-souls=omitted`
 - `decision:condition:not-is-ferial=included`
 - `decision:condition:not-is-ferial=omitted`
 - `decision:marian:boundary=civil-day`

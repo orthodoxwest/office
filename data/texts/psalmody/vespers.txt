@@ -98,3 +98,11 @@ psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
 psalm-antiphon-3 = psalms/112
 psalm-antiphon-5 = psalms/138
+
+[dead]
+# SOURCE: Monastic Diurnal.pdf, pp. 72*-75* (Vespers of the Dead)
+psalm-antiphon-1 = psalms/116
+psalm-antiphon-2 = psalms/120
+psalm-antiphon-3 = psalms/121
+psalm-antiphon-4 = psalms/130
+psalm-antiphon-5 = psalms/138

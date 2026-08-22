@@ -168,41 +168,53 @@ func SweepYear(dataDir string, year int) (*SweepReport, error) {
 	// pair the comparator calls equal lands in an arbitrary, run-to-run order,
 	// and the report stops being diffable.
 	sort.Slice(r.NotFound, func(i, j int) bool {
-		a, b := &r.NotFound[i], &r.NotFound[j]
-		if a.Marker != b.Marker {
-			return a.Marker < b.Marker
-		}
-		if a.Hour != b.Hour {
-			return a.Hour < b.Hour
-		}
-		return a.FirstDate.Before(b.FirstDate)
+		return lessNotFound(&r.NotFound[i], &r.NotFound[j])
 	})
 	for _, f := range fallbacks {
 		r.OrdinaryFallbacks = append(r.OrdinaryFallbacks, *f)
 	}
 	sort.Slice(r.OrdinaryFallbacks, func(i, j int) bool {
-		a, b := &r.OrdinaryFallbacks[i], &r.OrdinaryFallbacks[j]
-		if wa, wb := a.Rank.Weight(), b.Rank.Weight(); wa != wb {
-			return wa > wb
-		}
-		if a.FeastID != b.FeastID {
-			return a.FeastID < b.FeastID
-		}
-		if a.Hour != b.Hour {
-			return a.Hour < b.Hour
-		}
-		if a.Slot != b.Slot {
-			return a.Slot < b.Slot
-		}
-		// One slot can fall back to different ordinary texts on different days
-		// (a Saturday hymn and a Sunday one); SourceRef is part of the map key,
-		// so it must be part of the ordering too.
-		if a.SourceRef != b.SourceRef {
-			return a.SourceRef < b.SourceRef
-		}
-		return a.FirstDate.Before(b.FirstDate)
+		return lessOrdinaryFallback(&r.OrdinaryFallbacks[i], &r.OrdinaryFallbacks[j])
 	})
 	return r, nil
+}
+
+// lessNotFound and lessOrdinaryFallback order the two sweep reports. They are
+// named rather than inline so their totality can be tested directly: the rows
+// come out of a map, so a comparator that calls any pair equal leaves them in
+// an arbitrary, run-to-run order and the report stops being diffable. The
+// repo's own data is not a reliable fixture for that — it holds no fallbacks
+// at all once the propers are complete.
+func lessNotFound(a, b *NotFoundText) bool {
+	if a.Marker != b.Marker {
+		return a.Marker < b.Marker
+	}
+	if a.Hour != b.Hour {
+		return a.Hour < b.Hour
+	}
+	return a.FirstDate.Before(b.FirstDate)
+}
+
+func lessOrdinaryFallback(a, b *OrdinaryFallback) bool {
+	if wa, wb := a.Rank.Weight(), b.Rank.Weight(); wa != wb {
+		return wa > wb
+	}
+	if a.FeastID != b.FeastID {
+		return a.FeastID < b.FeastID
+	}
+	if a.Hour != b.Hour {
+		return a.Hour < b.Hour
+	}
+	if a.Slot != b.Slot {
+		return a.Slot < b.Slot
+	}
+	// One slot can fall back to different ordinary texts on different days
+	// (a Saturday hymn and a Sunday one); SourceRef is part of the map key,
+	// so it must be part of the ordering too.
+	if a.SourceRef != b.SourceRef {
+		return a.SourceRef < b.SourceRef
+	}
+	return a.FirstDate.Before(b.FirstDate)
 }
 
 // sweepFeast returns the celebration that owns the given hour on this day:

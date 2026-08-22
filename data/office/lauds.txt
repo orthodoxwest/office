@@ -78,8 +78,66 @@ Ref = canticles/benedicite
 Type = proper-antiphon
 Ref = easter-antiphon-4
 
+[Psalmody-Dead]
+Condition = feast-all-souls
+Label = The Psalms
+
+# Lauds of the Dead (Monastic Diurnal pp. 99*-104*). The Office of the Dead
+# says no Gloria Patri: "At the end of all Psalms is always said: Rest eternal
+# grant unto them, O Lord" (p. 72*), so the doxology slot carries that instead.
+# Psalm 130 (De profundis), printed at p. 106*, is not said at the
+# Commemoration of All the Faithful Departed.
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/065
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/063
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/isaiah-38
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Sunday]
-Condition = not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody
+Condition = not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -241,7 +299,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Festal]
-Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm
+Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -296,7 +354,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Monday]
-Condition = not-is-feast,weekday-monday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-monday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -354,7 +412,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Tuesday]
-Condition = not-is-feast,weekday-tuesday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-tuesday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -412,7 +470,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Wednesday]
-Condition = not-is-feast,weekday-wednesday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-wednesday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -470,7 +528,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Thursday]
-Condition = not-is-feast,weekday-thursday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-thursday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -528,7 +586,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Friday]
-Condition = not-is-feast,weekday-friday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-friday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -586,7 +644,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Saturday]
-Condition = not-is-feast,weekday-saturday,not-festal-lauds-psalmody
+Condition = not-is-feast,weekday-saturday,not-festal-lauds-psalmody,not-feast-all-souls
 Label = The Psalms
 
 Type = psalm
@@ -631,6 +689,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Laudate-Dead]
+Condition = feast-all-souls
+
+# The Office of the Dead sings Psalm 150 alone under the fifth antiphon, not
+# the whole Laudate group (Monastic Diurnal p. 104*).
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/150
+
+Type = gloria-patri
+Ref = shared/formulas/rest-eternal
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
 [Laudate-Easter]
 Condition = feast-easter-sunday
 
@@ -653,7 +729,7 @@ Type = proper-antiphon
 Ref = easter-antiphon-5
 
 [Laudate-Saturday]
-Condition = not-is-feast,weekday-saturday
+Condition = not-is-feast,weekday-saturday,not-feast-all-souls
 
 Type = proper-antiphon
 Ref = psalm-antiphon-4
@@ -674,7 +750,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Laudate-Saturday-Festal]
-Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm
+Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5
@@ -737,7 +813,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-5
 
 [Laudate-Non-Saturday]
-Condition = not-feast-easter-sunday,not-weekday-saturday
+Condition = not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5

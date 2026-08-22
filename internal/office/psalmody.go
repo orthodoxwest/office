@@ -289,7 +289,7 @@ func composeResolvedPsalmody(day *models.CalendarDay, hourName string, items []p
 		elems = append(elems,
 			antiphon,
 			resolveElement(HourElement{Type: "psalm", Ref: item.psalm}, corpus),
-			resolveElement(HourElement{Type: "gloria-patri", Ref: "ordinary/shared/gloria-patri"}, corpus),
+			resolveElement(HourElement{Type: "gloria-patri", Ref: psalmDoxologyRef(day)}, corpus),
 			antiphon,
 		)
 	}
