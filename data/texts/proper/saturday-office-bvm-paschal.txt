@@ -1,15 +1,9 @@
 [magnificat-antiphon]
-# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, III In
-# Paschaltide, At Vespers). Previously taken from the Regina caeli in "Final
-# Antiphons of the Blessed Virgin Mary.pdf", pointed as an antiphon, on the
-# strength of the 2026 ordo's May 16 incipit; the Diurnal prints it as the
-# office's own antiphon, and slightly differently ("because whom so meetly",
-# not "because he whom").
+# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, III In Paschaltide, At Vespers)
 O Queen of heaven, * be joyful, alleluia; Because whom so meetly thou barest, alleluia, Hath arisen, as he promised, alleluia: Pray for us to the Father, alleluia.
 
 [benedictus-antiphon]
-# "Ant. on Benedictus. O Queen of heaven, as above at Vespers."
-# — Monastic Diurnal p. 71*
+# SOURCE: Monastic Diurnal.pdf, p. 71* — "Ant. on Benedictus. O Queen of heaven, as above at Vespers."
 @use proper/saturday-office-bvm-paschal/magnificat-antiphon
 
 [short-responsory-lauds]

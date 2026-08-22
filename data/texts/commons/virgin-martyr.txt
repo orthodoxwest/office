@@ -46,9 +46,7 @@ This is one of the wise virgins, * whom the Lord found watching.
 @use commons/virgin-martyr/magnificat-antiphon
 
 [commemoration-versicle]
-# The same versicle as I Vespers, which previously stood here in a second
-# translation ("In thy comeliness… fare prosperously"). Both hour-qualified
-# commemoration versicles exist below, so this is only the last-resort form.
+# The last-resort form; both hour-qualified commemoration versicles exist below.
 @use commons/virgin-martyr/versicle-first-vespers
 
 [commemoration-versicle-lauds]
@@ -167,8 +165,7 @@ R. Go forth, ride prosperously, and reign.
 
 [versicle-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 50* (Common of Virgins, At II Vespers)
-# The versicle is the one thing II Vespers changes from I Vespers, so this is
-# not the commemoration versicle it formerly aliased.
+# The versicle is the one thing II Vespers changes from I Vespers.
 V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
