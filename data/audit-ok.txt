@@ -59,7 +59,6 @@ st-isidore-seville *
 st-leo-great *
 st-maximus-constantinople *
 st-peter-chrysologus *
-st-peter-damian *
 st-gregory-nazianzen *
 st-hilary *
 st-john-chrysostom *
