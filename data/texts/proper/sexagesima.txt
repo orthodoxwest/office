@@ -48,6 +48,12 @@ R. Thanks be to God.
 [chapter-first]
 @use proper/sexagesima/chapter-lauds
 
+[chapter-vespers]
+# "Chapter as above at Lauds" — Monastic Diurnal p. 240 (At Vespers). The
+# hymn, short responsory and versicle are NOT proper here: the same rubric
+# sends them "as in the Psalter, p. 114".
+@use proper/sexagesima/chapter-lauds
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 164 (Sexagesima Sunday)
 V. Lord, thou hast been our refuge.
