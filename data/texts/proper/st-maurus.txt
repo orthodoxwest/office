@@ -7,6 +7,19 @@
 # that silences make audit without providing text.
 # Commons fallback: commons/confessor/{ref}
 # Intentional commons-only: add this feast id to data/audit-ok.txt
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal.pdf, p. 456 (January 15, At I Vespers)
+O most blessed of men! * who, rejecting this world, bore the yoke of Holy Rule from tender years so lovingly; and being made obedient even unto death, he denied himself, that he might wholly cling to Christ his Master, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 457 — "Ant. on Benedictus. O most blessed of men, as above at I Vespers."
+@use proper/st-maurus/magnificat-antiphon-first
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 458 (January 15, At II Vespers)
+To-day holy Maurus, * lying upon a goat-skin, died happily before the altar; to-day the first-begotten disciple of blessed Benedict, through the guiding of the Holy Rule, came up to Christ, rising untroubled, accompanied by choirs of Angels; to-day the obedient man, telling his victories, was worthy to be crowned by the Lord, alleluia.
+
 #
 # --- core ---
 #
