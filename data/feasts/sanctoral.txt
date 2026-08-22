@@ -956,8 +956,6 @@ ProperName = Romuald
 Month = 2
 Day = 7
 
-# St Peter Damian is not part of the current AWRV calendar.
-
 [st-perpetua-felicitas]
 Name = St Perpetua & Felicitas, Martyrs
 Rank = double

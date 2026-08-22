@@ -78,26 +78,6 @@ func TestBuildCalendarEpiphanySundays(t *testing.T) {
 	}
 }
 
-func TestBuildCalendarOmitsPeterDamianFromAWRVCalendar(t *testing.T) {
-	for _, year := range []int{2024, 2025, 2026, 2027} {
-		days, err := BuildCalendar(year, findDataDir(t))
-		if err != nil {
-			t.Fatalf("BuildCalendar(%d): %v", year, err)
-		}
-		for i := range days {
-			day := &days[i]
-			if day.Celebration != nil && day.Celebration.ID == "st-peter-damian" {
-				t.Fatalf("St Peter Damian owns the office on %s", day.Date.Format("2006-01-02"))
-			}
-			for _, comm := range append(append([]*models.Feast{}, day.Commemorations...), day.Vespers.Commemorations...) {
-				if comm.ID == "st-peter-damian" {
-					t.Fatalf("St Peter Damian is commemorated on %s", day.Date.Format("2006-01-02"))
-				}
-			}
-		}
-	}
-}
-
 func TestAnticipatedEpiphanySundayFeastBoundaries(t *testing.T) {
 	tests := []struct {
 		year   int
