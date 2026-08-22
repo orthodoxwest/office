@@ -507,9 +507,9 @@ func TestResolveDaySuppressCommemorationOfStPaulOutsideChairAtAntioch(t *testing
 	m := ComputeMoveableDates(2026)
 	date := time.Date(2026, 2, 23, 0, 0, 0, 0, time.UTC)
 
-	peterDamian := &models.Feast{
-		ID:       "st-peter-damian",
-		Name:     "St Peter Damian, Bishop, Confessor & Doctor",
+	ordinaryFeast := &models.Feast{
+		ID:       "other-double-feast",
+		Name:     "Other Double Feast",
 		Rank:     models.Double,
 		Color:    models.White,
 		Category: models.CategoryConfessorDoctor,
@@ -538,15 +538,15 @@ func TestResolveDaySuppressCommemorationOfStPaulOutsideChairAtAntioch(t *testing
 
 	day, _ := ResolveDay(
 		date,
-		[]*models.Feast{peterDamian, commStPaul, vigilMatthias},
+		[]*models.Feast{ordinaryFeast, commStPaul, vigilMatthias},
 		models.Septuagesima,
 		models.Violet,
 		m,
 		nil,
 	)
 
-	if day.Celebration != peterDamian {
-		t.Fatal("expected St Peter Damian to win")
+	if day.Celebration != ordinaryFeast {
+		t.Fatal("expected the ordinary feast to win")
 	}
 	if len(day.Commemorations) != 1 || day.Commemorations[0] != vigilMatthias {
 		t.Fatal("expected commemoration of St Paul to be suppressed outside Chair at Antioch")

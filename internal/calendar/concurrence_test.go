@@ -445,7 +445,7 @@ func TestResolveConcurrenceFiltersOccurrenceCommemorationsAtSecondVespers(t *tes
 func TestResolveConcurrenceOrdersFollowingOfficeBeforeOccurrenceCommemorations(t *testing.T) {
 	winner := &models.Feast{ID: "chair-peter", Rank: models.Double2ndClass, Category: models.CategoryApostle}
 	following := &models.Feast{ID: "st-matthias", Rank: models.Double2ndClass, Category: models.CategoryApostle}
-	doctor := &models.Feast{ID: "st-peter-damian", Rank: models.Double, Category: models.CategoryConfessorDoctor}
+	doctor := &models.Feast{ID: "generic-confessor-doctor", Rank: models.Double, Category: models.CategoryConfessorDoctor}
 	companion := &models.Feast{ID: "commemoration-st-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
 	feria := &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}
 

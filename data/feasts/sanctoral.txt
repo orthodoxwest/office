@@ -956,15 +956,6 @@ ProperName = Romuald
 Month = 2
 Day = 7
 
-[st-peter-damian]
-Name = St Peter Damian, Bishop, Confessor & Doctor
-Rank = double
-Color = white
-Category = confessor-doctor
-ProperName = Peter
-Month = 2
-Day = 23
-
 [st-perpetua-felicitas]
 Name = St Perpetua & Felicitas, Martyrs
 Rank = double
