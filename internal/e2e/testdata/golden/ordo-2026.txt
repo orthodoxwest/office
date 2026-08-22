@@ -219,7 +219,7 @@ JANUARY
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. St. Martina, Virgin & Martyr ("The kingdom of heaven")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. Great · Suff.
  31  Sat     Saturday Office of the B.V.M               [s]   w
            Lauds   w · Ben. A great and wondrous mystery · No Preces · Suff.
            Hours   Preces
@@ -858,9 +858,9 @@ MAY
  15  Fri  L  Feria                                            w
            Lauds   w · Ben. These are the words · No Preces · No Suff.
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · No Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O Queen of heaven · No Suff.
  16  Sat     Saturday Office of the B.V.M               [s]   w
-           Lauds   w · Ben. O Queen of Heaven, be joyful, alleluia · No Preces · No Suff.
+           Lauds   w · Ben. O Queen of heaven · No Preces · No Suff.
            Hours   Preces
            Vespers w · I fol. (V Sunday after Easter) · Mag. Hitherto · No Suff.
  17  Sun     V Sunday after Easter                      [sd]  w
@@ -1081,11 +1081,11 @@ JUNE
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. Ss. Gervase & Protase, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
                Com. St Silverius, Bishop & Martyr ("Whosoever will come after me")
  20  Sat     Saturday Office of the B.V.M               [s]   w
            St Silverius, Bishop & Martyr (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
                Com. St Silverius, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers g · I fol. (III Sunday after Pentecost) · Mag. And all Israel knew · Suff.
@@ -1237,11 +1237,11 @@ JULY
                Com. The Seven Holy Brothers, with Ss Rufina & Secunda, Martyrs ("The very hairs of your head")
                Com. St. Joseph of Damascus (Priest) & companions, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
                Com. St Pius I, Bishop & Martyr ("Whosoever will come after me")
  11  Sat     Saturday Office of the B.V.M               [s]   w
            St Pius I, Bishop & Martyr (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
                Com. St Pius I, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers g · I fol. (VI Sunday after Pentecost) · Mag. O Lord, I beseech thee · Suff.
@@ -1618,7 +1618,7 @@ SEPTEMBER
            Hours   No Preces
            Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
   5  Sat     Saturday Office of the B.V.M               [s]   w
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
            Hours   Preces
            Vespers g · I fol. (XIV Sunday after Pentecost) · Mag. In all this · Suff.
   6  Sun     XIV Sunday after Pentecost                 [sd]  g
@@ -1738,11 +1738,11 @@ SEPTEMBER
  25  Fri  L  Feria                                            g
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
                Com. Ss. Cyprian & Justina, Martyrs ("In the heavenly kingdom")
  26  Sat     Saturday Office of the B.V.M               [s]   w
            Ss. Cyprian & Justina, Martyrs (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
                Com. Ss. Cyprian & Justina, Martyrs ("The very hairs of your head")
            Hours   Preces
            Vespers g · I fol. (XVII Sunday after Pentecost) · Mag. O Lord · Suff.
@@ -1786,7 +1786,7 @@ OCTOBER
            Hours   No Preces
            Vespers w · II prec. · Mag. Praise ye God · No Suff.
   3  Sat     Saturday Office of the B.V.M               [s]   w
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
            Hours   Preces
            Vespers g · I fol. (XVIII Sunday after Pentecost) · Mag. The Lord open your hearts · Suff.
   4  Sun     XVIII Sunday after Pentecost               [sd]  g
@@ -1822,9 +1822,9 @@ OCTOBER
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. Ss. Denys, Rusticus & Eleutherius, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
  10  Sat     Saturday Office of the B.V.M               [s]   w
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Motherhood of the B.V.M) · Mag. With peaceful joy · No Suff.
                Com. XIX Sunday after Pentecost ("And the King came in")
@@ -1860,9 +1860,9 @@ OCTOBER
  16  Fri  L  Feria                                            g
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
  17  Sat     Saturday Office of the B.V.M               [s]   w
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
            Hours   Preces
            Vespers r · I fol. (St. Luke, Evangelist) · Mag. They will deliver you up · No Suff.
                Com. XX Sunday after Pentecost ("So the father knew")
@@ -2040,11 +2040,11 @@ NOVEMBER
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. St Britius of Tours, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. All generations shall call me blessed · Suff.
+           Vespers w · I fol. (Saturday Office of the B.V.M) · Mag. O blessed Mother · Suff.
                Com. St Gregory Palamas, Bishop & Confessor ("The Lord loved him")
  14  Sat     Saturday Office of the B.V.M               [s]   w
            St Gregory Palamas, Bishop & Confessor (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · Suff.
+           Lauds   w · Ben. O ever blessed Mother of God · No Preces · Suff.
                Com. St Gregory Palamas, Bishop & Confessor ("Well done")
            Hours   Preces
            Vespers g · I fol. (VI Sunday after Epiphany (Resumed)) · Mag. Thou that upholdest · Suff.

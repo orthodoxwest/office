@@ -3,5 +3,13 @@
 # sections fall back to proper/saturday-office-bvm and the commons.
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 114 (The Circumcision; Mirabile mysterium) — 2026 ordo Jan 31 assigns it to the Saturday Office of the B.V.M.
+# SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After
+# Christmas, At Lauds). Previously carried from the draft archdiocesan Lauds book
+# p. 114 (The Circumcision) on the strength of the 2026 ordo's Jan 31 incipit; the
+# Diurnal prints it here word for word, so the inference is now attested.
 A great and wondrous mystery * is made known to us this day; a new thing is wrought in both natures: God is made man; that which was, remained, and that which was not, he assumed; suffering no confusion, nor yet division.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 70* (Office of Saint Mary on Saturday, II After
+# Christmas, At Vespers)
+Great * is the mystery of the inheritance: the womb of her that knew not man is become the temple of the Godhead; by taking flesh of her, he was no way defiled: all the nations shall gather, saying: Glory be to thee, O Lord.
