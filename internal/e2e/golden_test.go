@@ -89,14 +89,12 @@ var hourCases = []hourCase{
 	// Vespers — Easter exercises hour-qualified hymn (vespers vs lauds)
 	{"vespers", "2026-04-12", "Easter Sunday — proper vespers hymn, hour-qualified"},
 
-	// All Souls — the Office of the Dead, which differs from every other
-	// office structurally and not only in its texts. Its parity-snapshot hash
-	// would flip on a regression without saying what broke, and each of these
-	// properties is carried by a different mechanism: the psalmody sections in
-	// lauds.txt, the psalmody declaration for Vespers, @omit in the proper, and
-	// psalmDoxologyRef in the composer.
+	// All Souls — Lauds is the Office of the Dead, while the daytime Hours and
+	// Vespers remain of Day II within the Octave of All Saints in the 2026 ordo.
 	{"lauds", "2026-11-02", "All Souls — Lauds of the Dead: no chapter/hymn/short responsory, Rest eternal in place of the Gloria Patri, Psalm 150 alone under the fifth antiphon"},
-	{"vespers", "2026-11-02", "All Souls — Vespers of the Dead: five psalms rather than four, Rest eternal in place of the Gloria Patri"},
+	{"prime", "2026-11-02", "All Souls — Prime remains of Day II within the Octave of All Saints"},
+	{"terce", "2026-11-02", "All Souls — the Little Hours remain of Day II within the Octave of All Saints"},
+	{"vespers", "2026-11-02", "All Souls — Vespers is of Day II within the Octave of All Saints"},
 
 	// Compline — one date per Marian antiphon + alleluia seasonal variation
 	{"compline", "2026-04-11", "Easter Eve (Holy Saturday) — no hymn/chapter, Nunc Dimittis"},

@@ -79,12 +79,13 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 		return nil, err
 	}
 	byKey := inv.ByKey()
+	contextDay := officeContextDay(&days[idx], hourName)
 
 	a := &CompositionAssurance{
 		Date:        date.Format("2006-01-02"),
 		Hour:        hourName,
-		UnitKey:     unitKey(&days[idx], hourName),
-		Celebration: celebrationName(&days[idx]),
+		UnitKey:     unitKey(contextDay, hourName),
+		Celebration: celebrationName(contextDay),
 		Season:      hour.Season,
 		Color:       hour.Color,
 		Decisions:   dedupeDecisions(hour.Decisions),
@@ -686,9 +687,11 @@ func betterCoverPick(c ReviewCandidate, impact, newCount int, first bool, candid
 }
 
 func candidateFor(day *models.CalendarDay, hourName string, hour *models.OfficeHour, includeSources bool) ReviewCandidate {
-	u := Unit{Hour: hourName, Rank: celebrationRank(day, hourName), Date: day.Date}
+	civilDate := day.Date
+	day = officeContextDay(day, hourName)
+	u := Unit{Hour: hourName, Rank: celebrationRank(day, hourName), Date: civilDate}
 	c := ReviewCandidate{
-		Hash: HashHour(hour), Priority: u.Priority(), Hour: hourName, Date: day.Date,
+		Hash: HashHour(hour), Priority: u.Priority(), Hour: hourName, Date: civilDate,
 		UnitKey: unitKey(day, hourName), Celebration: celebrationName(day),
 		Context: contextNote(day, hourName), Dependencies: hourDependencies(hour),
 	}

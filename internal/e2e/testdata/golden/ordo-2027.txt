@@ -355,15 +355,11 @@ FEBRUARY
                Com. St Paul ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. During his pontificate · No Suff.
-               Com. St Peter Damian, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. St Paul ("The world, and all things earthly")
- 23  Tue     St Peter Damian, Bishop, Confessor & Doctor [d]   w
-           Vigil of St. Matthias (s)
-           Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Vigil of St. Matthias ("Blessed be the Lord God of Israel, for he…")
-           Hours   No Preces
+ 23  Tue     Vigil of St. Matthias                      [s]   v
+           Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
+           Hours   Preces
            Vespers r · I fol. (St. Matthias, Apostle) · Mag. They will deliver you up · No Suff.
-               Com. St Peter Damian, Bishop, Confessor & Doctor ("O Teacher right excellent")
  24  Wed     St. Matthias, Apostle                      [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
@@ -1948,8 +1944,7 @@ NOVEMBER
            Lauds   b · Ben. I am the resurrection · No Preces · No Suff.
                Com. Day II within the Octave of All Saints ("I beheld a great multitude")
            Hours   No Preces
-           Vespers b · Mag. All that the Father giveth me · No Suff.
-               Com. Day II within the Octave of All Saints ("I beheld a great multitude")
+           Vespers w · Mag. O how glorious · No Suff.
                Com. St Winifred, Virgin & Martyr ("Come, thou Bride of Christ")
   3  Wed     Day III within the Octave of All Saints    [sd]  w
            St Winifred, Virgin & Martyr (com)

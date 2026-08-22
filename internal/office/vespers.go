@@ -21,9 +21,15 @@ func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSectio
 	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
 		hourName:    "vespers",
 		title:       "Vespers",
-		officeDay:   vespersOfficeDay,
+		officeDay:   vespersCompositionDay,
 		psalmodyDay: vespersPsalmodyDay,
 	})
+}
+
+// vespersCompositionDay applies dispositions that change which office is
+// sung at Vespers without changing the civil day's concurrence record.
+func vespersCompositionDay(day *models.CalendarDay) *models.CalendarDay {
+	return allSaintsOctaveOfficeDay(vespersOfficeDay(day))
 }
 
 // vespersPsalmodyDay returns the office day that supplies the psalms and their
@@ -37,7 +43,7 @@ func vespersPsalmodyDay(day *models.CalendarDay) *models.CalendarDay {
 		return day
 	}
 	if !day.Vespers.PsalmodyFromPreceding {
-		return vespersOfficeDay(day)
+		return vespersCompositionDay(day)
 	}
 	psalmodyDay := *day
 	psalmodyDay.Commemorations = nil

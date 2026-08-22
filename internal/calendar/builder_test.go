@@ -78,6 +78,26 @@ func TestBuildCalendarEpiphanySundays(t *testing.T) {
 	}
 }
 
+func TestBuildCalendarOmitsPeterDamianFromAWRVCalendar(t *testing.T) {
+	for _, year := range []int{2024, 2025, 2026, 2027} {
+		days, err := BuildCalendar(year, findDataDir(t))
+		if err != nil {
+			t.Fatalf("BuildCalendar(%d): %v", year, err)
+		}
+		for i := range days {
+			day := &days[i]
+			if day.Celebration != nil && day.Celebration.ID == "st-peter-damian" {
+				t.Fatalf("St Peter Damian owns the office on %s", day.Date.Format("2006-01-02"))
+			}
+			for _, comm := range append(append([]*models.Feast{}, day.Commemorations...), day.Vespers.Commemorations...) {
+				if comm.ID == "st-peter-damian" {
+					t.Fatalf("St Peter Damian is commemorated on %s", day.Date.Format("2006-01-02"))
+				}
+			}
+		}
+	}
+}
+
 func TestAnticipatedEpiphanySundayFeastBoundaries(t *testing.T) {
 	tests := []struct {
 		year   int
@@ -663,6 +683,20 @@ func TestBuildCalendarVigils(t *testing.T) {
 	if !oct31.Celebration.IsVigil {
 		t.Error("generated Vigil of All Saints is missing IsVigil trait")
 	}
+}
+
+func TestBuildCalendarKeepsAllSaintsOctaveDayUnderAllSouls(t *testing.T) {
+	days := buildCalendar2026(t)
+	nov2 := findDay(days, 2026, 11, 2)
+	if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.ID != "all-souls" {
+		t.Fatalf("Nov 2 celebration = %#v, want all-souls", nov2)
+	}
+	for _, comm := range nov2.Commemorations {
+		if comm.ID == "all-saints-octave-day-2" {
+			return
+		}
+	}
+	t.Fatal("Nov 2 occurrence lost Day II within the Octave of All Saints")
 }
 
 func TestBuildCalendarCommonVigilOwnership(t *testing.T) {

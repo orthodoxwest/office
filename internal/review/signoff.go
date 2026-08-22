@@ -167,10 +167,11 @@ func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note str
 	if err != nil {
 		return nil, nil, fmt.Errorf("composing %s: %w", hourName, err)
 	}
+	contextDay := officeContextDay(day, hourName)
 	unit := &Unit{
-		Hash: HashHour(hour), Hour: hourName, UnitKey: unitKey(day, hourName),
-		Name: celebrationName(day), Rank: celebrationRank(day, hourName), Season: day.Season,
-		Date: date, Occurrences: 1, Context: contextNote(day, hourName),
+		Hash: HashHour(hour), Hour: hourName, UnitKey: unitKey(contextDay, hourName),
+		Name: celebrationName(contextDay), Rank: celebrationRank(contextDay, hourName), Season: contextDay.Season,
+		Date: date, Occurrences: 1, Context: contextNote(contextDay, hourName),
 	}
 	signoff := &Signoff{
 		Hash: unit.Hash, Hour: hourName, UnitKey: unit.UnitKey,

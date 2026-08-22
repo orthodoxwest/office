@@ -48,16 +48,14 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 			if hourName != "vespers" {
 				continue
 			}
-			// Vespers sings four psalms, except the Office of the Dead, which
-			// sings five (Monastic Diurnal pp. 72*-75*). The office package
-			// owns that predicate; this is the one ID it applies to today.
-			wantPsalms := 4
-			if feastID(day) == "all-souls" {
-				wantPsalms = 5
-			}
-			if psalms != wantPsalms {
-				t.Errorf("Vespers on %s (%s) has %d psalms, want %d",
-					day.Date.Format(time.DateOnly), feastID(day), psalms, wantPsalms)
+			// The civil day's principal celebration can differ from the office
+			// appointed for Vespers (notably All Souls, whose Nov. 2 Vespers is
+			// of the All Saints octave). Every currently composed Vespers has
+			// four psalms; the five-psalm Vespers of the Dead is a separate
+			// ceremony after the preceding day's Vespers and is not appended yet.
+			if psalms != 4 {
+				t.Errorf("Vespers on %s (%s) has %d psalms, want 4",
+					day.Date.Format(time.DateOnly), feastID(day), psalms)
 			}
 		}
 	}
