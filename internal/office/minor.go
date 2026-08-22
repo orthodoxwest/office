@@ -18,6 +18,7 @@ type MinorHourComposer struct {
 
 // Compose builds a complete minor hour for the given day.
 func (m *MinorHourComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
+	day = allSaintsOctaveOfficeDay(day)
 	hour := &models.OfficeHour{
 		Date:   day.Date,
 		Hour:   m.Name,

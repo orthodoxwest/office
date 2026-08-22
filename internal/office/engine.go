@@ -156,7 +156,7 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("vespers:owner", owner, "")
 		add("vespers:rule", day.Vespers.Rule, "")
 		hour.Decisions = append(hour.Decisions, day.Vespers.Decisions...)
-		officeDay := vespersOfficeDay(day)
+		officeDay := vespersCompositionDay(day)
 		appendEveningOfficeContextDecisions(hour, officeDay)
 		// Suffrage and Marian selection follow the office that owns Vespers.
 		_, suffrageReason := suffrageDisposition(officeDay, moveable)
@@ -306,7 +306,7 @@ func antiphonsDoubled(day *models.CalendarDay, hourName string) bool {
 	}
 	officeDay := day
 	if hourName == "vespers" {
-		officeDay = vespersOfficeDay(day)
+		officeDay = vespersCompositionDay(day)
 	}
 	if officeDay == nil || officeDay.Celebration == nil {
 		return false
@@ -720,7 +720,7 @@ func titleCase(s string) string {
 // It does not perform a second resolution and cannot affect composed output.
 func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, selectedRef string) ProperResolutionTrace {
 	if hourName == "vespers" {
-		day = vespersOfficeDay(day)
+		day = vespersCompositionDay(day)
 	}
 	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
 }
@@ -737,7 +737,7 @@ const UnknownCommemorationOwnerReason = "unknown-commemoration-owner"
 // celebration.
 func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName, ref, selectedRef, ownerID string) ProperResolutionTrace {
 	if hourName == "vespers" {
-		day = vespersOfficeDay(day)
+		day = vespersCompositionDay(day)
 	}
 	ownerDay, found := commemorationOwnerDay(day, ownerID)
 	if ownerDay != nil {
