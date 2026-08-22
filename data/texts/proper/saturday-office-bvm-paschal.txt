@@ -1,6 +1,10 @@
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 71* (Office of Saint Mary on Saturday, III In Paschaltide, At Vespers)
+O Queen of heaven, * be joyful, alleluia; Because whom so meetly thou barest, alleluia, Hath arisen, as he promised, alleluia: Pray for us to the Father, alleluia.
+
 [benedictus-antiphon]
-# SOURCE: Final Antiphons of the Blessed Virgin Mary.pdf (Regina caeli), pointed as an antiphon — 2026 ordo May 16 assigns "O Queen of heaven" to the Saturday Office of the B.V.M. in Paschaltide.
-O Queen of Heaven, be joyful, alleluia: * because he whom so meetly thou barest, alleluia, hath arisen, as he promised, alleluia: pray for us to the Father, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 71* — "Ant. on Benedictus. O Queen of heaven, as above at Vespers."
+@use proper/saturday-office-bvm-paschal/magnificat-antiphon
 
 [short-responsory-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 120

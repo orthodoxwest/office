@@ -1,7 +1,17 @@
-# TODO(diurnal): the per-annum Benedictus antiphon (2026 ordo incipit "O ever
-# blessed", eight Saturdays Jun-Nov) is absent from the draft books and the
-# parish manuals; needs the Monastic Diurnal Noted. Until then the office
-# falls back to commons/blessed-virgin ("Blessed art thou, O Mary").
+# The Office of Saint Mary on Saturday, form I, "Throughout the Year" —
+# from the Saturday after the Purification through the Saturday before
+# Septuagesima, and from the Saturday after the Octave of Corpus Christi
+# through the Saturday before Advent (Monastic Diurnal p. 68*). Its Vespers is
+# the preceding evening's: the office itself runs Lauds through None, and
+# "ends with None" (p. 69*).
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 69* (Office of Saint Mary on Saturday, At Lauds)
+O ever blessed Mother of God, * Mary ever Virgin, temple of the Godhead, hallowed shrine of the Holy Spirit, thou only, above all others, wast acceptable to our Lord Jesus Christ: pray for the people, entreat for the clergy, intercede for all womankind vowed unto God.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 68* (Office of Saint Mary on Saturday, At Vespers)
+O blessed Mother * and spotless Virgin, thou glorious Queen of the world, intercede for us to the Lord.
 
 [saturday-psalm-antiphon-1]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 95–96, 101 (Saturday festal psalmody)

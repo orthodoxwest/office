@@ -30,6 +30,7 @@ Caveats learned the hard way (2026 sweep):
 """
 
 import datetime
+import os
 import re
 import subprocess
 import sys
@@ -321,10 +322,10 @@ def cmd_rubrics(pdf_path, tsv_path):
             if pv is not None and pv != ours[k][f]:
                 bad.append((k, ours[k][f], pv, ours[k]["cel"]))
         print(f"== {label}: {len(bad)} mismatches ==")
-        for (m, d), ov, pv, cel in bad[:10]:
+        for (m, d), ov, pv, cel in bad[:SAMPLE_CAP]:
             print(f"   {m:02d}-{d:02d}  ours={ov} pdf={pv}  ({cel[:48]})")
-        if len(bad) > 10:
-            print(f"   ... and {len(bad) - 10} more")
+        if len(bad) > SAMPLE_CAP:
+            print(f"   ... and {len(bad) - SAMPLE_CAP} more (ORDO_COMPARE_ALL=1 to list every one)")
 
 
 def cmd_commemorations(pdf_path, tsv_path):
@@ -464,11 +465,13 @@ def cmd_antiphons(pdf_path, tsv_path):
             tot += 1
             if not incipit_matches(m.group(1), ours[k][field]):
                 n += 1
-                if len(samples) < 10:
+                if len(samples) < SAMPLE_CAP:
                     samples.append(f"   {k[0]:02d}-{k[1]:02d} pdf=\"{m.group(1)[:36]}\""
                                    f" ours=\"{ours[k][field][:36]}\"")
         print(f"== {label} antiphon: {n}/{tot} mismatches ==")
         print("\n".join(samples))
+        if n > len(samples):
+            print(f"   ... and {n - len(samples)} more (ORDO_COMPARE_ALL=1 to list every one)")
 
 
 def cmd_colors(pdf_path, ours_path):
@@ -555,6 +558,10 @@ def cmd_moveable(resources_dir, years):
         diffs = [f"{k}: pdf={found[k]} ours={ours.get(k)}"
                  for k in found if ours.get(k) != found[k]]
         print(f"{y} {'DIFF ' + '; '.join(diffs) if diffs else 'OK'}")
+
+
+SHOW_ALL = os.environ.get("ORDO_COMPARE_ALL", "") not in ("", "0")
+SAMPLE_CAP = 10**9 if SHOW_ALL else 10
 
 
 def main():
