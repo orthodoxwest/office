@@ -86,6 +86,11 @@ All that the Father giveth me * shall come to me; and him that cometh to me, I w
 [short-responsory-vespers]
 @omit
 
+# The same versicle at both hours, but do NOT collapse these into one @use:
+# the book really does punctuate them differently, "from heaven saying" at
+# Lauds and "from heaven, saying" at Vespers. Both were read from the page
+# images and re-checked.
+
 [versicle-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 104* (Lauds of the Dead)
 V. I heard a voice from heaven saying unto me.

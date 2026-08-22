@@ -17,41 +17,6 @@ var doubleFeriaOfficeIDs = map[string]bool{
 	"vigil-pentecost": true,
 }
 
-// officeOfTheDeadIDs are the celebrations composed with the Office of the
-// Dead. Its psalms are not concluded with the Gloria Patri: "At the end of all
-// Psalms is always said: Rest eternal grant unto them, O Lord. And let light
-// perpetual shine upon them, even if the Office be said for one person only"
-// (Monastic Diurnal p. 72*). The Commemoration of All the Departed O.S.B.
-// (Nov 14) belongs here too once it is in the kalendar.
-var officeOfTheDeadIDs = map[string]bool{
-	"all-souls": true,
-}
-
-// isOfficeOfTheDead reports whether the day's office is the Office of the
-// Dead, which differs from every other office in more than its texts: five
-// psalms at Vespers rather than four, no Gloria Patri, and no chapter, hymn or
-// short responsory at either hour.
-func isOfficeOfTheDead(day *models.CalendarDay) bool {
-	return day != nil && day.Celebration != nil && officeOfTheDeadIDs[day.Celebration.ID]
-}
-
-// psalmDoxologyKeys are every corpus key psalmDoxologyRef can return, so the
-// hour-definition validator can require them all.
-var psalmDoxologyKeys = []string{
-	"ordinary/shared/gloria-patri",
-	"shared/formulas/rest-eternal",
-}
-
-// psalmDoxologyRef returns the corpus key for what concludes each psalm and
-// gospel canticle of the day's office — the Gloria Patri, or "Rest eternal" in
-// the Office of the Dead.
-func psalmDoxologyRef(day *models.CalendarDay) string {
-	if isOfficeOfTheDead(day) {
-		return "shared/formulas/rest-eternal"
-	}
-	return "ordinary/shared/gloria-patri"
-}
-
 // usesFestalLaudsPsalmody reports whether Lauds takes the festal psalms. Most
 // Sunday offices retain the Sunday psalter, but the printed offices for the
 // Sundays within the Nativity and Epiphany octaves explicitly share the

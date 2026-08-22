@@ -40,6 +40,16 @@ func TestSweepOrderingIsStableAcrossRuns(t *testing.T) {
 		}
 		t.Error("fallback rows are ordered differently between runs")
 	}
+
+	// The comparison above is vacuous while the propers are complete and the
+	// sweep reports nothing. Say so out loud rather than letting the test read
+	// as coverage it does not provide: if the data regresses and rows come
+	// back, this fires and the run-to-run check becomes meaningful again.
+	if len(first.OrdinaryFallbacks) != 0 || len(first.NotFound) != 0 {
+		t.Errorf("the sweep reported %d fallback and %d not-found rows; the repo's data "+
+			"is expected to be clean, so either fix the data or drop this note",
+			len(first.OrdinaryFallbacks), len(first.NotFound))
+	}
 }
 
 // The run-to-run check above cannot see an ordering bug the repo's own data

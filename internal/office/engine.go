@@ -502,11 +502,12 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		}
 		return resolveElement(elem, corpus)
 	case "gloria-patri":
-		// Ref "day" defers to the office: the Gloria Patri, or "Rest eternal"
-		// in the Office of the Dead. Sections shared across every office use
-		// it; ones that belong to a single office name their text outright.
-		if elem.Ref == "day" {
-			return resolveElement(HourElement{Type: elem.Type, Ref: psalmDoxologyRef(day)}, corpus)
+		// Ref "office" defers to the office of the day: the Gloria Patri, or
+		// "Rest eternal" in the Office of the Dead. Only sections shared across
+		// every office need it; ones that run in a single office name their
+		// text outright.
+		if elem.Ref == doxologyRefPerOffice {
+			elem.Ref = psalmDoxologyRef(day)
 		}
 		return resolveElement(elem, corpus)
 	case "proper-antiphon":

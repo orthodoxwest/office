@@ -8,7 +8,7 @@
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 601 |
-| Rendered text entries needing review | 1365 |
+| Rendered text entries needing review | 1370 |
 | Rendered text entries with unknown source | 226 |
 | Classified zero-occurrence entries | 71 |
 | Zeroes needing classification | 24 |
@@ -57,8 +57,6 @@
 - `decision:commemoration:st-george-octave=suppressed`
 - `decision:commemoration:vigil-seasonal-exclusion=suppressed`
 - `decision:concurrence:simple-begins-at-chapter=split`
-- `decision:condition:feast-all-souls=included`
-- `decision:condition:feast-all-souls=omitted`
 - `decision:condition:feast-easter-sunday=included`
 - `decision:condition:feast-easter-sunday=omitted`
 - `decision:condition:feast-holy-saturday=included`
@@ -67,8 +65,8 @@
 - `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
 - `decision:condition:feast-saturday-office-bvm,season-easter=included`
 - `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
-- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=included`
-- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=omitted`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=included`
+- `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=omitted`
 - `decision:condition:festal-vespers-psalmody=included`
 - `decision:condition:festal-vespers-psalmody=omitted`
 - `decision:condition:if-cross-commemoration=included`
@@ -77,24 +75,26 @@
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=included`
-- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-feast-all-souls=omitted`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=included`
+- `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=omitted`
 - `decision:condition:is-ferial,not-season-easter=included`
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
-- `decision:condition:not-feast-all-souls=included`
-- `decision:condition:not-feast-all-souls=omitted`
-- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=included`
-- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-feast-all-souls=omitted`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls=included`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-feast-all-souls=omitted`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=included`
+- `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=omitted`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=included`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-holy-saturday=included`
 - `decision:condition:not-feast-holy-saturday=omitted`
-- `decision:condition:not-is-feast,weekday-saturday,not-feast-all-souls=included`
-- `decision:condition:not-is-feast,weekday-saturday,not-feast-all-souls=omitted`
+- `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=included`
+- `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-is-ferial=included`
 - `decision:condition:not-is-ferial=omitted`
+- `decision:condition:not-office-of-the-dead=included`
+- `decision:condition:not-office-of-the-dead=omitted`
+- `decision:condition:office-of-the-dead=included`
+- `decision:condition:office-of-the-dead=omitted`
 - `decision:marian:boundary=civil-day`
 - `decision:marian:boundary=purification-vespers-override`
 - `decision:marian:selection=alma-redemptoris-advent`

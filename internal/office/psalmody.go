@@ -272,6 +272,48 @@ func resolveVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) (
 	return items, source, nil
 }
 
+// officeOfTheDeadIDs are the celebrations composed with the Office of the
+// Dead, which differs from every other office in more than its texts: five
+// psalms at Vespers rather than four, no Gloria Patri, no opening versicles,
+// and no chapter, hymn or short responsory at either hour. The Commemoration
+// of All the Departed O.S.B. (Nov 14) belongs here too once it is in the
+// kalendar. Hour definitions ask for it by the "office-of-the-dead" condition
+// rather than by feast ID, so a second entry here reaches the data too.
+var officeOfTheDeadIDs = map[string]bool{
+	"all-souls": true,
+}
+
+// isOfficeOfTheDead reports whether the day's office is the Office of the Dead.
+func isOfficeOfTheDead(day *models.CalendarDay) bool {
+	return day != nil && day.Celebration != nil && officeOfTheDeadIDs[day.Celebration.ID]
+}
+
+// What concludes each psalm and gospel canticle. The Office of the Dead says
+// no Gloria Patri: "At the end of all Psalms is always said: Rest eternal
+// grant unto them, O Lord. And let light perpetual shine upon them, even if
+// the Office be said for one person only" (Monastic Diurnal p. 72*).
+const (
+	doxologyGloriaPatri = "ordinary/shared/gloria-patri"
+	doxologyRestEternal = "shared/formulas/rest-eternal"
+
+	// doxologyRefPerOffice is the Ref an hour definition uses to defer the
+	// choice to the office of the day, as "marian" defers to "seasonal".
+	doxologyRefPerOffice = "office"
+)
+
+// psalmDoxologyKeys is every key psalmDoxologyRef can return, so the
+// hour-definition validator can require them all.
+var psalmDoxologyKeys = []string{doxologyGloriaPatri, doxologyRestEternal}
+
+// psalmDoxologyRef returns the corpus key for what concludes each psalm and
+// gospel canticle of the day's office.
+func psalmDoxologyRef(day *models.CalendarDay) string {
+	if isOfficeOfTheDead(day) {
+		return doxologyRestEternal
+	}
+	return doxologyGloriaPatri
+}
+
 func usesFestalVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
 	items, _, err := resolveVespersPsalmody(day, corpus)
 	return err == nil && len(items) != 0
