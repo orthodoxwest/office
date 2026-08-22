@@ -10,6 +10,7 @@ func validPacket() ApplyPacket {
 		CandidateID:    "DI-aaaaaaaaaaaa-P78-bbbbbbbbbbbb",
 		SourceSHA256:   strings.Repeat("ab", 32),
 		RawTextSHA256:  strings.Repeat("cd", 32),
+		WitnessBody:    "!Sir 50:6-7\nBehold a great Confessor.\nR. Thanks be to God.",
 		Extractor:      "pdftotext-layout",
 		Pages:          []ApplyPage{{Page: 78, PrintedPage: "78", RawTextSHA256: strings.Repeat("cd", 32)}},
 		TargetKey:      "proper/st-benedict/chapter-lauds",
@@ -39,6 +40,11 @@ func validWorld() ApplyWorld {
 	}
 }
 
+func setPacketBody(packet *ApplyPacket, body string) {
+	packet.WitnessBody = body
+	packet.Body = body
+}
+
 func TestGateAllowsMissingOverrideAdd(t *testing.T) {
 	d := Gate(validPacket(), validWorld())
 	if d.Status != GateAllow {
@@ -57,7 +63,7 @@ func TestGateAllowsTwoPageSpan(t *testing.T) {
 	}
 	p.RawTextSHA256 = compositeSliceHashes([]string{strings.Repeat("11", 32), strings.Repeat("22", 32)})
 	p.TargetKey = "proper/st-benedict/hymn-lauds"
-	p.Body = "Laudibus cives resonent canoris\n\nGem of the highest, diadem immortal."
+	setPacketBody(&p, "Laudibus cives resonent canoris\n\nGem of the highest, diadem immortal.")
 	d := Gate(p, validWorld())
 	if d.Status != GateAllow {
 		t.Fatalf("two-page span refused: %s %v", d.Status, d.Reasons)
@@ -88,7 +94,7 @@ func TestGateRefusesInvalidColumnBBox(t *testing.T) {
 
 func TestGateRefusesPrintedCrossReferenceFragment(t *testing.T) {
 	p := validPacket()
-	p.Body = "“Good and faithful servant” from Lauds\n   in Common (35*) /"
+	setPacketBody(&p, "“Good and faithful servant” from Lauds\n   in Common (35*) /")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse {
 		t.Fatalf("cross-reference fragment allowed: %v", d.Reasons)
@@ -169,7 +175,7 @@ func TestGateFlagsVerifiedReplace(t *testing.T) {
 	p.Action = ApplyReplaceSection
 	p.DiscoveryClass = ClassExistingDifferent
 	p.TextSimilarity = 0.72
-	p.Body = "Martyr of God, whose strength was from on high."
+	setPacketBody(&p, "Martyr of God, whose strength was from on high.")
 	d := Gate(p, validWorld())
 	if d.Status != GateAllow {
 		t.Fatalf("verified replace blocked: %s %v", d.Status, d.Reasons)
@@ -207,7 +213,7 @@ func TestGateRefusesNonConsecutivePages(t *testing.T) {
 func TestGateRefusesUnknownOwner(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/st-nobody/collect"
-	p.Body = "O God, who didst raise up thy servant."
+	setPacketBody(&p, "O God, who didst raise up thy servant.")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "not a known") {
 		t.Fatalf("unknown owner: %s %v", d.Status, d.Reasons)
@@ -217,7 +223,7 @@ func TestGateRefusesUnknownOwner(t *testing.T) {
 func TestGateRefusesAddWhenKeyExists(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/st-benedict/collect"
-	p.Body = "Almighty and everlasting God."
+	setPacketBody(&p, "Almighty and everlasting God.")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "already exists") {
 		t.Fatalf("add existing: %s %v", d.Status, d.Reasons)
@@ -241,7 +247,7 @@ func TestGateRefusesLowReplaceSimilarity(t *testing.T) {
 	p.Action = ApplyReplaceSection
 	p.DiscoveryClass = ClassExistingDifferent
 	p.TextSimilarity = 0.20
-	p.Body = "Almighty and everlasting God."
+	setPacketBody(&p, "Almighty and everlasting God.")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "below") {
 		t.Fatalf("low similarity: %s %v", d.Status, d.Reasons)
@@ -259,17 +265,73 @@ func TestGateRefusesAddThatLooksLikeFallback(t *testing.T) {
 
 func TestGateRefusesEmptyBody(t *testing.T) {
 	p := validPacket()
-	p.Body = "   \n"
+	setPacketBody(&p, "   \n")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "empty") {
 		t.Fatalf("empty body: %s %v", d.Status, d.Reasons)
 	}
 }
 
+func TestGateRefusesMissingRawWitness(t *testing.T) {
+	p := validPacket()
+	p.WitnessBody = ""
+	d := Gate(p, validWorld())
+	if d.Status != GateRefuse || !hasReason(d, "witness_body is required") {
+		t.Fatalf("missing raw witness allowed: %s %v", d.Status, d.Reasons)
+	}
+}
+
+func TestGateRefusesRawWitnessDefectRemovedFromBody(t *testing.T) {
+	p := validPacket()
+	p.WitnessBody = "Grant, we beseech thee, Almighty God, that we may trust in thy good\ufffdness."
+	p.Body = "Grant, we beseech thee, Almighty God, that we may trust in thy goodness."
+	d := Gate(p, validWorld())
+	if d.Status != GateRefuse || !hasReason(d, "raw witness contains replacement") {
+		t.Fatalf("lossily cleaned raw defect allowed: %s %v", d.Status, d.Reasons)
+	}
+}
+
+func TestGateRefusesUnrelatedCleanBody(t *testing.T) {
+	p := validPacket()
+	p.Body = "Laudibus cives resonent canoris."
+	d := Gate(p, validWorld())
+	if d.Status != GateRefuse || !hasReason(d, "exact normalized witness text") {
+		t.Fatalf("unrelated clean body allowed: %s %v", d.Status, d.Reasons)
+	}
+}
+
+func TestGateRefusesCorruptOrIncompleteBodies(t *testing.T) {
+	tests := map[string]string{
+		"artifact glyph":  "Grant us thy grace ~ and preserve us always.",
+		"line-end hyphen": "Grant that we may con-\ntinue in thy loving protection.",
+		"fragments":       "RANT ect bes h th Gcccd. ee g ty. Through.",
+		"terminal comma":  "Ask, and ye shall receive; seek, and ye shall find,",
+	}
+	for name, body := range tests {
+		t.Run(name, func(t *testing.T) {
+			p := validPacket()
+			setPacketBody(&p, body)
+			d := Gate(p, validWorld())
+			if d.Status != GateRefuse {
+				t.Fatalf("corrupt body allowed: %v", d.Reasons)
+			}
+		})
+	}
+}
+
+func TestGateAllowsLowercaseContinuation(t *testing.T) {
+	p := validPacket()
+	setPacketBody(&p, "and grant that we may ever continue in thy loving protection.")
+	d := Gate(p, validWorld())
+	if d.Status != GateAllow {
+		t.Fatalf("lowercase continuation refused: %s %v", d.Status, d.Reasons)
+	}
+}
+
 func TestGateRefusesVersicleWithoutResponses(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/st-benedict/versicle-lauds"
-	p.Body = "They declared the work of God."
+	setPacketBody(&p, "They declared the work of God.")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "V. and R.") {
 		t.Fatalf("versicle: %s %v", d.Status, d.Reasons)
@@ -279,7 +341,7 @@ func TestGateRefusesVersicleWithoutResponses(t *testing.T) {
 func TestGateAllowsVersicleWithSigils(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/st-benedict/versicle-lauds"
-	p.Body = "V. They declared the work of God.\nR. And wisely considered of his doing."
+	setPacketBody(&p, "V. They declared the work of God.\nR. And wisely considered of his doing.")
 	d := Gate(p, validWorld())
 	if d.Status != GateAllow {
 		t.Fatalf("versicle refused: %s %v", d.Status, d.Reasons)
@@ -289,7 +351,7 @@ func TestGateAllowsVersicleWithSigils(t *testing.T) {
 func TestGateRefusesCollectUnderlay(t *testing.T) {
 	p := validPacket()
 	p.TargetKey = "proper/st-benedict/collect"
-	p.Body = "Al-migh-ty and ev-er-last-ing God who didst."
+	setPacketBody(&p, "Al-migh-ty and ev-er-last-ing God who didst.")
 	d := Gate(p, validWorld())
 	if d.Status != GateRefuse || !hasReason(d, "chant underlay") {
 		t.Fatalf("collect underlay: %s %v", d.Status, d.Reasons)
@@ -304,7 +366,7 @@ func TestGateRefusesAntiphonWithNextSlotRubric(t *testing.T) {
 	p.TextSimilarity = 0.97
 	world := validWorld()
 	world.ExistingKeys["proper/st-benedict/benedictus-antiphon"] = true
-	p.Body = "Benedict, thou father and guide of monks.\nBenedictus, tone viii.2, page .\nAfter the Canticle, the Antiphon is repeated."
+	setPacketBody(&p, "Benedict, thou father and guide of monks.\nBenedictus, tone viii.2, page .\nAfter the Canticle, the Antiphon is repeated.")
 	d := Gate(p, world)
 	if d.Status != GateRefuse || !hasReason(d, "leftover rubric") {
 		t.Fatalf("rubric leftover: %s %v", d.Status, d.Reasons)
@@ -340,7 +402,7 @@ func TestGateAllowsLongCanticleSpan(t *testing.T) {
 	p.Action = ApplyReplaceSection
 	p.DiscoveryClass = ClassExistingDifferent
 	p.TextSimilarity = 0.90
-	p.Body = "O all ye Works of the Lord, bless ye the Lord."
+	setPacketBody(&p, "O all ye Works of the Lord, bless ye the Lord.")
 	world := validWorld()
 	world.ExistingKeys["canticles/benedicite"] = true
 	pages := make([]ApplyPage, 8)

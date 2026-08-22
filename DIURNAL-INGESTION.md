@@ -119,6 +119,14 @@ the apply command on a reviewable branch.
    attestation. Record `review attest` separately after a person checks the
    page.
 
+   Every writable packet carries both the untouched `witness_body` and the
+   cleaned `body`. The Go gate rejects missing or lossy-corrupt raw witnesses
+   and requires the written body to equal the raw witness after only newline
+   and line-edge whitespace normalization. It independently checks that body
+   for visible extraction artifacts, unresolved line wraps, fragmentation,
+   and an incomplete ending. Queue generation also records content-free
+   candidate IDs and machine-readable reasons for every skipped witness.
+
    Unresolved `rubrical-complex`, `needs-ruling`, ambiguous owners, and
    ordo-vs-diurnal conflicts stay in `output/` and do not apply.
 

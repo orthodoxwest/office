@@ -1218,6 +1218,84 @@ class SourceReconcileTest(unittest.TestCase):
             "Whatsoever * thou shalt bind on earth shall be bound in heaven.",
         )
 
+    def test_apply_packet_rejects_corrupt_or_incomplete_witness_body(self):
+        bodies = (
+            "RANT ect bes h\nth A]~ch Gcccd.\nee, g ty o .\nwe who in our afflic-\ndo put our trust in\nThrough.",
+            "and ye shall re-\nseek, and ye shall\nknock, and it shall\n~pened unto you,",
+        )
+        for body in bodies:
+            candidate = SOURCE_RECONCILE.SourceCandidate(
+                source="monastic-diurnal", source_page=432, hour="lauds",
+                office_title="Rogation Monday", office_variant="", slot="collect",
+                latin_incipit="", source_text=body,
+                canonical_owner="rogation-monday", source_sha256="a" * 64,
+                raw_text_sha256="b" * 64, extractor="pdftotext-bbox-layout-column",
+                discovery_classification="missing-override",
+            )
+            self.assertIsNone(
+                SOURCE_RECONCILE.candidate_to_apply_packet(candidate), body
+            )
+
+    def test_mechanically_safe_apply_body_accepts_complete_liturgical_text(self):
+        self.assertTrue(
+            SOURCE_RECONCILE.mechanically_safe_apply_body(
+                "Grant, we beseech thee, Almighty God, that we may ever trust in thy goodness."
+            )
+        )
+
+    def test_mechanically_safe_apply_body_rejects_terminal_comma(self):
+        self.assertFalse(
+            SOURCE_RECONCILE.mechanically_safe_apply_body(
+                "Ask, and ye shall receive; seek, and ye shall find,"
+            )
+        )
+
+    def test_mechanically_safe_apply_body_rejects_isolated_fragments(self):
+        self.assertFalse(
+            SOURCE_RECONCILE.mechanically_safe_apply_body(
+                "RANT ect bes h\nth Ach Gcccd.\nee, g ty o.\nThrough."
+            )
+        )
+
+    def test_mechanically_safe_apply_body_allows_lowercase_continuation(self):
+        self.assertTrue(
+            SOURCE_RECONCILE.mechanically_safe_apply_body(
+                "and grant that we may ever continue in thy loving protection."
+            )
+        )
+
+    def test_apply_packet_rejects_raw_defect_before_lossy_cleaning(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="monastic-diurnal", source_page=432, hour="lauds",
+            office_title="Rogation Monday", office_variant="", slot="collect",
+            latin_incipit="",
+            source_text="Grant, we beseech thee, Almighty God, that we may trust in thy good\ufffdness.",
+            canonical_owner="rogation-monday", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="missing-override",
+        )
+        self.assertEqual(
+            SOURCE_RECONCILE.clean_witness_body(candidate.source_text),
+            "Grant, we beseech thee, Almighty God, that we may trust in thy goodness.",
+        )
+        packet, reason = SOURCE_RECONCILE.candidate_apply_decision(candidate)
+        self.assertIsNone(packet)
+        self.assertEqual(reason, "raw-witness-replacement-or-private-use")
+
+    def test_apply_packet_rejects_cleanup_that_changes_witness_text(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            source="monastic-diurnal", source_page=100, hour="lauds",
+            office_title="Example", office_variant="", slot="benedictus-antiphon",
+            latin_incipit="",
+            source_text="Ecce confessor\nBehold a great Confessor, who pleased God in his days.",
+            canonical_owner="example", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="missing-override",
+        )
+        packet, reason = SOURCE_RECONCILE.candidate_apply_decision(candidate)
+        self.assertIsNone(packet)
+        self.assertEqual(reason, "body-not-direct-witness")
+
     def test_apply_packet_skips_near_identical_replace(self):
         current = "Because thou hast seen me, * Thomas, thou hast believed: blessed are they that have not seen, and yet have believed, alleluia."
         candidate = SOURCE_RECONCILE.SourceCandidate(
@@ -1299,7 +1377,30 @@ class SourceReconcileTest(unittest.TestCase):
         self.assertEqual(packet["action"], "add-section")
         self.assertEqual(packet["target_key"], "proper/example-feast/collect")
         self.assertEqual(packet["raw_text_sha256"], "b" * 64)
+        self.assertEqual(packet["witness_body"], candidate.source_text)
         self.assertIn("agent-proposed, not attested", packet["source_comment"])
+
+    def test_apply_queue_records_content_free_skip_reasons(self):
+        candidate = SOURCE_RECONCILE.SourceCandidate(
+            candidate_id="DI-test-corrupt", source="monastic-diurnal",
+            source_page=432, hour="lauds", office_title="Rogation Monday",
+            office_variant="", slot="collect", latin_incipit="",
+            source_text="Ask, and ye shall receive,",
+            canonical_owner="rogation-monday", source_sha256="a" * 64,
+            raw_text_sha256="b" * 64, extractor="pdftotext-layout",
+            discovery_classification="missing-override",
+        )
+        output_root = SOURCE_RECONCILE.ROOT / "output"
+        output_root.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=output_root) as tmp:
+            path = SOURCE_RECONCILE.write_apply_queue(pathlib.Path(tmp), [candidate])
+            payload = json.loads(path.read_text())
+        self.assertEqual(payload["packets"], [])
+        self.assertEqual(payload["skipped"], 1)
+        self.assertEqual(payload["skip_decisions"], [{
+            "candidate_id": "DI-test-corrupt",
+            "reason": "body-corrupt-or-incomplete",
+        }])
 
     def test_qualify_slot_adds_hour_suffix(self):
         self.assertEqual(SOURCE_RECONCILE.qualify_slot("hymn", "lauds"), "hymn-lauds")

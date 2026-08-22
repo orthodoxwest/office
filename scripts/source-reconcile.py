@@ -2959,6 +2959,44 @@ def drop_leading_latin_incipit(text: str) -> str:
     return text
 
 
+def mechanically_safe_apply_body(text: str) -> bool:
+    """Reject visibly corrupt or incomplete extraction before corpus apply.
+
+    This is intentionally conservative. A false negative remains reviewable in
+    output; a false positive would write damaged prayer text into the corpus.
+    """
+    body = text.strip()
+    if not body or len(re.findall(r"[A-Za-z]+", body)) < 4:
+        return False
+    # BBox/native extraction artifacts and unresolved line-wrap hyphenation
+    # require a better witness route (usually OCR), not an apply packet.
+    if re.search(r"[~\[\]{}<>\ufffd\ue000-\uf8ff]", body) or re.search(r"-\s*\n", body):
+        return False
+    fragments = re.findall(r"(?<![A-Za-z])[A-Za-z](?![A-Za-z.])", body)
+    if len([item for item in fragments if item.lower() not in {"a", "i", "o"}]) >= 2:
+        return False
+    # A mapped slot must end as a complete sentence, response, or prayer.
+    if not re.search(r"[.!?…][\"'”’)]*$", body):
+        return False
+    return True
+
+
+def raw_witness_is_safe(text: str) -> bool:
+    """Check defects that the deterministic cleaner would otherwise erase."""
+    return bool(text.strip()) and not _PUA_RE.search(text)
+
+
+def normalized_witness_text(text: str) -> str:
+    """Normalize only newline spelling, outer blanks, and line-edge space."""
+    lines = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+    lines = [line.strip() for line in lines]
+    while lines and not lines[0]:
+        lines.pop(0)
+    while lines and not lines[-1]:
+        lines.pop()
+    return "\n".join(lines)
+
+
 def apply_pages_from_candidate(candidate: SourceCandidate) -> list[dict]:
     if candidate.page_slices:
         try:
@@ -3033,21 +3071,32 @@ def candidate_to_apply_packet(
     existing_keys: set[str] | None = None,
     corpus: dict[str, CorpusEntry] | None = None,
 ) -> dict | None:
+    packet, _ = candidate_apply_decision(candidate, existing_keys, corpus)
+    return packet
+
+
+def candidate_apply_decision(
+    candidate: SourceCandidate,
+    existing_keys: set[str] | None = None,
+    corpus: dict[str, CorpusEntry] | None = None,
+) -> tuple[dict | None, str]:
     if candidate.discovery_classification not in {"missing-override", "existing-different"}:
-        return None
+        return None, "discovery-class-not-writable"
     slot = qualify_slot(candidate.runtime_slot or candidate.slot, candidate.hour)
     target = proper_target(candidate.canonical_owner, slot)
     if not target:
-        return None
+        return None, "target-unresolved"
     if existing_keys is not None:
         action = "replace-section" if target in existing_keys else "add-section"
     elif candidate.discovery_classification == "missing-override":
         action = "add-section"
     else:
         action = "replace-section"
+    if not raw_witness_is_safe(candidate.source_text):
+        return None, "raw-witness-replacement-or-private-use"
     body = clean_witness_body(candidate.source_text)
-    if not body:
-        return None
+    if not mechanically_safe_apply_body(body):
+        return None, "body-corrupt-or-incomplete"
     similarity = candidate.text_similarity
     if corpus:
         fallback = corpus.get(candidate.runtime_target) if candidate.runtime_target else None
@@ -3055,29 +3104,32 @@ def candidate_to_apply_packet(
             similarity = round(anchored_text_similarity(body, fallback.text), 3)
             # A printed common on the feast page is not a proper override.
             if action == "add-section" and similarity >= 0.84:
-                return None
+                return None, "matches-runtime-fallback"
         current = corpus.get(target)
         if action == "replace-section" and current and current.text:
             similarity = round(anchored_text_similarity(body, current.text), 3)
             if similarity >= 0.985:
-                return None
+                return None, "near-identical-existing"
             if "\n\n" in current.text and "\n\n" not in body:
-                return None
+                return None, "flattened-multiblock-replacement"
             if current.text.lstrip().startswith("!") and not body.lstrip().startswith("!"):
-                return None
+                return None, "loses-directive-marker"
     if re.search(r"THE GOSPEL CANTICLE", body, re.I):
-        return None
+        return None, "contains-gospel-canticle-rubric"
     if re.search(r"(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)", body, re.I | re.S):
-        return None
+        return None, "contains-printed-cross-reference"
+    if normalized_witness_text(body) != normalized_witness_text(candidate.source_text):
+        return None, "body-not-direct-witness"
     pages = apply_pages_from_candidate(candidate)
     if not pages:
-        return None
+        return None, "missing-page-provenance"
     printed = candidate.printed_page or (str(pages[0]["page"]) if pages else "")
     source = candidate.source or "monastic-diurnal"
     return {
         "candidate_id": candidate.candidate_id,
         "source_sha256": candidate.source_sha256,
         "raw_text_sha256": candidate.raw_text_sha256,
+        "witness_body": candidate.source_text,
         "extractor": candidate.extractor,
         "pages": pages,
         "target_key": target,
@@ -3089,7 +3141,7 @@ def candidate_to_apply_packet(
         ),
         "discovery_class": candidate.discovery_classification,
         "text_similarity": similarity,
-    }
+    }, "queued"
 
 
 def write_apply_queue(
@@ -3104,15 +3156,22 @@ def write_apply_queue(
         corpus = load_corpus(data_dir)
         existing = set(corpus)
     packets = []
-    skipped = 0
+    skip_decisions = []
     for candidate in candidates:
-        packet = candidate_to_apply_packet(candidate, existing or None, corpus)
+        packet, reason = candidate_apply_decision(candidate, existing or None, corpus)
         if packet is None:
-            skipped += 1
+            skip_decisions.append({
+                "candidate_id": candidate.candidate_id,
+                "reason": reason,
+            })
             continue
         packets.append(packet)
     path = output_dir / "apply-queue.json"
-    path.write_text(json.dumps({"packets": packets, "skipped": skipped}, indent=2, ensure_ascii=False) + "\n")
+    path.write_text(json.dumps({
+        "packets": packets,
+        "skipped": len(skip_decisions),
+        "skip_decisions": skip_decisions,
+    }, indent=2, ensure_ascii=False) + "\n")
     return path
 
 

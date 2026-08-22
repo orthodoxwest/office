@@ -70,6 +70,7 @@ type ApplyPacket struct {
 	CandidateID    string      `json:"candidate_id"`
 	SourceSHA256   string      `json:"source_sha256"`
 	RawTextSHA256  string      `json:"raw_text_sha256"`
+	WitnessBody    string      `json:"witness_body"`
 	Extractor      string      `json:"extractor"`
 	Pages          []ApplyPage `json:"pages"`
 	TargetKey      string      `json:"target_key"`
@@ -98,12 +99,15 @@ type GateDecision struct {
 }
 
 var (
-	ownerIDRE  = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
-	columnIDRE = regexp.MustCompile(`^[a-z][a-z0-9_-]*$`)
-	sha256RE   = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
-	underlayRE = regexp.MustCompile(`[A-Za-z][-–][A-Za-z]`)
-	puaRE      = regexp.MustCompile(`\x{FFFD}|[\x{E000}-\x{F8FF}]`)
-	crossRefRE = regexp.MustCompile(`(?is)(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)`)
+	ownerIDRE    = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+	columnIDRE   = regexp.MustCompile(`^[a-z][a-z0-9_-]*$`)
+	sha256RE     = regexp.MustCompile(`^[0-9a-fA-F]{64}$`)
+	underlayRE   = regexp.MustCompile(`[A-Za-z][-–][A-Za-z]`)
+	puaRE        = regexp.MustCompile(`\x{FFFD}|[\x{E000}-\x{F8FF}]`)
+	artifactRE   = regexp.MustCompile(`[~\[\]{}<>]`)
+	wordRE       = regexp.MustCompile(`[A-Za-z]+`)
+	lineHyphenRE = regexp.MustCompile(`-\s*\n`)
+	crossRefRE   = regexp.MustCompile(`(?is)(?:from|see|as in)\s+(?:the\s+)?(?:lauds|vespers|matins|compline)\b.*\bcommon\b.*(?:/|$)`)
 )
 
 var allowedClasses = map[string]bool{
@@ -220,11 +224,23 @@ func Gate(packet ApplyPacket, world ApplyWorld) GateDecision {
 	checkSpan(&d, packet, parsed)
 
 	body := packet.Body
+	witness := packet.WitnessBody
+	if strings.TrimSpace(witness) == "" {
+		refuse("witness_body is required")
+	} else if puaRE.MatchString(witness) {
+		refuse("raw witness contains replacement or private-use glyphs")
+	}
+	if normalizedWitnessText(witness) != normalizedWitnessText(body) {
+		refuse("body is not the exact normalized witness text")
+	}
 	if strings.TrimSpace(body) == "" {
 		refuse("body is empty")
 	} else {
 		if puaRE.MatchString(body) {
 			refuse("body contains replacement or private-use glyphs")
+		}
+		for _, reason := range applyBodyIntegrityReasons(body) {
+			refuse(reason)
 		}
 		if reasons := genreReasons(packet.TargetKey, body); len(reasons) > 0 {
 			for _, r := range reasons {
@@ -254,6 +270,75 @@ func Gate(packet ApplyPacket, world ApplyWorld) GateDecision {
 		d.Reasons = []string{"passed mechanical gate"}
 	}
 	return d
+}
+
+// applyBodyIntegrityReasons enforces conservative, model-independent checks on
+// the exact text the writer would place in the corpus. Lowercase starts remain
+// valid for page-spanning continuations; incomplete or visibly damaged bodies
+// must return to witness review.
+func applyBodyIntegrityReasons(body string) []string {
+	trimmed := strings.TrimSpace(body)
+	var reasons []string
+	if len(wordRE.FindAllString(trimmed, -1)) < 4 {
+		reasons = append(reasons, "body has fewer than four words")
+	}
+	if artifactRE.MatchString(trimmed) {
+		reasons = append(reasons, "body contains extraction artifact glyphs")
+	}
+	if lineHyphenRE.MatchString(trimmed) {
+		reasons = append(reasons, "body contains unresolved line-end hyphenation")
+	}
+	if isolatedLetterFragments(trimmed) >= 2 {
+		reasons = append(reasons, "body contains multiple isolated letter fragments")
+	}
+	terminal := strings.TrimRight(trimmed, "\"'”’) ")
+	if terminal == "" || !strings.ContainsRune(".!?…", []rune(terminal)[len([]rune(terminal))-1]) {
+		reasons = append(reasons, "body does not end with terminal punctuation")
+	}
+	return reasons
+}
+
+func isolatedLetterFragments(text string) int {
+	runes := []rune(text)
+	count := 0
+	for i, r := range runes {
+		if !isASCIILetter(r) {
+			continue
+		}
+		if i > 0 && isASCIILetter(runes[i-1]) {
+			continue
+		}
+		if i+1 < len(runes) && (isASCIILetter(runes[i+1]) || runes[i+1] == '.') {
+			continue
+		}
+		switch unicode.ToLower(r) {
+		case 'a', 'i', 'o':
+			continue
+		}
+		count++
+	}
+	return count
+}
+
+func isASCIILetter(r rune) bool {
+	return r >= 'A' && r <= 'Z' || r >= 'a' && r <= 'z'
+}
+
+func normalizedWitnessText(text string) string {
+	text = strings.ReplaceAll(text, "\r\n", "\n")
+	text = strings.ReplaceAll(text, "\r", "\n")
+	lines := strings.Split(text, "\n")
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
+	}
+	start, end := 0, len(lines)
+	for start < end && lines[start] == "" {
+		start++
+	}
+	for end > start && lines[end-1] == "" {
+		end--
+	}
+	return strings.Join(lines[start:end], "\n")
 }
 
 type applyTarget struct {

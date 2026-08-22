@@ -65,7 +65,7 @@ func TestApplyQueueWritesGatedAdd(t *testing.T) {
 
 	packet := validPacket()
 	packet.TargetKey = "proper/st-benedict/hymn-lauds"
-	packet.Body = "Laudibus cives resonent canoris\n\nGem of the highest."
+	setPacketBody(&packet, "Laudibus cives resonent canoris\n\nGem of the highest.")
 	packet.SourceComment = FormatSourceComment("monastic-diurnal", packet.Pages, packet.CandidateID, "hymn-lauds")
 
 	report, err := ApplyQueue(dir, ApplyQueueFile{Packets: []ApplyPacket{packet}}, false)
@@ -108,7 +108,7 @@ func TestApplyQueueDryRunDoesNotWrite(t *testing.T) {
 
 	packet := validPacket()
 	packet.TargetKey = "proper/st-benedict/hymn-lauds"
-	packet.Body = "Gem of the highest."
+	setPacketBody(&packet, "Gem of the highest.")
 	packet.SourceComment = "monastic-diurnal p. 80 (DI-x) — " + SourceHedge
 
 	report, err := ApplyQueue(dir, ApplyQueueFile{Packets: []ApplyPacket{packet}}, true)
@@ -135,7 +135,7 @@ func TestApplyQueueRefusesPsalmPacket(t *testing.T) {
 	packet.Action = ApplyReplaceSection
 	packet.DiscoveryClass = ClassExistingDifferent
 	packet.TextSimilarity = 0.9
-	packet.Body = "Let God arise, and let his enemies be scattered."
+	setPacketBody(&packet, "Let God arise, and let his enemies be scattered.")
 
 	_, err := ApplyQueue(dir, ApplyQueueFile{Packets: []ApplyPacket{packet}}, false)
 	if err == nil {
@@ -157,7 +157,7 @@ func TestApplyQueueNoopDoesNotWrite(t *testing.T) {
 	packet.Action = ApplyReplaceSection
 	packet.DiscoveryClass = ClassFallbackEqual
 	packet.TextSimilarity = 0.99
-	packet.Body = "Almighty God, original collect text."
+	setPacketBody(&packet, "Almighty God, original collect text.")
 	packet.SourceComment = "x — " + SourceHedge
 
 	report, err := ApplyQueue(dir, ApplyQueueFile{Packets: []ApplyPacket{packet}}, false)
@@ -165,6 +165,23 @@ func TestApplyQueueNoopDoesNotWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	if report.Noop != 1 || report.Wrote != 0 {
+		t.Fatalf("report = %+v", report)
+	}
+}
+
+func TestApplyQueueRefusesWitnessBodyMismatch(t *testing.T) {
+	dir := t.TempDir()
+	writeTestFile(t, filepath.Join(dir, "texts", "proper", "st-benedict.txt"), siblingCollect+hymnScaffold)
+	writeTestFile(t, filepath.Join(dir, "review", "provenance.csv"), strings.Join(provenanceHeader, ",")+"\n")
+
+	packet := validPacket()
+	packet.TargetKey = "proper/st-benedict/hymn-lauds"
+	packet.Body = "Laudibus cives resonent canoris."
+	report, err := ApplyQueue(dir, ApplyQueueFile{Packets: []ApplyPacket{packet}}, true)
+	if err == nil {
+		t.Fatal("expected witness/body mismatch refusal")
+	}
+	if report.Refused != 1 || report.Allowed != 0 || report.Wrote != 0 {
 		t.Fatalf("report = %+v", report)
 	}
 }
