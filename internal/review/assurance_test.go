@@ -67,6 +67,23 @@ func TestExplainCompositionIncludesDependenciesAndDecisions(t *testing.T) {
 	}
 }
 
+func TestExplainCompositionPriscaCommemorationUsesCommemorationOwner(t *testing.T) {
+	a, err := ExplainComposition("../../data", "lauds", time.Date(2026, 1, 18, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const prisca = "comm-01-18-st-prisca-of-rome-virgin-martyr"
+	for _, resolution := range a.Resolutions {
+		if resolution.RequestedSlot == "commemoration-collect" && strings.Contains(strings.Join(resolution.ProperIDs, " "), prisca) {
+			if resolution.CanonicalOwner != prisca {
+				t.Fatalf("Prisca commemoration owner = %q, want %q", resolution.CanonicalOwner, prisca)
+			}
+			return
+		}
+	}
+	t.Fatal("missing Prisca commemoration collect resolution")
+}
+
 func TestShouldIncludeResolution(t *testing.T) {
 	tests := []struct {
 		name, source, tier string

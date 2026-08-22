@@ -50,28 +50,34 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 			return lookupCommemoration(comm, day.Season, hourName, ref, corpus)
 		}
 		elems = append(elems, models.OfficeElement{
-			Type: models.Heading,
-			Text: fmt.Sprintf("Commemoration of %s", comm.CommemorationName()),
+			Type:                 models.Heading,
+			Text:                 fmt.Sprintf("Commemoration of %s", comm.CommemorationName()),
+			CommemorationOwnerID: comm.ID,
+			IsCommemoration:      true,
 		})
 
 		// Antiphon: feast-specific or fallback
 		antText, antSrc := lookup("commemoration-antiphon")
 		elems = append(elems, models.OfficeElement{
-			Type:       models.Antiphon,
-			Text:       antText,
-			SlotRef:    "commemoration-antiphon",
-			SourceRef:  antSrc,
-			SourceRefs: compactRefs([]string{antSrc}),
+			Type:                 models.Antiphon,
+			Text:                 antText,
+			SlotRef:              "commemoration-antiphon",
+			SourceRef:            antSrc,
+			SourceRefs:           compactRefs([]string{antSrc}),
+			CommemorationOwnerID: comm.ID,
+			IsCommemoration:      true,
 		})
 
 		// Versicle + Response
 		versText, versSrc := lookup("commemoration-versicle")
 		elems = append(elems, models.OfficeElement{
-			Type:       models.Versicle,
-			Text:       versText,
-			SlotRef:    "commemoration-versicle",
-			SourceRef:  versSrc,
-			SourceRefs: compactRefs([]string{versSrc}),
+			Type:                 models.Versicle,
+			Text:                 versText,
+			SlotRef:              "commemoration-versicle",
+			SourceRef:            versSrc,
+			SourceRefs:           compactRefs([]string{versSrc}),
+			CommemorationOwnerID: comm.ID,
+			IsCommemoration:      true,
 		})
 
 		// Collect. Of a run of collects only the first and the last are
@@ -86,11 +92,13 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 			collectText, collectRefs = applyConclusion(collectText, collectSrc, corpus)
 		}
 		elems = append(elems, models.OfficeElement{
-			Type:       models.Collect,
-			Text:       collectText,
-			SlotRef:    "commemoration-collect",
-			SourceRef:  collectSrc,
-			SourceRefs: compactRefs(collectRefs),
+			Type:                 models.Collect,
+			Text:                 collectText,
+			SlotRef:              "commemoration-collect",
+			SourceRef:            collectSrc,
+			SourceRefs:           compactRefs(collectRefs),
+			CommemorationOwnerID: comm.ID,
+			IsCommemoration:      true,
 		})
 	}
 	return elems

@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 )
 
@@ -47,6 +48,13 @@ func isDynamicResolutionRef(ref string) bool {
 	return false
 }
 
+func traceInventoryElement(eng *office.Engine, day *models.CalendarDay, hourName string, element models.OfficeElement) office.ProperResolutionTrace {
+	if element.IsCommemoration {
+		return eng.TraceCommemorationResolution(day, hourName, element.SlotRef, element.SourceRef, element.CommemorationOwnerID)
+	}
+	return eng.TraceProperResolution(day, hourName, element.SlotRef, element.SourceRef)
+}
+
 // BuildResolutionInventory sweeps composed hours and records the selected
 // fallback tier for each dynamic slot. It uses the actual composed source key,
 // so special composer paths (collects and hymn doxologies) stay truthful.
@@ -80,7 +88,7 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 						// SourceRef is the source actually selected by the composer.
 						// Tracing it as metadata (rather than resolving again) keeps
 						// special composition paths truthful.
-						trace := eng.TraceProperResolution(day, hourName, element.SlotRef, element.SourceRef)
+						trace := traceInventoryElement(eng, day, hourName, element)
 						if !isDynamicResolutionRef(element.SourceRef) && trace.SelectedTier != "not-found" {
 							continue
 						}
