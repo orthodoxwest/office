@@ -69,9 +69,15 @@ He that feareth the Lord will do good; and he that hath the knowledge of the law
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-27 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 200 (St John, Apostle and Evangelist, At Sext)
 !Sir 15:3
-With the bread of life and understanding, she shall feed him, and give him the water of wholesome wisdom to drink; God, our Lord.
+With the bread of understanding shall she feed him, * and give him the water of wisdom to drink.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 200 (St John, Apostle and Evangelist, At None)
+!Sir 15:5-6
+In the midst of the congregation shall she open his mouth. He shall find joy and a crown of gladness, * and she shall cause him to inherit an everlasting name.
 R. Thanks be to God.
 
 [short-responsory-lauds]

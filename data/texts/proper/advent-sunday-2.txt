@@ -41,15 +41,15 @@ Brethren: Whatsoever things were written aforetime were written for our learning
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 167 (II Sunday in Advent, At Sext)
 !Rom 15:5-6
-Now the God of patience and of comfort grant you to be of one mind one towards another, according to Jesus Christ:That with one mind, and with one mouth, you may glorify God and the Father of our Lord Jesus Christ.
+Now the God of patience and consolation grant you to be like-minded one toward another, according to Christ Jesus; that ye may with one mind and one mouth glorify God, * even the Father of our Lord Jesus Christ.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Adv2-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, pp. 167–168 (II Sunday in Advent, At None)
 !Rom 15:13
-Now the God of hope fill you with all joy and peace in believing; that you may abound in hope, and in the power of the Holy Ghost.
+Now the God of hope fill you with all joy and peace in believing, that ye may abound in hope, * through the power of the Holy Ghost.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -59,56 +59,56 @@ R. Thanks be to God.
 @use proper/advent-sunday-2/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Adv2-1 [Ant 2] — check against diurnal
-The Lord the Ruler * cometh from heaven, and in His hand are honour and dominion.
+# SOURCE: monastic diurnal, p. 168 (II Week in Advent, Monday)
+From heaven there cometh * the Lord, the Ruler, and in his hand are honour and dominion.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Adv2-1 [Ant 3] — check against diurnal
-Behold, the Lord cometh * the King of all the earth, to take off from us the yoke of our captivity.
+# SOURCE: monastic diurnal, p. 168 (II Week in Advent, Monday)
+Behold the King shall come, * the Lord of the earth, and he shall take away the yoke of our captivity.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Adv2-2 [Ant 2] — check against diurnal
-The Lord shall arise * upon thee, O Jerusalem, and His glory shall be seen upon thee.
+# SOURCE: monastic diurnal, p. 168 (II Week in Advent, Tuesday)
+The Lord shall arise upon thee, * O Jerusalem, and his glory shall be seen upon thee.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Adv2-2 [Ant 3] — check against diurnal
-The voice * of one crying in the wilderness: Prepare ye the way of the Lord, make His paths straight.
+# SOURCE: monastic diurnal, p. 168 (II Week in Advent, Tuesday)
+The voice of one crying * in the wilderness, Prepare ye the way of the Lord, make straight in the desert a highway for our God.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Adv2-3 [Ant 2] — check against diurnal
-Behold I send My angel * which shall prepare My way before thy face.
+# SOURCE: monastic diurnal, p. 168 (II Week in Advent, Wednesday)
+Behold I send my messenger, * and he shall prepare my way before thy face.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Adv2-3 [Ant 3] — check against diurnal
-Thou shalt yet be built anew, * O Zion, and thou shalt see thy Righteous One, Who shall come in thee.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Wednesday)
+Sion, * thou shalt be renewed, and shalt see thy righteous One, he that cometh unto thee.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Adv2-4 [Ant 2] — check against diurnal
-O Lord, Thou art He That should come, * for Whom we look, that Thou shouldest save thy people.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Thursday)
+Thou, O Lord, * art he that is to come, for whom we look, to save thy people.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Adv2-4 [Ant 3] — check against diurnal
-He it is * Who, coming after me, is preferred before me, Whose shoe's latchet I am not worthy to unloose.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Thursday)
+He that cometh after me * is preferred before me, the latchet of whose shoes I am not worthy to unloose.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Adv2-5 [Ant 2] — check against diurnal
-Say: * Ye that are of a fearful heart, be strong; behold, the Lord our God will come.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Friday)
+Say to them: * Ye that are of a fearful heart, be strong: for behold the Lord our God shall come.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Adv2-5 [Ant 3] — check against diurnal
-Sing unto the Lord * a new song; from the end of the earth, let the voice of praise be heard.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Friday)
+Sing unto the Lord * a new song; and his praise from the end of the earth.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Adv2-6 [Ant 2] — check against diurnal
-The Lord shall lift up a standard * unto the nations, and shall gather together the outcasts of Israel.
+# SOURCE: monastic diurnal, p. 169 (II Week in Advent, Saturday)
+The Lord shall set up an ensign * for the nations, and shall assemble the outcasts of Israel.
 
 [benedictus-antiphon]
 # SOURCE: draft archdiocesan Lauds book, p. 26 (The Second Sunday in Advent)
 Now when John * had heard in the prison the works of Christ, he sent two of his disciples, and said unto him: Art thou he that should come, or do we look for another?
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Adv2-0 [Ant 3] — check against diurnal
-Art thou he that art to come * or look we for another? Go and relate to John what you have seen: the blind see, the dead rise again, to the poor the gospel is preached. Alleluia.
+# SOURCE: monastic diurnal, p. 168 (II Sunday in Advent, At II Vespers)
+Art thou he * that should come, or do we look for another? Go and shew John those things which ye do see: the blind receive their sight, the dead are raised, and the poor have the gospel preached unto them, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 18 (The Second Sunday in Advent, I Vespers)

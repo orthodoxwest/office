@@ -221,6 +221,20 @@ ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Majo
 proper/advent-sunday-1/psalm-antiphon-1,7de540e90841,draft archdiocesan Vespers book,,4,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-2,313b9a7eaed8,draft archdiocesan Vespers book,,5,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-3,eaf2860c47f3,draft archdiocesan Vespers book,,6,verified,codex,2026-07-17,
+proper/advent-sunday-2/benedictus-antiphon-friday,f339c073220f,diurnal,"II Week in Advent, Friday",169,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/benedictus-antiphon-monday,5595279672d2,diurnal,"II Week in Advent, Monday",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/benedictus-antiphon-saturday,964e06c672eb,diurnal,"II Week in Advent, Saturday",169,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/benedictus-antiphon-thursday,3c344f1367b3,diurnal,"II Week in Advent, Thursday",169,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/benedictus-antiphon-tuesday,3ca6f6ac4e25,diurnal,"II Week in Advent, Tuesday",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/benedictus-antiphon-wednesday,725948084d9e,diurnal,"II Week in Advent, Wednesday",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/chapter-none,73495d1c3259,diurnal,"II Sunday in Advent, At None",167-168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/chapter-sext,b6c81fc8d0a3,diurnal,"II Sunday in Advent, At Sext",167,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon,152c798b3da1,diurnal,"II Sunday in Advent, At II Vespers",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon-friday,97750117a676,diurnal,"II Week in Advent, Friday",169,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon-monday,5f108a198ed4,diurnal,"II Week in Advent, Monday",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon-thursday,6fea8e656685,diurnal,"II Week in Advent, Thursday",169,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon-tuesday,23ba4c4d0157,diurnal,"II Week in Advent, Tuesday",168,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-2/magnificat-antiphon-wednesday,515261fbc6db,diurnal,"II Week in Advent, Wednesday",169,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-2/psalm-antiphon-1,fde254fa4204,draft archdiocesan Vespers book,,12,verified,codex,2026-07-17,
 proper/advent-sunday-2/psalm-antiphon-2,b812cbeca586,draft archdiocesan Vespers book,,13,verified,codex,2026-07-17,
 proper/advent-sunday-2/psalm-antiphon-3,612b47e87ae6,draft archdiocesan Vespers book,,14,verified,codex,2026-07-17,
@@ -287,6 +301,8 @@ proper/assumption-bvm/versicle-lauds,65002c4aac6d,draft archdiocesan Lauds book,
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,50e47a3dc415,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
+proper/christ-the-king/chapter-none,8599bde68bc2,diurnal,"Christ the King, At None",631,verified,grok,2026-08-22,word-for-word from printed page image
+proper/christ-the-king/chapter-sext,51656689d201,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-22,word-for-word from printed page image
 proper/christ-the-king/hymn-vespers,da0343a2687c,office-hymns.zip,"O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/christmas/benedictus-antiphon,563e7d19001d,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,72,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/collect,482a33f21028,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,73,verified,codex,2026-07-18,checked word for word
@@ -314,6 +330,11 @@ proper/corpus-christi/short-responsory-lauds,210b7848f3c7,Propers of Lauds & Ves
 proper/corpus-christi/short-responsory-terce,210b7848f3c7,draft Temporal Cycle Vespers book,Saturday within the Octave of Corpus Christi,200-201,verified,codex,2026-07-18,
 proper/corpus-christi/short-responsory-vespers,979bb8cb3d04,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (rubric)
 proper/corpus-christi/versicle-lauds,89b7ed1d753b,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/easter-sunday-3/benedictus-antiphon,38c54b9c26d9,diurnal,"III Sunday after Easter, At Lauds",380,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-3/benedictus-antiphon-friday,5c8ea5f3d66d,diurnal,"III Week after the Octave of Easter, Friday",382,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-3/benedictus-antiphon-thursday,43950cf2ef70,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-3/magnificat-antiphon,87eac0e355e0,diurnal,"III Sunday after Easter, At II Vespers",381,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-3/magnificat-antiphon-thursday,e1d2a40a57a3,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/collect,1ed6ac486f79,draft archdiocesan Vespers book,,165,verified,codex,2026-07-17,
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
@@ -345,6 +366,8 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
+proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
@@ -368,6 +391,8 @@ proper/saturday-office-bvm/magnificat-antiphon,8ac1016e4a77,diurnal,"Office of S
 proper/solemnity-st-joseph/hymn-vespers,d60c25ccf291,draft archdiocesan Vespers book,,168,verified,codex,2026-07-18,
 proper/st-anne/collect,34daf8cad2b5,diurnal,,575,verified,bwaldrep,2026-07-25,
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
+proper/st-john-evangelist/chapter-none,1bdcf3c788f8,diurnal,"St John, Apostle and Evangelist, At None",200,verified,grok,2026-08-22,word-for-word from printed page image
+proper/st-john-evangelist/chapter-sext,baf16b998f3d,diurnal,"St John, Apostle and Evangelist, At Sext",200,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-joseph/hymn-vespers,6bb45b958450,draft archdiocesan Vespers book,"Saint Joseph, I Vespers",325-326,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/st-joseph/short-responsory-vespers,97970bbbbb33,draft archdiocesan Vespers book,,"324, 333",verified,codex,2026-07-17,
 proper/st-lawrence/psalm-antiphon-3,441ca5cf4bc3,draft archdiocesan Lauds book,,517,verified,codex,2026-07-17,
