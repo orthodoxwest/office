@@ -67,11 +67,19 @@ func TestTraceInventoryElementEmptyCommemorationOwnerFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	day := &models.CalendarDay{Celebration: &models.Feast{ID: "principal-feast"}}
+	// The ID-less commemoration is the trap: an empty owner would otherwise
+	// match it and be reported as found.
+	day := &models.CalendarDay{
+		Celebration:    &models.Feast{ID: "principal-feast"},
+		Commemorations: []*models.Feast{{Name: "Commemoration with no ID"}},
+	}
 	element := models.OfficeElement{IsCommemoration: true, SlotRef: "commemoration-collect", SourceRef: "ordinary/lauds/collect"}
 	trace := traceInventoryElement(engine, day, "lauds", element)
 	if trace.OwnerID != "" || trace.CanonicalOwner != "" {
 		t.Fatalf("empty commemoration owner attributed to principal: %#v", trace)
+	}
+	if trace.Reason != office.UnknownCommemorationOwnerReason {
+		t.Fatalf("reason = %q, want %q", trace.Reason, office.UnknownCommemorationOwnerReason)
 	}
 }
 

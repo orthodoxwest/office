@@ -1211,6 +1211,11 @@ func TestEngineTraceProperResolutionUnknownCommemorationOwnerFailsClosed(t *test
 	if trace.OwnerID == "principal-feast" || trace.CanonicalOwner == "principal-feast" {
 		t.Fatalf("unknown owner attributed to principal celebration: %#v", trace)
 	}
+	// The empty owner alone reads exactly like a legitimately unowned feria,
+	// so the reason must mark the failure.
+	if trace.Reason != UnknownCommemorationOwnerReason {
+		t.Fatalf("reason = %q, want %q", trace.Reason, UnknownCommemorationOwnerReason)
+	}
 }
 
 func TestEngineTraceProperResolutionUsesCommemorationOwnerAndProperID(t *testing.T) {
@@ -1228,6 +1233,9 @@ func TestEngineTraceProperResolutionUsesCommemorationOwnerAndProperID(t *testing
 	}
 	if len(trace.ProperIDs) < 2 || trace.ProperIDs[0] != "redirected-feast" || trace.ProperIDs[1] != "calendar-comm" {
 		t.Fatalf("trace proper IDs = %#v", trace.ProperIDs)
+	}
+	if trace.Reason == UnknownCommemorationOwnerReason {
+		t.Fatalf("found owner marked unknown: %#v", trace)
 	}
 }
 

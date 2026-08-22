@@ -678,6 +678,13 @@ func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, s
 	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
 }
 
+// UnknownCommemorationOwnerReason marks a commemoration trace whose owner
+// could not be found among the day's commemorations. The trace fails closed
+// with no owner, which on its own is indistinguishable from a legitimately
+// unowned day (a feria with no Celebration), so the reason carries the
+// distinction the OwnerID column cannot.
+const UnknownCommemorationOwnerReason = "unknown-commemoration-owner"
+
 // TraceCommemorationResolution traces a generated commemoration slot. An
 // empty owner ID is intentionally not allowed to fall back to the principal
 // celebration.
@@ -685,33 +692,47 @@ func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName,
 	if hourName == "vespers" {
 		day = vespersOfficeDay(day)
 	}
-	day = commemorationOwnerDay(day, ownerID)
-	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
+	ownerDay, found := commemorationOwnerDay(day, ownerID)
+	trace := traceProperResolution(ownerDay, hourName, ref, selectedRef, e.corpus)
+	if !found {
+		trace.Reason = UnknownCommemorationOwnerReason
+	}
+	return trace
 }
 
 // commemorationOwnerDay changes only the celebration used for proper tracing.
 // Composition has already selected the text; this keeps inventory ownership
 // tied to the actual commemoration Feast, including its ProperID redirect.
-func commemorationOwnerDay(day *models.CalendarDay, ownerID string) *models.CalendarDay {
+// It reports whether the owner was found; an unfound owner fails closed with
+// no celebration at all.
+func commemorationOwnerDay(day *models.CalendarDay, ownerID string) (*models.CalendarDay, bool) {
 	if day == nil {
-		return day
+		return day, false
+	}
+	// An empty owner must fail closed before the search: it would otherwise
+	// match the first commemoration whose Feast has no ID, which is exactly
+	// the case IsCommemoration exists to keep off the principal celebration.
+	if ownerID == "" {
+		unowned := *day
+		unowned.Celebration = nil
+		return &unowned, false
 	}
 	for _, feast := range day.Commemorations {
 		if feast != nil && feast.ID == ownerID {
-			copy := *day
-			copy.Celebration = feast
-			return &copy
+			ownerDay := *day
+			ownerDay.Celebration = feast
+			return &ownerDay, true
 		}
 	}
 	if day.FeriaCommemoration != nil && day.FeriaCommemoration.ID == ownerID {
-		copy := *day
-		copy.Celebration = day.FeriaCommemoration
-		return &copy
+		ownerDay := *day
+		ownerDay.Celebration = day.FeriaCommemoration
+		return &ownerDay, true
 	}
 	// An explicit owner that is not present in the transformed commemoration
 	// list must fail closed; attributing it to the principal celebration would
 	// make inventory rows appear to belong to the wrong feast.
-	copy := *day
-	copy.Celebration = nil
-	return &copy
+	ownerDay := *day
+	ownerDay.Celebration = nil
+	return &ownerDay, false
 }
