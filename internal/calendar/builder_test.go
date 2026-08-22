@@ -78,41 +78,22 @@ func TestBuildCalendarEpiphanySundays(t *testing.T) {
 	}
 }
 
-func TestBuildCalendarOmitsPeterDamianFromCurrentAWRVCalendar(t *testing.T) {
-	days := buildCalendar2026(t)
-	feb23 := findDay(days, 2026, 2, 23)
-	if feb23 == nil {
-		t.Fatal("Feb 23 not found")
-	}
-	if feb23.Celebration != nil && feb23.Celebration.ID == "st-peter-damian" {
-		t.Fatal("St Peter Damian must not own the office on Feb 23")
-	}
-	for _, comm := range feb23.Commemorations {
-		if comm.ID == "st-peter-damian" {
-			t.Fatal("St Peter Damian must not be commemorated on Feb 23")
-		}
-	}
-}
-
-func TestBuildCalendarPreservesPeterDamianOutside2026(t *testing.T) {
-	for _, year := range []int{2024, 2025, 2027} {
+func TestBuildCalendarOmitsPeterDamianFromAWRVCalendar(t *testing.T) {
+	for _, year := range []int{2024, 2025, 2026, 2027} {
 		days, err := BuildCalendar(year, findDataDir(t))
 		if err != nil {
 			t.Fatalf("BuildCalendar(%d): %v", year, err)
 		}
-		feb23 := findDay(days, year, 2, 23)
-		if feb23 == nil {
-			t.Fatalf("%d-02-23 not found", year)
-		}
-		found := feb23.Celebration != nil && feb23.Celebration.ID == "st-peter-damian"
-		for _, comm := range feb23.Commemorations {
-			found = found || comm.ID == "st-peter-damian"
-		}
-		for _, comm := range feb23.Vespers.Commemorations {
-			found = found || comm.ID == "st-peter-damian"
-		}
-		if !found {
-			t.Errorf("St Peter Damian disappeared from %d historical/future calendar", year)
+		for i := range days {
+			day := &days[i]
+			if day.Celebration != nil && day.Celebration.ID == "st-peter-damian" {
+				t.Fatalf("St Peter Damian owns the office on %s", day.Date.Format("2006-01-02"))
+			}
+			for _, comm := range append(append([]*models.Feast{}, day.Commemorations...), day.Vespers.Commemorations...) {
+				if comm.ID == "st-peter-damian" {
+					t.Fatalf("St Peter Damian is commemorated on %s", day.Date.Format("2006-01-02"))
+				}
+			}
 		}
 	}
 }
