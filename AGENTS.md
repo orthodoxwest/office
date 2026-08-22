@@ -1,4 +1,4 @@
-# Diurnal ingestion guardrails
+# Data maintenance and diurnal ingestion guardrails
 
 The received monastic diurnal is evidence for reviewing and, when the
 mechanical gate allows, updating the office corpus. Extraction, OCR, heading
@@ -7,13 +7,21 @@ verification.
 
 ## Non-negotiable boundaries
 
-- Agents may change `data/texts/` **only** through `office review apply` on an
-  apply-queue packet that passed the mechanical gate. Do not `git add data/`
-  or edit corpus files with a general write tool.
-- First-wave applies may touch any liturgical text except `data/texts/psalms/`
-  (already independently validated). They must not write `data/review/`
-  ledgers, feast metadata, hour defs, signoffs, attestations, or prescreen
-  flags.
+- Automated diurnal ingestion, OCR cleanup, and model-generated corpus text
+  may change `data/texts/` **only** through `office review apply` on an
+  apply-queue packet that passed the mechanical gate.
+- A narrow direct edit under `data/texts/` is allowed only when a maintainer
+  explicitly names the exact target and requested action. This includes
+  deletion of a named orphan proper scaffold whose owner is absent and which
+  has no live sections. Do not use this exception for agent-initiated, OCR,
+  extracted, or model-generated wording. Keep the edit reviewable and verify
+  it with the relevant validation, audit, calendar, and office-composition
+  tests.
+- Do not directly edit `data/texts/psalms/`, which has been independently
+  validated, unless a maintainer explicitly requests a particular correction
+  backed by an independently checked source.
+- First-wave generated applies must not write `data/review/` ledgers, feast
+  metadata, hour defs, signoffs, attestations, or prescreen flags.
 - Never represent an OCR result, a match score, a model verdict, or a merged
   apply PR as a human verification. `review attest` remains a separate human
   act. Agent-written `# SOURCE:` comments must keep the hedge
@@ -51,7 +59,11 @@ verification.
    a printed proper from an equal fallback.
 4. Run agents with immutable packet hashes. A cleaner may emit an apply
    packet; the gate, not the model score, decides whether it is writable.
-5. `office review apply` writes gated packets on a branch. A maintainer
-   merges the PR. Attestation is a later, separate `review attest`.
+5. `office review apply` writes gated ingestion packets on a branch. A
+   maintainer merges the PR. Attestation is a later, separate `review attest`.
+
+Explicit maintainer-directed repository maintenance is outside the automated
+ingestion path and may use the narrow exception above. It must remain small
+enough to review and must not relabel agent work as human attestation.
 
 Follow the operational details in `DIURNAL-INGESTION.md`.

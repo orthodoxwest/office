@@ -4,8 +4,10 @@ This tooling prepares evidence for reviewing a received monastic diurnal and,
 when the mechanical gate allows, writing corpus edits through
 `office review apply`. It does not attest provenance or decide rubrics.
 Keep the PDF and all source-derived artifacts outside Git; intake, discovery,
-and apply-queues live under ignored `output/`. Corpus writes happen only via
-the apply command on a reviewable branch.
+and apply-queues live under ignored `output/`. Generated ingestion writes
+happen only via the apply command on a reviewable branch. Exact maintenance
+actions explicitly requested by a maintainer follow the narrow exception in
+`AGENTS.md`.
 
 ## Workflow
 
@@ -106,7 +108,7 @@ the apply command on a reviewable branch.
 
    High-confidence packets (`missing-override` or `existing-different` that
    pass `internal/review` Gate) become an apply-queue under `output/`. The
-   only writer is:
+   only writer for generated ingestion packets is:
 
    ```bash
    scripts/source-reconcile.py apply-queue --output output/source-reconcile
