@@ -488,7 +488,13 @@ func TestFestalVespersPsalmodyFullYearHasFourPsalms(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: ComposeHour: %v", day.Date.Format("2006-01-02"), err)
 		}
-		if !usesFestalVespersPsalmody(vespersOfficeDay(day), engine.corpus) {
+		officeDay := vespersOfficeDay(day)
+		if !usesFestalVespersPsalmody(officeDay, engine.corpus) {
+			continue
+		}
+		// The Office of the Dead declares a psalmody table too, but it is not
+		// festal Vespers: it sings five psalms (Monastic Diurnal pp. 72*-75*).
+		if isOfficeOfTheDead(officeDay) {
 			continue
 		}
 		festalEvenings++

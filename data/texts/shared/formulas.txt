@@ -25,6 +25,14 @@ R. Thanks be to God.
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
 
+[rest-eternal]
+# SOURCE: Monastic Diurnal.pdf, p. 72* (The Office of the Dead)
+# The Office of the Dead says no Gloria Patri. "At the end of all Psalms is
+# always said: Rest eternal grant unto them, O Lord. And let light perpetual
+# shine upon them, even if the Office be said for one person only."
+Rest eternal grant unto them, O Lord.
+And let light perpetual shine upon them.
+
 [our-father-partly-secret-rubric]
 # SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2 (corporate form);
 # 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5

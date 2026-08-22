@@ -184,6 +184,19 @@ func ValidateHourDefinitions(dataDir string) []string {
 						}
 					}
 
+				case "gloria-patri":
+					// The per-office Ref stands for either key it can resolve
+					// to at runtime; any other Ref is a direct corpus lookup.
+					keys := []string{elem.Ref}
+					if elem.Ref == doxologyRefPerOffice {
+						keys = psalmDoxologyKeys
+					}
+					for _, key := range keys {
+						if _, seen := required[key]; !seen {
+							required[key] = src
+						}
+					}
+
 				case "commemorations":
 					// Resolved dynamically at runtime; nothing to validate.
 

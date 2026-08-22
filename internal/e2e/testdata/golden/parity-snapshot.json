@@ -120,9 +120,9 @@
     {
       "year": 2026,
       "hour": "lauds",
-      "content": "610c9f2fdb798fbc0ac4f618f17965c4a32850681b77f0b47a4511210e250ab4",
-      "sources": "470b939d2712de2d1932b7c9e79a59c0143c5a0ab8672722c74fb2fad53fa1db",
-      "decisions": "29b6b320edebad83f80f7d60b470af3625889171ab12f2faa4f184c9713fe3a5"
+      "content": "7d199706bffab51fc63a1b5a8f243a90049fa4926ea38ee902f0cce616648e70",
+      "sources": "769feb9d64f1bab0d366a4f9481076ef139fb732ae98111e5653dd6e3d7a92e2",
+      "decisions": "637c1c1ad8d833418c3c2d52e90e3ef877c0cacbe86e7632931810fdfff69862"
     },
     {
       "year": 2026,
@@ -134,14 +134,14 @@
     {
       "year": 2026,
       "hour": "terce",
-      "content": "65e267ac495582c8debf4c35d3d6882b8cbbbbfcb7de7789ef7ded95307c74c8",
+      "content": "99f74ed0c05781d1018a2e984a46a21cb191ba404649b4899877ebc8e6703556",
       "sources": "a0cf60f6792c8336fc30b47867e5d205391f22dbfc58a1d86bf149c3f2b6af6e",
       "decisions": "c01ff63dbf697be663340b91cc39f3d5a21041235d8268ef6e0aa767392a4200"
     },
     {
       "year": 2026,
       "hour": "sext",
-      "content": "344db284a9c4fa02faaff791733fcae038441cb69a3c15589d1d9f5518581c0c",
+      "content": "170cbb7d0fb0c04ae387e8eb81d11db9adc44a2dda48e37d3b2f5b3225a3008b",
       "sources": "42a33d5df07dc271d9ec4b7b03749bfe60279890a818d8911bb4bbbc21fc8bfa",
       "decisions": "c01ff63dbf697be663340b91cc39f3d5a21041235d8268ef6e0aa767392a4200"
     },
@@ -149,15 +149,15 @@
       "year": 2026,
       "hour": "none",
       "content": "da7487141605c2d5ae45aa8e51338d1f2820b120448bdab696e837487e015158",
-      "sources": "7db8e881772d8b5d40f4fc65d69c2ee5b7aa171f0566a73aeecdd0c11eb6cfbe",
+      "sources": "f9ce09f805dd650019d1104a5778140c447d9192afb5f8d1c3dfef2aab4207ef",
       "decisions": "c01ff63dbf697be663340b91cc39f3d5a21041235d8268ef6e0aa767392a4200"
     },
     {
       "year": 2026,
       "hour": "vespers",
-      "content": "496b8fcf987fc7a4f6fa449e5e7888fc9c9b86c176d2a33574eebbde24f31378",
-      "sources": "1f6916b2d31ee949c240ac44a65a62bb061491b27acbf7961ced84833d74cf20",
-      "decisions": "9441d03ee9ffaf499907a28ec84c59cba0a8a11412faec589ba974d01e284653"
+      "content": "fbbd683d82c90d3e8aa18811a12d93e388aa905f75bc1de7a603d2a9668c6a29",
+      "sources": "c237545d78a2fac9acdc0004c6a410f2adff1cd2520a80d143941032e18c9dd9",
+      "decisions": "4f7391e1f1941486e35b16d05d356262c33c3ebde0ffafcd64a4e78003c2e115"
     },
     {
       "year": 2026,
@@ -169,9 +169,9 @@
     {
       "year": 2027,
       "hour": "lauds",
-      "content": "b9dd3f3616d4d791ee0a030c795aea9e9434c2014a28f3aed8b497f3d370942f",
-      "sources": "52a9355f6cc478660fad8b0f6980c67cc5e7591ec621a83cada92925d44bc000",
-      "decisions": "64044d5c63aec62d7e04d95e3e1490b773ca4650ad31fe9c484162f7536276d4"
+      "content": "ded0c97922a864018401d60d0404ff9c5699a9f75df1bebefe3f6970866b5b7f",
+      "sources": "26c2571efe60a783ac28bd2c678ccef72d1887d90e541d3e01897c53086c01d4",
+      "decisions": "80d58316aec20096a3485be8d5bbbd6a7f3924c353394176ae079106e7252138"
     },
     {
       "year": 2027,
@@ -183,14 +183,14 @@
     {
       "year": 2027,
       "hour": "terce",
-      "content": "1089409af4762acdfaa7266e4b7464e80a0eb8a5c58353f9f1294901f81af195",
+      "content": "22f2d8361af16a22ed2e7c2d282c3ac2dc37628fca2d4c561aa7d0225040b7bf",
       "sources": "f5fe0e9f92ae5c25bd26a5705191ae399798da24f8bc4a404d6f6c43dba9510e",
       "decisions": "3d1212c4bb76da977d878810e660244c776601d79282c22b97877332c7aed640"
     },
     {
       "year": 2027,
       "hour": "sext",
-      "content": "36d7fbbe26c4d4775ff5cbe0c4bdf3287a0aef831464dc1d11f33395ca73a630",
+      "content": "1dc7438b435e62d1990c7bdcde8c83d32718b6fa199190be1ed3f1947784348b",
       "sources": "50bca26bd282a20e77d28bba0df2fd4d2c58bb2152dae5d49e45ea3fcf80a163",
       "decisions": "3d1212c4bb76da977d878810e660244c776601d79282c22b97877332c7aed640"
     },
@@ -198,15 +198,15 @@
       "year": 2027,
       "hour": "none",
       "content": "20a48998c9358c23963a15b1cadebda514112ab52c313a70602122982de8e9e4",
-      "sources": "6cd1cd7d065b41c4c7449547bd3895da5f9cf1af34e4821bf44996340eaec6c6",
+      "sources": "da1589b3cdc8ad2e3845c1792fa948d135bad88d74cc07f83f7454f32477f7ba",
       "decisions": "3d1212c4bb76da977d878810e660244c776601d79282c22b97877332c7aed640"
     },
     {
       "year": 2027,
       "hour": "vespers",
-      "content": "d0aa8c85dc3c74ca704afd128f3daf470052e675626460e9d9faf8e22f3d9230",
-      "sources": "67ffeb7011b871f6031f854a3c0b1086bcaa4cbca31b012992b0c5ae8cd6df6b",
-      "decisions": "e6cff6f9caad537f19beb1b571b0d71cfed9c7bb18a964b66c47665823dcc54d"
+      "content": "f9eee3f169518ac8c2b5fb31874fa840242a888a0292ec206820ad079bf63ff7",
+      "sources": "41aaba7416af89819594fcc2acf81734ca2a74dbc4792cb246cc4bfb0e0a30d8",
+      "decisions": "f78920532167a23d2775bea1ea847b1eb841a3f1061bd00cc03626ecdda7dbb5"
     },
     {
       "year": 2027,
@@ -218,9 +218,9 @@
     {
       "year": 2028,
       "hour": "lauds",
-      "content": "e2a03d4efbaa75052786a498c6e60f188ea6d8618ee09ecf9c7d207c953ddefd",
-      "sources": "1d9185e4bbba323f43e2c9fcd1ba41ef87f7e5faedb4f52f3905ff73e97517b6",
-      "decisions": "d5838880c22b1f9136e6f1c9e349da033f59d879376e5f424fcb82ca134ae7c5"
+      "content": "b8b8b947d8f865127fed9e331222273ce02726ccd6aa1db88c2f88d2ce2c2a67",
+      "sources": "35a70eb42df49f841ca0281b292bfe70d81808e57c4047daaed49847913e1484",
+      "decisions": "609c8e5a27aabce96dc1b288d93d5688f2c492da098742a9020bb366c5373538"
     },
     {
       "year": 2028,
@@ -232,14 +232,14 @@
     {
       "year": 2028,
       "hour": "terce",
-      "content": "c4ced37f1464060103149bdaf02ed4b323ebecc078a9280b31d2ee6fdcae8a9a",
+      "content": "6ec153dccc1fb7c35ad3c774efff9a530e126ea457d06144749e7c6373956e59",
       "sources": "0e26059e0bb86dbe6b43e2bfe02a06cc6f137724d5ba6d872f6a0c6081299255",
       "decisions": "57cb988805140da7bb56da5a4b9f8e5203594075c35d418e09a4148b3c9468cf"
     },
     {
       "year": 2028,
       "hour": "sext",
-      "content": "42ce9f1ec669a2c74c5629a3a5e2a7cf4ed568398c7d7d904b85e465357a937d",
+      "content": "be6cb0f357f7be8020df31b24981854841f4e9443cb96a664908d5dd7e882377",
       "sources": "3ec44bb1d07e23386490c08d7b8b35db9258f29ef5dd82cd7f5e7786d6e32954",
       "decisions": "57cb988805140da7bb56da5a4b9f8e5203594075c35d418e09a4148b3c9468cf"
     },
@@ -247,15 +247,15 @@
       "year": 2028,
       "hour": "none",
       "content": "6230d14547a44fe2fc0a7eab9df4efabc5afa4a3af9278bf935815c3ab85ba97",
-      "sources": "35ddafe5076c0db4fa6a2a026b51eb55e8a5ad068fae29f72163c1d75ff4ae95",
+      "sources": "4b24cbfe51a9c5dfcd1fe5b6903bde6a20813fa401035ad4d311aaafc335a5f6",
       "decisions": "57cb988805140da7bb56da5a4b9f8e5203594075c35d418e09a4148b3c9468cf"
     },
     {
       "year": 2028,
       "hour": "vespers",
-      "content": "d74d4319f486d4773238e1175b7d7b5267c0c2a530f0ed749ed37f10ed2b683f",
-      "sources": "ab81981d200f125f9bfb340aefce24c3ed79515a9247a65eb8086bbac06e511d",
-      "decisions": "3e1f1de12232c28d69f20e2d03ee3f410eb944a9471d4448c21860d83c1634c4"
+      "content": "7f12035b0964d35aee1861f3158420a34eba598a5e785d65a386d30c8cca0226",
+      "sources": "a755038f961995835f7196f092dd539db2fc4b8314d3379012b3c18cb5eefc5f",
+      "decisions": "ea9dcd6bbcb01decbe8234b4c25d4636f384628be17e9223d83244d0da180d8f"
     },
     {
       "year": 2028,
@@ -267,9 +267,9 @@
     {
       "year": 2029,
       "hour": "lauds",
-      "content": "aba88f75eb454fea1dbf1aa88770d51c9d429ad04aee23e51208aca7828a1ae9",
-      "sources": "de8c527a4c647dae3d299fcdf49b6db0d70b98e0b1cd577494ebcd4095a92a14",
-      "decisions": "2f9616f0d6a11df6f6a7d887d32e791c6a3f761b48f8d3aa62b63839a618645e"
+      "content": "2948db6a8bcdb99e093fbad7bf5f3f3d78faae5b1f105b1d502518c40c03e161",
+      "sources": "108538a38c34c207b1e61719768c36ebaf7b4c3b3314f694b804741d082ee0a8",
+      "decisions": "3e793faa270c7bfd5df9db2d991c3cc11a65368066776d14e423b7db00ea16fb"
     },
     {
       "year": 2029,
@@ -281,14 +281,14 @@
     {
       "year": 2029,
       "hour": "terce",
-      "content": "a2da5f7c59be8c104fa4eb40b39da586a8a615e81354f96ab5a8188e62ee97be",
+      "content": "4cc09d53a807b3f5e681447b464ff40d520fc7e06ebf8a8e1edd0bddc62018ef",
       "sources": "f87de2fd02f05d009b955a2a4cce4d0ea1cf3d11327319dd67060b46a4ffa7bf",
       "decisions": "831fd959d1f57d2f4b39b8f7459d2e769baea7f0ac5549504779eab5673beb2b"
     },
     {
       "year": 2029,
       "hour": "sext",
-      "content": "ac9cc52b08845f8f37502467a623ff3fdc37e0b15c15acbbde74b3f54ef7d217",
+      "content": "a19eaea5f3e20c61fa107c5256d5362f9e8576d23a6665d619fe7782e640dff3",
       "sources": "302e80fd24f4ba9f9e7f2a24ce70b51e512ebb9269ad64c63ccb1b6b60f05ad3",
       "decisions": "831fd959d1f57d2f4b39b8f7459d2e769baea7f0ac5549504779eab5673beb2b"
     },
@@ -296,15 +296,15 @@
       "year": 2029,
       "hour": "none",
       "content": "f52d1bd6c399ac2281ae5adfed9d12189eade2b4d25c3d709b2442924bf0fcad",
-      "sources": "240bb80870f2f08074e13f28b155c9e4caf390d311d992127b2d81175261c512",
+      "sources": "e8d8d25702c34787888792653b4c1dec9d1efa73d1b2ade3cb197bb9a2435d30",
       "decisions": "831fd959d1f57d2f4b39b8f7459d2e769baea7f0ac5549504779eab5673beb2b"
     },
     {
       "year": 2029,
       "hour": "vespers",
-      "content": "39564cc42e29dc69486f6f2c759451fed35619bb3e35cfc77229df54d081a995",
-      "sources": "a510a2be3bfed3bba11bc91c1bb0bff0d873afa5cb7b87212cede09ac7f40be1",
-      "decisions": "d017c431f67af7c03fb4ba4df4a5c6dd68b0edc8642b739be0855dee706bc994"
+      "content": "df10f5a70bbbb0af9efa53b2c1e6d4a766534aef17a1b51ede809338f5999f2d",
+      "sources": "1a845ff931c1f413683540da734e6624824e002ae1eb0849ab7cc3064fcd1c0e",
+      "decisions": "239f1b910902e57343d5d769c07934f2ca9039e794fd723c6656ae76ed91b53f"
     },
     {
       "year": 2029,
@@ -316,9 +316,9 @@
     {
       "year": 2030,
       "hour": "lauds",
-      "content": "96ea2276f2231515b7cc0d1f0043170b2f70773e315cd227c8918d1412859f58",
-      "sources": "593535ec401a6a7e638430fbf8e3abd0e5a4053fc93c30cee841e06c85b2f7b2",
-      "decisions": "455b91191ef69684d4ce92bbba91f7caf1811662ef6d931d80abc2bd468d4848"
+      "content": "8b146cd65229e6bcd77fa7168aa371ac8bb3f0ddddf6ff807ff0c749a9134aed",
+      "sources": "ffe8c5443e7609aa5e51cf2debd82e63336289202ba9f82eda2ba6029b3810d4",
+      "decisions": "98c6c6756a66312020e44f7fdd882362868a1022e64ca0a9ec4d060f29ecda97"
     },
     {
       "year": 2030,
@@ -330,14 +330,14 @@
     {
       "year": 2030,
       "hour": "terce",
-      "content": "8866bec4d2efeacad36f740ae95faa896bcc9e193f11494d9b266ba7c88d81ee",
+      "content": "f62665d407c628413e448958e34566376de69480d5c77b904df79c32557b582e",
       "sources": "a53830f38ca7e6fc9a53844b375f57b321639fe1849c67f97fe515965880db61",
       "decisions": "05199d513019bd36b1d3b435d9a98c401b85366512e176ef4247081d48971801"
     },
     {
       "year": 2030,
       "hour": "sext",
-      "content": "a9238cb325342ac8e9c0a8607b8e688664f73416afd289f09e4f1d6cbaf99f63",
+      "content": "e2612dfec4927356cc17318cc9d22c73188b9475d05e8e35c4721e2b58bff27c",
       "sources": "75da1540bc07cc7ccbe5c595b380028ecec1808b2f6b7867b4fd7896799793b1",
       "decisions": "05199d513019bd36b1d3b435d9a98c401b85366512e176ef4247081d48971801"
     },
@@ -345,7 +345,7 @@
       "year": 2030,
       "hour": "none",
       "content": "e4e1ee47d817a543617628b8f9ddfe03add9ce4322a18713243e00c34647d265",
-      "sources": "bc7cd8236b41bcdf61a24f65684e33a0f5583013d891b288f79c01dd713e5419",
+      "sources": "d1709168e83cbdcb2582d589feca6b772ca7951914b5f6edc5997abb5af784da",
       "decisions": "05199d513019bd36b1d3b435d9a98c401b85366512e176ef4247081d48971801"
     },
     {
@@ -353,7 +353,7 @@
       "hour": "vespers",
       "content": "938be9c65d8cfdd1cbe803f155949eb099ae607f7e5d7d87db8a768cdc077b49",
       "sources": "66f11a3f0f8e96a382fde6591b4484a3fedf50467257d0ada39783f86d90f218",
-      "decisions": "770d5d6f3ae93456ddfe4d5d810c0bb2ec4095a9852b4b0d9e1fac53bd0c18c2"
+      "decisions": "1bbba4628b13bd566d1385d844bdf888d6c3aafb34692261513d60a5aa11cb82"
     },
     {
       "year": 2030,
@@ -365,9 +365,9 @@
     {
       "year": 2031,
       "hour": "lauds",
-      "content": "7bf5592e247c94d689eb1e0780db4f5e87fb4a0b782dfea9a26db90aef6d0fd5",
-      "sources": "bd463f0946860669ce9ae224d4ed282f54cf0dd19168a5005dca37905ab886cf",
-      "decisions": "cbc4e6dde0811be687f92397630a84d310b14f713da72e1db3ad5203272406a4"
+      "content": "618c63e01967846551b8b067b04c6860452e7c03fe9a924748f2f09d7f448a44",
+      "sources": "36c4c5b658d6cd4d671961372b111946d9612378530272adba05ef749f339cc0",
+      "decisions": "41afda9f74102671beda8f8eeba9fb26d347345ebf95960afdc753cd9617f80a"
     },
     {
       "year": 2031,
@@ -400,9 +400,9 @@
     {
       "year": 2031,
       "hour": "vespers",
-      "content": "ced76ab97b409850fdc7e206caa557e18dc87b75ab24227928d05183096e3f04",
-      "sources": "dabef407683fe5184d5d5a0fd3ec314d38c71a245a16fdcf87a43684b6ee69de",
-      "decisions": "78542d73973436762e3fee5242504ccb029d21bd0260d957e961f547aa9739a3"
+      "content": "f08c35e86f8c8b5ad306d13c579fc9cca3b769dce88ee2601421b050776d9152",
+      "sources": "55ff333d19bba289c0f31f35613efa92fb663f0823fab2d5878fb1d0a9ed7e10",
+      "decisions": "ed4f02669346d2b4ae87b32ce0304eec8345a5f276720b8f8ba6d8d70cb8d24f"
     },
     {
       "year": 2031,
@@ -414,9 +414,9 @@
     {
       "year": 2032,
       "hour": "lauds",
-      "content": "5311a9baa5c2c3205bbd66e37f8a4491c024386da8361b37b9dfb44e22b3c367",
-      "sources": "a7572cbfb47d12ee8983faf886a1003cd094f8e0ca95078287793b3b5e5b4acb",
-      "decisions": "0f985fc3277ddfec477993c1ac727cb174ff9a9e355ec47146f872b063e38f95"
+      "content": "6d618ce7424abffdc76c80c9c2b953f6548b52fb625c27ace9bec78efb7f8f83",
+      "sources": "4fbf8eb4417312e9eccd3302c286099ca317848bed3969948c8175743668811b",
+      "decisions": "199273794e33242af7057dd9421fbe419791d20028ad6237e1dad442966a29fd"
     },
     {
       "year": 2032,
@@ -428,14 +428,14 @@
     {
       "year": 2032,
       "hour": "terce",
-      "content": "a3eb55d740f3ad6d6b38757686a9352e88461a0988bf9b82b5a82e5c49dbf854",
+      "content": "17083fdbd0a5fa392a82c517a5cf239b73826329a0b8535314b749543549bd2d",
       "sources": "ac2614312735f21e3377e5deb05392eb0635b518f4a10309c51acc5253161aae",
       "decisions": "c0932ff66359b686ce6c8de5d3de9fb3cbaae120b9608aa4a725a41b18576814"
     },
     {
       "year": 2032,
       "hour": "sext",
-      "content": "e5009253ebf4f9216342b73b4961fb474edc19914d02124a7dd177c7b82ed600",
+      "content": "0450d033e912d5b52da64534e1db3787c1562536d27fc220a067acccaf2408fd",
       "sources": "9411b3d79658b959a82a22049d03fd35d0103cca2f64029afab4808d301de1f3",
       "decisions": "c0932ff66359b686ce6c8de5d3de9fb3cbaae120b9608aa4a725a41b18576814"
     },
@@ -443,15 +443,15 @@
       "year": 2032,
       "hour": "none",
       "content": "74f737e49d79e6380df4a6b860b9703b1cdc0c4166537416e813d76ea92419b6",
-      "sources": "aa8ee47d69a60b03529c75faa33edf75dd2d0b82d8f915881a2c13bbe5d88f9b",
+      "sources": "34dc36a6349ff078940cba9eeb1eb4b544b52394b3bc6f44fd6df8d78c1fd41e",
       "decisions": "c0932ff66359b686ce6c8de5d3de9fb3cbaae120b9608aa4a725a41b18576814"
     },
     {
       "year": 2032,
       "hour": "vespers",
-      "content": "b6a1f25cb112ee1b9f8d104645d883a0360efd44688c869e7280f0cb6e5e9819",
-      "sources": "162ec6fdeff813828e6571d50030dea0b556c6cb0b84038808a14173d1590b04",
-      "decisions": "daf6b4bcbf95c1d0fd5201e3820a06cb6461c46437b8fa464bf6428286f4a630"
+      "content": "5f20f436a7dd57d657b2df6bcd0cf4cea6983d30fa4fda621174935c1c70992a",
+      "sources": "a118c2f4b90456725a11cec15bfc234d565dae1c457b662d493a0d67fdfdf925",
+      "decisions": "6a82c4bacf1bb6ed3d9411f273b7ad7d7bab2aba077ff2cac5680affe7eaa11a"
     },
     {
       "year": 2032,
@@ -463,9 +463,9 @@
     {
       "year": 2033,
       "hour": "lauds",
-      "content": "79b4dbcbba3960671751ea11d6d0a824b35a22b17222fdf6c0f247ba409bdff1",
-      "sources": "80c8bb7e615e902b37ab0e661f142ebf635c831aee2e6783ea4eecec5b45bf43",
-      "decisions": "fefad12c4b0f73bdd939243d36752656289040e547028215fd254b38e1e7fb6f"
+      "content": "bc068cafef7bfa48f63fef17524c57c6c50a875989ac1d710da2ad49156f279f",
+      "sources": "ea6f8bde176fb6dbab0929783a6e64c4718fd0678e0554a541f6b24dcc17a814",
+      "decisions": "57fce74906e16e68f1c6d5d178c8d64e696fe1f7185d675dc0461ca185456f03"
     },
     {
       "year": 2033,
@@ -477,14 +477,14 @@
     {
       "year": 2033,
       "hour": "terce",
-      "content": "5918b338f4da0254d9df302ebda5dc7b562b3db1fc6fdda4826413d6ff81a909",
+      "content": "6526344bbf349beb4e5ad200ff29fa0370835d43c17ebd3cb2a05e233c52168f",
       "sources": "4002f992b24fee6f0384cf1c0f62771a3ce5cdec6c35eea20338dd8de1adc240",
       "decisions": "f77330baaa7731616b87b1156f0345d87e3ccea0e699144213d8abc5f345274d"
     },
     {
       "year": 2033,
       "hour": "sext",
-      "content": "1a6455004091059106428951ce91868f12f2755c89e5fb3f12fec79fd6e6e1af",
+      "content": "ecc3639fb9befecf912e52d36cf16c19cdc1b58e091213a05d1e5af90aabe327",
       "sources": "1fcdf7a6cecfdca91c8b8282f5211ed94756fe30c520bc6d838c528f807b9db7",
       "decisions": "f77330baaa7731616b87b1156f0345d87e3ccea0e699144213d8abc5f345274d"
     },
@@ -492,15 +492,15 @@
       "year": 2033,
       "hour": "none",
       "content": "2ea731eadc3c3316dac75640def7bbf7d33142f1d91615178498861f9830248b",
-      "sources": "e1e0eedbababcd468fcb30c1595b7eec4a90d5b4dad854f48d355f9820985eef",
+      "sources": "84a1c4586c37d620a03b87abc7e9107f56c8c99178ed2f2b058319c579ae27dc",
       "decisions": "f77330baaa7731616b87b1156f0345d87e3ccea0e699144213d8abc5f345274d"
     },
     {
       "year": 2033,
       "hour": "vespers",
-      "content": "0a45e928f882e14fe1b6ac54b0925bd80eaf9662f5297d2feaf64f958f82ab85",
-      "sources": "13ab004d1b80afb4bca0981c5d06ef00becdd964b767d20beca92a50fea7cc8b",
-      "decisions": "b6001ebab776d90eb93f56a65e8131e3e807206b1ea2469f86fd1474163c2b42"
+      "content": "379fab3f05ab480d1970646425cc4c535246bbc06c28f019d26e43be95eda966",
+      "sources": "253716e343eb1f9d6d8eb31cd4d104a00dc2b6f36227eaf85abfafbab41a4cca",
+      "decisions": "fdc35db01db27dd0d785757de0e5b975012eedce32b06bdd89eafb4f8cebd5fe"
     },
     {
       "year": 2033,
@@ -512,9 +512,9 @@
     {
       "year": 2034,
       "hour": "lauds",
-      "content": "2fba2181a017e4c1f6a1803f5a64f031c5abc34b09eaf27ba097e3501fea88da",
-      "sources": "aa9d57bf6c486a93312f37cdc9e54a5c8e7511df8ba8c76a9dc4783d78260d00",
-      "decisions": "9af319d265756d0b440b8436fc970fed56b23fedecaec2f595fb4a2456084db7"
+      "content": "496900e32f8ccf0c52ebf138c5d4c066ca2a6bdf7d05ed8955e7af19e154b9b3",
+      "sources": "c2953d3e1462ea652e479251fd76a971c4d638069d5a645de98b4abb35e40d21",
+      "decisions": "8cb89c91777f6ac05911f60e43e5c7a5ae0d1ee2e5f8406399b02f287f8a9fb5"
     },
     {
       "year": 2034,
@@ -526,14 +526,14 @@
     {
       "year": 2034,
       "hour": "terce",
-      "content": "67c486e94f3075ed4d750cb711b17b0bc297642ddce69ed205e913378a4ffcf3",
+      "content": "cc65649519b7e74f3b84bdd4a076bad79839842fcdd1d498d47247555f69edeb",
       "sources": "556ddaff922b6b3f1d4c25b17fda52a76734a2025f87fcdc5540769fb2cc3c92",
       "decisions": "3d6628ba890317d3be7a60f24ebf0a398514364cb0c9c26fb9e5a564214e8260"
     },
     {
       "year": 2034,
       "hour": "sext",
-      "content": "297c15d39db7795b82d4f87ba778fc1421efcf3552d42fc8e0f4c2008e46f339",
+      "content": "7acfa46308140dbd0f3aae2211d08def18c0ae48c9224e0bcce90519388486b0",
       "sources": "216b7d5f70e437cde65f3d7ef379c7471f7b0d4b34e45649af6b9485ec604972",
       "decisions": "3d6628ba890317d3be7a60f24ebf0a398514364cb0c9c26fb9e5a564214e8260"
     },
@@ -541,15 +541,15 @@
       "year": 2034,
       "hour": "none",
       "content": "409d7689c18a090e0bbce874c050c458b7b9277d86d1b30b1493e4cd3797a9cc",
-      "sources": "421b5bc351b19208ae485856d0add38ac008d2efb3939965b8f79038abd70b58",
+      "sources": "4d7dbbe8dd2cfaea1c7085c76241bf304e83c98d45786da53fdffc4f5167e2f1",
       "decisions": "3d6628ba890317d3be7a60f24ebf0a398514364cb0c9c26fb9e5a564214e8260"
     },
     {
       "year": 2034,
       "hour": "vespers",
-      "content": "1e00f2afe7a92574f0e9c19db3c099ad83c28ddf3b47cd04fa28c26232c58b5b",
-      "sources": "24dfc9fb1bb39f7b41dd979f292e411a8c63aadb36278ab28167428a9f425eec",
-      "decisions": "fc9712f1fcd731c88893058242e55ab844eb9e305026f692cf13193c8c7623e7"
+      "content": "95d9af8325b799e66838479d81ea8284e1f17526d9df442939af14bbcd3a4196",
+      "sources": "74275bc6e23a03e6eb8a74bc776d684502ecdc4a572a02934eed1a36465bb2d3",
+      "decisions": "1e1ec9371bd7dff01df863c1d0079855aa2257076ab0ebf8d9a21e6ab204585d"
     },
     {
       "year": 2034,
@@ -561,9 +561,9 @@
     {
       "year": 2035,
       "hour": "lauds",
-      "content": "6702bf77e29e81b1628893679e03bea701686bee59a572cb403506f95e2340ca",
-      "sources": "3afc1b4c6cefa64e9b0eeb7d914782a52f7f1efa0dbae4479a448f2755d385f2",
-      "decisions": "820e6d0cd7f681d766433a8c9c6e724f7598656eb65dfb8f524614d8a8f68369"
+      "content": "aad139ef7c41c6d446a079fe487440b10b0b107f7bebd871f447a2fa0529b945",
+      "sources": "54f493f375a88e07011482064d5bc317a7af0dab977b92345d44f91b94b84e8a",
+      "decisions": "b7db3457757a94638f86ff85fd4f555924be2958553ebd7ced5cfb7d7d89e555"
     },
     {
       "year": 2035,
@@ -575,14 +575,14 @@
     {
       "year": 2035,
       "hour": "terce",
-      "content": "93f8c87f42e1a3c4bfb56dc2bd5521d8589dc95255e3cd32908edeaab8c50908",
+      "content": "65241a00f0730897f56295423769d5b0f4242e1493dc5bb55e52601c463af952",
       "sources": "adfc874fe851ef131e2855afb9462846be8cb69c45a7bcb5c5c1a4c9fd62b062",
       "decisions": "14854c49d84c68ec4addbf854299e94a9693b78a6f264a35e43a7696e14c9018"
     },
     {
       "year": 2035,
       "hour": "sext",
-      "content": "e1cfd8fc3fa4884fe0871e4b1bae248ca00df04dc11de5477dc3cf79ec6c0468",
+      "content": "96e6abc77ac001f8f9cf56c1d9f51d4169477a1d99a277dd5c7cfb0ad3184940",
       "sources": "ffcf0ff92d837675769c54ddc29e71374884ce7a519485f7641362b62446a14c",
       "decisions": "14854c49d84c68ec4addbf854299e94a9693b78a6f264a35e43a7696e14c9018"
     },
@@ -590,15 +590,15 @@
       "year": 2035,
       "hour": "none",
       "content": "c74b7d66349618eb84ce0f5ffc6b851fc58bff529248253d33022bd47cfb5555",
-      "sources": "9dd0093f90a59ff8c3329ade69ea25911888a5ebc598a856d27722e8d705f3d3",
+      "sources": "eddbd425dd655e5db515903afcd41c9ec36c7a632eda04a558d01518476c4d8d",
       "decisions": "14854c49d84c68ec4addbf854299e94a9693b78a6f264a35e43a7696e14c9018"
     },
     {
       "year": 2035,
       "hour": "vespers",
-      "content": "b14e76dfc44d1fbb5cc7841a62c1fb988a9f1ac9952b3a3ea8633c067a4c28e7",
-      "sources": "8ae3f963faa9575a4da622c215ee4b71136c217fbb96eb1f1cb194345b9dc851",
-      "decisions": "9bf169a43ee331b98feb2d8d58eca5d1d9c2c5d7784e03265ef841a2d6526703"
+      "content": "3f7a409b709090a48f0e26e7c6c1bb25a037b88aa7614662b10f6805dacfffa3",
+      "sources": "419fd53575cbd898973172d75b5c40bcb6fcf942e4a7c9d5b4e786c257ec0563",
+      "decisions": "838491d0bae4cb950ad10cee70382ed44e8e04405897896d054c4bed34dc5961"
     },
     {
       "year": 2035,
@@ -610,9 +610,9 @@
     {
       "year": 2036,
       "hour": "lauds",
-      "content": "5f549fb7aaf01e649593bca94cd09d0069d3c54a2260d050fe1e97da40a0c99c",
-      "sources": "6d309a9578bde2a2911b392e7c02c997ac75eb63ee11771638bc10e64d9d7730",
-      "decisions": "4081f7d10c9777924c7cf027b31f6d774837325f44092fbc1ad3f47f4bd0f80b"
+      "content": "0f103fdf16782cb5833959b81dcc2f6c03f8866a2f03245cf8234a500d64a1c5",
+      "sources": "108bdb357f5ce0fa528cb880f1be1363934716440e8c92866cb29004e1e2c2e9",
+      "decisions": "4f41a2e2e30281d574b7f57b1b6f0a9deb0c8ca554cda09a80da1c3b1ff99c67"
     },
     {
       "year": 2036,
@@ -645,9 +645,9 @@
     {
       "year": 2036,
       "hour": "vespers",
-      "content": "58c046c4197025ffafcd050cb212dc49b872a206a8ab9a99c41c49595c6f1e68",
-      "sources": "8fa1e232263d8e25fa8fe1143ae93f1b129f5386cf46c6812df1b96a7c754409",
-      "decisions": "a392ed649dc6f35ed995e29c6fd7c3ee994d1613cb8963a523d8a977bfc7418d"
+      "content": "d81def80feacf1e0eec745286190adc7807fbf0efb07c44708f6893d8df4f209",
+      "sources": "b653febb93b2052e40236ff571882975ed7c7d35fe32eead98d0173290b240bd",
+      "decisions": "e8e885a7bd0776f7250bf52ecfd351b8960868a251bd3a944fb23a0b9a5b49b1"
     },
     {
       "year": 2036,
@@ -659,9 +659,9 @@
     {
       "year": 2037,
       "hour": "lauds",
-      "content": "06de07e255b6559bb5179808fe33230a72a33c083ec64defd715b27513b8e78d",
-      "sources": "88bf63c44c5e32b3bd8e6b30079e1253f95fde924dcfe7d2b21944c3b01209f6",
-      "decisions": "3cbf706b353cf0393b62e9c059a615878d01d8110700a01b4edf80fa71e38eff"
+      "content": "beec4affe4c10a26d2d927cad763fe89d649b2c90f4150154f939a75e0772cd6",
+      "sources": "2d54e59d27956f3ce08f2abb3c5d3ea67f2c1148581a9f69b7cabf99167d64f7",
+      "decisions": "f09fdfb87d55eda92882e6d30b8314b46d4ec020fd09102ec4dcf0ea95e43a10"
     },
     {
       "year": 2037,
@@ -673,14 +673,14 @@
     {
       "year": 2037,
       "hour": "terce",
-      "content": "95796939b0a548639cba3818afde7765d7cc72750aee86337ab5ed2746d8b03e",
+      "content": "d79764b5457d077d264b5546cb071ce2430be5c2d2c95a535c69a31d1a21c0ae",
       "sources": "b7d767dc458309c8bb86cd5a43a52870f93a88ef0129ad0e44f686b6c4c49adb",
       "decisions": "ee3294b2e385cf0c903bfd47828f27e9a6fc5ff5a347d50f33b5a66df103be80"
     },
     {
       "year": 2037,
       "hour": "sext",
-      "content": "ff9446f57e4ae9521b8ed129bad2bc31ae34e85a6ae1949c4204859d40bf431b",
+      "content": "a312fd2f3520cba7cb1565188fc32926e3fbf6d8614fdd606e894203a95061b5",
       "sources": "64a6b2d696aec4765220e648d177d2248c3dde0e0f7267a45628b1512d485b87",
       "decisions": "ee3294b2e385cf0c903bfd47828f27e9a6fc5ff5a347d50f33b5a66df103be80"
     },
@@ -688,15 +688,15 @@
       "year": 2037,
       "hour": "none",
       "content": "3bf99155387006686aaab871258d08459096f0b41f1fc081254e21d1f60b5979",
-      "sources": "d16c33e3eb63fec21fce415dbd623d921719353c15a73796cd256ca86d61ee69",
+      "sources": "fd4686fdc01d425948f13869d5eba87755a37b6431d043a478e5d783daf849a2",
       "decisions": "ee3294b2e385cf0c903bfd47828f27e9a6fc5ff5a347d50f33b5a66df103be80"
     },
     {
       "year": 2037,
       "hour": "vespers",
-      "content": "54c44ab31272d13f327ec2cbaba1c6fe3618d4d0b181d315bd22e3853da5daf4",
-      "sources": "5b2ebff8ca8f43215d0ba0cd55038ffd1d559aba273406da3e1678271e592f9f",
-      "decisions": "3cb3b1b814d2ea4bab7d79dd3ede6ad3821f6b321c6a5f110fd08aaf362b2326"
+      "content": "769e7650db4b4ddfb1f594bf9d3f4b5e24a95e2f2df631ff2b7798b619b8605b",
+      "sources": "23511b81604a4c6081c9bbb5307c74fe7c836463b5af5aac9d8e312765308a98",
+      "decisions": "b2c44111eaf97cf1dddf68ca2ea22429e3b85219051c4f12a41bf1a29d6ace5c"
     },
     {
       "year": 2037,
@@ -708,9 +708,9 @@
     {
       "year": 2038,
       "hour": "lauds",
-      "content": "9a149d9199e6ccaee7977f97338ec2123db77cf1911bb6896d13aef3a972f1ee",
-      "sources": "fa8a676d81caf22acf130c90c4ae1fc43762a870c3dff7cf816bd4c890f7a379",
-      "decisions": "3c8f56802557b393bc2afe5c8657065b134897bbe513ad54e644b7e757c26112"
+      "content": "cd74b6529ade0b71a513c2129a22fc62bc2561aae590dc041b832da37b7859d2",
+      "sources": "66f28c4431dd1602b7b7d06d1aea0201afa378f9b9f1a1e56e632291e7f05d51",
+      "decisions": "00bcbf9e508d731fa072b8bdec8ebc07b940b9ef84a05058fd037e5289bc767f"
     },
     {
       "year": 2038,
@@ -722,14 +722,14 @@
     {
       "year": 2038,
       "hour": "terce",
-      "content": "5744a9ae6f822e1b4da4e13fdae17cc3df2b23beb50ce038a43b5eb85efea776",
+      "content": "2de5841387daf1691fe197d67366d79d84e89f7cbaeec90f394a1bb7e2d71220",
       "sources": "b7bcc02d9691da4090738d84883f075eea6952955d4a20a2e9ad8e6b5f478b36",
       "decisions": "a883c7c4b5615df7eb55aa2237de0fce4206ebe6e065adf1f0f5a409e049ec20"
     },
     {
       "year": 2038,
       "hour": "sext",
-      "content": "88d947a4005fa59be9a7bc45c329abfa9627b421f45962cac58d712737ef7fb9",
+      "content": "d3674052cd4afd9549d2095bb559ab0d8659f347e09b149773f506785fc0e671",
       "sources": "64538a6a219fa381656c8ad60b5ef12d908adbd0446f42780ac4a80385b78d8c",
       "decisions": "a883c7c4b5615df7eb55aa2237de0fce4206ebe6e065adf1f0f5a409e049ec20"
     },
@@ -737,15 +737,15 @@
       "year": 2038,
       "hour": "none",
       "content": "3d9f842a22381d5c7d4ff8cd12ce7514fe6b08c013e07e1955c25f273198f869",
-      "sources": "e7d6839bf8d0dd9444b9a6075b1909f79de020de0e154b7cda506ca3824575c9",
+      "sources": "25f34f3c310c2883ec7dca369c9c8ed6a96419146ba367d4117bc6d938058b3f",
       "decisions": "a883c7c4b5615df7eb55aa2237de0fce4206ebe6e065adf1f0f5a409e049ec20"
     },
     {
       "year": 2038,
       "hour": "vespers",
-      "content": "5d9d080356e18115f9a59c14cb831bc77642cd180c9b6fec222dc70b4578a64c",
-      "sources": "8843ae4b7b2f8599e10ac08ec167192d0202afcfa5736bafa2df9769bb3eb66d",
-      "decisions": "6945833402804b2b77647a202d601d5f131c333fa4174f412fe14e60a0278d95"
+      "content": "ab8a7419ed3a7e3c3d45b60f73e7a24bc51681a3f90d34ce1b7bd5c775b3f65a",
+      "sources": "6ee9965b15a12571b4cb0defa9fdade6b44c01476c775f73d91aced047b2a688",
+      "decisions": "27cc4df460b25180f277606943c0e339a331510a561fdcd1e02c3c96d8e32d02"
     },
     {
       "year": 2038,
@@ -757,9 +757,9 @@
     {
       "year": 2039,
       "hour": "lauds",
-      "content": "678dab15c20a9c1812faa4fa92330952e75730228e247cf3277ccf26a1bd3072",
-      "sources": "16144008b81b3862c781f29b51a08001795651c286383d7eaf16a2b9c1caeea5",
-      "decisions": "b4efdec4d410a197f3dc9cd935005199a757c692866898b2e2aa9a2c1d58771b"
+      "content": "dc116a6bcb8ae7a2d42f82817b958e512c32021c901aa80e480299956b0f4b27",
+      "sources": "a17e6325ec4a1f4b19cd5749b9666bb6ecde462a47b7821fee07f3c1017be1c9",
+      "decisions": "9271b0f66c0caf10da62091be82e30d523dcb7553b1379b778c662daaf99d6a1"
     },
     {
       "year": 2039,
@@ -771,14 +771,14 @@
     {
       "year": 2039,
       "hour": "terce",
-      "content": "26400324e6dfc132eb58df21ede91d7c069b8287a143215d699d619a4e24f8a2",
+      "content": "b86332fb4724fed06b0820bcf933e1fe16173cad278200c20d2deda3860552bb",
       "sources": "6015561cdb922694de26e3fd3ae7eaf218eb16c7b616423735b6ceae33d954cc",
       "decisions": "001988fbc8dcd213d2827d658397692544327e19affd244e435e45d05d2ead4c"
     },
     {
       "year": 2039,
       "hour": "sext",
-      "content": "693ac73072df9f9001fca927eb7c0edc73c908f54b082816f02aecc8327460f2",
+      "content": "bb53fa53543c864a518954f9dca4ea089c7ea5759d6b43c766a50dccc5a88f10",
       "sources": "3f6341db03294344cf805f8569fcc1e5c85dae975400dda826a618a529bd08b3",
       "decisions": "001988fbc8dcd213d2827d658397692544327e19affd244e435e45d05d2ead4c"
     },
@@ -786,15 +786,15 @@
       "year": 2039,
       "hour": "none",
       "content": "235f1a5dfc1f95d1a3600b5a9cbda2633cb65f4aced6d5d19058445e622d118c",
-      "sources": "d5ea494fbfa4f9a39b9ee361b0f292dc513c3d8d31110282c4fb79a47f067314",
+      "sources": "af8ef22138dc770b7ecc6815df7df5202dadff1850937b0401125c1dfea34281",
       "decisions": "001988fbc8dcd213d2827d658397692544327e19affd244e435e45d05d2ead4c"
     },
     {
       "year": 2039,
       "hour": "vespers",
-      "content": "a980f90dd5acefb0e74ca34d4dc80889678af3311fee407478258f6c213577df",
-      "sources": "eee2d5eda73399c774db34cbd0d73b20fdb1df832a8a46b393dc50ca07b849de",
-      "decisions": "976a3013636ad713c61f1f3193fb95bd81e74a3b47c3822c66d99ae871f983ef"
+      "content": "ca93f64ffa68671e86ef0788feb30d9c4ff1b0708b447f29025e2b42ddab4857",
+      "sources": "6cdb059cbaca9ca10135a0de8ba9b09d3ab12e52892c950891d84253f4aebf93",
+      "decisions": "b2c72ca250253544a5e334b93935c983d25ee36e1610024eae092663bc800121"
     },
     {
       "year": 2039,
@@ -806,9 +806,9 @@
     {
       "year": 2040,
       "hour": "lauds",
-      "content": "598872ff0e38c3ed524321b673b63baeeaaaf7f982e3dd8936f89f996a2826e9",
-      "sources": "8798fbc0aace97320bee48e7e838821526455256978d6ed811628e093c44cf32",
-      "decisions": "1ca0d7ea3a0fc2481fe0dc9839af175ce5f81cc698a2277fd7c988c74c97b552"
+      "content": "f153e21f609155079951082088e8dd00f22b900b7043f7439c9c385beeb14da4",
+      "sources": "fa1f35326b20a0825fae82c8fc473f808f1a42967602efc51b51889d0f30b410",
+      "decisions": "1ce92b364548e8607c65a763e6d5d41bf554012958e42e05a29562823cbb7a2e"
     },
     {
       "year": 2040,
@@ -820,14 +820,14 @@
     {
       "year": 2040,
       "hour": "terce",
-      "content": "7133b28398fc4af009227a345162031cddf36fbf67ed5da6d5a0b1876acab632",
+      "content": "9f9fa8f4cae4e548c5087947d655c5fba565889a7351ad4063ea8ef87b115507",
       "sources": "67fd75d01a49643a6e03303b948ed115166bc783acb3603ea7c37538692e717a",
       "decisions": "c6b161c0282baf6e7593ce9a817b7a605c46fe89f7aed13888fa416906cb543c"
     },
     {
       "year": 2040,
       "hour": "sext",
-      "content": "651eee772a011a6075e06a1858c356965981648f5b31e34a287624d7e0ec6e7c",
+      "content": "a703d785c42bc0a77daa1fa100f7c81e4647b65ac2e2ae30e8c16910f2080f06",
       "sources": "8e688125139a91536fa8eba9f3c7c062d17beb98867cfb038deee9ff4bcfc807",
       "decisions": "c6b161c0282baf6e7593ce9a817b7a605c46fe89f7aed13888fa416906cb543c"
     },
@@ -835,15 +835,15 @@
       "year": 2040,
       "hour": "none",
       "content": "839c8f5f7b0cf013f444aa832429b4fbac9735f56d2249cff6c0b9f536ae438e",
-      "sources": "5d68fc23d4f40035f894519b6a4c1cf666cdac77791dd8374aa81d37106d2df7",
+      "sources": "e428a60cc5e9644cb909278ad4847aeedb4cf24363a9da4b97d23ec913542cff",
       "decisions": "c6b161c0282baf6e7593ce9a817b7a605c46fe89f7aed13888fa416906cb543c"
     },
     {
       "year": 2040,
       "hour": "vespers",
-      "content": "1544b3cdcaca57e0111899b8d270ab002c283f617bd6e1ec4977b66808f02a2e",
-      "sources": "50120d6f016ccc364ee77885a910d4122ab4faf5ad9aa966c25fcecdc2ec89b2",
-      "decisions": "c97bd8197e13b041dd27f40650a652abc567be1d92388a3068302350c1e2dbd9"
+      "content": "42bd2077fc443955d89a754ec8dc3eb811d949fcd29bf5d5744f3e75b0beb4f9",
+      "sources": "95eb5f2a8544236958cb72a041af88bdaa795d1271a8d8c8aa75b826ef7a8605",
+      "decisions": "98c02d5d03f786c97aa88e0e9b2b7642a7fff421d37fc6c55e54a911889599b8"
     },
     {
       "year": 2040,
@@ -855,9 +855,9 @@
     {
       "year": 2041,
       "hour": "lauds",
-      "content": "088cb381d1853e6b88a40c53ebd82abad3757ac72620ace5e750b6aebc7a67c6",
-      "sources": "d0786b773995256863c264118be22a92611a70b040903cc3888f6516c831e04f",
-      "decisions": "49609a7cc01fd9dbb87488499d907233d9802225b4685fc9de210057f73171c3"
+      "content": "b25fb2eb7b49add9bf4d560daf331cf89d2f9e4f56e392ce11a44753e5ffee31",
+      "sources": "9470598bebab89b073ec596b5a9bfffb248ffe9cbf6c81779ee8b84ab52b5510",
+      "decisions": "84afa67a6be83c5260a280d04cfcd3c70192b59d3ab76eaf9e2fb56e8377d92b"
     },
     {
       "year": 2041,
@@ -869,14 +869,14 @@
     {
       "year": 2041,
       "hour": "terce",
-      "content": "67f9f12ca9ff6470406586367c28002f9d51ddc5dc27d27e0c02c2065aa34a23",
+      "content": "30b647782493cf20487db493f5b1c4e567c51dcd4ca80536d0beba5af5a6bf47",
       "sources": "ae46933dad75a41664f9ccb51c2c76b9c9b46ad8fc69ac6a3aa96a35aabc60d8",
       "decisions": "49cd9504a1558ce699f14821fb0b5eee33b8d9ee04e8081044bb52e997ca16bd"
     },
     {
       "year": 2041,
       "hour": "sext",
-      "content": "ba49420ed95c6a63ca56a6a8d94c51d430569c687c68c80e44f529a17539f321",
+      "content": "727fe5054e744e1922bbda64465b015c7f8939b03089e86ac67050d5159e11a5",
       "sources": "fb16cf690c52fb4f01ca7bd4f92d238c1953c1b520a25fadcd6bbc47e577bbdc",
       "decisions": "49cd9504a1558ce699f14821fb0b5eee33b8d9ee04e8081044bb52e997ca16bd"
     },
@@ -884,7 +884,7 @@
       "year": 2041,
       "hour": "none",
       "content": "137a733bdeddcfa1102c77d30d6f8c8256a8667327f75707e8f2fd57310f559b",
-      "sources": "4fe3d45888b6a24b5b529cca758bb6a92055651f3340334cfa9e2796f210feb9",
+      "sources": "c8c8b6cbad89082eae73188600da5daeb7ce9c103c9ab38a404cd795395c298e",
       "decisions": "49cd9504a1558ce699f14821fb0b5eee33b8d9ee04e8081044bb52e997ca16bd"
     },
     {
@@ -892,7 +892,7 @@
       "hour": "vespers",
       "content": "f5ba674dccd3e73d9be1c8b23b015244878028c2b98cddb1487e94f1e5215ab4",
       "sources": "1238a8744fed1f6cdacbfb43d4e9acbfaef962d4cf7294445a69e326ce158002",
-      "decisions": "e390ac933fb233edaee8da610a125cbfd351463fbd52496211b514c3ca48b11a"
+      "decisions": "504c67749f31a7c0d3fa25f1861b4a361cd44c933c8db92ce3140ee1352ae57b"
     },
     {
       "year": 2041,
@@ -904,9 +904,9 @@
     {
       "year": 2042,
       "hour": "lauds",
-      "content": "59843e538190a186c6b8b90526942b53270adee53b290ee97a15560fbd5500bb",
-      "sources": "a48f4edaf0fc7cbd117042d4bfc70189e99f6c7752421d22d1f4ed12cc1f0120",
-      "decisions": "3ebfd7f6edc01dad62086098e44197d71eb3ffa6719aa802284e4075ea839fc9"
+      "content": "fdd458997da900fd359ebcdb8d26502481cec38e6a06c89d4273c321d6723884",
+      "sources": "c533cae64cd45a33c8e9d933e32da2929d117580eb648d39e757c61c08df3e74",
+      "decisions": "f3232a789e8c973ea24f274211049e6794ed15725c540c41eb2ba88aed100eed"
     },
     {
       "year": 2042,
@@ -939,9 +939,9 @@
     {
       "year": 2042,
       "hour": "vespers",
-      "content": "a60596b38b369514228a05dc49c7fedf3b6f5710498db67910b72fcc724c1676",
-      "sources": "ac3173f47a8bcee1460785a16af685cfb82ddd8225aab45cac0757e2be2ad755",
-      "decisions": "34102ba39a551101ee03600cec70bac9c21378adff32b3dd99b03881c9b7a07b"
+      "content": "27fc6314eefbbabddbdbc4580e3bb4e9da7c4fa66952ba6ffd33740d5176f400",
+      "sources": "1b356badc2ce7edf3cf2843b05817b08edc5f61ca3b1fedac564ee0fc32009c8",
+      "decisions": "dd3ff40b22d51b7fd58a443fdb3d787782e5198073febd6800738ab05387b175"
     },
     {
       "year": 2042,
@@ -953,9 +953,9 @@
     {
       "year": 2043,
       "hour": "lauds",
-      "content": "4512ef0fbdaea36dac6a9a00ce581773b7e115d73a836181a678bb5c720a4bd3",
-      "sources": "fbb62cf5949e2560a39d534291263bb7dc977b37435c07eb418155e2d2e53af7",
-      "decisions": "849eb4353b4fc48141c9e61ab09db4a7065ac102d4fba0eb5cc0c08a87bc023f"
+      "content": "9cce280b37e171a37f4af224027272157002c80fa2e1976311ff0c5fed29d896",
+      "sources": "8bd92d4355409820b6cf495a7854e895a337d5213893af7f486b9897b5dc8956",
+      "decisions": "78a03b92c7bf59f64782befd85642ad92496320493904c472d3f1fd24e9fd7de"
     },
     {
       "year": 2043,
@@ -967,14 +967,14 @@
     {
       "year": 2043,
       "hour": "terce",
-      "content": "a662bf0f6d04c9492039a9fb269a727652cee2001151b1e350f92dd16b405302",
+      "content": "bb16257fa89c69a72a0a030811111edbb8c673e7cd8d5c2df7ff6c2813679f4e",
       "sources": "125b7a02a3afbeed57aa33739bbd64f33180fa52d82e3422de0bb6998df2f889",
       "decisions": "049900654abd886e25d8c007c6bf0e587a2b7e2a50e79ae3da0c76f317b58b97"
     },
     {
       "year": 2043,
       "hour": "sext",
-      "content": "e2b374fd26ddbc09cd95fc6b2ccd16b0db11b47bf53c8cee682cc2a2dc64ebed",
+      "content": "570f3b8d17a7c46cf9728906e3b58dff3fe7ed72a61cbec7182de723bc4a3dc5",
       "sources": "c3a8e9b0d2d019474f9041ebd51913d3c311dace5091e425267d19f915781e99",
       "decisions": "049900654abd886e25d8c007c6bf0e587a2b7e2a50e79ae3da0c76f317b58b97"
     },
@@ -982,15 +982,15 @@
       "year": 2043,
       "hour": "none",
       "content": "eda6b93a243444f1473b74951e49177dc588e0f5b34bcd472255c556e516e77c",
-      "sources": "a399c34f06d77146e118072bcf7c144fc9fdf2488e51db03b5c5eb23f0b64846",
+      "sources": "abce687986d7bfc1a0436bdb84fe6a84dd828e2260078cb5d168ec26a0295da7",
       "decisions": "049900654abd886e25d8c007c6bf0e587a2b7e2a50e79ae3da0c76f317b58b97"
     },
     {
       "year": 2043,
       "hour": "vespers",
-      "content": "69a12300a3f3f2e4e7eb56b27e8b3016201f5ab3483eb3c7ef816269f2dc9960",
-      "sources": "0716383bd627a912ff49acd7849b17c46fe7ff07ae95d40d3db0bf0971b57192",
-      "decisions": "df0e1b544d56314ab8cea70fb0a287ecff84070bd3635f06d97eff69b4c500fd"
+      "content": "71e13a7ad4c17b3af09d5c1d977ede3d6229f72bf3c1d0d15e55a3b299650d1a",
+      "sources": "9799a493a405aef5a4575d47275d6406e3f6933abae30841c76a97a605e0a7cf",
+      "decisions": "7d8b279d6608696f8d6ffbbe777327357f7bf4ca6d70641ca2a326d1b6a07a3d"
     },
     {
       "year": 2043,
@@ -1002,9 +1002,9 @@
     {
       "year": 2044,
       "hour": "lauds",
-      "content": "1d85199b7831fdf014ae568507cba3c13476ff8b0f9787709c213041029804ce",
-      "sources": "c3c43e545dfd4f1e257809bef8b278ac3dad048c6526f8c8de92e5352b46e06c",
-      "decisions": "033263843dac3bc09b4ccbf5bd3fc1c771059ee28d82ea97a71c2cbe1500b789"
+      "content": "8b1d41a4ce2b0ab3c7d8d6c81d83fdc80dff53dc63f7448f79f2e37db1f1eb60",
+      "sources": "d1ca9a5f8431a04a0cf9299c53d1aea1f3d9d2807920896d465da63d6b0d5e82",
+      "decisions": "21eb815f5fff47250e71085797a5a541e314ff2fe26654ae29379d23907dde62"
     },
     {
       "year": 2044,
@@ -1016,14 +1016,14 @@
     {
       "year": 2044,
       "hour": "terce",
-      "content": "7a0207a1ed3e67936a5129319e2d0e5d918193c3e290a66f2e76bf2b9fbc9433",
+      "content": "19a20fde69f498e585ab8d72fcd7ed4fce76b2099bfe766b2429b8e6aace3049",
       "sources": "f36c50c93db0e45292d3452e9d603e785365d0747b1a353c389539bbb22dddf2",
       "decisions": "d47eb7110bfffce0bbfea0a3da014e1a1aef785779449b931b79ddca98d045c9"
     },
     {
       "year": 2044,
       "hour": "sext",
-      "content": "960b10db1e10309f03ca4e63d1225ae52d69682bd53fa4e08940297546f9ba6e",
+      "content": "bcd509510c5d0557e1f3b144077e2fa59b93be4544ebf57762f49a9440cbd6aa",
       "sources": "52c03e04801002ed198aa2c8dea7a36604cb10d3222ff56f2137820ae57805f7",
       "decisions": "d47eb7110bfffce0bbfea0a3da014e1a1aef785779449b931b79ddca98d045c9"
     },
@@ -1031,15 +1031,15 @@
       "year": 2044,
       "hour": "none",
       "content": "d1e2b0e58316d3a6beda77d09fa058055b795bbbcc422898c47228e47a1ac5d7",
-      "sources": "6d6aed5190c56b134ad1a092f56e898cb5ae693330512ad4422d5092dced05a7",
+      "sources": "a6aedd2b8e235a9a7ccf8942da45a81b726bd9a249bf0d1d37bc9758271effb4",
       "decisions": "d47eb7110bfffce0bbfea0a3da014e1a1aef785779449b931b79ddca98d045c9"
     },
     {
       "year": 2044,
       "hour": "vespers",
-      "content": "6907e3942ba88f52f3041aae311832e5ab80a877bf9835ce47d10884b321e7ac",
-      "sources": "1d87da8149e29ad697aafa7cc179716a8ec2c6d929824f35f985e581e31a9055",
-      "decisions": "a6640962fe9e7ff75b9e316ff0201266ffe7142055b85f062cae1c4f57bcd34a"
+      "content": "54970a9e3dabffddf5c73452b074cefd2b7256b1e11258ce51c62244c425d52a",
+      "sources": "c0ff01695ae0d18faf945a2c300f9dc1099426c22accd6bdf1c53acae4737a90",
+      "decisions": "11dc5069b1d72ad0ad5456b9a7a5b7171876c538ff209e43b67a26c43e0cf68f"
     },
     {
       "year": 2044,
@@ -1051,9 +1051,9 @@
     {
       "year": 2045,
       "hour": "lauds",
-      "content": "91e8ccad7a24106bc1ea9a4f08403c96daeaf81e9dfa82be769bd7668a19da81",
-      "sources": "d98a95c95c04387b8a86df5c43d2648514f982b4f36582bb92788eb4332e1469",
-      "decisions": "d701ea4f80931e175d0639fd3445cfe1929820d665e418810c50f5f9232e60a4"
+      "content": "0815409525aefd68aea2d1a851ebaff822bf94a23776d2a6e21ea3cc87821006",
+      "sources": "c81eb069e048bf44198a6d344c3ad199aa4a7a02d45c7c0fa21e9027ad57d247",
+      "decisions": "cb8f17615249049baf2ac91e76e1a2a315af11cf7ee473af56cfc222c401dfee"
     },
     {
       "year": 2045,
@@ -1065,14 +1065,14 @@
     {
       "year": 2045,
       "hour": "terce",
-      "content": "c423e54298edb51e813f64b7f9f3608dcf2cc515afaaf59ab4f07d5a18200a8d",
+      "content": "a128c875fba8a86aba9531bcb3d794dc613c2a019d709966a9cca0e863015513",
       "sources": "5c4907fb28429ec6ec4837b96d3973bd922ca4cb26c033269e8559be35a1003c",
       "decisions": "7efbd1cfc9173b44b4959cb62b5f9134ec369fd837ec20ce1abbe869c3c049ff"
     },
     {
       "year": 2045,
       "hour": "sext",
-      "content": "56b0b8824f90b120dafbde3295155e635eef948168aed5d56119e207486395a2",
+      "content": "b8bb65bedd889ff96fd46673ef7a64977c06f9c507664f74687f617fbf3aa0e3",
       "sources": "9a2cecdfcaaeb01a07fffca0695b417369e681fcff42afc944257ed5b2ec6fee",
       "decisions": "7efbd1cfc9173b44b4959cb62b5f9134ec369fd837ec20ce1abbe869c3c049ff"
     },
@@ -1080,15 +1080,15 @@
       "year": 2045,
       "hour": "none",
       "content": "7940b1568b504d2fb7a4ed80c0b02b9e9acaa5af04e3cb72e46a38a69e7f48aa",
-      "sources": "4469d5270775634169e9b21f527b7fa7eb4c29c29b536bdfcce1df108a33cbb0",
+      "sources": "dd19a27a96321cb44814271a6b3fa3865c530eb9de9cc572e0984bc94f02ec7d",
       "decisions": "7efbd1cfc9173b44b4959cb62b5f9134ec369fd837ec20ce1abbe869c3c049ff"
     },
     {
       "year": 2045,
       "hour": "vespers",
-      "content": "d87059b9d5032a432cf1dda589493b0b06614618c292825e86f4fdf161f2621a",
-      "sources": "f1a1a4e84b5ebac949325b4dc9ea4ab31cd678a462a9bcd32eaf7ffde299e071",
-      "decisions": "f13159969e6cbe233edb7c6fa8f000779f793660f5abfb759e648e76bdda7f65"
+      "content": "8e09a38172ded7de9c745231c33fb3aaa2654bf38dcb512b75a37e8c84949da8",
+      "sources": "d08dcd95b2e6122d5b3f1bf9061777e9def84514638f97e7cff08d199ab5d4d5",
+      "decisions": "8b5b8e597b7759fc80c948d7283f563ca22ca1237ad0880e271ba8f608c48a71"
     },
     {
       "year": 2045,
@@ -1100,9 +1100,9 @@
     {
       "year": 2046,
       "hour": "lauds",
-      "content": "07de8caee036c4a47948b5fdcd1850eba6d4e4f50d21b55d32cc9fdcf2180767",
-      "sources": "3b6240af24b0a669e9541750516a26be014523dd219fb90002461e335889e864",
-      "decisions": "7001995fea0c0a44d76abbd98231af3abf6dd6fdab16c4a47b7fd24262bf3a61"
+      "content": "35b67ba3d718565adeaa8e3bae524cb2159970438223e89517f6809747d8a328",
+      "sources": "459ae4e252bab19746e302c6226e74897134f5f83091799b2c439e2ebe2ade79",
+      "decisions": "3dc8aa385eb8c0f8afdd07ec9b76f35123286f89355948dae1debee1070507d5"
     },
     {
       "year": 2046,
@@ -1114,14 +1114,14 @@
     {
       "year": 2046,
       "hour": "terce",
-      "content": "06c7cc87a8e13429d60d993fbd0f6969519eed2d400f601bc7de7a1f6ee01234",
+      "content": "9f9903f04579da97549ab195ee7f437c5fe05ba0a32f71247894231e4f22f8f9",
       "sources": "7e32981dc3d3f92b8da45a2c4405171985aa560682705689564333f122dfe240",
       "decisions": "d426e89b4b169aebddc75b1b66b2ae521a3b7dd9a716215d43db546f060e5225"
     },
     {
       "year": 2046,
       "hour": "sext",
-      "content": "b70cac499b17ecedd52868e55dfdb599078ebffbe9fafcea92e2e38baa9713ed",
+      "content": "fe91a1d99378debb8f056417a476709dee4dfb3a70de8ac79ba3586f4bcc6ec1",
       "sources": "fb51c9000a748b38f473c307b1cd08aad7a2045d337a1dda49acc1e5ad322697",
       "decisions": "d426e89b4b169aebddc75b1b66b2ae521a3b7dd9a716215d43db546f060e5225"
     },
@@ -1129,15 +1129,15 @@
       "year": 2046,
       "hour": "none",
       "content": "48353fd10336282f76e307eb70114877b20fd81d213f7101f8e6c4f458f451a4",
-      "sources": "3027500d71d9bf1296d9b49582199e3489cc626313b51eb93363643d0dd5198a",
+      "sources": "5c39d60b3a7352a7c2863620348d61f756beba45a760ce69dfd6e9733085bbfd",
       "decisions": "d426e89b4b169aebddc75b1b66b2ae521a3b7dd9a716215d43db546f060e5225"
     },
     {
       "year": 2046,
       "hour": "vespers",
-      "content": "f197e71b503196d5dd62fd23ef7f5dba1c53000796563d0365887a9bd0f16cfb",
-      "sources": "99d6ffd35f31988b23c2a835673c265049eedd346b83cacb02eccdcab3655704",
-      "decisions": "1e2939c21ce3469928b17c23b2700f7c37e3b3334fedaa67796e1225179c59bf"
+      "content": "2132a2eca9d17ea72833262c5c7ccab976da7d49501d5b4d54bd6fed8117f50c",
+      "sources": "269b60ad42c275e7877c4668b2a4ea472881f99d5b8f0b7fb9685fa8eaa274d0",
+      "decisions": "cced50377710e3176e651fcb66b656aedad1e8b28e3acbf87565fd7b8deb43ac"
     },
     {
       "year": 2046,
@@ -1149,9 +1149,9 @@
     {
       "year": 2047,
       "hour": "lauds",
-      "content": "e1450b2acf06ed561b4e019b9695d25d6780502e42f62c7f0dea738b9c08b5b3",
-      "sources": "2b38e3d77891928621341383d16b61d6c9794dcef2fee26e58693685feebd73d",
-      "decisions": "cc5e65ef02e4dc59b16fc2d52bdcc2ab9941fc541972df04464ee7be71fc1772"
+      "content": "e9e279b6124002be71cf4a8e1f414bc4b3642801f524623acc07b4449f0f843e",
+      "sources": "4806299cac756b150743fbc1b24a2340b6ec12ac6d1c74154ff54c732a54ef59",
+      "decisions": "8705c9c3bb840e6e0ad76642c09e261d6d2ee7d3a76a67a40005147ee9bffe78"
     },
     {
       "year": 2047,
@@ -1163,14 +1163,14 @@
     {
       "year": 2047,
       "hour": "terce",
-      "content": "dac32a2d1da4a3500551e812afa5927aa419b8efc4ad7304325f8dded765ac3a",
+      "content": "c4cf0b36382d05761362e1ce4b64c3df07edb3e23a34dfa1ebcf85f44f701e1d",
       "sources": "1689d3daa51b4b7da0fabf469b1d4e2fa5262cf5df8e698bcf395d812e50fe84",
       "decisions": "c22b2bf2a6f2949ec0c6f12e24372a789ff0ce93af40948723d43ba15ac25d56"
     },
     {
       "year": 2047,
       "hour": "sext",
-      "content": "58a61175f426da6c5df9503125368d2ff08ebf37756ebae44469484060e9da82",
+      "content": "171f1da8f95928118cba7ed56848db94eefc42f6348c4a031165008a7d2aec8b",
       "sources": "10ca5d2bc7013a4eb69b03e1ce8902c240eaae07d095fe5cd95f483e28900e13",
       "decisions": "c22b2bf2a6f2949ec0c6f12e24372a789ff0ce93af40948723d43ba15ac25d56"
     },
@@ -1178,7 +1178,7 @@
       "year": 2047,
       "hour": "none",
       "content": "e37fdc086a08a34c15d824af087350e85bcff34baf96624ef41de833ab624df7",
-      "sources": "8b3a38c8fbbd51d6b1b6640ff5ed24ed0d1883b534dfc6e75d5108151596698c",
+      "sources": "71f0bb6a9e826869747dc30cfa72c12316f83b1e52ce36ffd77db0016f688959",
       "decisions": "c22b2bf2a6f2949ec0c6f12e24372a789ff0ce93af40948723d43ba15ac25d56"
     },
     {
@@ -1186,7 +1186,7 @@
       "hour": "vespers",
       "content": "3ab1002b96db6ccf7f68206ec707aaa4e890244b873cc9423c4f48b12fd0d329",
       "sources": "f593f6d6d9cdd33fa886b1d8b1dbd31d2f4f151e82fa4d98e433565f29de2bf0",
-      "decisions": "59d1e7d3c65e1d5cc6f4efcf75c69aeebacc94bbbd5d8cdb6dadd4d4fa31cccb"
+      "decisions": "ebfa1e94fc662ffefedad31a7c4b6273ed080536d6db3a6a2f72dd90227dbfd9"
     },
     {
       "year": 2047,
@@ -1198,9 +1198,9 @@
     {
       "year": 2048,
       "hour": "lauds",
-      "content": "44dde425e46049cbf4bb083b4b61c6ef4e89b60b81922da268bdc27b74dd8359",
-      "sources": "5fbf78560a5ab5c159e25c3e76a084345606ebb689be07e0f94fbc2b874c9dcf",
-      "decisions": "38192cf066689cbfed3f35e0798e84eea4f07a343edbf14fa8f2ca62a23ab2cf"
+      "content": "4f53ee2c1b7105ee5909f691d5989045ca35836ed0e605d0594d777637148a64",
+      "sources": "018eb1e027f78901be3bf757d3ffa65fcb1894dc431ab842be1d1406719ddf8f",
+      "decisions": "bdcd71dad22e586b56e2cf1b618f16c9d069ae367dd86a276cf8f2eb47388c33"
     },
     {
       "year": 2048,
@@ -1212,14 +1212,14 @@
     {
       "year": 2048,
       "hour": "terce",
-      "content": "a90fa12d191abb2c573ea7fbfded4534db4c6acd7b905f9dd238643788350b29",
+      "content": "01b6c8ac57a2e533c96c1f8a9e4204a5c21bd34b49f370d968b92a4149998549",
       "sources": "8b232866f735e687a2026b61db342af8eb247f66b898c535f386a212e823e656",
       "decisions": "2250e3292df959536a80159c24c690424476b99ed63b059f15a35e46064e602f"
     },
     {
       "year": 2048,
       "hour": "sext",
-      "content": "e843e4193a8b86fadb5eb3cf4dd8136dbbe5515c53ec122d682de7bc0e5644d9",
+      "content": "b1f8f7fd90b8bda710bdba6f9bd314514c01dc7a1e26819a63ba8674a98c3540",
       "sources": "3054c4ee56c0fa953fc87fc388798c2da846b02dd387c85cfd1bd6b952c0ae83",
       "decisions": "2250e3292df959536a80159c24c690424476b99ed63b059f15a35e46064e602f"
     },
@@ -1227,15 +1227,15 @@
       "year": 2048,
       "hour": "none",
       "content": "679521eaec8a0c294cdc0bde1861b79678dc062c0d8ab73d3a770c3a0ca3fdaa",
-      "sources": "eba50fafd1f67af1282a4cc1fc0315b536ca0c725383fe6afc4e22c86b8bcf2c",
+      "sources": "201f40ab6fd4bf74b1f83aa170b79b920504a12dc7f1661a79a42739c396edb4",
       "decisions": "2250e3292df959536a80159c24c690424476b99ed63b059f15a35e46064e602f"
     },
     {
       "year": 2048,
       "hour": "vespers",
-      "content": "a6f26896ec978d05e2952d61a28f0524a47fcab30a47e16eb9010704f9e0a117",
-      "sources": "8e83afedb17941ff207ac2d1af52ae4ad213b5a633d90c9fbc76cef874d2e339",
-      "decisions": "a0a5687a6d463c63f035361f8a805e024efd797a71e0552d10d448d77ef70542"
+      "content": "1865d0431cd598d17e91ec66cfe5b8431f371482a6acf70667ddf175e07358ed",
+      "sources": "ca498c86ff9161b56a05b12121edf0e6e10f41fc179ce41c645df907c39cd7f3",
+      "decisions": "6929438f0c782132289cb553baf7330b3af00b25bc6d29a565d1d70465dbb3e3"
     },
     {
       "year": 2048,
@@ -1247,9 +1247,9 @@
     {
       "year": 2049,
       "hour": "lauds",
-      "content": "137f68f2aaf2ba23cc3d57bd80937013f6879f86c6749c16c6aaf068d2ace325",
-      "sources": "5d0211ae7d5e5ff2211aa5372e28daf481e4b1d091d6fafdf440525422d59b4e",
-      "decisions": "db7886c1f68222bbab32274f1d0eebd75a994dd459b913f7574398cbe7f3b827"
+      "content": "a072b6cbb181f5f290f66793c66b52e307320e4828ff8821c251d17a129726dd",
+      "sources": "17559d8b8701a6b5e67c036bb8b3e92c50e84489d41ae83b79b3dc6606c71246",
+      "decisions": "e42ae95df1d588fb9f7aeb720939fde770b2f8191042de39a5d65683fa7e0c25"
     },
     {
       "year": 2049,
@@ -1261,14 +1261,14 @@
     {
       "year": 2049,
       "hour": "terce",
-      "content": "7542d9dcf406a8ae82a5b52722499d65bbd1cc5681bdbea095431f4cc669e8ab",
+      "content": "0f71f917a663676067960adc0b9da8301d11871962865a01243adee09b2b7d8a",
       "sources": "0752d40c21a21cd0d2b3a20d0945dc54988cec01ff07208c3d640e4355c2f2ce",
       "decisions": "b8e521d9f08d0038eb0c62d056e9b727984abfbb961a2dd804a086a667ae905d"
     },
     {
       "year": 2049,
       "hour": "sext",
-      "content": "89f5a318f5d30402ecce1279546a6684504624955cf913df31093b22dd594203",
+      "content": "1f9b6c8ffa2b06b56b32e8583e582b44bb3eb3efe2f5364f6f37facd25c48a2b",
       "sources": "8840143a4a18fb41fafabc604971c1f60ff0d827b8a13a718977ac8a6191ccdb",
       "decisions": "b8e521d9f08d0038eb0c62d056e9b727984abfbb961a2dd804a086a667ae905d"
     },
@@ -1276,15 +1276,15 @@
       "year": 2049,
       "hour": "none",
       "content": "fe8deb19ec396a86ce312809d25f6eb0c9a732bbdda2523b6937d68d720c2183",
-      "sources": "aa7772b55b381190f59c5947986bc51769ed2d55a1ac32d7d9d93d3bc95668df",
+      "sources": "5828d82ccae4407123e30132582280beac121ce7dfd1507327a3feb1eec4c573",
       "decisions": "b8e521d9f08d0038eb0c62d056e9b727984abfbb961a2dd804a086a667ae905d"
     },
     {
       "year": 2049,
       "hour": "vespers",
-      "content": "2c378bcdd704d010eed6d5830322b2806d463464b34d1086f8e8a8b0fad7427f",
-      "sources": "739ebd43a8ea2506b93f798b6608f07068d9632b863e26554f5481af0d984e9e",
-      "decisions": "785e0cb9d07127934376ea76cc85052bfac632c409e3dde307cf2631e5b70f2a"
+      "content": "0b1f98c8900a1e46f5bca6b6728210da1d27dadcf0081959fc0344907aeb225f",
+      "sources": "a5bd34caf1703f1ed82a4d16f4c00709a29a9590b2ad94740d83c1d9f2624b9a",
+      "decisions": "86b5c37bfe860c6dcb0ffbecff1b898de3599ee974f980a97766cc8ab7993885"
     },
     {
       "year": 2049,
@@ -1296,9 +1296,9 @@
     {
       "year": 2050,
       "hour": "lauds",
-      "content": "2e0598583e6cea63d5edabad7453f594a7ef2c3af45d87b572c9d64438e4769c",
-      "sources": "ee415750baadc4e1cc4419f4426f01ea84c9eba9c85449fb33160a60412a2883",
-      "decisions": "30a30f4ca433f8b5d8c9613b0079c3012ad75d58c7f1400e1e8c498fc931926e"
+      "content": "e9de961dc8a7704e9b9929bc35eaa50de0cf620a6827363207ec045cf3294628",
+      "sources": "df10cb987de7bb8bccdfcff68346d270eeafb9d7a446d72b6c67e49d212a103f",
+      "decisions": "38ddac5fa44ab8b260f2c36a2dd8a27f3485b6ea64ba9a0dc5d8a635bc7ef979"
     },
     {
       "year": 2050,
@@ -1310,14 +1310,14 @@
     {
       "year": 2050,
       "hour": "terce",
-      "content": "0c72ba6aca163f5ddd386589fd0468dbdd015e1341f5acdf935aff1109e1760f",
+      "content": "c48e3ee55363d8cd3415b6cba754de27cb504dbc246984ae5edf68b43224e31b",
       "sources": "e3ed2e7af18de302545a150692c52569df2ddfa2de344c06b414fe8298773017",
       "decisions": "1f1b639f2c1a3019f6effe6111aaf6e00ea233ce8a6c922473d95bb4a8fc7400"
     },
     {
       "year": 2050,
       "hour": "sext",
-      "content": "b3ceb5ac523bcaf5b9e35d27ee0b4275d43aec8d7832e4c727d76ef5fb95122a",
+      "content": "2578ee062ec60814a2401a14d28fe22d3c45413a6384e5b7deb1eba6c94f9215",
       "sources": "b11f6931bb218dd1610c1929ccc41cc42c27acc2acdd0a07253110e10c4415d4",
       "decisions": "1f1b639f2c1a3019f6effe6111aaf6e00ea233ce8a6c922473d95bb4a8fc7400"
     },
@@ -1325,15 +1325,15 @@
       "year": 2050,
       "hour": "none",
       "content": "afa6b2e47c1f836f1fa3130980a305fe30bad1927f44e8e457ce830d91c27a13",
-      "sources": "4f9bc797ef36c3d7cc857ba386653b0182054dca7ffc528eb5ceedcd9c45f5d0",
+      "sources": "10e9ee399a32b1a6f25c0d59c5a426691f5fe39a2411d057fa74a0b2d01e13be",
       "decisions": "1f1b639f2c1a3019f6effe6111aaf6e00ea233ce8a6c922473d95bb4a8fc7400"
     },
     {
       "year": 2050,
       "hour": "vespers",
-      "content": "8740770a0711744b3801693ce09e01b13b256677d5c9ea0769680e532f31c1d0",
-      "sources": "39285b68ab7226204f7fc10da704c99dd8dffed908a848765f94943e5b747d42",
-      "decisions": "2850a8d2408be3a9b0c9a74ebe90c4dfd4e8e0437506db743f1ec4d33793e127"
+      "content": "e5e3887263d6cc62dc5b09842cb3bf6fab2c63657c9731886a9bd22b2f72bd15",
+      "sources": "6656574d531119992eba53cb2e8806ddfb1074038334d6d85137aa6483c28361",
+      "decisions": "34989488ff6200654061e2e883eccb58b3fadc06e597a6729e886412ebdc7097"
     },
     {
       "year": 2050,
@@ -1345,9 +1345,9 @@
     {
       "year": 2051,
       "hour": "lauds",
-      "content": "733fc9b1f4401b128748eca779cd004fd53d753c08a37572dc1756f57dad9be2",
-      "sources": "9ddd6616c51f589675baca2414d286fdb6645742353cd3049e2da173cbff3687",
-      "decisions": "e498af86fc3712c3f66a9dea28ed04aae971aa7aa4d0ccd3672b035929bb701d"
+      "content": "822df4871112a493c9193be1342c27741fc21858b6dbeaee571e80dfe1004fc3",
+      "sources": "da4186d03521d8dc6fdc45445052e2acd146abf83d1ea5848a93646d2dcf7bb2",
+      "decisions": "0a5af4927491579ebcabec143bf5f6619a4e650925aa42a209d172cc5226ed1f"
     },
     {
       "year": 2051,
@@ -1359,14 +1359,14 @@
     {
       "year": 2051,
       "hour": "terce",
-      "content": "f50ba4ffa5e2b7ab06124a84752848fb395134430f4feed402131b09f9649d01",
+      "content": "c94aeb30eb84c157c570aecba026bbd0505ef4740526758c396810049dd93917",
       "sources": "a8326835f0ed8eede5219d80eefef43fe9dc66aea59ef7fc19669e5ffbfa72da",
       "decisions": "5717001eab83169abfe237fe7f127c8ae8db07d922ac9ad97274e3541ab063c5"
     },
     {
       "year": 2051,
       "hour": "sext",
-      "content": "044a2e87a9d59e9fdc0fc04f3808d4b5cc994d45257c7423d0ec7d7f57b9ff5d",
+      "content": "1eb22e762d6ebd253fba28dc6dbd146473f1615b4d89eab1a88044d78edcebeb",
       "sources": "251843caa1e84ef8c73882562ec3b76d52ad5ad0bc17acf9c16b89fca83c8d10",
       "decisions": "5717001eab83169abfe237fe7f127c8ae8db07d922ac9ad97274e3541ab063c5"
     },
@@ -1374,15 +1374,15 @@
       "year": 2051,
       "hour": "none",
       "content": "f166f9b6acd985af8c22e84aab21cbd68536dfd5d952bdfe30b52c1b64d1de04",
-      "sources": "d89d2b4c57eea8f9d65209ccad2181740788214e3214592a3452942d31c5dc75",
+      "sources": "f84d9a14213ab8194460a96d5c9ec5621a9d02be10dfa71f3b33c590e1783416",
       "decisions": "5717001eab83169abfe237fe7f127c8ae8db07d922ac9ad97274e3541ab063c5"
     },
     {
       "year": 2051,
       "hour": "vespers",
-      "content": "72cdb4eda53c41eca1e20038a43552cd40e6c2d7291f7b72fca065fef1f76d7c",
-      "sources": "33284722a259c143b3817fb77f7681228734d7e28fa3674731c2d17b078faa6c",
-      "decisions": "355767b83cf1af3d714fa400b2a49b551b7df81775421c47d22f507035315065"
+      "content": "2b532bb678764934b7b7d21ba651ae367041a6f2a6a7b41a5c1828676bc73cd8",
+      "sources": "d92c5997b4c5309e6e23262ced5eaeab6c7ceb1af5354f360d4baf0cf126e70b",
+      "decisions": "a617d716d5e2b3fe7d3d133a6dcffbbace2de4b10273934e144a30db437050f0"
     },
     {
       "year": 2051,
@@ -1394,9 +1394,9 @@
     {
       "year": 2052,
       "hour": "lauds",
-      "content": "7b997bd73cbbb8403f2bfda8e06e26f99fd3790bd98f6b0e901d4f98222a7b66",
-      "sources": "c8a446d1df3af7e00086a7c604189d00e326e799d3b3aac44133e2cac646a4be",
-      "decisions": "aaf35952118b52228a060ecb193f372ae83e0b84bca095e3c3d28f0409e1480a"
+      "content": "09b1f359818e9e97d3dd15a986382a1d7d98fa0e2c8123675657071292d0dfb2",
+      "sources": "3b1f589077d110c4ffbf7d825cb1aa2b5162f70f04ab92c2ac2c1be719b2c27f",
+      "decisions": "2c24e64693efaf86b8c498147a1d6decadc1834a94117f4551d132db2f8cc3ee"
     },
     {
       "year": 2052,
@@ -1408,14 +1408,14 @@
     {
       "year": 2052,
       "hour": "terce",
-      "content": "aa38131fdbcd78858d4dc77639d5d4df092bee1001101c2a89113bd77ce8eba3",
+      "content": "95904923d46315b7d1732f7d3f4b7fa2371e8197ca3cd454758a31b03764d0e0",
       "sources": "5747dde737d541bf6e5106c7f5185ee342b64e7ad5d0275a9afada7766d49139",
       "decisions": "2c71792380654e075c7e1f136f7f70e2ab1442e94831dd74cb68ec9dfe73d634"
     },
     {
       "year": 2052,
       "hour": "sext",
-      "content": "0a63cb65b4d5461b40d8ba589a3685c2197f09a0300d2631556bd84a188ebc80",
+      "content": "6c9a57d24fbc415208de4710e347a96abd74743267950dce293166fa28bc467b",
       "sources": "67ec47f5edba9915715d43de90648d134365b0ac0e9de0ced32f4221b03a3900",
       "decisions": "2c71792380654e075c7e1f136f7f70e2ab1442e94831dd74cb68ec9dfe73d634"
     },
@@ -1423,7 +1423,7 @@
       "year": 2052,
       "hour": "none",
       "content": "4d49b5555e3cf5a9f0de5ac776e6259a23c21cd9117ecf691f94e2b032683f3d",
-      "sources": "a1410d5fa7bb8723faf6578b0148c9037389ac35f85989271fff25f418bab43c",
+      "sources": "b3aa928632904a4fbf75a39223ddf3f1d9a7eb1eda53eb9facdd8a6655999e61",
       "decisions": "2c71792380654e075c7e1f136f7f70e2ab1442e94831dd74cb68ec9dfe73d634"
     },
     {
@@ -1431,7 +1431,7 @@
       "hour": "vespers",
       "content": "68c1bfb73a69e666183c81ce18960e3f47f50da358c93668a2450feef0b40126",
       "sources": "d2928770a814f6d26768896a2cdd8855bb35920070006d6b1069ad5dcb16612d",
-      "decisions": "6eda0d9a3174370fb1825973b151a63f55746006cc845bda6162676e04d49fd0"
+      "decisions": "c94c56cda2eb3bb6f9707537df73b80cee1bfd801fce7d1b1932fdb93a12c222"
     },
     {
       "year": 2052,
@@ -1443,9 +1443,9 @@
     {
       "year": 2053,
       "hour": "lauds",
-      "content": "1e87868ffc23ecbfc68a31e8b35590750f7cf484a09aac1adc00923f2d8b47a9",
-      "sources": "726c54c5affac76baf2f5f2dc1ee728bb336dc752405d94541f3430b5173eb55",
-      "decisions": "47f85feda78d757cce87091c8e9b696b20f85d9f9c7d5fd9ab1c737164b0e901"
+      "content": "cf72571acb982fdea4cb2cd78d894cceddb477e9713c532dba58fd2a53ce6746",
+      "sources": "406a438242aae9ac9543444e7558b09d3e445b2ebb87677174aac45d3f9a9bb5",
+      "decisions": "9b0a774bd7cd5b8ed83527dd166f29541b5f5ddde1ab1350b5892b74dc4555cc"
     },
     {
       "year": 2053,
@@ -1478,9 +1478,9 @@
     {
       "year": 2053,
       "hour": "vespers",
-      "content": "1e683421b471f6826603faa2dab364e8074800c93e4bb4fe2fa487b2c723735d",
-      "sources": "53421f9202c5580e3670112cd8e5784f51818518cb4b6bd8871aceab99f3f496",
-      "decisions": "82c980bf1fd1f0c3b73ded24d30ca914c5a997c44d4ad005206196e0f73dbc3c"
+      "content": "3bad671085ccc43e0fe8340de0214bc4042fc7e2eebc5f97ac27e887fae7c10a",
+      "sources": "f15e95d976af3c620587149bfaa4e4c7ab4362b343f23e93f3b5c5090e9799ce",
+      "decisions": "846936e95ae6adc40162e10031692a4a408245e2418dced71e9ca2ce49f76e84"
     },
     {
       "year": 2053,

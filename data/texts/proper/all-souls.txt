@@ -1,59 +1,116 @@
+[vespers-psalmody]
+# SOURCE: Monastic Diurnal.pdf, pp. 72*-75* (Vespers of the Dead)
+@use psalmody/vespers/dead
+
 [psalm-antiphon]
 @use proper/all-souls/psalm-antiphon-1
 
+# Lauds of the Dead, antiphons 1-5 (Monastic Diurnal pp. 99*-104*).
+# The psalms they carry are laid out in data/office/lauds.txt [Psalmody-Dead].
+
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
-The bones which thou hast broken * may rejoice.
+# SOURCE: Monastic Diurnal.pdf, p. 99* (Lauds of the Dead)
+The bones which thou hast broken * shall rejoice in the Lord.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
-Lord, hear * my prayer; unto thee shall all flesh come.
+# SOURCE: Monastic Diurnal.pdf, p. 101* (Lauds of the Dead)
+Thou, O Lord, * that hearest the prayer, unto thee shall all flesh come.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
-Thy right hand * upholdeth me.
+# SOURCE: Monastic Diurnal.pdf, p. 102* (Lauds of the Dead)
+Thy right hand * hath upholden me, O Lord.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Commune/C9 [Ant Laudes_] — check against diurnal
-From the gates of hell * deliver my soul, O Lord.
+# SOURCE: Monastic Diurnal.pdf, p. 103* (Lauds of the Dead)
+From the gate of hell, * deliver my soul, O Lord.
 
 [psalm-antiphon-5]
-@use proper/all-souls/benedictus-antiphon
-[benedictus-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 104* (Lauds of the Dead)
 Let everything that hath breath * praise the Lord.
 
-[magnificat-antiphon]
-O Lord, forsake not * the works of thine own hands.
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 104* (Lauds of the Dead)
+# Previously held psalm-antiphon-5 ("Let everything that hath breath"), which
+# is the fifth psalm antiphon, not the antiphon on the Benedictus.
+I am the resurrection * and the life, saith the Lord: he that believeth in me, though he were dead, yet shall he live: and whosoever liveth and believeth in me shall never die.
 
-[commemoration-antiphon]
-I will walk before the Lord * in the land of the living.
-
-[commemoration-versicle]
-V. I heard a voice from heaven, saying unto me:
-R. Blessed are the dead which die in the Lord.
-
-[collect]
-O God, the Creator and Redeemer of all the faithful: grant unto the souls of thy servants and handmaids the remission of all their sins; that through devout supplications they may obtain the pardon they have always desired.
-
-# Vespers of the Dead uses its own antiphon set (the Placebo psalms);
-# the indexed psalm-antiphon-N sections above are the Lauds set.
+# Vespers of the Dead, antiphons 1-5 (Monastic Diurnal pp. 72*-75*).
 
 [psalm-antiphon-1-vespers]
-@use proper/all-souls/commemoration-antiphon
+# SOURCE: Monastic Diurnal.pdf, p. 72* (Vespers of the Dead)
+I will walk before the Lord * in the land of the living.
+
 [psalm-antiphon-2-vespers]
-# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
-Woe is me! O Lord, * that my sojourn is long.
+# SOURCE: Monastic Diurnal.pdf, p. 73* (Vespers of the Dead)
+Woe is me * that I am constrained to dwell with Mesech.
 
 [psalm-antiphon-3-vespers]
-# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
-The Lord shall keep thee from all evil, * the Lord shall keep thy soul.
+# SOURCE: Monastic Diurnal.pdf, p. 74* (Vespers of the Dead)
+The Lord shall preserve thee from all evil: * yea, it is even he that shall keep thy soul.
 
 [psalm-antiphon-4-vespers]
-# SOURCE: divinum-officium Commune/C9 [Ant Vespera] — check against diurnal
-If Thou, Lord, shouldest mark iniquities, * O Lord, who shall stand.
+# SOURCE: Monastic Diurnal.pdf, p. 74* (Vespers of the Dead)
+If thou, Lord, wilt be extreme to mark what is done amiss, * O Lord, who may abide it?
 
 [psalm-antiphon-5-vespers]
-@use proper/all-souls/magnificat-antiphon
+# SOURCE: Monastic Diurnal.pdf, p. 75* (Vespers of the Dead)
+Despise not then, * O Lord, the works of thine own hands.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 75* (Vespers of the Dead)
+# Previously held psalm-antiphon-5-vespers ("O Lord, forsake not the works of
+# thine own hands"), which is the fifth psalm antiphon, not the antiphon on
+# the Magnificat.
+All that the Father giveth me * shall come to me; and him that cometh to me, I will in no wise cast out.
+
+# The Office of the Dead has no chapter, hymn or short responsory at either
+# hour: Lauds "begins at once" with the first antiphon (Monastic Diurnal
+# p. 99*) and runs psalmody -> versicle -> Benedictus antiphon -> Our Father
+# -> collect; Vespers likewise (pp. 72*-77*).
+
+[chapter-lauds]
+@omit
+
+[chapter-vespers]
+@omit
+
+[hymn-lauds]
+@omit
+
+[hymn-vespers]
+@omit
+
+[short-responsory-lauds]
+@omit
+
+[short-responsory-vespers]
+@omit
+
+# The same versicle at both hours, but do NOT collapse these into one @use:
+# the book really does punctuate them differently, "from heaven saying" at
+# Lauds and "from heaven, saying" at Vespers. Both were read from the page
+# images and re-checked.
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 104* (Lauds of the Dead)
+V. I heard a voice from heaven saying unto me.
+R. Blessed are the dead which die in the Lord.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 75* (Vespers of the Dead)
+V. I heard a voice from heaven, saying unto me.
+R. Blessed are the dead which die in the Lord.
+
+[commemoration-antiphon]
+@use proper/all-souls/psalm-antiphon-1-vespers
+
+[commemoration-versicle]
+@use proper/all-souls/versicle-vespers
+
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 77* (The Office of the Dead, Collects)
+# The ordo appoints the first collect only on Nov 2 ("1st Col. only, MD 77*").
+O God, the Creator and Redeemer of all the faithful: grant unto the souls of thy servants and handmaids the remission of all their sins; that through devout supplications they may obtain the pardon they have always desired.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
