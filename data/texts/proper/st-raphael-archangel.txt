@@ -99,10 +99,41 @@ All His creation joins His praise confessing,
 Now and forever.
 
 Amen.
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 633 (October 24, At Lauds)
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+V. I will worship toward thy holy temple, and praise thy Name.
+R. I will sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 632 (October 24, At I Vespers)
+# II Vespers takes it unchanged: "Short R. and Hymn as above at I Vespers"
+# (p. 635).
+R. The smoke of the incense ascended up * before God.
+R. The smoke of the incense ascended up * before God.
+V. Out of the Angel's hand.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense ascended up * before God.
+
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/10-24 [Versum 2] — check against diurnal
-V. Before the Angels will I sing praise unto thee, O my God.
-R. I will worship toward thy holy Temple, and praise thy Name.
+# SOURCE: Monastic Diurnal.pdf, p. 634 (October 24, At Lauds)
+V. An Angel stood at the altar of the temple.
+R. Having in his hand a golden censer.
+
+[versicle-first-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 633 (October 24, At I Vespers)
+V. An Angel stood at the altar of the temple.
+R. Having in his hand a golden censer.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 635 (October 24, At II Vespers)
+# The versicle is what II Vespers changes from I Vespers.
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.
 
 [chapter-vespers]
 @use proper/st-raphael-archangel/chapter-lauds

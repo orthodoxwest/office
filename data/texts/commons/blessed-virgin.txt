@@ -136,9 +136,26 @@ V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
 [versicle-vespers]
-# SOURCE: divinum-officium Commune/C11 [Versum 1] — check against diurnal
-V. Holy Virgin, my praise by thee accepted be.
+# SOURCE: Monastic Diurnal.pdf, p. 64* (Common of Feasts B.V.M., At I Vespers)
+# II Vespers takes it unchanged: "All as at I Vespers, p. 61*, except" names
+# only the Magnificat antiphon (p. 67*).
+V. Vouchsafe that I may praise thee, O holy Virgin.
 R. Give me strength against thine enemies.
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 65* (Common of Feasts B.V.M., At Lauds)
+R. Hail Mary, full of grace, * the Lord is with thee.
+R. Hail Mary, full of grace, * the Lord is with thee.
+V. Blessed art thou among women, and blessed is the fruit of thy womb.
+R. The Lord is with thee.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Hail Mary, full of grace, * the Lord is with thee.
+
+[short-responsory-vespers]
+# Both Vespers take the Lauds responsory: I Vespers has "Chapter and Short R.
+# as below at Lauds" (Monastic Diurnal p. 64*), and II Vespers is all as at I
+# Vespers except the Magnificat antiphon (p. 67*).
+@use commons/blessed-virgin/short-responsory-lauds
 
 [short-responsory-terce]
 # SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Tertia] — check against diurnal

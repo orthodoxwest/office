@@ -165,10 +165,19 @@ lent-ember-friday psalm-antiphon
 lent-ember-saturday psalm-antiphon
 
 # The Saturday Vespers books appoint the Saturday psalter for I Vespers of
-# these Sundays. Quinquagesima's remaining warned Lauds/Vespers slots are
-# likewise printed as the ordinary forms in the parish books.
-septuagesima psalm-antiphon
-sexagesima psalm-antiphon
+# these Sundays.
+#
+# The hymn, short responsory and versicle are not proper to the three
+# Septuagesimatide Sundays: the Monastic Diurnal sends them to the Psalter at
+# both hours — "Short R., Hymn and V. as in the Psalter, p. 39" at Lauds and
+# "p. 114" at Vespers (pp. 236, 237, 239, 240, 242, 243). The Psalter prints
+# the one substitution the season does make, at Sunday Lauds (p. 40): "On
+# Septuagesima, Sexagesima, and Quinquagesima Sundays, V. Lord, thou hast been
+# our refuge. R. From one generation to another" — which is the versicle-lauds
+# each proper file already carries from the parish books. The chapter is the
+# only other proper element, and is now supplied at Vespers too.
+septuagesima psalm-antiphon hymn short-responsory versicle
+sexagesima psalm-antiphon hymn short-responsory versicle
 quinquagesima psalm-antiphon hymn short-responsory versicle
 lent-sunday-1 psalm-antiphon
 lent-sunday-2 psalm-antiphon

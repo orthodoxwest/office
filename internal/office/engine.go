@@ -716,6 +716,13 @@ func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, s
 	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
 }
 
+// UnknownCommemorationOwnerReason marks a commemoration trace whose owner
+// could not be found among the day's commemorations. The trace fails closed
+// with no owner, which on its own is indistinguishable from a legitimately
+// unowned day (a feria with no Celebration), so the reason carries the
+// distinction the OwnerID column cannot.
+const UnknownCommemorationOwnerReason = "unknown-commemoration-owner"
+
 // TraceCommemorationResolution traces a generated commemoration slot. An
 // empty owner ID is intentionally not allowed to fall back to the principal
 // celebration.
@@ -723,33 +730,71 @@ func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName,
 	if hourName == "vespers" {
 		day = vespersOfficeDay(day)
 	}
-	day = commemorationOwnerDay(day, ownerID)
-	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
+	ownerDay, found := commemorationOwnerDay(day, ownerID)
+	if ownerDay != nil {
+		// The office day's FirstVespers describes the incoming celebration,
+		// never the commemoration, so it must be re-derived for the owner.
+		ownerDay.FirstVespers = found && hourName == "vespers" &&
+			commemorationTakesFirstVespers(day, ownerDay.Celebration, ref)
+	}
+	trace := traceProperResolution(ownerDay, hourName, ref, selectedRef, e.corpus)
+	if !found {
+		trace.Reason = UnknownCommemorationOwnerReason
+	}
+	return trace
+}
+
+// commemorationTakesFirstVespers reports whether a commemoration at Vespers is
+// taken from its owner's I Vespers rather than its II Vespers. It mirrors the
+// composer: on an evening that is I Vespers of the following feast the office
+// day carries FirstVespers, but the commemorations there are of the outgoing
+// office, whose II Vespers they are. Only the incoming office's commemoration
+// (XIII.2-17) and a Sunday commemorated at Saturday II Vespers (XIV.14) begin
+// with their own I-Vespers text, and only in the slots the composer prefers it
+// for — a collect is the same at either Vespers.
+func commemorationTakesFirstVespers(day *models.CalendarDay, comm *models.Feast, ref string) bool {
+	if day == nil || comm == nil {
+		return false
+	}
+	if comm.ID != "" && comm.ID == day.FollowingOfficeCommemorationID {
+		return ref == "commemoration-antiphon" || ref == "commemoration-versicle"
+	}
+	return isSaturdaySecondVespersSundayCommemoration(day, comm, "vespers", ref)
 }
 
 // commemorationOwnerDay changes only the celebration used for proper tracing.
 // Composition has already selected the text; this keeps inventory ownership
 // tied to the actual commemoration Feast, including its ProperID redirect.
-func commemorationOwnerDay(day *models.CalendarDay, ownerID string) *models.CalendarDay {
+// It reports whether the owner was found; an unfound owner fails closed with
+// no celebration at all.
+func commemorationOwnerDay(day *models.CalendarDay, ownerID string) (*models.CalendarDay, bool) {
 	if day == nil {
-		return day
+		return day, false
+	}
+	// An empty owner must fail closed before the search: it would otherwise
+	// match the first commemoration whose Feast has no ID, which is exactly
+	// the case IsCommemoration exists to keep off the principal celebration.
+	if ownerID == "" {
+		unowned := *day
+		unowned.Celebration = nil
+		return &unowned, false
 	}
 	for _, feast := range day.Commemorations {
 		if feast != nil && feast.ID == ownerID {
-			copy := *day
-			copy.Celebration = feast
-			return &copy
+			ownerDay := *day
+			ownerDay.Celebration = feast
+			return &ownerDay, true
 		}
 	}
 	if day.FeriaCommemoration != nil && day.FeriaCommemoration.ID == ownerID {
-		copy := *day
-		copy.Celebration = day.FeriaCommemoration
-		return &copy
+		ownerDay := *day
+		ownerDay.Celebration = day.FeriaCommemoration
+		return &ownerDay, true
 	}
 	// An explicit owner that is not present in the transformed commemoration
 	// list must fail closed; attributing it to the principal celebration would
 	// make inventory rows appear to belong to the wrong feast.
-	copy := *day
-	copy.Celebration = nil
-	return &copy
+	ownerDay := *day
+	ownerDay.Celebration = nil
+	return &ownerDay, false
 }

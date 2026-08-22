@@ -1204,12 +1204,70 @@ func TestEngineTraceProperResolutionUsesTransformedVespersCommemoration(t *testi
 	}
 }
 
+func TestEngineTraceCommemorationOutgoingOfficeIsNotFirstVespers(t *testing.T) {
+	engine := &Engine{corpus: texts.NewTestCorpus(map[string]string{
+		"commons/martyr/commemoration-antiphon": "Outgoing antiphon",
+	})}
+	// The evening is I Vespers of the following feast, so the office day
+	// carries FirstVespers — but the commemoration is of the outgoing office,
+	// whose II Vespers it is.
+	comm := &models.Feast{ID: "outgoing-feast", ProperID: "martyr"}
+	day := &models.CalendarDay{
+		Celebration: comm,
+		Vespers: models.VespersDesignation{
+			Owner:          models.VespersIOfFollowing,
+			Feast:          &models.Feast{ID: "following-feast"},
+			Commemorations: []*models.Feast{comm},
+		},
+	}
+	trace := engine.TraceCommemorationResolution(day, "vespers", "commemoration-antiphon", "commons/martyr/commemoration-antiphon", comm.ID)
+	if trace.FirstVespers {
+		t.Fatalf("commemoration of the outgoing office reported as first Vespers: %#v", trace)
+	}
+	if trace.Reason == "first-vespers" {
+		t.Fatalf("reason = %q, want the commemoration's own role", trace.Reason)
+	}
+}
+
+func TestEngineTraceCommemorationIncomingOfficeTakesFirstVespers(t *testing.T) {
+	engine := &Engine{corpus: texts.NewTestCorpus(map[string]string{
+		"proper/incoming-feast/magnificat-antiphon-first": "Incoming antiphon",
+		"proper/incoming-feast/collect":                   "Incoming collect",
+	})}
+	comm := &models.Feast{ID: "incoming-feast"}
+	day := &models.CalendarDay{
+		Celebration: &models.Feast{ID: "todays-feast"},
+		Vespers: models.VespersDesignation{
+			Owner:                          models.VespersIIOfPreceding,
+			Feast:                          &models.Feast{ID: "todays-feast"},
+			Commemorations:                 []*models.Feast{comm},
+			FollowingOfficeCommemorationID: comm.ID,
+		},
+	}
+	// The incoming office's commemoration begins with its own I Vespers text.
+	antiphon := engine.TraceCommemorationResolution(day, "vespers", "commemoration-antiphon", "proper/incoming-feast/magnificat-antiphon-first", comm.ID)
+	if !antiphon.FirstVespers {
+		t.Fatalf("incoming commemoration antiphon not reported as first Vespers: %#v", antiphon)
+	}
+	// A collect is the same at either Vespers, and the composer does not
+	// prefer a -first variant for it.
+	collect := engine.TraceCommemorationResolution(day, "vespers", "commemoration-collect", "proper/incoming-feast/collect", comm.ID)
+	if collect.FirstVespers {
+		t.Fatalf("commemoration collect reported as first Vespers: %#v", collect)
+	}
+}
+
 func TestEngineTraceProperResolutionUnknownCommemorationOwnerFailsClosed(t *testing.T) {
 	engine := &Engine{corpus: texts.NewTestCorpus(nil)}
 	day := &models.CalendarDay{Celebration: &models.Feast{ID: "principal-feast"}}
 	trace := engine.TraceCommemorationResolution(day, "lauds", "commemoration-collect", "ordinary/lauds/collect", "not-a-member")
 	if trace.OwnerID == "principal-feast" || trace.CanonicalOwner == "principal-feast" {
 		t.Fatalf("unknown owner attributed to principal celebration: %#v", trace)
+	}
+	// The empty owner alone reads exactly like a legitimately unowned feria,
+	// so the reason must mark the failure.
+	if trace.Reason != UnknownCommemorationOwnerReason {
+		t.Fatalf("reason = %q, want %q", trace.Reason, UnknownCommemorationOwnerReason)
 	}
 }
 
@@ -1228,6 +1286,9 @@ func TestEngineTraceProperResolutionUsesCommemorationOwnerAndProperID(t *testing
 	}
 	if len(trace.ProperIDs) < 2 || trace.ProperIDs[0] != "redirected-feast" || trace.ProperIDs[1] != "calendar-comm" {
 		t.Fatalf("trace proper IDs = %#v", trace.ProperIDs)
+	}
+	if trace.Reason == UnknownCommemorationOwnerReason {
+		t.Fatalf("found owner marked unknown: %#v", trace)
 	}
 }
 
