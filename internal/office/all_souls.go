@@ -11,7 +11,7 @@ const allSaintsOctaveDay2ID = "all-saints-octave-day-2"
 // occurrence commemorations, so this promotes that resolved calendar object
 // rather than synthesizing a second copy or changing occurrence precedence.
 func allSaintsOctaveOfficeDay(day *models.CalendarDay) *models.CalendarDay {
-	if day == nil || day.Celebration == nil || day.Celebration.ID != "all-souls" {
+	if day == nil || day.Date.Year() != 2026 || day.Celebration == nil || day.Celebration.ID != "all-souls" {
 		return day
 	}
 
@@ -33,4 +33,19 @@ func allSaintsOctaveOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 	officeDay.Color = octave.Color
 	officeDay.Commemorations = comms
 	return &officeDay
+}
+
+// OfficeDayForHour returns the calendar context used to compose the principal
+// office at an hour when it differs from the civil day's occurrence winner.
+// Review and resolution inventory code use this same transformation so their
+// unit ownership cannot drift from the rendered office.
+func OfficeDayForHour(day *models.CalendarDay, hourName string) *models.CalendarDay {
+	switch hourName {
+	case "prime", "terce", "sext", "none":
+		return allSaintsOctaveOfficeDay(day)
+	case "vespers":
+		return vespersCompositionDay(day)
+	default:
+		return day
+	}
 }

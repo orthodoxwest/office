@@ -865,6 +865,7 @@ func BuildCalendar(year int, dataDir string) ([]models.CalendarDay, error) {
 // BuildCalendar only after the following Jan 1 has been built.
 func buildCalendarYear(year int, feasts []*models.Feast, penitentialRules []penitentialRule, incomingTransfers []*models.Feast) ([]models.CalendarDay, []*models.Feast, error) {
 	moveable := ComputeMoveableDates(year)
+	feasts = feastsObservedInYear(feasts, year)
 
 	// Generate computed Sundays
 	computedSundays := epiphanySundayFeasts(year, moveable.Septuagesima)
@@ -978,4 +979,22 @@ func buildCalendarYear(year int, feasts []*models.Feast, penitentialRules []peni
 	}
 
 	return calendarDays, pendingTransfers, nil
+}
+
+// feastsObservedInYear applies dated local-calendar directions without
+// deleting observances from the historical corpus. The 2026 archdiocesan ordo
+// omits St Peter Damian; earlier supplied ordos retain him, so this exception
+// is deliberately confined to that civil year.
+func feastsObservedInYear(feasts []*models.Feast, year int) []*models.Feast {
+	if year != 2026 {
+		return feasts
+	}
+	observed := make([]*models.Feast, 0, len(feasts))
+	for _, feast := range feasts {
+		if feast != nil && feast.ID == "st-peter-damian" {
+			continue
+		}
+		observed = append(observed, feast)
+	}
+	return observed
 }

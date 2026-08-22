@@ -26,7 +26,7 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
     proper/easter-sunday-4/magnificat-antiphon
     proper/ss-philip-james/psalm-antiphon-3
 
-=== Suppressed: 75 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 76 feast(s) via data/audit-ok.txt ===
   our-lady-of-sorrows-passion
   octave-day-st-stephen
   octave-day-holy-innocents
@@ -86,6 +86,7 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   st-cyril-alexandria
   st-ignatius-antioch
   st-romuald
+  st-peter-damian
   st-perpetua-felicitas
   st-cuthbert
   st-john-damascene

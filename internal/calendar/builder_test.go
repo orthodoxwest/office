@@ -94,6 +94,29 @@ func TestBuildCalendarOmitsPeterDamianFromCurrentAWRVCalendar(t *testing.T) {
 	}
 }
 
+func TestBuildCalendarPreservesPeterDamianOutside2026(t *testing.T) {
+	for _, year := range []int{2024, 2025, 2027} {
+		days, err := BuildCalendar(year, findDataDir(t))
+		if err != nil {
+			t.Fatalf("BuildCalendar(%d): %v", year, err)
+		}
+		feb23 := findDay(days, year, 2, 23)
+		if feb23 == nil {
+			t.Fatalf("%d-02-23 not found", year)
+		}
+		found := feb23.Celebration != nil && feb23.Celebration.ID == "st-peter-damian"
+		for _, comm := range feb23.Commemorations {
+			found = found || comm.ID == "st-peter-damian"
+		}
+		for _, comm := range feb23.Vespers.Commemorations {
+			found = found || comm.ID == "st-peter-damian"
+		}
+		if !found {
+			t.Errorf("St Peter Damian disappeared from %d historical/future calendar", year)
+		}
+	}
+}
+
 func TestAnticipatedEpiphanySundayFeastBoundaries(t *testing.T) {
 	tests := []struct {
 		year   int

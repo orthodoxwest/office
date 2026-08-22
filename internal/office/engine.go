@@ -719,9 +719,7 @@ func titleCase(s string) string {
 // Vespers is evaluated against its liturgical owner, just as ComposeHour does.
 // It does not perform a second resolution and cannot affect composed output.
 func (e *Engine) TraceProperResolution(day *models.CalendarDay, hourName, ref, selectedRef string) ProperResolutionTrace {
-	if hourName == "vespers" {
-		day = vespersCompositionDay(day)
-	}
+	day = OfficeDayForHour(day, hourName)
 	return traceProperResolution(day, hourName, ref, selectedRef, e.corpus)
 }
 
@@ -736,9 +734,7 @@ const UnknownCommemorationOwnerReason = "unknown-commemoration-owner"
 // empty owner ID is intentionally not allowed to fall back to the principal
 // celebration.
 func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName, ref, selectedRef, ownerID string) ProperResolutionTrace {
-	if hourName == "vespers" {
-		day = vespersCompositionDay(day)
-	}
+	day = OfficeDayForHour(day, hourName)
 	ownerDay, found := commemorationOwnerDay(day, ownerID)
 	if ownerDay != nil {
 		// The office day's FirstVespers describes the incoming celebration,

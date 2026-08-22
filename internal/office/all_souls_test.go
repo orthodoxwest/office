@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -71,9 +72,45 @@ func TestAllSoulsHourOwnershipFollowsCurrentOrdo(t *testing.T) {
 }
 
 func TestAllSoulsPromotionFailsClosedWithoutResolvedOctave(t *testing.T) {
-	day := &models.CalendarDay{Celebration: &models.Feast{ID: "all-souls"}}
+	day := &models.CalendarDay{Date: time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC), Celebration: &models.Feast{ID: "all-souls"}}
 	if got := allSaintsOctaveOfficeDay(day); got != day {
 		t.Fatal("All Souls without the resolved octave commemoration must remain unchanged")
+	}
+}
+
+func TestAllSoulsPromotionIsConfinedTo2026Ordo(t *testing.T) {
+	day := &models.CalendarDay{
+		Date:        time.Date(2027, 11, 2, 0, 0, 0, 0, time.UTC),
+		Celebration: &models.Feast{ID: "all-souls"},
+		Commemorations: []*models.Feast{{
+			ID: allSaintsOctaveDay2ID,
+		}},
+	}
+	if got := allSaintsOctaveOfficeDay(day); got != day {
+		t.Fatal("the 2026-specific All Souls disposition changed another year")
+	}
+
+	dataDir := filepath.Join("..", "..", "data")
+	days, err := calendar.BuildCalendar(2027, dataDir)
+	if err != nil {
+		t.Fatalf("BuildCalendar(2027): %v", err)
+	}
+	for i := range days {
+		if days[i].Date.Month() == 11 && days[i].Date.Day() == 2 {
+			day = &days[i]
+			break
+		}
+	}
+	engine, err := NewEngine(dataDir)
+	if err != nil {
+		t.Fatalf("NewEngine: %v", err)
+	}
+	vespers, err := engine.ComposeHour("vespers", day, calendar.ComputeMoveableDates(2027))
+	if err != nil {
+		t.Fatalf("ComposeHour(vespers): %v", err)
+	}
+	if vespers.Feast != day.Celebration.Name || vespers.Color != models.Black {
+		t.Fatalf("2027 Vespers = %q/%s, want All Souls/black", vespers.Feast, vespers.Color)
 	}
 }
 

@@ -161,16 +161,17 @@ func BuildManifest(dataDir string, startYear, years int) (*Manifest, error) {
 					u.Occurrences++
 					continue
 				}
+				contextDay := officeContextDay(day, hourName)
 				u := &Unit{
 					Hash:        h,
 					Hour:        hourName,
-					UnitKey:     unitKey(day, hourName),
-					Name:        celebrationName(day),
-					Rank:        celebrationRank(day, hourName),
-					Season:      day.Season,
+					UnitKey:     unitKey(contextDay, hourName),
+					Name:        celebrationName(contextDay),
+					Rank:        celebrationRank(contextDay, hourName),
+					Season:      contextDay.Season,
 					Date:        day.Date,
 					Occurrences: 1,
-					Context:     contextNote(day, hourName),
+					Context:     contextNote(contextDay, hourName),
 				}
 				byHash[h] = u
 				order = append(order, u)

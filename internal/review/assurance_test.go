@@ -84,6 +84,30 @@ func TestExplainCompositionPriscaCommemorationUsesCommemorationOwner(t *testing.
 	t.Fatal("missing Prisca commemoration collect resolution")
 }
 
+func TestExplainCompositionUsesRenderedAllSaintsOctaveOwner(t *testing.T) {
+	date := time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC)
+	for _, hourName := range []string{"prime", "terce", "sext", "none", "vespers"} {
+		a, err := ExplainComposition("../../data", hourName, date)
+		if err != nil {
+			t.Fatalf("ExplainComposition(%s): %v", hourName, err)
+		}
+		if a.UnitKey != "all-saints-octave-day-2" {
+			t.Errorf("%s unit key = %q, want all-saints-octave-day-2", hourName, a.UnitKey)
+		}
+		if a.Celebration != "Day II within the Octave of All Saints" {
+			t.Errorf("%s celebration = %q, want rendered octave office", hourName, a.Celebration)
+		}
+	}
+
+	lauds, err := ExplainComposition("../../data", "lauds", date)
+	if err != nil {
+		t.Fatalf("ExplainComposition(lauds): %v", err)
+	}
+	if lauds.UnitKey != "all-souls" || lauds.Celebration != "All Souls' Day" {
+		t.Fatalf("Lauds owner = %q/%q, want All Souls", lauds.UnitKey, lauds.Celebration)
+	}
+}
+
 func TestShouldIncludeResolution(t *testing.T) {
 	tests := []struct {
 		name, source, tier string

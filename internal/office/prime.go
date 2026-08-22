@@ -13,7 +13,7 @@ type PrimeComposer struct{}
 
 // Compose builds a complete Prime hour for the given day.
 func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
-	day = allSaintsOctaveOfficeDay(day)
+	day = OfficeDayForHour(day, "prime")
 	hour := &models.OfficeHour{
 		Date:   day.Date,
 		Hour:   "Prime",
