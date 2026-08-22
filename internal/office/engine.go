@@ -693,11 +693,35 @@ func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName,
 		day = vespersOfficeDay(day)
 	}
 	ownerDay, found := commemorationOwnerDay(day, ownerID)
+	if ownerDay != nil {
+		// The office day's FirstVespers describes the incoming celebration,
+		// never the commemoration, so it must be re-derived for the owner.
+		ownerDay.FirstVespers = found && hourName == "vespers" &&
+			commemorationTakesFirstVespers(day, ownerDay.Celebration, ref)
+	}
 	trace := traceProperResolution(ownerDay, hourName, ref, selectedRef, e.corpus)
 	if !found {
 		trace.Reason = UnknownCommemorationOwnerReason
 	}
 	return trace
+}
+
+// commemorationTakesFirstVespers reports whether a commemoration at Vespers is
+// taken from its owner's I Vespers rather than its II Vespers. It mirrors the
+// composer: on an evening that is I Vespers of the following feast the office
+// day carries FirstVespers, but the commemorations there are of the outgoing
+// office, whose II Vespers they are. Only the incoming office's commemoration
+// (XIII.2-17) and a Sunday commemorated at Saturday II Vespers (XIV.14) begin
+// with their own I-Vespers text, and only in the slots the composer prefers it
+// for — a collect is the same at either Vespers.
+func commemorationTakesFirstVespers(day *models.CalendarDay, comm *models.Feast, ref string) bool {
+	if day == nil || comm == nil {
+		return false
+	}
+	if comm.ID != "" && comm.ID == day.FollowingOfficeCommemorationID {
+		return ref == "commemoration-antiphon" || ref == "commemoration-versicle"
+	}
+	return isSaturdaySecondVespersSundayCommemoration(day, comm, "vespers", ref)
 }
 
 // commemorationOwnerDay changes only the celebration used for proper tracing.
