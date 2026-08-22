@@ -399,14 +399,14 @@ MARCH
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. These last have wrought but one hour · Suff.
+           Vespers v · Mag. These last · Suff.
                Com. St Chad, Bishop & Confessor ("The Lord loved him")
   2  Tue     Feria                                            v
            St Chad, Bishop & Confessor (com)
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
                Com. St Chad, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. And the householder said · Suff.
+           Vespers v · Mag. The householder answered and said · Suff.
   3  Wed     Feria                                            v
            Lauds   v · Ben. From the hand of all that hate us · No Preces · Suff.
            Hours   Preces
@@ -417,7 +417,7 @@ MARCH
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
                Com. St Lucius I, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers v · Mag. Is it not lawful for me · Suff.
+           Vespers v · Mag. Is it not lawful · Suff.
   5  Fri  L  Feria                                            v
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
@@ -436,21 +436,21 @@ MARCH
   8  Mon     Feria                                            v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. If ye would be truly honourable · Suff.
+           Vespers v · Mag. If ye seek the summit · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("O Teacher right excellent")
   9  Tue     Feria                                            v
            St Gregory of Nyssa, Bishop, Confessor & Doctor (com)
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("Well done")
            Hours   Preces
-           Vespers v · Mag. The seed is the word of God · Suff.
+           Vespers v · Mag. The seed · Suff.
                Com. The Forty Holy Martyrs ("In the heavenly kingdom")
  10  Wed     Feria                                            v
            The Forty Holy Martyrs (com)
            Lauds   v · Ben. From the hand of all that hate us · No Preces · Suff.
                Com. The Forty Holy Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers v · Mag. But that on the good ground · Suff.
+           Vespers v · Mag. But that · Suff.
  11  Thu     Feria                                            v
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
@@ -460,7 +460,7 @@ MARCH
                Com. Friday after Sexagesima ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
-               Com. Friday after Sexagesima ("My soul doth magnify the Lord, and my spirit…")
+               Com. Friday after Sexagesima ("They who keep the word of God")
  13  Sat     Feria                                            v
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
            Hours   Preces
