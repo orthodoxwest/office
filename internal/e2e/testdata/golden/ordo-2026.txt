@@ -28,14 +28,14 @@ JANUARY
            Hours   No Preces
            Vespers w · II prec. · Mag. Great · No Suff.
   2  Fri  L  Octave Day of St Stephen                   [s]   r
-           Lauds   r · Ben. And Stephen, full of grace · No Preces · No Suff.
+           Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
            Hours   No Preces
            Vespers r · I fol. (Octave Day of St. John, Apostle & Evangelist) · Mag. This is the same John · No Suff.
   3  Sat     Octave Day of St. John, Apostle & Evangelist [s]   w
            Lauds   w · Ben. This is the same John · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Holy Name of Jesus) · Mag. For he that is mighty · No Suff.
-               Com. Octave Day of the Holy Innocents ("Innocent babies")
+               Com. Octave Day of the Holy Innocents ("Then were innocent children")
                Com. St. Titus, Bishop & Confessor ("The Lord loved him")
   4  Sun     Holy Name of Jesus                         [2cl] w
            Octave Day of the Holy Innocents (s)
@@ -153,12 +153,12 @@ JANUARY
  20  Tue     Ss. Fabian (Bishop) & Sebastian, Martyrs   [d]   r
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (St. Agnes of Rome, Virgin & Martyr) · Mag. The blessed Agnes · No Suff.
+           Vespers r · I fol. (St. Agnes of Rome, Virgin & Martyr) · Mag. Blessed Agnes · No Suff.
                Com. Ss. Fabian (Bishop) & Sebastian, Martyrs ("In the heavenly kingdom")
  21  Wed     St. Agnes of Rome, Virgin & Martyr         [gd]  r
-           Lauds   r · Ben. Behold, now I see that · No Preces · No Suff.
+           Lauds   r · Ben. Lo, that which I desired · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. The blessed Agnes stood in the midst of the… · No Suff.
+           Vespers r · II prec. · Mag. While the blessed Agnes · No Suff.
                Com. Ss Vincent, Martyr ("Whosoever will come after me")
  22  Thu     Feria                                            g
            Ss Vincent, Martyr (com)
@@ -1406,7 +1406,7 @@ AUGUST
            Vespers g · II prec. · Mag. Is it not written · No Suff.
                Com. The Finding of St. Stephen, Protomartyr ("This is a Martyr")
   3  Mon     The Finding of St. Stephen, Protomartyr    [d]   r
-           Lauds   r · Ben. And Stephen · No Preces · No Suff.
+           Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
            Hours   No Preces
            Vespers r · II prec. · Mag. Devout men · No Suff.
   4  Tue     Feria                                            g
@@ -2228,7 +2228,7 @@ DECEMBER
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
                Com. Saturday after Advent Sunday 2 ("My soul doth magnify the Lord, and my spirit…")
-               Com. St Lucy, Virgin & Martyr ("With such power")
+               Com. St Lucy, Virgin & Martyr ("With such gravity")
                Com. St Herman of Alaska, Priest & Confessor ("The world, and all things earthly")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
  13  Sun  L  III Sunday of Advent (Gaudete)             [2cl] p
@@ -2236,13 +2236,13 @@ DECEMBER
            St Herman of Alaska, Priest & Confessor (com)
            Day VI within Conception Octave (sd)
            Lauds   p · Ben. He shall sit upon the throne · No Preces · No Suff.
-               Com. St Lucy, Virgin & Martyr ("Thou art become as a pillar")
+               Com. St Lucy, Virgin & Martyr ("A pillar art thou")
                Com. St Herman of Alaska, Priest & Confessor ("Well done, good and faithful servant")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
            Hours   No Preces
            Vespers p · II prec. · Mag. Blessed art thou · No Suff.
                Com. Day VII within Conception Octave ("Thou art all fair, O Mary")
-               Com. St Lucy, Virgin & Martyr ("With such power")
+               Com. St Lucy, Virgin & Martyr ("With such gravity")
  14  Mon  L§ Day VII within Conception Octave           [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
                Com. Monday after Advent Sunday 3 ("There shall come forth")
@@ -2308,10 +2308,10 @@ DECEMBER
                Com. St Anastasia, Virgin & Martyr ("The kingdom of heaven")
            Hours   No Preces
            Vespers w · II prec. · Mag. Today · No Suff.
-               Com. St. Stephen, Protomartyr ("And Stephen")
+               Com. St. Stephen, Protomartyr ("And Stephen, full of faith and power")
  26  Sat     St. Stephen, Protomartyr                   [2cl] r
            Day II within the Nativity Octave (sd)
-           Lauds   r · Ben. And Stephen · No Preces · No Suff.
+           Lauds   r · Ben. And Stephen, full of faith and power · No Preces · No Suff.
                Com. Day II within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers r · II prec. · Mag. Devout men · No Suff.
