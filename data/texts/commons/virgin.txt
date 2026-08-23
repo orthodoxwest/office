@@ -50,13 +50,35 @@ The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who
 @use commons/virgin/collect
 
 [collect]
-Hear us, O God, our Saviour, that as we rejoice in the festival of blessed N. thy Virgin, so we may be instructed by the affections of holy devotion.
+# SOURCE: monastic diurnal, p. 49* (Common of Virgins, For a Virgin not a Martyr)
+Hear us, O God our Saviour: that as we rejoice in the festival of blessed N., thy Virgin, so we may be taught by the influence of her loving devotion.
 
 [chapter-lauds]
 @use commons/virgin-martyr/chapter-lauds
 
 [chapter-vespers]
 @use commons/virgin-martyr/chapter-lauds
+
+[chapter-terce]
+@use commons/virgin-martyr/chapter-lauds
+
+[chapter-sext]
+@use commons/virgin-martyr/chapter-sext
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At None, For a Virgin not a Martyr)
+!Wis 4:1
+O how fair is the chaste generation in the glory thereof: for the memorial thereof is immortal, * because it is known with God and with men.
+R. Thanks be to God.
+
+[short-responsory-terce]
+@use commons/virgin-martyr/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/virgin-martyr/short-responsory-sext
+
+[short-responsory-none]
+@use commons/virgin-martyr/short-responsory-none
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 683 (Common of Virgins)

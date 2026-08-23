@@ -5,24 +5,23 @@
 @use commons/holy-woman/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 688 (Common of Holy Women not Virgins)
+# SOURCE: monastic diurnal, p. 51* (Common of Holy Women not Virgins, At Lauds)
 While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Lauds book, p. 689 (Common of Holy Women not Virgins)
+# SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, At Lauds)
 We will run after thee * because of the savour of thine ointments: exceedingly do the virgins love thee.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins)
+# SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, At Lauds)
 Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 690 (Common of Holy Women not Virgins)
-# NOTE: The source suppresses the final Alleluia after Septuagesima; no current holy-woman feast exercises that seasonal exception.
+# SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, At Lauds)
 Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 691 (Common of Holy Women not Virgins)
+# SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, At Lauds)
 This woman * is beautiful among the daughters of Jerusalem.
 
 [psalm-antiphon-4-vespers]
@@ -65,12 +64,13 @@ R. He clothed her with a robe of glory.
 @use commons/holy-woman/collect
 
 [collect]
-Graciously hear us, O God of our salvation, that as we rejoice in the festivity of blessed N., we may be instructed in the affections of a loving devotion.
+# SOURCE: monastic diurnal, p. 53* (Common of Holy Women not Virgins, For a Saint neither Virgin nor Martyr)
+Hear us, O God our Saviour: that as we rejoice in the festival of blessed N., so we may be taught by the influence of her loving devotion.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 692 (Saint neither Virgin nor Martyr)
+# SOURCE: monastic diurnal, p. 52* (Common of Holy Women not Virgins, For a Saint neither Virgin nor Martyr)
 !Prov 31:10-11
-Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, so that he shall have no need of spoil.
+Who can find a virtuous woman? for her price is far above rubies. The heart of her husband doth safely trust in her, * so that he shall have no need of spoil.
 R. Thanks be to God.
 
 [short-responsory-lauds]
@@ -82,10 +82,28 @@ V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
 [chapter-sext]
-# SOURCE: divinum-officium CommuneM/C7a [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Sext, For a Saint neither Virgin nor Martyr)
 !Prov 31:20-21
-She hath opened her hand to the needy, and stretched out her hands to the poor. She shall not fear for her house in the cold of snow.
+She stretcheth out her hand to the poor: yea, she reacheth forth her hands to the needy; * she is not afraid of the snow for her household.
 R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 55* (Common of Holy Women not Virgins, At None, For a Saint neither Virgin nor Martyr)
+!Prov 31:29-30
+Many daughters have done virtuously, but thou excellest them all. Favour is deceitful, and beauty is vain: * but a woman that feareth the Lord, she shall be praised.
+R. Thanks be to God.
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Terce)
+@use commons/holy-woman/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Sext)
+@use commons/holy-woman/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 55* (Common of Holy Women not Virgins, At None)
+@use commons/virgin-martyr/short-responsory-none
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 694–695 (Common of Holy Women not Virgins)

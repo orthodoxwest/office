@@ -76,8 +76,8 @@ R. He shall grow like a cedar in Lebanon.
 @use commons/martyr/collect
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 638, 589, 596 (Common of One Martyr out of Paschaltide, non-bishop collect)
-Grant, we beseech thee, almighty God: that we, who devoutly celebrate the birthday of blessed N., thy Martyr, may by his intercession be stablished in the love of thy Name.
+# SOURCE: monastic diurnal, p. 22* (Common of One Martyr out of Paschaltide, For a Martyr not a Bishop)
+Grant, we beseech thee, Almighty God: that we who honour the birthday of blessed N., thy Martyr, may by his intercession be strengthened in the love of thy holy Name.
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 628-629 (Common of One Martyr out of Paschaltide)
@@ -109,6 +109,24 @@ Amen.
 
 [chapter-vespers]
 @use commons/bishop-martyr/chapter-lauds
+
+[chapter-terce]
+@use commons/bishop-martyr/chapter-lauds
+
+[chapter-sext]
+@use commons/bishop-martyr/chapter-sext
+
+[chapter-none]
+@use commons/bishop-martyr/chapter-none
+
+[short-responsory-terce]
+@use commons/bishop-martyr/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/bishop-martyr/short-responsory-sext
+
+[short-responsory-none]
+@use commons/bishop-martyr/short-responsory-none
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 628 (Common of One Martyr out of Paschaltide)

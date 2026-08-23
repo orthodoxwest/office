@@ -10,23 +10,29 @@
 @use commons/confessor-doctor/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
-Behold an high priest, * who in his days pleased God, and was found righteous.
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds; For a Doctor uses the same ants)
+@use commons/confessor-bishop/psalm-antiphon-1
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
-None was found like unto him, * to keep the Law of the Most High.
+@use commons/confessor-bishop/psalm-antiphon-2
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
-Therefore the Lord assured him * by an oath that He would multiply his seed among His people.
+@use commons/confessor-bishop/psalm-antiphon-3
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
-O all ye Priests of God, * bless ye the Lord O all ye servants of the Lord, sing praises unto our God.
+@use commons/confessor-bishop/psalm-antiphon-4
+
+[psalm-antiphon-4-septuagesima]
+@use commons/confessor-bishop/psalm-antiphon-4-septuagesima
+
+[psalm-antiphon-4-lent]
+@use commons/confessor-bishop/psalm-antiphon-4-septuagesima
+
+[psalm-antiphon-4-passiontide]
+@use commons/confessor-bishop/psalm-antiphon-4-septuagesima
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C4a [Ant Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds; For a Doctor uses the same ants)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon-1-vespers]
@@ -49,7 +55,7 @@ Good and faithful servant, * enter thou into the joy of thy Lord.
 @use commons/confessor-bishop/benedictus-antiphon
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 665 (Common of Doctors, Doctor optime; both Vespers)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, For a Doctor, at both Vespers)
 O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God.
 
 [commemoration-antiphon]
@@ -75,7 +81,7 @@ R. He clothed him with a robe of glory.
 @use commons/confessor-doctor/collect
 
 [collect]
-# SOURCE: 00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf, p. 117 (For a Doctor, Collect)
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, For a Doctor)
 O God, who gavest blessed N. to thy people as a minister of eternal salvation: grant, we beseech thee, that we may be worthy to have him as our intercessor in heaven, whom we had as our teacher here upon earth.
 
 [chapter-lauds]
@@ -83,6 +89,15 @@ O God, who gavest blessed N. to thy people as a minister of eternal salvation: g
 
 [chapter-vespers]
 @use commons/confessor-bishop/chapter-lauds
+
+[chapter-terce]
+@use commons/confessor-bishop/chapter-lauds
+
+[chapter-sext]
+@use commons/confessor-bishop/chapter-sext
+
+[chapter-none]
+@use commons/confessor-bishop/chapter-none
 
 [hymn-lauds]
 # SOURCE: office-hymns.zip (Jesu, the World_s Redeemer Hear.docx)
@@ -119,6 +134,15 @@ Amen.
 
 [short-responsory-vespers]
 @use commons/confessor-bishop/short-responsory-vespers
+
+[short-responsory-terce]
+@use commons/confessor-bishop/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/confessor-bishop/short-responsory-sext
+
+[short-responsory-none]
+@use commons/confessor-bishop/short-responsory-none
 
 [versicle-lauds]
 @use commons/confessor-bishop/versicle-lauds

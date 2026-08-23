@@ -5,29 +5,36 @@
 @use commons/blessed-virgin/psalm-antiphon-1
 
 [psalm-antiphon-1]
-While the King sitteth at his table, * my spikenard sendeth forth a sweet-smelling savour.
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
+While the King * sitteth at his table, my spikenard sendeth forth a sweet-smelling savour.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-His left hand is under my head, * and his right hand doth embrace me.
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
+His left hand * is under my head, and his right hand doth embrace me.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-I am black but comely, * O ye daughters of Jerusalem; therefore hath the King loved me, and brought me into his chamber.
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
+I am black, but comely, * O ye daughters of Jerusalem; therefore the King delighteth in me, and hath brought me into his chambers.
 
 [psalm-antiphon-4]
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
 Lo, the winter is past, * the rain is over and gone: rise up, my love, and come away.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C11 [Ant Laudes] — check against diurnal
-O Holy Mother of God, thou art become beautiful * and gentle in thy gladness.
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
+Thou art beautiful * and pleasant, O holy Mother of God, in thy felicity.
 
 [benedictus-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of Feasts of the B.V.M.) — parish noted manual
-Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord.
+# SOURCE: monastic diurnal, p. 66* (Common of Feasts B.V.M., At Lauds)
+Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord, alleluia.
 
 [magnificat-antiphon]
-All generations shall call me blessed, * for he that is mighty hath done to me great things, and holy is his name.
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At II Vespers)
+All generations * shall call me blessed: for God hath regarded the lowliness of his handmaiden.
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At I Vespers)
+O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thy holy festival.
 
 [commemoration-antiphon]
 Holy Mary, succour the miserable, * help the fainthearted, comfort the sorrowful, pray for the people, plead for the clergy, intercede for all women vowed to God.
@@ -54,36 +61,45 @@ R. O Mother of God, intercede for us.
 @use commons/blessed-virgin/collect
 
 [collect]
-Grant, we beseech thee, O Lord God, unto all thy servants, that they may remain continually in the enjoyment of soundness both of mind and body, and by the glorious intercession of the Blessed Mary, always a Virgin, may be delivered from present sadness, and enter into the joy of thine eternal gladness.
+# SOURCE: monastic diurnal, pp. 66*–67* (Common of Feasts B.V.M., At Lauds)
+Grant, we beseech thee, O Lord God, that we thy servants may rejoice in continual health of mind and body: and that by the glorious intercession of blessed Mary ever Virgin we may be delivered from this present heaviness, and have the fruition of eternal joy.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Commune/C11 [Capitulum Laudes] — check against diurnal
-!Sir 24:14
-From the beginning, and before the world, was I created, and unto the world to come I shall not cease to be, and in the holy dwelling place I have ministered before him.
+# SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
+!Sir 24:9-10
+He created me from the beginning before the world, and I shall never fail. * In the holy tabernacle I served before him.
+R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C11 [Capitulum Sexta] — check against diurnal
-!Sir 24:15-16
-And so was I established in Sion, and in the holy city likewise I rested, and my power was in Jerusalem. And I took root in an honourable people, and in the portion of my God his inheritance, and my abode is in the full assembly of saints.
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Sext)
+!Sir 24:10-12
+So was I established in Sion; likewise in the beloved city he gave me rest, and in Jerusalem was my power; and I took root in an honourable people, even in the portion of the Lord's inheritance, * and my abode is in the assembly of the saints.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At None)
+!Sir 24:15
+I gave a sweet smell like cinnamon and aspalathus, * and I yielded a pleasant odour like the best myrrh.
+R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Commune/C11 [Hymnus Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 66* (Common of Feasts B.V.M., At Lauds)
 O gloriosa Domina
 
-O glorious lady! throned on high
-Above the star-illumined sky;
-Thereto ordained, thy bosom lent
-To thy Creator nourishment.
+O glorious Lady, throned in rest,
+Amidst the starry host above,
+Who gavest nurture from thy breast
+To God, with pure maternal love.
 
-Through thy sweet offspring we receive
-The bliss once lost through hapless Eve;
-And heaven to mortals open lies
-Now thou art portal of the skies.
+What we had lost through sinful Eve
+The Blossom sprung from thee restores,
+And, granting bliss to souls that grieve,
+Unbars the everlasting doors.
 
-Thou art the door of heaven's high King,
-Light's gateway fair and glistering;
-Life through a Virgin is restored;
-Ye ransomed nations, praise the Lord!
+O Gate, through which hath passed the King,
+O Hall, whence Light shone through the gloom;
+The ransomed nations praise and sing
+Life given from the Virgin womb.
 
 All honour, laud, and glory be,
 O Jesu, Virgin-born, to thee;
@@ -158,31 +174,16 @@ R. Hail Mary, full of grace, * the Lord is with thee.
 @use commons/blessed-virgin/short-responsory-lauds
 
 [short-responsory-terce]
-# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Tertia] — check against diurnal
-R. In thy comeliness * and in thy beauty.
-R. In thy comeliness * and in thy beauty.
-V. Go forward, fare prosperously, and reign.
-R. In thy beauty.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. In thy comeliness * and in thy beauty.
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Terce)
+@use commons/virgin-martyr/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Sexta] — check against diurnal
-R. God shall help her * with His countenance.
-R. God shall help her * with His countenance.
-V. God is in the midst of her, she shall not be moved.
-R. With His countenance.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God shall help her * with His countenance.
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Sext)
+@use commons/virgin-martyr/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium CommuneM/C11 [Responsory Breve Nona] — check against diurnal
-R. God hath chosen her, * and fore-chosen her.
-R. God hath chosen her, * and fore-chosen her.
-V. He hath made her to dwell in His tabernacle.
-R. And fore-chosen her.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God hath chosen her, * and fore-chosen her.
+# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At None)
+@use commons/virgin-martyr/short-responsory-none
 
 [chapter-vespers]
 @use commons/blessed-virgin/chapter-lauds
