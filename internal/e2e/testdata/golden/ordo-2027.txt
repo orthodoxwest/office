@@ -255,9 +255,9 @@ FEBRUARY
            Hours   Preces
            Vespers r · I fol. (St. Agatha) · Mag. The blessed Agatha · No Suff.
   5  Fri  L  St. Agatha                                 [gd]  r
-           Lauds   r · Ben. The heathen multitude made haste · No Preces · No Suff.
+           Lauds   r · Ben. The multitude · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Upon Him Who hath vouchsafed · No Suff.
+           Vespers r · II prec. · Mag. The blessed Agatha · No Suff.
                Com. St Dorothy, Virgin & Martyr ("Come, thou Bride of Christ")
                Com. St Photius, Bishop and Confessor ("The Lord loved him")
   6  Sat     Saturday Office of the B.V.M               [s]   w
@@ -872,7 +872,7 @@ MAY
  23  Sun     III Sunday after Easter                    [sd]  w
            Lauds   w · Ben. A little while · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. Amen, amen I say to you · No Suff.
+           Vespers w · II prec. · Mag. Verily I say unto you · No Suff.
                Com. St Vincent of Lerins, Confessor ("The world, and all things earthly")
  24  Mon     Feria                                            w
            St Vincent of Lerins, Confessor (com)
@@ -2005,14 +2005,14 @@ NOVEMBER
            Lauds   g · Ben. From the hand of all that hate us · No Preces · Suff.
                Com. Ss. Tryphon, Respicius & Nympha, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · I fol. (St. Martin of Tours) · Mag. O how blessed a man is he! · No Suff.
+           Vespers w · I fol. (St. Martin of Tours) · Mag. O blessed Martin · No Suff.
                Com. St Mennas, Martyr ("Whosoever will come after me")
  11  Thu     St. Martin of Tours                        [gd]  w
            St Mennas, Martyr (com)
-           Lauds   w · Ben. Martin is called joyfully into Abraham's bosom · No Preces · No Suff.
+           Lauds   w · Ben. O blessed Martin · No Preces · No Suff.
                Com. St Mennas, Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · II prec. · Mag. O how blessed a Bishop was he! · No Suff.
+           Vespers w · II prec. · Mag. O blessed Bishop · No Suff.
                Com. St Martin I, Bishop & Martyr ("Whosoever will come after me")
  12  Fri  L  Feria                                            g
            St Martin I, Bishop & Martyr (com)
@@ -2167,38 +2167,38 @@ DECEMBER
            Lauds   v · Ben. Now when John · No Preces · No Suff.
                Com. St Sabbas of Judæa, Abbot ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers v · II prec. · Mag. Art thou he that art to come · No Suff.
+           Vespers v · II prec. · Mag. Art thou he · No Suff.
                Com. St. Nicholas ("O thou Priest and Bishop")
   6  Mon  L§ St. Nicholas                               [d]   w
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Monday after Advent Sunday 2 ("The Lord the Ruler")
+               Com. Monday after Advent Sunday 2 ("From heaven there cometh")
            Hours   No Preces
            Vespers w · I fol. (St. Ambrose) · Mag. O Teacher right excellent · No Suff.
                Com. St. Nicholas ("The Lord loved him")
-               Com. Monday after Advent Sunday 2 ("Behold, the Lord cometh")
+               Com. Monday after Advent Sunday 2 ("Behold the King shall come")
   7  Tue  L  St. Ambrose                                [gd]  w
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Tuesday after Advent Sunday 2 ("The Lord shall arise")
+               Com. Tuesday after Advent Sunday 2 ("The Lord shall arise upon thee")
            Hours   No Preces
            Vespers w · I fol. (Conception of the Blessed Virgin Mary) · Mag. All generations · No Suff.
                Com. St. Ambrose ("O Teacher right excellent")
-               Com. Tuesday after Advent Sunday 2 ("The voice")
+               Com. Tuesday after Advent Sunday 2 ("The voice of one crying")
   8  Wed  L§ Conception of the Blessed Virgin Mary      [2cl] w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Wednesday after Advent Sunday 2 ("Behold I send My angel")
+               Com. Wednesday after Advent Sunday 2 ("Behold I send my messenger")
            Hours   No Preces
            Vespers w · II prec. · Mag. Let us celebrate · No Suff.
-               Com. Wednesday after Advent Sunday 2 ("Thou shalt yet be built anew")
+               Com. Wednesday after Advent Sunday 2 ("Sion")
   9  Thu  L  Day II within Conception Octave            [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Thursday after Advent Sunday 2 ("O Lord, Thou art He That should come")
+               Com. Thursday after Advent Sunday 2 ("Thou, O Lord")
            Hours   No Preces
            Vespers w · Mag. Let us celebrate · No Suff.
                Com. St Melchiades, Bishop & Martyr ("Whosoever will come after me")
  10  Fri  L§ Day III within Conception Octave           [sd]  w
            St Melchiades, Bishop & Martyr (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Friday after Advent Sunday 2 ("Say")
+               Com. Friday after Advent Sunday 2 ("Say to them")
                Com. St Melchiades, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · Mag. Let us celebrate · No Suff.
@@ -2206,7 +2206,7 @@ DECEMBER
  11  Sat  L  Day IV within Conception Octave            [sd]  w
            St Damasus, Bishop & Confessor (com)
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Saturday after Advent Sunday 2 ("The Lord shall lift up a standard")
+               Com. Saturday after Advent Sunday 2 ("The Lord shall set up an ensign")
                Com. St Damasus, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.

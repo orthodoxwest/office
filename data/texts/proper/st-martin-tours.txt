@@ -2,37 +2,42 @@
 @use proper/st-martin-tours/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal
-His disciples said * unto Blessed Martin: Father, why wilt thou go away from us? or with whom wilt thou leave us orphans? For ravening wolves will break in upon thy flock.
+# SOURCE: monastic diurnal, p. 656 (St Martin, At Lauds)
+His disciples * said unto blessed Martin: Father, why dost thou abandon us? or to whom wilt thou leave thy fatherless children? for grievous wolves shall enter in among us, not sparing the flock.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal
-Lord, if I be still needful to thy people, I refuse not * to work. thy will be done.
+# SOURCE: monastic diurnal, p. 656 (St Martin, At Lauds)
+O Lord, * if I am yet needful unto thy people, I refuse not to labour: thy will be done.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal
-Not to be told is this man's glory; * whom work did not and death could not conquer; who neither feared to die, nor refused to live.
+# SOURCE: monastic diurnal, pp. 656–657 (St Martin, At Lauds)
+O man of worth past telling, * whom labour could not conquer, nor death discomfit; who neither feared to die, nor refused to live.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/11-11 [Ant Laudes] — check against diurnal
-With eyes and hands lifted up to heaven, * he never let his mighty spirit slacken in prayer. Alleluia.
+# SOURCE: monastic diurnal, p. 657 (St Martin, At Lauds)
+With eyes and hands * ever raised toward heaven, his undaunted spirit ceased not from supplication, alleluia.
 
 [psalm-antiphon-5]
-@use proper/st-martin-tours/benedictus-antiphon
+# SOURCE: monastic diurnal, p. 657 (St Martin, At Lauds)
+Martin is received, * rejoicing, into the bosom of Abraham: Martin, poor and lowly here on earth, entereth rich into heaven, and is saluted with heavenly songs.
+
 [benedictus-antiphon]
-Martin is called joyfully into Abraham's bosom. * Martin, who was poor here and of small estimation, entereth rich into heaven, and the songs of heaven are raised in his honour.
+@use proper/st-martin-tours/magnificat-antiphon-first
 
 [magnificat-antiphon]
-O how blessed a Bishop was he! * All his bowels yearned on the King Christ, and he had no dread for the power of the Empire! O how holy a soul was his, which passed not away by the sword of the persecutor, and yet lost not the palm of martyrdom.
+# SOURCE: monastic diurnal, p. 657 (St Martin, At II Vespers)
+O blessed Bishop, * who with all his heart loved Christ the King, and feared not the dominion of princes! O holy soul, which, although withheld from the persecutor's sword, lacked not the palm of martyrdom!
 
 [commemoration-antiphon]
-O how blessed a man is he! * His soul hath entered into possession in Paradise. There the Angels cry aloud for joy, there the Archangels make glad, there the whole company of the Saints do shout, there the army of the Virgins do call others to follow, (saying:) Make thine everlasting abode with us.
+@use proper/st-martin-tours/magnificat-antiphon-first
 
 [collect]
-Grant, we beseech thee, O Almighty God, that the worshipful Feast of thy blessed Confessor and Bishop Martin, may avail us to the increase both of godliness toward thee, and healthfulness to our own souls.
+# SOURCE: monastic diurnal, p. 657 (St Martin)
+O God, who seest that of our own strength we cannot stand upright: mercifully grant, at the prayer of blessed Martin, thy Confessor and Bishop, that we may be defended against all adversities.
 
 [magnificat-antiphon-first]
-@use proper/st-martin-tours/commemoration-antiphon
+# SOURCE: monastic diurnal, p. 656 (St Martin, At I Vespers)
+O blessed Martin, * whose righteous soul possesseth Paradise; whereat the Angels triumph, the Archangels are jubilant: thee the choir of Saints proclaimeth, the throng of Virgins inviteth, saying, Abide with us for ever.
 
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.

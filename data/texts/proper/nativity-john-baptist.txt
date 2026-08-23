@@ -66,9 +66,15 @@ Listen, O isles, unto me; and hearken, ye people, from afar; The Lord hath calle
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/06-24 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At Sext)
 !Isa 49:5-6
-And now, saith the Lord that formed me from the womb to be His servant, I have given thee for a light to the Gentiles, that thou mayest be My salvation unto the end of the earth.
+And now, saith the Lord that formed me from the womb to be his servant: I will give thee for a light to the Gentiles, * that thou mayest be my salvation unto the end of the earth.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At None)
+!Isa 49:7
+Kings shall see and arise, princes also shall worship the Lord thy God, * and the Holy One of Israel, who hath chosen thee.
 R. Thanks be to God.
 
 [hymn-lauds]

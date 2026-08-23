@@ -67,15 +67,15 @@ Brethren: Let us give thanks unto the Father, which hath made us meet to be part
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/10-DU [Capitulum Sexta] — check against diurnal
-!Col 1;16-18
-LL things were created by him and in him, and he is before all, and by him all things consist. And he is the head of the body, the Church, who is the beginning, the firstborn from the dead, that in all things he may hold the primacy.
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
+!Col 1:16-18
+All things were created by him, and for him: and he is before all things, and by him all things consist. And he is the head of the body, the Church: who is the beginning, the firstborn from the dead; * that in all things he might have the preeminence.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Sancti/10-DU [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
 !Col 1:19-20
-In him, it hath well pleased the Father, that all fullness should dwell, and through him to reconcile all things unto himself, making peace through the blood of his cross, both as to the things that are on earth, and the things that are in heaven, in Christ Jesus our Lord.
+For it pleased the Father that in him should all fulness dwell; and, having made peace through the blood of his cross, to reconcile all things unto himself, whether they be things in earth, or things in heaven, * in Christ Jesus our Lord.
 R. Thanks be to God.
 
 [hymn-lauds]
