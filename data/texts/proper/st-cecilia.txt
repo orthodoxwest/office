@@ -2,28 +2,32 @@
 @use proper/st-cecilia/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-The musicians played, and Cecilia sang unto the Lord, * saying: Let my heart be undefiled, that I be not ashamed.
+# SOURCE: monastic diurnal, p. 665 (St Cecilia, At Lauds)
+The organs made melody * while Cecilia sang again to the Lord, and said: Let my heart be sound in thy statutes, that I be not ashamed.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-Valerian found Cecilia praying in her chamber, * and with her the Angel.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+Then did Valerian * find Cecilia in her chamber with an Angel, making her supplication.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-Busy like a bee, * O Lord, did thine handmaiden Cecilia serve thee.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+Cecilia * thine handmaid, O Lord, ever serveth thee as zealously as a busy bee.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/11-22 [Ant Vespera] — check against diurnal
-I bless thee, O Father of my Lord Jesus Christ, * that through thy Son the fire is gone out round about me.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+I bless thee, * O Father of my Lord Jesus Christ: for by thy Son the fire is quenched round about thine handmaid.
 
 [psalm-antiphon-5]
-@use proper/st-cecilia/magnificat-antiphon
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+I desired * of the Lord a three days' respite, that I might hallow my dwelling as a temple.
+
 [benedictus-antiphon]
-As dawn was fading * into day, Cecilia cried and said: Arise, O soldiers of Christ, cast away the works of darkness, and put on the armour of light.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+When the dawn of day was breaking, * Cecilia the Martyr cried, saying: Forward, soldiers of Christ! Cast off the works of darkness, and put on the armour of light.
 
 [magnificat-antiphon]
-I have asked the Lord for three days, * that I may consecrate my house as a Church.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At II Vespers)
+This noble maiden * alway bare the glorious Gospel of Christ in her bosom: without ceasing, she continued in prayer and supplication, and celestial converse, night and day.
 
 [commemoration-antiphon]
 @use proper/st-cecilia/psalm-antiphon-1
@@ -32,11 +36,12 @@ I have asked the Lord for three days, * that I may consecrate my house as a Chur
 @use commons/virgin-martyr/commemoration-versicle
 
 [collect]
-O God, Who year by year dost gladden thy people by the solemn feast of thy blessed Virgin and Martyr Cecilia, grant unto us, we beseech thee, not only devoutly to observe the same, but also to follow after the pattern of her godly conversation.
+# SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
+O God, who makest us glad with the yearly festival of blessed Cecilia thy Virgin and Martyr: grant that we, who honour her with duteous service, may also follow the example of her good and holy life.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/11-22.txt [Ant 1] — check against diurnal
-Valerian! there is a secret * which I wish to tell thee. I have an Angel of God for a lover, and he is very jealous to keep my body.
+# SOURCE: monastic diurnal, p. 665 (St Cecilia, At I Vespers)
+It is secret, * O Valerian, what now I wish to tell thee: I have an Angel of God who loves me, and guards my body with exceeding zeal.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

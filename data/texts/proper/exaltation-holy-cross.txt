@@ -54,9 +54,9 @@ Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium SanctiM/09-14 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 600 (Exaltation of the Holy Cross, At Sext)
 !Gal 6:14
-But God forbid that I should glory, save in the Cross of our Lord Jesus Christ, by Whom the world is crucified unto me, and I unto the world.
+But God forbid that I should glory, * save in the Cross of our Lord Jesus Christ, by whom the world is crucified unto me, and I unto the world.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -197,13 +197,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. We adore thee, O Christ, * and we bless thee.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/09-14 [Responsory Breve Nona] — check against diurnal
-R. Let all the earth worship thee, * and sing unto thee.
-R. Let all the earth worship thee, * and sing unto thee.
-V. Let them sing praises to thy Name, O Lord.
-R. And sing unto thee.
+# SOURCE: monastic diurnal, pp. 600–601 (Exaltation of the Holy Cross, At None)
+R. All the world shall worship thee * and sing of thee.
+R. All the world shall worship thee * and sing of thee.
+V. And praise thy Name, O Lord.
+R. And sing of thee.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Let all the earth worship thee, * and sing unto thee.
+R. All the world shall worship thee * and sing of thee.
 
 [commemoration-antiphon]
 @use proper/exaltation-holy-cross/benedictus-antiphon

@@ -2,28 +2,32 @@
 @use proper/guardian-angels/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-God hath given His Angels charge over thee, * to keep thee in all thy ways.
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+God shall give his Angels * charge over thee, to keep thee in all thy ways.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-Let us praise the Lord, * Whom the Angels do praise, unto Whom Cherubim and Seraphim do cry, Holy, Holy, Holy.
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+Let us praise the Lord * whom the Angels praise, to whom Cherubim and Seraphim cry aloud, Holy, Holy, Holy.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-In heaven their Angels do always behold the face of My Father, * Which is in heaven.
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+Their Angels * do always behold the face of my Father which is in heaven.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/10-02 [Ant Laudes] — check against diurnal
-Blessed be God, * Who sent His Angel, and delivered His servants that trusted in Him.
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+Blessed be God, * who hath sent his Angel, and delivered his servants who put their trust in him.
 
 [psalm-antiphon-5]
-@use proper/guardian-angels/magnificat-antiphon
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+Praise God, * all ye Angels of his: praise him, all his host.
+
 [benedictus-antiphon]
-The Angel that talked * with me came again, and waked me, as a man that is wakened out of his sleep.
+# SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Lauds)
+And the Angel * that talked with me came again, and waked me, as a man that is wakened out of his sleep.
 
 [magnificat-antiphon]
-Praise ye God, * all His Angels Praise ye Him, all His hosts.
+# SOURCE: monastic diurnal, p. 616 (Holy Guardian Angels, At II Vespers)
+Ye holy Angels, * our Guardians, defend us in time of battle, lest we perish in the dreadful day of judgment.
 
 [commemoration-antiphon]
 @use proper/guardian-angels/psalm-antiphon-1
@@ -33,80 +37,86 @@ V. He shall give his Angels charge over thee.
 R. To keep thee in all thy ways.
 
 [collect]
-O God, Who in thine unspeakable Providence hast been pleased to give thine holy Angels charge over us, to keep us, mercifully grant unto our prayers, that we be both ever fenced by their wardship here, and everlastingly blessed by their fellowship hereafter.
+# SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Lauds)
+O God, who in thine unspeakable providence deignest to send thy holy Angels for our safekeeping: grant unto us thy suppliants, that we may ever be defended by their protection, and may rejoice in their eternal fellowship.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/10-02 [Capitulum Laudes] — check against diurnal
-!Exod. 23:20-21
-Behold I will send my angel, who shall go before thee, and keep thee in thy journey, and bring thee into the place that I have prepared. Take notice of him, and hear his voice.
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At Lauds)
+!Exod 23:20-21
+Behold, I send an Angel before thee, * to keep thee in the way, and to bring thee into the place which I have prepared. Beware of him, and obey his voice.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/10-02 [Capitulum Sexta] — check against diurnal
-!Exod. 23:21
-Take notice of him, and hear his voice, and do not think him one to be contemned: for he will not forgive when thou hast sinned, and my name is in him.
+# SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Sext)
+!Exod 23:21
+Provoke him not; * for he will not pardon your transgressions: for my Name is in him.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 616 (Holy Guardian Angels, At None)
+!Exod 23:22-23
+But if thou shalt indeed obey his voice, and do all that I speak; * then I will be an enemy unto thine enemies, and an adversary unto thine adversaries. For mine Angel shall go before thee.
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/10-02 [Hymnus Laudes] — check against diurnal
-Aeterne Rector siderum
+# SOURCE: monastic diurnal, pp. 614–615 (Holy Guardian Angels, At Lauds)
+Orbis patrator optime
 
-Ruler of the dread immense!
-Maker of this mighty frame!
-Whose eternal providence
-Guides it, as from thee it came:
+Creator of the circling sky,
+Who madest all by power most high,
+Thy Providence will never cease
+To rule thy works in might and peace.
 
-Low before thy throne we bend;
-Hear our supplicating cries;
-And thy light celestial send
-With the freshly dawning skies.
+Be present when we cry to thee,
+A sinful people though we be;
+And as the day-dawn grows apace
+Illume our minds with light of grace.
 
-King of kings, and Lord most high!
-This of thy dear love we pray:
-May thy guardian angel nigh,
-Keep us from all sin this day.
+O send thine Angel thitherward
+Assigned by thee to be our guard,
+That now his presence may begin
+To keep us from all stain of sin.
 
-May he crush the deadly wiles
-Of the envious serpent's art,
-Ever spreading cunning toils
-Round about the thoughtless heart.
+Let him destroy that hidden snare
+The eager serpent doth prepare,
+Lest we be taken in the net
+Before our heedless bosoms set.
 
-May he scatter ruthless war
-Ere to this our land it come;
-Plague and famine drive away,
-Fix securely peace at home.
+At his command let every fear
+Of hostile foemen disappear;
+Let civil strife give way to peace,
+And pestilence and famine cease.
 
-Father, Son, and Holy Ghost,
-One eternal Trinity!
-Guard by thy angelic host
-Us who put our trust in thee.
+/:The following Ending is never changed.:/
 
-Amen.
+To God the Father glory be;
+For those the Saviour setteth free,
+Anointed by the Holy Ghost,
+Are guarded by the Angel host. Amen.
+
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/10-02 [Hymnus Vespera] — check against diurnal
-Custodes hominum psallimus Angelos
+# SOURCE: monastic diurnal, p. 613 (Holy Guardian Angels, At I Vespers)
+Custodes hominum
 
-Angel-guardians of men, spirits and powers we sing,
-Whom our Father hath sent, aids to our weakly frame,
-Heavenly friends and guides, help from on high to bring,
-Lest we fail through the foeman's wile.
+The Guardians of our race, our Angel Guides we hail;
+Our Father sendeth forth to aid our nature frail
+These heavenly friends, lest we should suffer overthrow
+Through cunning of our subtle foe.
 
-He, the spoiler of souls, angel-traitor of old,
-Cast in merited wrath out of his honoured place,
-Burns with envy and hate, seeking their souls to gain
-Whom God's mercy invites to heaven.
+For he, who justly lost the honour once his own,
+The traitor angel, rues his lost and vacant throne,
+With burning envy strives to make them fall away
+Whom God doth call to heavenly day.
 
-Therefore come to our help, watchful ward of our lives:
-Turn aside from the land God to thy care confides
-Sickness and woe of soul, yea, and what else of ill
-Peace of heart to its folk denies.
+Then, watchful Guardian, spread thy wings and cleave the air,
+Haste hither to our home committed to thy care;
+Drive thence each noxious ill that might the soul infest,
+Nor suffer danger here to rest.
 
-Now to the Holy Three praise evermore resound:
-Under whose hand divine resteth the triple world
-Governed in wondrous wise: glory be theirs and might
-While the ages unending run.
-
-Amen.
+Now to the holy Three your praise devoutly pour;
+His glorious Godhead guides and governs evermore
+This triple frame: to him ascribe we all our praise
+Who reigns through everlasting days. Amen.
 [short-responsory-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 614 (October 2, At Lauds)
 R. An Angel stood * at the altar of the temple.
@@ -139,31 +149,21 @@ V. In the presence of the Angels I will sing praise unto thee, O my God.
 R. I will worship toward thy holy temple, and praise thy Name.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Tertia] — check against diurnal
-R. An Angel stood * at the Altar of the Temple.
-R. An Angel stood * at the Altar of the Temple.
-V. Having a golden censer in his hand.
-R. At the Altar of the Temple.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. An Angel stood * at the Altar of the Temple.
+# SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Terce)
+@use proper/guardian-angels/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Sexta] — check against diurnal
-R. The smoke of the incense * ascended up before the Lord.
-R. The smoke of the incense * ascended up before the Lord.
-V. Out of the Angel's hand.
-R. Ascended up before the Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The smoke of the incense * ascended up before the Lord.
+# SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Sext)
+@use proper/guardian-angels/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium SanctiM/10-02 [Responsory Breve Nona] — check against diurnal
-R. Before the Angels * will I sing praise unto thee, O my God.
-R. Before the Angels * will I sing praise unto thee, O my God.
-V. I will worship toward thy holy Temple, and praise thy Name.
-R. Will I sing praise unto thee, O my God.
+# SOURCE: monastic diurnal, p. 616 (Holy Guardian Angels, At None)
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+V. I will worship toward thy holy temple, and praise thy Name.
+R. I will sing praise unto thee, O my God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Before the Angels * will I sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
 
 [chapter-vespers]
 @use proper/guardian-angels/chapter-lauds
@@ -172,8 +172,8 @@ R. Before the Angels * will I sing praise unto thee, O my God.
 @use proper/guardian-angels/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/10-02.txt [Ant 1] — check against diurnal
-Are they not all * ministering spirits, sent forth to minister for them who shall be heirs of salvation?
+# SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At I Vespers)
+They are all * ministering spirits, sent forth to minister to them who shall be heirs of salvation?
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

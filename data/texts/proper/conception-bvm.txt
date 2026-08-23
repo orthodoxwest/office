@@ -54,9 +54,15 @@ The Lord possessed me in the beginning of his way, before his works of old. I wa
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-08 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, pp. 449–450 (Conception of the B.V.M., At Sext)
 !Ezek 44:2-3
-This gate shall be shut, it shall not be opened, and no man shall pass through it: because the Lord the God of Israel hath entered in by it, and it shall be shut. For the prince, the prince himself, shall sit in it.
+This gate shall be shut, it shall not be opened, and no man shall enter in by it; * because the Lord, the God of Israel, hath entered in by it, therefore it shall be shut. It is for the prince; the prince, he shall sit in it.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At None)
+!Rev 12:1
+There appeared a great wonder in heaven; * a woman clothed with the sun, and the moon under her feet, and upon her head a crown of twelve stars.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -90,31 +96,21 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. By this I know * thou favourest me.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Tertia] — check against diurnal
-R. It is Almighty God * That girdeth me with strength.
-R. It is Almighty God * That girdeth me with strength.
-V. And maketh my way perfect.
-R. That girdeth me with strength.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. It is Almighty God * That girdeth me with strength.
+# SOURCE: monastic diurnal, p. 449 (Conception of the B.V.M., At Terce)
+@use proper/conception-bvm/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Sexta] — check against diurnal
-R. By this I know that * Thou favourest me.
-R. By this I know that * Thou favourest me.
-V. Because mine enemy shall not triumph over me.
-R. Thou favourest me.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. By this I know that * Thou favourest me.
+# SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At Sext)
+@use proper/conception-bvm/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/12-08 [Responsory Breve Nona] — check against diurnal
-R. I will extol thee, O Lord, * for Thou hast lifted me up.
-R. I will extol thee, O Lord, * for Thou hast lifted me up.
-V. And hast not made my foes to rejoice over me.
-R. Thou hast lifted me up.
+# SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At None)
+R. I will magnify thee, O Lord, * for thou hast set me up.
+R. I will magnify thee, O Lord, * for thou hast set me up.
+V. And not made my foes to triumph over me.
+R. For thou hast set me up.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. I will extol thee, O Lord, * for Thou hast lifted me up.
+R. I will magnify thee, O Lord, * for thou hast set me up.
 
 [chapter-vespers]
 @use proper/conception-bvm/chapter-lauds

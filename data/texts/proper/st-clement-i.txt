@@ -2,28 +2,32 @@
 @use proper/st-clement-i/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-While St. Clement prayed, * there appeared unto him the Lamb of God.
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+While holy Clement * prayed, the Lamb of God appeared unto him.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-Not for my own merits * hath the Lord sent me unto you, that I may share your crowns.
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+Not for my own merits * did the Lord send me unto you, that I might be made partaker of your crowns.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-I saw on the mountain * the Lamb standing, from beneath whose foot flowed a fountain of living waters.
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+Upon the mountain * I saw the Lamb standing, from beneath whose foot floweth a fount of living waters.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/11-23 [Ant Vespera] — check against diurnal
-From beneath whose foot * a fountain of living waters flowed forth: the stream of the river that maketh glad the city of God.
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+From underneath his foot * floweth a fount of living waters: a river, the streams whereof make glad the city of God.
 
 [psalm-antiphon-5]
-@use proper/st-clement-i/magnificat-antiphon
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+All the nations * round about believed in Christ the Lord.
+
 [benedictus-antiphon]
-As he began to move toward the sea * the people cried out with a loud voice: O Lord Jesus Christ, deliver him! And Clement wept, and said: Father, receive my spirit!
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+When he had started going to the sea, * the people cried out with loud voices, O Lord Jesus Christ, save him: and Clement responded, weeping, Heavenly Father, receive my spirit.
 
 [magnificat-antiphon]
-All the nations * round about believed in Christ the Lord.
+# SOURCE: monastic diurnal, p. 668 (St Clement, At II Vespers)
+@use proper/st-clement-i/magnificat-antiphon-first
 
 [commemoration-antiphon]
 @use proper/st-clement-i/psalm-antiphon-1
@@ -32,11 +36,12 @@ All the nations * round about believed in Christ the Lord.
 @use commons/bishop-martyr/commemoration-versicle
 
 [collect]
-O God, Who dost gladden us by the yearly Feast-day of thine holy Martyr, Clement mercifully grant unto us who keep their birthday, the strength to imitate their patience under suffering.
+# SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
+O God, who makest us glad by the yearly festival of blessed Clement, thy Martyr and Bishop: mercifully grant that we who honour his birthday may imitate his fortitude in suffering.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/11-23.txt [Ant 1] — check against diurnal
-Let us all * pray Our Lord Jesus Christ to open a spring for those that own His Name.
+# SOURCE: monastic diurnal, pp. 666–667 (St Clement, At I Vespers)
+Let us all pray * to our Lord Jesus Christ, that he would open a fountain for his Confessors.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

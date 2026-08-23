@@ -51,9 +51,15 @@ In all things I sought rest, and I shall abide in the Lord's inheritance. So the
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium SanctiM/08-15 [Capitulum Sexta] — check against diurnal
-!Jdt 13:24-25
-Blessed be the Lord, because he hath so magnified thy name this day, that thy praise shall not depart out of the mouth of men.
+# SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At Sext)
+!Sir 24:10-12
+So was I established in Sion: likewise in the beloved city he gave me rest, and in Jerusalem was my power; * and I took root in an honourable people, even in the portion of the Lord's inheritance, and my abode is in the assembly of the saints.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At None)
+!Sir 24:15
+I gave a sweet smell like cinnamon and aspalathus, * and I yielded a pleasant odour like the best myrrh.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -130,31 +136,21 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Mary is taken up into heaven * the Angels triumph.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/08-15 [Responsory Breve Tertia] — check against diurnal
-R. The holy Mother of God * hath been exalted.
-R. The holy Mother of God * hath been exalted.
-V. Over choirs of Angels, into the heavenly kingdom.
-R. Hath been exalted.
+# SOURCE: monastic diurnal, p. 589 (Assumption of the B.V.M., At Terce)
+R. The holy Mother of God * is exalted.
+R. The holy Mother of God * is exalted.
+V. Above choirs of Angels to the heavenly kingdom.
+R. Is exalted.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The holy Mother of God * hath been exalted.
+R. The holy Mother of God * is exalted.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/08-15 [Responsory Breve Sexta] — check against diurnal
-R. Mary hath been taken to heaven * the Angels rejoice.
-R. Mary hath been taken to heaven * the Angels rejoice.
-V. They praise and bless the Lord.
-R. The Angels rejoice.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Mary hath been taken to heaven * the Angels rejoice.
+# SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At Sext)
+@use proper/assumption-bvm/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/08-15 [Responsory Breve Nona] — check against diurnal
-R. The Virgin Mary hath been taken * into the chamber on high.
-R. The Virgin Mary hath been taken * into the chamber on high.
-V. Where the King of kings sitteth on a throne amid the stars.
-R. On high.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Virgin Mary hath been taken * into the chamber on high.
+# SOURCE: monastic diurnal, p. 590 (Assumption of the B.V.M., At None)
+@use proper/assumption-bvm/short-responsory-lauds
 
 [chapter-vespers]
 @use proper/assumption-bvm/chapter-lauds

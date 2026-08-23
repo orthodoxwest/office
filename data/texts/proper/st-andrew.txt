@@ -46,9 +46,9 @@ Brethren: With the heart man believeth unto righteousness; and with the mouth co
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/11-30 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 445 (St Andrew, At Sext)
 !Rom 10:12-13
-For there is no distinction of the Jew and the Greek: for the same is Lord over all, rich unto all that call upon him. For whosoever shall call upon the name of the Lord, shall be saved.
+For there is no difference between the Jew and the Greek: * for the same Lord over all is rich unto all that call upon him. For whosoever shall call upon the Name of the Lord shall be saved.
 R. Thanks be to God.
 
 [chapter-vespers]
