@@ -60,32 +60,32 @@ V. Lord, thou hast been our refuge.
 R. From one generation to another.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 236 (Septuagesima Sunday, At Sext)
 !1 Cor 9:25
-And every one that striveth for the mastery, refraineth himself from all things: and they indeed that they may receive a corruptible crown; but we an incorruptible one.
+And every man that striveth for the mastery is temperate in all things. Now they do it to obtain a corruptible crown; * but we an incorruptible.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Quadp1-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 237 (Septuagesima Sunday, At None)
 !1 Cor 10:4-5
-And all drank the same spiritual drink; and they drank of the spiritual rock that followed them, and the rock was Christ. But with most of them God was not well pleased: for they were overthrown in the desert.
+For they drank of that spiritual Rock which followed them: and that Rock was Christ. * But with some of them God was not well pleased.
 R. Thanks be to God.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quadp1-1 [Ant 3] — check against diurnal
-These last have wrought but one hour, * and thou hast made them equal unto us, which have borne the burden and heat of the day.
+# SOURCE: monastic diurnal, p. 237 (Week of Septuagesima, Monday)
+These last * have wrought but one hour, and thou hast made them equal unto us, which have borne the burden and heat of the day.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quadp1-2 [Ant 3] — check against diurnal
-And the householder said: * Friend, I do thee no wrong didst not thou agree with me for a penny? Take that is thine, and go thy way.
+# SOURCE: monastic diurnal, p. 237 (Week of Septuagesima, Tuesday)
+The householder answered and said, * Friend, I do thee no wrong: didst not thou agree with me for a penny? Take that thine is, and go thy way.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quadp1-3 [Ant 3] — check against diurnal
-Take that thine is, * and go thy way; for I am good, saith the Lord.
+# SOURCE: monastic diurnal, p. 238 (Week of Septuagesima, Wednesday)
+Take that thine is * and go thy way: because I am good, saith the Lord.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quadp1-4 [Ant 3] — check against diurnal
-Is it not lawful for me * to do what I will? Is thine eye evil, because I am gracious?" saith the Lord.
+# SOURCE: monastic diurnal, p. 238 (Week of Septuagesima, Thursday)
+Is it not lawful * for me to do what I will? Is thine eye evil, because I am good? saith the Lord.
 
 [magnificat-antiphon-first]
 # SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 1 (Dixit Dominus)

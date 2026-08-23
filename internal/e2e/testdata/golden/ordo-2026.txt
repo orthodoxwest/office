@@ -296,7 +296,7 @@ FEBRUARY
                Com. Tuesday after Septuagesima ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. Come, thou Bride of Christ · No Suff.
-               Com. Tuesday after Septuagesima ("And the householder said")
+               Com. Tuesday after Septuagesima ("The householder answered and said")
                Com. St Gregory II, Bishop & Confessor ("The Lord loved him")
  11  Wed     Feria                                            v
            St Gregory II, Bishop & Confessor (com)
@@ -307,7 +307,7 @@ FEBRUARY
  12  Thu     Feria                                            v
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. Is it not lawful for me · Suff.
+           Vespers v · Mag. Is it not lawful · Suff.
  13  Fri  L  Feria                                            v
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
@@ -329,18 +329,18 @@ FEBRUARY
  16  Mon     Feria                                            v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. If ye would be truly honourable · Suff.
+           Vespers v · Mag. If ye seek · Suff.
  17  Tue     Feria                                            v
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. The seed is the word of God · Suff.
+           Vespers v · Mag. The seed · Suff.
                Com. St Simeon of Jerusalem, Bishop & Martyr ("Whosoever will come after me")
  18  Wed     Feria                                            v
            St Simeon of Jerusalem, Bishop & Martyr (com)
            Lauds   v · Ben. From the hand of all that hate us · No Preces · Suff.
                Com. St Simeon of Jerusalem, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers v · Mag. But that on the good ground · Suff.
+           Vespers v · Mag. But that · Suff.
  19  Thu     Feria                                            v
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
@@ -370,7 +370,7 @@ FEBRUARY
            Vespers w · II prec. · Mag. During his pontificate · No Suff.
                Com. St. Matthias, Apostle ("They will deliver you up")
                Com. St Paul ("O holy Apostle Paul")
-               Com. Monday after Quinquagesima ("And they that went before")
+               Com. Monday after Quinquagesima ("And they which went before")
  24  Tue     St. Matthias, Apostle                      [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. Tuesday after Quinquagesima ("Blessed be the Lord God of Israel, for he…")
@@ -386,20 +386,20 @@ FEBRUARY
                Com. St. Alexander of Alexandria, Bishop & Confessor ("The Lord loved him")
  26  Thu  L§ Thursday after Ash Wednesday               [f2]  v
            St. Alexander of Alexandria, Bishop & Confessor (com)
-           Lauds   v · Ben. Lord · No Preces · Suff.
+           Lauds   v · Ben. Lord, my servant · No Preces · Suff.
                Com. St. Alexander of Alexandria, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. O Lord · No Suff.
+           Vespers v · Mag. Lord, I am not worthy · No Suff.
                Com. St. Raphael of Brooklyn ("The Lord loved him")
  27  Fri  L§ Friday after Ash Wednesday                 [f2]  v
            St. Raphael of Brooklyn (gd)
-           Lauds   v · Ben. When thou dost · No Preces · No Suff.
+           Lauds   v · Ben. When thou doest thine alms · No Preces · No Suff.
                Com. St. Raphael of Brooklyn ("Well done")
            Hours   No Preces
-           Vespers v · Mag. But thou when thou shalt pray · No Suff.
+           Vespers v · Mag. But thou, when thou prayest · No Suff.
                Com. St. Raphael of Brooklyn ("The Lord loved him")
  28  Sat  L§ Saturday after Ash Wednesday               [f2]  v
-           Lauds   v · Ben. For they seek me · No Preces · Suff.
+           Lauds   v · Ben. Yet they seek me daily · No Preces · Suff.
            Hours   Preces
            Vespers v · I fol. (I Sunday in Lent) · Mag. Then shalt thou call · Suff.
                Com. St David of Wales, Bishop & Confessor ("The Lord loved him")
@@ -618,11 +618,11 @@ APRIL
            Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
                Com. St Isidore of Seville, Bishop, Confessor & Doctor ("Well done")
            Hours   No Preces
-           Vespers v · I fol. (Palm Sunday) · Mag. It is written: I will smite the Shepherd · No Suff.
+           Vespers v · I fol. (Palm Sunday) · Mag. Righteous Father · No Suff.
   5  Sun  L  PALM SUNDAY                                [1cl] v
            Lauds   v · Ben. The multitudes · No Preces · No Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. It is written: I will smite the Shepherd · No Suff.
+           Vespers v · II prec. · Mag. For it is written · No Suff.
   6  Mon  L§ HOLY MONDAY                                [1cl] v
            Lauds   v · Ben. And now, O Father, glorify Thou Me · No Preces · No Suff.
            Hours   Preces

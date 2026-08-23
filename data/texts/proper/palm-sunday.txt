@@ -26,10 +26,11 @@ Let them be confounded * that persecute me, but let not me be confounded, O Lord
 The multitudes * which came together for the feast day cried unto the Lord: Blessed is he that cometh in the Name of the Lord. Hosanna in the highest.
 
 [magnificat-antiphon]
-It is written: I will smite the Shepherd, * and the sheep of the flock shall be scattered abroad, but after I am risen again, I will go before you into Galilee: there shall ye see Me, saith the Lord.
+# SOURCE: monastic diurnal, pp. 280–281 (Palm Sunday, At II Vespers)
+For it is written, * I will smite the shepherd, and the sheep shall be scattered. But after I am risen again, I will go before you into Galilee: there shall ye see me, saith the Lord.
 
 [commemoration-antiphon]
-O just Father, * the world has not known thee: I however have known thee, for thou hast sent me.
+@use proper/palm-sunday/magnificat-antiphon-first
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -40,21 +41,21 @@ R. His praise shall continually be in my mouth.
 Almighty and everlasting God, who, of thy tender love towards mankind, hast sent thy Son, our Saviour Jesus Christ, to take upon him our flesh, and to suffer death upon the cross, that all mankind should follow the example of his great humility; mercifully grant, that we may both follow the example of his patience, and also be made partakers of his resurrection.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 279 (Palm Sunday, At Lauds)
 !Phil 2:5-7
-Brothers: For let this mind be in you, which was also in Christ Jesus: Who being in the form of God, thought it not robbery to be equal with God: But emptied himself, taking the form of a servant, being made in the likeness of men, and in habit found as a man.
+Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: * and was found in fashion as a man.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 280 (Palm Sunday, At Sext)
 !Phil 2:8-9
-He humbled himself, becoming obedient unto death, even to the death of the cross. For which cause God also hath exalted him, and hath given him a name which is above all names:
+He humbled himself, and became obedient unto death, even the death of the Cross. Wherefore God also hath highly exalted him, * and given him a Name which is above every name.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Quad6-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 280 (Palm Sunday, At None)
 !Phil 2:10-11
-That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth: And that every tongue should confess that the Lord Jesus Christ is in the glory of God the Father.
+At the Name of Jesus every knee should bow, of things in heaven, and things in earth, and things under the earth; and every tongue should confess that Jesus Christ is Lord, * to the glory of God the Father.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -69,9 +70,10 @@ R. Thanks be to God.
 [versicle-lauds]
 @use seasonal/passiontide/versicle-lauds
 
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
-#
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 278 (Palm Sunday, At I Vespers)
+Righteous Father, * the world hath not known thee: but I have known thee, because thou hast sent me.
+
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
