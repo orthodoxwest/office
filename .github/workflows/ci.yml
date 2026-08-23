@@ -360,10 +360,82 @@ jobs:
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
 
+  go-changes:
+    name: Go changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      run: ${{ steps.detect.outputs.run }}
+    steps:
+      - name: Determine whether Go code changed
+        id: detect
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Mutation testing only says something about Go code. A data-only
+            // change (feast/text files plus the golden output they move) can
+            // never alter a mutant's fate, so the mutation jobs are gated on
+            // this. Anything that can change how the Go code is built or
+            // measured — sources, module files, the gremlins config, the
+            // Makefile targets, this workflow — counts as a Go change.
+            const isGoChange = filename =>
+              filename.endsWith('.go') ||
+              filename === 'go.mod' ||
+              filename === 'go.sum' ||
+              filename === '.gremlins.yaml' ||
+              filename === 'Makefile' ||
+              filename === '.github/workflows/ci.yml';
+
+            let files;
+            if (context.eventName === 'pull_request') {
+              files = await github.paginate(github.rest.pulls.listFiles, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                per_page: 100,
+              });
+              files = files.map(file => file.filename);
+            } else if (context.eventName === 'push') {
+              const before = context.payload.before;
+              if (!before || /^0+$/.test(before)) {
+                core.notice('Running mutation jobs because this push has no comparison base.');
+                core.setOutput('run', 'true');
+                return;
+              }
+
+              const comparison = await github.rest.repos.compareCommits({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                base: before,
+                head: context.sha,
+                per_page: 100,
+              });
+              files = (comparison.data.files || []).map(file => file.filename);
+
+              // GitHub truncates very large comparisons. Run conservatively if
+              // the result may not include every changed path.
+              if (files.length >= 300) {
+                core.notice('Running mutation jobs because the changed-file list may be truncated.');
+                core.setOutput('run', 'true');
+                return;
+              }
+            } else {
+              core.setOutput('run', 'true');
+              return;
+            }
+
+            const run = files.length === 0 || files.some(isGoChange);
+            core.notice(run
+              ? 'Running mutation jobs because the change includes Go code.'
+              : 'Skipping mutation jobs because no Go code changed.');
+            core.setOutput('run', run ? 'true' : 'false');
+
   mutation-ratchet:
     name: Mutation ratchet (${{ matrix.package }})
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    needs: go-changes
     permissions:
       contents: read
     strategy:
@@ -376,14 +448,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        if: needs.go-changes.outputs.run == 'true'
 
       - name: Set up Go
+        if: needs.go-changes.outputs.run == 'true'
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
           cache: false
 
       - name: Cache Go build and module cache
+        if: needs.go-changes.outputs.run == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -395,12 +470,20 @@ jobs:
             go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
 
       - name: Enforce mutation ratchet
+        if: needs.go-changes.outputs.run == 'true'
         run: make mutate-ratchet MUTATE_RATCHET=${{ matrix.package }}
+
+      - name: Record skipped mutation ratchet
+        if: needs.go-changes.outputs.run == 'false'
+        run: echo "Mutation ratchet skipped because no Go code changed." >> "$GITHUB_STEP_SUMMARY"
 
   mutation:
     name: Mutation
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    needs: go-changes
+    # Reporting-only and pull-request-only, so it can be skipped outright
+    # rather than gated step by step the way the ratchet jobs are.
+    if: github.event_name == 'pull_request' && needs.go-changes.outputs.run == 'true'
     # Mutants that alter loop counters can spin until their per-mutant timeout,
     # which is derived from the baseline test run and can reach several minutes
     # in --diff mode. Bound the job so a pathological PR can't burn the 6-hour
