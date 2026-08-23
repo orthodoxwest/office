@@ -611,7 +611,14 @@ proper/pentecost/short-responsory-sext,3f43392d1d91,diurnal,"The Feast of Pentec
 proper/pentecost/short-responsory-terce,5a8be47397fb,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost/short-responsory-vespers,b998e2a4240e,Propers of Lauds and Vespers during the Octave of Pentecost,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/pentecost/versicle-lauds,1717e2913fbc,draft archdiocesan Lauds book,The Feast of Pentecost,306,verified,codex,2026-07-18,
-proper/purification-bvm/collect,6bf250c5c65f,diurnal,,470,verified,bwaldrep,2026-07-25,
+proper/purification-bvm/benedictus-antiphon,a0b34d15012b,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/chapter-lauds,f6f45853442e,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/chapter-none,9845978272ac,diurnal,"Purification BVM, At None",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/chapter-sext,b4c2ab4c8165,diurnal,"Purification BVM, At Sext",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/collect,6bf250c5c65f,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/magnificat-antiphon,4abaa2a2df15,diurnal,"Purification BVM, At II Vespers",471,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/magnificat-antiphon-first,984b37f4b2d7,diurnal,"Purification BVM, At I Vespers",469,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/short-responsory-none,706fcdc42c62,diurnal,"Purification BVM, At None",470,verified,grok,2026-08-23,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-friday,840d7154f1c0,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-saturday,7290fe599588,diurnal,Saturday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-thursday,e94b5c8a90b0,diurnal,Thursday after Ash Wednesday,244,verified,grok,2026-08-22,word-for-word from printed page image
