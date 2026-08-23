@@ -41,11 +41,11 @@ Unto the godly * there ariseth up light in the darkness: the Lord is merciful, l
 Of the fruit * of thy body shall I set upon thy seat.
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 78 (Saint Stephen, Protomartyr)
-And Stephen, * full of faith and power, did great wonders and miracles among the people.
+# SOURCE: monastic diurnal, p. 194 (St Stephen, At Lauds)
+And Stephen, full of faith and power, * did great wonders and miracles among the people.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 66 (Saint Stephen, Protomartyr)
+# SOURCE: monastic diurnal, p. 197 (St Stephen, At II Vespers)
 Devout men * carried Stephen to his burial, and made great lamentation over him.
 
 [commemoration-antiphon]
@@ -61,19 +61,25 @@ R. And madest him to have dominion of the works of thy hands.
 Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may learn to love our enemies; since we celebrate the birthday of him who knew how to pray even for his persecutors to our Lord Jesus Christ, thy Son.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 79, 67
-Grant us, we beseech thee, O Lord, so to imitate that which we revere: that we may learn to love even our enemies; forasmuch as we celebrate the birthday of him who knew how to pray even for his persecutors to our Lord Jesus Christ thy Son.
+# SOURCE: monastic diurnal, pp. 194–195 (St Stephen, At Lauds)
+Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may learn to love our enemies; since we celebrate the birthday of him who knew how to pray even for his persecutors to our Lord Jesus Christ, thy Son.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 76 (Saint Stephen, Protomartyr)
+# SOURCE: monastic diurnal, p. 194 (St Stephen, At Lauds)
 !Acts 6:8
-And Stephen, full of faith and power, did great wonders and miracles among the people.
+And Stephen, full of faith and power, * did great wonders and miracles among the people.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-26 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, pp. 195–196 (St Stephen, At Sext)
 !Acts 6:9-10
-Now there arose some of that which is called the synagogue of the Libertines, and of the Cyrenians, and of the Alexandrians, and of them that were of Cilicia and Asia, disputing with Stephen. And they were not able to resist the wisdom and the spirit that spoke.
+Then there arose certain of the synagogue, which is called the synagogue of the Libertines, and Cyrenians, and Alexandrians, and of them of Cilicia and of Asia, disputing with Stephen. * And they were not able to resist the wisdom and the spirit by which he spake.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 196 (St Stephen, At None)
+!Acts 7:60
+And he kneeled down, and cried with a loud voice, Lord, lay not this sin to their charge. * And when he had said this, he fell asleep.
 R. Thanks be to God.
 
 [short-responsory-lauds]
@@ -158,6 +164,23 @@ R. He saw, and entered in: how blessed is the man unto whom heaven stood open!
 
 [chapter-terce]
 @use proper/st-stephen/chapter-lauds
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 195 (St Stephen, At Terce)
+@use commons/martyr/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 196 (St Stephen, At Sext)
+@use proper/st-stephen/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 196 (St Stephen, At None)
+R. His honour is great * in thy salvation.
+R. His honour is great * in thy salvation.
+V. Glory and great worship shalt thou lay upon him.
+R. In thy salvation.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. His honour is great * in thy salvation.
 
 [magnificat-antiphon-first]
 @use proper/st-stephen/benedictus-antiphon
