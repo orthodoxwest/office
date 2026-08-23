@@ -87,15 +87,18 @@ R. Thanks be to God.
 @use proper/corpus-christi/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!1 Cor 11:23-24
-Brothers: For I have received of the Lord that which also I delivered unto you, that the Lord Jesus, the same night in which he was betrayed, took bread. And giving thanks, broke, and said: Take ye, and eat: this is my body, which shall be delivered for you: this do for the commemoration of me.
-R. Thanks be to God.
+@use proper/corpus-christi/chapter-lauds
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At Sext)
 !1 Cor 11:26
-As often as ye eat this Bread, and drink this Cup, ye do show the Lord's death till He come.
+For as often as ye eat this bread, and drink this cup, * ye do shew the Lord's death till he come.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At None)
+!1 Cor 11:27
+Whosoever shall eat this bread, and drink this cup of the Lord, unworthily, * shall be guilty of the body and blood of the Lord.
 R. Thanks be to God.
 
 [short-responsory-lauds]
@@ -218,22 +221,22 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. He gave them bread from heaven, * alleluia, alleluia.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Sexta] — check against diurnal
-R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
-R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
-V. And with honey out of the rock did He satisfy them.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At Sext)
+R. He fed them with the finest wheat flour. * Alleluia, alleluia.
+R. He fed them with the finest wheat flour. * Alleluia, alleluia.
+V. And with honey out of the stony rock did he satisfy them.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. He fed them with the finest of the wheat. * Alleluia, Alleluia.
+R. He fed them with the finest wheat flour. * Alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Tempora/Pent01-4 [Responsory Breve Nona] — check against diurnal
-R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
-R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At None)
+R. Thou bringest bread out of the earth. * Alleluia, alleluia.
+R. Thou bringest bread out of the earth. * Alleluia, alleluia.
 V. And wine that maketh glad the heart of man.
-R. Alleluia, Alleluia.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou bringest forth food out of the earth. * Alleluia, Alleluia.
+R. Thou bringest bread out of the earth. * Alleluia, alleluia.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
