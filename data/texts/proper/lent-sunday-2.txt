@@ -26,7 +26,8 @@ He hath made them fast * for ever and ever: he hath given them a law which shall
 And Jesus taketh his disciples, * and goeth up into a mountain, and was transfigured before them.
 
 [magnificat-antiphon]
-Tell the vision that ye have seen to no man, * until the Son of man be risen again from the dead.
+# SOURCE: monastic diurnal, pp. 254, 256 (II Sunday in Lent, At I and II Vespers)
+Tell the vision * which ye have seen to no man, until the Son of Man be risen again from the dead.
 
 [commemoration-antiphon]
 @use proper/lent-sunday-2/magnificat-antiphon
@@ -40,21 +41,21 @@ R. His praise shall continually be in my mouth.
 Almighty God, who seest that we have no power of ourselves to help ourselves; keep us both outwardly in our bodies, and inwardly in our souls; that we may be defended from all adversities which may happen to the body, and from all evil thoughts which may assault and hurt the soul.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 255 (II Sunday in Lent, At Lauds)
 !1 Thess 4:1
-For the rest therefore, brethren, we pray and beseech you in the Lord Jesus, that as you have received from us, how you ought to walk, and to please God, so also you would walk, that you may abound the more.
+We beseech you, brethren, and exhort you by the Lord Jesus, that as ye have received of us how ye ought to walk and to please God, * so ye would abound more and more.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, pp. 255–256 (II Sunday in Lent, At Sext)
 !1 Thess 4:3-4
-For this is the will of God, your sanctification; that you should abstain from fornication, that every one of you should know how to possess his vessel in sanctification and honour.
+For this is the will of God, even your sanctification, that ye should abstain from fornication: * that every one of you should know how to possess his vessel in sanctification and honour.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Quad2-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 256 (II Sunday in Lent, At None)
 !1 Thess 4:7
-For God hath not called us unto uncleanness, but unto sanctification in Christ Jesus our Lord.
+For God hath not called us unto uncleanness, * but unto holiness in Christ Jesus our Lord.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -64,48 +65,48 @@ R. Thanks be to God.
 @use proper/lent-sunday-2/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad2-1 [Ant 2] — check against diurnal
-The beginning, * who also speak unto you.
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday)
+I am the Beginning, * even I that speak unto you.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad2-1 [Ant 3] — check against diurnal
-He That sent Me is with Me, * and hath not left Me alone, for I do always those things that please Him.
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Monday)
+He that sent me * is with me; the Father hath not left me alone; for I do always those things that please him.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad2-2 [Ant 2] — check against diurnal
-For One is your Master, * Which is in heaven, even Christ the Lord.
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Tuesday)
+One is your Master, * which is in heaven, even Christ the Lord.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad2-2 [Ant 3] — check against diurnal
-And all ye are brethren, * and call no man your father upon earth, for One is your Father, Which is in heaven; neither be ye called masters, for One is your Master, even Christ.
+# SOURCE: monastic diurnal, p. 257 (II Week in Lent, Tuesday)
+But all ye are brethren; * and call no man your father upon earth; for one is your Father, which is in heaven: neither be ye called masters; for one is your Master, even Christ.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad2-3 [Ant 2] — check against diurnal
-Behold, we go up to Jerusalem, * and the Son of man shall be betrayed to be crucified.
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday)
+Behold, we go up * to Jerusalem: and the Son of man shall be betrayed to be crucified.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad2-3 [Ant 3] — check against diurnal
-For He shall be delivered to the Gentiles, * to mock, and to scourge, and to crucify.
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Wednesday)
+For he shall be delivered * unto the Gentiles, to mock, and to scourge, and to crucify him.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad2-4 [Ant 2] — check against diurnal
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday)
 Son, remember * that thou in thy lifetime receivedst thy good things, and likewise Lazarus evil things.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad2-4 [Ant 3] — check against diurnal
-That rich man * who had refused Lazarus bread-crumbs, cried for a drop of water.
+# SOURCE: monastic diurnal, p. 258 (II Week in Lent, Thursday)
+That rich man * who refused to Lazarus a crumb of bread, desired a drop of water.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad2-5 [Ant 2] — check against diurnal
-He will miserably destroy * those wicked men, and will let out His vineyard unto other husbandmen, which shall render Him the fruits in their seasons.
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday)
+He will miserably destroy * those wicked men: and will let out his vineyard unto other husbandmen, which shall render him the fruits in their seasons.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad2-5 [Ant 3] — check against diurnal
-When they sought * to lay hands on Him, they feared the multitude, because they took Him for a Prophet.
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Friday)
+When they sought to lay hands on him, * they feared the multitude, because they took him for a prophet.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Quad2-6 [Ant 2] — check against diurnal
-I will arise and go to my father, * and will say unto him: Make me as one of thine hired servants.
+# SOURCE: monastic diurnal, p. 259 (II Week in Lent, Saturday)
+I will go * to my father, and will say unto him: Father, make me as one of thy hired servants.
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
 

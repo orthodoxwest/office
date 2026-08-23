@@ -401,6 +401,38 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/lent-sunday-1/benedictus-antiphon-friday,9643974c1d5c,diurnal,"I Week in Lent, Ember Friday",253,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/benedictus-antiphon-monday,37203678a17a,diurnal,"I Week in Lent, Monday",252,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/benedictus-antiphon-saturday,55d562904ebe,diurnal,"I Week in Lent, Ember Saturday",254,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/benedictus-antiphon-thursday,c90989c212ca,diurnal,"I Week in Lent, Thursday",253,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/benedictus-antiphon-tuesday,e4e62bdf3137,diurnal,"I Week in Lent, Tuesday",252,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/benedictus-antiphon-wednesday,6e7d2fc7224c,diurnal,"I Week in Lent, Ember Wednesday",252-253,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/chapter-lauds,ff4bd753e6d4,diurnal,"I Sunday in Lent, At Lauds",247,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/chapter-none,9be5b662c57f,diurnal,"I Sunday in Lent, At None",249,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/chapter-sext,099da9b45fa5,diurnal,"I Sunday in Lent, At Sext",249,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/collect,76bbb6879484,diurnal,I Sunday in Lent,248,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon,8adc9bb2b256,diurnal,"I Sunday in Lent, At II Vespers",249-250,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-first,ea488f8e3bec,diurnal,"I Sunday in Lent, At I Vespers",246-247,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-friday,afd2fbc763ec,diurnal,"I Week in Lent, Ember Friday",254,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-monday,8db82ee96f51,diurnal,"I Week in Lent, Monday",252,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-thursday,94c3bfa571ee,diurnal,"I Week in Lent, Thursday",253,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-tuesday,7ea923a792bf,diurnal,"I Week in Lent, Tuesday",252,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-1/magnificat-antiphon-wednesday,01fac2086059,diurnal,"I Week in Lent, Ember Wednesday",253,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-friday,0dac2a10e7ea,diurnal,"II Week in Lent, Friday",259,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-monday,9287e5fcc5e6,diurnal,"II Week in Lent, Monday",257,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-saturday,b7472b969a52,diurnal,"II Week in Lent, Saturday",259,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-thursday,4aea1d695d45,diurnal,"II Week in Lent, Thursday",258,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-tuesday,9b827fb172e9,diurnal,"II Week in Lent, Tuesday",257,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/benedictus-antiphon-wednesday,34b90baa5af2,diurnal,"II Week in Lent, Wednesday",258,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/chapter-lauds,0a4535390163,diurnal,"II Sunday in Lent, At Lauds",255,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/chapter-none,1b26e738f775,diurnal,"II Sunday in Lent, At None",256,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/chapter-sext,93e338a4c3b8,diurnal,"II Sunday in Lent, At Sext",255-256,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon,16b70e791d22,diurnal,"II Sunday in Lent, At I and II Vespers","254, 256",verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon-friday,55d936720f65,diurnal,"II Week in Lent, Friday",259,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon-monday,5c12cafc4695,diurnal,"II Week in Lent, Monday",257,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon-thursday,fcd06c1c1e3d,diurnal,"II Week in Lent, Thursday",258,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon-tuesday,af0995b26a2b,diurnal,"II Week in Lent, Tuesday",257,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-2/magnificat-antiphon-wednesday,6b23ccee113b,diurnal,"II Week in Lent, Wednesday",258,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
