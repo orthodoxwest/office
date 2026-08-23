@@ -68,9 +68,15 @@ When the day of Pentecost was fully come, they were all with one accord in one p
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At Sext)
 !Acts 2:6
-When this was noised abroad, the multitude came together, and were confounded, because that every man heard them speak in his own language.
+Now when this was noised abroad, the multitude came together, and were confounded, * because that every man heard them speak in his own language.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At None)
+!Acts 2:10-11
+Jews and proselytes, Cretes and Arabians, we do hear them speak in our tongues * the wonderful works of God.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -180,40 +186,37 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Holy Ghost, the Comforter * alleluia, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Tertia] — check against diurnal
-R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
-R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
-V. And That Which containeth all things hath knowledge of the voice.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 396 (The Feast of Pentecost, At Lauds; Terce versicle)
+R. The Spirit of the Lord hath filled the whole world. * Alleluia, alleluia.
+R. The Spirit of the Lord hath filled the whole world. * Alleluia, alleluia.
+V. And that which containeth all things hath knowledge of the voice.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Spirit of the Lord filleth the world. * Alleluia, Alleluia.
+R. The Spirit of the Lord hath filled the whole world. * Alleluia, alleluia.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Sexta] — check against diurnal
-R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
-R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
-V. He shall teach you all things.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At Sext)
+R. The Holy Ghost, the Comforter. * Alleluia, alleluia.
+R. The Holy Ghost, the Comforter. * Alleluia, alleluia.
+V. Shall teach you all things.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Comforter, Which is the Holy Ghost. * Alleluia, Alleluia.
+R. The Holy Ghost, the Comforter. * Alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Responsory Breve Nona] — check against diurnal
-R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
-R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 398 (The Feast of Pentecost, At None)
+R. They were all filled with the Holy Ghost. * Alleluia, alleluia.
+R. They were all filled with the Holy Ghost. * Alleluia, alleluia.
 V. And began to speak.
-R. Alleluia, Alleluia.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. They were all filled with the Holy Ghost. * Alleluia, Alleluia.
+R. They were all filled with the Holy Ghost. * Alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/pentecost/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Acts 2:1-2
-When the day of Pentecost was fully come, the disciples were all with one accord in one place and suddenly there came a sound from heaven, as of a rushing mighty wind and it filled all the house where they were sitting.
-R. Thanks be to God.
+@use proper/pentecost/chapter-lauds
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

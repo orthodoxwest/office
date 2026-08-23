@@ -1,7 +1,7 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-1 [Ant 2] — check against diurnal
-God so loved the world * that He gave His Only-begotten Son, that whosoever believeth in Him should not perish, but have everlasting life. Alleluia.
+# SOURCE: monastic diurnal, p. 399 (Monday within the Octave of Pentecost)
+God so loved the world, * that he gave his only-begotten Son, that whosoever believeth in him should not perish, but have everlasting life, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-1 [Ant 3] — check against diurnal
-If a Man love Me * he will keep My word and My Father will love him, and We will come unto him, and make Our abode with him. Alleluia.
+# SOURCE: monastic diurnal, p. 399 (Monday within the Octave of Pentecost)
+If a man love me, * he will keep my saying, and my Father will love him: and we will come unto him, and make our abode with him, alleluia.
