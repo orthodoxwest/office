@@ -5,32 +5,36 @@
 @use commons/dedication/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
-Holiness becometh thine house, * O Lord, for ever.
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
+Holiness becometh * thine house, O Lord, for ever.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
 My house * shall be called the house of prayer.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
-This is the Lord's house * stoutly builded, well founded upon a sure rock.
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
+This is the Lord's house, * firmly builded: it is well founded on the solid rock.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
-The Lord's house is well founded * upon a sure rock.
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
+Well founded * is the Lord's house on the solid rock.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C8 [Ant Vespera] — check against diurnal
-All thy walls are of stones most precious, * and the towers of Jerusalem shall be built up with jewels.
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
+All thy walls * shall be stones most precious; and the towers of Jerusalem shall be upbuilded with jewels.
 
 [benedictus-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of the Dedication of a Church) — parish noted manual
-Zacchaeus, * make haste, and come down; for today I must abide at thy house: and he made haste, and came down, and received him joyfully into his house. This day is salvation come to this house from the Lord.
+# SOURCE: monastic diurnal, p. 59* (Common of the Dedication of a Church, At Lauds)
+Zacchaeus, * make haste, and come down; for to-day I must abide at thy house: and he made haste, and came down, and received him joyfully into his house. This day is salvation come to this house from the Lord, alleluia.
 
 [magnificat-antiphon]
-# Incipit per 2026 ordo (O quam metuenda); text after KJV Gen 28:17 — check against diurnal
-O how dreadful is this place! * this is none other but the house of God, and this is the gate of heaven.
+# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At II Vespers)
+O how dreadful * is this place! truly this is none other but the house of God, and the gate of heaven.
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, pp. 57*–58* (Common of the Dedication of a Church, At I Vespers)
+The Lord hath hallowed * his tabernacle: for this is the house of the Lord, wherein men may call upon his Name; whereof it is written, My Name shall be therein, saith the Lord.
 
 [commemoration-antiphon]
 This is none other but the house of God, * and this is the gate of heaven.
@@ -57,19 +61,34 @@ R. For all nations.
 @use commons/dedication/collect
 
 [collect]
-O God, who dost invisibly contain all things, and yet for the salvation of mankind dost visibly manifest thy signs; enlighten thy people who resort to this holy place, and grant that they may worthily and devoutly celebrate thy holy mysteries, and when they depart hence receive the fulness of thy blessing.
+# SOURCE: monastic diurnal, p. 59* (Common of the Dedication of a Church, On the Anniversary and throughout the Octave)
+O God, who year by year renewest for us the dedication day of this thy holy temple, and continually bringest us in safety to the divine mysteries: hear the prayers of thy people; and grant that whosoever shall enter this temple to ask thy blessings may rejoice in the granting of all his petitions.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 703 (Common of the Dedication of a Church)
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
 !Rev 21:2
-I saw the holy city, new Jerusalem, coming down from God out of heaven, prepared as a bride adorned for her husband.
+I saw the holy city, new Jerusalem, coming down from God out of heaven, * prepared as a bride adorned for her husband.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C8 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At Sext)
 !Rev 21:3
-And I heard a great voice out of the throne, saying Behold, the tabernacle of God is with men, and He will dwell with them. And they shall be His people; and God Himself shall be with them, and be their God.
+And I heard a great voice out of heaven, saying, Behold, the tabernacle of God is with men, and he will dwell with them, and they shall be his people, * and God himself shall be with them, and be their God.
 R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At None)
+!Rev 21:4-5
+And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying, neither shall there be any more pain: for the former things are passed away. * And he that sat upon the throne said, Behold I make all things new.
+R. Thanks be to God.
+
+[short-responsory-lauds]
+# SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
+@use commons/dedication/short-responsory-terce
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, p. 56* (Common of the Dedication of a Church, At I Vespers)
+@use commons/dedication/short-responsory-sext
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 705–706 (Common of the Dedication of a Church)
@@ -152,44 +171,47 @@ Through the ages infinite.
 
 Amen.
 [versicle-lauds]
-# SOURCE: divinum-officium CommuneM/C8 [Versum 2] — check against diurnal
-V. This is the house of God, stoutly builded.
-R. Well founded upon a sure rock.
+# SOURCE: monastic diurnal, p. 59* (Common of the Dedication of a Church, At Lauds)
+V. This is the Lord's house, firmly builded.
+R. It is well founded on the solid rock.
 
 [versicle-vespers]
+# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At II Vespers)
+V. Holiness becometh thine house, O Lord.
+R. For ever.
+
+[versicle-first-vespers]
 @use commons/dedication/versicle-lauds
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Commune/C8 [Responsory Breve Tertia] — check against diurnal
-R. Holiness becometh thine house, * O Lord.
-R. Holiness becometh thine house, * O Lord.
+# SOURCE: monastic diurnal, p. 60* (Common of the Dedication of a Church, At Terce)
+R. Holiness becometh * thine house, O Lord.
+R. Holiness becometh * thine house, O Lord.
 V. For ever.
-R. O Lord.
+R. Thine house, O Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Holiness becometh thine house, * O Lord.
+R. Holiness becometh * thine house, O Lord.
 
 [short-responsory-sext]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 143 (Common of the Dedication of a Church)
-R. This place is holy, * wherein the priest prayeth.
-R. This place is holy, * wherein the priest prayeth.
+# SOURCE: monastic diurnal, p. 56* (Common of the Dedication of a Church, At I Vespers)
+R. This place is holy * wherein the priest prayeth.
+R. This place is holy * wherein the priest prayeth.
 V. For the sins and offences of the people.
 R. Wherein the priest prayeth.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This place is holy, * wherein the priest prayeth.
+R. This place is holy * wherein the priest prayeth.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C8 [Responsory Breve Nona] — check against diurnal
-R. This is the Lord's house, * stoutly builded.
-R. This is the Lord's house, * stoutly builded.
-V. Well founded upon a sure rock.
-R. Stoutly builded.
+# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At None)
+R. This is the Lord's house, * firmly builded.
+R. This is the Lord's house, * firmly builded.
+V. It is well founded on the solid rock.
+R. Firmly builded.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This is the Lord's house, * stoutly builded.
+R. This is the Lord's house, * firmly builded.
 
 [chapter-vespers]
-@use commons/dedication/chapter-terce
+@use commons/dedication/chapter-lauds
+
 [chapter-terce]
-# SOURCE: divinum-officium CommuneM/C8 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rev 21:2
-I saw the holy city, New Jerusalem, coming down from God out of heaven, prepared as a Bride adorned for her husband.
-R. Thanks be to God.
+@use commons/dedication/chapter-lauds

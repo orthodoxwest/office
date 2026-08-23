@@ -7,10 +7,10 @@
 | Full structural-cover pages | 58 |
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
-| Verified text entries | 952 |
-| Rendered text entries needing review | 1072 |
-| Rendered text entries with unknown source | 204 |
-| Classified zero-occurrence entries | 52 |
+| Verified text entries | 979 |
+| Rendered text entries needing review | 1051 |
+| Rendered text entries with unknown source | 202 |
+| Classified zero-occurrence entries | 51 |
 | Zeroes needing classification | 22 |
 | Stale zero-occurrence classifications | 8 |
 | Stale attestations | 5 |

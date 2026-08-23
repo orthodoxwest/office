@@ -95,8 +95,24 @@ commons/confessor/psalm-antiphon-4-vespers,393916e9cbdb,draft archdiocesan Commo
 commons/confessor/psalm-antiphon-5,393916e9cbdb,diurnal,"Common of a Confessor not a Bishop, At Lauds",43*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/short-responsory-none,545338665ae9,diurnal,"Common of a Confessor not a Bishop, At None",46*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/short-responsory-sext,1e87fe1dad24,diurnal,"Common of a Confessor not a Bishop, At Sext",46*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/benedictus-antiphon,27d9d2cd7940,diurnal,"Common of the Dedication of a Church, At Lauds",59*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/chapter-lauds,5a06b0b54144,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/chapter-none,aeccd62a5eee,diurnal,"Common of the Dedication of a Church, At None",61*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/chapter-sext,eb50a644bd89,diurnal,"Common of the Dedication of a Church, At Sext",61*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/collect,fe1772b4d2de,diurnal,"Common of the Dedication of a Church, Anniversary",59*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/dedication/hymn-lauds,91e74ff784dc,draft archdiocesan Lauds book,,705-706,verified,codex,2026-07-18,
-commons/dedication/short-responsory-sext,5859fcba5458,draft archdiocesan Commons Vespers book,Common of the Dedication of a Church,143,verified,codex,2026-07-18,
+commons/dedication/magnificat-antiphon,421473020c7e,diurnal,"Common of the Dedication of a Church, At II Vespers",61*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/magnificat-antiphon-first,ef02ead8fc06,diurnal,"Common of the Dedication of a Church, At I Vespers",57*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/psalm-antiphon-1,3cf12ace2ff6,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/psalm-antiphon-2,125def5c0d3b,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/psalm-antiphon-3,5973b336a93a,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/psalm-antiphon-4,594eaf7de778,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/psalm-antiphon-5,dfc8f2cff904,diurnal,"Common of the Dedication of a Church, At Lauds",58*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/short-responsory-none,a13f516213f3,diurnal,"Common of the Dedication of a Church, At None",61*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/short-responsory-sext,99f6cc1e2ec3,diurnal,"Common of the Dedication of a Church, At I Vespers",56*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/short-responsory-terce,0a3b14519bee,diurnal,"Common of the Dedication of a Church, At Terce",60*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/versicle-lauds,4dfce1df4e4a,diurnal,"Common of the Dedication of a Church, At Lauds",59*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/dedication/versicle-vespers,5addc4cdbf2e,diurnal,"Common of the Dedication of a Church, At II Vespers",61*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/evangelist/psalm-antiphon-1,c6041b6635df,draft archdiocesan Commons Vespers book,,1,verified,codex,2026-07-17,
 commons/evangelist/psalm-antiphon-3,ba044f8c8117,draft archdiocesan Commons Vespers book,,3,verified,codex,2026-07-17,
 commons/evangelist/psalm-antiphon-5,d8c01a0143cf,draft archdiocesan Commons Lauds book,,5,verified,codex,2026-07-17,
@@ -110,8 +126,19 @@ commons/holy-woman-paschal/short-responsory-lauds,7a28f237888b,draft archdiocesa
 commons/holy-woman-paschal/short-responsory-vespers,9618fe06f0aa,draft archdiocesan Vespers book,,670-671,verified,codex,2026-07-18,
 commons/holy-woman-paschal/versicle-first-vespers,eb06f2fd03a2,draft archdiocesan Vespers book,,673,verified,codex,2026-07-18,
 commons/holy-woman-paschal/versicle-lauds,408686c94a8a,draft archdiocesan Lauds book,,695,verified,bwaldrep,2026-07-24,Book prints 'alelluia' (sic) at p. 695; corpus uses corrected 'alleluia' per editorial ruling (#122)
-commons/holy-woman/benedictus-antiphon,d1f7aefaffb8,lauds-commons-manual-noted.pdf,,94,verified,codex,2026-07-18,
+commons/holy-woman/benedictus-antiphon,d1f7aefaffb8,diurnal,"Common of Holy Women not Virgins, At Lauds",53*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/chapter-lauds,38900b8a5cc4,diurnal,"Common of Holy Women not Virgins, For a Saint neither Virgin nor Martyr",52*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/chapter-none,5a36f85ce87e,diurnal,"Common of Holy Women not Virgins, At None",55*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/chapter-sext,f17b10287b21,diurnal,"Common of Holy Women not Virgins, At Sext",54*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/collect,0a1bca0b1e1b,diurnal,"Common of Holy Women not Virgins, For a Saint neither Virgin nor Martyr",53*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/holy-woman/hymn-lauds,491c920f6f69,draft archdiocesan Lauds book,,694,verified,codex,2026-07-17,
+commons/holy-woman/magnificat-antiphon,2ef7defcd072,diurnal,"Common of Holy Women not Virgins, At II Vespers",55*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/magnificat-antiphon-first,bc006942d0e8,diurnal,"Common of Holy Women not Virgins, At I Vespers",51*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/psalm-antiphon-1,b553dbbb3803,diurnal,"Common of Holy Women not Virgins, At Lauds",51*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/psalm-antiphon-2,668c49b11233,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/psalm-antiphon-3,61e13288e9ed,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/psalm-antiphon-4,79fdada64859,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/psalm-antiphon-5,738553933d8a,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/martyr-paschal/hymn-lauds,ba5bc629b13f,A Noted Hymnary for the Anglican Breviary,,102,verified,codex,2026-07-17,
 commons/martyr-paschal/hymn-vespers,d73c4ed00b9c,A Noted Hymnary for the Anglican Breviary,,98,verified,codex,2026-07-17,
 commons/martyr/benedictus-antiphon,2cdcdf816c2e,draft archdiocesan Lauds book,,637,verified,codex,2026-07-17,
