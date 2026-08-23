@@ -322,8 +322,13 @@ proper/annunciation/short-responsory-vespers-easter,c4f623e07809,draft archdioce
 proper/annunciation/versicle-lauds,0e36e6e165c3,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
 proper/annunciation/versicle-lauds-easter,33417077a6ad,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
 proper/ascension/chapter-lauds,c4584adf8dae,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
+proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/hymn-lauds,008fee8de556,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 proper/ascension/short-responsory-lauds,6ec84494ca32,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (gl0ry)
+proper/ascension/short-responsory-none,a70e7ebf39a6,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
+proper/ascension/short-responsory-sext,ed7a39f16e90,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
+proper/ascension/short-responsory-terce,7769625f8ec7,diurnal,"Ascension Day, At Terce",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/short-responsory-vespers,158b358ac994,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/versicle-lauds,556430070423,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/versicle-vespers,d4472f185bda,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -360,8 +365,12 @@ proper/corpus-christi-octave-day/magnificat-antiphon-first,783b4208e0ac,draft Te
 proper/corpus-christi-octave-set-1/magnificat-antiphon,4efeb2adb551,draft Temporal Cycle Vespers book,,203,verified,codex,2026-07-17,
 proper/corpus-christi-octave-set-4/magnificat-antiphon,4efeb2adb551,draft Temporal Cycle Vespers book,,203,verified,codex,2026-07-17,
 proper/corpus-christi/chapter-lauds,6080f810eca7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/corpus-christi/chapter-none,536ffd64891a,diurnal,"Corpus Christi, At None",417,verified,grok,2026-08-22,word-for-word from printed page image
+proper/corpus-christi/chapter-sext,307e10af5e0c,diurnal,"Corpus Christi, At Sext",417,verified,grok,2026-08-22,word-for-word from printed page image
 proper/corpus-christi/hymn-lauds,c74be151c3c7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 proper/corpus-christi/short-responsory-lauds,210b7848f3c7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/corpus-christi/short-responsory-none,86ff3e924aca,diurnal,"Corpus Christi, At None",417,verified,grok,2026-08-22,word-for-word from printed page image
+proper/corpus-christi/short-responsory-sext,1e4e93b9b52c,diurnal,"Corpus Christi, At Sext",417,verified,grok,2026-08-22,word-for-word from printed page image
 proper/corpus-christi/short-responsory-terce,210b7848f3c7,draft Temporal Cycle Vespers book,Saturday within the Octave of Corpus Christi,200-201,verified,codex,2026-07-18,
 proper/corpus-christi/short-responsory-vespers,979bb8cb3d04,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (rubric)
 proper/corpus-christi/versicle-lauds,89b7ed1d753b,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -620,9 +629,15 @@ proper/st-raphael-archangel/short-responsory-vespers,8aba3cb98a7d,diurnal,"Octob
 proper/st-raphael-archangel/versicle-first-vespers,d0fa20313df6,diurnal,"October 24, At I Vespers",633,verified,claude,2026-08-20,
 proper/st-raphael-archangel/versicle-lauds,d0fa20313df6,diurnal,"October 24, At Lauds",634,verified,claude,2026-08-20,
 proper/st-raphael-archangel/versicle-vespers,9c50d614fe3b,diurnal,"October 24, At II Vespers",635,verified,claude,2026-08-20,
+proper/trinity-sunday/chapter-none,f2ab0b727533,diurnal,"Trinity Sunday, At None",408,verified,grok,2026-08-22,word-for-word from printed page image
+proper/trinity-sunday/chapter-sext,4d669b03edac,diurnal,"Trinity Sunday, At Sext",408,verified,grok,2026-08-22,word-for-word from printed page image
+proper/trinity-sunday/magnificat-antiphon,354b8ebfc8fc,diurnal,"Trinity Sunday, At II Vespers",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/trinity-sunday/psalm-antiphon-1,116ab0c2b5da,draft archdiocesan Vespers book,,189,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-2,c491b409b4d9,draft archdiocesan Vespers book,,190,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-3,f538e9d68586,draft archdiocesan Vespers book,,191,verified,codex,2026-07-17,
+proper/trinity-sunday/short-responsory-none,19b2080b7c16,diurnal,"Trinity Sunday, At None",408,verified,grok,2026-08-22,word-for-word from printed page image
+proper/trinity-sunday/short-responsory-sext,ae92b8f5f33d,diurnal,"Trinity Sunday, At Sext",408,verified,grok,2026-08-22,word-for-word from printed page image
+proper/trinity-sunday/short-responsory-terce,2a231f9f2b86,diurnal,"Trinity Sunday, At Terce",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-ascension/benedictus-antiphon,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-ascension/collect,69e0b9e0fe88,diurnal,V Sunday after Easter; said on the Vigil,385,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word

@@ -57,9 +57,15 @@ The former treatise have I made, O Theophilus, of all that Jesus began both to d
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 390 (Ascension Day, At Sext)
 !Acts 1:4-5
-And eating together with them, he commanded them, that they should not depart from Jerusalem, but should wait for the promise of the Father, which you have heard (saith he) by my mouth. For John indeed baptized with water, but you shall be baptized with the Holy Ghost, not many days hence.
+He, being assembled together with them, commanded them that they should not depart from Jerusalem, but wait for the promise of the Father, which, saith he, ye have heard of me. For John truly baptized with water; * but ye shall be baptized with the Holy Ghost not many days hence.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 390 (Ascension Day, At None)
+!Acts 1:11
+Ye men of Galilee, why stand ye gazing up into heaven? this same Jesus, which is taken up from you into heaven, * shall so come in like manner as ye have seen him go into heaven.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -124,16 +130,16 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. When Christ ascended up on high, * alleluia, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Tertia] — check against diurnal
-R. God is gone up with jubilation. * Alleluia, alleluia.
-R. God is gone up with jubilation. * Alleluia, alleluia.
-V. And the Lord with the sound of trumpet.
+# SOURCE: monastic diurnal, p. 390 (Ascension Day, At Terce)
+R. God is gone up with a merry noise. * Alleluia, alleluia.
+R. God is gone up with a merry noise. * Alleluia, alleluia.
+V. And the Lord with the sound of the trump.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God is gone up with jubilation. * Alleluia, alleluia.
+R. God is gone up with a merry noise. * Alleluia, alleluia.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 390 (Ascension Day, At Sext)
 R. When Christ ascended up on high. * Alleluia, alleluia.
 R. When Christ ascended up on high. * Alleluia, alleluia.
 V. He led captivity captive.
@@ -142,13 +148,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. When Christ ascended up on high. * Alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Tempora/Pasc5-4 [Responsory Breve Nona] — check against diurnal
-R. I ascend to my Father and to your Father. * Alleluia, alleluia.
-R. I ascend to my Father and to your Father. * Alleluia, alleluia.
-V. To my God and your God.
+# SOURCE: monastic diurnal, p. 390 (Ascension Day, At None)
+R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
+R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
+V. And to my God, and your God.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. I ascend to my Father and to your Father. * Alleluia, alleluia.
+R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/ascension/chapter-lauds
