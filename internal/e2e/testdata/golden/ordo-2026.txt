@@ -411,18 +411,18 @@ MARCH
            Lauds   v · Ben. Then was Jesus · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · II prec. · Mag. Then shalt thou call · Suff.
+           Vespers v · II prec. · Mag. Behold, now · Suff.
                Com. St Chad, Bishop & Confessor ("The Lord loved him")
   2  Mon  L§ Monday after Lent I                        [f2]  v
            St Chad, Bishop & Confessor (com)
-           Lauds   v · Ben. Come, ye blessed of My Father · No Preces · Suff.
+           Lauds   v · Ben. Come, ye blessed · No Preces · Suff.
                Com. St Chad, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. As long as you did it to one · Suff.
+           Vespers v · Mag. That which ye have done · Suff.
   3  Tue  L§ Tuesday after Lent I                       [f2]  v
-           Lauds   v · Ben. Jesus went into · No Preces · Suff.
+           Lauds   v · Ben. And Jesus · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. For it is written · Suff.
+           Vespers v · Mag. Truly it is written · Suff.
                Com. St Lucius I, Bishop & Martyr ("Whosoever will come after me")
   4  Wed  L§ Lent Ember Wednesday                       [f2]  v
            St Lucius I, Bishop & Martyr (com)
@@ -431,7 +431,7 @@ MARCH
            Hours   Preces
            Vespers v · Mag. As Jonas was three days and three nights in… · Suff.
   5  Thu  L§ Thursday after Lent I                      [f2]  v
-           Lauds   v · Ben. And Jesus went from thence · No Preces · Suff.
+           Lauds   v · Ben. Jesus went thence · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. O woman · No Suff.
                Com. St Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
@@ -445,30 +445,30 @@ MARCH
   7  Sat  L§ Lent Ember Saturday                        [f2]  v
            Lauds   v · Ben. And Jesus taketh his disciples · No Preces · Suff.
            Hours   Preces
-           Vespers v · I fol. (II Sunday in Lent) · Mag. Tell the vision that ye have seen to no… · Suff.
+           Vespers v · I fol. (II Sunday in Lent) · Mag. Tell the vision · Suff.
   8  Sun  L  II SUNDAY IN LENT                          [1cl] v
            Lauds   v · Ben. And Jesus taketh his disciples · No Preces · Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. Tell the vision that ye have seen to no… · Suff.
+           Vespers v · II prec. · Mag. Tell the vision · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("O Teacher right excellent")
   9  Mon  L§ Monday after Lent II                       [f2]  v
            St Gregory of Nyssa, Bishop, Confessor & Doctor (com)
-           Lauds   v · Ben. The beginning · No Preces · Suff.
+           Lauds   v · Ben. I am the Beginning · No Preces · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("Well done")
            Hours   Preces
-           Vespers v · Mag. He That sent Me is with Me · Suff.
+           Vespers v · Mag. He that sent me · Suff.
                Com. The Forty Holy Martyrs ("In the heavenly kingdom")
  10  Tue  L§ Tuesday after Lent II                      [f2]  v
            The Forty Holy Martyrs (com)
-           Lauds   v · Ben. For One is your Master · No Preces · Suff.
+           Lauds   v · Ben. One is your Master · No Preces · Suff.
                Com. The Forty Holy Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers v · Mag. And all ye are brethren · Suff.
+           Vespers v · Mag. But all ye are brethren · Suff.
  11  Wed  L§ Wednesday after Lent II                    [f2]  v
-           Lauds   v · Ben. Behold, we go up to Jerusalem · No Preces · Suff.
+           Lauds   v · Ben. Behold, we go up · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (St. Gregory the Great) · Mag. O Teacher right excellent · No Suff.
-               Com. Wednesday after Lent II ("For He shall be delivered to the Gentiles")
+               Com. Wednesday after Lent II ("For he shall be delivered")
  12  Thu  L§ St. Gregory the Great                      [2cl] w
            Thursday after Lent II (f2)
            Lauds   w · Ben. Gregory · No Preces · No Suff.
@@ -479,48 +479,48 @@ MARCH
  13  Fri  L§ Friday after Lent II                       [f2]  v
            Lauds   v · Ben. He will miserably destroy · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. When they sought · Suff.
+           Vespers v · Mag. When they sought to lay hands on him · Suff.
  14  Sat  L§ Saturday after Lent II                     [f2]  v
-           Lauds   v · Ben. I will arise and go to my father · No Preces · Suff.
+           Lauds   v · Ben. I will go · No Preces · Suff.
            Hours   Preces
-           Vespers v · I fol. (III Sunday in Lent) · Mag. But the father said · Suff.
+           Vespers v · I fol. (III Sunday in Lent) · Mag. But the father · Suff.
  15  Sun  L  III SUNDAY IN LENT                         [1cl] v
            Lauds   v · Ben. When a strong man armed · No Preces · Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. A certain woman of the company lifed up her… · Suff.
+           Vespers v · II prec. · Mag. A certain woman · Suff.
  16  Mon  L§ Monday after Lent III                      [f2]  v
-           Lauds   v · Ben. Amen I say unto you · No Preces · Suff.
+           Lauds   v · Ben. Verily I say unto you · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. But Jesus · No Suff.
+           Vespers v · Mag. But Jesus, passing · No Suff.
                Com. St. Patrick ("The Lord loved him")
                Com. St Joseph of Arimathea, C ("The world, and all things earthly")
  17  Tue  L§ Tuesday after Lent III                     [f2]  v
            St. Patrick (d)
            St Joseph of Arimathea, C (com)
-           Lauds   v · Ben. If two of you shall agree on earth · No Preces · No Suff.
+           Lauds   v · Ben. If two of you · No Preces · No Suff.
                Com. St. Patrick ("Well done")
                Com. St Joseph of Arimathea, C ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers v · Mag. Where two or three are gathered together in My… · No Suff.
+           Vespers v · Mag. Where two or three · No Suff.
                Com. St. Patrick ("The Lord loved him")
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. St Edward, King & Martyr ("Whosoever will come after me")
  18  Wed  L§ Wednesday after Lent III                   [f2]  v
            St Cyril of Jerusalem, Bishop, Confessor & Doctor (d)
            St Edward, King & Martyr (com)
-           Lauds   v · Ben. Hear and understand · No Preces · No Suff.
+           Lauds   v · Ben. Hearken · No Preces · No Suff.
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("Well done")
                Com. St Edward, King & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · I fol. (St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. Joseph, being raised · No Suff.
-               Com. Wednesday after Lent III ("To eat")
+               Com. Wednesday after Lent III ("To eat with unwashen hands")
  19  Thu  L§ St. Joseph, Spouse of the Blessed Virgin Mary [2cl] w
            Thursday after Lent III (f2)
            Lauds   w · Ben. Jesus himself · No Preces · No Suff.
-               Com. Thursday after Lent III ("And devils also came out of many")
+               Com. Thursday after Lent III ("And devils also")
            Hours   No Preces
            Vespers w · II prec. · Mag. Behold a faithful · No Suff.
-               Com. Thursday after Lent III ("All they that had")
+               Com. Thursday after Lent III ("Whosoever had any sick")
                Com. St. Cuthbert, Bishop & Confessor ("The Lord loved him")
  20  Fri  L§ Friday after Lent III                      [f2]  v
            St. Cuthbert, Bishop & Confessor (d)
@@ -532,23 +532,23 @@ MARCH
  21  Sat  L§ St. Benedict                               [2cl] w
            Saturday after Lent III (f2)
            Lauds   w · Ben. Benedict · No Preces · No Suff.
-               Com. Saturday after Lent III ("Jesus stooped down")
+               Com. Saturday after Lent III ("But Jesus stooped down")
            Hours   No Preces
            Vespers w · II prec. · Mag. Today holy Benedict · No Suff.
-               Com. IV Sunday in Lent ("Woman, hath no man condemned thee?")
+               Com. IV Sunday in Lent ("Woman")
                Com. Saturday after Lent III ("My soul doth magnify the Lord, and my spirit…")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
            Lauds   p · Ben. When Jesus · No Preces · Suff.
            Hours   Preces
-           Vespers p · II prec. · Mag. Woman, hath no man condemned thee? · Suff.
+           Vespers p · II prec. · Mag. And Jesus · Suff.
  23  Mon  L§ Monday after Lent IV                       [f2]  v
-           Lauds   v · Ben. Thus saith the Lord · No Preces · Suff.
+           Lauds   v · Ben. Take these things hence · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. Thus saith the Lord · No Suff.
+           Vespers v · Mag. Destroy this temple · No Suff.
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
  24  Tue  L§ Tuesday after Lent IV                      [f2]  v
            St. Gabriel the Archangel (gd)
-           Lauds   v · Ben. Why go ye about to kill Me · No Preces · No Suff.
+           Lauds   v · Ben. Why go ye about · No Preces · No Suff.
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
            Hours   No Preces
            Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Holy Ghost · No Suff.
@@ -556,66 +556,66 @@ MARCH
  25  Wed  L§ ANNUNCIATION OF THE BLESSED VIRGIN MARY    [1cl] w
            Wednesday after Lent IV (f2)
            Lauds   w · Ben. How shall this be · No Preces · No Suff.
-               Com. Wednesday after Lent IV ("Rabbi, who did sin, this man, or his parents")
+               Com. Wednesday after Lent IV ("Master")
            Hours   No Preces
            Vespers w · II prec. · Mag. The Angel Gabriel · No Suff.
  26  Thu  L§ Thursday after Lent IV                     [f2]  v
            Lauds   v · Ben. Jesus went · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. A great Prophet · No Suff.
+           Vespers v · Mag. A great prophet · No Suff.
                Com. St. John Damascene, Confessor & Doctor ("O Teacher right excellent")
  27  Fri  L§ Friday after Lent IV                       [f2]  v
            St. John Damascene, Confessor & Doctor (d)
-           Lauds   v · Ben. Our friend Lazarus sleepeth · No Preces · No Suff.
+           Lauds   v · Ben. Our friend · No Preces · No Suff.
                Com. St. John Damascene, Confessor & Doctor ("Well done")
            Hours   No Preces
-           Vespers v · Mag. Lord, if Thou hadst been here · No Suff.
+           Vespers v · Mag. Lord, if thou hadst been here · No Suff.
                Com. St. John Damascene, Confessor & Doctor ("O Teacher right excellent")
  28  Sat  L§ Saturday after Lent IV                     [f2]  v
-           Lauds   v · Ben. Thus saith the Lord · No Preces · Suff.
+           Lauds   v · Ben. He that followeth me · No Preces · Suff.
            Hours   Preces
-           Vespers v · I fol. (Sunday of the Passion) · Mag. I am One · No Suff.
+           Vespers v · I fol. (Sunday of the Passion) · Mag. I am one · No Suff.
  29  Sun  L  SUNDAY OF THE PASSION                      [1cl] v
            Lauds   v · Ben. Jesus said · No Preces · No Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. Your father Abraham rejoiced to see My day · No Suff.
+           Vespers v · II prec. · Mag. Your father Abraham · No Suff.
                Com. St John Climacus, Abbot ("The world, and all things earthly")
  30  Mon  L§ Monday after Passion Sunday                [f2]  v
            St John Climacus, Abbot (com)
-           Lauds   v · Ben. In the last day, that great day of the… · No Preces · No Suff.
+           Lauds   v · Ben. In the great day of the feast · No Preces · No Suff.
                Com. St John Climacus, Abbot ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers v · Mag. If any man thirst, let him come unto Me · No Suff.
+           Vespers v · Mag. If any man thirst · No Suff.
                Com. St Innocent of Alaska, Bishop & Confessor ("The Lord loved him")
  31  Tue  L§ Tuesday after Passion Sunday               [f2]  v
            St Innocent of Alaska, Bishop & Confessor (com)
-           Lauds   v · Ben. My time is not yet come · No Preces · No Suff.
+           Lauds   v · Ben. My time · No Preces · No Suff.
                Com. St Innocent of Alaska, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. Go ye up unto this Feast · No Suff.
+           Vespers v · Mag. Go ye up · No Suff.
 
 APRIL
 ------------------------------------------------------------
   1  Wed  L§ Wednesday after Passion Sunday             [f2]  v
-           Lauds   v · Ben. My sheep hear My voice · No Preces · No Suff.
+           Lauds   v · Ben. My sheep · No Preces · No Suff.
            Hours   Preces
-           Vespers v · Mag. Many good works have I wrought · No Suff.
+           Vespers v · Mag. Many good works · No Suff.
   2  Thu  L§ Thursday after Passion Sunday              [f2]  v
-           Lauds   v · Ben. The Master saith: My time is at hand · No Preces · No Suff.
+           Lauds   v · Ben. The Master saith · No Preces · No Suff.
            Hours   Preces
-           Vespers v · Mag. With desire I have desired · No Suff.
+           Vespers v · Mag. With desire · No Suff.
                Com. Our Lady of Sorrows ("All generations shall call me blessed")
   3  Fri  L§ Friday after Passion Sunday                [f2]  v
            Our Lady of Sorrows (gd)
-           Lauds   v · Ben. When Jesus saw His Mother · No Preces · No Suff.
+           Lauds   v · Ben. Now the feast day of the Jews · No Preces · No Suff.
                Com. Our Lady of Sorrows ("Blessed art thou")
            Hours   No Preces
-           Vespers v · Mag. When Jesus saw His Mother · No Suff.
+           Vespers v · Mag. The chief priests · No Suff.
                Com. Our Lady of Sorrows ("All generations shall call me blessed")
                Com. St Isidore of Seville, Bishop, Confessor & Doctor ("O Teacher right excellent")
   4  Sat  L§ Saturday after Passion Sunday              [f2]  v
            St Isidore of Seville, Bishop, Confessor & Doctor (d)
-           Lauds   v · Ben. Father, glorify Thou Me · No Preces · No Suff.
+           Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
                Com. St Isidore of Seville, Bishop, Confessor & Doctor ("Well done")
            Hours   No Preces
            Vespers v · I fol. (Palm Sunday) · Mag. It is written: I will smite the Shepherd · No Suff.
