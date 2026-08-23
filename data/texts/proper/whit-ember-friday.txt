@@ -5,21 +5,22 @@
 @use proper/pentecost/commemoration-antiphon
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-The Spirit of the Lord * filleth the world, alleluia.
+# SOURCE: monastic diurnal, p. 396 (The Feast of Pentecost, At Lauds)
+The Spirit of the Lord * hath filled the whole world, alleluia.
 
 [psalm-antiphon-3]
 @use proper/pentecost/psalm-antiphon-3
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Tempora/Pasc7-0 [Ant Laudes] — check against diurnal
-See ye fountains, * and all that move in the waters, ascribe ye praise to God, alleluia.
+# SOURCE: monastic diurnal, p. 396 (The Feast of Pentecost, At Lauds)
+O ye wells, * and all that move in the waters, sing a hymn unto God, alleluia.
 
 [psalm-antiphon-5]
 @use proper/whit-ember-friday/magnificat-antiphon
 
 [benedictus-antiphon]
-Receive ye the Holy Ghost; * whoseoever sins ye remit, they are remitted unto them, alleluia.
+# SOURCE: monastic diurnal, p. 401 (Ember Friday within the Octave of Pentecost)
+Jesus said: * But that ye may know that the Son of man hath power on earth to forgive sins, (he saith unto the sick of the palsy) I say unto thee, Arise, take up thy bed, and go thy way into thine house, alleluia.
 
 [magnificat-antiphon]
 The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.

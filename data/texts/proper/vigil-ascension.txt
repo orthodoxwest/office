@@ -1,14 +1,13 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc5-3 [Ant 2] — check against diurnal
-Father, the hour is come, * glorify thy Son, with the glory which I had, before the world was, with thee, alleluia.
+# SOURCE: monastic diurnal, p. 387 (Rogation Wednesday / Vigil of the Ascension)
+Father, the hour is come: * glorify thy Son with the glory which I had with thee before the world was, alleluia.
 
 [commemoration-antiphon]
 @use proper/vigil-ascension/benedictus-antiphon
 
 [collect]
-# SOURCE: divinum-officium Tempora/Pasc5-0 [Oratio] — the vigil takes the collect
-# of the preceding (Fifth) Sunday after Easter — check against diurnal
-O God, from Whom all good things do come, grant to us thy humble servants that by thy holy inspiration we may think those things that be good, and by thy merciful guiding may perform the same.
+# SOURCE: monastic diurnal, p. 385 (V Sunday after Easter; said on the Vigil)
+O Lord, from whom all good things do come; grant to us thy humble servants, that by thy holy inspiration we may think those things that are good, and by thy merciful guiding may perform the same.
 
 # Psalm antiphons and Magnificat antiphon are ferial (vespers belong to
 # I Vespers of the Ascension); see data/audit-ok.txt.

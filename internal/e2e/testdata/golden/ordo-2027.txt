@@ -920,7 +920,7 @@ MAY
                Com. St Petronilla, Virgin ("Come, thou Bride of Christ")
  31  Mon     Feria                                            w
            St Petronilla, Virgin (com)
-           Lauds   w · Ben. Did not our heart burn within us, at the… · No Preces · No Suff.
+           Lauds   w · Ben. Did not our heart · No Preces · No Suff.
                Com. St Petronilla, Virgin ("The kingdom of heaven")
            Hours   Preces
            Vespers w · Mag. I tell you the truth · No Suff.
@@ -928,20 +928,20 @@ MAY
 JUNE
 ------------------------------------------------------------
   1  Tue     Feria                                            w
-           Lauds   w · Ben. Peace be unto you · No Preces · No Suff.
+           Lauds   w · Ben. Peace be unto you, it is I · No Preces · No Suff.
            Hours   Preces
-           Vespers w · Mag. When the Comforter, the Spirit of truth, is come · No Suff.
+           Vespers w · Mag. When the Comforter · No Suff.
                Com. Ss. Marcellinus, Peter & Erasmus, Martyrs ("In the heavenly kingdom")
   2  Wed     Feria                                            w
            Ss. Marcellinus, Peter & Erasmus, Martyrs (com)
-           Lauds   w · Ben. A spirit hath not flesh and bones · No Preces · No Suff.
+           Lauds   w · Ben. A spirit · No Preces · No Suff.
                Com. Ss. Marcellinus, Peter & Erasmus, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers w · Mag. I have yet many things to say unto you… · No Suff.
+           Vespers w · Mag. I have yet · No Suff.
   3  Thu     Feria                                            w
-           Lauds   w · Ben. The disciples gave the Lord a piece · No Preces · No Suff.
+           Lauds   w · Ben. The disciples · No Preces · No Suff.
            Hours   Preces
-           Vespers w · Mag. For He shall not speak of Himself · No Suff.
+           Vespers w · Mag. For he shall not speak of himself · No Suff.
   4  Fri  L  Feria                                            w
            Lauds   w · Ben. These are the words · No Preces · No Suff.
            Hours   Preces
@@ -954,13 +954,13 @@ JUNE
   6  Sun     V Sunday after Easter                      [sd]  w
            Lauds   w · Ben. Hitherto · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. Ask, and ye shall receive · No Suff.
+           Vespers w · II prec. · Mag. Ask · No Suff.
   7  Mon     Rogation Monday                            [f2]  v
-           Lauds   v · Ben. Ask, and ye shall receive · No Preces · No Suff.
+           Lauds   v · Ben. Ask · No Preces · No Suff.
            Hours   Preces
-           Vespers v · Mag. The Father Himself loveth you · No Suff.
+           Vespers v · Mag. For the Father · No Suff.
   8  Tue     Feria                                            w
-           Lauds   w · Ben. Christ ought to have suffered · No Preces · No Suff.
+           Lauds   w · Ben. It behoved Christ to suffer · No Preces · No Suff.
            Hours   Preces
            Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him unto a wise man · No Suff.
                Com. Ss Primus & Felician, Martyrs ("In the heavenly kingdom")
@@ -1051,41 +1051,41 @@ JUNE
  21  Mon     DAY II WITHIN THE OCTAVE OF PENTECOST      [1cl] r
            Lauds   r · Ben. God so loved the world · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. If a Man love Me · No Suff.
+           Vespers r · II prec. · Mag. If a man love me · No Suff.
  22  Tue     DAY III WITHIN THE OCTAVE OF PENTECOST     [1cl] r
            St Alban, Protomartyr of England (d)
            St Paulinus, Bishop & Confessor (com)
-           Lauds   r · Ben. I am the Door · No Preces · No Suff.
+           Lauds   r · Ben. I am the door · No Preces · No Suff.
                Com. St Alban, Protomartyr of England ("He that hateth his life")
                Com. St Paulinus, Bishop & Confessor ("Well done")
            Hours   No Preces
-           Vespers r · II prec. · Mag. Peace I leave with you · No Suff.
+           Vespers r · II prec. · Mag. Peace · No Suff.
  23  Wed  L§ Day IV within the Octave of Pentecost      [sd]  r
            St. Etheldreda, Queen & Virgin (com)
-           Lauds   r · Ben. I am the Living Bread · No Preces · No Suff.
+           Lauds   r · Ben. I am the living bread · No Preces · No Suff.
                Com. St. Etheldreda, Queen & Virgin ("The kingdom of heaven")
            Hours   No Preces
-           Vespers r · II prec. · Mag. I am the Living Bread Which came down from… · No Suff.
+           Vespers r · II prec. · Mag. I am the living bread · No Suff.
                Com. Day V within the Octave of Pentecost ("I will not leave you")
  24  Thu     Day V within the Octave of Pentecost       [sd]  r
            Nativity of St John Baptist (com)
-           Lauds   r · Ben. Jesus called His twelve disciples · No Preces · No Suff.
+           Lauds   r · Ben. Jesus called unto him · No Preces · No Suff.
                Com. Nativity of St John Baptist ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers r · II prec. · Mag. The Comforter · No Suff.
+           Vespers r · II prec. · Mag. The Spirit · No Suff.
                Com. Day VI within the Octave of Pentecost ("I will not leave you")
  25  Fri  L§ Day VI within the Octave of Pentecost      [sd]  r
            Day II within the Octave of St John Baptist (sd)
-           Lauds   r · Ben. But that ye may know · No Preces · No Suff.
+           Lauds   r · Ben. Jesus said · No Preces · No Suff.
                Com. Day II within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
-           Vespers r · II prec. · Mag. But the Comforter which is the Holy Ghost · No Suff.
+           Vespers r · II prec. · Mag. But the Comforter · No Suff.
                Com. Day VII within the Octave of Pentecost ("I will not leave you")
  26  Sat  L§ Day VII within the Octave of Pentecost     [sd]  r
            Ss. John & Paul, Martyrs (d)
            Octave of the Compassion of Our Lord Jesus Christ (com)
            Day III within the Octave of St John Baptist (sd)
-           Lauds   r · Ben. The charity of God · No Preces · No Suff.
+           Lauds   r · Ben. The love of God is shed · No Preces · No Suff.
                Com. Ss. John & Paul, Martyrs ("These are the holy ones")
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
                Com. Day III within the Octave of St John Baptist ("He shall go before him")

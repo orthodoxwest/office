@@ -1,7 +1,7 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-4 [Ant 2] — check against diurnal
-Jesus called His twelve disciples * together, * and gave them power and authority over all devils, and to cure diseases and He sent them to preach the kingdom of God, and to heal the sick. Alleluia.
+# SOURCE: monastic diurnal, p. 401 (Thursday within the Octave of Pentecost)
+Jesus called unto him * his twelve disciples, and gave them power and authority over all devils, and to cure diseases: and he sent them to preach the kingdom of God, and to heal the sick, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc7-4 [Ant 3] — check against diurnal
-The Comforter, * Which proceedeth from the Father, alleluia, He shall glorify Me, alleluia, alleluia.
+# SOURCE: monastic diurnal, p. 401 (Thursday within the Octave of Pentecost)
+The Spirit * which proceedeth from the Father, alleluia: he shall glorify me, alleluia, alleluia.
