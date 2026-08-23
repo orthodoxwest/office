@@ -59,9 +59,9 @@ For theirs is the kingdom of heaven, * who despised worldly living: who have won
 @use commons/martyrs/magnificat-antiphon
 
 [commemoration-versicle]
-# SOURCE: divinum-officium Commune/C3 [Versum 2] — check against diurnal
-V. The saints shall rejoice in glory:
-R. They shall be joyful in their beds.
+# SOURCE: monastic diurnal, p. 26* (Common of Many Martyrs out of Paschaltide, At Lauds)
+V. Let the Saints be joyful with glory.
+R. Let them rejoice in their beds.
 
 [commemoration-versicle-lauds]
 @use commons/martyrs/versicle-lauds
@@ -73,7 +73,8 @@ R. They shall be joyful in their beds.
 @use commons/martyrs/collect
 
 [collect]
-Grant, we beseech thee, almighty God, that the venerable feast of blessed N. thy Martyr may both increase our devotion and promote our salvation.
+# SOURCE: monastic diurnal, pp. 26*–27* (Common of Many Martyrs, If not Bishops)
+O God, who dost suffer us to honour the birthday of thy holy Martyrs N.: grant us to rejoice in their eternal and blessed fellowship.
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 638 (Common of Many Martyrs out of Paschaltide)
@@ -101,23 +102,55 @@ To God the Holy Paraclete.
 
 Amen.
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 637 (Common of Many Martyrs out of Paschaltide)
+# SOURCE: monastic diurnal, p. 25* (Common of Many Martyrs out of Paschaltide, At Lauds)
 !Wis 3:1-3
-The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise, they seemed to die, but they are in peace.
+The souls of the righteous are in the hand of God, and there shall no torment touch them. In the sight of the unwise they seemed to die, * but they are in peace.
 R. Thanks be to God.
 
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Sext)
+!Wis 10:17
+The Lord rendered to the righteous a reward of their labours, guided them in a marvellous way, and was unto them for a cover by day, * and a light of stars in the night-season.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At None)
+!Wis 3:7-8
+The righteous shall shine, and run to and fro like sparks among the stubble. They shall judge the nations, and have dominion over the people, * and their Lord shall reign for ever.
+R. Thanks be to God.
+
+[chapter-terce]
+@use commons/martyrs/chapter-lauds
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Terce)
+@use commons/martyrs/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Sext)
+@use commons/martyrs/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At None)
+R. The righteous live * for evermore.
+R. The righteous live * for evermore.
+V. Their reward also is with the Lord.
+R. For evermore.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The righteous live * for evermore.
+
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 638 (Common of Many Martyrs out of Paschaltide)
-R. Be glad, O ye righteous * and rejoice in the Lord.
-R. Be glad, O ye righteous * and rejoice in the Lord.
+# SOURCE: monastic diurnal, p. 26* (Common of Many Martyrs out of Paschaltide, At Lauds)
+R. Be glad, O ye righteous, * and rejoice in the Lord.
+R. Be glad, O ye righteous, * and rejoice in the Lord.
 V. And be joyful, all ye that are true of heart.
 R. And rejoice in the Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Be glad, O ye righteous * and rejoice in the Lord.
+R. Be glad, O ye righteous, * and rejoice in the Lord.
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 639 (Common of Many Martyrs out of Paschaltide)
-V. Let the saints be joyful with glory.
+# SOURCE: monastic diurnal, p. 26* (Common of Many Martyrs out of Paschaltide, At Lauds)
+V. Let the Saints be joyful with glory.
 R. Let them rejoice in their beds.
 
 [chapter-vespers]

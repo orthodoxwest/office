@@ -8,19 +8,19 @@
 @use commons/confessor-bishop/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 652 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 Behold a great priest, * who in his days pleased God, and was found righteous.
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Lauds book, p. 653 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 There was none * like unto him, who kept the law of the Most High.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 653 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 The Lord, * therefore, assured him by an oath that he would bless the nations in his seed.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 654 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn unto God, alleluia.
 
 [psalm-antiphon-4-septuagesima]
@@ -34,22 +34,22 @@ O ye priests of God, * bless ye the Lord: O ye servants of the Lord, sing a hymn
 @use commons/confessor-bishop/psalm-antiphon-4-septuagesima
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 656 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon-4-vespers]
 @use commons/confessor-bishop/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of a Confessor and Bishop) — parish noted manual
+# SOURCE: monastic diurnal, p. 36* (Common of a Confessor and Bishop, At Lauds)
 Well done, * good and faithful servant: thou hast been faithful over a few things, I will make thee ruler over many things, saith the Lord.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 643 (II Vespers, Common of a Confessor and Bishop)
-The Lord loved him * and adorned him; he clothed him with a robe of glory, and at the gates of Paradise, he crowned him.
+# SOURCE: monastic diurnal, p. 41* (Common of a Confessor and Bishop, At II Vespers)
+The Lord loved him * and adorned him; he clothed him with a robe of glory, and at the gates of Paradise he crowned him.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 632 (I Vespers, Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At I Vespers)
 O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of the people, pray unto the Lord for us.
 
 [commemoration-antiphon]
@@ -77,18 +77,25 @@ R. He clothed him with a robe of glory.
 @use commons/confessor-bishop/collect
 
 [collect]
-Grant, we beseech thee, Almighty God: that the venerable solemnity of blessed N., thy Confessor and Bishop, may both increase our devotion and set forward our salvation.
+# SOURCE: monastic diurnal, p. 36* (Common of a Confessor and Bishop, At Lauds)
+Grant, we beseech thee, Almighty God: that the reverend solemnity of blessed N., thy Confessor and Bishop, may both increase our devotion and set forward our salvation.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 658 (Common of a Confessor and Bishop)
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds)
 !Sir 44:17
-Behold a great priest who in his days pleased God and was found righteous: and in the time of wrath was made a reconciliation.
+Behold a great priest who in his days pleased God and was found righteous: * and in the time of wrath he was made a reconciliation.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C4 [Capitulum Sexta] — check against diurnal
-!Sir 44:20; 44:22
-There was not found the like to him in glory, who kept the law of the most High, and was in covenant with him. Therefore by an oath he gave him glory in his posterity, that he should increase in his people.
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Sext)
+!Sir 44:19-21
+In glory was there none like unto him, who kept the law of the Most High: * therefore the Lord assured him by an oath that he would bless the nations in his seed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At None)
+!Sir 45:15-16
+He consecrated him to execute the office of the priesthood, to bless the people in his Name, * and to offer sacrifices to the Lord, incense, and a sweet savour.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -182,31 +189,21 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord chose him * for a priest unto himself.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Commune/C4 [Responsory Breve Tertia] — check against diurnal
-R. The Lord loved him, * and beautified him.
-R. The Lord loved him, * and beautified him.
-V. He clothed him with a robe of glory.
-R. And beautified him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord loved him, * and beautified him.
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Terce)
+@use commons/confessor-bishop/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C4 [Responsory Breve Sexta] — check against diurnal
-R. The Lord hath chosen him * for a Priest unto Himself.
-R. The Lord hath chosen him * for a Priest unto Himself.
-V. To offer up unto Him the sacrifice of praise.
-R. For a Priest unto Himself.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord hath chosen him * for a Priest unto Himself.
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Sext)
+@use commons/confessor-bishop/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C4 [Responsory Breve Nona] — check against diurnal
-R. Thou art a Priest * for ever.
-R. Thou art a Priest * for ever.
-V. After the order of Melchisedek.
+# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At None)
+R. Thou art a priest * for ever.
+R. Thou art a priest * for ever.
+V. After the order of Melchisedech.
 R. For ever.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou art a Priest * for ever.
+R. Thou art a priest * for ever.
 
 [chapter-vespers]
 @use commons/confessor-bishop/chapter-lauds
