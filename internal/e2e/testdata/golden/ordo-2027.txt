@@ -105,7 +105,7 @@ JANUARY
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St. Felix of Nola, Priest & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · I fol. (St Maurus, Abbot) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Maurus, Abbot) · Mag. I will liken him · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("O Teacher right excellent")
  15  Fri  L  St Maurus, Abbot                           [gd]  w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
@@ -962,7 +962,7 @@ JUNE
   8  Tue     Feria                                            w
            Lauds   w · Ben. It behoved Christ to suffer · No Preces · No Suff.
            Hours   Preces
-           Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him · No Suff.
                Com. Ss Primus & Felician, Martyrs ("In the heavenly kingdom")
   9  Wed     St Columba of Iona, Abbot                  [d]   w
            Vigil of the Ascension (s)
@@ -1244,7 +1244,7 @@ JULY
  14  Wed     Feria                                            g
            Lauds   g · Ben. From the hand of all that hate us · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Vladimir of Kiev, King & Confessor) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Vladimir of Kiev, King & Confessor) · Mag. I will liken him · No Suff.
  15  Thu     St Vladimir of Kiev, King & Confessor      [d]   w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
            Hours   No Preces
@@ -1284,7 +1284,7 @@ JULY
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
                Com. St Seraphim of Sarov, Priest & Confessor ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers w · I fol. (St Elias the Prophet) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Elias the Prophet) · Mag. I will liken him · No Suff.
                Com. St Margaret of Antioch, Virgin & Martyr ("Come, thou Bride of Christ")
  20  Tue     St Elias the Prophet                       [d]   w
            St Margaret of Antioch, Virgin & Martyr (com)
@@ -1451,7 +1451,7 @@ AUGUST
  12  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Maximus of Constantinople, Confessor) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Maximus of Constantinople, Confessor) · Mag. I will liken him · No Suff.
                Com. Ss. Hippolytus & Cassian, Martyrs ("In the heavenly kingdom")
  13  Fri  L  St Maximus of Constantinople, Confessor    [d]   w
            Ss. Hippolytus & Cassian, Martyrs (com)
@@ -1459,7 +1459,7 @@ AUGUST
                Com. Ss. Hippolytus & Cassian, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
-               Com. St Eusebius, Priest & Confessor ("I will liken him unto a wise man")
+               Com. St Eusebius, Priest & Confessor ("I will liken him")
  14  Sat  L§ Vigil of the Assumption                    [s]   v
            St Eusebius, Priest & Confessor (com)
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.

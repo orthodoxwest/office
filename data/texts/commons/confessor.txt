@@ -5,27 +5,28 @@
 @use commons/confessor/psalm-antiphon-1
 
 [psalm-antiphon-1]
-Lord, thou deliveredst unto me five talents: * behold, I have gained beside them five talents more.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
+Lord, thou deliveredst * unto me five talents: behold, I have gained beside them five talents more.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-Well done, thou good servant, * thou hast been faithful in a very little, enter thou into the joy of thy Lord.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
+Well done, thou good servant, * in little things found faithful, enter thou into the joy of thy Lord.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-A faithful and wise servant * whom his Lord hath made ruler over His household.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
+A wise and faithful servant, * whom the Lord hath made ruler over all his household.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-Blessed is that servant * whom his Lord, when He cometh and knocketh at the door, shall find watching.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
+Blessed is that servant * whom his Lord, when he cometh and knocketh at the door, shall find watching.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium CommuneM/C5 [Ant Laudes] — check against diurnal
-Thou good and faithful servant, * enter thou into the joy of thy Lord.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
+Good and faithful servant, * enter thou into the joy of thy Lord.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Commons Vespers book, p. 678 (Common of a Confessor not a Bishop)
-Lord, thou deliveredst unto me five talents: * behold, I have gained beside them five talents more.
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds; I Vespers takes the Lauds ants, omitting the fourth)
+Lord, thou deliveredst * unto me five talents: behold, I have gained beside them five talents more.
 
 [psalm-antiphon-2-vespers]
 # SOURCE: draft archdiocesan Commons Vespers book, p. 679 (Common of a Confessor not a Bishop)
@@ -48,8 +49,8 @@ Well done, good and faithful servant, * thou hast been faithful over a few thing
 The world, and all things earthly, * this man despised, triumphant: he laid up treasures in heaven by word and deed.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Commune/C5 [Ant 1] — check against diurnal
-I will liken him unto a wise man, * which built his house upon a rock.
+# SOURCE: monastic diurnal, p. 42* (Common of a Confessor not a Bishop, At I Vespers)
+I will liken him * unto a wise man, which built his house upon a rock.
 
 [commemoration-antiphon]
 @use commons/confessor/psalm-antiphon-1
@@ -75,18 +76,25 @@ I will liken him unto a wise man, * which built his house upon a rock.
 @use commons/confessor/collect
 
 [collect]
-O God, Who, year by year, dost gladden us by the solemn feast-day of thy blessed confessor N., mercifully grant unto all who keep his birthday, grace to follow after the pattern of his godly conversation.
+# SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, At Lauds)
+O God, who makest us glad by the yearly solemnity of thy blessed Confessor N.: mercifully grant that we who honour his birthday may also imitate his good deeds.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 668 (Common of a Confessor not a Bishop)
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, At Lauds)
 !Sir 31:8-9
-Blessed is the man that is found without blemish, and hath not gone after gold. Who is he? and we will call him blessed: for wonderful things hath he done among his people.
+Blessed is the man that is found without blemish, and hath not gone after gold. * Who is he? and we will call him blessed: for wonderful things hath he done among his people.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C5 [Capitulum Sexta] — check against diurnal
-!Sir 39:6
-The righteous will give his heart to resort early to the Lord that made him, and he will pray in the sight of the most High.
+# SOURCE: monastic diurnal, pp. 45*–46* (Common of a Confessor not a Bishop, At Sext)
+!Sir 39:5
+The righteous man will give his heart to resort early to the Lord that made him, * and will pray before the Most High.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At None)
+!Wis 10:10
+The Lord guided the righteous in right paths, shewed him the kingdom of God, and gave him knowledge of holy things, * made him rich in his travels, and multiplied the fruit of his labours.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -140,20 +148,24 @@ Amen.
 [versicle-lauds]
 @use commons/confessor-bishop/versicle-lauds
 
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, At Terce)
+@use commons/confessor/short-responsory-lauds
+
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C5 [Responsory Breve Sexta] — check against diurnal
-R. The mouth of the righteous * speaketh wisdom.
-R. The mouth of the righteous * speaketh wisdom.
-V. And his tongue talketh judgment.
-R. The righteous speaketh wisdom.
+# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At Sext)
+R. The mouth of the righteous * is exercised in wisdom.
+R. The mouth of the righteous * is exercised in wisdom.
+V. And his tongue will be talking of judgment.
+R. Is exercised in wisdom.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The mouth of the righteous * speaketh wisdom.
+R. The mouth of the righteous * is exercised in wisdom.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C5 [Responsory Breve Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At None)
 R. The law of his God * is in his heart.
 R. The law of his God * is in his heart.
-V. None of his steps shall slide.
+V. And his goings shall not slide.
 R. In his heart.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The law of his God * is in his heart.
@@ -192,7 +204,4 @@ Amen.
 @use commons/confessor/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Commune/C5 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Sir 31:8-9
-Blessed is the rich man that is found without blemish: and that hath not gone after gold, nor put his trust in money nor in treasures. Who is he, and we will praise him? for he hath done wonderful things in his life.
-R. Thanks be to God.
+@use commons/confessor/chapter-lauds

@@ -8,24 +8,24 @@
 @use commons/bishop-martyr/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 20 (Common of One Martyr out of Paschaltide)
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
 Whosoever shall confess me * before men, him will I confess also before my Father.
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Commons Lauds/Vespers books, pp. 21, 34, 42 (Common of One Martyr out of Paschaltide)
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
 He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 21 (Common of One Martyr out of Paschaltide)
-If any man serve me * let him follow me; and where I am, there shall also my servant be.
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
+If any man serve me, * let him follow me; and where I am, there shall also my servant be.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 22 (Common of One Martyr out of Paschaltide)
-If any man have served me * he shall be honoured of my Father which is in heaven, saith the Lord.
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
+If any man have served me, * he shall be honoured of my Father which is in heaven, saith the Lord.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 24 (Common of One Martyr out of Paschaltide)
-Father * I will that where I am, there may also my servant be.
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
+Father, * I will that where I am, there may also my servant be.
 
 [psalm-antiphon-1-vespers]
 @use commons/bishop-martyr/psalm-antiphon-1
@@ -60,8 +60,9 @@ Father * I will that where I am, there may also my servant be.
 @use commons/bishop-martyr/magnificat-antiphon
 
 [commemoration-versicle]
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At I Vespers)
 V. Thou hast crowned him with glory and honour, O Lord.
-R. And madest him to have dominion over the works of thy hands.
+R. And madest him to have dominion of the works of thy hands.
 
 [commemoration-versicle-lauds]
 @use commons/bishop-martyr/versicle-lauds
@@ -73,19 +74,25 @@ R. And madest him to have dominion over the works of thy hands.
 @use commons/bishop-martyr/collect
 
 [collect]
-# SOURCE: draft archdiocesan Commons Lauds/Vespers books, pp. 28, 40, 48 (primary Martyr Bishop collect)
+# SOURCE: monastic diurnal, p. 22* (Common of One Martyr out of Paschaltide, For a Martyr Bishop)
 Almighty God, mercifully look upon our infirmity: and because we are oppressed by the burden of our own deeds, may the glorious intercession of blessed N., thy Martyr and Bishop, defend us.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 25 (Common of One Martyr out of Paschaltide)
+# SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
 !Jas 1:12
-Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, which the Lord hath promised to them that love him.
+Blessed is the man that endureth temptation: for when he is tried, he shall receive the crown of life, * which the Lord hath promised to them that love him.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C2 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Sext)
 !Sir 15:3
-With the bread of life and understanding, she shall feed him, and give him the water of wholesome wisdom to drink: and she shall be made strong in him, and he shall not be moved.
+With the bread of life and understanding shall the Lord our God feed him, * and give him the water of saving wisdom to drink.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At None)
+!Sir 39:5
+The righteous man will give his heart to resort early to the Lord that made him, * and will pray before the Most High.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -95,8 +102,8 @@ R. Thanks be to God.
 @use commons/martyr/hymn-vespers
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Commons Lauds book, p. 27 (Common of One Martyr out of Paschaltide)
-V. The righteous shall flourish like the palm-tree.
+# SOURCE: monastic diurnal, p. 22* (Common of One Martyr out of Paschaltide, At Lauds)
+V. The righteous shall flourish like a palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-vespers]
@@ -112,31 +119,31 @@ R. And shall spread abroad like a cedar in Libanus.
 @use commons/martyr/short-responsory-vespers
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Commune/C2 [Responsory Breve Tertia] — check against diurnal
+# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Terce)
 R. Thou hast crowned him * with glory and honour, O Lord.
 R. Thou hast crowned him * with glory and honour, O Lord.
-V. And madest him to have dominion over the works of thy hands.
-R. Thou hast crowned him.
+V. And madest him to have dominion of the works of thy hands.
+R. With glory and honour, O Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou hast crowned him * with glory and honour, O Lord.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C2 [Responsory Breve Sexta] — check against diurnal
-R. O Lord, Thou hast set * Upon his head.
-R. O Lord, Thou hast set * Upon his head.
-V. A Crown of precious stones.
-R. Upon his head.
+# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Sext)
+R. Thou hast set upon his head, * O Lord.
+R. Thou hast set upon his head, * O Lord.
+V. A crown of pure gold.
+R. O Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. O Lord, Thou hast set * Upon his head.
+R. Thou hast set upon his head, * O Lord.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C2 [Responsory Breve Nona] — check against diurnal
-R. His glory is great * in thy salvation.
-R. His glory is great * in thy salvation.
-V. Honour and great majesty shalt Thou lay upon him.
+# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At None)
+R. His honour is great * in thy salvation.
+R. His honour is great * in thy salvation.
+V. Glory and great worship shalt thou lay upon him.
 R. In thy salvation.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His glory is great * in thy salvation.
+R. His honour is great * in thy salvation.
 
 [chapter-vespers]
 @use commons/bishop-martyr/chapter-lauds

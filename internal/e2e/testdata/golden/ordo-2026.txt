@@ -107,7 +107,7 @@ JANUARY
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St. Felix of Nola, Priest & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · I fol. (St Maurus, Abbot) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Maurus, Abbot) · Mag. I will liken him · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("O Teacher right excellent")
  15  Thu     St Maurus, Abbot                           [gd]  w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
@@ -119,7 +119,7 @@ JANUARY
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. St. Marcellus I of Rome, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers w · I fol. (St. Anthony of Egypt) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St. Anthony of Egypt) · Mag. I will liken him · No Suff.
  17  Sat     St. Anthony of Egypt                       [d]   w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
            Hours   No Preces
@@ -999,7 +999,7 @@ JUNE
   8  Mon     Feria                                            g
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Columba of Iona, Abbot) · Mag. I will liken him · No Suff.
                Com. Ss Primus & Felician, Martyrs ("In the heavenly kingdom")
   9  Tue     St Columba of Iona, Abbot                  [d]   w
            Ss Primus & Felician, Martyrs (com)
@@ -1258,7 +1258,7 @@ JULY
  14  Tue     Feria                                            g
            Lauds   g · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Vladimir of Kiev, King & Confessor) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Vladimir of Kiev, King & Confessor) · Mag. I will liken him · No Suff.
  15  Wed     St Vladimir of Kiev, King & Confessor      [d]   w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
            Hours   No Preces
@@ -1296,7 +1296,7 @@ JULY
                Com. St Seraphim of Sarov, Priest & Confessor ("Well done, good and faithful servant")
            Hours   Preces
            Vespers g · II prec. · Mag. A good tree · No Suff.
-               Com. St Elias the Prophet ("I will liken him unto a wise man")
+               Com. St Elias the Prophet ("I will liken him")
                Com. St Margaret of Antioch, Virgin & Martyr ("Come, thou Bride of Christ")
  20  Mon     St Elias the Prophet                       [d]   w
            St Margaret of Antioch, Virgin & Martyr (com)
@@ -1462,7 +1462,7 @@ AUGUST
  12  Wed     Feria                                            g
            Lauds   g · Ben. From the hand of all that hate us · No Preces · Suff.
            Hours   Preces
-           Vespers w · I fol. (St Maximus of Constantinople, Confessor) · Mag. I will liken him unto a wise man · No Suff.
+           Vespers w · I fol. (St Maximus of Constantinople, Confessor) · Mag. I will liken him · No Suff.
                Com. Ss. Hippolytus & Cassian, Martyrs ("In the heavenly kingdom")
  13  Thu     St Maximus of Constantinople, Confessor    [d]   w
            Ss. Hippolytus & Cassian, Martyrs (com)
@@ -1470,7 +1470,7 @@ AUGUST
                Com. Ss. Hippolytus & Cassian, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
-               Com. St Eusebius, Priest & Confessor ("I will liken him unto a wise man")
+               Com. St Eusebius, Priest & Confessor ("I will liken him")
  14  Fri  L§ Vigil of the Assumption                    [s]   v
            St Eusebius, Priest & Confessor (com)
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.

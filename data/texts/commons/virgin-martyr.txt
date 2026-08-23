@@ -5,8 +5,8 @@
 @use psalmody/vespers/martyrs
 
 [psalm-antiphon]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-This is one of the wise virgins, * one chosen out of the number of the careful.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
+This is a wise Virgin, * and one of the number of the prudent.
 
 [psalm-antiphon-1]
 @use commons/virgin-martyr/psalm-antiphon
@@ -15,27 +15,28 @@ This is one of the wise virgins, * one chosen out of the number of the careful.
 @use commons/virgin-martyr/commemoration-antiphon
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-This, is one which hath not known the sinful bed, * she shall have fruit in the visitation of holy souls.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
+Blessed is the barren * that is undefiled; she shall have fruit in the visitation of holy souls.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-Come, O my chosen one, * and I will establish My throne in thee.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
+Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Commune/C6 [Ant Vespera] — check against diurnal
-She is beautiful * among the daughters of Jerusalem.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
+This woman * is beautiful among the daughters of Jerusalem.
 
 [benedictus-antiphon]
-# SOURCE: lauds-commons-manual-noted.pdf (Common of Virgins) — parish noted manual
+# SOURCE: monastic diurnal, p. 48* (Common of Virgins, At Lauds)
 The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book (Common of a Virgin; Veni sponsa)
+# SOURCE: monastic diurnal, pp. 47*, 50* (Common of Virgins, At I and II Vespers)
 Come, thou Bride of Christ, * receive the crown which the Lord hath prepared for thee for ever.
 
 [commemoration-antiphon]
-This is one of the wise virgins, * whom the Lord found watching.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
+This is a wise Virgin, * whom the Lord hath found watching.
 
 [commemoration-antiphon-lauds]
 # Rubric: commemorations use the gospel-canticle antiphon of the common
@@ -59,18 +60,25 @@ This is one of the wise virgins, * whom the Lord found watching.
 @use commons/virgin-martyr/collect
 
 [collect]
-O God, who among the other miracles of thy power hast bestowed the victory of martyrdom even upon the weaker sex, graciously grant that we who celebrate the feast of blessed N., thy Virgin and Martyr, may come to thee by the path of her example.
+# SOURCE: monastic diurnal, pp. 48*–49* (Common of Virgins, For a Virgin Martyr)
+O God, who among other miracles of thy power hast bestowed the victory of martyrdom also upon women: mercifully grant that we who honour the birthday of blessed N., thy Virgin and Martyr, may through her example walk in the way that leadeth unto thee.
 
 [chapter-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 142
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
 !2 Cor 10:17-18
-Brethren: He that glorieth, let him glory in the Lord. For not he that commendeth himself is approved, but whom the Lord commendeth.
+Brethren: He that glorieth, let him glory in the Lord. * For not he that commendeth himself is approved, but whom the Lord commendeth.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C6 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At Sext)
 !2 Cor 11:2
-For I am jealous of you with the jealousy of God. For I have espoused you to one husband that I may present you as a chaste virgin to Christ.
+I am jealous over you with godly jealousy: for I have espoused you to one husband, * that I may present you as a chaste virgin to Christ.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At None, For a Virgin Martyr)
+!Sir 51:9-10
+Then lifted I up my supplication from the earth, and prayed for deliverance from death. I called upon the Lord, the Father of my Lord, that he would not leave me in the days of my trouble, * and in the time of the proud, when there was no help.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -104,35 +112,8 @@ From age to age eternally.
 
 Amen.
 [hymn-vespers]
-# SOURCE: divinum-officium Commune/C6 [Hymnus Vespera] — check against diurnal
-Jesu, corona Virginum
-
-Jesu, the virgins' crown, do thou
-Accept us as in prayer we bow;
-Born of that Virgin, whom alone
-The mother and the maid we own.
-
-Amongst the lilies thou dost feed,
-By virgin choirs accompanied;
-With glory decked, the spotless brides
-Whose bridal gifts thy love provides.
-
-They, wheresoe'er thy footsteps bend,
-With hymns and praises still attend:
-In blessèd troops they follow thee,
-With dance, and song, and melody.
-
-We pray thee therefore to bestow
-Upon our senses here below
-Thy grace, that so we may endure
-From taint of all corruption pure.
-
-* All laud to God the Father be,
-All praise, eternal Son, to thee;
-All glory as is ever meet,
-To God, the holy Paraclete.
-
-Amen.
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, At I Vespers: Hymn as below at Lauds)
+@use commons/virgin-martyr/hymn-lauds
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
 V. Full of grace are thy lips.
@@ -170,36 +151,24 @@ V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Commune/C6 [Responsory Breve Tertia] — check against diurnal
-R. In thy comeliness * and in thy beauty.
-R. In thy comeliness * and in thy beauty.
-V. Go forward, fare prosperously, and reign.
-R. In thy beauty.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. In thy comeliness * and in thy beauty.
+# SOURCE: monastic diurnal, p. 49* (Common of Virgins, At Terce)
+@use commons/virgin-martyr/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C6 [Responsory Breve Sexta] — check against diurnal
-R. God shall help her * with His countenance.
-R. God shall help her * with His countenance.
-V. God is in the midst of her, she shall not be moved.
-R. With His countenance.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God shall help her * with His countenance.
+# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At Sext)
+@use commons/virgin-martyr/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Commune/C6 [Responsory Breve Nona] — check against diurnal
-R. God hath chosen her, * and fore-chosen her.
-R. God hath chosen her, * and fore-chosen her.
-V. He hath made her to dwell in His tabernacle.
-R. And fore-chosen her.
+# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At None)
+R. God hath chosen her * and preferred her.
+R. God hath chosen her * and preferred her.
+V. He hath made her to dwell in his tabernacle.
+R. And preferred her.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God hath chosen her, * and fore-chosen her.
+R. God hath chosen her * and preferred her.
 
 [chapter-vespers]
-@use commons/virgin-martyr/chapter-terce
+@use commons/virgin-martyr/chapter-lauds
+
 [chapter-terce]
-# SOURCE: divinum-officium Commune/C6 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!2 Cor 10:17-18
-Brothers: But he that glorieth, let him glory in the Lord. For not he who commendeth himself, is approved, but he, whom God commendeth.
-R. Thanks be to God.
+@use commons/virgin-martyr/chapter-lauds

@@ -1,5 +1,4 @@
 key,content_hash,severity,reason,flagged,issue
-commons/bishop-martyr/short-responsory-sext,f86f1da5a79b,high,"division of Ps 21:3 garbled: stray capitals, wrong split of responsory",2026-07,
 proper/apparition-st-michael/versicle-lauds,8a1613d9dbc3,medium,parenthesized '(Alleluia.)' renders year-round; confirm Eastertide-conditional rendering against book,2026-07,
 proper/chains-st-peter/versicle-vespers,1563536e55a8,high,modern-English versicle ('I am going to build my church') amid archaic register,2026-07,
 proper/chair-peter-antioch/magnificat-antiphon,437e6456d70e,medium,Unresolved source conflict: 2026 ordo Mag. Ant. 'While he was High Priest' vs corpus/parish Vespers books 'During his pontificate'; neither source authoritative by default,2026-07,115
