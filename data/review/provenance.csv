@@ -381,7 +381,23 @@ proper/easter-sunday-3/benedictus-antiphon-friday,5c8ea5f3d66d,diurnal,"III Week
 proper/easter-sunday-3/benedictus-antiphon-thursday,43950cf2ef70,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/magnificat-antiphon,87eac0e355e0,diurnal,"III Sunday after Easter, At II Vespers",381,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/magnificat-antiphon-thursday,e1d2a40a57a3,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/benedictus-antiphon-friday,1f40b243c54f,diurnal,"IV Week after the Octave of Easter, Friday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/benedictus-antiphon-monday,11577c39237b,diurnal,"IV Week after the Octave of Easter, Monday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/benedictus-antiphon-thursday,24519e135432,diurnal,"IV Week after the Octave of Easter, Thursday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/benedictus-antiphon-tuesday,81b39a781d2f,diurnal,"IV Week after the Octave of Easter, Tuesday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/benedictus-antiphon-wednesday,5b2aaa34dcb9,diurnal,"IV Week after the Octave of Easter, Wednesday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/magnificat-antiphon-monday,77d50b0c2237,diurnal,"IV Week after the Octave of Easter, Monday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/magnificat-antiphon-thursday,ff4fc7b153de,diurnal,"IV Week after the Octave of Easter, Thursday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/magnificat-antiphon-tuesday,c70fe56716c3,diurnal,"IV Week after the Octave of Easter, Tuesday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/magnificat-antiphon-wednesday,55104563eb9e,diurnal,"IV Week after the Octave of Easter, Wednesday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/benedictus-antiphon,9c2f89393672,diurnal,"V Sunday after Easter, At Lauds",385,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/benedictus-antiphon-monday,b0dc83e2c628,diurnal,Rogation Monday,386,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/benedictus-antiphon-tuesday,73817e23081b,diurnal,Rogation Tuesday,387,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/benedictus-antiphon-wednesday,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/collect,1ed6ac486f79,draft archdiocesan Vespers book,,165,verified,codex,2026-07-17,
+proper/easter-sunday-5/magnificat-antiphon,83dadc803969,diurnal,"V Sunday after Easter, At II Vespers",386,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/magnificat-antiphon-monday,000c31e33c53,diurnal,Rogation Monday,387,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/magnificat-antiphon-tuesday,c8dc0d94f4bd,diurnal,Rogation Tuesday,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-4/benedictus-antiphon,6e8002911333,diurnal,Wednesday in Easter Week,368,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-4/magnificat-antiphon,57753eb8be0c,diurnal,Wednesday in Easter Week,368,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-5/benedictus-antiphon,2e4f79645365,diurnal,Thursday in Easter Week,368-369,verified,grok,2026-08-22,word-for-word from printed page image
@@ -592,6 +608,8 @@ proper/st-raphael-archangel/versicle-vespers,9c50d614fe3b,diurnal,"October 24, A
 proper/trinity-sunday/psalm-antiphon-1,116ab0c2b5da,draft archdiocesan Vespers book,,189,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-2,c491b409b4d9,draft archdiocesan Vespers book,,190,verified,codex,2026-07-17,
 proper/trinity-sunday/psalm-antiphon-3,f538e9d68586,draft archdiocesan Vespers book,,191,verified,codex,2026-07-17,
+proper/vigil-ascension/benedictus-antiphon,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
+proper/vigil-ascension/collect,69e0b9e0fe88,diurnal,V Sunday after Easter; said on the Vigil,385,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word
 proper/vigil-epiphany/hymn-lauds,ce7f4d0c3e25,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 psalms/001,e19d81a02f61,Coverdale Psalter,Psalm 1,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
