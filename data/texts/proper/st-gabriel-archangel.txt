@@ -2,30 +2,32 @@
 @use proper/st-gabriel-archangel/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/03-24 [Ant Laudes] — check against diurnal
-When Zacharias went into the temple of the Lord, * there appeared unto him the Angel Gabriel, standing on the right side of the Altar of incense. (Alleluia.)
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+When Zacharias * went into the temple, there appeared unto him the Angel Gabriel, standing on the right side of the altar of incense.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/03-24 [Ant Laudes] — check against diurnal
-But the Angel said unto him: Fear not, * Zacharias: for thy prayer is heard. (Alleluia.)
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+But the Angel said unto him, * Fear not, Zacharias, for thy prayer is heard.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/03-24 [Ant Laudes] — check against diurnal
-I am the Angel Gabriel, * that stand in the presence of God, and am sent to speak unto thee. (Alleluia.)
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+I am the Angel Gabriel, * that stand in the presence of God; and am sent to speak unto thee.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/03-24 [Ant Laudes] — check against diurnal
-The Angel Gabriel spoke unto Mary * and said: Behold, thou shalt conceive in thy womb, and bring forth a Son, and shalt call His Name Jesus. (Alleluia.)
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+The Angel Gabriel * spake unto Mary, saying: Behold, thou shalt conceive in thy womb, and bring forth a Son, and shalt call his Name Jesus.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/03-24 [Ant Laudes] — check against diurnal
-Then said Mary unto the Angel: How shall this be, seeing I know not a man? * And the Angel Gabriel answered and said unto her: The Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee. (Alleluia.)
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+Then said Mary * unto the Angel, How shall this be, seeing I know not a man? And the Angel Gabriel answered and said unto her, The Holy Ghost shall come upon thee, and the power of the Highest shall overshadow thee.
 
 [benedictus-antiphon]
-I am Gabriel, * that stand in the presence of God, and am sent to speak unto thee and to show thee these glad tidings.
+# SOURCE: monastic diurnal, p. 500 (St Gabriel, At Lauds)
+The Angel Gabriel * descended to Zacharias, and said unto him: Thy wife shall bear thee a son, and thou shalt call his name John; and many shall rejoice at his birth; for he shall go before the face of the Lord, to prepare his ways.
 
 [magnificat-antiphon]
-The Angel Gabriel spoke unto Mary * and said: Behold, thou shalt conceive in thy womb and bring forth a Son, and shalt call his name Jesus.
+# SOURCE: monastic diurnal, p. 501 (St Gabriel, At II Vespers)
+The Archangel Gabriel * said unto Mary: With God nothing shall be impossible. And Mary said, Behold the handmaid of the Lord: be it unto me according to thy word. And the Angel departed from her.
 
 [commemoration-antiphon]
 The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph, and the virgin's name was Mary.
@@ -34,73 +36,80 @@ The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph
 @use proper/guardian-angels/commemoration-versicle
 
 [collect]
-O God, who didst choose the Archangel Gabriel from among all thine other Angels and send him to herald the mystery of thine Incarnation, mercifully grant that we who keep his feast upon earth may feel his protection in heaven.
+# SOURCE: monastic diurnal, p. 500 (St Gabriel, At Lauds)
+O God, who from among other Angels didst choose the Archangel Gabriel to announce the mystery of thy Incarnation: mercifully grant that we who celebrate his feast on earth may experience his protection from heaven.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/03-24 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
 !Dan 9:21-22
-Behold, the man Gabriel, whom I had seen in the vision at the beginning, being caused to fly swiftly, touched me about the time of the evening oblation; and he informed me, and talked with me, and said: O Daniel, I am now come forth to give thee skill and understanding.
+Behold the man Gabriel, whom I had seen in the vision at the beginning, being caused to fly swiftly, touched me about the time of the evening oblation. And he informed me, and talked with me, and said, * O Daniel, I am now come forth to give thee skill and understanding.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/03-24 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 501 (St Gabriel, At Sext)
 !Dan 9:23-24
-And I have come to show thee, for thou art greatly beloved: Seventy weeks are determined, to finish the trangression, and to make an end of sin, and to seal up the vision and prophecy, and to anoint the Most Holy.
+And I am come to shew thee; for thou art greatly beloved: * seventy weeks are determined to make an end of sins, and to seal up the vision and prophecy, and to anoint the most Holy.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 501 (St Gabriel, At None)
+!Dan 9:25
+Know therefore and understand, that from the going forth of the commandment to restore and to build Jerusalem unto the Messiah the Prince, * shall be seven weeks, and threescore and two weeks.
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/03-24 [Hymnus Laudes] — check against diurnal
-Placare, Christe, servulis
+# SOURCE: monastic diurnal, pp. 499–500 (St Gabriel, At Lauds)
+Christe, Redemptor omnium
 
-O Christ, Redeemer of mankind,
-Thy servants here protect and spare,
-Who hearest with a loving mind
-The Blessed Virgin's holy prayer.
+O Christ, Redeemer of us all,
+Protect thy servants when they call,
+And hear with reconciling care
+The blessed Virgin's holy prayer.
 
-Be ever present, Angel high,
-Whose name God's might doth signify;
+Be ever present, Angel high
+Whose name 'God's might' doth signify:
 To all the weak new strength impart,
 And solace to the sad of heart.
 
-May those glad hosts which see Thy Face,
-The spirits of the heavenly home,
-Away from us all evils chase,
-Both past, and present, and to come.
+And ye, O ever blissful throng
+Of heavenly Spirits, guardians strong,
+Our past and present ills dispel,
+From future peril shield us well.
 
-Then purge away all unbelief,
-From every land where Christians dwell,
-That unto Thee, our Victor Chief,
-Our thanks and praises we may tell.
+From lands wherein thy faithful dwell
+Drive far away the infidel;
+So we to Christ due hymns of praise
+Henceforth with eager hearts may raise.
 
-The Father Unbegot we laud,
-We praise the sole-begotten Son,
-And Holy Spirit, with them God,
-Now, and while endless ages run.
+To thee, O Father, born of none,
+And thee, O sole-begotten Son,
+One with the Holy Paraclete,
+Be glory ever, as is meet.
 
 Amen.
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/03-24 [Hymnus Vespera] — check against diurnal
+# SOURCE: monastic diurnal, p. 498 (St Gabriel, At I Vespers)
 Christe, sanctorum decus Angelorum
 
-Christ, of the angels praise and adoration,
-Father and Saviour thou, of every nation,
-Graciously grant us all to gain a station,
-Where thou art reigning.
+Christ, the fair glory of the holy Angels,
+Thou who hast made us, thou who o'er us rulest,
+Grant of thy mercy unto us thy servants
+Steps up to heaven.
 
-Angel of strength, who triumphed, tumults quelling,
-Gabriel send us, ancient foes expelling,
-Oft in these temples may he make his dwelling,
-Dear unto heaven.
+Send thy Archangel, Gabriel, the mighty,
+Herald of heaven; may he from us mortals
+Spurn the old serpent, watching o'er the temples
+Where thou art worshipped.
 
-May the fair Mother of the Light be o'er us,
-Virgin of peace, with all the angel chorus,
-And may the heavenly army go before us,
-Guiding and guarding.
+May the blest Mother of our God and Saviour,
+May the assembly of the Saints in glory,
+May the celestial companies of Angels
+Ever assist us.
 
-O may the Godhead, endless bliss possessing,
-Father, Son, Spirit, grant to us this blessing;
-All his creation joins his praise confessing,
-Now and forever.
+This he vouchsafe us, God for ever blessed,
+Father eternal, Son, and Holy Spirit,
+Whose is the glory which through all creation
+Ever resoundeth.
 
 Amen.
 [chapter-vespers]
@@ -110,8 +119,53 @@ Amen.
 @use proper/st-gabriel-archangel/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/03-24.txt [Ant 1] — check against diurnal
-The Angel Gabriel * appeared to Daniel and said: From the beginning of thy prayers the word came forth: and I am come to show it to thee, because thou art a man of desires: therefore do thou mark the word, and understand the vision.
+# SOURCE: monastic diurnal, p. 498 (St Gabriel, At I Vespers)
+The Angel Gabriel * came in unto Mary and said, Hail, thou that art full of grace, the Lord is with thee; blessed art thou among women.
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 500 (St Gabriel, At Terce)
+R. An Angel stood * at the altar of the temple.
+R. An Angel stood * at the altar of the temple.
+V. Having in his hand a golden censer.
+R. At the altar of the temple.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. An Angel stood * at the altar of the temple.
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 501 (St Gabriel, At Sext)
+R. The smoke of the incense ascended up * before God.
+R. The smoke of the incense ascended up * before God.
+V. Out of the Angel's hand.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense ascended up * before God.
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 501 (St Gabriel, At None)
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+V. I will worship toward thy holy temple, and praise thy Name.
+R. I will sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, p. 498 (St Gabriel, At I Vespers)
+R. The smoke of the incense ascended up * before God.
+R. The smoke of the incense ascended up * before God.
+V. Out of the Angel's hand.
+R. Before God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The smoke of the incense ascended up * before God.
+
+[short-responsory-lauds]
+# SOURCE: monastic diurnal, p. 499 (St Gabriel, At Lauds)
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
+V. I will worship toward thy holy temple, and praise thy Name.
+R. I will sing praise unto thee, O my God.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. In the presence of the Angels * I will sing praise unto thee, O my God.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
