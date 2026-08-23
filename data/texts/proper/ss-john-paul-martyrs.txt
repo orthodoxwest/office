@@ -1,10 +1,10 @@
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/06-26.txt [Ant 1] — check against diurnal
-The righteous stand * in the Presence of the Lord, and are not divided the one from the other; they drank of the Lord's Cup, and they are called Friends of God.
+# SOURCE: monastic diurnal, p. 542 (Ss John and Paul, Vespers commemoration)
+The righteous * stood before the Lord, and were not separated one from another: they drank of the chalice of the Lord, and were called the friends of God.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/06-26.txt [Ant 2] — check against diurnal
-These are the holy ones * who for the love of Christ, recked nothing of the threats of men. In the kingdom of heaven the holy martyrs are filled with joy in the company of Angels. O how precious in the sight of the Lord was the death of these His saints who now stand day and night in His presence and are not divided the one from the other.
+# SOURCE: monastic diurnal, p. 543 (Ss John and Paul, Lauds commemoration)
+These are the holy ones, * who for the love of Christ despised the threats of men: in the kingdom of heaven, the holy Martyrs exult with Angels: O how precious is the death of the Saints, who stand unceasingly before the Lord, and are not separated one from another.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 613 (Common of Many Martyrs out of Paschaltide, II Vespers; Gaudent in cælis)
