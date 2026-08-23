@@ -78,18 +78,25 @@ The Angel Gabriel * spake unto Mary, saying: Hail, thou that art full of grace, 
 @use proper/annunciation/versicle-lauds-easter
 
 [collect]
-O God, Who didst will that thy Word should, by the message of an Angel, take flesh in the womb of the Blessed Virgin Mary, grant unto us, we beseech thee, that all who do believe her to be in very deed the Mother of God, may be helped by her prayers in thy sight.
+# SOURCE: monastic diurnal, p. 503 (Annunciation, At Lauds)
+O God, who didst ordain that thy Word should take flesh in the womb of the blessed Virgin Mary, at the message of an Angel: grant that we thy suppliants, who believe her to be indeed the Mother of God, may be aided by her intercessions before thee.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 437
+# SOURCE: monastic diurnal, p. 502 (Annunciation, At Lauds)
 !Isa 7:14-15
-Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
+Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel. * Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 503 (Annunciation, At Sext)
 !Luke 1:32-33
-The Lord God shall give unto him the throne of David his father; and he shall reign in the house of Jacob for ever. And of his kingdom there shall be no end.
+The Lord God shall give unto him the throne of his father David: and he shall reign over the house of Jacob for ever; * and of his kingdom there shall be no end.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 504 (Annunciation, At None)
+!Isa 11:1-2
+There shall come forth a rod out of the stem of Jesse, and a Branch shall grow out of his roots: * and the Spirit of the Lord shall rest upon him.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -152,10 +159,24 @@ R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
 @use proper/annunciation/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/03-25 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Isa 7:14-15
-Behold a virgin shall conceive, and bear a son, and his name shall be called Emmanuel. He shall eat butter and honey, that he may know to refuse the evil, and to choose the good.
-R. Thanks be to God.
+@use proper/annunciation/chapter-lauds
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 503 (Annunciation, At Terce)
+@use commons/virgin-martyr/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 503 (Annunciation, At Sext)
+@use commons/virgin-martyr/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 504 (Annunciation, At None)
+R. God hath chosen her * and preferred her.
+R. God hath chosen her * and preferred her.
+V. He hath made her to dwell in his tabernacle.
+R. And preferred her.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. God hath chosen her * and preferred her.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

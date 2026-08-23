@@ -3,8 +3,8 @@
 # see data/audit-ok.txt.
 
 [collect]
-# SOURCE: divinum-officium Commune/C1v [Oratio 1 loco], "N." rendered as James — check against diurnal
-Grant, we beseech thee, O Almighty God, that the worshipful feast of thy blessed Apostle, James, on the eve whereof we now stand, may avail us to the increase both of godliness toward thee, and of health to our own souls.
+# SOURCE: monastic diurnal, p. 7* (On Vigils of Apostles; p. 570 assigns this collect to the Vigil of St James)
+Grant, we beseech thee, Almighty God: that the reverend solemnity of thy blessed Apostle James, to which we are drawing nigh, may both increase our devotion and set forward our salvation.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.

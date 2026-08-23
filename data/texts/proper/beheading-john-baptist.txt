@@ -2,28 +2,32 @@
 @use proper/beheading-john-baptist/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-For Herod had laid hold upon John, * and bound him, and put him in prison, for Herodias' sake.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+Herod himself had sent forth * and laid hold upon John, and bound him in prison, for Herodias' sake.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-O Lord my King, * give me in a charger the head of John the Baptist.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+My lord the king, * give me in a charger the head of John the Baptist.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-The damsel danced, * and her mother charged her, saying: See thou ask nothing, but only the head of John.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+When the damsel danced, * her mother bade her: Ask for nothing else but the head of John.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium SanctiM/08-29 [Ant Laudes] — check against diurnal
-John had rebuked Herod for Herodias' sake, * his brother Philip's wife, for he had taken her.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+John reproved * Herod for the sake of Herodias, whom he took for wife from his brother Philip.
 
 [psalm-antiphon-5]
-@use proper/beheading-john-baptist/magnificat-antiphon
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+Give me in a charger * the head of John the Baptist: and the king was exceeding sorry for his oath's sake.
+
 [benedictus-antiphon]
-He that hateth his life * in this world, shall keep it unto life eternal.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+@use proper/beheading-john-baptist/magnificat-antiphon-first
 
 [magnificat-antiphon]
-Give me in a charger the head of John the Baptist. * And the King was sorry, for his oath's sake.
+# SOURCE: monastic diurnal, p. 595 (Beheading of St John Baptist, At II Vespers)
+The king, the unbeliever, * sent his detestable servants, and commanded them to behead John the Baptist.
 
 [commemoration-antiphon]
 @use proper/beheading-john-baptist/psalm-antiphon-1
@@ -32,11 +36,12 @@ Give me in a charger the head of John the Baptist. * And the King was sorry, for
 @use commons/bishop-martyr/commemoration-versicle
 
 [collect]
-Lord, we beseech thee, that the keeping of this honourable feastday in memory of the holy Baptist John, thy Fore-runner, and thy Martyr, may be a mean to draw upon us the effectual outpouring of thy saving help.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
+We beseech thee, O Lord, that the reverend festival of holy John Baptist thy Forerunner and Martyr: may bring upon us the benefit of thy saving help.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/08-29.txt [Ant 1] — check against diurnal
-Herod sent * an executioner, and commanded that John's head should be cut off in the prison. And when his disciples heard of it, they came and took up his corpse, and laid it in a tomb.
+# SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At I Vespers)
+Herod sent * an executioner, and commanded him to behead John in the prison: and when his disciples heard of it, they came, and took up his body, and laid it in a tomb.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

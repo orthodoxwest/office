@@ -492,7 +492,7 @@ MARCH
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("Well done")
                Com. St Edward, King & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · I fol. (St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. Joseph, being raised · No Suff.
+           Vespers w · I fol. (St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. Then Joseph · No Suff.
                Com. Thursday after Ash Wednesday ("Lord, I am not worthy")
  19  Fri  L§ St. Joseph, Spouse of the Blessed Virgin Mary [2cl] w
            Friday after Ash Wednesday (f2)
@@ -787,11 +787,11 @@ MAY
            Apparition of St. Michael the Archangel (gd)
            St Boniface IV, Bishop & Confessor (com)
            Lauds   w · Ben. They ran both together · No Preces · No Suff.
-               Com. Apparition of St. Michael the Archangel ("An Angel stood at the Altar")
+               Com. Apparition of St. Michael the Archangel ("An Angel stood")
                Com. St Boniface IV, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers w · I fol. (Low Sunday (Octave of Easter)) · Mag. The same day · No Suff.
-               Com. Apparition of St. Michael the Archangel ("An Angel stood at the Altar")
+               Com. Apparition of St. Michael the Archangel ("An Angel stood")
                Com. St. Gregory Nazianzen, Bishop, Confessor & Doctor ("O Teacher right excellent")
   9  Sun     LOW SUNDAY (OCTAVE OF EASTER)              [1cl] w
            St. Gregory Nazianzen, Bishop, Confessor & Doctor (d)
@@ -1119,7 +1119,7 @@ JUNE
                Com. Day VI within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
            Vespers r · II prec. · Mag. Today · No Suff.
-               Com. St Paul, Apostle ("O Holy Apostle Paul")
+               Com. St Paul, Apostle ("O holy Apostle Paul")
  30  Wed     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)
            Day VII within the Octave of St John Baptist (sd)
@@ -1131,7 +1131,7 @@ JUNE
            Hours   No Preces
            Vespers w · I fol. (Corpus Christi) · Mag. O how sweet · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
-               Com. St Peter, Apostle ("O Holy Apostle Paul")
+               Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Octave of St John Baptist ("He shall go before him")
 
 JULY
@@ -1553,17 +1553,17 @@ AUGUST
            Hours   No Preces
            Vespers g · I fol. (X Sunday after Pentecost) · Mag. Now when Job had heard · No Suff.
                Com. St Augustine of Hippo, Bishop, Confessor & Doctor ("O Teacher right excellent")
-               Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
+               Com. Beheading of St. John the Baptist ("Herod himself had sent forth")
                Com. St Sabina, Martyr ("Whosoever will come after me")
  29  Sun     X Sunday after Pentecost                   [sd]  g
            Beheading of St. John the Baptist (gd)
            St Sabina, Martyr (com)
            Lauds   g · Ben. And the publican · No Preces · No Suff.
-               Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
+               Com. Beheading of St. John the Baptist ("Herod himself had sent forth")
                Com. St Sabina, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers g · II prec. · Mag. This man went down · No Suff.
-               Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
+               Com. Beheading of St. John the Baptist ("Herod himself had sent forth")
                Com. Ss. Felix & Adauctus, Martyrs ("In the heavenly kingdom")
  30  Mon     Feria                                            g
            Ss. Felix & Adauctus, Martyrs (com)
@@ -1770,12 +1770,12 @@ OCTOBER
            Lauds   g · Ben. Through the tender mercy of our God · No Preces · Suff.
                Com. St Remigius, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers w · I fol. (Holy Guardian Angels) · Mag. Are they not all · No Suff.
+           Vespers w · I fol. (Holy Guardian Angels) · Mag. They are all · No Suff.
   2  Sat     Holy Guardian Angels                       [gd]  w
-           Lauds   w · Ben. The Angel that talked · No Preces · No Suff.
+           Lauds   w · Ben. And the Angel · No Preces · No Suff.
            Hours   No Preces
            Vespers g · I fol. (XV Sunday after Pentecost) · Mag. The Lord open your hearts · No Suff.
-               Com. Holy Guardian Angels ("God hath given His Angels charge over thee")
+               Com. Holy Guardian Angels ("God shall give his Angels")
   3  Sun     XV Sunday after Pentecost                  [sd]  g
            Lauds   g · Ben. Jesus went into a city · No Preces · Suff.
            Hours   Preces
@@ -2081,20 +2081,20 @@ NOVEMBER
                Com. St Gelasius, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers g · II prec. · Mag. Verily I say unto you · No Suff.
-               Com. St. Cecilia ("Valerian! there is a secret")
+               Com. St. Cecilia ("It is secret")
                Com. Presentation of the Blessed Virgin Mary ("O Holy Mary")
  22  Mon     St. Cecilia                                [d]   r
-           Lauds   r · Ben. As dawn was fading · No Preces · No Suff.
+           Lauds   r · Ben. When the dawn of day was breaking · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · I fol. (St. Clement I, Bishop and Martyr) · Mag. Let us all · No Suff.
-               Com. St. Cecilia ("The musicians played, and Cecilia sang unto the Lord")
+           Vespers r · I fol. (St. Clement I, Bishop and Martyr) · Mag. Let us all pray · No Suff.
+               Com. St. Cecilia ("The organs made melody")
                Com. St Felicitas, Martyr ("Whosoever will come after me")
  23  Tue     St. Clement I, Bishop and Martyr           [d]   r
            St Felicitas, Martyr (com)
-           Lauds   r · Ben. As he began to move toward the sea · No Preces · No Suff.
+           Lauds   r · Ben. When he had started going to the sea · No Preces · No Suff.
                Com. St Felicitas, Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers r · II prec. · Mag. All the nations · No Suff.
+           Vespers r · II prec. · Mag. Let us all pray · No Suff.
                Com. St Chrysogonus, Martyr ("Whosoever will come after me")
  24  Wed     Feria                                            g
            St Chrysogonus, Martyr (com)

@@ -78,10 +78,10 @@ Kings shall see and arise, princes also shall worship the Lord thy God, * and th
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/06-24 [Hymnus Laudes] — check against diurnal
-O nimis felix, meritique celsi
+# SOURCE: monastic diurnal, pp. 540–541 (Nativity of St John Baptist, At Lauds)
+O nimis felix
 
-O more than blessèd, merit high attaining,
+O more than blessed, merit high attaining,
 Pure as the snow-drift, innocent of evil,
 Child of the desert, mightiest of martyrs,
 Greatest of prophets.
@@ -163,22 +163,22 @@ R. There was a man * sent from God.
 @use proper/nativity-john-baptist/short-responsory-terce
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/06-24 [Responsory Breve Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At Sext)
 R. Among them that are born of women * there hath not risen a greater.
 R. Among them that are born of women * there hath not risen a greater.
 V. Than John the Baptist.
 R. There hath not risen a greater.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Among them that are born of women there hath not risen a greater.
+R. Among them that are born of women * there hath not risen a greater.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/06-24 [Responsory Breve Nona] — check against diurnal
-R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
-R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
-V. Even of John the Baptist, the Fore-runner of the Lord.
-R. A mighty man.
+# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At None)
+R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
+R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
+V. John the Baptist, the Lord's Forerunner.
+R. Brought forth a mighty son.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Elizabeth, the wife of Zacharias, was the mother of a mighty man.
+R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
 
 [chapter-vespers]
 @use proper/nativity-john-baptist/chapter-lauds

@@ -377,6 +377,8 @@ proper/advent-sunday-4/psalm-antiphon-1,1366da2e99de,draft archdiocesan Vespers 
 proper/advent-sunday-4/psalm-antiphon-2,80fa46f62ebf,draft archdiocesan Vespers book,,29,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-3,488e7ad8bf64,draft archdiocesan Vespers book,,30,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-4,1ba943492c77,draft archdiocesan Lauds book,,45,verified,codex,2026-07-17,
+proper/all-saints/chapter-none,00be877a8a7b,diurnal,"All Saints, At None",640-641,verified,grok,2026-08-23,word-for-word from printed page image
+proper/all-saints/chapter-sext,e926e174c88d,diurnal,"All Saints, At Sext",640,verified,grok,2026-08-23,word-for-word from printed page image
 proper/all-saints/hymn-vespers,ada0d77a0179,draft archdiocesan Vespers book,"The Feast of All Saints, I Vespers",528-529,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/all-saints/psalm-antiphon-1,8638dd5a4117,draft archdiocesan Vespers book,,524,verified,codex,2026-07-18,
 proper/all-saints/psalm-antiphon-3,e0d099e79783,draft archdiocesan Vespers book,,533,verified,codex,2026-07-18,
@@ -396,11 +398,15 @@ proper/all-souls/psalm-antiphon-5,ab881eaed3a2,diurnal,Lauds of the Dead,104*,ve
 proper/all-souls/psalm-antiphon-5-vespers,7e39e7b31ec9,diurnal,Vespers of the Dead,75*,verified,claude,2026-08-21,
 proper/all-souls/versicle-lauds,bf4c6123f98f,diurnal,Lauds of the Dead,104*,verified,claude,2026-08-21,
 proper/all-souls/versicle-vespers,dbadab77beac,diurnal,Vespers of the Dead,75*,verified,claude,2026-08-21,
-proper/annunciation/benedictus-antiphon,62f9f983514c,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
+proper/annunciation/benedictus-antiphon,62f9f983514c,diurnal,"Annunciation, At Lauds",503,verified,grok,2026-08-23,word-for-word from printed page image
 proper/annunciation/benedictus-antiphon-easter,60315a242b6d,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
-proper/annunciation/magnificat-antiphon,ea290c522739,draft archdiocesan Vespers book,,354,verified,codex,2026-07-18,
+proper/annunciation/chapter-lauds,d67e9c0282c7,diurnal,"Annunciation, At Lauds",502,verified,grok,2026-08-23,word-for-word from printed page image
+proper/annunciation/chapter-none,5a08a49930d2,diurnal,"Annunciation, At None",504,verified,grok,2026-08-23,word-for-word from printed page image
+proper/annunciation/chapter-sext,ccddac4506b7,diurnal,"Annunciation, At Sext",503,verified,grok,2026-08-23,word-for-word from printed page image
+proper/annunciation/collect,e192c63d7beb,diurnal,"Annunciation, At Lauds",503,verified,grok,2026-08-23,word-for-word from printed page image
+proper/annunciation/magnificat-antiphon,ea290c522739,diurnal,"Annunciation, At II Vespers",504,verified,grok,2026-08-23,word-for-word from printed page image
 proper/annunciation/magnificat-antiphon-easter,15b82c1c01c0,draft archdiocesan Vespers book,,354,verified,codex,2026-07-18,
-proper/annunciation/magnificat-antiphon-first,558614b1baab,draft archdiocesan Vespers book,,354,verified,codex,2026-07-18,
+proper/annunciation/magnificat-antiphon-first,558614b1baab,diurnal,"Annunciation, At I Vespers",502,verified,grok,2026-08-23,word-for-word from printed page image
 proper/annunciation/magnificat-antiphon-first-easter,55597bdd8287,draft archdiocesan Vespers book,,354,verified,codex,2026-07-18,
 proper/annunciation/psalm-antiphon-1,ea95dc5bdb03,draft archdiocesan Lauds book,,432,verified,codex,2026-07-18,
 proper/annunciation/psalm-antiphon-1-easter,f8aaa197c1d1,draft archdiocesan Lauds book,,432,verified,codex,2026-07-18,
@@ -414,10 +420,28 @@ proper/annunciation/psalm-antiphon-5,86248c1198db,draft archdiocesan Lauds book,
 proper/annunciation/psalm-antiphon-5-easter,16cf6ba0c158,draft archdiocesan Lauds book,,436,verified,codex,2026-07-18,
 proper/annunciation/short-responsory-lauds,e9818c8e1dec,draft archdiocesan Lauds book,,438,verified,codex,2026-07-18,
 proper/annunciation/short-responsory-lauds-easter,c4f623e07809,draft archdiocesan Lauds book,,438,verified,codex,2026-07-18,
+proper/annunciation/short-responsory-none,706fcdc42c62,diurnal,"Annunciation, At None",504,verified,grok,2026-08-23,word-for-word from printed page image
 proper/annunciation/short-responsory-vespers,e9818c8e1dec,draft archdiocesan Vespers book,,351,verified,codex,2026-07-17,
 proper/annunciation/short-responsory-vespers-easter,c4f623e07809,draft archdiocesan Vespers book,,351,verified,codex,2026-07-18,
 proper/annunciation/versicle-lauds,0e36e6e165c3,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
 proper/annunciation/versicle-lauds-easter,33417077a6ad,draft archdiocesan Lauds book,,440,verified,codex,2026-07-18,
+proper/apparition-st-michael/benedictus-antiphon,cef5614826dc,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",610,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/chapter-lauds,562edfeb5a11,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/chapter-none,6dc236f7eb89,diurnal,"Dedication of St Michael, At None; Apparition uses the same office",611-612,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/chapter-sext,655e86d6866c,diurnal,"Dedication of St Michael, At Sext; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/collect,2ff2a2a5f57a,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",610,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/hymn-lauds,e6aba782dfa2,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609-610,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/hymn-vespers,8692e34ecb1b,diurnal,"Dedication of St Michael, At I Vespers; Apparition uses the same office",608,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/magnificat-antiphon-first,8d58de6f422d,diurnal,"Dedication of St Michael, At I Vespers; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/psalm-antiphon-1,df85427755c6,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/psalm-antiphon-2,9cb4eff4704d,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/psalm-antiphon-3,a391d311f01c,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/psalm-antiphon-4,a7bf5ba73da7,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/psalm-antiphon-5,0983ff1d2e07,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",609,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/short-responsory-none,0a692d614a29,diurnal,"Dedication of St Michael, At None; Apparition uses the same office",612,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/short-responsory-sext,8aba3cb98a7d,diurnal,"Dedication of St Michael, At Sext; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/short-responsory-terce,1571f3a59379,diurnal,"Dedication of St Michael, At Terce; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
+proper/apparition-st-michael/versicle-lauds,d0fa20313df6,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",610,verified,grok,2026-08-23,word-for-word from printed page image
 proper/ascension/chapter-lauds,c4584adf8dae,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
@@ -431,10 +455,21 @@ proper/ascension/versicle-lauds,556430070423,Propers of Lauds & Vespers During O
 proper/ascension/versicle-vespers,d4472f185bda,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ash-wednesday/chapter-vespers,ad8fb9b1bbfd,draft archdiocesan Vespers book,,129,verified,codex,2026-07-17,
 proper/ash-wednesday/hymn-vespers,e38a16eb1982,office-hymns.zip,"O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+proper/assumption-bvm/chapter-none,97403831b5e6,diurnal,"Assumption of the B.V.M., At None",590,verified,grok,2026-08-23,word-for-word from printed page image
+proper/assumption-bvm/chapter-sext,fd97a27275d9,diurnal,"Assumption of the B.V.M., At Sext",590,verified,grok,2026-08-23,word-for-word from printed page image
 proper/assumption-bvm/hymn-vespers,7efab5dfe5fe,draft archdiocesan Vespers book,,464-465,verified,codex,2026-07-18,
 proper/assumption-bvm/psalm-antiphon-1,4f464a27b205,draft archdiocesan Vespers book,,460,verified,codex,2026-07-18,
 proper/assumption-bvm/psalm-antiphon-2,35724bd00a5f,draft archdiocesan Vespers book,,461,verified,codex,2026-07-18,
+proper/assumption-bvm/short-responsory-terce,8c6352a22e35,diurnal,"Assumption of the B.V.M., At Terce",589,verified,grok,2026-08-23,word-for-word from printed page image
 proper/assumption-bvm/versicle-lauds,65002c4aac6d,draft archdiocesan Lauds book,The Assumption of the Blessed Virgin Mary,528,verified,codex,2026-07-18,
+proper/beheading-john-baptist/collect,de142d895f4b,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/magnificat-antiphon,abe04c89234b,diurnal,"Beheading of St John Baptist, At II Vespers",595,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/magnificat-antiphon-first,8ef8909879f9,diurnal,"Beheading of St John Baptist, At I Vespers",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/psalm-antiphon-1,06186c55fb42,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/psalm-antiphon-2,0b0791a0dbeb,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/psalm-antiphon-3,1674a6a94adf,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/psalm-antiphon-4,27347f95cb3d,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
+proper/beheading-john-baptist/psalm-antiphon-5,1309d6a58700,diurnal,"Beheading of St John Baptist, At Lauds",594,verified,grok,2026-08-23,word-for-word from printed page image
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,50e47a3dc415,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
@@ -454,9 +489,14 @@ proper/christmas/short-responsory-lauds,c314b1468146,draft archdiocesan Lauds bo
 proper/christmas/versicle-lauds,e2fa7635953e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,71,verified,codex,2026-07-18,checked word for word
 proper/circumcision/hymn-lauds,ce7f4d0c3e25,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/circumcision/hymn-vespers,a2cdf5687be3,draft archdiocesan Vespers book,,94-95,verified,codex,2026-07-18,
+proper/commemoration-st-paul-apostle/magnificat-antiphon-first,a3387c079b23,diurnal,"Commemoration of St Paul, At I Vespers",548,verified,grok,2026-08-23,word-for-word from printed page image
+proper/commemoration-st-peter-apostle/magnificat-antiphon-first,52503eefbfc5,diurnal,"Ss Peter and Paul, At I Vespers",545,verified,grok,2026-08-23,word-for-word from printed page image
 proper/conception-bvm/chapter-lauds,f920a86583d0,draft archdiocesan Lauds book,,365,verified,codex,2026-07-18,
+proper/conception-bvm/chapter-none,615102481a3c,diurnal,"Conception of the B.V.M., At None",450,verified,grok,2026-08-23,word-for-word from printed page image
+proper/conception-bvm/chapter-sext,e9a8387c2d18,diurnal,"Conception of the B.V.M., At Sext",449-450,verified,grok,2026-08-23,word-for-word from printed page image
 proper/conception-bvm/psalm-antiphon-1,485b67b9622f,draft archdiocesan Vespers book,,243,verified,codex,2026-07-18,
 proper/conception-bvm/psalm-antiphon-3,186b8def1aca,draft archdiocesan Vespers book,,245,verified,codex,2026-07-18,
+proper/conception-bvm/short-responsory-none,049368f0d692,diurnal,"Conception of the B.V.M., At None",450,verified,grok,2026-08-23,word-for-word from printed page image
 proper/conception-bvm/versicle-lauds,2532ac9326a1,draft archdiocesan Lauds book,,367,verified,codex,2026-07-17,
 proper/conversion-st-paul/benedictus-antiphon,4dca7edcf446,diurnal,"Conversion of St Paul, At Lauds",464,verified,grok,2026-08-23,word-for-word from printed page image
 proper/conversion-st-paul/chapter-lauds,b43d68b3cafa,diurnal,"Conversion of St Paul, At Lauds",464,verified,grok,2026-08-23,word-for-word from printed page image
@@ -521,6 +561,7 @@ proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Satur
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/benedictus-antiphon,d41107adf6c1,draft archdiocesan Lauds book,,554,verified,codex,2026-07-17,
+proper/exaltation-holy-cross/chapter-sext,1f78ef8ab598,diurnal,"Exaltation of the Holy Cross, At Sext",600,verified,grok,2026-08-23,word-for-word from printed page image
 proper/exaltation-holy-cross/hymn-lauds,f653d437eeac,draft archdiocesan Lauds book,,547-549,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/hymn-vespers,6158946e9065,draft archdiocesan Vespers book,,482-483,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/magnificat-antiphon-first,2d8d44848148,draft archdiocesan Vespers book,,484,verified,codex,2026-07-18,
@@ -529,6 +570,7 @@ proper/exaltation-holy-cross/psalm-antiphon-2,1926c58c8001,draft archdiocesan La
 proper/exaltation-holy-cross/psalm-antiphon-4,459a126e6807,draft archdiocesan Lauds book,,548,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/psalm-antiphon-5,32699fb0723f,draft archdiocesan Lauds book,,550,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/short-responsory-lauds,9d6ddd30af86,draft archdiocesan Lauds book,,552,verified,codex,2026-07-17,
+proper/exaltation-holy-cross/short-responsory-none,60d3e4b30b75,diurnal,"Exaltation of the Holy Cross, At None",600-601,verified,grok,2026-08-23,word-for-word from printed page image
 proper/exaltation-holy-cross/short-responsory-sext,46b962a8e2c1,draft archdiocesan Vespers book,Exaltation of the Holy Cross,481,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/short-responsory-terce,9d6ddd30af86,draft archdiocesan Lauds book,Exaltation of the Holy Cross,552,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/short-responsory-vespers,46b962a8e2c1,draft archdiocesan Vespers book,,481,verified,codex,2026-07-18,
@@ -539,8 +581,24 @@ proper/finding-holy-cross/commemoration-antiphon,2e2b3e7f742a,draft archdiocesan
 proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archdiocesan Lauds book,,453,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
+proper/finding-holy-cross/short-responsory-none,77d82c235c70,diurnal,"Finding of the Holy Cross, At None",524,verified,grok,2026-08-23,word-for-word from printed page image
 proper/good-friday/versicle-lauds,c0f024283763,diurnal,Good Friday at Lauds,341,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/guardian-angels/benedictus-antiphon,8b93e3d0650e,diurnal,"Holy Guardian Angels, At Lauds",615,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/chapter-lauds,50d156afa556,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/chapter-none,92b98909ebde,diurnal,"Holy Guardian Angels, At None",616,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/chapter-sext,22f4b3900e75,diurnal,"Holy Guardian Angels, At Sext",615,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/collect,11308c76aac6,diurnal,"Holy Guardian Angels, At Lauds",615,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/hymn-lauds,fc77bbc0ec86,diurnal,"Holy Guardian Angels, At Lauds",614-615,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/hymn-vespers,64f86dcc2ef5,diurnal,"Holy Guardian Angels, At I Vespers",613,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/magnificat-antiphon,f03e66b67193,diurnal,"Holy Guardian Angels, At II Vespers",616,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/magnificat-antiphon-first,d751e90bd00c,diurnal,"Holy Guardian Angels, At I Vespers",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/psalm-antiphon-1,1899b5e43072,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/psalm-antiphon-2,0c5ff8a28fe9,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/psalm-antiphon-3,99f9091294eb,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/psalm-antiphon-4,fcac987e5321,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/psalm-antiphon-5,62a6a56b5caa,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/short-responsory-lauds,1571f3a59379,diurnal,"October 2, At Lauds",614,verified,claude,2026-08-20,
+proper/guardian-angels/short-responsory-none,0a692d614a29,diurnal,"Holy Guardian Angels, At None",616,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/short-responsory-vespers,8aba3cb98a7d,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
 proper/guardian-angels/versicle-lauds,9c50d614fe3b,diurnal,"October 2, At Lauds",615,verified,claude,2026-08-20,
 proper/guardian-angels/versicle-vespers,9c50d614fe3b,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
@@ -635,6 +693,9 @@ proper/low-sunday/magnificat-antiphon-tuesday,c71722baca17,diurnal,"I Week after
 proper/low-sunday/magnificat-antiphon-wednesday,7845dca666ab,diurnal,"I Week after the Octave of Easter, Wednesday",376,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
+proper/nativity-john-baptist/hymn-lauds,bc9d9b381391,diurnal,"Nativity of St John Baptist, At Lauds",540,verified,grok,2026-08-23,word-for-word from printed page image
+proper/nativity-john-baptist/short-responsory-none,5101e4b2a2c2,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-23,word-for-word from printed page image
+proper/nativity-john-baptist/short-responsory-sext,8ea4d9f01e6c,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-23,word-for-word from printed page image
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
@@ -742,6 +803,11 @@ proper/sexagesima/magnificat-antiphon-monday,0a4fbc150e23,diurnal,"Week of Sexag
 proper/sexagesima/magnificat-antiphon-tuesday,74d72b1e8e2c,diurnal,"Week of Sexagesima, Tuesday",240,verified,grok,2026-08-22,word-for-word from printed page image
 proper/sexagesima/magnificat-antiphon-wednesday,009d14d4200a,diurnal,"Week of Sexagesima, Wednesday",240,verified,grok,2026-08-22,word-for-word from printed page image
 proper/solemnity-st-joseph/hymn-vespers,d60c25ccf291,draft archdiocesan Vespers book,,168,verified,codex,2026-07-18,
+proper/ss-cyril-methodius/collect,95132b3cff85,diurnal,Ss. Cyril and Methodius,559,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ss-john-paul-martyrs/benedictus-antiphon,3d77e0e86c6c,diurnal,"Ss John and Paul, Lauds commemoration",543,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ss-john-paul-martyrs/magnificat-antiphon-first,a49f0c583bc1,diurnal,"Ss John and Paul, Vespers commemoration",542,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ss-peter-paul/chapter-none,3c31b38fc5a9,diurnal,"Ss Peter and Paul, At None",547,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ss-peter-paul/chapter-sext,268efdb149f5,diurnal,"Ss Peter and Paul, At Sext",547,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-agatha/benedictus-antiphon,4491aec9bb90,diurnal,"St Agatha, At Lauds",472,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-agatha/chapter-lauds,c8294185c307,diurnal,"St Agatha, At Lauds",472,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-agatha/chapter-none,93b06e88a0d3,diurnal,"St Agatha, At None",473,verified,grok,2026-08-22,word-for-word from printed page image
@@ -765,12 +831,70 @@ proper/st-agnes-rome/psalm-antiphon-2,eef2a341ffd9,diurnal,"St Agnes, At Lauds",
 proper/st-agnes-rome/psalm-antiphon-3,905f32e74168,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-agnes-rome/psalm-antiphon-4,e71e210759ff,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-agnes-rome/psalm-antiphon-5,7784ba87e5e2,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-andrew/chapter-sext,f52804f339fb,diurnal,"St Andrew, At Sext",445,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-anne/collect,34daf8cad2b5,diurnal,,575,verified,bwaldrep,2026-07-25,
+proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/collect,edb1d4bb13fa,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/magnificat-antiphon,5e8a5a836590,diurnal,"St Cecilia, At II Vespers",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/magnificat-antiphon-first,14c198f9eb6a,diurnal,"St Cecilia, At I Vespers",665,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/psalm-antiphon-1,a733d6c994ed,diurnal,"St Cecilia, At Lauds",665,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/psalm-antiphon-2,0503228de16c,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/psalm-antiphon-3,9fc0650ec3ba,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/psalm-antiphon-4,e71e210759ff,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-cecilia/psalm-antiphon-5,d54bed4aee76,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/benedictus-antiphon,f2fba8e9e276,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/collect,89c0d6b9e287,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/magnificat-antiphon-first,7a134304e692,diurnal,"St Clement, At I Vespers",666-667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/psalm-antiphon-1,614884354feb,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/psalm-antiphon-2,dd705c23ef07,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/psalm-antiphon-3,899da7986f84,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/psalm-antiphon-4,b46ac4194402,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-clement-i/psalm-antiphon-5,5197faf5b4eb,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/benedictus-antiphon,2e4ad4f31a8c,diurnal,"St Gabriel, At Lauds",500,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/chapter-lauds,fc229b9a822c,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/chapter-none,76299df121bf,diurnal,"St Gabriel, At None",501,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/chapter-sext,71c6af5d44e8,diurnal,"St Gabriel, At Sext",501,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/collect,b040f271a32e,diurnal,"St Gabriel, At Lauds",500,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/hymn-lauds,816e35946878,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/hymn-vespers,1d6a95f94da4,diurnal,"St Gabriel, At I Vespers",498,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/magnificat-antiphon,06ca8ce8675d,diurnal,"St Gabriel, At II Vespers",501,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/magnificat-antiphon-first,5fa3b6253b8c,diurnal,"St Gabriel, At I Vespers",498,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/psalm-antiphon-1,44494f2876be,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/psalm-antiphon-2,de55702221db,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/psalm-antiphon-3,fc09919f60c3,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/psalm-antiphon-4,6b23bb2bef20,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/psalm-antiphon-5,5680eec9c7c2,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/short-responsory-terce,1571f3a59379,diurnal,"St Gabriel, At Terce",500,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
 proper/st-john-evangelist/chapter-none,1bdcf3c788f8,diurnal,"St John, Apostle and Evangelist, At None",200,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-john-evangelist/chapter-sext,baf16b998f3d,diurnal,"St John, Apostle and Evangelist, At Sext",200,verified,grok,2026-08-22,word-for-word from printed page image
+proper/st-john-latin-gate/collect,33c538edc070,diurnal,St John before the Latin Gate,525,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-john-latin-gate/magnificat-antiphon-first,4192e6946a1a,diurnal,St John before the Latin Gate,525,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/benedictus-antiphon,f4ab1b8ef25b,diurnal,"St Joseph, At Lauds",492,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/chapter-lauds,cd5783d5c2c0,diurnal,"St Joseph, At Lauds",491,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/chapter-none,3998231763f0,diurnal,"St Joseph, At None",493,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/chapter-sext,2e6380706e0a,diurnal,"St Joseph, At Sext",492,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/collect,b4f62eec133b,diurnal,"St Joseph, At Lauds",492,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-joseph/hymn-vespers,6bb45b958450,draft archdiocesan Vespers book,"Saint Joseph, I Vespers",325-326,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
+proper/st-joseph/magnificat-antiphon,ffd3beec0543,diurnal,"St Joseph, At II Vespers",493,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/magnificat-antiphon-first,1cc001a75dc5,diurnal,"St Joseph, At I Vespers",490,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-1,e0499c11f9c2,diurnal,"St Joseph, At Lauds",490,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-1-first-vespers,6c3fd6fb73fa,diurnal,"St Joseph, At I Vespers",489,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-2,dddf1a3ea029,diurnal,"St Joseph, At Lauds",491,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-2-first-vespers,594b9e50e7f3,diurnal,"St Joseph, At I Vespers",489,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-3,4712de9512a0,diurnal,"St Joseph, At Lauds",491,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-3-first-vespers,825314fecf45,diurnal,"St Joseph, At I Vespers",489,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-4,97cdbdf69c98,diurnal,"St Joseph, At Lauds",491,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-4-first-vespers,ac2451f7b2dc,diurnal,"St Joseph, At I Vespers",489,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/psalm-antiphon-5,c8a4d838c21e,diurnal,"St Joseph, At Lauds",491,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/short-responsory-none,aa85050a6ddf,diurnal,"St Joseph, At None",493,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/short-responsory-sext,081af4f09f23,diurnal,"St Joseph, At Sext",492,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/short-responsory-terce,4572d19ceebb,diurnal,"St Joseph, At Terce",492,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-joseph/short-responsory-vespers,97970bbbbb33,draft archdiocesan Vespers book,,"324, 333",verified,codex,2026-07-17,
+proper/st-joseph/versicle-first-vespers,9bd09262e6f8,diurnal,"St Joseph, At I Vespers",490,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-joseph/versicle-vespers,353bc4f12fbc,diurnal,"St Joseph, At II Vespers",493,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-lawrence/chapter-none,b8ad85897a02,diurnal,"St Lawrence, At None",587,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-lawrence/chapter-sext,03da4b907828,diurnal,"St Lawrence, At Sext",587,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lawrence/psalm-antiphon-3,441ca5cf4bc3,draft archdiocesan Lauds book,,517,verified,codex,2026-07-17,
 proper/st-lucy/benedictus-antiphon,e9e023ffde47,diurnal,"St Lucy, At Lauds",452,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lucy/collect,de6a4fa4d3fe,diurnal,"St Lucy, At Lauds",452,verified,grok,2026-08-23,word-for-word from printed page image
@@ -789,6 +913,25 @@ proper/st-martin-tours/psalm-antiphon-2,5290e1369bda,diurnal,"St Martin, At Laud
 proper/st-martin-tours/psalm-antiphon-3,365d7e50dc12,diurnal,"St Martin, At Lauds",656-657,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-martin-tours/psalm-antiphon-4,49528cebea0c,diurnal,"St Martin, At Lauds",657,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-martin-tours/psalm-antiphon-5,89f172cb8568,diurnal,"St Martin, At Lauds",657,verified,grok,2026-08-22,word-for-word from printed page image
+proper/st-mary-magdalene/chapter-lauds,36932b279c33,diurnal,"St Mary Magdalene, At Lauds",568,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-mary-magdalene/chapter-none,5822ec084f87,diurnal,"St Mary Magdalene, At None",570,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-mary-magdalene/chapter-sext,818e819fdc7c,diurnal,"St Mary Magdalene, At Sext",570,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-mary-magdalene/hymn-vespers,700e3f51d5f1,diurnal,"St Mary Magdalene, At I Vespers",568,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-mary-magdalene/versicle-first-vespers,85f10c8ef3db,diurnal,"St Mary Magdalene, At I Vespers",568,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-mary-magdalene/versicle-vespers,9cef917b4788,diurnal,"St Mary Magdalene, At II Vespers",570,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/chapter-lauds,53a4b322eb27,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/chapter-none,ee63b52ed047,diurnal,"St Raphael, At None",635,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/chapter-sext,36fe6c78be31,diurnal,"St Raphael, At Sext",634,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/collect,bbebd09d51cd,diurnal,"St Raphael, At Lauds",634,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/hymn-lauds,f45778d7d1d4,diurnal,"St Raphael, At Lauds",633-634,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/hymn-vespers,624030ada62b,diurnal,"St Raphael, At I Vespers",632,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/magnificat-antiphon,18bd0fa9115b,diurnal,"St Raphael, At II Vespers",635,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/magnificat-antiphon-first,d1318d015b30,diurnal,"St Raphael, At I Vespers",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/psalm-antiphon-1,2757069ae623,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/psalm-antiphon-2,9793bd35c44d,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/psalm-antiphon-3,effe16111863,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/psalm-antiphon-4,23c087349e60,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-raphael-archangel/psalm-antiphon-5,d7230dc16e57,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-raphael-archangel/short-responsory-lauds,0a692d614a29,diurnal,"October 24, At Lauds",633,verified,claude,2026-08-20,
 proper/st-raphael-archangel/short-responsory-vespers,8aba3cb98a7d,diurnal,"October 24, At I Vespers",632,verified,claude,2026-08-20,
 proper/st-raphael-archangel/versicle-first-vespers,d0fa20313df6,diurnal,"October 24, At I Vespers",633,verified,claude,2026-08-20,
@@ -801,6 +944,7 @@ proper/st-stephen/chapter-sext,c1544bf60a22,diurnal,"St Stephen, At Sext",196,ve
 proper/st-stephen/collect,6a08a8493887,diurnal,"St Stephen, At Lauds",194,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-stephen/magnificat-antiphon,f25ae17b18ac,diurnal,"St Stephen, At II Vespers",197,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-stephen/short-responsory-none,081af4f09f23,diurnal,"St Stephen, At None",196,verified,grok,2026-08-23,word-for-word from printed page image
+proper/transfiguration/short-responsory-none,f752c09158be,diurnal,"Transfiguration, At None",584,verified,grok,2026-08-23,word-for-word from printed page image
 proper/trinity-sunday/chapter-none,f2ab0b727533,diurnal,"Trinity Sunday, At None",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/trinity-sunday/chapter-sext,4d669b03edac,diurnal,"Trinity Sunday, At Sext",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/trinity-sunday/magnificat-antiphon,354b8ebfc8fc,diurnal,"Trinity Sunday, At II Vespers",408,verified,grok,2026-08-22,word-for-word from printed page image
@@ -814,6 +958,7 @@ proper/vigil-ascension/benedictus-antiphon,b43a93770b3e,diurnal,Rogation Wednesd
 proper/vigil-ascension/collect,69e0b9e0fe88,diurnal,V Sunday after Easter; said on the Vigil,385,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word
 proper/vigil-epiphany/hymn-lauds,ce7f4d0c3e25,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+proper/vigil-st-james/collect,9c1c987bd0bf,diurnal,On Vigils of Apostles; assigned on p. 570 to the Vigil of St James,7*,verified,grok,2026-08-23,word-for-word from printed page image
 proper/whit-ember-friday/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/whit-ember-friday/psalm-antiphon-2,55916376dd89,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
 proper/whit-ember-friday/psalm-antiphon-4,6288bf850fd5,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image

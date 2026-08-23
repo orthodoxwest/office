@@ -10,8 +10,10 @@ In holiness * and righteousness before Him all the days of their life did they s
 # SOURCE: divinum-officium Sancti/07-07.txt [Ant 3] — check against diurnal
 These are * the holy men become the friends of God and made glorious by the preaching of divine truth; their tongues have become the keys of heaven.
 
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
+[collect]
+# SOURCE: monastic diurnal, p. 559 (Ss. Cyril and Methodius)
+Almighty everlasting God, who by thy blessed Bishops and Confessors Cyril and Methodius didst vouchsafe to call the Slavic peoples to the knowledge of thy Name: grant that we who glory in their festival may be joined unto their fellowship.
+
 #
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).

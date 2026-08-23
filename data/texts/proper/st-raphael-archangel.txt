@@ -2,28 +2,32 @@
 @use proper/st-raphael-archangel/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
-The Angel Raphael was sent * unto Tobias and Sara to heal them.
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
+The Angel * Raphael was sent unto Tobit and Sara, that he might heal them.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
-The Angel went in * unto Tobias, and said: Joy be ever with thee.
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
+The Angel * went in unto Tobit, and saluted him, saying: Joy be ever with thee.
 
 [psalm-antiphon-3]
-@use proper/st-raphael-archangel/benedictus-antiphon
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
+Be of good courage, * O Tobit; for the time is nigh at hand that God will heal thee.
+
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
-Bless ye the God of Heaven, * and confess Him before all living, for He hath had mercy upon you.
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
+Bless ye the God of heaven, * and praise him in the sight of all that live; magnify him and praise him for the merciful things which he hath done unto you.
 
 [psalm-antiphon-5]
-# SOURCE: divinum-officium Sancti/10-24 [Ant Laudes] — check against diurnal
-Peace be unto you, * fear not, bless ye God, and give praise to Him.
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
+Peace be with you, * fear not: bless ye the Lord, and sing praises unto him.
 
 [benedictus-antiphon]
-Be of good courage, Tobias, * for it is nigh at hand that God shall heal thee.
+# SOURCE: monastic diurnal, p. 634 (St Raphael, At Lauds)
+@use proper/st-raphael-archangel/magnificat-antiphon-first
 
 [magnificat-antiphon]
-Bless ye the God of heaven, * and confess him before all living, for he hath had mercy upon you.
+# SOURCE: monastic diurnal, p. 635 (St Raphael, At II Vespers)
+O Prince most glorious, * Raphael the Archangel, keep us in remembrance: here and everywhere, always, entreat the Son of God for us.
 
 [commemoration-antiphon]
 I am the Angel Raphael, * who stand before the Lord: bless ye God, and tell of all his wondrous works.
@@ -32,73 +36,82 @@ I am the Angel Raphael, * who stand before the Lord: bless ye God, and tell of a
 @use proper/guardian-angels/commemoration-versicle
 
 [collect]
-O God, who didst give thy blessed Archangel Raphael unto thy servant Tobias to be his fellow wayfarer, grant unto us thy servants that the same may ever keep and shield us, help and defend us.
+# SOURCE: monastic diurnal, p. 634 (St Raphael, At Lauds)
+O God, who gavest blessed Raphael, the Archangel, unto thy servant Tobias as a comrade on his journey: grant unto us thy servants that we may always be protected by his watchfulness and defended by his help.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/10-24 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At Lauds)
 !Tob 12:12
-Then thou didst pray with tears, and didst bury the dead, and didst leave thy dinner, and didst hide the dead in thine house through the day, and bury them in the night, I offered up thy prayer before the Lord.
+Now therefore, when thou didst pray, and Sara thy daughter in law, I did bring the remembrance of your prayers before the Holy One: * and when thou didst bury the dead, I was with thee likewise.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/10-24 [Capitulum Sexta] — check against diurnal
-!Tob 12:14
-And now the Lord sent me to heal thee, and to deliver Sara, thy son's wife, from a devil. For I am the Angel Raphael, one of the seven, which stand before the Lord.
+# SOURCE: monastic diurnal, p. 634 (St Raphael, At Sext)
+!Tob 12:14-15
+And now God hath sent me to heal thee and Sara thy daughter in law. * I am Raphael, one of the seven holy Angels which stand before God, and which present the prayers of the saints.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 635 (St Raphael, At None)
+!Tob 12:20
+Now therefore give God thanks: for I go up to him that sent me; * but write all things which are done in a book, and tell of all his wonders.
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/10-24 [Hymnus Laudes] — check against diurnal
-O Christ, Redeemer of us all,
-Protect thy servants when they call,
-And hear with reconciling care
-The Blessed Virgin's holy prayer.
+# SOURCE: monastic diurnal, pp. 633–634 (St Raphael, At Lauds)
+Christe, sanctorum
 
-Be ever present, Angel high,
-Whose name doth healing signify:
-From bodily ills protect us sure,
-And keep our souls in health secure.
+Christ, the fair glory of the holy Angels,
+Thou who hast made us, thou who o'er us rulest,
+Grant of thy mercy unto us thy servants
+Steps up to heaven.
 
-And ye, O ever blissful throng
-Of heavenly spirits, guardians strong,
-Our past and present ills dispel,
-From future peril shield us well.
+Send thy Archangel, Raphael, the restorer
+Of the misguided ways of men who wander,
+Who at thy bidding strengthens soul and body
+With thine anointing.
 
-From lands wherein thy faithful dwell
-Drive far the trait'rous infidel;
-So we to Christ due hymns of praise
-Henceforth with gladsome hearts we raise.
+May the blest Mother of our God and Saviour,
+May the assembly of the Saints in glory,
+May the celestial companies of Angels
+Ever assist us.
 
-To God the Father, praise be done,
-Who doth redeem us by his Son,
-Anoint us by his Holy Ghost,
-And guard us by his Angel-host.
+This he vouchsafe us, God for ever blessed;
+Father eternal, Son, and Holy Spirit,
+Whose is the glory which through all creation
+Ever resoundeth. Amen.
 
-Amen.
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/10-24 [Hymnus Vespera] — check against diurnal
-Christe, sanctorum decus Angelorum
+# SOURCE: monastic diurnal, p. 632 (St Raphael, At I Vespers)
+Tibi, Christe, splendor Patris
 
-Christ, of the angels praise and adoration,
-Father and Saviour thou, of every nation,
-Graciously grant us all to gain a station,
-Where Thou art reigning.
+Thee, O Christ, the Father's splendour,
+Life and virtue of the heart,
+In the presence of the Angels
+Sing we now with tuneful art:
+Meetly in alternate chorus
+Bearing our responsive part.
 
-Angel Physician, health on man bestowing,
-Raphael send us from the skies all glowing,
-All sickness curing, wisest counsel showing
-In doubt and danger.
+Thus we praise with veneration
+All the armies of the sky;
+Chiefly him, the faithful healer
+And companion heavenly,
+Raphael, by whose princely virtue
+Helpless bound the demons lie.
 
-May the fair Mother of the Light be over us,
-Virgin of peace, with all the angel chorus,
-And may the heavenly army go before us,
-Guiding and guarding.
+By whose watchful care repelling,
+King of everlasting grace,
+Every ghostly adversary,
+All things evil, all things base,
+Grant us of thine only goodness
+In thy Paradise a place.
 
-O May the Godhead, endless bliss possessing,
-Father, Son, Spirit, grant to us this blessing;
-All His creation joins His praise confessing,
-Now and forever.
-
-Amen.
+Glory to the Father sing we
+With resounding voices sweet,
+Glory unto Christ our Saviour,
+Glory to the Paraclete:
+Standing forth, One God and Trinal,
+Ere the ages; as is meet. Amen.
 [short-responsory-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 633 (October 24, At Lauds)
 R. In the presence of the Angels * I will sing praise unto thee, O my God.
@@ -142,8 +155,8 @@ R. I will worship toward thy holy temple, and praise thy Name.
 @use proper/st-raphael-archangel/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/10-24.txt [Ant 1] — check against diurnal
-I am the Angel Raphael * who stand before the Lord; but bless ye God, and tell of all His wondrous works, alleluia.
+# SOURCE: monastic diurnal, p. 633 (St Raphael, At I Vespers)
+I am Raphael * the Angel, that stand before the Holy One: wherefore bless ye God for ever, and confess ye all his great and wonderful doings.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

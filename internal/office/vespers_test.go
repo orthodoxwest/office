@@ -398,10 +398,10 @@ func TestComposeVespersNewFestalClassPsalmAntiphonPairs(t *testing.T) {
 			},
 			wantPsalms: []string{"Psalm 110", "Psalm 111", "Psalm 112", "Psalm 138"},
 			wantAntiphons: []string{
-				"God hath given His Angels",
+				"God shall give his Angels",
 				"Let us praise the Lord",
-				"In heaven their Angels",
-				"Praise ye God",
+				"Their Angels",
+				"Praise God",
 			},
 		},
 	}

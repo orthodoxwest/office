@@ -59,9 +59,15 @@ Brethren: He which soweth sparingly shall reap also sparingly; and he which sowe
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/08-10 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 587 (St Lawrence, At Sext)
 !2 Cor 9:7
-Every one as he hath determined in his heart, not with sadness, or of necessity: for God loveth a cheerful giver.
+Every man according as he purposeth in his heart, so let him give; * not grudgingly, or of necessity: for God loveth a cheerful giver.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 587 (St Lawrence, At None)
+!2 Cor 9:8-9
+God is able to make all grace abound toward you; * that ye, always having all sufficiency in all things, may abound to every good work: as it is written, He hath dispersed abroad; he hath given to the poor; his righteousness remaineth for ever.
 R. Thanks be to God.
 
 [versicle-lauds]

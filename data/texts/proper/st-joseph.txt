@@ -2,31 +2,47 @@
 @use proper/st-joseph/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
-The parents of Jesus * went to Jerusalem every year, at the feast of the Passover.
+# SOURCE: monastic diurnal, pp. 490–491 (St Joseph, At Lauds)
+The parents of Jesus * went to Jerusalem every year at the feast of the Passover.
 
 [psalm-antiphon-2]
-# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
-When they returned, * the Child Jesus tarried behind in Jerusalem, and His parents knew not of it.
+# SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
+As they returned, * the Child Jesus tarried behind in Jerusalem; and Joseph and his mother knew not of it.
 
 [psalm-antiphon-3]
-# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
-When they found not Jesus, * they turned back again to Jerusalem, seeking Him; and after three days they found Him in the Temple, sitting in the midst of the Doctors, both hearing them and asking them questions.
+# SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
+And when they found him not, * they turned back again to Jerusalem, seeking him: and after three days, they found him in the temple, sitting in the midst of the doctors, both hearing them, and asking them questions.
 
 [psalm-antiphon-4]
-# SOURCE: divinum-officium Sancti/03-19 [Ant Laudes] — check against diurnal
-His mother said unto Him: * Son, why hast Thou thus dealt with us? Behold, thy father and I have sought thee sorrowing.
+# SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
+His mother said unto him, * Son, why hast thou thus dealt with us? behold, thy father and I have sought thee sorrowing.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 424 (St. Joseph; Descendit Jesus)
+# SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
 Jesus went down with them, * and came to Nazareth, and was subject unto them.
 
+[psalm-antiphon-1-first-vespers]
+# SOURCE: monastic diurnal, p. 489 (St Joseph, At I Vespers)
+And Jacob * begat Joseph, the husband of Mary, of whom was born Jesus, who is called Christ.
+
+[psalm-antiphon-2-first-vespers]
+# SOURCE: monastic diurnal, p. 489 (St Joseph, At I Vespers)
+The Angel Gabriel * was sent from God to a virgin espoused to a man whose name was Joseph, of the house of David: and the virgin's name was Mary.
+
+[psalm-antiphon-3-first-vespers]
+# SOURCE: monastic diurnal, p. 489 (St Joseph, At I Vespers)
+When Mary * the mother of Jesus was espoused to Joseph, before they came together, she was found with child of the Holy Ghost.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: monastic diurnal, p. 489 (St Joseph, At I Vespers)
+Joseph her husband, * being a just man, and not willing to make her a public example, was minded to put her away privily.
+
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 424 (St. Joseph; Ipse Jesus)
+# SOURCE: monastic diurnal, p. 492 (St Joseph, At Lauds)
 Jesus himself * began to be about thirty years of age, being, as was supposed, the son of Joseph.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 341 (St. Joseph, II Vespers; Ecce fidelis servus)
+# SOURCE: monastic diurnal, p. 493 (St Joseph, At II Vespers)
 Behold a faithful * and wise servant, whom his Lord hath made ruler over his household.
 
 [commemoration-antiphon]
@@ -36,19 +52,25 @@ And Jacob begat Joseph * the husband of Mary, of whom was born Jesus, Who is cal
 @use proper/st-joseph/versicle-vespers
 
 [collect]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 71 (St. Joseph)
+# SOURCE: monastic diurnal, p. 492 (St Joseph, At Lauds)
 Help us, we beseech thee, O Lord, for the worth of him who espoused thy most holy Mother: that those good things which we cannot obtain by our own power may be given us at his petition.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 417
+# SOURCE: monastic diurnal, p. 491 (St Joseph, At Lauds)
 !Prov 28:20; 27:18
-A faithful man shall abound with blessings; and he that waiteth on his Master shall be honoured.
+A faithful man shall abound with blessings; * and he that waiteth on his Master shall be honoured.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/03-19 [Capitulum Sexta] — check against diurnal
-!Sir 45:1; 45:4
-Beloved of God, and men: whose memory is in benediction. He sanctified him in his faith, and meekness, and chose him out of all flesh.
+# SOURCE: monastic diurnal, p. 492 (St Joseph, At Sext)
+!Sir 45:1,4
+Beloved of God and men, whose memorial is blessed. He sanctified him in his faithfulness and meekness, * and chose him out of all men.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, pp. 492–493 (St Joseph, At None)
+!Wis 10:10
+When the righteous fled, Wisdom guided him in right paths, shewed him the kingdom of God, and gave him knowledge of holy things, * made him rich in his travels, and multiplied the fruit of his labours.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -113,9 +135,14 @@ Exulting canticles of praise.
 
 Amen.
 [versicle-vespers]
-# SOURCE: divinum-officium Sancti/03-19 [Versum 1] — check against diurnal
-V. He made him lord of His house.
-R. And ruler of all His substance.
+# SOURCE: monastic diurnal, p. 493 (St Joseph, At II Vespers)
+V. Riches and plenteousness shall be in his house.
+R. And his righteousness endureth for ever.
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 490 (St Joseph, At I Vespers)
+V. He made him lord of his house.
+R. And ruler of all his substance.
 
 [versicle-lauds]
 # SOURCE: parish Sanctoral Lauds booklet, PDF p. 70 (St. Joseph; ordinary form only; printed Paschaltide form deferred)
@@ -134,47 +161,44 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I called upon the Lord, * the Father of my Lord.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Tertia]; parish Sanctoral Lauds booklet, PDF p. 68 (ordinary form identical at Lauds; printed Paschaltide form deferred)
-R. He made him * lord of His house.
-R. He made him * lord of His house.
-V. And ruler of all His substance.
-R. Lord of His house.
+# SOURCE: monastic diurnal, p. 492 (St Joseph, At Terce)
+R. He made him * lord of his house.
+R. He made him * lord of his house.
+V. And ruler of all his substance.
+R. Lord of his house.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. He made him * lord of His house.
+R. He made him * lord of his house.
 
 [short-responsory-lauds]
 @use proper/st-joseph/short-responsory-terce
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Sexta] — check against diurnal
-R. His glory is great * in thy salvation.
-R. His glory is great * in thy salvation.
-V. Honour and great majesty shalt Thou lay upon him.
+# SOURCE: monastic diurnal, p. 492 (St Joseph, At Sext)
+R. His honour is great * in thy salvation.
+R. His honour is great * in thy salvation.
+V. Glory and great worship shalt thou lay upon him.
 R. In thy salvation.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His glory is great * in thy salvation.
+R. His honour is great * in thy salvation.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/03-19 [Responsory Breve Nona] — check against diurnal
-R. The righteous shall grow * as the lily.
-R. The righteous shall grow * as the lily.
-V. Yea, he shall flourish for ever in the presence of the Lord.
+# SOURCE: monastic diurnal, p. 493 (St Joseph, At None)
+R. The righteous shall blossom * as the lily.
+R. The righteous shall blossom * as the lily.
+V. He shall flourish for ever before the Lord.
 R. As the lily.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The righteous shall grow * as the lily.
+R. The righteous shall blossom * as the lily.
 
 [chapter-vespers]
 @use proper/st-joseph/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/03-19 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Prov 28:20; 27:18
-A faithful man shall be much praised: and he that is the keeper of his master, shall be glorified.
-R. Thanks be to God.
+@use proper/st-joseph/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/03-19.txt [Ant 1] — check against diurnal
-Joseph, being raised * from sleep, did as the Angel of the Lord had bidden him, and took unto him his wife.
+# SOURCE: monastic diurnal, p. 490 (St Joseph, At I Vespers)
+Then Joseph, * being raised from sleep, did as the Angel of the Lord had bidden him, and took unto him his wife.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

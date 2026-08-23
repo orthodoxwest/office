@@ -44,39 +44,73 @@ Whose bounty doth reward.
 
 Amen.
 [hymn-vespers]
-# SOURCE: divinum-officium Sancti/07-22 [Hymnus Vespera] — check against diurnal
+# SOURCE: monastic diurnal, p. 568 (St Mary Magdalene, At I Vespers)
 Pater superni luminis
 
-Father of lights! one glance of thine,
-Whose eyes the universe control,
-Fills Magdalene with holy love,
-And melts the ice within her soul.
+O Father of celestial rays,
+When thou on Magdalene dost gaze,
+The flame of burning love appears,
+Her icy heart dissolves in tears.
 
-Her precious ointment forth she brings
-Upon those sacred feet to pour;
-She washes them with burning tears,
-And with her hair she wipes them o'er.
+Wounded by love, she hastens o'er
+The feet of Christ her tears to pour,
+Anoints them, wipes them with her hair,
+And prints adoring kisses there.
 
-Impassioned, to the cross she clings,
-Nor fears beside the tomb to stay;
-Nor dreads the soldiers' savage mien,
-For love has cast all fear away.
+Fearless, the Cross she will not leave:
+And grieving, to the Tomb doth cleave:
+No ruthless soldiers cause her dread:
+For from her love all fear hath fled.
 
-O Christ, thou very love itself!
-Blest hope of man, through thee forgiven!
-So touch our spirits from above,
-So purify our souls for heaven.
+O Christ, true Charity thou art;
+Purge thou the foulness of our heart,
+Fill every soul with grace and love,
+And give us thy rewards above.
 
-* To God the Father, with the Son
-And Holy Paraclete, with thee,
-As evermore hath been before,
-Be glory through eternity.
+All laud to God the Father be;
+All praise, eternal Son, to thee;
+All glory, as is ever meet,
+To God the Holy Paraclete. Amen.
 
-Amen.
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 568 (St Mary Magdalene, At I Vespers)
+V. Mary hath chosen that good part.
+R. Which shall not be taken away from her.
+
 [versicle-lauds]
 # SOURCE: divinum-officium Sancti/07-22 [Versum 2] — check against diurnal
+# Lauds hymn and versicle fall on printed p. 569, which this scan skips.
 V. God hath chosen her and forechosen her.
 R. He hath made her to dwell in His tabernacle.
+
+[versicle-vespers]
+# SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At II Vespers)
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
+
+[chapter-lauds]
+# SOURCE: monastic diurnal, p. 568 (St Mary Magdalene, At Lauds)
+!Cant 3:2
+I will rise now, * and go about the city in the streets, and in the broad ways I will seek him whom my soul loveth.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At Sext)
+!Cant 8:6
+Set me as a seal upon thine heart, * as a seal upon thine arm: for love is strong as death.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At None)
+!Cant 8:7
+Many waters cannot quench love, * neither can the floods drown it.
+R. Thanks be to God.
+
+[chapter-vespers]
+@use proper/st-mary-magdalene/chapter-lauds
+
+[chapter-terce]
+@use proper/st-mary-magdalene/chapter-lauds
 
 [magnificat-antiphon-first]
 @use proper/st-mary-magdalene/commemoration-antiphon

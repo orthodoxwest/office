@@ -64,9 +64,15 @@ Herod the king stretched forth his hands to vex certain of the church. And he ki
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/06-29 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 547 (Ss Peter and Paul, At Sext)
 !Acts 12:5
-Peter therefore was kept in prison. But prayer was made without ceasing of the Church unto God for him.
+Peter therefore was kept in prison: * but prayer was made without ceasing of the church unto God for him.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 547 (Ss Peter and Paul, At None)
+!Acts 12:11
+And when Peter was come to himself, he said, Now I know of a surety, that the Lord hath sent his Angel, and hath delivered me out of the hand of Herod, * and from all the expectation of the people of the Jews.
 R. Thanks be to God.
 
 [hymn-lauds]

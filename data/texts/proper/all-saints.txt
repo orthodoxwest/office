@@ -64,9 +64,15 @@ Behold, I John saw another Angel ascending from the east, having the seal of the
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/11-01 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 640 (All Saints, At Sext)
 !Rev 7:9
-After this I saw a great multitude, which no man could number, of all nations, and tribes, and peoples, and tongues, standing before the throne, and in sight of the Lamb, clothed with white robes, and palms in their hands.
+After this I beheld, and, lo, a great multitude, which no man could number, * of all nations, and kindreds, and people, and tongues, stood before the throne, and before the Lamb, clothed with white robes, and palms in their hands.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, pp. 640–641 (All Saints, At None)
+!Rev 7:12
+Blessing, and glory, and wisdom, and thanksgiving, * and honour, and power, and might, be unto our God for ever and ever. Amen.
 R. Thanks be to God.
 
 [hymn-lauds]

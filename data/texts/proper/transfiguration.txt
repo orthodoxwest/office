@@ -144,13 +144,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou hast crowned him with glory and honour, O Lord, * alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/08-06 [Responsory Breve Nona] — check against diurnal
-R. His honour is great in thy salvation. * Alleluia, Alleluia.
-R. His honour is great in thy salvation. * Alleluia, Alleluia.
-V. Glory and great worship shalt Thou lay upon him.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 584 (Transfiguration, At None)
+R. His honour is great in thy salvation, * alleluia, alleluia.
+R. His honour is great in thy salvation, * alleluia, alleluia.
+V. Glory and great worship shalt thou lay upon him.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His honour is great in thy salvation. * Alleluia, Alleluia.
+R. His honour is great in thy salvation, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/transfiguration/chapter-lauds

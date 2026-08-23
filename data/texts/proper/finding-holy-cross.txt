@@ -139,31 +139,21 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. We adore thee, O Christ, and we bless thee, * alleluia, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Tertia] — check against diurnal
-R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
-R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
-V. When the Lord cometh to judgment.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This sign of the Cross shall be in heaven. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 524 (Finding of the Holy Cross, At Terce)
+@use proper/finding-holy-cross/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Sexta] — check against diurnal
-R. We adore thee, O Christ, and we bless thee. * Alleluia, alleluia.
-R. We adore thee, O Christ, and we bless thee. * Alleluia, alleluia.
-V. Because that through thy cross thou hast redeemed the world.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. We adore thee, O Christ, and we bless thee. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 524 (Finding of the Holy Cross, At Sext)
+@use proper/finding-holy-cross/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/05-03 [Responsory Breve Nona] — check against diurnal
-R. Let all the earth worship thee, and sing unto thee. * Alleluia, Alleluia.
-R. Let all the earth worship thee, and sing unto thee. * Alleluia, alleluia.
-V. Let them sing praises to thy Name, O Lord.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 524 (Finding of the Holy Cross, At None)
+R. All the world shall worship thee and sing of thee, * alleluia, alleluia.
+R. All the world shall worship thee and sing of thee, * alleluia, alleluia.
+V. And praise thy Name, O Lord.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Let all the earth worship thee, and sing unto thee. * Alleluia, Alleluia.
+R. All the world shall worship thee and sing of thee, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/exaltation-holy-cross/chapter-lauds

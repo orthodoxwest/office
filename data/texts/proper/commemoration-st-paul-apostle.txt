@@ -15,8 +15,8 @@ R. A preacher of the truth throughout all the world.
 O God, who didst teach a multitude of the Gentiles by the preaching of blessed Paul the Apostle: grant unto us, we beseech thee, that we who honour his Commemoration may perceive the benefits of his intercession before thee.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/06-30.txt [Ant 1] — check against diurnal
-O Holy Apostle Paul, * Preacher of the truth, and Teacher of the Gentiles, pray for us to God Who hath chosen thee.
+# SOURCE: monastic diurnal, p. 548 (Commemoration of St Paul, At I Vespers)
+O holy Apostle Paul, * thou preacher of the truth and Doctor of the Gentiles, intercede for us unto God, who hath chosen thee.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
