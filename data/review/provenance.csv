@@ -401,6 +401,22 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/laetare-sunday/benedictus-antiphon-friday,289e8be8a866,diurnal,"IV Week in Lent, Friday",268,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/benedictus-antiphon-monday,ce178f463deb,diurnal,"IV Week in Lent, Monday",266,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/benedictus-antiphon-saturday,229457252426,diurnal,"IV Week in Lent, Saturday",268,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/benedictus-antiphon-thursday,60de13c58e48,diurnal,"IV Week in Lent, Thursday",267,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/benedictus-antiphon-tuesday,ea7494affbde,diurnal,"IV Week in Lent, Tuesday",266-267,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/benedictus-antiphon-wednesday,82d43abcde20,diurnal,"IV Week in Lent, Wednesday",267,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/chapter-lauds,57e75ee0f5e1,diurnal,"IV Sunday in Lent, At Lauds",264-265,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/chapter-none,dd9824738d34,diurnal,"IV Sunday in Lent, At None",266,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/chapter-sext,00f70f5f6ab2,diurnal,"IV Sunday in Lent, At Sext",265,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon,1daccad76c4c,diurnal,"IV Sunday in Lent, At II Vespers",266,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-first,31edef6b14b4,diurnal,"IV Sunday in Lent, At I Vespers",264,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-friday,a84c46dd2a59,diurnal,"IV Week in Lent, Friday",268,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-monday,4620bb502b0e,diurnal,"IV Week in Lent, Monday",266,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-thursday,fe41968d6e82,diurnal,"IV Week in Lent, Thursday",268,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-tuesday,012a408ca26f,diurnal,"IV Week in Lent, Tuesday",267,verified,grok,2026-08-22,word-for-word from printed page image
+proper/laetare-sunday/magnificat-antiphon-wednesday,093bf9c67280,diurnal,"IV Week in Lent, Wednesday",267,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-1/benedictus-antiphon-friday,9643974c1d5c,diurnal,"I Week in Lent, Ember Friday",253,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-1/benedictus-antiphon-monday,37203678a17a,diurnal,"I Week in Lent, Monday",252,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-1/benedictus-antiphon-saturday,55d562904ebe,diurnal,"I Week in Lent, Ember Saturday",254,verified,grok,2026-08-22,word-for-word from printed page image
@@ -433,12 +449,44 @@ proper/lent-sunday-2/magnificat-antiphon-monday,5c12cafc4695,diurnal,"II Week in
 proper/lent-sunday-2/magnificat-antiphon-thursday,fcd06c1c1e3d,diurnal,"II Week in Lent, Thursday",258,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-2/magnificat-antiphon-tuesday,af0995b26a2b,diurnal,"II Week in Lent, Tuesday",257,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-2/magnificat-antiphon-wednesday,6b23ccee113b,diurnal,"II Week in Lent, Wednesday",258,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-friday,6265db3ff38b,diurnal,"III Week in Lent, Friday",263,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-monday,06e2948f068c,diurnal,"III Week in Lent, Monday",261,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-saturday,d024d8bc25ea,diurnal,"III Week in Lent, Saturday",264,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-thursday,da27cc7ae23e,diurnal,"III Week in Lent, Thursday",263,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-tuesday,02b654f6c5de,diurnal,"III Week in Lent, Tuesday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/benedictus-antiphon-wednesday,89f46f0391b0,diurnal,"III Week in Lent, Wednesday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/chapter-lauds,e8cb8675e2e4,diurnal,"III Sunday in Lent, At Lauds",260,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/chapter-none,110c08dc8b5c,diurnal,"III Sunday in Lent, At None",261,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/chapter-sext,024e8a3312e0,diurnal,"III Sunday in Lent, At Sext",261,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon,a577d9619f35,diurnal,"III Sunday in Lent, At II Vespers",261,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-first,ce0368b44045,diurnal,"III Sunday in Lent, At I Vespers",259,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-friday,ce3ba3e451ac,diurnal,"III Week in Lent, Friday",263,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-monday,250588240508,diurnal,"III Week in Lent, Monday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-thursday,a13ecc3960e6,diurnal,"III Week in Lent, Thursday",263,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-tuesday,a6bd74b7d5d3,diurnal,"III Week in Lent, Tuesday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/magnificat-antiphon-wednesday,90a3229826b7,diurnal,"III Week in Lent, Wednesday",262,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,71,verified,codex,2026-07-18,Sunday-specific versicle checked word for word
+proper/passion-sunday/benedictus-antiphon-friday,3585bc400957,diurnal,"Passion Week, Friday",277,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/benedictus-antiphon-monday,64e1c02b16d7,diurnal,"Passion Week, Monday",276,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/benedictus-antiphon-saturday,4dcfcfceb329,diurnal,"Passion Week, Saturday",278,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/benedictus-antiphon-thursday,bc6728f13e74,diurnal,"Passion Week, Thursday",277,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/benedictus-antiphon-tuesday,9b68b1046d0c,diurnal,"Passion Week, Tuesday",276,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/benedictus-antiphon-wednesday,73dcbfe8727e,diurnal,"Passion Week, Wednesday",276,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/chapter-lauds,51936d0527dd,diurnal,"Passion Sunday, At Lauds",271,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/chapter-none,c448b12150a6,diurnal,"Passion Sunday, At None",273,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/chapter-sext,9b768219811c,diurnal,"Passion Sunday, At Sext",273,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/commemoration-antiphon,10afe4e92b96,diurnal,"Passion Sunday, At I Vespers",270,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon,f2ee73da6002,diurnal,"Passion Sunday, At II Vespers",273,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon-friday,9f1607d23b13,diurnal,"Passion Week, Friday",278,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon-monday,7880b076e460,diurnal,"Passion Week, Monday",276,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon-thursday,f33054d8d091,diurnal,"Passion Week, Thursday",277,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon-tuesday,ef5b668e65d5,diurnal,"Passion Week, Tuesday",276,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/magnificat-antiphon-wednesday,3bad84f1c7fc,diurnal,"Passion Week, Wednesday",277,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost/benedictus-antiphon,947ffcdb05e3,draft archdiocesan Lauds book,,310,verified,codex,2026-07-17,
 proper/pentecost/chapter-lauds,736f1f1c8b19,draft archdiocesan Lauds book,The Feast of Pentecost,304,verified,codex,2026-07-18,
 proper/pentecost/psalm-antiphon-1,0764e19393b9,draft archdiocesan Vespers book,,181,verified,codex,2026-07-17,

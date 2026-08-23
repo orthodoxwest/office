@@ -26,10 +26,11 @@ O ye sun and moon, * praise ye the Lord: for his Name only is excellent.
 When a strong man armed * keepeth his palace, all his goods are in peace.
 
 [magnificat-antiphon]
-A certain woman of the company lifed up her voice and cried, Blessed is the womb that bare thee, and the paps which thou hast sucked. But Jesus answered, Yea, rather, blessed are they that hear the word of God, and keep it.
+# SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At II Vespers)
+A certain woman * of the company lifted up her voice and cried, Blessed is the womb that bare thee, and the paps which thou hast sucked. But Jesus answered, Yea, rather, blessed are they that hear the word of God, and keep it.
 
 [commemoration-antiphon]
-But the father said to his servants: * Bring forth the best robe, and put it on him, and put a ring on his hand, and shoes on his feet.
+@use proper/lent-sunday-3/magnificat-antiphon-first
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -40,21 +41,21 @@ R. His praise shall continually be in my mouth.
 We beseech thee, Almighty God, look upon the hearty desires of thy humble servants: and stretch forth the right hand of thy Majesty, to be our defence.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 260 (III Sunday in Lent, At Lauds)
 !Eph 5:1-2
-Be ye, therefore, followers of God, as most dear children; And walk in love, as Christ also hath loved us, and hath delivered himself for us, an oblation and a sacrifice to God for an odour of sweetness.
+Brethren: Be ye therefore followers of God, as dear children; and walk in love, as Christ also hath loved us, * and hath given himself for us, an offering and a sacrifice to God for a sweet-smelling savour.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At Sext)
 !Eph 5:5
-For know you this and understand, that no fornicator, or unclean, or covetous person (which is a serving of idols), hath inheritance in the kingdom of Christ and of God.
+For this ye know, that no whoremonger, nor unclean person, nor covetous man, who is an idolater, * hath any inheritance in the kingdom of Christ and of God.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Quad3-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At None)
 !Eph 5:8-9
-For you were heretofore darkness, but now light in the Lord. Walk then as children of the light. For the fruit of the light is in all goodness, and justice, and truth.
+For ye were sometimes darkness, but now are ye light in the Lord: * walk as children of light; for the fruit of the Spirit is in all goodness and righteousness and truth.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -70,52 +71,52 @@ R. Thanks be to God.
 @use proper/lent-sunday-3/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad3-1 [Ant 2] — check against diurnal
-Amen I say unto you, * no Prophet is accepted in his own country.
+# SOURCE: monastic diurnal, p. 261 (III Week in Lent, Monday)
+Verily I say unto you, * No prophet is accepted in his own country.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad3-1 [Ant 3] — check against diurnal
-But Jesus, * passing through the midst of them, went His way.
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Monday)
+But Jesus, passing * through the midst of them, went his way.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad3-2 [Ant 2] — check against diurnal
-If two of you shall agree on earth * as touching anything that they shall ask, it shall be done for them of My Father, saith the Lord.
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday)
+If two of you * shall agree on earth as touching anything that they shall ask, it shall be done for them of my Father, saith the Lord.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad3-2 [Ant 3] — check against diurnal
-Where two or three are gathered together in My Name, * there am I in the midst of them, saith the Lord.
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Tuesday)
+Where two or three * are gathered together in my Name, there am I in the midst of them, saith the Lord.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad3-3 [Ant 2] — check against diurnal
-Hear and understand * the traditions which the Lord hath given unto us.
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Wednesday)
+Hearken, * and understand ye the traditions which the Lord hath given you.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad3-3 [Ant 3] — check against diurnal
-To eat * with unwashen hands, defileth not a man.
+# SOURCE: monastic diurnal, p. 262 (III Week in Lent, Wednesday)
+To eat with unwashen hands * defileth not a man.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad3-4 [Ant 2] — check against diurnal
-And devils also came out of many, * crying out and saying: Thou art Christ, the Son of God. And He, rebuking them, suffered them not to speak, for they knew that He was Christ.
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday)
+And devils also * came out of many, crying out and saying: Thou art Christ the Son of God. And he, rebuking them, suffered them not to speak: for they knew that he was Christ.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad3-4 [Ant 3] — check against diurnal
-All they that had * any sick brought them unto Jesus, and He healed them.
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Thursday)
+Whosoever had any sick, * they brought them unto Jesus; and they were healed.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad3-5 [Ant 2] — check against diurnal
-Whosoever drinketh * of the water that I shall give him, shall never thirst.
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Friday)
+Whosoever drinketh * of the water that I shall give him shall never thirst.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad3-5 [Ant 3] — check against diurnal
-Sir, I perceive * that Thou art a prophet: our fathers worshipped in this mountain.
+# SOURCE: monastic diurnal, p. 263 (III Week in Lent, Friday)
+Sir, I perceive * that thou art a prophet. Our fathers worshipped in this mountain.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Quad3-6 [Ant 2] — check against diurnal
-Jesus stooped down, * and wrote on the ground: He that is without sin, let him cast a stone at her.
+# SOURCE: monastic diurnal, p. 264 (III Week in Lent, Saturday)
+But Jesus stooped down, * and wrote on the ground: If any is without sin, let him cast a stone at her.
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium TemporaM/Quad3-0 [Ant 1] — check against diurnal
-But the father said * to his servants: Bring forth quickly the first robe, and put it on him, and put a ring on his hand, and shoes on his feet.
+# SOURCE: monastic diurnal, p. 259 (III Sunday in Lent, At I Vespers)
+But the father * said to his servants, Bring forth the best robe and put it on him; and put a ring on his hand, and shoes on his feet.
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
 

@@ -26,10 +26,11 @@ Kings of the earth * and all people, praise ye the Lord.
 When Jesus * lifted up his eyes, and saw a great company come unto him, he saith unto Philip: Whence shall we buy bread that these may eat? And this he said to prove him; for he himself knew what he would do.
 
 [magnificat-antiphon]
-Woman, hath no man condemned thee? * No man, Lord. Neither do I condemn thee; go, and sin no more.
+# SOURCE: monastic diurnal, p. 266 (IV Sunday in Lent, At II Vespers)
+And Jesus * went up into a mountain, and there he sat with his disciples.
 
 [commemoration-antiphon]
-@use proper/laetare-sunday/magnificat-antiphon
+@use proper/laetare-sunday/magnificat-antiphon-first
 
 [commemoration-versicle]
 V. I will bless the Lord at all times.
@@ -40,21 +41,21 @@ R. His praise shall continually be in my mouth.
 Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthily deserve to be punished, by the comfort of thy grace may mercifully be relieved.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, pp. 264–265 (IV Sunday in Lent, At Lauds)
 !Gal 4:22-24
-Brothers: For it is written that Abraham had two sons: the one by a bondwoman, and the other by a free woman. But he who was of the bondwoman, was born according to the flesh: but he of the free woman, was by promise, which things are said by an allegory.
+Brethren: It is written, that Abraham had two sons; the one by a bondmaid, the other by a freewoman. But he who was of the bondwoman was born after the flesh: but he of the freewoman was by promise. * Which things are an allegory.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 265 (IV Sunday in Lent, At Sext)
 !Gal 4:27
-For it is written: Rejoice, thou barren, that bearest not: break forth and cry, thou that travailest not: for many are the children of the desolate, more than of her that hath a husband.
+Rejoice, thou barren that bearest not; break forth and cry, thou that travailest not; * for the desolate hath many more children than she which hath an husband.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Quad4-0 [Capitulum Nona] — check against diurnal
-!Gal 4:31
-So then, brethren, we are not the children of the bondwoman, but of the free: by the freedom wherewith Christ has made us free.
+# SOURCE: monastic diurnal, p. 266 (IV Sunday in Lent, At None)
+!Gal 4:31-5:1
+So then, brethren, we are not children of the bondwoman, but of the free. * Stand fast, therefore, in the liberty wherewith Christ hath made us free.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -64,51 +65,52 @@ R. Thanks be to God.
 @use proper/laetare-sunday/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad4-1 [Ant 2] — check against diurnal
-Thus saith the Lord: * Take these things hence; make not My Father's house an house of merchandise.
+# SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday)
+Take these things hence, * saith the Lord, and make not my Father's house an house of merchandise.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Quad4-1 [Ant 3] — check against diurnal
-Thus saith the Lord: * Destroy this temple, and in three days I will raise it up. But He spoke of the temple of His Body.
+# SOURCE: monastic diurnal, p. 266 (IV Week in Lent, Monday)
+Destroy this temple, * saith the Lord, and in three days I will raise it up: but he spake of the temple of his body.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad4-2 [Ant 2] — check against diurnal
-Why go ye about to kill Me, * a Man that hath told you the truth?
+# SOURCE: monastic diurnal, pp. 266–267 (IV Week in Lent, Tuesday)
+Why go ye about * to kill me, a man that hath told you the truth?
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Quad4-2 [Ant 3] — check against diurnal
-No man laid hands on Him; * because His hour was not yet come.
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Tuesday)
+But no man * laid hands on him, because his hour was not yet come.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad4-3 [Ant 2] — check against diurnal
-Rabbi, who did sin, this man, or his parents, * that he was born blind? Jesus answered, and said: Neither hath this man sinned, nor his parents; but that the works of God shall be made manifest in him.
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday)
+Master, * wherein hath this man sinned, that he was born blind? Jesus answered and said: Neither hath this man sinned, nor his parents; but that the works of God should be manifest in him.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Quad4-3 [Ant 3] — check against diurnal
-The Man that is called Jesus * made clay of His Spittle, and anointed mine eyes, and now I do see.
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Wednesday)
+A man * that is called Jesus made clay out of spittle and anointed mine eyes, and now I see.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad4-4 [Ant 2] — check against diurnal
-Jesus went * into a city that is called Naim: and behold, a dead man was being carried out, the only son of his mother.
+# SOURCE: monastic diurnal, p. 267 (IV Week in Lent, Thursday)
+Jesus went * into a city called Nain: and behold there was a dead man carried out, the only son of his mother.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Quad4-4 [Ant 3] — check against diurnal
-A great Prophet * is risen up among us, and God hath visited His people.
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Thursday)
+A great prophet * is risen up among us, and God hath visited his people.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad4-5 [Ant 2] — check against diurnal
-Our friend Lazarus sleepeth; * let us go and awake him out of sleep.
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday)
+Our friend * Lazarus sleepeth: let us go, that we may awake him out of sleep.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Quad4-5 [Ant 3] — check against diurnal
-Lord, if Thou hadst been here * Lazarus had not died; behold, by this time he stinketh, for he hath lain in the grave four days already.
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Friday)
+Lord, if thou hadst been here, * Lazarus would not have died: lo, by this time he stinketh; for he hath lain in the grave four days already.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Quad4-6 [Ant 2] — check against diurnal
-Thus saith the Lord: * He that followeth Me walketh not in darkness, but shall have the Light of life.
+# SOURCE: monastic diurnal, p. 268 (IV Week in Lent, Saturday)
+He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
 
 [magnificat-antiphon-first]
-@use proper/laetare-sunday/magnificat-antiphon
+# SOURCE: monastic diurnal, p. 264 (IV Sunday in Lent, At I Vespers)
+Woman, * hath no man condemned thee? No man, Lord. Neither do I condemn thee; go and sin no more.
 [versicle-lauds]
 @use seasonal/lent/versicle-lauds
 
