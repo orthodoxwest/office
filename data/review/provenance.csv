@@ -29,9 +29,20 @@ commons/bishop-martyr/short-responsory-none,081af4f09f23,diurnal,"Common of One 
 commons/bishop-martyr/short-responsory-sext,32c679d43f1e,diurnal,"Common of One Martyr, At Sext",23*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/short-responsory-terce,1981436935d4,diurnal,"Common of One Martyr, At Terce",23*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/versicle-lauds,56ebc77e9322,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",22*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/benedictus-antiphon,e699d2317449,diurnal,"Common of Feasts B.V.M., At Lauds",66*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/chapter-lauds,aa6ce83bb4fd,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/chapter-none,97403831b5e6,diurnal,"Common of Feasts B.V.M., At None",67*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/chapter-sext,133604f9ad9a,diurnal,"Common of Feasts B.V.M., At Sext",67*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/collect,0a4f14534f64,diurnal,"Common of Feasts B.V.M., At Lauds",66*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/hymn-lauds,4fe818a3e3da,diurnal,"Common of Feasts B.V.M., At Lauds",66*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/blessed-virgin/hymn-vespers,e5ed334620b8,draft archdiocesan Vespers book,,692,verified,codex,2026-07-17,
-commons/blessed-virgin/psalm-antiphon-1,6d57cf78c709,draft archdiocesan Lauds book,,709,verified,codex,2026-07-17,
-commons/blessed-virgin/psalm-antiphon-4,61e13288e9ed,draft archdiocesan Lauds book,,711,verified,codex,2026-07-17,
+commons/blessed-virgin/magnificat-antiphon,08aade08e09d,diurnal,"Common of Feasts B.V.M., At II Vespers",67*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/magnificat-antiphon-first,24075e6d546f,diurnal,"Common of Feasts B.V.M., At I Vespers",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/psalm-antiphon-1,b553dbbb3803,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/psalm-antiphon-2,6ff291720a26,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/psalm-antiphon-3,2e990f263591,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/psalm-antiphon-4,61e13288e9ed,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/blessed-virgin/psalm-antiphon-5,3e5d0756ac85,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/blessed-virgin/short-responsory-lauds,14508eeeb35c,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,claude,2026-08-20,
 commons/blessed-virgin/versicle-lauds,c2e21ab641bb,draft archdiocesan Lauds book,,725,verified,codex,2026-07-17,
 commons/blessed-virgin/versicle-vespers,f5e74029e94f,diurnal,"Common of Feasts B.V.M., At I Vespers",64*,verified,claude,2026-08-20,
