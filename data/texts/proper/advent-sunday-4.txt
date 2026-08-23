@@ -41,15 +41,15 @@ Brethren: Let a man so account of us as of the ministers of Christ, and stewards
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 180 (IV Sunday in Advent, At Sext)
 !1 Cor 4:3
-But to me it is a very small thing to be judged by you, or by man's day; but neither do I judge my own self.
+But with me it is a very small thing that I should be judged of you, or of man's judgment; * yea, I judge not mine own self.
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 180 (IV Sunday in Advent, At None)
 !1 Cor 4:5
-Therefore judge not before the time; until the Lord come, who both will bring to light the hidden things of darkness, and will make manifest the counsels of the hearts; and then shall every man have praise from God.
+Therefore judge nothing before the time, until the Lord come, who both will bring to light the hidden things of darkness, and will make manifest the counsels of the hearts: * and then shall every man have praise of God.
 R. Thanks be to God.
 
 [chapter-vespers]
@@ -62,28 +62,28 @@ R. Thanks be to God.
 @use proper/advent-sunday-4/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Adv4-1 [Ant 2] — check against diurnal
-Thus saith the Lord: * Repent ye, for the kingdom of heaven is at hand. Alleluia.
+# SOURCE: monastic diurnal, p. 181 (IV Week in Advent, Monday)
+Thus saith the Lord * your God: Repent ye, and turn again; for the kingdom of heaven is at hand, alleluia.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Adv4-2 [Ant 2] — check against diurnal
-Awake, awake, * put on strength, O arm of the Lord!
+# SOURCE: monastic diurnal, p. 181 (IV Week in Advent, Tuesday)
+Awake, awake, * put on strength, O arm of the Lord.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Adv4-3 [Ant 2] — check against diurnal
-I will place salvation * in Zion, and My glory in Jerusalem. Alleluia.
+# SOURCE: monastic diurnal, p. 181 (IV Week in Advent, Wednesday)
+I will place salvation * in Sion, and in Jerusalem my glory, alleluia.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Adv4-4 [Ant 2] — check against diurnal
-Comfort ye, comfort ye, * My people, saith the Lord your God.
+# SOURCE: monastic diurnal, p. 181 (IV Week in Advent, Thursday)
+Comfort ye, * comfort ye my people, saith your God.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Adv4-5 [Ant 2] — check against diurnal
-Behold, all things are fulfilled * which were spoken by the Angel concerning the Virgin Mary.
+# SOURCE: monastic diurnal, p. 181 (IV Week in Advent, Friday)
+Behold all things are fulfilled * which were spoken by the Angel of the Virgin Mary.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Adv4-0 [Ant 2] — check against diurnal
-Hail, Mary, full of grace, * the Lord is with thee; blessed art thou among women. Alleluia.
+# SOURCE: monastic diurnal, p. 179 (IV Sunday in Advent, At Lauds)
+Hail, Mary, * thou that art full of grace, the Lord is with thee; blessed art thou among women, alleluia.
 
 [commemoration-antiphon]
 @use proper/advent-sunday-4/benedictus-antiphon
