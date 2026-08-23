@@ -40,10 +40,16 @@ Stir up, we beseech thee, O Lord, thy power and come: that by thy protection, we
 Brethren: It is high time to awake out of sleep: for now is our salvation nearer than when we believed.
 R. Thanks be to God.
 
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 161 (I Sunday in Advent, At Sext)
+!Rom 13:12
+The night is far spent, the day is at hand: let us therefore cast off the works of darkness, * and let us put on the armour of light.
+R. Thanks be to God.
+
 [chapter-none]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Capitulum Nona] — check against diurnal
+# SOURCE: monastic diurnal, p. 162 (I Sunday in Advent, At None)
 !Rom 13:13-14
-Let us walk honestly, as in the day: not in rioting and drunkenness, not in chambering and impurities, not in contention and envy: But put ye on the Lord Jesus Christ.
+Let us walk honestly, as in the day; not in rioting and drunkenness, not in chambering and wantonness, not in strife and envying. * But put ye on the Lord Jesus Christ.
 R. Thanks be to God.
 
 [psalm-antiphon-4-vespers]
@@ -56,56 +62,56 @@ R. Thanks be to God.
 @use proper/advent-sunday-1/chapter-lauds
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Tempora/Adv1-1 [Ant 2] — check against diurnal
-The angel of the Lord * announced unto Mary, and she conceived of the Holy Ghost. Alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Monday)
+The Angel of the Lord * announced unto Mary, and she conceived by the Holy Ghost, alleluia.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium TemporaM/Adv1-1 [Ant 3] — check against diurnal
-Lift up thine eyes, * O Jerusalem, and see that thy King is mighty behold, thy Saviour shall come and loose thee from thy chain.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Monday)
+Lift up thine eyes, * O Jerusalem, and see the power of the King: behold, the Saviour cometh to loose thee from thy chain.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Adv1-2 [Ant 2] — check against diurnal
-Before they came together, * Mary was found with child of the Holy Ghost. Alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Tuesday)
+Before they came together * Mary was found with child of the Holy Ghost, alleluia.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Tempora/Adv1-2 [Ant 3] — check against diurnal
-Seek ye the Lord * while He may be found; call ye upon Him while He is near. Alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Tuesday)
+Seek ye the Lord * while he may be found: call ye upon him while he is near, alleluia.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Adv1-3 [Ant 2] — check against diurnal
-Out of Zion * shall go forth the law, and the word of the Lord from Jerusalem.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Wednesday)
+Out of Sion * shall go forth the law, and the word of the Lord from Jerusalem.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Tempora/Adv1-3 [Ant 3] — check against diurnal
-There cometh One mightier * than I after me, the latchet of Whose shoes I am not worthy to unloose.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Wednesday)
+After me * cometh one mightier than I, the latchet of whose shoes I am not worthy to unloose.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Adv1-4 [Ant 2] — check against diurnal
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Thursday)
 Blessed art thou * among women, and blessed is the fruit of thy womb.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Tempora/Adv1-4 [Ant 3] — check against diurnal
-I will wait * upon the Lord my Saviour, and come before Him when He is near, alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Thursday)
+I will wait * upon the Lord my Saviour: and I will look for him while he is near, alleluia.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Adv1-5 [Ant 2] — check against diurnal
-He that is both God and man * shall come of the house of David and sit in David's seat. Alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Friday)
+Lo, there cometh one * that is both God and Man, of the house of David, to sit upon the throne, alleluia.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Tempora/Adv1-5 [Ant 3] — check against diurnal
-Out of Egypt * have I called My Son; He shall come to save His people.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Friday)
+Out of Egypt * have I called my Son: he shall come to save his people.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Adv1-6 [Ant 2] — check against diurnal
-Fear not * Zion, behold, thy God cometh, Alleluia.
+# SOURCE: monastic diurnal, p. 165 (I Week in Advent, Saturday)
+Fear not, * O Sion, behold thy God cometh, alleluia.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 2] — check against diurnal
-The Holy Ghost shall come upon thee, * O Mary; fear not, thou shalt bear in thy womb the Son of God. Alleluia.
+# SOURCE: monastic diurnal, p. 160 (I Sunday in Advent, At Lauds)
+The Holy Ghost * shall come upon thee, Mary; fear not, thou shalt bear in thy womb the Son of God, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Adv1-0 [Ant 3] — check against diurnal
-Fear not, Mary, * for thou hast found grace with the Lord; behold, thou shalt conceive in thy womb, and bring forth a son. Alleluia.
+# SOURCE: monastic diurnal, p. 162 (I Sunday in Advent, At II Vespers)
+Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt conceive, and bring forth a Son, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 10 (The First Sunday in Advent, I Vespers)

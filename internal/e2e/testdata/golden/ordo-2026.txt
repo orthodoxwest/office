@@ -2134,14 +2134,14 @@ NOVEMBER
                Com. St Saturninus, Bishop & Martyr ("Whosoever will come after me")
  29  Sun  L  I Sunday of Advent                         [2cl] v
            St Saturninus, Bishop & Martyr (com)
-           Lauds   v · Ben. The Holy Ghost shall come upon thee · No Preces · No Suff.
+           Lauds   v · Ben. The Holy Ghost · No Preces · No Suff.
                Com. St Saturninus, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers r · I fol. (St. Andrew, Apostle) · Mag. One of the two · No Suff.
-               Com. I Sunday of Advent ("The Holy Ghost shall come upon thee")
+               Com. I Sunday of Advent ("The Holy Ghost")
  30  Mon  L§ St. Andrew, Apostle                        [2cl] r
            Lauds   r · Ben. Yield up to us · No Preces · No Suff.
-               Com. Monday after Advent Sunday 1 ("The angel of the Lord")
+               Com. Monday after Advent Sunday 1 ("The Angel of the Lord")
            Hours   No Preces
            Vespers r · II prec. · Mag. When blessed Andrew · No Suff.
                Com. Monday after Advent Sunday 1 ("Lift up thine eyes")
@@ -2156,11 +2156,11 @@ DECEMBER
   2  Wed  L§ St Peter Chrysologus, Bishop, Confessor & Doctor [d]   w
            St Bibiana, Virgin & Martyr (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Wednesday after Advent Sunday 1 ("Out of Zion")
+               Com. Wednesday after Advent Sunday 1 ("Out of Sion")
                Com. St Bibiana, Virgin & Martyr ("The kingdom of heaven")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
-               Com. Wednesday after Advent Sunday 1 ("There cometh One mightier")
+               Com. Wednesday after Advent Sunday 1 ("After me")
   3  Thu  L  Feria                                            v
            Lauds   v · Ben. Blessed art thou · No Preces · No Suff.
            Hours   Preces
@@ -2168,7 +2168,7 @@ DECEMBER
                Com. St Barbara, Virgin & Martyr ("Come, thou Bride of Christ")
   4  Fri  L§ Feria                                            v
            St Barbara, Virgin & Martyr (com)
-           Lauds   v · Ben. He that is both God and man · No Preces · No Suff.
+           Lauds   v · Ben. Lo, there cometh one · No Preces · No Suff.
                Com. St Barbara, Virgin & Martyr ("The kingdom of heaven")
            Hours   Preces
            Vespers v · Mag. Out of Egypt · No Suff.
@@ -2245,10 +2245,10 @@ DECEMBER
                Com. St Lucy, Virgin & Martyr ("With such power")
  14  Mon  L§ Day VII within Conception Octave           [sd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
-               Com. Monday after Advent Sunday 3 ("There shall come forth a rod")
+               Com. Monday after Advent Sunday 3 ("There shall come forth")
            Hours   No Preces
            Vespers w · I fol. (Octave of the Conception of the B.V.M) · Mag. All generations · No Suff.
-               Com. Monday after Advent Sunday 3 ("All generations shall call me blessed")
+               Com. Monday after Advent Sunday 3 ("All generations")
  15  Tue  L  Octave of the Conception of the B.V.M      [gd]  w
            Lauds   w · Ben. The Lord God said · No Preces · No Suff.
                Com. Tuesday after Advent Sunday 3 ("Thou, Bethlehem")
@@ -2258,12 +2258,12 @@ DECEMBER
                Com. St Eusebius of Vercelli, Bishop & Martyr ("Whosoever will come after me")
  16  Wed  L§ Advent Ember Wednesday                     [f2]  v
            St Eusebius of Vercelli, Bishop & Martyr (com)
-           Lauds   v · Ben. The angel Gabriel · No Preces · No Suff.
+           Lauds   v · Ben. The Angel · No Preces · No Suff.
                Com. St Eusebius of Vercelli, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers v · Mag. Behold the handmaid · No Suff.
+           Vespers v · Mag. Behold the handmaid of the Lord · No Suff.
  17  Thu  L  Feria                                            v
-           Lauds   v · Ben. Let your soul watch · No Preces · No Suff.
+           Lauds   v · Ben. Be ye watchful · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O Wisdom · No Suff.
                Com. Expectation of the B.V.M ("All generations shall call me blessed")
@@ -2279,10 +2279,10 @@ DECEMBER
            Hours   Preces
            Vespers v · I fol. (IV Sunday of Advent) · Mag. O Root of Jesse · No Suff.
  20  Sun  L  IV Sunday of Advent                        [2cl] v
-           Lauds   v · Ben. Hail, Mary, full of grace · No Preces · No Suff.
+           Lauds   v · Ben. Hail, Mary · No Preces · No Suff.
            Hours   Preces
            Vespers r · I fol. (St. Thomas, Apostle) · Mag. Because thou hast seen me · No Suff.
-               Com. IV Sunday of Advent ("Hail, Mary, full of grace")
+               Com. IV Sunday of Advent ("Hail, Mary")
  21  Mon  L§ St. Thomas, Apostle                        [2cl] r
            Lauds   r · Ben. Because thou hast seen me · No Preces · No Suff.
                Com. Monday after Advent Sunday 4 ("Thus saith the Lord")

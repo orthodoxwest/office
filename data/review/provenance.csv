@@ -218,6 +218,21 @@ ordinary/vespers/psalm-antiphon-4-saturday,12559aa40ef7,00. Vespers for Saturday
 ordinary/vespers/psalm-antiphon-4-wednesday,2eedc60b0692,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Before the gods,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
 ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
+proper/advent-sunday-1/benedictus-antiphon,0456eca8e11f,diurnal,"I Sunday in Advent, At Lauds",160,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-friday,ac5bdbe011c8,diurnal,"I Week in Advent, Friday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-monday,3133c0a73fb6,diurnal,"I Week in Advent, Monday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-saturday,93f9229161cd,diurnal,"I Week in Advent, Saturday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-thursday,8ccf7fea9b4f,diurnal,"I Week in Advent, Thursday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-tuesday,4fb323117d54,diurnal,"I Week in Advent, Tuesday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/benedictus-antiphon-wednesday,f8652461ac52,diurnal,"I Week in Advent, Wednesday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/chapter-none,6adf97ae7c8c,diurnal,"I Sunday in Advent, At None",162,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/chapter-sext,dbcbe6cb9b5c,diurnal,"I Sunday in Advent, At Sext",161,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon,696287b73330,diurnal,"I Sunday in Advent, At II Vespers",162,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon-friday,ba4a2b8c7c88,diurnal,"I Week in Advent, Friday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon-monday,a29c930b4c4f,diurnal,"I Week in Advent, Monday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon-thursday,a6b3324b102e,diurnal,"I Week in Advent, Thursday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon-tuesday,aa272cd84dd6,diurnal,"I Week in Advent, Tuesday",165,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-1/magnificat-antiphon-wednesday,72333b7a249c,diurnal,"I Week in Advent, Wednesday",165,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-1/psalm-antiphon-1,7de540e90841,draft archdiocesan Vespers book,,4,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-2,313b9a7eaed8,draft archdiocesan Vespers book,,5,verified,codex,2026-07-17,
 proper/advent-sunday-1/psalm-antiphon-3,eaf2860c47f3,draft archdiocesan Vespers book,,6,verified,codex,2026-07-17,
@@ -238,9 +253,29 @@ proper/advent-sunday-2/magnificat-antiphon-wednesday,515261fbc6db,diurnal,"II We
 proper/advent-sunday-2/psalm-antiphon-1,fde254fa4204,draft archdiocesan Vespers book,,12,verified,codex,2026-07-17,
 proper/advent-sunday-2/psalm-antiphon-2,b812cbeca586,draft archdiocesan Vespers book,,13,verified,codex,2026-07-17,
 proper/advent-sunday-2/psalm-antiphon-3,612b47e87ae6,draft archdiocesan Vespers book,,14,verified,codex,2026-07-17,
+proper/advent-sunday-3/benedictus-antiphon-monday,2dd7a467278b,diurnal,"III Week in Advent, Monday",176,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/benedictus-antiphon-thursday,d5cb5ac83196,diurnal,"III Week in Advent, Thursday",177,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/benedictus-antiphon-tuesday,6013b1653145,diurnal,"III Week in Advent, Tuesday",176,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/benedictus-antiphon-wednesday,dc060ff97ee9,diurnal,"III Week in Advent, Ember Wednesday",177,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/chapter-none,7097ef3904e5,diurnal,"III Sunday in Advent, At None",171,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/chapter-sext,e6e31c7d3b4f,diurnal,"III Sunday in Advent, At Sext",171,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon,f489773c5e99,diurnal,"III Sunday in Advent, At II Vespers",171-172,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon-friday,f41c0cd9a465,diurnal,"III Week in Advent, Ember Friday",177,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon-monday,08aade08e09d,diurnal,"III Week in Advent, Monday",176,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon-thursday,b9d438b6574b,diurnal,"III Week in Advent, Thursday",177,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon-tuesday,8096c9f45c5e,diurnal,"III Week in Advent, Tuesday",176,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-3/magnificat-antiphon-wednesday,86248c1198db,diurnal,"III Week in Advent, Ember Wednesday",177,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-3/psalm-antiphon-1,c5d135ccda20,draft archdiocesan Vespers book,,20,verified,codex,2026-07-17,
 proper/advent-sunday-3/psalm-antiphon-2,0e6b678bb50d,draft archdiocesan Vespers book,,21,verified,codex,2026-07-17,
 proper/advent-sunday-3/psalm-antiphon-3,b1f61b8eb8b7,draft archdiocesan Vespers book,,22,verified,codex,2026-07-17,
+proper/advent-sunday-4/benedictus-antiphon,8ce4b888351f,diurnal,"IV Sunday in Advent, At Lauds",179,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/benedictus-antiphon-friday,6706de53481e,diurnal,"IV Week in Advent, Friday",181,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/benedictus-antiphon-monday,02f31539b5c7,diurnal,"IV Week in Advent, Monday",181,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/benedictus-antiphon-thursday,c1a07d3c64fd,diurnal,"IV Week in Advent, Thursday",181,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/benedictus-antiphon-tuesday,7d76df95a061,diurnal,"IV Week in Advent, Tuesday",181,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/benedictus-antiphon-wednesday,b1f61b8eb8b7,diurnal,"IV Week in Advent, Wednesday",181,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/chapter-none,5b4bc18dc9a5,diurnal,"IV Sunday in Advent, At None",180,verified,grok,2026-08-22,word-for-word from printed page image
+proper/advent-sunday-4/chapter-sext,0ae02106ab73,diurnal,"IV Sunday in Advent, At Sext",180,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-4/psalm-antiphon-1,1366da2e99de,draft archdiocesan Vespers book,,28,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-2,80fa46f62ebf,draft archdiocesan Vespers book,,29,verified,codex,2026-07-17,
 proper/advent-sunday-4/psalm-antiphon-3,488e7ad8bf64,draft archdiocesan Vespers book,,30,verified,codex,2026-07-17,
