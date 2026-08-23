@@ -347,7 +347,7 @@ FEBRUARY
            Lauds   g · Ben. For she said within herself · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the shepherd of the sheep · No Suff.
-               Com. VII Sunday after Epiphany ("But Jesus turned Him about")
+               Com. VII Sunday after Epiphany ("But Jesus turned him about")
                Com. St Paul ("The world, and all things earthly")
  22  Mon     Chair of St. Peter at Antioch              [2cl] w
            St Paul (com)
@@ -1166,7 +1166,7 @@ JULY
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
                Com. All Saints of Antioch ("The world, and all things earthly")
-               Com. Sunday within the Octave of Corpus Christi ("Go out quickly into the streets")
+               Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
   4  Sun     Visitation of the Blessed Virgin Mary      [2cl] w
            All Saints of Antioch (com)
            Sunday within the Octave of Corpus Christi (sd)
@@ -1180,7 +1180,7 @@ JULY
            Hours   No Preces
            Vespers w · II prec. · Mag. All generations · No Suff.
                Com. Day V within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
-               Com. Sunday within the Octave of Corpus Christi ("Go out quickly into the streets")
+               Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
   5  Mon     Day V within the Octave of Corpus Christi  [sd]  w
            Day VII within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
@@ -1276,7 +1276,7 @@ JULY
                Com. St Sergius of Radonezh, Abbot ("Well done, good and faithful servant")
                Com. St Symphorosa & her seven sons, Martyrs ("The very hairs of your head")
            Hours   No Preces
-           Vespers g · II prec. · Mag. Master, we have toiled all night · No Suff.
+           Vespers g · II prec. · Mag. Master · No Suff.
                Com. Translation of St Raphael of Brooklyn ("The Lord loved him")
                Com. St Seraphim of Sarov, Priest & Confessor ("The world, and all things earthly")
  19  Mon     Feria                                            g
@@ -1324,7 +1324,7 @@ JULY
            Hours   Preces
            Vespers r · I fol. (St. James the Greater, Apostle) · Mag. They will deliver you up · No Suff.
                Com. St Christopher, Martyr ("Whosoever will come after me")
-               Com. V Sunday after Pentecost ("If thou bring thy gift to the Altar")
+               Com. V Sunday after Pentecost ("If thou bring")
  25  Sun     St. James the Greater, Apostle             [2cl] r
            St Christopher, Martyr (com)
            V Sunday after Pentecost (sd)
@@ -1334,7 +1334,7 @@ JULY
            Hours   No Preces
            Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
                Com. St. Anne, Mother of the Blessed Virgin Mary ("The kingdom of heaven")
-               Com. V Sunday after Pentecost ("If thou bring thy gift to the Altar")
+               Com. V Sunday after Pentecost ("If thou bring")
  26  Mon     St. Anne, Mother of the Blessed Virgin Mary [2cl] w
            Lauds   w · Ben. Give her · No Preces · No Suff.
            Hours   No Preces
@@ -1385,7 +1385,7 @@ AUGUST
                Com. St Paul, Apostle ("Ye which have forsaken all")
                Com. Holy Maccabees, Martyrs ("The very hairs of your head")
            Hours   No Preces
-           Vespers g · II prec. · Mag. I have compassion on the multitude · No Suff.
+           Vespers g · II prec. · Mag. I have compassion · No Suff.
                Com. Chains of St Peter, Apostle ("Whatsoever")
                Com. St Paul, Apostle ("Be ye valiant in warfare")
                Com. St Stephen, Bishop & Martyr ("Whosoever will come after me")
@@ -1430,7 +1430,7 @@ AUGUST
            Lauds   g · Ben. Beware · No Preces · Suff.
                Com. Ss. Cyriacus, Largus & Smaragdus, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers g · II prec. · Mag. A good tree cannot bring forth evil fruit · Suff.
+           Vespers g · II prec. · Mag. A good tree · Suff.
                Com. St Romanus, Martyr ("Whosoever will come after me")
   9  Mon     Vigil of St. Lawrence, Martyr              [s]   v
            St Romanus, Martyr (com)
@@ -1520,7 +1520,7 @@ AUGUST
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("The very hairs of your head")
                Com. Octave Day of the Assumption ("Through thee have the gates of Paradise been thrown…")
            Hours   No Preces
-           Vespers g · II prec. · Mag. It is written: My house is the house of… · No Suff.
+           Vespers g · II prec. · Mag. Is it not written · No Suff.
                Com. Octave Day of the Assumption ("Through thee have the gates of Paradise been thrown…")
  23  Mon     Vigil of St. Bartholomew                   [s]   v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
@@ -1562,7 +1562,7 @@ AUGUST
                Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
                Com. St Sabina, Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers g · II prec. · Mag. This man went down to his house · No Suff.
+           Vespers g · II prec. · Mag. This man went down · No Suff.
                Com. Beheading of St. John the Baptist ("For Herod had laid hold upon John")
                Com. Ss. Felix & Adauctus, Martyrs ("In the heavenly kingdom")
  30  Mon     Feria                                            g
@@ -1649,7 +1649,7 @@ SEPTEMBER
            Lauds   g · Ben. Master · No Preces · No Suff.
                Com. The Most Holy Name of Mary ("Blessed art thou")
            Hours   No Preces
-           Vespers g · II prec. · Mag. A certain man went down from Jerusalem · No Suff.
+           Vespers g · II prec. · Mag. A certain man · No Suff.
                Com. The Most Holy Name of Mary ("O holy Mary")
  13  Mon     Feria                                            g
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
@@ -1735,7 +1735,7 @@ SEPTEMBER
            Lauds   g · Ben. Be not therefore anxious · No Preces · Suff.
                Com. Ss. Cyprian & Justina, Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers g · II prec. · Mag. Seek ye first the kingdom of God · Suff.
+           Vespers g · II prec. · Mag. Seek ye first · Suff.
                Com. Ss. Cosmas & Damian, Martyrs ("In the heavenly kingdom")
  27  Mon     Feria                                            g
            Ss. Cosmas & Damian, Martyrs (com)
@@ -1779,7 +1779,7 @@ OCTOBER
   3  Sun     XV Sunday after Pentecost                  [sd]  g
            Lauds   g · Ben. Jesus went into a city · No Preces · Suff.
            Hours   Preces
-           Vespers g · II prec. · Mag. A great prophet is risen up among us · Suff.
+           Vespers g · II prec. · Mag. A great prophet · Suff.
   4  Mon     Feria                                            g
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
@@ -1817,7 +1817,7 @@ OCTOBER
            Lauds   g · Ben. As Jesus went · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Motherhood of the B.V.M) · Mag. With peaceful joy · No Suff.
-               Com. XVI Sunday after Pentecost ("When thou art bidden")
+               Com. XVI Sunday after Pentecost ("When thou art bidden to")
  11  Mon     Motherhood of the B.V.M                    [2cl] w
            Lauds   w · Ben. O holy Mary · No Preces · No Suff.
            Hours   No Preces
@@ -1852,7 +1852,7 @@ OCTOBER
            Lauds   g · Ben. Master · No Preces · Suff.
            Hours   Preces
            Vespers r · I fol. (St. Luke, Evangelist) · Mag. They will deliver you up · No Suff.
-               Com. XVII Sunday after Pentecost ("What think ye of Christ? Whose Son is He?")
+               Com. XVII Sunday after Pentecost ("What think ye of Christ?")
  18  Mon     St. Luke, Evangelist                       [2cl] r
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
            Hours   No Preces
@@ -1891,7 +1891,7 @@ OCTOBER
            Lauds   g · Ben. The Lord said · No Preces · No Suff.
                Com. St Raphael the Archangel ("I am the Angel Raphael")
            Hours   No Preces
-           Vespers g · II prec. · Mag. And immediately, he that had been sick of the… · No Suff.
+           Vespers g · II prec. · Mag. The sick of the palsy · No Suff.
                Com. St Raphael the Archangel ("I am the Angel Raphael")
                Com. Ss Chrysanthus & Daria, Martyrs ("In the heavenly kingdom")
  25  Mon     Feria                                            g
@@ -1923,7 +1923,7 @@ OCTOBER
            Lauds   v · Ben. O Lord, give light · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. The Lord God shall give unto him · No Suff.
-               Com. XIX Sunday after Pentecost ("And the King came in")
+               Com. XIX Sunday after Pentecost ("And when the king came in")
  31  Sun     THE FEAST OF O..J.C. THE KING              [1cl] w
            XIX Sunday after Pentecost (sd)
            Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
@@ -1931,7 +1931,7 @@ OCTOBER
            Hours   No Preces
            Vespers w · II prec. · Mag. He hath on his vesture · No Suff.
                Com. All Saints ("O ye Angels and Archangels")
-               Com. XIX Sunday after Pentecost ("And the King came in")
+               Com. XIX Sunday after Pentecost ("And when the king came in")
 
 NOVEMBER
 ------------------------------------------------------------
@@ -2033,7 +2033,7 @@ NOVEMBER
            Lauds   g · Ben. Then said the lord · No Preces · Suff.
                Com. St Gregory Palamas, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers g · II prec. · Mag. O thou wicked servant, I forgave thee all · Suff.
+           Vespers g · II prec. · Mag. Thou wicked servant · Suff.
  15  Mon     Feria                                            g
            Lauds   g · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
@@ -2080,7 +2080,7 @@ NOVEMBER
                Com. St Columbanus, Abbot ("Well done, good and faithful servant")
                Com. St Gelasius, Bishop & Confessor ("Well done")
            Hours   No Preces
-           Vespers g · II prec. · Mag. Amen, I say unto you, this generation shall not… · No Suff.
+           Vespers g · II prec. · Mag. Verily I say unto you · No Suff.
                Com. St. Cecilia ("Valerian! there is a secret")
                Com. Presentation of the Blessed Virgin Mary ("O Holy Mary")
  22  Mon     St. Cecilia                                [d]   r
