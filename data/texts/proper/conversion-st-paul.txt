@@ -35,31 +35,56 @@ Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck,
 @use proper/conversion-st-paul/psalm-antiphon-5
 
 [commemoration-antiphon]
-Go forth, Ananias, * and enquire for Saul, for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
+@use proper/conversion-st-paul/magnificat-antiphon-first
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 379, 259, 268 (Conversion of St Paul)
+# SOURCE: monastic diurnal, p. 464 (Conversion of St Paul, At Lauds)
 O God, who hast taught the whole world by the preaching of blessed Paul the Apostle: grant unto us, we beseech thee, that we who on this day celebrate his Conversion may, by following his example, advance in the way that leadeth unto thee.
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 378 (Conversion of St Paul)
+# SOURCE: monastic diurnal, p. 464 (Conversion of St Paul, At Lauds)
 Ye which have followed me * shall sit upon twelve thrones, judging the twelve tribes of Israel, saith the Lord.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 267 (II Vespers, Conversion of St Paul)
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At II Vespers)
 O holy Apostle Paul, * thou preacher of the truth and Doctor of the Gentiles, intercede for us unto God, who hath chosen thee.
 
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 463 (Conversion of St Paul, At I Vespers)
+Go forth, Ananias, * and enquire for Saul; for behold, he prayeth: for he is a chosen vessel unto me, to bear my Name before the Gentiles, and Kings, and the children of Israel.
+
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 376 (Conversion of St Paul)
+# SOURCE: monastic diurnal, p. 464 (Conversion of St Paul, At Lauds)
 !Acts 9:1-2
-And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, he might bring them bound unto Jerusalem.
+And Saul, yet breathing out threatenings and slaughter against the disciples of the Lord, went unto the high priest, and desired of him letters to Damascus to the synagogues, that if he found any of this way, whether they were men or women, * he might bring them bound unto Jerusalem.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/01-25 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At Sext)
 !Acts 9:8-9
-And Saul arose from the ground; and when his eyes were opened, he saw nothing. But they leading him by the hands, brought him to Damascus. And he was there three days, without sight, and he did neither eat nor drink.
+And Saul arose from the earth; and when his eyes were opened, he saw no man: but they led him by the hand, and brought him into Damascus. * And he was three days without sight, and neither did eat nor drink.
 R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At None)
+!Acts 9:22
+But Saul increased the more in strength, and confounded the Jews which dwelt at Damascus, * proving that this is very Christ.
+R. Thanks be to God.
+
+[chapter-terce]
+@use proper/conversion-st-paul/chapter-lauds
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At Terce)
+@use commons/apostle/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At Sext)
+@use commons/apostle/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 465 (Conversion of St Paul, At None)
+@use commons/apostle/short-responsory-none
 
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 257, 266 (I and II Vespers, Conversion of St Paul)
@@ -98,12 +123,6 @@ R. A preacher of the truth throughout all the world.
 
 [chapter-vespers]
 @use proper/conversion-st-paul/chapter-lauds
-
-[chapter-terce]
-@use proper/conversion-st-paul/chapter-lauds
-
-[magnificat-antiphon-first]
-@use proper/conversion-st-paul/commemoration-antiphon
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

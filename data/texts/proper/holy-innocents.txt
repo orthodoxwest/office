@@ -41,11 +41,11 @@ Unto the godly * there ariseth up light in the darkness: the Lord is merciful, l
 Of the fruit * of thy body shall I set upon thy seat.
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 99 (Holy Innocents)
+# SOURCE: monastic diurnal, p. 202 (Holy Innocents, At Lauds)
 These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 86 (Holy Innocents)
+# SOURCE: monastic diurnal, p. 204 (Holy Innocents, At II Vespers)
 Then were innocent children * slain instead of Christ by a wicked ruler; the very sucklings were put to death: spotless, they follow the Lamb himself, and say for ever: Glory be to thee, O Lord.
 
 [commemoration-antiphon]
@@ -55,19 +55,25 @@ Then were innocent children * slain instead of Christ by a wicked ruler; the ver
 @use proper/holy-innocents/versicle-lauds
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 100, 87 (Holy Innocents)
-O God, whose praise the Innocents, thy Martyrs, did confess this day, not by speaking but by dying: mortify all evil vices in us, that, as our tongues do confess thy faith, so our lives may by their actions show forth the same.
+# SOURCE: monastic diurnal, p. 202 (Holy Innocents, At Lauds)
+O God, whose praise the Martyr Innocents confessed this day, not by speaking but by dying: mortify in us all the evils of vice, that our life may shew forth in deeds that faith in thee which our lips profess.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 97 (Holy Innocents)
+# SOURCE: monastic diurnal, p. 201 (Holy Innocents, At Lauds)
 !Rev 14:1
-I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, having his Father's name written in their foreheads.
+I looked, and lo, a Lamb stood on the mount Sion, and with him an hundred and forty and four thousand, * having his Father's name written in their foreheads.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-28 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 203 (Holy Innocents, At Sext)
 !Rev 14:4
-These are they who were not defiled with women: for they are virgins. These follow the Lamb whithersoever he goeth.
+These are they which were not defiled with women; for they are virgins. * These are they which follow the Lamb whithersoever he goeth.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 203 (Holy Innocents, At None)
+!Rev 14:4-5
+These were redeemed from among men, being the firstfruits unto God and to the Lamb. And in their mouth was found no guile: * for they are without fault before the throne of God.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -128,8 +134,25 @@ R. Let the righteous rejoice before God.
 @use proper/holy-innocents/chapter-lauds
 
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/12-28.txt [Ant 1] — check against diurnal
-These are they * who were not defiled with women; for they are virgins, and follow the Lamb whithersoever he goeth.
+# SOURCE: monastic diurnal, p. 201 (Holy Innocents, I Vespers commemoration / gospel antiphon)
+These are they * which were not defiled with women; for they are virgins: and they follow the Lamb whithersoever he goeth.
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 203 (Holy Innocents, At Terce)
+@use proper/holy-innocents/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 203 (Holy Innocents, At Sext)
+@use proper/holy-innocents/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 203 (Holy Innocents, At None)
+R. The righteous live * for evermore.
+R. The righteous live * for evermore.
+V. Their reward also is with the Lord.
+R. For evermore.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The righteous live * for evermore.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
