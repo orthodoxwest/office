@@ -471,6 +471,11 @@ proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdioce
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,71,verified,codex,2026-07-18,Sunday-specific versicle checked word for word
+proper/palm-sunday/chapter-lauds,1dcfd46af767,diurnal,"Palm Sunday, At Lauds",279,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/chapter-none,eb0ef07d9b7b,diurnal,"Palm Sunday, At None",280,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/chapter-sext,8a32745ad0c3,diurnal,"Palm Sunday, At Sext",280,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/magnificat-antiphon,3941f454fef6,diurnal,"Palm Sunday, At II Vespers",280-281,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/magnificat-antiphon-first,578f824e8471,diurnal,"Palm Sunday, At I Vespers",278,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-friday,3585bc400957,diurnal,"Passion Week, Friday",277,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-monday,64e1c02b16d7,diurnal,"Passion Week, Monday",276,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-saturday,4dcfcfceb329,diurnal,"Passion Week, Saturday",278,verified,grok,2026-08-22,word-for-word from printed page image
@@ -496,6 +501,15 @@ proper/pentecost/short-responsory-lauds,643ad252145d,Propers of Lauds and Vesper
 proper/pentecost/short-responsory-vespers,b998e2a4240e,Propers of Lauds and Vespers during the Octave of Pentecost,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/pentecost/versicle-lauds,1717e2913fbc,draft archdiocesan Lauds book,The Feast of Pentecost,306,verified,codex,2026-07-18,
 proper/purification-bvm/collect,6bf250c5c65f,diurnal,,470,verified,bwaldrep,2026-07-25,
+proper/quinquagesima/benedictus-antiphon-friday,840d7154f1c0,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/benedictus-antiphon-saturday,7290fe599588,diurnal,Saturday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/benedictus-antiphon-thursday,e94b5c8a90b0,diurnal,Thursday after Ash Wednesday,244,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/benedictus-antiphon-wednesday,e2d7e86f0e80,diurnal,Ash Wednesday,243,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/magnificat-antiphon-friday,01e176cce272,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/magnificat-antiphon-monday,39f235fbd99b,diurnal,"Week of Quinquagesima, Monday",243,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/magnificat-antiphon-thursday,41ad9076c263,diurnal,Thursday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/magnificat-antiphon-tuesday,7ae43af98dad,diurnal,"Week of Quinquagesima, Tuesday",243,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/magnificat-antiphon-wednesday,230f98ddfca1,diurnal,"Ash Wednesday, At Vespers",244,verified,grok,2026-08-22,word-for-word from printed page image
 proper/saturday-office-bvm-christmastide/benedictus-antiphon,71723a27cb06,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Lauds",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-christmastide/magnificat-antiphon,e94affcbd982,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Vespers",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-paschal/magnificat-antiphon,420d7ab91a53,diurnal,"Office of Saint Mary on Saturday, III In Paschaltide, At Vespers",71*,verified,claude,2026-08-22,
@@ -503,6 +517,15 @@ proper/saturday-office-bvm-paschal/short-responsory-lauds,91143d1f7b76,Copy of O
 proper/saturday-office-bvm/benedictus-antiphon,a1d0eddde456,diurnal,"Office of Saint Mary on Saturday, At Lauds",69*,verified,claude,2026-08-22,
 proper/saturday-office-bvm/hymn-lauds,0002effe3e0f,Copy of OCP Ferial Lauds.pdf,,107,verified,codex,2026-07-18,
 proper/saturday-office-bvm/magnificat-antiphon,8ac1016e4a77,diurnal,"Office of Saint Mary on Saturday, At Vespers",68*,verified,claude,2026-08-22,
+proper/septuagesima/chapter-none,fd64dac1aa24,diurnal,"Septuagesima Sunday, At None",237,verified,grok,2026-08-22,word-for-word from printed page image
+proper/septuagesima/chapter-sext,5fd6f89d10f3,diurnal,"Septuagesima Sunday, At Sext",236,verified,grok,2026-08-22,word-for-word from printed page image
+proper/septuagesima/magnificat-antiphon-monday,274bdf7cde5d,diurnal,"Week of Septuagesima, Monday",237,verified,grok,2026-08-22,word-for-word from printed page image
+proper/septuagesima/magnificat-antiphon-thursday,29a20bb2b531,diurnal,"Week of Septuagesima, Thursday",238,verified,grok,2026-08-22,word-for-word from printed page image
+proper/septuagesima/magnificat-antiphon-tuesday,a43300c206cf,diurnal,"Week of Septuagesima, Tuesday",237,verified,grok,2026-08-22,word-for-word from printed page image
+proper/septuagesima/magnificat-antiphon-wednesday,351818fc4a42,diurnal,"Week of Septuagesima, Wednesday",238,verified,grok,2026-08-22,word-for-word from printed page image
+proper/sexagesima/magnificat-antiphon-monday,0a4fbc150e23,diurnal,"Week of Sexagesima, Monday",240,verified,grok,2026-08-22,word-for-word from printed page image
+proper/sexagesima/magnificat-antiphon-tuesday,74d72b1e8e2c,diurnal,"Week of Sexagesima, Tuesday",240,verified,grok,2026-08-22,word-for-word from printed page image
+proper/sexagesima/magnificat-antiphon-wednesday,009d14d4200a,diurnal,"Week of Sexagesima, Wednesday",240,verified,grok,2026-08-22,word-for-word from printed page image
 proper/solemnity-st-joseph/hymn-vespers,d60c25ccf291,draft archdiocesan Vespers book,,168,verified,codex,2026-07-18,
 proper/st-agatha/benedictus-antiphon,4491aec9bb90,diurnal,"St Agatha, At Lauds",472,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-agatha/chapter-lauds,c8294185c307,diurnal,"St Agatha, At Lauds",472,verified,grok,2026-08-22,word-for-word from printed page image

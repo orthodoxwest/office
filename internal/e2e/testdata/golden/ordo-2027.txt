@@ -395,14 +395,14 @@ MARCH
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
                Com. St David of Wales, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. These last have wrought but one hour · Suff.
+           Vespers v · Mag. These last · Suff.
                Com. St Chad, Bishop & Confessor ("The Lord loved him")
   2  Tue     Feria                                            v
            St Chad, Bishop & Confessor (com)
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
                Com. St Chad, Bishop & Confessor ("Well done")
            Hours   Preces
-           Vespers v · Mag. And the householder said · Suff.
+           Vespers v · Mag. The householder answered and said · Suff.
   3  Wed     Feria                                            v
            Lauds   v · Ben. From the hand of all that hate us · No Preces · Suff.
            Hours   Preces
@@ -413,7 +413,7 @@ MARCH
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
                Com. St Lucius I, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers v · Mag. Is it not lawful for me · Suff.
+           Vespers v · Mag. Is it not lawful · Suff.
   5  Fri  L  Feria                                            v
            Lauds   v · Ben. Through the tender mercy of our God · No Preces · Suff.
            Hours   Preces
@@ -432,21 +432,21 @@ MARCH
   8  Mon     Feria                                            v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. If ye would be truly honourable · Suff.
+           Vespers v · Mag. If ye seek · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("O Teacher right excellent")
   9  Tue     Feria                                            v
            St Gregory of Nyssa, Bishop, Confessor & Doctor (com)
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
                Com. St Gregory of Nyssa, Bishop, Confessor & Doctor ("Well done")
            Hours   Preces
-           Vespers v · Mag. The seed is the word of God · Suff.
+           Vespers v · Mag. The seed · Suff.
                Com. The Forty Holy Martyrs ("In the heavenly kingdom")
  10  Wed     Feria                                            v
            The Forty Holy Martyrs (com)
            Lauds   v · Ben. From the hand of all that hate us · No Preces · Suff.
                Com. The Forty Holy Martyrs ("The very hairs of your head")
            Hours   Preces
-           Vespers v · Mag. But that on the good ground · Suff.
+           Vespers v · Mag. But that · Suff.
  11  Thu     Feria                                            v
            Lauds   v · Ben. Let us serve the Lord · No Preces · Suff.
            Hours   Preces
@@ -468,7 +468,7 @@ MARCH
  15  Mon     Feria                                            v
            Lauds   v · Ben. Blessed be the Lord · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. And they that went before · Suff.
+           Vespers v · Mag. And they which went before · Suff.
  16  Tue     Feria                                            v
            Lauds   v · Ben. The Lord hath raised up · No Preces · Suff.
            Hours   Preces
@@ -488,23 +488,23 @@ MARCH
  18  Thu  L§ Thursday after Ash Wednesday               [f2]  v
            St Cyril of Jerusalem, Bishop, Confessor & Doctor (d)
            St Edward, King & Martyr (com)
-           Lauds   v · Ben. Lord · No Preces · No Suff.
+           Lauds   v · Ben. Lord, my servant · No Preces · No Suff.
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("Well done")
                Com. St Edward, King & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · I fol. (St. Joseph, Spouse of the Blessed Virgin Mary) · Mag. Joseph, being raised · No Suff.
-               Com. Thursday after Ash Wednesday ("O Lord")
+               Com. Thursday after Ash Wednesday ("Lord, I am not worthy")
  19  Fri  L§ St. Joseph, Spouse of the Blessed Virgin Mary [2cl] w
            Friday after Ash Wednesday (f2)
            Lauds   w · Ben. Jesus himself · No Preces · No Suff.
-               Com. Friday after Ash Wednesday ("When thou dost")
+               Com. Friday after Ash Wednesday ("When thou doest thine alms")
            Hours   No Preces
            Vespers w · II prec. · Mag. Behold a faithful · No Suff.
-               Com. Friday after Ash Wednesday ("But thou when thou shalt pray")
+               Com. Friday after Ash Wednesday ("But thou, when thou prayest")
                Com. St. Cuthbert, Bishop & Confessor ("The Lord loved him")
  20  Sat  L§ Saturday after Ash Wednesday               [f2]  v
            St. Cuthbert, Bishop & Confessor (d)
-           Lauds   v · Ben. For they seek me · No Preces · No Suff.
+           Lauds   v · Ben. Yet they seek me daily · No Preces · No Suff.
                Com. St. Cuthbert, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers v · I fol. (I Sunday in Lent) · Mag. Then shalt thou call · Suff.
@@ -699,11 +699,11 @@ APRIL
            Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
                Com. Day II within the Octave of St. George ("Whosoever shall confess Me")
            Hours   No Preces
-           Vespers v · I fol. (Palm Sunday) · Mag. It is written: I will smite the Shepherd · No Suff.
+           Vespers v · I fol. (Palm Sunday) · Mag. Righteous Father · No Suff.
  25  Sun  L  PALM SUNDAY                                [1cl] v
            Lauds   v · Ben. The multitudes · No Preces · No Suff.
            Hours   No Preces
-           Vespers v · II prec. · Mag. It is written: I will smite the Shepherd · No Suff.
+           Vespers v · II prec. · Mag. For it is written · No Suff.
                Com. St. Cletus & Marcellinus, Martyrs ("In the heavenly kingdom")
  26  Mon  L§ HOLY MONDAY                                [1cl] v
            St. Cletus & Marcellinus, Martyrs (com)
