@@ -365,12 +365,30 @@ proper/corpus-christi/short-responsory-lauds,210b7848f3c7,Propers of Lauds & Ves
 proper/corpus-christi/short-responsory-terce,210b7848f3c7,draft Temporal Cycle Vespers book,Saturday within the Octave of Corpus Christi,200-201,verified,codex,2026-07-18,
 proper/corpus-christi/short-responsory-vespers,979bb8cb3d04,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (rubric)
 proper/corpus-christi/versicle-lauds,89b7ed1d753b,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/easter-sunday-2/benedictus-antiphon,5b731c59f074,diurnal,"II Sunday after Easter, At Lauds",377,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/benedictus-antiphon-friday,a18932afce3f,diurnal,"II Week after the Octave of Easter, Friday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/benedictus-antiphon-monday,8e739d29441e,diurnal,"II Week after the Octave of Easter, Monday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/benedictus-antiphon-thursday,24371ce11db7,diurnal,"II Week after the Octave of Easter, Thursday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/benedictus-antiphon-tuesday,966b81b03d41,diurnal,"II Week after the Octave of Easter, Tuesday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/benedictus-antiphon-wednesday,ba67ecaba518,diurnal,"II Week after the Octave of Easter, Wednesday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/magnificat-antiphon,276d1c977e29,diurnal,"II Sunday after Easter, At II Vespers",378,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/magnificat-antiphon-monday,987ff2a205c2,diurnal,"II Week after the Octave of Easter, Monday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/magnificat-antiphon-thursday,fe197f2eaab6,diurnal,"II Week after the Octave of Easter, Thursday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/magnificat-antiphon-tuesday,8e3350cd6935,diurnal,"II Week after the Octave of Easter, Tuesday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/magnificat-antiphon-wednesday,82839b1d833c,diurnal,"II Week after the Octave of Easter, Wednesday",379,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/benedictus-antiphon,38c54b9c26d9,diurnal,"III Sunday after Easter, At Lauds",380,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/benedictus-antiphon-friday,5c8ea5f3d66d,diurnal,"III Week after the Octave of Easter, Friday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/benedictus-antiphon-thursday,43950cf2ef70,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/magnificat-antiphon,87eac0e355e0,diurnal,"III Sunday after Easter, At II Vespers",381,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/magnificat-antiphon-thursday,e1d2a40a57a3,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/collect,1ed6ac486f79,draft archdiocesan Vespers book,,165,verified,codex,2026-07-17,
+proper/easter-sunday-octave-day-4/benedictus-antiphon,6e8002911333,diurnal,Wednesday in Easter Week,368,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-4/magnificat-antiphon,57753eb8be0c,diurnal,Wednesday in Easter Week,368,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-5/benedictus-antiphon,2e4f79645365,diurnal,Thursday in Easter Week,368-369,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-5/magnificat-antiphon,17b0663cc102,diurnal,Thursday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-6/benedictus-antiphon,6764ee86adeb,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-6/magnificat-antiphon,9d21a60462ed,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Saturday before Low Sunday,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/benedictus-antiphon,d41107adf6c1,draft archdiocesan Lauds book,,554,verified,codex,2026-07-17,
@@ -465,6 +483,19 @@ proper/lent-sunday-3/magnificat-antiphon-monday,250588240508,diurnal,"III Week i
 proper/lent-sunday-3/magnificat-antiphon-thursday,a13ecc3960e6,diurnal,"III Week in Lent, Thursday",263,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-tuesday,a6bd74b7d5d3,diurnal,"III Week in Lent, Tuesday",262,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-wednesday,90a3229826b7,diurnal,"III Week in Lent, Wednesday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/benedictus-antiphon-friday,89acbaf408b8,diurnal,"I Week after the Octave of Easter, Friday",377,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/benedictus-antiphon-monday,af004e7b92e1,diurnal,"I Week after the Octave of Easter, Monday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/benedictus-antiphon-thursday,edeb93bd0339,diurnal,"I Week after the Octave of Easter, Thursday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/benedictus-antiphon-tuesday,49cec84ab431,diurnal,"I Week after the Octave of Easter, Tuesday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/benedictus-antiphon-wednesday,cf9c11746832,diurnal,"I Week after the Octave of Easter, Wednesday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/chapter-lauds,961b291efe92,diurnal,"Low Sunday, At Lauds",370,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/chapter-none,400f028fef65,diurnal,"Low Sunday, At None",371-372,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/chapter-sext,8d410df9f426,diurnal,"Low Sunday, At Sext",371,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/magnificat-antiphon,dc570ffb0206,diurnal,"Low Sunday, At II Vespers",372,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/magnificat-antiphon-monday,81b39a781d2f,diurnal,"I Week after the Octave of Easter, Monday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/magnificat-antiphon-thursday,9053ff34a3bf,diurnal,"I Week after the Octave of Easter, Thursday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/magnificat-antiphon-tuesday,c71722baca17,diurnal,"I Week after the Octave of Easter, Tuesday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/low-sunday/magnificat-antiphon-wednesday,7845dca666ab,diurnal,"I Week after the Octave of Easter, Wednesday",376,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,

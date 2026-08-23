@@ -1,7 +1,7 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc0-5 [Ant 2] — check against diurnal
-When the eleven disciples * saw the Lord in Galilee, they worshipped Him, alleluia.
+# SOURCE: monastic diurnal, p. 369 (Friday in Easter Week)
+The eleven disciples, * when they saw the Lord in Galilee, worshipped him, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Pasc0-5 [Ant 3] — check against diurnal
-All power is given unto Me * in heaven and in earth, alleluia.
+# SOURCE: monastic diurnal, p. 369 (Friday in Easter Week)
+All power * is given unto me in heaven and in earth, alleluia.
