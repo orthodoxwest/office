@@ -287,7 +287,7 @@ ordinary/sext/versicle,436144ea56c9,03. Sext Throughout the Week Alex edit 09-23
 ordinary/shared/alleluia,0595c5c9f33e,diurnal,,2,verified,bwaldrep,2026-07-11,
 ordinary/shared/apostles-creed,01e8acad0703,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Apostles’ Creed,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, typography, and the sign-of-cross glyph."
 ordinary/shared/confiteor,e81b80291b77,st patrick prayer book,,42,verified,bwaldrep,2026-07-16,
-ordinary/shared/gloria-patri,0306bbb45eaf,diurnal,,4,verified,bwaldrep,2026-07-10,
+ordinary/shared/gloria-patri,a177ab602e9c,diurnal,"Monday at Prime, opening",2,verified,codex,2026-08-23,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0048
 ordinary/shared/hail-mary,ea3a728f1e37,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Hail Mary,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, and typography."
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,b66987e4e924,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Our Father,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, capitalization, and punctuation."
@@ -1183,10 +1183,11 @@ seasonal/passiontide/versicle-vespers,d5317e8b3923,Propers of Lauds & Vespers Du
 seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/closing-peace,6dd169108046,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
+shared/formulas/collect-conclusion-through,1c791174c54e,diurnal,"Monday at Prime, after the Preces",9,verified,codex,2026-08-23,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0055
 shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,
 shared/formulas/divine-help,c73885541916,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/faithful-departed,78cd4856d8a2,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
-shared/formulas/opening-versicle,9cda7ff3a79e,diurnal,,2,verified,bwaldrep,2026-07-15,
+shared/formulas/opening-versicle,8d4e25133098,diurnal,"Monday at Prime, opening",2,verified,codex,2026-08-23,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0048
 shared/formulas/our-father-partly-secret-rubric,f0c8170f526b,General Rubrics of the Monastic Breviary,XXXV.1-2 — The Lord’s Prayer,51,verified,codex,2026-07-20,Rubric faithfully states the prescribed secret recitation and public final versicle and response.
 shared/formulas/paschal-psalm-antiphon,d92894995670,00. Sunday Prime Alex edit 10-31 v.01.docx,The Psalms — Alleluia antiphon,3-5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography; directly verifies its use at Prime.
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,
