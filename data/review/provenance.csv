@@ -261,6 +261,7 @@ ordinary/prime/chapter,b9ab0498a31d,01. Monday Prime Alex edit 10-28 v.01.docx,T
 ordinary/prime/chapter-ferial,ba58f15a0c32,01. Monday Prime Alex edit 10-28 v.01.docx,THE CHAPTER / Zechariah 8:19,,verified,grok,2026-07-20,Word-for-word ferial chapter.
 ordinary/prime/collect,c09af24d4946,01. Monday Prime Alex edit 10-28 v.01.docx,THE COLLECT,,verified,grok,2026-07-20,Word-for-word after normalizing line breaks; matches all weekday Prime booklets.
 ordinary/prime/hymn,3058bf7bee6a,01. Monday Prime Alex edit 10-28 v.01.docx,The Hymn — Iam lucis orto sidere,3-4,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, elisions, and typography."
+ordinary/prime/martyrology-rubric,a9f749b7b94e,diurnal,Monday at Prime,10,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0056
 ordinary/prime/pre-collect-versicle,b3ea375a6784,01. Monday Prime Alex edit 10-28 v.01.docx,THE VERSICLE O Christ arise,,verified,grok,2026-07-20,Word-for-word.
 ordinary/prime/preces-our-help,e7ba8a0297d0,01. Monday Prime Alex edit 10-28 v.01.docx,The Preces,8,verified,codex,2026-07-20,Word-for-word; the source chant font cross is normalized to the corpus cross glyph.
 ordinary/prime/preces-vouchsafe,1756a1196e36,01. Monday Prime Alex edit 10-28 v.01.docx,After the Absolution is added,9,verified,codex,2026-07-20,Word-for-word after normalizing capitalization and punctuation.
