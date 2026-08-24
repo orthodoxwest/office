@@ -1,5 +1,4 @@
 key,content_hash,severity,reason,flagged,issue
-proper/chains-st-peter/versicle-vespers,1563536e55a8,high,modern-English versicle ('I am going to build my church') amid archaic register,2026-07,
 proper/chair-peter-antioch/magnificat-antiphon,437e6456d70e,medium,Unresolved source conflict: 2026 ordo Mag. Ant. 'While he was High Priest' vs corpus/parish Vespers books 'During his pontificate'; neither source authoritative by default,2026-07,115
 proper/chair-peter-rome/versicle-vespers,1563536e55a8,high,modern-English versicle ('I am going to build my church') amid archaic register,2026-07,
 proper/corpus-christi/hymn-vespers,3d4a3714f0b1,medium,"Pange lingua translation differs from the Corpus Christi octave propers booklet: corpus ""Now, my tongue, the mystery telling""; booklet ""Of the glorious body telling, O my tongue, its mysteries""",2026-07,
