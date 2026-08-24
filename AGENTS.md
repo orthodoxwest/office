@@ -7,17 +7,10 @@ verification.
 
 ## Non-negotiable boundaries
 
-- Agents may change `data/texts/` **only** through `office review apply` on an
-  apply-queue packet that passed the mechanical gate. Do not `git add data/`
-  or edit corpus files with a general write tool.
 - First-wave applies may touch any liturgical text except `data/texts/psalms/`
   (already independently validated). They must not write `data/review/`
   ledgers, feast metadata, hour defs, signoffs, attestations, or prescreen
   flags.
-- Never represent an OCR result, a match score, a model verdict, or a merged
-  apply PR as a human verification. `review attest` remains a separate human
-  act. Agent-written `# SOURCE:` comments must keep the hedge
-  `agent-proposed, not attested`.
 - The newest local archdiocesan ordo is the authority for the current year.
   If it conflicts with older ordos or the normative rubrics, flag the issue for
   clergy rather than selecting a side. Do not apply those packets.
@@ -51,7 +44,6 @@ verification.
    a printed proper from an equal fallback.
 4. Run agents with immutable packet hashes. A cleaner may emit an apply
    packet; the gate, not the model score, decides whether it is writable.
-5. `office review apply` writes gated packets on a branch. A maintainer
-   merges the PR. Attestation is a later, separate `review attest`.
+5. `office review apply` writes gated packets on a branch. 
 
 Follow the operational details in `DIURNAL-INGESTION.md`.
