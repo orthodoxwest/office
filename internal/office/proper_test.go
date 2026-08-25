@@ -850,6 +850,82 @@ func TestResolveProperCollectTextMinorHoursReuseLauds(t *testing.T) {
 	}
 }
 
+func TestResolveProperTextFeriaUsesSundayCollect(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/pentecost-sunday-12/collect": "Sunday collect",
+		"ordinary/lauds/collect":             "Daily Lauds collect",
+		"ordinary/vespers/collect":           "Daily Vespers collect",
+		"ordinary/prime/collect":             "Prime collect",
+		"proper/st-bartholomew/collect":      "Feast collect",
+		"commons/apostle/collect":            "Apostle common collect",
+	})
+
+	feria := &models.CalendarDay{
+		Date:           time.Date(2026, 8, 25, 0, 0, 0, 0, time.UTC),
+		Season:         models.Pentecost,
+		TemporalWeekID: "pentecost-sunday-12",
+	}
+
+	t.Run("lauds", func(t *testing.T) {
+		got, ref := resolveProperCollectText(feria, "lauds", corpus)
+		if got != "Sunday collect" || ref != "proper/pentecost-sunday-12/collect" {
+			t.Fatalf("lauds = %q (%s), want Sunday collect", got, ref)
+		}
+	})
+	t.Run("vespers", func(t *testing.T) {
+		got, ref := resolveProperCollectText(feria, "vespers", corpus)
+		if got != "Sunday collect" || ref != "proper/pentecost-sunday-12/collect" {
+			t.Fatalf("vespers = %q (%s), want Sunday collect", got, ref)
+		}
+	})
+	t.Run("terce follows lauds", func(t *testing.T) {
+		got, ref := resolveProperCollectText(feria, "terce", corpus)
+		if got != "Sunday collect" || ref != "proper/pentecost-sunday-12/collect" {
+			t.Fatalf("terce = %q (%s), want Sunday collect", got, ref)
+		}
+	})
+	t.Run("prime keeps its own collect", func(t *testing.T) {
+		got, ref := resolveProperCollectText(feria, "prime", corpus)
+		if got != "Prime collect" || ref != "ordinary/prime/collect" {
+			t.Fatalf("prime = %q (%s), want Prime collect", got, ref)
+		}
+	})
+	t.Run("feast collect still wins", func(t *testing.T) {
+		day := &models.CalendarDay{
+			Date:           time.Date(2026, 8, 24, 0, 0, 0, 0, time.UTC),
+			Season:         models.Pentecost,
+			TemporalWeekID: "pentecost-sunday-12",
+			Celebration:    &models.Feast{ID: "st-bartholomew", Category: models.CategoryApostle},
+		}
+		got, ref := resolveProperCollectText(day, "lauds", corpus)
+		if got != "Feast collect" || ref != "proper/st-bartholomew/collect" {
+			t.Fatalf("feast = %q (%s), want feast collect", got, ref)
+		}
+	})
+	t.Run("commons collect still wins over Sunday", func(t *testing.T) {
+		day := &models.CalendarDay{
+			Date:           time.Date(2026, 8, 26, 0, 0, 0, 0, time.UTC),
+			Season:         models.Pentecost,
+			TemporalWeekID: "pentecost-sunday-12",
+			Celebration:    &models.Feast{ID: "unknown-apostle", Category: models.CategoryApostle},
+		}
+		got, ref := resolveProperCollectText(day, "lauds", corpus)
+		if got != "Apostle common collect" || ref != "commons/apostle/collect" {
+			t.Fatalf("commons = %q (%s), want apostle common collect", got, ref)
+		}
+	})
+	t.Run("no temporal week keeps ordinary", func(t *testing.T) {
+		day := &models.CalendarDay{
+			Date:   time.Date(2026, 1, 8, 0, 0, 0, 0, time.UTC),
+			Season: models.Epiphany,
+		}
+		got, ref := resolveProperCollectText(day, "lauds", corpus)
+		if got != "Daily Lauds collect" || ref != "ordinary/lauds/collect" {
+			t.Fatalf("no week = %q (%s), want ordinary Lauds collect", got, ref)
+		}
+	})
+}
+
 func TestResolveProperTextEasterHourQualifiedOverrides(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"seasonal/easter/short-responsory-lauds":   "Paschal lauds short responsory",

@@ -415,6 +415,15 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		if text, resolved := firstText(corpus, prefix, wdRefs); text != "" {
 			return substituteProperName(text, properName), resolved
 		}
+		// The collect of a feria is the Sunday collect, not a per-day
+		// variant. Little hours resolve collects as Lauds; Prime and
+		// Compline keep their own ordinary collects. 2026 ordo: weekday
+		// Lauds, Hours, and Vespers of a green feria cite the Sunday page.
+		if baseProperRef(ref) == "collect" && (hourName == "lauds" || hourName == "vespers") {
+			if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+				return substituteProperName(text, properName), resolved
+			}
+		}
 	}
 
 	// 3. Seasonal default (hour-qualified, then generic)
