@@ -329,15 +329,23 @@ ordinary/vespers/psalm-antiphon-1-sunday,215d4fbb70ee,diurnal,"Sunday at Vespers
 ordinary/vespers/psalm-antiphon-1-thursday,3ac204df8bf9,diurnal,"Thursday at Vespers, Throughout the Year",132,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-1-tuesday,1dda4f709c1f,diurnal,"Tuesday at Vespers, Throughout the Year",123,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-1-wednesday,ebc91367b526,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Whatsoever the Lord pleased,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and line-break hyphenation.
+ordinary/vespers/psalm-antiphon-2-friday,cbdf1256a539,diurnal,"Friday at Vespers, Throughout the Year",137,verified,grok,2026-08-25,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-2-saturday,53e9146bfec8,draft archdiocesan Vespers book,,211,verified,codex,2026-07-18,
 ordinary/vespers/psalm-antiphon-2-sunday,0c3590e4ce9f,diurnal,"Sunday at Vespers, Throughout the Year",111,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-2-tuesday,8087b54601bb,diurnal,"Tuesday at Vespers, Throughout the Year",123,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-2-wednesday,efb4b43f9fdf,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. For his mercy,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
+ordinary/vespers/psalm-antiphon-3-monday,bc46e38f3779,diurnal,"Monday at Vespers, Throughout the Year",119,verified,grok,2026-08-25,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-3-saturday,3b963b10355b,draft archdiocesan Vespers book,,212,verified,codex,2026-07-18,
 ordinary/vespers/psalm-antiphon-3-sunday,90e394a4f985,diurnal,"Sunday at Vespers, Throughout the Year",112,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-3-thursday,1d89ad99a68b,diurnal,"Thursday at Vespers, Throughout the Year",134,verified,grok,2026-08-25,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-3-tuesday,603fd06510fe,diurnal,"Tuesday at Vespers, Throughout the Year",124,verified,grok,2026-08-25,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-3-wednesday,b7de46a6dd9a,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Sing us one,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
+ordinary/vespers/psalm-antiphon-4-friday,3d398a2e0ee5,diurnal,"Friday at Vespers, Throughout the Year",138,verified,grok,2026-08-25,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-4-monday,5eb1bb04b032,diurnal,"Monday at Vespers, Throughout the Year",120,verified,grok,2026-08-25,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-4-saturday,12559aa40ef7,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ant. Praise the Lord, O Jerusalem",216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
 ordinary/vespers/psalm-antiphon-4-sunday,98550e0ffabc,diurnal,"Sunday at Vespers, Throughout the Year",113,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-4-thursday,10b54289f493,diurnal,"Thursday at Vespers, Throughout the Year",134,verified,grok,2026-08-25,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-4-tuesday,79dbb3ac4d5f,diurnal,"Tuesday at Vespers, Throughout the Year",125,verified,grok,2026-08-25,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-4-wednesday,2eedc60b0692,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Before the gods,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
 ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
@@ -1237,6 +1245,11 @@ seasonal/advent/magnificat-antiphon-december-20,8563200fe5f6,diurnal,"The Great 
 seasonal/advent/magnificat-antiphon-december-21,8302d39c3390,diurnal,"The Great Antiphons, Dec. 21, O Oriens",173,verified,grok,2026-08-24,word-for-word from printed page image
 seasonal/advent/magnificat-antiphon-december-22,816ed1a51bdc,diurnal,"The Great Antiphons, Dec. 22, O Rex gentium",173,verified,grok,2026-08-24,word-for-word from printed page image
 seasonal/advent/magnificat-antiphon-december-23,143cc44a4e03,diurnal,"The Great Antiphons, Dec. 23, O Emmanuel",173,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/psalm-antiphon-1-prime-friday,18cc93aaf4a4,diurnal,"Antiphons at Lauds and the Hours, Dec. 17-23, Friday",175,verified,grok,2026-08-25,word-for-word from printed page image
+seasonal/advent/psalm-antiphon-1-prime-monday,c5ce69556621,diurnal,"Antiphons at Lauds and the Hours, Dec. 17-23, Monday",174,verified,grok,2026-08-25,word-for-word from printed page image
+seasonal/advent/psalm-antiphon-1-prime-thursday,dcbeb11934f0,diurnal,"Antiphons at Lauds and the Hours, Dec. 17-23, Thursday",175,verified,grok,2026-08-25,word-for-word from printed page image
+seasonal/advent/psalm-antiphon-1-prime-tuesday,b48c4358affb,diurnal,"Antiphons at Lauds and the Hours, Dec. 17-23, Tuesday",174,verified,grok,2026-08-25,word-for-word from printed page image
+seasonal/advent/psalm-antiphon-1-prime-wednesday,38ba9482bab8,diurnal,"Antiphons at Lauds and the Hours, Dec. 17-23, Wednesday",175,verified,grok,2026-08-25,word-for-word from printed page image
 seasonal/advent/short-responsory-lauds,00c9d2455ecd,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/short-responsory-vespers,458552f095f0,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/versicle-lauds,beea678300ae,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -1251,6 +1264,7 @@ seasonal/lent/chapter-lauds,7d4853ed8399,Propers of Lauds & Vespers During Lent,
 seasonal/lent/chapter-vespers,ee8fdda43c83,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/hymn-lauds,a1cd6fa9808c,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,"verified; residual diffs typographic only (bow, ae)"
 seasonal/lent/hymn-vespers,a6e9d352f90b,draft archdiocesan Vespers book,,138,verified,codex,2026-07-18,
+seasonal/lent/psalm-antiphon-1-prime,492ea426f595,diurnal,"The Ordinary of the Ferial Office in Lent, At Prime",250,verified,grok,2026-08-25,word-for-word from printed page image
 seasonal/lent/short-responsory-lauds,59e89b66ebbf,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/short-responsory-vespers,64b473edaf1b,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/versicle-lauds,6adcce448c1a,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -1260,6 +1274,7 @@ seasonal/passiontide/chapter-lauds,1365a3cf647c,Propers of Lauds & Vespers Durin
 seasonal/passiontide/chapter-vespers,f2cffa7577a4,Propers of Lauds & Vespers During Passiontide,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/hymn-first-vespers,293490011298,office-hymns.zip,"The Royal Banners Forward Go, Passiontide Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 seasonal/passiontide/hymn-lauds,02e3cda31166,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
+seasonal/passiontide/psalm-antiphon-1-prime,b4f355faef4f,diurnal,"The Ordinary of the Ferial Office in Passiontide, At Prime",274,verified,grok,2026-08-25,word-for-word from printed page image
 seasonal/passiontide/short-responsory-lauds,cc10440bf71b,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/short-responsory-vespers,d5d8a4eca7ea,draft archdiocesan Vespers book,Saturdays in Passiontide,147,verified,codex,2026-07-18,
 seasonal/passiontide/versicle-lauds,51350cbce0ff,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet

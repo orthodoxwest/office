@@ -3,24 +3,24 @@
 # Add overrides here as needed.
 
 [psalm-antiphon-1-prime-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv42, 1] — check against diurnal
-Behold, the Lord cometh, * the Prince of the Kings of the earth: blessed are they that are ready to go forth to meet him.
+# SOURCE: monastic diurnal, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+Behold the Lord shall come, * the Prince of the kings of the earth: blessed are they that are prepared to meet him.
 
 [psalm-antiphon-1-prime-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv43, 1] — check against diurnal
-Drop down, ye heavens, from above, * and let the skies pour down the Righteous One: let the earth open and bring forth the Saviour.
+# SOURCE: monastic diurnal, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+Drop down, ye heavens, from above, * and let the skies pour down righteousness: let the earth open, and let them bring forth salvation.
 
 [psalm-antiphon-1-prime-wednesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv44, 1] — check against diurnal
-The Prophets foretold * that the Saviour should be born of the Virgin Mary.
+# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+The prophets did foretell * that a Saviour should be born of the Virgin Mary.
 
 [psalm-antiphon-1-prime-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv45, 1] — check against diurnal
-The Lord, the Almighty, * cometh out of Zion, to save his people.
+# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+From Sion * draweth nigh the Lord Almighty to bring salvation unto his people.
 
 [psalm-antiphon-1-prime-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv46, 1] — check against diurnal
-Stand still * and you shall see the salvation of the Lord.
+# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+Be ye steadfast, * and see the salvation of the Lord with you.
 
 [psalm-antiphon-1-prime-saturday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv47, 1] — check against diurnal

@@ -324,12 +324,12 @@ But we who live * from this time forth will praise the Lord.
 [psalm-antiphon-2-monday]
 @use ordinary/vespers/psalm-antiphon-1-monday
 [psalm-antiphon-3-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 2)] — check against diurnal
+# SOURCE: monastic diurnal, p. 119 (Monday at Vespers, Throughout the Year)
 The Lord hath inclined * his ear unto me.
 
 [psalm-antiphon-4-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 2)] — check against diurnal
-I have believed * therefore have I spoken.
+# SOURCE: monastic diurnal, p. 120 (Monday at Vespers, Throughout the Year)
+I believed, * and therefore will I speak.
 
 [psalm-antiphon-1-tuesday]
 # SOURCE: monastic diurnal, p. 123 (Tuesday at Vespers, Throughout the Year)
@@ -340,12 +340,12 @@ Out of the deep * have I called unto thee, O Lord.
 O Israel, * trust in the Lord.
 
 [psalm-antiphon-3-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 3)] — check against diurnal
-O Lord, remember Israel * and all his meekness.
+# SOURCE: monastic diurnal, p. 124 (Tuesday at Vespers, Throughout the Year)
+And all * his trouble.
 
 [psalm-antiphon-4-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 3)] — check against diurnal
-Behold * how good and how pleasant it is for brethren to dwell together in unity.
+# SOURCE: monastic diurnal, p. 125 (Tuesday at Vespers, Throughout the Year)
+Behold, * how good and joyful a thing it is, brethren, to dwell together in unity.
 
 [psalm-antiphon-1-wednesday]
 # SOURCE: draft archdiocesan Vespers book, p. 124 (Wednesday)
@@ -370,26 +370,26 @@ O Lord, * thou hast searched me out and known me.
 [psalm-antiphon-2-thursday]
 @use ordinary/vespers/psalm-antiphon-1-thursday
 [psalm-antiphon-3-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal
-Deliver me, O Lord * from the evil man.
+# SOURCE: monastic diurnal, p. 134 (Thursday at Vespers, Throughout the Year)
+Deliver me, O Lord, * from the wicked man.
 
 [psalm-antiphon-4-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal
-I have cried to thee, * O Lord, hearken to my voice.
+# SOURCE: monastic diurnal, p. 134 (Thursday at Vespers, Throughout the Year)
+Lord, I call * upon thee, haste thee unto me.
 
 [psalm-antiphon-1-friday]
 # SOURCE: monastic diurnal, p. 136 (Friday at Vespers, Throughout the Year)
 O Lord, let my portion * be in the land of the living.
 
 [psalm-antiphon-2-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
-Blessed be * the Lord my God.
+# SOURCE: monastic diurnal, p. 137 (Friday at Vespers, Throughout the Year)
+Blessed be * the Lord my strength and my fortress.
 
 [psalm-antiphon-3-friday]
 @use ordinary/vespers/psalm-antiphon-2-friday
 [psalm-antiphon-4-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
-Day by day * I shall bless thee, O Lord.
+# SOURCE: monastic diurnal, p. 138 (Friday at Vespers, Throughout the Year)
+Every day, * O Lord, will I give thanks unto thee.
 
 [psalm-antiphon-1-saturday]
 # SOURCE: draft archdiocesan Vespers book, p. 210
