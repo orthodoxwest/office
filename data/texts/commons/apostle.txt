@@ -95,9 +95,15 @@ Brethren: Now therefore ye are no more strangers and foreigners, but fellow-citi
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Commune/C1 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At Sext)
 !Acts 5:12
-And by the hands of the apostles were many signs and wonders wrought among the people.
+By the hands of the Apostles * were many signs and wonders wrought among the people.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At None)
+!Acts 5:41
+And they departed from the presence of the council, * rejoicing that they were counted worthy to suffer shame for the Name of Jesus.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -170,22 +176,12 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou shalt make them princes * in all lands.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Commune/C1 [Responsory Breve Tertia] — check against diurnal
-R. Their sound hath gone * forth into all the earth.
-R. Their sound hath gone * forth into all the earth.
-V. And their words unto the ends of the world.
-R. Forth into all the earth.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Their sound hath gone * forth into all the earth.
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At Terce)
+@use commons/apostle/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Commune/C1 [Responsory Breve Sexta] — check against diurnal
-R. Thou shalt make them princes * over all the earth.
-R. Thou shalt make them princes * over all the earth.
-V. They shall remember thy name, O Lord.
-R. All over the earth.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou shalt make them princes * over all the earth.
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At Sext)
+@use commons/apostle/short-responsory-vespers
 
 [short-responsory-none]
 # SOURCE: draft archdiocesan / diurnal Common of Apostles (None; reduced form is

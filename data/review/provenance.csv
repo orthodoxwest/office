@@ -9,6 +9,8 @@ commons/apostle-paschal/psalm-antiphon-2,eebae0d7adbd,draft archdiocesan Lauds b
 commons/apostle-paschal/psalm-antiphon-3,2b1e1c6548ad,draft archdiocesan Vespers book,"Second Vespers, Common of Apostles in Paschaltide",565,verified,codex,2026-07-18,
 commons/apostle-paschal/versicle-first-vespers,e3c6e91bb33f,draft archdiocesan Vespers book,,571,verified,codex,2026-07-17,
 commons/apostle/chapter-lauds,4cb8e19d13a4,draft archdiocesan Lauds book,,608,verified,codex,2026-07-18,
+commons/apostle/chapter-none,3c0a5120bd29,diurnal,"Common of Apostles out of Paschaltide, At None",12*,verified,grok,2026-08-24,word-for-word from printed page image
+commons/apostle/chapter-sext,4c22fa4eab8a,diurnal,"Common of Apostles out of Paschaltide, At Sext",12*,verified,grok,2026-08-24,word-for-word from printed page image
 commons/apostle/hymn-lauds,ff63c049a2fb,draft archdiocesan Vespers book,"Saint Andrew, I Vespers",230-231,verified,codex,2026-07-18,canonical Apostles hymn wording and verse order checked against dehyphenated chant underlay
 commons/apostle/psalm-antiphon-1,c6041b6635df,draft archdiocesan Lauds book,,603,verified,codex,2026-07-17,
 commons/apostle/psalm-antiphon-2,a9e4b8ea3fd5,draft archdiocesan Lauds book,,604,verified,codex,2026-07-17,
@@ -443,6 +445,12 @@ proper/apparition-st-michael/short-responsory-none,0a692d614a29,diurnal,"Dedicat
 proper/apparition-st-michael/short-responsory-sext,8aba3cb98a7d,diurnal,"Dedication of St Michael, At Sext; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
 proper/apparition-st-michael/short-responsory-terce,1571f3a59379,diurnal,"Dedication of St Michael, At Terce; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
 proper/apparition-st-michael/versicle-lauds,d0fa20313df6,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",610,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ascension-sunday-within-octave/benedictus-antiphon,67e51c5114f5,diurnal,"Sunday within the Octave of the Ascension, At I Vespers and Lauds",391-392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-lauds,4d241676b0cc,diurnal,"Sunday within the Octave of the Ascension, At Lauds",392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-none,b70efc2aef3b,diurnal,"Sunday within the Octave of the Ascension, At None",393,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-sext,611dbed695bb,diurnal,"Sunday within the Octave of the Ascension, At Sext",393,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/collect,d138c1ff3f72,diurnal,"Sunday within the Octave of the Ascension, At Lauds",392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/magnificat-antiphon,7f2ece2d43cf,diurnal,"Sunday within the Octave of the Ascension, At II Vespers",393,verified,grok,2026-08-24,word-for-word from printed page image
 proper/ascension/chapter-lauds,c4584adf8dae,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
@@ -479,9 +487,12 @@ proper/chains-st-peter/versicle-vespers,ea9cc7f6ba65,diurnal,"St Peter’s Chain
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,50e47a3dc415,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
-proper/christ-the-king/chapter-none,8599bde68bc2,diurnal,"Christ the King, At None",631,verified,grok,2026-08-22,word-for-word from printed page image
-proper/christ-the-king/chapter-sext,51656689d201,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-22,word-for-word from printed page image
+proper/christ-the-king/chapter-none,daa6d596ac4f,diurnal,"Christ the King, At None",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/chapter-sext,ba05bc2d0ea3,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/commemoration-versicle,a017333648c4,diurnal,"Christ the King, At Lauds",630,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christ-the-king/hymn-vespers,da0343a2687c,office-hymns.zip,"O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+proper/christ-the-king/short-responsory-none,92b14997e1ec,diurnal,"Christ the King, At None",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/short-responsory-sext,7bf51e8fa794,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christmas/benedictus-antiphon,563e7d19001d,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,72,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/chapter-none,1a9cc50a6b93,diurnal,"Nativity, At None",188,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christmas/chapter-sext,551436498758,diurnal,"Nativity, At Sext",188,verified,grok,2026-08-24,word-for-word from printed page image
