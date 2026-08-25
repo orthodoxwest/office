@@ -250,24 +250,24 @@ R. And let thy mercy come down upon us.
 My soul doth magnify the Lord, and my spirit hath rejoiced in God my Saviour.
 
 [magnificat-antiphon-monday]
-# SOURCE: divinum-officium Major Special.txt [Feria2 Ant 3]; incipit per 2026 ordo — check against diurnal
-My soul doth magnify the Lord * for God hath regarded the lowliness of his handmaiden.
+# SOURCE: monastic diurnal, p. 122 (Monday at Vespers, Throughout the Year)
+My soul * doth magnify the Lord, for he hath regarded my lowliness.
 
 [magnificat-antiphon-tuesday]
-# SOURCE: divinum-officium Major Special.txt [Feria3 Ant 3]; incipit per 2026 ordo — check against diurnal
+# SOURCE: monastic diurnal, p. 126 (Tuesday at Vespers, Throughout the Year)
 Let my spirit rejoice * in God my Saviour.
 
 [magnificat-antiphon-wednesday]
-# SOURCE: divinum-officium Major Special.txt [Feria4 Ant 3]; incipit per 2026 ordo — check against diurnal
-The Lord hath regarded * my lowliness, and he that is mighty hath done great things for me.
+# SOURCE: monastic diurnal, p. 131 (Wednesday at Vespers, Throughout the Year)
+The Lord * hath regarded my lowliness: and he that is mighty hath done in me great things.
 
 [magnificat-antiphon-thursday]
-# SOURCE: divinum-officium Major Special.txt [Feria5 Ant 3]; incipit per 2026 ordo ("Show strength") — check against diurnal
-Show strength with thine arm * scatter the proud in the imagination of their hearts.
+# SOURCE: monastic diurnal, p. 136 (Thursday at Vespers, Throughout the Year)
+Show strength, O God, * with thine arm: scatter the proud, and exalt the humble.
 
 [magnificat-antiphon-friday]
-# SOURCE: divinum-officium Major Special.txt [Feria6 Ant 3]; incipit per 2026 ordo — check against diurnal
-He hath put down the mighty * from their seat, and hath exalted the humble and meek.
+# SOURCE: monastic diurnal, p. 140 (Friday at Vespers, Throughout the Year)
+He hath put down the mighty * that persecute the holy; and hath exalted the humble that confess his Christ.
 
 [magnificat-antiphon-saturday]
 # SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 1 (Suscepit Deus)
@@ -302,24 +302,24 @@ R. Amen.
 @use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera] — check against diurnal
-The Lord said * to my Lord: Sit thou at my right hand.
+# SOURCE: monastic diurnal, pp. 110–111 (Sunday at Vespers, Throughout the Year)
+The Lord said * unto my Lord, Sit thou on my right hand.
 
 [psalm-antiphon-2-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera] — check against diurnal
-All his commandments are faithful: * confirmed for ever and ever.
+# SOURCE: monastic diurnal, p. 111 (Sunday at Vespers, Throughout the Year)
+All his commandments * are true: they stand fast for ever and ever.
 
 [psalm-antiphon-3-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera] — check against diurnal
-He shall delight * exceedingly in his commandments.
+# SOURCE: monastic diurnal, p. 112 (Sunday at Vespers, Throughout the Year)
+He hath great delight * in his commandments.
 
 [psalm-antiphon-4-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera] — check against diurnal
-Blessed be the name of the Lord * from henceforth now and for ever.
+# SOURCE: monastic diurnal, p. 113 (Sunday at Vespers, Throughout the Year)
+Blessed be the Name * of the Lord for ever and ever.
 
 [psalm-antiphon-1-monday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 2)] — check against diurnal
-But we that live * bless the Lord.
+# SOURCE: monastic diurnal, p. 117 (Monday at Vespers, Throughout the Year)
+But we who live * from this time forth will praise the Lord.
 
 [psalm-antiphon-2-monday]
 @use ordinary/vespers/psalm-antiphon-1-monday
@@ -332,12 +332,12 @@ The Lord hath inclined * his ear unto me.
 I have believed * therefore have I spoken.
 
 [psalm-antiphon-1-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 3)] — check against diurnal
-Out of the depths * have I cried unto thee, O Lord!
+# SOURCE: monastic diurnal, p. 123 (Tuesday at Vespers, Throughout the Year)
+Out of the deep * have I called unto thee, O Lord.
 
 [psalm-antiphon-2-tuesday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 3)] — check against diurnal
-Let Israel * hope in the Lord.
+# SOURCE: monastic diurnal, p. 123 (Tuesday at Vespers, Throughout the Year)
+O Israel, * trust in the Lord.
 
 [psalm-antiphon-3-tuesday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 3)] — check against diurnal
@@ -364,8 +364,8 @@ Sing us one * of the songs of Sion.
 Before the gods * will I sing praise unto thee, my God.
 
 [psalm-antiphon-1-thursday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 5)] — check against diurnal
-O Lord * thou hast proved me, and known me.
+# SOURCE: monastic diurnal, p. 132 (Thursday at Vespers, Throughout the Year)
+O Lord, * thou hast searched me out and known me.
 
 [psalm-antiphon-2-thursday]
 @use ordinary/vespers/psalm-antiphon-1-thursday
@@ -378,8 +378,8 @@ Deliver me, O Lord * from the evil man.
 I have cried to thee, * O Lord, hearken to my voice.
 
 [psalm-antiphon-1-friday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
-May my portion * O Lord, be in the land of the living.
+# SOURCE: monastic diurnal, p. 136 (Friday at Vespers, Throughout the Year)
+O Lord, let my portion * be in the land of the living.
 
 [psalm-antiphon-2-friday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [Monastic Vespera (feria 6)] — check against diurnal
