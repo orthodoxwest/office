@@ -52,7 +52,7 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 			// sings five (Monastic Diurnal pp. 72*-75*). The office package
 			// owns that predicate; this is the one ID it applies to today.
 			wantPsalms := 4
-			if feastID(day) == "all-souls" {
+			if hour.Feast == "All Souls' Day" {
 				wantPsalms = 5
 			}
 			if psalms != wantPsalms {

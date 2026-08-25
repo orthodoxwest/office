@@ -3,9 +3,9 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 214 |
-| Full structural-cover pages | 56 |
-| Residual structural-review pages | 56 |
+| Modeled structural features | 215 |
+| Full structural-cover pages | 57 |
+| Residual structural-review pages | 57 |
 | Uncovered features | 0 |
 | Verified text entries | 1289 |
 | Rendered text entries needing review | 811 |
@@ -142,6 +142,7 @@
 - `decision:vespers:owner=first-of-following`
 - `decision:vespers:owner=not-applicable`
 - `decision:vespers:owner=second-of-preceding`
+- `decision:vespers:rule=concurrence:all-souls-ends-at-none`
 - `decision:vespers:rule=concurrence:class-i-ii-vs-octave-day`
 - `decision:vespers:rule=concurrence:class-i-ii-vs-sunday`
 - `decision:vespers:rule=concurrence:double-vs-octave-or-saturday-bvm`

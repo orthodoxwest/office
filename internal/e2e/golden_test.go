@@ -97,7 +97,7 @@ var hourCases = []hourCase{
 	// lauds.txt, the psalmody declaration for Vespers, @omit in the proper, and
 	// psalmDoxologyRef in the composer.
 	{"lauds", "2026-11-02", "All Souls — Lauds of the Dead: no chapter/hymn/short responsory, Rest eternal in place of the Gloria Patri, Psalm 150 alone under the fifth antiphon"},
-	{"vespers", "2026-11-02", "All Souls — Vespers of the Dead: five psalms rather than four, Rest eternal in place of the Gloria Patri"},
+	{"vespers", "2026-11-02", "All Souls ends at None; Vespers of the All Saints octave (white, four psalms, O how glorious)"},
 
 	// Compline — one date per Marian antiphon + alleluia seasonal variation
 	{"compline", "2026-04-11", "Easter Eve (Holy Saturday) — no hymn/chapter, Nunc Dimittis"},

@@ -1013,6 +1013,8 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 		{1, 17, models.VespersIOfFollowing, "St Anthony D yields to Sunday"},
 		// Mar 21 (St Benedict D2): II prec. against Laetare Sunday (XIII.6)
 		{3, 21, models.VespersIIOfPreceding, "St Benedict D2 retains Vespers against Laetare"},
+		// All Souls ends at None; Vespers are of the All Saints octave (MD p. 654).
+		{11, 2, models.VespersIIOfPreceding, "All Souls Vespers are of the Octave of All Saints"},
 	}
 
 	for _, tt := range tests {
@@ -1024,6 +1026,48 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 			t.Errorf("2026-%02d-%02d vespers: got %d, want %d (%s)",
 				tt.month, tt.day, day.Vespers.Owner, tt.wantOwner, tt.desc)
 		}
+	}
+
+	nov2 := findDay(days, 2026, 11, 2)
+	if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.ID != "all-souls" {
+		t.Fatal("2026-11-02 should remain All Souls at Lauds")
+	}
+	if nov2.Vespers.Feast == nil || nov2.Vespers.Feast.ID != "all-saints-octave-day-2" {
+		t.Fatalf("2026-11-02 vespers feast = %#v, want all-saints-octave-day-2", nov2.Vespers.Feast)
+	}
+	if nov2.Vespers.Color != models.White {
+		t.Errorf("2026-11-02 vespers colour = %s, want white", nov2.Vespers.Color)
+	}
+	if nov2.Vespers.Rule != "concurrence:all-souls-ends-at-none" {
+		t.Errorf("2026-11-02 vespers rule = %q, want concurrence:all-souls-ends-at-none", nov2.Vespers.Rule)
+	}
+	foundWinifred := false
+	for _, comm := range nov2.Vespers.Commemorations {
+		if comm != nil && strings.Contains(comm.ID, "winifred") {
+			foundWinifred = true
+		}
+	}
+	if !foundWinifred {
+		t.Errorf("2026-11-02 vespers commemorations = %#v, want Winifred", nov2.Vespers.Commemorations)
+	}
+}
+
+func TestAllSoulsSaturdayVespersYieldToSunday(t *testing.T) {
+	// 2024 Nov 2 is Saturday; the ordo gives I Vespers of the following Sunday
+	// with a commemoration of the octave, not Vespers of the Dead.
+	days, err := BuildCalendar(2024, findDataDir(t))
+	if err != nil {
+		t.Fatalf("BuildCalendar(2024): %v", err)
+	}
+	nov2 := findDay(days, 2024, 11, 2)
+	if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.ID != "all-souls" {
+		t.Fatal("2024-11-02 should be All Souls")
+	}
+	if nov2.Vespers.Owner != models.VespersIOfFollowing {
+		t.Errorf("2024-11-02 vespers owner = %v, want I of following", nov2.Vespers.Owner)
+	}
+	if nov2.Vespers.Feast == nil || nov2.Vespers.Feast.Category != models.CategorySunday {
+		t.Errorf("2024-11-02 vespers feast = %#v, want the following Sunday", nov2.Vespers.Feast)
 	}
 }
 
