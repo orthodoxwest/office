@@ -59,6 +59,7 @@ var hourCases = []hourCase{
 	{"lauds", "2026-05-21", "Ascension Day — Ascensiontide hymn doxology"},
 	{"lauds", "2026-06-07", "Trinity Sunday — 1st class feast on a Sunday, Festal psalmody only (not also Sunday psalmody)"},
 	{"lauds", "2026-06-28", "Green Sunday in summer hymn window — Sunday Lauds summer hymn (Ecce iam noctis)"},
+	{"lauds", "2026-08-25", "Pentecost feria — preceding Sunday collect (XII after Pentecost)"},
 
 	// Vespers
 	{"vespers", "2026-01-06", "Epiphany — proper short responsory"},
