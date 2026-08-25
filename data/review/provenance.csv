@@ -9,6 +9,8 @@ commons/apostle-paschal/psalm-antiphon-2,eebae0d7adbd,draft archdiocesan Lauds b
 commons/apostle-paschal/psalm-antiphon-3,2b1e1c6548ad,draft archdiocesan Vespers book,"Second Vespers, Common of Apostles in Paschaltide",565,verified,codex,2026-07-18,
 commons/apostle-paschal/versicle-first-vespers,e3c6e91bb33f,draft archdiocesan Vespers book,,571,verified,codex,2026-07-17,
 commons/apostle/chapter-lauds,4cb8e19d13a4,draft archdiocesan Lauds book,,608,verified,codex,2026-07-18,
+commons/apostle/chapter-none,3c0a5120bd29,diurnal,"Common of Apostles out of Paschaltide, At None",12*,verified,grok,2026-08-24,word-for-word from printed page image
+commons/apostle/chapter-sext,4c22fa4eab8a,diurnal,"Common of Apostles out of Paschaltide, At Sext",12*,verified,grok,2026-08-24,word-for-word from printed page image
 commons/apostle/hymn-lauds,ff63c049a2fb,draft archdiocesan Vespers book,"Saint Andrew, I Vespers",230-231,verified,codex,2026-07-18,canonical Apostles hymn wording and verse order checked against dehyphenated chant underlay
 commons/apostle/psalm-antiphon-1,c6041b6635df,draft archdiocesan Lauds book,,603,verified,codex,2026-07-17,
 commons/apostle/psalm-antiphon-2,a9e4b8ea3fd5,draft archdiocesan Lauds book,,604,verified,codex,2026-07-17,
@@ -212,12 +214,19 @@ ordinary/compline/post-preces,f2f75ffa6d8f,Compline Alex edit 10-24 v.08.docx,or
 ordinary/compline/preces,0a409a8e33bf,Compline Alex edit 10-24 v.08.docx,ordinary/compline/preces,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/short-lesson,a069c157be80,Compline Alex edit 10-24 v.08.docx,ordinary/compline/short-lesson,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
 ordinary/compline/short-responsory,0bfe891ff7c1,Compline Alex edit 10-24 v.08.docx,ordinary/compline/short-responsory,,verified,grok,2026-07-20,"Word-for-word vs parish Compline booklet after normalizing chant line breaks, hyphenation, and typography."
+ordinary/lauds/benedictus-antiphon-friday,5b508ffd432d,diurnal,"Friday at Lauds, Throughout the Year",73,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/lauds/benedictus-antiphon-monday,677adbeb8e34,diurnal,"Monday at Lauds, Throughout the Year",49,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/lauds/benedictus-antiphon-saturday,210b81a00458,diurnal,"Saturday at Lauds, Throughout the Year",80,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/lauds/benedictus-antiphon-thursday,c64c5b80d6be,diurnal,"Thursday at Lauds, Throughout the Year",66-67,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/lauds/benedictus-antiphon-tuesday,83818a7992ca,diurnal,"Tuesday at Lauds, Throughout the Year",55,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/lauds/benedictus-antiphon-wednesday,1fa1db35ec86,diurnal,"Wednesday at Lauds, Throughout the Year",60,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/chapter,421368055f67,Copy of OCP Ferial Lauds.pdf,The Chapter PER ANNUM,14,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing; ferial chapter.
 ordinary/lauds/hymn-sunday,c99fc1014e0c,office-hymns.zip,"Maker of All, Eternal King, Thru the Year, Lauds Winter Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 ordinary/lauds/hymn-sunday-summer,afbfd46489b9,office-hymns.zip,"Lo! the Dim Shadows, Thru the Year, Lauds Summer Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation; source has typo Radiently vs Radiantly.
 ordinary/lauds/psalm-antiphon-1-friday,46c82ae12ec3,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-friday,76,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-monday,825ecc5b313e,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-monday,7,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-saturday,daeaca54ae58,Copy of OCP Ferial Lauds.pdf,Antiphon 1 Saturday,95-96,verified,grok,2026-07-20,Word match after normalizing pointing; house spelling favourable vs OCP favorable.
+ordinary/lauds/psalm-antiphon-1-sunday,337720a487c1,diurnal,"Sunday at Lauds, Throughout the Year",30,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/psalm-antiphon-1-thursday,641e7b7090b8,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-thursday,56,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-tuesday,72428d2dec72,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/psalm-antiphon-1-tuesday,23,verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
 ordinary/lauds/psalm-antiphon-1-wednesday,a7722cd23c64,draft archdiocesan Lauds book,Ash Wednesday,179,verified,codex,2026-07-18,
@@ -235,11 +244,13 @@ ordinary/lauds/psalm-antiphon-3-tuesday,f7ff9ae7abf3,Copy of OCP Ferial Lauds.pd
 ordinary/lauds/psalm-antiphon-4-friday,7689dfaa94ea,Copy of OCP Ferial Lauds.pdf,,79,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-monday,3ef87a2935a9,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,10,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-saturday,9d5a529616d9,Copy of OCP Ferial Lauds.pdf,Antiphon 4 Saturday,103-104,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
+ordinary/lauds/psalm-antiphon-4-sunday,21f947d1fb00,diurnal,"Sunday at Lauds, Throughout the Year",35,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/psalm-antiphon-4-thursday,32f50a6946ed,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,60,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-tuesday,75e060646d75,Copy of OCP Ferial Lauds.pdf,,26,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-4-wednesday,d9314fe73f1e,draft archdiocesan Lauds book,Ash Wednesday,182,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-friday,aac9752d760a,Copy of OCP Ferial Lauds.pdf,,82,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-monday,01649f2ac975,Copy of OCP Ferial Lauds.pdf,Monday Ferial Lauds,11,verified,codex,2026-07-18,
+ordinary/lauds/psalm-antiphon-5-sunday,d92894995670,diurnal,"Sunday at Lauds, In Paschaltide",35,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/psalm-antiphon-5-thursday,bac7bfd010c5,Copy of OCP Ferial Lauds.pdf,Thursday Ferial Lauds,62,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-tuesday,f0edaf80ca03,Copy of OCP Ferial Lauds.pdf,,28,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-wednesday,d12bdd529e0f,draft archdiocesan Lauds book,Ash Wednesday,183,verified,codex,2026-07-18,
@@ -306,13 +317,27 @@ ordinary/vespers/chapter,209d8d16cfcd,00. Vespers for Saturdays & Major Feasts 2
 ordinary/vespers/chapter-saturday,9e3ce8815eed,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE CHAPTER / Romans 11:33,217,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing.
 ordinary/vespers/hymn-saturday,1499f2c6f9f3,office-hymns.zip,"O Trinity of Blessed Light, Thru the Year Vespers, winter and summer tunes.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and punctuation.
 ordinary/vespers/hymn-wednesday,20133066d572,office-hymns.zip,"O God Whose Hand Hath Spread the Sky, Ash Wed Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+ordinary/vespers/magnificat-antiphon-friday,dc8365f0af78,diurnal,"Friday at Vespers, Throughout the Year",140,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/magnificat-antiphon-monday,28509ea6cf0c,diurnal,"Monday at Vespers, Throughout the Year",122,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/magnificat-antiphon-thursday,d7a9cfa3f793,diurnal,"Thursday at Vespers, Throughout the Year",136,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/magnificat-antiphon-tuesday,845eb8ba8419,diurnal,"Tuesday at Vespers, Throughout the Year",126,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/magnificat-antiphon-wednesday,b717f94439c1,diurnal,"Wednesday at Vespers, Throughout the Year",131,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-1-friday,5ebf6370705d,diurnal,"Friday at Vespers, Throughout the Year",136,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-1-monday,3e2bbfcfe012,diurnal,"Monday at Vespers, Throughout the Year",117,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-1-saturday,008eaa940e11,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,Saturdays Throughout the Year,213-216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and accents.
+ordinary/vespers/psalm-antiphon-1-sunday,215d4fbb70ee,diurnal,"Sunday at Vespers, Throughout the Year",110-111,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-1-thursday,3ac204df8bf9,diurnal,"Thursday at Vespers, Throughout the Year",132,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-1-tuesday,1dda4f709c1f,diurnal,"Tuesday at Vespers, Throughout the Year",123,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-1-wednesday,ebc91367b526,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Whatsoever the Lord pleased,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing and line-break hyphenation.
 ordinary/vespers/psalm-antiphon-2-saturday,53e9146bfec8,draft archdiocesan Vespers book,,211,verified,codex,2026-07-18,
+ordinary/vespers/psalm-antiphon-2-sunday,0c3590e4ce9f,diurnal,"Sunday at Vespers, Throughout the Year",111,verified,grok,2026-08-24,word-for-word from printed page image
+ordinary/vespers/psalm-antiphon-2-tuesday,8087b54601bb,diurnal,"Tuesday at Vespers, Throughout the Year",123,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-2-wednesday,efb4b43f9fdf,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. For his mercy,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/psalm-antiphon-3-saturday,3b963b10355b,draft archdiocesan Vespers book,,212,verified,codex,2026-07-18,
+ordinary/vespers/psalm-antiphon-3-sunday,90e394a4f985,diurnal,"Sunday at Vespers, Throughout the Year",112,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-3-wednesday,b7de46a6dd9a,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Sing us one,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/psalm-antiphon-4-saturday,12559aa40ef7,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,"Ant. Praise the Lord, O Jerusalem",216,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing.
+ordinary/vespers/psalm-antiphon-4-sunday,98550e0ffabc,diurnal,"Sunday at Vespers, Throughout the Year",113,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/vespers/psalm-antiphon-4-wednesday,2eedc60b0692,00. The Temporal Cycle - Vespers 2025 Jacob edit 03-28 v.12.pdf,Wednesday Vespers / Ant. Before the gods,,verified,grok,2026-07-20,Word-for-word after normalizing chant pointing (†/*).
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
 ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
@@ -443,6 +468,12 @@ proper/apparition-st-michael/short-responsory-none,0a692d614a29,diurnal,"Dedicat
 proper/apparition-st-michael/short-responsory-sext,8aba3cb98a7d,diurnal,"Dedication of St Michael, At Sext; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
 proper/apparition-st-michael/short-responsory-terce,1571f3a59379,diurnal,"Dedication of St Michael, At Terce; Apparition uses the same office",611,verified,grok,2026-08-23,word-for-word from printed page image
 proper/apparition-st-michael/versicle-lauds,d0fa20313df6,diurnal,"Dedication of St Michael, At Lauds; Apparition uses the same office",610,verified,grok,2026-08-23,word-for-word from printed page image
+proper/ascension-sunday-within-octave/benedictus-antiphon,67e51c5114f5,diurnal,"Sunday within the Octave of the Ascension, At I Vespers and Lauds",391-392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-lauds,4d241676b0cc,diurnal,"Sunday within the Octave of the Ascension, At Lauds",392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-none,b70efc2aef3b,diurnal,"Sunday within the Octave of the Ascension, At None",393,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/chapter-sext,611dbed695bb,diurnal,"Sunday within the Octave of the Ascension, At Sext",393,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/collect,d138c1ff3f72,diurnal,"Sunday within the Octave of the Ascension, At Lauds",392,verified,grok,2026-08-24,word-for-word from printed page image
+proper/ascension-sunday-within-octave/magnificat-antiphon,7f2ece2d43cf,diurnal,"Sunday within the Octave of the Ascension, At II Vespers",393,verified,grok,2026-08-24,word-for-word from printed page image
 proper/ascension/chapter-lauds,c4584adf8dae,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
@@ -479,10 +510,15 @@ proper/chains-st-peter/versicle-vespers,ea9cc7f6ba65,diurnal,"St Peter’s Chain
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,50e47a3dc415,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
 proper/chair-peter-antioch/versicle-lauds,6096f83fb79a,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
-proper/christ-the-king/chapter-none,8599bde68bc2,diurnal,"Christ the King, At None",631,verified,grok,2026-08-22,word-for-word from printed page image
-proper/christ-the-king/chapter-sext,51656689d201,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-22,word-for-word from printed page image
+proper/christ-the-king/chapter-none,daa6d596ac4f,diurnal,"Christ the King, At None",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/chapter-sext,ba05bc2d0ea3,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/commemoration-versicle,a017333648c4,diurnal,"Christ the King, At Lauds",630,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christ-the-king/hymn-vespers,da0343a2687c,office-hymns.zip,"O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+proper/christ-the-king/short-responsory-none,92b14997e1ec,diurnal,"Christ the King, At None",631,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christ-the-king/short-responsory-sext,7bf51e8fa794,diurnal,"Christ the King, At Sext",631,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christmas/benedictus-antiphon,563e7d19001d,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,72,verified,codex,2026-07-18,checked against dehyphenated chant underlay
+proper/christmas/chapter-none,1a9cc50a6b93,diurnal,"Nativity, At None",188,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christmas/chapter-sext,551436498758,diurnal,"Nativity, At Sext",188,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christmas/collect,482a33f21028,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,73,verified,codex,2026-07-18,checked word for word
 proper/christmas/hymn-lauds,513505fb08eb,draft archdiocesan Lauds book,,70-71,verified,codex,2026-07-18,
 proper/christmas/hymn-vespers,a2cdf5687be3,draft archdiocesan Vespers book,,"47-48, 58-59",verified,codex,2026-07-18,
@@ -492,6 +528,8 @@ proper/christmas/psalm-antiphon-3,bb60d2c0a995,draft archdiocesan Lauds book,Nat
 proper/christmas/psalm-antiphon-4,76ac128d7ac5,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,65,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/psalm-antiphon-5,7b020cfa0f86,draft archdiocesan Lauds book,Nativity and Sunday within the Octave,66,verified,codex,2026-07-18,checked against dehyphenated chant underlay
 proper/christmas/short-responsory-lauds,c314b1468146,draft archdiocesan Lauds book,Nativity and days within the Octave,68-69,verified,codex,2026-07-18,simple-tone wording checked; optional solemn tone does not change text
+proper/christmas/short-responsory-none,f3ad87571b57,diurnal,"Nativity, At None",188,verified,grok,2026-08-24,word-for-word from printed page image
+proper/christmas/short-responsory-sext,1cfe7d7dfa66,diurnal,"Nativity, At Sext",188,verified,grok,2026-08-24,word-for-word from printed page image
 proper/christmas/versicle-lauds,e2fa7635953e,draft archdiocesan Lauds book,Nativity and Sunday within the Octave; feast form used for octave commemoration,71,verified,codex,2026-07-18,checked word for word
 proper/circumcision/hymn-lauds,ce7f4d0c3e25,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 proper/circumcision/hymn-vespers,a2cdf5687be3,draft archdiocesan Vespers book,,94-95,verified,codex,2026-07-18,
@@ -565,7 +603,30 @@ proper/easter-sunday-octave-day-6/benedictus-antiphon,6764ee86adeb,diurnal,Frida
 proper/easter-sunday-octave-day-6/magnificat-antiphon,9d21a60462ed,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Saturday before Low Sunday,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
+proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,diurnal,"Within the Octave of the Epiphany, II Day",227,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,diurnal,"Within the Octave of the Epiphany, II Day",227-228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-2/benedictus-antiphon,21939f821bc9,diurnal,"Within the Octave of the Epiphany, III Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-2/magnificat-antiphon,ffa7a3fae5df,diurnal,"Within the Octave of the Epiphany, III Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-3/benedictus-antiphon,0d49fe72a82a,diurnal,"Within the Octave of the Epiphany, IV Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-3/magnificat-antiphon,ef6e88a6ba8a,diurnal,"Within the Octave of the Epiphany, IV Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-4/benedictus-antiphon,805df3148da7,diurnal,"Within the Octave of the Epiphany, V Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-4/magnificat-antiphon,f61b95f7bb2a,diurnal,"Within the Octave of the Epiphany, V Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-5/benedictus-antiphon,6fe815a1a16d,diurnal,"Within the Octave of the Epiphany, VI Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-octave-set-5/magnificat-antiphon,ca38dde79348,diurnal,"Within the Octave of the Epiphany, VI Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-2/magnificat-antiphon,551e77aceee9,diurnal,II Sunday after the Epiphany,232,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-3/magnificat-antiphon,6c93bfc29997,diurnal,III Sunday after the Epiphany,233,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-4/magnificat-antiphon,e58236b750f8,diurnal,IV Sunday after the Epiphany,233,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-5/magnificat-antiphon,a82a8474014a,diurnal,V Sunday after the Epiphany,234,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-6/magnificat-antiphon,5cfbbdb9f19b,diurnal,VI Sunday after the Epiphany,234-235,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-within-octave/benedictus-antiphon,36dfc52ca087,diurnal,"Sunday within the Octave of the Epiphany, At I Vespers and Lauds",229-230,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-within-octave/magnificat-antiphon,16e332ea3f3c,diurnal,"Sunday within the Octave of the Epiphany, At II Vespers",231,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany/chapter-lauds,de310a2d710f,diurnal,"Epiphany, At Lauds",224,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany/chapter-none,c8a77b00203c,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany/chapter-sext,0462d501e782,diurnal,"Epiphany, At Sext",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
+proper/epiphany/short-responsory-none,e9a013f143a2,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany/versicle-lauds,d8fea834bc58,diurnal,"Epiphany, At Lauds",225,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany/versicle-vespers,a2198be23d16,diurnal,"Epiphany, At I Vespers",224,verified,grok,2026-08-24,word-for-word from printed page image
 proper/exaltation-holy-cross/benedictus-antiphon,d41107adf6c1,draft archdiocesan Lauds book,,554,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/chapter-sext,1f78ef8ab598,diurnal,"Exaltation of the Holy Cross, At Sext",600,verified,grok,2026-08-23,word-for-word from printed page image
 proper/exaltation-holy-cross/hymn-lauds,f653d437eeac,draft archdiocesan Lauds book,,547-549,verified,codex,2026-07-18,
@@ -616,8 +677,12 @@ proper/holy-innocents/collect,01c1374d1fc1,diurnal,"Holy Innocents, At Lauds",20
 proper/holy-innocents/magnificat-antiphon,964cf7d1099d,diurnal,"Holy Innocents, At II Vespers",204,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/magnificat-antiphon-first,d0fecbb41021,diurnal,"Holy Innocents, At I Vespers",201,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/short-responsory-none,015bfd7a2eac,diurnal,"Holy Innocents, At None",203,verified,grok,2026-08-23,word-for-word from printed page image
+proper/holy-name-jesus/chapter-none,e90f753d7d15,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
+proper/holy-name-jesus/chapter-sext,2d1ae91c8b17,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
+proper/holy-name-jesus/short-responsory-none,198f7d31cd10,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
+proper/holy-name-jesus/short-responsory-sext,dceee9df6644,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/laetare-sunday/benedictus-antiphon-friday,289e8be8a866,diurnal,"IV Week in Lent, Friday",268,verified,grok,2026-08-22,word-for-word from printed page image
@@ -963,7 +1028,14 @@ proper/trinity-sunday/short-responsory-terce,2a231f9f2b86,diurnal,"Trinity Sunda
 proper/vigil-ascension/benedictus-antiphon,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-ascension/collect,69e0b9e0fe88,diurnal,V Sunday after Easter; said on the Vigil,385,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-epiphany/chapter-lauds,654350c65f37,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,68,verified,codex,2026-07-18,Sunday-specific chapter checked word for word
+proper/vigil-epiphany/chapter-none,e9b75969b8a8,diurnal,"Vigil of the Epiphany, At None",223,verified,grok,2026-08-24,word-for-word from printed page image
+proper/vigil-epiphany/chapter-sext,7acbe2dde319,diurnal,"Vigil of the Epiphany, At Sext",222,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-epiphany/hymn-lauds,ce7f4d0c3e25,office-hymns.zip,"From Lands That See the Sun Arise, Circum Lauds.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
+proper/vigil-nativity/chapter-none,6d02e787a671,diurnal,"Christmas Eve, At None",183,verified,grok,2026-08-24,word-for-word from printed page image
+proper/vigil-nativity/chapter-sext,bac35cdbfb33,diurnal,"Christmas Eve, At Sext",183,verified,grok,2026-08-24,word-for-word from printed page image
+proper/vigil-nativity/short-responsory-none,52ea7635a9d6,diurnal,"Christmas Eve, At None",183,verified,grok,2026-08-24,word-for-word from printed page image
+proper/vigil-nativity/short-responsory-sext,e715b85b58da,diurnal,"Christmas Eve, At Sext",183,verified,grok,2026-08-24,word-for-word from printed page image
+proper/vigil-nativity/short-responsory-terce,16415e791824,diurnal,"Christmas Eve, At Terce",183,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-st-james/collect,9c1c987bd0bf,diurnal,On Vigils of Apostles; assigned on p. 570 to the Vigil of St James,7*,verified,grok,2026-08-23,word-for-word from printed page image
 proper/whit-ember-friday/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/whit-ember-friday/psalm-antiphon-2,55916376dd89,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1159,6 +1231,12 @@ seasonal/advent/chapter-lauds,348103f4a71a,Propers of Lauds & Vespers During Adv
 seasonal/advent/chapter-vespers,f899ee3c15ba,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/hymn-lauds,421bb218f240,draft archdiocesan Lauds book,The First Sunday in Advent,13,verified,codex,2026-07-18,
 seasonal/advent/hymn-vespers,42dc965d6005,draft archdiocesan Vespers book,Saturday before the First Sunday in Advent,8,verified,codex,2026-07-18,
+seasonal/advent/magnificat-antiphon-december-18,874f4dfd06a0,diurnal,"The Great Antiphons, Dec. 18, O Adonai",172,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/magnificat-antiphon-december-19,ca8efcb80a7f,diurnal,"The Great Antiphons, Dec. 19, O Radix Jesse",172-173,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/magnificat-antiphon-december-20,8563200fe5f6,diurnal,"The Great Antiphons, Dec. 20, O Clavis David",173,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/magnificat-antiphon-december-21,8302d39c3390,diurnal,"The Great Antiphons, Dec. 21, O Oriens",173,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/magnificat-antiphon-december-22,816ed1a51bdc,diurnal,"The Great Antiphons, Dec. 22, O Rex gentium",173,verified,grok,2026-08-24,word-for-word from printed page image
+seasonal/advent/magnificat-antiphon-december-23,143cc44a4e03,diurnal,"The Great Antiphons, Dec. 23, O Emmanuel",173,verified,grok,2026-08-24,word-for-word from printed page image
 seasonal/advent/short-responsory-lauds,00c9d2455ecd,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/short-responsory-vespers,458552f095f0,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/versicle-lauds,beea678300ae,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -1195,6 +1273,6 @@ shared/formulas/divine-help,c73885541916,draft archdiocesan Lauds book,,17,verif
 shared/formulas/faithful-departed,78cd4856d8a2,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/opening-versicle,8d4e25133098,diurnal,"Monday at Prime, opening",2,verified,codex,2026-08-23,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0048
 shared/formulas/our-father-partly-secret-rubric,f0c8170f526b,General Rubrics of the Monastic Breviary,XXXV.1-2 — The Lord’s Prayer,51,verified,codex,2026-07-20,Rubric faithfully states the prescribed secret recitation and public final versicle and response.
-shared/formulas/paschal-psalm-antiphon,d92894995670,00. Sunday Prime Alex edit 10-31 v.01.docx,The Psalms — Alleluia antiphon,3-5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography; directly verifies its use at Prime.
+shared/formulas/paschal-psalm-antiphon,d92894995670,diurnal,"Monday at Lauds, In Paschaltide",48,verified,grok,2026-08-24,word-for-word from printed page image
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,
 shared/formulas/rest-eternal,bf647dbb2752,diurnal,The Office of the Dead,72*,verified,claude,2026-08-21,

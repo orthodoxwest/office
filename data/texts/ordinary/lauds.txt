@@ -305,28 +305,28 @@ R. So shall we rejoice and be glad all the days of our life.
 Blessed be the Lord God of Israel, for he hath visited and redeemed his people.
 
 [benedictus-antiphon-monday]
-# SOURCE: divinum-officium Major Special.txt [Feria2 Ant 2]; incipit per 2026 ordo — check against diurnal
-Blessed be the Lord * God of Israel, for he hath visited and redeemed his people.
+# SOURCE: monastic diurnal, p. 49 (Monday at Lauds, Throughout the Year)
+Blessed * be the Lord God of Israel.
 
 [benedictus-antiphon-tuesday]
-# SOURCE: divinum-officium Major Special.txt [Feria3 Ant 2]; incipit per 2026 ordo — check against diurnal
-The Lord hath raised up * a mighty salvation for us, in the house of his servant David.
+# SOURCE: monastic diurnal, p. 55 (Tuesday at Lauds, Throughout the Year)
+The Lord hath raised up for us * an horn of salvation in the house of his servant David.
 
 [benedictus-antiphon-wednesday]
-# SOURCE: divinum-officium Major Special.txt [Feria4 Ant 2]; incipit per 2026 ordo — check against diurnal
-From the hand of all that hate us * hath the Lord delivered us.
+# SOURCE: monastic diurnal, p. 60 (Wednesday at Lauds, Throughout the Year)
+From the hand of all * that hate us, the Lord hath delivered us.
 
 [benedictus-antiphon-thursday]
-# SOURCE: divinum-officium Major Special.txt [Feria5 Ant 2]; incipit per 2026 ordo — check against diurnal
-Let us serve the Lord * in holiness and righteousness before him, all the days of our life.
+# SOURCE: monastic diurnal, pp. 66–67 (Thursday at Lauds, Throughout the Year)
+Let us serve * the Lord in holiness, and he will deliver us from the hand of our enemies.
 
 [benedictus-antiphon-friday]
-# SOURCE: divinum-officium Major Special.txt [Feria6 Ant 2]; incipit per 2026 ordo — check against diurnal
-Through the tender mercy of our God * the day-spring from on high hath visited us.
+# SOURCE: monastic diurnal, p. 73 (Friday at Lauds, Throughout the Year)
+Through the tender mercy * of our God: whereby the day-spring from on high hath visited us.
 
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Major Special.txt [Feria7 Ant 2] — check against diurnal
-O Lord, give light * to them that sit in darkness and in the shadow of death, and guide our feet into the way of peace.
+# SOURCE: monastic diurnal, p. 80 (Saturday at Lauds, Throughout the Year)
+Give light, O Lord, * to them that sit in darkness and in the shadow of death, and guide our feet into the way of peace.
 
 [pre-collect-versicles]
 @use shared/formulas/pre-collect-versicles
@@ -350,7 +350,7 @@ of thy righteousness.
 @use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 30 (Sunday at Lauds, Throughout the Year)
 Alleluia, * alleluia.
 
 [psalm-antiphon-2-sunday]
@@ -358,11 +358,11 @@ Alleluia, * alleluia.
 [psalm-antiphon-3-sunday]
 @use ordinary/lauds/psalm-antiphon-1-sunday
 [psalm-antiphon-4-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal
-The three young boys * cast into the furnace by the king, fearing not the flames of fire, said: Blessed be God.
+# SOURCE: monastic diurnal, p. 35 (Sunday at Lauds, Throughout the Year)
+At the king's commandment, * the three children were cast into the furnace, fearing not the flame of the fire, but saying, Blessed be our God.
 
 [psalm-antiphon-5-sunday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi major [DaymF Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 35 (Sunday at Lauds, In Paschaltide)
 Alleluia, * alleluia, alleluia.
 
 [psalm-antiphon-1-monday]

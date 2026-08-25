@@ -111,9 +111,15 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Word was made flesh, * alleluia, alleluia.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-25 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 188 (Nativity, At Sext)
 !Heb 1:10
-And: Thou in the beginning, O Lord, didst found the earth: and the works of thy hands are the heavens.
+And: Thou, Lord, in the beginning hast laid the foundation of the earth; * and the heavens are the works of thine hands.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 188 (Nativity, At None)
+!Heb 1:11-12
+They shall perish, but thou remainest; and they all shall wax old as doth a garment; * and as a vesture shalt thou fold them up, and they shall be changed: but thou art the same, and thy years shall not fail.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -215,31 +221,26 @@ V. To-morrow the iniquity of the earth shall be blotted out.
 R. And the Saviour of the world shall reign over us.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/12-25 [Responsory Breve Tertia] — check against diurnal
-R. The Word was made flesh. * Alleluia, Alleluia.
-R. The Word was made flesh. * Alleluia, Alleluia.
-V. And dwelt among us.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Word was made flesh. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 188 (Nativity, At Terce)
+@use proper/christmas/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/12-25 [Responsory Breve Sexta] — check against diurnal
-R. The Lord hath made known. * Alleluia, Alleluia.
-R. The Lord hath made known. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 188 (Nativity, At Sext)
+R. The Lord declared, * alleluia, alleluia.
+R. The Lord declared, * alleluia, alleluia.
 V. His salvation.
-R. Alleluia, Alleluia.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord hath made known. * Alleluia, Alleluia.
+R. The Lord declared, * alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/12-25 [Responsory Breve Nona] — check against diurnal
-R. All the ends of the earth have seen. * Alleluia, Alleluia.
-R. All the ends of the earth have seen. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 188 (Nativity, At None)
+R. All the ends of the world have seen, * alleluia, alleluia.
+R. All the ends of the world have seen, * alleluia, alleluia.
 V. The salvation of our God.
-R. Alleluia, Alleluia.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. All the ends of the earth have seen. * Alleluia, Alleluia.
+R. All the ends of the world have seen, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/christmas/chapter-lauds

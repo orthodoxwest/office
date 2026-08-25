@@ -64,15 +64,19 @@ R. Thanks be to God.
 @use proper/vigil-epiphany/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Gal 4:1-2
-Brothers: As long as the heir is a child, he differeth nothing from a servant, though he be lord of all; But is under tutors and governors until the time appointed by the father.
-R. Thanks be to God.
+# SOURCE: monastic diurnal, p. 222 (Vigil of the Epiphany, At Terce)
+@use proper/vigil-epiphany/chapter-lauds
 
 [chapter-sext]
-# SOURCE: divinum-officium SanctiM/01-05 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 222 (Vigil of the Epiphany, At Sext)
 !Gal 4:4-5
-But when the fulness of the time was come, God sent his Son, made of a woman, made under the law: That he might redeem them who were under the law: that we might receive the adoption of sons.
+But when the fulness of the time was come, God sent forth his Son, made of a woman, * made under the law, to redeem them that were under the law, that we might receive the adoption of sons.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 223 (Vigil of the Epiphany, At None)
+!Gal 4:7
+Wherefore thou art no more a servant, but a son; * and if a son, then an heir of God through Christ.
 R. Thanks be to God.
 
 [short-responsory-lauds]

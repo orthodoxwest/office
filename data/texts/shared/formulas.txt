@@ -1,5 +1,5 @@
 [paschal-psalm-antiphon]
-# SOURCE: divinum-officium (tempore paschali: psalms are sung under a single Alleluia antiphon, said before the first psalm and after the last) — check against diurnal
+# SOURCE: monastic diurnal, p. 48 (Monday at Lauds, In Paschaltide)
 Alleluia, * alleluia, alleluia.
 
 [opening-versicle]

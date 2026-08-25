@@ -69,13 +69,13 @@ R. Thanks be to God.
 [chapter-sext]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
 !Col 1:16-18
-All things were created by him, and for him: and he is before all things, and by him all things consist. And he is the head of the body, the Church: who is the beginning, the firstborn from the dead; * that in all things he might have the preeminence.
+All things were created by him, and for him: and he is before all things, and by him all things consist. * And he is the head of the body, the Church: who is the beginning, the firstborn from the dead; that in all things he might have the preeminence.
 R. Thanks be to God.
 
 [chapter-none]
 # SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
 !Col 1:19-20
-For it pleased the Father that in him should all fulness dwell; and, having made peace through the blood of his cross, to reconcile all things unto himself, whether they be things in earth, or things in heaven, * in Christ Jesus our Lord.
+For it pleased the Father that in him should all fulness dwell; and, having made peace through the blood of his cross, * to reconcile all things unto himself, whether they be things in earth, or things in heaven, in Christ Jesus our Lord.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -192,49 +192,42 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Ascribe unto the Lord, O ye kindreds of the people.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Tertia] — check against diurnal
-R. Given to me is * All power.
-R. Given to me is * All power.
-V. In heaven and in earth.
-R. All power.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Given to me is * All power.
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At Terce)
+@use proper/christ-the-king/short-responsory-vespers
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Sexta] — check against diurnal
-R. Bring ye to the Lord, * O ye families of the nations.
-R. Bring ye to the Lord, * O ye families of the nations.
-V. Bring ye to the Lord glory and empire.
-R. O ye families of the nations.
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
+R. All kings shall fall down * before him.
+R. All kings shall fall down * before him.
+V. All nations shall do him service.
+R. Before him.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Bring ye to the Lord, * O ye families of the nations.
+R. All kings shall fall down * before him.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/10-DU [Responsory Breve Nona] — check against diurnal
-R. They shall adore him: * All kings of the earth.
-R. They shall adore him: * All kings of the earth.
-V. All nations shall serve him.
-R. All kings of the earth.
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
+R. His kingdom shall be * increased.
+R. His kingdom shall be * increased.
+V. And of his peace there shall be no end.
+R. Increased.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. They shall adore him: * All kings of the earth.
+R. His kingdom shall be * increased.
 
 [commemoration-antiphon]
-# SOURCE: divinum-officium Sancti/10-DU [Ant 2] — check against diurnal
-He hath made us * a kingdom to God and his Father: the first begotten of the dead, and the Prince of the kings of the earth, alleluia.
+# SOURCE: monastic diurnal, p. 630 (Christ the King, At Lauds)
+@use proper/christ-the-king/benedictus-antiphon
 
 [commemoration-versicle]
-# SOURCE: divinum-officium Sancti/10-DU [Versum 2] — check against diurnal
-V. His empire shall be multiplied.
-R. And there shall be no end of peace.
+# SOURCE: monastic diurnal, p. 630 (Christ the King, At Lauds)
+V. His kingdom shall be increased.
+R. And of his peace there shall be no end.
 
 [chapter-vespers]
 @use proper/christ-the-king/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/10-DU [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Col 1:12-13
-Brethren: We give thanks to God the Father, who hath made us worthy to be partakers of the lot of the saints in light, who hath delivered us from the power of darkness, and hath translated us into the kingdom of the Son of his love.
-R. Thanks be to God.
+# SOURCE: monastic diurnal, p. 631 (Christ the King, At Terce)
+@use proper/christ-the-king/chapter-lauds
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

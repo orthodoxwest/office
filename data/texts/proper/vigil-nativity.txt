@@ -45,9 +45,15 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Ye shall know this day * that the Lord will come.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/12-24 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Sext)
 !Rom 1:4
-Who was predestinated the Son of God in power, according to the spirit of sanctification, by the resurrection of our Lord Jesus Christ from the dead.
+Who was declared to be the Son of God with power, * according to the Spirit of holiness, by the resurrection from the dead.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At None)
+!Rom 1:5-6
+By whom we have received grace and apostleship, * for obedience to the faith among all nations, for his name: among whom are ye also the called of Jesus Christ our Lord.
 R. Thanks be to God.
 
 [versicle-lauds]
@@ -56,31 +62,31 @@ V. Tomorrow the iniquity of the earth shall be blotted out.
 R. And the Saviour of the world shall reign over us.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/12-24 [Responsory Breve Tertia] — check against diurnal
-R. This day ye shall know * That the Lord cometh.
-R. This day ye shall know * That the Lord cometh.
-V. And in the morning, then ye shall see His glory.
-R. That the Lord cometh.
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Terce)
+R. Be ye * steadfast.
+R. Be ye * steadfast.
+V. And see the salvation of the Lord with you.
+R. Steadfast.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This day ye shall know * That the Lord cometh.
+R. Be ye * steadfast.
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/12-24 [Responsory Breve Sexta] — check against diurnal
-R. On the morrow * the sins of the earth shall be washed away.
-R. On the morrow * the sins of the earth shall be washed away.
-V. And the Saviour of the world will be our King.
-R. The sins of the earth shall be washed away.
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Sext)
+R. To-morrow ye shall have * salvation.
+R. To-morrow ye shall have * salvation.
+V. Saith the Lord God of hosts.
+R. Salvation.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. On the morrow * the sins of the earth shall be washed away.
+R. To-morrow ye shall have * salvation.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/12-24 [Responsory Breve Nona] — check against diurnal
-R. On the morrow * Ye shall be saved.
-R. On the morrow * Ye shall be saved.
-V. Saith the Lord God of hosts.
-R. Ye shall be saved.
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At None)
+R. To-morrow the iniquity of the earth * shall be blotted out.
+R. To-morrow the iniquity of the earth * shall be blotted out.
+V. And the Saviour of the world shall reign over us.
+R. Shall be blotted out.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. On the morrow * Ye shall be saved.
+R. To-morrow the iniquity of the earth * shall be blotted out.
 
 [commemoration-antiphon]
 @use proper/vigil-nativity/benedictus-antiphon
@@ -89,12 +95,11 @@ R. On the morrow * Ye shall be saved.
 @use proper/vigil-nativity/versicle-lauds
 
 [chapter-vespers]
-@use proper/vigil-nativity/chapter-terce
+@use proper/vigil-nativity/chapter-lauds
+
 [chapter-terce]
-# SOURCE: divinum-officium Sancti/12-24 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Rom 1:1-3
-Paul, a servant of Jesus Christ, called to be an apostle, separated unto the gospel of God, which he had promised before, by his prophets, in the holy scriptures concerning his Son, who was made to him of the seed of David, according to the flesh.
-R. Thanks be to God.
+# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Terce)
+@use proper/vigil-nativity/chapter-lauds
 
 # No Magnificat antiphon: vespers of Dec 24 belong to I Vespers of Christmas.
 # See data/audit-ok.txt.

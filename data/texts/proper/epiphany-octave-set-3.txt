@@ -1,7 +1,7 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/01-09 [Ant 2]; incipit per 2026 ordo — check against diurnal
+# SOURCE: monastic diurnal, p. 228 (Within the Octave of the Epiphany, IV Day)
 We have seen his star * in the East, and are come with gifts to worship the Lord.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Sancti/01-09 [Ant 3]; incipit per 2026 ordo — check against diurnal
-Herod inquired * of the wise men: What is the sign that ye have seen that a King is born? We have seen the shining of the star, the glory whereof enlighteneth the whole world.
+# SOURCE: monastic diurnal, p. 228 (Within the Octave of the Epiphany, IV Day)
+Herod inquired * of the wise men, What sign have ye seen, concerning him that is born King? We have seen a star shining, the brightness whereof enlightens the world.
