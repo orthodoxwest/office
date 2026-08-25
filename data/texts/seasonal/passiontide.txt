@@ -5,8 +5,8 @@
 Praise be to thee, O Lord, King of eternal glory.
 
 [psalm-antiphon-1-prime]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Quad5_, 1] — checked against user-supplied diurnal rubric
-Deliver me, O Lord, * and set me beside thee, and any man's hand may fight against me.
+# SOURCE: monastic diurnal, p. 274 (The Ordinary of the Ferial Office in Passiontide, At Prime)
+Deliver me, O Lord, * and set me beside thee; and I care not who lifteth his hand against me.
 
 [chapter-lauds]
 # SOURCE: Propers of Lauds & Vespers During Passiontide (propers booklet), Propers for

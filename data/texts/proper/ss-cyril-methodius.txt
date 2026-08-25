@@ -1,5 +1,6 @@
 [magnificat-antiphon-first]
 # SOURCE: divinum-officium Sancti/07-07.txt [Ant 1] — check against diurnal
+# The diurnal prints only a memorial collect (p. 559); no gospel ants.
 How beautiful * are the feet of them that preach the gospel of peace, and bring glad tidings of good things, that say unto Sion thy God reigneth.
 
 [benedictus-antiphon]

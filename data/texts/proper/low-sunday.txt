@@ -107,8 +107,9 @@ There came unto the tomb * Mary Magdalene and the other Mary, to see the sepulch
 [magnificat-antiphon-friday]
 @use proper/low-sunday/commemoration-antiphon
 [benedictus-antiphon-saturday]
-# SOURCE: divinum-officium Tempora/Pasc1-6 [Ant 2] — check against diurnal
-O Lord, give light * to those who sit in darkness and in the shadow of death, and guide our feet into the way of peace
+# SOURCE: monastic diurnal, p. 80 (Saturday at Lauds, Throughout the Year); p. 373
+# directs the ferial Paschal office to the occurrent feria's Benedictus
+@use ordinary/lauds/benedictus-antiphon-saturday
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 159

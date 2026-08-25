@@ -37,6 +37,8 @@ Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Lif
 
 [magnificat-antiphon]
 # SOURCE: divinum-officium Sancti/09-14 [Ant 3] — check against diurnal
+# The diurnal and parish Vespers book print only I Vespers; II Vespers is
+# displaced by I Vespers of Seven Sorrows on the fixed September 14 boundary.
 O blessed art thou, O Cross, * thou which wast counted the only tree worthy to bear the Lord and King of heaven.
 
 [magnificat-antiphon-first]

@@ -2,8 +2,8 @@
 Praise be to thee, O Lord, King of eternal glory.
 
 [psalm-antiphon-1-prime]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Quad, 1] — checked against user-supplied diurnal rubric
-As I live, * saith the Lord, I have no pleasure in the death of the sinner, but rather that he be converted and live.
+# SOURCE: monastic diurnal, p. 250 (The Ordinary of the Ferial Office in Lent, At Prime)
+As I live, * saith the Lord, I have no pleasure in the death of a sinner, but rather that he turn from his way and live.
 
 [chapter-lauds]
 # SOURCE: Propers of Lauds & Vespers During Lent (propers booklet), Propers for Lauds,
