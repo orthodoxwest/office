@@ -75,18 +75,18 @@ JANUARY
            Lauds   w · Ben. Many nations · No Preces · No Suff.
                Com. St. Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The child Jesus · No Suff.
+           Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The Child Jesus · No Suff.
                Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Hyginus of Rome, Bishop & Martyr ("Whosoever will come after me")
                Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
  11  Sun     Sunday within the Octave of Epiphany       [sd]  w
            St. Hyginus of Rome, Bishop & Martyr (com)
            Day VI within the Octave of the Epiphany (sd)
-           Lauds   w · Ben. The child Jesus · No Preces · No Suff.
+           Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
                Com. St. Hyginus of Rome, Bishop & Martyr ("He that hateth his life")
                Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Son, why hast thou thus dealt with us? Behold… · No Suff.
+           Vespers w · II prec. · Mag. Son · No Suff.
                Com. Day VII within the Octave of the Epiphany ("When the wise men saw the star")
                Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Benedict Biscop, Abbot ("The world, and all things earthly")
@@ -137,7 +137,7 @@ JANUARY
                Com. St Paul ("Well done, good and faithful servant")
                Com. St. Prisca of Rome, Virgin Martyr ("The kingdom of heaven")
            Hours   No Preces
-           Vespers g · II prec. · Mag. The wine failing · No Suff.
+           Vespers g · II prec. · Mag. And when they wanted wine · No Suff.
                Com. Chair of St Peter in Rome ("Thus saith the Lord")
                Com. St Paul ("The world, and all things earthly")
                Com. Ss. Marius, Martha, Audifax, & Abachum, Martyrs ("In the heavenly kingdom")
@@ -187,7 +187,7 @@ JANUARY
                Com. Conversion of St. Paul ("Go forth, Ananias")
                Com. St. Peter ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers g · II prec. · Mag. Lord, if Thou wilt · No Suff.
+           Vespers g · II prec. · Mag. Lord, if thou wilt · No Suff.
                Com. Conversion of St. Paul ("Go forth, Ananias")
                Com. St. Peter ("The world, and all things earthly")
                Com. St. Polycarp of Smyrna, Bishop & Martyr ("Whosoever will come after me")
@@ -237,7 +237,7 @@ FEBRUARY
                Com. St Bridget of Ireland, Virgin ("The kingdom of heaven")
            Hours   No Preces
            Vespers w · I fol. (Purification of the Blessed Virgin Mary) · Mag. The ancient · No Suff.
-               Com. IV Sunday after Epiphany ("Lord, save us")
+               Com. IV Sunday after Epiphany ("Save us, Lord")
   2  Mon     Purification of the Blessed Virgin Mary    [2cl] w
            Lauds   w · Ben. And when the parents · No Preces · No Suff.
            Hours   No Preces
@@ -279,7 +279,7 @@ FEBRUARY
                Com. St Romuald, Abbot ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers v · I fol. (Septuagesima Sunday) · Mag. The Lord said · Suff.
-               Com. Office of the V Sunday after Epiphany ("The master saith: Gather ye together first the tares")
+               Com. Office of the V Sunday after Epiphany ("Gather ye together")
   8  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. The kingdom · No Preces · Suff.
            Hours   Preces

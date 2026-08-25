@@ -42,15 +42,21 @@ When the wise men saw the star * they said one unto another: This is the sign of
 O God, who on this day by the leading of a star didst manifest thy only-begotten Son to the Gentiles: mercifully grant; that we, which know thee now by faith, may be brought even to the contemplation of the beauty of thy majesty.
 
 [chapter-lauds]
-# SOURCE: divinum-officium Sancti/01-06 [Capitulum Laudes] — check against diurnal
+# SOURCE: monastic diurnal, p. 224 (Epiphany, At Lauds)
 !Isa 60:1
-Arise, be enlightened, O Jerusalem: for thy light is come, and the glory of the Lord is risen upon thee.
+Arise, shine; for thy light is come, * and the glory of the Lord is risen upon thee.
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Sancti/01-06 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 226 (Epiphany, At Sext)
 !Isa 60:4
-Lift up thy eyes round about, and see: all these are gathered together, they are come to thee: thy sons shall come from afar.
+Lift up thine eyes round about, and see: all they gather themselves together, they come to thee: * thy sons shall come from far, and thy daughters shall be nursed at thy side.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 226 (Epiphany, At None)
+!Isa 60:6
+All they from Sheba shall come: * they shall bring gold and incense; and they shall shew forth the praises of the Lord.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -114,14 +120,14 @@ To Father and to Paraclete.
 
 Amen.
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/01-06 [Versum 2] — check against diurnal
-V. Worship God. Alleluia.
-R. All ye His angels. Alleluia.
+# SOURCE: monastic diurnal, p. 225 (Epiphany, At Lauds)
+V. O worship the Lord, alleluia.
+R. All ye Angels of his, alleluia.
 
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/01-06 [Versum 1] — check against diurnal
-V. The kings of Tarshish and of the isles shall bring presents.
-R. The kings of Arabia and Saba shall offer gifts.
+# SOURCE: monastic diurnal, p. 224 (Epiphany, At I Vespers)
+V. The kings of Tharsis and of the isles shall give presents.
+R. The kings of Arabia and Saba shall bring gifts.
 
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 137 (The Epiphany of Our Lord and Sunday within the Octave)
@@ -142,31 +148,21 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. All they from Sheba shall come, * alleluia, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Sancti/01-06 [Responsory Breve Tertia] — check against diurnal
-R. The kings of Tarshish and of the isles shall bring presents. * Alleluia, Alleluia.
-R. The kings of Tarshish and of the isles shall bring presents. * Alleluia, Alleluia.
-V. The kings of Arabia and Saba shall offer gifts.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The kings of Tarshish and of the isles shall bring presents. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 226 (Epiphany, At Terce)
+@use proper/epiphany/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Sancti/01-06 [Responsory Breve Sexta] — check against diurnal
-R. All they from Saba shall come. * Alleluia, Alleluia.
-R. All they from Saba shall come. * Alleluia, Alleluia.
-V. They shall bring gold and incense.
-R. Alleluia, Alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. All they from Saba shall come. * Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 226 (Epiphany, At Sext)
+@use proper/epiphany/short-responsory-vespers
 
 [short-responsory-none]
-# SOURCE: divinum-officium Sancti/01-06 [Responsory Breve Nona] — check against diurnal
-R. Worship the Lord. * Alleluia, Alleluia.
-R. Worship the Lord. * Alleluia, Alleluia.
-V. In His holy courts.
-R. Alleluia, Alleluia.
+# SOURCE: monastic diurnal, p. 226 (Epiphany, At None)
+R. O worship the Lord, * alleluia, alleluia.
+R. O worship the Lord, * alleluia, alleluia.
+V. In the beauty of holiness.
+R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Worship the Lord. * Alleluia, Alleluia.
+R. O worship the Lord, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/epiphany/chapter-lauds

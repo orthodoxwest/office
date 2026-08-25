@@ -70,9 +70,15 @@ Brethren: Christ humbled himself, and became obedient unto death, even the death
 R. Thanks be to God.
 
 [chapter-sext]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Capitulum Sexta] — check against diurnal
+# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Sext)
 !Phil 2:10-11
-That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth: And that every tongue should confess that the Lord Jesus Christ is in the glory of God the Father.
+At the Name of Jesus every knee should bow, of things in heaven, and things in earth, and things under the earth; * and every tongue should confess that Jesus Christ is Lord, to the glory of God the Father.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 218 (Holy Name of Jesus, At None)
+!Col 3:17
+Whatsoever ye do in word or deed, * do all in the Name of the Lord Jesus, giving thanks unto God and the Father by him.
 R. Thanks be to God.
 
 [hymn-lauds]
@@ -180,40 +186,33 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Our help standeth in the Name of the Lord, alleluia, alleluia.
 
 [short-responsory-terce]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Responsory Breve Tertia] — check against diurnal
-R. Blessed be the Name of the Lord, * Alleluia, alleluia.
-R. Blessed be the Name of the Lord, * Alleluia, alleluia.
-V. From this time forth, and for evermore.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Blessed be the Name of the Lord, * Alleluia, alleluia.
+# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Terce)
+@use proper/holy-name-jesus/short-responsory-lauds
 
 [short-responsory-sext]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Responsory Breve Sexta] — check against diurnal
-R. Give unto the Lord glory and honour, * Alleluia, alleluia.
-R. Give unto the Lord glory and honour, * Alleluia, alleluia.
-V. Give unto the Lord the glory due unto His Name.
+# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Sext)
+R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
+R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
+V. Give the Lord the honour due unto his Name.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Give unto the Lord glory and honour, * Alleluia, alleluia.
+R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
 
 [short-responsory-none]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Responsory Breve Nona] — check against diurnal
-R. O magnify the Lord with me, * Alleluia, alleluia.
-R. O magnify the Lord with me, * Alleluia, alleluia.
-V. And let us exalt His Name together.
+# SOURCE: monastic diurnal, p. 218 (Holy Name of Jesus, At None)
+R. O praise the Lord with me, * alleluia, alleluia.
+R. O praise the Lord with me, * alleluia, alleluia.
+V. And let us magnify his Name together.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. O magnify the Lord with me, * Alleluia, alleluia.
+R. O praise the Lord with me, * alleluia, alleluia.
 
 [chapter-vespers]
 @use proper/holy-name-jesus/chapter-lauds
 
 [chapter-terce]
-# SOURCE: divinum-officium Tempora/Nat2-0 [Capitulum Laudes] (= Lauds chapter) — check against diurnal
-!Phil 2:8-10
-He humbled himself, becoming obedient unto death, even to the death of the cross. For which cause God also hath exalted him, and hath given him a name which is above all names: That in the name of Jesus every knee should bow, of those that are in heaven, on earth, and under the earth.
-R. Thanks be to God.
+# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Terce)
+@use proper/holy-name-jesus/chapter-lauds
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
