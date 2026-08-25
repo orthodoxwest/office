@@ -6,12 +6,13 @@ import (
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
-// General Rubrics of the Monastic Breviary XXXIII.4 appoints a conclusion for
-// every collect, inflected by whether and where the collect names the Son, and
-// by whether it names the Holy Spirit. The choice is a property of each
-// collect's own text rather than of the day, so it is recorded per corpus key
-// in data/collect-conclusions.txt; "through" is the default and is not listed
-// there.
+// XII Of the Collects in the Monastic Diurnal's General Rubrics (the same rule
+// appears as XXXIII.4 in the General Rubrics of the Monastic Breviary) appoints
+// a conclusion for every collect, inflected by whether and where the collect
+// names the Son, and by whether it names the Holy Spirit. The choice is a
+// property of each collect's own text rather than of the day, so it is recorded
+// per corpus key in data/collect-conclusions.txt; "through" is the default and
+// is not listed there.
 //
 // XXXIII.5 governs a run of collects: only the first and the last are
 // concluded, and the ones between are not. Each is still preceded by Let us

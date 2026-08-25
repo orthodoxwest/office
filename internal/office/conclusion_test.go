@@ -155,6 +155,77 @@ func TestCollectConclusionDataIsConsistent(t *testing.T) {
 	}
 }
 
+// These forms are printed alongside the matching collects in the complete
+// Monastic Diurnal scan. Keep the page-audited corrections independent of the
+// general consistency test: a valid but wrong form name would otherwise pass.
+func TestCollectConclusionFormsMatchPrintedDiurnal(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("loading corpus: %v", err)
+	}
+
+	tests := []struct {
+		key  string
+		form string
+	}{
+		{"proper/advent-sunday-2/collect", "through-same"},
+		{"proper/advent-sunday-3/collect", "who-livest"},
+		{"proper/assumption-bvm/collect", "who-liveth"},
+		{"proper/chair-peter-rome/collect", "who-livest"},
+		{"proper/holy-monday/collect", "who-liveth"},
+		{"proper/holy-wednesday/collect", "who-liveth"},
+		{"proper/laetare-sunday/collect", "who-liveth"},
+		{"proper/nativity-sunday-within-octave/collect", "through-same"},
+		{"proper/octave-day-st-stephen/collect", "who-liveth"},
+		{"proper/pentecost-sunday-23/collect", "who-liveth"},
+		{"proper/st-gabriel-archangel/collect", "who-livest"},
+		{"proper/st-joseph/collect", "who-livest"},
+		{"proper/vigil-epiphany/collect", "through-same"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			got, ok := corpus.CollectConclusionForm(tt.key)
+			if !ok || got != tt.form {
+				t.Errorf("CollectConclusionForm(%q) = (%q, %v), want (%q, true)",
+					tt.key, got, ok, tt.form)
+			}
+		})
+	}
+}
+
+// The Diurnal prints these clauses before "Who with thee". Without them, the
+// generated relative clause has no grammatical antecedent in the collect.
+func TestWhoLivethCollectsRetainPrintedChristClause(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatalf("loading corpus: %v", err)
+	}
+
+	tests := []struct {
+		key      string
+		fragment string
+	}{
+		{"proper/laetare-sunday/collect", "through our Lord and Saviour Jesus Christ."},
+		{"proper/pentecost-sunday-3/collect", "for Jesus Christ's sake our Lord."},
+		{"proper/pentecost-sunday-23/collect", "Jesus Christ, our blessed Lord and Saviour."},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key, func(t *testing.T) {
+			body := corpus.Get(tt.key)
+			if !strings.Contains(body, tt.fragment) {
+				t.Errorf("%s does not contain printed final Christ clause %q: %q",
+					tt.key, tt.fragment, body)
+			}
+			text, _ := applyConclusion(body, tt.key, corpus)
+			if !strings.Contains(text, tt.fragment+"\nWho with thee") {
+				t.Errorf("%s does not join its Christ clause to Who with thee: %q", tt.key, text)
+			}
+		})
+	}
+}
+
 // No collect reachable through proper-collect may carry its conclusion inline:
 // the engine appends one, and a collect that already had its own would print
 // the ending twice.
