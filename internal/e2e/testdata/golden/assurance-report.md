@@ -10,7 +10,7 @@
 | Verified text entries | 1289 |
 | Rendered text entries needing review | 811 |
 | Rendered text entries with unknown source | 172 |
-| Classified zero-occurrence entries | 38 |
+| Classified zero-occurrence entries | 37 |
 | Zeroes needing classification | 24 |
 | Stale zero-occurrence classifications | 6 |
 | Stale attestations | 3 |

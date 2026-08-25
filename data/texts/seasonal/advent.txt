@@ -24,6 +24,9 @@ Be ye steadfast, * and see the salvation of the Lord with you.
 
 [psalm-antiphon-1-prime-saturday]
 # SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv47, 1] — check against diurnal
+# The diurnal (pp. 173–176) does not print a Saturday set of hour ants for
+# Dec. 17–23. Saturday takes the ants of the weekday on which St Thomas
+# (21 Dec.) falls, which changes year to year.
 Consider how glorious is the one * who shall bring about the salvation of the peoples.
 
 [chapter-lauds]

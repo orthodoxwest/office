@@ -3,6 +3,9 @@ O God, who hast given unto thy blessed Apostle Peter the keys of the kingdom of 
 
 [benedictus-antiphon]
 # SOURCE: divinum-officium SanctiM/01-18 [Ant 2] — check against diurnal
+# The monastic diurnal prints St Prisca on January 18. The local Chair of
+# St Peter supplement is dated February 21–22; the 2026 ordo cites it for
+# the January 18 commemoration as well, but does not reprint these ants.
 Thus saith the Lord * unto Simon Peter: Whatsoever thou shalt bind on earth, shall be bound in heaven; and whatsoever thou shalt loose on earth, shall be loosed in heaven.
 
 [magnificat-antiphon]
@@ -47,9 +50,9 @@ V. Let them exalt Him in the congregation of the people.
 R. And praise Him in the assembly of the elders.
 
 [versicle-vespers]
-# SOURCE: divinum-officium SanctiM/01-18 [Versum 1] — check against diurnal
-V. You are Peter.
-R. And on this rock I am going to build my church.
+# SOURCE: Chair of St Peter supplement, II Vespers of S. Peter's Chair
+V. Thou art Peter.
+R. And upon this rock I will build my Church.
 
 [commemoration-antiphon]
 @use proper/chair-peter-rome/benedictus-antiphon

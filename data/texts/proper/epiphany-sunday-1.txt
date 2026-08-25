@@ -1,7 +1,8 @@
 [benedictus-antiphon]
-# SOURCE: divinum-officium Tempora/Epi1-0.txt [Ant 2] — check against diurnal
-Enlighten us, O Lord, * by the example of thy family, and direct our feet into the way of peace.
+# SOURCE: monastic diurnal Holy Family supplement, at Lauds (Ant. on Ben.)
+# Holy Family option for the Sunday within the Octave of the Epiphany.
+Let the example of thine household, * O Lord, give light to the dark ways of this world and thereby guide thou the feet of parents and children into the way of peace.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Tempora/Epi1-0.txt [Ant 3] — check against diurnal
-But Mary * kept all these words, pondering them in her heart.
+# SOURCE: monastic diurnal Holy Family supplement, at II Vespers (Ant. on Mag.)
+But Mary * kept all these things in her heart, and did ponder them.
