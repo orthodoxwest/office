@@ -3,9 +3,9 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 217 |
-| Full structural-cover pages | 57 |
-| Residual structural-review pages | 57 |
+| Modeled structural features | 219 |
+| Full structural-cover pages | 58 |
+| Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 1289 |
 | Rendered text entries needing review | 817 |
@@ -26,6 +26,7 @@
 - `decision:commemoration:first-vespers-concurrence=included`
 - `decision:commemoration:first-vespers-day-within-octave-exclusion=suppressed`
 - `decision:commemoration:first-vespers-day-within-octave=included`
+- `decision:commemoration:first-vespers-duplicate-octave-day=suppressed`
 - `decision:commemoration:first-vespers-feria-or-vigil-lauds-only=suppressed`
 - `decision:commemoration:first-vespers-first-class-exclusion=suppressed`
 - `decision:commemoration:first-vespers-first-class-seasonal-feria-exclusion=suppressed`
@@ -127,6 +128,7 @@
 - `decision:occurrence:temporal-tiebreak=challenger-wins`
 - `decision:occurrence:temporal-tiebreak=incumbent-holds`
 - `decision:occurrence:transfer-in=considered`
+- `decision:occurrence:transfer-out=all-souls-from-sunday`
 - `decision:occurrence:transfer-out=second-class-or-higher`
 - `decision:preces=said`
 - `decision:preces=suppressed:double-commemoration`

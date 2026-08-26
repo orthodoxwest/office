@@ -69,7 +69,6 @@ JANUARY
            Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The Child Jesus · No Suff.
                Com. Day IV within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Paul the First Hermit ("The world, and all things earthly")
-               Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
  10  Sun     Sunday within the Octave of Epiphany       [sd]  w
            St. Paul the First Hermit (com)
            Day V within the Octave of the Epiphany (sd)
@@ -1512,7 +1511,6 @@ AUGUST
            Vespers g · I fol. (IX Sunday after Pentecost) · Mag. Wisdom crieth · No Suff.
                Com. Day VII within the Octave of the Assumption ("Through thee have the gates of Paradise been thrown…")
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("For theirs is the kingdom of heaven")
-               Com. Octave Day of the Assumption ("Through thee have the gates of Paradise been thrown…")
  22  Sun     IX Sunday after Pentecost                  [sd]  g
            Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
            Octave Day of the Assumption (gd)
@@ -1972,7 +1970,6 @@ NOVEMBER
            Vespers g · I fol. (XX Sunday after Pentecost) · Mag. Encompass us · No Suff.
                Com. Day VI within the Octave of All Saints ("I beheld a great multitude")
                Com. St Willibrord, Bishop & Confessor ("The Lord loved him")
-               Com. Day VII within the Octave of All Saints ("I beheld a great multitude")
   7  Sun     XX Sunday after Pentecost                  [sd]  g
            St Willibrord, Bishop & Confessor (com)
            Day VII within the Octave of All Saints (sd)
@@ -2331,7 +2328,6 @@ DECEMBER
            Hours   No Preces
            Vespers w · I fol. (St. Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
                Com. Day VI within the Nativity Octave ("The King of Peace")
-               Com. Day VII within the Nativity Octave ("The King of Peace")
  31  Fri  L  St. Sylvester I, Bishop                    [d]   w
            Day VII within the Nativity Octave (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.

@@ -105,6 +105,27 @@ func isDayWithinOctave(f *models.Feast) bool {
 	return len(suffix) > 0
 }
 
+// octaveParentID returns the parent feast ID for a generated octave-day feast,
+// e.g. "all-saints-octave-day-2" → "all-saints". Empty when f is not an octave day.
+func octaveParentID(f *models.Feast) string {
+	if f == nil {
+		return ""
+	}
+	if isOctaveDay(f) {
+		return strings.TrimSuffix(f.ID, "-octave-day")
+	}
+	idx := strings.LastIndex(f.ID, "-octave-day-")
+	if idx >= 0 && isDayWithinOctave(f) {
+		return f.ID[:idx]
+	}
+	return ""
+}
+
+func sameOctaveDays(a, b *models.Feast) bool {
+	parent := octaveParentID(a)
+	return parent != "" && parent == octaveParentID(b)
+}
+
 // isDoubleOrAbove returns true if the feast rank is Double or higher.
 func isDoubleOrAbove(f *models.Feast) bool {
 	return f.Rank.Weight() >= models.Double.Weight()
@@ -548,6 +569,14 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 			winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
 			winner.Category != models.CategorySunday {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-day-within-octave-exclusion", Outcome: "suppressed", Detail: c.ID})
+			continue
+		}
+		// I Vespers commemorates "the Octave" once. When the outgoing office
+		// is already a day within that octave (Saturday All Souls → Sunday,
+		// 2024 ordo: "Comm. Octave & Winifred"), do not also pull the
+		// following day's octave-day occurrence.
+		if !secondVespers && loserIncluded && sameOctaveDays(loser, c) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-duplicate-octave-day", Outcome: "suppressed", Detail: c.ID})
 			continue
 		}
 		if included, rule := occurrenceCommemoratedAtFirstVespers(c); !included {

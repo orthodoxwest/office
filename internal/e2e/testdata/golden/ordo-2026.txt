@@ -78,7 +78,6 @@ JANUARY
            Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The Child Jesus · No Suff.
                Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Hyginus of Rome, Bishop & Martyr ("Whosoever will come after me")
-               Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
  11  Sun     Sunday within the Octave of Epiphany       [sd]  w
            St. Hyginus of Rome, Bishop & Martyr (com)
            Day VI within the Octave of the Epiphany (sd)
@@ -914,7 +913,6 @@ MAY
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
                Com. Day V within the Octave of the Ascension ("Ye men of Galilee")
                Com. St Eleutherius, Bishop & Martyr ("Whosoever will come after me")
-               Com. Day VI within the Octave of the Ascension ("Ye men of Galilee")
  26  Tue     St Augustine of Canterbury, Bishop & Confessor [d]   w
            St Eleutherius, Bishop & Martyr (com)
            Day VI within the Octave of the Ascension (sd)
@@ -1114,7 +1112,6 @@ JUNE
            Vespers r · I fol. (Ss. John & Paul, Martyrs) · Mag. The righteous · No Suff.
                Com. Day II within the Octave of St John Baptist ("He shall go before him")
                Com. Octave of the Compassion of Our Lord Jesus Christ ("The world, and all things earthly")
-               Com. Day III within the Octave of St John Baptist ("He shall go before him")
  26  Fri  L  Ss. John & Paul, Martyrs                   [d]   r
            Octave of the Compassion of Our Lord Jesus Christ (com)
            Day III within the Octave of St John Baptist (sd)
@@ -1133,7 +1130,6 @@ JUNE
            Vespers g · I fol. (IV Sunday after Pentecost) · Mag. So David prevailed · No Suff.
                Com. Day IV within the Octave of St John Baptist ("He shall go before him")
                Com. St Leo II, Bishop & Confessor ("The Lord loved him")
-               Com. Day V within the Octave of St John Baptist ("He shall go before him")
  28  Sun     IV Sunday after Pentecost                  [sd]  g
            St Leo II, Bishop & Confessor (com)
            Day V within the Octave of St John Baptist (sd)
@@ -1198,7 +1194,6 @@ JULY
            Hours   No Preces
            Vespers g · I fol. (V Sunday after Pentecost) · Mag. Ye mountains · No Suff.
                Com. Day VI within the Octave of Ss Peter & Paul ("Peter and John")
-               Com. Day VII within the Octave of Ss Peter & Paul ("Peter and John")
   5  Sun     V Sunday after Pentecost                   [sd]  g
            Day VII within the Octave of Ss Peter & Paul (sd)
            Lauds   g · Ben. Ye have heard that it was said · No Preces · No Suff.
@@ -1990,7 +1985,6 @@ NOVEMBER
            Vespers g · I fol. (XXIII Sunday after Pentecost) · Mag. Encompass us · No Suff.
                Com. Day VII within the Octave of All Saints ("I beheld a great multitude")
                Com. Four Crowned Martyrs ("In the heavenly kingdom")
-               Com. Octave Day of All Saints ("I beheld a great multitude")
   8  Sun     XXIII Sunday after Pentecost               [sd]  g
            Four Crowned Martyrs (com)
            Octave Day of All Saints (gd)
@@ -2342,7 +2336,6 @@ DECEMBER
            Hours   No Preces
            Vespers w · I fol. (St. Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
                Com. Day VI within the Nativity Octave ("The King of Peace")
-               Com. Day VII within the Nativity Octave ("The King of Peace")
  31  Thu     St. Sylvester I, Bishop                    [d]   w
            Day VII within the Nativity Octave (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
