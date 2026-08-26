@@ -15,6 +15,7 @@ type conditionKind uint8
 const (
 	conditionPreces conditionKind = iota
 	conditionSuffrage
+	conditionBVMSuffrageForm
 	conditionCrossCommemoration
 	conditionIsFeast
 	conditionFestalLaudsPsalmody
@@ -73,6 +74,8 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionPreces}, nil
 	case "if-suffrage":
 		return conditionClause{kind: conditionSuffrage}, nil
+	case "bvm-suffrage-form":
+		return conditionClause{kind: conditionBVMSuffrageForm}, nil
 	case "if-cross-commemoration":
 		return conditionClause{kind: conditionCrossCommemoration}, nil
 	case "is-feast":
@@ -133,6 +136,8 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 		return shouldSayPreces(day, moveable)
 	case conditionSuffrage:
 		return shouldSaySuffrage(day, moveable)
+	case conditionBVMSuffrageForm:
+		return usesBVMSuffrageForm(day)
 	case conditionCrossCommemoration:
 		return shouldSayCrossCommemoration(day, moveable)
 	case conditionIsFeast:
@@ -156,6 +161,24 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 	default:
 		return false
 	}
+}
+
+// usesBVMSuffrageForm reports whether the current office or one of its
+// commemorations is of the Blessed Virgin Mary. In either case the Suffrage
+// omits its invocation of the Blessed Virgin, as directed by the Diurnal.
+func usesBVMSuffrageForm(day *models.CalendarDay) bool {
+	if day == nil {
+		return false
+	}
+	if day.Celebration != nil && day.Celebration.Category == models.CategoryBlessedVirgin {
+		return true
+	}
+	for _, commemoration := range day.Commemorations {
+		if commemoration != nil && commemoration.Category == models.CategoryBlessedVirgin {
+			return true
+		}
+	}
+	return false
 }
 
 // evaluateCondition is retained for focused rule tests. Runtime composition

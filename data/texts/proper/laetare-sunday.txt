@@ -37,8 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 232, 141 (Fourth Sunday in Lent)
-Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthily deserve to be punished, by the comfort of thy grace may mercifully be relieved.
+# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 232, 141; monastic diurnal, p. 265 (Fourth Sunday in Lent)
+Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthily deserve to be punished, by the comfort of thy grace may mercifully be relieved; through our Lord and Saviour Jesus Christ.
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, pp. 264–265 (IV Sunday in Lent, At Lauds)
