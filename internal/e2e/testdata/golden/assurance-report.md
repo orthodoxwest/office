@@ -3,16 +3,16 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 214 |
+| Modeled structural features | 218 |
 | Full structural-cover pages | 56 |
 | Residual structural-review pages | 56 |
 | Uncovered features | 0 |
 | Verified text entries | 1289 |
 | Rendered text entries needing review | 811 |
-| Rendered text entries with unknown source | 172 |
-| Classified zero-occurrence entries | 37 |
-| Zeroes needing classification | 24 |
-| Stale zero-occurrence classifications | 6 |
+| Rendered text entries with unknown source | 174 |
+| Classified zero-occurrence entries | 36 |
+| Zeroes needing classification | 25 |
+| Stale zero-occurrence classifications | 7 |
 | Stale attestations | 3 |
 
 ### Modeled structural features
@@ -73,6 +73,10 @@
 - `decision:condition:if-cross-commemoration=omitted`
 - `decision:condition:if-preces=included`
 - `decision:condition:if-preces=omitted`
+- `decision:condition:if-suffrage,feast-saturday-office-bvm=included`
+- `decision:condition:if-suffrage,feast-saturday-office-bvm=omitted`
+- `decision:condition:if-suffrage,not-feast-saturday-office-bvm=included`
+- `decision:condition:if-suffrage,not-feast-saturday-office-bvm=omitted`
 - `decision:condition:if-suffrage=included`
 - `decision:condition:if-suffrage=omitted`
 - `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=included`

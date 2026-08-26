@@ -236,10 +236,11 @@ func TestWhoLivethCollectsRetainPrintedChristClause(t *testing.T) {
 // ordinary-tier fallbacks behind proper-collect — must not.
 func TestNoProperCollectCarriesInlineConclusion(t *testing.T) {
 	directlyReferenced := map[string]bool{
-		"ordinary/prime/collect":           true,
-		"ordinary/compline/collect":        true,
-		"ordinary/shared/suffrage-collect": true,
-		"ordinary/shared/cross-collect":    true,
+		"ordinary/prime/collect":               true,
+		"ordinary/compline/collect":            true,
+		"ordinary/shared/suffrage-collect":     true,
+		"ordinary/shared/suffrage-collect-bvm": true,
+		"ordinary/shared/cross-collect":        true,
 	}
 	corpus, err := texts.LoadTexts("../../data")
 	if err != nil {
