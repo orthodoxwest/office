@@ -3,12 +3,12 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 219 |
+| Modeled structural features | 222 |
 | Full structural-cover pages | 58 |
 | Residual structural-review pages | 58 |
 | Uncovered features | 0 |
 | Verified text entries | 1289 |
-| Rendered text entries needing review | 817 |
+| Rendered text entries needing review | 824 |
 | Rendered text entries with unknown source | 168 |
 | Classified zero-occurrence entries | 36 |
 | Zeroes needing classification | 25 |
@@ -84,12 +84,14 @@
 - `decision:condition:is-ferial,not-season-easter=omitted`
 - `decision:condition:is-ferial,season-easter=included`
 - `decision:condition:is-ferial,season-easter=omitted`
+- `decision:condition:not-appended-office-of-the-dead,not-office-of-the-dead=included`
+- `decision:condition:not-appended-office-of-the-dead,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=included`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=included`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=omitted`
-- `decision:condition:not-feast-holy-saturday=included`
-- `decision:condition:not-feast-holy-saturday=omitted`
+- `decision:condition:not-feast-holy-saturday,not-office-of-the-dead=included`
+- `decision:condition:not-feast-holy-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=included`
 - `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-is-ferial=included`
@@ -143,6 +145,7 @@
 - `decision:suffrage=suppressed:non-customary-office`
 - `decision:suffrage=suppressed:out-of-season`
 - `decision:suffrage=suppressed:within-octave`
+- `decision:vespers:appended-office-of-the-dead=included`
 - `decision:vespers:owner=first-of-following`
 - `decision:vespers:owner=not-applicable`
 - `decision:vespers:owner=second-of-preceding`

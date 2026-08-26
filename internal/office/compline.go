@@ -56,6 +56,9 @@ func (c *ComplineComposer) Compose(day *models.CalendarDay, sections []HourSecti
 // vespersOfficeDay deliberately retains the civil day's MarianAntiphon field,
 // whose value already models the distinct Compline handoffs.
 func complineOfficeDay(day *models.CalendarDay) *models.CalendarDay {
+	if day != nil && day.Vespers.AppendedOfficeOfTheDead {
+		return deadOfficeDay(day)
+	}
 	return vespersOfficeDay(day)
 }
 

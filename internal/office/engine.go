@@ -318,10 +318,20 @@ func antiphonsDoubled(day *models.CalendarDay, hourName string) bool {
 // antiphon frame when the office does not double antiphons at this hour.
 // Text stays whole; renderers print models.AntiphonAnnouncement via DisplayText.
 func markAnnouncedAntiphons(hour *models.OfficeHour, day *models.CalendarDay, hourName string) {
-	if hour == nil || antiphonsDoubled(day, hourName) {
+	if hour == nil {
 		return
 	}
+	doubled := antiphonsDoubled(day, hourName)
+	inDead := false
 	for si := range hour.Sections {
+		if hour.Sections[si].Label == vespersOfTheDeadLabel {
+			inDead = true
+		}
+		// Vespers of the Dead on the eve of All Souls is said under the rite
+		// of a Double even when the day's Vespers is not (2025: Sunday).
+		if doubled || inDead {
+			continue
+		}
 		elems := hour.Sections[si].Elements
 		for i := range elems {
 			if elems[i].Type != models.Antiphon {

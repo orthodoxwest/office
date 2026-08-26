@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -1104,6 +1105,41 @@ func TestAllSoulsTransfersFromSunday(t *testing.T) {
 			}
 			if nov3.Vespers.Color != models.White {
 				t.Errorf("%d-11-03 vespers colour = %s, want white", year, nov3.Vespers.Color)
+			}
+		})
+	}
+}
+
+func TestAllSoulsEveAppendsVespersOfTheDead(t *testing.T) {
+	// Vespers of the Dead is appended on the evening before All Souls
+	// (diurnal p. 642; 2024/2026 ordos after All Saints, 2025 ordo after Sunday).
+	tests := []struct {
+		year, month, day int
+		want             bool
+	}{
+		{2024, 11, 1, true},  // Friday All Saints, All Souls Saturday
+		{2024, 11, 2, false}, // All Souls itself: I Vespers of Sunday
+		{2025, 11, 1, false}, // Saturday All Saints; All Souls transferred
+		{2025, 11, 2, true},  // Sunday, All Souls on Monday (optional in the ordo)
+		{2026, 11, 1, true},  // Sunday All Saints, All Souls Monday
+		{2026, 11, 2, false},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%d-%02d-%02d", tt.year, tt.month, tt.day), func(t *testing.T) {
+			days, err := BuildCalendar(tt.year, findDataDir(t))
+			if err != nil {
+				t.Fatalf("BuildCalendar(%d): %v", tt.year, err)
+			}
+			day := findDay(days, tt.year, tt.month, tt.day)
+			if day == nil {
+				t.Fatalf("%d-%02d-%02d not found", tt.year, tt.month, tt.day)
+			}
+			if day.Vespers.AppendedOfficeOfTheDead != tt.want {
+				t.Errorf("%d-%02d-%02d AppendedOfficeOfTheDead = %v, want %v",
+					tt.year, tt.month, tt.day, day.Vespers.AppendedOfficeOfTheDead, tt.want)
+			}
+			if tt.want && (day.Vespers.AppendedFeast == nil || day.Vespers.AppendedFeast.ID != "all-souls") {
+				t.Errorf("%d-%02d-%02d AppendedFeast = %#v, want all-souls", tt.year, tt.month, tt.day, day.Vespers.AppendedFeast)
 			}
 		})
 	}

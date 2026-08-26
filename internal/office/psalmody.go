@@ -288,6 +288,37 @@ func isOfficeOfTheDead(day *models.CalendarDay) bool {
 	return day != nil && day.Celebration != nil && officeOfTheDeadIDs[day.Celebration.ID]
 }
 
+// vespersOfTheDeadLabel is the section heading for Vespers of the Dead when it
+// is appended after the day's Vespers on the evening before All Souls.
+const vespersOfTheDeadLabel = "Vespers of the Dead"
+
+// deadOfficeDay returns the synthetic office used to compose Vespers of the
+// Dead and Compline of the Dead on the evening before All Souls. Colour is
+// black; commemorations of the civil day do not belong to the Dead office.
+func deadOfficeDay(day *models.CalendarDay) *models.CalendarDay {
+	if day == nil || day.Vespers.AppendedFeast == nil {
+		return day
+	}
+	feast := day.Vespers.AppendedFeast
+	out := *day
+	out.Celebration = feast
+	out.Color = models.Black
+	out.Commemorations = nil
+	out.FeriaCommemoration = nil
+	out.FirstVespers = false
+	out.FollowingOfficeCommemorationID = ""
+	out.Vespers = models.VespersDesignation{
+		Owner:                   models.VespersIIOfPreceding,
+		Feast:                   feast,
+		Color:                   models.Black,
+		Season:                  day.Season,
+		AppendedOfficeOfTheDead: true,
+		AppendedFeast:           feast,
+		Rule:                    "vespers:appended-office-of-the-dead",
+	}
+	return &out
+}
+
 // What concludes each psalm and gospel canticle. The Office of the Dead says
 // no Gloria Patri: "At the end of all Psalms is always said: Rest eternal
 // grant unto them, O Lord. And let light perpetual shine upon them, even if

@@ -26,6 +26,12 @@ func (l *LaudsComposer) Compose(day *models.CalendarDay, sections []HourSection,
 // Commemoration of the Cross — is said after these, in which case none of these
 // collects is the last of the run.
 func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.TextCorpus, moreCollects bool) []models.OfficeElement {
+	// All Souls "excludes all occurrent Feasts" (diurnal, Nov 2). The 2024–2026
+	// ordos print no commemorations at Dead Lauds; the displaced octave day
+	// is used only to own Vespers after None.
+	if isOfficeOfTheDead(day) {
+		return nil
+	}
 	comms := day.Commemorations
 
 	// The occurring privileged feria is commemorated at Lauds when a feast takes

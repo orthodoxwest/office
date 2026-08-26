@@ -847,5 +847,14 @@ func applyChapterSplit(d models.VespersDesignation, fol *models.Feast, preceding
 func resolveVespersConcurrence(days []models.CalendarDay) {
 	for i := 0; i < len(days)-1; i++ {
 		days[i].Vespers = resolveConcurrence(&days[i], &days[i+1])
+		if days[i+1].Celebration != nil && days[i+1].Celebration.ID == "all-souls" {
+			days[i].Vespers.AppendedOfficeOfTheDead = true
+			days[i].Vespers.AppendedFeast = days[i+1].Celebration
+			days[i].Vespers.Decisions = append(days[i].Vespers.Decisions, models.CompositionDecision{
+				Rule:    "vespers:appended-office-of-the-dead",
+				Outcome: "included",
+				Detail:  "all-souls",
+			})
+		}
 	}
 }

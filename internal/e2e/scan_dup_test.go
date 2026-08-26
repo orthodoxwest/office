@@ -49,11 +49,17 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 				continue
 			}
 			// Vespers sings four psalms, except the Office of the Dead, which
-			// sings five (Monastic Diurnal pp. 72*-75*). The office package
-			// owns that predicate; this is the one ID it applies to today.
+			// sings five (Monastic Diurnal pp. 72*-75*). On the evening before
+			// All Souls those five are appended after the day's four.
 			wantPsalms := 4
 			if hour.Feast == "All Souls' Day" {
 				wantPsalms = 5
+			}
+			for _, sec := range hour.Sections {
+				if sec.Label == "Vespers of the Dead" {
+					wantPsalms += 5
+					break
+				}
 			}
 			if psalms != wantPsalms {
 				t.Errorf("Vespers on %s (%s) has %d psalms, want %d",

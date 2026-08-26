@@ -22,6 +22,7 @@ const (
 	conditionFestalVespersPsalmody
 	conditionIsFerial
 	conditionOfficeOfTheDead
+	conditionAppendedOfficeOfTheDead
 	conditionWeekday
 	conditionFeast
 	conditionSeason
@@ -88,6 +89,8 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionIsFerial}, nil
 	case "office-of-the-dead":
 		return conditionClause{kind: conditionOfficeOfTheDead}, nil
+	case "appended-office-of-the-dead":
+		return conditionClause{kind: conditionAppendedOfficeOfTheDead}, nil
 	}
 	if value, ok := strings.CutPrefix(atom, "weekday-"); ok {
 		weekdays := map[string]time.Weekday{
@@ -152,6 +155,8 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 		return day.Celebration == nil || day.Celebration.Category == models.CategoryFeria
 	case conditionOfficeOfTheDead:
 		return isOfficeOfTheDead(day)
+	case conditionAppendedOfficeOfTheDead:
+		return day != nil && day.Vespers.AppendedOfficeOfTheDead
 	case conditionWeekday:
 		return civilWeekday(day) == c.weekday
 	case conditionFeast:
