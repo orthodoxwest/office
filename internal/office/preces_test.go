@@ -74,6 +74,56 @@ func TestEvaluateConditionNegation(t *testing.T) {
 	}
 }
 
+func TestBVMSuffrageFormCondition(t *testing.T) {
+	tests := []struct {
+		name      string
+		condition string
+		day       *models.CalendarDay
+		want      bool
+	}{
+		{
+			name:      "BVM office",
+			condition: "bvm-suffrage-form",
+			day:       &models.CalendarDay{Celebration: &models.Feast{ID: "future-bvm-office", Category: models.CategoryBlessedVirgin}},
+			want:      true,
+		},
+		{
+			name:      "BVM commemoration",
+			condition: "bvm-suffrage-form",
+			day: &models.CalendarDay{
+				Celebration:    &models.Feast{ID: "feria", Category: models.CategoryFeria},
+				Commemorations: []*models.Feast{{ID: "future-bvm-commemoration", Category: models.CategoryBlessedVirgin}},
+			},
+			want: true,
+		},
+		{
+			name:      "ordinary office",
+			condition: "bvm-suffrage-form",
+			day:       &models.CalendarDay{Celebration: &models.Feast{ID: "feria", Category: models.CategoryFeria}},
+			want:      false,
+		},
+		{
+			name:      "negated ordinary office",
+			condition: "not-bvm-suffrage-form",
+			day:       &models.CalendarDay{Celebration: &models.Feast{ID: "feria", Category: models.CategoryFeria}},
+			want:      true,
+		},
+		{
+			name:      "nil day",
+			condition: "bvm-suffrage-form",
+			want:      false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := evaluateCondition(tt.condition, tt.day, nil); got != tt.want {
+				t.Fatalf("evaluateCondition(%q) = %t, want %t", tt.condition, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEvaluateConditionAND(t *testing.T) {
 	moveable := calendar.ComputeMoveableDates(2026)
 

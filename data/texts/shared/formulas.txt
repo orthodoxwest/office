@@ -90,11 +90,13 @@ Holy Ghost, liveth and reigneth God, world without end.
 R. Amen.
 
 [collect-conclusion-through-same]
+# SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
 Through the same thy Son Jesus Christ our Lord, who with thee in the unity of
 the Holy Spirit, liveth and reigneth God, world without end.
 R. Amen.
 
 [collect-conclusion-through-same-spirit]
+# SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
 Through the same thy Son Jesus Christ our Lord, who with thee in the unity of
 the same Holy Spirit, liveth and reigneth God, world without end.
 R. Amen.

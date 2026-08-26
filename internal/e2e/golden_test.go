@@ -64,6 +64,7 @@ var hourCases = []hourCase{
 	// Vespers
 	{"vespers", "2026-01-06", "Epiphany — proper short responsory"},
 	{"vespers", "2026-01-10", "Saturday within the Epiphany octave — Sunday proper with Saturday psalms"},
+	{"vespers", "2026-01-30", "I Vespers of the Saturday Office of the B.V.M. — Marian suffrage form"},
 	{"vespers", "2026-01-31", "Saturday before a per-annum Sunday — Saturday psalter and ordinary with Sunday collect"},
 	{"vespers", "2026-03-07", "Saturday in Lent — Saturday psalter with Lenten chapter, responsory, hymn, and versicle"},
 	{"vespers", "2026-03-15", "Lent Sunday — Sunday psalmody, Magnificat"},

@@ -899,7 +899,7 @@ Type = commemorations
 Ref = commemorations
 
 [Suffrage]
-Condition = if-suffrage,not-feast-saturday-office-bvm
+Condition = if-suffrage,not-bvm-suffrage-form
 Label = Suffrage of All Saints
 
 Type = antiphon
@@ -911,8 +911,8 @@ Ref = ordinary/shared/suffrage-versicle
 Type = collect
 Ref = ordinary/shared/suffrage-collect
 
-[Suffrage-Saturday-BVM]
-Condition = if-suffrage,feast-saturday-office-bvm
+[Suffrage-BVM]
+Condition = if-suffrage,bvm-suffrage-form
 Label = Suffrage of All Saints
 
 Type = antiphon

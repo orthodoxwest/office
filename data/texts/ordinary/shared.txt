@@ -7,13 +7,17 @@
 # titular; the Diurnal's parenthetical Benedictine insertion is retained. Its
 # dagger is normalized to the app's consistent mediant marker.
 [suffrage-antiphon]
+# SOURCE: Monastic Diurnal.pdf Sunday at Lauds, printed p. 42 (PDF p. 88)
 May the blessed Mother of God, * the Virgin Mary, and all the Saints, intercede for us to the Lord.
 
 [suffrage-versicle]
+# SOURCE: Monastic Diurnal.pdf Sunday at Lauds, printed p. 42 (PDF p. 88)
 V. The Lord hath made his Saints wonderful.
 R. And hath heard them when they called upon him.
 
 [suffrage-collect]
+# SOURCE: Monastic Diurnal.pdf Sunday at Lauds, printed pp. 42–43 (PDF pp. 88–89)
+# SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
 Defend us, we beseech thee, O Lord, from all perils of mind and body: and at the
 intercession of the blessed and glorious Mary, the ever Virgin Mother of God, of
 blessed Joseph, of thy blessed Apostles Peter and Paul, of our blessed Father
@@ -24,9 +28,12 @@ thee in the unity of the Holy Spirit, liveth and reigneth God, world without end
 R. Amen.
 
 [suffrage-antiphon-bvm]
+# SOURCE: Monastic Diurnal.pdf Suffrage in an Office of the B.V.M., printed p. 146 (PDF p. 192)
 May all the Saints * intercede for us to the Lord.
 
 [suffrage-collect-bvm]
+# SOURCE: Monastic Diurnal.pdf Suffrage in an Office of the B.V.M., printed p. 146 (PDF p. 192)
+# SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
 Defend us, we beseech thee, O Lord, from all perils of mind and body: and at the
 intercession of blessed Joseph, of thy blessed Apostles Peter and Paul, of our
 blessed Father Benedict and all Saints, graciously bestow upon us both peace and
