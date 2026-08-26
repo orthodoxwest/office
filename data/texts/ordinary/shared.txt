@@ -4,9 +4,10 @@
 # SOURCE: Monastic Diurnal.pdf, Sunday at Lauds, pp. 42–43 (PDF pp. 88–89),
 # with the distinct form for the Office of the B.V.M. on p. 146 (PDF p. 192).
 # The configurable titular N. is omitted until the app knows the church's
-# titular; the Diurnal's parenthetical Benedictine insertion is retained.
+# titular; the Diurnal's parenthetical Benedictine insertion is retained. Its
+# dagger is normalized to the app's consistent mediant marker.
 [suffrage-antiphon]
-May the blessed Mother of God, † the Virgin Mary, and all the Saints, intercede for us to the Lord.
+May the blessed Mother of God, * the Virgin Mary, and all the Saints, intercede for us to the Lord.
 
 [suffrage-versicle]
 V. The Lord hath made his Saints wonderful.
@@ -23,7 +24,7 @@ thee in the unity of the Holy Spirit, liveth and reigneth God, world without end
 R. Amen.
 
 [suffrage-antiphon-bvm]
-May all the Saints † intercede for us to the Lord.
+May all the Saints * intercede for us to the Lord.
 
 [suffrage-collect-bvm]
 Defend us, we beseech thee, O Lord, from all perils of mind and body: and at the
