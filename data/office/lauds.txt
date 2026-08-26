@@ -899,7 +899,7 @@ Type = commemorations
 Ref = commemorations
 
 [Suffrage]
-Condition = if-suffrage
+Condition = if-suffrage,not-bvm-suffrage-form
 Label = Suffrage of All Saints
 
 Type = antiphon
@@ -910,6 +910,19 @@ Ref = ordinary/shared/suffrage-versicle
 
 Type = collect
 Ref = ordinary/shared/suffrage-collect
+
+[Suffrage-BVM]
+Condition = if-suffrage,bvm-suffrage-form
+Label = Suffrage of All Saints
+
+Type = antiphon
+Ref = ordinary/shared/suffrage-antiphon-bvm
+
+Type = versicle
+Ref = ordinary/shared/suffrage-versicle
+
+Type = collect
+Ref = ordinary/shared/suffrage-collect-bvm
 
 [CrossCommemoration]
 Condition = if-cross-commemoration
