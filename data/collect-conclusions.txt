@@ -1,13 +1,14 @@
-# Collect conclusion forms, per the General Rubrics of the Monastic Breviary
-# XXXIII.4 (diurnal-rubrics.pdf). See data/texts/shared/formulas.txt for the
+# Collect conclusion forms, per XII Of the Collects in the Monastic Diurnal's
+# General Rubrics (PDF p. 29, printed p. xxxi). The same rule appears as
+# XXXIII.4 in diurnal-rubrics.pdf. See data/texts/shared/formulas.txt for the
 # formula texts and the quoted rule.
 #
 # Format:  <corpus-key> <form>
 #
 # Forms (suffixes of shared/formulas/collect-conclusion-*):
 #   through        addressed to the Father, the Son not mentioned (DEFAULT)
-#   through-same   the Son is mentioned in the body, but not at the end
-#   who-liveth     the Son is mentioned at the very end of the collect
+#   through-same   the Son is mentioned before, but not at, the ending
+#   who-liveth     the Son is mentioned at the ending of the collect
 #   who-livest     the collect is ADDRESSED to the Son (second person)
 #   ...-spirit     any of the above, when the Holy Spirit is also mentioned
 #                  ("in the unity of the SAME Holy Ghost")
@@ -17,25 +18,18 @@
 #
 # HOW THESE WERE DETERMINED
 #
-# The parish books print each collect's conclusion ("Through &c.", "Through the
-# same &c.", "Who with thee ... liveth &c.", "Who with God the Father ...
-# livest &c."), so they are the authority wherever one of our collects matches a
-# printed one. Every entry marked (book) below was confirmed that way, against
-# the six PDFs *and* the two .docx books in ../resources — the .docx Lauds and
-# Vespers books for Sundays & Major Feasts are the only place the second-person
-# form appears, so a sweep that misses them will wrongly conclude that no collect
-# is addressed to the Son. 97 of 171 collect entries match a printed conclusion
-# closely enough to inherit its verdict.
-#
-# Entries marked (latin) could not be matched — our translation diverges too far
-# from the printed one — and are classified from the Latin they translate.
-# Entries marked (uncertain) are flagged for a second opinion.
+# The complete Monastic Diurnal scan prints the rule and, for most of its
+# collects, the appointed abbreviated conclusion ("Through", "Through the
+# same", "Who with thee ... liveth", or "Who with God the Father ... livest").
+# Its direct printed examples govern wherever the corpus carries that prayer.
+# Parish books and supplements govern prayers added or translated differently
+# in current parish use. Classification from wording is reserved for prayers
+# without a matching printed conclusion.
 #
 # One genuine book disagreement: proper/st-anne/collect. The Sanctoral Vespers
 # book prints "Through &c."; the Sanctoral Lauds book and the diurnal (p. 575)
-# print "Through the same &c." Her collect names the Son, so XXXIII.4 makes the
-# Vespers book wrong. Across all Lauds/Vespers book pairs the printed
-# conclusions otherwise agree.
+# print "Through the same &c." Her collect names the Son before the ending, so
+# the General Rubrics make the Vespers book's plain "Through" inconsistent.
 
 # --- Ordinary-tier collects ---
 # The last-resort fallbacks behind proper-collect, reached on days with no proper
@@ -52,41 +46,55 @@ ordinary/terce/collect through-spirit
 
 # --- Addressed to the Son: "Who with God the Father ... livest and reignest" ---
 proper/advent-sunday-1/collect who-livest
+# The Diurnal (p. 170) prints "Who with God ... livest": the prayer's "thy
+# visitation" addresses the Son, rather than mentioning him in the third person.
+proper/advent-sunday-3/collect who-livest
 proper/advent-sunday-4/collect who-livest
 proper/all-souls/collect who-livest
 proper/chair-peter-antioch/collect who-livest
+# This is the same collect whose Diurnal form is printed for the commemoration
+# of St Peter on p. 463 with "Who with God the Father ... livest".
+proper/chair-peter-rome/collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest
 proper/solemnity-st-joseph/collect who-livest
-# (latin) "O God, in whose Passion ... a sword of grief pierced through the
-# well-beloved soul" addresses the Son; Deus in cuius passione takes Qui vivis et
-# regnas. Our wording diverges from the printed collect, so this one is not
-# book-confirmed.
+# Directly printed in the Diurnal with the second-person ending (pp. 492, 500).
+proper/st-gabriel-archangel/collect who-livest
+proper/st-joseph/collect who-livest
+# The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
 
-# --- The Son is mentioned at the very end: "Who with thee ... liveth" ---
-proper/advent-sunday-2/collect who-liveth
-proper/advent-sunday-3/collect who-liveth
+# --- The Son is mentioned at the ending: "Who with thee ... liveth" ---
 proper/ascension/collect who-liveth
+# Directly printed in the Diurnal with "Who with thee ... liveth" (pp. 589,
+# 281, and 284 respectively).
+proper/assumption-bvm/collect who-liveth
 proper/christ-the-king/collect who-liveth
 proper/circumcision/collect who-liveth
 proper/good-friday/collect who-liveth
+proper/holy-monday/collect who-liveth
 proper/holy-thursday/collect who-liveth
-proper/nativity-sunday-within-octave/collect who-liveth
+proper/holy-wednesday/collect who-liveth
+# The restored final Christ clauses are printed on pp. 265, 430, and 441.
+proper/laetare-sunday/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth
+proper/pentecost-sunday-23/collect who-liveth
 # Diurnal p. 470 prints the body ending "...by the same thy Son Jesus Christ our
 # Lord. Who with thee..." — our text had dropped that trailing clause, which is
 # what makes this Son-at-the-end; restored with the collect.
 proper/purification-bvm/collect who-liveth
+# The Octave repeats its own printed collect, which also ends on the Son
+# (Diurnal p. 220), rather than resolving through the feast's corpus key.
+proper/octave-day-st-stephen/collect who-liveth
 proper/st-stephen/collect who-liveth
 proper/st-stephen/commemoration-collect who-liveth
-proper/vigil-epiphany/collect who-liveth
 proper/vigil-nativity/collect who-liveth
 
-# --- The Son is mentioned in the body, but not at the end ---
+# --- The Son is mentioned before, but not at, the ending ---
+# Directly printed "Through the same" in the Diurnal (pp. 167, 206, and 222).
+proper/advent-sunday-2/collect through-same
 proper/annunciation/collect through-same
-proper/assumption-bvm/collect through-same
 proper/christmas/collect through-same
 proper/easter-sunday/collect through-same
 proper/easter-sunday-2/collect through-same
@@ -95,17 +103,12 @@ proper/epiphany/collect through-same
 proper/holy-name-jesus/collect through-same
 proper/holy-saturday/collect through-same
 proper/motherhood-bvm/collect through-same
+proper/nativity-sunday-within-octave/collect through-same
 proper/palm-sunday/collect through-same
 proper/st-anne/collect through-same
 proper/st-joachim/collect through-same
 proper/transfiguration/collect through-same
-
-# (uncertain) These two end on the Son in our English, but the Latin they
-# translate ends on the verb ("...respiremus", "...liberemur") and takes Per
-# eundem. Classified by the Latin; neither matches a printed collect closely
-# enough to confirm. Worth a second opinion.
-proper/holy-monday/collect through-same
-proper/holy-wednesday/collect through-same
+proper/vigil-epiphany/collect through-same
 
 # --- The Holy Spirit is mentioned: "in the unity of the same Holy Ghost" ---
 proper/pentecost/collect through-spirit
