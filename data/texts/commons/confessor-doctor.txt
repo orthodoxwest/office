@@ -99,6 +99,9 @@ O God, who gavest blessed N. to thy people as a minister of eternal salvation: g
 [chapter-none]
 @use commons/confessor-bishop/chapter-none
 
+[hymn-vespers]
+@use commons/confessor-bishop/hymn-vespers
+
 [hymn-lauds]
 # SOURCE: office-hymns.zip (Jesu, the World_s Redeemer Hear.docx)
 Jesu Redemptor omnium
