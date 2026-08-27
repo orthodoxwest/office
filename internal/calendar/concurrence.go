@@ -105,6 +105,27 @@ func isDayWithinOctave(f *models.Feast) bool {
 	return len(suffix) > 0
 }
 
+// octaveParentID returns the parent feast ID for a generated octave-day feast,
+// e.g. "all-saints-octave-day-2" → "all-saints". Empty when f is not an octave day.
+func octaveParentID(f *models.Feast) string {
+	if f == nil {
+		return ""
+	}
+	if isOctaveDay(f) {
+		return strings.TrimSuffix(f.ID, "-octave-day")
+	}
+	idx := strings.LastIndex(f.ID, "-octave-day-")
+	if idx >= 0 && isDayWithinOctave(f) {
+		return f.ID[:idx]
+	}
+	return ""
+}
+
+func sameOctaveDays(a, b *models.Feast) bool {
+	parent := octaveParentID(a)
+	return parent != "" && parent == octaveParentID(b)
+}
+
 // isDoubleOrAbove returns true if the feast rank is Double or higher.
 func isDoubleOrAbove(f *models.Feast) bool {
 	return f.Rank.Weight() >= models.Double.Weight()
@@ -550,6 +571,14 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-day-within-octave-exclusion", Outcome: "suppressed", Detail: c.ID})
 			continue
 		}
+		// I Vespers commemorates "the Octave" once. When the outgoing office
+		// is already a day within that octave (Saturday All Souls → Sunday,
+		// 2024 ordo: "Comm. Octave & Winifred"), do not also pull the
+		// following day's octave-day occurrence.
+		if !secondVespers && loserIncluded && sameOctaveDays(loser, c) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-duplicate-octave-day", Outcome: "suppressed", Detail: c.ID})
+			continue
+		}
 		if included, rule := occurrenceCommemoratedAtFirstVespers(c); !included {
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: c.ID})
 		} else if !suppressed(c) {
@@ -649,6 +678,30 @@ func noOwnerCommemorationsWithDecisions(preceding, following *models.CalendarDay
 // of its own (XIII.18) — that must not be confused with "no concurrence to
 // resolve": the following day's I Vespers still applies in that case.
 func resolveConcurrence(preceding, following *models.CalendarDay) models.VespersDesignation {
+	// All Souls owns Matins through None and then ends (diurnal p. 654;
+	// every AWRV ordo 2017–2026: "The Office of All Souls' is ended with
+	// the celebration of Mass after None. Vespers are of the Octave of
+	// All Saints."). Recur as if the displaced octave day were still in
+	// possession. When that leaves the evening unowned (the next octave
+	// day also has no I Vespers), keep II Vespers of the octave rather
+	// than falling back to the Dead office. A following Sunday or feast
+	// that has I Vespers still wins (Saturday All Souls, 2019/2024).
+	if octave := allSoulsOctaveVespersOffice(preceding); octave != nil {
+		synth := *preceding
+		synth.Celebration = octave
+		synth.Color = octave.Color
+		synth.Commemorations = withoutFeast(preceding.Commemorations, octave.ID)
+		result := resolveConcurrence(&synth, following)
+		if result.Owner == models.VespersNotApplicable {
+			result.Owner = models.VespersIIOfPreceding
+			result.Feast = octave
+			result.Color = octave.Color
+			result.Season = preceding.Season
+			result.Rule = "concurrence:all-souls-ends-at-none"
+		}
+		return result
+	}
+
 	precFeast := preceding.Celebration
 	folFeast := following.Celebration
 	followingOfficeID := ""
@@ -734,6 +787,34 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	}, folFeast, preceding)
 }
 
+// allSoulsOctaveVespersOffice returns the All Saints octave day All Souls
+// displaced, used as the Vespers office once the Dead office has ended at None.
+func allSoulsOctaveVespersOffice(day *models.CalendarDay) *models.Feast {
+	if day == nil || day.Celebration == nil || day.Celebration.ID != "all-souls" {
+		return nil
+	}
+	for _, comm := range day.Commemorations {
+		if comm != nil && strings.HasPrefix(comm.ID, "all-saints-octave-day") {
+			return comm
+		}
+	}
+	return nil
+}
+
+func withoutFeast(comms []*models.Feast, id string) []*models.Feast {
+	if id == "" || len(comms) == 0 {
+		return comms
+	}
+	out := make([]*models.Feast, 0, len(comms))
+	for _, comm := range comms {
+		if comm != nil && comm.ID == id {
+			continue
+		}
+		out = append(out, comm)
+	}
+	return out
+}
+
 // applyChapterSplit marks a designation whose incoming office begins only at
 // the Chapter, leaving the psalmody with the outgoing office.
 // See VespersDesignation.PsalmodyFromPreceding.
@@ -766,5 +847,14 @@ func applyChapterSplit(d models.VespersDesignation, fol *models.Feast, preceding
 func resolveVespersConcurrence(days []models.CalendarDay) {
 	for i := 0; i < len(days)-1; i++ {
 		days[i].Vespers = resolveConcurrence(&days[i], &days[i+1])
+		if days[i+1].Celebration != nil && days[i+1].Celebration.ID == "all-souls" {
+			days[i].Vespers.AppendedOfficeOfTheDead = true
+			days[i].Vespers.AppendedFeast = days[i+1].Celebration
+			days[i].Vespers.Decisions = append(days[i].Vespers.Decisions, models.CompositionDecision{
+				Rule:    "vespers:appended-office-of-the-dead",
+				Outcome: "included",
+				Detail:  "all-souls",
+			})
+		}
 	}
 }

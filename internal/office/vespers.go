@@ -18,12 +18,50 @@ func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSectio
 			return nil, err
 		}
 	}
-	return composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
+	hour, err := composeMajorHour(day, sections, corpus, moveable, majorHourOptions{
 		hourName:    "vespers",
 		title:       "Vespers",
 		officeDay:   vespersOfficeDay,
 		psalmodyDay: vespersPsalmodyDay,
 	})
+	if err != nil {
+		return nil, err
+	}
+	if day != nil && day.Vespers.AppendedOfficeOfTheDead {
+		if err := appendVespersOfTheDead(hour, day, sections, corpus, moveable); err != nil {
+			return nil, err
+		}
+	}
+	return hour, nil
+}
+
+func appendVespersOfTheDead(hour *models.OfficeHour, day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) error {
+	deadHour, err := composeMajorHour(deadOfficeDay(day), sections, corpus, moveable, majorHourOptions{
+		hourName:    "vespers",
+		title:       "Vespers",
+		officeDay:   vespersOfficeDay,
+		psalmodyDay: vespersPsalmodyDay,
+	})
+	if err != nil {
+		return err
+	}
+	rubricRef := "shared/formulas/appended-vespers-of-the-dead-rubric"
+	if day.Celebration == nil || day.Celebration.ID != "all-saints" {
+		rubricRef = "shared/formulas/appended-vespers-of-the-dead-rubric-optional"
+	}
+	rubric := resolveElement(HourElement{Type: "rubric", Ref: rubricRef}, corpus)
+	hour.Sections = append(hour.Sections, models.OfficeSection{
+		Label:    vespersOfTheDeadLabel,
+		Elements: []models.OfficeElement{rubric},
+	})
+	hour.Sections = append(hour.Sections, deadHour.Sections...)
+	hour.Decisions = append(hour.Decisions, deadHour.Decisions...)
+	hour.Decisions = append(hour.Decisions, models.CompositionDecision{
+		Rule:    "vespers:appended-office-of-the-dead",
+		Outcome: "included",
+		Detail:  "all-souls",
+	})
+	return nil
 }
 
 // vespersPsalmodyDay returns the office day that supplies the psalms and their

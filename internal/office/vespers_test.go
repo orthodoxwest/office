@@ -500,6 +500,9 @@ func TestFestalVespersPsalmodyFullYearHasFourPsalms(t *testing.T) {
 		festalEvenings++
 		var psalms []string
 		for _, section := range hour.Sections {
+			if section.Label == vespersOfTheDeadLabel {
+				break
+			}
 			for _, elem := range section.Elements {
 				if elem.Type == models.Psalm {
 					psalms = append(psalms, elem.Label)

@@ -33,6 +33,45 @@ R. Amen.
 Rest eternal grant unto them, O Lord.
 And let light perpetual shine upon them.
 
+[may-they-rest-in-peace]
+# SOURCE: Monastic Diurnal.pdf, p. 81* (The Office of the Dead, after the Collect)
+V. May they rest in peace.
+R. Amen.
+
+[kneeling-our-father-rubric]
+# SOURCE: Monastic Diurnal.pdf, p. 76* (Vespers of the Dead); p. 105* (Lauds of the Dead)
+The following prayers are said kneeling.
+
+[dead-pre-collect-versicles]
+# SOURCE: Monastic Diurnal.pdf, pp. 76*–77* (Vespers of the Dead); p. 106* (Lauds of the Dead)
+V. From the gate of hell.
+R. Deliver their souls, O Lord.
+
+V. May they rest in peace.
+R. Amen.
+
+V. O Lord, hear my prayer.
+R. And let my cry come unto thee.
+
+V. The Lord be with you.
+R. And with thy spirit.
+
+Let us pray.
+
+[appended-vespers-of-the-dead-rubric]
+# SOURCE: Monastic Diurnal.pdf, p. 642 (November 1–2); 2026 ordo, 1 November
+After Let us bless the Lord, Vespers of the Dead are begun immediately under the rite of a Double, with the Antiphon I will walk. Our Father and Hail Mary are not said first.
+
+[appended-vespers-of-the-dead-rubric-optional]
+# SOURCE: 2025 ordo, 2 November (All Souls transferred to Monday)
+Optional: After Let us bless the Lord, Vespers of the Dead are begun immediately under the rite of a Double, with the Antiphon I will walk. Our Father and Hail Mary are not said first.
+
+[dead-compline-confiteor-rubric]
+# SOURCE: Monastic Diurnal.pdf, p. 643 (All Souls, At Compline)
+# Sir, ask a blessing, the Short Lesson, Our help, and the Lord's Prayer are
+# omitted; after the Confession and Absolution the psalms begin at once.
+Confession is made:
+
 [our-father-partly-secret-rubric]
 # SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2 (corporate form);
 # 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5

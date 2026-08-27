@@ -399,6 +399,13 @@ type VespersDesignation struct {
 	// are the incoming office's. Colour follows the outgoing office, as the
 	// printed ordos do (2022-2026: Jan 3 white → Innocents red prints "Vespers W").
 	PsalmodyFromPreceding bool
+
+	// AppendedOfficeOfTheDead is set on the evening before All Souls. After
+	// "Let us bless the Lord" of the day's Vespers, Vespers of the Dead begins
+	// at the antiphon "I will walk", and Compline that night is of the Dead
+	// (diurnal pp. 72*, 643f; 2024–2026 ordos). AppendedFeast is all-souls.
+	AppendedOfficeOfTheDead bool
+	AppendedFeast           *Feast
 }
 
 // CalendarDay represents the resolved calendar for a single day.

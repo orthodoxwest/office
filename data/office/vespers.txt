@@ -2,6 +2,7 @@
 # Psalms vary by day of week. Magnificat antiphon uses proper resolution.
 
 [Pre-Office]
+Condition = not-office-of-the-dead
 Collapsible = true
 Label = Prayers Before the Office
 
@@ -425,6 +426,7 @@ Type = proper-antiphon
 Ref = magnificat-antiphon
 
 [Pre-Collect]
+Condition = not-office-of-the-dead
 Label = The Prayers
 
 Type = dialogue
@@ -435,6 +437,18 @@ Ref = ordinary/shared/our-father
 
 Type = prayer
 Ref = ordinary/vespers/pre-collect-versicles
+
+[Pre-Collect-Dead]
+Condition = office-of-the-dead
+
+Type = rubric
+Ref = shared/formulas/kneeling-our-father-rubric
+
+Type = corporate-lord-prayer
+Ref = ordinary/shared/our-father
+
+Type = versicle
+Ref = shared/formulas/dead-pre-collect-versicles
 
 [Collect]
 Type = proper-collect
@@ -484,9 +498,13 @@ Type = collect
 Ref = ordinary/shared/cross-collect
 
 [Closing]
+Condition = not-office-of-the-dead
 
 Type = blessing
 Ref = ordinary/vespers/blessing
+
+[Closing-Peace]
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead
 
 Type = rubric
 Ref = shared/formulas/closing-our-father
@@ -497,17 +515,29 @@ Ref = ordinary/shared/our-father
 Type = versicle
 Ref = shared/formulas/closing-peace
 
+[Closing-Dead]
+Condition = office-of-the-dead
+
+Type = versicle
+Ref = shared/formulas/rest-eternal
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace
+
 [Marian]
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead
 
 Type = marian
 Ref = seasonal
 
 [Conclusion]
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead
 
 Type = versicle
 Ref = shared/formulas/divine-help
 
 [Post-Office]
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead
 Collapsible = true
 Label = Prayers After the Office
 
