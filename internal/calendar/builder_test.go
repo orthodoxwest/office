@@ -1,8 +1,10 @@
 package calendar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -1013,6 +1015,8 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 		{1, 17, models.VespersIOfFollowing, "St Anthony D yields to Sunday"},
 		// Mar 21 (St Benedict D2): II prec. against Laetare Sunday (XIII.6)
 		{3, 21, models.VespersIIOfPreceding, "St Benedict D2 retains Vespers against Laetare"},
+		// All Souls ends at None; Vespers are of the All Saints octave (MD p. 654).
+		{11, 2, models.VespersIIOfPreceding, "All Souls Vespers are of the Octave of All Saints"},
 	}
 
 	for _, tt := range tests {
@@ -1025,6 +1029,130 @@ func TestBuildCalendarVespersConcurrence2026(t *testing.T) {
 				tt.month, tt.day, day.Vespers.Owner, tt.wantOwner, tt.desc)
 		}
 	}
+
+	nov2 := findDay(days, 2026, 11, 2)
+	if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.ID != "all-souls" {
+		t.Fatal("2026-11-02 should remain All Souls at Lauds")
+	}
+	if nov2.Vespers.Feast == nil || nov2.Vespers.Feast.ID != "all-saints-octave-day-2" {
+		t.Fatalf("2026-11-02 vespers feast = %#v, want all-saints-octave-day-2", nov2.Vespers.Feast)
+	}
+	if nov2.Vespers.Color != models.White {
+		t.Errorf("2026-11-02 vespers colour = %s, want white", nov2.Vespers.Color)
+	}
+	if nov2.Vespers.Rule != "concurrence:all-souls-ends-at-none" {
+		t.Errorf("2026-11-02 vespers rule = %q, want concurrence:all-souls-ends-at-none", nov2.Vespers.Rule)
+	}
+	foundWinifred := false
+	for _, comm := range nov2.Vespers.Commemorations {
+		if comm != nil && strings.Contains(comm.ID, "winifred") {
+			foundWinifred = true
+		}
+	}
+	if !foundWinifred {
+		t.Errorf("2026-11-02 vespers commemorations = %#v, want Winifred", nov2.Vespers.Commemorations)
+	}
+}
+
+func TestAllSoulsSaturdayVespersYieldToSunday(t *testing.T) {
+	// 2024 Nov 2 is Saturday; the ordo gives I Vespers of the following Sunday
+	// with a commemoration of the octave, not Vespers of the Dead.
+	days, err := BuildCalendar(2024, findDataDir(t))
+	if err != nil {
+		t.Fatalf("BuildCalendar(2024): %v", err)
+	}
+	nov2 := findDay(days, 2024, 11, 2)
+	if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.ID != "all-souls" {
+		t.Fatal("2024-11-02 should be All Souls")
+	}
+	if nov2.Vespers.Owner != models.VespersIOfFollowing {
+		t.Errorf("2024-11-02 vespers owner = %v, want I of following", nov2.Vespers.Owner)
+	}
+	if nov2.Vespers.Feast == nil || nov2.Vespers.Feast.Category != models.CategorySunday {
+		t.Errorf("2024-11-02 vespers feast = %#v, want the following Sunday", nov2.Vespers.Feast)
+	}
+	gotIDs := commemorationIDs(nov2.Vespers.Commemorations)
+	wantIDs := []string{"all-saints-octave-day-2", "comm-11-03-st-winifred-virgin-and-martyr"}
+	if !slices.Equal(gotIDs, wantIDs) {
+		t.Errorf("2024-11-02 vespers commemorations = %v, want %v (ordo: Comm. Octave & Winifred)", gotIDs, wantIDs)
+	}
+}
+
+func TestAllSoulsTransfersFromSunday(t *testing.T) {
+	// 2025 Nov 2 is Sunday; the Diurnal and 2025 ordo keep All Souls on Monday.
+	// The same Sunday collision recurs in 2031, 2036, 2042, and 2053.
+	for _, year := range []int{2025, 2031, 2036, 2042, 2053} {
+		t.Run(strconv.Itoa(year), func(t *testing.T) {
+			days, err := BuildCalendar(year, findDataDir(t))
+			if err != nil {
+				t.Fatalf("BuildCalendar(%d): %v", year, err)
+			}
+			nov2 := findDay(days, year, 11, 2)
+			if nov2 == nil || nov2.Celebration == nil || nov2.Celebration.Category != models.CategorySunday {
+				t.Fatalf("%d-11-02 celebration = %#v, want the Sunday", year, nov2)
+			}
+			for _, comm := range nov2.Commemorations {
+				if comm != nil && comm.ID == "all-souls" {
+					t.Fatalf("%d-11-02 should not commemorate All Souls; it transfers to Monday", year)
+				}
+			}
+			nov3 := findDay(days, year, 11, 3)
+			if nov3 == nil || nov3.Celebration == nil || nov3.Celebration.ID != "all-souls" {
+				t.Fatalf("%d-11-03 celebration = %#v, want all-souls", year, nov3)
+			}
+			if nov3.Vespers.Feast == nil || nov3.Vespers.Feast.ID != "all-saints-octave-day-3" {
+				t.Fatalf("%d-11-03 vespers feast = %#v, want all-saints-octave-day-3", year, nov3.Vespers.Feast)
+			}
+			if nov3.Vespers.Color != models.White {
+				t.Errorf("%d-11-03 vespers colour = %s, want white", year, nov3.Vespers.Color)
+			}
+		})
+	}
+}
+
+func TestAllSoulsEveAppendsVespersOfTheDead(t *testing.T) {
+	// Vespers of the Dead is appended on the evening before All Souls
+	// (diurnal p. 642; 2024/2026 ordos after All Saints, 2025 ordo after Sunday).
+	tests := []struct {
+		year, month, day int
+		want             bool
+	}{
+		{2024, 11, 1, true},  // Friday All Saints, All Souls Saturday
+		{2024, 11, 2, false}, // All Souls itself: I Vespers of Sunday
+		{2025, 11, 1, false}, // Saturday All Saints; All Souls transferred
+		{2025, 11, 2, true},  // Sunday, All Souls on Monday (optional in the ordo)
+		{2026, 11, 1, true},  // Sunday All Saints, All Souls Monday
+		{2026, 11, 2, false},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%d-%02d-%02d", tt.year, tt.month, tt.day), func(t *testing.T) {
+			days, err := BuildCalendar(tt.year, findDataDir(t))
+			if err != nil {
+				t.Fatalf("BuildCalendar(%d): %v", tt.year, err)
+			}
+			day := findDay(days, tt.year, tt.month, tt.day)
+			if day == nil {
+				t.Fatalf("%d-%02d-%02d not found", tt.year, tt.month, tt.day)
+			}
+			if day.Vespers.AppendedOfficeOfTheDead != tt.want {
+				t.Errorf("%d-%02d-%02d AppendedOfficeOfTheDead = %v, want %v",
+					tt.year, tt.month, tt.day, day.Vespers.AppendedOfficeOfTheDead, tt.want)
+			}
+			if tt.want && (day.Vespers.AppendedFeast == nil || day.Vespers.AppendedFeast.ID != "all-souls") {
+				t.Errorf("%d-%02d-%02d AppendedFeast = %#v, want all-souls", tt.year, tt.month, tt.day, day.Vespers.AppendedFeast)
+			}
+		})
+	}
+}
+
+func commemorationIDs(comms []*models.Feast) []string {
+	ids := make([]string, 0, len(comms))
+	for _, comm := range comms {
+		if comm != nil {
+			ids = append(ids, comm.ID)
+		}
+	}
+	return ids
 }
 
 // A Simple's office begins only at the Chapter of Vespers (General Rubrics

@@ -309,6 +309,10 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
 				}},
+				{Name: "Closing-Dead", Elements: []HourElement{
+					{Type: "versicle", Ref: "shared/formulas/rest-eternal"},
+					{Type: "versicle", Ref: "shared/formulas/may-they-rest-in-peace"},
+				}},
 				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
 				{Name: "Conclusion", Elements: []HourElement{{Type: "versicle", Ref: "shared/formulas/divine-help"}}},
 				{Name: "Post-Office", Elements: []HourElement{
@@ -325,9 +329,15 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 			sections: []HourSection{
 				{Name: "Closing", Elements: []HourElement{
 					{Type: "blessing", Ref: "ordinary/vespers/blessing"},
+				}},
+				{Name: "Closing-Peace", Elements: []HourElement{
 					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
 					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
 					{Type: "versicle", Ref: "shared/formulas/closing-peace"},
+				}},
+				{Name: "Closing-Dead", Elements: []HourElement{
+					{Type: "versicle", Ref: "shared/formulas/rest-eternal"},
+					{Type: "versicle", Ref: "shared/formulas/may-they-rest-in-peace"},
 				}},
 				{Name: "Marian", Elements: []HourElement{{Type: "marian", Ref: "seasonal"}}},
 				{Name: "Conclusion", Elements: []HourElement{{Type: "versicle", Ref: "shared/formulas/divine-help"}}},

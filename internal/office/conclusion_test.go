@@ -238,6 +238,7 @@ func TestNoProperCollectCarriesInlineConclusion(t *testing.T) {
 	directlyReferenced := map[string]bool{
 		"ordinary/prime/collect":               true,
 		"ordinary/compline/collect":            true,
+		"proper/all-souls/compline-collect":    true,
 		"ordinary/shared/suffrage-collect":     true,
 		"ordinary/shared/suffrage-collect-bvm": true,
 		"ordinary/shared/cross-collect":        true,

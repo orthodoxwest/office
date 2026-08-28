@@ -107,6 +107,13 @@ R. Blessed are the dead which die in the Lord.
 # The ordo appoints the first collect only on Nov 2 ("1st Col. only, MD 77*").
 O God, the Creator and Redeemer of all the faithful: grant unto the souls of thy servants and handmaids the remission of all their sins; that through devout supplications they may obtain the pardon they have always desired.
 
+[compline-collect]
+# SOURCE: Monastic Diurnal.pdf, p. 643 (All Souls, At Compline)
+# Printed conclusion "Through."
+Look down, we beseech thee, O Lord, in merciful forgiveness upon the souls of all thy servants and handmaids, for whom we humbly entreat thy Majesty: that through this office of devout supplication they may be counted worthy to enter into everlasting rest.
+Through Jesus Christ thy Son, our Lord, who with thee in the unity of the Holy Ghost, liveth and reigneth God, world without end.
+R. Amen.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #

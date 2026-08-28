@@ -419,9 +419,9 @@ func ResolveDay(
 				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:other-privileged-day", Outcome: "suppressed", Detail: f.ID})
 				continue
 			}
-			if f.Rank.Weight() >= models.Double2ndClass.Weight() && f.Category != models.CategorySunday {
+			if shouldTransferOut(f, date) {
 				transfersOut = append(transfersOut, f)
-				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: "second-class-or-higher", Detail: f.ID})
+				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: transferOutOutcome(f, date), Detail: f.ID})
 			} else if f.Rank.Weight() >= models.Commemoration.Weight() {
 				comms = append(comms, f)
 				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
@@ -459,9 +459,9 @@ func ResolveDay(
 		if f == winner {
 			continue
 		}
-		if f.Rank.Weight() >= models.Double2ndClass.Weight() && f.Category != models.CategorySunday {
+		if shouldTransferOut(f, date) {
 			transfersOut = append(transfersOut, f)
-			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: "second-class-or-higher", Detail: f.ID})
+			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:transfer-out", Outcome: transferOutOutcome(f, date), Detail: f.ID})
 		} else if f.Rank.Weight() >= models.Commemoration.Weight() {
 			comms = append(comms, f)
 			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
@@ -481,6 +481,27 @@ func ResolveDay(
 		ResolutionRule:      "occurrence:general-precedence",
 		OccurrenceDecisions: decisions,
 	}, transfersOut
+}
+
+// shouldTransferOut reports whether a displaced feast is kept on the next
+// unhindered day rather than commemorated. II Class Doubles and above transfer
+// in the usual way. All Souls is only a Double, but the Diurnal (Nov 2) and
+// every AWRV ordo transfer it from Sunday to Monday.
+func shouldTransferOut(f *models.Feast, date time.Time) bool {
+	if f == nil {
+		return false
+	}
+	if f.ID == "all-souls" && date.Weekday() == time.Sunday {
+		return true
+	}
+	return f.Rank.Weight() >= models.Double2ndClass.Weight() && f.Category != models.CategorySunday
+}
+
+func transferOutOutcome(f *models.Feast, date time.Time) string {
+	if f != nil && f.ID == "all-souls" && date.Weekday() == time.Sunday {
+		return "all-souls-from-sunday"
+	}
+	return "second-class-or-higher"
 }
 
 func feastIDs(feasts []*models.Feast) []string {

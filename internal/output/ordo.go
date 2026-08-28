@@ -167,6 +167,14 @@ func FormatDay(day *models.CalendarDay, eng *office.Engine, moveable *calendar.M
 		lines = append(lines, fmt.Sprintf("%sVespers %s", indent,
 			joinBar(vespers.Color.Abbrev(), owner, mag, suffrageLabel(vespers.Suffrage))))
 		lines = append(lines, commLines(vespers.Comms)...)
+		if day.Vespers.AppendedOfficeOfTheDead {
+			if day.Celebration == nil || day.Celebration.ID != "all-saints" {
+				lines = append(lines, indent+"Vespers of the Dead (optional) after Let us bless the Lord")
+			} else {
+				lines = append(lines, indent+"Vespers of the Dead after Let us bless the Lord")
+			}
+			lines = append(lines, indent+"Compline of the Dead")
+		}
 	} else if day.Vespers.Owner != models.VespersNotApplicable {
 		// Fallback (no engine): keep the terse owner line.
 		switch day.Vespers.Owner {

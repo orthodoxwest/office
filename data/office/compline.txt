@@ -2,6 +2,7 @@
 # Same structure every day; only preces and Marian antiphon vary.
 
 [Opening]
+Condition = not-office-of-the-dead
 
 Type = versicle
 Ref = ordinary/compline/opening-versicle
@@ -24,28 +25,37 @@ Ref = ordinary/compline/post-absolution
 Type = proper-opening-acclamation
 Ref = alleluia
 
+[Opening-Dead]
+Condition = office-of-the-dead
+
+Type = rubric
+Ref = shared/formulas/dead-compline-confiteor-rubric
+
+Type = prayer
+Ref = ordinary/shared/confiteor
+
 [Psalmody]
 
 Type = psalm
 Ref = psalms/004
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/091
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/134
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 [Hymn]
-Condition = not-feast-holy-saturday
+Condition = not-feast-holy-saturday,not-office-of-the-dead
 Type = proper-hymn
 Ref = hymn
 
@@ -64,8 +74,17 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = nunc-dimittis-antiphon
 
+[Nunc-Dimittis-Dead]
+Condition = office-of-the-dead
+
+Type = canticle
+Ref = canticles/nunc-dimittis
+
+Type = gloria-patri
+Ref = office
+
 [Chapter]
-Condition = not-feast-holy-saturday
+Condition = not-feast-holy-saturday,not-office-of-the-dead
 Type = proper-chapter
 Ref = chapter
 
@@ -98,6 +117,7 @@ Type = preces
 Ref = ordinary/compline/preces
 
 [Collect]
+Condition = not-office-of-the-dead
 Label = Collect
 
 Type = prayer
@@ -112,14 +132,37 @@ Ref = ordinary/compline/post-collect
 Type = blessing
 Ref = ordinary/compline/blessing
 
+[Collect-Dead]
+Condition = office-of-the-dead
+Label = Collect
+
+Type = rubric
+Ref = shared/formulas/kneeling-our-father-rubric
+
+Type = corporate-lord-prayer
+Ref = ordinary/shared/our-father
+
+Type = versicle
+Ref = shared/formulas/dead-pre-collect-versicles
+
+Type = collect
+Ref = proper/all-souls/compline-collect
+
+Type = versicle
+Ref = shared/formulas/rest-eternal
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace
 
 [Marian]
+Condition = not-office-of-the-dead
 Label = Final Antiphon of the Blessed Virgin Mary
 
 Type = marian
 Ref = seasonal
 
 [Closing]
+Condition = not-office-of-the-dead
 
 Type = blessing
 Ref = ordinary/compline/conclusion
