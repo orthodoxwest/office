@@ -58,6 +58,10 @@ Good and faithful servant, * enter thou into the joy of thy Lord.
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, For a Doctor, at both Vespers)
 O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God.
 
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, "For a Doctor, at both Vespers")
+@use commons/confessor-doctor/magnificat-antiphon
+
 [commemoration-antiphon]
 @use commons/confessor-doctor/psalm-antiphon-1
 

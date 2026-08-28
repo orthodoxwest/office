@@ -36,6 +36,18 @@ R. Thanks be to God.
 [chapter-terce]
 @use commons/apostle-paschal/chapter-lauds
 
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At Sext)
+!Wis 5:5
+How is he numbered among the children of God, * and his lot is among the Saints!
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At None)
+!Rom 8:28
+We know that all things work together for good to them that love God, * to them who are the called according to his purpose.
+R. Thanks be to God.
+
 [chapter-vespers]
 @use commons/apostle-paschal/chapter-lauds
 
@@ -56,6 +68,23 @@ V. And an ageless eternity.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At Terce)
+@use commons/apostle-paschal/short-responsory-lauds
+
+[short-responsory-sext]
+# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At Sext)
+@use commons/apostle-paschal/short-responsory-vespers
+
+[short-responsory-none]
+# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At None)
+R. Everlasting joy * shall be upon their heads, alleluia.
+R. Everlasting joy * shall be upon their heads, alleluia.
+V. They shall obtain joy and gladness, alleluia.
+R. Upon their heads, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Everlasting joy * shall be upon their heads, alleluia.
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 618–619 (Common of Apostles and Evangelists in Paschaltide)

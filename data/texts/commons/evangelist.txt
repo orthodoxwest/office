@@ -1,3 +1,9 @@
+# The Monastic Diurnal has a single Common of Apostles and Evangelists
+# (pp. 7*-15* out of Paschaltide), so every slot here is the Apostles' text.
+# Sections are aliased rather than duplicated so the two categories cannot
+# drift apart; only the psalm antiphons are spelled out, because they were
+# transcribed from the parish books before the two files were unified.
+
 [vespers-psalmody-first]
 @use ordinary/vespers/festal-psalmody
 
@@ -23,6 +29,32 @@ Ye are my friends * if ye do whatsoever I command you, saith the Lord.
 
 [psalm-antiphon-5]
 In your patience * possess ye your souls.
+
+[psalm-antiphon-1-first-vespers]
+# SOURCE: monastic diurnal, p. 7* (Common of Apostles and Evangelists, At I Vespers)
+@use commons/apostle/psalm-antiphon-1-first-vespers
+
+[psalm-antiphon-2-first-vespers]
+@use commons/apostle/psalm-antiphon-2-first-vespers
+
+[psalm-antiphon-3-first-vespers]
+@use commons/apostle/psalm-antiphon-3-first-vespers
+
+[psalm-antiphon-4-first-vespers]
+@use commons/apostle/psalm-antiphon-4-first-vespers
+
+[psalm-antiphon-1-vespers]
+# SOURCE: monastic diurnal, pp. 12*-15* (Common of Apostles and Evangelists, At II Vespers)
+@use commons/apostle/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+@use commons/apostle/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+@use commons/apostle/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+@use commons/apostle/psalm-antiphon-4-vespers
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Apostles and Evangelists) — parish noted manual
@@ -51,16 +83,62 @@ They will deliver you up * to the councils, and they will scourge you in their s
 V. Their sound hath gone forth into all the earth:
 R. And their words unto the ends of the world.
 
+[commemoration-versicle-lauds]
+@use commons/evangelist/versicle-lauds
+
+[commemoration-versicle-vespers]
+@use commons/evangelist/versicle-vespers
+
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 11* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
 @use commons/apostle/chapter-lauds
-
-[hymn-lauds]
-# SOURCE: monastic diurnal, p. 11* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
-@use commons/apostle/hymn-lauds
 
 [chapter-vespers]
 @use commons/evangelist/chapter-lauds
 
 [chapter-terce]
 @use commons/evangelist/chapter-lauds
+
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles and Evangelists out of Paschaltide, At Sext)
+@use commons/apostle/chapter-sext
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 12* (Common of Apostles and Evangelists out of Paschaltide, At None)
+@use commons/apostle/chapter-none
+
+[hymn-lauds]
+# SOURCE: monastic diurnal, p. 11* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
+@use commons/apostle/hymn-lauds
+
+[hymn-vespers]
+# SOURCE: monastic diurnal, pp. 10*, 15* (Common of Apostles and Evangelists, "Hymn as at Lauds")
+@use commons/apostle/hymn-vespers
+
+[versicle-lauds]
+# SOURCE: monastic diurnal, p. 11* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
+@use commons/apostle/versicle-lauds
+
+[versicle-vespers]
+@use commons/apostle/versicle-vespers
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 10* (Common of Apostles and Evangelists, At I Vespers)
+@use commons/apostle/versicle-first-vespers
+
+[short-responsory-lauds]
+# SOURCE: monastic diurnal, p. 10* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
+@use commons/apostle/short-responsory-lauds
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, pp. 10*, 15* (Common of Apostles and Evangelists, At I and II Vespers)
+@use commons/apostle/short-responsory-vespers
+
+[short-responsory-terce]
+@use commons/apostle/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/apostle/short-responsory-sext
+
+[short-responsory-none]
+@use commons/apostle/short-responsory-none

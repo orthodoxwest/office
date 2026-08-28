@@ -1,34 +1,77 @@
-# Paschal variant of the Common of an Evangelist.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of an Evangelist. The Monastic Diurnal has one
+# Common of Apostles and Evangelists in Paschaltide (pp. 16*-19*), so every
+# slot is the Apostles' Paschaltide text.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/evangelist-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 17* (Common of Apostles and Evangelists in Paschaltide, At Lauds)
+@use commons/apostle-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/apostle-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/apostle-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/apostle-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/apostle-paschal/psalm-antiphon-5
+
+[psalm-antiphon-4-vespers]
+@use commons/apostle-paschal/psalm-antiphon-4-vespers
 
 [benedictus-antiphon]
-@use commons/martyr-paschal/benedictus-antiphon
+@use commons/apostle-paschal/benedictus-antiphon
 
 [magnificat-antiphon]
-@use commons/martyr-paschal/magnificat-antiphon
+@use commons/apostle-paschal/magnificat-antiphon
 
 [magnificat-antiphon-first]
-@use commons/martyr-paschal/magnificat-antiphon-first
+@use commons/apostle-paschal/magnificat-antiphon-first
+
+[chapter-lauds]
+@use commons/apostle-paschal/chapter-lauds
+
+[chapter-vespers]
+@use commons/apostle-paschal/chapter-vespers
+
+[chapter-terce]
+@use commons/apostle-paschal/chapter-terce
+
+[chapter-sext]
+@use commons/apostle-paschal/chapter-sext
+
+[chapter-none]
+@use commons/apostle-paschal/chapter-none
+
+[short-responsory-lauds]
+@use commons/apostle-paschal/short-responsory-lauds
+
+[short-responsory-vespers]
+@use commons/apostle-paschal/short-responsory-vespers
+
+[short-responsory-terce]
+@use commons/apostle-paschal/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/apostle-paschal/short-responsory-sext
+
+[short-responsory-none]
+@use commons/apostle-paschal/short-responsory-none
+
+[versicle-lauds]
+@use commons/apostle-paschal/versicle-lauds
+
+[versicle-vespers]
+@use commons/apostle-paschal/versicle-vespers
+
+[versicle-first-vespers]
+@use commons/apostle-paschal/versicle-first-vespers
 
 [hymn-lauds]
 @use commons/apostle-paschal/hymn-lauds

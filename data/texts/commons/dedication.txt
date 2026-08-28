@@ -24,6 +24,10 @@ Well founded * is the Lord's house on the solid rock.
 # SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
 All thy walls * shall be stones most precious; and the towers of Jerusalem shall be upbuilded with jewels.
 
+[psalm-antiphon-4-vespers]
+# SOURCE: monastic diurnal, p. 55* (Common of the Dedication of a Church, At I Vespers); II Vespers is all as at I Vespers (p. 61*)
+@use commons/dedication/psalm-antiphon-5
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 59* (Common of the Dedication of a Church, At Lauds)
 Zacchaeus, * make haste, and come down; for to-day I must abide at thy house: and he made haste, and came down, and received him joyfully into his house. This day is salvation come to this house from the Lord, alleluia.
