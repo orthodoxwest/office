@@ -1282,7 +1282,14 @@ seasonal/passiontide/versicle-vespers,d5317e8b3923,Propers of Lauds & Vespers Du
 seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/closing-peace,6dd169108046,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
-shared/formulas/collect-conclusion-through,1c791174c54e,diurnal,"Monday at Prime, after the Preces",9,verified,codex,2026-08-23,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0055
+shared/formulas/collect-conclusion-through,93da58b24c75,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-through-same,eb0d5af59820,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-through-same-spirit,79b9e4e36cc9,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-through-spirit,32957078d506,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-who-livest,298d64dd1ae9,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-who-livest-spirit,9f426dbfc726,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-who-liveth,3198d9d4cc94,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
+shared/formulas/collect-conclusion-who-liveth-spirit,589561b1f761,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
 shared/formulas/daily-blessing,88713ce680d1,diurnal,,10,verified,bwaldrep,2026-07-15,
 shared/formulas/divine-help,c73885541916,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/faithful-departed,78cd4856d8a2,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
