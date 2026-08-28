@@ -19,6 +19,10 @@
 [psalm-antiphon-5]
 @use commons/virgin-martyr/psalm-antiphon-5
 
+[psalm-antiphon-4-vespers]
+# SOURCE: monastic diurnal, p. 46* (Common of Virgins, At I Vespers: "Ants. of Lauds, omitting the fourth"); II Vespers is all as at I Vespers (p. 50*)
+@use commons/virgin/psalm-antiphon-5
+
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Virgins) — parish noted manual
 The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.

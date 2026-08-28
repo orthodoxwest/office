@@ -24,6 +24,10 @@ Lo, the winter is past, * the rain is over and gone: rise up, my love, and come 
 # SOURCE: monastic diurnal, p. 65* (Common of Feasts B.V.M., At Lauds)
 Thou art beautiful * and pleasant, O holy Mother of God, in thy felicity.
 
+[psalm-antiphon-4-vespers]
+# SOURCE: monastic diurnal, pp. 61*-63* (Common of Feasts B.V.M., At I Vespers); II Vespers is all as at I Vespers (p. 67*)
+@use commons/blessed-virgin/psalm-antiphon-5
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 66* (Common of Feasts B.V.M., At Lauds)
 Blessed art thou, * O Mary, for thou hast believed: and there shall be a performance in thee of those things which were told thee from the Lord, alleluia.

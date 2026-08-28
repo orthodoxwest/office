@@ -1,31 +1,49 @@
-# Paschal variant of the Common of a Virgin.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of Virgins (a Virgin not a Martyr). The
+# Monastic Diurnal has one Common of Virgins, so every slot takes the
+# virgin-martyr Paschaltide text.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-5
+
+[psalm-antiphon-4-vespers]
+@use commons/virgin-paschal/psalm-antiphon-5
+
+[benedictus-antiphon]
+@use commons/virgin-martyr-paschal/benedictus-antiphon
+
+[magnificat-antiphon]
+@use commons/virgin-martyr-paschal/magnificat-antiphon
 
 [short-responsory-lauds]
 @use commons/virgin-martyr-paschal/short-responsory-lauds
 
 [short-responsory-vespers]
 @use commons/virgin-martyr-paschal/short-responsory-vespers
+
+[versicle-lauds]
+@use commons/virgin-martyr-paschal/versicle-lauds
+
+[versicle-first-vespers]
+@use commons/virgin-martyr-paschal/versicle-first-vespers
+
+[versicle-vespers]
+@use commons/virgin-martyr-paschal/versicle-vespers
 
 [hymn-lauds]
 @use commons/virgin/hymn-lauds

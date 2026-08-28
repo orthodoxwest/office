@@ -29,6 +29,24 @@
 [chapter-vespers]
 @use commons/martyr-paschal/chapter-vespers
 
+[chapter-terce]
+@use commons/martyr-paschal/chapter-terce
+
+[chapter-sext]
+@use commons/martyr-paschal/chapter-sext
+
+[chapter-none]
+@use commons/martyr-paschal/chapter-none
+
+[short-responsory-terce]
+@use commons/martyr-paschal/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/martyr-paschal/short-responsory-sext
+
+[short-responsory-none]
+@use commons/martyr-paschal/short-responsory-none
+
 [short-responsory-lauds]
 @use commons/martyr-paschal/short-responsory-lauds
 

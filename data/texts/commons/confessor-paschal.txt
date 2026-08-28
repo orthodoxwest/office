@@ -1,25 +1,35 @@
-# Paschal variant of the Common of a Confessor.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of a Confessor not a Bishop.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
+#
+# Per the Monastic Diurnal's General Rubric on the Common of Saints (p. 6*, §3),
+# in the Commons of Confessors, Virgins and Holy Women all is said as out of
+# Paschaltide except that one Alleluia is added to each Antiphon, Versicle and
+# Response, and the Short Responsories of Lauds and Vespers take a double
+# Alleluia. The draft archdiocesan Commons Lauds book prints the same rule
+# inline as "(P.T. Alleluia)" after each antiphon (pp. 61-66).
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Commons Lauds book, p. 61 (Common of a Confessor not a Bishop, "(P.T. alleluia)")
+Lord, thou deliveredst * unto me five talents: behold, I have gained beside them five talents more, alleluia.
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Commons Lauds book, p. 62 (Common of a Confessor not a Bishop, "(p.t. alleluia)")
+Well done, thou good servant, * in little things found faithful, enter thou into the joy of thy Lord, alleluia.
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Commons Lauds book, p. 63 (Common of a Confessor not a Bishop, "(P.T. alleluia)")
+A wise and faithful servant, * whom the Lord hath made ruler over all his household, alleluia.
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Commons Lauds book, p. 63 (Common of a Confessor not a Bishop, "P.T. Alleluia")
+Blessed is that servant * whom his Lord, when he cometh and knocketh at the door, shall find watching, alleluia.
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: draft archdiocesan Commons Lauds book, p. 66 (Common of a Confessor not a Bishop, "(p.t. Alleluia)")
+Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
 
 [psalm-antiphon-1-vespers]
 # SOURCE: draft archdiocesan Commons Vespers book, p. 678 (Common of a Confessor not a Bishop, Paschaltide)
@@ -37,8 +47,43 @@ A wise and faithful servant, * whom the Lord hath made ruler over all his househ
 # SOURCE: draft archdiocesan Commons Vespers book, p. 681 (Common of a Confessor not a Bishop, Paschaltide)
 Good and faithful servant, * enter thou into the joy of thy Lord, alleluia.
 
+[benedictus-antiphon]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+Well done, good and faithful servant, * thou hast been faithful over a few things, I will make thee ruler over many things: enter thou into the joy of thy Lord, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+I will liken him * unto a wise man, which built his house upon a rock, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+The world, and all things earthly, * this man despised, triumphant: he laid up treasures in heaven by word and deed, alleluia.
+
 [short-responsory-lauds]
+# SOURCE: draft archdiocesan Commons Lauds book, p. 67 (Common of a Confessor not a Bishop, "In Paschaltide")
 @use commons/confessor-doctor-paschal/short-responsory-lauds
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, p. 42* (Common of a Confessor not a Bishop, "In Paschaltide Short R.")
+R. The mouth of the righteous is exercised in wisdom, * alleluia, alleluia.
+R. The mouth of the righteous is exercised in wisdom, * alleluia, alleluia.
+V. And his tongue will be talking of judgment.
+R. Alleluia, alleluia.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The mouth of the righteous is exercised in wisdom, * alleluia, alleluia.
+
+[versicle-lauds]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Versicle and Response)
+V. The Lord guided the righteous in right paths, alleluia.
+R. And shewed him the kingdom of God, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Versicle and Response)
+V. The Lord loved him and adorned him, alleluia.
+R. He clothed him with a robe of glory, alleluia.
+
+[versicle-vespers]
+@use commons/confessor-paschal/versicle-lauds
 
 [hymn-lauds]
 @use commons/confessor/hymn-lauds

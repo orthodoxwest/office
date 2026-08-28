@@ -148,9 +148,26 @@ Amen.
 [versicle-lauds]
 @use commons/confessor-bishop/versicle-lauds
 
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 42* (Common of a Confessor not a Bishop, At I Vespers)
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
+
+[versicle-vespers]
+# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At II Vespers)
+# The versicle is one of the two things II Vespers changes from I Vespers.
+@use commons/confessor/versicle-lauds
+
 [short-responsory-terce]
 # SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, At Terce)
 @use commons/confessor/short-responsory-lauds
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, p. 41* (Common of a Confessor not a Bishop, At I Vespers);
+# the same text the Little Hours use at Sext (p. 46*).
+# II Vespers takes it unchanged: "All as at I Vespers, p. 41*, except the
+# following" names only the versicle and the Magnificat antiphon (p. 46*).
+@use commons/confessor/short-responsory-sext
 
 [short-responsory-sext]
 # SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At Sext)

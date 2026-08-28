@@ -1,28 +1,49 @@
-# Paschal variant of the Common of a Virgin and Martyr.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of Virgins (Virgin Martyrs).
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
+#
+# Per the Monastic Diurnal's General Rubric on the Common of Saints (p. 6*, §3),
+# in the Common of Virgins all is said as out of Paschaltide except that one
+# Alleluia is added to each Antiphon, Versicle and Response, and the Short
+# Responsories of Lauds and Vespers take a double Alleluia. The draft
+# archdiocesan Commons Lauds book prints the same rule inline as
+# "(P.T. Alleluia)" (pp. 74-84).
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/virgin-martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+This is a wise Virgin, * and one of the number of the prudent, alleluia.
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+This is a wise Virgin, * whom the Lord hath found watching, alleluia.
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+Blessed is the barren * that is undefiled; she shall have fruit in the visitation of holy souls, alleluia.
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+# Already ends with Alleluia out of Paschaltide (monastic diurnal, p. 47*).
+@use commons/virgin-martyr/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+This woman * is beautiful among the daughters of Jerusalem, alleluia.
+
+[psalm-antiphon-4-vespers]
+@use commons/virgin-martyr-paschal/psalm-antiphon-5
+
+[benedictus-antiphon]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it, alleluia.
+
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Antiphon)
+Come, thou Bride of Christ, * receive the crown which the Lord hath prepared for thee for ever, alleluia.
 
 [short-responsory-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 142
+# SOURCE: monastic diurnal, p. 48* (Common of Virgins, "In Paschaltide Short R.")
 R. In thy grace and in thy beauty, * alleluia, alleluia.
 R. In thy grace and in thy beauty, * alleluia, alleluia.
 V. Go forth, ride prosperously, and reign.
@@ -31,7 +52,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace and in thy beauty, * alleluia, alleluia.
 
 [short-responsory-vespers]
-# SOURCE: Monastic Diurnal.pdf, p. 47* (Common of Virgins, In Paschaltide)
+# SOURCE: monastic diurnal, p. 47* (Common of Virgins, "In Paschaltide Short R.")
 R. God shall help her with his countenance, * alleluia, alleluia.
 R. God shall help her with his countenance, * alleluia, alleluia.
 V. God is in the midst of her, therefore shall she not be removed.
@@ -39,8 +60,21 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. God shall help her with his countenance, * alleluia, alleluia.
 
+[versicle-lauds]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Versicle and Response)
+V. Full of grace are thy lips, alleluia.
+R. Because God hath blessed thee for ever, alleluia.
+
+[versicle-first-vespers]
+# SOURCE: monastic diurnal, p. 6* (General Rubric §3: one Alleluia added to each Versicle and Response)
+V. In thy grace and in thy beauty, alleluia.
+R. Go forth, ride prosperously, and reign, alleluia.
+
+[versicle-vespers]
+@use commons/virgin-martyr-paschal/versicle-lauds
+
 [hymn-lauds]
-@use commons/virgin/hymn-lauds
+@use commons/virgin-martyr/hymn-lauds
 
 [hymn-vespers]
-@use commons/virgin/hymn-lauds
+@use commons/virgin-martyr/hymn-lauds

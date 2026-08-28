@@ -4,22 +4,23 @@
 # See the regular commons file for available section names.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-doctor-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At Lauds; For a Doctor uses the same ants)
+@use commons/confessor-bishop-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-bishop-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-bishop-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-bishop-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/confessor-bishop-paschal/psalm-antiphon-5
 
 [psalm-antiphon-1-vespers]
 @use commons/confessor-bishop-paschal/psalm-antiphon-1
@@ -69,3 +70,10 @@ R. The Lord chose him for a priest unto himself, alleluia, alleluia.
 
 [versicle-vespers]
 @use commons/confessor-bishop-paschal/versicle-lauds
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, "For a Doctor, at both Vespers")
+@use commons/confessor-doctor-paschal/magnificat-antiphon
+
+[benedictus-antiphon]
+@use commons/confessor-bishop-paschal/benedictus-antiphon

@@ -1,25 +1,31 @@
-# Paschal variant of the Common of a Bishop and Martyr.
-# Add sections here that differ during Paschaltide (Easter season).
+# Paschal variant of the Common of a Bishop and Martyr. The Monastic Diurnal
+# has one Common of One or Many Martyrs in Paschaltide (pp. 31*-32*), which is
+# "All as in the Common of Apostles in Paschaltide, except the following" —
+# only the hymns vary with the number of martyrs. Every slot therefore takes
+# the martyr-paschal text.
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
 
 [psalm-antiphon]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/bishop-martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-@use shared/formulas/paschal-psalm-antiphon
+# SOURCE: monastic diurnal, p. 31* (Common of One or Many Martyrs in Paschaltide)
+@use commons/martyr-paschal/psalm-antiphon-1
 
 [psalm-antiphon-2]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-2
 
 [psalm-antiphon-3]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-3
 
 [psalm-antiphon-4]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-4
 
 [psalm-antiphon-5]
-@use shared/formulas/paschal-psalm-antiphon
+@use commons/martyr-paschal/psalm-antiphon-5
+
+[psalm-antiphon-4-vespers]
+@use commons/martyr-paschal/psalm-antiphon-4-vespers
 
 [benedictus-antiphon]
 @use commons/martyr-paschal/benedictus-antiphon
@@ -29,6 +35,45 @@
 
 [magnificat-antiphon-first]
 @use commons/martyr-paschal/magnificat-antiphon-first
+
+[chapter-lauds]
+@use commons/martyr-paschal/chapter-lauds
+
+[chapter-vespers]
+@use commons/martyr-paschal/chapter-vespers
+
+[chapter-terce]
+@use commons/martyr-paschal/chapter-terce
+
+[chapter-sext]
+@use commons/martyr-paschal/chapter-sext
+
+[chapter-none]
+@use commons/martyr-paschal/chapter-none
+
+[short-responsory-lauds]
+@use commons/martyr-paschal/short-responsory-lauds
+
+[short-responsory-vespers]
+@use commons/martyr-paschal/short-responsory-vespers
+
+[short-responsory-terce]
+@use commons/martyr-paschal/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/martyr-paschal/short-responsory-sext
+
+[short-responsory-none]
+@use commons/martyr-paschal/short-responsory-none
+
+[versicle-lauds]
+@use commons/martyr-paschal/versicle-lauds
+
+[versicle-vespers]
+@use commons/martyr-paschal/versicle-vespers
+
+[versicle-first-vespers]
+@use commons/martyr-paschal/versicle-first-vespers
 
 [hymn-lauds]
 @use commons/martyr-paschal/hymn-lauds

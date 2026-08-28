@@ -36,6 +36,26 @@
 # SOURCE: draft archdiocesan Vespers book, pp. 609, 618 (I and II Vespers, Common of One or Many Martyrs in Paschaltide)
 @use commons/martyr-paschal/chapter-lauds
 
+[chapter-terce]
+# SOURCE: monastic diurnal, p. 31* ("All as in the Common of Apostles in Paschaltide, except the following")
+@use commons/apostle-paschal/chapter-terce
+
+[chapter-sext]
+@use commons/apostle-paschal/chapter-sext
+
+[chapter-none]
+@use commons/apostle-paschal/chapter-none
+
+[short-responsory-terce]
+# SOURCE: monastic diurnal, p. 31* ("All as in the Common of Apostles in Paschaltide, except the following")
+@use commons/apostle-paschal/short-responsory-terce
+
+[short-responsory-sext]
+@use commons/apostle-paschal/short-responsory-sext
+
+[short-responsory-none]
+@use commons/apostle-paschal/short-responsory-none
+
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 646 (Common of One or Many Martyrs in Paschaltide)
 @use commons/apostle-paschal/short-responsory-lauds

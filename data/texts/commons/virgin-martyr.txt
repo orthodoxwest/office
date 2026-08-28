@@ -1,8 +1,9 @@
-[vespers-psalmody-first]
-@use ordinary/vespers/festal-psalmody
-
 [vespers-psalmody]
-@use psalmody/vespers/martyrs
+# SOURCE: monastic diurnal, p. 46* (Common of Virgins, At I Vespers: "Psalms as on
+# Feasts of the Blessed Virgin Mary, p. 61*"); II Vespers is all as at I Vespers
+# (p. 50*). The draft archdiocesan Commons Vespers book prints the same psalms
+# (109, 112, 121, 126) for both Vespers of the Common of Virgins, pp. 119-122.
+@use psalmody/vespers/blessed-virgin
 
 [psalm-antiphon]
 # SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
@@ -25,6 +26,10 @@ Come, O thou my chosen one, * and I will set my throne within thee, alleluia.
 [psalm-antiphon-5]
 # SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
 This woman * is beautiful among the daughters of Jerusalem.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: monastic diurnal, p. 46* (Common of Virgins, At I Vespers: "Ants. of Lauds, omitting the fourth"); II Vespers is all as at I Vespers (p. 50*)
+@use commons/virgin-martyr/psalm-antiphon-5
 
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 48* (Common of Virgins, At Lauds)
