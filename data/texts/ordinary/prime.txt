@@ -80,6 +80,12 @@ V. Vouchsafe, O Lord, this day.
 R. To keep us without sin.
 
 [collect]
+# SOURCE: Monastic Diurnal.pdf, Monday at Prime, printed p. 9 (PDF p. 55)
+# The conclusion is printed here in full and is kept verbatim, even though it
+# says "Holy Ghost" where the book's own General Rubrics XII (printed p. xxxi)
+# gives "Holy Spirit" for every conclusion form. The same page prints "Holy
+# Ghost" again in the PB Collect, so this reads as deliberate for the two
+# Prayer Book collects at Prime rather than a slip. Flagged for a ruling.
 O Lord God Almighty, who hast brought us to the beginning of this day;
 Defend us in the same with thy mighty power, that we may not fall this day into any sin,
 but that all our thoughts, words, and works may be directed to the fulfilment of thy righteousness.
