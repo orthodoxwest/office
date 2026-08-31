@@ -95,6 +95,27 @@ func TestTriduumLittleHours(t *testing.T) {
 		}
 	}
 
+	t.Run("Lauds and Vespers say no psalm doxology", func(t *testing.T) {
+		// p. 311 prints the Triduum psalms with the antiphon following straight
+		// on from the last verse. Holy Saturday evening is excluded: its
+		// Vespers belongs to Easter, which says the Gloria Patri again.
+		for _, date := range []string{"2026-04-09", "2026-04-10"} {
+			for _, hourName := range []string{"lauds", "vespers", "compline"} {
+				hour, err := engine.ComposeHour(hourName, byDate[date], moveable)
+				if err != nil {
+					t.Fatalf("ComposeHour(%s, %s): %v", hourName, date, err)
+				}
+				for _, section := range hour.Sections {
+					for _, elem := range section.Elements {
+						if elem.Type == models.PsalmDoxology {
+							t.Errorf("%s %s: psalm doxology rendered, want none", date, hourName)
+						}
+					}
+				}
+			}
+		}
+	})
+
 	t.Run("ordinary days keep their weekday form", func(t *testing.T) {
 		day := byDate["2026-04-08"] // Wednesday in Holy Week, outside the Triduum
 		hour, err := engine.ComposeHour("terce", day, moveable)
@@ -114,6 +135,24 @@ func TestTriduumLittleHours(t *testing.T) {
 		}
 		if !sawHymn || !sawDoxology {
 			t.Errorf("Wednesday in Holy Week: hymn=%v doxology=%v, want both", sawHymn, sawDoxology)
+		}
+
+		// Easter's I Vespers on Holy Saturday evening is outside the Triduum
+		// office even though the civil day is in it.
+		easterEve, err := engine.ComposeHour("vespers", byDate["2026-04-11"], moveable)
+		if err != nil {
+			t.Fatalf("ComposeHour(vespers, 2026-04-11): %v", err)
+		}
+		var sawEasterDoxology bool
+		for _, section := range easterEve.Sections {
+			for _, elem := range section.Elements {
+				if elem.Type == models.PsalmDoxology {
+					sawEasterDoxology = true
+				}
+			}
+		}
+		if !sawEasterDoxology {
+			t.Error("Holy Saturday Vespers (Easter I Vespers) says no psalm doxology, want one")
 		}
 	})
 }
