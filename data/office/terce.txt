@@ -21,6 +21,7 @@ Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
 [Opening]
+Condition = not-triduum
 Label = Opening Versicles
 
 Type = versicle
@@ -30,11 +31,45 @@ Type = proper-opening-acclamation
 Ref = alleluia
 
 [Hymn]
+Condition = not-triduum
 Type = proper-hymn
 Ref = hymn
 
+[Triduum-Psalmody]
+Condition = triduum
+# Monastic Diurnal, printed p. 314: the Hour begins at once with a fixed
+# psalmody, and the Gloria Patri is not said during the Triduum.
+# Psalm 119 vv. 33-80, as at Sunday Terce and Sext.
+
+Type = rubric
+Ref = shared/formulas/triduum-hours-opening-rubric
+
+Type = psalm
+Ref = psalms/119-v
+
+Type = psalm
+Ref = psalms/119-vi
+
+Type = psalm
+Ref = psalms/119-vii
+
+Type = psalm
+Ref = psalms/119-viii
+
+Type = psalm
+Ref = psalms/119-ix
+
+Type = psalm
+Ref = psalms/119-x
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
 [Psalmody-Sunday]
-Condition = weekday-sunday
+Condition = weekday-sunday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -61,7 +96,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Monday]
-Condition = weekday-monday
+Condition = weekday-monday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -88,7 +123,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Tuesday]
-Condition = weekday-tuesday
+Condition = weekday-tuesday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -115,7 +150,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Wednesday]
-Condition = weekday-wednesday
+Condition = weekday-wednesday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -142,7 +177,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Thursday]
-Condition = weekday-thursday
+Condition = weekday-thursday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -169,7 +204,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Friday]
-Condition = weekday-friday
+Condition = weekday-friday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -196,7 +231,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Psalmody-Saturday]
-Condition = weekday-saturday
+Condition = weekday-saturday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -223,6 +258,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Chapter]
+Condition = not-triduum
 Type = proper-chapter
 Ref = chapter
 
@@ -230,6 +266,7 @@ Type = proper-versicle
 Ref = versicle
 
 [Pre-Collect]
+Condition = not-triduum
 Label = Closing Prayers
 
 Type = dialogue
@@ -245,10 +282,30 @@ Type = prayer
 Ref = ordinary/terce/pre-collect-versicles
 
 [Collect]
+Condition = not-triduum
+Type = proper-collect
+Ref = collect
+
+[Triduum-Ending]
+Condition = triduum
+# Monastic Diurnal, printed p. 313: the same ending closes every Hour of
+# the Triduum -- kneeling at the antiphon, the Our Father in secret,
+# Psalm 51, and the collect of the day said without Let us pray.
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = psalm
+Ref = psalms/051
+
+Type = rubric
+Ref = shared/formulas/triduum-collect-rubric
+
 Type = proper-collect
 Ref = collect
 
 [Closing]
+Condition = not-triduum
 
 Type = blessing
 Ref = ordinary/terce/blessing

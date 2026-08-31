@@ -24,6 +24,7 @@ Type = secret-prayer
 Ref = ordinary/shared/apostles-creed
 
 [Opening]
+Condition = not-triduum
 Label = Opening Versicles
 
 Type = versicle
@@ -33,11 +34,42 @@ Type = proper-opening-acclamation
 Ref = alleluia
 
 [Hymn]
+Condition = not-triduum
 Type = proper-hymn
 Ref = hymn
 
+[Triduum-Psalmody]
+Condition = triduum
+# Monastic Diurnal, printed p. 314: the Hour begins at once with a fixed
+# psalmody, and the Gloria Patri is not said during the Triduum.
+# Psalm 54, then Psalm 119 vv. 1-32 as at Sunday Prime.
+
+Type = rubric
+Ref = shared/formulas/triduum-hours-opening-rubric
+
+Type = psalm
+Ref = psalms/054
+
+Type = psalm
+Ref = psalms/119-i
+
+Type = psalm
+Ref = psalms/119-ii
+
+Type = psalm
+Ref = psalms/119-iii
+
+Type = psalm
+Ref = psalms/119-iv
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
 [Psalmody-Sunday]
-Condition = weekday-sunday
+Condition = weekday-sunday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -70,7 +102,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Monday]
-Condition = weekday-monday
+Condition = weekday-monday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -97,7 +129,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Tuesday]
-Condition = weekday-tuesday
+Condition = weekday-tuesday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -124,7 +156,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Wednesday]
-Condition = weekday-wednesday
+Condition = weekday-wednesday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -154,7 +186,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Thursday]
-Condition = weekday-thursday
+Condition = weekday-thursday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -181,7 +213,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Friday]
-Condition = weekday-friday
+Condition = weekday-friday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -208,7 +240,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Psalmody-Saturday]
-Condition = weekday-saturday
+Condition = weekday-saturday,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-1
@@ -235,24 +267,25 @@ Type = proper-antiphon
 Ref = psalm-antiphon-1
 
 [Chapter-Ferial]
-Condition = is-ferial,not-season-easter
+Condition = is-ferial,not-season-easter,not-triduum
 
 Type = proper-chapter
 Ref = chapter-ferial
 
 [Chapter-Festal]
-Condition = not-is-ferial
+Condition = not-is-ferial,not-triduum
 
 Type = proper-chapter
 Ref = chapter
 
 [Chapter-Easter-Feria]
-Condition = is-ferial,season-easter
+Condition = is-ferial,season-easter,not-triduum
 
 Type = proper-chapter
 Ref = chapter
 
 [Pre-Collect]
+Condition = not-triduum
 Label = Litany & Lord's Prayer
 
 Type = proper-versicle
@@ -268,7 +301,7 @@ Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
 [Preces]
-Condition = if-preces
+Condition = if-preces,not-triduum
 Label = Preces
 
 Type = preces
@@ -284,24 +317,50 @@ Type = prayer
 Ref = ordinary/prime/preces-vouchsafe
 
 [Collect-Intro]
+Condition = not-triduum
 Type = prayer
 Ref = ordinary/prime/collect-intro
 
 [Collect]
+Condition = not-triduum
 Label = Collect
 
 Type = collect
 Ref = ordinary/prime/collect
 
 [Martyrology]
+Condition = not-triduum
 Type = rubric
 Ref = ordinary/prime/martyrology-rubric
 
 [Athanasian]
+Condition = not-triduum
 Type = rubric
 Ref = ordinary/prime/athanasian-rubric
 
+[Triduum-Ending]
+Condition = triduum
+# Monastic Diurnal, printed p. 313: the same ending closes every Hour of
+# the Triduum -- kneeling at the antiphon, the Our Father in secret,
+# Psalm 51, and the collect of the day said without Let us pray.
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = psalm
+Ref = psalms/051
+
+Type = rubric
+Ref = shared/formulas/triduum-collect-rubric
+
+Type = proper-collect
+Ref = collect
+
+Type = rubric
+Ref = shared/formulas/triduum-prime-ending-rubric
+
 [Closing]
+Condition = not-triduum
 Label = Blessing
 
 Type = blessing

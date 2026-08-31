@@ -31,6 +31,12 @@ O all ye that pass by * behold, and see if there be any sorrow like unto my sorr
 V. My flesh shall rest in hope.
 R. Neither wilt Thou suffer thine Holy One to see corruption.
 
+[triduum-antiphon]
+# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+# Said after the psalmody at every Hour of the Triduum; the second and
+# third days add their clauses to the first day's text.
+Christ, ✠ for our sake, became obedient unto death, even the death of the cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name.
+
 [collect]
 Grant, we beseech thee, O Lord, that as we who are redeemed by the precious Blood of thy Son, so also cleansed by his holy Passion, we may this night pass from death to life.
 
@@ -39,9 +45,11 @@ Now Thou dost dismiss Thy servant, O Lord, * according to Thy word in peace, all
 
 # The Triduum omits these at Lauds and Vespers; see the SCOPE note on
 # seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
-# slots are hour-qualified because those two rubrics (Monastic Diurnal pp. 311
-# and 315) speak only for Lauds and Vespers; the Little Hours have their own
-# Triduum rubric on p. 314, not yet modelled.
+# slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers. The Little Hours have their own
+# rubric on p. 314, modelled in the hour definitions rather than here: they omit
+# the opening versicles and hymn outright and take a fixed psalmody, none of
+# which a proper slot can express.
 
 [chapter-lauds]
 @omit

@@ -33,14 +33,22 @@ I will take the cup of salvation; * and call upon the Name of the Lord.
 V. Mine own familiar friend, in whom I trusted;
 R. Which did eat of my bread, hath lifted up his heel against me.
 
+[triduum-antiphon]
+# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+# Said after the psalmody at every Hour of the Triduum; the second and
+# third days add their clauses to the first day's text.
+Christ, ✠ for our sake, became obedient unto death.
+
 [collect]
 O God, from whom Judas received the punishment of his guilt, and the thief the reward of his confession: grant unto us the full effect of thy clemency; that as in his Passion our Lord Jesus Christ gave to each a recompense meet for his deserts, so having taken away our old sins, he may bestow on us the grace of his resurrection.
 
 # The Triduum omits these at Lauds and Vespers; see the SCOPE note on
 # seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
-# slots are hour-qualified because those two rubrics (Monastic Diurnal pp. 311
-# and 315) speak only for Lauds and Vespers; the Little Hours have their own
-# Triduum rubric on p. 314, not yet modelled.
+# slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers. The Little Hours have their own
+# rubric on p. 314, modelled in the hour definitions rather than here: they omit
+# the opening versicles and hymn outright and take a fixed psalmody, none of
+# which a proper slot can express.
 
 [chapter-lauds]
 @omit
