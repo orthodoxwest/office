@@ -657,6 +657,7 @@ proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archd
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
 proper/finding-holy-cross/short-responsory-none,77d82c235c70,diurnal,"Finding of the Holy Cross, At None",524,verified,grok,2026-08-23,word-for-word from printed page image
+proper/good-friday/triduum-antiphon,0d63c19a3d66,diurnal,"Maundy Thursday at Lauds, addition on the second night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/good-friday/versicle-lauds,c0f024283763,diurnal,Good Friday at Lauds,341,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/guardian-angels/benedictus-antiphon,8b93e3d0650e,diurnal,"Holy Guardian Angels, At Lauds",615,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/chapter-lauds,50d156afa556,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
@@ -691,7 +692,9 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-name-jesus/short-responsory-none,198f7d31cd10,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/short-responsory-sext,dceee9df6644,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
+proper/holy-saturday/triduum-antiphon,3498be524a99,diurnal,"Maundy Thursday at Lauds, addition on the third night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/holy-thursday/triduum-antiphon,17ca8be312f7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,First day's form; transcribed from the page image.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/laetare-sunday/benedictus-antiphon-friday,289e8be8a866,diurnal,"IV Week in Lent, Friday",268,verified,grok,2026-08-22,word-for-word from printed page image
 proper/laetare-sunday/benedictus-antiphon-monday,ce178f463deb,diurnal,"IV Week in Lent, Monday",266,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1298,3 +1301,7 @@ shared/formulas/our-father-partly-secret-rubric,f0c8170f526b,General Rubrics of 
 shared/formulas/paschal-psalm-antiphon,d92894995670,diurnal,"Monday at Lauds, In Paschaltide",48,verified,grok,2026-08-24,word-for-word from printed page image
 shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,2026-07-15,
 shared/formulas/rest-eternal,bf647dbb2752,diurnal,The Office of the Dead,72*,verified,claude,2026-08-21,
+shared/formulas/triduum-christus-factus-rubric,350831b66dad,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-collect-rubric,a0457aa7ced7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-hours-opening-rubric,3419686e95a5,diurnal,Maundy Thursday at the Hours,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-prime-ending-rubric,823815a296ed,diurnal,Maundy Thursday at Prime,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.

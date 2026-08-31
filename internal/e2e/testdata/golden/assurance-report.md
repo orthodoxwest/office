@@ -3,11 +3,11 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 222 |
-| Full structural-cover pages | 58 |
-| Residual structural-review pages | 58 |
+| Modeled structural features | 243 |
+| Full structural-cover pages | 62 |
+| Residual structural-review pages | 62 |
 | Uncovered features | 0 |
-| Verified text entries | 1296 |
+| Verified text entries | 1303 |
 | Rendered text entries needing review | 842 |
 | Rendered text entries with unknown source | 163 |
 | Classified zero-occurrence entries | 34 |
@@ -72,6 +72,8 @@
 - `decision:condition:festal-vespers-psalmody=omitted`
 - `decision:condition:if-cross-commemoration=included`
 - `decision:condition:if-cross-commemoration=omitted`
+- `decision:condition:if-preces,not-triduum=included`
+- `decision:condition:if-preces,not-triduum=omitted`
 - `decision:condition:if-preces=included`
 - `decision:condition:if-preces=omitted`
 - `decision:condition:if-suffrage,bvm-suffrage-form=included`
@@ -80,10 +82,10 @@
 - `decision:condition:if-suffrage,not-bvm-suffrage-form=omitted`
 - `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=included`
 - `decision:condition:is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=omitted`
-- `decision:condition:is-ferial,not-season-easter=included`
-- `decision:condition:is-ferial,not-season-easter=omitted`
-- `decision:condition:is-ferial,season-easter=included`
-- `decision:condition:is-ferial,season-easter=omitted`
+- `decision:condition:is-ferial,not-season-easter,not-triduum=included`
+- `decision:condition:is-ferial,not-season-easter,not-triduum=omitted`
+- `decision:condition:is-ferial,season-easter,not-triduum=included`
+- `decision:condition:is-ferial,season-easter,not-triduum=omitted`
 - `decision:condition:not-appended-office-of-the-dead,not-office-of-the-dead=included`
 - `decision:condition:not-appended-office-of-the-dead,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=included`
@@ -94,12 +96,30 @@
 - `decision:condition:not-feast-holy-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=included`
 - `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=omitted`
-- `decision:condition:not-is-ferial=included`
-- `decision:condition:not-is-ferial=omitted`
+- `decision:condition:not-is-ferial,not-triduum=included`
+- `decision:condition:not-is-ferial,not-triduum=omitted`
 - `decision:condition:not-office-of-the-dead=included`
 - `decision:condition:not-office-of-the-dead=omitted`
+- `decision:condition:not-triduum=included`
+- `decision:condition:not-triduum=omitted`
 - `decision:condition:office-of-the-dead=included`
 - `decision:condition:office-of-the-dead=omitted`
+- `decision:condition:triduum=included`
+- `decision:condition:triduum=omitted`
+- `decision:condition:weekday-friday,not-triduum=included`
+- `decision:condition:weekday-friday,not-triduum=omitted`
+- `decision:condition:weekday-monday,not-triduum=included`
+- `decision:condition:weekday-monday,not-triduum=omitted`
+- `decision:condition:weekday-saturday,not-triduum=included`
+- `decision:condition:weekday-saturday,not-triduum=omitted`
+- `decision:condition:weekday-sunday,not-triduum=included`
+- `decision:condition:weekday-sunday,not-triduum=omitted`
+- `decision:condition:weekday-thursday,not-triduum=included`
+- `decision:condition:weekday-thursday,not-triduum=omitted`
+- `decision:condition:weekday-tuesday,not-triduum=included`
+- `decision:condition:weekday-tuesday,not-triduum=omitted`
+- `decision:condition:weekday-wednesday,not-triduum=included`
+- `decision:condition:weekday-wednesday,not-triduum=omitted`
 - `decision:marian:boundary=civil-day`
 - `decision:marian:boundary=purification-vespers-override`
 - `decision:marian:selection=alma-redemptoris-advent`
@@ -234,6 +254,7 @@
 - `resolution:short-responsory=ordinary`
 - `resolution:short-responsory=proper`
 - `resolution:short-responsory=seasonal`
+- `resolution:triduum-antiphon=proper`
 - `resolution:versicle=commons`
 - `resolution:versicle=ordinary`
 - `resolution:versicle=proper`

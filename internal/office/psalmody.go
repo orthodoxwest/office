@@ -337,12 +337,36 @@ const (
 var psalmDoxologyKeys = []string{doxologyGloriaPatri, doxologyRestEternal}
 
 // psalmDoxologyRef returns the corpus key for what concludes each psalm and
-// gospel canticle of the day's office.
+// gospel canticle of the day's office. Callers must first ask
+// saysPsalmDoxology, since some offices conclude them with nothing at all.
 func psalmDoxologyRef(day *models.CalendarDay) string {
 	if isOfficeOfTheDead(day) {
 		return doxologyRestEternal
 	}
 	return doxologyGloriaPatri
+}
+
+// saysPsalmDoxology reports whether the office concludes its psalms and gospel
+// canticles with anything at all. Nothing is said during the Triduum: the
+// Monastic Diurnal prints those psalms with the antiphon following straight on
+// from the last verse (p. 311 at Lauds, and the same form at the Little Hours
+// on p. 314). The choice belongs to the office rather than to the hour
+// definition, so definitions that name the Gloria Patri outright still defer
+// here and one rubric governs every hour.
+//
+// The rubric bounds itself: "Thus are ended all the Hours during this Triduum
+// through None of Holy Sabbath" (p. 313). Holy Saturday's evening belongs to
+// Easter, which says the Gloria Patri again — its Vespers already resolves
+// against Easter, but Compline keeps the civil day for the sections proper to
+// Holy Saturday, so the bound has to be stated rather than inferred.
+func saysPsalmDoxology(day *models.CalendarDay, hourName string) bool {
+	if !isTriduum(day) {
+		return true
+	}
+	if day.Celebration.ID == "holy-saturday" && (hourName == "vespers" || hourName == "compline") {
+		return true
+	}
+	return false
 }
 
 func usesFestalVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
@@ -362,9 +386,11 @@ func composeResolvedPsalmody(day *models.CalendarDay, hourName string, items []p
 		elems = append(elems,
 			antiphon,
 			resolveElement(HourElement{Type: "psalm", Ref: item.psalm}, corpus),
-			resolveElement(HourElement{Type: "gloria-patri", Ref: psalmDoxologyRef(day)}, corpus),
-			antiphon,
 		)
+		if saysPsalmDoxology(day, hourName) {
+			elems = append(elems, resolveElement(HourElement{Type: "gloria-patri", Ref: psalmDoxologyRef(day)}, corpus))
+		}
+		elems = append(elems, antiphon)
 	}
 	return elems
 }

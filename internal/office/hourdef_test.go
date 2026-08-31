@@ -467,8 +467,11 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 		switch section.Name {
 		case "Preces":
 			foundPreces = true
-			if section.Condition != "if-preces" {
-				t.Fatalf("Prime Preces condition = %q, want if-preces", section.Condition)
+			// The Triduum silences everything after the collect at Prime
+			// (Monastic Diurnal, printed p. 314), so the block carries that
+			// exclusion alongside its preces test.
+			if section.Condition != "if-preces,not-triduum" {
+				t.Fatalf("Prime Preces condition = %q, want if-preces,not-triduum", section.Condition)
 			}
 			wantRefs := []string{
 				"ordinary/shared/apostles-creed",
@@ -763,21 +766,21 @@ func TestPrimeUsesFixedCollectAndSplitPsalm9(t *testing.T) {
 
 func TestLittleHoursUseParishPsalm119Sections(t *testing.T) {
 	tests := []struct {
-		file      string
-		condition string
-		want      []string
+		file    string
+		section string
+		want    []string
 	}{
-		{file: "prime.txt", condition: "weekday-sunday", want: []string{"psalms/119-i", "psalms/119-ii", "psalms/119-iii", "psalms/119-iv"}},
-		{file: "terce.txt", condition: "weekday-sunday", want: []string{"psalms/119-v", "psalms/119-vi", "psalms/119-vii"}},
-		{file: "sext.txt", condition: "weekday-sunday", want: []string{"psalms/119-viii", "psalms/119-ix", "psalms/119-x"}},
-		{file: "none.txt", condition: "weekday-sunday", want: []string{"psalms/119-xi", "psalms/119-xii", "psalms/119-xiii"}},
-		{file: "terce.txt", condition: "weekday-monday", want: []string{"psalms/119-xiv", "psalms/119-xv", "psalms/119-xvi"}},
-		{file: "sext.txt", condition: "weekday-monday", want: []string{"psalms/119-xvii", "psalms/119-xviii", "psalms/119-xix"}},
-		{file: "none.txt", condition: "weekday-monday", want: []string{"psalms/119-xx", "psalms/119-xxi", "psalms/119-xxii"}},
+		{file: "prime.txt", section: "Psalmody-Sunday", want: []string{"psalms/119-i", "psalms/119-ii", "psalms/119-iii", "psalms/119-iv"}},
+		{file: "terce.txt", section: "Psalmody-Sunday", want: []string{"psalms/119-v", "psalms/119-vi", "psalms/119-vii"}},
+		{file: "sext.txt", section: "Psalmody-Sunday", want: []string{"psalms/119-viii", "psalms/119-ix", "psalms/119-x"}},
+		{file: "none.txt", section: "Psalmody-Sunday", want: []string{"psalms/119-xi", "psalms/119-xii", "psalms/119-xiii"}},
+		{file: "terce.txt", section: "Psalmody-Monday", want: []string{"psalms/119-xiv", "psalms/119-xv", "psalms/119-xvi"}},
+		{file: "sext.txt", section: "Psalmody-Monday", want: []string{"psalms/119-xvii", "psalms/119-xviii", "psalms/119-xix"}},
+		{file: "none.txt", section: "Psalmody-Monday", want: []string{"psalms/119-xx", "psalms/119-xxi", "psalms/119-xxii"}},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.file+"/"+tt.condition, func(t *testing.T) {
+		t.Run(tt.file+"/"+tt.section, func(t *testing.T) {
 			path := filepath.Join("..", "..", "data", "office", tt.file)
 			sections, err := ParseHourDefinition(path)
 			if err != nil {
@@ -786,7 +789,7 @@ func TestLittleHoursUseParishPsalm119Sections(t *testing.T) {
 
 			var got []string
 			for _, section := range sections {
-				if section.Condition != tt.condition {
+				if section.Name != tt.section {
 					continue
 				}
 				for _, elem := range section.Elements {
@@ -796,7 +799,7 @@ func TestLittleHoursUseParishPsalm119Sections(t *testing.T) {
 				}
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Fatalf("%s %s psalms = %v, want %v", tt.file, tt.condition, got, tt.want)
+				t.Fatalf("%s %s psalms = %v, want %v", tt.file, tt.section, got, tt.want)
 			}
 		})
 	}

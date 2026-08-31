@@ -512,6 +512,12 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		}
 		return resolveElement(elem, corpus)
 	case "gloria-patri":
+		// An office that concludes its psalms with nothing overrides whatever
+		// the definition names, since most sections name the Gloria Patri
+		// outright rather than deferring.
+		if !saysPsalmDoxology(day, hourName) {
+			return models.OfficeElement{Type: models.Doxology, Text: texts.OmitMarker, SlotRef: elem.Ref}
+		}
 		// Ref "office" defers to the office of the day: the Gloria Patri, or
 		// "Rest eternal" in the Office of the Dead. Only sections shared across
 		// every office need it; ones that run in a single office name their

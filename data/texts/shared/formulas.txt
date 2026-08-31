@@ -175,3 +175,27 @@ R. Amen.
 Who with God the Father in the unity of the same Holy Spirit livest and reignest
 God, world without end.
 R. Amen.
+
+[triduum-hours-opening-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 314 (Maundy Thursday at the Hours)
+The Our Father and Hail Mary (and at Prime I believe) having been said secretly,
+the Hour is begun at once with the Psalms, without the opening Versicles or the
+Hymn.
+
+[triduum-christus-factus-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+When the Antiphon Christ, for our sake is begun, all kneel; and when it is ended
+the Our Father is said entirely in secret. Then in a somewhat higher voice is
+said Psalm 51.
+
+[triduum-collect-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+The Psalm being ended, there is said, without Let us pray, in a low voice, the
+Collect of the day, its conclusion Who with thee ... liveth being said in
+silence. Thus are ended all the Hours during this Triduum, through None of Holy
+Saturday.
+
+[triduum-prime-ending-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 314 (Maundy Thursday at Prime)
+During this Triduum the Martyrology is not read, and the rest until the end of
+the Hour is not said.

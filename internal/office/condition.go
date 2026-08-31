@@ -23,6 +23,7 @@ const (
 	conditionIsFerial
 	conditionOfficeOfTheDead
 	conditionAppendedOfficeOfTheDead
+	conditionTriduum
 	conditionWeekday
 	conditionFeast
 	conditionSeason
@@ -91,6 +92,8 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionOfficeOfTheDead}, nil
 	case "appended-office-of-the-dead":
 		return conditionClause{kind: conditionAppendedOfficeOfTheDead}, nil
+	case "triduum":
+		return conditionClause{kind: conditionTriduum}, nil
 	}
 	if value, ok := strings.CutPrefix(atom, "weekday-"); ok {
 		weekdays := map[string]time.Weekday{
@@ -157,6 +160,8 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 		return isOfficeOfTheDead(day)
 	case conditionAppendedOfficeOfTheDead:
 		return day != nil && day.Vespers.AppendedOfficeOfTheDead
+	case conditionTriduum:
+		return isTriduum(day)
 	case conditionWeekday:
 		return civilWeekday(day) == c.weekday
 	case conditionFeast:
@@ -166,6 +171,22 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 	default:
 		return false
 	}
+}
+
+// isTriduum reports whether the office is one of the three days of the Sacred
+// Triduum, which share a single set of rubrics ("during this Triduum") rather
+// than three per-day ones: no opening versicles, no hymn, no Gloria Patri, a
+// fixed psalmody at the Little Hours, and the common ending at Christus factus
+// est (Monastic Diurnal, printed pp. 313-316).
+func isTriduum(day *models.CalendarDay) bool {
+	if day == nil || day.Celebration == nil {
+		return false
+	}
+	switch day.Celebration.ID {
+	case "holy-thursday", "good-friday", "holy-saturday":
+		return true
+	}
+	return false
 }
 
 // usesBVMSuffrageForm reports whether the current office or one of its
