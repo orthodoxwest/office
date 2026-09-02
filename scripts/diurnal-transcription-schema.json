@@ -1,14 +1,38 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["found", "text", "printed_page", "pdf_page", "confidence", "notes"],
+  "required": [
+    "found",
+    "text",
+    "printed_page",
+    "pdf_page",
+    "confidence",
+    "notes"
+  ],
   "properties": {
-    "found": {"type": "boolean"},
-    "text": {"type": "string"},
-    "printed_page": {"type": "string"},
-    "pdf_page": {"type": "integer", "minimum": 1},
-    "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
-    "notes": {"type": "string"}
+    "found": {
+      "type": "boolean"
+    },
+    "text": {
+      "type": "string"
+    },
+    "printed_page": {
+      "type": "string"
+    },
+    "pdf_page": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    }
   }
 }

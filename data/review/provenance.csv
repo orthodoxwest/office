@@ -303,6 +303,9 @@ ordinary/shared/gloria-patri,a177ab602e9c,diurnal,"Monday at Prime, opening",2,v
 ordinary/shared/hail-mary,ea3a728f1e37,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Hail Mary,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, and typography."
 ordinary/shared/kyrie,ed8aa92f8205,missal,,N/A,verified,bwaldrep,2026-07-10,
 ordinary/shared/our-father,b66987e4e924,01. Monday Prime Alex edit 10-28 v.01.docx,Before the Divine Office — Our Father,2,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, hyphenation, capitalization, and punctuation."
+ordinary/shared/suffrage-antiphon,d5519081ec69,diurnal,,42,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0088.png
+ordinary/shared/suffrage-antiphon-bvm,29836508c729,diurnal,,146,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0192.png
+ordinary/shared/suffrage-versicle,5f8f5c0f60a8,diurnal,,42,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0088.png
 ordinary/terce/chapter,e3f9b39f398a,03. Terce Through the Week Alex edit 11-24 v.01.docx,The Chapter; Jeremiah 17:14,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/chapter-sunday,cf04763fa083,01. Terce Sunday Alex edit 11-24 v.01.docx,The Chapter; 1 John 4:16,5,verified,codex,2026-07-20,Word-for-word after normalizing chant pointing and typography.
 ordinary/terce/hymn,745b3faabc63,03. Terce Throughout the Week Alex edit 11-24 v.01.docx,The Hymn — Nunc Sancte nobis Spiritus,2-3,verified,codex,2026-07-20,"Word-for-word after normalizing chant line breaks, ornamental initials, syllabification, and typography; all three Terce drafts agree."
@@ -916,6 +919,7 @@ proper/st-agnes-rome/psalm-antiphon-4,e71e210759ff,diurnal,"St Agnes, At Lauds",
 proper/st-agnes-rome/psalm-antiphon-5,7784ba87e5e2,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-andrew/chapter-sext,f52804f339fb,diurnal,"St Andrew, At Sext",445,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-anne/collect,34daf8cad2b5,diurnal,,575,verified,bwaldrep,2026-07-25,
+proper/st-athanasius/collect,23739796cf90,diurnal,,520,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0566.png
 proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/collect,edb1d4bb13fa,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/magnificat-antiphon,5e8a5a836590,diurnal,"St Cecilia, At II Vespers",666,verified,grok,2026-08-23,word-for-word from printed page image
