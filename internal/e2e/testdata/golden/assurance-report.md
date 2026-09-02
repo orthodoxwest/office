@@ -90,8 +90,8 @@
 - `decision:condition:not-appended-office-of-the-dead,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=included`
 - `decision:condition:not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead=omitted`
-- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=included`
+- `decision:condition:not-feast-easter-sunday,weekday-sunday,not-festal-lauds-psalmody,not-office-of-the-dead=omitted`
 - `decision:condition:not-feast-holy-saturday,not-office-of-the-dead=included`
 - `decision:condition:not-feast-holy-saturday,not-office-of-the-dead=omitted`
 - `decision:condition:not-is-feast,weekday-saturday,not-office-of-the-dead=included`
