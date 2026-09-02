@@ -28,7 +28,13 @@ DEFAULT_PAGE_KEY = "monastic-diurnal"
 DEFAULT_MODEL = "gpt-5.6-luna"
 MAX_OUTPUT_BYTES = 1024 * 1024
 DEFAULT_TIMEOUT = 300
+DEFAULT_MAX_ATTEMPTS = 3
 NAMESPACES = {"proper", "commons", "seasonal", "ordinary", "shared", "psalms", "canticles"}
+LEADING_LABEL_RE = re.compile(
+    r"^\s*(?:(?:Ant\.\s+on\s+Magnificat\.)|Ant\.|Antiphon\.?|Collect\.?|Chapter\.?|"
+    r"Hymn\.?|Prayer\.?|Memorial\.?)\s*",
+    re.I,
+)
 
 PAGES_SPEC = importlib.util.spec_from_file_location("diurnal_pages", Path(__file__).with_name("diurnal-pages.py"))
 diurnal_pages = importlib.util.module_from_spec(PAGES_SPEC)
@@ -40,7 +46,9 @@ class RunOptions:
     def __init__(self, run_dir: Path, page_key: str = DEFAULT_PAGE_KEY, provider: str = "codex",
                  model: str = DEFAULT_MODEL, timeout: int = DEFAULT_TIMEOUT,
                  max_output_bytes: int = MAX_OUTPUT_BYTES, dry_run: bool = False,
-                 apply: bool = False):
+                 apply: bool = False, max_attempts: int = DEFAULT_MAX_ATTEMPTS):
+        if max_attempts < 1:
+            raise ValueError("max_attempts must be positive")
         self.run_dir = run_dir
         self.page_key = page_key
         self.provider = provider
@@ -49,6 +57,7 @@ class RunOptions:
         self.max_output_bytes = max_output_bytes
         self.dry_run = dry_run
         self.apply = apply
+        self.max_attempts = max_attempts
 
 
 class ProviderError(RuntimeError):
@@ -57,6 +66,7 @@ class ProviderError(RuntimeError):
 
 def normalize_text(text: str) -> str:
     """Normalize only comparison-level typography and layout differences."""
+    text = LEADING_LABEL_RE.sub("", text, count=1)
     text = text.replace("\u00ad", "")
     text = re.sub(r"(?<=\w)[\-‐‑]\s*\n\s*(?=\w)", "", text)
     text = text.translate(str.maketrans({
@@ -66,6 +76,7 @@ def normalize_text(text: str) -> str:
         "℣": "V.", "℟": "R.", "Ꝟ": "V.",
     }))
     text = unicodedata.normalize("NFKC", text)
+    text = re.sub(r"\s*[†*‡]\s*", " ", text)
     normalized_lines = []
     for line in text.splitlines():
         line = re.sub(r"^\s*[vV][./:]+\s*", "V. ", line)
@@ -149,7 +160,9 @@ def describe_key(key: str, data_dir: Path, feast_names: dict[str, str] | None = 
 
 CORPUS_GRAMMAR = """Corpus output grammar:
 - Return only the requested corpus entry, without surrounding page headings, rubrics, or explanatory prose. Retain only a title or incipit required by the entry forms below.
+- Omit printed entry labels such as `Ant.`, `Ant. on Magnificat.`, `Collect`, `Chapter`, `Hymn`, `Prayer`, and `Memorial`. When a printed ℣./℟. labels dialogue, use the corpus `V. ` / `R. ` markers below instead of copying the printed label.
 - Preserve the book's archaic spelling and capitalization. Expand nothing and silently correct nothing.
+- Render every printed flex or mediant mark (`†`, `*`, or `‡`) as the corpus marker ` * `.
 - A psalm/canticle entry keeps its corpus title line and `!Reference`, then a blank line before the verses. Use `[section: Heading]` for a printed canticle section break.
 - Use `!Reference` for a printed scripture reference that belongs to a chapter or other block.
 - Use `V. ` and `R. ` at the start of versicle and response lines (the corpus renderers display ℣./℟.).
@@ -290,13 +303,43 @@ def build_read_prompt(prompt: str, images: list[Path]) -> str:
 class PageResolver:
     def __init__(self, root: Path = ROOT):
         self.root = root
+        self._indexes: dict[str, dict] = {}
+
+    def _index(self, key: str) -> dict:
+        if key not in self._indexes:
+            index_path = self.root / "output" / "pages" / key / "index.json"
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+            index["pages"] = diurnal_pages.repair_label_runs(index.get("pages", []))
+            self._indexes[key] = index
+        return self._indexes[key]
 
     def resolve(self, key: str, printed_page: str) -> list[dict]:
-        index_path = self.root / "output" / "pages" / key / "index.json"
-        index = json.loads(index_path.read_text(encoding="utf-8"))
+        index = self._index(key)
         located = diurnal_pages.locate_page(index, printed_page)
+        return self._pages_from_pdf(key, located["pdf_page"])
+
+    def resolve_pdf(self, key: str, cited_page: str) -> list[dict]:
+        if not cited_page.isdigit() or int(cited_page) < 1:
+            raise ValueError(f"cited page is not a PDF page number: {cited_page}")
+        return self._pages_from_pdf(key, int(cited_page))
+
+    def find(self, key: str, query: str, limit: int = 3) -> list[list[dict]]:
+        index = self._index(key)
+        return [self._pages_from_pdf(key, item["pdf_page"])
+                for item in diurnal_pages.find_candidates(index, query, limit)]
+
+    def page(self, key: str, pdf_page: int) -> dict:
+        for page in self._index(key).get("pages", []):
+            if page["pdf_page"] == pdf_page:
+                return self._page_record(page)
+        raise LookupError(f"PDF page {pdf_page} not found")
+
+    def _pages_from_pdf(self, key: str, pdf_page: int) -> list[dict]:
+        index = self._index(key)
         by_pdf = {page["pdf_page"]: page for page in index["pages"]}
-        selected = by_pdf[located["pdf_page"]]
+        if pdf_page not in by_pdf:
+            raise LookupError(f"PDF page {pdf_page} not found")
+        selected = by_pdf[pdf_page]
         result = [self._page_record(selected)]
         if selected["pdf_page"] + 1 in by_pdf:
             result.append(self._page_record(by_pdf[selected["pdf_page"] + 1]))
@@ -349,6 +392,28 @@ def row_page(row: dict) -> str | None:
                 if found := extract_printed_page(page):
                     return found
     return extract_printed_page(row.get("page", ""))
+
+
+def corpus_search_query(text: str, word_limit: int = 8) -> str:
+    """Build a short OCR locator from corpus wording, without grammar sigils."""
+    content = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("!") or (line.startswith("[") and line.endswith("]")):
+            continue
+        line = LEADING_LABEL_RE.sub("", line, count=1)
+        line = re.sub(r"^(?:[VR][./:]|Blessing\.|All:)\s*", "", line, flags=re.I)
+        line = re.sub(r"^\d{1,3}\.\s*", "", line)
+        content.append(line)
+    words = diurnal_pages.normalize_search(" ".join(content)).split()
+    return " ".join(words[:word_limit])
+
+
+def feast_slot_query(key: str, description: str, feast_names: dict[str, str]) -> str:
+    parts = key.split("/")
+    if len(parts) >= 3 and parts[0] == "proper":
+        return f"{feast_names.get(parts[1], humanize(parts[1]))} {humanize(parts[-1])}"
+    return description
 
 
 def is_default_candidate(row: dict) -> bool:
@@ -413,49 +478,171 @@ def replace_and_attest(options: RunOptions, key: str, printed_page: str, png: st
 def process_row(row: dict, options: RunOptions, resolver: PageResolver,
                 provider_runner: ProviderRunner, feast_names: dict[str, str]) -> dict:
     key = row["key"]
-    printed_page = row_page(row)
+    cited_page = row_page(row)
     base = {
-        "key": key, "printed_page": printed_page, "representative_url": row.get("representative_url", ""),
+        "key": key, "cited_page": cited_page, "printed_page": None,
+        "representative_url": row.get("representative_url", ""),
         "provider": options.provider, "model": options.model, "queue_status": row.get("status", ""),
         "work_type": row.get("work_type", ""), "source": row.get("source", ""),
         "locator": row.get("locator", ""),
     }
     empty_result = {
-        "corpus_text": None, "first_transcription": None, "second_transcription": None,
+        "corpus_text": None, "first": None, "second": None,
         "diff": "", "similarity": 0.0, "timing_seconds": {"first": None, "second": None},
+        "locate_strategy": None, "locate_attempts": [],
     }
-    if not printed_page:
+    if not cited_page:
         return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
                 "notes": "queue row has no usable printed page", "pages": []}
-    try:
-        pages = resolver.resolve(options.page_key, printed_page)
-    except (OSError, ValueError, LookupError, json.JSONDecodeError) as exc:
-        return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
-                "notes": f"page resolution failed: {exc}", "pages": []}
+
     description = describe_key(key, ROOT / "data", feast_names)
-    prompt = build_prompt(key, description, printed_page, pages)
+
+    # A dry run prepares only the first resolvable prompt; without a reader it
+    # cannot determine whether a later locating strategy is necessary.
     if options.dry_run:
+        dry_strategies = (
+            ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
+            ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
+        )
+        pages = None
+        locate_strategy = None
+        errors = []
+        for strategy, locate in dry_strategies:
+            try:
+                pages = locate()[0]
+                locate_strategy = strategy
+                break
+            except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError) as exc:
+                errors.append(f"{strategy}: {exc}")
+        if pages is None:
+            try:
+                dry_corpus = corpus_text(key)
+                dry_ocr_strategies = (
+                    ("corpus-ocr", lambda: resolver.find(
+                        options.page_key, corpus_search_query(dry_corpus), limit=3)),
+                    ("feast-slot-ocr", lambda: resolver.find(
+                        options.page_key, feast_slot_query(key, description, feast_names), limit=3)),
+                )
+                for strategy, locate in dry_ocr_strategies:
+                    candidates = locate()
+                    if candidates:
+                        pages = candidates[0]
+                        locate_strategy = strategy
+                        break
+            except (AttributeError, OSError, RuntimeError, ValueError, LookupError,
+                    json.JSONDecodeError) as exc:
+                errors.append(f"OCR fallback: {exc}")
+        if pages is None:
+            return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
+                    "notes": "page resolution failed: " + "; ".join(errors), "pages": []}
+        prompt_page = pages[0].get("printed_page") or cited_page
+        prompt = build_prompt(key, description, prompt_page, pages)
         prompts = options.run_dir / "prompts"
         prompts.mkdir(exist_ok=True)
         prompt_path = prompts / f"{safe_key(key)}.txt"
         prompt_path.write_text(prompt + "\n", encoding="utf-8")
-        return {**base, "prompt": str(prompt_path), "pages": pages, "dry_run": True}
+        return {**base, "prompt": str(prompt_path), "pages": pages, "dry_run": True,
+                "locate_strategy": locate_strategy}
 
     existing = None
     try:
         existing = corpus_text(key)
-        first, first_seconds = provider_runner.transcribe(
-            options.provider, options.model, prompt, [Path(page["png"]) for page in pages]
-        )
-    except (OSError, RuntimeError, ProviderError) as exc:
+    except (OSError, RuntimeError) as exc:
+        return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
+                "notes": f"corpus read failed: {exc}", "pages": []}
+
+    strategies = (
+        ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
+        ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
+        ("corpus-ocr", lambda: resolver.find(
+            options.page_key, corpus_search_query(existing), limit=3)),
+        ("feast-slot-ocr", lambda: resolver.find(
+            options.page_key, feast_slot_query(key, description, feast_names), limit=3)),
+    )
+    attempts = 0
+    attempted_pdf_pages = set()
+    locate_attempts = []
+    locate_errors = []
+    first = None
+    first_seconds = 0.0
+    pages: list[dict] = []
+    locate_strategy = None
+    result_pages: list[dict] = []
+    result_strategy = None
+    stop = False
+    for strategy, locate in strategies:
+        try:
+            candidates = locate()
+        except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError) as exc:
+            locate_errors.append(f"{strategy}: {exc}")
+            continue
+        for candidate_pages in candidates:
+            if attempts >= options.max_attempts:
+                stop = True
+                break
+            primary_pdf = candidate_pages[0]["pdf_page"]
+            if primary_pdf in attempted_pdf_pages:
+                continue
+            attempted_pdf_pages.add(primary_pdf)
+            attempts += 1
+            pages = candidate_pages
+            locate_strategy = strategy
+            prompt_page = pages[0].get("printed_page") or cited_page
+            prompt = build_prompt(key, description, prompt_page, pages)
+            try:
+                result, seconds = provider_runner.transcribe(
+                    options.provider, options.model, prompt, [Path(page["png"]) for page in pages]
+                )
+                first_seconds += seconds
+                first = result
+                result_pages = candidate_pages
+                result_strategy = strategy
+                locate_attempts.append({
+                    "strategy": strategy, "pdf_page": primary_pdf,
+                    "found": bool(result.get("found")), "reader": result,
+                })
+            except (OSError, RuntimeError, ProviderError) as exc:
+                locate_attempts.append({
+                    "strategy": strategy, "pdf_page": primary_pdf, "found": False,
+                    "error": str(exc),
+                })
+                continue
+            if result.get("found"):
+                stop = True
+                break
+        if stop:
+            break
+
+    if first is not None:
+        pages = result_pages
+        locate_strategy = result_strategy
+
+    if first is None:
+        notes = "first reader failed"
+        if locate_errors:
+            notes += "; " + "; ".join(locate_errors)
         return {**base, **empty_result, "corpus_text": existing, "classification": "low-confidence",
-                "decision": "needs-human", "notes": f"first reader failed: {exc}", "pages": pages}
+                "decision": "needs-human", "notes": notes, "pages": pages,
+                "locate_strategy": locate_strategy, "locate_attempts": locate_attempts}
+
     classification, score = classify_transcription(existing, first)
     decision = apply_decision(key, classification, first)
+    found_page = None
+    if first.get("found"):
+        try:
+            found_page = resolver.page(options.page_key, first["pdf_page"])
+        except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError):
+            found_page = next((page for page in pages if page["pdf_page"] == first["pdf_page"]), None)
+        if found_page is None or not found_page.get("printed_page"):
+            decision = "needs-human"
+
     second = None
     second_seconds = None
-    if options.apply and classification == "different":
-        second_prompt = build_prompt(key, description, printed_page, pages, paths_for_read=True)
+    second_error = None
+    if options.apply and classification == "different" and attempts < options.max_attempts:
+        attempts += 1
+        prompt_page = pages[0].get("printed_page") or cited_page
+        second_prompt = build_prompt(key, description, prompt_page, pages, paths_for_read=True)
         try:
             second, second_seconds = provider_runner.transcribe(
                 "claude", "sonnet", second_prompt, [Path(page["png"]) for page in pages]
@@ -463,19 +650,33 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
             decision = apply_decision(key, classification, first, second)
         except (OSError, RuntimeError, ProviderError) as exc:
             decision = "needs-human"
-            second = {"error": str(exc)}
+            second_error = str(exc)
+    elif options.apply and classification == "different":
+        decision = "needs-human"
+
+    if first.get("found") and (found_page is None or not found_page.get("printed_page")):
+        decision = "needs-human"
+    actual_printed_page = found_page.get("printed_page") if found_page else None
     record = {
-        **base, "classification": classification, "similarity": round(score, 6), "decision": decision,
-        "pages": pages, "corpus_text": existing, "first_transcription": first,
-        "second_transcription": second, "diff": unified_diff(existing, str(first.get("text", ""))),
+        **base, "printed_page": actual_printed_page, "classification": classification,
+        "similarity": round(score, 6), "decision": decision, "pages": pages,
+        "corpus_text": existing, "first": first, "second": second,
+        "diff": unified_diff(existing, str(first.get("text", ""))),
+        "locate_strategy": locate_strategy, "locate_attempts": locate_attempts,
         "timing_seconds": {"first": round(first_seconds, 3), "second": None if second_seconds is None else round(second_seconds, 3)},
     }
+    if locate_errors:
+        record["locate_errors"] = locate_errors
+    if second_error:
+        record["second_error"] = second_error
+    if first.get("found") and actual_printed_page is None:
+        record["notes"] = "found PDF page has no detected or inferred printed label"
     if options.apply:
         try:
             if decision == "attest":
-                attest(key, printed_page, pages[0]["png"])
+                attest(key, actual_printed_page, found_page["png"])
             elif decision == "replace-and-attest":
-                replace_and_attest(options, key, printed_page, pages[0]["png"], str(first["text"]))
+                replace_and_attest(options, key, actual_printed_page, found_page["png"], str(first["text"]))
         except RuntimeError as exc:
             record["decision"] = "needs-human"
             record["apply_error"] = str(exc)
@@ -493,12 +694,14 @@ def default_run_id() -> str:
 def run_command(args: argparse.Namespace) -> int:
     if args.apply and args.dry_run:
         raise ValueError("--apply and --dry-run are mutually exclusive")
+    if args.max_attempts < 1:
+        raise ValueError("--max-attempts must be positive")
     run_dir = TRANSCRIBE_ROOT / (args.run_id or default_run_id())
     run_dir.mkdir(parents=True, exist_ok=False)
     options = RunOptions(
         run_dir=run_dir, page_key=args.page_key, provider=args.provider, model=args.model,
         timeout=args.timeout, max_output_bytes=args.max_output_bytes,
-        dry_run=args.dry_run, apply=args.apply,
+        dry_run=args.dry_run, apply=args.apply, max_attempts=args.max_attempts,
     )
     keys = parse_keys(args.keys)
     rows = selected_rows(load_queue(args.queue, args.start, args.years), args.all, keys)
@@ -561,6 +764,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--model", default=DEFAULT_MODEL)
     run.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     run.add_argument("--max-output-bytes", type=int, default=MAX_OUTPUT_BYTES)
+    run.add_argument("--max-attempts", type=int, default=DEFAULT_MAX_ATTEMPTS,
+                     help="maximum reader calls per key across locating and adjudication")
     run.add_argument("--run-id")
     run.add_argument("--dry-run", action="store_true", help="write prompts without invoking a provider")
     run.add_argument("--apply", action="store_true", help="attest matches and gate agreed replacements")

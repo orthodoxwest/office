@@ -33,6 +33,24 @@ class NormalizationTests(unittest.TestCase):
         missing = {"found": False, "text": "", "confidence": "medium"}
         self.assertEqual(transcribe.classify_transcription("O Lord", missing)[0], "not-found")
 
+    def test_real_suffrage_label_and_flex_pairs_are_near(self):
+        pairs = (
+            (
+                "May the blessed Mother of God, * the Virgin Mary, and all the Saints, "
+                "intercede for us to the Lord.",
+                "Ant. May the blessed Mother of God, the Virgin Mary, and all the Saints, "
+                "intercede for us to the Lord.",
+            ),
+            (
+                "May all the Saints * intercede for us to the Lord.",
+                "May all the Saints † intercede for us to the Lord.",
+            ),
+        )
+        for corpus, observed in pairs:
+            with self.subTest(observed=observed):
+                result = {"found": True, "text": observed, "confidence": "high"}
+                self.assertEqual(transcribe.classify_transcription(corpus, result)[0], "near")
+
 
 class PromptTests(unittest.TestCase):
     def test_prompt_names_feast_slot_pages_and_grammar(self):
@@ -47,7 +65,7 @@ class PromptTests(unittest.TestCase):
         )
         for wanted in ("short responsory vespers for St. Athanasius", "printed page 595",
                        "PDF 624", "V. ` and `R. `", "blank line between stanzas",
-                       "Never infer"):
+                       "Omit printed entry labels", "corpus marker ` * `", "Never infer"):
             self.assertIn(wanted, prompt)
 
 
@@ -67,6 +85,36 @@ class FakeResolver:
             {"pdf_page": 624, "printed_page": page, "inferred": False, "png": "/cache/0624.png"},
             {"pdf_page": 625, "printed_page": "596", "inferred": False, "png": "/cache/0625.png"},
         ]
+
+    def page(self, key, pdf_page):
+        return next(page for page in self.resolve(key, "595") if page["pdf_page"] == pdf_page)
+
+
+class FallbackResolver:
+    def __init__(self, printed=None, pdf=None, found=None):
+        self.printed = printed
+        self.pdf = pdf
+        self.found = found or []
+        self.find_calls = []
+
+    def resolve(self, key, page):
+        if isinstance(self.printed, Exception):
+            raise self.printed
+        return self.printed
+
+    def resolve_pdf(self, key, page):
+        if isinstance(self.pdf, Exception):
+            raise self.pdf
+        return self.pdf
+
+    def find(self, key, query, limit=3):
+        self.find_calls.append((query, limit))
+        return self.found
+
+    def page(self, key, pdf_page):
+        candidates = [self.printed, self.pdf, *self.found]
+        return next(page for records in candidates if isinstance(records, list)
+                    for page in records if page["pdf_page"] == pdf_page)
 
 
 def answer(text, confidence="high"):
@@ -111,6 +159,8 @@ class ApplyDecisionTests(unittest.TestCase):
                 )
             self.assertEqual([call[0] for call in provider.calls], ["codex", "claude"])
             self.assertEqual(record["decision"], "replace-and-attest")
+            self.assertEqual(record["first"]["text"], "Printed wording.")
+            self.assertEqual(record["second"]["text"], "Printed wording")
             self.assertEqual(replaced, [("proper/st-athanasius/collect", "Printed wording.")])
         finally:
             transcribe.corpus_text = original_corpus
@@ -136,6 +186,96 @@ class ApplyDecisionTests(unittest.TestCase):
         finally:
             transcribe.corpus_text = original_corpus
             transcribe.attest = original_attest
+
+    def test_process_falls_back_from_printed_label_to_pdf_page(self):
+        original_corpus = transcribe.corpus_text
+        original_attest = transcribe.attest
+        attested = []
+        try:
+            transcribe.corpus_text = lambda key: "Existing corpus wording."
+            transcribe.attest = lambda key, page, png: attested.append((key, page, png))
+            printed = [
+                {"pdf_page": 611, "printed_page": "566", "inferred": False, "png": "/cache/0611.png"},
+            ]
+            pdf = [
+                {"pdf_page": 566, "printed_page": "521", "inferred": False, "png": "/cache/0566.png"},
+            ]
+            resolver = FallbackResolver(printed=printed, pdf=pdf)
+            provider = FakeProvider([
+                {"found": False, "text": "", "printed_page": "566", "pdf_page": 611,
+                 "confidence": "high", "notes": "section absent"},
+                {"found": True, "text": "Existing corpus wording.", "printed_page": "566", "pdf_page": 566,
+                 "confidence": "high", "notes": "section visible"},
+            ])
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "proper/st-athanasius/collect", "page": "566", "source": "monastic-diurnal"},
+                    transcribe.RunOptions(Path(directory), apply=True), resolver, provider,
+                    {"st-athanasius": "St. Athanasius"},
+                )
+            self.assertEqual(record["locate_strategy"], "pdf-page")
+            self.assertEqual(record["printed_page"], "521")
+            self.assertEqual(record["first"]["text"], "Existing corpus wording.")
+            self.assertEqual(len(provider.calls), 2)
+            self.assertEqual(attested, [("proper/st-athanasius/collect", "521", "/cache/0566.png")])
+        finally:
+            transcribe.corpus_text = original_corpus
+            transcribe.attest = original_attest
+
+    def test_process_falls_back_to_top_three_corpus_ocr_candidates(self):
+        original_corpus = transcribe.corpus_text
+        try:
+            transcribe.corpus_text = lambda key: "V. First six words locate this existing corpus text."
+            ocr_pages = [[
+                {"pdf_page": 88, "printed_page": "42", "inferred": True, "png": "/cache/0088.png"},
+            ]]
+            resolver = FallbackResolver(
+                printed=LookupError("printed miss"), pdf=LookupError("PDF miss"), found=ocr_pages,
+            )
+            provider = FakeProvider([{
+                "found": True, "text": "V. First six words locate this existing corpus text.",
+                "printed_page": "42", "pdf_page": 88, "confidence": "high", "notes": "visible",
+            }])
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "proper/st-athanasius/collect", "page": "566", "source": "monastic-diurnal"},
+                    transcribe.RunOptions(Path(directory)), resolver, provider,
+                    {"st-athanasius": "St. Athanasius"},
+                )
+            self.assertEqual(record["locate_strategy"], "corpus-ocr")
+            self.assertEqual(record["printed_page"], "42")
+            self.assertEqual(resolver.find_calls[0], ("first six words locate this existing corpus text", 3))
+            self.assertEqual(len(provider.calls), 1)
+        finally:
+            transcribe.corpus_text = original_corpus
+
+    def test_locating_and_second_reader_share_attempt_cap(self):
+        original_corpus = transcribe.corpus_text
+        try:
+            transcribe.corpus_text = lambda key: "Existing corpus wording."
+            printed = [{"pdf_page": 10, "printed_page": "10", "inferred": False, "png": "/10.png"}]
+            pdf = [{"pdf_page": 20, "printed_page": "20", "inferred": False, "png": "/20.png"}]
+            found = [[{"pdf_page": number, "printed_page": str(number), "inferred": False,
+                       "png": f"/{number}.png"}] for number in (30, 31, 32)]
+            resolver = FallbackResolver(printed=printed, pdf=pdf, found=found)
+            missing = [
+                {"found": False, "text": "", "printed_page": str(number), "pdf_page": number,
+                 "confidence": "high", "notes": "absent"}
+                for number in (10, 20, 30, 31)
+            ]
+            provider = FakeProvider(missing)
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "proper/st-athanasius/collect", "page": "10", "source": "monastic-diurnal"},
+                    transcribe.RunOptions(Path(directory), apply=True, max_attempts=3),
+                    resolver, provider, {"st-athanasius": "St. Athanasius"},
+                )
+            self.assertEqual(len(provider.calls), 3)
+            self.assertEqual(len(record["locate_attempts"]), 3)
+            self.assertEqual(record["classification"], "not-found")
+            self.assertEqual(record["decision"], "record-only")
+        finally:
+            transcribe.corpus_text = original_corpus
 
 
 class ProviderCommandTests(unittest.TestCase):

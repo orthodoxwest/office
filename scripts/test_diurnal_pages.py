@@ -22,6 +22,7 @@ class LabelTests(unittest.TestCase):
 
     def test_detects_star_label(self):
         self.assertEqual(pages.detect_printed_label("COMMONS\ntext\n— 72* —"), "72*")
+        self.assertIn("1*", pages.ocr_label_candidates({"text": "APPENDIX\ntext\nl*", "layout_text": ""}))
 
     def test_detects_and_validates_roman(self):
         self.assertEqual(pages.detect_printed_label("xxvi\nPREFACE\ntext"), "xxvi")
@@ -50,6 +51,29 @@ class LabelTests(unittest.TestCase):
             {"pdf_page": 3, "printed_page": "9*"},
         ])
         self.assertEqual(result[1]["printed_page"], "8*")
+
+    def test_repairs_roman_run_and_rejects_valid_out_of_sequence_ocr(self):
+        result = pages.repair_label_runs([
+            {"pdf_page": 23, "printed_page": "xxv", "inferred": False, "text": "", "layout_text": ""},
+            {"pdf_page": 24, "printed_page": None, "inferred": False, "text": "", "layout_text": ""},
+            {"pdf_page": 25, "printed_page": "mi", "inferred": False, "text": "", "layout_text": ""},
+            {"pdf_page": 26, "printed_page": None, "inferred": False, "text": "", "layout_text": ""},
+            {"pdf_page": 27, "printed_page": "xxix", "inferred": False, "text": "", "layout_text": ""},
+        ])
+        self.assertEqual([page["printed_page"] for page in result],
+                         ["xxv", "xxvi", "xxvii", "xxviii", "xxix"])
+        self.assertTrue(result[2]["inferred"])
+
+    def test_repairs_every_page_inside_star_run(self):
+        result = pages.repair_label_runs([
+            {"pdf_page": number, "png": f"{number}.png", "printed_page": label,
+             "inferred": False, "text": "", "layout_text": ""}
+            for number, label in ((714, "1*"), (715, "2*"), (716, None),
+                                  (717, "73111"), (718, None), (719, "6*"))
+        ])
+        self.assertEqual([page["printed_page"] for page in result],
+                         ["1*", "2*", "3*", "4*", "5*", "6*"])
+        self.assertEqual(pages.locate_page({"pages": result}, "4*")["pdf_page"], 717)
 
 
 class IndexTests(unittest.TestCase):

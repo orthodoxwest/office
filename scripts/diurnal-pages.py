@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import difflib
 import hashlib
 import json
@@ -65,9 +66,11 @@ def canonical_label(value: str) -> str | None:
         return None
     token = re.sub(r"\s+", "", match.group(1)).casefold()
     if token.endswith("*"):
-        return f"{int(token[:-1])}*"
+        number = int(token[:-1])
+        return f"{number}*" if number > 0 else None
     if token.isdigit():
-        return str(int(token))
+        number = int(token)
+        return str(number) if number > 0 else None
     return token if roman_to_int(token) is not None else None
 
 
@@ -124,6 +127,89 @@ def interpolate_labels(pages: list[dict]) -> list[dict]:
             page = result[left_index + offset]
             page["printed_page"] = format_series(left[0], left[1] + offset)
             page["inferred"] = True
+    return result
+
+
+def ocr_label_candidates(page: dict) -> set[str]:
+    """Return page-like OCR tokens at an edge, including ambiguous ones."""
+    candidates = set()
+    for text in (page.get("text", ""), page.get("layout_text", "")):
+        for line in edge_lines(text):
+            if label := canonical_label(line):
+                candidates.add(label)
+            elif re.fullmatch(r"[Il]\s*\*", line.strip()):
+                # The appendix begins at 1*, which OCR commonly reads as l*.
+                candidates.add("1*")
+    return candidates
+
+
+def page_label_candidates(page: dict) -> set[str]:
+    candidates = ocr_label_candidates(page)
+    if label := page.get("printed_page"):
+        if canonical := canonical_label(str(label)):
+            candidates.add(canonical)
+    return candidates
+
+
+def repair_label_runs(pages: list[dict]) -> list[dict]:
+    """Recover dominant numbered runs and reject sequence-breaking OCR labels.
+
+    A printed run has a constant difference between its numeric label and PDF
+    page. Requiring the same offset on at least two pages lets clean anchors
+    repair long OCR gaps while excluding plausible-looking errors such as
+    ``mi`` for ``xxxi``.
+    """
+    cleaned = [dict(page) for page in pages]
+    for page in cleaned:
+        current = page.get("printed_page")
+        if current is not None:
+            page["printed_page"] = canonical_label(str(current))
+            if page["printed_page"] is None:
+                page["inferred"] = False
+    result = interpolate_labels(cleaned)
+    candidates: dict[str, list[tuple[int, int, str]]] = {"roman": [], "star": []}
+    page_candidates: dict[int, set[str]] = {}
+    for index, source_page in enumerate(pages):
+        labels = page_label_candidates(source_page)
+        page_candidates[index] = ocr_label_candidates(source_page)
+        for label in labels:
+            series = label_series(label)
+            if series and series[0] in candidates:
+                candidates[series[0]].append((index, series[1], label))
+
+    for kind, anchors in candidates.items():
+        offsets = Counter(value - result[index]["pdf_page"] for index, value, _ in anchors)
+        supported = [(count, offset) for offset, count in offsets.items() if count >= 2]
+        if not supported:
+            continue
+        _, offset = max(supported, key=lambda item: (item[0], -abs(item[1])))
+        coherent = [
+            (index, value) for index, value, _ in anchors
+            if value - result[index]["pdf_page"] == offset
+        ]
+        first = min(index for index, _ in coherent)
+        last = max(index for index, _ in coherent)
+
+        # Once a coherent run is known, same-series labels elsewhere are OCR
+        # outliers rather than independent numbering runs in this book.
+        for index, page in enumerate(result):
+            current = page.get("printed_page")
+            if current and (series := label_series(current)) and series[0] == kind:
+                expected = page["pdf_page"] + offset
+                if not (first <= index <= last and series[1] == expected):
+                    page["printed_page"] = None
+                    page["inferred"] = False
+
+        for index in range(first, last + 1):
+            page = result[index]
+            value = page["pdf_page"] + offset
+            if value <= 0:
+                continue
+            expected = format_series(kind, value)
+            directly_seen = expected in page_candidates[index]
+            already_exact = page.get("printed_page") == expected and not page.get("inferred", False)
+            page["printed_page"] = expected
+            page["inferred"] = not (directly_seen or already_exact)
     return result
 
 
@@ -253,7 +339,7 @@ def render_pdf(source: Path, key: str, dpi: int) -> dict:
             "printed_page": detect_printed_label(plain, layout),
             "inferred": False,
         })
-    pages = interpolate_labels(pages)
+    pages = repair_label_runs(pages)
     index = {**expected, "page_count": count, "pages": pages}
     index_path.write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return index
@@ -263,14 +349,16 @@ def load_index(key: str) -> dict:
     path = cache_dir(key) / "index.json"
     if not path.is_file():
         raise FileNotFoundError(f"page index not found: {path}")
-    return json.loads(path.read_text(encoding="utf-8"))
+    index = json.loads(path.read_text(encoding="utf-8"))
+    index["pages"] = repair_label_runs(index.get("pages", []))
+    return index
 
 
 def locate_page(index: dict, printed_page: str) -> dict:
     target = canonical_label(printed_page)
     if target is None:
         raise ValueError(f"invalid printed page label: {printed_page}")
-    matches = [page for page in index.get("pages", []) if page.get("printed_page") == target]
+    matches = [page for page in repair_label_runs(index.get("pages", [])) if page.get("printed_page") == target]
     if len(matches) != 1:
         if not matches:
             raise LookupError(f"printed page {target} not found")
