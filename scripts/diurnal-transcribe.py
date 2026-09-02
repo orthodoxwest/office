@@ -35,6 +35,16 @@ LEADING_LABEL_RE = re.compile(
     r"Hymn\.?|Prayer\.?|Memorial\.?)\s*",
     re.I,
 )
+COLLECT_CONCLUSION_RE = re.compile(
+    r"(?:^|\s)(?:through\s+our\s+lord\b.*|through\s+jesus\s+christ\b.*|"
+    r"who\s+livest\b.*|who\s+liveth\b.*|in\s+the\s+unity\s+of\s+the\s+same\b.*|"
+    r"through\s+the\s+same|through)\s*$",
+    re.I | re.S,
+)
+SOURCE_PAGE_RE = re.compile(
+    r"(?i)(?:(?:printed)\s+|(?<!PDF\s))(?<![A-Za-z])p{1,2}\.\s*"
+    r"([ivxlcdm]+|[0-9]+\*?)(?:\s*[-–]\s*([ivxlcdm]+|[0-9]+\*?))?"
+)
 
 PAGES_SPEC = importlib.util.spec_from_file_location("diurnal_pages", Path(__file__).with_name("diurnal-pages.py"))
 diurnal_pages = importlib.util.module_from_spec(PAGES_SPEC)
@@ -64,7 +74,17 @@ class ProviderError(RuntimeError):
     pass
 
 
-def normalize_text(text: str) -> str:
+def is_collect_key(key: str) -> bool:
+    slot = key.rsplit("/", 1)[-1]
+    return (
+        "collect" in slot
+        and "conclusion" not in slot
+        and slot not in {"collect-intro", "post-collect", "triduum-collect-rubric"}
+        and "versicle" not in slot
+    )
+
+
+def normalize_text(text: str, key: str = "") -> str:
     """Normalize only comparison-level typography and layout differences."""
     text = LEADING_LABEL_RE.sub("", text, count=1)
     text = text.replace("\u00ad", "")
@@ -84,14 +104,20 @@ def normalize_text(text: str) -> str:
         line = re.sub(r"[\s.,;:!?…–—]+$", "", line.strip())
         if line:
             normalized_lines.append(line)
-    return " ".join(" ".join(normalized_lines).split()).casefold()
+    normalized = " ".join(" ".join(normalized_lines).split()).casefold()
+    if is_collect_key(key):
+        normalized = COLLECT_CONCLUSION_RE.sub("", normalized)
+        normalized = re.sub(r"[\s.,;:!?…–—]+$", "", normalized)
+    return normalized
 
 
-def similarity(left: str, right: str) -> float:
-    return difflib.SequenceMatcher(None, normalize_text(left), normalize_text(right), autojunk=False).ratio()
+def similarity(left: str, right: str, key: str = "") -> float:
+    return difflib.SequenceMatcher(
+        None, normalize_text(left, key), normalize_text(right, key), autojunk=False,
+    ).ratio()
 
 
-def classify_transcription(corpus_text: str, transcription: dict) -> tuple[str, float]:
+def classify_transcription(corpus_text: str, transcription: dict, key: str = "") -> tuple[str, float]:
     if not transcription.get("found") or not str(transcription.get("text", "")).strip():
         return "not-found", 0.0
     if transcription.get("confidence") == "low":
@@ -99,13 +125,14 @@ def classify_transcription(corpus_text: str, transcription: dict) -> tuple[str, 
     observed = str(transcription["text"])
     if corpus_text.replace("\r\n", "\n").strip() == observed.replace("\r\n", "\n").strip():
         return "exact", 1.0
-    score = similarity(corpus_text, observed)
-    if normalize_text(corpus_text) == normalize_text(observed) or score >= 0.985:
+    score = similarity(corpus_text, observed, key)
+    if normalize_text(corpus_text, key) == normalize_text(observed, key) or score >= 0.985:
         return "near", score
     return "different", score
 
 
-def apply_decision(key: str, classification: str, first: dict, second: dict | None = None) -> str:
+def apply_decision(key: str, classification: str, first: dict, second: dict | None = None,
+                   corpus_text: str | None = None) -> str:
     if classification in {"exact", "near"}:
         return "attest"
     if classification != "different":
@@ -117,7 +144,11 @@ def apply_decision(key: str, classification: str, first: dict, second: dict | No
     # The first-wave ingestion guardrail forbids automatic psalter writes.
     if key.startswith("psalms/"):
         return "needs-human"
-    return "replace-and-attest" if similarity(str(first.get("text", "")), str(second.get("text", ""))) >= 0.985 else "needs-human"
+    if corpus_text is None or similarity(str(first.get("text", "")), corpus_text, key) < 0.6:
+        return "needs-human"
+    return "replace-and-attest" if similarity(
+        str(first.get("text", "")), str(second.get("text", "")), key,
+    ) >= 0.985 else "needs-human"
 
 
 def safe_key(key: str) -> str:
@@ -167,6 +198,7 @@ CORPUS_GRAMMAR = """Corpus output grammar:
 - Use `!Reference` for a printed scripture reference that belongs to a chapter or other block.
 - Use `V. ` and `R. ` at the start of versicle and response lines (the corpus renderers display ℣./℟.).
 - Keep the `Blessing. ` and `All: ` sigils when those speakers are printed.
+- For a collect, the transcription must stop before its conclusion cue (for example `Through` or `Who livest`).
 - Psalm/canticle verses use one verse per line, an optional `N. ` number, and ` * ` at the mediant.
 - In hymns, keep each verse line and put one blank line between stanzas; a lone Latin incipit may stand above a blank line.
 - Preserve meaningful blank lines. Do not include page headers, page numbers, rubrics, Latin parallel-column text, or adjacent slots."""
@@ -287,7 +319,8 @@ class ProviderRunner:
             read_prompt = build_read_prompt(prompt, images)
             command = [
                 "claude", "-p", read_prompt, "--model", model, "--output-format", "json",
-                "--json-schema", str(SCHEMA), "--allowedTools", "Read", "--no-session-persistence",
+                "--json-schema", SCHEMA.read_text(encoding="utf-8"),
+                "--allowedTools", "Read", "--no-session-persistence",
             ]
         else:
             raise ProviderError(f"unsupported provider: {provider}")
@@ -364,6 +397,60 @@ def run_office(args: list[str], *, capture: bool = True) -> str:
 
 def corpus_text(key: str) -> str:
     return run_office(["corpus", "show", key]).rstrip("\n")
+
+
+def corpus_source_lines(key: str, data_dir: Path = ROOT / "data") -> list[str]:
+    """Return SOURCE comments belonging to a corpus key's live section."""
+    parts = key.split("/")
+    plain_path = data_dir / "texts" / Path(*parts).with_suffix(".txt")
+    if plain_path.is_file():
+        section_lines = plain_path.read_text(encoding="utf-8").splitlines()
+    else:
+        if len(parts) < 2:
+            return []
+        section_path = data_dir / "texts" / Path(*parts[:-1]).with_suffix(".txt")
+        if not section_path.is_file():
+            return []
+        lines = section_path.read_text(encoding="utf-8").splitlines()
+        header = re.compile(rf"^\s*\[{re.escape(parts[-1])}\]\s*$")
+        start = next((index + 1 for index, line in enumerate(lines) if header.match(line)), None)
+        if start is None:
+            return []
+        section_lines = []
+        for line in lines[start:]:
+            if re.match(r"^\s*#?\s*\[[a-z0-9][a-z0-9-]*\]\s*$", line, re.I):
+                break
+            section_lines.append(line)
+    result = []
+    for line in section_lines:
+        match = re.match(r"^\s*#\s*SOURCE:\s*(.*)$", line, re.I)
+        if match:
+            result.append(match.group(1).strip())
+    return result
+
+
+def corpus_source_pages(key: str, data_dir: Path = ROOT / "data") -> list[str]:
+    """Extract printed Diurnal page starts from a corpus section's sources."""
+    pages = []
+    for source in corpus_source_lines(key, data_dir):
+        if not re.search(r"diurnal|monastic", source, re.I):
+            continue
+        for match in SOURCE_PAGE_RE.finditer(source):
+            page = diurnal_pages.canonical_label(match.group(1))
+            if page and page not in pages:
+                pages.append(page)
+    return pages
+
+
+def source_page_candidates(resolver: PageResolver, page_key: str, key: str) -> list[list[dict]]:
+    """Resolve each cited printed source page, preserving citation order."""
+    candidates = []
+    for page in corpus_source_pages(key):
+        try:
+            candidates.append(resolver.resolve(page_key, page))
+        except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError):
+            continue
+    return candidates
 
 
 def unified_diff(corpus: str, transcription: str) -> str:
@@ -502,6 +589,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
     if options.dry_run:
         dry_strategies = (
             ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
+            ("source-page", lambda: source_page_candidates(resolver, options.page_key, key)),
             ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
         )
         pages = None
@@ -509,7 +597,10 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
         errors = []
         for strategy, locate in dry_strategies:
             try:
-                pages = locate()[0]
+                candidates = locate()
+                if not candidates:
+                    continue
+                pages = candidates[0]
                 locate_strategy = strategy
                 break
             except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError) as exc:
@@ -553,6 +644,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
 
     strategies = (
         ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
+        ("source-page", lambda: source_page_candidates(resolver, options.page_key, key)),
         ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
         ("corpus-ocr", lambda: resolver.find(
             options.page_key, corpus_search_query(existing), limit=3)),
@@ -569,6 +661,8 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
     locate_strategy = None
     result_pages: list[dict] = []
     result_strategy = None
+    result_classification = None
+    result_score = 0.0
     stop = False
     for strategy, locate in strategies:
         try:
@@ -597,9 +691,18 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
                 first = result
                 result_pages = candidate_pages
                 result_strategy = strategy
+                candidate_classification, candidate_score = classify_transcription(existing, result, key)
+                wrong_page = bool(
+                    result.get("found") and str(result.get("text", "")).strip()
+                    and similarity(existing, str(result["text"]), key) < 0.5
+                )
+                result_classification = "wrong-page" if wrong_page else candidate_classification
+                result_score = candidate_score
                 locate_attempts.append({
                     "strategy": strategy, "pdf_page": primary_pdf,
                     "found": bool(result.get("found")), "reader": result,
+                    "classification": result_classification,
+                    "similarity": round(candidate_score, 6),
                 })
             except (OSError, RuntimeError, ProviderError) as exc:
                 locate_attempts.append({
@@ -607,6 +710,8 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
                     "error": str(exc),
                 })
                 continue
+            if wrong_page:
+                break
             if result.get("found"):
                 stop = True
                 break
@@ -625,10 +730,13 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
                 "decision": "needs-human", "notes": notes, "pages": pages,
                 "locate_strategy": locate_strategy, "locate_attempts": locate_attempts}
 
-    classification, score = classify_transcription(existing, first)
-    decision = apply_decision(key, classification, first)
+    if result_classification == "wrong-page":
+        classification, score = "not-found", result_score
+    else:
+        classification, score = classify_transcription(existing, first, key)
+    decision = apply_decision(key, classification, first, corpus_text=existing)
     found_page = None
-    if first.get("found"):
+    if first.get("found") and result_classification != "wrong-page":
         try:
             found_page = resolver.page(options.page_key, first["pdf_page"])
         except (AttributeError, OSError, ValueError, LookupError, json.JSONDecodeError):
@@ -647,14 +755,15 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
             second, second_seconds = provider_runner.transcribe(
                 "claude", "sonnet", second_prompt, [Path(page["png"]) for page in pages]
             )
-            decision = apply_decision(key, classification, first, second)
+            decision = apply_decision(key, classification, first, second, corpus_text=existing)
         except (OSError, RuntimeError, ProviderError) as exc:
             decision = "needs-human"
             second_error = str(exc)
     elif options.apply and classification == "different":
         decision = "needs-human"
 
-    if first.get("found") and (found_page is None or not found_page.get("printed_page")):
+    if (first.get("found") and result_classification != "wrong-page"
+            and (found_page is None or not found_page.get("printed_page"))):
         decision = "needs-human"
     actual_printed_page = found_page.get("printed_page") if found_page else None
     record = {
@@ -669,7 +778,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
         record["locate_errors"] = locate_errors
     if second_error:
         record["second_error"] = second_error
-    if first.get("found") and actual_printed_page is None:
+    if first.get("found") and result_classification != "wrong-page" and actual_printed_page is None:
         record["notes"] = "found PDF page has no detected or inferred printed label"
     if options.apply:
         try:

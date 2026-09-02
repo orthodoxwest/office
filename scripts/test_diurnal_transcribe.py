@@ -51,6 +51,28 @@ class NormalizationTests(unittest.TestCase):
                 result = {"found": True, "text": observed, "confidence": "high"}
                 self.assertEqual(transcribe.classify_transcription(corpus, result)[0], "near")
 
+    def test_pilot2_collect_conclusion_cue_is_near(self):
+        corpus = (
+            "O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity "
+            "of blessed Athanasius, thy Bishop and Confessor: and by the interceding merits "
+            "of him who worthily attained to serve thee, absolve us from all our sins."
+        )
+        observed = (
+            "O LORD, we beseech thee, hear the prayers which we offer thee on the solemnity "
+            "of blessed Athanasius, thy Bishop and Confessor: and by the interceding merits "
+            "of him who worthily attained to serve thee, absolve us from all our sins. Through."
+        )
+        result = {"found": True, "text": observed, "confidence": "high"}
+        classification, score = transcribe.classify_transcription(
+            corpus, result, "proper/st-athanasius/collect",
+        )
+        self.assertEqual(classification, "near")
+        self.assertEqual(score, 1.0)
+
+    def test_collect_conclusion_entries_are_not_stripped(self):
+        key = "shared/formulas/collect-conclusion-through"
+        self.assertEqual(transcribe.normalize_text("Through.", key), "through")
+
 
 class PromptTests(unittest.TestCase):
     def test_prompt_names_feast_slot_pages_and_grammar(self):
@@ -65,7 +87,8 @@ class PromptTests(unittest.TestCase):
         )
         for wanted in ("short responsory vespers for St. Athanasius", "printed page 595",
                        "PDF 624", "V. ` and `R. `", "blank line between stanzas",
-                       "Omit printed entry labels", "corpus marker ` * `", "Never infer"):
+                       "Omit printed entry labels", "corpus marker ` * `", "Never infer",
+                       "must stop before its conclusion cue"):
             self.assertIn(wanted, prompt)
 
 
@@ -117,6 +140,34 @@ class FallbackResolver:
                     for page in records if page["pdf_page"] == pdf_page)
 
 
+class MappingResolver:
+    def __init__(self, printed, pdf=None):
+        self.printed = printed
+        self.pdf = pdf or {}
+        self.resolve_calls = []
+
+    def resolve(self, key, page):
+        self.resolve_calls.append(page)
+        value = self.printed[page]
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    def resolve_pdf(self, key, page):
+        value = self.pdf.get(page, LookupError("PDF miss"))
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    def find(self, key, query, limit=3):
+        return []
+
+    def page(self, key, pdf_page):
+        candidates = [*self.printed.values(), *self.pdf.values()]
+        return next(page for records in candidates if isinstance(records, list)
+                    for page in records if page["pdf_page"] == pdf_page)
+
+
 def answer(text, confidence="high"):
     return {"found": True, "text": text, "printed_page": "595", "pdf_page": 624,
             "confidence": confidence, "notes": "clearly printed"}
@@ -128,8 +179,31 @@ class ApplyDecisionTests(unittest.TestCase):
         self.assertEqual(transcribe.apply_decision("proper/x/collect", "near", first), "attest")
         self.assertEqual(transcribe.apply_decision("proper/x/collect", "different", first), "needs-human")
         second = answer("O Lord, hear us")
-        self.assertEqual(transcribe.apply_decision("proper/x/collect", "different", first, second), "replace-and-attest")
-        self.assertEqual(transcribe.apply_decision("psalms/001", "different", first, second), "needs-human")
+        corpus = "O Lord, hear us today."
+        self.assertEqual(
+            transcribe.apply_decision(
+                "proper/x/collect", "different", first, second, corpus_text=corpus,
+            ),
+            "replace-and-attest",
+        )
+        self.assertEqual(
+            transcribe.apply_decision(
+                "psalms/001", "different", first, second, corpus_text=corpus,
+            ),
+            "needs-human",
+        )
+
+    def test_replace_requires_first_reader_similarity_to_corpus(self):
+        corpus = "abcdefghij"
+        first = answer("abcdeXXXXX")
+        second = answer("abcdeXXXXX")
+        self.assertLess(transcribe.similarity(first["text"], corpus), 0.6)
+        self.assertEqual(
+            transcribe.apply_decision(
+                "proper/x/collect", "different", first, second, corpus_text=corpus,
+            ),
+            "needs-human",
+        )
 
     def test_process_dry_run_never_calls_provider(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -148,7 +222,7 @@ class ApplyDecisionTests(unittest.TestCase):
         original_replace = transcribe.replace_and_attest
         replaced = []
         try:
-            transcribe.corpus_text = lambda key: "Existing text."
+            transcribe.corpus_text = lambda key: "Printed wording in corpus."
             transcribe.replace_and_attest = lambda options, key, page, png, text: replaced.append((key, text))
             with tempfile.TemporaryDirectory() as directory:
                 options = transcribe.RunOptions(Path(directory), apply=True)
@@ -165,6 +239,97 @@ class ApplyDecisionTests(unittest.TestCase):
         finally:
             transcribe.corpus_text = original_corpus
             transcribe.replace_and_attest = original_replace
+
+    def test_wrong_page_continues_to_next_locate_strategy(self):
+        original_corpus = transcribe.corpus_text
+        corpus = "Defend us, we beseech thee, O Lord, from all perils of mind and body."
+        wrong = "O God, grant rest to the departed brethren and benefactors of our Congregation."
+        try:
+            transcribe.corpus_text = lambda key: corpus
+            printed = {
+                "29": [{"pdf_page": 75, "printed_page": "29", "inferred": False,
+                        "png": "/cache/0075.png"}],
+                "42": [{"pdf_page": 88, "printed_page": "42", "inferred": False,
+                        "png": "/cache/0088.png"},
+                       {"pdf_page": 89, "printed_page": "43", "inferred": False,
+                        "png": "/cache/0089.png"}],
+                "xxxi": [{"pdf_page": 29, "printed_page": "xxxi", "inferred": False,
+                           "png": "/cache/0029.png"}],
+            }
+            resolver = MappingResolver(printed)
+            provider = FakeProvider([
+                {"found": True, "text": wrong, "printed_page": "29", "pdf_page": 75,
+                 "confidence": "high", "notes": "a different collect is visible"},
+                {"found": True, "text": corpus, "printed_page": "42", "pdf_page": 88,
+                 "confidence": "high", "notes": "requested collect is visible"},
+            ])
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "ordinary/shared/suffrage-collect", "page": "29",
+                     "source": "Monastic Diurnal"},
+                    transcribe.RunOptions(Path(directory)), resolver, provider, {},
+                )
+            self.assertEqual(record["classification"], "exact")
+            self.assertEqual(record["locate_strategy"], "source-page")
+            self.assertEqual(record["locate_attempts"][0]["classification"], "wrong-page")
+            self.assertLess(record["locate_attempts"][0]["similarity"], 0.5)
+            self.assertEqual(resolver.resolve_calls[:2], ["29", "42"])
+            self.assertEqual(
+                provider.calls[1][3], [Path("/cache/0088.png"), Path("/cache/0089.png")],
+            )
+        finally:
+            transcribe.corpus_text = original_corpus
+
+    def test_exhausted_wrong_page_is_not_found_record_only(self):
+        original_corpus = transcribe.corpus_text
+        try:
+            transcribe.corpus_text = lambda key: "abcdefghij"
+            resolver = MappingResolver({
+                "10": [{"pdf_page": 10, "printed_page": "10", "inferred": False,
+                        "png": "/cache/0010.png"}],
+                "566": [{"pdf_page": 566, "printed_page": "520", "inferred": False,
+                         "png": "/cache/0566.png"}],
+            })
+            provider = FakeProvider([{
+                "found": True, "text": "XXXXXXXXXX", "printed_page": "10", "pdf_page": 10,
+                "confidence": "high", "notes": "unrelated text",
+            }])
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "proper/st-athanasius/collect", "page": "10",
+                     "source": "Monastic Diurnal"},
+                    transcribe.RunOptions(Path(directory), apply=True, max_attempts=1),
+                    resolver, provider, {"st-athanasius": "St. Athanasius"},
+                )
+            self.assertEqual(record["classification"], "not-found")
+            self.assertEqual(record["decision"], "record-only")
+            self.assertEqual(record["locate_attempts"][0]["classification"], "wrong-page")
+            self.assertEqual(len(provider.calls), 1)
+        finally:
+            transcribe.corpus_text = original_corpus
+
+    def test_source_comment_pages_are_tried_with_range_continuation(self):
+        self.assertEqual(
+            transcribe.corpus_source_pages("ordinary/shared/suffrage-collect"),
+            ["42", "xxxi"],
+        )
+
+    def test_source_comment_parser_accepts_hyphen_and_en_dash_ranges(self):
+        with tempfile.TemporaryDirectory() as directory:
+            data = Path(directory)
+            path = data / "texts" / "ordinary" / "example.txt"
+            path.parent.mkdir(parents=True)
+            path.write_text(
+                "[collect]\n"
+                "# SOURCE: Monastic Diurnal.pdf, printed pp. 12-13 (PDF pp. 58-59)\n"
+                "# SOURCE: monastic diurnal p. 20; pp. 30–31\n"
+                "Prayer.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                transcribe.corpus_source_pages("ordinary/example/collect", data),
+                ["12", "20", "30"],
+            )
 
     def test_exact_apply_attests_without_second_reader(self):
         original_corpus = transcribe.corpus_text
@@ -309,6 +474,9 @@ class ProviderCommandTests(unittest.TestCase):
         command = commands[0]
         self.assertEqual(command[0], "claude")
         self.assertIn("--json-schema", command)
+        inline_schema = command[command.index("--json-schema") + 1]
+        self.assertEqual(json.loads(inline_schema), json.loads(transcribe.SCHEMA.read_text()))
+        self.assertNotEqual(inline_schema, str(transcribe.SCHEMA))
         self.assertIn("--allowedTools", command)
         self.assertIn("page.png", command[command.index("-p") + 1])
 
