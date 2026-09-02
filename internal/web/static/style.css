@@ -3069,6 +3069,8 @@ body.season-eastertide {
   background: var(--inscription-ground);
   color: var(--inscription-ink);
   font-size: 0.8rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
   text-align: center;
 }
