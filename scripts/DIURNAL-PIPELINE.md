@@ -46,12 +46,60 @@ Then print the PR-ready summary using the run path reported by the command:
 make transcribe-report RUN=20260902T180000Z
 ```
 
+Rows whose queue status is `source-unknown` are included by default alongside
+`needs-review`. Since they have no citation to resolve, their search begins
+with the opening words of the live corpus entry and then tries the feast name
+plus slot description. Limit a run to either class with a repeatable status
+flag:
+
+```bash
+python3 scripts/diurnal-transcribe.py run --dry-run --status source-unknown
+python3 scripts/diurnal-transcribe.py run --dry-run --status needs-review
+```
+
+## Discovering silent proper fallthroughs
+
+The discovery command sweeps the 2026 fallback resolution inventory and groups
+eligible sanctoral, commemoration, and explicitly modelled temporal rows into
+one dossier per feast. It considers only the kinds of sections printed in a
+feast proper and excludes weekday/temporal-week fallthroughs. OCR date lines,
+running heads, and titles locate a run of at most eight cached pages; OCR never
+supplies corpus wording.
+
+Prepare dossiers and prompts without readers or corpus writes:
+
+```bash
+make discover
+make discover FEASTS=st-stephen-hungary
+make discover MONTH=9 LIMIT=10
+```
+
+After inspecting `output/discover/<run-id>/dossiers.jsonl` and
+`prompts.jsonl`, run the gated pilot explicitly:
+
+```bash
+make discover APPLY=1 FEASTS=st-stephen-hungary
+make discover-report RUN=20260902T190000Z
+```
+
+The first reader sees every located page for the feast in one call and must
+classify each fallback as actual printed proper text or as absent/cross-referred.
+It also records unrequested printed sections as `extra`; those are never
+applied. A high/medium printed candidate is rejected as `same-as-fallback` when
+it is at least 0.9 similar to the currently resolved fallback. Otherwise one
+Claude Sonnet reading of the named slot and page must agree at 0.985 before
+`office corpus put` and a Diurnal attestation. Disagreement, low confidence,
+an unrecognised printed page, or an apply error remains `needs-human` with a
+representative web URL in the report. All dossiers, prompts, reader output,
+and body files remain under ignored `output/`.
+
 For page diagnostics, the underlying helpers are also useful directly:
 
 ```bash
 python3 scripts/diurnal-pages.py locate monastic-diurnal 595
 python3 scripts/diurnal-pages.py locate monastic-diurnal xxvi
 python3 scripts/diurnal-pages.py find monastic-diurnal "blessed Athanasius"
+python3 scripts/diurnal-pages.py feast-pages 7 17 "Translation of St. Osmund"
 ```
 
 ## Classification and application

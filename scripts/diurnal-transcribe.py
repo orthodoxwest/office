@@ -7,6 +7,7 @@ import argparse
 import csv
 import datetime as dt
 import difflib
+import hashlib
 import importlib.util
 import json
 import os
@@ -26,10 +27,17 @@ SCHEMA = Path(__file__).with_name("diurnal-transcription-schema.json")
 TRANSCRIBE_ROOT = ROOT / "output" / "transcribe"
 DEFAULT_PAGE_KEY = "monastic-diurnal"
 DEFAULT_MODEL = "gpt-5.6-luna"
+PROVIDER_MODELS = {"codex": "gpt-5.6-luna", "claude": "sonnet", "grok": "grok-4.5", "muse": "muse-spark-1.3-contributor"}
 MAX_OUTPUT_BYTES = 1024 * 1024
 DEFAULT_TIMEOUT = 300
 DEFAULT_MAX_ATTEMPTS = 3
 NAMESPACES = {"proper", "commons", "seasonal", "ordinary", "shared", "psalms", "canticles"}
+CANTICLE_DESCRIPTIONS = {
+    "habakkuk-3": "Canticle of Habakkuk (Hab. 3)",
+    "isaiah-38": "Canticle of Isaiah (Is. 38)",
+    "isaiah-12": "Canticle of Isaiah (Is. 12)",
+    "hannah": "Canticle of Hannah (1 Sam. 2)",
+}
 LEADING_LABEL_RE = re.compile(
     r"^\s*(?:(?:Ant\.\s+on\s+Magnificat\.)|Ant\.|Antiphon\.?|Collect\.?|Chapter\.?|"
     r"Hymn\.?|Prayer\.?|Memorial\.?)\s*",
@@ -142,7 +150,7 @@ def apply_decision(key: str, classification: str, first: dict, second: dict | No
     if not second.get("found") or second.get("confidence") == "low":
         return "needs-human"
     # The first-wave ingestion guardrail forbids automatic psalter writes.
-    if key.startswith("psalms/"):
+    if key.startswith(("psalms/", "canticles/")):
         return "needs-human"
     if corpus_text is None or similarity(str(first.get("text", "")), corpus_text, key) < 0.6:
         return "needs-human"
@@ -181,6 +189,8 @@ def describe_key(key: str, data_dir: Path, feast_names: dict[str, str] | None = 
     if len(parts) < 2 or parts[0] not in NAMESPACES:
         raise ValueError(f"unsupported corpus key: {key}")
     slot = humanize(parts[-1])
+    if parts[0] == "canticles" and len(parts) == 2:
+        return CANTICLE_DESCRIPTIONS.get(parts[1], f"the canticle {slot}")
     if parts[0] == "proper" and len(parts) >= 3:
         names = feast_names if feast_names is not None else parse_feast_names(data_dir)
         owner = names.get(parts[1], humanize(parts[1]))
@@ -276,6 +286,30 @@ def find_result_object(value) -> dict | None:
     return None
 
 
+def embedded_json_objects(values) -> list:
+    """Parse JSON objects embedded as strings (or fenced) inside provider event payloads."""
+    found = []
+    stack = list(values)
+    while stack:
+        value = stack.pop()
+        if isinstance(value, dict):
+            stack.extend(value.values())
+        elif isinstance(value, list):
+            stack.extend(value)
+        elif isinstance(value, str) and "{" in value:
+            text = value.strip()
+            if text.startswith("```"):
+                text = text.strip("`")
+                text = text.split("\n", 1)[1] if "\n" in text else text
+            start, end = text.find("{"), text.rfind("}")
+            if start != -1 and end > start:
+                try:
+                    found.append(json.loads(text[start:end + 1]))
+                except json.JSONDecodeError:
+                    continue
+    return found
+
+
 def parse_provider_output(output: str) -> dict:
     candidates = []
     try:
@@ -286,6 +320,7 @@ def parse_provider_output(output: str) -> dict:
                 candidates.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
+    candidates.extend(embedded_json_objects(candidates))
     for candidate in reversed(candidates):
         result = find_result_object(candidate)
         if result:
@@ -309,9 +344,14 @@ class ProviderRunner:
         self.execute = execute
 
     def transcribe(self, provider: str, model: str, prompt: str, images: list[Path]) -> tuple[dict, float]:
+        return self.read_json(provider, model, prompt, images, SCHEMA, parse_provider_output)
+
+    def read_json(self, provider: str, model: str, prompt: str, images: list[Path],
+                  schema: Path, parser: Callable[[str], dict]) -> tuple[dict, float]:
+        """Run one bounded image-reading call with a caller-supplied JSON schema."""
         started = time.monotonic()
         if provider == "codex":
-            command = ["codex", "exec", "--ephemeral", "--json", "--output-schema", str(SCHEMA)]
+            command = ["codex", "exec", "--ephemeral", "--json", "--output-schema", str(schema)]
             for image in images:
                 command.extend(["-i", str(image)])
             command.extend(["--sandbox", "read-only", "-m", model, prompt])
@@ -319,13 +359,26 @@ class ProviderRunner:
             read_prompt = build_read_prompt(prompt, images)
             command = [
                 "claude", "-p", read_prompt, "--model", model, "--output-format", "json",
-                "--json-schema", SCHEMA.read_text(encoding="utf-8"),
+                "--json-schema", schema.read_text(encoding="utf-8"),
                 "--allowedTools", "Read", "--no-session-persistence",
             ]
+        elif provider == "grok":
+            read_prompt = build_read_prompt(prompt, images)
+            command = [
+                "grok", "--single", read_prompt, "--output-format", "json",
+                "--json-schema", schema.read_text(encoding="utf-8"),
+                "--permission-mode", "plan", "--no-memory", "--no-subagents",
+                "--disable-web-search", "--max-turns", "4", "--model", model,
+            ]
+        elif provider == "muse":
+            command = ["muse", "exec", "--json", "--reasoning-effort", "low", "--max-model-steps", "4"]
+            for image in images:
+                command.extend(["--image", str(image)])
+            command.extend(["--model", model, prompt + "\n\nReply with the JSON object only, no prose."])
         else:
             raise ProviderError(f"unsupported provider: {provider}")
         output = self.execute(command, self.timeout, self.max_bytes)
-        return parse_provider_output(output), time.monotonic() - started
+        return parser(output), time.monotonic() - started
 
 
 def build_read_prompt(prompt: str, images: list[Path]) -> str:
@@ -362,9 +415,10 @@ class PageResolver:
                 for item in diurnal_pages.find_candidates(index, query, limit)]
 
     def page(self, key: str, pdf_page: int) -> dict:
-        for page in self._index(key).get("pages", []):
+        index = self._index(key)
+        for page in index.get("pages", []):
             if page["pdf_page"] == pdf_page:
-                return self._page_record(page)
+                return self._page_record(key, page, index)
         raise LookupError(f"PDF page {pdf_page} not found")
 
     def _pages_from_pdf(self, key: str, pdf_page: int) -> list[dict]:
@@ -373,17 +427,22 @@ class PageResolver:
         if pdf_page not in by_pdf:
             raise LookupError(f"PDF page {pdf_page} not found")
         selected = by_pdf[pdf_page]
-        result = [self._page_record(selected)]
+        result = [self._page_record(key, selected, index)]
         if selected["pdf_page"] + 1 in by_pdf:
-            result.append(self._page_record(by_pdf[selected["pdf_page"] + 1]))
+            result.append(self._page_record(key, by_pdf[selected["pdf_page"] + 1], index))
         return result
 
-    def _page_record(self, page: dict) -> dict:
+    def _page_record(self, key: str, page: dict, index: dict) -> dict:
         png = Path(page["png"])
         absolute = png if png.is_absolute() else self.root / png
         return {
             "pdf_page": page["pdf_page"], "printed_page": page.get("printed_page"),
             "inferred": bool(page.get("inferred", False)), "png": str(absolute.resolve()),
+            "page_key": key, "pdf_sha256": index.get("pdf_sha256", ""),
+            "ocr_route": "pdftotext+pdftotext-layout",
+            "ocr_text_sha256": hashlib.sha256(
+                (page.get("text", "") + "\0" + page.get("layout_text", "")).encode("utf-8")
+            ).hexdigest(),
         }
 
 
@@ -518,7 +577,9 @@ def load_queue(path: Path | None, start: int, years: int) -> list[dict]:
     return list(csv.DictReader(output.splitlines()))
 
 
-def selected_rows(rows: Iterable[dict], all_rows: bool, keys: set[str]) -> list[dict]:
+def selected_rows(rows: Iterable[dict], all_rows: bool, keys: set[str],
+                  statuses: set[str] | None = None) -> list[dict]:
+    statuses = statuses or {"needs-review", "source-unknown"}
     selected = []
     seen = set()
     for row in rows:
@@ -527,7 +588,10 @@ def selected_rows(rows: Iterable[dict], all_rows: bool, keys: set[str]) -> list[
             continue
         if keys and key not in keys:
             continue
-        if not keys and not all_rows and not is_default_candidate(row):
+        if not keys and row.get("status", "") not in statuses:
+            continue
+        if not keys and not all_rows and not (
+                is_default_candidate(row) or row.get("status") == "source-unknown"):
             continue
         selected.append(row)
         seen.add(key)
@@ -538,6 +602,9 @@ def selected_rows(rows: Iterable[dict], all_rows: bool, keys: set[str]) -> list[
 
 
 def write_jsonl(path: Path, record: dict) -> None:
+    if "packet_sha256" not in record:
+        encoded = json.dumps(record, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        record = {**record, "packet_sha256": hashlib.sha256(encoded.encode("utf-8")).hexdigest()}
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
 
@@ -553,11 +620,25 @@ def attest(key: str, printed_page: str, png: str) -> None:
                 "--note", note, "--replace", key, "codex"])
 
 
+def conform_section_body(key: str, text: str) -> str:
+    """Apply corpus-wide section conventions a literal reader does not know."""
+    lines = [line.rstrip() for line in text.strip().splitlines()]
+    section = key.rsplit("/", 1)[-1]
+    if lines and lines[0].startswith("!"):
+        while len(lines) > 1 and not lines[1].strip():
+            del lines[1]
+        # Scripture refs are written "!Gal 6:14", never "!Gal. 6:14".
+        lines[0] = re.sub(r"^!([1-3]?\s?[A-Za-z]+)\.", r"!\1", lines[0])
+    if section.startswith("chapter") and not any("thanks be to god" in line.lower() for line in lines):
+        lines.append("R. Thanks be to God.")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def replace_and_attest(options: RunOptions, key: str, printed_page: str, png: str, text: str) -> None:
     bodies = options.run_dir / "bodies"
     bodies.mkdir(exist_ok=True)
     body_path = bodies / f"{safe_key(key)}.txt"
-    body_path.write_text(text.rstrip() + "\n", encoding="utf-8")
+    body_path.write_text(conform_section_body(key, text), encoding="utf-8")
     run_office(["corpus", "put", key, "--file", str(body_path), "--source", f"diurnal p. {printed_page}"])
     attest(key, printed_page, png)
 
@@ -578,16 +659,12 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
         "diff": "", "similarity": 0.0, "timing_seconds": {"first": None, "second": None},
         "locate_strategy": None, "locate_attempts": [],
     }
-    if not cited_page:
-        return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
-                "notes": "queue row has no usable printed page", "pages": []}
-
     description = describe_key(key, ROOT / "data", feast_names)
 
     # A dry run prepares only the first resolvable prompt; without a reader it
     # cannot determine whether a later locating strategy is necessary.
     if options.dry_run:
-        dry_strategies = (
+        dry_strategies = () if not cited_page else (
             ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
             ("source-page", lambda: source_page_candidates(resolver, options.page_key, key)),
             ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
@@ -626,7 +703,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
         if pages is None:
             return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
                     "notes": "page resolution failed: " + "; ".join(errors), "pages": []}
-        prompt_page = pages[0].get("printed_page") or cited_page
+        prompt_page = pages[0].get("printed_page") or cited_page or "unknown"
         prompt = build_prompt(key, description, prompt_page, pages)
         prompts = options.run_dir / "prompts"
         prompts.mkdir(exist_ok=True)
@@ -642,10 +719,12 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
         return {**base, **empty_result, "classification": "not-found", "decision": "needs-human",
                 "notes": f"corpus read failed: {exc}", "pages": []}
 
-    strategies = (
+    page_strategies = () if not cited_page else (
         ("printed-page", lambda: [resolver.resolve(options.page_key, cited_page)]),
         ("source-page", lambda: source_page_candidates(resolver, options.page_key, key)),
         ("pdf-page", lambda: [resolver.resolve_pdf(options.page_key, cited_page)]),
+    )
+    strategies = page_strategies + (
         ("corpus-ocr", lambda: resolver.find(
             options.page_key, corpus_search_query(existing), limit=3)),
         ("feast-slot-ocr", lambda: resolver.find(
@@ -681,7 +760,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
             attempts += 1
             pages = candidate_pages
             locate_strategy = strategy
-            prompt_page = pages[0].get("printed_page") or cited_page
+            prompt_page = pages[0].get("printed_page") or cited_page or "unknown"
             prompt = build_prompt(key, description, prompt_page, pages)
             try:
                 result, seconds = provider_runner.transcribe(
@@ -749,7 +828,7 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
     second_error = None
     if options.apply and classification == "different" and attempts < options.max_attempts:
         attempts += 1
-        prompt_page = pages[0].get("printed_page") or cited_page
+        prompt_page = pages[0].get("printed_page") or cited_page or "unknown"
         second_prompt = build_prompt(key, description, prompt_page, pages, paths_for_read=True)
         try:
             second, second_seconds = provider_runner.transcribe(
@@ -808,12 +887,16 @@ def run_command(args: argparse.Namespace) -> int:
     run_dir = TRANSCRIBE_ROOT / (args.run_id or default_run_id())
     run_dir.mkdir(parents=True, exist_ok=False)
     options = RunOptions(
-        run_dir=run_dir, page_key=args.page_key, provider=args.provider, model=args.model,
+        run_dir=run_dir, page_key=args.page_key, provider=args.provider,
+        model=args.model or PROVIDER_MODELS.get(args.provider, DEFAULT_MODEL),
         timeout=args.timeout, max_output_bytes=args.max_output_bytes,
         dry_run=args.dry_run, apply=args.apply, max_attempts=args.max_attempts,
     )
     keys = parse_keys(args.keys)
-    rows = selected_rows(load_queue(args.queue, args.start, args.years), args.all, keys)
+    rows = selected_rows(
+        load_queue(args.queue, args.start, args.years), args.all, keys,
+        set(args.status or ("needs-review", "source-unknown")),
+    )
     resolver = PageResolver()
     provider_runner = ProviderRunner(options.timeout, options.max_output_bytes)
     feast_names = parse_feast_names(ROOT / "data")
@@ -867,10 +950,14 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--start", type=int, default=2026)
     run.add_argument("--years", type=int, default=1)
     run.add_argument("--all", action="store_true", help="include all queue rows that have pages")
+    run.add_argument(
+        "--status", action="append", choices=("needs-review", "source-unknown"),
+        default=None, help="queue status to include (repeatable; default: both)",
+    )
     run.add_argument("--keys", action="append", default=[], metavar="KEY[,KEY]", help="limit to named queue keys")
     run.add_argument("--page-key", default=DEFAULT_PAGE_KEY)
-    run.add_argument("--provider", choices=("codex", "claude"), default="codex")
-    run.add_argument("--model", default=DEFAULT_MODEL)
+    run.add_argument("--provider", choices=("codex", "claude", "grok", "muse"), default="codex")
+    run.add_argument("--model", default=None)
     run.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     run.add_argument("--max-output-bytes", type=int, default=MAX_OUTPUT_BYTES)
     run.add_argument("--max-attempts", type=int, default=DEFAULT_MAX_ATTEMPTS,

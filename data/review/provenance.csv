@@ -636,10 +636,12 @@ proper/epiphany/chapter-lauds,de310a2d710f,diurnal,"Epiphany, At Lauds",224,veri
 proper/epiphany/chapter-none,c8a77b00203c,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/chapter-sext,0462d501e782,diurnal,"Epiphany, At Sext",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
+proper/epiphany/psalm-antiphon-4,eab48aa00e3f,diurnal,,224,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/short-responsory-none,e9a013f143a2,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/versicle-lauds,d8fea834bc58,diurnal,"Epiphany, At Lauds",225,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/versicle-vespers,a2198be23d16,diurnal,"Epiphany, At I Vespers",224,verified,grok,2026-08-24,word-for-word from printed page image
 proper/exaltation-holy-cross/benedictus-antiphon,d41107adf6c1,draft archdiocesan Lauds book,,554,verified,codex,2026-07-17,
+proper/exaltation-holy-cross/chapter-none,3380a83c70f9,diurnal,,600,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0644.png
 proper/exaltation-holy-cross/chapter-sext,1f78ef8ab598,diurnal,"Exaltation of the Holy Cross, At Sext",600,verified,grok,2026-08-23,word-for-word from printed page image
 proper/exaltation-holy-cross/hymn-lauds,f653d437eeac,draft archdiocesan Lauds book,,547-549,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/hymn-vespers,6158946e9065,draft archdiocesan Vespers book,,482-483,verified,codex,2026-07-18,
@@ -953,6 +955,7 @@ proper/st-gabriel-archangel/psalm-antiphon-4,6b23bb2bef20,diurnal,"St Gabriel, A
 proper/st-gabriel-archangel/psalm-antiphon-5,5680eec9c7c2,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/short-responsory-terce,1571f3a59379,diurnal,"St Gabriel, At Terce",500,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
+proper/st-jerome/collect,28f2f8a80685,diurnal,,612,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0656.png
 proper/st-john-evangelist/chapter-none,1bdcf3c788f8,diurnal,"St John, Apostle and Evangelist, At None",200,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-john-evangelist/chapter-sext,baf16b998f3d,diurnal,"St John, Apostle and Evangelist, At Sext",200,verified,grok,2026-08-22,word-for-word from printed page image
 proper/st-john-latin-gate/collect,33c538edc070,diurnal,St John before the Latin Gate,525,verified,grok,2026-08-23,word-for-word from printed page image

@@ -245,3 +245,69 @@ R. All the world shall worship thee * and sing of thee.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+[chapter-none]
+# SOURCE: diurnal p. 600
+!Phil 2:8,9
+HE humbled himself, and became obedient unto death, even the death of the Cross. * Wherefore God also hath highly exalted him, * and given him a Name which is above every name.
+R. Thanks be to God.
+
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+# [versicle-sext]
+# Proper versicle at Sext.
+#
+# [versicle-none]
+# Proper versicle at None.
+#
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

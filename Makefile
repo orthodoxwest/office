@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance review-sources review-agent-plan review-agent-run review-agent-status review-agent-collect review-agent-adjudicate review-agent-test diurnal-doctor diurnal-test pages transcribe transcribe-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance review-sources review-agent-plan review-agent-run review-agent-status review-agent-collect review-agent-adjudicate review-agent-test diurnal-doctor diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -22,6 +22,7 @@ test: ## Run all tests
 	python3 scripts/test_diurnal_agent.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
+	python3 scripts/test_diurnal_discover.py
 
 diurnal-doctor: ## Check PDF/OCR tools needed for diurnal intake
 	python3 scripts/diurnal-intake.py doctor
@@ -30,6 +31,7 @@ diurnal-test: ## Run PDF intake unit tests
 	python3 scripts/test_diurnal_intake.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
+	python3 scripts/test_diurnal_discover.py
 
 BOOKS_DIR ?= ../resources/books
 DIURNAL_PDF ?= $(BOOKS_DIR)/Monastic Diurnal.pdf
@@ -48,6 +50,13 @@ transcribe: build ## Prepare prompts by default; APPLY=1 invokes readers and app
 transcribe-report: ## Print markdown for RUN=<run-id-or-directory>
 	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
 	python3 scripts/diurnal-transcribe.py report "$(RUN)"
+
+discover: build ## Prepare silent-fallthrough dossiers; APPLY=1 invokes readers and applies gated propers
+	python3 scripts/diurnal-discover.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(MONTH),--month "$(MONTH)",) $(if $(LIMIT),--limit "$(LIMIT)",)
+
+discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
+	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
+	python3 scripts/diurnal-discover.py report "$(RUN)"
 
 test-race: ## Run Go tests with the race detector
 	go test -race ./...

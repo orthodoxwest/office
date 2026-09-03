@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import calendar
 from collections import Counter
 import difflib
 import hashlib
@@ -248,6 +249,118 @@ def find_candidates(index: dict, query: str, limit: int = 10) -> list[dict]:
     return candidates[:limit]
 
 
+def heading_lines(page: dict, count: int = 14) -> list[str]:
+    """Return the leading OCR lines where running heads and date lines live."""
+    lines: list[str] = []
+    for field in ("layout_text", "text"):
+        current = [line.strip() for line in page.get(field, "").splitlines() if line.strip()]
+        lines.extend(current[:count])
+    return lines
+
+
+def page_mentions_date(page: dict, month: int, day: int) -> bool:
+    if month < 1 or month > 12 or day < 1 or day > 31:
+        raise ValueError("month/day is out of range")
+    month_name = calendar.month_name[month]
+    month_token = normalize_search(month_name)
+    for line in heading_lines(page):
+        normalized = normalize_search(line)
+        tokens = normalized.split()
+        # Running heads suffer OCR noise ("Septembet", "Ocrober"): accept a close token.
+        hit = next((t for t in tokens if t == month_token
+                    or (len(t) >= 4 and difflib.SequenceMatcher(None, t, month_token).ratio() >= 0.8)), None)
+        if hit is None:
+            continue
+        tail = normalized.split(hit, 1)[1]
+        if str(day) in re.findall(r"\d{1,2}", tail):
+            return True
+    return False
+
+
+def feast_name_score(page: dict, name: str) -> float:
+    if not name.strip():
+        return 0.0
+    leading = "\n".join(heading_lines(page, 24))
+    return max(fuzzy_score(name, leading), fuzzy_score(name, page.get("text", "")),
+               fuzzy_score(name, page.get("layout_text", "")))
+
+
+def heading_name_score(page: dict, name: str, count: int = 16) -> float:
+    """Score a title against short adjacent heading windows, not scattered body words."""
+    best = 0.0
+    for field in ("layout_text", "text"):
+        lines = [line.strip() for line in page.get(field, "").splitlines() if line.strip()][:count]
+        for size in (1, 2, 3):
+            for start in range(0, max(0, len(lines) - size + 1)):
+                best = max(best, fuzzy_score(name, " ".join(lines[start:start + size])))
+    return best
+
+
+def locate_feast_pages(index: dict, month: int, day: int, name: str = "",
+                       cap: int = 8) -> dict:
+    """Locate a fixed feast by its running-head date and printed title."""
+    if cap < 1 or cap > 8:
+        raise ValueError("feast page cap must be between 1 and 8")
+    source = repair_label_runs(index.get("pages", []))
+    dated = [i for i, page in enumerate(source) if page_mentions_date(page, month, day)]
+    if not dated:
+        return {"pages": [], "locate_confidence": "none", "reason": "no-pages"}
+    if name.strip():
+        scored = [(feast_name_score(source[i], name), i) for i in dated]
+        score, anchor = max(scored, key=lambda item: (item[0], -item[1]))
+        if score < 0.45:
+            return {"pages": [], "locate_confidence": "none", "reason": "no-pages"}
+        confidence = "high" if score >= 0.72 else "medium"
+    else:
+        anchor, score, confidence = dated[0], 0.0, "medium"
+
+    start = anchor
+    while start > 0 and page_mentions_date(source[start - 1], month, day):
+        start -= 1
+    selected = []
+    for page in source[start:]:
+        if not page_mentions_date(page, month, day):
+            break
+        selected.append(page)
+        if len(selected) == cap:
+            break
+    return {
+        "pages": selected, "locate_confidence": confidence,
+        "name_score": round(score, 6), "reason": "matched",
+    }
+
+
+def locate_named_pages(index: dict, name: str, cap: int = 8) -> dict:
+    """Locate a temporal proper by title/running head when it has no fixed date."""
+    if not name.strip():
+        raise ValueError("a feast name is required")
+    if cap < 1 or cap > 8:
+        raise ValueError("feast page cap must be between 1 and 8")
+    source = repair_label_runs(index.get("pages", []))
+    # Roman-numbered front matter contains a table of contents whose exact
+    # feast titles would otherwise outrank the actual proper.
+    scored = [
+        (heading_name_score(page, name), i)
+        for i, page in enumerate(source)
+        if (series := label_series(str(page.get("printed_page", "")))) and series[0] != "roman"
+    ]
+    score, anchor = max(scored, default=(0.0, -1), key=lambda item: (item[0], -item[1]))
+    if anchor < 0 or score < 0.72:
+        return {"pages": [], "locate_confidence": "none", "reason": "no-pages"}
+    selected = [source[anchor]]
+    for page in source[anchor + 1:]:
+        header_score = heading_name_score(page, name)
+        if header_score < 0.45:
+            break
+        selected.append(page)
+        if len(selected) == cap:
+            break
+    return {
+        "pages": selected, "locate_confidence": "high",
+        "name_score": round(score, 6), "reason": "matched",
+    }
+
+
 def cache_dir(key: str) -> Path:
     if not KEY_RE.fullmatch(key):
         raise ValueError("key must contain only letters, digits, dot, underscore, or hyphen")
@@ -381,6 +494,11 @@ def build_parser() -> argparse.ArgumentParser:
     find.add_argument("key")
     find.add_argument("words")
     find.add_argument("--limit", type=int, default=10)
+    feast = subparsers.add_parser("feast-pages", help="locate a fixed feast's consecutive pages")
+    feast.add_argument("month", type=int)
+    feast.add_argument("day", type=int)
+    feast.add_argument("name", nargs="?", default="")
+    feast.add_argument("--key", default="monastic-diurnal")
     return parser
 
 
@@ -392,8 +510,12 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"key": args.key, "pages": index["page_count"], "index": str(cache_dir(args.key) / "index.json")}))
         elif args.command == "locate":
             print(json.dumps(locate_page(load_index(args.key), args.printed_page)))
-        else:
+        elif args.command == "find":
             print(json.dumps(find_candidates(load_index(args.key), args.words, args.limit), indent=2))
+        else:
+            print(json.dumps(locate_feast_pages(
+                load_index(args.key), args.month, args.day, args.name,
+            ), indent=2))
     except (OSError, ValueError, LookupError, RuntimeError, json.JSONDecodeError) as exc:
         print(f"diurnal-pages: {exc}", file=sys.stderr)
         return 1

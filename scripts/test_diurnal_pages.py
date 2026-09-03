@@ -117,6 +117,57 @@ class IndexTests(unittest.TestCase):
                 self.assertEqual(pages.main(["find", "book", "common abbots"]), 0)
                 self.assertEqual(json.loads(output.call_args.args[0])[0]["pdf_page"], 802)
 
+    def test_feast_pages_uses_date_run_and_title_confirmation(self):
+        index = {"pages": [
+            {"pdf_page": 10, "png": "10.png", "printed_page": "565", "inferred": False,
+             "text": "July 15, 16\nOTHER FEAST", "layout_text": "July 15, 16"},
+            {"pdf_page": 11, "png": "11.png", "printed_page": "566", "inferred": False,
+             "text": "566  July 16, 17, 18, 19\n(JULY 17)\nST. OSMUND",
+             "layout_text": "566  July 16, 17, 18, 19\nTRANSLATION OF ST. OSMUND"},
+            {"pdf_page": 12, "png": "12.png", "printed_page": "567", "inferred": False,
+             "text": "July 16, 17, 18, 19\ncontinued text", "layout_text": "July 16, 17, 18, 19"},
+            {"pdf_page": 13, "png": "13.png", "printed_page": "568", "inferred": False,
+             "text": "July 18, 19, 20\nnext feast", "layout_text": "July 18, 19, 20"},
+        ]}
+        found = pages.locate_feast_pages(index, 7, 17, "Translation of St. Osmund")
+        self.assertEqual([page["pdf_page"] for page in found["pages"]], [11, 12])
+        self.assertEqual(found["locate_confidence"], "high")
+
+    def test_cli_feast_pages(self):
+        index = {"pages": [{
+            "pdf_page": 11, "png": "11.png", "printed_page": "566", "inferred": False,
+            "text": "(JULY 17)\nTRANSLATION OF ST. OSMUND", "layout_text": "July 17",
+        }]}
+        cache = self.root / "book"
+        cache.mkdir(exist_ok=True)
+        (cache / "index.json").write_text(json.dumps(index), encoding="utf-8")
+        with mock.patch.object(pages, "PAGES_ROOT", self.root):
+            with mock.patch("builtins.print") as output:
+                self.assertEqual(pages.main([
+                    "feast-pages", "7", "17", "Translation of St. Osmund", "--key", "book",
+                ]), 0)
+                self.assertEqual(json.loads(output.call_args.args[0])["pages"][0]["pdf_page"], 11)
+
+    def test_temporal_name_locator_ignores_roman_table_of_contents(self):
+        index = {"pages": [
+            {"pdf_page": 8, "png": "8.png", "printed_page": "x", "inferred": False,
+             "text": "CORPUS CHRISTI ........ 401", "layout_text": "TABLE OF CONTENTS"},
+            {"pdf_page": 447, "png": "447.png", "printed_page": "401", "inferred": False,
+             "text": "THE FEAST OF CORPUS CHRISTI", "layout_text": "CORPUS CHRISTI"},
+        ]}
+        found = pages.locate_named_pages(index, "Corpus Christi")
+        self.assertEqual(found["pages"][0]["pdf_page"], 447)
+
+    def test_temporal_name_locator_rejects_scattered_ordinary_rubric_words(self):
+        index = {"pages": [
+            {"pdf_page": 49, "png": "49.png", "printed_page": "3", "inferred": False,
+             "text": "Monday at Prime\nTo God the Holy Paraclete", "layout_text": "Monday at Prime"},
+            {"pdf_page": 350, "png": "350.png", "printed_page": "304", "inferred": False,
+             "text": "MONDAY IN HOLY WEEK", "layout_text": "MONDAY IN HOLY WEEK"},
+        ]}
+        found = pages.locate_named_pages(index, "Monday in Holy Week")
+        self.assertEqual(found["pages"][0]["pdf_page"], 350)
+
 
 if __name__ == "__main__":
     unittest.main()
