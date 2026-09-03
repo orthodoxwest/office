@@ -355,12 +355,22 @@ def parse_discovery_output(output: str) -> dict:
             raise ProviderError("provider returned invalid discovery slot field types")
         if slot["confidence"] not in {"high", "medium", "low"}:
             raise ProviderError("provider returned invalid discovery confidence")
+    # Extra sections are advisory (recorded, never written): normalize rather than fail.
+    normalized_extra = []
     for extra in result["extra"]:
-        required = {"section", "hour", "text", "printed_page", "confidence", "note"}
-        if not isinstance(extra, dict) or not required <= extra.keys():
-            raise ProviderError("provider returned an invalid extra discovery section")
-        if extra["confidence"] not in {"high", "medium", "low"}:
-            raise ProviderError("provider returned invalid extra-section confidence")
+        if not isinstance(extra, dict):
+            continue
+        item = {
+            "section": str(extra.get("section") or extra.get("slot") or extra.get("id") or ""),
+            "hour": str(extra.get("hour") or ""),
+            "text": str(extra.get("text") or ""),
+            "printed_page": str(extra.get("printed_page") or ""),
+            "confidence": extra.get("confidence") if extra.get("confidence") in {"high", "medium", "low"} else "low",
+            "note": str(extra.get("note") or extra.get("notes") or ""),
+        }
+        if item["section"] or item["text"]:
+            normalized_extra.append(item)
+    result["extra"] = normalized_extra
     return result
 
 
@@ -435,7 +445,7 @@ class CorpusApplier:
         )
 
 
-def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = False,
+def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = False, provider: str = "codex",
                     corpus_get: Callable[[str, str], str] = resolved_corpus_text,
                     apply_text: Callable[[dict, dict, dict, dict], None] | None = None) -> dict:
     record = {key: dossier[key] for key in (
@@ -450,7 +460,7 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
     prompt = build_prompt(dossier)
     try:
         answer, seconds = runner.read_json(
-            "codex", DEFAULT_MODEL, prompt, [Path(page["png"]) for page in dossier["pages"]],
+            provider, transcribe.PROVIDER_MODELS.get(provider, DEFAULT_MODEL), prompt, [Path(page["png"]) for page in dossier["pages"]],
             SCHEMA, parse_discovery_output,
         )
     except (OSError, RuntimeError, ProviderError) as exc:
@@ -587,7 +597,7 @@ def run_command(args: argparse.Namespace) -> int:
         write_jsonl(prompt_path, prompt_record)
         if not args.dry_run:
             write_jsonl(results_path, process_dossier(
-                dossier, runner, apply=args.apply, apply_text=applier,
+                dossier, runner, provider=args.provider, apply=args.apply, apply_text=applier,
             ))
     print(json.dumps({
         "run": str(run_dir), "feasts": len(dossiers),
@@ -671,6 +681,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--month", type=int)
     run.add_argument("--limit", type=int)
     run.add_argument("--run-id")
+    run.add_argument("--provider", choices=("codex", "claude", "grok", "muse"), default="codex")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--apply", action="store_true")
     run.add_argument("--timeout", type=int, default=transcribe.DEFAULT_TIMEOUT)

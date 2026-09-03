@@ -27,6 +27,7 @@ SCHEMA = Path(__file__).with_name("diurnal-transcription-schema.json")
 TRANSCRIBE_ROOT = ROOT / "output" / "transcribe"
 DEFAULT_PAGE_KEY = "monastic-diurnal"
 DEFAULT_MODEL = "gpt-5.6-luna"
+PROVIDER_MODELS = {"codex": "gpt-5.6-luna", "claude": "sonnet", "grok": "grok-4.5", "muse": "muse-spark-1.3-contributor"}
 MAX_OUTPUT_BYTES = 1024 * 1024
 DEFAULT_TIMEOUT = 300
 DEFAULT_MAX_ATTEMPTS = 3
@@ -285,6 +286,30 @@ def find_result_object(value) -> dict | None:
     return None
 
 
+def embedded_json_objects(values) -> list:
+    """Parse JSON objects embedded as strings (or fenced) inside provider event payloads."""
+    found = []
+    stack = list(values)
+    while stack:
+        value = stack.pop()
+        if isinstance(value, dict):
+            stack.extend(value.values())
+        elif isinstance(value, list):
+            stack.extend(value)
+        elif isinstance(value, str) and "{" in value:
+            text = value.strip()
+            if text.startswith("```"):
+                text = text.strip("`")
+                text = text.split("\n", 1)[1] if "\n" in text else text
+            start, end = text.find("{"), text.rfind("}")
+            if start != -1 and end > start:
+                try:
+                    found.append(json.loads(text[start:end + 1]))
+                except json.JSONDecodeError:
+                    continue
+    return found
+
+
 def parse_provider_output(output: str) -> dict:
     candidates = []
     try:
@@ -295,6 +320,7 @@ def parse_provider_output(output: str) -> dict:
                 candidates.append(json.loads(line))
             except json.JSONDecodeError:
                 continue
+    candidates.extend(embedded_json_objects(candidates))
     for candidate in reversed(candidates):
         result = find_result_object(candidate)
         if result:
@@ -336,6 +362,19 @@ class ProviderRunner:
                 "--json-schema", schema.read_text(encoding="utf-8"),
                 "--allowedTools", "Read", "--no-session-persistence",
             ]
+        elif provider == "grok":
+            read_prompt = build_read_prompt(prompt, images)
+            command = [
+                "grok", "--single", read_prompt, "--output-format", "json",
+                "--json-schema", schema.read_text(encoding="utf-8"),
+                "--permission-mode", "plan", "--no-memory", "--no-subagents",
+                "--disable-web-search", "--max-turns", "4", "--model", model,
+            ]
+        elif provider == "muse":
+            command = ["muse", "exec", "--json", "--reasoning-effort", "low", "--max-model-steps", "4"]
+            for image in images:
+                command.extend(["--image", str(image)])
+            command.extend(["--model", model, prompt + "\n\nReply with the JSON object only, no prose."])
         else:
             raise ProviderError(f"unsupported provider: {provider}")
         output = self.execute(command, self.timeout, self.max_bytes)
@@ -834,7 +873,8 @@ def run_command(args: argparse.Namespace) -> int:
     run_dir = TRANSCRIBE_ROOT / (args.run_id or default_run_id())
     run_dir.mkdir(parents=True, exist_ok=False)
     options = RunOptions(
-        run_dir=run_dir, page_key=args.page_key, provider=args.provider, model=args.model,
+        run_dir=run_dir, page_key=args.page_key, provider=args.provider,
+        model=args.model or PROVIDER_MODELS.get(args.provider, DEFAULT_MODEL),
         timeout=args.timeout, max_output_bytes=args.max_output_bytes,
         dry_run=args.dry_run, apply=args.apply, max_attempts=args.max_attempts,
     )
@@ -902,8 +942,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--keys", action="append", default=[], metavar="KEY[,KEY]", help="limit to named queue keys")
     run.add_argument("--page-key", default=DEFAULT_PAGE_KEY)
-    run.add_argument("--provider", choices=("codex", "claude"), default="codex")
-    run.add_argument("--model", default=DEFAULT_MODEL)
+    run.add_argument("--provider", choices=("codex", "claude", "grok", "muse"), default="codex")
+    run.add_argument("--model", default=None)
     run.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     run.add_argument("--max-output-bytes", type=int, default=MAX_OUTPUT_BYTES)
     run.add_argument("--max-attempts", type=int, default=DEFAULT_MAX_ATTEMPTS,

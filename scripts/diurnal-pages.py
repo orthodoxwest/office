@@ -265,9 +265,13 @@ def page_mentions_date(page: dict, month: int, day: int) -> bool:
     month_token = normalize_search(month_name)
     for line in heading_lines(page):
         normalized = normalize_search(line)
-        if month_token not in normalized.split():
+        tokens = normalized.split()
+        # Running heads suffer OCR noise ("Septembet", "Ocrober"): accept a close token.
+        hit = next((t for t in tokens if t == month_token
+                    or (len(t) >= 4 and difflib.SequenceMatcher(None, t, month_token).ratio() >= 0.8)), None)
+        if hit is None:
             continue
-        tail = normalized.split(month_token, 1)[1]
+        tail = normalized.split(hit, 1)[1]
         if str(day) in re.findall(r"\d{1,2}", tail):
             return True
     return False
