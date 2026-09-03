@@ -150,7 +150,7 @@ def apply_decision(key: str, classification: str, first: dict, second: dict | No
     if not second.get("found") or second.get("confidence") == "low":
         return "needs-human"
     # The first-wave ingestion guardrail forbids automatic psalter writes.
-    if key.startswith("psalms/"):
+    if key.startswith(("psalms/", "canticles/")):
         return "needs-human"
     if corpus_text is None or similarity(str(first.get("text", "")), corpus_text, key) < 0.6:
         return "needs-human"
@@ -620,11 +620,25 @@ def attest(key: str, printed_page: str, png: str) -> None:
                 "--note", note, "--replace", key, "codex"])
 
 
+def conform_section_body(key: str, text: str) -> str:
+    """Apply corpus-wide section conventions a literal reader does not know."""
+    lines = [line.rstrip() for line in text.strip().splitlines()]
+    section = key.rsplit("/", 1)[-1]
+    if lines and lines[0].startswith("!"):
+        while len(lines) > 1 and not lines[1].strip():
+            del lines[1]
+        # Scripture refs are written "!Gal 6:14", never "!Gal. 6:14".
+        lines[0] = re.sub(r"^!([1-3]?\s?[A-Za-z]+)\.", r"!\1", lines[0])
+    if section.startswith("chapter") and not any("thanks be to god" in line.lower() for line in lines):
+        lines.append("R. Thanks be to God.")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def replace_and_attest(options: RunOptions, key: str, printed_page: str, png: str, text: str) -> None:
     bodies = options.run_dir / "bodies"
     bodies.mkdir(exist_ok=True)
     body_path = bodies / f"{safe_key(key)}.txt"
-    body_path.write_text(text.rstrip() + "\n", encoding="utf-8")
+    body_path.write_text(conform_section_body(key, text), encoding="utf-8")
     run_office(["corpus", "put", key, "--file", str(body_path), "--source", f"diurnal p. {printed_page}"])
     attest(key, printed_page, png)
 
