@@ -548,9 +548,12 @@ footer .text-size-switch {
     font-size: 0.82rem;
   }
 
+  /* The current page wears the same gold underline as every other chosen
+     control — a filled cell reads as a settings panel. */
   .site-menu nav a.active {
-    background: rgba(107, 58, 31, 0.08);
+    background: transparent;
     border-bottom: none;
+    box-shadow: inset 0 -1px 0 var(--gold-line);
   }
 
   .nav-divider {
@@ -733,13 +736,6 @@ footer::before {
    The hook is `day-color-*`, not `color-*`: the bare `color-*` classes are
    full-surface row tints, and reusing them here painted the block a flat
    liturgical color behind text that has no horizontal padding. */
-.home-summary {
-  padding: 0.7rem 0 0;
-  border: none;
-  border-top: 3px solid var(--day-color, var(--border));
-  background: transparent;
-  box-shadow: none;
-}
 
 /* Shared liturgical-color palette. Home uses it as a top hairline; repeating
    ordo entries use it as a side rail. */
@@ -750,30 +746,20 @@ footer::before {
 .day-color-black  { --day-color: #3a3a3a; }
 .day-color-rose   { --day-color: #c4607a; }
 
-/* Title stack: date and feast sit close; secondary lines use smaller gaps. */
+/* Title stack: date and feast sit close; the base keeps only the vertical
+   stack, and gaps live in .page-home .home-day-head below. */
 .home-day-head {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  margin-bottom: 0.55rem;
 }
 
 .home-day-head > * {
   margin: 0;
 }
 
-/* Prayer surface: the single framed action block. */
-.home-prayer-card {
-  border: 1px solid var(--surface-edge);
-  background: var(--surface);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  padding: 1.15rem 1.25rem 1.25rem;
-}
-
+/* Size and line-height live in .page-home .home h1 below. */
 .home h1 {
-  font-size: 1.55rem;
   font-weight: normal;
-  line-height: 1.25;
   letter-spacing: 0.01em;
 }
 
@@ -802,10 +788,8 @@ footer::before {
   margin-bottom: 0.35rem;
 }
 
+/* Measure and size live in .page-home .home .feast below. */
 .home .feast {
-  font-size: 1.15rem;
-  line-height: 1.3;
-  max-width: 32rem;
   color: var(--accent);
 }
 
@@ -890,86 +874,33 @@ footer::before {
   font-style: italic;
 }
 
-.home .penitential {
-  margin-top: 0.15rem;
-}
-
+/* Shape lives in .page-home .penitential-badge below: red work, not a chip. */
 .penitential-badge {
   display: inline-block;
-  margin-right: 0.35rem;
-  margin-bottom: 0.15rem;
-  padding: 0.08rem 0.4rem;
-  border: 1px solid var(--rubric);
-  border-radius: 999px;
   color: var(--rubric);
   font-size: 0.78rem;
-  letter-spacing: 0.02em;
 }
 
-.pray-now-wrap {
-  margin-bottom: 0.85rem;
-}
-
-/* Fills the card at every width. It reads as a banner rather than a button
-   only when the card itself sprawls, which the desktop measure now prevents. */
+/* Fills the card at every width. Surface and size live in
+   .page-home .pray-now below; the base keeps only the full-width block,
+   the banner radius, and the transition. */
 .pray-now {
   display: block;
   text-align: center;
-  padding: 0.85rem 1.15rem;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--bg);
   text-decoration: none;
-  font-size: 1.12rem;
   letter-spacing: 0.02em;
   border-radius: 2px;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.pray-now:hover {
-  background: #5a3019;
-  border-color: #5a3019;
-  color: var(--bg);
-}
-
-.home-prayer-card h2 {
-  font-size: 1.05rem;
-  font-weight: normal;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 0.7rem;
-}
-
-.home-hour-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-/* Every hour is a chip at every width. Borderless chips left the current
-   hour as the only framed item in the row, which read as a misalignment
-   rather than as emphasis. */
+/* Framing and spacing live in .page-home .home-hour-link below; the base
+   keeps only the row box, the ink, and the transition. */
 .home-hour-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.8rem;
-  border: 1px solid var(--border);
   color: var(--text);
   text-decoration: none;
-  background: rgba(255, 255, 255, 0.28);
   transition: border-color 0.15s, background 0.15s, color 0.15s;
-}
-
-.home-hour-link:hover {
-  border-color: var(--accent);
-}
-
-.home-hour-link.is-current {
-  border-color: var(--accent);
-  background: rgba(107, 58, 31, 0.08);
-  color: var(--text);
 }
 
 .home-hour-link-name {
@@ -1015,48 +946,9 @@ footer::before {
     min-height: 0; /* release the global 60vh floor to centre cleanly */
   }
 
-  .home-hero {
-    width: 100%;
-    max-width: 36rem;
-    margin-inline: auto;
-  }
-
-  /* Day identity centred beneath its colour hairline, echoing the centred
-     title under the colour band on hour pages. The prayer card below keeps
-     its own left axis — it's a framed object, not part of this stack. */
-  .home-summary {
-    text-align: center;
-  }
-
-  .home-day-head {
-    align-items: center;
-  }
-
-  /* The hero already holds the measure; a narrower cap here would centre the
-     text on an off-page axis. */
-  .home .feast {
-    max-width: none;
-  }
-
-  .home .commemorations {
-    justify-content: center;
-  }
-
   /* NB: the date-nav half of this centring lives further down, after the
      .home-date-nav overrides it has to beat on source order. */
 
-  /* An even grid rather than a wrapped flex row: at this measure the seven
-     chips don't fit on one line, and free wrapping stranded Compline alone
-     on a second row. Equal columns fill the card and stay tidy no matter how
-     wide the current-hour chip's "now" badge makes it. */
-  .home-hour-links {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .home-hour-link {
-    justify-content: center;
-  }
 }
 
 /* ── Hour page ── */
@@ -1215,27 +1107,6 @@ footer::before {
   margin-top: 0.35rem;
   margin-bottom: 0.15rem;
   padding-top: 0.4rem;
-}
-
-/* Desktop centres the day block (see the min-width: 701px block above); the
-   date control follows it onto the centre axis. These must come after the
-   rules they override — equal specificity, and a media query adds none. */
-@media (min-width: 701px) {
-  .home-day-meta {
-    justify-content: center;
-  }
-
-  .home-day-meta .home-date-nav {
-    text-align: center;
-  }
-
-  .home-day-meta .home-date-nav > summary {
-    margin-inline: auto;
-  }
-
-  .home-day-meta .home-date-nav .day-nav {
-    justify-content: center;
-  }
 }
 
 .day-nav a {
@@ -1843,7 +1714,6 @@ footer::before {
   margin-bottom: 0.4rem;
   text-align: center;
 }
-
 
 .liturgical-gap {
   height: 0.5rem;
@@ -2473,39 +2343,6 @@ footer::before {
     margin-bottom: 1rem;
   }
 
-  .home-hero {
-    gap: 1rem;
-  }
-
-  .home-prayer-card {
-    padding: 1.1rem 1.1rem 1.15rem;
-  }
-
-  .home-summary {
-    border: 1px solid var(--border);
-    border-top-width: 3px;
-    background: var(--surface);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-    padding: 1rem 1.1rem 0.95rem;
-  }
-
-  .home-day-head {
-    margin-bottom: 0.45rem;
-  }
-
-  .home h1 {
-    font-size: 1.45rem;
-  }
-
-  .home .feast {
-    font-size: 1.12rem;
-  }
-
-  /* Chips stay easy to tap on phones. */
-  .home-hour-link {
-    padding: 0.55rem 0.85rem;
-  }
-
   .calendar {
     gap: 0.9rem;
   }
@@ -2958,17 +2795,6 @@ body.season-eastertide {
     line-height: 1.65;
   }
 
-  .home-hour-links {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-
-  .home-hour-link {
-    justify-content: space-between;
-    min-height: 2.75rem;
-  }
-
   .day-nav {
     align-items: center;
   }
@@ -3243,6 +3069,8 @@ body.season-eastertide {
   background: var(--inscription-ground);
   color: var(--inscription-ink);
   font-size: 0.8rem;
+  font-weight: normal;
+  font-variant-caps: all-small-caps;
   letter-spacing: 0.16em;
   text-align: center;
 }
