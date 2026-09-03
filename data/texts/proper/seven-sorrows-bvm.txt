@@ -242,15 +242,13 @@ R. Thanks be to God.
 # [versicle-terce]
 # Proper versicle at Terce.
 #
-[versicle-sext]
-# SOURCE: diurnal p. 605
-V. A bundle of myrrh is my well-beloved unto me.
-R. He shall lie all night betwixt my breasts.
+# [versicle-sext]
+# Proper versicle at this hour.
+#
 
-[versicle-none]
-# SOURCE: diurnal p. 605
-V. My soul failed.
-R. When my beloved spake.
+# [versicle-none]
+# Proper versicle at this hour.
+#
 
 # [versicle-compline]
 # Proper versicle at Compline.

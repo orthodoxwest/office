@@ -178,20 +178,17 @@ R. Thanks be to God.
 # [versicle-prime]
 # Proper versicle at Prime.
 #
-[versicle-terce]
-# SOURCE: diurnal p. 497
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
+# [versicle-terce]
+# Proper versicle at this hour.
+#
 
-[versicle-sext]
-# SOURCE: diurnal p. 497
-V. The mouth of the righteous is exercised in wisdom.
-R. And his tongue will be talking of judgment.
+# [versicle-sext]
+# Proper versicle at this hour.
+#
 
-[versicle-none]
-# SOURCE: diurnal p. 497
-V. The law of his God is in his heart.
-R. And his goings shall not slide.
+# [versicle-none]
+# Proper versicle at this hour.
+#
 
 # [versicle-compline]
 # Proper versicle at Compline.

@@ -157,20 +157,17 @@ Thou art Peter, * and upon this rock I will build my Church.
 # [versicle-prime]
 # Proper versicle at Prime.
 #
-[versicle-terce]
-# SOURCE: diurnal p. 579
-V. Their sound is gone out into all lands.
-R. And their words into the ends of the world.
+# [versicle-terce]
+# Proper versicle at this hour.
+#
 
-[versicle-sext]
-# SOURCE: diurnal p. 579
-V. Thou shalt make them princes in all lands.
-R. They shall remember thy Name, O Lord.
+# [versicle-sext]
+# Proper versicle at this hour.
+#
 
-[versicle-none]
-# SOURCE: diurnal p. 579
-V. Exceedingly honoured are thy friends, O Lord.
-R. Firmly stablished is their princedom.
+# [versicle-none]
+# Proper versicle at this hour.
+#
 
 # [versicle-compline]
 # Proper versicle at Compline.

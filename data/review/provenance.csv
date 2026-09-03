@@ -517,9 +517,6 @@ proper/chains-st-peter/benedictus-antiphon,da3f8f56db0b,diurnal,"St Peter’s Ch
 proper/chains-st-peter/chapter-lauds,582ddada56e6,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chains-st-peter/chapter-none,21bae413cd1f,diurnal,"St Peter’s Chains, At None",579,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0623
 proper/chains-st-peter/psalm-antiphon-4,05828e814e65,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
-proper/chains-st-peter/versicle-none,0bc0f20454bb,diurnal,,579,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0623.png
-proper/chains-st-peter/versicle-sext,081d346161c8,diurnal,,579,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0623.png
-proper/chains-st-peter/versicle-terce,f886575e0617,diurnal,,579,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0623.png
 proper/chains-st-peter/versicle-vespers,ea9cc7f6ba65,diurnal,"St Peter’s Chains, At II Vespers",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/hymn-vespers,50e47a3dc415,draft archdiocesan Vespers book,"Chair of Saint Peter at Antioch, I Vespers",290-291,verified,codex,2026-07-18,wording and verse order checked against dehyphenated chant underlay
@@ -736,9 +733,6 @@ proper/holy-rosary-bvm/psalm-antiphon-4,2411179d9816,diurnal,,619,verified,codex
 proper/holy-rosary-bvm/psalm-antiphon-5,8d2299d6a1e9,diurnal,,619,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0663.png
 proper/holy-rosary-bvm/versicle-first-vespers,305e37b7d15f,diurnal,,619,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0663.png
 proper/holy-rosary-bvm/versicle-lauds,9cef917b4788,diurnal,,620,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0664.png
-proper/holy-rosary-bvm/versicle-none,cb1a6092cd1b,diurnal,,621,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0665.png
-proper/holy-rosary-bvm/versicle-sext,564932224b7a,diurnal,,621,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0665.png
-proper/holy-rosary-bvm/versicle-terce,365c835ba0bc,diurnal,,621,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0665.png
 proper/holy-saturday/triduum-antiphon,3498be524a99,diurnal,"Maundy Thursday at Lauds, addition on the third night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-thursday/triduum-antiphon,17ca8be312f7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,First day's form; transcribed from the page image.
@@ -936,8 +930,6 @@ proper/septuagesima/magnificat-antiphon-thursday,29a20bb2b531,diurnal,"Week of S
 proper/septuagesima/magnificat-antiphon-tuesday,a43300c206cf,diurnal,"Week of Septuagesima, Tuesday",237,verified,grok,2026-08-22,word-for-word from printed page image
 proper/septuagesima/magnificat-antiphon-wednesday,351818fc4a42,diurnal,"Week of Septuagesima, Wednesday",238,verified,grok,2026-08-22,word-for-word from printed page image
 proper/seven-sorrows-bvm/chapter-none,6d34f8dbf745,diurnal,,605,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0649.png
-proper/seven-sorrows-bvm/versicle-none,f72a38b15ccf,diurnal,,605,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0649.png
-proper/seven-sorrows-bvm/versicle-sext,df5a61660b1e,diurnal,,605,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0649.png
 proper/sexagesima/chapter-sext,883f6dc5173c,diurnal,,239,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
 proper/sexagesima/magnificat-antiphon-monday,0a4fbc150e23,diurnal,"Week of Sexagesima, Monday",240,verified,grok,2026-08-22,word-for-word from printed page image
 proper/sexagesima/magnificat-antiphon-tuesday,74d72b1e8e2c,diurnal,"Week of Sexagesima, Tuesday",240,verified,grok,2026-08-22,word-for-word from printed page image
@@ -982,9 +974,6 @@ proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,202
 proper/st-benedict/psalm-antiphon-3,11b76cedfadb,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-4,c1ebf0c51296,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-5,01022ce96162,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
-proper/st-benedict/versicle-none,3f672a6a4cfa,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0543.png
-proper/st-benedict/versicle-sext,350b3c845865,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0543.png
-proper/st-benedict/versicle-terce,2eb3198c7903,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0543.png
 proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/collect,edb1d4bb13fa,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/magnificat-antiphon,5e8a5a836590,diurnal,"St Cecilia, At II Vespers",666,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1085,9 +1074,6 @@ proper/st-maurus/magnificat-antiphon-first,5c61ae668914,diurnal,,458,verified,co
 proper/st-maurus/psalm-antiphon-4,f0188bcb29e7,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0503.png
 proper/st-maurus/psalm-antiphon-5,741f866aacaa,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0503.png
 proper/st-maurus/short-responsory-first-vespers,76db5a052506,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0501.png
-proper/st-maurus/versicle-none,3f672a6a4cfa,diurnal,,458,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0504.png
-proper/st-maurus/versicle-sext,350b3c845865,diurnal,,458,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0504.png
-proper/st-maurus/versicle-terce,2eb3198c7903,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0503.png
 proper/st-perpetua-felicitas/commemoration-collect,495f24ade6bd,diurnal,,483,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0529.png
 proper/st-peter-chrysologus/collect,734293de7d96,diurnal,,446,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0492.png
 proper/st-raphael-archangel/chapter-lauds,53a4b322eb27,diurnal,"St Raphael, At Lauds",633,verified,grok,2026-08-23,word-for-word from printed page image

@@ -202,20 +202,17 @@ R. Thanks be to God.
 # [versicle-prime]
 # Proper versicle at Prime.
 #
-[versicle-terce]
-# SOURCE: diurnal p. 621
-V. Holy Mother of God, Mary ever Virgin.
-R. Intercede for us unto the Lord our God.
+# [versicle-terce]
+# Proper versicle at this hour.
+#
 
-[versicle-sext]
-# SOURCE: diurnal p. 621
-V. After Childbearing, O Virgin, thou didst remain inviolate.
-R. Intercede for us, O Mother of God.
+# [versicle-sext]
+# Proper versicle at this hour.
+#
 
-[versicle-none]
-# SOURCE: diurnal p. 621
-V. Thou art beautiful and pleasant.
-R. O holy Mother of God, in thy felicity.
+# [versicle-none]
+# Proper versicle at this hour.
+#
 
 # [versicle-compline]
 # Proper versicle at Compline.
