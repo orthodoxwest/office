@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slots", "extra", "notes"],
+  "properties": {
+    "slots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "printed", "text", "printed_page", "confidence", "note"],
+        "properties": {
+          "id": {"type": "string"},
+          "printed": {"type": "boolean"},
+          "text": {"type": "string"},
+          "printed_page": {"type": "string"},
+          "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "extra": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["section", "hour", "text", "printed_page", "confidence", "note"],
+        "properties": {
+          "section": {"type": "string"},
+          "hour": {"type": "string"},
+          "text": {"type": "string"},
+          "printed_page": {"type": "string"},
+          "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
+          "note": {"type": "string"}
+        }
+      }
+    },
+    "notes": {"type": "string"}
+  }
+}

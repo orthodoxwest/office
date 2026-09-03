@@ -64,6 +64,9 @@ Day = 7
 	if !strings.Contains(text, "# [chapter-lauds]") {
 		t.Fatalf("scaffold missing optional # [chapter-lauds]")
 	}
+	if !strings.Contains(text, "# [short-responsory-terce]") {
+		t.Fatalf("scaffold missing optional # [short-responsory-terce]")
+	}
 	// Must not create live empty sections.
 	for _, line := range strings.Split(text, "\n") {
 		trimmed := strings.TrimSpace(line)
@@ -224,6 +227,10 @@ Day = 1
 	text := string(body)
 	if !strings.Contains(text, "# [commemoration-antiphon]") {
 		t.Fatalf("expected thin catalog:\n%s", text)
+	}
+	if !strings.Contains(text, "# [commemoration-antiphon-lauds]") ||
+		!strings.Contains(text, "# [commemoration-antiphon-vespers]") {
+		t.Fatalf("expected hour-qualified commemoration antiphons:\n%s", text)
 	}
 	if strings.Contains(text, "# [chapter-lauds]") {
 		t.Fatalf("commemoration scaffold should not include optional chapter-lauds")

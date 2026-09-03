@@ -91,6 +91,13 @@ class PromptTests(unittest.TestCase):
                        "must stop before its conclusion cue"):
             self.assertIn(wanted, prompt)
 
+    def test_canticle_descriptions_include_biblical_references(self):
+        self.assertEqual(
+            transcribe.describe_key("canticles/habakkuk-3", Path("data")),
+            "Canticle of Habakkuk (Hab. 3)",
+        )
+        self.assertIn("1 Sam. 2", transcribe.describe_key("canticles/hannah", Path("data")))
+
 
 class FakeProvider:
     def __init__(self, answers):
@@ -216,6 +223,47 @@ class ApplyDecisionTests(unittest.TestCase):
             self.assertTrue(record["dry_run"])
             self.assertEqual(provider.calls, [])
             self.assertTrue(Path(record["prompt"]).is_file())
+
+    def test_source_unknown_starts_with_ocr_strategies(self):
+        original_corpus = transcribe.corpus_text
+        try:
+            transcribe.corpus_text = lambda key: "O Lord, hear the opening words of this canticle."
+            found = [[{"pdf_page": 40, "printed_page": "12", "inferred": False,
+                       "png": "/cache/0040.png"}]]
+            resolver = FallbackResolver(found=found)
+            provider = FakeProvider([{
+                "found": True, "text": "O Lord, hear the opening words of this canticle.",
+                "printed_page": "12", "pdf_page": 40, "confidence": "high", "notes": "visible",
+            }])
+            with tempfile.TemporaryDirectory() as directory:
+                record = transcribe.process_row(
+                    {"key": "canticles/habakkuk-3", "page": "", "source": "",
+                     "status": "source-unknown"},
+                    transcribe.RunOptions(Path(directory)), resolver, provider, {},
+                )
+            self.assertEqual(record["locate_strategy"], "corpus-ocr")
+            self.assertEqual(record["classification"], "exact")
+            self.assertEqual(len(resolver.find_calls), 1)
+            self.assertIn("o lord hear the opening", resolver.find_calls[0][0])
+        finally:
+            transcribe.corpus_text = original_corpus
+
+    def test_status_filter_defaults_to_unknown_and_needs_review(self):
+        rows = [
+            {"key": "proper/a/collect", "status": "source-unknown"},
+            {"key": "proper/b/collect", "status": "needs-review", "source": "diurnal", "page": "2"},
+            {"key": "proper/c/collect", "status": "verified", "source": "diurnal", "page": "3"},
+        ]
+        self.assertEqual(
+            [row["key"] for row in transcribe.selected_rows(rows, False, set())],
+            ["proper/a/collect", "proper/b/collect"],
+        )
+        self.assertEqual(
+            [row["key"] for row in transcribe.selected_rows(
+                rows, False, set(), {"source-unknown"},
+            )],
+            ["proper/a/collect"],
+        )
 
     def test_different_calls_second_reader_only_in_apply_mode(self):
         original_corpus = transcribe.corpus_text
