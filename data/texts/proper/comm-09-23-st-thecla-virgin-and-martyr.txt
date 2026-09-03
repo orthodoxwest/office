@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-09-23-st-thecla-virgin-and-martyr]
+# Name: St Thecla, Virgin & Martyr
+# Rank: commemoration  Category: virgin-martyr
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/virgin-martyr/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 607
+Grant, we beseech thee, Almighty God: that we who honour the birthday of blessed Thecla, thy Virgin and Martyr, may both rejoice in her yearly festival, and profit by the example of so great a faith.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

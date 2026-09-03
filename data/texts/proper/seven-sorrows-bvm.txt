@@ -196,3 +196,85 @@ R. Who didst stand by the Cross of Jesus.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-sext]
+# Proper chapter at Sext.
+#
+[chapter-none]
+# SOURCE: diurnal p. 605
+!Lam 2:18
+Let tears run down like a river day and night: * give thyself no rest; * let not the apple of thine eye cease.
+R. Thanks be to God.
+
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+[versicle-sext]
+# SOURCE: diurnal p. 605
+V. A bundle of myrrh is my well-beloved unto me.
+R. He shall lie all night betwixt my breasts.
+
+[versicle-none]
+# SOURCE: diurnal p. 605
+V. My soul failed.
+R. When my beloved spake.
+
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

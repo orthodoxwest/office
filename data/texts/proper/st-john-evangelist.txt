@@ -128,3 +128,83 @@ R. Who leaned on the Lord's bosom at the last supper.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+[hymn-none]
+# SOURCE: diurnal p. 198
+Exsultet cælum laudibus
+
+LET heaven's exultant praises ring,
+And earth with joy responsive sing:
+The Apostle's deeds and high estate
+This festal-tide we celebrate.
+
+O ye who, throned in glory dread,
+Shall judge the living and the dead,
+True lights, the world illumining,
+Regard the suppliant prayer we bring.
+
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+# [versicle-sext]
+# Proper versicle at Sext.
+#
+# [versicle-none]
+# Proper versicle at None.
+#
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

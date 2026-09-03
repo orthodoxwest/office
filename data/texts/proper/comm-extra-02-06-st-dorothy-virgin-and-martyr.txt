@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-extra-02-06-st-dorothy-virgin-and-martyr]
+# Name: St Dorothy, Virgin & Martyr
+# Rank: commemoration  Category: virgin-martyr
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/virgin-martyr/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 474
+Almighty and everlasting God, in whose Name the glorious Virgin Martyr Dorothea conquered her manifold torments: we humbly beseech thee that we may overcome all perils through her intercession, and may find her a frequent helper in our necessities.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

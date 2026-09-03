@@ -10,18 +10,21 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: diurnal p. 457
+O God, who for a pattern of obedience didst cause blessed Maurus to walk dry-shod upon the waters: grant that we may both follow perfectly the example of his virtues, and also be worthy to share in his reward.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
-#
+[magnificat-antiphon]
+# SOURCE: diurnal p. 456
+O most blessed of men! * who, rejecting this world, bore the yoke of Holy Rule from tender years lovingly; and being made obedient even unto death, he denied himself, that he might wholly cling to Christ his Master, alleluia.
+
+[magnificat-antiphon-first]
+# SOURCE: diurnal p. 458
+To-day holy Maurus, * lying upon a goat-skin, died happily before the altar; to-day the first-begotten disciple of blessed Benedict, through the guiding of the Holy Rule, came up to Christ, rising untroubled, accompanied by choirs of Angels; to-day the obedient man, telling of his victories, was worthy to be crowned by the Lord, alleluia.
+
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
@@ -34,12 +37,14 @@
 # [psalm-antiphon-3]
 # Third psalm antiphon at Lauds.
 #
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
+[psalm-antiphon-4]
+# SOURCE: diurnal p. 457
+From the house of prayer * he passed over unto the place of the wondrous tabernacle, even unto the house of God, with exceeding love of whom he burned.
+
+[psalm-antiphon-5]
+# SOURCE: diurnal p. 457
+He was chosen * by the Lord to be an example to the cloistered, and a chief observer of the Holy Rule.
+
 # [commemoration-antiphon]
 # Antiphon when this feast is only commemorated (not the day's celebration).
 #
@@ -107,3 +112,93 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-terce]
+# Proper chapter at Terce.
+#
+# [chapter-sext]
+# Proper chapter at Sext.
+#
+# [chapter-none]
+# Proper chapter at None.
+#
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+[versicle-terce]
+# SOURCE: diurnal p. 457
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
+
+[versicle-sext]
+# SOURCE: diurnal p. 458
+V. The mouth of the righteous is exercised in wisdom.
+R. And his tongue will be talking of judgment.
+
+[versicle-none]
+# SOURCE: diurnal p. 458
+V. The law of his God is in his heart.
+R. And his goings shall not slide.
+
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+[short-responsory-first-vespers]
+# SOURCE: diurnal p. 455
+R. The mouth of the righteous * Is exercised in wisdom.
+R. The mouth.
+V. And his tongue will be talking of judgment.
+R. Is exercised.
+Glory be.
+R. The mouth.
+
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

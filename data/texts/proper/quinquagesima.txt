@@ -152,3 +152,87 @@ Mighty Abraham, * the father of our faith, offered a burnt offering upon the alt
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-terce]
+# Proper chapter at Terce.
+#
+[chapter-sext]
+# SOURCE: diurnal p. 242
+!1 Cor 13:8, 9
+Charity never faileth: * but whether there be prophecies, they shall fail; whether there be tongues, they shall cease; whether there be knowledge, it shall vanish away. * For we know in part, and we prophesy in part.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 242
+!1 Cor 13:13
+And now abideth * faith, hope, charity, these three; * but the greatest of these is charity.
+R. Thanks be to God.
+
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+# [versicle-sext]
+# Proper versicle at Sext.
+#
+# [versicle-none]
+# Proper versicle at None.
+#
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

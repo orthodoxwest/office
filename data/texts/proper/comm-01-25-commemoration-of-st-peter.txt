@@ -1,0 +1,39 @@
+# Proper scaffold for [comm-01-25-commemoration-of-st-peter]
+# Name: Commemoration of St. Peter
+# Rank: commemoration  Category: confessor
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+[commemoration-antiphon-vespers]
+# SOURCE: diurnal p. 463
+Thou art the shepherd of the sheep, O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
+
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+[commemoration-versicle-vespers]
+# SOURCE: diurnal p. 463
+V. Thou art Peter.
+R. And upon this rock I will build my Church.
+
+[commemoration-collect]
+# SOURCE: diurnal p. 463
+O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

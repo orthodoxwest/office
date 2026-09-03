@@ -203,6 +203,7 @@ CORPUS_GRAMMAR = """Corpus output grammar:
 - Return only the requested corpus entry, without surrounding page headings, rubrics, or explanatory prose. Retain only a title or incipit required by the entry forms below.
 - Omit printed entry labels such as `Ant.`, `Ant. on Magnificat.`, `Collect`, `Chapter`, `Hymn`, `Prayer`, and `Memorial`. When a printed ℣./℟. labels dialogue, use the corpus `V. ` / `R. ` markers below instead of copying the printed label.
 - Preserve the book's archaic spelling and capitalization. Expand nothing and silently correct nothing.
+- The ornamental initial capital that opens a collect, chapter or antiphon is the first letter of the text (or the word "O" when it stands alone): include it, e.g. "O God, who…" not "God, who…". Write the opening words in sentence case, not the printed small capitals.
 - Render every printed flex or mediant mark (`†`, `*`, or `‡`) as the corpus marker ` * `.
 - A psalm/canticle entry keeps its corpus title line and `!Reference`, then a blank line before the verses. Use `[section: Heading]` for a printed canticle section break.
 - Use `!Reference` for a printed scripture reference that belongs to a chapter or other block.
@@ -447,6 +448,19 @@ class PageResolver:
 
 
 def run_office(args: list[str], *, capture: bool = True) -> str:
+    """Run the office binary; ledger and corpus writes are serialized across processes."""
+    import fcntl
+    lock_path = ROOT / "output" / ".office-write.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(lock_path, "w", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            return _run_office_unlocked(args, capture=capture)
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def _run_office_unlocked(args: list[str], *, capture: bool = True) -> str:
     command = [str(ROOT / "office"), *args]
     result = subprocess.run(command, cwd=ROOT, capture_output=capture, text=True, check=False)
     if result.returncode != 0:
@@ -620,6 +634,45 @@ def attest(key: str, printed_page: str, png: str) -> None:
                 "--note", note, "--replace", key, "codex"])
 
 
+SMALL_CAPS_WORD = re.compile(r"^([A-Z]{2,}(?:[’'][A-Z]+)?)(\b)")
+DROPPED_O_OPENINGS = ("GOD,", "GOD ", "LORD,", "LORD ")
+
+
+def sentence_case_opening(line: str) -> str:
+    """The book sets the opening words in small caps after an ornamental initial;
+    the corpus writes sentence case. Restore a dropped ornamental "O" before
+    GOD/LORD, and lower every leading all-caps word after its first letter."""
+    if line.startswith(DROPPED_O_OPENINGS):
+        line = "O " + line
+    words = line.split(" ")
+    for i, word in enumerate(words):
+        core = word.rstrip(",.;:!?")
+        if core.isupper() and len(core) >= 2 and core.isalpha():
+            words[i] = word[0] + word[1:].lower()
+            continue
+        if i > 0:
+            break
+    return " ".join(words)
+
+
+INCIPIT_SLOTS = ("antiphon", "versicle", "short-responsory", "chapter", "hymn")
+CROSSREF = re.compile(r"\bp{1,2}\.\s*\d+\*?", re.IGNORECASE)
+
+
+def looks_like_incipit(key: str, text: str) -> bool:
+    """The book abbreviates a borrowed text to its opening words plus a page
+    cross-reference ("Ant. O Teacher, p. 35*"). Such a fragment is a pointer to
+    the Common, never the proper text a slot should hold."""
+    section = key.rsplit("/", 1)[-1]
+    if not any(token in section for token in INCIPIT_SLOTS):
+        return False
+    body = "\n".join(l for l in text.strip().splitlines() if not l.startswith(("!", "#")))
+    if CROSSREF.search(body):
+        return True
+    words = body.replace("V.", " ").replace("R.", " ").split()
+    return len(words) <= 6
+
+
 def conform_section_body(key: str, text: str) -> str:
     """Apply corpus-wide section conventions a literal reader does not know."""
     lines = [line.rstrip() for line in text.strip().splitlines()]
@@ -628,7 +681,11 @@ def conform_section_body(key: str, text: str) -> str:
         while len(lines) > 1 and not lines[1].strip():
             del lines[1]
         # Scripture refs are written "!Gal 6:14", never "!Gal. 6:14".
+        lines[0] = re.sub(r"^!\s*(?:Reference|Ref\.?|Chapter)\s+", "!", lines[0])
         lines[0] = re.sub(r"^!([1-3]?\s?[A-Za-z]+)\.", r"!\1", lines[0])
+    body_index = 1 if lines and lines[0].startswith("!") else 0
+    if body_index < len(lines):
+        lines[body_index] = sentence_case_opening(lines[body_index])
     if section.startswith("chapter") and not any("thanks be to god" in line.lower() for line in lines):
         lines.append("R. Thanks be to God.")
     return "\n".join(lines).rstrip() + "\n"

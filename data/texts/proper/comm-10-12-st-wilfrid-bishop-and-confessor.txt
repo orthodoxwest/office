@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-10-12-st-wilfrid-bishop-and-confessor]
+# Name: St Wilfrid, Bishop & Confessor
+# Rank: commemoration  Category: confessor-bishop
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor-bishop/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 624
+O God, by whose grace blessed Wilfrid thy Bishop did shine with such evident signs of holiness: grant, we beseech thee, that we may ever be defended by his protection, as by his teaching we have been taught to desire heavenly things.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

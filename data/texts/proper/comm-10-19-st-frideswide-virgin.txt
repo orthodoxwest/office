@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-10-19-st-frideswide-virgin]
+# Name: St. Frideswide, Virgin
+# Rank: commemoration  Category: virgin
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/virgin/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 627
+Almighty everlasting God, author of all virtue and lover of virginity: grant, we beseech thee, that we may be commended by the merits of holy Frideswide, thy Virgin, which were well-pleasing unto thee; and whose life of chastity deserved to win thy favour.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

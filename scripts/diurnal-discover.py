@@ -39,6 +39,7 @@ ProviderError = transcribe.ProviderError
 ALLOWED_TIERS = {"common", "seasonal", "ordinary"}
 EXCLUDED_SLOTS = {"alleluia", "marian-antiphon", "pre-collect-versicle", "athanasian"}
 EXCLUDED_TIERS = {"ordinary-weekday", "temporal-week"}
+EXCLUDED_HOURS = {"prime", "compline"}
 FIXED_FILES = ("sanctoral.txt", "commemorations.txt", "awrv.txt")
 
 
@@ -99,6 +100,9 @@ def slot_is_printed(row: dict) -> bool:
         return False
     slot = row.get("resolver_slot") or row.get("slot_ref") or row.get("requested_slot", "")
     if slot in EXCLUDED_SLOTS:
+        return False
+    # The diurnal never prints feast propers for Prime or Compline chapter/hymn/responsory.
+    if row.get("hour") in EXCLUDED_HOURS and slot in {"chapter", "hymn", "short-responsory", "versicle"}:
         return False
     if slot in {
         "collect", "benedictus-antiphon", "magnificat-antiphon",
@@ -391,6 +395,8 @@ def gate_decision(primary: dict, fallback_text: str | list[str], secondary: dict
         return "printed-false", 0.0
     if primary.get("confidence") == "low" or not str(primary.get("text", "")).strip():
         return "needs-human", 0.0
+    if transcribe.looks_like_incipit(target_key, str(primary["text"])):
+        return "incipit-crossref", 0.0
     fallbacks = fallback_text if isinstance(fallback_text, list) else [fallback_text]
     fallback_score = max(
         (transcribe.similarity(str(primary["text"]), text, target_key) for text in fallbacks),
@@ -501,7 +507,7 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
             primary, fallback, applying=False, target_key=request["target_key"],
         )
         page = exact_page(dossier["pages"], str(primary.get("printed_page", "")))
-        if page is None and decision not in {"same-as-fallback", "printed-false"}:
+        if page is None and decision not in {"same-as-fallback", "printed-false", "incipit-crossref"}:
             decision = "needs-human"
             slot_record["error"] = "reader printed page is not one of the located pages"
         secondary = None
@@ -625,7 +631,8 @@ def render_report(records: list[dict], run_name: str) -> str:
              f"- Printed false: {decisions['printed-false']}",
              f"- Extra unmodelled sections: {len(extras)}",
              f"- Needs human: {decisions['needs-human'] + len(dossier_needs)}",
-             f"- Same as fallback: {decisions['same-as-fallback']}"]
+             f"- Same as fallback: {decisions['same-as-fallback']}",
+             f"- Incipit cross-references: {decisions['incipit-crossref']}"]
 
     def section(title: str, entries: list[str]) -> None:
         lines.extend(["", f"## {title}", ""])

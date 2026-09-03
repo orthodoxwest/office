@@ -28,7 +28,7 @@
 
 [collect]
 # SOURCE: diurnal p. 612
-O GOD, who in blessed Jerome, thy Confessor, didst vouchsafe to provide for thy Church a most eminent Teacher for the setting forth of the Holy Scriptures: grant, we beseech thee, that through his prayers and merits we may be able by thy help to practise what he taught, both in word and deed.
+O God, who in blessed Jerome, thy Confessor, didst vouchsafe to provide for thy Church a most eminent Teacher for the setting forth of the Holy Scriptures: grant, we beseech thee, that through his prayers and merits we may be able by thy help to practise what he taught, both in word and deed.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
