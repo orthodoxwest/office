@@ -108,6 +108,12 @@ make verify-psalms                  # machine-check all Coverdale Psalm files
 ./office review assurance          # release assurance gates and summary
 ```
 
+For scanned-diurnal ingestion, use the
+[page-image transcription and discovery workflow](scripts/DIURNAL-PIPELINE.md):
+`make pages`, then `make transcribe` or `make discover`. Both prepare prompts
+by default; `APPLY=1` enables readers and gated corpus updates with provenance
+attestations. The provenance queue and resolution inventory supply their inputs.
+
 ## PDF booklets
 
 The `tex` subcommand produces a `.tex` file formatted as a half-letter (5.5"×8.5") booklet, suitable for printing handouts (e.g. Compline for overnight guests, Sunday Lauds for visitors).

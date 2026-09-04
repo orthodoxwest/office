@@ -149,7 +149,7 @@ def apply_decision(key: str, classification: str, first: dict, second: dict | No
         return "needs-human"
     if not second.get("found") or second.get("confidence") == "low":
         return "needs-human"
-    # The first-wave ingestion guardrail forbids automatic psalter writes.
+    # Psalm and canticle replacements require human review.
     if key.startswith(("psalms/", "canticles/")):
         return "needs-human"
     if corpus_text is None or similarity(str(first.get("text", "")), corpus_text, key) < 0.6:

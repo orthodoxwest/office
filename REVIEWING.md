@@ -136,8 +136,8 @@ reviewers to handle version identifiers.
 
 Some corpus sections carry
 `# SOURCE: … — agent-proposed, not attested`. Those came through
-`office review apply` from a gated diurnal witness. Treat them as current
-wording awaiting a human check, not as a finished verification. A later
+the retired packet-apply pipeline from a gated diurnal witness. Treat them as
+current wording awaiting a human check, not as a finished verification. A later
 `review attest` is what flips the key to `verified`. Do not delete the hedge
 until that attestation lands.
 
@@ -250,44 +250,28 @@ the exact page contents automatically, so any later edit makes the unit show
 up as **stale** in `review-status` until re-reviewed. Sign-offs are committed
 to git like any other data change.
 
-### Pairing against local draft office books
+### Ingesting scanned diurnal pages
 
-When the local `../resources/` directory contains the full Lauds and Vespers
-DOCX books, generate page-aware source comparisons with:
-
-```bash
-make review-sources
-```
-
-The command extracts into `output/source-reconcile/`, which is gitignored. It
-does not edit the corpus, copy source text into tracked files, or record human
-attestations. Start with `output/source-reconcile/README.md`, then work through
-the small Markdown files under `batches/`. Candidate IDs can be printed again
-without rebuilding:
+Use the [page-image workflow](scripts/DIURNAL-PIPELINE.md) to transcribe entries
+from the provenance queue or discover printed propers hidden behind fallbacks:
 
 ```bash
-scripts/source-reconcile.py show SR-0001-01234567
+make pages
+make transcribe KEYS=proper/st-athanasius/collect
+make discover FEASTS=st-stephen-hungary
 ```
 
-Keep local decisions from returning to later batches with the ignored scratch
-ledger:
+Transcription and discovery prepare prompts without invoking readers or
+changing the corpus by default. After inspecting the prompts and cache, add
+`APPLY=1` to enable readers and application through `office corpus put` and
+`office review attest`. The pipeline documentation describes the comparison
+thresholds, independent second readings, and meaning of a Codex attestation.
+Unresolved rows remain `needs-human`; OCR only locates pages.
 
-```bash
-scripts/source-reconcile.py decide retain SR-0001-01234567 --note "current text is intentional"
-scripts/source-reconcile.py decide defer SR-0002-89abcdef --note "needs seasonal variants"
-make review-sources
-```
-
-Use `applied` after a corpus change has been validated, `manual` when a source
-lead has become a hand-entry task, and `pending` to remove a prior decision.
-Both the extracted excerpts and `decisions.csv` remain under the gitignored
-`output/source-reconcile/` tree.
-
-For each candidate, compare the page-aware source extraction with the current
-corpus and decide to retain it, replace it from the source, edit it manually,
-or defer it. Apply and validate accepted changes in small batches. Record a
-`review attest` entry only after a person has actually checked the wording;
-the reconciliation script deliberately never marks its own matches verified.
+The former intake, source-reconciliation, agent scheduler, and packet-apply
+tools have been retired. Existing local artifacts and decisions under ignored
+`output/` remain historical evidence, and existing provenance records retain
+their meaning.
 
 ### Annual cadence
 

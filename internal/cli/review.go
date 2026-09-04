@@ -29,8 +29,7 @@ Subcommands:
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
                                          Fan-out-weighted structural plan (default 28y; credits sign-offs)
-  sign HOUR YYYY-MM-DD REVIEWER [note...] Record a structural sign-off for one page
-  apply [--dry-run] QUEUE.json          Write gated diurnal apply packets into data/texts`
+  sign HOUR YYYY-MM-DD REVIEWER [note...] Record a structural sign-off for one page`
 
 // cmdReview dispatches the review subcommands.
 func cmdReview(e env, args []string) error {
@@ -64,8 +63,6 @@ func cmdReview(e env, args []string) error {
 		return e.reviewPlan(rest)
 	case "sign":
 		return e.reviewSign(rest)
-	case "apply":
-		return e.reviewApply(rest)
 	default:
 		return fmt.Errorf("%s", reviewUsage)
 	}
@@ -352,31 +349,6 @@ func (e env) reviewSign(args []string) error {
 		return fmt.Errorf("writing sign-off: %w", err)
 	}
 	fmt.Fprintf(e.out, "Signed off: %s %s on %s by %s\n", unit.Hour, unit.Name, date.Format("2006-01-02"), reviewer)
-	return nil
-}
-
-func (e env) reviewApply(args []string) error {
-	fs := e.newFlagSet("review apply")
-	dryRun := fs.Bool("dry-run", false, "gate the queue and report writes without touching data/")
-	if err := fs.Parse(args); err != nil {
-		return err
-	}
-	rest := fs.Args()
-	if len(rest) != 1 {
-		return fmt.Errorf("usage: office review apply [--dry-run] QUEUE.json")
-	}
-	queue, err := review.LoadApplyQueue(rest[0])
-	if err != nil {
-		return fmt.Errorf("loading apply queue: %w", err)
-	}
-	report, err := review.ApplyQueue(e.dataDir, queue, *dryRun)
-	for _, item := range report.Items {
-		fmt.Fprintf(e.out, "%s\t%s\t%s\t%s\n", item.Decision.Status, item.CandidateID, item.TargetKey, strings.Join(item.Decision.Reasons, "; "))
-	}
-	fmt.Fprintf(e.out, "allowed %d  noop %d  refused %d  wrote %d\n", report.Allowed, report.Noop, report.Refused, report.Wrote)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

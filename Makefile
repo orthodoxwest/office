@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance review-sources review-agent-plan review-agent-run review-agent-status review-agent-collect review-agent-adjudicate review-agent-test diurnal-doctor diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -17,18 +17,11 @@ test: ## Run all tests
 	python3 scripts/test_mutation_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
-	python3 scripts/test_source_reconcile.py
-	python3 scripts/test_diurnal_intake.py
-	python3 scripts/test_diurnal_agent.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
 
-diurnal-doctor: ## Check PDF/OCR tools needed for diurnal intake
-	python3 scripts/diurnal-intake.py doctor
-
-diurnal-test: ## Run PDF intake unit tests
-	python3 scripts/test_diurnal_intake.py
+diurnal-test: ## Run page-image, transcription, and discovery unit tests
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
@@ -134,29 +127,6 @@ review-plan: build ## Print residual structural checklist CSV (default 28y fan-o
 
 review-assurance: build ## Run release assurance coverage gates
 	./office review assurance
-
-review-sources: build ## Build disposable source-vs-corpus review packets under output/
-	python3 scripts/source-reconcile.py build --resources ../resources --data data --office ./office --output output/source-reconcile
-
-DISCOVERY ?= output/source-reconcile/proper-discovery.json
-
-review-agent-plan: ## Plan read-only agent jobs from DISCOVERY
-	python3 scripts/diurnal-agent.py plan $(DISCOVERY)
-
-review-agent-run: ## Dry-run the current agent plan (add --execute explicitly at the CLI)
-	python3 scripts/diurnal-agent.py run
-
-review-agent-status: ## Report the current agent run state
-	python3 scripts/diurnal-agent.py status
-
-review-agent-collect: ## Collect non-stale structured agent proposals
-	python3 scripts/diurnal-agent.py collect
-
-review-agent-adjudicate: ## Plan Claude jobs for conflicting replicas (must be enabled in policy)
-	python3 scripts/diurnal-agent.py adjudicate
-
-review-agent-test: ## Run provider-runner tests without invoking providers
-	python3 scripts/test_diurnal_agent.py
 
 DATE ?= $(shell date +%Y-%m-%d)
 CHANT ?=

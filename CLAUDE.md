@@ -96,6 +96,10 @@ data/
   review/assurance-baseline.json  Intentional verified/structural coverage floors
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
 scripts/
+  DIURNAL-PIPELINE.md      Supported scanned-diurnal ingestion workflow and attestation semantics
+  diurnal-pages.py         Render/index page images; OCR only locates pages
+  diurnal-transcribe.py    Read provenance-queue entries from pages and apply agreed wording
+  diurnal-discover.py      Find printed propers behind runtime fallbacks
   seed-divinum.go          Seed propers/commons from a local Divinum Officium checkout
                            (go run scripts/seed-divinum.go -do <path> [-feast id] [-write])
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
@@ -161,6 +165,9 @@ make validate    # Validate data files
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
+make pages       # Render and index diurnal/supplement pages under ignored output/
+make transcribe  # Prepare page-reading prompts; APPLY=1 enables readers and gated application
+make discover    # Prepare proper-discovery dossiers; APPLY=1 enables readers and gated application
 make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
 make review-status    # Report review coverage vs data/review/signoffs.txt
 make review-provenance # Report generated corpus source coverage
