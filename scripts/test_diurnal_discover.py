@@ -160,3 +160,46 @@ class ReportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoRenderedEffectTests(unittest.TestCase):
+    """The Little Hours derive their versicle from the hour's short responsory,
+    so a versicle section written beside one is duplication the engine ignores."""
+
+    def test_applier_reverts_and_drops_attestation_when_render_is_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            texts = root / "data" / "texts" / "proper"
+            texts.mkdir(parents=True)
+            target = texts / "st-example.txt"
+            target.write_text("# [versicle-terce]\n# Proper versicle at Terce.\n#\n", encoding="utf-8")
+            ledger = root / "data" / "review" / "provenance.csv"
+            ledger.parent.mkdir(parents=True)
+            ledger.write_text("key,content_hash\nproper/st-example/versicle-terce,abc\n", encoding="utf-8")
+            original_root, original_render = discover.ROOT, discover.render_hour
+            discover.ROOT = root
+            discover.render_hour = lambda date, hour: "identical output"
+            try:
+                applier = discover.CorpusApplier(root / "run")
+                applier.scaffolded.add("st-example")
+                written = []
+                original_replace = discover.transcribe.replace_and_attest
+                discover.transcribe.replace_and_attest = lambda *a: written.append(a)
+                try:
+                    with self.assertRaises(discover.NoRenderedEffect):
+                        applier(
+                            {"feast_id": "st-example"},
+                            {"target_key": "proper/st-example/versicle-terce",
+                             "contexts": [{"date": "2026-03-21", "hour": "terce"}]},
+                            {"printed_page": "497", "text": "V. The Lord loved him."},
+                            {"png": "page.png"},
+                        )
+                finally:
+                    discover.transcribe.replace_and_attest = original_replace
+                self.assertEqual(len(written), 1)
+                restored = target.read_text(encoding="utf-8")
+                self.assertNotIn("\n[versicle-terce]", restored)
+                self.assertIn("# [versicle-terce]", restored)
+                self.assertNotIn("proper/st-example/versicle-terce", ledger.read_text(encoding="utf-8"))
+            finally:
+                discover.ROOT, discover.render_hour = original_root, original_render

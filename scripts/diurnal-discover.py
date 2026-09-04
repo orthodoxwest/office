@@ -11,6 +11,7 @@ import importlib.util
 import json
 import re
 import sys
+import subprocess
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -39,6 +40,7 @@ ProviderError = transcribe.ProviderError
 ALLOWED_TIERS = {"common", "seasonal", "ordinary"}
 EXCLUDED_SLOTS = {"alleluia", "marian-antiphon", "pre-collect-versicle", "athanasian"}
 EXCLUDED_TIERS = {"ordinary-weekday", "temporal-week"}
+EXCLUDED_HOURS = {"prime", "compline"}
 FIXED_FILES = ("sanctoral.txt", "commemorations.txt", "awrv.txt")
 
 
@@ -99,6 +101,9 @@ def slot_is_printed(row: dict) -> bool:
         return False
     slot = row.get("resolver_slot") or row.get("slot_ref") or row.get("requested_slot", "")
     if slot in EXCLUDED_SLOTS:
+        return False
+    # The diurnal never prints feast propers for Prime or Compline chapter/hymn/responsory.
+    if row.get("hour") in EXCLUDED_HOURS and slot in {"chapter", "hymn", "short-responsory", "versicle"}:
         return False
     if slot in {
         "collect", "benedictus-antiphon", "magnificat-antiphon",
@@ -391,6 +396,8 @@ def gate_decision(primary: dict, fallback_text: str | list[str], secondary: dict
         return "printed-false", 0.0
     if primary.get("confidence") == "low" or not str(primary.get("text", "")).strip():
         return "needs-human", 0.0
+    if transcribe.looks_like_incipit(target_key, str(primary["text"])):
+        return "incipit-crossref", 0.0
     fallbacks = fallback_text if isinstance(fallback_text, list) else [fallback_text]
     fallback_score = max(
         (transcribe.similarity(str(primary["text"]), text, target_key) for text in fallbacks),
@@ -427,6 +434,26 @@ def secondary_prompt(dossier: dict, request: dict, primary: dict, page: dict) ->
     )
 
 
+class NoRenderedEffect(RuntimeError):
+    """Raised when a written section leaves every rendered hour unchanged."""
+
+
+def section_file(key: str) -> Path | None:
+    parts = key.split("/")
+    return ROOT / "data" / "texts" / parts[0] / f"{parts[1]}.txt" if len(parts) == 3 else None
+
+
+def render_hour(date: str, hour: str) -> str:
+    return subprocess.run([str(ROOT / "office"), hour, date],
+                          capture_output=True, text=True).stdout
+
+
+def drop_attestation(key: str) -> None:
+    path = ROOT / "data" / "review" / "provenance.csv"
+    lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+    path.write_text("".join(l for l in lines if not l.startswith(key + ",")), encoding="utf-8")
+
+
 class CorpusApplier:
     def __init__(self, run_dir: Path):
         self.options = transcribe.RunOptions(run_dir, apply=True)
@@ -440,9 +467,23 @@ class CorpusApplier:
                 args.append("-include-commemorations")
             transcribe.run_office(args)
             self.scaffolded.add(feast_id)
+        key = request["target_key"]
+        path = section_file(key)
+        contexts = [(c.get("date"), c.get("hour")) for c in request.get("contexts", [])
+                    if c.get("date") and c.get("hour")]
+        before = {ctx: render_hour(*ctx) for ctx in contexts} if path else {}
+        original = path.read_text(encoding="utf-8") if path and path.exists() else None
         transcribe.replace_and_attest(
-            self.options, request["target_key"], primary["printed_page"], page["png"], primary["text"],
+            self.options, key, primary["printed_page"], page["png"], primary["text"],
         )
+        # A section the engine never consults is duplication: the Little Hours
+        # derive their versicle from the hour's short responsory, so writing a
+        # versicle slot beside it changes nothing and doubles the edit surface.
+        if before and all(render_hour(*ctx) == text for ctx, text in before.items()):
+            if original is not None:
+                path.write_text(original, encoding="utf-8")
+            drop_attestation(key)
+            raise NoRenderedEffect(key)
 
 
 def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = False, provider: str = "codex",
@@ -501,7 +542,7 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
             primary, fallback, applying=False, target_key=request["target_key"],
         )
         page = exact_page(dossier["pages"], str(primary.get("printed_page", "")))
-        if page is None and decision not in {"same-as-fallback", "printed-false"}:
+        if page is None and decision not in {"same-as-fallback", "printed-false", "incipit-crossref"}:
             decision = "needs-human"
             slot_record["error"] = "reader printed page is not one of the located pages"
         secondary = None
@@ -525,6 +566,8 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
         if apply and decision == "put-and-attest" and apply_text is not None and page is not None:
             try:
                 apply_text(dossier, request, primary, page)
+            except NoRenderedEffect:
+                slot_record.update(decision="no-rendered-effect")
             except (OSError, RuntimeError) as exc:
                 slot_record.update(decision="needs-human", apply_error=str(exc))
         record["slots"].append(slot_record)
@@ -625,7 +668,9 @@ def render_report(records: list[dict], run_name: str) -> str:
              f"- Printed false: {decisions['printed-false']}",
              f"- Extra unmodelled sections: {len(extras)}",
              f"- Needs human: {decisions['needs-human'] + len(dossier_needs)}",
-             f"- Same as fallback: {decisions['same-as-fallback']}"]
+             f"- Same as fallback: {decisions['same-as-fallback']}",
+             f"- Incipit cross-references: {decisions['incipit-crossref']}",
+             f"- No rendered effect (engine derives the slot): {decisions['no-rendered-effect']}"]
 
     def section(title: str, entries: list[str]) -> None:
         lines.extend(["", f"## {title}", ""])

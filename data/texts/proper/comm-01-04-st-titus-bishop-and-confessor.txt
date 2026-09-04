@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-01-04-st-titus-bishop-and-confessor]
+# Name: St. Titus, Bishop & Confessor
+# Rank: commemoration  Category: confessor-bishop
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor-bishop/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 454
+O God, who didst adorn blessed Titus, thy Bishop and Confessor, with the signs of an Apostle: grant that through his merits and intercession, we may live soberly, righteously, and godly, in this present world; and be made meet hereafter to come unto the heavenly country.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

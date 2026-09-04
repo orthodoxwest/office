@@ -106,12 +106,12 @@ JANUARY
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St. Felix of Nola, Priest & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers w · I fol. (St Maurus, Abbot) · Mag. I will liken him · No Suff.
+           Vespers w · I fol. (St Maurus, Abbot) · Mag. To-day holy Maurus · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("O Teacher right excellent")
  15  Thu     St Maurus, Abbot                           [gd]  w
            Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
+           Vespers w · II prec. · Mag. O most blessed of men! · No Suff.
                Com. St. Marcellus I of Rome, Bishop & Martyr ("Whosoever will come after me")
  16  Fri  L  Feria                                            g
            St. Marcellus I of Rome, Bishop & Martyr (com)
@@ -178,7 +178,7 @@ JANUARY
            Vespers g · I fol. (III Sunday after Epiphany) · Mag. God hath holpen · No Suff.
                Com. St Timothy, Bishop & Martyr ("Whosoever will come after me")
                Com. Conversion of St. Paul ("Go forth, Ananias")
-               Com. St. Peter ("The world, and all things earthly")
+               Com. St. Peter ("Thou art the shepherd of the sheep, O chief…")
  25  Sun     III Sunday after Epiphany                  [sd]  g
            Conversion of St. Paul (gd)
            St. Peter (com)
@@ -188,7 +188,7 @@ JANUARY
            Hours   No Preces
            Vespers g · II prec. · Mag. Lord, if thou wilt · No Suff.
                Com. Conversion of St. Paul ("Go forth, Ananias")
-               Com. St. Peter ("The world, and all things earthly")
+               Com. St. Peter ("Thou art the shepherd of the sheep, O chief…")
                Com. St. Polycarp of Smyrna, Bishop & Martyr ("Whosoever will come after me")
  26  Mon     Feria                                            g
            St. Polycarp of Smyrna, Bishop & Martyr (com)
@@ -1150,7 +1150,7 @@ JUNE
            Day VII within the Octave of St John Baptist (sd)
            Day II within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
-               Com. St Peter, Apostle ("Ye which have forsaken all")
+               Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Day VII within the Octave of St John Baptist ("He shall go before him")
                Com. Day II within the Octave of Ss Peter & Paul ("Peter and John")
            Hours   No Preces
@@ -1798,11 +1798,11 @@ OCTOBER
   7  Wed     The Holy Rosary of the Blessed Virgin Mary [gd]  w
            Ss. Sergius, Bacchus, Marcellus & Apuleius, Martyrs (com)
            St. Mark of Rome, Bishop & Confessor (com)
-           Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
+           Lauds   w · Ben. To-day let us celebrate · No Preces · No Suff.
                Com. Ss. Sergius, Bacchus, Marcellus & Apuleius, Martyrs ("The very hairs of your head")
                Com. St. Mark of Rome, Bishop & Confessor ("Well done")
            Hours   No Preces
-           Vespers w · II prec. · Mag. All generations · No Suff.
+           Vespers w · II prec. · Mag. O blessed Mother · No Suff.
   8  Thu     Feria                                            g
            Lauds   g · Ben. Let us serve · No Preces · Suff.
            Hours   Preces
@@ -2070,7 +2070,7 @@ NOVEMBER
  20  Fri  L  St Edmund, King & Martyr                   [d]   r
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · I fol. (Presentation of the Blessed Virgin Mary) · Mag. O holy Mary · No Suff.
+           Vespers w · I fol. (Presentation of the Blessed Virgin Mary) · Mag. O ever blessed Mother of God · No Suff.
                Com. St Edmund, King & Martyr ("Whosoever will come after me")
                Com. St Columbanus, Abbot ("The world, and all things earthly")
                Com. St Gelasius, Bishop & Confessor ("The Lord loved him")

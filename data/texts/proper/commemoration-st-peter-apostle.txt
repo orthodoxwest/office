@@ -1,3 +1,31 @@
 [magnificat-antiphon-first]
 # SOURCE: monastic diurnal, p. 545 (Ss Peter and Paul, At I Vespers; also commemoration of St Peter)
 Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
+
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+[commemoration-antiphon-lauds]
+# SOURCE: diurnal p. 549
+Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
+
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+[commemoration-versicle-lauds]
+# SOURCE: diurnal p. 549
+V. Thou art Peter.
+R. And upon this rock I will build my Church.
+
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 549
+O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

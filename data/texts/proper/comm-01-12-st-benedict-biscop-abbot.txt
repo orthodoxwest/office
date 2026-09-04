@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-01-12-st-benedict-biscop-abbot]
+# Name: St. Benedict Biscop, Abbot
+# Rank: commemoration  Category: confessor
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 454
+O God, by whose gift the blessed Abbot Benedict left all things that he might be made perfect: grant unto all those who have entered upon the path of evangelical perfection, that they may neither look back nor linger in the way; but hastening to thee without stumbling, may lay hold upon eternal life.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).

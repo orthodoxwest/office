@@ -62,9 +62,10 @@
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.
 #
-# [commemoration-collect]
-# Collect for the commemoration (defaults to [collect] when omitted).
-#
+[commemoration-collect]
+# SOURCE: diurnal p. 536
+O God, who hast vouchsafed to enlighten thy Church by the wondrous learning and the excellent merits and life of blessed Ephrem thy Confessor and Doctor: we humbly beseech thee that at his intercession, thou wouldst protect it by thy power against every assault of wickedness and error.
+
 # [chapter-lauds]
 # Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
 #
@@ -106,3 +107,81 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-terce]
+# Proper chapter at Terce.
+#
+# [chapter-sext]
+# Proper chapter at Sext.
+#
+# [chapter-none]
+# Proper chapter at None.
+#
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+# [versicle-sext]
+# Proper versicle at Sext.
+#
+# [versicle-none]
+# Proper versicle at None.
+#
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

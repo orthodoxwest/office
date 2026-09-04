@@ -10,36 +10,44 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
-# [benedictus-antiphon]
-# Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
+[collect]
+# SOURCE: diurnal p. 621
+O God, whose only-begotten Son by his life, death, and resurrection hath purchased for us the rewards of eternal salvation: grant, we beseech thee, that meditating upon these mysteries in the holy Rosary of the blessed Virgin Mary, we may both imitate what they contain, and obtain what they promise.
+
+[benedictus-antiphon]
+# SOURCE: diurnal p. 620
+To-day let us celebrate * devoutly the Solemnity of the holy Rosary of Mary, Mother of God, that she may intercede for us unto Jesus Christ the Lord.
+
+[magnificat-antiphon]
+# SOURCE: diurnal p. 622
+O blessed Mother * and spotless Virgin, thou glorious Queen of the world, may all acknowledge the help of thy prayer who celebrate the solemnity of thy holy Rosary.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
+[psalm-antiphon-1]
+# SOURCE: diurnal p. 619
+Be joyful, * Virgin Mother; Christ hath risen from the tomb.
+
+[psalm-antiphon-2]
+# SOURCE: diurnal p. 619
+God is gone up * with a merry noise, and the Lord with the sound of the trump.
+
+[psalm-antiphon-3]
+# SOURCE: diurnal p. 619
+The Spirit of the Lord * hath filled the whole world.
+
+[psalm-antiphon-4]
+# SOURCE: diurnal p. 619
+Mary is taken up * into heaven: the Angels triumph, exalting and blessing the Lord, alleluia.
+
+[psalm-antiphon-5]
+# SOURCE: diurnal p. 619
+The Virgin Mary * is exalted above the choirs of Angels: and upon her head a crown of twelve stars.
+
 # [commemoration-antiphon]
 # Antiphon when this feast is only commemorated (not the day's celebration).
 #
@@ -51,27 +59,65 @@
 
 # --- optional ---
 #
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
+[chapter-lauds]
+# SOURCE: diurnal p. 619
+!Ecclus 24:25; 39:17
+In me is all grace of the way and of the truth; * in me is all hope of life and of virtue. * As a rose planted by the water-brooks have I budded forth.
+R. Thanks be to God.
+
 # [chapter-vespers]
 # Chapter at Vespers (often @use of chapter-lauds).
 #
-# [hymn-lauds]
-# Hymn at Lauds. First line may be a Latin incipit title.
-#
+[hymn-lauds]
+# SOURCE: diurnal p. 620
+Jam morte, victor, obruta
+
+Now hell is vanquished; every chain
+Of sin is broken; Christ again
+Returning, victor over death,
+The gates of heaven openeth.
+
+We mortals saw him, till he passed
+Into the heavens, where at last,
+Partaker of God's glory bright,
+He sitteth on the Father's right.
+
+From thence he sheds the promised boon,
+His Holy Spirit on his own
+In fiery tongues of love, o'erspreading
+Above each sad disciple's head.
+
+The Virgin, from the flesh set free,
+Is borne beyond the stars; where she
+Receives from heaven's joyous throngs
+The welcome of angelic songs.
+
+Twice six the stars that crown her brow;
+The gracious Mother reigneth now
+Beside her Son's eternal throne
+O'er all creation as her own.
+
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete. Amen.
+
 # [hymn-vespers]
 # Hymn at Vespers.
 #
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
+[versicle-lauds]
+# SOURCE: diurnal p. 620
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
+
 # [versicle-vespers]
 # Versicle after the hymn at Vespers.
 #
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
+[versicle-first-vespers]
+# SOURCE: diurnal p. 619
+V. Queen of the holy Rosary, pray for us.
+R. That we may be made worthy of the promises of Christ.
+
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #
@@ -107,3 +153,90 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-terce]
+# Proper chapter at Terce.
+#
+[chapter-sext]
+# SOURCE: diurnal p. 621
+!Ecclus 39:14
+Flourish as a lily, * send forth a smell, and sing a song of praise, * bless the Lord in all his works.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 621
+!Ecclus 24:13,14
+I was exalted like a cedar in Libanus, * and as a cypress tree upon the mountains of Hermon. * I was exalted like a palm tree in Engaddi, and as a rose plant in Jericho.
+R. Thanks be to God.
+
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at this hour.
+#
+
+# [versicle-sext]
+# Proper versicle at this hour.
+#
+
+# [versicle-none]
+# Proper versicle at this hour.
+#
+
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.

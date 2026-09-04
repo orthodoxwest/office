@@ -1,0 +1,36 @@
+# Proper scaffold for [comm-06-10-st-margaret-of-scotland-queen-and-widow]
+# Name: St Margaret of Scotland, Queen & Widow
+# Rank: commemoration  Category: confessor
+#
+# Uncomment a section header and put text (or @use …) beneath it to activate.
+# Commented sections are not loaded. Do not leave an empty uncommented [key] —
+# that silences make audit without providing text.
+# Commons fallback: commons/confessor/{ref}
+# Intentional commons-only: add this feast id to data/audit-ok.txt
+#
+# --- core ---
+#
+# [commemoration-antiphon]
+# Antiphon when this feast is commemorated.
+#
+# [commemoration-antiphon-lauds]
+# Benedictus antiphon when this feast is commemorated at Lauds.
+#
+# [commemoration-antiphon-vespers]
+# Magnificat antiphon when this feast is commemorated at Vespers.
+#
+# [commemoration-versicle]
+# Versicle pair (V. … / R. …) for the commemoration.
+#
+# [commemoration-versicle-lauds]
+# Versicle pair for the commemoration at Lauds.
+#
+# [commemoration-versicle-vespers]
+# Versicle pair for the commemoration at Vespers.
+#
+[commemoration-collect]
+# SOURCE: diurnal p. 535
+O God, who madest the blessed Queen Margaret wonderful for tender love toward the poor: grant that through her intercession and example thy charity may increase evermore within our hearts.
+
+# [collect]
+# Collect of this feast (used when it is celebrated, or as commemoration fallback).
