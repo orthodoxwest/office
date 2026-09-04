@@ -4,8 +4,7 @@ This is a narrow, page-first review loop. It maps corpus keys to cited printed
 pages, renders those pages into a content-bound cache under ignored `output/`,
 asks a vision reader for literal transcription, and compares that witness with
 the live corpus. OCR is retained only for locating pages; it is never accepted
-as wording. The older intake/reconcile/agent tools remain available but are not
-part of this loop.
+as wording. This is the supported ingestion workflow.
 
 The cache records the PDF SHA-256 and render DPI. It stores one PNG per PDF page
 and an index containing plain and layout OCR plus detected printed labels

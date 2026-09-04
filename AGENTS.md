@@ -1,49 +1,50 @@
 # Diurnal ingestion guardrails
 
-The received monastic diurnal is evidence for reviewing and, when the
-mechanical gate allows, updating the office corpus. Extraction, OCR, heading
-mapping, and model output remain witnesses — they are not printed-page
-verification.
+Use the page-image transcription and discovery workflow documented in
+[scripts/DIURNAL-PIPELINE.md](scripts/DIURNAL-PIPELINE.md). OCR locates pages;
+wording comes from reading the cited page images.
 
-## Non-negotiable boundaries
+## Boundaries
 
-- First-wave applies may touch any liturgical text except `data/texts/psalms/`
-  (already independently validated). They must not write `data/review/`
-  ledgers, feast metadata, hour defs, signoffs, attestations, or prescreen
-  flags.
+- Keep source PDFs outside the repository. Do not commit copyrighted book
+  pages, extracted text, OCR text, images, or page coordinates. Generated
+  caches, prompts, reader results, and reports belong beneath ignored
+  `output/`.
+- Preserve the page cache with its document hash and render settings. Keep
+  PDF page identity, detected or inferred printed labels, and reader results
+  in run artifacts.
+  Attest the found printed page, not an unresolved queue citation.
+- Use the workflow's comparison checks before applying. Exact/near readings
+  may be attested; replacements and discovered propers require independent
+  reader agreement. Automatic psalm and canticle replacements remain
+  `needs-human`. OCR and model confidence alone do not establish wording.
+- Corpus updates use `office corpus put`; source attestations use
+  `office review attest`. Ingestion does not change feast metadata, hour
+  definitions, structural signoffs, or prescreen flags.
 - The newest local archdiocesan ordo is the authority for the current year.
-  If it conflicts with older ordos or the normative rubrics, flag the issue for
-  clergy rather than selecting a side. Do not apply those packets.
-- Do not commit copyrighted book pages, extracted text, OCR text, images, or
-  page coordinates. Generated intake and review artifacts belong only beneath
-  the gitignored `output/` directory.
-- Preserve source witness identity (document hash, PDF page, printed folio,
-  extractor/OCR route, and text hash) in every packet. Do not combine text
-  from different documents or mixed extractor routes. Same-document
-  consecutive continuation of one mapped slot is required for page-spanning
-  entries, not forbidden.
+  If it conflicts with older ordos or normative rubrics, flag the issue for
+  clergy rather than selecting a side. Do not apply affected entries.
 
-## Agent roles and provider context
+## Providers and review
 
-- Use the project `diurnal_reconciler` role (Luna, medium reasoning) for bounded,
-  repeatable packet classification. Its output is advisory JSON, never a patch.
-- Use Grok for inexpensive independent replicas only where ambiguity warrants
-  comparison. Invoke its authenticated `grok` CLI in the host context; do not
-  clear `HOME`, XDG variables, or other auth environment. A sandbox auth error
-  means execution context is unavailable, not that the account is logged out.
-- Reserve Claude Sonnet for sparse adjudication because its rate limits are
-  limited. Use it to compare competing advisory findings, not to make edits.
+- Use the transcription/discovery scripts' bounded reader calls and structured
+  results. The old packet reconciler role and agent scheduler are retired.
+- Preserve provider login environments, including `HOME` and XDG variables.
+  A sandbox authentication error means the execution context may be
+  unavailable; it does not establish that the account is logged out.
+- Claude Sonnet supplies independent second readings where required by the
+  workflow. Readers return evidence; the scripts control corpus writes.
 - Use the `diurnal_reviewer` role (Terra, high reasoning) before any pull
   request that changes the ingestion pipeline or its safety controls.
 
-## Safe workflow
+## Workflow
 
-1. Keep source files outside the repository and run intake into `output/`.
-2. Inspect extraction/OCR QA before segmentation or matching.
-3. Compare only against a generated runtime resolution inventory; distinguish
-   a printed proper from an equal fallback.
-4. Run agents with immutable packet hashes. A cleaner may emit an apply
-   packet; the gate, not the model score, decides whether it is writable.
-5. `office review apply` writes gated packets on a branch. 
-
-Follow the operational details in `DIURNAL-INGESTION.md`.
+1. Render and index pages with `make pages`.
+2. Prepare prompts with `make transcribe`, or feast dossiers with
+   `make discover`. The provenance queue and generated runtime resolution
+   inventory remain the baselines; distinguish printed propers from fallbacks.
+3. Inspect the cache and prompts, then use `APPLY=1` to enable readers and
+   application through the workflow's checks.
+4. Review the run report and handle `needs-human` rows separately. Keep corpus
+   changes and hash-bound source attestations reviewable in Git. A Codex
+   attestation has the limited meaning documented in the pipeline guide.
