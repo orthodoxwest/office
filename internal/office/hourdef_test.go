@@ -237,10 +237,10 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	}{
 		{file: "lauds.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
 		{file: "vespers.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
-		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
+		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 		// secret-prayer conversions for opening/closing are covered in TestOfficeDataExpandsModeledSecretPrayers
 	}
 

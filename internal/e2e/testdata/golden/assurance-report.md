@@ -7,13 +7,13 @@
 | Full structural-cover pages | 62 |
 | Residual structural-review pages | 62 |
 | Uncovered features | 0 |
-| Verified text entries | 1379 |
-| Rendered text entries needing review | 839 |
+| Verified text entries | 1419 |
+| Rendered text entries needing review | 798 |
 | Rendered text entries with unknown source | 162 |
 | Classified zero-occurrence entries | 34 |
 | Zeroes needing classification | 33 |
 | Stale zero-occurrence classifications | 6 |
-| Stale attestations | 4 |
+| Stale attestations | 0 |
 
 ### Modeled structural features
 - `decision:antiphon:doubling=announced`
