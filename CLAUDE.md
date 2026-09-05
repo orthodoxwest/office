@@ -53,6 +53,10 @@ internal/
     links.go               Nav/asset URL construction (navLink, hourLink, static stamping)
     templates/             Embedded HTML templates (layout, home, hour, calendar)
                            UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
+  usage/                   Approximate daily usage counts (not request logs)
+    store.go               SQLite day/scope/browser-hash dedupe + daily rollup
+    bots.go                Crawler user-agent filter: scraping is welcome, it just
+                           never counts (see README "Usage metrics")
   web/                     HTTP server
     server.go              Server struct, route registration, embedded static assets
     handlers.go            Handlers: home, hour, calendar — resolve the day, fill render view models

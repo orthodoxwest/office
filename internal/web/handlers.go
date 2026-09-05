@@ -378,6 +378,7 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 	data := render.HomeData{
 		DateStr:        date.Format("Monday, January 2, 2006"),
 		DateSlug:       dateSlug,
+		UsageWhen:      dateSlug,
 		PrevDate:       date.AddDate(0, 0, -1).Format("2006-01-02"),
 		NextDate:       date.AddDate(0, 0, 1).Format("2006-01-02"),
 		PrevLink:       render.HomeLink(date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
@@ -464,6 +465,7 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		HourName:         hourName,
 		DateStr:          date.Format("Monday, January 2, 2006"),
 		DateSlug:         dateStr,
+		UsageWhen:        dateStr,
 		PrevDate:         date.AddDate(0, 0, -1).Format("2006-01-02"),
 		NextDate:         date.AddDate(0, 0, 1).Format("2006-01-02"),
 		PrevLink:         render.HourLink(hourName, date.AddDate(0, 0, -1).Format("2006-01-02"), theme),
@@ -529,6 +531,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		NextYear:   year + 1,
 		Months:     buildMonthData(days, s.engine, moveable),
 		NavDate:    navDate,
+		UsageWhen:  strconv.Itoa(year),
 		Theme:      themeParam(r),
 		Page:       "calendar",
 		ShowBanner: false,

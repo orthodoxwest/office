@@ -30,10 +30,15 @@ type HomeData struct {
 	PrayNowLink    string
 	Hours          []HomeHourLink
 	NavDate        string
-	Theme          string
-	Page           string
-	SeasonClass    string
-	ShowBanner     bool
+	// UsageWhen dates the page for the usage beacon: an ISO day for pages
+	// that stand on one day, a bare year for the ordo, empty when the page
+	// is always current. app.js refuses to count a stale archive page, so
+	// crawling the unbounded date space cannot inflate the metrics.
+	UsageWhen   string
+	Theme       string
+	Page        string
+	SeasonClass string
+	ShowBanner  bool
 }
 
 // HomeHourLink is one entry in the home page's grid of hours.
@@ -61,13 +66,15 @@ type HourData struct {
 	NextHourName     string
 	NextHourLink     string
 	NavDate          string
-	Hour             *models.OfficeHour
-	ReportURL        string
-	Theme            string
-	Page             string
-	SeasonClass      string
-	ShowBanner       bool
-	Assurance        HourAssurance
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen   string
+	Hour        *models.OfficeHour
+	ReportURL   string
+	Theme       string
+	Page        string
+	SeasonClass string
+	ShowBanner  bool
+	Assurance   HourAssurance
 }
 
 // HourAssurance is the hour page's review-metadata disclosure. It carries
@@ -105,8 +112,10 @@ type CalendarData struct {
 	NextYear int
 	Months   []MonthData
 	NavDate  string
-	Theme    string
-	Page     string
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen string
+	Theme     string
+	Page      string
 	// SeasonClass is always empty here: a year of calendar spans every season
 	// at once, so the ornaments stay neutral gold. The field exists because the
 	// shared layout template reads it on every page.
@@ -167,7 +176,9 @@ type RemindersData struct {
 	Hours                             []ReminderHour
 	Days                              []ReminderDay
 	NavDate, Theme, Page, SeasonClass string
-	ShowBanner                        bool
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen  string
+	ShowBanner bool
 	// ShowToday is always false here (layout brand current-state reads it).
 	ShowToday bool
 }
@@ -185,7 +196,9 @@ type ReminderDay struct {
 
 // NotFoundData is the styled 404 page.
 type NotFoundData struct {
-	NavDate     string
+	NavDate string
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen   string
 	Theme       string
 	Page        string
 	SeasonClass string
@@ -196,9 +209,11 @@ type NotFoundData struct {
 
 // ErrorData is the styled error page for other 4xx/5xx conditions.
 type ErrorData struct {
-	Title       string
-	Message     string
-	NavDate     string
+	Title   string
+	Message string
+	NavDate string
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen   string
 	Theme       string
 	Page        string
 	SeasonClass string
