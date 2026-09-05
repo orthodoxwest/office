@@ -1,409 +1,148 @@
 # AWRV Benedictine Divine Office
 
-Web application that renders the complete text of the Benedictine Divine Office — no jumping around in a physical breviary required.
+[Pray the Office](https://office.fly.dev) — the English Benedictine daily
+office for Antiochian Western Rite Vicariate use, with each hour's prayers,
+psalms, and propers assembled on one page.
 
-**Live:** https://office.fly.dev
+Lauds, Prime, Terce, Sext, None, Vespers, and Compline are supported; Matins
+is not yet included. The calendar uses the Julian paschalion and pre-1962
+feast ranks, with AWRV observances and the Coverdale Psalter. The newest local
+archdiocesan ordo governs current-year practice.
 
-## Hours covered
+The web app includes a browsable calendar, an installable PWA with cached
+pages available offline, and a subscribable prayer-reminder calendar at
+`/reminders`. Each hour has a collapsed Assurance disclosure for source and
+composition metadata. Corpus verification is ongoing; see
+[REVIEWING.md](REVIEWING.md) for how to help.
 
-Lauds, Prime, Terce, Sext, None, Vespers, Compline (no Matins yet).
+## Run locally
 
-## Web features
-
-- **Hour pages** — complete rendered text for any hour on any date, with a collapsed
-  **Assurance** disclosure showing provenance and composition metadata.
-- **Calendar** — browsable liturgical calendar at `/calendar`.
-- **PWA** — installable on phones/tablets; works offline via a service worker.
-- **Reminders** — `/reminders` builds a subscribable `/office.ics` calendar feed
-  for hour-by-hour prayer reminders.
-
-## Liturgical specifics
-
-- **Calendar:** Julian paschalion, pre-1962 feast ranking
-- **Psalter:** Coverdale (Book of Common Prayer)
-- **Language:** English only
-- **AWRV additions:** post-schism Eastern saints (St. Raphael of Brooklyn, St. Innocent of Alaska, St. Tikhon of Moscow, St. Herman of Alaska)
-
----
-
-## Contributing
-
-### Editing data files (no programming required)
-
-The liturgical texts live in the `data/` directory as plain text files. You can edit them directly on GitHub without installing anything.
-
-**To fix a text or fill in a missing proper:**
-
-1. Find the file you want to edit in `data/texts/proper/` (one file per feast) or `data/texts/commons/` (shared texts by category).
-2. Click the pencil icon on GitHub to edit the file in your browser.
-3. Make your changes, then click **Propose changes** to open a pull request.
-
-**To find what's missing:** look at the live site and note any feasts that show placeholder text, or ask a maintainer to run `make audit` (see below).
-
-See the [Data files](#data-files) section for the file format and valid keys.
-
-### Running locally (no Go experience required)
-
-You need two things: Go and Make.
-
-**Install Go:**
-- Download from [go.dev/dl](https://go.dev/dl/) — pick the installer for your OS (Windows, macOS, or Linux).
-- Verify: open a terminal and run `go version`. You should see `go1.26` or later.
-
-**Install Make:**
-- macOS: comes with Xcode Command Line Tools (`xcode-select --install`)
-- Linux: `sudo apt install make` (Debian/Ubuntu) or `sudo dnf install make` (Fedora)
-- Windows: use [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) and then `sudo apt install make`
-
-**Clone and run:**
+Install Go at the version required by [go.mod](go.mod) (currently 1.26.3 or
+later) and Make. On Windows, use WSL.
 
 ```bash
 git clone https://github.com/orthodoxwest/office.git
 cd office
-make build   # builds the ./office binary
-make serve   # starts the server at http://localhost:8080
+make serve
 ```
 
-Open http://localhost:8080 in your browser. The server loads all data files at startup, so after editing a file you need to restart it (`Ctrl-C`, then `make serve` again). You do not need to run `make build` between restarts unless you changed Go code.
+Open [localhost:8080](http://localhost:8080). `make serve` builds the binary
+and starts the server. Data is loaded at startup, so restart the server after
+editing it. To run an already-built binary, use `./office serve`.
 
----
+## Contribute texts or review
 
-## Running locally (for developers)
+Liturgical data is plain text under [data/](data/). You can propose edits
+through GitHub's file editor without installing the app. Include the source
+and page or section for a correction.
 
-Requires Go 1.26+. The full check suite also requires `python3`, Node.js
-20.19+ and npm. Install the pinned JavaScript tooling dependencies with
-`npm ci --prefix .web-tools`.
+- [Editing liturgical data](DATA.md): file formats, proper slots, aliases,
+  scaffolding, and psalm numbering.
+- [Reviewing the Office](REVIEWING.md): checking texts and rendered hours,
+  recording findings, and tracking source and structural coverage.
+- [Diurnal transcription and discovery](scripts/DIURNAL-PIPELINE.md): reading
+  scanned pages, comparing the corpus, and finding propers hidden by fallbacks.
+
+The page-image workflow starts with `make pages`, then `make transcribe` or
+`make discover`. Transcription and discovery prepare prompts by default;
+`APPLY=1` enables readers and application through the workflow's checks.
+Keep source PDFs outside the repository and generated artifacts under ignored
+`output/`.
+
+Text attestations and structural hour signoffs are separate. The provenance
+queue prioritizes individual corpus entries; the structural review plan
+covers composition rules. Their commands and attestation semantics are
+documented in [REVIEWING.md](REVIEWING.md).
+
+## Common commands
+
+Run commands from the repository root after `make build`. Use `make help`
+for the full list of build and maintenance targets.
 
 ```bash
-npm ci --prefix .web-tools # install pinned JavaScript tooling dependencies
-npm --prefix .web-tools run install:browser # install Chromium for UX tests
-make install-hooks # once per clone; pre-push runs the full check suite
-make build   # build ./office binary
-make serve   # start server on http://localhost:8080
+./office lauds 2026-09-04          # render an hour (also prime … compline)
+./office ordo 2026                # annual ordo
+./office rubrics 2026             # per-day rubric and antiphon TSV
+./office validate                # check data files
+./office audit                   # report missing texts and fallback coverage
+./office lint                    # mechanical and advisory corpus findings
+./office corpus show proper/st-andrew/collect
+./office review provenance       # source coverage
+./office review provenance-queue # prioritize text review
+./office review explain lauds 2026-09-04
+make project-status YEAR=2026     # proper, assurance, and ordo reports
 ```
-
-The server finds `data/` relative to the binary or the working directory.
-
-## CLI commands
-
-```bash
-./office serve [addr]              # web server (default :8080)
-./office ordo YEAR                 # print text ordo for a year
-./office rubrics YEAR              # per-day TSV of composed rubric flags + Ben/Mag antiphons
-./office lauds YYYY-MM-DD          # print Lauds text for a date
-./office vespers YYYY-MM-DD        # (same for prime, terce, sext, none, compline)
-./office tex [--chant] HOUR [YYYY-MM-DD] # emit LaTeX booklet (date defaults to today)
-./office validate                  # validate all data files
-./office audit                     # report placeholder texts and missing propers
-./office lint                      # lint text corpus (mechanical + advisory findings)
-make verify-psalms                  # machine-check all Coverdale Psalm files
-./office review manifest           # human-review checklist CSV
-./office review status             # review coverage vs data/review/signoffs.txt
-./office review provenance         # generated source/provenance coverage summary
-./office review provenance-queue   # dependency-weighted atomic text review queue
-./office review attest [flags] KEY REVIEWER # verify one text against its source
-./office review explain HOUR DATE  # JSON dependencies and decisions for one hour
-./office review plan               # residual structural-review checklist CSV (default 28y fan-out)
-./office review sign HOUR DATE REVIEWER # sign off one reviewed hour page
-./office review assurance          # release assurance gates and summary
-```
-
-For scanned-diurnal ingestion, use the
-[page-image transcription and discovery workflow](scripts/DIURNAL-PIPELINE.md):
-`make pages`, then `make transcribe` or `make discover`. Both prepare prompts
-by default; `APPLY=1` enables readers and gated corpus updates with provenance
-attestations. The provenance queue and resolution inventory supply their inputs.
-
-## PDF booklets
-
-The `tex` subcommand produces a `.tex` file formatted as a half-letter (5.5"×8.5") booklet, suitable for printing handouts (e.g. Compline for overnight guests, Sunday Lauds for visitors).
-
-```bash
-# Quickest path — generate and compile in one step (output lands in output/):
-make pdf HOUR=compline              # today's date
-make pdf HOUR=lauds DATE=2026-03-15
-make pdf HOUR=compline CHANT=1     # include GABC chant scores where available
-
-# Or step by step:
-./office tex compline > compline.tex
-lualatex compline.tex
-
-# Booklet imposition for saddle-stitched printing:
-pdfjam --booklet true --paper letter compline.pdf
-```
-
-**Requirements:** lualatex, gregoriotex, EB Garamond (`fonts-ebgaramond`), Noto Sans Symbols (`fonts-noto-extra`). With `--chant` (or `CHANT=1`), elements that have a GABC score render as engraved chant (compiled via `--shell-escape`, which `make pdf` passes automatically); everything else falls back to formatted text. GABC scores live in `data/texts/chant/` (psalms so far; canticles and hymns as they're added).
 
 ## Development
 
-```bash
-make test     # run all tests (Go + Python script tests, includes golden files)
-make test-ux  # run mobile-first Playwright behavior and accessibility tests
-make check    # formatting + Go/JS analysis + tests + data validation/lint
-make lint-js  # run ESLint on browser and service-worker JavaScript
-make install-hooks # configure the versioned pre-push hook (once per clone)
-make golden   # regenerate golden files after intentional changes
-make audit    # show data completeness report
-make lint-texts # lint text corpus (mechanical findings fail; advisory printed)
-make review-manifest   # human-review checklist CSV (START=2026 YEARS=1)
-make review-status     # review coverage vs data/review/signoffs.txt
-make review-provenance # generated corpus provenance counts
-make review-provenance-queue # prioritize atomic text verification
-make review-plan       # residual structural-review checklist
-make review-assurance  # release assurance gates
-```
-
-The Playwright suite runs separately from `make check`. Visual regression tests
-run in CI's pinned browser container so host rendering differences do not cause
-false local failures. CI skips Playwright when a change contains only files under
-`data/` and `internal/e2e/testdata/golden/`. When an intentional UI change alters
-the snapshots, review the expected, actual, and diff images in the Playwright
-report artifact, then apply the `update-ux-snapshots` label to the pull request.
-GitHub Actions regenerates candidates in a read-only job, validates that the
-artifact contains only bounded PNG snapshots, and commits them from a separate
-trusted job.
-
-Golden files live in `internal/e2e/testdata/golden/`. Alongside representative
-rendered hours, `assurance-report.md` records the current review counts and
-sorted structural feature inventory so coverage changes appear directly in a
-PR diff. Run `make golden` after changing office composition, text output, or
-assurance coverage, then review the diff before committing.
-
-### Assurance and review planning
-
-Volunteers checking rendered hours against the printed books should start with
-[REVIEWING.md](REVIEWING.md) — it explains the review workflow without assuming
-any knowledge of the code. The notes below are the maintainer-side tooling.
-
-Text verification and structural verification are tracked separately:
-
-- Reuse an identical corpus entry without creating another provenance task by
-  making the duplicate section contain only `@use path/to/canonical/key`.
-  Alias targets are validated at load time, and rendered assurance manifests
-  report the canonical key. `./office lint` reports remaining identical
-  concrete entries as advisory `duplicate-candidate` findings; these require a
-  semantic reuse decision before they are converted to aliases.
-
-- `./office review provenance` derives non-stale counts from every corpus entry
-  and its adjacent `# SOURCE:` / `# TODO(diurnal):` annotations. Add `-csv` for
-  the complete inventory.
-- `data/review/provenance.csv` records explicit source attestations. A
-  `verified` row must name its source, a page or section locator, reviewer, and
-  review date. It stores citations and internal content-version metadata, not
-  source-book contents.
-- `./office review explain lauds 2026-06-07` emits a JSON assurance manifest
-  containing the corpus dependencies, provenance status, condition branches,
-  exact occurrence/commemoration decisions, color resolution, transfers, and
-  calendar/concurrence rule identifiers behind that hour.
-- `./office review provenance-queue -start 2026 -years 1` ranks every atomic
-  corpus entry by distinct composition fan-out, priority-A use, principal-hour
-  use, and total occurrences. Verified entries are excluded unless
-  `-include-verified` is supplied.
-- `./office review plan` builds a residual structural checklist over **28 years**
-  by default (aligned with the assurance window): tier-A composition features
-  (occurrence/concurrence, preces and suffrage *reasons*, Marian
-  selection/boundary, resolution tiers), reduced by features present on
-  sign-offs recorded under the current structural feature schema, ordered by
-  date-hour fan-out so high-impact branches come first. Checklist **dates
-  prefer the start year**; later years appear only for features that never
-  occur in the start year (CSV `primary_year=yes|no`). Override with
-  `-years 1` for a single-year residual. Legacy sign-offs without `schema=N`
-  do not credit structural residual. Text entries stay on the provenance track.
-  Add `-include-sources` only when a checklist that also covers every used
-  corpus key is desired (maintainer use).
-
-Record a completed source check without editing CSV manually:
+The full check suite needs Go, Make, Python 3, `staticcheck`, Node.js 20.19+
+and npm. CI uses Node.js 22. Install the pinned tooling:
 
 ```bash
-./office review attest --source "Printed Diurnal" --page 123 \
-  --locator "Proper of Example" --note "word-for-word" \
-  proper/example/collect reviewer
+go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
+npm ci --prefix .web-tools
+make install-hooks               # optional: pre-push runs make check
+make check
 ```
 
-The command binds the attestation to the current corpus text automatically so
-later changes make it stale. An existing attestation requires `--replace`.
-
-Record a completed structural review by the hour and date that was checked:
+Ensure the Go binary directory (`go env GOBIN`, or `$(go env GOPATH)/bin`
+when unset) is on your `PATH`.
 
 ```bash
-./office review sign lauds 2026-06-07 reviewer
+make test                        # Go and Python tests, including golden files
+make check                       # formatting, analysis, tests, validation, lint
+make diurnal-test                # page/transcription/discovery tests; no providers
+make golden                      # update expected output after intentional changes
+make verify-psalms                # compare the psalter with its reference witness
 ```
 
-The command resolves the page's internal version identity automatically and
-records the current structural feature schema. Schema-current sign-offs credit
-that composition's structural features so the next `review plan` shrinks;
-content status (current/stale) still works for legacy rows.
+Review golden-file changes under [internal/e2e/testdata/golden/](internal/e2e/testdata/golden/)
+before committing. They cover rendered hours, parity, and assurance coverage.
 
-`./office review assurance` runs the representative multi-year structural
-plan, validates provenance, and enforces the reviewable floors in
-`data/review/assurance-baseline.json`. CI publishes its source-content-free
-Markdown summary. After an intentional increase in verified coverage or
-modeled rules, refresh the floor with `--update-baseline` and review the JSON
-diff.
-
-On rendered hour pages, a collapsed **Assurance** disclosure shows provenance
-counts, corpus dependency keys, fallback tiers, and composition rule IDs.
-Unverified texts are either `needs-review` when a source lead or explicit
-review task exists, or `source-unknown` when provenance research must come
-first.
-It deliberately omits local paths, source-book links, and source contents;
-expanding it is optional and does not alter the prayer view or review state.
-
----
-
-## Data files
-
-Liturgical data lives in `data/`. The engine reads these at startup — no recompile needed when editing them.
-
-```
-data/
-  feasts/          feast definitions (sanctoral, temporal, AWRV-specific)
-  penitential.txt  fasting and abstinence discipline rules
-  audit-ok.txt     feasts that intentionally use ordinary/common texts
-  texts/
-    psalms/        Coverdale Psalter, one file per psalm (Hebrew numbering)
-    canticles/     Benedictus, Magnificat, Nunc Dimittis, etc.
-    ordinary/      fixed prayers, hymns, versicles, Marian antiphons (per hour)
-      session.txt  session opening/closing prayers (Aperi Domine, Sacrosanctae)
-    proper/        feast-specific antiphons and collects (one file per feast)
-    commons/       texts by category (apostle, martyr, confessor, etc.)
-    seasonal/      season-specific overrides
-    shared/        texts reused across several files (Marian texts, formulas)
-    chant/         GABC chant scores (psalms/, canticles/, hymns/)
-  office/          hour structure definitions
-  review/          sign-offs, provenance attestations, assurance baseline
-```
-
-### File format
-
-A simple INI-like format: `[section]` headers, `Key = value` lines, `#` comments, blank lines for readability. No indentation sensitivity, no quoting, no multiline values.
-
-**Feast definition** (`data/feasts/sanctoral.txt`):
-
-```ini
-[st-andrew]
-Name     = Saint Andrew, Apostle
-Rank     = double-2nd-class
-Color    = red
-Category = apostle
-Month    = 11
-Day      = 30
-```
-
-Valid `Rank` values: `double-1st-class`, `double-2nd-class`, `greater-double`, `double`, `semi-double`, `privileged-feria`, `simple`, `commemoration`
-
-Valid `Color` values: `white`, `red`, `green`, `violet`, `rose`, `black`
-
-Valid `Category` values: `lord`, `blessed-virgin`, `angel`, `apostle`, `evangelist`, `martyr`, `martyrs`, `bishop-martyr`, `virgin-martyr`, `confessor-bishop`, `confessor-doctor`, `confessor`, `virgin`, `holy-woman`, `dedication`, `sunday`, `feria`
-
-Optional keys: `HasOctave = true`, `HasVigil = true` (generate a preceding vigil), `IsVigil = true` with `VigilOf = feast-id` (this observance is an explicit vigil of the canonical feast), `IsApostolicCompanion = true` (the Peter/Paul companion retained at II Vespers), `ProperName = Andrew` (saint's given name, substituted for `N.` in common texts), `ProperID` (use another feast's proper texts), `DateRule` (for moveable feasts instead of `Month`/`Day`), `OnlyWith` (only kept on days where the named feast wins the day), `SkipRomanLeapShift = true` (keep a fixed late-February feast on its civil date in leap years), `Source` and `Notes` (documentation).
-
-**Feast proper** (`data/texts/proper/st-andrew.txt`):
-
-Each `[section]` key corresponds to a liturgical text slot. A feast file need only include the slots it actually has — the engine falls back to the common (by `Category`) or ordinary for anything omitted.
-
-In prose sections such as collects, chapters, and prayers, a single newline is a soft source wrap and the web renderer lets the paragraph reflow. A blank line starts a new paragraph. Hymn and psalm renderers preserve their verse structure automatically.
-
-```ini
-[psalm-antiphon]
-The Lord saw Peter and Andrew, * and He called them.
-
-[benedictus-antiphon]
-There followed the Lord two brethren, Peter and Andrew.
-
-[magnificat-antiphon]
-O Lord, Thou hast caused them that persecuted the just to be swallowed up in hell,
-* but to the just Thou hast thyself shown the way on the tree of the cross.
-
-[collect]
-O Lord, we humbly beseech thy Majesty: that even as Thou didst give thy blessed
-Apostle Andrew to thy Church to be a teacher and ruler on earth, so, now that he is
-with thee, he may continually make intercession for us.
-```
-
-Valid sections for feast propers:
-
-| Section | Used in |
-|---------|---------|
-| `[psalm-antiphon]` | Single psalm antiphon at Lauds |
-| `[psalm-antiphon-1]` … `[psalm-antiphon-5]` | One antiphon per psalm (add `-vespers` for Vespers variants, e.g. `[psalm-antiphon-4-vespers]`) |
-| `[benedictus-antiphon]` | Benedictus antiphon at Lauds |
-| `[magnificat-antiphon]` | Magnificat antiphon at (2nd) Vespers |
-| `[magnificat-antiphon-first]` | Magnificat antiphon at 1st Vespers |
-| `[collect]` | Collect at all hours |
-| `[chapter-lauds]`, `[chapter-vespers]`, `[chapter-terce]`, … | Chapter, per hour |
-| `[versicle-lauds]`, `[versicle-vespers]`, … | Versicle/response, per hour |
-| `[short-responsory-lauds]`, `[short-responsory-vespers]`, … | Short responsory, per hour |
-| `[hymn-lauds]`, `[hymn-vespers]` | Full hymn text (overrides common/ordinary) |
-| `[commemoration-antiphon]` | Antiphon for commemoration |
-| `[commemoration-versicle]` | Versicle/response for commemoration |
-| `[commemoration-collect]` | Collect for commemoration (defaults to `[collect]`) |
-
-A section whose body is a single `@use path/to/other/key` line reuses another
-corpus entry verbatim (see the assurance notes above). `#` comment lines inside
-sections — including `# SOURCE:` provenance annotations — are stripped by the
-loader and never render.
-
-A section whose body is a bare `@omit` says the element is **not said** in this
-office. Resolution walks proper → seasonal → ordinary and returns the first
-non-empty body, so leaving a section out inherits a lower tier's text rather
-than suppressing it; `@omit` resolves like a text, ending the walk at the tier
-that declares it, and the composers drop the element (and any section left with
-no elements) instead of rendering it. Use it only where the books say an element
-is omitted — the Triduum's chapter, short responsory, hymn and Vespers versicle
-are the current cases. An omission carries no wording, so it is excluded from
-the lint, provenance and zero-occurrence inventories; it is not permitted on a
-psalm antiphon, since every psalm is sung under one.
-
-**Common texts** (`data/texts/commons/confessor.txt`) — used when a feast has no proper of its own:
-
-```ini
-[collect]
-O God, Who, year by year, dost gladden us by the solemn feast-day of thy blessed
-confessor N., mercifully grant unto all who keep his birthday, grace to follow after
-the pattern of his godly conversation.
-```
-
-`N.` is a placeholder substituted with the feast's `ProperName` field at runtime (e.g. `ProperName = Nicholas` → "blessed confessor Nicholas").
-
-### Adding missing propers
-
-Run `make scaffold-propers` first: it creates a proper file for every non-commemoration feast that lacks one, and appends any missing section keys as comments to sparse existing files. Live (uncommented) sections are never rewritten. Each commented key has a one-line explanation — uncomment the header and put text (or `@use …`) beneath it to activate.
+Playwright behavior and accessibility tests run separately from `make check`:
 
 ```bash
-make scaffold-propers                          # create/append scaffolds
-./office scaffold propers -dry-run             # plan only
-./office scaffold propers -check               # CI: fail if any feast still needs a scaffold
-./office scaffold propers -feast st-ambrose    # one feast
-./office scaffold propers -include-commemorations  # thin catalog for rank=commemoration
+npm --prefix .web-tools run install:browser
+make test-ux
 ```
 
-Then run `make audit` to see which feasts still need real proper *text*. For each feast listed, edit `data/texts/proper/{feast-id}.txt` (e.g. feast `[st-andrew]` → `data/texts/proper/st-andrew.txt`).
+Visual snapshots run in CI's pinned browser container. For intentional visual
+changes, inspect the Playwright report and apply the `update-ux-snapshots`
+PR label to regenerate them. See the [CI workflow](.github/workflows/ci.yml)
+and [snapshot workflow](.github/workflows/update-ux-snapshots.yml) for details.
 
-If a feast should intentionally fall back to ordinary/common texts (e.g. a feria or a minor feast without a unique proper), add its ID to `data/audit-ok.txt` to suppress the warning:
+## PDF booklets
 
+Generate half-letter (5.5 × 8.5 inch) booklets with LuaLaTeX:
+
+```bash
+make pdf HOUR=compline
+make pdf HOUR=lauds DATE=2026-09-04
+make pdf HOUR=compline CHANT=1     # engrave available GABC scores
 ```
-# data/audit-ok.txt
-st-raphael-of-brooklyn *    # suppress all warnings for this feast
-some-martyr commemoration-antiphon    # suppress only this one slot
+
+Output goes under `output/`. The template requires LuaLaTeX, GregorioTeX,
+EB Garamond, and Noto Sans Symbols. Its symbol-font path currently assumes
+the Debian/Ubuntu font layout; see [the TeX template](internal/output/tex.go).
+`make pdf` enables shell escape for chant compilation. Elements without
+scores use formatted text.
+
+For TeX output alone, use `./office tex compline` or
+`./office tex --chant compline`. Optional saddle-stitch imposition with
+`pdfjam`:
+
+```bash
+pdfjam --booklet true --paper letter output/compline-2026-09-04.pdf
 ```
-
-### Psalm numbering
-
-Hour and proper definitions use **Vulgate** psalm numbers (liturgical standard). Psalm files use **Hebrew** numbers (Coverdale standard). The engine maps between them automatically. Psalms 1–9 and 147–150 are identical in both schemes; psalms 10–146 differ by one (e.g. Vulgate Psalm 31 = Hebrew Psalm 32).
-
-### Psalm text verification
-
-Run `make verify-psalms` to compare every file in `data/texts/psalms/` with the [Church of England's official 1662 BCP Psalter](https://www.churchofengland.org/prayer-and-worship/worship-texts-and-resources/book-common-prayer/psalter). The check covers wording, punctuation, verse numbering, and chant separators; local `*` separators are retained as the project's representation. Historical readings are checked against the [official 1662 Book of Common Prayer PDF](https://www.churchofengland.org/sites/default/files/2019-10/the-book-of-common-prayer-1662.pdf) where the online transcription differs.
-
----
 
 ## Deployment
 
-Deployed on [Fly.io](https://fly.io). Configuration is in `fly.toml`.
+The app runs on Fly.io; configuration is in [fly.toml](fly.toml).
+The [Dockerfile](Dockerfile) builds a static Go binary and copies it with
+`data/` into a `scratch` image.
+
+Maintainers with Fly access can deploy with:
 
 ```bash
-fly deploy   # deploy to fly.io (requires flyctl and access)
+fly deploy
 ```
-
-The Dockerfile does a multi-stage build: compiles the binary, then copies it with the `data/` directory into a minimal Debian image.
