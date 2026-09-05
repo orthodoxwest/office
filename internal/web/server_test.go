@@ -10,7 +10,7 @@ import (
 	"github.com/orthodoxwest/office/internal/review"
 )
 
-func TestShowVettingBannerDependsOnReviewHash(t *testing.T) {
+func TestShowVettingBannerDependsOnCorpusProvenance(t *testing.T) {
 	hour := &models.OfficeHour{
 		Hour:   "lauds",
 		Title:  "Lauds",
@@ -21,20 +21,27 @@ func TestShowVettingBannerDependsOnReviewHash(t *testing.T) {
 			{
 				Label: "The Collect",
 				Elements: []models.OfficeElement{
-					{Type: models.Collect, Text: "Almighty and everlasting God..."},
+					{Type: models.Collect, Text: "Almighty and everlasting God...", SourceRefs: []string{"proper/example/collect"}},
 				},
 			},
 		},
 	}
 
-	s := &Server{reviewed: map[string]bool{review.HashHour(hour): true}}
+	s := &Server{provenance: map[string]review.EntryProvenance{
+		"proper/example/collect": {Key: "proper/example/collect", Status: review.ProvenanceVerified},
+	}}
 	if s.showVettingBanner(hour) {
-		t.Fatal("expected vetted hour to hide the construction banner")
+		t.Fatal("expected an hour with fully verified corpus dependencies to hide the construction banner")
 	}
 
-	hour.Sections[0].Elements[0].Text = "Changed text."
+	s.provenance["proper/example/collect"] = review.EntryProvenance{Key: "proper/example/collect", Status: review.ProvenanceNeedsReview}
 	if !s.showVettingBanner(hour) {
-		t.Fatal("expected changed or unreviewed hour to show the construction banner")
+		t.Fatal("expected an hour with unreviewed corpus dependencies to show the construction banner")
+	}
+
+	delete(s.provenance, "proper/example/collect")
+	if !s.showVettingBanner(hour) {
+		t.Fatal("expected an hour with unknown corpus provenance to show the construction banner")
 	}
 }
 
