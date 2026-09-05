@@ -4349,16 +4349,67 @@ body.page-home::before {
   }
 }
 
-/* Unlinked usage report: plain counts using the app's existing palette. */
-.usage-window { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; }
-.usage-window a { padding-block: .5rem; }
-.usage-window [aria-current] { box-shadow: inset 0 -1px 0 var(--gold); }
-.usage-chart { display: grid; gap: .3rem; font-variant-numeric: tabular-nums; }
-.usage-bar-row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 3rem; align-items: center; gap: .6rem; }
-.usage-bar-row meter { width: 100%; height: 1.3rem; accent-color: var(--gold); }
-.usage-bar-row span { text-align: right; }
-.usage-table-wrap { overflow-x: auto; }
-.usage-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.usage-table caption { text-align: left; margin-bottom: .7rem; }
-.usage-table th, .usage-table td { padding: .5rem; text-align: right; border-bottom: 1px solid var(--border); }
-.usage-table th:first-child { text-align: left; white-space: nowrap; }
+/* Usage report: a working room in the same plaster, oak and gold palette. */
+.page-usage main { max-width: 64rem; }
+.usage-page { padding-block: 1.2rem 2rem; }
+.usage-heading { margin-bottom: 1.8rem; }
+.usage-eyebrow { color: var(--accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .13em; }
+.usage-heading h1 { font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 400; line-height: 1.1; margin: .5rem 0; }
+.usage-heading > p:last-child { color: var(--muted); margin: .6rem 0 0; }
+.usage-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; border-block: 1px solid var(--border); }
+.usage-toolbar > p { color: var(--muted); font-size: .85rem; margin: .5rem 0; }
+.usage-window { display: flex; gap: 1.3rem; }
+.usage-window a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-block: .35rem; color: var(--muted); text-decoration: none; }
+.usage-window a:hover, .usage-window [aria-current] { color: var(--text); box-shadow: inset 0 -2px 0 var(--gold); }
+.usage-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.8rem; border-bottom: 1px solid var(--border); }
+.usage-summary > div { padding-inline: 1.5rem; border-left: 1px solid var(--border); }
+.usage-summary > div:first-child { padding-left: 0; border-left: 0; }
+.usage-summary dt { font-size: .9rem; color: var(--muted); }
+.usage-summary dd { margin: .4rem 0; font-size: 3rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
+.usage-summary .usage-stat-note { margin: .6rem 0 0; color: var(--muted); font-size: .82rem; line-height: 1.4; }
+.usage-panel { margin-block: 1.5rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); }
+.usage-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.usage-section-heading h2 { margin: 0; font-size: 1.5rem; font-weight: 400; }
+.usage-section-heading p { margin: .25rem 0 0; color: var(--muted); font-size: .92rem; }
+.usage-period { color: var(--muted); font-size: .85rem; white-space: nowrap; }
+.usage-trend { position: relative; margin: 0; padding-left: 2rem; }
+.usage-chart { display: block; width: 100%; height: 11rem; overflow: visible; }
+.usage-grid { fill: none; stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.usage-bar { fill: var(--accent); opacity: .8; }
+.usage-bar-today { fill: var(--gold); opacity: 1; }
+.usage-chart-scale { position: absolute; left: 0; top: -.45rem; height: 11.9rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--muted); font-size: .8rem; }
+.usage-trend figcaption { display: flex; justify-content: space-between; margin-top: .7rem; color: var(--muted); font-size: .85rem; }
+.usage-empty { position: absolute; inset: 2.3rem 0 auto 2rem; text-align: center; color: var(--text); background: var(--surface); padding-block: .7rem; }
+.usage-empty span { font-size: .9rem; color: var(--muted); }
+.usage-table-wrap { overflow: auto; max-height: 28rem; scrollbar-color: var(--border) var(--surface); }
+.usage-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .95rem; font-variant-numeric: lining-nums tabular-nums; }
+.usage-table th, .usage-table td { padding: .8rem .65rem; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.usage-table thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); font-size: .8rem; font-weight: 400; color: var(--muted); }
+.usage-table th:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); font-weight: 400; }
+.usage-table thead th:first-child { z-index: 3; }
+.usage-table tbody th { z-index: 1; }
+.usage-total { font-weight: 700; }
+.usage-zero { color: var(--muted); }
+.usage-today-label { display: block; color: var(--accent); font-size: .72rem; }
+.usage-today td, .usage-today th { border-bottom-color: var(--gold-line); }
+.usage-notes { max-width: 46rem; margin-top: 2rem; color: var(--muted); }
+.usage-notes h2 { font-size: 1.1rem; color: var(--text); font-weight: 400; margin-bottom: .6rem; }
+.usage-notes p { font-size: .95rem; margin: .6rem 0; }
+@media (max-width: 540px) {
+  .usage-page { padding-top: .5rem; }
+  .usage-heading { margin-bottom: 1.4rem; }
+  .usage-toolbar { gap: 0; padding-bottom: .4rem; }
+  .usage-summary { padding-block: 1.3rem; margin-bottom: 1.3rem; }
+  .usage-summary > div { padding-inline: .7rem; }
+  .usage-summary dd { font-size: 2.3rem; }
+  .usage-summary .usage-stat-note { font-size: .75rem; }
+  .usage-panel { padding: 1rem .8rem; }
+  .usage-section-heading { gap: .5rem; }
+  .usage-chart { height: 9rem; }
+  .usage-chart-scale { height: 9.9rem; }
+  .usage-table th, .usage-table td { padding: .7rem .55rem; }
+}
+@media print {
+  .usage-table-wrap { max-height: none; overflow: visible; }
+  .usage-table th { position: static !important; }
+}
