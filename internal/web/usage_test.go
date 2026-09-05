@@ -24,16 +24,22 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := &Server{usage: store, pages: pages}
-	send := func(method, body, origin string, cookie *http.Cookie) *httptest.ResponseRecorder {
+	const humanUA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+		"(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+	sendAs := func(agent, method, body, origin string, cookie *http.Cookie) *httptest.ResponseRecorder {
 		r := httptest.NewRequest(method, "https://office.test/api/usage", strings.NewReader(body))
 		r.Header.Set("X-Office-Usage", "1")
 		r.Header.Set("Origin", origin)
+		r.Header.Set("User-Agent", agent)
 		if cookie != nil {
 			r.AddCookie(cookie)
 		}
 		w := httptest.NewRecorder()
 		s.handleUsageEvent(w, r)
 		return w
+	}
+	send := func(method, body, origin string, cookie *http.Cookie) *httptest.ResponseRecorder {
+		return sendAs(humanUA, method, body, origin, cookie)
 	}
 	first := send("POST", "lauds", "https://office.test", nil)
 	if first.Code != 204 {
@@ -59,11 +65,29 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 			t.Fatalf("%+v: %d", tc, w.Code)
 		}
 	}
+	// Crawlers are answered politely and dropped: no cookie, no count. Scraping
+	// stays welcome; it just must not mint a "unique browser" per scraped URL.
+	for _, agent := range []string{
+		"Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+		"Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+		"GPTBot/1.1", "ClaudeBot/1.0", "python-requests/2.32.3", "curl/8.7.1", "",
+	} {
+		w := sendAs(agent, "POST", "lauds", "https://office.test", nil)
+		if w.Code != 204 || len(w.Result().Cookies()) != 0 {
+			t.Fatalf("bot %q: %d cookies=%d", agent, w.Code, len(w.Result().Cookies()))
+		}
+	}
+	// A phone whose model name merely embeds "bot" is a person, not a crawler.
+	if w := sendAs("Mozilla/5.0 (Linux; Android 13; Cubot Note 20) AppleWebKit/537.36 Chrome/141.0.0.0 Mobile",
+		"POST", "prime", "https://office.test", nil); w.Code != 204 || len(w.Result().Cookies()) != 1 {
+		t.Fatalf("Cubot phone treated as bot: %d cookies=%d", w.Code, len(w.Result().Cookies()))
+	}
 	rows, err := store.Daily(context.Background(), time.Now(), 7)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rows[0].Users != 1 || rows[0].Hours[0] != 1 {
+	// One human browser for lauds, one for prime; every bot agent above dropped.
+	if rows[0].Users != 2 || rows[0].Hours[0] != 1 || rows[0].Hours[1] != 1 {
 		t.Fatalf("rejected events affected counts: %+v", rows[0])
 	}
 	w := httptest.NewRecorder()

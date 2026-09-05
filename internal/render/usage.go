@@ -8,12 +8,14 @@ import (
 
 type UsageData struct {
 	NavDate, Theme, Page, SeasonClass string
-	ShowBanner, ShowToday             bool
-	Days, Max, Today, Yesterday       int
-	Hours                             []string
-	Rows                              []usage.Daily
-	Chart                             []UsageBar
-	FirstDate, LastDate, PeakDate     string
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen                     string
+	ShowBanner, ShowToday         bool
+	Days, Max, Today, Yesterday   int
+	Hours                         []string
+	Rows                          []usage.Daily
+	Chart                         []UsageBar
+	FirstDate, LastDate, PeakDate string
 }
 
 type UsageBar struct {

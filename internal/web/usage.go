@@ -40,6 +40,13 @@ func (s *Server) handleUsageEvent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	// Crawlers present a fresh cookie jar on every render, so each scraped URL
+	// would otherwise land as a new "unique browser". Scraping stays welcome;
+	// it just does not count. Stale archive pages are refused client-side.
+	if usage.IsBot(r.UserAgent()) {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 32))
 	if err != nil || !usage.ValidScope(string(body)) {
 		http.Error(w, "Invalid office", http.StatusBadRequest)

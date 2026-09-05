@@ -159,6 +159,31 @@ and reminders contribute to the overall total. Preloads do not count;
 offline use and browsers without JavaScript are missed. Separate devices,
 blocked cookies, and cleared cookies can inflate the approximate user count.
 
+Three filters keep scraping from becoming usage. The site stays freely
+crawlable — there is no robots.txt and the dated archive is deliberately
+open — but a crawl must not read as a congregation, because a crawler
+presents a fresh cookie jar per render and would otherwise mint one "unique
+browser" for every URL it touches:
+
+- **Only a current page counts.** `data-usage-when` carries the page's day
+  (or the ordo's year), and the beacon refuses anything outside today ±1 day
+  (±1 year for the ordo). The dated archive is unbounded; today's surface is
+  about ten pages, so that is the ceiling on what any crawl can contribute,
+  however deep it goes.
+- **Engagement is required.** Nothing is reported until someone touches the
+  page or leaves it visible for eight seconds. Dwell accrues only while the
+  page is visible, so a background tab never qualifies and a scraper that
+  renders and moves on reports nothing.
+- **Self-identifying crawlers are dropped** server-side by user agent
+  (`usage.IsBot`), answered `204` with no cookie and no count. The bare word
+  "bot" is not enough to be dropped — phone agents such as "Cubot Note 20"
+  embed it — so the check wants the conventional `<name>bot/<version>` form
+  or an explicit token.
+
+Honest limits: a stealth scraper with a browser user agent that dwells or
+clicks on today's pages still counts, and a real reader browsing only the
+archive is missed. Both are bounded and deliberate.
+
 Fly configuration expects one replica and a volume named `office_usage` in
 `iad`, mounted at `/usage`. Create it before deploying:
 

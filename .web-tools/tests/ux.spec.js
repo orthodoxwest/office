@@ -1696,26 +1696,112 @@ for (const { name, path, theme, knownViolations } of [
 
 // Usage metrics: exercise the normal CI behavior-test entry point.
 
-test("visible office visits send an event, background page fetches do not", async ({ page }) => {
+// Reporting days are Eastern, so "today" must be computed there and not from
+// the runner's clock or a literal that would rot into the archive tomorrow.
+function easternDay(offsetDays = 0) {
+  const now = new Date(Date.now() + offsetDays * 864e5);
+  return now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+}
+
+// A person, not the default HeadlessChrome agent the server drops as a bot.
+const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+  "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
+
+test("engaged visits to a current page send an event, passive and background ones do not", async ({ page }) => {
   const events = [];
   await page.route("**/api/usage", async route => {
     events.push(route.request().postData());
     await route.fulfill({ status: 204 });
   });
-  await page.goto("/lauds/2026-09-04");
+
+  // Rendering alone is not use: a scraper that renders and leaves must not count.
+  await page.goto(`/lauds/${easternDay()}`);
+  await page.waitForTimeout(1500);
+  expect(events).toEqual([]);
+
+  // A touch is engagement.
+  await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(1);
   expect(events).toEqual(["lauds"]);
+
+  // A background fetch of another hour is not a visit to it.
   await page.evaluate(async () => {
-    await fetch("/vespers/2026-09-04");
+    // Drain it: an abandoned body would be cancelled by the next navigation.
+    await (await fetch(`/vespers/${document.body.getAttribute("data-usage-when")}`)).text();
     document.dispatchEvent(new Event("visibilitychange"));
   });
   expect(events).toEqual(["lauds"]);
-  await page.goto("/?date=2026-09-04");
+
+  await page.goto(`/?date=${easternDay()}`);
+  await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(2);
   expect(events[1]).toBe("site");
+
+  // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
+  await page.mouse.click(200, 300);
   await expect(page.getByRole("heading", { name: "Daily usage", exact: true })).toBeVisible();
   expect(events.length).toBe(2);
+});
+
+test("the dated archive is freely readable but never counted", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  // Deep past, far future, and a distant ordo year: all render, none report.
+  for (const path of ["/lauds/2019-03-04", "/?date=2045-06-01", "/calendar/2050", "/vespers/2031-12-25"]) {
+    await page.goto(path);
+    await page.mouse.click(200, 300);
+    await page.waitForTimeout(300);
+    await expect(page.locator("body")).toBeVisible();
+  }
+  expect(events).toEqual([]);
+
+  // Yesterday and tomorrow are ordinary use, not archive.
+  for (const day of [easternDay(-1), easternDay(1)]) {
+    await page.goto(`/lauds/${day}`);
+    await page.mouse.click(200, 300);
+  }
+  await expect.poll(() => events.length).toBe(2);
+});
+
+// The cookie round trip is the whole basis of deduplication, so exercise it
+// against the real endpoint rather than a stubbed one.
+test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {
+  const today = async (page) => {
+    await page.goto("/admin/usage?days=7");
+    const row = page.locator("tbody tr").first();
+    return Number(await row.locator("td.usage-total").innerText());
+  };
+
+  const readerCtx = await browser.newContext({ baseURL, userAgent: HUMAN_UA, timezoneId: "America/New_York" });
+  const reader = await readerCtx.newPage();
+  const before = await today(reader);
+
+  // One browser reading several hours is one visitor, however many pages.
+  for (const hour of ["lauds", "prime", "vespers"]) {
+    await reader.goto(`/${hour}/${easternDay()}`);
+    await reader.mouse.click(200, 300);
+    await reader.waitForTimeout(300);
+  }
+  expect(await today(reader)).toBe(before + 1);
+
+  // A crawler with a fresh profile per URL adds nothing at all.
+  for (const path of [`/lauds/${easternDay()}`, `/?date=${easternDay()}`]) {
+    const botCtx = await browser.newContext({
+      baseURL, timezoneId: "America/New_York",
+      userAgent: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    });
+    const bot = await botCtx.newPage();
+    await bot.goto(path);
+    await bot.mouse.click(200, 300);
+    await bot.waitForTimeout(300);
+    await botCtx.close();
+  }
+  expect(await today(reader)).toBe(before + 1);
+  await readerCtx.close();
 });
 
 test("usage report is accessible and fits narrow and wide screens", async ({ page }) => {

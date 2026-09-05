@@ -1023,7 +1023,8 @@ document.documentElement.classList.add("js");
   }
 })();
 
-// Record visible page use, never the service worker's background preloads.
+// Record engaged use of a current page, never the service worker's background
+// preloads, crawlers, or a scrape of the dated archive.
 (function () {
   var scope = "site";
   var hours = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
@@ -1035,13 +1036,37 @@ document.documentElement.classList.add("js");
   })) {
     return;
   }
-  var formatter = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York" });
+
+  // Only a current page counts. The dated archive is unbounded and stays
+  // freely crawlable, so counting it would let one scraper mint a fresh
+  // "unique browser" per URL; today's surface is a handful of pages however
+  // hard anyone crawls. data-usage-when is an ISO day, a bare year for the
+  // ordo, or absent on pages that are always current (see render.UsageWhen).
+  var when = document.body.getAttribute("data-usage-when") || "";
+  var parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit"
+  });
+  var today = function () {
+    var got = {};
+    parts.formatToParts(new Date()).forEach(function (part) { got[part.type] = part.value; });
+    return got.year + "-" + got.month + "-" + got.day;
+  };
+  // Re-checked on every attempt, so a tab left open across midnight ages out
+  // of the window instead of counting forever.
+  var current = function (day) {
+    if (!when) return true;
+    if (/^\d{4}$/.test(when)) return Math.abs(Number(when) - Number(day.slice(0, 4))) <= 1;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(when)) return false;
+    return Math.abs(Date.parse(when + "T00:00:00Z") - Date.parse(day + "T00:00:00Z")) <= 864e5;
+  };
+
   var recordedDay = "";
   var pending = false;
+  var engaged = false;
   function record() {
-    if (document.visibilityState !== "visible" || !navigator.onLine || pending) return;
-    var day = formatter.format(new Date());
-    if (recordedDay === day) return;
+    if (!engaged || document.visibilityState !== "visible" || !navigator.onLine || pending) return;
+    var day = today();
+    if (recordedDay === day || !current(day)) return;
     pending = true;
     var controller = new AbortController();
     var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
@@ -1058,10 +1083,46 @@ document.documentElement.classList.add("js");
       // Best effort: never delay prayer or queue offline browsing history.
     }).finally(function () { window.clearTimeout(timeout); pending = false; });
   }
-  record();
-  document.addEventListener("visibilitychange", record);
-  window.addEventListener("pageshow", record);
+
+  // Engagement gate: a headless scraper renders, snapshots and moves on, so
+  // nothing counts until someone touches the page or leaves it open a while.
+  // Dwell accrues only while visible, so a background tab never qualifies.
+  var DWELL_MS = 8000;
+  var dwelt = 0;
+  var since = 0;
+  var timer = 0;
+  function pause() {
+    if (!since) return;
+    dwelt += Date.now() - since;
+    since = 0;
+    window.clearTimeout(timer);
+    timer = 0;
+  }
+  function engage() {
+    if (engaged) return;
+    engaged = true;
+    pause();
+    record();
+  }
+  function resume() {
+    if (engaged || since || document.visibilityState !== "visible") return;
+    since = Date.now();
+    timer = window.setTimeout(engage, Math.max(0, DWELL_MS - dwelt));
+  }
+  ["pointerdown", "keydown", "touchstart", "wheel"].forEach(function (type) {
+    window.addEventListener(type, engage, { once: true, passive: true });
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      resume();
+      record();
+    } else {
+      pause();
+    }
+  });
+  window.addEventListener("pageshow", function () { resume(); record(); });
   window.addEventListener("online", record);
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
+  resume();
 })();
