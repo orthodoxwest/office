@@ -16,11 +16,8 @@ var rubricPrayerPhrases = map[string][]string{
 	"ordinary/session/prime-opening-secret-prayers-rubric": {"Our Father", "Hail Mary", "Apostles' Creed"},
 	"ordinary/session/little-hours-opening-rubric":         {"Our Father", "Hail Mary"},
 	"ordinary/session/closing-rubric":                      {"Our Father", "Hail Mary"},
-	"shared/formulas/our-father-partly-secret-rubric": {
-		"Our Father", "And lead us not into temptation", "But deliver us from evil. Amen.",
-	},
-	"shared/formulas/closing-our-father": {"Our Father"},
-	"ordinary/compline/confiteor-rubric": {"Our Father"},
+	"shared/formulas/closing-our-father":                   {"Our Father"},
+	"ordinary/compline/confiteor-rubric":                   {"Our Father"},
 }
 
 // buildRubricSpans partitions a known rubric into instruction and quoted

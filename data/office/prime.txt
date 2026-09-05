@@ -294,9 +294,6 @@ Ref = pre-collect-versicle
 Type = dialogue
 Ref = ordinary/shared/kyrie
 
-Type = rubric
-Ref = shared/formulas/our-father-partly-secret-rubric
-
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 

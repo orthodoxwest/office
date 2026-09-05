@@ -72,11 +72,6 @@ Optional: After Let us bless the Lord, Vespers of the Dead are begun immediately
 # omitted; after the Confession and Absolution the psalms begin at once.
 Confession is made:
 
-[our-father-partly-secret-rubric]
-# SOURCE: General Rubrics of the Monastic Breviary, XXXV.1-2 (corporate form);
-# 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
-The Our Father is said by the officiant through And lead us not into temptation; ℟. But deliver us from evil. Amen.
-
 [closing-our-father]
 Our Father is said secretly.
 

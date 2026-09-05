@@ -237,10 +237,10 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 	}{
 		{file: "lauds.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
 		{file: "vespers.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
-		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
+		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 		// secret-prayer conversions for opening/closing are covered in TestOfficeDataExpandsModeledSecretPrayers
 	}
 
@@ -590,9 +590,8 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 	}) {
 		t.Fatalf("Compline Opening private prayers = %+v", got)
 	}
-	if got := byName["Chapter"].Elements; !reflect.DeepEqual(got[len(got)-3:], []HourElement{
+	if got := byName["Chapter"].Elements; !reflect.DeepEqual(got[len(got)-2:], []HourElement{
 		{Type: "dialogue", Ref: "ordinary/shared/kyrie"},
-		{Type: "rubric", Ref: "shared/formulas/our-father-partly-secret-rubric"},
 		{Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"},
 	}) {
 		t.Fatalf("Compline Chapter private prayers = %+v", got)
@@ -611,7 +610,6 @@ func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {
 		"ordinary/session/little-hours-opening-rubric":         {"ordinary/shared/our-father", "ordinary/shared/hail-mary"},
 		"ordinary/session/closing-rubric":                      {"ordinary/shared/our-father", "ordinary/shared/hail-mary"},
 		"shared/formulas/closing-our-father":                   {"ordinary/shared/our-father"},
-		"shared/formulas/our-father-partly-secret-rubric":      {"ordinary/shared/our-father"},
 		"ordinary/compline/confiteor-rubric":                   {"ordinary/shared/our-father"},
 		"ordinary/compline/concluding-rubric":                  {"ordinary/shared/our-father", "ordinary/shared/hail-mary", "ordinary/shared/apostles-creed"},
 	}
@@ -637,9 +635,6 @@ func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {
 				for j, ref := range want {
 					got := section.Elements[i+1+j]
 					wantType := "secret-prayer"
-					if elem.Ref == "shared/formulas/our-father-partly-secret-rubric" {
-						wantType = "corporate-lord-prayer"
-					}
 					if got.Type != wantType || got.Ref != ref {
 						t.Errorf("%s %s after %q[%d] = %+v, want %s %q", file, section.Name, elem.Ref, j, got, wantType, ref)
 					}
