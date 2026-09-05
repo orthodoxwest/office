@@ -31,7 +31,6 @@ type Server struct {
 	pages      *render.Pages
 	addr       string
 	version    string
-	reviewed   map[string]bool
 	provenance map[string]review.EntryProvenance
 	suspicions map[string][]review.Suspicion
 }
@@ -49,10 +48,6 @@ func New(dataDir, addr string) (*Server, error) {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
 
-	reviewed, err := loadReviewedHashes(dataDir)
-	if err != nil {
-		return nil, fmt.Errorf("loading review signoffs: %w", err)
-	}
 	provenanceInventory, err := review.ScanProvenance(dataDir)
 	if err != nil {
 		return nil, fmt.Errorf("loading provenance: %w", err)
@@ -68,29 +63,26 @@ func New(dataDir, addr string) (*Server, error) {
 		pages:      pages,
 		addr:       addr,
 		version:    version,
-		reviewed:   reviewed,
 		provenance: provenanceInventory.ByKey(),
 		suspicions: suspicions,
 	}, nil
-}
-
-func loadReviewedHashes(dataDir string) (map[string]bool, error) {
-	signoffs, err := review.LoadSignoffs(dataDir)
-	if err != nil {
-		return nil, err
-	}
-	reviewed := make(map[string]bool, len(signoffs))
-	for _, s := range signoffs {
-		reviewed[s.Hash] = true
-	}
-	return reviewed, nil
 }
 
 func (s *Server) showVettingBanner(hour *models.OfficeHour) bool {
 	if hour == nil {
 		return true
 	}
-	return !s.reviewed[review.HashHour(hour)]
+	dependencies := review.HourDependencies(hour)
+	if len(dependencies) == 0 {
+		return true
+	}
+	for _, key := range dependencies {
+		entry, ok := s.provenance[key]
+		if !ok || entry.Status != review.ProvenanceVerified {
+			return true
+		}
+	}
+	return false
 }
 
 // ListenAndServe registers routes and starts the HTTP server.
