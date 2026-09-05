@@ -1029,6 +1029,12 @@ footer::before {
   padding: 0.35rem 0.5rem;
   width: fit-content;
   margin: 0 auto;
+  /* A fit-content label is a small target in both dimensions. Same touch
+     floor as the home date control; flex keeps the label and caret centred
+     in the taller box without moving the surrounding header rhythm. */
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-target);
 }
 
 .hour-date-nav > summary::-webkit-details-marker {
@@ -1052,7 +1058,9 @@ footer::before {
 .hour-date-nav .day-nav {
   margin-top: 0.15rem;
   padding-top: 0.45rem;
-  border-top: 1px solid rgba(26, 26, 26, 0.06);
+  /* A theme-aware hairline: a fixed near-black rule vanishes on the Apse
+     night wash, while the surface edge reads in both themes. */
+  border-top: 1px solid var(--surface-edge);
 }
 
 .day-nav {
@@ -1063,7 +1071,7 @@ footer::before {
   align-items: center;
   justify-content: center;
   padding-top: 0.35rem;
-  border-top: 1px solid rgba(26, 26, 26, 0.06);
+  border-top: 1px solid var(--surface-edge);
 }
 
 /* Season and date control share one baseline, so naming the season costs no
@@ -2693,10 +2701,10 @@ footer::before {
    (render.SeasonClass), so it varies per URL and stays service-worker safe.
 
    Contrast, worst case (a drop cap sits immediately beside body text):
-   nave    veiled  #756a7e on #fdf1e6 = 4.6:1  (gold baseline 3.9:1)
-   nave    paschal #a4731a on #fdf1e6 = 3.7:1  (same lightness as gold, more chroma)
-   apse    veiled  #b0a4c2 on #121c28 = 7.3:1  (gold baseline 9.3:1)
-   apse    paschal #e6cf8c on #121c28 = 11.2:1 */
+   nave    veiled  #756a7e on #fdf1e6 = 4.3:1  (gold baseline 3.6:1)
+   nave    paschal #a4731a on #fdf1e6 = 3.5:1  (same lightness as gold, more chroma)
+   apse    veiled  #b0a4c2 on #121c28 = 6.8:1  (gold baseline 8.7:1)
+   apse    paschal #e6cf8c on #121c28 = 10.4:1 */
 
 /* The gilded caps take a gradient, so each season also carries a stop pair
    (--ornament-hi / --ornament-lo) alongside its flat --ornament. Each pair
@@ -2719,8 +2727,8 @@ footer::before {
    its images, not its timber.
 
    Contrast on the band, worst case:
-   nave ground #3f372f  veiled #b0a4c2 = 5.3:1   paschal #e6cf8c = 7.3:1
-   apse ground #262f3d  veiled #b0a4c2 = 6.4:1   paschal #e6cf8c = 8.9:1 */
+   nave ground #3f372f  veiled #b0a4c2 = 5.0:1   paschal #e6cf8c = 7.6:1
+   apse ground #262f3d  veiled #b0a4c2 = 5.7:1   paschal #e6cf8c = 8.8:1 */
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;

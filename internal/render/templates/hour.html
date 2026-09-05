@@ -58,8 +58,10 @@
       <a class="day-hours-link" href="{{.DayLink}}">All hours</a>
       {{if .NextHourLink}}<a class="hour-continuation-link next-hour" href="{{.NextHourLink}}"><span class="continuation-label">Next hour</span><span>{{.NextHourName}} &rarr;</span></a>{{else}}<span></span>{{end}}
     </nav>
+    {{/* The one-line digest names only nonzero categories; the full
+         dependency, resolution, and decision lists below always render. */}}
     <details class="assurance-panel">
-      <summary>Assurance: {{.Assurance.Verified}} verified &middot; {{.Assurance.NeedsReview}} need review &middot; {{.Assurance.SourceUnknown}} source unknown{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
+      <summary>Assurance: {{.Assurance.Verified}} verified{{if .Assurance.NeedsReview}} &middot; {{.Assurance.NeedsReview}} need review{{end}}{{if .Assurance.SourceUnknown}} &middot; {{.Assurance.SourceUnknown}} source unknown{{end}}{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
       <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
       <h2>Text dependencies</h2>
       <ul class="assurance-list">
