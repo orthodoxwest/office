@@ -29,6 +29,7 @@ type Pages struct {
 	notFound  *template.Template
 	errorPage *template.Template
 	reminders *template.Template
+	usage     *template.Template
 }
 
 // New parses the embedded templates. version stamps static asset URLs (see
@@ -47,6 +48,7 @@ func New(version string) (*Pages, error) {
 		{"404.html", &p.notFound},
 		{"error.html", &p.errorPage},
 		{"reminders.html", &p.reminders},
+		{"usage.html", &p.usage},
 	} {
 		tmpl, err := template.New("").Funcs(funcs).ParseFS(templates,
 			"templates/layout.html", "templates/"+page.file)
@@ -56,6 +58,10 @@ func New(version string) (*Pages, error) {
 		*page.dst = tmpl
 	}
 	return p, nil
+}
+
+func (p *Pages) Usage(w io.Writer, data UsageData) error {
+	return p.usage.ExecuteTemplate(w, "layout", data)
 }
 
 // Home renders the day's landing page.

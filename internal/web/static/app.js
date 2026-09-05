@@ -1022,3 +1022,46 @@ document.documentElement.classList.add("js");
     }
   }
 })();
+
+// Record visible page use, never the service worker's background preloads.
+(function () {
+  var scope = "site";
+  var hours = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+  var hour = hours.find(function (name) { return document.body.classList.contains("page-" + name); });
+  if (hour) {
+    scope = hour;
+  } else if (!["home", "calendar", "reminders"].some(function (name) {
+    return document.body.classList.contains("page-" + name);
+  })) {
+    return;
+  }
+  var formatter = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York" });
+  var recordedDay = "";
+  var pending = false;
+  function record() {
+    if (document.visibilityState !== "visible" || !navigator.onLine || pending) return;
+    var day = formatter.format(new Date());
+    if (recordedDay === day) return;
+    pending = true;
+    var controller = new AbortController();
+    var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
+    fetch("/api/usage", {
+      method: "POST",
+      headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
+      body: scope,
+      credentials: "same-origin",
+      cache: "no-store",
+      signal: controller.signal
+    }).then(function (response) {
+      if (response.ok) recordedDay = day;
+    }).catch(function () {
+      // Best effort: never delay prayer or queue offline browsing history.
+    }).finally(function () { window.clearTimeout(timeout); pending = false; });
+  }
+  record();
+  document.addEventListener("visibilitychange", record);
+  window.addEventListener("pageshow", record);
+  window.addEventListener("online", record);
+  // A foreground page left open across midnight belongs to the new day too.
+  window.setInterval(record, 60000);
+})();

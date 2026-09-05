@@ -4348,3 +4348,17 @@ body.page-home::before {
     color: #444;
   }
 }
+
+/* Unlinked usage report: plain counts using the app's existing palette. */
+.usage-window { display: flex; flex-wrap: wrap; gap: 1rem; margin-block: 1.5rem; }
+.usage-window a { padding-block: .5rem; }
+.usage-window [aria-current] { box-shadow: inset 0 -1px 0 var(--gold); }
+.usage-chart { display: grid; gap: .3rem; font-variant-numeric: tabular-nums; }
+.usage-bar-row { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) 3rem; align-items: center; gap: .6rem; }
+.usage-bar-row meter { width: 100%; height: 1.3rem; accent-color: var(--gold); }
+.usage-bar-row span { text-align: right; }
+.usage-table-wrap { overflow-x: auto; }
+.usage-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.usage-table caption { text-align: left; margin-bottom: .7rem; }
+.usage-table th, .usage-table td { padding: .5rem; text-align: right; border-bottom: 1px solid var(--border); }
+.usage-table th:first-child { text-align: left; white-space: nowrap; }
