@@ -146,3 +146,48 @@ Maintainers with Fly access can deploy with:
 ```bash
 fly deploy
 ```
+
+### Usage metrics
+
+The unlinked, unauthenticated `/admin/usage` report shows daily unique browsers
+and unique browsers opening each office, with 7/30/90/366-day views. It is
+public to anyone who knows the URL, marked `noindex`, and excluded from the
+service-worker cache. Reporting days use America/New_York, including DST.
+Counts describe visible pages, not completed prayers. A browser opening
+several hours counts once overall and once in each hour column. Home, Ordo,
+and reminders contribute to the overall total. Preloads do not count;
+offline use and browsers without JavaScript are missed. Separate devices,
+blocked cookies, and cleared cookies can inflate the approximate user count.
+
+Fly configuration expects one replica and a volume named `office_usage` in
+`iad`, mounted at `/usage`. Create it before deploying:
+
+```bash
+fly volumes create office_usage --region iad --size 1 --app office
+```
+
+`OFFICE_USAGE_DB=/usage/usage.sqlite` enables metrics. For local use:
+
+```bash
+mkdir -p output/usage
+OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" go run ./cmd/server serve
+```
+
+Unset `OFFICE_USAGE_DB` to disable storage (the event endpoint is a no-op and
+the report returns 404). If SQLite cannot open, the server logs a warning and
+continues serving offices without metrics. Runtime storage failures return
+503 only on the metrics endpoints. The parent directory must already exist.
+
+The first-party `office-usage` cookie is a random 128-bit identifier, lasts
+30 days, and is HttpOnly and SameSite=Strict (Secure over HTTPS). Its path is
+limited to `/api/usage`. SQLite stores only a different hash each day, an
+office category, and a reporting date; no raw cookie, IP address, user agent,
+URL, or precise visit timestamp is stored. Deduplication rows older than the
+current day and previous two days are deleted on the next event or report
+read. Aggregate counts are retained indefinitely. Existing volume snapshots
+can retain older database contents until those snapshots expire.
+
+SQLite uses WAL mode and a single connection. Keep the database and its WAL
+files together on the volume; use SQLite-aware backups or volume snapshots,
+not a copy of the live database file alone. Multiple app replicas would have
+independent counts and require a different storage arrangement.

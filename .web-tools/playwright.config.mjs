@@ -33,11 +33,12 @@ export default defineConfig({
   webServer: externalServer
     ? undefined
     : {
-        command: "go run ./cmd/server serve 127.0.0.1:18159",
+        command: "mkdir -p output/playwright && go run ./cmd/server serve 127.0.0.1:18159",
         cwd: "..",
         env: {
           ...process.env,
           GOFLAGS: goFlags,
+          OFFICE_USAGE_DB: process.env.OFFICE_USAGE_DB || "output/playwright/usage.sqlite",
         },
         url: baseURL,
         reuseExistingServer: !process.env.CI,

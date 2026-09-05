@@ -427,6 +427,11 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
+  // Metrics and the unlinked report must never enter Cache Storage.
+  if (url.pathname === "/api/usage" || url.pathname === "/admin/usage") {
+    return;
+  }
+
   // ICS feed is personalized and always network.
   if (url.pathname === "/office.ics") {
     return;

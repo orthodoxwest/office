@@ -9,6 +9,11 @@ primary_region = "iad"
 
 [env]
   PORT = "8080"
+  OFFICE_USAGE_DB = "/usage/usage.sqlite"
+
+[[mounts]]
+  source = "office_usage"
+  destination = "/usage"
 
 [http_service]
   internal_port = 8080

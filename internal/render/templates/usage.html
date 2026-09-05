@@ -1,0 +1,31 @@
+{{define "title"}}Usage — Divine Office{{end}}
+{{define "content"}}
+<section class="usage-page" aria-labelledby="usage-title">
+  <h1 id="usage-title">Daily usage</h1>
+  <p>Approximate unique browsers, by Eastern time (America/New_York). Today is still in progress.</p>
+  <nav class="usage-window" aria-label="Reporting period">
+    <a href="?days=7"{{if eq .Days 7}} aria-current="page"{{end}}>7 days</a>
+    <a href="?days=30"{{if eq .Days 30}} aria-current="page"{{end}}>30 days</a>
+    <a href="?days=90"{{if eq .Days 90}} aria-current="page"{{end}}>90 days</a>
+    <a href="?days=366"{{if eq .Days 366}} aria-current="page"{{end}}>366 days</a>
+  </nav>
+  <h2>Browsers per day</h2>
+  <div class="usage-chart">
+    {{range .Rows}}<div class="usage-bar-row">
+      <time datetime="{{.Day}}">{{.Day}}</time>
+      <meter min="0" max="{{$.Max}}" value="{{.Users}}" aria-label="Browsers on {{.Day}}">{{.Users}}</meter>
+      <span>{{.Users}}</span>
+    </div>{{end}}
+  </div>
+  <h2>Office hours opened</h2>
+  <div class="usage-table-wrap" role="region" aria-label="Daily office counts" tabindex="0">
+    <table class="usage-table">
+      <caption>Unique browsers per day and office</caption>
+      <thead><tr><th scope="col">Date</th><th scope="col">All visitors</th>{{range .Hours}}<th scope="col">{{titleCase .}}</th>{{end}}</tr></thead>
+      <tbody>{{range .Rows}}<tr><th scope="row">{{.Day}}</th><td>{{.Users}}</td>{{range .Hours}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+    </table>
+  </div>
+  <p>Each browser counts once per day overall and once per office it opens. Office columns overlap; they do not add up to the daily total. Visits to home, Ordo and reminders also count toward the total.</p>
+  <p>These are visible page visits, not completed prayers. Preloading does not count. Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again. Zero means no recorded visits.</p>
+</section>
+{{end}}

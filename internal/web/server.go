@@ -10,12 +10,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 	"github.com/orthodoxwest/office/internal/render"
 	"github.com/orthodoxwest/office/internal/review"
+	"github.com/orthodoxwest/office/internal/usage"
 )
 
 //go:embed static
@@ -23,6 +25,7 @@ var files embed.FS
 
 // Server handles HTTP requests for the Divine Office web interface.
 type Server struct {
+	usage      *usage.Store
 	engine     *office.Engine
 	cache      *yearCache
 	pages      *render.Pages
@@ -92,6 +95,15 @@ func (s *Server) showVettingBanner(hour *models.OfficeHour) bool {
 
 // ListenAndServe registers routes and starts the HTTP server.
 func (s *Server) ListenAndServe() error {
+	if path := os.Getenv("OFFICE_USAGE_DB"); path != "" {
+		var err error
+		s.usage, err = usage.Open(path)
+		if err != nil {
+			log.Printf("warn: usage metrics disabled: %v", err)
+		} else {
+			defer s.usage.Close()
+		}
+	}
 	go func() {
 		year := time.Now().Year()
 		if _, _, err := s.cache.get(year); err != nil {
@@ -100,6 +112,8 @@ func (s *Server) ListenAndServe() error {
 	}()
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("/api/usage", s.handleUsageEvent)
+	mux.HandleFunc("/admin/usage", s.handleUsageDashboard)
 	// Static assets are served with long-lived cache headers when requested
 	// with ?v=… (see staticFileServer). HTML stamps that query via static().
 	mux.Handle("/static/", staticFileServer(http.FS(files)))
