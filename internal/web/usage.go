@@ -103,12 +103,7 @@ func (s *Server) handleUsageDashboard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Usage temporarily unavailable", http.StatusServiceUnavailable)
 		return
 	}
-	data := render.UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours, Max: 1}
-	for _, row := range rows {
-		if row.Users > data.Max {
-			data.Max = row.Users
-		}
-	}
+	data := render.NewUsageData(rows, days)
 	var buf bytes.Buffer
 	if err := s.pages.Usage(&buf, data); err != nil {
 		http.Error(w, "Unable to render usage", http.StatusInternalServerError)
