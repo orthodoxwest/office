@@ -3,16 +3,19 @@
 @use psalmody/vespers/ferial
 
 [easter-antiphon-1]
-For an angel of the Lord * descended from heaven and coming rolled back the stone and sat upon it, alleluia, alleluia.
+# SOURCE: diurnal p. 363
+The Angel of the Lord * descended from heaven, and came and rolled back the stone from the door, and sat upon it, alleluia, alleluia.
 
 [easter-antiphon-2]
-There was a great earthquake; * for an angel of the Lord descended from heaven, alleluia.
+# SOURCE: diurnal p. 363
+And behold, * there was a great earthquake: for the Angel of the Lord descended from heaven, alleluia.
 
 [easter-antiphon-3]
 And his countenance * was as lightning and his raiment as snow, alleluia, alleluia.
 
 [easter-antiphon-4]
-And for fear of him * the guards were struck with terror and became as dead men, alleluia.
+# SOURCE: diurnal p. 363
+And for fear of him * the keepers did shake, and became as dead men, alleluia.
 
 [easter-antiphon-5]
 And the angel answering * said to the women: Fear not you: for I know that you seek Jesus, alleluia.
