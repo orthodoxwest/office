@@ -21,6 +21,9 @@ Subcommands:
                                          suspect (pre-flagged) entries first
   zero-occurrences [-start YEAR] [-years N] [-summary]
                                          List unverified entries never selected in a sweep
+  usage-weighted [-start YEAR] [-years N]
+                                         Verified % of a year's rendered text, weighted by
+                                         how often each entry is actually prayed
   resolution-inventory [-start YEAR] [-years N] [-json] [-fallback-only] [-summary]
                                          List effective dynamic-proper resolutions and fallbacks
   attest [flags] KEY REVIEWER            Record a source attestation for one text
@@ -49,6 +52,8 @@ func cmdReview(e env, args []string) error {
 		return e.reviewProvenanceQueue(rest)
 	case "zero-occurrences":
 		return e.reviewZeroOccurrences(rest)
+	case "usage-weighted":
+		return e.reviewUsageWeighted(rest)
 	case "resolution-inventory":
 		return e.reviewResolutionInventory(rest)
 	case "attest":
@@ -188,6 +193,22 @@ func (e env) reviewZeroOccurrences(args []string) error {
 	if err := review.WriteZeroOccurrenceCSV(report, e.out); err != nil {
 		return fmt.Errorf("writing zero-occurrence CSV: %w", err)
 	}
+	return nil
+}
+
+func (e env) reviewUsageWeighted(args []string) error {
+	fs := e.newFlagSet("review usage-weighted")
+	start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
+	years := fs.Int("years", 1, "number of calendar years to sweep")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	report, err := review.BuildUsageWeightedProvenance(e.dataDir, *start, *years)
+	if err != nil {
+		return fmt.Errorf("building usage-weighted provenance: %w", err)
+	}
+	review.PrintUsageWeightedProvenance(report, e.out)
 	return nil
 }
 
