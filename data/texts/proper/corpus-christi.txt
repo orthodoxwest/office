@@ -8,8 +8,8 @@
 @use proper/corpus-christi/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 320 (Corpus Christi)
-Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
+# SOURCE: diurnal p. 415
+Wisdom * hath builded her house, she hath mingled her wine, and furnished her table, alleluia.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds book, p. 321 (Corpus Christi)

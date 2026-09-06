@@ -506,6 +506,7 @@ proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,
 proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/hymn-lauds,008fee8de556,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 proper/ascension/psalm-antiphon,4e7ed69409db,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
+proper/ascension/psalm-antiphon-2,ec66d376c7f6,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
 proper/ascension/psalm-antiphon-3,db44f454ad9b,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
 proper/ascension/psalm-antiphon-5,54884ad0ccc1,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
 proper/ascension/short-responsory-lauds,6ec84494ca32,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (gl0ry)
@@ -615,6 +616,7 @@ proper/corpus-christi/chapter-lauds,6080f810eca7,Propers of Lauds & Vespers in t
 proper/corpus-christi/chapter-none,536ffd64891a,diurnal,"Corpus Christi, At None",417,verified,grok,2026-08-22,word-for-word from printed page image
 proper/corpus-christi/chapter-sext,307e10af5e0c,diurnal,"Corpus Christi, At Sext",417,verified,grok,2026-08-22,word-for-word from printed page image
 proper/corpus-christi/hymn-lauds,c74be151c3c7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
+proper/corpus-christi/psalm-antiphon-1,8a5cb7e379f1,diurnal,,415,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0461.png
 proper/corpus-christi/psalm-antiphon-2,31b3921b6f4c,diurnal,,415,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0461.png
 proper/corpus-christi/psalm-antiphon-3,2d9efc20f4f1,diurnal,,415,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0461.png
 proper/corpus-christi/short-responsory-lauds,210b7848f3c7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
@@ -668,6 +670,9 @@ proper/easter-sunday-octave-day-6/benedictus-antiphon,6764ee86adeb,diurnal,Frida
 proper/easter-sunday-octave-day-6/magnificat-antiphon,9d21a60462ed,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Saturday before Low Sunday,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday/chapter-lauds,da32f941aa7b,diurnal,,363,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/easter-antiphon-1,b27a56d3f7f1,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/easter-antiphon-2,9d6c31357293,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/easter-antiphon-4,520571fe3063,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,diurnal,"Within the Octave of the Epiphany, II Day",227,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,diurnal,"Within the Octave of the Epiphany, II Day",227-228,verified,grok,2026-08-24,word-for-word from printed page image
@@ -693,6 +698,7 @@ proper/epiphany/chapter-lauds,de310a2d710f,diurnal,"Epiphany, At Lauds",224,veri
 proper/epiphany/chapter-none,c8a77b00203c,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/chapter-sext,0462d501e782,diurnal,"Epiphany, At Sext",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
+proper/epiphany/psalm-antiphon-2,b5e68f2371e5,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/psalm-antiphon-3,f1b43827efea,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/psalm-antiphon-4,eab48aa00e3f,diurnal,,224,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/short-responsory-none,e9a013f143a2,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
