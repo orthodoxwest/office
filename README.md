@@ -67,9 +67,8 @@ for the full list of build and maintenance targets.
 ./office audit                   # report missing texts and fallback coverage
 ./office lint                    # mechanical and advisory corpus findings
 ./office corpus show proper/st-andrew/collect
-./office review provenance       # source coverage
+./office review provenance       # source coverage, flat + usage-weighted
 ./office review provenance-queue # prioritize text review
-./office review usage-weighted   # verified % of a year's text, weighted by how often it's prayed
 ./office review explain lauds 2026-09-04
 make project-status YEAR=2026     # proper, assurance, and ordo reports
 ```

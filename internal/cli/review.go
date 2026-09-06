@@ -15,15 +15,15 @@ Subcommands:
   manifest [-start YEAR] [-years N] [-base URL]
                                          Print the review-unit checklist as CSV
   status   [-start YEAR] [-years N]      Report coverage vs data/review/signoffs.txt
-  provenance [-csv]                     Report structured corpus provenance
+  provenance [-csv] [-start YEAR] [-years N]
+                                         Report structured corpus provenance, plus (unless -csv)
+                                         verified % of that sweep's rendered text weighted by
+                                         how often each entry is actually prayed
   provenance-queue [-start YEAR] [-years N] [-base URL] [-summary] [-include-verified] [-suspect-only]
                                          Rank atomic text review by dependency fan-out,
                                          suspect (pre-flagged) entries first
   zero-occurrences [-start YEAR] [-years N] [-summary]
                                          List unverified entries never selected in a sweep
-  usage-weighted [-start YEAR] [-years N]
-                                         Verified % of a year's rendered text, weighted by
-                                         how often each entry is actually prayed
   resolution-inventory [-start YEAR] [-years N] [-json] [-fallback-only] [-summary]
                                          List effective dynamic-proper resolutions and fallbacks
   attest [flags] KEY REVIEWER            Record a source attestation for one text
@@ -52,8 +52,6 @@ func cmdReview(e env, args []string) error {
 		return e.reviewProvenanceQueue(rest)
 	case "zero-occurrences":
 		return e.reviewZeroOccurrences(rest)
-	case "usage-weighted":
-		return e.reviewUsageWeighted(rest)
 	case "resolution-inventory":
 		return e.reviewResolutionInventory(rest)
 	case "attest":
@@ -126,6 +124,8 @@ func (e env) reviewStatus(args []string) error {
 func (e env) reviewProvenance(args []string) error {
 	fs := e.newFlagSet("review provenance")
 	csvOutput := fs.Bool("csv", false, "write the complete provenance inventory as CSV")
+	start := fs.Int("start", time.Now().Year(), "first calendar year of the usage-weighted sweep")
+	years := fs.Int("years", 1, "number of calendar years to sweep for usage weighting")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -134,13 +134,26 @@ func (e env) reviewProvenance(args []string) error {
 	if err != nil {
 		return fmt.Errorf("scanning provenance: %w", err)
 	}
-	if !*csvOutput {
-		review.PrintProvenanceSummary(inventory, e.out)
+	if *csvOutput {
+		if err := review.WriteProvenanceCSV(inventory, e.out); err != nil {
+			return fmt.Errorf("writing provenance CSV: %w", err)
+		}
 		return nil
 	}
-	if err := review.WriteProvenanceCSV(inventory, e.out); err != nil {
-		return fmt.Errorf("writing provenance CSV: %w", err)
+
+	review.PrintProvenanceSummary(inventory, e.out)
+
+	// The flat count above weights every corpus entry equally, including
+	// ones a year of prayer never touches. Sweep every hour of every day to
+	// show what share of *actually rendered* text is verified, weighted by
+	// how often each entry recurs — a daily psalm counts far more than a
+	// once-a-year collect.
+	weighted, err := review.BuildUsageWeightedProvenance(e.dataDir, *start, *years)
+	if err != nil {
+		return fmt.Errorf("building usage-weighted provenance: %w", err)
 	}
+	fmt.Fprintln(e.out)
+	review.PrintUsageWeightedProvenance(weighted, e.out)
 	return nil
 }
 
@@ -193,22 +206,6 @@ func (e env) reviewZeroOccurrences(args []string) error {
 	if err := review.WriteZeroOccurrenceCSV(report, e.out); err != nil {
 		return fmt.Errorf("writing zero-occurrence CSV: %w", err)
 	}
-	return nil
-}
-
-func (e env) reviewUsageWeighted(args []string) error {
-	fs := e.newFlagSet("review usage-weighted")
-	start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
-	years := fs.Int("years", 1, "number of calendar years to sweep")
-	if err := fs.Parse(args); err != nil {
-		return err
-	}
-
-	report, err := review.BuildUsageWeightedProvenance(e.dataDir, *start, *years)
-	if err != nil {
-		return fmt.Errorf("building usage-weighted provenance: %w", err)
-	}
-	review.PrintUsageWeightedProvenance(report, e.out)
 	return nil
 }
 

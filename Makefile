@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-usage-weighted review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -107,17 +107,14 @@ review-manifest: build ## Print human-review checklist CSV for current year (STA
 review-status: build ## Report human-review coverage vs data/review/signoffs.txt
 	./office review status $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
-review-provenance: build ## Report generated corpus provenance coverage
-	./office review provenance
+review-provenance: build ## Report generated corpus provenance coverage (+ usage-weighted %; START/YEARS scope the sweep)
+	./office review provenance $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-provenance-queue: build ## Rank atomic text review by rendered dependency fan-out
 	./office review provenance-queue $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-zero-occurrences: build ## List unrendered atomic texts with classification heuristics
 	./office review zero-occurrences $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-usage-weighted: build ## Verified % of a year's rendered text, weighted by how often it is prayed
-	./office review usage-weighted $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-resolution-inventory: build ## Inventory proper-resolution paths (default 28y; START/YEARS override)
 	./office review resolution-inventory -json $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
