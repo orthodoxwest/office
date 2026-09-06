@@ -107,7 +107,7 @@ which linked hour and date you checked so it can be signed off.
 ```bash
 make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEARS=1)
 make review-status                    # coverage report: current / stale / unreviewed
-make review-provenance                # generated text-provenance coverage
+make review-provenance                # generated text-provenance coverage (flat + usage-weighted)
 make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
 make review-zero-occurrences START=2026 YEARS=30 > zero-occurrences.csv  # classification worklist
 make review-suspects > suspects.csv   # only pre-flagged texts — the findings-sprint list
@@ -202,6 +202,22 @@ provenance queue labels these rows `classified-zero` or
 `zero-needs-classification` and keeps current classified zeroes in a separate
 final tier. The assurance summary counts pending provenance only for rendered
 entries and reports classified and unclassified zeroes separately.
+
+### Usage-weighted provenance: a status-update metric
+
+The headline count in `make review-provenance` weights every corpus entry
+equally — a once-a-year collect and a daily-recited psalm each count as one
+entry. That undersells practical coverage: common texts (ordinaries,
+psalter, frequently-used propers) tend to get verified first, so the entries
+still outstanding skew toward rarely-rendered ones.
+
+To give a second, more honest number, `review provenance` also composes
+every hour of every day across a sweep (default: the current year; override
+with `START`/`YEARS`) and weights each rendered corpus entry by how many
+times it was actually prayed. It prints both the flat percentage among
+*rendered* entries and the usage-weighted percentage — verified renders over
+total renders — which answers "how much of what we actually pray each year
+is verified" and is typically well above the flat corpus-wide count.
 
 ### Release assurance
 

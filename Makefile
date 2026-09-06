@@ -107,8 +107,8 @@ review-manifest: build ## Print human-review checklist CSV for current year (STA
 review-status: build ## Report human-review coverage vs data/review/signoffs.txt
 	./office review status $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
-review-provenance: build ## Report generated corpus provenance coverage
-	./office review provenance
+review-provenance: build ## Report generated corpus provenance coverage (+ usage-weighted %; START/YEARS scope the sweep)
+	./office review provenance $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-provenance-queue: build ## Rank atomic text review by rendered dependency fan-out
 	./office review provenance-queue $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
