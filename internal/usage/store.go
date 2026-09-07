@@ -14,6 +14,11 @@ import (
 
 var Hours = []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
 
+// extraScopes are single-purpose scopes tracked alongside the hours: the
+// ordo (calendar) page view, and the reminder-feed link actually being
+// generated (not merely the /reminders page loading — see app.js).
+var extraScopes = []string{"ordo", "reminders"}
+
 var eastern = func() *time.Location {
 	l, err := time.LoadLocation("America/New_York")
 	if err != nil {
@@ -33,15 +38,22 @@ func ValidScope(scope string) bool {
 			return true
 		}
 	}
+	for _, s := range extraScopes {
+		if scope == s {
+			return true
+		}
+	}
 	return false
 }
 
 type Store struct{ db *sql.DB }
 
 type Daily struct {
-	Day   string
-	Users int
-	Hours [7]int
+	Day       string
+	Users     int
+	Hours     [7]int
+	Ordo      int
+	Reminders int
 }
 
 func Open(path string) (*Store, error) {
@@ -140,12 +152,18 @@ func (s *Store) Daily(ctx context.Context, now time.Time, days int) ([]Daily, er
 		if !ok {
 			continue
 		}
-		if scope == "site" {
+		switch scope {
+		case "site":
 			result[i].Users = n
-		}
-		for h, name := range Hours {
-			if scope == name {
-				result[i].Hours[h] = n
+		case "ordo":
+			result[i].Ordo = n
+		case "reminders":
+			result[i].Reminders = n
+		default:
+			for h, name := range Hours {
+				if scope == name {
+					result[i].Hours[h] = n
+				}
 			}
 		}
 	}

@@ -82,17 +82,25 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 		"POST", "prime", "https://office.test", nil); w.Code != 204 || len(w.Result().Cookies()) != 1 {
 		t.Fatalf("Cubot phone treated as bot: %d cookies=%d", w.Code, len(w.Result().Cookies()))
 	}
+	// The ordo page view and a generated reminder feed link are tracked as
+	// their own scopes, distinct from the hours.
+	if w := send("POST", "ordo", "https://office.test", nil); w.Code != 204 {
+		t.Fatalf("ordo event: %d %s", w.Code, w.Body)
+	}
+	if w := send("POST", "reminders", "https://office.test", nil); w.Code != 204 {
+		t.Fatalf("reminders event: %d %s", w.Code, w.Body)
+	}
 	rows, err := store.Daily(context.Background(), time.Now(), 7)
 	if err != nil {
 		t.Fatal(err)
 	}
 	// One human browser for lauds, one for prime; every bot agent above dropped.
-	if rows[0].Users != 2 || rows[0].Hours[0] != 1 || rows[0].Hours[1] != 1 {
+	if rows[0].Users != 4 || rows[0].Hours[0] != 1 || rows[0].Hours[1] != 1 || rows[0].Ordo != 1 || rows[0].Reminders != 1 {
 		t.Fatalf("rejected events affected counts: %+v", rows[0])
 	}
 	w := httptest.NewRecorder()
 	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=7", nil))
-	if w.Code != 200 || !strings.Contains(w.Body.String(), "Daily usage") || w.Header().Get("Cache-Control") != "no-store" || w.Header().Get("X-Robots-Tag") == "" {
+	if w.Code != 200 || !strings.Contains(w.Body.String(), "Daily usage") || !strings.Contains(w.Body.String(), "Ordo") || !strings.Contains(w.Body.String(), "Reminders") || w.Header().Get("Cache-Control") != "no-store" || w.Header().Get("X-Robots-Tag") == "" {
 		t.Fatalf("dashboard: %d %s", w.Code, w.Body)
 	}
 	if strings.Contains(w.Body.String(), cookies[0].Value) {

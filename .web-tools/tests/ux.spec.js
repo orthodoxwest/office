@@ -1767,6 +1767,43 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   await expect.poll(() => events.length).toBe(2);
 });
 
+test("the current ordo page is tracked in its own column, not just the site total", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const year = new Date().getFullYear();
+  await page.goto(`/calendar/${year}`);
+  await page.mouse.click(200, 300);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events).toEqual(["ordo"]);
+});
+
+test("generating a reminder feed link is tracked separately from viewing the page", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  // A stub so the copy actually "succeeds" without a real clipboard permission.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: () => Promise.resolve() },
+    });
+  });
+  await page.goto("/reminders");
+  await page.mouse.click(200, 300);
+  await page.waitForTimeout(300);
+  // Merely opening and engaging with the page reports "site", never "reminders".
+  expect(events).toEqual([]);
+
+  await page.getByRole("button", { name: "Copy link" }).click();
+  await expect.poll(() => events.length).toBe(1);
+  expect(events).toEqual(["reminders"]);
+});
+
 // The cookie round trip is the whole basis of deduplication, so exercise it
 // against the real endpoint rather than a stubbed one.
 test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {

@@ -615,6 +615,25 @@ document.documentElement.classList.add("js");
     });
   }
 
+  // Fires a one-off usage beacon for an explicit action rather than a page
+  // view — used below when a reminder feed link is actually generated.
+  // Bot filtering and per-day/per-browser dedup happen server-side, so a
+  // repeat click is harmless. Best-effort: never surfaces an error to the
+  // person praying.
+  var reportUsageAction = function (scope) {
+    try {
+      fetch("/api/usage", {
+        method: "POST",
+        headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
+        body: scope,
+        credentials: "same-origin",
+        cache: "no-store"
+      }).catch(function () {});
+    } catch {
+      // Ignored — best effort.
+    }
+  };
+
   var remindersForm = document.getElementById("reminders-form");
   if (remindersForm) {
     var urlEl = document.getElementById("reminder-url");
@@ -702,7 +721,9 @@ document.documentElement.classList.add("js");
     webcalEl.addEventListener("click", function (event) {
       if (webcalEl.getAttribute("aria-disabled") === "true") {
         event.preventDefault();
+        return;
       }
+      reportUsageAction("reminders");
     });
 
     copyBtn.addEventListener("click", function () {
@@ -723,6 +744,7 @@ document.documentElement.classList.add("js");
       navigator.clipboard.writeText(urlEl.textContent).then(function () {
         copiedEl.textContent = "Copied.";
         copiedEl.hidden = false;
+        reportUsageAction("reminders");
       }).catch(showCopyFallback);
     });
   }
@@ -1031,7 +1053,9 @@ document.documentElement.classList.add("js");
   var hour = hours.find(function (name) { return document.body.classList.contains("page-" + name); });
   if (hour) {
     scope = hour;
-  } else if (!["home", "calendar", "reminders"].some(function (name) {
+  } else if (document.body.classList.contains("page-calendar")) {
+    scope = "ordo";
+  } else if (!["home", "reminders"].some(function (name) {
     return document.body.classList.contains("page-" + name);
   })) {
     return;
