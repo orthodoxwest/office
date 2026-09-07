@@ -39,14 +39,14 @@
     <div class="usage-table-wrap" role="region" aria-label="Daily office counts; scroll for more days and offices" tabindex="0">
       <table class="usage-table">
         <caption class="sr-only">Unique browsers per day and office, newest first</caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">All visitors</th>{{range .Hours}}<th scope="col">{{titleCase .}}</th>{{end}}</tr></thead>
-        <tbody>{{range $i, $row := .Rows}}<tr{{if eq $i 0}} class="usage-today"{{end}}><th scope="row"><time datetime="{{.Day}}">{{.Day}}</time>{{if eq $i 0}}<span class="usage-today-label">Today</span>{{end}}</th><td class="usage-total">{{.Users}}</td>{{range .Hours}}<td{{if not .}} class="usage-zero"{{end}}>{{.}}</td>{{end}}</tr>{{end}}</tbody>
+        <thead><tr><th scope="col">Date</th><th scope="col">All visitors</th>{{range .Hours}}<th scope="col">{{titleCase .}}</th>{{end}}<th scope="col">Ordo</th><th scope="col">Reminders</th></tr></thead>
+        <tbody>{{range $i, $row := .Rows}}<tr{{if eq $i 0}} class="usage-today"{{end}}><th scope="row"><time datetime="{{.Day}}">{{.Day}}</time>{{if eq $i 0}}<span class="usage-today-label">Today</span>{{end}}</th><td class="usage-total">{{.Users}}</td>{{range .Hours}}<td{{if not .}} class="usage-zero"{{end}}>{{.}}</td>{{end}}<td{{if not .Ordo}} class="usage-zero"{{end}}>{{.Ordo}}</td><td{{if not .Reminders}} class="usage-zero"{{end}}>{{.Reminders}}</td></tr>{{end}}</tbody>
       </table>
     </div>
   </section>
   <aside class="usage-notes" aria-labelledby="usage-notes-title">
     <h2 id="usage-notes-title">Reading these numbers</h2>
-    <p>These are approximate browser counts, not completed prayers. Office columns overlap; they do not add up to the daily total. Home, Ordo and reminders also contribute to the total.</p>
+    <p>These are approximate browser counts, not completed prayers. Office, Ordo and Reminders columns overlap; they do not add up to the daily total. Ordo counts a viewed calendar page; Reminders counts a generated feed link, not a visit to the reminders page. Home also contributes to the total but has no column of its own.</p>
     <p>Only today&rsquo;s Office counts, and only once someone touches the page or lingers on it. Reading the dated archive, preloading, and self-identifying crawlers are all excluded, so the site stays open to scraping without it showing up here.</p>
     <p>Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again. Zero means no recorded visits. All reporting days use America/New_York.</p>
   </aside>

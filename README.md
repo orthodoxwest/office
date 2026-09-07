@@ -150,14 +150,18 @@ fly deploy
 ### Usage metrics
 
 The unlinked, unauthenticated `/admin/usage` report shows daily unique browsers
-and unique browsers opening each office, with 7/30/90/366-day views. It is
-public to anyone who knows the URL, marked `noindex`, and excluded from the
-service-worker cache. Reporting days use America/New_York, including DST.
-Counts describe visible pages, not completed prayers. A browser opening
-several hours counts once overall and once in each hour column. Home, Ordo,
-and reminders contribute to the overall total. Preloads do not count;
-offline use and browsers without JavaScript are missed. Separate devices,
-blocked cookies, and cleared cookies can inflate the approximate user count.
+and unique browsers opening each office, the ordo, and the reminder feed, with
+7/30/90/366-day views. It is public to anyone who knows the URL, marked
+`noindex`, and excluded from the service-worker cache. Reporting days use
+America/New_York, including DST. Counts describe visible pages, not completed
+prayers. A browser opening several hours counts once overall and once in each
+hour column; likewise the Ordo column counts a viewed calendar page, and the
+Reminders column counts a *generated* feed link (the subscribe or copy action
+on `/reminders`, not merely loading that page) — both also count once toward
+the overall total. Home contributes to the overall total but has no column of
+its own. Preloads do not count; offline use and browsers without JavaScript
+are missed. Separate devices, blocked cookies, and cleared cookies can inflate
+the approximate user count.
 
 Three filters keep scraping from becoming usage. The site stays freely
 crawlable — there is no robots.txt and the dated archive is deliberately
