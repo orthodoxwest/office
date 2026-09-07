@@ -60,7 +60,7 @@ type PsalmText struct {
 }
 
 // ParsePsalm parses a psalm or canticle body. The title block — everything
-// above the first blank line — is dropped except for a "!" scripture
+// above the first blank line or numbered verse — is dropped except for a "!" scripture
 // reference, which callers print above the verses.
 //
 // A "Glory be…" line opens a Gloria that the following "as it was…" line
@@ -74,6 +74,10 @@ func ParsePsalm(text string) PsalmText {
 	contentStart := len(lines)
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
+		if _, _, numbered := splitLeadingVerseNumber(trimmed); numbered {
+			contentStart = i
+			break
+		}
 		if trimmed == "" {
 			contentStart = i + 1
 			break
