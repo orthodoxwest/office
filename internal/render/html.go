@@ -208,7 +208,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(`<div class="collect">`)
 		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 		sb.WriteString(`</div>`)
-	case models.Prayer:
+	case models.Prayer, models.Reading:
 		if len(elem.Voice) > 0 {
 			sb.WriteString(string(renderVoiceLiturgicalBlock(elem.Voice, flowProseLines)))
 		} else {

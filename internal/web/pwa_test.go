@@ -134,6 +134,15 @@ func TestServiceWorkerRoutingContract(t *testing.T) {
 	}
 	cases := []routeCase{
 		{
+			name: "preview is network-only and isolated from page cache",
+			want: []string{
+				`url.searchParams.has("preview")`,
+				`event.respondWith(previewNetworkOnly(req))`,
+				`fetch(req, { cache: "no-store" })`,
+				`function previewOfflineResponse()`,
+			},
+		},
+		{
 			name: "undated home redirects to /?date=today",
 			want: []string{
 				`if (path === "/")`,
@@ -188,6 +197,10 @@ func TestServiceWorkerRoutingContract(t *testing.T) {
 			},
 		},
 	}
+
+	if !strings.Contains(body, `no-store(?:\s*,|$)`) || !strings.Contains(body, `function putIfOk`) {
+		t.Error("cache writes should honor Cache-Control: no-store responses")
+	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			for _, w := range tc.want {
@@ -196,6 +209,22 @@ func TestServiceWorkerRoutingContract(t *testing.T) {
 				}
 			}
 		})
+	}
+	previewIdx := strings.Index(body, `if (url.searchParams.has("preview"))`)
+	staticRouteIdx := strings.Index(body, `// Static assets: cache-first`)
+	if previewIdx < 0 || staticRouteIdx < 0 || previewIdx > staticRouteIdx {
+		t.Error("preview routing must run before static/page cache strategies")
+	}
+	previewFnStart := strings.Index(body, "function previewNetworkOnly")
+	previewUsesCache := true
+	if previewFnStart >= 0 {
+		previewFnEnd := strings.Index(body[previewFnStart:], "\n}\n")
+		if previewFnEnd >= 0 {
+			previewUsesCache = strings.Contains(body[previewFnStart:previewFnStart+previewFnEnd], "caches.")
+		}
+	}
+	if previewFnStart < 0 || previewUsesCache {
+		t.Error("preview network path must not access Cache Storage")
 	}
 }
 

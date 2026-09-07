@@ -1,0 +1,70 @@
+# Reviewed selections for the Prime Martyrology pilot.
+# See MARTYROLOGY.md before adding dates. Keys name the announced date,
+# which is the civil day following the date of Prime.
+
+[09-07]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 24; selected notices; deaths after 1200 omitted
+At Nicomedia, the birthday of the blessed martyr John, who seeing the cruel edicts against Christians posted up in the public square, and being inflamed with an ardent faith, stretched forth his hand, took them away and tore them up. This being reported to the emperors Diocletian and Maximian, then residing in that city, they gave orders that he should be subjected to all kinds of torments, which the noble champion bore with such cheerfulness of spirit, as not to show on his countenance the least trace of pain or grief.
+
+At Cæsarea, in Cappadocia, in the time of the emperor Adrian, St. Eupsychius, martyr, who, on being accused of professing Christianity, was cast into prison. His release following shortly after, he immediately sold his patrimony, and distributed the proceeds of it partly to the poor and partly to his accusers, whom he regarded as his benefactors. But being again arrested, under the judge Sapritius, he was lacerated, pierced through with a sword, and thus consummated his martyrdom.
+
+At Pompeiopolis, in Cilicia, St. Sozon, martyr, who, being thrown into the fire, yielded up his spirit, in the time of the emperor Maximian.
+
+At Aquileia, St. Anastasius, martyr.
+
+In the diocese of Autun, St. Regina, virgin and martyr, under the proconsul Olybrius. After having suffered imprisonment, the rack, and burning with torches, she was condemned to capital punishment, and so went to her spouse.
+
+At Troyes, St. Nemorius, deacon, and his companions, martyrs, who were slain by Attila, king of the Huns.
+
+At Orleans, in France, the departure from this life of the holy bishop Evortius, who was first a subdeacon of the Roman Church, and afterwards, through the divine favor, was designated bishop of that city by a dove.
+
+In France, St. Augustalis, bishop and confessor.
+
+At Capua, St. Pamphilus, bishop.
+
+In the territory of Paris, St. Cloud, priest and confessor.
+
+At Nonantola, pope St. Adrian III., remarkable for his zeal to reconcile the Eastern churches with the Holy See. He died in the odor of sanctity at San Cesario, and became widely celebrated by his miracles.
+
+[09-08]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 24; selected notices; deaths after 1200 omitted
+The Nativity of the most Blessed and ever Virgin Mary, Mother of God.
+
+At Nicomedia, St. Adrian, with twenty-three other martyrs, who ended their martyrdom the 4th of March by having their limbs crushed, after enduring many torments under the emperors Diocletian and Maximian. Their remains were carried to Byzantium by the Christians, and buried with due honors. Afterwards the body of St. Adrian was taken to Rome on this day, on which his festival is celebrated.
+
+At Alexandria, the holy martyrs Ammon, Theophilus, Neoterius, and twenty-two others.
+
+At Antioch, the Saints Timothy and Faustus, martyrs.
+
+At Gaza, in Palestine, the holy martyrs Eusebius, Nestabus, and Zeno, brothers, who were cut to pieces by a multitude of Pagans that rushed upon them, in the time of Julian the Apostate.
+
+In the same place, and under the same Julian, St. Nestor, martyr, who, being most cruelly tortured by the same furious Gentiles, breathed his last.
+
+At Freisingen, St. Corbinian, first bishop of that city. Being consecrated by pope Gregory II., and sent to preach the Gospel, he reaped an abundant harvest in France and Germany, and finally renowned for virtues and miracles, rested in peace.
+
+[09-09]
+# SOURCE: Roman Martyrology (1916), Introduction and July-December, p. 24; selected notices; deaths after 1200 omitted
+At Nicomedia, the holy martyrs Dorotheus and Gorgonius. The greatest honors had been conferred on them by the emperor Diocletian, but as they detested the cruelty which he exercised against the Christians, they were by his order suspended in his presence, and lacerated with whips; then their skin being torn from their bodies, and vinegar with salt poured over them, they were burned on a gridiron and finally strangled. After some time, the body of blessed Gorgonius was brought to Rome, and deposited on the Latin road. Thence it was transferred to the basilica of St. Peter.
+
+Among the Sabines, thirty miles from Rome, the holy martyrs Hyacinthus, Alexander, and Tiburtius.
+
+At Sebaste, St. Severian, a soldier of the emperor Licinius. For frequently visiting the Forty Martyrs whilst they were in prison, he was suspended in the air with a stone tied to his feet by order of the governor Lysias, and being scourged and torn with whips, yielded up his soul in the midst of torments.
+
+The same day, St. Straton, who ended his martyrdom for Christ by being tied to two trees and torn to pieces.
+
+Also, the holy martyrs Rufinus and Rufinian, brothers.
+
+At Rome, St. Sergius, pope and confessor.
+
+In the territory of Térouanne, St. Omer, bishop.
+
+In Ireland, St. Kieran, abbot.
+
+[conclusion]
+# SOURCE: Roman Martyrology (1916), January-June, p. 1; common ending
+And in other places, many other holy martyrs, confessors, and virgins.
+
+[response]
+# SOURCE: Roman Martyrology (1916), January-June, p. 1; common ending
+Thanks be to God.
+
