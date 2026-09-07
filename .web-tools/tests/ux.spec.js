@@ -1843,3 +1843,44 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await expect(page.goto("/admin/usage?days=7")).rejects.toThrow();
   await context.close();
 });
+
+test("Martyrology preview stays opt-in and cannot enter the offline office cache", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
+  try {
+    const page = await context.newPage();
+    const normal = "/prime/2026-09-07";
+    const preview = normal + "?preview=martyrology";
+    await page.goto(normal);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) {
+        await new Promise(resolve => navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true }));
+      }
+    });
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+    await page.goto(preview);
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toBeVisible();
+    await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
+    expect(await page.evaluate(async () => {
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        for (const key of await cache.keys()) {
+          if (new URL(key.url).searchParams.has("preview")) return false;
+          if (new URL(key.url).pathname === "/prime/2026-09-07") {
+            if ((await (await cache.match(key)).text()).includes("Martyrology — September 8")) return false;
+          }
+        }
+      }
+      return true;
+    })).toBe(true);
+    await context.setOffline(true);
+    await page.goto(preview);
+    await expect(page.getByRole("heading", { name: "Preview unavailable offline" })).toBeVisible();
+    await page.goto(normal);
+    await expect(page.locator(".elements")).toContainText("this may laudably be done");
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+  } finally {
+    await context.close();
+  }
+});

@@ -59,9 +59,24 @@ func NewEngine(dataDir string) (*Engine, error) {
 
 // ComposeHour composes the named hour for the given calendar day.
 func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
+	return e.ComposeHourWithOptions(hourName, day, moveable, ComposeOptions{})
+}
+
+// ComposeOptions enables explicitly requested, unpublished content. The zero
+// value keeps normal web pages, exports, and offline precaches unchanged.
+type ComposeOptions struct {
+	MartyrologyPreview bool
+}
+
+// ComposeHourWithOptions keeps preview choices local to this composition;
+// the shared engine and calendar remain immutable across requests.
+func (e *Engine) ComposeHourWithOptions(hourName string, day *models.CalendarDay, moveable *calendar.MoveableDates, options ComposeOptions) (*models.OfficeHour, error) {
 	composer, ok := e.composers[hourName]
 	if !ok {
 		return nil, fmt.Errorf("unknown hour: %s", hourName)
+	}
+	if hourName == "prime" && options.MartyrologyPreview {
+		composer = &PrimeComposer{MartyrologyPreview: true}
 	}
 
 	sections := e.definitions[hourName]

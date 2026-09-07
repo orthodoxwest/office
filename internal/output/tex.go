@@ -217,7 +217,7 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 		b.WriteString(formatGloriaPatriTeX(elem.Text))
 
 	case models.Doxology, models.Versicle, models.Response, models.Dialogue,
-		models.Prayer, models.Chapter,
+		models.Prayer, models.Chapter, models.Reading,
 		models.Blessing, models.Preces:
 		b.WriteString(formatLiturgicalBlockTeX(elem.Text))
 	case models.Collect:

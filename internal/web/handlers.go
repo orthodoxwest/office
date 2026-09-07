@@ -453,7 +453,8 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 	}
 	day := &days[dayIndex]
 
-	hour, err := s.engine.ComposeHour(hourName, day, moveable)
+	preview := r.URL.Query().Get("preview") == "martyrology" && hourName == "prime"
+	hour, err := s.engine.ComposeHourWithOptions(hourName, day, moveable, office.ComposeOptions{MartyrologyPreview: preview})
 	if err != nil {
 		s.handleError(w, r, http.StatusInternalServerError, fmt.Sprintf("error composing hour: %v", err))
 		return
@@ -490,6 +491,10 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		Assurance:   s.hourAssurance(hour, hourName, dateStr),
 	}
 	setHTMLCacheHeaders(w)
+	if r.URL.Query().Has("preview") {
+		w.Header().Set("Cache-Control", "private, no-store")
+		w.Header().Set("X-Robots-Tag", "noindex, nofollow")
+	}
 	if err := s.pages.Hour(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
