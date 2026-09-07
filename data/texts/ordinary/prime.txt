@@ -97,9 +97,5 @@ R. Amen.
 # SOURCE: monastic diurnal, p. 10 (Monday at Prime)
 Then the Martyrology is read in Choir, and this may laudably be done also in the private recitation of the Office out of Choir.
 
-[athanasian-rubric]
-On Sundays and feasts outside of Eastertide, the Athanasian Creed
-(Quicumque vult) is sung here.
-
 [blessing]
 @use shared/formulas/daily-blessing

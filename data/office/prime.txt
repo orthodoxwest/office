@@ -98,6 +98,20 @@ Ref = psalms/119-iv
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
 
+# The 2026 ordo, pp. 20, 70, places the Athanasian Creed here on
+# Trinity Sunday, before the antiphon is repeated (Diurnal pp. 405-407).
+[Athanasian]
+Condition = feast-trinity-sunday
+
+Type = canticle
+Ref = proper/trinity-sunday/athanasian-creed
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+[Psalmody-Sunday-Antiphon]
+Condition = weekday-sunday,not-triduum
+
 Type = proper-antiphon
 Ref = psalm-antiphon-1
 
@@ -329,11 +343,6 @@ Ref = ordinary/prime/collect
 Condition = not-triduum
 Type = rubric
 Ref = ordinary/prime/martyrology-rubric
-
-[Athanasian]
-Condition = not-triduum
-Type = rubric
-Ref = ordinary/prime/athanasian-rubric
 
 [Triduum-Ending]
 Condition = triduum

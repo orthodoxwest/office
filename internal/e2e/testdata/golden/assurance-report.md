@@ -3,13 +3,13 @@
 | Measure | Count |
 |---|---:|
 | Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 243 |
-| Full structural-cover pages | 62 |
-| Residual structural-review pages | 62 |
+| Modeled structural features | 245 |
+| Full structural-cover pages | 63 |
+| Residual structural-review pages | 63 |
 | Uncovered features | 0 |
-| Verified text entries | 1452 |
+| Verified text entries | 1453 |
 | Rendered text entries needing review | 768 |
-| Rendered text entries with unknown source | 159 |
+| Rendered text entries with unknown source | 158 |
 | Classified zero-occurrence entries | 34 |
 | Zeroes needing classification | 33 |
 | Stale zero-occurrence classifications | 6 |
@@ -66,6 +66,8 @@
 - `decision:condition:feast-saturday-office-bvm,not-season-easter=omitted`
 - `decision:condition:feast-saturday-office-bvm,season-easter=included`
 - `decision:condition:feast-saturday-office-bvm,season-easter=omitted`
+- `decision:condition:feast-trinity-sunday=included`
+- `decision:condition:feast-trinity-sunday=omitted`
 - `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=included`
 - `decision:condition:festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead=omitted`
 - `decision:condition:festal-vespers-psalmody=included`
