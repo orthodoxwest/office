@@ -44,6 +44,7 @@ type hourCase struct {
 }
 
 var hourCases = []hourCase{
+	{"prime", "2026-06-07", "Trinity Sunday — Athanasian Creed with the ordo correction, before the repeated antiphon"},
 	// Lauds — covers the main branches in the largest hour
 	{"lauds", "2026-01-06", "Epiphany — proper psalmody and short responsory"},
 	{"lauds", "2026-01-11", "Sunday within the Epiphany octave — complete proper Lauds office"},
