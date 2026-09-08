@@ -460,3 +460,13 @@ func TestRenderBlessingUsesVersicleLine(t *testing.T) {
 		t.Fatalf("expected blessing body in sigil-text: %s", html)
 	}
 }
+
+func TestCommemorationHeadingPreservesNameAndEscapesMarkup(t *testing.T) {
+	got := string(renderSectionHeading("Commemoration of St A & St B <test>"))
+	if !strings.Contains(got, `class="commemoration-kicker">Commemoration of</span> `) || !strings.Contains(got, `St A &amp; St B &lt;test&gt;`) {
+		t.Fatalf("heading lost its label or escaping: %s", got)
+	}
+	if got := string(renderSectionHeading("Lauds")); got != `<h2 class="section-heading">Lauds</h2>` {
+		t.Fatalf("ordinary heading changed: %s", got)
+	}
+}

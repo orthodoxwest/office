@@ -1795,13 +1795,11 @@ test("generating a reminder feed link is tracked separately from viewing the pag
   });
   await page.goto("/reminders");
   await page.mouse.click(200, 300);
-  await page.waitForTimeout(300);
   // Merely opening and engaging with the page reports "site", never "reminders".
-  expect(events).toEqual([]);
+  await expect.poll(() => events).toEqual(["site"]);
 
   await page.getByRole("button", { name: "Copy link" }).click();
-  await expect.poll(() => events.length).toBe(1);
-  expect(events).toEqual(["reminders"]);
+  await expect.poll(() => events).toEqual(["site", "reminders"]);
 });
 
 // The cookie round trip is the whole basis of deduplication, so exercise it
@@ -1885,7 +1883,11 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
   const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
   try {
     const page = await context.newPage();
-    const normal = "/prime/2026-09-07";
+    // Keep the September 8 pilot reading, but visit its next occurrence:
+    // precache intentionally prunes historical pages as the real clock moves.
+    const now = new Date();
+    const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
+    const normal = `/prime/${year}-09-07`;
     const preview = normal + "?preview=martyrology";
     await page.goto(normal);
     await page.evaluate(async () => {
@@ -1899,18 +1901,18 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
     await page.goto(preview);
     await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toBeVisible();
     await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
-    expect(await page.evaluate(async () => {
+    expect(await page.evaluate(async (normal) => {
       for (const name of await caches.keys()) {
         const cache = await caches.open(name);
         for (const key of await cache.keys()) {
           if (new URL(key.url).searchParams.has("preview")) return false;
-          if (new URL(key.url).pathname === "/prime/2026-09-07") {
+          if (new URL(key.url).pathname === normal) {
             if ((await (await cache.match(key)).text()).includes("Martyrology — September 8")) return false;
           }
         }
       }
       return true;
-    })).toBe(true);
+    }, normal)).toBe(true);
     await context.setOffline(true);
     await page.goto(preview);
     await expect(page.getByRole("heading", { name: "Preview unavailable offline" })).toBeVisible();
@@ -1919,5 +1921,95 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
     await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
   } finally {
     await context.close();
+  }
+});
+
+test("long opening verses return to the numbered text edge below the initial", async ({ page }) => {
+  for (const width of [320, 390, 540]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-06-18");
+    for (const size of ["normal", "large"]) {
+      await page.evaluate((value) => document.documentElement.setAttribute("data-text-size", value), size);
+      const geometry = await page.locator(".psalm-verses").first().evaluate((psalm) => {
+        const opening = psalm.querySelector(".verse");
+        const walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
+        const lines = new Map();
+        let node;
+        let first = true;
+        while ((node = walker.nextNode())) {
+          for (let i = 0; i < node.length; i++) {
+            if (first) { first = false; continue; } // The initial has its own ink box.
+            if (/\s/.test(node.textContent[i])) continue;
+            const range = document.createRange();
+            range.setStart(node, i);
+            range.setEnd(node, i + 1);
+            const rect = range.getBoundingClientRect();
+            // Mediant has an optical vertical offset; it is not a new line.
+            if (node.parentElement.closest(".mediant")) continue;
+            const y = Math.round(rect.top);
+            lines.set(y, Math.min(lines.get(y) ?? Infinity, rect.left));
+          }
+        }
+        return {
+          lines: [...lines.entries()].sort((a, b) => a[0] - b[0]).map((line) => line[1]),
+          edge: psalm.querySelector(".verse-body").getBoundingClientRect().left,
+          overflow: document.documentElement.scrollWidth > innerWidth,
+        };
+      });
+      expect(geometry.overflow).toBe(false);
+      if (width <= 390) expect(geometry.lines.length).toBeGreaterThan(2);
+      for (const left of geometry.lines.slice(2)) {
+        expect(Math.abs(left - geometry.edge), `${width}px ${size} continuation alignment`).toBeLessThan(1);
+      }
+    }
+  }
+});
+
+test("wide and narrow initials clear text in native and fallback layouts", async ({ page }) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-06-18");
+    for (const size of ["normal", "large"]) {
+      await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+      for (const fallback of [false, true]) {
+        const override = fallback ? await page.addStyleTag({ content:
+          ".psalm-verses .verse:first-child::first-letter { initial-letter: normal; margin-top: .05em; margin-bottom: -.1em; }",
+        }) : null;
+        for (const initial of ["W", "I"]) {
+          const geometry = await page.locator(".psalm-verses").first().evaluate((psalm, letter) => {
+            const opening = psalm.querySelector(".verse");
+            // Deliberate layout fixture: exercise the extremes of the font's
+            // initial widths without depending on a particular day's psalms.
+            opening.textContent = letter + "ith all my heart I will give thanks unto the Lord, and tell of all his wonderful works. With all my heart I will give thanks unto the Lord.";
+            const node = opening.firstChild;
+            const glyph = index => {
+              const range = document.createRange();
+              range.setStart(node, index);
+              range.setEnd(node, index + 1);
+              const { left, right, top, bottom } = range.getBoundingClientRect();
+              return { left, right, top, bottom };
+            };
+            const cap = glyph(0);
+            const following = glyph(1);
+            return {
+              cap, following,
+              last: glyph(node.length - 1),
+              next: psalm.querySelector(".verse.numbered").getBoundingClientRect().top,
+              gloria: psalm.parentElement.querySelector(".gloria-patri").getBoundingClientRect().left +
+                parseFloat(getComputedStyle(psalm.parentElement.querySelector(".gloria-patri")).paddingLeft),
+              edge: psalm.querySelector(".verse-body").getBoundingClientRect().left,
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            };
+          }, initial);
+          const label = `${width}/${size}/${fallback ? "fallback" : "native"}/${initial}`;
+          expect(geometry.overflow, label).toBe(false);
+          expect(geometry.following.left, label).toBeGreaterThanOrEqual(geometry.cap.right - .5);
+          expect(geometry.next, label).toBeGreaterThan(geometry.cap.bottom);
+          expect(geometry.next, label).toBeGreaterThan(geometry.last.top);
+          expect(Math.abs(geometry.gloria - geometry.edge), label).toBeLessThan(1);
+        }
+        if (override) await override.evaluate(node => node.remove());
+      }
+    }
   }
 });

@@ -44,7 +44,7 @@
         {{renderSectionElements .Elements}}
       </details>
       {{else}}
-      {{if .Label}}<h2 class="section-heading">{{.Label}}</h2>{{end}}
+      {{if .Label}}{{renderSectionHeading .Label}}{{end}}
       {{renderSectionElements .Elements}}
       {{end}}
     {{end}}
