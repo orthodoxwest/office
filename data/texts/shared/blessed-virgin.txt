@@ -35,8 +35,7 @@ To Father and to Paraclete.
 
 Amen.
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Star of Ocean Fairest, BVM Vespers.docx)
-# SOURCE: draft archdiocesan Vespers book, pp. 430–431, 510–511, 473–474, 275, 282–283, 352 (Visitation, Motherhood, Nativity, Purification, and Annunciation)
+# SOURCE: monastic diurnal, p. 64* (Common of Feasts B.V.M., At I Vespers)
 Ave, maris stella
 
 /:The first stanza of the following hymn is said kneeling.:/

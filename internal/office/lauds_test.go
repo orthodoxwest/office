@@ -627,8 +627,8 @@ func TestComposeHourKeepsResolutionKeyButCanonicalizesAliasDependency(t *testing
 			if elem.SourceRef != "proper/nativity-bvm/hymn-lauds" {
 				t.Fatalf("SourceRef = %q, want proper resolution key", elem.SourceRef)
 			}
-			if len(elem.SourceRefs) != 1 || elem.SourceRefs[0] != "shared/blessed-virgin/hymn-lauds" {
-				t.Fatalf("SourceRefs = %v, want canonical shared dependency", elem.SourceRefs)
+			if len(elem.SourceRefs) != 1 || elem.SourceRefs[0] != "commons/blessed-virgin/hymn-lauds" {
+				t.Fatalf("SourceRefs = %v, want canonical common dependency", elem.SourceRefs)
 			}
 			return
 		}

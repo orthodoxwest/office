@@ -868,6 +868,16 @@ proper/low-sunday/magnificat-antiphon-monday,81b39a781d2f,diurnal,"I Week after 
 proper/low-sunday/magnificat-antiphon-thursday,9053ff34a3bf,diurnal,"I Week after the Octave of Easter, Thursday",376,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/magnificat-antiphon-tuesday,c71722baca17,diurnal,"I Week after the Octave of Easter, Tuesday",376,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/magnificat-antiphon-wednesday,7845dca666ab,diurnal,"I Week after the Octave of Easter, Wednesday",376,verified,grok,2026-08-22,word-for-word from printed page image
+proper/nativity-bvm/benedictus-antiphon,cd823e4052de,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/collect,adf8cda82c5f,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/magnificat-antiphon,41ef73ea7ef2,diurnal,"Nativity of the B.V.M., At II Vespers",597,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0641.png
+proper/nativity-bvm/magnificat-antiphon-first,d3e1dc720d57,diurnal,"Nativity of the B.V.M., At I Vespers",595,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0639.png
+proper/nativity-bvm/psalm-antiphon-1,8bed74706b8c,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/psalm-antiphon-2,ce2bdc916fd4,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/psalm-antiphon-3,4e507d9800fa,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/psalm-antiphon-4,cf3ab68ccdbe,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/psalm-antiphon-5,58218a9722a1,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
+proper/nativity-bvm/versicle-lauds,f3fd78791ad2,diurnal,"Nativity of the B.V.M., At Lauds",596,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0640.png
 proper/nativity-john-baptist/chapter-none,d4c142acc8a1,diurnal,"Nativity of St John Baptist, At None",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/chapter-sext,1e6375b3c715,diurnal,"Nativity of St John Baptist, At Sext",542,verified,grok,2026-08-22,word-for-word from printed page image
 proper/nativity-john-baptist/collect,5c2afd879416,diurnal,,541,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0586.png
@@ -1436,6 +1446,7 @@ seasonal/passiontide/short-responsory-vespers,d5d8a4eca7ea,draft archdiocesan Ve
 seasonal/passiontide/versicle-lauds,51350cbce0ff,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/versicle-vespers,d5317e8b3923,Propers of Lauds & Vespers During Passiontide,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
+shared/blessed-virgin/hymn-vespers,b19cfaab2074,diurnal,"Common of Feasts B.V.M., At I Vespers",64*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0777.png
 shared/formulas/closing-our-father,f9351f4fc232,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/closing-peace,6dd169108046,draft archdiocesan Lauds book,,17,verified,codex,2026-07-17,
 shared/formulas/collect-conclusion-through,93da58b24c75,diurnal,General Rubrics XII Of the Collects,xxxi,verified,claude,2026-08-27,word-for-word from the rendered printed page image (PDF p. 29); all five forms read Holy Spirit
