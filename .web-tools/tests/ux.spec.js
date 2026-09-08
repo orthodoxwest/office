@@ -1230,6 +1230,55 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
   }
 });
 
+test("hymn-embedded kneeling rubric is an instruction, not a Latin title", async ({ page }) => {
+  const instruction = "The first stanza of the following hymn is said kneeling.";
+  for (const theme of ["light", "dark"]) {
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openDatedPage(page, "/vespers/2026-09-08", theme);
+
+      const hymn = page.locator(".hymn");
+      await expect(hymn.locator(".hymn-title")).toHaveText("Ave, maris stella");
+      const rubric = hymn.locator(".hymn-rubric");
+      await expect(rubric).toHaveText(instruction);
+      await expect(rubric).not.toContainText("/:");
+      await expect(hymn.locator(".hymn-latin")).toHaveCount(0);
+      await expect(hymn.locator(".hymn-stanza-opening .hymn-line").first()).toContainText(
+        "Star of ocean fairest",
+      );
+
+      const geometry = await page.evaluate(() => {
+        const rubric = document.querySelector(".hymn .hymn-rubric");
+        const title = document.querySelector(".hymn .hymn-title");
+        const verses = document.querySelector(".hymn .hymn-verses");
+        const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
+        const rs = getComputedStyle(rubric);
+        const ts = getComputedStyle(title);
+        const rubricBox = rubric.getBoundingClientRect();
+        const versesBox = verses.getBoundingClientRect();
+        return {
+          color: rs.color,
+          titleColor: ts.color,
+          fontStyle: rs.fontStyle,
+          textAlign: rs.textAlign,
+          overflow: rubricBox.left < versesBox.left - 1 || rubricBox.right > versesBox.right + 1,
+          pageOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+          capFloat: getComputedStyle(opening, "::first-letter").float,
+        };
+      });
+      const label = `${theme}/${width}px`;
+      expect(geometry.fontStyle, `${label} rubric face`).toBe("normal");
+      expect(geometry.textAlign, `${label} rubric alignment`).toBe("center");
+      expect(geometry.color, `${label} rubric is not the muted incipit colour`).not.toBe(
+        geometry.titleColor,
+      );
+      expect(geometry.overflow, `${label} rubric stays in the verse column`).toBe(false);
+      expect(geometry.pageOverflow, `${label} horizontal overflow`).toBe(false);
+      expect(geometry.capFloat, `${label} opening drop cap`).toBe("left");
+    }
+  }
+});
+
 test("Marian antiphon initial clears its second chant line", async ({ page }) => {
   // Salve Regina (Ordinary Time) is the long English form. The opening pair
   // shares one block so a two-line drop cap can float beside both source

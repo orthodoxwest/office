@@ -1470,6 +1470,17 @@ footer::before {
   margin-bottom: 0.75rem;
 }
 
+/* Hymn-embedded /:...:/ instructions sit in the verse column as red roman
+   type, matching standalone .rubric, rather than as a second Latin incipit.
+   width:0 / min-width:100% keeps the prose from becoming the longest line of
+   a fit-content .hymn-verses box and shoving the rag off-centre. */
+.hymn-verses > .hymn-rubric {
+  width: 0;
+  min-width: 100%;
+  text-align: center;
+  margin: 0 0 0.75rem;
+}
+
 .hymn-stanza {
   margin-bottom: 0.75rem;
 }

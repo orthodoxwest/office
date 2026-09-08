@@ -13,6 +13,7 @@ import "strings"
 //	Glory be to the Father, …
 //	as it was in the beginning, …
 //	                      the two-line Gloria Patri
+//	/:Said kneeling.:/    a hymn-embedded rubric; delimiters are markup
 //	[Ad Laudes]           a bracketed title artifact, dropped
 //
 // Parsing that grammar is knowledge about the data format, so it lives here
@@ -281,6 +282,11 @@ func SplitHymnTitle(text string) (title, body string) {
 	if strings.ContainsRune(firstBlock, '\n') {
 		return "", text
 	}
+	// A /:...:/ line is an instruction standing above the verse, not a
+	// Latin incipit.
+	if _, ok := HymnRubricText(firstBlock); ok {
+		return "", text
+	}
 	return firstBlock, strings.TrimSpace(rest)
 }
 
@@ -308,4 +314,36 @@ func ParseHymn(text string) Hymn {
 	flush()
 
 	return parsed
+}
+
+// HymnRubricText reports whether line is a corpus hymn rubric wrapped in the
+// /:...:/ delimiters used by the printed-diurnal encoding, and returns the
+// inner instruction with those delimiters stripped.
+func HymnRubricText(line string) (string, bool) {
+	s := strings.TrimSpace(line)
+	if len(s) < 4 || !strings.HasPrefix(s, "/:") || !strings.HasSuffix(s, ":/") {
+		return "", false
+	}
+	inner := strings.TrimSpace(s[2 : len(s)-2])
+	if inner == "" {
+		return "", false
+	}
+	return inner, true
+}
+
+// HymnRubricStanza reports whether every line of a parsed stanza is a /:...:/
+// rubric, returning the inner instructions in order.
+func HymnRubricStanza(stanza []string) ([]string, bool) {
+	if len(stanza) == 0 {
+		return nil, false
+	}
+	out := make([]string, len(stanza))
+	for i, line := range stanza {
+		rubric, ok := HymnRubricText(line)
+		if !ok {
+			return nil, false
+		}
+		out[i] = rubric
+	}
+	return out, true
 }
