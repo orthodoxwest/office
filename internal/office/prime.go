@@ -1,6 +1,7 @@
 package office
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/orthodoxwest/office/internal/calendar"
@@ -9,7 +10,9 @@ import (
 )
 
 // PrimeComposer composes the hour of Prime.
-type PrimeComposer struct{}
+type PrimeComposer struct {
+	MartyrologyPreview bool
+}
 
 // Compose builds a complete Prime hour for the given day.
 func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) (*models.OfficeHour, error) {
@@ -36,6 +39,10 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 
 		var elems []models.OfficeElement
 		for _, elem := range section.Elements {
+			if p.MartyrologyPreview && section.Name == "Martyrology" && elem.Ref == "ordinary/prime/martyrology-rubric" {
+				elems = append(elems, resolvePrimeMartyrology(day, corpus)...)
+				continue
+			}
 			if elem.Type == "proper-antiphon" && elem.Ref == "psalm-antiphon-1" {
 				elems = append(elems, resolvePrimePsalmAntiphon(day, corpus, moveable))
 				continue
@@ -50,6 +57,31 @@ func (p *PrimeComposer) Compose(day *models.CalendarDay, sections []HourSection,
 	}
 
 	return hour, nil
+}
+
+// resolvePrimeMartyrology supplies the next day's reviewed Martyrology entry.
+// The static rubric remains the fallback while the per-date corpus is being
+// populated or when a date has no qualifying entries.
+func resolvePrimeMartyrology(day *models.CalendarDay, corpus *texts.TextCorpus) []models.OfficeElement {
+	if day == nil {
+		return []models.OfficeElement{resolveElement(HourElement{Type: "rubric", Ref: "ordinary/prime/martyrology-rubric"}, corpus)}
+	}
+	next := day.Date.AddDate(0, 0, 1)
+	ref := fmt.Sprintf("ordinary/martyrology/%02d-%02d", next.Month(), next.Day())
+	text := corpus.Get(ref)
+	conclusionRef := "ordinary/martyrology/conclusion"
+	responseRef := "ordinary/martyrology/response"
+	conclusion := corpus.Get(conclusionRef)
+	response := corpus.Get(responseRef)
+	if text == "" || conclusion == "" || response == "" {
+		return []models.OfficeElement{resolveElement(HourElement{Type: "rubric", Ref: "ordinary/prime/martyrology-rubric"}, corpus)}
+	}
+	return []models.OfficeElement{
+		{Type: models.Heading, Text: "Martyrology — " + next.Format("January 2"), SourceRef: ref, SourceRefs: []string{ref}},
+		{Type: models.Reading, Text: text, SourceRef: ref, SourceRefs: []string{ref}},
+		{Type: models.Reading, Text: conclusion, SourceRef: conclusionRef, SourceRefs: []string{conclusionRef}},
+		{Type: models.Response, Text: "R. " + response, SourceRef: responseRef, SourceRefs: []string{responseRef}},
+	}
 }
 
 // resolvePrimePsalmAntiphon follows Prime's antiphon rubric. Feasts and

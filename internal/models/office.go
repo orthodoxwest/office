@@ -24,6 +24,9 @@ const (
 	Doxology      ElementType = "doxology"
 	PsalmDoxology ElementType = "psalm-doxology"
 	Preces        ElementType = "preces"
+	// Reading is non-scriptural prose, such as the daily Martyrology.
+	// Unlike Chapter, it does not introduce a Scripture chapter heading.
+	Reading ElementType = "reading"
 	// OpeningAcclamation is the seasonal Alleluia (or its Septuagesima
 	// replacement) which follows the opening versicle. It is not an antiphon
 	// and therefore never takes the rubrical "Ant." sigil or psalm-frame
