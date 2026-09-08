@@ -7,8 +7,8 @@ O mighty work of mercy! * death then died, when life died upon the Tree.
 Save us, * O Christ our Saviour, by the virtue of the Cross: thou who savedst Peter in the sea, have mercy upon us.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 542, 479 (Exaltation of the Holy Cross)
-Behold the Cross of the Lord; * flee away, ye adversaries: the Lion of the tribe of Judah, the Root of David hath prevailed, alleluia.
+# SOURCE: monastic diurnal, p. 599 (Exaltation of the Holy Cross, At Lauds)
+Behold the Cross of the Lord; * flee away, ye adversaries: the Lion of the tribe of Judah, the Root of David, hath prevailed, alleluia.
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 543 (Exaltation of the Holy Cross)
@@ -46,13 +46,13 @@ O blessed art thou, O Cross, * thou which wast counted the only tree worthy to b
 O Cross, * surpassing all the stars in splendour, world-renowned, exceeding dear unto the hearts of men, holier than all things: thou only wert counted worthy to uphold the world's ransom. Sweet the wood, sweet the iron, bearing so sweet a burden: bring aid to this congregation, who are here assembled to celebrate thy praises.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 550, 485 (Exaltation of the Holy Cross)
+# SOURCE: monastic diurnal, p. 600 (Exaltation of the Holy Cross, At Lauds)
 O God, who makest us glad this day by the yearly solemnity of the Exaltation of the Holy Cross: grant, we beseech thee, that we who on earth have learned the mystery of our redemption, may be found worthy of its rewards in heaven.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 546 (Exaltation of the Holy Cross)
+# SOURCE: monastic diurnal, p. 599 (Exaltation of the Holy Cross, At Lauds)
 !Phil 2:5-8
-Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, and took upon him the form of a servant, and was made in the likeness of men: And was found in fashion as a man.
+Brethren: Let this mind be in you, which was also in Christ Jesus: who, being in the form of God, thought it not robbery to be equal with God; but made himself of no reputation, * and took upon him the form of a servant, and was made in the likeness of men: * and was found in fashion as a man.
 R. Thanks be to God.
 
 [chapter-sext]

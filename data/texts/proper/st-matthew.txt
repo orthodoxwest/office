@@ -1,5 +1,5 @@
 [collect]
-# SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 210
+# SOURCE: monastic diurnal, p. 606 (St Matthew, Apostle and Evangelist)
 May we be helped, O Lord, by the prayers of the blessed Apostle and Evangelist Matthew: that those things which we are not able to obtain by our own power, may be given us at his intercession.
 
 # [benedictus-antiphon]

@@ -2,23 +2,23 @@
 @use proper/seven-sorrows-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 551, 486 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 Whither * is thy beloved gone, O thou fairest among women? whither is thy beloved turned aside? that we may seek him with thee.
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 552, 487 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 Look away from me; * I will weep bitterly, labour not to comfort me.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 552, 488 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 He hath no form * nor comeliness; and when we shall see him, there is no beauty that we should desire him.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 553 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 From the sole of the foot * even unto the head, there is no soundness in him.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 555, 489 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 Stay me with flagons, * comfort me with apples; for I am sick of love.
 
 [psalm-antiphon-1-vespers]
@@ -34,23 +34,23 @@ Stay me with flagons, * comfort me with apples; for I am sick of love.
 @use proper/seven-sorrows-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 Come ye, * and let us go up to the mountain of the Lord, and see if there be any sorrow like unto my sorrow.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 492 (I Vespers for The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 602 (Seven Sorrows of the B.V.M., At I Vespers)
 Look not * upon me, because I am black, because the sun hath looked upon me: my mother's children were angry with me.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 492 (II Vespers for The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 605 (Seven Sorrows of the B.V.M., At II Vespers)
 Sorrow oppresseth me, * my face is swollen with weeping, and on my eyelids is the shadow of death.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 559, 493 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 O God, in whose Passion, according to the prophecy of Simeon, a sword of grief pierced through the well-beloved soul of the glorious Virgin Mother Mary: mercifully grant that we who devoutly call to mind her sorrows, may obtain the blessed fruit of thy Passion.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 556 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 !Lam 2:13
 What thing shall I take to witness for thee? what thing shall I liken to thee, O daughter of Jerusalem? what shall I equal to thee, that I may comfort thee, O virgin daughter of Sion? for thy breach is great like the sea.
 R. Thanks be to God.
@@ -62,7 +62,7 @@ R. Thanks be to God.
 @use proper/seven-sorrows-bvm/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 557 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 603 (Seven Sorrows of the B.V.M., At Lauds)
 R. Mine eyes do fail * with weeping.
 R. Mine eyes do fail * with weeping.
 V. My heart within me is troubled.
@@ -71,7 +71,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Mine eyes do fail * with weeping.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 490 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 601 (Seven Sorrows of the B.V.M., At I Vespers)
 R. A bundle of myrrh * is my well-beloved unto me.
 R. A bundle of myrrh * is my well-beloved unto me.
 V. He shall lie all night betwixt my breasts.
@@ -80,7 +80,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. A bundle of myrrh * is my well-beloved unto me.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 557–558 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, pp. 603–604 (Seven Sorrows of the B.V.M., At Lauds)
 Summæ Deus clementiæ
 
 O God, in whom all grace doth dwell,
@@ -105,7 +105,7 @@ And Holy Spirit evermore.
 
 Amen.
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 490–492 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, pp. 601–602 (Seven Sorrows of the B.V.M., At I Vespers)
 Jam toto subitus
 
 Now let the darkling eve
@@ -158,12 +158,12 @@ That erst upheld the Virgin's heart!
 
 Amen.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 558 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 604 (Seven Sorrows of the B.V.M., At Lauds)
 V. O Virgin Mary, by thy sorrow's might.
 R. Make us rejoice in heaven's kingdom bright.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 492 (The Seven Sorrows of the B.V.M.)
+# SOURCE: monastic diurnal, p. 605 (Seven Sorrows of the B.V.M., At II Vespers)
 V. Pray for us, O Queen of Martyrs.
 R. Who didst stand by the Cross of Jesus.
 
