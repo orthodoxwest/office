@@ -1,6 +1,7 @@
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book (Common of Feasts of the B.V.M.; Sancta Maria, I Vespers)
-O holy Mary, * help thou the suffering, strengthen the faint-hearted, comfort the sorrowful; pray for the people, entreat for the clergy, intercede for all womankind vowed unto God: may all acknowledge the help of thy prayer, who celebrate thy holy festival.
+# The Most Holy Name of Mary is not in the diurnal; I Vespers uses the
+# Common of Feasts B.V.M. Magnificat antiphon (p. 65*).
+@use commons/blessed-virgin/magnificat-antiphon-first
 
 # [collect]
 # Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
