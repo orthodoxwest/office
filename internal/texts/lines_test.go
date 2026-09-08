@@ -169,3 +169,54 @@ func TestParseHymnSingleStanza(t *testing.T) {
 		t.Errorf("hymn = %#v", hymn)
 	}
 }
+
+func TestHymnRubricText(t *testing.T) {
+	tests := []struct {
+		line string
+		want string
+		ok   bool
+	}{
+		{"/:The first stanza of the following hymn is said kneeling.:/", "The first stanza of the following hymn is said kneeling.", true},
+		{"  /:Stand and bow.:/  ", "Stand and bow.", true},
+		{"/:  Said kneeling.  :/", "Said kneeling.", true},
+		{"/::/", "", false},
+		{"/:   :/", "", false},
+		{":/not a rubric/:", "", false},
+		{"The first stanza is said kneeling.", "", false},
+		{"/:unterminated", "", false},
+	}
+	for _, tt := range tests {
+		got, ok := HymnRubricText(tt.line)
+		if ok != tt.ok || got != tt.want {
+			t.Errorf("HymnRubricText(%q) = (%q, %v), want (%q, %v)", tt.line, got, ok, tt.want, tt.ok)
+		}
+	}
+}
+
+func TestParseHymnKeepsRubricOutOfTheTitle(t *testing.T) {
+	// Engine-peeled body: the Latin incipit is already gone, and the kneeling
+	// line stands alone above the first stanza.
+	peeled := ParseHymn("/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\nMother, God who barest.\n")
+	if peeled.Title != "" {
+		t.Errorf("Title = %q, want empty (rubric is not an incipit)", peeled.Title)
+	}
+	if len(peeled.Stanzas) != 2 || peeled.Stanzas[0][0] != "/:The first stanza of the following hymn is said kneeling.:/" {
+		t.Fatalf("Stanzas = %#v, want the rubric kept as the first stanza", peeled.Stanzas)
+	}
+
+	titled := ParseHymn("Ave, maris stella\n\n/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\nMother, God who barest.\n")
+	if titled.Title != "Ave, maris stella" {
+		t.Errorf("Title = %q", titled.Title)
+	}
+	if len(titled.Stanzas) < 2 || titled.Stanzas[0][0] != "/:The first stanza of the following hymn is said kneeling.:/" {
+		t.Fatalf("Stanzas = %#v, want the rubric after the incipit", titled.Stanzas)
+	}
+
+	rubrics, ok := HymnRubricStanza(peeled.Stanzas[0])
+	if !ok || len(rubrics) != 1 || rubrics[0] != "The first stanza of the following hymn is said kneeling." {
+		t.Errorf("HymnRubricStanza = (%q, %v)", rubrics, ok)
+	}
+	if _, ok := HymnRubricStanza(peeled.Stanzas[1]); ok {
+		t.Error("verse stanza must not classify as a rubric")
+	}
+}
