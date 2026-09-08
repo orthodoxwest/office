@@ -1767,6 +1767,41 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   await expect.poll(() => events.length).toBe(2);
 });
 
+test("the current ordo page is tracked in its own column, not just the site total", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const year = new Date().getFullYear();
+  await page.goto(`/calendar/${year}`);
+  await page.mouse.click(200, 300);
+  await expect.poll(() => events.length).toBe(1);
+  expect(events).toEqual(["ordo"]);
+});
+
+test("generating a reminder feed link is tracked separately from viewing the page", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  // A stub so the copy actually "succeeds" without a real clipboard permission.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: () => Promise.resolve() },
+    });
+  });
+  await page.goto("/reminders");
+  await page.mouse.click(200, 300);
+  // Merely opening and engaging with the page reports "site", never "reminders".
+  await expect.poll(() => events).toEqual(["site"]);
+
+  await page.getByRole("button", { name: "Copy link" }).click();
+  await expect.poll(() => events).toEqual(["site", "reminders"]);
+});
+
 // The cookie round trip is the whole basis of deduplication, so exercise it
 // against the real endpoint rather than a stubbed one.
 test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {
@@ -1842,6 +1877,51 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await context.setOffline(true);
   await expect(page.goto("/admin/usage?days=7")).rejects.toThrow();
   await context.close();
+});
+
+test("Martyrology preview stays opt-in and cannot enter the offline office cache", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ serviceWorkers: "allow", baseURL });
+  try {
+    const page = await context.newPage();
+    // Keep the September 8 pilot reading, but visit its next occurrence:
+    // precache intentionally prunes historical pages as the real clock moves.
+    const now = new Date();
+    const year = now.getFullYear() + (now >= new Date(now.getFullYear(), 8, 8) ? 1 : 0);
+    const normal = `/prime/${year}-09-07`;
+    const preview = normal + "?preview=martyrology";
+    await page.goto(normal);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) {
+        await new Promise(resolve => navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true }));
+      }
+    });
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+    await page.goto(preview);
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toBeVisible();
+    await expect(page.locator(".elements")).not.toContainText("Thomas of Villanova");
+    expect(await page.evaluate(async (normal) => {
+      for (const name of await caches.keys()) {
+        const cache = await caches.open(name);
+        for (const key of await cache.keys()) {
+          if (new URL(key.url).searchParams.has("preview")) return false;
+          if (new URL(key.url).pathname === normal) {
+            if ((await (await cache.match(key)).text()).includes("Martyrology — September 8")) return false;
+          }
+        }
+      }
+      return true;
+    }, normal)).toBe(true);
+    await context.setOffline(true);
+    await page.goto(preview);
+    await expect(page.getByRole("heading", { name: "Preview unavailable offline" })).toBeVisible();
+    await page.goto(normal);
+    await expect(page.locator(".elements")).toContainText("this may laudably be done");
+    await expect(page.getByRole("heading", { name: "Martyrology — September 8", exact: true })).toHaveCount(0);
+  } finally {
+    await context.close();
+  }
 });
 
 test("long opening verses return to the numbered text edge below the initial", async ({ page }) => {

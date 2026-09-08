@@ -25,7 +25,7 @@ func TestDailyDeduplicationAndPersistence(t *testing.T) {
 		})
 	}
 	wg.Wait()
-	for _, event := range []struct{ id, scope string }{{"browser-a", "vespers"}, {"browser-b", "lauds"}, {"browser-c", "site"}} {
+	for _, event := range []struct{ id, scope string }{{"browser-a", "vespers"}, {"browser-b", "lauds"}, {"browser-c", "site"}, {"browser-d", "ordo"}, {"browser-e", "reminders"}} {
 		if err := s.Record(ctx, now, event.id, event.scope); err != nil {
 			t.Fatal(err)
 		}
@@ -42,7 +42,7 @@ func TestDailyDeduplicationAndPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rows[0].Users != 3 || rows[0].Hours[0] != 2 || rows[0].Hours[5] != 1 || rows[1].Users != 0 {
+	if rows[0].Users != 5 || rows[0].Hours[0] != 2 || rows[0].Hours[5] != 1 || rows[0].Ordo != 1 || rows[0].Reminders != 1 || rows[1].Users != 0 {
 		t.Fatalf("counts: %+v", rows)
 	}
 	tomorrow := now.Add(2 * time.Minute)
@@ -53,7 +53,7 @@ func TestDailyDeduplicationAndPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rows[0].Day != "2026-09-05" || rows[0].Users != 1 || rows[1].Users != 3 {
+	if rows[0].Day != "2026-09-05" || rows[0].Users != 1 || rows[1].Users != 5 {
 		t.Fatalf("midnight counts: %+v", rows)
 	}
 	var hashes int
@@ -72,7 +72,7 @@ func TestDailyDeduplicationAndPersistence(t *testing.T) {
 	if err := s.db.QueryRow("SELECT COUNT(*) FROM seen").Scan(&remaining); err != nil {
 		t.Fatal(err)
 	}
-	if remaining != 0 || rows[4].Users != 3 {
+	if remaining != 0 || rows[4].Users != 5 {
 		t.Fatalf("retention lost totals or retained identifiers: %d %+v", remaining, rows)
 	}
 }
