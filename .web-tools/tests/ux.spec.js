@@ -1795,13 +1795,14 @@ test("generating a reminder feed link is tracked separately from viewing the pag
   });
   await page.goto("/reminders");
   await page.mouse.click(200, 300);
-  await page.waitForTimeout(300);
-  // Merely opening and engaging with the page reports "site", never "reminders".
-  expect(events).toEqual([]);
+  // Engaging with the page reports the ordinary page view ("site"), never
+  // "reminders" — that scope is reserved for an actual generated link.
+  await expect.poll(() => events.length).toBe(1);
+  expect(events).toEqual(["site"]);
 
   await page.getByRole("button", { name: "Copy link" }).click();
-  await expect.poll(() => events.length).toBe(1);
-  expect(events).toEqual(["reminders"]);
+  await expect.poll(() => events.length).toBe(2);
+  expect(events[1]).toBe("reminders");
 });
 
 // The cookie round trip is the whole basis of deduplication, so exercise it
