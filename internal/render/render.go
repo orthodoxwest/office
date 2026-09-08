@@ -114,6 +114,7 @@ func templateFuncs(version string) template.FuncMap {
 		"calendarYearLink":      CalendarYearLink,
 		"static":                func(name string) string { return StaticURL(name, version) },
 		"renderSectionElements": renderSectionElements,
+		"renderSectionHeading":  renderSectionHeading,
 		"typeEq": func(t models.ElementType, s string) bool {
 			return string(t) == s
 		},

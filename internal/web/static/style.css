@@ -3852,6 +3852,44 @@ body.season-eastertide {
   }
 }
 
+/* Commemorations retain one heading and their full spoken name. The rubric
+   is a small-cap label; mixed-case names keep long titles quiet on phones. */
+.commemoration-heading .commemoration-kicker {
+  display: block;
+  font-size: 0.78em;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.commemoration-heading .commemoration-name {
+  display: block;
+  font-variant-caps: normal;
+  letter-spacing: 0.015em;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+/* Continuations remain distinct from the next metrical line. Opening pairs
+   keep their separate float clearance rules. */
+.hymn-line {
+  padding-left: 1.1rem;
+  text-indent: -1.1rem;
+}
+
+/* Prose spans need the same last-line care as paragraphs. Do not balance
+   entire prayers: preserve their natural measure and metrical hymn breaks. */
+.chapter .plain-line,
+.chapter .sigil-text,
+.collect .plain-line {
+  text-wrap: pretty;
+}
+
+/* Dialogue responses finish the preceding utterance. Let the gutter carry
+   the speaker and keep the adjacent lines on one steady vertical rhythm. */
+.liturgical-block > :is(.versicle-line, .response-line, .all-line) {
+  margin-bottom: 0.25rem;
+}
+
 /* ── Desktop scrollbar ──
    A thin oak thumb on an unpainted track, so the browser's grey slab does not
    sit beside the plaster. Desktop only: touch scrollbars are transient

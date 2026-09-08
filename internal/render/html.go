@@ -125,14 +125,22 @@ func renderSectionElements(elems []models.OfficeElement) template.HTML {
 	return template.HTML(sb.String())
 }
 
+// renderSectionHeading retains the full accessible heading while separating
+// a commemoration's rubric from its often long feast name.
+func renderSectionHeading(label string) template.HTML {
+	const prefix = "Commemoration of "
+	if name, ok := strings.CutPrefix(label, prefix); ok && name != "" {
+		return template.HTML(`<h2 class="section-heading commemoration-heading"><span class="commemoration-kicker">Commemoration of</span> <span class="commemoration-name">` + template.HTMLEscapeString(name) + `</span></h2>`)
+	}
+	return template.HTML(`<h2 class="section-heading">` + template.HTMLEscapeString(label) + `</h2>`)
+}
+
 func renderOfficeElement(elem models.OfficeElement, doxologyText string) string {
 	var sb strings.Builder
 
 	switch elem.Type {
 	case models.Heading:
-		sb.WriteString(`<h2 class="section-heading">`)
-		sb.WriteString(template.HTMLEscapeString(elem.Text))
-		sb.WriteString(`</h2>`)
+		sb.WriteString(string(renderSectionHeading(elem.Text)))
 	case models.Rubric:
 		sb.WriteString(string(renderRubric(elem)))
 	case models.OpeningAcclamation:
