@@ -2,38 +2,39 @@
 @use proper/nativity-bvm/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 531, 469 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 The Nativity * of the glorious Virgin Mary, of the seed of Abraham, sprung from the tribe of Juda, of the noble stem of David.
 
 [psalm-antiphon-2]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 532, 470 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 To-day is the Nativity * of the holy Virgin Mary, whose glorious life illumineth all the churches.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 532, 471 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 Sprung from a royal race, * lo, Mary shineth resplendent: by whose prayers we ask devoutly that we may be aided both in mind and spirit.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 533 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 With all our heart and soul, * let us sing glory unto Christ on this holy solemnity of Mary, the exalted Mother of God.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 535 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 With joy and gladness * let us celebrate the Nativity of blessed Mary: that she may intercede for us unto Jesus Christ our Lord.
 
 [psalm-antiphon-4-vespers]
+# I and II Vespers: "Ants. of Lauds, omitting the fourth" (diurnal p. 595).
 @use proper/nativity-bvm/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 539 (Nativity BVM)
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
 To-day let us celebrate * with due solemnity the Nativity of God's Mother, the ever Virgin Mary: from whom the Son of the Highest proceeded, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: older Sanctoral Vespers (II Vespers, Nativity BVM)
+# SOURCE: monastic diurnal, p. 597 (Nativity of the B.V.M., At II Vespers)
 Thy Nativity, * O Virgin Mother of God, hath proclaimed joyful tidings unto all the world: for out of thee hath arisen the Sun of righteousness, even Christ our God: who, taking away the curse, hath bestowed a blessing; and confounding death, hath given unto us life everlasting.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 475 (I Vespers, Nativity BVM)
+# SOURCE: monastic diurnal, pp. 595–596 (Nativity of the B.V.M., At I Vespers)
 Let us celebrate * the worshipful Nativity of the blessed and glorious Virgin Mary: for she hath obtained the dignity of Motherhood, and yet lost not her maiden purity.
 
 [commemoration-antiphon]
@@ -44,27 +45,30 @@ V. This day is the Birthday of the holy Virgin Mary.
 R. Whose famous life still sheddeth lustre upon all the Churches.
 
 [collect]
-# SOURCE: older Sanctoral Lauds/Vespers (Nativity BVM)
-We beseech thee, O Lord, bestow upon us thy servants the gift of thy heavenly grace: that as our salvation began by the Child-bearing of the blessed Virgin, so this devout solemnity of her Nativity may afford us an increase of peace.
+# SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
+We beseech thee, O Lord, bestow upon us thy servants the gift of thy heavenly grace: that as our salvation began by the Childbearing of the blessed Virgin, so this devout solemnity of her Nativity may afford us an increase of peace.
 
 [chapter-lauds]
-@use shared/blessed-virgin/chapter-sirach-24-9-10
+# Diurnal p. 596: "Chapter, Short R., and Hymn as in the Common, p. 65*".
+@use commons/blessed-virgin/chapter-lauds
 
 [chapter-vespers]
-@use shared/blessed-virgin/chapter-sirach-24-9-10
+# Diurnal p. 595: "Chapter, Short R., and Hymn of the Common".
+@use commons/blessed-virgin/chapter-lauds
 
 [short-responsory-lauds]
-@use shared/blessed-virgin/short-responsory
+@use commons/blessed-virgin/short-responsory-lauds
 
 [short-responsory-vespers]
-@use shared/blessed-virgin/short-responsory
+@use commons/blessed-virgin/short-responsory-lauds
 
 [hymn-lauds]
-@use shared/blessed-virgin/hymn-lauds
+@use commons/blessed-virgin/hymn-lauds
 [hymn-vespers]
+# Diurnal p. 595 points to the Common hymn; Ave maris stella is printed at p. 64*.
 @use shared/blessed-virgin/hymn-vespers
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 538 (Nativity BVM)
+# SOURCE: monastic diurnal, pp. 595–597 (Nativity of the B.V.M., I Vespers / Lauds / II Vespers)
 V. To-day is the Nativity of the holy Virgin Mary.
 R. Whose glorious life illumineth all the churches.
 
