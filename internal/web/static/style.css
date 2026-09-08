@@ -98,6 +98,7 @@
      the header beam can span the full width (see .site-header). */
   --page-gutter: 1.5rem;
   --touch-target: max(2.75rem, 44px);
+  --verse-gutter: 1.8rem;
 }
 
 :root[data-theme="light"] {
@@ -1518,7 +1519,7 @@ footer::before {
 /* After the two-line initial, a long opening returns to the same text edge
    as the numbered verses. The initial hangs into their number gutter. */
 .psalm-verses .verse:first-child:not(.numbered) {
-  padding-left: 1.8rem;
+  padding-left: var(--verse-gutter);
 }
 
 /* Numbered verses — flex so the number sits in a fixed-width gutter */
@@ -1529,7 +1530,7 @@ footer::before {
 }
 
 .psalm-verses .verse-num {
-  flex: 0 0 1.8rem;
+  flex: 0 0 var(--verse-gutter);
   text-align: right;
   padding-right: 0.5rem;
   color: var(--muted);
@@ -1563,7 +1564,7 @@ footer::before {
 /* Gloria Patri doxology rendered with * mediant like a psalm verse */
 .gloria-patri {
   line-height: 1.75;
-  padding-left: 1.8rem;
+  padding-left: var(--verse-gutter);
   padding-right: 0;
 }
 
@@ -1595,7 +1596,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em 0.1em -0.1em -1.8rem;
+  margin: 0.05em 0.1em -0.1em calc(-1 * var(--verse-gutter));
   color: var(--ornament);
 }
 
@@ -3797,6 +3798,41 @@ body.season-eastertide {
   }
 }
 
+/* Let supporting browsers align the initial's cap height and second-line
+   baseline using the actual font metrics. The float rules above remain the
+   fallback; no script or font-load measurement is needed. */
+@supports (initial-letter: 2) {
+  .psalm-verses .verse:first-child::first-letter,
+  .chapter .liturgical-block .plain-line:first-child::first-letter,
+  .chapter .liturgical-block .versicle-line:first-child .sigil-text::first-letter,
+  .collect .liturgical-block .plain-line:first-child::first-letter,
+  .hymn-stanza-opening .hymn-line:first-child::first-letter,
+  .marian-antiphon .chant-line-opening::first-letter,
+  .corporate-lord-prayer-officiant::first-letter,
+  .short-responsory-opening .sigil-text::first-letter {
+    initial-letter: 2;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+/* The phone's title stack keeps a compact cadence even with several
+   commemorations. Text size and all date/prayer touch targets stay intact. */
+@media (max-width: 700px) {
+  .page-home .home-day-head {
+    margin-bottom: 0.55rem;
+  }
+
+  .page-home .home .commemorations {
+    line-height: 1.4;
+    column-gap: 0.45rem;
+  }
+
+  .page-home .home-day-head .not-today-notice {
+    margin-block: 0 0.15rem;
+  }
+}
+
 /* ── Desktop scrollbar ──
    A thin oak thumb on an unpainted track, so the browser's grey slab does not
    sit beside the plaster. Desktop only: touch scrollbars are transient
@@ -4088,7 +4124,7 @@ body {
   :root:not([data-theme="light"]) body {
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-    --apse-line: color-mix(in srgb, var(--ornament) 6%, transparent);
+    --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
     --apse-vault:
       radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
       radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
@@ -4111,7 +4147,7 @@ body {
 :root[data-theme="dark"] body {
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-  --apse-line: color-mix(in srgb, var(--ornament) 6%, transparent);
+  --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
   --apse-vault:
     radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
     radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),

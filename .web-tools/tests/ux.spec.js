@@ -1884,3 +1884,52 @@ test("long opening verses return to the numbered text edge below the initial", a
     }
   }
 });
+
+test("wide and narrow initials clear text in native and fallback layouts", async ({ page }) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-06-18");
+    for (const size of ["normal", "large"]) {
+      await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+      for (const fallback of [false, true]) {
+        const override = fallback ? await page.addStyleTag({ content:
+          ".psalm-verses .verse:first-child::first-letter { initial-letter: normal; margin-top: .05em; margin-bottom: -.1em; }",
+        }) : null;
+        for (const initial of ["W", "I"]) {
+          const geometry = await page.locator(".psalm-verses").first().evaluate((psalm, letter) => {
+            const opening = psalm.querySelector(".verse");
+            // Deliberate layout fixture: exercise the extremes of the font's
+            // initial widths without depending on a particular day's psalms.
+            opening.textContent = letter + "ith all my heart I will give thanks unto the Lord, and tell of all his wonderful works. With all my heart I will give thanks unto the Lord.";
+            const node = opening.firstChild;
+            const glyph = index => {
+              const range = document.createRange();
+              range.setStart(node, index);
+              range.setEnd(node, index + 1);
+              const { left, right, top, bottom } = range.getBoundingClientRect();
+              return { left, right, top, bottom };
+            };
+            const cap = glyph(0);
+            const following = glyph(1);
+            return {
+              cap, following,
+              last: glyph(node.length - 1),
+              next: psalm.querySelector(".verse.numbered").getBoundingClientRect().top,
+              gloria: psalm.parentElement.querySelector(".gloria-patri").getBoundingClientRect().left +
+                parseFloat(getComputedStyle(psalm.parentElement.querySelector(".gloria-patri")).paddingLeft),
+              edge: psalm.querySelector(".verse-body").getBoundingClientRect().left,
+              overflow: document.documentElement.scrollWidth > innerWidth,
+            };
+          }, initial);
+          const label = `${width}/${size}/${fallback ? "fallback" : "native"}/${initial}`;
+          expect(geometry.overflow, label).toBe(false);
+          expect(geometry.following.left, label).toBeGreaterThanOrEqual(geometry.cap.right - .5);
+          expect(geometry.next, label).toBeGreaterThan(geometry.cap.bottom);
+          expect(geometry.next, label).toBeGreaterThan(geometry.last.top);
+          expect(Math.abs(geometry.gloria - geometry.edge), label).toBeLessThan(1);
+        }
+        if (override) await override.evaluate(node => node.remove());
+      }
+    }
+  }
+});
