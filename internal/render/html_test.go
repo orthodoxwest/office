@@ -444,6 +444,37 @@ func TestRenderHymnDoesNotMarkNonCodaAmen(t *testing.T) {
 	}
 }
 
+func TestRenderHymnRubricIsInstructionNotLatinTitle(t *testing.T) {
+	html := string(renderHymnStanzas("/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\nMother, God who barest.\n"))
+
+	if !strings.Contains(html, `<p class="rubric hymn-rubric">The first stanza of the following hymn is said kneeling.</p>`) {
+		t.Fatalf("expected hymn-embedded rubric without delimiters: %s", html)
+	}
+	if strings.Contains(html, "/:") || strings.Contains(html, ":/") {
+		t.Fatalf("rubric delimiters must not survive into HTML: %s", html)
+	}
+	if strings.Contains(html, `hymn-latin`) || strings.Contains(html, `lang="la"`) {
+		t.Fatalf("kneeling rubric must not render as a Latin incipit: %s", html)
+	}
+	if !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">Star of ocean fairest,</span>`) {
+		t.Fatalf("drop-cap hook belongs on the first English stanza, not the rubric: %s", html)
+	}
+}
+
+func TestRenderHymnMidHymnRubric(t *testing.T) {
+	html := string(renderHymnStanzas("Title\n\nThe royal banners forward go.\n\n/:The following stanza is said kneeling.:/\n\nO Cross, our one reliance, hail!\n"))
+
+	if !strings.Contains(html, `<p class="hymn-latin" lang="la">Title</p>`) {
+		t.Fatalf("real Latin title must remain: %s", html)
+	}
+	if !strings.Contains(html, `<p class="rubric hymn-rubric">The following stanza is said kneeling.</p>`) {
+		t.Fatalf("expected mid-hymn rubric: %s", html)
+	}
+	if strings.Count(html, `hymn-stanza-opening`) != 1 || !strings.Contains(html, `<p class="hymn-stanza hymn-stanza-opening"><span class="hymn-line">The royal banners forward go.</span></p>`) {
+		t.Fatalf("opening stanza stays the first verse: %s", html)
+	}
+}
+
 func TestRenderBlessingUsesVersicleLine(t *testing.T) {
 	html := string(renderLiturgicalBlock("Blessing. May the Almighty and merciful Lord grant us a quiet night."))
 

@@ -285,6 +285,22 @@ func TestTeXOpeningDropCapsAreLimitedToTheFirstHymnStanza(t *testing.T) {
 	}
 }
 
+func TestTeXHymnRubricIsNotADropCapTitle(t *testing.T) {
+	hymn := formatHymnTeX("/:The first stanza of the following hymn is said kneeling.:/\n\nStar of ocean fairest,\nMother, God who barest.", "", "", false)
+	if !strings.Contains(hymn, `\rubric{The first stanza of the following hymn is said kneeling.}`) {
+		t.Fatalf("expected hymn rubric macro:\n%s", hymn)
+	}
+	if strings.Contains(hymn, `/:`) || strings.Contains(hymn, `:/`) {
+		t.Fatalf("rubric delimiters must not survive into TeX:\n%s", hymn)
+	}
+	if strings.Contains(hymn, `\dropcap{/}`) || strings.Contains(hymn, `\small\itshape /:`) {
+		t.Fatalf("kneeling rubric must not be a Latin title or take the drop cap:\n%s", hymn)
+	}
+	if !strings.Contains(hymn, `\dropcap{S}{tar} of ocean fairest,`) {
+		t.Fatalf("drop cap belongs on the first English stanza:\n%s", hymn)
+	}
+}
+
 func TestFormatMultilineAntiphonTeXAnthemLineBoundaries(t *testing.T) {
 	if got := formatMultilineAntiphonTeX(models.OfficeElement{}); got != "\n" {
 		t.Fatalf("empty multiline antiphon = %q, want newline", got)

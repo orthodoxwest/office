@@ -315,18 +315,30 @@ func formatHymnTeX(text, dataDir, label string, chant bool) string {
 
 	var b strings.Builder
 	if hymn.Title != "" {
-		fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
+		if rubric, ok := texts.HymnRubricText(hymn.Title); ok {
+			fmt.Fprintf(&b, "\\rubric{%s}\n\n", escapeTeX(rubric))
+		} else {
+			fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
+		}
 	}
-	for stanzaIndex, stanza := range hymn.Stanzas {
-		if stanzaIndex > 0 {
+	dropped := false
+	for _, stanza := range hymn.Stanzas {
+		if rubrics, ok := texts.HymnRubricStanza(stanza); ok {
+			for _, rubric := range rubrics {
+				fmt.Fprintf(&b, "\\rubric{%s}\\par\\smallskip\n", escapeTeX(rubric))
+			}
+			continue
+		}
+		if dropped {
 			b.WriteString("\\noindent ")
 		}
 		for i, line := range stanza {
 			if i > 0 {
 				b.WriteString("\\\\\n")
 			}
-			if stanzaIndex == 0 && i == 0 {
+			if !dropped && i == 0 {
 				b.WriteString(texDropCap(line))
+				dropped = true
 			} else {
 				b.WriteString(texLine(line))
 			}

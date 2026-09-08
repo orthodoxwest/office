@@ -665,23 +665,36 @@ func renderHymnStanzas(text string) template.HTML {
 
 	sb.WriteString(`<div class="hymn-verses">`)
 	if hymn.Title != "" {
-		// Latin incipit standing above English stanzas.
-		sb.WriteString(`<p class="hymn-latin" lang="la">`)
-		sb.WriteString(template.HTMLEscapeString(hymn.Title))
-		sb.WriteString(`</p>`)
+		if rubric, ok := texts.HymnRubricText(hymn.Title); ok {
+			writeHymnRubric(&sb, rubric)
+		} else {
+			// Latin incipit standing above English stanzas.
+			sb.WriteString(`<p class="hymn-latin" lang="la">`)
+			sb.WriteString(template.HTMLEscapeString(hymn.Title))
+			sb.WriteString(`</p>`)
+		}
 	}
 
+	opening := true
 	for i, stanza := range hymn.Stanzas {
 		// A standalone Amen is a hymn coda, but it is prayed as the close of
 		// the preceding verse rather than as an italic stanza of its own.
 		if isHymnAmen(stanza) && i > 0 {
 			continue
 		}
+		if rubrics, ok := texts.HymnRubricStanza(stanza); ok {
+			for _, rubric := range rubrics {
+				writeHymnRubric(&sb, rubric)
+			}
+			continue
+		}
 		class := "hymn-stanza"
-		if i == 0 {
+		if opening {
 			// This hook names the opening English stanza even when the source
-			// carries a Latin incipit above it, avoiding a positional CSS guess.
+			// carries a Latin incipit or a kneeling rubric above it, avoiding
+			// a positional CSS guess.
 			class += " hymn-stanza-opening"
+			opening = false
 		}
 		sb.WriteString(`<p class="`)
 		sb.WriteString(class)
@@ -704,6 +717,12 @@ func renderHymnStanzas(text string) template.HTML {
 
 	sb.WriteString(`</div>`)
 	return template.HTML(sb.String())
+}
+
+func writeHymnRubric(sb *strings.Builder, rubric string) {
+	sb.WriteString(`<p class="rubric hymn-rubric">`)
+	sb.WriteString(template.HTMLEscapeString(rubric))
+	sb.WriteString(`</p>`)
 }
 
 // isHymnAmen reports whether a stanza is a single Amen line (with optional
