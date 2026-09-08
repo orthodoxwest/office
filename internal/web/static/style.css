@@ -30,13 +30,9 @@
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
-  /* Limewash, measured off the parish walls rather than guessed. The hue was
-     already right — the photographs sit at 22–29° and this sat at 26° — but
-     the chroma was less than half of theirs (0.055 against ~0.12 of channel
-     spread), so Nave read as warm grey where the plaster reads as rose. This
-     carries the wall's chroma at very nearly the old lightness, so every
-     contrast pair holds. */
-  --bg: #fdf1e6;
+  /* Warm ivory plaster: retain the parish's rose undertone without casting
+     a peach wash over a full phone screen. Oak and rubric carry the colour. */
+  --bg: #faf3e9;
   --accent: #6b3a1f;
   --gold: #9a7328;
   --gold-line: #c9ac72;
@@ -70,11 +66,9 @@
   --violet: #f4f0f8;
   --black: #f0f0f0;
   --rose: #fdf4f8;
-  /* Both follow --bg's warming so the plaster, the framed card and the notice
-     stay one family; the surface keeps its previous ~5/255 step below the
-     page so cards still separate from the wall without a border doing it. */
-  --banner-bg: #f6e9dd;
-  --surface: #f9ece0;
+  /* A small tonal step separates the frontispiece from the plaster. */
+  --banner-bg: #f1e7da;
+  --surface: #f6eddf;
   --surface-edge: rgba(107, 58, 31, 0.12);
   --pressed-wash: rgba(107, 58, 31, 0.09);
   /* Broad tonal fields, not grain: these translate the hand-worked parish
@@ -1521,6 +1515,12 @@ footer::before {
   margin-bottom: 0.3rem;
 }
 
+/* After the two-line initial, a long opening returns to the same text edge
+   as the numbered verses. The initial hangs into their number gutter. */
+.psalm-verses .verse:first-child:not(.numbered) {
+  padding-left: 1.8rem;
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter */
 .psalm-verses .verse.numbered {
   display: flex;
@@ -1595,7 +1595,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em 0.1em -0.1em 0;
+  margin: 0.05em 0.1em -0.1em -1.8rem;
   color: var(--ornament);
 }
 
@@ -4087,19 +4087,19 @@ body {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
-    --apse-star2: color-mix(in srgb, var(--ornament) 59%, transparent);
-    --apse-line: color-mix(in srgb, var(--ornament) 14%, transparent);
+    --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
+    --apse-line: color-mix(in srgb, var(--ornament) 6%, transparent);
     --apse-vault:
-      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
-      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
       radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
-      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
       radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
-      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
-      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
-      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
+      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
+      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
       linear-gradient(45deg,
         transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
       linear-gradient(135deg,
@@ -4110,19 +4110,19 @@ body {
 
 :root[data-theme="dark"] body {
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
-  --apse-star2: color-mix(in srgb, var(--ornament) 59%, transparent);
-  --apse-line: color-mix(in srgb, var(--ornament) 14%, transparent);
+  --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
+  --apse-line: color-mix(in srgb, var(--ornament) 6%, transparent);
   --apse-vault:
-    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
-    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
     radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
-    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 26%, transparent 90%),
+    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
     radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
-    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 30%, transparent 92%),
-    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
-    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 30%, transparent 92%),
+    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
+    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
+    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
     linear-gradient(45deg,
       transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
     linear-gradient(135deg,
@@ -4223,8 +4223,8 @@ body.page-home::before {
   /* Clear the header beam, carry the field behind the frontispiece, then thin
      the ornament toward the controls at the foot of the page. A mask thins
      stars and ribs without tinting the night itself. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-  mask-image: linear-gradient(to bottom, transparent 0 4%, #000 9% 72%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+  mask-image: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
 }
 
 @media (min-width: 701px) {

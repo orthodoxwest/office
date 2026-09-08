@@ -1843,3 +1843,44 @@ test("service worker does not cache the usage report", async ({ browser, baseURL
   await expect(page.goto("/admin/usage?days=7")).rejects.toThrow();
   await context.close();
 });
+
+test("long opening verses return to the numbered text edge below the initial", async ({ page }) => {
+  for (const width of [320, 390, 540]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-06-18");
+    for (const size of ["normal", "large"]) {
+      await page.evaluate((value) => document.documentElement.setAttribute("data-text-size", value), size);
+      const geometry = await page.locator(".psalm-verses").first().evaluate((psalm) => {
+        const opening = psalm.querySelector(".verse");
+        const walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
+        const lines = new Map();
+        let node;
+        let first = true;
+        while ((node = walker.nextNode())) {
+          for (let i = 0; i < node.length; i++) {
+            if (first) { first = false; continue; } // The initial has its own ink box.
+            if (/\s/.test(node.textContent[i])) continue;
+            const range = document.createRange();
+            range.setStart(node, i);
+            range.setEnd(node, i + 1);
+            const rect = range.getBoundingClientRect();
+            // Mediant has an optical vertical offset; it is not a new line.
+            if (node.parentElement.closest(".mediant")) continue;
+            const y = Math.round(rect.top);
+            lines.set(y, Math.min(lines.get(y) ?? Infinity, rect.left));
+          }
+        }
+        return {
+          lines: [...lines.entries()].sort((a, b) => a[0] - b[0]).map((line) => line[1]),
+          edge: psalm.querySelector(".verse-body").getBoundingClientRect().left,
+          overflow: document.documentElement.scrollWidth > innerWidth,
+        };
+      });
+      expect(geometry.overflow).toBe(false);
+      if (width <= 390) expect(geometry.lines.length).toBeGreaterThan(2);
+      for (const left of geometry.lines.slice(2)) {
+        expect(Math.abs(left - geometry.edge), `${width}px ${size} continuation alignment`).toBeLessThan(1);
+      }
+    }
+  }
+});
