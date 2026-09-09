@@ -59,9 +59,9 @@ Firmly stablished * is their princedom: and highly honoured are thy friends, O G
 Ye which have forsaken all * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 554 (II Vespers for Common of Apostles out of Paschaltide)
+# SOURCE: monastic diurnal, p. 16* (Common of Apostles out of Paschaltide, At II Vespers)
 # NOTE: the source suppresses the final alleluia after Septuagesima; the current text resolver has no inline date-conditional antiphon form.
-Be ye valiant in warfare * and contend ye with the old serpent: and ye shall receive an eternal kingdom, alleluia.
+Be ye valiant in warfare, * and contend ye with the old serpent: and ye shall receive an eternal kingdom, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 545 (I Vespers for Common of Apostles and Evangelists out of Paschaltide)
