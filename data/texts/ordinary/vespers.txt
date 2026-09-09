@@ -149,10 +149,10 @@ Shall live and reign eternally.
 
 Amen.
 [hymn-friday]
-# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 43
+# SOURCE: monastic diurnal, p. 139 (Friday at Vespers)
 Plasmator hominis, Deus
 
-MAKER of men, from heaven, thy throne,
+Maker of men, from heaven, thy throne,
 Who orderest all things, God alone;
 By whose decree the teeming earth
 To reptile and to beast gave birth:
@@ -162,10 +162,10 @@ Instinct with life at thy command,
 Are given subdued to human-kind
 For service in their rank assigned.
 
-Therefore subdue in us today
-Fierce passions which would else have sway,
-Or mingle with the heart's intent,
-And with our actions thus be blent.
+From all thy servants drive away
+Whate'er of thought impure to-day
+Hath mingled with the heart's intent,
+Or with the actions hath been blent.
 
 In heaven thine endless joys bestow,
 But grant thy gifts of grace below;
@@ -238,8 +238,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Great is our Lord * and great is his power.
 
 [versicle]
-V. Let my prayer be set forth in thy sight as the incense.
-R. And let the lifting up of my hands be an evening sacrifice.
+# SOURCE: monastic diurnal, p. 122 (Monday at Vespers); also p. 114 (Sunday)
+V. Lord, let my prayer be set forth.
+R. In thy sight as the incense.
 
 [versicle-saturday]
 # SOURCE: draft archdiocesan Vespers book, p. 216 (Saturdays Throughout the Year)
