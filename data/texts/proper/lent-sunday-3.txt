@@ -37,8 +37,8 @@ V. I will bless the Lord at all times.
 R. His praise shall continually be in my mouth.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 221, 141 (Third Sunday in Lent)
-We beseech thee, Almighty God, look upon the hearty desires of thy humble servants: and stretch forth the right hand of thy Majesty, to be our defence.
+# SOURCE: diurnal p. 260
+We beseech thee, Almighty God, look upon the hearty desires of thy humble servants: and stretch forth the right hand of thy Majesty, to be our defence against all our enemies.
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 260 (III Sunday in Lent, At Lauds)

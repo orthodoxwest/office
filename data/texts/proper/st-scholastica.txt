@@ -10,15 +10,18 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
-# [benedictus-antiphon]
-# Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
+[collect]
+# SOURCE: diurnal p. 478
+O God, who didst reveal in a vision the soul of blessed Scholastica thy Virgin entering heaven in the likeness of a dove, that thou mightest shew the way of the undefiled: grant us by the aid of her merits and prayers so innocently to live, that we may worthily attain unto joys eternal.
+
+[benedictus-antiphon]
+# SOURCE: diurnal p. 478
+O how illustrious * are the merits of blessed Scholastica! O how great the power of her tears! through which the renowned virgin, out of sunny clearness, drew down from the air a mighty flood of rain.
+
+[magnificat-antiphon]
+# SOURCE: diurnal p. 479
+To-day * the holy virgin Scholastica, in the likeness of a dove, went forth with all gladness to the heavenly places: to-day she was found worthy to enjoy for ever the bliss of celestial life beside her brother.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
@@ -63,9 +66,11 @@
 # [hymn-vespers]
 # Hymn at Vespers.
 #
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
+[versicle-lauds]
+# SOURCE: diurnal p. 478
+V. Behold, thou art fair, my love.
+R. Behold, thou art fair; thou hast dove's eyes.
+
 # [versicle-vespers]
 # Versicle after the hymn at Vespers.
 #
@@ -107,3 +112,87 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# [chapter-first-vespers]
+# Chapter at I Vespers when it differs from II Vespers.
+#
+# [chapter-prime]
+# Proper chapter at Prime.
+#
+# [chapter-ferial-prime]
+# Proper ferial chapter at Prime when the office explicitly supplies one.
+#
+# [chapter-terce]
+# Proper chapter at Terce.
+#
+[chapter-sext]
+# SOURCE: diurnal p. 478
+!Cant 6:9
+My dove, my undefiled is but one; * the daughters of Sion saw her and blessed her; * yea, the queens praised her.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 479
+!Cant 5:12
+Her eyes are as the eyes of doves by the rivers of waters, * washed with milk, and fitly set.
+R. Thanks be to God.
+
+# [chapter-compline]
+# Proper chapter at Compline.
+#
+# [hymn-first-vespers]
+# Hymn at I Vespers when it differs from II Vespers.
+#
+# [hymn-prime]
+# Proper hymn at Prime.
+#
+# [hymn-terce]
+# Proper hymn at Terce.
+#
+# [hymn-sext]
+# Proper hymn at Sext.
+#
+# [hymn-none]
+# Proper hymn at None.
+#
+# [hymn-compline]
+# Proper hymn at Compline.
+#
+# [versicle-prime]
+# Proper versicle at Prime.
+#
+# [versicle-terce]
+# Proper versicle at Terce.
+#
+# [versicle-sext]
+# Proper versicle at Sext.
+#
+# [versicle-none]
+# Proper versicle at None.
+#
+# [versicle-compline]
+# Proper versicle at Compline.
+#
+# [short-responsory-prime]
+# Proper short responsory at Prime.
+#
+# [short-responsory-terce]
+# Proper short responsory at Terce.
+#
+# [short-responsory-sext]
+# Proper short responsory at Sext.
+#
+# [short-responsory-none]
+# Proper short responsory at None.
+#
+# [short-responsory-first-vespers]
+# Short responsory at I Vespers when it differs from II Vespers.
+#
+# [short-responsory-compline]
+# Proper short responsory at Compline.
+#
+# [psalm-antiphon-5-vespers]
+# Vespers-only override for psalm antiphon 5.
+#
+# [psalm-antiphon-5-first-vespers]
+# I Vespers override for psalm antiphon 5.
