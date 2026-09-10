@@ -34,6 +34,25 @@
       <figcaption><span>{{.FirstDate}}</span><span>{{.LastDate}} · Today</span></figcaption>
     </figure>
   </section>
+  <section class="usage-panel" aria-labelledby="usage-splits-title">
+    <div class="usage-section-heading"><div><h2 id="usage-splits-title">Appearance &amp; screen</h2><p>How the Office was met, day by day.</p></div><span class="usage-period">{{.Days}} days</span></div>
+    <div class="usage-splits">
+      {{range $i, $split := .Splits}}<div class="usage-split">
+        <div class="usage-split-head"><h3>{{$split.Title}}</h3><p>{{$split.Note}}</p></div>
+        {{if $split.Total}}<figure class="usage-mix">
+          <svg class="usage-mix-band" viewBox="0 0 720 40" preserveAspectRatio="none" role="img" aria-labelledby="usage-mix-{{$i}}-title usage-mix-{{$i}}-desc">
+            <title id="usage-mix-{{$i}}-title">{{$split.Left.Label}} against {{$split.Right.Label}}, day by day</title>
+            <desc id="usage-mix-{{$i}}-desc">{{$split.Reported}} of {{$.Days}} days reported, from {{$split.FirstDate}} to {{$split.LastDate}}. Over the whole period {{$split.Left.Percent}} percent {{$split.Left.Label}}. On the earliest day that reported, {{$split.FirstShare}} percent; on the most recent, {{$split.LastShare}} percent.</desc>
+            {{range $split.Mix}}{{if .Reported}}<rect class="usage-share usage-share-left" x="{{.X}}" y="0" width="{{.Width}}" height="{{.LeftHeight}}"><title>{{.Day}}: {{$split.Left.Label}} {{.Left}}, {{$split.Right.Label}} {{.Right}} — {{.Percent}}% {{$split.Left.Label}}</title></rect><rect class="usage-share usage-share-right" x="{{.X}}" y="{{.RightY}}" width="{{.Width}}" height="{{.RightHeight}}"><title>{{.Day}}: {{$split.Left.Label}} {{.Left}}, {{$split.Right.Label}} {{.Right}} — {{.Percent}}% {{$split.Left.Label}}</title></rect>{{end}}{{end}}
+          </svg>
+          <figcaption><span>{{$split.FirstDate}}</span><span>{{$split.LastDate}}</span></figcaption>
+        </figure>
+        <p class="usage-split-legend"><span><span class="usage-key usage-key-left" aria-hidden="true"></span>{{$split.Left.Label}} <span class="usage-share-pct">{{$split.Left.Percent}}%</span> · {{$split.Left.Count}}</span><span><span class="usage-key usage-key-right" aria-hidden="true"></span>{{$split.Right.Label}} <span class="usage-share-pct">{{$split.Right.Percent}}%</span> · {{$split.Right.Count}}</span></p>
+        {{else}}<p class="usage-split-empty">Nothing reported in this period.<br><span>Counts begin once readers load the current app.</span></p>{{end}}
+      </div>{{end}}
+    </div>
+    <p class="usage-splits-note">Each column is one day&rsquo;s mix, not its size; a day nobody reported leaves a gap. The percentages beside each name are the whole period, which is the steadier figure — a single day&rsquo;s share swings easily at these volumes.</p>
+  </section>
   <section class="usage-panel" aria-labelledby="usage-offices-title">
     <div class="usage-section-heading"><div><h2 id="usage-offices-title">By day &amp; office</h2><p>Each browser counts once per office, per day.</p></div></div>
     <div class="usage-table-wrap" role="region" aria-label="Daily office counts; scroll for more days and offices" tabindex="0">
@@ -47,6 +66,7 @@
   <aside class="usage-notes" aria-labelledby="usage-notes-title">
     <h2 id="usage-notes-title">Reading these numbers</h2>
     <p>These are approximate browser counts, not completed prayers. Office, Ordo and Reminders columns overlap; they do not add up to the daily total. Ordo counts a viewed calendar page; Reminders counts a generated feed link, not a visit to the reminders page. Home also contributes to the total but has no column of its own.</p>
+    <p>Appearance and screen are recorded as the page was rendered at the moment it counted, once per browser per day, each under its own named dimension so a pair added or retired later cannot disturb the others. The band shows each day&rsquo;s mix and the percentages beside it sum the period as browser-days, so both compare with each other rather than with the daily totals above. Apse covers a dark appearance whether chosen or inherited from the device; Mobile covers a viewport under 700px or any touch-primary pointer, so tablets and a phone in landscape count there too. A reader who switches appearance or rotates a phone on different days counts on both sides.</p>
     <p>Only today&rsquo;s Office counts, and only once someone touches the page or lingers on it. Reading the dated archive, preloading, and self-identifying crawlers are all excluded, so the site stays open to scraping without it showing up here.</p>
     <p>Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again. Zero means no recorded visits. All reporting days use America/New_York.</p>
   </aside>

@@ -1752,6 +1752,10 @@ function easternDay(offsetDays = 0) {
   return now.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
 }
 
+// A beacon body is the page scope followed by the dimensions describing how
+// that page was rendered; most of these tests care only about the scope.
+const scopes = (events) => events.map(body => body.split(" ")[0]);
+
 // A person, not the default HeadlessChrome agent the server drops as a bot.
 const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
@@ -1771,7 +1775,7 @@ test("engaged visits to a current page send an event, passive and background one
   // A touch is engagement.
   await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(1);
-  expect(events).toEqual(["lauds"]);
+  expect(scopes(events)).toEqual(["lauds"]);
 
   // A background fetch of another hour is not a visit to it.
   await page.evaluate(async () => {
@@ -1779,12 +1783,12 @@ test("engaged visits to a current page send an event, passive and background one
     await (await fetch(`/vespers/${document.body.getAttribute("data-usage-when")}`)).text();
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  expect(events).toEqual(["lauds"]);
+  expect(scopes(events)).toEqual(["lauds"]);
 
   await page.goto(`/?date=${easternDay()}`);
   await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(2);
-  expect(events[1]).toBe("site");
+  expect(scopes(events)[1]).toBe("site");
 
   // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
@@ -1826,7 +1830,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
   await page.goto(`/calendar/${year}`);
   await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(1);
-  expect(events).toEqual(["ordo"]);
+  expect(scopes(events)).toEqual(["ordo"]);
 });
 
 test("generating a reminder feed link is tracked separately from viewing the page", async ({ page }) => {
@@ -1845,10 +1849,62 @@ test("generating a reminder feed link is tracked separately from viewing the pag
   await page.goto("/reminders");
   await page.mouse.click(200, 300);
   // Merely opening and engaging with the page reports "site", never "reminders".
-  await expect.poll(() => events).toEqual(["site"]);
+  await expect.poll(() => scopes(events)).toEqual(["site"]);
 
   await page.getByRole("button", { name: "Copy link" }).click();
-  await expect.poll(() => events).toEqual(["site", "reminders"]);
+  await expect.poll(() => scopes(events)).toEqual(["site", "reminders"]);
+});
+
+// The default project emulates a phone, which is what most readers use.
+test("the beacon reports the appearance the page was read in", async ({ page }) => {
+  const events = [];
+  await page.route("**/api/usage", async route => {
+    events.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const read = async (label) => {
+    events.length = 0;
+    await page.goto(`/vespers/${easternDay()}`);
+    await page.mouse.click(200, 300);
+    await expect.poll(() => events.length, { message: label }).toBe(1);
+    return events[0];
+  };
+
+  // Device appearance, no stored choice: what is on screen is what counts.
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile");
+  await page.emulateMedia({ colorScheme: "dark" });
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile");
+
+  // An explicit choice overrides the device, so someone reading the Nave on a
+  // dark-mode phone counts as Nave.
+  await page.evaluate(() => localStorage.setItem("office-theme", "light"));
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile");
+  await page.evaluate(() => localStorage.removeItem("office-theme"));
+});
+
+test.describe("on a screen with a mouse", () => {
+  test.use({ isMobile: false, hasTouch: false, viewport: { width: 1280, height: 900 } });
+
+  test("the beacon separates a desk from a narrowed window", async ({ page }) => {
+    const events = [];
+    await page.route("**/api/usage", async route => {
+      events.push(route.request().postData());
+      await route.fulfill({ status: 204 });
+    });
+    const read = async (label) => {
+      events.length = 0;
+      await page.goto(`/vespers/${easternDay()}`);
+      await page.mouse.click(200, 300);
+      await expect.poll(() => events.length, { message: label }).toBe(1);
+      return events[0];
+    };
+
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop");
+    // A desktop window dragged narrow gets the phone layout, and is counted
+    // as the layout it is actually being read in.
+    await page.setViewportSize({ width: 390, height: 900 });
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile");
+  });
 });
 
 // The cookie round trip is the whole basis of deduplication, so exercise it
@@ -1885,6 +1941,15 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
     await botCtx.close();
   }
   expect(await today(reader)).toBe(before + 1);
+
+  // The same visit lands in the mix band for today — a light-scheme phone in
+  // this project, so the day is drawn and titled with both sides' counts.
+  await reader.goto("/admin/usage?days=7");
+  for (const [name, side] of [["Nave vs Apse", "Nave"], ["Desktop vs Mobile", "Desktop"]]) {
+    const band = reader.locator(".usage-split", { hasText: name });
+    await expect(band.locator("rect > title").last())
+      .toHaveText(new RegExp(`^${easternDay()}: ${side} \\d+, `));
+  }
   await readerCtx.close();
 });
 
@@ -1893,6 +1958,8 @@ test("usage report is accessible and fits narrow and wide screens", async ({ pag
   expect(response.headers()["cache-control"]).toBe("no-store");
   expect(response.headers()["x-robots-tag"]).toContain("noindex");
   await expect(page.locator("tbody tr")).toHaveCount(7);
+  await expect(page.getByRole("heading", { name: "Nave vs Apse" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Desktop vs Mobile" })).toBeVisible();
   for (const theme of ["light", "dark"]) {
     await page.evaluate(theme => document.documentElement.setAttribute("data-theme", theme), theme);
     for (const width of [320, 390, 540, 768, 1280, 1920]) {

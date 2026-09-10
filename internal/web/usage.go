@@ -47,8 +47,15 @@ func (s *Server) handleUsageEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 32))
-	if err != nil || !usage.ValidScope(string(body)) {
+	// A scope plus one token per dimension family; 64 bytes leaves room for
+	// another dimension without a client and server having to agree on a day.
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 64))
+	if err != nil {
+		http.Error(w, "Invalid office", http.StatusBadRequest)
+		return
+	}
+	event, ok := usage.ParseEvent(string(body))
+	if !ok {
 		http.Error(w, "Invalid office", http.StatusBadRequest)
 		return
 	}
@@ -76,7 +83,7 @@ func (s *Server) handleUsageEvent(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
-	if err := s.usage.Record(ctx, time.Now(), id, string(body)); err != nil {
+	if err := s.usage.Record(ctx, time.Now(), id, event.Scope, event.Dimensions...); err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}

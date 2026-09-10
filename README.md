@@ -150,18 +150,51 @@ fly deploy
 ### Usage metrics
 
 The unlinked, unauthenticated `/admin/usage` report shows daily unique browsers
-and unique browsers opening each office, the ordo, and the reminder feed, with
-7/30/90/366-day views. It is public to anyone who knows the URL, marked
-`noindex`, and excluded from the service-worker cache. Reporting days use
-America/New_York, including DST. Counts describe visible pages, not completed
-prayers. A browser opening several hours counts once overall and once in each
-hour column; likewise the Ordo column counts a viewed calendar page, and the
-Reminders column counts a *generated* feed link (the subscribe or copy action
-on `/reminders`, not merely loading that page) — both also count once toward
-the overall total. Home contributes to the overall total but has no column of
-its own. Preloads do not count; offline use and browsers without JavaScript
-are missed. Separate devices, blocked cookies, and cleared cookies can inflate
-the approximate user count.
+and unique browsers opening each office, the ordo, and the reminder feed, plus
+how those browsers rendered the page, with 7/30/90/366-day views. It is public
+to anyone who knows the URL, marked `noindex`, and excluded from the
+service-worker cache. Reporting days use America/New_York, including DST.
+Counts describe visible pages, not completed prayers. A browser opening several
+hours counts once overall and once in each hour column; likewise the Ordo
+column counts a viewed calendar page, and the Reminders column counts a
+*generated* feed link (the subscribe or copy action on `/reminders`, not merely
+loading that page) — both also count once toward the overall total. Home
+contributes to the overall total but has no column of its own. Preloads do not
+count; offline use and browsers without JavaScript are missed. Separate
+devices, blocked cookies, and cleared cookies can inflate the approximate user
+count.
+
+Two further dimensions ride along on the same beacon, describing how a page
+was rendered rather than which page it was, to show where design work pays
+off: **Nave vs Apse** — the appearance actually on screen, whether chosen or
+inherited from the device — and **Desktop vs Mobile** — a viewport under the
+700px layout breakpoint or a touch-primary pointer, so tablets and a phone in
+landscape count as mobile, as does a narrowed desktop window. Each is counted
+like any other scope, once per browser per day, and stored under a qualified
+`family:value` name (`appearance:apse`, `screen:mobile`) rather than the bare
+value. A value therefore belongs to exactly one family, two families may each
+offer a `default`, and a family retired later cannot be silently continued by
+a different one that reuses one of its value names. A key or value that has
+been written is never redefined: add a new key, so an old series ends where
+its meaning ended instead of changing mid-flight. The report draws each pair as
+a day-by-day mix band with its period share beside it: a single figure for the
+window cannot tell a settled 60/40 from a migration that passed through it,
+and the longer the window the more movement it would hide. Both compare with
+each other, not with the daily totals; a day nobody reported leaves a gap in
+the band rather than being drawn as an even split, and a single day's share
+swings easily at these volumes, so the period figure is the steadier one.
+
+A reader who switches appearance or rotates a phone on different days counts
+on both sides, so a pair can exceed the daily total; a browser still serving a
+cached `app.js` from before this existed reports neither, so a pair can also
+fall short of it.
+
+Only the scope has to be understood server-side. The service worker keeps
+`app.js` across deploys, so both directions of skew are ordinary: a client
+from before dimensions existed posts the bare scope, and a client cached from
+a build newer than the server posts tokens the server has never heard of.
+Either way the page still counts and the unreadable tokens are dropped, rather
+than un-refreshed browsers dropping out of the report.
 
 Three filters keep scraping from becoming usage. The site stays freely
 crawlable — there is no robots.txt and the dated archive is deliberately
