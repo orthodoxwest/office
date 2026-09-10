@@ -85,7 +85,7 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 	// A current client reports how it rendered the page alongside the scope;
 	// a browser still serving app.js from the service-worker cache sends the
 	// bare scope and must keep counting exactly as before.
-	modern := send("POST", "terce apse mobile", "https://office.test", nil)
+	modern := send("POST", "terce appearance:apse screen:mobile", "https://office.test", nil)
 	if modern.Code != 204 {
 		t.Fatalf("dimensioned event: %d %s", modern.Code, modern.Body)
 	}
@@ -94,7 +94,7 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 		t.Fatalf("stale client event: %d %s", stale.Code, stale.Body)
 	}
 	// A token from a newer build than this one loses the dimension, not the hour.
-	if w := send("POST", "none nave transept", "https://office.test", nil); w.Code != 204 {
+	if w := send("POST", "none appearance:nave transept:north", "https://office.test", nil); w.Code != 204 {
 		t.Fatalf("unknown dimension: %d %s", w.Code, w.Body)
 	}
 	// The ordo page view and a generated reminder feed link are tracked as
@@ -115,8 +115,9 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 	}
 	// Three cookieless browsers reached the hours above; only the two that
 	// described themselves land in a dimension.
-	if rows[0].Apse != 1 || rows[0].Mobile != 1 || rows[0].Nave != 1 || rows[0].Desktop != 0 {
-		t.Fatalf("dimension counts: %+v", rows[0])
+	if rows[0].Dimensions["appearance:apse"] != 1 || rows[0].Dimensions["screen:mobile"] != 1 ||
+		rows[0].Dimensions["appearance:nave"] != 1 || rows[0].Dimensions["screen:desktop"] != 0 {
+		t.Fatalf("dimension counts: %+v", rows[0].Dimensions)
 	}
 	w := httptest.NewRecorder()
 	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=7", nil))

@@ -7,6 +7,10 @@ document.documentElement.classList.add("js");
 // coarse pointer, which catches tablets and a phone held in landscape. Both
 // are read at send time and never stored; the server counts each like any
 // other scope, once per browser per day.
+//
+// Each is reported as "family:value", the name it is stored under, so a value
+// belongs to exactly one family and a family retired later cannot be confused
+// with a value name reused by a different one (see usage.Dimensions).
 function usageBeaconBody(scope) {
   if (!window.matchMedia) {
     return scope;
@@ -15,7 +19,9 @@ function usageBeaconBody(scope) {
   var dark = forced === "dark" ||
     (forced !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   var handheld = window.matchMedia("(max-width: 700px), (pointer: coarse)").matches;
-  return scope + (dark ? " apse" : " nave") + (handheld ? " mobile" : " desktop");
+  return scope +
+    (dark ? " appearance:apse" : " appearance:nave") +
+    (handheld ? " screen:mobile" : " screen:desktop");
 }
 
 (function () {

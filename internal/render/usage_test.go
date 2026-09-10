@@ -30,10 +30,14 @@ func TestUsageSummaryAndChronologicalChart(t *testing.T) {
 func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
 	// A mix that reverses across the window: a period figure alone would call
 	// this an even split and hide the migration entirely.
+	mix := func(nave, apse, desktop, mobile int) map[string]int {
+		return map[string]int{"appearance:nave": nave, "appearance:apse": apse,
+			"screen:desktop": desktop, "screen:mobile": mobile}
+	}
 	rows := []usage.Daily{
-		{Day: "2026-09-06", Users: 5, Nave: 1, Apse: 4, Desktop: 1, Mobile: 4},
+		{Day: "2026-09-06", Users: 5, Dimensions: mix(1, 4, 1, 4)},
 		{Day: "2026-09-05", Users: 4},
-		{Day: "2026-09-04", Users: 5, Nave: 4, Apse: 1, Desktop: 0, Mobile: 5},
+		{Day: "2026-09-04", Users: 5, Dimensions: mix(4, 1, 0, 5)},
 	}
 	d := NewUsageData(rows, 3)
 	appearance, screen := d.Splits[0], d.Splits[1]
@@ -76,8 +80,8 @@ func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
 	// A window that reaches back into last year dates its far end, so the two
 	// ends of a 366-day band cannot read as the same "Sep 9".
 	crossing := NewUsageData([]usage.Daily{
-		{Day: "2026-01-02", Users: 1, Nave: 1},
-		{Day: "2025-12-31", Users: 1, Apse: 1},
+		{Day: "2026-01-02", Users: 1, Dimensions: mix(1, 0, 0, 0)},
+		{Day: "2025-12-31", Users: 1, Dimensions: mix(0, 1, 0, 0)},
 	}, 366)
 	if crossing.FirstDate != "Dec 31, 2025" || crossing.LastDate != "Jan 2" {
 		t.Fatalf("ambiguous window labels: %q to %q", crossing.FirstDate, crossing.LastDate)
@@ -91,6 +95,30 @@ func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
 	for _, split := range quiet.Splits {
 		if split.Total != 0 || split.Reported != 0 || split.Mix[0].Reported {
 			t.Fatalf("unreported dimension drew a band: %+v", split)
+		}
+	}
+}
+
+// The report and the storage vocabulary are written in different packages and
+// have to name the same families: a dimension with no words would silently
+// stop being drawn, and words for a retired dimension would draw an empty
+// band forever.
+func TestUsageSplitsCoverTheVocabulary(t *testing.T) {
+	if len(usageSplitWords) != len(usage.Dimensions) {
+		t.Fatalf("%d dimensions, %d described", len(usage.Dimensions), len(usageSplitWords))
+	}
+	for _, words := range usageSplitWords {
+		dimension, ok := usage.DimensionByKey(words.Key)
+		if !ok {
+			t.Fatalf("report draws %q, which the vocabulary does not declare", words.Key)
+		}
+		for i, label := range words.Labels {
+			if label == "" {
+				t.Fatalf("%s has no word for %q", words.Key, dimension.Values[i])
+			}
+		}
+		if words.Title == "" || words.Note == "" {
+			t.Fatalf("%s is unlabelled: %+v", words.Key, words)
 		}
 	}
 }

@@ -1871,14 +1871,14 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers nave mobile");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers apse mobile");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers nave mobile");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
 });
 
@@ -1899,11 +1899,11 @@ test.describe("on a screen with a mouse", () => {
       return events[0];
     };
 
-    expect(await read("wide window")).toBe("vespers nave desktop");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers nave mobile");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile");
   });
 });
 

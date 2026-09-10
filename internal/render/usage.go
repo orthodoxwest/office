@@ -96,11 +96,12 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 			d.PeakDate = label(row.Day)
 		}
 	}
-	d.Splits = []UsageSplit{
-		newUsageSplit("Nave vs Apse", "The appearance actually rendered, whether chosen or inherited from the device",
-			rows, label, "Nave", "Apse", func(row usage.Daily) (int, int) { return row.Nave, row.Apse }),
-		newUsageSplit("Desktop vs Mobile", "Phone-shaped reading: a narrow window, or any touch screen",
-			rows, label, "Desktop", "Mobile", func(row usage.Daily) (int, int) { return row.Desktop, row.Mobile }),
+	for _, words := range usageSplitWords {
+		// A dimension the vocabulary no longer declares simply stops being
+		// drawn; TestUsageSplitsCoverTheVocabulary keeps the two in step.
+		if dimension, ok := usage.DimensionByKey(words.Key); ok {
+			d.Splits = append(d.Splits, newUsageSplit(words, dimension, rows, label))
+		}
 	}
 	scale := d.Max
 	if scale == 0 {
@@ -116,21 +117,36 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 	return d
 }
 
+// usageSplitWords binds each stored dimension to the words the report uses
+// for it, in the order the panel draws them. The keys and the two values are
+// the storage vocabulary (usage.Dimensions); only the wording lives here.
+var usageSplitWords = []usageSplitWord{
+	{Key: "appearance", Title: "Nave vs Apse", Labels: [2]string{"Nave", "Apse"},
+		Note: "The appearance actually rendered, whether chosen or inherited from the device"},
+	{Key: "screen", Title: "Desktop vs Mobile", Labels: [2]string{"Desktop", "Mobile"},
+		Note: "Phone-shaped reading: a narrow window, or any touch screen"},
+}
+
+type usageSplitWord struct {
+	Key, Title, Note string
+	Labels           [2]string
+}
+
 // newUsageSplit lays out one dimension: its period totals and its day-by-day
 // mix band, chronological like the trend chart above it. Percentages are made
 // to sum to 100 rather than rounded independently. A dimension nothing has
 // reported yet — a period before it was collected, or one served entirely to
 // clients still on a cached app.js — draws nothing at all, so the template can
 // say so instead of implying an even split.
-func newUsageSplit(title, note string, rows []usage.Daily, label func(string) string,
-	leftLabel, rightLabel string, pick func(usage.Daily) (int, int)) UsageSplit {
-	split := UsageSplit{Title: title, Note: note,
-		Left:      UsageShare{Label: leftLabel},
-		Right:     UsageShare{Label: rightLabel},
+func newUsageSplit(words usageSplitWord, dimension usage.Dimension, rows []usage.Daily, label func(string) string) UsageSplit {
+	split := UsageSplit{Title: words.Title, Note: words.Note,
+		Left:      UsageShare{Label: words.Labels[0]},
+		Right:     UsageShare{Label: words.Labels[1]},
 		FirstDate: label(rows[len(rows)-1].Day), LastDate: label(rows[0].Day)}
+	leftScope, rightScope := dimension.Scope(dimension.Values[0]), dimension.Scope(dimension.Values[1])
 	step := 720 / float64(len(rows))
 	for i := len(rows) - 1; i >= 0; i-- {
-		left, right := pick(rows[i])
+		left, right := rows[i].Dimensions[leftScope], rows[i].Dimensions[rightScope]
 		split.Left.Count += left
 		split.Right.Count += right
 		day := UsageMixDay{Day: rows[i].Day, Left: left, Right: right,
