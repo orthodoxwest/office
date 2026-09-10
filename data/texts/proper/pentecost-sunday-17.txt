@@ -1,6 +1,6 @@
 [collect]
 # SOURCE: diurnal p. 438
-O Lord, we beseech thee, grant thy people grace to withstand the temptations of the world, the flesh, and the devil; and with pure hearts and minds to follow thee, the only God.
+Lord, we beseech thee, grant thy people grace to withstand the temptations of the world, the flesh, and the devil; and with pure hearts and minds to follow thee, the only God.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 8 (Magister quod est)
