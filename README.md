@@ -192,10 +192,17 @@ each other, not with the daily totals; a day nobody reported leaves a gap in
 the band rather than being drawn as an even split, and a single day's share
 swings easily at these volumes, so the period figure is the steadier one.
 
-A reader who switches appearance or rotates a phone on different days counts
+A reader who switches appearance or rotates a phone during the day can count
 on both sides, so a pair can exceed the daily total; a browser still serving a
 cached `app.js` from before this existed reports neither, so a pair can also
 fall short of it.
+
+Office pages also report `prayer-form:private|deacon|priest`, including a
+selection changed during an engaged visit. This measures the prayers being
+read, not the reader's ordination. The report shows browser-days for each
+form and daily counts; someone using two forms on the same day counts in both,
+while the overall visitor and hour counts remain deduplicated. This dimension
+is ignored on Home, Ordo, and Reminders, and no offline history is queued.
 
 Only the scope has to be understood server-side. The service worker keeps
 `app.js` across deploys, so both directions of skew are ordinary: a client
