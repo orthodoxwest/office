@@ -16,6 +16,7 @@
       <a class="today-link not-today-link" href="{{.TodayLink}}">Go to today</a>
     </p>
     {{end}}
+    <div class="hour-context-controls">
     <details class="hour-date-nav">
       <summary>Change date</summary>
       <nav class="day-nav" aria-label="Date navigation">
@@ -29,14 +30,43 @@
         <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
       </nav>
     </details>
+    {{if .LeaderForms}}
+    <details class="leader-selector">
+      <summary>Prayer form: {{range .LeaderForms}}<span data-leaders="{{.Form}}">{{.Form.Label}}</span>{{end}}</summary>
+      <fieldset disabled>
+        <legend>How are you praying this office?</legend>
+        {{range .LeaderForms}}<label><input type="radio" name="office-prayer-form" value="{{.Form}}"{{if eq .Form "private"}} checked{{end}}> <span>{{.Form.Label}}</span></label>{{end}}
+        <p>Choose Private when praying alone, whatever your ordination. For choir prayer, choose the rank of the officiant. Your choice is remembered on this device.</p>
+      </fieldset>
+      <noscript><p>JavaScript is needed to change the prayer form. The private form is shown.</p></noscript>
+    </details>
+    <p class="leader-print-label">Prayer form: {{range .LeaderForms}}<span data-leaders="{{.Form}}">{{.Form.Label}}</span>{{end}}</p>
+    <span class="sr-only" id="leader-status" role="status"></span>
+    {{end}}
+    </div>
   </div>
   {{if .ShowBanner}}
+  {{if .LeaderForms}}<div data-leaders="{{.BannerForms}}">{{end}}
   <aside class="site-banner" id="site-banner" aria-label="Review notice">
     <p>This office has not yet been fully checked against the printed books and may contain errors.</p>
     <button type="button" data-dismiss-banner aria-label="Dismiss review notice">Dismiss</button>
   </aside>
+  {{if .LeaderForms}}</div>{{end}}
   {{end}}
   <div class="elements">
+    {{if .LeaderForms}}
+    {{range .LeaderSections}}
+      {{if .Collapsible}}
+      <details class="session-prayers"{{if or (eq $.HourName "lauds") (eq $.HourName "prime") (eq $.HourName "vespers")}} open{{end}}>
+        <summary>{{.Label}}</summary>
+        {{.HTML}}
+      </details>
+      {{else}}
+      {{if .Label}}{{renderSectionHeading .Label}}{{end}}
+      {{.HTML}}
+      {{end}}
+    {{end}}
+    {{else}}
     {{range .Hour.Sections}}
       {{if .Collapsible}}
       <details class="session-prayers"{{if or (eq $.HourName "lauds") (eq $.HourName "prime") (eq $.HourName "vespers")}} open{{end}}>
@@ -47,6 +77,7 @@
       {{if .Label}}{{renderSectionHeading .Label}}{{end}}
       {{renderSectionElements .Elements}}
       {{end}}
+    {{end}}
     {{end}}
   </div>
   {{/* The prayer ends above this wrapper. In Apse it becomes the threshold
@@ -60,6 +91,14 @@
     </nav>
     {{/* The one-line digest names only nonzero categories; the full
          dependency, resolution, and decision lists below always render. */}}
+    {{if .LeaderForms}}
+    {{range .LeaderForms}}<div data-leaders="{{.Form}}">{{template "leader-assurance" .}}</div>{{end}}
+    {{else}}{{template "leader-assurance" .}}{{end}}
+  </div>
+</div>
+{{end}}
+
+{{define "leader-assurance"}}
     <details class="assurance-panel">
       <summary>Assurance: {{.Assurance.Verified}} verified{{if .Assurance.NeedsReview}} &middot; {{.Assurance.NeedsReview}} need review{{end}}{{if .Assurance.SourceUnknown}} &middot; {{.Assurance.SourceUnknown}} source unknown{{end}}{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
       <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
@@ -83,6 +122,4 @@
     <p class="report-issue">
       Spotted an error on this page? <a href="{{.ReportURL}}" target="_blank" rel="noopener">Report a problem</a>
     </p>
-  </div>
-</div>
 {{end}}

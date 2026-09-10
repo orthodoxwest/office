@@ -1,0 +1,68 @@
+# Ordinary forms for private and clergy-led prayer.
+# App scope: private recitation; choir led by a deacon, priest, or bishop.
+
+[greeting-lay]
+# SOURCE: diurnal p. 9
+V. O Lord, hear my prayer.
+R. And let my cry come unto thee.
+
+[greeting-clergy]
+# SOURCE: diurnal p. 9
+V. The Lord be with you.
+R. And with thy spirit.
+
+[let-us-pray]
+# SOURCE: diurnal p. 9
+Let us pray.
+
+[benedicamus-domino]
+# SOURCE: diurnal p. 43
+V. Let us bless the Lord.
+R. Thanks be to God.
+
+[dead-pre-collect-prayers]
+# SOURCE: diurnal p. 77*
+V. From the gate of hell.
+R. Deliver their souls, O Lord.
+V. May they rest in peace.
+R. Amen.
+V. O Lord, hear my prayer.
+R. And let my cry come unto thee.
+
+[confiteor-officiant]
+# SOURCE: diurnal p. 7
+I confess to God Almighty, to blessed Mary ever Virgin, to blessed Michael the Archangel, to blessed John the Baptist, to the holy Apostles Peter and Paul, (to our blessed Father Benedict,) to all the Saints, and to you, brethren, that I have sinned exceedingly in thought, word, and deed: by my fault, by my own fault, by my own most grievous fault. Wherefore I beg blessed Mary ever Virgin, blessed Michael the Archangel, blessed John the Baptist, the holy Apostles Peter and Paul, (our blessed Father Benedict,) all the Saints, and you, brethren, to pray for me to the Lord our God.
+
+[confiteor-choir-response]
+# SOURCE: diurnal p. 7–8
+Almighty God have mercy upon thee, forgive thee thy sins, and bring thee to everlasting life.
+R. Amen.
+
+[confiteor-officiant-response]
+# SOURCE: diurnal p. 8
+Almighty God have mercy upon you, forgive you your sins, and bring you to everlasting life.
+R. Amen.
+
+[confiteor-absolution]
+# SOURCE: diurnal p. 8
+The Almighty and merciful Lord grant us pardon, absolution, and remission of our sins.
+R. Amen.
+
+[confiteor-officiant-rubric]
+# SOURCE: diurnal p. 7
+Then the Officiant makes Confession:
+
+[confiteor-choir-rubric]
+# SOURCE: diurnal p. 8
+Then the Confession is repeated by the Choir, and thee, father, is said instead of you, brethren.
+
+[confiteor-response-rubric]
+# SOURCE: diurnal p. 8
+After Confession has been made by the Choir, the Officiant says:
+
+[compline-opening-choir]
+# SOURCE: diurnal p. 147
+V. Sir, ask a blessing.
+Blessing. The Lord Almighty grant us a quiet night and a perfect end.
+R. Amen.
+

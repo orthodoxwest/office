@@ -47,9 +47,9 @@ func (s *Server) handleUsageEvent(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	// A scope plus one token per dimension family; 64 bytes leaves room for
+	// A scope plus one token per dimension family; 96 bytes leaves room for
 	// another dimension without a client and server having to agree on a day.
-	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 64))
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, 96))
 	if err != nil {
 		http.Error(w, "Invalid office", http.StatusBadRequest)
 		return

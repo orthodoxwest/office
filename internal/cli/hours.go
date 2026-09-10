@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
@@ -12,7 +13,7 @@ import (
 
 // composeHour builds the calendar and engine for the given date and composes
 // the named hour.
-func composeHour(dataDir, hourName string, date time.Time) (*models.OfficeHour, error) {
+func composeHour(dataDir, hourName string, date time.Time, forms ...models.PrayerForm) (*models.OfficeHour, error) {
 	year := date.Year()
 	moveable := calendar.ComputeMoveableDates(year)
 
@@ -31,13 +32,57 @@ func composeHour(dataDir, hourName string, date time.Time) (*models.OfficeHour, 
 		return nil, fmt.Errorf("creating office engine: %w", err)
 	}
 
-	return engine.ComposeHour(hourName, &days[dayIndex], moveable)
+	form := models.PrayerPrivate
+	if len(forms) != 0 {
+		form = forms[0]
+	}
+	return engine.ComposeHourWithOptions(hourName, &days[dayIndex], moveable, office.ComposeOptions{Form: form})
+}
+
+// takePrayerForm accepts the option before or after positional arguments,
+// including review commands whose final arguments are a free-form note.
+func takePrayerForm(args []string) ([]string, models.PrayerForm, error) {
+	form := models.PrayerPrivate
+	var rest []string
+	seen := false
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		if arg != "--form" && !strings.HasPrefix(arg, "--form=") {
+			rest = append(rest, arg)
+			continue
+		}
+		if seen {
+			return nil, "", fmt.Errorf("--form may be supplied only once")
+		}
+		seen = true
+		value := strings.TrimPrefix(arg, "--form=")
+		if arg == "--form" {
+			i++
+			if i == len(args) {
+				return nil, "", fmt.Errorf("--form requires private, deacon, or priest")
+			}
+			value = args[i]
+		}
+		if value == "" {
+			return nil, "", fmt.Errorf("--form requires private, deacon, or priest")
+		}
+		var err error
+		form, err = models.ParsePrayerForm(value)
+		if err != nil {
+			return nil, "", err
+		}
+	}
+	return rest, form, nil
 }
 
 // cmdHour prints one composed hour as plain text.
 func cmdHour(e env, hourName string, args []string) error {
+	args, form, err := takePrayerForm(args)
+	if err != nil {
+		return err
+	}
 	if len(args) < 1 {
-		return fmt.Errorf("usage: office %s YYYY-MM-DD", hourName)
+		return fmt.Errorf("usage: office %s YYYY-MM-DD [--form private|deacon|priest]", hourName)
 	}
 
 	date, err := parseDate(args[0])
@@ -45,7 +90,7 @@ func cmdHour(e env, hourName string, args []string) error {
 		return err
 	}
 
-	hour, err := composeHour(e.dataDir, hourName, date)
+	hour, err := composeHour(e.dataDir, hourName, date, form)
 	if err != nil {
 		return fmt.Errorf("composing %s: %w", hourName, err)
 	}
@@ -56,7 +101,11 @@ func cmdHour(e env, hourName string, args []string) error {
 
 // cmdTeX emits one composed hour as a LuaLaTeX booklet source.
 func cmdTeX(e env, args []string) error {
-	const texUsage = "usage: office tex [--chant] HOUR [YYYY-MM-DD]\n" +
+	args, form, err := takePrayerForm(args)
+	if err != nil {
+		return err
+	}
+	const texUsage = "usage: office tex [--chant] [--form private|deacon|priest] HOUR [YYYY-MM-DD]\n" +
 		"Example: office tex lauds 2026-03-11 > lauds.tex\n" +
 		"         office tex --chant compline > compline.tex"
 
@@ -84,7 +133,7 @@ func cmdTeX(e env, args []string) error {
 		}
 	}
 
-	hour, err := composeHour(e.dataDir, hourName, date)
+	hour, err := composeHour(e.dataDir, hourName, date, form)
 	if err != nil {
 		return fmt.Errorf("composing %s: %w", hourName, err)
 	}

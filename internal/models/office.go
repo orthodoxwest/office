@@ -95,6 +95,9 @@ type RubricSpan struct {
 // after-antiphon stay whole. Announce is presentation-only and is not part of
 // the review content hash.
 type OfficeElement struct {
+	// LeaderSlot identifies a bounded sequence that varies with the officiant.
+	// It is presentation metadata, excluded from content hashes.
+	LeaderSlot  string
 	Type        ElementType
 	Text        string
 	Label       string
@@ -165,6 +168,7 @@ type OfficeSection struct {
 
 // OfficeHour represents a fully composed office hour ready for rendering.
 type OfficeHour struct {
+	Form      PrayerForm
 	Date      time.Time
 	Hour      string
 	Title     string

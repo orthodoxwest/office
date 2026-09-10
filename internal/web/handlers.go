@@ -38,7 +38,8 @@ func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 		celebration = render.TitleCase(string(hour.Season)) + " feria"
 	}
 	title := fmt.Sprintf("[review] %s — %s (%s)", hour.Title, dateSlug, celebration)
-	body := fmt.Sprintf(`**Page:** /%s/%s
+	body := fmt.Sprintf(`**Page:** /%s/%s?form=%s
+**Prayer form:** %s
 **Celebration:** %s
 **Season:** %s
 
@@ -52,7 +53,7 @@ func reportURL(hour *models.OfficeHour, hourName, dateSlug string) string {
 
 **What the app shows:**
 
-`, hourName, dateSlug, celebration, render.TitleCase(string(hour.Season)))
+`, hourName, dateSlug, hour.Form, hour.Form.Label(), celebration, render.TitleCase(string(hour.Season)))
 
 	q := url.Values{}
 	q.Set("title", title)
@@ -67,7 +68,8 @@ func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string
 		celebration = render.TitleCase(string(hour.Season)) + " feria"
 	}
 	title := fmt.Sprintf("[review] Source verification — %s", key)
-	body := fmt.Sprintf(`**Page:** /%s/%s
+	body := fmt.Sprintf(`**Page:** /%s/%s?form=%s
+**Prayer form:** %s
 **Celebration:** %s
 **Corpus entry:** %s
 **Current provenance status:** %s
@@ -77,7 +79,7 @@ func dependencyReportURL(hour *models.OfficeHour, hourName, dateSlug, key string
 
 **Finding:**
 
-`, hourName, dateSlug, celebration, key, status)
+`, hourName, dateSlug, hour.Form, hour.Form.Label(), celebration, key, status)
 	q := url.Values{}
 	q.Set("title", title)
 	q.Set("body", body)
@@ -490,6 +492,18 @@ func (s *Server) handleHour(w http.ResponseWriter, r *http.Request, hourName, da
 		ShowBanner:  s.showVettingBanner(hour),
 		Assurance:   s.hourAssurance(hour, hourName, dateStr),
 	}
+	for _, leader := range models.PrayerForms {
+		form := hour
+		if leader != models.PrayerPrivate {
+			form, err = s.engine.ComposeHourWithOptions(hourName, day, moveable, office.ComposeOptions{MartyrologyPreview: preview, Form: leader})
+			if err != nil {
+				s.handleError(w, r, http.StatusInternalServerError, "Unable to compose the selected office form.")
+				return
+			}
+		}
+		data.LeaderForms = append(data.LeaderForms, render.LeaderForm{Form: leader, Hour: form,
+			Assurance: s.hourAssurance(form, hourName, dateStr), ReportURL: reportURL(form, hourName, dateStr), ShowBanner: s.showVettingBanner(form)})
+	}
 	setHTMLCacheHeaders(w)
 	if r.URL.Query().Has("preview") {
 		w.Header().Set("Cache-Control", "private, no-store")
@@ -509,7 +523,13 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 	if len(parts) == 1 || parts[1] == "" {
 		// No year specified: redirect to current year anchored at today's row.
 		slug := "d-" + now.Format("2006-01-02")
-		target := fmt.Sprintf("/calendar/%d#%s", year, slug)
+		formQuery := ""
+		if value := r.URL.Query().Get("form"); value != "" {
+			if form, err := models.ParsePrayerForm(value); err == nil {
+				formQuery = "?form=" + string(form)
+			}
+		}
+		target := fmt.Sprintf("/calendar/%d%s#%s", year, formQuery, slug)
 		http.Redirect(w, r, target, http.StatusFound)
 		return
 	}

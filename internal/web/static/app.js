@@ -1,19 +1,22 @@
 document.documentElement.classList.add("js");
 
-// Two dimensions ride along with every usage beacon, describing how the page
+// Appearance and screen dimensions accompany every usage beacon; office pages
+// also report the selected prayer form. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
 // screen (Nave or Apse, whether chosen or inherited from the device), and
 // whether this is a phone-shaped reading — the 700px layout breakpoint, or a
 // coarse pointer, which catches tablets and a phone held in landscape. Both
-// are read at send time and never stored; the server counts each like any
+// are read at send time; the server counts each like any
 // other scope, once per browser per day.
 //
 // Each is reported as "family:value", the name it is stored under, so a value
 // belongs to exactly one family and a family retired later cannot be confused
 // with a value name reused by a different one (see usage.Dimensions).
 function usageBeaconBody(scope) {
+  var leader = document.documentElement.getAttribute("data-leader") || "private";
+  var leaderToken = document.body.classList.contains("page-hour") && ["private", "deacon", "priest"].indexOf(leader) >= 0 ? " prayer-form:" + leader : "";
   if (!window.matchMedia) {
-    return scope;
+    return scope + leaderToken;
   }
   var forced = document.documentElement.getAttribute("data-theme");
   var dark = forced === "dark" ||
@@ -21,7 +24,7 @@ function usageBeaconBody(scope) {
   var handheld = window.matchMedia("(max-width: 700px), (pointer: coarse)").matches;
   return scope +
     (dark ? " appearance:apse" : " appearance:nave") +
-    (handheld ? " screen:mobile" : " screen:desktop");
+    (handheld ? " screen:mobile" : " screen:desktop") + leaderToken;
 }
 
 (function () {
@@ -518,6 +521,7 @@ function usageBeaconBody(scope) {
     syncDatedNavigation();
     updatePrayNow();
     markCalendarToday();
+    window.dispatchEvent(new Event("officenavigation"));
   }
 
   document.addEventListener("visibilitychange", function () {
@@ -1108,28 +1112,36 @@ function usageBeaconBody(scope) {
     return Math.abs(Date.parse(when + "T00:00:00Z") - Date.parse(day + "T00:00:00Z")) <= 864e5;
   };
 
-  var recordedDay = "";
+  var recorded = new Set();
   var pending = false;
   var engaged = false;
   function record() {
     if (!engaged || document.visibilityState !== "visible" || !navigator.onLine || pending) return;
     var day = today();
-    if (recordedDay === day || !current(day)) return;
+    var body = usageBeaconBody(scope);
+    var key = day + " " + body;
+    if (recorded.has(key) || !current(day)) return;
     pending = true;
     var controller = new AbortController();
     var timeout = window.setTimeout(function () { controller.abort(); }, 4000);
     fetch("/api/usage", {
       method: "POST",
       headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-      body: usageBeaconBody(scope),
+      body: body,
       credentials: "same-origin",
       cache: "no-store",
       signal: controller.signal
     }).then(function (response) {
-      if (response.ok) recordedDay = day;
+      if (response.ok) recorded.add(key);
     }).catch(function () {
       // Best effort: never delay prayer or queue offline browsing history.
-    }).finally(function () { window.clearTimeout(timeout); pending = false; });
+    }).finally(function () {
+      window.clearTimeout(timeout);
+      pending = false;
+      // A selection made while the previous beacon was in flight still
+      // records the form actually selected, without duplicating page totals.
+      if (usageBeaconBody(scope) !== body) record();
+    });
   }
 
   // Engagement gate: a headless scraper renders, snapshots and moves on, so
@@ -1170,6 +1182,7 @@ function usageBeaconBody(scope) {
   });
   window.addEventListener("pageshow", function () { resume(); record(); });
   window.addEventListener("online", record);
+  window.addEventListener("officeleaderchange", function () { engage(); record(); });
   // A foreground page left open across midnight belongs to the new day too.
   window.setInterval(record, 60000);
   resume();

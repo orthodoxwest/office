@@ -4543,3 +4543,33 @@ body.page-home::before {
   .usage-table-wrap { max-height: none; overflow: visible; }
   .usage-table th { position: static !important; }
 }
+
+/* The cached hour contains every officiant form. Select before first paint;
+   display:none also removes inactive words from print and accessibility. */
+[data-leaders] { display: none !important; }
+:root:not([data-leader]) [data-leaders~="private"],
+:root[data-leader="private"] [data-leaders~="private"],
+:root[data-leader="deacon"] [data-leaders~="deacon"],
+:root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
+.hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
+.hour-context-controls > .hour-date-nav { margin: 0; }
+.leader-selector { max-width: 100%; color: var(--accent); font-size: .9rem; }
+.leader-selector > summary { cursor: pointer; list-style: none; min-height: var(--touch-target); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .5rem; }
+.leader-selector > summary::-webkit-details-marker { display: none; }
+.leader-selector > summary::after { content: " ▾"; color: var(--gold); }
+.leader-selector[open] > summary::after { content: " ▴"; }
+.leader-selector[open] { flex: 1 1 100%; }
+.leader-selector fieldset { text-align: left; border: 1px solid var(--surface-edge); background: var(--surface); padding: .7rem 1rem; margin: .25rem auto .5rem; max-width: 30rem; color: var(--text); }
+.leader-selector legend { padding: 0 .25rem; }
+.leader-selector label { display: flex; align-items: center; gap: .6rem; cursor: pointer; min-height: var(--touch-target); }
+.leader-selector input:checked + span { box-shadow: inset 0 -1px var(--gold-line); }
+.leader-selector p { color: var(--muted); font-size: .85rem; margin-top: .5rem; line-height: 1.45; }
+.leader-selector summary:focus-visible, .leader-selector input:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.leader-print-label { display: none; }
+@media print { .leader-selector { display: none; } .leader-print-label { display: block; } }
+.usage-form-counts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin: 1rem 0; }
+.usage-form-counts dt { color: var(--muted); }
+.usage-form-counts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.usage-form-counts dd span { color: var(--muted); font-size: .85rem; }
+.usage-form-days { margin-top: 1rem; }
+.usage-form-days summary { cursor: pointer; min-height: var(--touch-target); }

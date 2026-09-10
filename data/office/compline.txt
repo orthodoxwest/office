@@ -4,7 +4,7 @@
 [Opening]
 Condition = not-office-of-the-dead
 
-Type = versicle
+Type = officiant-opening
 Ref = ordinary/compline/opening-versicle
 
 Type = chapter
@@ -16,7 +16,7 @@ Ref = ordinary/compline/confiteor-rubric
 Type = secret-prayer
 Ref = ordinary/shared/our-father
 
-Type = prayer
+Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
 Type = versicle
@@ -31,7 +31,7 @@ Condition = office-of-the-dead
 Type = rubric
 Ref = shared/formulas/dead-compline-confiteor-rubric
 
-Type = prayer
+Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
 [Psalmody]
@@ -117,14 +117,20 @@ Ref = ordinary/compline/preces
 Condition = not-office-of-the-dead
 Label = Collect
 
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
 Type = prayer
-Ref = ordinary/compline/post-preces
+Ref = shared/leader/let-us-pray
 
 Type = collect
 Ref = ordinary/compline/collect
 
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
 Type = versicle
-Ref = ordinary/compline/post-collect
+Ref = shared/leader/benedicamus-domino
 
 Type = blessing
 Ref = ordinary/compline/blessing
@@ -139,8 +145,14 @@ Ref = shared/formulas/kneeling-our-father-rubric
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
-Type = versicle
-Ref = shared/formulas/dead-pre-collect-versicles
+Type = prayer
+Ref = shared/leader/dead-pre-collect-prayers
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
 
 Type = collect
 Ref = proper/all-souls/compline-collect

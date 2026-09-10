@@ -1675,8 +1675,8 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
         ".site-brand",
         ".hour-date-nav > summary",
         ".session-prayers > summary",
-        ".assurance-panel > summary",
-        ".report-issue a",
+        ".assurance-panel > summary:visible",
+        ".report-issue a:visible",
       ],
     ],
     [
@@ -1871,14 +1871,14 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   };
 
   // Device appearance, no stored choice: what is on screen is what counts.
-  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile");
+  expect(await read("light phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
   await page.emulateMedia({ colorScheme: "dark" });
-  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile");
+  expect(await read("dark phone")).toBe("vespers appearance:apse screen:mobile prayer-form:private");
 
   // An explicit choice overrides the device, so someone reading the Nave on a
   // dark-mode phone counts as Nave.
   await page.evaluate(() => localStorage.setItem("office-theme", "light"));
-  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile");
+  expect(await read("chosen Nave on a dark phone")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
   await page.evaluate(() => localStorage.removeItem("office-theme"));
 });
 
@@ -1899,11 +1899,11 @@ test.describe("on a screen with a mouse", () => {
       return events[0];
     };
 
-    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop");
+    expect(await read("wide window")).toBe("vespers appearance:nave screen:desktop prayer-form:private");
     // A desktop window dragged narrow gets the phone layout, and is counted
     // as the layout it is actually being read in.
     await page.setViewportSize({ width: 390, height: 900 });
-    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile");
+    expect(await read("narrow window")).toBe("vespers appearance:nave screen:mobile prayer-form:private");
   });
 });
 
@@ -1912,7 +1912,7 @@ test.describe("on a screen with a mouse", () => {
 test("real events deduplicate per browser and exclude crawlers", async ({ browser, baseURL }) => {
   const today = async (page) => {
     await page.goto("/admin/usage?days=7");
-    const row = page.locator("tbody tr").first();
+    const row = page.locator("tbody tr").filter({ has: page.locator(".usage-total") }).first();
     return Number(await row.locator("td.usage-total").innerText());
   };
 
@@ -1957,7 +1957,8 @@ test("usage report is accessible and fits narrow and wide screens", async ({ pag
   const response = await page.goto("/admin/usage?days=7");
   expect(response.headers()["cache-control"]).toBe("no-store");
   expect(response.headers()["x-robots-tag"]).toContain("noindex");
-  await expect(page.locator("tbody tr")).toHaveCount(7);
+  await expect(page.locator("tbody tr").filter({ has: page.locator(".usage-total") })).toHaveCount(7);
+  await expect(page.locator(".usage-form-days tbody tr")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "Nave vs Apse" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Desktop vs Mobile" })).toBeVisible();
   for (const theme of ["light", "dark"]) {
@@ -2128,4 +2129,145 @@ test("wide and narrow initials clear text in native and fallback layouts", async
       }
     }
   }
+});
+
+async function choosePrayerForm(page, value) {
+  const selector = page.locator('.leader-selector');
+  if ((await selector.getAttribute('open')) === null) await selector.locator('summary').click();
+  await selector.locator(`input[value="${value}"]`).check();
+  await expect(page.locator('html')).toHaveAttribute('data-leader', value);
+}
+
+test('prayer forms switch complete sequences and keep reports and print consistent', async ({ page, context }) => {
+  await page.goto(`/compline/${testDate}`);
+  const prayers = page.locator('.elements');
+  await expect(page.locator('.leader-selector > summary')).toHaveText(/Prayer form: Private/);
+  expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
+  await context.setOffline(true);
+  await choosePrayerForm(page, 'deacon');
+  expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(2);
+  expect(await prayers.innerText()).toContain('thee, father');
+  expect(await prayers.innerText()).toContain('Sir, ask a blessing');
+  await choosePrayerForm(page, 'priest');
+  const report = page.locator('.report-issue:visible a');
+  const body = new URL(await report.getAttribute('href')).searchParams.get('body');
+  expect(body).toContain('?form=priest');
+  expect(body).toContain('Priest or bishop');
+  await page.emulateMedia({ media: 'print' });
+  expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(2);
+  await expect(page.locator('.leader-selector')).not.toBeVisible();
+  await page.emulateMedia({ media: 'screen' });
+  await choosePrayerForm(page, 'private');
+  expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
+  expect(await prayers.innerText()).not.toContain('The Lord be with you');
+});
+
+test('prayer form persists and explicit review links override it without changing another tab', async ({ page, context }) => {
+  await page.goto(`/compline/${testDate}`);
+  await choosePrayerForm(page, 'priest');
+  await page.reload();
+  await expect(page.locator('.leader-selector > summary')).toHaveText(/Priest or bishop/);
+  const other = await context.newPage();
+  // Avoid Chromium cross-document transition stalls with multiple test tabs.
+  await other.emulateMedia({ reducedMotion: 'reduce' });
+  await other.goto(`/lauds/${testDate}?form=deacon`);
+  await expect(other.locator('html')).toHaveAttribute('data-leader', 'deacon');
+  expect(await other.evaluate(() => localStorage.getItem('office-prayer-form'))).toBe('priest');
+  await other.locator('.next-hour').click();
+  await expect(other).toHaveURL(/\/prime\/.*form=deacon/);
+  await other.bringToFront();
+  await expect(other.locator('html')).toHaveAttribute('data-leader', 'deacon');
+  await choosePrayerForm(other, 'private');
+  await expect(page.locator('html')).toHaveAttribute('data-leader', 'priest');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-leader', 'private');
+  await other.close();
+});
+
+test('prayer-form metrics record the rendered form and subsequent switches only on office pages', async ({ page }) => {
+  const bodies = [];
+  await page.route('**/api/usage', async route => {
+    bodies.push(route.request().postData());
+    await route.fulfill({ status: 204 });
+  });
+  const today = await serverTodaySlug(page);
+  bodies.length = 0;
+  await page.goto(`/lauds/${today}`);
+  await page.locator('.hour-header h1').click();
+  await expect.poll(() => bodies.some(body => body.includes('prayer-form:private'))).toBe(true);
+  await choosePrayerForm(page, 'priest');
+  await expect.poll(() => bodies.some(body => body.includes('prayer-form:priest'))).toBe(true);
+  await choosePrayerForm(page, 'deacon');
+  await expect.poll(() => bodies.some(body => body.includes('prayer-form:deacon'))).toBe(true);
+  const count = bodies.length;
+  await choosePrayerForm(page, 'private');
+  await page.waitForTimeout(150);
+  expect(bodies).toHaveLength(count);
+  await page.goto('/');
+  await page.locator('.site-brand').click();
+  await expect.poll(() => bodies.some(body => body.startsWith('site '))).toBe(true);
+  expect(bodies.filter(body => body.startsWith('site ')).every(body => !body.includes('prayer-form:'))).toBe(true);
+});
+
+test('cached prayer pages include every form and preserve an explicit form through redirects', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
+  try {
+    const page = await context.newPage();
+    const today = await serverTodaySlug(page);
+    await page.goto(`/compline/${today}`);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+    });
+    await page.reload();
+    await context.setOffline(true);
+    await page.goto(`/compline?date=${today}&form=priest`);
+    await expect(page.locator('html')).toHaveAttribute('data-leader', 'priest');
+    expect((await page.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(2);
+    await choosePrayerForm(page, 'private');
+    expect((await page.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
+  } finally { await context.close(); }
+});
+
+test('prayer-form controls fit both themes and narrow or wide reading', async ({ page }) => {
+  await page.goto(`/compline/${testDate}`);
+  for (const width of [320, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.evaluate(value => document.documentElement.setAttribute('data-theme', value), theme);
+      const selector = page.locator('.leader-selector');
+      await selector.evaluate(element => { element.open = true; });
+      const bounds = await selector.boundingBox();
+      expect(bounds.x).toBeGreaterThanOrEqual(0);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+      const labels = await selector.locator('label').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().height));
+      expect(labels.every(height => height >= 44)).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      const results = await new AxeBuilder({ page }).include('.leader-selector').analyze();
+      expect(results.violations).toEqual([]);
+    }
+  }
+});
+
+test('prayer forms fall back safely with unavailable storage or scripting', async ({ page, browser, baseURL }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', { get() { throw new Error('storage disabled'); } });
+  });
+  await page.goto(`/compline/${testDate}`);
+  await expect(page.locator('html')).toHaveAttribute('data-leader', 'private');
+  await choosePrayerForm(page, 'deacon');
+  await expect(page).toHaveURL(/form=deacon/);
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-leader', 'deacon');
+
+  const plain = await browser.newContext({ baseURL, javaScriptEnabled: false });
+  try {
+    const reader = await plain.newPage();
+    await reader.goto(`/compline/${testDate}?form=priest`);
+    await expect(reader.locator('.leader-selector > summary')).toHaveText(/Prayer form: Private/);
+    await reader.locator('.leader-selector > summary').click();
+    await expect(reader.locator('.leader-selector input').first()).toBeDisabled();
+    await expect(reader.locator('noscript p')).toContainText('The private form is shown');
+    expect((await reader.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
+  } finally { await plain.close(); }
 });

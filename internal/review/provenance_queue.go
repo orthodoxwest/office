@@ -10,12 +10,14 @@ import (
 	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 )
 
 // ProvenanceQueueEntry is one atomic corpus review task, ranked by the
 // rendered coverage that a verification would unlock.
 type ProvenanceQueueEntry struct {
+	RepresentativeForm   models.PrayerForm
 	Key                  string
 	ContentHash          string
 	Status               ProvenanceStatus
@@ -106,30 +108,32 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		for i := range days {
 			day := &days[i]
 			for _, hourName := range HourNames {
-				hour, err := eng.ComposeHour(hourName, day, moveable)
+				forms, err := composeReviewForms(eng, hourName, day, moveable)
 				if err != nil {
 					return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
 				}
-				candidate := candidateFor(day, hourName, hour, false)
-				priorityA := candidate.Priority == "A"
-				principal := hourTier[hourName] == 0
-				for _, ref := range candidate.Dependencies {
-					a := acc[ref]
-					if a == nil {
-						continue
-					}
-					a.entry.Occurrences++
-					if priorityA {
-						a.entry.PriorityAOccurrences++
-					}
-					if principal {
-						a.entry.PrincipalOccurrences++
-					}
-					a.hours[hourName] = true
-					a.compositions[candidate.Hash] = true
-					if !a.hasRepresentative || representativeLess(candidate, a.representative) {
-						a.representative = candidate
-						a.hasRepresentative = true
+				for _, hour := range forms {
+					candidate := candidateFor(day, hourName, hour, false)
+					priorityA := candidate.Priority == "A"
+					principal := hourTier[hourName] == 0
+					for _, ref := range candidate.Dependencies {
+						a := acc[ref]
+						if a == nil {
+							continue
+						}
+						a.entry.Occurrences++
+						if priorityA {
+							a.entry.PriorityAOccurrences++
+						}
+						if principal {
+							a.entry.PrincipalOccurrences++
+						}
+						a.hours[hourName] = true
+						a.compositions[candidate.Hash] = true
+						if !a.hasRepresentative || representativeLess(candidate, a.representative) {
+							a.representative = candidate
+							a.hasRepresentative = true
+						}
 					}
 				}
 			}
@@ -146,6 +150,7 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		a.entry.Score = provenanceQueueScore(a.entry)
 		if a.hasRepresentative {
 			a.entry.RepresentativeHour = a.representative.Hour
+			a.entry.RepresentativeForm = a.representative.Form
 			a.entry.RepresentativeDate = a.representative.Date
 		}
 		queue.Entries = append(queue.Entries, a.entry)
@@ -285,7 +290,7 @@ func WriteProvenanceQueueCSV(q *ProvenanceQueue, w io.Writer, baseURL string) er
 		}
 		url := ""
 		if !e.RepresentativeDate.IsZero() {
-			url = fmt.Sprintf("%s/%s/%s", baseURL, e.RepresentativeHour, e.RepresentativeDate.Format("2006-01-02"))
+			url = fmt.Sprintf("%s/%s/%s", baseURL, e.RepresentativeHour, e.RepresentativeDate.Format("2006-01-02")) + "?form=" + string(e.RepresentativeForm)
 		}
 		flags := make([]string, len(e.Flags))
 		for j, flag := range e.Flags {

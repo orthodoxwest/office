@@ -15,6 +15,13 @@ pages available offline, and a subscribable prayer-reminder calendar at
 composition metadata. Corpus verification is ongoing; see
 [REVIEWING.md](REVIEWING.md) for how to help.
 
+Each hour has a **Prayer form** selector near the date control: **Private**,
+**Deacon**, or **Priest or bishop**. Private is the default for anyone praying
+alone, including clergy. The ordained choices are for following or leading
+choir prayer; choir without clergy is not modeled yet. Explicit choices are
+remembered on the device and can be changed offline. A `?form=deacon` (or
+`private` / `priest`) link temporarily overrides the saved choice.
+
 ## Run locally
 
 Install Go at the version required by [go.mod](go.mod) (currently 1.26.3 or
@@ -61,6 +68,7 @@ for the full list of build and maintenance targets.
 
 ```bash
 ./office lauds 2026-09-04          # render an hour (also prime … compline)
+./office prime 2026-03-11 --form deacon # choir form (also available for tex)
 ./office ordo 2026                # annual ordo
 ./office rubrics 2026             # per-day rubric and antiphon TSV
 ./office validate                # check data files

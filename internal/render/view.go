@@ -51,6 +51,9 @@ type HomeHourLink struct {
 
 // HourData is a composed office hour and its surrounding chrome.
 type HourData struct {
+	LeaderForms      []LeaderForm
+	LeaderSections   []LeaderSection
+	BannerForms      string
 	HourName         string
 	DateStr          string
 	DateSlug         string

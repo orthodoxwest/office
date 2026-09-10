@@ -235,11 +235,11 @@ func TestOfficeDataUsesExpectedPreCollectSections(t *testing.T) {
 		elements []HourElement
 		noIfPre  bool
 	}{
-		{file: "lauds.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/lauds/pre-collect-versicles"}}, noIfPre: true},
-		{file: "vespers.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/vespers/pre-collect-versicles"}}, noIfPre: true},
-		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/terce/pre-collect-versicles"}}, noIfPre: true},
-		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/sext/pre-collect-versicles"}}, noIfPre: true},
-		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "prayer", Ref: "ordinary/none/pre-collect-versicles"}}, noIfPre: true},
+		{file: "lauds.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "prayer", Ref: "shared/leader/let-us-pray"}}, noIfPre: true},
+		{file: "vespers.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "prayer", Ref: "shared/leader/let-us-pray"}}, noIfPre: true},
+		{file: "terce.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "prayer", Ref: "shared/leader/let-us-pray"}}, noIfPre: true},
+		{file: "sext.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "prayer", Ref: "shared/leader/let-us-pray"}}, noIfPre: true},
+		{file: "none.txt", elements: []HourElement{{Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}, {Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "prayer", Ref: "shared/leader/let-us-pray"}}, noIfPre: true},
 		{file: "prime.txt", elements: []HourElement{{Type: "proper-versicle", Ref: "pre-collect-versicle"}, {Type: "dialogue", Ref: "ordinary/shared/kyrie"}, {Type: "corporate-lord-prayer", Ref: "ordinary/shared/our-father"}}, noIfPre: false},
 		// secret-prayer conversions for opening/closing are covered in TestOfficeDataExpandsModeledSecretPrayers
 	}
@@ -303,7 +303,7 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 			start: "Closing",
 			sections: []HourSection{
 				{Name: "Closing", Elements: []HourElement{
-					{Type: "blessing", Ref: "ordinary/lauds/blessing"},
+					{Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "versicle", Ref: "shared/leader/benedicamus-domino"},
 					{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
 					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
 					{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
@@ -328,7 +328,8 @@ func TestOfficeDataUsesPrintedClosingSequence(t *testing.T) {
 			start: "Closing",
 			sections: []HourSection{
 				{Name: "Closing", Elements: []HourElement{
-					{Type: "blessing", Ref: "ordinary/vespers/blessing"},
+					{Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "versicle", Ref: "shared/leader/benedicamus-domino"},
+					{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
 				}},
 				{Name: "Closing-Peace", Elements: []HourElement{
 					{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
@@ -433,9 +434,8 @@ func TestMinorHourDataUsesParishStructure(t *testing.T) {
 			}) {
 				t.Fatalf("%s Chapter = %+v", file, got)
 			}
-			hour := strings.TrimSuffix(file, ".txt")
 			if got := byName["Closing"].Elements; !reflect.DeepEqual(got, []HourElement{
-				{Type: "blessing", Ref: "ordinary/" + hour + "/blessing"},
+				{Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "versicle", Ref: "shared/leader/benedicamus-domino"},
 				{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
 				{Type: "rubric", Ref: "shared/formulas/closing-our-father"},
 				{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
@@ -479,7 +479,7 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 				"ordinary/shared/confiteor",
 				"ordinary/prime/preces-vouchsafe",
 			}
-			wantTypes := []string{"preces", "prayer", "prayer", "prayer"}
+			wantTypes := []string{"preces", "prayer", "officiant-confession", "prayer"}
 			if len(section.Elements) != len(wantRefs) {
 				t.Fatalf("Prime Preces elements = %d, want %d", len(section.Elements), len(wantRefs))
 			}
@@ -490,7 +490,7 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 			}
 		case "Collect-Intro":
 			foundCollectIntro = true
-			if len(section.Elements) != 1 || section.Elements[0].Ref != "ordinary/prime/collect-intro" {
+			if len(section.Elements) != 2 || section.Elements[0].Type != "officiant-greeting" || section.Elements[1].Ref != "shared/leader/let-us-pray" {
 				t.Fatalf("Prime Collect-Intro = %+v", section.Elements)
 			}
 		}
@@ -523,7 +523,7 @@ func TestPrimeUsesParishOpeningAndClosingStructure(t *testing.T) {
 		t.Fatalf("Prime Opening = %+v", got)
 	}
 	if got := byName["Closing"].Elements; !reflect.DeepEqual(got, []HourElement{
-		{Type: "blessing", Ref: "ordinary/prime/blessing"},
+		{Type: "officiant-greeting", Ref: "shared/leader/greeting-clergy"}, {Type: "versicle", Ref: "shared/leader/benedicamus-domino"},
 		{Type: "versicle", Ref: "shared/formulas/faithful-departed"},
 	}) {
 		t.Fatalf("Prime Closing = %+v", got)
@@ -582,11 +582,11 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 		byName[section.Name] = section
 	}
 	if got := byName["Opening"].Elements[:5]; !reflect.DeepEqual(got, []HourElement{
-		{Type: "versicle", Ref: "ordinary/compline/opening-versicle"},
+		{Type: "officiant-opening", Ref: "ordinary/compline/opening-versicle"},
 		{Type: "chapter", Ref: "ordinary/compline/short-lesson"},
 		{Type: "rubric", Ref: "ordinary/compline/confiteor-rubric"},
 		{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
-		{Type: "prayer", Ref: "ordinary/shared/confiteor"},
+		{Type: "officiant-confession", Ref: "ordinary/shared/confiteor"},
 	}) {
 		t.Fatalf("Compline Opening private prayers = %+v", got)
 	}

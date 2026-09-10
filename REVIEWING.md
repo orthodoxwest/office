@@ -356,3 +356,25 @@ The report keeps several percentages separate:
 This makes the headline stable without conflating “the page renders,” “we
 have no known proper gap,” “the wording was checked against a book,” and “the
 calendar matches the annual ordo.”
+
+### Prayer forms
+
+Review links include `?form=private|deacon|priest` so the selected prayers and
+source metadata remain reproducible regardless of a device's saved preference.
+Use the matching `--form` option for `office review explain`, `office review
+sign`, an hour command, or `office tex`. Omitting it selects Private.
+
+The manifest, provenance queue, and structural plan sweep every distinct
+composition across the three forms. Identical Deacon and Priest compositions
+share one review unit; the parity snapshot checks all three explicitly.
+Structural schema 3 adds the prayer-form branches. Earlier schema signoffs
+retain their content status but do not credit the expanded structural universe.
+Dynamic proper-resolution inventory remains a calendar sweep: prayer forms
+only replace marked ordinary slots, after proper resolution.
+
+The ordinary greetings and choir confession use the Monastic Diurnal's
+Prime (pp. 7–9), closing versicles (p. 43), and Compline (pp. 147–148).
+The All Souls Compline rubric (p. 643) retains Confession and Absolution while
+omitting the opening blessing, lesson, Our help, and Lord's Prayer.
+The selected longer choir confession and its responses currently apply to
+both ordained choices; no distinct priest-only wording is inferred.

@@ -58,6 +58,8 @@ func traceInventoryElement(eng *office.Engine, day *models.CalendarDay, hourName
 // BuildResolutionInventory sweeps composed hours and records the selected
 // fallback tier for each dynamic slot. It uses the actual composed source key,
 // so special composer paths (collects and hymn doxologies) stay truthful.
+// Prayer forms vary only marked ordinary slots after resolution; one private
+// composition per date/hour represents these form-independent proper rows.
 func BuildResolutionInventory(dataDir string, startYear, years int) (*ResolutionInventory, error) {
 	if years < 1 {
 		return nil, fmt.Errorf("years must be positive")

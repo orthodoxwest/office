@@ -435,8 +435,11 @@ Ref = ordinary/shared/kyrie
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
 Type = prayer
-Ref = ordinary/vespers/pre-collect-versicles
+Ref = shared/leader/let-us-pray
 
 [Pre-Collect-Dead]
 Condition = office-of-the-dead
@@ -447,8 +450,14 @@ Ref = shared/formulas/kneeling-our-father-rubric
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
-Type = versicle
-Ref = shared/formulas/dead-pre-collect-versicles
+Type = prayer
+Ref = shared/leader/dead-pre-collect-prayers
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
 
 [Collect]
 Type = proper-collect
@@ -500,8 +509,14 @@ Ref = ordinary/shared/cross-collect
 [Closing]
 Condition = not-office-of-the-dead
 
-Type = blessing
-Ref = ordinary/vespers/blessing
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = shared/leader/benedicamus-domino
+
+Type = versicle
+Ref = shared/formulas/faithful-departed
 
 [Closing-Peace]
 Condition = not-appended-office-of-the-dead,not-office-of-the-dead

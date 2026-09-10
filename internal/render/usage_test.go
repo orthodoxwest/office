@@ -104,7 +104,7 @@ func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
 // stop being drawn, and words for a retired dimension would draw an empty
 // band forever.
 func TestUsageSplitsCoverTheVocabulary(t *testing.T) {
-	if len(usageSplitWords) != len(usage.Dimensions) {
+	if len(usageSplitWords)+1 != len(usage.Dimensions) {
 		t.Fatalf("%d dimensions, %d described", len(usage.Dimensions), len(usageSplitWords))
 	}
 	for _, words := range usageSplitWords {

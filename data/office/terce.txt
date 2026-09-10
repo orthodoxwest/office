@@ -275,8 +275,11 @@ Ref = ordinary/shared/kyrie
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
 Type = prayer
-Ref = ordinary/terce/pre-collect-versicles
+Ref = shared/leader/let-us-pray
 
 [Collect]
 Condition = not-triduum
@@ -304,8 +307,11 @@ Ref = collect
 [Closing]
 Condition = not-triduum
 
-Type = blessing
-Ref = ordinary/terce/blessing
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = shared/leader/benedicamus-domino
 
 Type = versicle
 Ref = shared/formulas/faithful-departed
