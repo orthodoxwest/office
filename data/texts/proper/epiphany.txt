@@ -5,7 +5,8 @@
 @use proper/epiphany/psalm-antiphon-1
 
 [psalm-antiphon-1]
-The Lord our Saviour, * begotten before the day-star, and before the ages, is this day made manifest in the world.
+# SOURCE: diurnal p. 224
+Before the morning star begotten, * and Lord from everlasting, our Saviour is made manifest unto the world to-day.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Vespers book, p. 115 (The Epiphany of Our Lord and Saturday within the Octave)
@@ -20,7 +21,8 @@ When they had opened their treasures, * the wise men presented unto the Lord gol
 O ye seas and floods, * bless ye the Lord: O ye wells, sing a hymn unto the Lord, alleluia.
 
 [psalm-antiphon-5]
-This star shineth * as a flame of fire, and pointeth out God, the King of kings: the Wise Men beheld it, and offered gifts unto the great King.
+# SOURCE: diurnal p. 224
+Like a flame of fire, * that star glittereth yonder, revealing God, the King of kings: the wise men, when they beheld it, offered presents unto the mighty Ruler.
 
 [benedictus-antiphon]
 This day is the Church joined unto the Heavenly Bridegroom, * since Christ hath washed away her sins in Jordan; the wise men hasten with gifts to the marriage supper of the King; and they that sit at meat together make merry with water turned into wine. Alleluia.

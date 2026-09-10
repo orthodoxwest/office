@@ -133,6 +133,18 @@ class IndexTests(unittest.TestCase):
         self.assertEqual([page["pdf_page"] for page in found["pages"]], [11, 12])
         self.assertEqual(found["locate_confidence"], "high")
 
+    def test_date_locator_accepts_ocr_letter_o_for_10(self):
+        index = {"pages": [
+            {"pdf_page": 1, "png": "1.png", "printed_page": "476", "inferred": False,
+             "text": "February 9\nPREVIOUS", "layout_text": "February 9"},
+            {"pdf_page": 2, "png": "2.png", "printed_page": "477", "inferred": False,
+             "text": ".February IO\n477\nST. SCHOLASTICA", "layout_text": "February IO  477"},
+            {"pdf_page": 3, "png": "3.png", "printed_page": "478", "inferred": False,
+             "text": "February 10\nCollect", "layout_text": "February 10"},
+        ]}
+        found = pages.locate_feast_pages(index, 2, 10, "St. Scholastica")
+        self.assertEqual([page["pdf_page"] for page in found["pages"]], [2, 3])
+
     def test_cli_feast_pages(self):
         index = {"pages": [{
             "pdf_page": 11, "png": "11.png", "printed_page": "566", "inferred": False,

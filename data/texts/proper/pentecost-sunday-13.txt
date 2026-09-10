@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 223 (XIII Sunday after Pentecost)
-Almighty and everlasting God, give unto us the increase of faith, hope, and charity; and, that we may be worthy to obtain this which thou dost promise, make us to love that which thou dost command.
+# SOURCE: diurnal p. 436
+Almighty and everlasting God, give unto us the increase of faith, hope, and charity; and, that we may obtain that which thou dost promise, make us to love that which thou dost command.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 7 (Dum intraret)

@@ -272,7 +272,9 @@ def page_mentions_date(page: dict, month: int, day: int) -> bool:
         if hit is None:
             continue
         tail = normalized.split(hit, 1)[1]
-        if str(day) in re.findall(r"\d{1,2}", tail):
+        # OCR often reads 10 as "io", 1 as "i"/"l", and 0 as "o".
+        digit_tail = tail.translate(str.maketrans("oil", "011"))
+        if str(day) in re.findall(r"\d{1,2}", tail) or str(day) in re.findall(r"\d{1,2}", digit_tail):
             return True
     return False
 

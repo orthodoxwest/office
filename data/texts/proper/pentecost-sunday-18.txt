@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 224 (XVIII Sunday after Pentecost)
-O Lord, forasmuch as without thee we are not able to please thee; we beseech thee to direct our hearts by the operation of thy mercy.
+# SOURCE: diurnal p. 438
+O God, forasmuch as without thee we are not able to please thee; Mercifully grant that thy Holy Spirit may in all things direct and rule our hearts.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 8 (Dixit Dominus paralytico)
