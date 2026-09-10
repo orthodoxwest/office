@@ -58,8 +58,8 @@ When the day of Pentecost was fully come * they were all with one accord in one 
 @use proper/pentecost/versicle-lauds
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 308, 188 (The Feast of Pentecost)
-O God, who on this day didst teach the hearts of thy faithful people by sending to them the light of thy Holy Spirit: grant us by the same Spirit to have a right judgment in all things; and evermore to rejoice in his holy comfort.
+# SOURCE: diurnal p. 398
+O God, who as at this time didst teach the hearts of thy faithful people, by sending to them the light of thy Holy Spirit; Grant us by the same Spirit to have a right judgment in all things, and evermore to rejoice in his holy comfort;
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 304 (The Feast of Pentecost)

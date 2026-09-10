@@ -529,6 +529,7 @@ proper/ascension-sunday-within-octave/magnificat-antiphon,7f2ece2d43cf,diurnal,"
 proper/ascension/chapter-lauds,c4584adf8dae,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/ascension/chapter-none,e3d04d945a1e,diurnal,"Ascension Day, At None",390,verified,grok,2026-08-22,word-for-word from printed page image
 proper/ascension/chapter-sext,546b08cf9600,diurnal,"Ascension Day, At Sext",390,verified,grok,2026-08-22,word-for-word from printed page image
+proper/ascension/collect,ed8610426645,diurnal,,391,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0437.png
 proper/ascension/hymn-lauds,008fee8de556,Propers of Lauds & Vespers During Octave of Ascension,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 proper/ascension/psalm-antiphon,4e7ed69409db,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
 proper/ascension/psalm-antiphon-2,ec66d376c7f6,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
@@ -640,6 +641,7 @@ proper/corpus-christi-octave-set-4/magnificat-antiphon,4efeb2adb551,draft Tempor
 proper/corpus-christi/chapter-lauds,6080f810eca7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/corpus-christi/chapter-none,536ffd64891a,diurnal,"Corpus Christi, At None",417,verified,grok,2026-08-22,word-for-word from printed page image
 proper/corpus-christi/chapter-sext,307e10af5e0c,diurnal,"Corpus Christi, At Sext",417,verified,grok,2026-08-22,word-for-word from printed page image
+proper/corpus-christi/collect,d8fc6452d613,diurnal,,414,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0460.png
 proper/corpus-christi/hymn-lauds,c74be151c3c7,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 proper/corpus-christi/psalm-antiphon-1,8a5cb7e379f1,diurnal,,415,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0461.png
 proper/corpus-christi/psalm-antiphon-2,31b3921b6f4c,diurnal,,415,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0461.png
@@ -695,9 +697,12 @@ proper/easter-sunday-octave-day-6/benedictus-antiphon,6764ee86adeb,diurnal,Frida
 proper/easter-sunday-octave-day-6/magnificat-antiphon,9d21a60462ed,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Saturday before Low Sunday,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday/chapter-lauds,da32f941aa7b,diurnal,,363,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/collect,d4c84d31f16b,diurnal,,364,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0410.png
 proper/easter-sunday/easter-antiphon-1,b27a56d3f7f1,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/easter-antiphon-2,9d6c31357293,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/easter-antiphon-3,af5e24c72d5d,diurnal,,363,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/easter-antiphon-4,520571fe3063,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/easter-antiphon-5,50efa59c4ed7,diurnal,,363,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,diurnal,"Within the Octave of the Epiphany, II Day",227,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,diurnal,"Within the Octave of the Epiphany, II Day",227-228,verified,grok,2026-08-24,word-for-word from printed page image
@@ -871,6 +876,7 @@ proper/lent-sunday-3/benedictus-antiphon-wednesday,89f46f0391b0,diurnal,"III Wee
 proper/lent-sunday-3/chapter-lauds,e8cb8675e2e4,diurnal,"III Sunday in Lent, At Lauds",260,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/chapter-none,110c08dc8b5c,diurnal,"III Sunday in Lent, At None",261,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/chapter-sext,024e8a3312e0,diurnal,"III Sunday in Lent, At Sext",261,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/collect,ffa5125c14b4,diurnal,,260,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
 proper/lent-sunday-3/magnificat-antiphon,a577d9619f35,diurnal,"III Sunday in Lent, At II Vespers",261,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-first,ce0368b44045,diurnal,"III Sunday in Lent, At I Vespers",259,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-friday,ce3ba3e451ac,diurnal,"III Week in Lent, Friday",263,verified,grok,2026-08-22,word-for-word from printed page image
@@ -970,6 +976,7 @@ proper/pentecost-sunday-20/magnificat-antiphon,1998a3b3303a,diurnal,XX Sunday af
 proper/pentecost-sunday-21/collect,5d7aac8bc0e9,diurnal,,439,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0485.png
 proper/pentecost-sunday-21/magnificat-antiphon,50ad1174f2f9,diurnal,XXI Sunday after Pentecost,440,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-sunday-22/magnificat-antiphon,0ed891b96755,diurnal,XXII Sunday after Pentecost,440,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-23/collect,822650ca3128,diurnal,,440,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0486.png
 proper/pentecost-sunday-23/magnificat-antiphon,8e28686f54d0,diurnal,XXIII Sunday after Pentecost,441,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-sunday-24/collect,a0fa462f63ec,diurnal,,441,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0487.png
 proper/pentecost-sunday-24/magnificat-antiphon,2eb19dec4d32,diurnal,XXIV Sunday after Pentecost,442,verified,grok,2026-08-22,word-for-word from printed page image
@@ -987,6 +994,7 @@ proper/pentecost/benedictus-antiphon,947ffcdb05e3,draft archdiocesan Lauds book,
 proper/pentecost/chapter-lauds,736f1f1c8b19,draft archdiocesan Lauds book,The Feast of Pentecost,304,verified,codex,2026-07-18,
 proper/pentecost/chapter-none,ab0076dd1125,diurnal,"The Feast of Pentecost, At None",398,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost/chapter-sext,4e8ac8d5ddd1,diurnal,"The Feast of Pentecost, At Sext",398,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost/collect,83c135012577,diurnal,,398,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0444.png
 proper/pentecost/psalm-antiphon-1,0764e19393b9,draft archdiocesan Vespers book,,181,verified,codex,2026-07-17,
 proper/pentecost/psalm-antiphon-2,55916376dd89,draft archdiocesan Vespers book,,182,verified,codex,2026-07-17,
 proper/pentecost/psalm-antiphon-3,a4c49844e898,draft archdiocesan Vespers book,,183,verified,codex,2026-07-17,
@@ -1086,11 +1094,14 @@ proper/st-agnes-rome/psalm-antiphon-2,eef2a341ffd9,diurnal,"St Agnes, At Lauds",
 proper/st-agnes-rome/psalm-antiphon-3,905f32e74168,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-agnes-rome/psalm-antiphon-4,e71e210759ff,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-agnes-rome/psalm-antiphon-5,7784ba87e5e2,diurnal,"St Agnes, At Lauds",460,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-alban/collect,7c5b95e41173,diurnal,,538,verified,codex,2026-09-09,"Word-for-word after normalization; page image output/pages/monastic-diurnal/0583.png; second reader (his, not thy)"
 proper/st-andrew/chapter-sext,f52804f339fb,diurnal,"St Andrew, At Sext",445,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-anne/collect,34daf8cad2b5,diurnal,,575,verified,bwaldrep,2026-07-25,
 proper/st-athanasius/collect,23739796cf90,diurnal,,520,verified,codex,2026-09-02,Word-for-word after normalization; page image output/pages/monastic-diurnal/0566.png
+proper/st-augustine-canterbury/collect,de0d542e4abb,diurnal,,528,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0573.png
 proper/st-augustine-hippo/collect,ed403e8d947a,diurnal,,593,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0637.png
 proper/st-basil-great/collect,b0659f89131a,diurnal,,536,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0581.png
+proper/st-bede-venerable/collect,c3ee8aef7130,diurnal,,528,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0573.png
 proper/st-benedict/chapter-none,dcd2be32a3f5,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-3,11b76cedfadb,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
@@ -1135,6 +1146,7 @@ proper/st-gabriel-archangel/psalm-antiphon-5,5680eec9c7c2,diurnal,"St Gabriel, A
 proper/st-gabriel-archangel/short-responsory-terce,1571f3a59379,diurnal,"St Gabriel, At Terce",500,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-george/collect,60e7f9750312,diurnal,,512,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0558.png
 proper/st-hilary/collect,8483582f0bc8,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0501.png
+proper/st-irenaeus/collect,71b31cf79e32,diurnal,,558,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0603.png
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
 proper/st-jerome/collect,70995b3e58d3,diurnal,,612,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0656.png
 proper/st-joachim/versicle-vespers,46c3e22ee9b2,diurnal,,591,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0635.png
@@ -1224,6 +1236,12 @@ proper/st-raphael-archangel/versicle-lauds,d0fa20313df6,diurnal,"October 24, At 
 proper/st-raphael-archangel/versicle-sext,5798ff53811a,diurnal,,634,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0678.png
 proper/st-raphael-archangel/versicle-terce,d0fa20313df6,diurnal,,634,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0678.png
 proper/st-raphael-archangel/versicle-vespers,9c50d614fe3b,diurnal,"October 24, At II Vespers",635,verified,claude,2026-08-20,
+proper/st-scholastica/benedictus-antiphon,136d0ae76054,diurnal,,478,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0524.png
+proper/st-scholastica/chapter-none,3ffd065cdb1f,diurnal,,479,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0525.png
+proper/st-scholastica/chapter-sext,dc49af4d1297,diurnal,,478,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0524.png
+proper/st-scholastica/collect,3c875dad6a13,diurnal,,478,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0524.png
+proper/st-scholastica/magnificat-antiphon,16ddbedfe8d1,diurnal,,479,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0525.png
+proper/st-scholastica/versicle-lauds,3ec40669b033,diurnal,,478,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0524.png
 proper/st-stephen/benedictus-antiphon,9c1ff3ee36ac,diurnal,"St Stephen, At Lauds",194,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-stephen/chapter-lauds,8dcea46984de,diurnal,"St Stephen, At Lauds",194,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-stephen/chapter-none,4f23de3e1127,diurnal,"St Stephen, At None",196,verified,grok,2026-08-23,word-for-word from printed page image
