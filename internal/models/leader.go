@@ -32,7 +32,7 @@ func (l PrayerForm) Label() string {
 	case PrayerDeacon:
 		return "Deacon"
 	case PrayerPriest:
-		return "Priest or bishop"
+		return "Priest"
 	default:
 		return "Private"
 	}

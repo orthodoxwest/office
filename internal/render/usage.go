@@ -70,7 +70,7 @@ type UsageBar struct {
 func NewUsageData(rows []usage.Daily, days int) UsageData {
 	d := UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours}
 	for i, value := range []string{"private", "deacon", "priest"} {
-		share := UsageShare{Label: []string{"Private", "Deacon", "Priest or bishop"}[i]}
+		share := UsageShare{Label: []string{"Private", "Deacon", "Priest"}[i]}
 		for _, row := range rows {
 			share.Count += row.Dimensions["prayer-form:"+value]
 		}

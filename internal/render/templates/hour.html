@@ -33,10 +33,12 @@
     {{if .LeaderForms}}
     <details class="leader-selector">
       <summary>Prayer form: {{range .LeaderForms}}<span data-leaders="{{.Form}}">{{.Form.Label}}</span>{{end}}</summary>
-      <fieldset disabled>
-        <legend>How are you praying this office?</legend>
-        {{range .LeaderForms}}<label><input type="radio" name="office-prayer-form" value="{{.Form}}"{{if eq .Form "private"}} checked{{end}}> <span>{{.Form.Label}}</span></label>{{end}}
-        <p>Choose Private when praying alone, whatever your ordination. For choir prayer, choose the rank of the officiant. Your choice is remembered on this device.</p>
+      <fieldset disabled aria-describedby="leader-preference-note">
+        <legend>How are you praying?</legend>
+        <div class="leader-options">
+          {{range .LeaderForms}}<label class="leader-option"><input type="radio" name="office-prayer-form" value="{{.Form}}"{{if eq .Form "private"}} checked{{end}}> <span>{{if eq .Form "private"}}Praying privately{{else if eq .Form "deacon"}}With others, led by a deacon{{else}}With others, led by a priest{{end}}</span></label>{{end}}
+        </div>
+        <p id="leader-preference-note">Remembered on this device. Change it any time.</p>
       </fieldset>
       <noscript><p>JavaScript is needed to change the prayer form. The private form is shown.</p></noscript>
     </details>

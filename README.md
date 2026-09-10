@@ -15,12 +15,13 @@ pages available offline, and a subscribable prayer-reminder calendar at
 composition metadata. Corpus verification is ongoing; see
 [REVIEWING.md](REVIEWING.md) for how to help.
 
-Each hour has a **Prayer form** selector near the date control: **Private**,
-**Deacon**, or **Priest or bishop**. Private is the default for anyone praying
-alone, including clergy. The ordained choices are for following or leading
-choir prayer; choir without clergy is not modeled yet. Explicit choices are
-remembered on the device and can be changed offline. A `?form=deacon` (or
-`private` / `priest`) link temporarily overrides the saved choice.
+Each hour has a **Prayer form** selector near the date control: **Praying privately**,
+**With others, led by a deacon**, or **With others, led by a priest**. Private
+is the default for anyone praying alone, including clergy. The ordained
+choices are for following or leading choir prayer; choir without clergy is not
+modeled yet. Explicit choices are remembered on the device and can be changed
+offline. A `?form=deacon` (or `private` / `priest`) link temporarily overrides
+the saved choice.
 
 ## Run locally
 

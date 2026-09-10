@@ -2141,7 +2141,7 @@ async function choosePrayerForm(page, value) {
 test('prayer forms switch complete sequences and keep reports and print consistent', async ({ page, context }) => {
   await page.goto(`/compline/${testDate}`);
   const prayers = page.locator('.elements');
-  await expect(page.locator('.leader-selector > summary')).toHaveText(/Prayer form: Private/);
+  await expect(page.locator('.leader-selector > summary')).toHaveText('Prayer form: Private', { useInnerText: true });
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
   await context.setOffline(true);
   await choosePrayerForm(page, 'deacon');
@@ -2152,7 +2152,7 @@ test('prayer forms switch complete sequences and keep reports and print consiste
   const report = page.locator('.report-issue:visible a');
   const body = new URL(await report.getAttribute('href')).searchParams.get('body');
   expect(body).toContain('?form=priest');
-  expect(body).toContain('Priest or bishop');
+  expect(body).toContain('Priest');
   await page.emulateMedia({ media: 'print' });
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(2);
   await expect(page.locator('.leader-selector')).not.toBeVisible();
@@ -2166,7 +2166,7 @@ test('prayer form persists and explicit review links override it without changin
   await page.goto(`/compline/${testDate}`);
   await choosePrayerForm(page, 'priest');
   await page.reload();
-  await expect(page.locator('.leader-selector > summary')).toHaveText(/Priest or bishop/);
+  await expect(page.locator('.leader-selector > summary')).toHaveText('Prayer form: Priest', { useInnerText: true });
   const other = await context.newPage();
   // Avoid Chromium cross-document transition stalls with multiple test tabs.
   await other.emulateMedia({ reducedMotion: 'reduce' });
@@ -2237,6 +2237,9 @@ test('prayer-form controls fit both themes and narrow or wide reading', async ({
       await page.evaluate(value => document.documentElement.setAttribute('data-theme', value), theme);
       const selector = page.locator('.leader-selector');
       await selector.evaluate(element => { element.open = true; });
+      for (const name of ['Praying privately', 'With others, led by a deacon', 'With others, led by a priest']) {
+        await expect(selector.getByRole('radio', { name, exact: true })).toBeVisible();
+      }
       const bounds = await selector.boundingBox();
       expect(bounds.x).toBeGreaterThanOrEqual(0);
       expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
@@ -2264,7 +2267,7 @@ test('prayer forms fall back safely with unavailable storage or scripting', asyn
   try {
     const reader = await plain.newPage();
     await reader.goto(`/compline/${testDate}?form=priest`);
-    await expect(reader.locator('.leader-selector > summary')).toHaveText(/Prayer form: Private/);
+    await expect(reader.locator('.leader-selector > summary')).toHaveText('Prayer form: Private', { useInnerText: true });
     await reader.locator('.leader-selector > summary').click();
     await expect(reader.locator('.leader-selector input').first()).toBeDisabled();
     await expect(reader.locator('noscript p')).toContainText('The private form is shown');

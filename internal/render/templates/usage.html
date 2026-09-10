@@ -60,7 +60,7 @@
     <details class="usage-form-days"><summary>Daily counts by prayer form</summary>
       <div class="usage-table-wrap"><table class="usage-table">
         <caption class="sr-only">Browsers using each prayer form, newest day first</caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">Private</th><th scope="col">Deacon</th><th scope="col">Priest or bishop</th></tr></thead>
+        <thead><tr><th scope="col">Date</th><th scope="col">Private</th><th scope="col">Deacon</th><th scope="col">Priest</th></tr></thead>
         <tbody>{{range .Rows}}<tr><th scope="row">{{.Day}}</th><td>{{index .Dimensions "prayer-form:private"}}</td><td>{{index .Dimensions "prayer-form:deacon"}}</td><td>{{index .Dimensions "prayer-form:priest"}}</td></tr>{{end}}</tbody>
       </table></div>
     </details>

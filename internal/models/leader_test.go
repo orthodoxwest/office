@@ -11,7 +11,7 @@ func TestPrayerFormVocabulary(t *testing.T) {
 		{"", PrayerPrivate, "Private"},
 		{"private", PrayerPrivate, "Private"},
 		{"deacon", PrayerDeacon, "Deacon"},
-		{"priest", PrayerPriest, "Priest or bishop"},
+		{"priest", PrayerPriest, "Priest"},
 	} {
 		form, err := ParsePrayerForm(tc.value)
 		if err != nil || form != tc.form || form.Label() != tc.label {

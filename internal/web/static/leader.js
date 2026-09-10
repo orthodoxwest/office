@@ -60,7 +60,7 @@
       selector.querySelector("summary").focus({ preventScroll: true });
       if (anchor) window.scrollBy(0, anchor.getBoundingClientRect().top - top);
       syncLinks();
-      document.getElementById("leader-status").textContent = "Prayers updated. Prayer form: " + event.target.nextElementSibling.textContent + ".";
+      document.getElementById("leader-status").textContent = "Prayers updated. " + event.target.nextElementSibling.textContent + ".";
       window.dispatchEvent(new Event("officeleaderchange"));
     });
   }
