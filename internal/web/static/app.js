@@ -1,5 +1,23 @@
 document.documentElement.classList.add("js");
 
+// Two dimensions ride along with every usage beacon, describing how the page
+// is being rendered rather than which page it is: the appearance actually on
+// screen (Nave or Apse, whether chosen or inherited from the device), and
+// whether this is a phone-shaped reading — the 700px layout breakpoint, or a
+// coarse pointer, which catches tablets and a phone held in landscape. Both
+// are read at send time and never stored; the server counts each like any
+// other scope, once per browser per day.
+function usageBeaconBody(scope) {
+  if (!window.matchMedia) {
+    return scope;
+  }
+  var forced = document.documentElement.getAttribute("data-theme");
+  var dark = forced === "dark" ||
+    (forced !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  var handheld = window.matchMedia("(max-width: 700px), (pointer: coarse)").matches;
+  return scope + (dark ? " apse" : " nave") + (handheld ? " mobile" : " desktop");
+}
+
 (function () {
   document.cookie = "tz=" + Intl.DateTimeFormat().resolvedOptions().timeZone + ";path=/;SameSite=Lax";
 
@@ -625,7 +643,7 @@ document.documentElement.classList.add("js");
       fetch("/api/usage", {
         method: "POST",
         headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-        body: scope,
+        body: usageBeaconBody(scope),
         credentials: "same-origin",
         cache: "no-store"
       }).catch(function () {});
@@ -1097,7 +1115,7 @@ document.documentElement.classList.add("js");
     fetch("/api/usage", {
       method: "POST",
       headers: { "X-Office-Usage": "1", "Content-Type": "text/plain" },
-      body: scope,
+      body: usageBeaconBody(scope),
       credentials: "same-origin",
       cache: "no-store",
       signal: controller.signal
