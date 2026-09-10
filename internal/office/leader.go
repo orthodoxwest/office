@@ -13,6 +13,7 @@ import (
 func (e *Engine) applyLeader(hour *models.OfficeHour, leader models.PrayerForm) error {
 	hour.Form = leader
 	recorded := map[string]bool{}
+	var previousPrayer string
 	for si := range hour.Sections {
 		var resolved []models.OfficeElement
 		for _, elem := range hour.Sections[si].Elements {
@@ -35,6 +36,13 @@ func (e *Engine) applyLeader(hour *models.OfficeHour, leader models.PrayerForm) 
 				var greeting models.OfficeElement
 				greeting, err = e.leaderElement(models.Versicle, key)
 				replacement = []models.OfficeElement{greeting}
+				// The tutorial (p. 8, note 21) omits this substitution when
+				// the same pair immediately precedes it. Section headings and
+				// rubrics do not interrupt the spoken sequence. Compare only
+				// this marked greeting; repetitions elsewhere are intentional.
+				if err == nil && leader == models.PrayerPrivate && strings.HasSuffix(previousPrayer, strings.Join(strings.Fields(greeting.Text), " ")) {
+					replacement = []models.OfficeElement{}
+				}
 			case "opening":
 				if leader == models.PrayerPriest {
 					var opening models.OfficeElement
@@ -58,6 +66,9 @@ func (e *Engine) applyLeader(hour *models.OfficeHour, leader models.PrayerForm) 
 			}
 			for i := range replacement {
 				replacement[i].LeaderSlot = elem.LeaderSlot
+				if replacement[i].Type != models.Rubric && replacement[i].Type != models.Heading && replacement[i].Text != "" {
+					previousPrayer = strings.Join(strings.Fields(replacement[i].Text), " ")
+				}
 			}
 			resolved = append(resolved, replacement...)
 		}

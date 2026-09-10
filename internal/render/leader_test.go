@@ -59,3 +59,34 @@ func TestPrayerSpeakerLabelsKeepResponsesInOrder(t *testing.T) {
 		t.Errorf("invalid partition lost text: %s", html)
 	}
 }
+
+func TestLeaderSectionsAlignOmittedPrivateGreeting(t *testing.T) {
+	var forms []LeaderForm
+	for _, form := range models.PrayerForms {
+		elems := []models.OfficeElement{{Type: models.Prayer, Text: "Fixed preces response"}}
+		if form != models.PrayerPrivate {
+			elems = append(elems, models.OfficeElement{Type: models.Versicle, Text: "Clergy greeting", LeaderSlot: "greeting"})
+		}
+		elems = append(elems, models.OfficeElement{Type: models.Collect, Text: "The collect"}, models.OfficeElement{Type: models.Versicle, Text: "Closing greeting", LeaderSlot: "greeting"})
+		forms = append(forms, LeaderForm{Form: form, Hour: &models.OfficeHour{Sections: []models.OfficeSection{{Elements: elems}}}})
+	}
+	sections, err := leaderSections(forms)
+	if err != nil {
+		t.Fatal(err)
+	}
+	html := string(sections[0].HTML)
+	for _, text := range []string{"Fixed preces response", "The collect", "Clergy greeting", "Closing greeting"} {
+		if strings.Count(html, text) != 1 {
+			t.Errorf("lost or duplicated %q: %s", text, html)
+		}
+	}
+	if !strings.Contains(html, `<div class="leader-slot" data-leader-slot="greeting" data-leaders="deacon priest"><div data-leaders="deacon priest">`) {
+		t.Errorf("missing private alternative not aligned: %s", html)
+	}
+	// Omitting an unmarked prayer must still fail, rather than making a
+	// missing collect appear to be another legitimate form variation.
+	forms[0].Hour.Sections[0].Elements = forms[0].Hour.Sections[0].Elements[1:]
+	if _, err := leaderSections(forms); err == nil {
+		t.Error("accepted missing common prayer")
+	}
+}

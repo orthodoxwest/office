@@ -182,3 +182,58 @@ func TestFixedPrecesResponsePrecedesClergyGreeting(t *testing.T) {
 		}
 	}
 }
+
+// The fixed preces response remains; its immediately repeated private
+// substitution disappears. Later greetings still belong to the office.
+func TestPrivateGreetingIsNotRepeatedAfterPreces(t *testing.T) {
+	engine, err := office.NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	days, err := calendar.BuildCalendar(2026, "../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pair := "V. O Lord, hear my prayer. R. And let my cry come unto thee."
+	for _, tc := range []struct {
+		hour, date   string
+		privateCount int
+	}{
+		{"prime", "2026-03-10", 2},
+		{"compline", "2026-03-10", 2},
+		{"lauds", "2026-11-02", 1},
+		{"vespers", "2026-11-01", 3},
+		{"compline", "2026-11-01", 1},
+		// Without preces, the private greeting must still introduce the collect.
+		{"compline", "2026-03-19", 2},
+	} {
+		t.Run(tc.hour+"/"+tc.date, func(t *testing.T) {
+			d, _ := time.Parse(time.DateOnly, tc.date)
+			for _, form := range models.PrayerForms {
+				hour, err := engine.ComposeHourWithOptions(tc.hour, &days[d.YearDay()-1], calendar.ComputeMoveableDates(2026), office.ComposeOptions{Form: form})
+				if err != nil {
+					t.Fatal(err)
+				}
+				var parts []string
+				for _, section := range hour.Sections {
+					for _, elem := range section.Elements {
+						if elem.Type != models.Rubric && elem.Type != models.Heading {
+							parts = append(parts, elem.Text)
+						}
+					}
+				}
+				text := strings.Join(strings.Fields(strings.Join(parts, " ")), " ")
+				if strings.Contains(text, pair+" "+pair) {
+					t.Errorf("%s repeats the private response", form)
+				}
+				if form == models.PrayerPrivate {
+					if got := strings.Count(text, pair); got != tc.privateCount {
+						t.Errorf("private response count %d, want %d", got, tc.privateCount)
+					}
+				} else if tc.date != "2026-03-19" && !strings.Contains(text, pair+" V. The Lord be with you.") {
+					t.Errorf("%s lost the fixed preces response or clergy greeting", form)
+				}
+			}
+		})
+	}
+}

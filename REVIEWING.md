@@ -392,6 +392,9 @@ Amens, without changing the underlying source wording.
 The greeting audit checks both clergy and private formulas. “O Lord, hear my
 prayer” also occurs as a fixed preces response before the variable greeting:
 at Prime (Diurnal p. 9), Compline, and in the Office of the Dead. Those
-occurrences remain in every form. Psalm and antiphon occurrences are also
-independent of the leader. The older combined collect-intro entries are no
+occurrences remain in every form. In private prayer, the substituted greeting
+is omitted when the preceding prayer already ends with that same pair
+(diurnal-tutorial.pdf, p. 8, note 21). This covers Prime and Compline with
+preces, and Lauds, Vespers, and Compline of the Dead. Later greetings remain;
+Psalm and antiphon occurrences are independent of the leader. The older combined collect-intro entries are no
 longer used by the hour definitions.

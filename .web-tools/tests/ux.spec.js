@@ -2283,3 +2283,38 @@ test('prayer forms fall back safely with unavailable storage or scripting', asyn
     expect((await reader.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
   } finally { await plain.close(); }
 });
+
+test('private greetings are not repeated after preces when switching offline or printing', async ({ page, context }) => {
+  for (const [path, privateCount] of [
+    ['/compline/2026-03-10', 2],
+    ['/prime/2026-03-10', 2],
+    ['/lauds/2026-11-02', 1],
+    ['/vespers/2026-11-01', 3],
+    ['/compline/2026-11-01', 1],
+  ]) {
+    await context.setOffline(false);
+    await page.goto(`${path}?form=private`);
+    const prayers = page.locator('.elements');
+    const countPrivateResponses = async () => {
+      const text = (await prayers.innerText()).replace(/[℣℟]\./g, '').replace(/\s+/g, ' ');
+      return (text.match(/O Lord, hear my prayer\. And let my cry come unto thee\./g) || []).length;
+    };
+    expect(await countPrivateResponses()).toBe(privateCount);
+    const omittedGreeting = page.locator('.leader-slot[data-leader-slot="greeting"][data-leaders="deacon priest"]');
+    await expect(omittedGreeting).toHaveCount(1);
+    await expect(omittedGreeting).not.toBeVisible();
+    await context.setOffline(true);
+    for (const form of ['deacon', 'priest']) {
+      await choosePrayerForm(page, form);
+      expect(await countPrivateResponses()).toBe(1);
+      expect(await prayers.innerText()).toContain('The Lord be with you');
+      await expect(omittedGreeting).toBeVisible();
+    }
+    await choosePrayerForm(page, 'private');
+    expect(await countPrivateResponses()).toBe(privateCount);
+    await page.emulateMedia({ media: 'print' });
+    expect(await countPrivateResponses()).toBe(privateCount);
+    await expect(omittedGreeting).not.toBeVisible();
+    await page.emulateMedia({ media: 'screen' });
+  }
+});

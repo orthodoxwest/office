@@ -27,13 +27,17 @@ type LeaderSection struct {
 
 // leaderSections shares unchanged elements and bundles only explicit ordinary
 // slots. Each slot may contain a different number of elements (the choir
-// confession expands to several prayers and rubrics). A structural mismatch
+// confession expands to several prayers and rubrics, and a repeated private
+// greeting disappears). A structural mismatch
 // fails instead of attaching an alternative to the wrong prayer.
 func leaderSections(forms []LeaderForm) ([]LeaderSection, error) {
-	if len(forms) != len(models.PrayerForms) || forms[0].Hour == nil {
+	if len(forms) != len(models.PrayerForms) || forms[2].Hour == nil {
 		return nil, fmt.Errorf("expected three leader forms")
 	}
-	base := forms[0].Hour
+	// The priest form retains every greeting, making it the alignment
+	// template even where the private substitution is omitted.
+	const baseIndex = 2
+	base := forms[baseIndex].Hour
 	for i, form := range forms {
 		if form.Form != models.PrayerForms[i] || form.Hour == nil || len(form.Hour.Sections) != len(base.Sections) {
 			return nil, fmt.Errorf("inconsistent leader forms")
@@ -43,8 +47,13 @@ func leaderSections(forms []LeaderForm) ([]LeaderSection, error) {
 	for si, section := range base.Sections {
 		positions := make([]int, len(forms))
 		var html strings.Builder
-		for positions[0] < len(section.Elements) {
-			first := section.Elements[positions[0]]
+		for positions[baseIndex] < len(section.Elements) {
+			baseStart := positions[baseIndex]
+			first := section.Elements[baseStart]
+			baseEnd := baseStart + 1
+			for baseEnd < len(section.Elements) && section.Elements[baseEnd].LeaderSlot == first.LeaderSlot {
+				baseEnd++
+			}
 			var groups [][]models.OfficeElement
 			for fi, form := range forms {
 				s := form.Hour.Sections[si]
@@ -52,12 +61,25 @@ func leaderSections(forms []LeaderForm) ([]LeaderSection, error) {
 					return nil, fmt.Errorf("leader section mismatch")
 				}
 				start := positions[fi]
+				if fi == 0 && first.LeaderSlot == "greeting" && (start >= len(s.Elements) || s.Elements[start].LeaderSlot != first.LeaderSlot) {
+					groups = append(groups, nil)
+					continue
+				}
 				if start >= len(s.Elements) || s.Elements[start].LeaderSlot != first.LeaderSlot {
 					return nil, fmt.Errorf("leader slot mismatch")
 				}
 				end := start + 1
-				for end < len(s.Elements) && s.Elements[end].LeaderSlot == first.LeaderSlot {
-					end++
+				if first.LeaderSlot == "" {
+					// Common runs can join across a missing private greeting.
+					// Consume only the template's run, then compare it below.
+					end = start + baseEnd - baseStart
+					if end > len(s.Elements) {
+						return nil, fmt.Errorf("incomplete common leader sequence")
+					}
+				} else {
+					for end < len(s.Elements) && s.Elements[end].LeaderSlot == first.LeaderSlot {
+						end++
+					}
 				}
 				groups = append(groups, s.Elements[start:end])
 				positions[fi] = end
@@ -74,9 +96,21 @@ func leaderSections(forms []LeaderForm) ([]LeaderSection, error) {
 			// Deacon and priest currently share some complete sequences. Emit
 			// identical alternatives once, with both applicable values.
 			used := make([]bool, len(forms))
-			html.WriteString(`<div class="leader-slot" data-leader-slot="` + template.HTMLEscapeString(first.LeaderSlot) + `">`)
+			var available []string
 			for fi, group := range groups {
-				if used[fi] {
+				if len(group) > 0 {
+					available = append(available, string(forms[fi].Form))
+				}
+			}
+			html.WriteString(`<div class="leader-slot" data-leader-slot="` + template.HTMLEscapeString(first.LeaderSlot) + `"`)
+			if len(available) < len(forms) {
+				// Hide the grid item itself so an omitted greeting leaves no
+				// empty row or extra gap, on screen or in print.
+				html.WriteString(` data-leaders="` + strings.Join(available, " ") + `"`)
+			}
+			html.WriteString(`>`)
+			for fi, group := range groups {
+				if used[fi] || len(group) == 0 {
 					continue
 				}
 				leaders := []string{string(forms[fi].Form)}
