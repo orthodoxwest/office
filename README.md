@@ -153,8 +153,7 @@ The unlinked, unauthenticated `/admin/usage` report shows daily unique browsers
 and unique browsers opening each office, the ordo, and the reminder feed, plus
 how those browsers rendered the page, with 7/30/90/366-day views. It is public
 to anyone who knows the URL, marked `noindex`, and excluded from the
-service-worker cache. Reporting days use
-America/New_York, including DST. Counts describe visible pages, not completed
+service-worker cache. Reporting days use America/New_York, including DST. Counts describe visible pages, not completed
 prayers. A browser opening several hours counts once overall and once in each
 hour column; likewise the Ordo column counts a viewed calendar page, and the
 Reminders column counts a *generated* feed link (the subscribe or copy action
@@ -170,12 +169,18 @@ off: **Nave vs Apse** — the appearance actually on screen, whether chosen or
 inherited from the device — and **Desktop vs Mobile** — a viewport under the
 700px layout breakpoint or a touch-primary pointer, so tablets and a phone in
 landscape count as mobile, as does a narrowed desktop window. Each is counted
-like any other scope, once per browser per day, and the report sums them
-across the period as browser-days: they compare with each other, not with the
-daily totals. A reader who switches appearance or rotates a phone on different
-days counts on both sides, so a pair can exceed the daily total; a browser
-still serving a cached `app.js` from before this existed reports neither, so a
-pair can also fall short of it.
+like any other scope, once per browser per day. The report draws each pair as
+a day-by-day mix band with its period share beside it: a single figure for the
+window cannot tell a settled 60/40 from a migration that passed through it,
+and the longer the window the more movement it would hide. Both compare with
+each other, not with the daily totals; a day nobody reported leaves a gap in
+the band rather than being drawn as an even split, and a single day's share
+swings easily at these volumes, so the period figure is the steadier one.
+
+A reader who switches appearance or rotates a phone on different days counts
+on both sides, so a pair can exceed the daily total; a browser still serving a
+cached `app.js` from before this existed reports neither, so a pair can also
+fall short of it.
 
 Only the scope has to be understood server-side. The service worker keeps
 `app.js` across deploys, so both directions of skew are ordinary: a client

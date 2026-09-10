@@ -1,8 +1,10 @@
 package render
 
 import (
-	"github.com/orthodoxwest/office/internal/usage"
+	"math"
 	"testing"
+
+	"github.com/orthodoxwest/office/internal/usage"
 )
 
 func TestUsageSummaryAndChronologicalChart(t *testing.T) {
@@ -25,35 +27,70 @@ func TestUsageSummaryAndChronologicalChart(t *testing.T) {
 	}
 }
 
-func TestUsageSplitsSumOverThePeriod(t *testing.T) {
-	// Day one had a silent, un-refreshed browser: it lands in Users without
-	// landing in either half of a dimension.
+func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
+	// A mix that reverses across the window: a period figure alone would call
+	// this an even split and hide the migration entirely.
 	rows := []usage.Daily{
-		{Day: "2026-09-05", Users: 4, Nave: 1, Apse: 2, Desktop: 1, Mobile: 2},
-		{Day: "2026-09-04", Users: 3, Nave: 2, Apse: 1, Desktop: 0, Mobile: 3},
+		{Day: "2026-09-06", Users: 5, Nave: 1, Apse: 4, Desktop: 1, Mobile: 4},
+		{Day: "2026-09-05", Users: 4},
+		{Day: "2026-09-04", Users: 5, Nave: 4, Apse: 1, Desktop: 0, Mobile: 5},
 	}
-	d := NewUsageData(rows, 7)
+	d := NewUsageData(rows, 3)
 	appearance, screen := d.Splits[0], d.Splits[1]
-	if appearance.Total != 6 || appearance.Left.Count != 3 || appearance.Right.Count != 3 {
-		t.Fatalf("appearance: %+v", appearance)
+	if appearance.Total != 10 || appearance.Left.Count != 5 || appearance.Right.Count != 5 {
+		t.Fatalf("appearance totals: %+v", appearance)
 	}
 	if appearance.Left.Percent+appearance.Right.Percent != 100 || appearance.Left.Percent != 50 {
 		t.Fatalf("percentages do not close: %+v", appearance)
 	}
-	if screen.Left.Count != 1 || screen.Right.Count != 5 || screen.Left.Percent != 17 || screen.Right.Percent != 83 {
+	// The band runs oldest first, like the trend chart above it, so the drift
+	// the period totals conceal is visible and described.
+	if appearance.Mix[0].Day != "2026-09-04" || appearance.Mix[2].Day != "2026-09-06" {
+		t.Fatalf("band is not chronological: %+v", appearance.Mix)
+	}
+	if appearance.FirstShare != 80 || appearance.LastShare != 20 || appearance.Reported != 2 {
+		t.Fatalf("drift not reported: %+v", appearance)
+	}
+	if screen.Left.Count != 1 || screen.Right.Count != 9 || screen.Left.Percent != 10 {
 		t.Fatalf("screen: %+v", screen)
 	}
 	for _, split := range d.Splits {
-		if split.Left.X != 0 || split.Left.Width+split.Right.Width != 720 || split.Right.X != split.Left.Width {
-			t.Fatalf("bar segments do not tile: %+v", split)
+		var width float64
+		for _, day := range split.Mix {
+			width += day.Width
+			if !day.Reported {
+				// A day nobody reported draws nothing rather than an even split.
+				if day.LeftHeight != 0 || day.RightHeight != 0 || day.Percent != 0 {
+					t.Fatalf("unreported day drawn: %+v", day)
+				}
+				continue
+			}
+			if day.LeftHeight+day.RightHeight != 40 || day.RightY != day.LeftHeight {
+				t.Fatalf("column does not fill the band: %+v", day)
+			}
+		}
+		if math.Abs(width-720) > 1e-9 {
+			t.Fatalf("band does not span the plot: %v", width)
 		}
 	}
-	// Before any client reports a dimension the bar stays empty rather than
-	// implying an even split.
+	// A window that reaches back into last year dates its far end, so the two
+	// ends of a 366-day band cannot read as the same "Sep 9".
+	crossing := NewUsageData([]usage.Daily{
+		{Day: "2026-01-02", Users: 1, Nave: 1},
+		{Day: "2025-12-31", Users: 1, Apse: 1},
+	}, 366)
+	if crossing.FirstDate != "Dec 31, 2025" || crossing.LastDate != "Jan 2" {
+		t.Fatalf("ambiguous window labels: %q to %q", crossing.FirstDate, crossing.LastDate)
+	}
+	if crossing.Splits[0].FirstDate != "Dec 31, 2025" {
+		t.Fatalf("band labels drift from the chart: %+v", crossing.Splits[0])
+	}
+
+	// Before any client reports a dimension there is nothing to draw at all.
 	quiet := NewUsageData([]usage.Daily{{Day: "2026-09-05", Users: 2}}, 7)
 	for _, split := range quiet.Splits {
-		if split.Total != 0 || split.Left.Width != 0 || split.Right.Width != 0 || split.Left.Percent != 0 {
-			t.Fatalf("unreported dimension drew a bar: %+v", split)
+		if split.Total != 0 || split.Reported != 0 || split.Mix[0].Reported {
+			t.Fatalf("unreported dimension drew a band: %+v", split)
 		}
 	}
 }

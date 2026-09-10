@@ -1941,6 +1941,15 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
     await botCtx.close();
   }
   expect(await today(reader)).toBe(before + 1);
+
+  // The same visit lands in the mix band for today — a light-scheme phone in
+  // this project, so the day is drawn and titled with both sides' counts.
+  await reader.goto("/admin/usage?days=7");
+  for (const [name, side] of [["Nave vs Apse", "Nave"], ["Desktop vs Mobile", "Desktop"]]) {
+    const band = reader.locator(".usage-split", { hasText: name });
+    await expect(band.locator("rect > title").last())
+      .toHaveText(new RegExp(`^${easternDay()}: ${side} \\d+, `));
+  }
   await readerCtx.close();
 });
 

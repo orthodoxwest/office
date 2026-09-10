@@ -20,23 +20,41 @@ type UsageData struct {
 	FirstDate, LastDate, PeakDate string
 }
 
-// UsageSplit is one two-valued dimension of how the Office was read over the
-// whole window — which appearance was rendered, and whether the reading was
-// phone-shaped. Both sides are browser-days summed across the period, so they
-// compare with each other rather than with the daily unique counts above.
+// UsageSplit is one two-valued dimension of how the Office was read — which
+// appearance was rendered, and whether the reading was phone-shaped. The
+// period totals answer "which is more", and the daily mix answers "is that
+// changing": a single figure for the window cannot tell a settled 60/40 from
+// a migration that passed through it, and the longer the window the more of
+// that movement it hides.
 type UsageSplit struct {
-	Title, Note string
-	Total       int
-	Left, Right UsageShare
+	Title, Note         string
+	Total               int
+	Left, Right         UsageShare
+	Mix                 []UsageMixDay
+	FirstDate, LastDate string
+	// Shares on the earliest and most recent days that reported anything, and
+	// how many days those were: the drift the period totals cannot show.
+	FirstShare, LastShare, Reported int
 }
 
-// UsageShare is one side of a UsageSplit: its count, its rounded percentage,
-// and its segment of the 720-unit bar.
+// UsageShare is one side of a UsageSplit over the whole period.
 type UsageShare struct {
-	Label    string
-	Count    int
-	Percent  int
-	X, Width float64
+	Label   string
+	Count   int
+	Percent int
+}
+
+// UsageMixDay is one day's column of the mix band: the left side's share of
+// that day, drawn full height so the band reads as proportion rather than
+// volume — the daily totals above already carry volume. A day nobody reported
+// stays unreported and leaves a gap rather than being drawn as an even split.
+type UsageMixDay struct {
+	Day                  string
+	Left, Right, Percent int
+	Reported             bool
+	X, Width             float64
+	LeftHeight           float64
+	RightY, RightHeight  float64
 }
 
 type UsageBar struct {
@@ -53,10 +71,16 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 	if len(rows) == 0 {
 		return d
 	}
+	// The 366-day window reaches back into last year, where a bare "Sep 9"
+	// cannot be told from this year's — so date the ones that need it.
+	year := rows[0].Day[:4]
 	label := func(day string) string {
 		t, err := time.Parse(time.DateOnly, day)
 		if err != nil {
 			return day
+		}
+		if day[:4] != year {
+			return t.Format("Jan 2, 2006")
 		}
 		return t.Format("Jan 2")
 	}
@@ -72,16 +96,11 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 			d.PeakDate = label(row.Day)
 		}
 	}
-	var nave, apse, desktop, mobile int
-	for _, row := range rows {
-		nave += row.Nave
-		apse += row.Apse
-		desktop += row.Desktop
-		mobile += row.Mobile
-	}
 	d.Splits = []UsageSplit{
-		newUsageSplit("Nave vs Apse", "The appearance actually rendered, whether chosen or inherited from the device", "Nave", nave, "Apse", apse),
-		newUsageSplit("Desktop vs Mobile", "Phone-shaped reading: a narrow window, or any touch screen", "Desktop", desktop, "Mobile", mobile),
+		newUsageSplit("Nave vs Apse", "The appearance actually rendered, whether chosen or inherited from the device",
+			rows, label, "Nave", "Apse", func(row usage.Daily) (int, int) { return row.Nave, row.Apse }),
+		newUsageSplit("Desktop vs Mobile", "Phone-shaped reading: a narrow window, or any touch screen",
+			rows, label, "Desktop", "Mobile", func(row usage.Daily) (int, int) { return row.Desktop, row.Mobile }),
 	}
 	scale := d.Max
 	if scale == 0 {
@@ -97,21 +116,44 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 	return d
 }
 
-// newUsageSplit lays out one dimension bar. The percentages are made to sum
-// to 100 rather than rounded independently, and an unreported dimension (an
-// older cached client, or a period before it was collected) stays at zero
-// width so the template can say so instead of drawing a half-empty bar.
-func newUsageSplit(title, note, leftLabel string, left int, rightLabel string, right int) UsageSplit {
-	split := UsageSplit{Title: title, Note: note, Total: left + right,
-		Left:  UsageShare{Label: leftLabel, Count: left},
-		Right: UsageShare{Label: rightLabel, Count: right}}
+// newUsageSplit lays out one dimension: its period totals and its day-by-day
+// mix band, chronological like the trend chart above it. Percentages are made
+// to sum to 100 rather than rounded independently. A dimension nothing has
+// reported yet — a period before it was collected, or one served entirely to
+// clients still on a cached app.js — draws nothing at all, so the template can
+// say so instead of implying an even split.
+func newUsageSplit(title, note string, rows []usage.Daily, label func(string) string,
+	leftLabel, rightLabel string, pick func(usage.Daily) (int, int)) UsageSplit {
+	split := UsageSplit{Title: title, Note: note,
+		Left:      UsageShare{Label: leftLabel},
+		Right:     UsageShare{Label: rightLabel},
+		FirstDate: label(rows[len(rows)-1].Day), LastDate: label(rows[0].Day)}
+	step := 720 / float64(len(rows))
+	for i := len(rows) - 1; i >= 0; i-- {
+		left, right := pick(rows[i])
+		split.Left.Count += left
+		split.Right.Count += right
+		day := UsageMixDay{Day: rows[i].Day, Left: left, Right: right,
+			X: float64(len(rows)-1-i) * step, Width: step}
+		if total := left + right; total > 0 {
+			day.Reported = true
+			day.Percent = int(math.Round(100 * float64(left) / float64(total)))
+			day.LeftHeight = 40 * float64(left) / float64(total)
+			day.RightY = day.LeftHeight
+			day.RightHeight = 40 - day.LeftHeight
+			split.Reported++
+			if split.Reported == 1 {
+				split.FirstShare = day.Percent
+			}
+			split.LastShare = day.Percent
+		}
+		split.Mix = append(split.Mix, day)
+	}
+	split.Total = split.Left.Count + split.Right.Count
 	if split.Total == 0 {
 		return split
 	}
-	split.Left.Percent = int(math.Round(100 * float64(left) / float64(split.Total)))
+	split.Left.Percent = int(math.Round(100 * float64(split.Left.Count) / float64(split.Total)))
 	split.Right.Percent = 100 - split.Left.Percent
-	split.Left.Width = 720 * float64(left) / float64(split.Total)
-	split.Right.X = split.Left.Width
-	split.Right.Width = 720 - split.Left.Width
 	return split
 }
