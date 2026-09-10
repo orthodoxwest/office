@@ -644,3 +644,19 @@ func TestTexEmptyAntiphonEmitsNothing(t *testing.T) {
 		t.Fatalf("empty antiphon should emit no TeX, got %q", got)
 	}
 }
+
+func TestTeXPrayerSpeakerLabelsAndAmen(t *testing.T) {
+	elem := models.OfficeElement{Type: models.Prayer, Text: "Have mercy upon thee.\nR. Amen.", Voice: []models.VoiceSpan{
+		{Text: "Have mercy upon thee.\n", Spoken: true, Role: models.VoiceResponse},
+		{Text: "R. Amen.", Spoken: true, Role: models.VoicePriest},
+	}}
+	got := texElement(elem, "", false)
+	for _, want := range []string{`\rubric{\scshape People}\par\nopagebreak`, `\rubric{\scshape Priest}\par\nopagebreak`, `\Rbar{}Amen.`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q: %s", want, got)
+		}
+	}
+	if strings.Index(got, "Priest}") > strings.Index(got, "Amen.") {
+		t.Errorf("Amen assigned before speaker: %s", got)
+	}
+}

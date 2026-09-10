@@ -165,7 +165,7 @@ func TestServiceWorkerRoutingContract(t *testing.T) {
 		{
 			name: "undated calendar includes today hash",
 			want: []string{
-				`return "/calendar/" + new Date().getFullYear() + "#d-" + today`,
+				`return "/calendar/" + new Date().getFullYear() + formQuery + "#d-" + today`,
 			},
 		},
 		{

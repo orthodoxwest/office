@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 )
 
@@ -26,7 +27,8 @@ import (
 //	0 — pre-schema sign-offs (no structural credit for residual planning)
 //	1 — tier-A residual plan with preces/suffrage reasons, Marian selection
 //	2 — hour-scoped dispositions, Marian boundary feature, credit gating
-const StructuralFeatureSchema = 2
+//	3 — explicit private/choir greeting, opening, and confession branches
+const StructuralFeatureSchema = 3
 
 // Signoff records that a human reviewed one unit against the source books.
 // File format (data/review/signoffs.txt), whitespace-separated:
@@ -149,7 +151,7 @@ func AppendSignoff(dataDir string, s Signoff) error {
 // SignoffForPage resolves a reviewer-facing hour and date to the exact
 // composition identity stored in the sign-off ledger. Reviewers never need to
 // find or supply that internal identity themselves.
-func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note string) (*Signoff, *Unit, error) {
+func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note string, forms ...models.PrayerForm) (*Signoff, *Unit, error) {
 	days, err := calendar.BuildCalendar(date.Year(), dataDir)
 	if err != nil {
 		return nil, nil, fmt.Errorf("building calendar: %w", err)
@@ -163,12 +165,12 @@ func SignoffForPage(dataDir, hourName string, date time.Time, reviewer, note str
 		return nil, nil, fmt.Errorf("creating office engine: %w", err)
 	}
 	day := &days[idx]
-	hour, err := eng.ComposeHour(hourName, day, calendar.ComputeMoveableDates(date.Year()))
+	hour, err := eng.ComposeHourWithOptions(hourName, day, calendar.ComputeMoveableDates(date.Year()), office.ComposeOptions{Form: requestedPrayerForm(forms)})
 	if err != nil {
 		return nil, nil, fmt.Errorf("composing %s: %w", hourName, err)
 	}
 	unit := &Unit{
-		Hash: HashHour(hour), Hour: hourName, UnitKey: unitKey(day, hourName),
+		Form: hour.Form, Hash: HashHour(hour), Hour: hourName, UnitKey: unitKey(day, hourName),
 		Name: celebrationName(day), Rank: celebrationRank(day, hourName), Season: day.Season,
 		Date: date, Occurrences: 1, Context: contextNote(day, hourName),
 	}

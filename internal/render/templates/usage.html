@@ -53,6 +53,18 @@
     </div>
     <p class="usage-splits-note">Each column is one day&rsquo;s mix, not its size; a day nobody reported leaves a gap. The percentages beside each name are the whole period, which is the steadier figure — a single day&rsquo;s share swings easily at these volumes.</p>
   </section>
+  <section class="usage-panel" aria-labelledby="usage-forms-title">
+    <div class="usage-section-heading"><div><h2 id="usage-forms-title">Prayer form</h2><p>The form used on an Office page, including changes during a visit.</p></div></div>
+    <dl class="usage-form-counts">{{range .PrayerForms}}<div><dt>{{.Label}}</dt><dd>{{.Count}} <span>browser-days</span></dd></div>{{end}}</dl>
+    <p class="usage-splits-note">Each browser counts once per form, per day. Someone using private prayer at home and following clergy-led prayer later counts in both forms. These counts describe prayer forms, not the reader&rsquo;s ordination.</p>
+    <details class="usage-form-days"><summary>Daily counts by prayer form</summary>
+      <div class="usage-table-wrap"><table class="usage-table">
+        <caption class="sr-only">Browsers using each prayer form, newest day first</caption>
+        <thead><tr><th scope="col">Date</th><th scope="col">Private</th><th scope="col">Deacon</th><th scope="col">Priest</th></tr></thead>
+        <tbody>{{range .Rows}}<tr><th scope="row">{{.Day}}</th><td>{{index .Dimensions "prayer-form:private"}}</td><td>{{index .Dimensions "prayer-form:deacon"}}</td><td>{{index .Dimensions "prayer-form:priest"}}</td></tr>{{end}}</tbody>
+      </table></div>
+    </details>
+  </section>
   <section class="usage-panel" aria-labelledby="usage-offices-title">
     <div class="usage-section-heading"><div><h2 id="usage-offices-title">By day &amp; office</h2><p>Each browser counts once per office, per day.</p></div></div>
     <div class="usage-table-wrap" role="region" aria-label="Daily office counts; scroll for more days and offices" tabindex="0">

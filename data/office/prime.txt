@@ -321,16 +321,23 @@ Ref = ordinary/shared/apostles-creed
 Type = prayer
 Ref = ordinary/prime/preces-our-help
 
-Type = prayer
+Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
 Type = prayer
 Ref = ordinary/prime/preces-vouchsafe
 
+# This fixed preces response precedes the variable greeting (Diurnal p. 9).
+Type = versicle
+Ref = shared/leader/greeting-lay
+
 [Collect-Intro]
 Condition = not-triduum
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
 Type = prayer
-Ref = ordinary/prime/collect-intro
+Ref = shared/leader/let-us-pray
 
 [Collect]
 Condition = not-triduum
@@ -369,8 +376,11 @@ Ref = shared/formulas/triduum-prime-ending-rubric
 Condition = not-triduum
 Label = Blessing
 
-Type = blessing
-Ref = ordinary/prime/blessing
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = shared/leader/benedicamus-domino
 
 Type = versicle
 Ref = shared/formulas/faithful-departed

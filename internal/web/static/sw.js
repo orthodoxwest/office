@@ -41,6 +41,7 @@ function assetURL(path) {
 var CORE_ASSETS = [
   assetURL("/static/style.css"),
   assetURL("/static/app.js"),
+  assetURL("/static/leader.js"),
   assetURL("/static/favicon.svg"),
   assetURL("/static/manifest.webmanifest"),
   assetURL("/static/icons/icon-192.png"),
@@ -173,10 +174,12 @@ function datedEquivalent(url) {
   var today = localDateSlug(new Date());
   var path = normalizePathname(url.pathname);
   var qDate = url.searchParams.get("date");
+  var leader = url.searchParams.get("form");
+  var formQuery = ["private", "deacon", "priest"].indexOf(leader) >= 0 ? "?form=" + leader : "";
 
   if (path === "/") {
     if (!qDate) {
-      return "/?date=" + today;
+      return "/?date=" + today + formQuery.replace("?", "&");
     }
     return null;
   }
@@ -185,10 +188,10 @@ function datedEquivalent(url) {
   if (HOURS.indexOf(path.replace(/^\//, "")) >= 0) {
     var hour = path.replace(/^\//, "");
     if (qDate && DATE_RE.test(qDate)) {
-      return "/" + hour + "/" + qDate;
+      return "/" + hour + "/" + qDate + formQuery;
     }
     if (!qDate) {
-      return "/" + hour + "/" + today;
+      return "/" + hour + "/" + today + formQuery;
     }
     // Invalid ?date= — let the server render an error.
     return null;
@@ -196,7 +199,7 @@ function datedEquivalent(url) {
 
   if (path === "/calendar") {
     // Mirror server handleCalendar: year page anchored at today.
-    return "/calendar/" + new Date().getFullYear() + "#d-" + today;
+    return "/calendar/" + new Date().getFullYear() + formQuery + "#d-" + today;
   }
   return null;
 }

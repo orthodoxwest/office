@@ -367,9 +367,9 @@ func TestReviewPlanPrefersPrimaryYear(t *testing.T) {
 }
 
 func TestParseSignoffSchema(t *testing.T) {
-	input := `aaa lauds trinity-sunday mary.k 2026-06-08 schema=2 checked
+	input := `aaa lauds trinity-sunday mary.k 2026-06-08 schema=3 checked
 bbb vespers all-saints john.d 2026-06-09 legacy note
-ccc prime feria-lent jane.d 2026-06-10 schema=1 old universe
+ccc prime feria-lent jane.d 2026-06-10 schema=2 old universe
 `
 	signoffs, err := ParseSignoffs(strings.NewReader(input))
 	if err != nil {
@@ -378,16 +378,16 @@ ccc prime feria-lent jane.d 2026-06-10 schema=1 old universe
 	if len(signoffs) != 3 {
 		t.Fatalf("got %d", len(signoffs))
 	}
-	if signoffs[0].Schema != 2 || signoffs[0].Note != "checked" {
+	if signoffs[0].Schema != 3 || signoffs[0].Note != "checked" {
 		t.Fatalf("signoffs[0]=%#v", signoffs[0])
 	}
 	if signoffs[1].Schema != 0 || signoffs[1].Note != "legacy note" {
 		t.Fatalf("signoffs[1]=%#v", signoffs[1])
 	}
-	if signoffs[2].Schema != 1 || signoffs[2].CreditsStructuralFeatures() {
+	if signoffs[2].Schema != 2 || signoffs[2].CreditsStructuralFeatures() {
 		t.Fatalf("signoffs[2]=%#v should not credit", signoffs[2])
 	}
 	if !signoffs[0].CreditsStructuralFeatures() {
-		t.Fatal("schema=2 should credit at current StructuralFeatureSchema")
+		t.Fatal("schema=3 should credit at current StructuralFeatureSchema")
 	}
 }

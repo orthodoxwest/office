@@ -2,16 +2,16 @@
 
 | Measure | Count |
 |---|---:|
-| Candidate date-hours (2026–2053) | 71589 |
-| Modeled structural features | 245 |
-| Full structural-cover pages | 63 |
-| Residual structural-review pages | 63 |
+| Distinct date-hour forms (2026–2053) | 157916 |
+| Modeled structural features | 251 |
+| Full structural-cover pages | 64 |
+| Residual structural-review pages | 64 |
 | Uncovered features | 0 |
-| Verified text entries | 1553 |
-| Rendered text entries needing review | 694 |
+| Verified text entries | 1567 |
+| Rendered text entries needing review | 693 |
 | Rendered text entries with unknown source | 152 |
 | Classified zero-occurrence entries | 34 |
-| Zeroes needing classification | 33 |
+| Zeroes needing classification | 34 |
 | Stale zero-occurrence classifications | 6 |
 | Stale attestations | 0 |
 
@@ -154,6 +154,12 @@
 - `decision:occurrence:transfer-in=considered`
 - `decision:occurrence:transfer-out=all-souls-from-sunday`
 - `decision:occurrence:transfer-out=second-class-or-higher`
+- `decision:prayer-form:confession=choir`
+- `decision:prayer-form:confession=private`
+- `decision:prayer-form:greeting=choir`
+- `decision:prayer-form:greeting=private`
+- `decision:prayer-form:opening=choir`
+- `decision:prayer-form:opening=private`
 - `decision:preces=said`
 - `decision:preces=suppressed:double-commemoration`
 - `decision:preces=suppressed:double-office`

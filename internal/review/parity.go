@@ -48,11 +48,12 @@ type CalendarParityDigest struct {
 // HashHour; Sources covers the ordered SlotRef/SourceRef/SourceRefs selection;
 // Decisions covers the complete ordered decision records, including detail.
 type HourParityDigest struct {
-	Year      int    `json:"year"`
-	Hour      string `json:"hour"`
-	Content   string `json:"content"`
-	Sources   string `json:"sources"`
-	Decisions string `json:"decisions"`
+	Year      int               `json:"year"`
+	Hour      string            `json:"hour"`
+	Form      models.PrayerForm `json:"form"`
+	Content   string            `json:"content"`
+	Sources   string            `json:"sources"`
+	Decisions string            `json:"decisions"`
 }
 
 type paritySource struct {
@@ -104,29 +105,33 @@ func BuildParitySnapshot(dataDir string, startYear, years int) (*ParitySnapshot,
 		})
 
 		for _, hourName := range HourNames {
-			contentHash := sha256.New()
-			sourceHash := sha256.New()
-			decisionHash := sha256.New()
-			for i := range days {
-				day := &days[i]
-				hour, err := eng.ComposeHour(hourName, day, moveable)
-				if err != nil {
-					return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
+			for _, form := range models.PrayerForms {
+				contentHash := sha256.New()
+				sourceHash := sha256.New()
+				decisionHash := sha256.New()
+				for i := range days {
+					day := &days[i]
+					hour, err := eng.ComposeHourWithOptions(hourName, day, moveable, office.ComposeOptions{Form: form})
+					if err != nil {
+						return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
+					}
+					date := day.Date.Format("2006-01-02")
+					fmt.Fprintf(contentHash, "%s\x1f%s\n", date, HashHour(hour))
+					if err := writeJSONLine(sourceHash, paritySources(date, hour)); err != nil {
+						return nil, fmt.Errorf("serializing sources for %s %s: %w", hourName, date, err)
+					}
+					if err := writeJSONLine(decisionHash, parityDecisionsForDate{Date: date, Decisions: hour.Decisions}); err != nil {
+						return nil, fmt.Errorf("serializing decisions for %s %s: %w", hourName, date, err)
+					}
+					if form == models.PrayerPrivate {
+						snapshot.CandidateDateHours++
+					}
 				}
-				date := day.Date.Format("2006-01-02")
-				fmt.Fprintf(contentHash, "%s\x1f%s\n", date, HashHour(hour))
-				if err := writeJSONLine(sourceHash, paritySources(date, hour)); err != nil {
-					return nil, fmt.Errorf("serializing sources for %s %s: %w", hourName, date, err)
-				}
-				if err := writeJSONLine(decisionHash, parityDecisionsForDate{Date: date, Decisions: hour.Decisions}); err != nil {
-					return nil, fmt.Errorf("serializing decisions for %s %s: %w", hourName, date, err)
-				}
-				snapshot.CandidateDateHours++
+				snapshot.Hours = append(snapshot.Hours, HourParityDigest{
+					Year: year, Hour: hourName, Form: form,
+					Content: finishDigest(contentHash), Sources: finishDigest(sourceHash), Decisions: finishDigest(decisionHash),
+				})
 			}
-			snapshot.Hours = append(snapshot.Hours, HourParityDigest{
-				Year: year, Hour: hourName,
-				Content: finishDigest(contentHash), Sources: finishDigest(sourceHash), Decisions: finishDigest(decisionHash),
-			})
 		}
 	}
 	return snapshot, nil

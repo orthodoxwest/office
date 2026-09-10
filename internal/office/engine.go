@@ -63,14 +63,19 @@ func (e *Engine) ComposeHour(hourName string, day *models.CalendarDay, moveable 
 }
 
 // ComposeOptions enables explicitly requested, unpublished content. The zero
-// value keeps normal web pages, exports, and offline precaches unchanged.
+// value selects private prayer and omits experimental previews.
 type ComposeOptions struct {
 	MartyrologyPreview bool
+	Form               models.PrayerForm
 }
 
 // ComposeHourWithOptions keeps preview choices local to this composition;
 // the shared engine and calendar remain immutable across requests.
 func (e *Engine) ComposeHourWithOptions(hourName string, day *models.CalendarDay, moveable *calendar.MoveableDates, options ComposeOptions) (*models.OfficeHour, error) {
+	leader, err := models.ParsePrayerForm(string(options.Form))
+	if err != nil {
+		return nil, err
+	}
 	composer, ok := e.composers[hourName]
 	if !ok {
 		return nil, fmt.Errorf("unknown hour: %s", hourName)
@@ -83,6 +88,9 @@ func (e *Engine) ComposeHourWithOptions(hourName string, day *models.CalendarDay
 	hour, err := composer.Compose(day, sections, e.corpus, moveable)
 	if err != nil {
 		return nil, fmt.Errorf("composing %s: %w", hourName, err)
+	}
+	if err := e.applyLeader(hour, leader); err != nil {
+		return nil, err
 	}
 
 	dropEmptySections(hour)
@@ -434,6 +442,12 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 		oe.Incipit = corpus.Incipit(elem.Ref)
 	}
 	switch elem.Type {
+	case "officiant-greeting":
+		oe.LeaderSlot = "greeting"
+	case "officiant-confession":
+		oe.LeaderSlot = "confession"
+	case "officiant-opening":
+		oe.LeaderSlot = "opening"
 	case "secret-prayer":
 		oe.Voice = buildPrayerVoice(elem.Ref, text, false)
 	case "partly-secret-prayer":
@@ -632,11 +646,11 @@ func mapElementType(t string) models.ElementType {
 		return models.Hymn
 	case "antiphon":
 		return models.Antiphon
-	case "versicle":
+	case "versicle", "officiant-greeting", "officiant-opening":
 		return models.Versicle
 	case "response":
 		return models.Response
-	case "prayer", "secret-prayer", "partly-secret-prayer":
+	case "prayer", "secret-prayer", "partly-secret-prayer", "officiant-confession":
 		return models.Prayer
 	case "corporate-lord-prayer":
 		return models.CorporateLordPrayer

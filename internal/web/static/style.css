@@ -1764,6 +1764,26 @@ footer::before {
   color: var(--muted);
 }
 
+/* Name each speaker, including the leader's replies to the people. These
+   labels are part of the reading order and remain visible when printed. */
+.prayer-turn {
+  margin-block: 0.85rem;
+}
+
+.prayer-speaker {
+  color: var(--rubric);
+  font-size: 0.85em;
+  font-variant: small-caps;
+  letter-spacing: 0.055em;
+  line-height: 1.3;
+  margin: 0 0 0.2rem;
+  break-after: avoid;
+}
+
+.prayer-turn > .liturgical-block {
+  margin-block: 0;
+}
+
 /* The phone already gives the prayer a generous 20px book face. On a true
    desktop the historical 19px / 38rem pairing looked slightly slight against
    the wide still field and produced lines at the long edge of comfortable
@@ -4398,6 +4418,7 @@ body.page-home::before {
   }
 
   .rubric,
+  .prayer-speaker,
   .cross,
   .chapter-ref,
   .scripture-ref {
@@ -4543,3 +4564,90 @@ body.page-home::before {
   .usage-table-wrap { max-height: none; overflow: visible; }
   .usage-table th { position: static !important; }
 }
+
+/* The cached hour contains every officiant form. Select before first paint;
+   display:none also removes inactive words from print and accessibility. */
+[data-leaders] { display: none !important; }
+:root:not([data-leader]) [data-leaders~="private"],
+:root[data-leader="private"] [data-leaders~="private"],
+:root[data-leader="deacon"] [data-leaders~="deacon"],
+:root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
+.hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
+.hour-context-controls > .hour-date-nav { margin: 0; }
+.leader-selector { max-width: 100%; color: var(--accent); font-size: .9rem; }
+.leader-selector > summary { cursor: pointer; list-style: none; min-height: var(--touch-target); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .5rem; }
+.leader-selector > summary::-webkit-details-marker { display: none; }
+.leader-selector > summary::after { content: " ▾"; color: var(--gold); }
+.leader-selector[open] > summary::after { content: " ▴"; }
+.leader-selector[open] { flex: 1 1 100%; }
+.leader-selector fieldset {
+  text-align: left;
+  border: 0;
+  padding: 0;
+  margin: .75rem auto .5rem;
+  width: min(100%, 23rem);
+  min-width: 0;
+  color: var(--text);
+}
+.leader-selector legend {
+  width: 100%;
+  padding: 0 0 .65rem;
+  color: var(--muted);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.leader-options {
+  border-block: 1px solid var(--border);
+}
+.leader-option {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: .65rem .35rem;
+  min-height: var(--touch-target);
+  line-height: 1.4;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.leader-option + .leader-option { border-top: 1px solid var(--surface-edge); }
+.leader-option:hover { background: var(--surface); }
+.leader-option:active { background: var(--pressed-wash); }
+.leader-option input {
+  appearance: none;
+  flex: 0 0 auto;
+  width: .9rem;
+  height: .9rem;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.leader-option input:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 3px var(--bg);
+}
+.leader-option input:checked + span {
+  color: var(--accent);
+  box-shadow: inset 0 -1px var(--gold-line);
+}
+.leader-selector p {
+  color: var(--muted);
+  font-size: .8rem;
+  margin-top: .7rem;
+  line-height: 1.45;
+}
+.leader-selector summary:focus-visible,
+.leader-option:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 3px; }
+.leader-option input:focus-visible { outline: none; }
+@media (forced-colors: active) {
+  .leader-option input { appearance: auto; }
+}
+.leader-print-label { display: none; }
+@media print { .leader-selector { display: none; } .leader-print-label { display: block; } }
+.usage-form-counts { display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin: 1rem 0; }
+.usage-form-counts dt { color: var(--muted); }
+.usage-form-counts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.usage-form-counts dd span { color: var(--muted); font-size: .85rem; }
+.usage-form-days { margin-top: 1rem; }
+.usage-form-days summary { cursor: pointer; min-height: var(--touch-target); }

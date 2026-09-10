@@ -27,6 +27,7 @@ type DependencyEvidence struct {
 // CompositionAssurance is the machine-readable explanation for one rendered
 // hour. It contains no reference-book contents.
 type CompositionAssurance struct {
+	Form         models.PrayerForm            `json:"form"`
 	Date         string                       `json:"date"`
 	Hour         string                       `json:"hour"`
 	UnitKey      string                       `json:"unit_key"`
@@ -57,7 +58,7 @@ type ResolutionEvidence struct {
 
 // ExplainComposition composes one hour and joins its complete dependency set
 // to the generated provenance inventory.
-func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionAssurance, error) {
+func ExplainComposition(dataDir, hourName string, date time.Time, forms ...models.PrayerForm) (*CompositionAssurance, error) {
 	days, err := calendar.BuildCalendar(date.Year(), dataDir)
 	if err != nil {
 		return nil, err
@@ -70,7 +71,7 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 	if err != nil {
 		return nil, err
 	}
-	hour, err := eng.ComposeHour(hourName, &days[idx], calendar.ComputeMoveableDates(date.Year()))
+	hour, err := eng.ComposeHourWithOptions(hourName, &days[idx], calendar.ComputeMoveableDates(date.Year()), office.ComposeOptions{Form: requestedPrayerForm(forms)})
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +82,7 @@ func ExplainComposition(dataDir, hourName string, date time.Time) (*CompositionA
 	byKey := inv.ByKey()
 
 	a := &CompositionAssurance{
+		Form:        hour.Form,
 		Date:        date.Format("2006-01-02"),
 		Hour:        hourName,
 		UnitKey:     unitKey(&days[idx], hourName),
@@ -183,6 +185,7 @@ func UniqueCompositionDecisions(in []models.CompositionDecision) []models.Compos
 // ReviewCandidate is one representative composition considered by the set
 // cover planner.
 type ReviewCandidate struct {
+	Form         models.PrayerForm
 	Hash         string // internal composition identity; omitted from reviewer CSV
 	Priority     string
 	Hour         string
@@ -318,35 +321,37 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 		for i := range days {
 			day := &days[i]
 			for _, hourName := range HourNames {
-				hour, err := eng.ComposeHour(hourName, day, moveable)
+				forms, err := composeReviewForms(eng, hourName, day, moveable)
 				if err != nil {
 					return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
 				}
-				rawCount++
-				c := candidateFor(day, hourName, hour, includeSources)
-				// Drop bulk dependency text after features are extracted unless
-				// source coverage is in play (already folded into Features).
-				if !includeSources {
-					c.Dependencies = nil
-				}
-				for _, dependency := range hourDependencies(hour) {
-					renderedKeys[dependency] = true
-				}
-				inPrimary := year == startYear
-				for _, f := range c.Features {
-					allFeatures[f] = true
-					featureFanOut[f]++
-					if inPrimary {
-						featureInPrimaryYear[f] = true
+				for _, hour := range forms {
+					rawCount++
+					c := candidateFor(day, hourName, hour, includeSources)
+					// Drop bulk dependency text after features are extracted unless
+					// source coverage is in play (already folded into Features).
+					if !includeSources {
+						c.Dependencies = nil
 					}
-				}
-				if old, ok := hashCandidate[c.Hash]; !ok || betterHashRepresentative(c, old, startYear) {
-					hashCandidate[c.Hash] = c
-				}
-				sig := strings.Join(c.Features, "\x1f")
-				seen := slices.Contains(sigHashes[sig], c.Hash)
-				if !seen {
-					sigHashes[sig] = append(sigHashes[sig], c.Hash)
+					for _, dependency := range hourDependencies(hour) {
+						renderedKeys[dependency] = true
+					}
+					inPrimary := year == startYear
+					for _, f := range c.Features {
+						allFeatures[f] = true
+						featureFanOut[f]++
+						if inPrimary {
+							featureInPrimaryYear[f] = true
+						}
+					}
+					if old, ok := hashCandidate[c.Hash]; !ok || betterHashRepresentative(c, old, startYear) {
+						hashCandidate[c.Hash] = c
+					}
+					sig := strings.Join(c.Features, "\x1f")
+					seen := slices.Contains(sigHashes[sig], c.Hash)
+					if !seen {
+						sigHashes[sig] = append(sigHashes[sig], c.Hash)
+					}
 				}
 			}
 		}
@@ -688,7 +693,7 @@ func betterCoverPick(c ReviewCandidate, impact, newCount int, first bool, candid
 func candidateFor(day *models.CalendarDay, hourName string, hour *models.OfficeHour, includeSources bool) ReviewCandidate {
 	u := Unit{Hour: hourName, Rank: celebrationRank(day, hourName), Date: day.Date}
 	c := ReviewCandidate{
-		Hash: HashHour(hour), Priority: u.Priority(), Hour: hourName, Date: day.Date,
+		Form: hour.Form, Hash: HashHour(hour), Priority: u.Priority(), Hour: hourName, Date: day.Date,
 		UnitKey: unitKey(day, hourName), Celebration: celebrationName(day),
 		Context: contextNote(day, hourName), Dependencies: hourDependencies(hour),
 	}
@@ -789,7 +794,7 @@ func WriteReviewPlanCSV(p *ReviewPlan, w io.Writer, baseURL string) error {
 			c.UnitKey, c.Celebration, c.Context, c.SignoffState, primary,
 			fmt.Sprint(selected.NewImpact),
 			strings.Join(selected.NewCoverage, "; "),
-			baseURL + "/" + c.Hour + "/" + c.Date.Format("2006-01-02"),
+			baseURL + "/" + c.Hour + "/" + c.Date.Format("2006-01-02") + "?form=" + string(c.Form),
 		})
 	}
 	cw.Flush()

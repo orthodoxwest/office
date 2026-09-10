@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 	_ "time/tzdata"
@@ -23,12 +24,12 @@ var extraScopes = []string{"ordo", "reminders"}
 // Dimension is a named family of mutually exclusive values describing how a
 // page was rendered rather than which page it was. A beacon may report at
 // most one value per family, and each is counted like any other scope — once
-// per browser, per day — so a family sums to at most the daily total, and a
+// per browser, per day — so each value is bounded by the daily total, and a
 // reader who switches appearance or rotates a phone during a day counts on
 // both sides.
 type Dimension struct {
 	Key    string
-	Values [2]string
+	Values []string
 }
 
 // Dimensions are those families. Counts are stored under the qualified name
@@ -41,8 +42,9 @@ type Dimension struct {
 // changing mid-flight. Page scopes never contain a colon, so the page and
 // dimension namespaces cannot collide either.
 var Dimensions = []Dimension{
-	{Key: "appearance", Values: [2]string{"nave", "apse"}},
-	{Key: "screen", Values: [2]string{"desktop", "mobile"}},
+	{Key: "appearance", Values: []string{"nave", "apse"}},
+	{Key: "screen", Values: []string{"desktop", "mobile"}},
+	{Key: "prayer-form", Values: []string{"private", "deacon", "priest"}},
 }
 
 // Scope is the stored name of one value of a dimension.
@@ -97,7 +99,7 @@ func ParseEvent(body string) (Event, bool) {
 	seen := make(map[string]bool, len(Dimensions))
 	for _, field := range fields[1:] {
 		key, ok := dimensionKey(field)
-		if !ok || seen[key] {
+		if !ok || seen[key] || (key == "prayer-form" && !slices.Contains(Hours, event.Scope)) {
 			continue
 		}
 		seen[key] = true

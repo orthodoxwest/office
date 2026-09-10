@@ -24,7 +24,7 @@ export default [
     rules: js.configs.recommended.rules,
   },
   {
-    files: ["**/app.js"],
+    files: ["**/app.js", "**/leader.js"],
     languageOptions: {
       ecmaVersion: 2020,
       sourceType: "script",

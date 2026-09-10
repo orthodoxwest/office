@@ -297,15 +297,19 @@ func (e env) reviewAssurance(args []string) error {
 }
 
 func (e env) reviewExplain(args []string) error {
+	args, form, err := takePrayerForm(args)
+	if err != nil {
+		return err
+	}
 	if len(args) != 2 {
-		return fmt.Errorf("usage: office review explain HOUR YYYY-MM-DD")
+		return fmt.Errorf("usage: office review explain HOUR YYYY-MM-DD [--form private|deacon|priest]")
 	}
 	date, err := parseDate(args[1])
 	if err != nil {
 		return err
 	}
 
-	assurance, err := review.ExplainComposition(e.dataDir, args[0], date)
+	assurance, err := review.ExplainComposition(e.dataDir, args[0], date, form)
 	if err != nil {
 		return fmt.Errorf("explaining composition: %w", err)
 	}
@@ -349,8 +353,12 @@ func (e env) reviewPlan(args []string) error {
 }
 
 func (e env) reviewSign(args []string) error {
+	args, form, err := takePrayerForm(args)
+	if err != nil {
+		return err
+	}
 	if len(args) < 3 {
-		return fmt.Errorf("usage: office review sign HOUR YYYY-MM-DD REVIEWER [note...]")
+		return fmt.Errorf("usage: office review sign HOUR YYYY-MM-DD REVIEWER [--form private|deacon|priest] [note...]")
 	}
 	hourName, reviewer := args[0], args[2]
 	date, err := parseDate(args[1])
@@ -359,7 +367,7 @@ func (e env) reviewSign(args []string) error {
 	}
 	note := strings.Join(args[3:], " ")
 
-	s, unit, err := review.SignoffForPage(e.dataDir, hourName, date, reviewer, note)
+	s, unit, err := review.SignoffForPage(e.dataDir, hourName, date, reviewer, note, form)
 	if err != nil {
 		return fmt.Errorf("resolving reviewed page: %w", err)
 	}

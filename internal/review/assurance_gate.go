@@ -152,7 +152,7 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "| Measure | Count |")
 		fmt.Fprintln(w, "|---|---:|")
-		fmt.Fprintf(w, "| Candidate date-hours (%d–%d) | %d |\n", report.StartYear, report.StartYear+report.Years-1, report.CandidateCount)
+		fmt.Fprintf(w, "| Distinct date-hour forms (%d–%d) | %d |\n", report.StartYear, report.StartYear+report.Years-1, report.CandidateCount)
 		fmt.Fprintf(w, "| Modeled structural features | %d |\n", report.ModeledFeatures)
 		fmt.Fprintf(w, "| Full structural-cover pages | %d |\n", report.FullCoverPages)
 		fmt.Fprintf(w, "| Residual structural-review pages | %d |\n", report.SelectedPages)
@@ -166,7 +166,7 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "| Stale attestations | %d |\n", report.StaleAttestations)
 	} else {
 		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
-		fmt.Fprintf(w, "  candidate date-hours: %d\n", report.CandidateCount)
+		fmt.Fprintf(w, "  distinct date-hour forms: %d\n", report.CandidateCount)
 		fmt.Fprintf(w, "  modeled features:     %d\n", report.ModeledFeatures)
 		fmt.Fprintf(w, "  full-cover pages:     %d\n", report.FullCoverPages)
 		fmt.Fprintf(w, "  residual pages:       %d\n", report.SelectedPages)

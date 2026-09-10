@@ -71,6 +71,20 @@ func (p *Pages) Home(w io.Writer, data HomeData) error {
 
 // Hour renders a composed office hour.
 func (p *Pages) Hour(w io.Writer, data HourData) error {
+	if len(data.LeaderForms) != 0 {
+		var err error
+		data.ShowBanner = false
+		for _, form := range data.LeaderForms {
+			if form.ShowBanner {
+				data.ShowBanner = true
+				data.BannerForms += string(form.Form) + " "
+			}
+		}
+		data.LeaderSections, err = leaderSections(data.LeaderForms)
+		if err != nil {
+			return err
+		}
+	}
 	return p.hour.ExecuteTemplate(w, "layout", data)
 }
 

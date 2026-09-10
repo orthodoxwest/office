@@ -105,7 +105,8 @@ func composeMajorHour(
 // after section `after`.
 //
 // XXXIII.3 marks the end of the run with "The Lord be with you", which is the
-// blessing element; XXXIII.5 concludes only the first and the last collect of
+// officiant greeting (formerly blessing); XXXIII.5 concludes only the first
+// and the last collect of
 // the run. The Monastic Diurnal prints the boundary explicitly at the ordinary
 // of Saturday Vespers (p. 144): the collect of the day, "then the
 // Commemorations, if any occur, are made as required by the rubrics, and the
@@ -118,7 +119,7 @@ func collectFollows(sections []HourSection, included []bool, after int) bool {
 		if !included[i] {
 			continue
 		}
-		if sectionHasElementType(sections[i], "blessing") {
+		if sectionHasElementType(sections[i], "blessing") || sectionHasElementType(sections[i], "officiant-greeting") {
 			return false
 		}
 		if sectionHasElementType(sections[i], "collect", "proper-collect") {

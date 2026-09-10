@@ -356,3 +356,45 @@ The report keeps several percentages separate:
 This makes the headline stable without conflating “the page renders,” “we
 have no known proper gap,” “the wording was checked against a book,” and “the
 calendar matches the annual ordo.”
+
+### Prayer forms
+
+Review links include `?form=private|deacon|priest` so the selected prayers and
+source metadata remain reproducible regardless of a device's saved preference.
+Use the matching `--form` option for `office review explain`, `office review
+sign`, an hour command, or `office tex`. Omitting it selects Private.
+
+The manifest, provenance queue, and structural plan sweep every distinct
+composition across the three forms. Identical Deacon and Priest compositions
+share one review unit; the parity snapshot checks all three explicitly.
+Structural schema 3 adds the prayer-form branches. Earlier schema signoffs
+retain their content status but do not credit the expanded structural universe.
+Dynamic proper-resolution inventory remains a calendar sweep: prayer forms
+only replace marked ordinary slots, after proper resolution.
+
+The ordinary greetings and choir confession use the Monastic Diurnal's
+Prime (pp. 7–9), closing versicles (p. 43), and Compline (pp. 147–148).
+The All Souls Compline rubric (p. 643) retains Confession and Absolution while
+omitting the opening blessing, lesson, Our help, and Lord's Prayer.
+The priest-led form uses the longer choir confession and its exchanges, with
+“grant you … your sins” in the final absolution from the parish Compline draft
+(Compline Alex edit 10-24 v.08.docx, p. 5). The draft differs here from the
+older Diurnal's “grant us … our sins.” Its opening rubric also reserves “Sir,
+ask a blessing” for a priest; private and deacon-led forms use “Lord, grant a
+blessing.”
+
+The current application scope assigns the shared confession and “our sins”
+prayers to everyone together when led by a deacon. This mapping follows the
+feature's priest-only confession scope; the printed Out of Choir rubric does
+not explicitly name deacons. Speaker metadata labels every turn, including
+Amens, without changing the underlying source wording.
+
+The greeting audit checks both clergy and private formulas. “O Lord, hear my
+prayer” also occurs as a fixed preces response before the variable greeting:
+at Prime (Diurnal p. 9), Compline, and in the Office of the Dead. Those
+occurrences remain in every form. In private prayer, the substituted greeting
+is omitted when the preceding prayer already ends with that same pair
+(diurnal-tutorial.pdf, p. 8, note 21). This covers Prime and Compline with
+preces, and Lauds, Vespers, and Compline of the Dead. Later greetings remain;
+Psalm and antiphon occurrences are independent of the leader. The older combined collect-intro entries are no
+longer used by the hour definitions.

@@ -8,6 +8,7 @@ import (
 )
 
 type UsageData struct {
+	PrayerForms                       []UsageShare
 	NavDate, Theme, Page, SeasonClass string
 	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
 	UsageWhen                     string
@@ -68,6 +69,13 @@ type UsageBar struct {
 // newest first. The peak is a daily count, never a sum of overlapping users.
 func NewUsageData(rows []usage.Daily, days int) UsageData {
 	d := UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours}
+	for i, value := range []string{"private", "deacon", "priest"} {
+		share := UsageShare{Label: []string{"Private", "Deacon", "Priest"}[i]}
+		for _, row := range rows {
+			share.Count += row.Dimensions["prayer-form:"+value]
+		}
+		d.PrayerForms = append(d.PrayerForms, share)
+	}
 	if len(rows) == 0 {
 		return d
 	}

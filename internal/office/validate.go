@@ -21,6 +21,9 @@ func isValidCondition(condition string) bool {
 // validElementTypes is the set of Type values recognised by mapElementType.
 // Unknown values map silently to "rubric".
 var validElementTypes = map[string]bool{
+	"officiant-greeting":         true,
+	"officiant-confession":       true,
+	"officiant-opening":          true,
 	"psalm":                      true,
 	"canticle":                   true,
 	"hymn":                       true,

@@ -44,6 +44,7 @@ var hourTier = map[string]int{
 
 // Unit is one distinct composition of one hour: the atom of human review.
 type Unit struct {
+	Form        models.PrayerForm
 	Hash        string // content hash of the composed hour (date excluded)
 	Hour        string // lauds, prime, ...
 	UnitKey     string // stable celebration key (feast ID, tempora slug, or feria-{season})
@@ -69,7 +70,7 @@ func (u *Unit) Priority() string {
 
 // URL returns the web path where this unit's representative composition renders.
 func (u *Unit) URL() string {
-	return "/" + u.Hour + "/" + u.Date.Format("2006-01-02")
+	return "/" + u.Hour + "/" + u.Date.Format("2006-01-02") + "?form=" + string(u.Form)
 }
 
 // Manifest is the full set of review units for a sweep window.
@@ -152,28 +153,31 @@ func BuildManifest(dataDir string, startYear, years int) (*Manifest, error) {
 		for i := range days {
 			day := &days[i]
 			for _, hourName := range HourNames {
-				hour, err := engine.ComposeHour(hourName, day, moveable)
+				forms, err := composeReviewForms(engine, hourName, day, moveable)
 				if err != nil {
 					return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
 				}
-				h := HashHour(hour)
-				if u, ok := byHash[h]; ok {
-					u.Occurrences++
-					continue
+				for _, hour := range forms {
+					h := HashHour(hour)
+					if u, ok := byHash[h]; ok {
+						u.Occurrences++
+						continue
+					}
+					u := &Unit{
+						Hash:        h,
+						Form:        hour.Form,
+						Hour:        hourName,
+						UnitKey:     unitKey(day, hourName),
+						Name:        celebrationName(day),
+						Rank:        celebrationRank(day, hourName),
+						Season:      day.Season,
+						Date:        day.Date,
+						Occurrences: 1,
+						Context:     contextNote(day, hourName),
+					}
+					byHash[h] = u
+					order = append(order, u)
 				}
-				u := &Unit{
-					Hash:        h,
-					Hour:        hourName,
-					UnitKey:     unitKey(day, hourName),
-					Name:        celebrationName(day),
-					Rank:        celebrationRank(day, hourName),
-					Season:      day.Season,
-					Date:        day.Date,
-					Occurrences: 1,
-					Context:     contextNote(day, hourName),
-				}
-				byHash[h] = u
-				order = append(order, u)
 			}
 		}
 	}

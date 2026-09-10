@@ -105,7 +105,7 @@ func TestBuildManifestSweep(t *testing.T) {
 	}
 
 	dayHours := 365 * len(HourNames)
-	if len(m.Units) == 0 || len(m.Units) >= dayHours {
+	if len(m.Units) == 0 || len(m.Units) >= dayHours*len(models.PrayerForms) {
 		t.Fatalf("expected dedup: got %d units for %d day-hours", len(m.Units), dayHours)
 	}
 
@@ -129,8 +129,8 @@ func TestBuildManifestSweep(t *testing.T) {
 			}
 		}
 	}
-	if occurrences != dayHours {
-		t.Errorf("occurrences sum = %d, want %d", occurrences, dayHours)
+	if occurrences <= dayHours || occurrences > dayHours*len(models.PrayerForms) {
+		t.Errorf("distinct form occurrences = %d, outside (%d, %d]", occurrences, dayHours, dayHours*len(models.PrayerForms))
 	}
 	if !foundTrinity {
 		t.Error("expected a trinity-sunday lauds unit in the 2026 sweep")

@@ -6,9 +6,15 @@
   <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
   <title>{{block "title" .}}Divine Office{{end}}</title>
   {{/* Apply stored appearance before CSS to avoid a flash.
-       Keys: office-theme, office-text-size. */}}
+       Keys: office-theme, office-text-size, office-prayer-form. */}}
   <script>
     (function () {
+      try {
+        var leaders = ["private", "deacon", "priest"];
+        var requestedLeader = new URLSearchParams(location.search).get("form");
+        var leader = leaders.indexOf(requestedLeader) >= 0 ? requestedLeader : localStorage.getItem("office-prayer-form");
+        if (leaders.indexOf(leader) >= 0) document.documentElement.setAttribute("data-leader", leader);
+      } catch (e) {}
       try {
         var t = localStorage.getItem("office-theme");
         if (t === "light" || t === "dark") {
@@ -33,6 +39,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#fdf1e6" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
+  <script src="{{static "leader.js"}}" defer></script>
   <script src="{{static "app.js"}}" defer></script>
 </head>
 {{/* SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see

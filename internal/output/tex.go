@@ -216,8 +216,17 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 	case models.PsalmDoxology:
 		b.WriteString(formatGloriaPatriTeX(elem.Text))
 
+	case models.Prayer, models.Reading:
+		if turns := elem.SpeakerTurns(); len(turns) > 0 {
+			for _, turn := range turns {
+				fmt.Fprintf(&b, "\\noindent\\rubric{\\scshape %s}\\par\\nopagebreak\n", turn.Role.Label())
+				b.WriteString(formatLiturgicalBlockTeX(turn.Text))
+			}
+		} else {
+			b.WriteString(formatLiturgicalBlockTeX(elem.Text))
+		}
 	case models.Doxology, models.Versicle, models.Response, models.Dialogue,
-		models.Prayer, models.Chapter, models.Reading,
+		models.Chapter,
 		models.Blessing, models.Preces:
 		b.WriteString(formatLiturgicalBlockTeX(elem.Text))
 	case models.Collect:
