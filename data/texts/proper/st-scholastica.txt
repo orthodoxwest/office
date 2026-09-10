@@ -28,21 +28,26 @@ To-day * the holy virgin Scholastica, in the likeness of a dove, went forth with
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
+[psalm-antiphon-1]
+# SOURCE: diurnal p. 476
+Go forth now, brother, * go forth if thou canst: bid me farewell, and depart to the monastery.
+
+[psalm-antiphon-2]
+# SOURCE: diurnal p. 476
+Almighty God * forgive thee, my sister: what is this thou hast done?
+
+[psalm-antiphon-3]
+# SOURCE: diurnal p. 476
+Lo, I entreated thee, * and thou wouldest not hear me: I entreated my Lord, and he heard me.
+
+[psalm-antiphon-4]
+# SOURCE: diurnal p. 476
+Now speak we * even until morning of heavenly things, in holy converse regarding the life of the spirit.
+
+[psalm-antiphon-5]
+# SOURCE: diurnal p. 476
+When holy Benedict * had withdrawn himself in his cell for three days, he lifted up his eyes, and saw the soul of his sister, departing from the body in the likeness of a dove, enter the secret places of the heavens.
+
 # [commemoration-antiphon]
 # Antiphon when this feast is only commemorated (not the day's celebration).
 #
@@ -54,9 +59,12 @@ To-day * the holy virgin Scholastica, in the likeness of a dove, went forth with
 
 # --- optional ---
 #
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
+[chapter-lauds]
+# SOURCE: diurnal p. 477
+!Cant 2:10,14
+Rise up, my love, my fair one, and come away. * O my dove, that art in the clefts of the rock, in the secret places of the stairs, let me see thy countenance, let me hear thy voice; * for sweet is the voice, and thy countenance is comely.
+R. Thanks be to God.
+
 # [chapter-vespers]
 # Chapter at Vespers (often @use of chapter-lauds).
 #
@@ -74,9 +82,11 @@ R. Behold, thou art fair; thou hast dove's eyes.
 # [versicle-vespers]
 # Versicle after the hymn at Vespers.
 #
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
+[versicle-first-vespers]
+# SOURCE: diurnal p. 476
+V. Who is this that flieth as a cloud?
+R. And as a dove to her windows?
+
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #

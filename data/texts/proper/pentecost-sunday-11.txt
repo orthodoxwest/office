@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 223 (XI Sunday after Pentecost)
-Almighty and everlasting God, who in the abundance of thy loving-kindness dost give more than thy suppliants either desire or deserve: pour down upon us thy mercy; forgiving us those things whereof our conscience is afraid, and giving us those things which we do not presume to ask.
+# SOURCE: diurnal p. 435
+Almighty and everlasting God, who art always more ready to hear than we to pray, and art wont to give more than either we desire or deserve; Pour down upon us the abundance of thy mercy; forgiving us those things whereof our conscience is afraid, and giving us those good things which we are not worthy to ask, but through the merits and mediation of Jesus Christ, thy Son, our Lord.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Dum transiret Dominus)
