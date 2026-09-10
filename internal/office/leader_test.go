@@ -68,13 +68,10 @@ func TestPrayerFormsAcrossHoursAndExceptionalOffices(t *testing.T) {
 					if date == "2026-03-11" && greetings == 0 {
 						t.Error("ordinary hour has no greeting")
 					}
-					if (name == "prime" || name == "compline") && date == "2026-03-11" && form != models.PrayerPrivate && confessions != 2 {
+					if (name == "prime" || name == "compline") && date == "2026-03-11" && form == models.PrayerPriest && confessions != 2 {
 						t.Errorf("choir confessions=%d", confessions)
 					}
 					texts = append(texts, output.FormatOfficeHour(hour))
-				}
-				if texts[1] != texts[2] {
-					t.Error("deacon and priest diverged without an appointed distinction")
 				}
 				again, err := engine.ComposeHour(name, day, moveable)
 				if err != nil {
@@ -88,5 +85,100 @@ func TestPrayerFormsAcrossHoursAndExceptionalOffices(t *testing.T) {
 	}
 	if _, err := engine.ComposeHourWithOptions("lauds", &days[0], moveable, office.ComposeOptions{Form: "invalid"}); err == nil {
 		t.Error("invalid form accepted")
+	}
+}
+
+func TestConfessionSpeakersAndPriestAbsolution(t *testing.T) {
+	engine, err := office.NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	days, err := calendar.BuildCalendar(2026, "../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, date := range []string{"2026-03-11", "2026-11-02"} {
+		d, _ := time.Parse(time.DateOnly, date)
+		for _, name := range []string{"prime", "compline"} {
+			for _, form := range models.PrayerForms {
+				hour, err := engine.ComposeHourWithOptions(name, &days[d.YearDay()-1], calendar.ComputeMoveableDates(2026), office.ComposeOptions{Form: form})
+				if err != nil {
+					t.Fatal(err)
+				}
+				var roles []string
+				var confession strings.Builder
+				for _, section := range hour.Sections {
+					for _, elem := range section.Elements {
+						if elem.LeaderSlot != "confession" || elem.Type != models.Prayer {
+							continue
+						}
+						confession.WriteString(elem.Text)
+						if form == models.PrayerPrivate && len(elem.Voice) != 0 {
+							t.Error("private confession has speaker labels")
+						}
+						if form != models.PrayerPrivate && len(elem.SpeakerTurns()) == 0 {
+							t.Fatal("invalid confession voice partition")
+						}
+						for _, turn := range elem.SpeakerTurns() {
+							roles = append(roles, turn.Role.Label())
+						}
+					}
+				}
+				if confession.Len() == 0 {
+					continue
+				} // Prime can omit preces.
+				if form == models.PrayerPriest {
+					if strings.Join(roles, ",") != "Priest,People,Priest,People,Priest,People,Priest,People" {
+						t.Errorf("wrong speakers: %v", roles)
+					}
+					if !strings.Contains(confession.String(), "grant you pardon, absolution, and remission of your sins") {
+						t.Error("priest absolution must use parish wording")
+					}
+				} else {
+					if strings.Contains(confession.String(), "your sins") || strings.Contains(confession.String(), "you, brethren") {
+						t.Error("priest text leaked into common confession")
+					}
+					if form == models.PrayerDeacon && strings.Join(roles, ",") != "All" {
+						t.Errorf("deacon confession speakers: %v", roles)
+					}
+				}
+			}
+		}
+	}
+}
+
+func TestFixedPrecesResponsePrecedesClergyGreeting(t *testing.T) {
+	engine, err := office.NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	days, err := calendar.BuildCalendar(2026, "../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, _ := time.Parse(time.DateOnly, "2026-03-10")
+	for _, name := range []string{"prime", "compline"} {
+		for _, form := range models.PrayerForms {
+			hour, err := engine.ComposeHourWithOptions(name, &days[d.YearDay()-1], calendar.ComputeMoveableDates(2026), office.ComposeOptions{Form: form})
+			if err != nil {
+				t.Fatal(err)
+			}
+			fixed, greeting := -1, -1
+			index := 0
+			for _, section := range hour.Sections {
+				for _, elem := range section.Elements {
+					if elem.LeaderSlot == "" && strings.Contains(elem.Text, "And let my cry come unto thee") {
+						fixed = index
+					}
+					if elem.LeaderSlot == "greeting" && greeting < 0 {
+						greeting = index
+					}
+					index++
+				}
+			}
+			if fixed < 0 || greeting <= fixed {
+				t.Errorf("%s %s: preces response %d must precede greeting %d", name, form, fixed, greeting)
+			}
+		}
 	}
 }

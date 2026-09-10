@@ -44,7 +44,8 @@ const (
 	CorporateLordPrayer ElementType = "corporate-lord-prayer"
 )
 
-// VoiceSpan is a contiguous stretch of prayer text with a spoken/silent delivery.
+// VoiceSpan is a contiguous stretch of prayer text with a spoken/silent delivery
+// and, for shared prayers, an optional speaker.
 // Secret prayers are composed of an aloud incipit, a silent body, and optionally
 // an aloud tail (e.g. the pre-collect Our Father). Nil/empty Voice means the
 // whole Text is spoken normally.
@@ -62,7 +63,41 @@ type VoiceRole string
 const (
 	VoiceOfficiant VoiceRole = "officiant"
 	VoiceResponse  VoiceRole = "response"
+	VoicePriest    VoiceRole = "priest"
+	VoiceAll       VoiceRole = "all"
 )
+
+// Label names the speaker without requiring familiarity with liturgical sigils.
+func (r VoiceRole) Label() string {
+	switch r {
+	case VoiceOfficiant:
+		return "Leader"
+	case VoiceResponse:
+		return "People"
+	case VoicePriest:
+		return "Priest"
+	case VoiceAll:
+		return "All"
+	default:
+		return ""
+	}
+}
+
+// SpeakerTurns validates the presentation partition before renderers use it.
+// An incomplete partition must never hide or change the underlying prayer.
+func (e OfficeElement) SpeakerTurns() []VoiceSpan {
+	var text string
+	for _, span := range e.Voice {
+		if !span.Spoken || span.Role.Label() == "" {
+			return nil
+		}
+		text += span.Text
+	}
+	if text != e.Text {
+		return nil
+	}
+	return e.Voice
+}
 
 // RubricSpan is one semantically distinct run in a rubric. Prayed is limited
 // to words which the rubric quotes for recitation; the surrounding instruction
@@ -84,8 +119,8 @@ type RubricSpan struct {
 // example, a proper hymn with a seasonal doxology). These fields are excluded
 // from review hashes and never rendered.
 //
-// Voice, when non-empty, is a presentation partition of Text into spoken and
-// silent spans. The concatenation of span texts must equal Text. Plain-text
+// Voice, when non-empty, partitions Text by speaker and spoken/silent delivery.
+// The concatenation of span texts must equal Text. Plain-text
 // and golden output use Text only; HTML/TeX may style Voice.
 //
 // Announce, on an Antiphon, means the element is the opening half of a

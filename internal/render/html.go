@@ -2,6 +2,7 @@ package render
 
 import (
 	"html/template"
+	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -217,7 +218,15 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
 		sb.WriteString(`</div>`)
 	case models.Prayer, models.Reading:
-		if len(elem.Voice) > 0 {
+		if turns := elem.SpeakerTurns(); len(turns) > 0 {
+			for _, turn := range turns {
+				sb.WriteString(`<div class="prayer-turn" data-speaker="` + string(turn.Role) + `"><p class="prayer-speaker">`)
+				sb.WriteString(turn.Role.Label())
+				sb.WriteString(`</p>`)
+				sb.WriteString(string(renderFlowingLiturgicalBlock(turn.Text)))
+				sb.WriteString(`</div>`)
+			}
+		} else if len(elem.Voice) > 0 && !slices.ContainsFunc(elem.Voice, func(span models.VoiceSpan) bool { return span.Role != "" }) {
 			sb.WriteString(string(renderVoiceLiturgicalBlock(elem.Voice, flowProseLines)))
 		} else {
 			sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))

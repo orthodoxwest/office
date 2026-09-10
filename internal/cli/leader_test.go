@@ -20,7 +20,7 @@ func TestPrayerFormCommands(t *testing.T) {
 					t.Fatal(err)
 				}
 				want := 2
-				if form == "private" {
+				if form != "priest" {
 					want = 1
 				}
 				if got := strings.Count(strings.ToLower(out.String()), "i confess to god almighty"); got != want {

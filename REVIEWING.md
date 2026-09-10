@@ -376,5 +376,22 @@ The ordinary greetings and choir confession use the Monastic Diurnal's
 Prime (pp. 7–9), closing versicles (p. 43), and Compline (pp. 147–148).
 The All Souls Compline rubric (p. 643) retains Confession and Absolution while
 omitting the opening blessing, lesson, Our help, and Lord's Prayer.
-The selected longer choir confession and its responses currently apply to
-both ordained choices; no distinct priest-only wording is inferred.
+The priest-led form uses the longer choir confession and its exchanges, with
+“grant you … your sins” in the final absolution from the parish Compline draft
+(Compline Alex edit 10-24 v.08.docx, p. 5). The draft differs here from the
+older Diurnal's “grant us … our sins.” Its opening rubric also reserves “Sir,
+ask a blessing” for a priest; private and deacon-led forms use “Lord, grant a
+blessing.”
+
+The current application scope assigns the shared confession and “our sins”
+prayers to everyone together when led by a deacon. This mapping follows the
+feature's priest-only confession scope; the printed Out of Choir rubric does
+not explicitly name deacons. Speaker metadata labels every turn, including
+Amens, without changing the underlying source wording.
+
+The greeting audit checks both clergy and private formulas. “O Lord, hear my
+prayer” also occurs as a fixed preces response before the variable greeting:
+at Prime (Diurnal p. 9), Compline, and in the Office of the Dead. Those
+occurrences remain in every form. Psalm and antiphon occurrences are also
+independent of the leader. The older combined collect-intro entries are no
+longer used by the hour definitions.

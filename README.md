@@ -69,7 +69,7 @@ for the full list of build and maintenance targets.
 
 ```bash
 ./office lauds 2026-09-04          # render an hour (also prime … compline)
-./office prime 2026-03-11 --form deacon # choir form (also available for tex)
+./office prime 2026-03-11 --form deacon # deacon-led form (also available for tex)
 ./office ordo 2026                # annual ordo
 ./office rubrics 2026             # per-day rubric and antiphon TSV
 ./office validate                # check data files

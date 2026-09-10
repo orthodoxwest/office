@@ -2,12 +2,12 @@
 
 | Measure | Count |
 |---|---:|
-| Distinct date-hour forms (2026–2053) | 142842 |
+| Distinct date-hour forms (2026–2053) | 157916 |
 | Modeled structural features | 251 |
-| Full structural-cover pages | 63 |
-| Residual structural-review pages | 63 |
+| Full structural-cover pages | 64 |
+| Residual structural-review pages | 64 |
 | Uncovered features | 0 |
-| Verified text entries | 1566 |
+| Verified text entries | 1567 |
 | Rendered text entries needing review | 693 |
 | Rendered text entries with unknown source | 152 |
 | Classified zero-occurrence entries | 34 |

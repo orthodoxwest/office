@@ -37,3 +37,25 @@ func TestLeaderSectionsShareCommonTextAndExpandBoundedSlots(t *testing.T) {
 		t.Error("unmarked variation accepted")
 	}
 }
+
+func TestPrayerSpeakerLabelsKeepResponsesInOrder(t *testing.T) {
+	elem := models.OfficeElement{Type: models.Prayer, Text: "Have mercy upon thee.\nR. Amen.", Voice: []models.VoiceSpan{
+		{Text: "Have mercy upon thee.\n", Spoken: true, Role: models.VoiceResponse},
+		{Text: "R. Amen.", Spoken: true, Role: models.VoicePriest},
+	}}
+	html := renderOfficeElement(elem, "")
+	for _, want := range []string{`data-speaker="response"><p class="prayer-speaker">People</p>`, `data-speaker="priest"><p class="prayer-speaker">Priest</p>`} {
+		if !strings.Contains(html, want) {
+			t.Errorf("missing speaker: %s", html)
+		}
+	}
+	if strings.Index(html, "People</p>") > strings.Index(html, "Have mercy") || strings.Index(html, "Priest</p>") > strings.Index(html, "Amen.") {
+		t.Errorf("speaker must precede their words: %s", html)
+	}
+	// Invalid metadata must not truncate the source prayer or invent labels.
+	elem.Voice = elem.Voice[:1]
+	html = renderOfficeElement(elem, "")
+	if !strings.Contains(html, "Amen.") || strings.Contains(html, "prayer-speaker") {
+		t.Errorf("invalid partition lost text: %s", html)
+	}
+}

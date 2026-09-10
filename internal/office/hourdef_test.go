@@ -478,8 +478,9 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 				"ordinary/prime/preces-our-help",
 				"ordinary/shared/confiteor",
 				"ordinary/prime/preces-vouchsafe",
+				"shared/leader/greeting-lay",
 			}
-			wantTypes := []string{"preces", "prayer", "officiant-confession", "prayer"}
+			wantTypes := []string{"preces", "prayer", "officiant-confession", "prayer", "versicle"}
 			if len(section.Elements) != len(wantRefs) {
 				t.Fatalf("Prime Preces elements = %d, want %d", len(section.Elements), len(wantRefs))
 			}

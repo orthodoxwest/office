@@ -1555,6 +1555,7 @@ shared/formulas/triduum-prime-ending-rubric,823815a296ed,diurnal,Maundy Thursday
 shared/leader/benedicamus-domino,cd0d899d7586,diurnal,,43,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0089.png
 shared/leader/compline-opening-choir,82f912acb36d,diurnal,,147,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0193.png
 shared/leader/confiteor-absolution,fef46ea6f789,diurnal,,8,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0054.png
+shared/leader/confiteor-absolution-priest,bf903d166239,Compline Alex edit 10-24 v.08.docx,,5,verified,codex,2026-09-10,Prayer wording agreed between current-session page-image inspection and independent Sonnet reading. Rendered page output/pages/leader-parish-compline/0005.png; hash-bound source cache and comparison in output/leader-source/followup/agreement-report.json. Symbol annotation excluded.
 shared/leader/confiteor-choir-response,5a9fbc2f7393,diurnal,,7–8,verified,codex,2026-09-10,"Word-for-word after normalization; page images output/pages/monastic-diurnal/0053.png, output/pages/monastic-diurnal/0054.png"
 shared/leader/confiteor-choir-rubric,afd4e0eac746,diurnal,,8,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0054.png
 shared/leader/confiteor-officiant,d0be50701393,diurnal,,7,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0053.png

@@ -327,6 +327,10 @@ Ref = ordinary/shared/confiteor
 Type = prayer
 Ref = ordinary/prime/preces-vouchsafe
 
+# This fixed preces response precedes the variable greeting (Diurnal p. 9).
+Type = versicle
+Ref = shared/leader/greeting-lay
+
 [Collect-Intro]
 Condition = not-triduum
 Type = officiant-greeting

@@ -66,3 +66,8 @@ V. Sir, ask a blessing.
 Blessing. The Lord Almighty grant us a quiet night and a perfect end.
 R. Amen.
 
+[confiteor-absolution-priest]
+# SOURCE: Compline Alex edit 10-24 v.08.docx, p. 5 (corporate absolution)
+The Almighty and merciful Lord grant you pardon, absolution, and remission of your sins.
+R. Amen.
+
