@@ -876,6 +876,40 @@ test("the inscription band keeps the season with the rest of the gilding", async
   }
 });
 
+for (const theme of ["light", "dark"]) {
+  test(`Passiontide simplifies foliage without moving the prayer invitation — ${theme}`, async ({ page }) => {
+    await openDatedPage(page, "/?date=2026-04-08", theme);
+    const leaves = page.locator("use.ornament-foliage");
+    const rules = page.locator("use.ornament-sprig-rule");
+    // Inspect rendered instances: styling only a definition can leave a
+    // reused SVG painting leaves even when its source reports hidden.
+    expect(await leaves.count()).toBe(6);
+    for (const leaf of await leaves.all()) await expect(leaf).toBeHidden();
+    // A horizontal SVG stroke has a zero-height bounding box, so assert
+    // its visibility directly rather than Playwright's box-based matcher.
+    for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "visible");
+    await expect(page.locator(".ornament-headpiece > span")).toBeVisible();
+
+    const invitation = page.locator(".pray-now");
+    const veiledBox = await invitation.boundingBox();
+    // Hold the day's content constant to isolate ornament from different
+    // feast names, notices, or commemorations changing the page height.
+    await page.evaluate(() => {
+      document.body.classList.replace("season-passiontide", "season-eastertide");
+    });
+    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
+    for (const rule of await rules.all()) await expect(rule).toHaveCSS("visibility", "hidden");
+    expect(await invitation.boundingBox()).toEqual(veiledBox);
+
+    await page.goto("/?date=2026-04-20");
+    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
+    // The year heading remains in ordinary gold even after browsing Easter.
+    await page.goto("/calendar/2026");
+    await expect(page.locator("body")).not.toHaveClass(/season-/);
+    for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
+  });
+}
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);

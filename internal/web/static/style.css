@@ -971,6 +971,7 @@ footer::before {
 
 /* Double gold hairlines framing the hour title, echoing the gilded altar frame */
 .hour-header h1 {
+  position: relative;
   font-size: 1.55rem;
   font-weight: normal;
   letter-spacing: 0.08em;
@@ -981,6 +982,20 @@ footer::before {
   padding: 0.15rem 1.3rem 0.2rem;
   border-top: 3px double var(--ornament-line);
   border-bottom: 3px double var(--ornament-line);
+}
+
+/* A single lozenge interrupts the existing rule without adding a title row. */
+.hour-header h1::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1.5px;
+  width: 0.25rem;
+  height: 0.25rem;
+  background: var(--ornament);
+  box-shadow: 0 0 0 2px var(--bg);
+  transform: translate(-50%, 50%) rotate(45deg);
+  pointer-events: none;
 }
 
 .hour-meta {
@@ -1992,6 +2007,7 @@ footer::before {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  align-items: last baseline;
   gap: 0.5rem 2rem;
   margin-bottom: 0;
   padding-bottom: 0.55rem;
@@ -2001,6 +2017,16 @@ footer::before {
 .calendar-header h1 {
   font-size: 1.5rem;
   font-weight: normal;
+}
+
+.calendar-title .ornament-headpiece {
+  width: 6rem;
+  margin: 0 auto 0.2rem;
+  font-size: 0.7rem;
+}
+
+.calendar-title .ornament-sprig {
+  height: 0.75rem;
 }
 
 .calendar-legend {
@@ -3038,6 +3064,51 @@ body.season-eastertide {
   }
 }
 
+/* ── Shared printer's headpiece ──
+   One cross opens the home, year, or reminders heading. Foliage yields to
+   simple rules in Passiontide; both occupy exactly the same space. The Ordo
+   has no seasonal body class, keeping its year heading in ordinary gold. */
+.ornament-headpiece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 8.5rem;
+  color: var(--ornament);
+  font-size: 0.8rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ornament-sprig {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  height: 0.9rem;
+  fill: currentColor;
+  opacity: 0.55;
+}
+
+.ornament-sprig-end { transform: scaleX(-1); }
+
+.ornament-sprig-stem,
+.ornament-sprig-rule {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.8;
+}
+
+.ornament-sprig-rule,
+.season-passiontide .ornament-foliage {
+  /* Visibility belongs to the <use> instances, outside SVG's shadow tree. */
+  visibility: hidden;
+}
+
+.ornament-headpiece-plain .ornament-sprig-rule,
+.season-passiontide .ornament-sprig-rule {
+  visibility: visible;
+}
+
 /* ── Home frontispiece ──
    The day and its appointed prayer form one ceremonial object at every width:
    day identity → invitation → compact hours index → secondary date control.
@@ -3103,31 +3174,9 @@ body.season-eastertide {
   margin: 0 0 0.8rem;
 }
 
-/* A small printer's headpiece opens the frontispiece. Paired leaf sprigs
-   follow the seasonal gilding; the date remains the first reading. */
-.page-home .home-headpiece {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-  width: 8.5rem;
+.page-home .ornament-headpiece {
   margin: 0.05rem auto 0.4rem;
-  color: var(--ornament);
-  font-size: 0.8rem;
-  line-height: 1;
 }
-
-.page-home .home-headpiece-sprig {
-  display: block;
-  flex: 1;
-  min-width: 0;
-  height: 0.9rem;
-  fill: currentColor;
-  opacity: 0.55;
-}
-
-.page-home .home-headpiece-sprig-end { transform: scaleX(-1); }
-.page-home .home-sprig-stem { fill: none; stroke: currentColor; stroke-width: 0.8; }
 
 .page-home .home h1 {
   font-size: 1.38rem;
@@ -3610,6 +3659,12 @@ body.season-eastertide {
 .reminders {
   max-width: 38rem;
   margin: 0 auto;
+}
+
+.reminders .ornament-headpiece {
+  width: 5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
 }
 
 .reminders h1 {
@@ -4517,6 +4572,11 @@ body.page-home::before {
 
   .hour-header h1 {
     border-color: #888;
+  }
+
+  .hour-header h1::after {
+    background: #888;
+    box-shadow: 0 0 0 2px #fff;
   }
 
   .hour-continuation::before {

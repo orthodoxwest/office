@@ -1,0 +1,23 @@
+{{/* One headpiece per page. Pass true for foliage, false for plain rules.
+     The rules and sprigs share a viewBox so seasonal simplification does not
+     move the heading. All ornament stays outside the accessibility tree. */}}
+{{define "headpiece"}}
+<div class="ornament-headpiece{{if not .}} ornament-headpiece-plain{{end}}" aria-hidden="true">
+  <svg class="ornament-sprig" viewBox="0 0 56 20" focusable="false">
+    <defs>
+      <path id="headpiece-rule" d="M2 10h52"/>
+      {{if .}}<g id="headpiece-foliage">
+        <path class="ornament-sprig-stem" d="M2 15C20 15 34 11 54 5"/>
+        <path d="M14 14C8 14 7 9 6 6c6 0 9 3 8 8Zm12-2c-6-1-7-6-7-9 6 1 9 4 7 9Zm11-3c-5-2-5-6-4-9 5 3 7 5 4 9ZM16 14c-3 4-7 5-10 4 2-4 6-5 10-4Zm14-3c-2 5-6 7-10 7 1-4 5-7 10-7Zm14-4c-1 5-5 7-9 7 1-4 5-7 9-7Z"/>
+      </g>{{end}}
+    </defs>
+    <use class="ornament-sprig-rule" href="#headpiece-rule"/>
+    {{if .}}<use class="ornament-foliage" href="#headpiece-foliage"/>{{end}}
+  </svg>
+  <span>✠</span>
+  <svg class="ornament-sprig ornament-sprig-end" viewBox="0 0 56 20" focusable="false">
+    <use class="ornament-sprig-rule" href="#headpiece-rule"/>
+    {{if .}}<use class="ornament-foliage" href="#headpiece-foliage"/>{{end}}
+  </svg>
+</div>
+{{end}}

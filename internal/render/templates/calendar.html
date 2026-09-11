@@ -12,7 +12,10 @@
   </svg>
   {{$theme := .Theme}}
   <div class="calendar-header" id="calendar-top">
-    <h1>{{.Year}} Ordo</h1>
+    <div class="calendar-title">
+      {{template "headpiece" true}}
+      <h1>{{.Year}} Ordo</h1>
+    </div>
     <nav class="year-nav">
       <a href="{{calendarYearLink .PrevYear $theme}}">&laquo; {{.PrevYear}}</a>
       <a id="calendar-today-link" class="calendar-today-link" href="#" hidden>Today</a>
