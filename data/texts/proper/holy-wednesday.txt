@@ -2,7 +2,8 @@
 @use proper/holy-wednesday/psalm-antiphon-1
 
 [psalm-antiphon-1]
-Deliver me * from blood, O God, thou God of my salvation: and my tongue shall extol thy justice.
+# SOURCE: diurnal p. 283
+Deliver me * from blood-guiltiness, O God my God: and my tongue shall sing of thy righteousness.
 
 [psalm-antiphon-2]
 I received * injuries and terrors from them: but the Lord is with me as a strong warrior.
@@ -29,7 +30,8 @@ The handmaid said to Peter: * Surely thou also art one of them; for even thy spe
 @use proper/holy-monday/commemoration-versicle
 
 [collect]
-O Almighty God, we beseech Thee that we whose transgressions do unceasingly harm us, may find freedom in the Suffering of Thine Only-begotten Son.
+# SOURCE: diurnal p. 284
+Grant, we beseech thee, Almighty God: that we, who are continually afflicted because of our transgressions, may be delivered by the Passion of thine only-begotten Son.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
