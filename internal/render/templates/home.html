@@ -7,9 +7,27 @@
        and focus orders aligned makes the threshold equally clear by keyboard
        and screen reader. */}}
   <div class="home-hero day-color-{{.Color}}">
+    {{/* Corner tooling is decorative, outside the reading and focus order. */}}
+    <svg class="home-frame-corner home-frame-corner-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <defs><path id="home-corner-leaf" d="M3 29V3h26M7 7c7 0 12 4 13 11C13 18 8 14 7 7Zm0 0 9 8"/></defs>
+      <use href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><use href="#home-corner-leaf"/></svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><use href="#home-corner-leaf"/></svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><use href="#home-corner-leaf"/></svg>
     <section class="home-summary day-color-{{.Color}}" aria-labelledby="home-date-heading">
       <header class="home-day-head">
-        <div class="home-headpiece" aria-hidden="true">✠</div>
+        <div class="home-headpiece" aria-hidden="true">
+          <svg class="home-headpiece-sprig" viewBox="0 0 56 20" focusable="false">
+            <defs><g id="home-headpiece-leaf">
+              <path class="home-sprig-stem" d="M2 15C20 15 34 11 54 5"/>
+              <path d="M14 14C8 14 7 9 6 6c6 0 9 3 8 8Zm12-2c-6-1-7-6-7-9 6 1 9 4 7 9Zm11-3c-5-2-5-6-4-9 5 3 7 5 4 9ZM16 14c-3 4-7 5-10 4 2-4 6-5 10-4Zm14-3c-2 5-6 7-10 7 1-4 5-7 10-7Zm14-4c-1 5-5 7-9 7 1-4 5-7 9-7Z"/>
+            </g></defs>
+            <use href="#home-headpiece-leaf"/>
+          </svg>
+          <span>✠</span>
+          <svg class="home-headpiece-sprig home-headpiece-sprig-end" viewBox="0 0 56 20" focusable="false"><use href="#home-headpiece-leaf"/></svg>
+        </div>
         <h1 id="home-date-heading">
           <a class="home-date-link" href="{{.CalendarLink}}" title="See this day in the ordo">{{.DateStr}}</a>
         </h1>
