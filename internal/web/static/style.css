@@ -3367,6 +3367,7 @@ body.season-eastertide {
 }
 
 .page-home .home-hour-link {
+  position: relative;
   justify-content: center;
   min-width: 0;
   min-height: var(--touch-target);
@@ -3378,12 +3379,19 @@ body.season-eastertide {
   text-align: center;
 }
 
-/* No rule between the hours themselves. The three periods hold 2, 3 and 2
-   hours, so vertical rules imply columns that cannot line up — at 390px the
-   divisions fall at 230, then 188 and 272, then 230 again, and the block reads
-   as a mis-set table. Banded horizontally it reads as what it is: Morning,
-   Day, Evening. That is also the building's grammar, where the structure runs
-   in horizontal courses. */
+/* Short hairlines separate neighbouring hours within each band. Their clear
+   ends keep the unequal 2/3/2 groups from becoming continuous table columns. */
+.page-home .home-hour-link + .home-hour-link::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 1px;
+  height: 1rem;
+  background: var(--frontispiece-rule);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
 
 .page-home .home-hour-link.is-current {
   background: rgba(107, 58, 31, 0.08);
@@ -4364,18 +4372,18 @@ body {
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-    --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
+    --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
     --apse-vault:
-      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
-      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
+      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
       radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
-      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
+      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
       radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
       linear-gradient(45deg,
         transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
       linear-gradient(135deg,
@@ -4388,18 +4396,18 @@ body {
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-  --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
+  --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
   --apse-vault:
-    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
-    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
+    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
     radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
-    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
+    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
     radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
     linear-gradient(45deg,
       transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
     linear-gradient(135deg,

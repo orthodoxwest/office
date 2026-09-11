@@ -953,10 +953,8 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
         label.borderRightStyle,
         label.borderRightColor,
       ),
-      // Deliberately absent. The periods hold 2, 3 and 2 hours, so a rule
-      // between hours implies columns that cannot line up across the rows and
-      // the directory reads as a mis-set table. The frame, the label column
-      // and the band rules carry the structure instead.
+      // Full-height borders remain absent between the unequal 2/3/2 groups.
+      // Short decorative hairlines separate neighbours within each band.
       dividedHourLeft: isVisibleRule(
         dividedHour.borderLeftWidth,
         dividedHour.borderLeftStyle,
