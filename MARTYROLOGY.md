@@ -13,7 +13,7 @@ existing rubric. This is a three-day trial, not a complete annual Martyrology.
 The common conclusion and response must also be present, or Prime retains the
 rubric. The existing Triduum condition still suppresses the entire section.
 Readings remain tied to civil dates, independently of feast transfers. The
-calendar, feast metadata, other hours, and structural signoffs are unchanged.
+calendar, feast metadata, and other hours are unchanged.
 
 To extend the trial:
 

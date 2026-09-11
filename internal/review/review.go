@@ -1,13 +1,6 @@
-// Package review tracks human review coverage of composed office hours.
-//
-// The unit of review is not a calendar date but a distinct composition: the
-// same celebration produces the same hour year after year, so reviewing
-// "Trinity Sunday Lauds" once covers every year in which that composition
-// recurs. BuildManifest sweeps several calendar years, composes every hour of
-// every day, and dedupes by a content hash of the composed output (excluding
-// the date). Sign-offs recorded in data/review/signoffs.txt reference that
-// hash, so any later edit to the underlying texts automatically marks the
-// affected units stale.
+// Package review provides composition diagnostics, sampling, and corpus provenance.
+// Rendered content hashes deduplicate examples and support regression snapshots;
+// they do not certify appointments or correctness on other dates.
 package review
 
 import (
@@ -42,7 +35,7 @@ var hourTier = map[string]int{
 	"terce": 2, "sext": 2, "none": 2,
 }
 
-// Unit is one distinct composition of one hour: the atom of human review.
+// Unit is one distinct rendered composition of one hour.
 type Unit struct {
 	Form        models.PrayerForm
 	Hash        string // content hash of the composed hour (date excluded)
@@ -84,11 +77,11 @@ type Manifest struct {
 // deliberately excluded so that identical compositions on different dates
 // hash the same. Liturgical content is included; assurance metadata such as
 // source keys and decision traces is excluded so observability changes do not
-// invalidate a sign-off on an otherwise unchanged office.
+// change the content identity of an otherwise unchanged office.
 //
 // Psalm incipits count as content: they are printed on the page, and pairing
 // one with the wrong psalm is a mistake only a reader can catch, so changing
-// one must make the affected units stale.
+// one must change the content identity.
 func HashHour(h *models.OfficeHour) string {
 	var b strings.Builder
 	b.WriteString(h.Hour)
@@ -216,7 +209,7 @@ func BuildManifest(dataDir string, startYear, years int) (*Manifest, error) {
 }
 
 // unitKey returns a stable identifier for the celebration that owns this
-// hour, used to relate stale sign-offs to their current units. Vespers keys
+// hour. Vespers keys
 // on the office that owns the evening, since I Vespers belongs liturgically
 // to the following day's feast.
 func unitKey(day *models.CalendarDay, hourName string) string {

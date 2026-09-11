@@ -47,7 +47,7 @@ and page or section for a correction.
 - [Editing liturgical data](DATA.md): file formats, proper slots, aliases,
   scaffolding, and psalm numbering.
 - [Reviewing the Office](REVIEWING.md): checking texts and rendered hours,
-  recording findings, and tracking source and structural coverage.
+  recording source-backed composition checks, and tracking text provenance.
 - [Diurnal transcription and discovery](scripts/DIURNAL-PIPELINE.md): reading
   scanned pages, comparing the corpus, and finding propers hidden by fallbacks.
 
@@ -57,10 +57,10 @@ The page-image workflow starts with `make pages`, then `make transcribe` or
 Keep source PDFs outside the repository and generated artifacts under ignored
 `output/`.
 
-Text attestations and structural hour signoffs are separate. The provenance
-queue prioritizes individual corpus entries; the structural review plan
-covers composition rules. Their commands and attestation semantics are
-documented in [REVIEWING.md](REVIEWING.md).
+Text attestations verify individual corpus entries. Composition review records
+specific source requirements in tests and issues; the optional sample planner
+helps find example dates without assigning review-completion credit. Commands
+and evidence requirements are documented in [REVIEWING.md](REVIEWING.md).
 
 ## Common commands
 
@@ -106,7 +106,7 @@ make verify-psalms                # compare the psalter with its reference witne
 ```
 
 Review golden-file changes under [internal/e2e/testdata/golden/](internal/e2e/testdata/golden/)
-before committing. They cover rendered hours, parity, and assurance coverage.
+before committing. They cover rendered hours, date-sensitive parity, and text provenance.
 
 Playwright behavior and accessibility tests run separately from `make check`:
 

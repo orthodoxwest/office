@@ -155,8 +155,8 @@ func appendContextDecisions(hour *models.OfficeHour, day *models.CalendarDay, ho
 		add("context:feria-commemoration", "present", day.FeriaCommemoration.ProperID)
 	}
 
-	// Structural dispositions are recorded only on hours that render the
-	// corresponding element, so sign-off credit cannot cover unread sections.
+	// Disposition reasons are recorded only on hours that render the
+	// corresponding element, keeping composition explanations scoped to the hour.
 	// Preces: Prime and Compline. Suffrage: Lauds and Vespers. Marian: Lauds,
 	// Vespers, and Compline.
 	switch hourName {

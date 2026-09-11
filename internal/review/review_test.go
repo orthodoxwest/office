@@ -65,7 +65,7 @@ func TestHashHourIncludesContent(t *testing.T) {
 	}
 
 	// A Latin incipit is printed on the page, and only a reader can catch one
-	// paired with the wrong psalm, so changing it must stale the sign-off.
+	// paired with the wrong psalm, so changing it must alter the content hash.
 	d := sampleHour(date, "Almighty and everlasting God...")
 	d.Sections[0].Elements[0].Incipit = "Deus misereatur nostri"
 	if HashHour(a) == HashHour(d) {
