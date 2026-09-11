@@ -4206,10 +4206,12 @@ body.page-reminders {
    the stars gold through Passiontide while every other ornament veils. */
 body {
   --apse-vault: none;
+  --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
+    --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
     --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
@@ -4233,6 +4235,7 @@ body {
 }
 
 :root[data-theme="dark"] body {
+  --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
   --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
@@ -4296,6 +4299,14 @@ body.page-hour footer::after {
   background-position: top center;
   -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+/* Clear the small epilogue/footer lettering where it crosses the vault.
+   Background-coloured shadows follow the glyphs without placing another
+   panel over the diaper or moving its fixed tile origin. */
+body:is(.page-home, .page-hour) footer,
+body.page-hour .report-issue {
+  text-shadow: var(--apse-copy-shadow);
 }
 
 @media (min-width: 701px) {
@@ -4574,10 +4585,28 @@ body.page-home::before {
 :root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
 .hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
 .hour-context-controls > .hour-date-nav { margin: 0; }
-.leader-selector { max-width: 100%; color: var(--accent); font-size: .9rem; }
-.leader-selector > summary { cursor: pointer; list-style: none; min-height: var(--touch-target); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .5rem; }
+.leader-selector { max-width: 100%; color: var(--text); font-size: .9rem; }
+/* Match the adjacent date disclosure. The chosen form remains legible while
+   the shared heading, rather than a preference label, leads the prayer. */
+.leader-selector > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-target);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  padding: .35rem .5rem;
+  color: var(--muted);
+  font-size: .8rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: .035em;
+}
+.leader-selector > summary [data-leaders] { color: var(--text); }
+.leader-selector[open] > summary { color: var(--accent); }
 .leader-selector > summary::-webkit-details-marker { display: none; }
-.leader-selector > summary::after { content: " ▾"; color: var(--gold); }
+.leader-selector > summary::after { content: " ▾"; color: var(--gold-line); font-size: .85em; letter-spacing: 0; }
 .leader-selector[open] > summary::after { content: " ▴"; }
 .leader-selector[open] { flex: 1 1 100%; }
 .leader-selector fieldset {
