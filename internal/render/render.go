@@ -51,7 +51,7 @@ func New(version string) (*Pages, error) {
 		{"usage.html", &p.usage},
 	} {
 		tmpl, err := template.New("").Funcs(funcs).ParseFS(templates,
-			"templates/layout.html", "templates/"+page.file)
+			"templates/layout.html", "templates/ornaments.html", "templates/"+page.file)
 		if err != nil {
 			return nil, fmt.Errorf("parsing %s template: %w", page.file, err)
 		}

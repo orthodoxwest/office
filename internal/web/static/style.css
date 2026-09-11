@@ -971,6 +971,7 @@ footer::before {
 
 /* Double gold hairlines framing the hour title, echoing the gilded altar frame */
 .hour-header h1 {
+  position: relative;
   font-size: 1.55rem;
   font-weight: normal;
   letter-spacing: 0.08em;
@@ -981,6 +982,20 @@ footer::before {
   padding: 0.15rem 1.3rem 0.2rem;
   border-top: 3px double var(--ornament-line);
   border-bottom: 3px double var(--ornament-line);
+}
+
+/* A single lozenge interrupts the existing rule without adding a title row. */
+.hour-header h1::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1.5px;
+  width: 0.25rem;
+  height: 0.25rem;
+  background: var(--ornament);
+  box-shadow: 0 0 0 2px var(--bg);
+  transform: translate(-50%, 50%) rotate(45deg);
+  pointer-events: none;
 }
 
 .hour-meta {
@@ -1992,6 +2007,7 @@ footer::before {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  align-items: last baseline;
   gap: 0.5rem 2rem;
   margin-bottom: 0;
   padding-bottom: 0.55rem;
@@ -2001,6 +2017,16 @@ footer::before {
 .calendar-header h1 {
   font-size: 1.5rem;
   font-weight: normal;
+}
+
+.calendar-title .ornament-headpiece {
+  width: 6rem;
+  margin: 0 auto 0.2rem;
+  font-size: 0.7rem;
+}
+
+.calendar-title .ornament-sprig {
+  height: 0.75rem;
 }
 
 .calendar-legend {
@@ -3038,6 +3064,51 @@ body.season-eastertide {
   }
 }
 
+/* ── Shared printer's headpiece ──
+   One cross opens the home, year, or reminders heading. Foliage yields to
+   simple rules in Passiontide; both occupy exactly the same space. The Ordo
+   has no seasonal body class, keeping its year heading in ordinary gold. */
+.ornament-headpiece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 8.5rem;
+  color: var(--ornament);
+  font-size: 0.8rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.ornament-sprig {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  height: 0.9rem;
+  fill: currentColor;
+  opacity: 0.55;
+}
+
+.ornament-sprig-end { transform: scaleX(-1); }
+
+.ornament-sprig-stem,
+.ornament-sprig-rule {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.8;
+}
+
+.ornament-sprig-rule,
+.season-passiontide .ornament-foliage {
+  /* Visibility belongs to the <use> instances, outside SVG's shadow tree. */
+  visibility: hidden;
+}
+
+.ornament-headpiece-plain .ornament-sprig-rule,
+.season-passiontide .ornament-sprig-rule {
+  visibility: visible;
+}
+
 /* ── Home frontispiece ──
    The day and its appointed prayer form one ceremonial object at every width:
    day identity → invitation → compact hours index → secondary date control.
@@ -3050,6 +3121,7 @@ body.season-eastertide {
   --frontispiece-frame: var(--border);
   --frontispiece-rule: var(--border);
   --frontispiece-band: var(--inscription-wash);
+  position: relative;
   width: 100%;
   max-width: 36rem;
   margin-inline: auto;
@@ -3060,6 +3132,33 @@ body.season-eastertide {
   background: var(--surface);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
+
+/* Book-cover tooling stays inside the existing margin, with no extra page
+   height or pointer targets. The outer rail still carries the day's colour. */
+.page-home .home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--ornament) 18%, transparent);
+  pointer-events: none;
+}
+
+.page-home .home-frame-corner {
+  position: absolute;
+  width: 1.65rem;
+  height: 1.65rem;
+  fill: none;
+  stroke: var(--ornament);
+  stroke-width: 0.9;
+  stroke-linejoin: round;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.page-home .home-frame-corner-start { top: 0.2rem; left: 0.2rem; }
+.page-home .home-frame-corner-end { top: 0.2rem; right: 0.2rem; transform: scaleX(-1); }
+.page-home .home-frame-corner-bottom-start { bottom: 0.2rem; left: 0.2rem; transform: scaleY(-1); }
+.page-home .home-frame-corner-bottom-end { bottom: 0.2rem; right: 0.2rem; transform: scale(-1); }
 
 .page-home .home-summary {
   padding: 0;
@@ -3073,6 +3172,10 @@ body.season-eastertide {
   align-items: center;
   gap: 0.12rem;
   margin: 0 0 0.8rem;
+}
+
+.page-home .ornament-headpiece {
+  margin: 0.05rem auto 0.4rem;
 }
 
 .page-home .home h1 {
@@ -3127,6 +3230,9 @@ body.season-eastertide {
   padding: 0.2rem 1rem 0.16rem;
   background: var(--inscription-ground);
   color: var(--inscription-ink);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent);
   font-size: 0.8rem;
   font-weight: normal;
   font-variant-caps: all-small-caps;
@@ -3151,6 +3257,7 @@ body.season-eastertide {
 
 .page-home .pray-now,
 .page-home .pray-now:hover {
+  position: relative;
   padding: 0.68rem 0.8rem 0.72rem;
   border: 3px double var(--ornament-line);
   background: transparent;
@@ -3158,6 +3265,24 @@ body.season-eastertide {
   font-size: 1.2rem;
   line-height: 1.3;
 }
+
+/* Small gilt lozenges finish the invitation's double rule. Empty generated
+   boxes leave its spoken name and app.js's changing hour label untouched. */
+.page-home .pray-now::before,
+.page-home .pray-now::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0.28rem;
+  height: 0.28rem;
+  background: var(--ornament);
+  box-shadow: 0 0 0 2px var(--surface);
+  transform: translateY(-50%) rotate(45deg);
+  pointer-events: none;
+}
+
+.page-home .pray-now::before { left: -0.22rem; }
+.page-home .pray-now::after { right: -0.22rem; }
 
 .page-home .pray-now:active {
   border-color: var(--accent);
@@ -3197,8 +3322,10 @@ body.season-eastertide {
 
 .page-home .home-hour-group-label {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.16rem;
   border-right: 1px solid var(--frontispiece-rule);
   background: var(--frontispiece-band);
   color: var(--muted);
@@ -3208,6 +3335,21 @@ body.season-eastertide {
   letter-spacing: 0.08em;
   line-height: 1.2;
   padding: 0 0.4rem;
+}
+
+/* Tiny sun and star engravings mark the day's three periods. Labels carry
+   their meaning; these inline vectors stay decorative and inherit the leaf. */
+.page-home .home-period-ornament {
+  display: block;
+  flex: none;
+  width: 1.2rem;
+  height: 0.8rem;
+  fill: none;
+  stroke: var(--ornament);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
 }
 
 .page-home .home-hour-group-links {
@@ -3225,6 +3367,7 @@ body.season-eastertide {
 }
 
 .page-home .home-hour-link {
+  position: relative;
   justify-content: center;
   min-width: 0;
   min-height: var(--touch-target);
@@ -3236,12 +3379,19 @@ body.season-eastertide {
   text-align: center;
 }
 
-/* No rule between the hours themselves. The three periods hold 2, 3 and 2
-   hours, so vertical rules imply columns that cannot line up — at 390px the
-   divisions fall at 230, then 188 and 272, then 230 again, and the block reads
-   as a mis-set table. Banded horizontally it reads as what it is: Morning,
-   Day, Evening. That is also the building's grammar, where the structure runs
-   in horizontal courses. */
+/* Short hairlines separate neighbouring hours within each band. Their clear
+   ends keep the unequal 2/3/2 groups from becoming continuous table columns. */
+.page-home .home-hour-link + .home-hour-link::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  width: 1px;
+  height: 1rem;
+  background: var(--frontispiece-rule);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
 
 .page-home .home-hour-link.is-current {
   background: rgba(107, 58, 31, 0.08);
@@ -3353,6 +3503,8 @@ body.season-eastertide {
   }
 
   .page-home .home-hour-group-label {
+    flex-direction: row;
+    gap: 0.4rem;
     justify-content: center;
     min-height: 1.8rem;
     border-right: 0;
@@ -3515,6 +3667,12 @@ body.season-eastertide {
 .reminders {
   max-width: 38rem;
   margin: 0 auto;
+}
+
+.reminders .ornament-headpiece {
+  width: 5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
 }
 
 .reminders h1 {
@@ -4206,24 +4364,26 @@ body.page-reminders {
    the stars gold through Passiontide while every other ornament veils. */
 body {
   --apse-vault: none;
+  --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
+    --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-    --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
+    --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
     --apse-vault:
-      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
-      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
+      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
       radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
-      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
+      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
       radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
-      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
+      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
       linear-gradient(45deg,
         transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
       linear-gradient(135deg,
@@ -4233,20 +4393,21 @@ body {
 }
 
 :root[data-theme="dark"] body {
+  --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-  --apse-line: color-mix(in srgb, var(--ornament) 10%, transparent);
+  --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
   --apse-vault:
-    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
-    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
+    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
     radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
-    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 38%, transparent 76%),
+    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
+    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
     radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
-    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 40%, transparent 80%),
+    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
+    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
     linear-gradient(45deg,
       transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
     linear-gradient(135deg,
@@ -4296,6 +4457,14 @@ body.page-hour footer::after {
   background-position: top center;
   -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+/* Clear the small epilogue/footer lettering where it crosses the vault.
+   Background-coloured shadows follow the glyphs without placing another
+   panel over the diaper or moving its fixed tile origin. */
+body:is(.page-home, .page-hour) footer,
+body.page-hour .report-issue {
+  text-shadow: var(--apse-copy-shadow);
 }
 
 @media (min-width: 701px) {
@@ -4411,6 +4580,11 @@ body.page-home::before {
 
   .hour-header h1 {
     border-color: #888;
+  }
+
+  .hour-header h1::after {
+    background: #888;
+    box-shadow: 0 0 0 2px #fff;
   }
 
   .hour-continuation::before {
@@ -4574,10 +4748,28 @@ body.page-home::before {
 :root[data-leader="priest"] [data-leaders~="priest"] { display: revert !important; }
 .hour-context-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: start; gap: 0 .75rem; }
 .hour-context-controls > .hour-date-nav { margin: 0; }
-.leader-selector { max-width: 100%; color: var(--accent); font-size: .9rem; }
-.leader-selector > summary { cursor: pointer; list-style: none; min-height: var(--touch-target); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .25rem; padding: .35rem .5rem; }
+.leader-selector { max-width: 100%; color: var(--text); font-size: .9rem; }
+/* Match the adjacent date disclosure. The chosen form remains legible while
+   the shared heading, rather than a preference label, leads the prayer. */
+.leader-selector > summary {
+  cursor: pointer;
+  list-style: none;
+  min-height: var(--touch-target);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  padding: .35rem .5rem;
+  color: var(--muted);
+  font-size: .8rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: .035em;
+}
+.leader-selector > summary [data-leaders] { color: var(--text); }
+.leader-selector[open] > summary { color: var(--accent); }
 .leader-selector > summary::-webkit-details-marker { display: none; }
-.leader-selector > summary::after { content: " ▾"; color: var(--gold); }
+.leader-selector > summary::after { content: " ▾"; color: var(--gold-line); font-size: .85em; letter-spacing: 0; }
 .leader-selector[open] > summary::after { content: " ▴"; }
 .leader-selector[open] { flex: 1 1 100%; }
 .leader-selector fieldset {

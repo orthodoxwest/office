@@ -140,7 +140,8 @@ func TestHomeAndHourEmitDatedNavLinks(t *testing.T) {
 			}
 		}
 		for _, daypart := range []string{"Morning", "Day", "Evening"} {
-			if !strings.Contains(body, `>`+daypart+`</h3>`) {
+			heading := regexp.MustCompile(`(?s)<h3\b[^>]*id="home-hours-` + strings.ToLower(daypart) + `"[^>]*>.*?<span>` + daypart + `</span>\s*</h3>`)
+			if !heading.MatchString(body) {
 				t.Errorf("home prayer directory is missing %s heading", daypart)
 			}
 		}

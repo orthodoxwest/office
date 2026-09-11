@@ -7,8 +7,27 @@
        and focus orders aligned makes the threshold equally clear by keyboard
        and screen reader. */}}
   <div class="home-hero day-color-{{.Color}}">
+    {{/* Corner tooling is decorative, outside the reading and focus order. */}}
+    <svg class="home-frame-corner home-frame-corner-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <defs>
+        <path id="home-corner-rule" d="M3 29V3h26"/>
+        <path id="home-corner-leaf" d="M7 7c7 0 12 4 13 11C13 18 8 14 7 7Zm0 0 9 8"/>
+      </defs>
+      <use href="#home-corner-rule"/>
+      <use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
     <section class="home-summary day-color-{{.Color}}" aria-labelledby="home-date-heading">
       <header class="home-day-head">
+        {{template "headpiece" true}}
         <h1 id="home-date-heading">
           <a class="home-date-link" href="{{.CalendarLink}}" title="See this day in the ordo">{{.DateStr}}</a>
         </h1>
@@ -45,7 +64,12 @@
       <p class="pray-now-wrap"><a class="pray-now" href="{{.PrayNowLink}}">{{.PrayNowLabel}}</a></p>
       <nav class="home-hour-links" aria-label="Hours for the day">
         <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
-          <h3 class="home-hour-group-label" id="home-hours-morning">Morning</h3>
+          <h3 class="home-hour-group-label" id="home-hours-morning">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <path d="M2 13h20M7 13a5 5 0 0 1 10 0M12 2v3M4.2 5.2l2.1 2.1M19.8 5.2l-2.1 2.1"/>
+            </svg>
+            <span>Morning</span>
+          </h3>
           <div class="home-hour-group-links">
             {{range .Hours}}{{if or (eq .Slug "lauds") (eq .Slug "prime")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
@@ -56,7 +80,13 @@
           </div>
         </section>
         <section class="home-hour-group home-hour-group-day" aria-labelledby="home-hours-day">
-          <h3 class="home-hour-group-label" id="home-hours-day">Day</h3>
+          <h3 class="home-hour-group-label" id="home-hours-day">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="8" r="3.5"/>
+              <path d="M12 0.75v1.5M12 13.75v1.5M4.75 8h1.5M17.75 8h1.5M6.9 2.9l1.05 1.05M16.05 12.05l1.05 1.05M6.9 13.1l1.05-1.05M16.05 3.95l1.05-1.05"/>
+            </svg>
+            <span>Day</span>
+          </h3>
           <div class="home-hour-group-links">
             {{range .Hours}}{{if or (eq .Slug "terce") (eq .Slug "sext") (eq .Slug "none")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
@@ -67,7 +97,12 @@
           </div>
         </section>
         <section class="home-hour-group home-hour-group-evening" aria-labelledby="home-hours-evening">
-          <h3 class="home-hour-group-label" id="home-hours-evening">Evening</h3>
+          <h3 class="home-hour-group-label" id="home-hours-evening">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <path d="m12 1 1.8 4.7L19 7.5l-5.2 1.8L12 14l-1.8-4.7L5 7.5l5.2-1.8Z"/>
+            </svg>
+            <span>Evening</span>
+          </h3>
           <div class="home-hour-group-links">
             {{range .Hours}}{{if or (eq .Slug "vespers") (eq .Slug "compline")}}
             <a class="home-hour-link{{if .IsCurrent}} is-current{{end}}" href="{{.URL}}" data-hour="{{.Slug}}"{{if .IsCurrent}} aria-current="time"{{end}}>
