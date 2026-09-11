@@ -3075,6 +3075,27 @@ body.season-eastertide {
   margin: 0 0 0.8rem;
 }
 
+/* A small printer's headpiece opens the frontispiece. Its leaf follows the
+   season, with hairlines light enough to keep the date as the first reading. */
+.page-home .home-headpiece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 7rem;
+  margin: 0.05rem auto 0.4rem;
+  color: var(--ornament);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.page-home .home-headpiece::before,
+.page-home .home-headpiece::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid color-mix(in srgb, var(--ornament) 40%, transparent);
+}
+
 .page-home .home h1 {
   font-size: 1.38rem;
   line-height: 1.2;
@@ -3127,6 +3148,9 @@ body.season-eastertide {
   padding: 0.2rem 1rem 0.16rem;
   background: var(--inscription-ground);
   color: var(--inscription-ink);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent);
   font-size: 0.8rem;
   font-weight: normal;
   font-variant-caps: all-small-caps;
@@ -3197,8 +3221,10 @@ body.season-eastertide {
 
 .page-home .home-hour-group-label {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.16rem;
   border-right: 1px solid var(--frontispiece-rule);
   background: var(--frontispiece-band);
   color: var(--muted);
@@ -3208,6 +3234,21 @@ body.season-eastertide {
   letter-spacing: 0.08em;
   line-height: 1.2;
   padding: 0 0.4rem;
+}
+
+/* Tiny sun and star engravings mark the day's three periods. Labels carry
+   their meaning; these inline vectors stay decorative and inherit the leaf. */
+.page-home .home-period-ornament {
+  display: block;
+  flex: none;
+  width: 1.2rem;
+  height: 0.8rem;
+  fill: none;
+  stroke: var(--ornament);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
 }
 
 .page-home .home-hour-group-links {
@@ -3353,6 +3394,8 @@ body.season-eastertide {
   }
 
   .page-home .home-hour-group-label {
+    flex-direction: row;
+    gap: 0.4rem;
     justify-content: center;
     min-height: 1.8rem;
     border-right: 0;
