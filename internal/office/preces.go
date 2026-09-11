@@ -19,7 +19,7 @@ var doubleFeriaOfficeIDs = map[string]bool{
 
 // usesFestalLaudsPsalmody reports whether Lauds takes the festal psalms. Most
 // Sunday offices retain the Sunday psalter, but the printed offices for the
-// Sundays within the Nativity and Epiphany octaves explicitly share the
+// Sundays within the Nativity, Epiphany, and Ascension octaves share the
 // corresponding feast's psalmody.
 func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 	if day == nil || day.Celebration == nil {
@@ -27,7 +27,8 @@ func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 	}
 	for _, id := range feastProperIDs(day.Celebration) {
 		if id == "nativity-sunday-within-octave" ||
-			id == "epiphany-sunday-within-octave" {
+			id == "epiphany-sunday-within-octave" ||
+			id == "ascension-sunday-within-octave" {
 			return true
 		}
 	}

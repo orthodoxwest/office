@@ -240,6 +240,39 @@ func resolveProperCollectText(day *models.CalendarDay, hourName string, corpus *
 	}
 }
 
+// lookupFeastProperText searches only the feast's own proper and redirects.
+// Keep this shared by ordinary resolution and the I Vespers common fallback.
+func lookupFeastProperText(day *models.CalendarDay, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	hourCandidates := hourRefCandidates(hourName, ref)
+	refCands := refCandidates(ref)
+	ferialVespersAntiphon := hourName == "vespers" &&
+		strings.HasPrefix(baseProperRef(ref), "psalm-antiphon") && usesWeekdayVespersAntiphons(day, corpus)
+	var properName string
+	if day.Celebration != nil {
+		properName = day.Celebration.ProperName
+	}
+	if !ferialVespersAntiphon &&
+		day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
+		for _, feastID := range feastProperIDs(day.Celebration) {
+			if day.Season == models.Easter {
+				prefix := "proper/" + feastID + "-paschal/"
+				if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
+					return substituteProperName(text, properName), resolved
+				}
+				if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+					return substituteProperName(text, properName), resolved
+				}
+			}
+			prefix := "proper/" + feastID + "/"
+			if text, resolved := lookupSectionText(prefix, day.Season, hourName, ref, corpus); text != "" {
+				return substituteProperName(text, properName), resolved
+			}
+		}
+	}
+
+	return "", ""
+}
+
 // resolveProperText looks up a proper text for a given reference, checking
 // in order: feast-specific proper, common of saints (with paschal variant),
 // seasonal default, weekday ordinary, ordinary fallback, shared fallback.
@@ -247,9 +280,16 @@ func resolveProperCollectText(day *models.CalendarDay, hourName string, corpus *
 func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
 	// At I Vespers of a following feast, texts that differ from II Vespers
 	// carry a "-first" ref variant (e.g. magnificat-antiphon-first); prefer
-	// it across all tiers, falling back to the shared ref.
+	// it within the proper office before borrowing from a common.
 	if day.FirstVespers && hourName == "vespers" && !strings.HasSuffix(ref, "-first") {
 		if text, resolved := resolveProperText(day, hourName, ref+"-first", corpus); !strings.HasPrefix(text, "[Proper text not found") {
+			// A common's I Vespers text cannot displace the feast's own
+			// antiphon shared by both Vespers (e.g. the Saturday BVM office).
+			if strings.HasPrefix(resolved, "commons/") {
+				if own, ownRef := lookupFeastProperText(day, hourName, ref, corpus); own != "" {
+					return own, ownRef
+				}
+			}
 			return text, resolved
 		}
 	}
@@ -368,23 +408,8 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	// 1. Feast-specific proper (hour-qualified, then generic)
-	if !ferialVespersAntiphon &&
-		day.Celebration != nil && day.Celebration.ID != "" && !isSynthesizedFeria(day.Celebration) {
-		for _, feastID := range feastProperIDs(day.Celebration) {
-			if day.Season == models.Easter {
-				prefix := "proper/" + feastID + "-paschal/"
-				if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
-					return substituteProperName(text, properName), resolved
-				}
-				if text, resolved := firstText(corpus, prefix, refCands); text != "" {
-					return substituteProperName(text, properName), resolved
-				}
-			}
-			prefix := "proper/" + feastID + "/"
-			if text, resolved := lookupSectionText(prefix, day.Season, hourName, ref, corpus); text != "" {
-				return substituteProperName(text, properName), resolved
-			}
-		}
+	if text, resolved := lookupFeastProperText(day, hourName, ref, corpus); text != "" {
+		return text, resolved
 	}
 
 	// 1.5. The O antiphon outranks a feast's commons-sourced Magnificat

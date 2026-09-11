@@ -22,9 +22,10 @@ O how illustrious * are the merits of blessed Scholastica! O how great the power
 # SOURCE: diurnal p. 479
 To-day * the holy virgin Scholastica, in the likeness of a dove, went forth with all gladness to the heavenly places: to-day she was found worthy to enjoy for ever the bliss of celestial life beside her brother.
 
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
-#
+[magnificat-antiphon-first]
+# SOURCE: diurnal p. 476
+Let all the multitude * of the faithful exult in the glory of the gracious virgin Scholastica: and chiefly let the company of virgins be joyful, celebrating her Solemnity; for she besought the Lord, pouring forth her tears, and of him received greater power, because her love was greater.
+
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #

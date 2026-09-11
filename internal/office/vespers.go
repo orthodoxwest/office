@@ -93,6 +93,15 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		// but its occurrence commemorations belong to tomorrow rather than
 		// carrying today's Lauds commemorations one evening late (XIV.9).
 		officeDay.Commemorations = day.Vespers.Commemorations
+		// September Ember propers end at None. The free evening returns
+		// to the seasonal feria (Diurnal p. 426; 2026 ordo Sep 16/18).
+		if day.Celebration != nil {
+			switch day.Celebration.ID {
+			case "september-ember-wednesday", "september-ember-friday", "september-ember-saturday":
+				officeDay.Celebration = nil
+				officeDay.Color = calendar.SeasonColors[day.Season]
+			}
+		}
 		return &officeDay
 	}
 

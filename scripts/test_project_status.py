@@ -16,6 +16,20 @@ SPEC.loader.exec_module(PROJECT_STATUS)
 
 
 class ProjectStatusTest(unittest.TestCase):
+    def test_only_explicit_vespers_ownership_is_compared(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            reference, ordo, rubrics = (root / name for name in ("ref.txt", "ours.txt", "rubrics.tsv"))
+            reference.write_text("JANUARY\n1 Thu Feast\nVespers W / No Comm.\n"
+                                 "2 Fri Feast\nVespers W / I of fol. / No Comm.\n")
+            ordo.write_text("JANUARY\n1  Thu  Feast [d] w\nVespers w · II prec.\n"
+                            "2  Fri  Feast [d] w\nVespers w · II prec.\n")
+            rubrics.write_text("date\n")
+            comparison = PROJECT_STATUS.compare_ordo(2026, reference, ordo, rubrics)
+            self.assertEqual(comparison.comparable["vespers-ownership"], 1)
+            findings = [f for f in comparison.findings if f.aspect == "vespers-ownership"]
+            self.assertEqual([f.date for f in findings], ["01-02"])
+
     def test_exact_triage_rule_wins_over_wildcard(self):
         finding = PROJECT_STATUS.Finding(2026, "calendar", "07-16", "detail")
         rules = [

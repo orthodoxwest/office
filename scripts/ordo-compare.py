@@ -46,7 +46,7 @@ SECT_RE = re.compile(r"^\s*(Matins|Lauds|Mass|Hours|Vespers|Prime|Compline|N\.B\
 RANK_RE = re.compile(r"\s{2,}((?:D1|D2|Gd|Sd|D|M|S|F|V|Pr|C)\.?\d?)\s*$")
 
 
-def pdf_days(path):
+def pdf_days(path, year=None):
     """Segment a pdftotext ordo into {(month, day): {section: text}}.
 
     Also returns per-day title lines under the '' key.
@@ -57,10 +57,23 @@ def pdf_days(path):
     sect = None
     in_title = False
     days = {}
-    for ln in open(path, errors="replace"):
+    with open(path, errors="replace") as source:
+        lines = source.readlines()
+    if year is None:
+        heading = re.search(r"Pro Anno Domini ([MDCLXVI]+)", "".join(lines[:100]), re.I)
+        if heading:
+            values = {"M": 1000, "D": 500, "C": 100, "L": 50, "X": 10, "V": 5, "I": 1}
+            digits = [values[c] for c in heading.group(1).upper()]
+            year = sum(-v if i + 1 < len(digits) and v < digits[i + 1] else v
+                       for i, v in enumerate(digits))
+    previous = ""
+    for ln in lines:
         s = ln.strip()
+        prior, previous = previous, s or previous
         if s in MONTHS:
             m = MONTHS[s]
+            if cur_m == 12 and last_day == 31 and m == 1:
+                break  # January of the following year is not December 31.
             # month running heads repeat; only advance forward
             if m == cur_m + 1 or (cur_m == 0 and m == 1):
                 cur_m, last_day = m, 0
@@ -68,15 +81,36 @@ def pdf_days(path):
         md = DAY_RE.match(ln)
         if md and cur_m:
             d = int(md.group(1))
+            # Documented 2026 heading typo: Dec 24 is printed "23 Thu".
+            # Require the year, preceding date, weekday and vigil title;
+            # do not silently repair unrelated duplicated headings.
+            if (year == 2026 and cur_m == 12 and last_day == d == 23
+                    and md.group(2) == "Thu"
+                    and "Vigil of the Nativity" in (md.group(3) or "")):
+                d = 24
             # tolerate one skipped day (PDF typos, e.g. 2026 Dec 24)
             if d in (last_day + 1, last_day + 2):
                 last_day = d
                 key = (cur_m, d)
-                days[key] = {"": (md.group(3) or "").strip()}
+                title = (md.group(3) or "").strip()
+                if not clean_title(title) and (RANK_RE.search(prior)
+                        or "SUNDAY" in prior):
+                    title = prior
+                    # The title was placed above its date in the text layer.
+                    if len(days) and sect:
+                        preceding = next(reversed(days.values()))
+                        preceding[sect] = preceding.get(sect, "").removesuffix(" " + prior)
+                days[key] = {"": title}
                 sect = None
                 in_title = True
                 continue
         if key is None:
+            continue
+        if s.startswith("Announcements"):
+            sect = None  # Page furniture, until the next dated office.
+            in_title = False
+            continue
+        if not s or s == "P" or s.isdigit() or re.fullmatch(r"[A-Z]+ / [A-Z]+", s):
             continue
         ms = SECT_RE.match(ln)
         if ms:
@@ -86,7 +120,18 @@ def pdf_days(path):
             days[key][""] += "\n" + s
         elif sect:
             days[key][sect] = days[key].get(sect, "") + " " + s
+    for day in days.values():
+        for section in day:
+            # Double slashes introduce optional/scoped alternatives. Compare
+            # the default office preceding them, including wrapped headings.
+            day[section] = day[section].split("//", 1)[0].strip()
     return days
+
+
+def clean_title(title):
+    title = re.sub(r"^(?:L(?=\s|§|†|‡)|[§†‡\s])+", "", title)
+    title = RANK_RE.sub("", title).strip()
+    return "" if re.fullmatch(r"(?:D1|D2|Gd|Sd|D|M|S|F2|V1)", title) else title
 
 
 def our_ordo_days(path):
@@ -94,7 +139,9 @@ def our_ordo_days(path):
     cur_m = 0
     key = None
     days = {}
-    for ln in open(path):
+    with open(path) as source:
+        lines = source.readlines()
+    for ln in lines:
         s = ln.strip()
         if s in MONTHS:
             cur_m = MONTHS[s]
@@ -144,6 +191,9 @@ def similar(a, b):
 
 
 def is_ferial(title):
+    title = clean_title(title)
+    if "octave" in title.lower():
+        return False  # Named octave offices cannot match an ordinary feria.
     return title.lower().startswith(
         ("feria", "monday", "tuesday", "wednesday", "thursday", "friday",
          "saturday", "ember")) or title == ""
@@ -157,8 +207,10 @@ def cmd_calendar(pdf_path, ours_path):
         if not pdf[k].get(""):  # day whose title section didn't parse from the PDF
             continue
         p_title = pdf[k][""].splitlines()[0]
-        p_title = RANK_RE.sub("", re.sub(r"^[L§†‡\s]+", "", p_title)).strip()
-        o_title = ours[k]["title"]
+        p_title = clean_title(p_title)
+        if not p_title:
+            continue
+        o_title = clean_title(ours[k]["title"])
         if similar(p_title, o_title) < 0.5 and not (is_ferial(p_title) and is_ferial(o_title)):
             n += 1
             print(f"{k[0]:02d}-{k[1]:02d}  ours: {o_title}")
@@ -168,7 +220,9 @@ def cmd_calendar(pdf_path, ours_path):
 
 def read_rubrics(path):
     ours = {}
-    for ln in open(path):
+    with open(path) as source:
+        lines = source.readlines()
+    for ln in lines:
         p = ln.rstrip("\n").split("\t")
         if p[0] == "date":
             continue
@@ -209,10 +263,10 @@ def pdf_commemorations(section):
     # The ordo's parenthetical references are occasionally unbalanced after
     # text extraction. A closing page-reference parenthesis followed by "&"
     # is nevertheless a stable item boundary.
-    parts = re.split(r"\)\s*&\s*(?=(?:Comm\.\s*)?[A-Z])", block)
+    parts = re.split(r"\)\s*(?:/\s*)?&\s*(?=(?:Comm\.\s*)?[A-Z])", block)
     names = []
     for part in parts:
-        name = part.split("(", 1)[0]
+        name = re.split(r'[(/“"]', part, maxsplit=1)[0]
         # Subsequent items often begin "Comm."; Ash Wednesday can even be
         # printed as the redundant "Comm. Comm. Walburga".
         name = re.sub(r"^(?:Comm\.\s*)+", "", name)
@@ -220,7 +274,7 @@ def pdf_commemorations(section):
         name = re.sub(r"\s+only$", "", name, flags=re.I).strip()
         # Holy Cross commemorations are reported through a separate rubrics
         # flag and are not present in the TSV's feast-name column.
-        if name and name.upper() != "HC":
+        if name and not re.match(r"^HC(?:\s|$)", name, re.I):
             names.append(name)
     return names
 
@@ -273,24 +327,44 @@ def commemoration_similarity(a, b):
     ta, tb = commemoration_tokens(a), commemoration_tokens(b)
     if not ta or not tb:
         return 0.0
+    if "octave" in ta and "octave" in tb and (("sunday" in ta) != ("sunday" in tb)):
+        return 0.0  # The Sunday within an octave is a distinct commemoration.
     return len(ta & tb) / min(len(ta), len(tb))
 
 
 def match_commemorations(pdf_names, our_names):
-    """Return (missing_from_app, extra_in_app) after greedy fuzzy matching."""
-    candidates = []
+    """Match specific names first, with reassignment for generic shorthand.
+
+    Maximum matching prevents "Oct." from consuming the only Sunday match
+    when both the Sunday and its octave are present.
+    """
+    candidates = {}
     for pi, pdf_name in enumerate(pdf_names):
+        ta = commemoration_tokens(pdf_name)
+        ranked = []
         for oi, our_name in enumerate(our_names):
+            tb = commemoration_tokens(our_name)
             score = commemoration_similarity(pdf_name, our_name)
             if score >= 0.6:
-                candidates.append((score, pi, oi))
-    used_pdf, used_ours = set(), set()
-    for _, pi, oi in sorted(candidates, reverse=True):
-        if pi not in used_pdf and oi not in used_ours:
-            used_pdf.add(pi)
-            used_ours.add(oi)
+                ranked.append((score, len(ta & tb) / len(ta | tb), oi))
+        candidates[pi] = [oi for _, _, oi in sorted(ranked, reverse=True)]
+    matched = {}
+
+    def assign(pi, seen):
+        for oi in candidates[pi]:
+            if oi in seen:
+                continue
+            seen.add(oi)
+            if oi not in matched or assign(matched[oi], seen):
+                matched[oi] = pi
+                return True
+        return False
+
+    for pi in sorted(candidates, key=lambda i: len(commemoration_tokens(pdf_names[i])), reverse=True):
+        assign(pi, set())
+    used_pdf = set(matched.values())
     return ([name for i, name in enumerate(pdf_names) if i not in used_pdf],
-            [name for i, name in enumerate(our_names) if i not in used_ours])
+            [name for i, name in enumerate(our_names) if i not in matched])
 
 
 def flag(text, yes, no):
@@ -365,6 +439,7 @@ def _incipit_words(text):
     # æ→ae and z→s fold the books' orthographic variants (Elisabeth/Elizabeth,
     # Sion/Zion) that the ordo quotes interchangeably.
     norm = text.lower().replace("æ", "ae").replace("z", "s")
+    norm = re.sub(r"(?<=[a-z])-\s*(?=[a-z])", "", norm)
     return re.sub(r"[^a-z0-9 ]", " ", norm).split()
 
 
@@ -418,7 +493,7 @@ def incipit_matches(incipit, full):
             if not pw:
                 continue
             found = False
-            for i in range(pos, max(pos + 1, len(wf) - len(pw) + 1)):
+            for i in range(pos, len(wf) - len(pw) + 1):
                 if all(_words_align(pw[j], wf[i + j]) for j in range(len(pw))):
                     pos = i + len(pw)
                     found = True
@@ -450,24 +525,30 @@ def incipit_matches(incipit, full):
     return False
 
 
+def antiphon_incipit(section, canticle):
+    # A missing closing quote must not consume the collect/commemorations.
+    match = re.search(canticle + r'\.?\s*Ant\.?\s*\(?\s*[“"]([^”"/(]+)', section or "")
+    return match.group(1).strip() if match else None
+
+
 def cmd_antiphons(pdf_path, tsv_path):
     pdf = pdf_days(pdf_path)
     ours = read_rubrics(tsv_path)
-    for field, sect, pat, label in (
-            ("ben", "Lauds", r"Ben\.?\s*Ant\.?\s*[“\"]([^”\"]+)", "Benedictus"),
-            ("mag", "Vespers", r"Mag\.?\s*Ant\.?\s*[“\"]([^”\"]+)", "Magnificat")):
+    for field, sect, canticle, label in (
+            ("ben", "Lauds", "Ben", "Benedictus"),
+            ("mag", "Vespers", "Mag", "Magnificat")):
         n = tot = 0
         samples = []
         for k in sorted(ours):
-            m = re.search(pat, pdf.get(k, {}).get(sect, ""))
-            if not m or not ours[k][field]:
+            incipit = antiphon_incipit(pdf.get(k, {}).get(sect), canticle)
+            if not incipit or not ours[k][field]:
                 continue
             tot += 1
-            if not incipit_matches(m.group(1), ours[k][field]):
+            if not incipit_matches(incipit, ours[k][field]):
                 n += 1
                 if len(samples) < SAMPLE_CAP:
-                    samples.append(f"   {k[0]:02d}-{k[1]:02d} pdf=\"{m.group(1)[:36]}\""
-                                   f" ours=\"{ours[k][field][:36]}\"")
+                    samples.append(f'   {k[0]:02d}-{k[1]:02d} pdf="{incipit[:36]}"'
+                                   f' ours="{ours[k][field][:36]}"')
         print(f"== {label} antiphon: {n}/{tot} mismatches ==")
         print("\n".join(samples))
         if n > len(samples):
@@ -512,8 +593,8 @@ def cmd_vespers(pdf_path, ours_path):
         elif pv:
             pdf_only += 1
         elif ov:
-            ours_only += 1
-    print(f"-- agree {agree}, disagree {dis}, pdf-only {pdf_only}, ours-only {ours_only}")
+            ours_only += 1  # Missing printed notation is not a disagreement.
+    print(f"-- agree {agree}, disagree {dis}, pdf-only {pdf_only}, unasserted-in-pdf {ours_only}")
 
 
 MOVEABLE_TABLE = {
