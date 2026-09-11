@@ -1,3 +1,11 @@
+[magnificat-antiphon-monday]
+# SOURCE: diurnal p. 381
+Your sorrow * shall be turned into joy, alleluia: and your joy no man taketh from you, alleluia.
+
+[benedictus-antiphon-tuesday]
+# SOURCE: diurnal p. 381
+And they constrained him, * saying, Abide with us, O Lord, for it is toward evening, alleluia.
+
 [benedictus-antiphon-thursday]
 # SOURCE: monastic diurnal, p. 382 (III Week after the Octave of Easter, Thursday)
 And he went in * to tarry with them: and it came to pass, as he sat at meat with them, he took bread, and blessed it, and brake, and gave to them, alleluia, alleluia.

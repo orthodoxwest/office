@@ -3,13 +3,13 @@
 | Measure | Count |
 |---|---:|
 | Distinct date-hour forms (2026–2053) | 157916 |
-| Modeled structural features | 251 |
-| Full structural-cover pages | 64 |
-| Residual structural-review pages | 64 |
+| Modeled structural features | 252 |
+| Full structural-cover pages | 65 |
+| Residual structural-review pages | 65 |
 | Uncovered features | 0 |
-| Verified text entries | 1583 |
+| Verified text entries | 1594 |
 | Rendered text entries needing review | 687 |
-| Rendered text entries with unknown source | 150 |
+| Rendered text entries with unknown source | 144 |
 | Classified zero-occurrence entries | 34 |
 | Zeroes needing classification | 34 |
 | Stale zero-occurrence classifications | 6 |
@@ -198,6 +198,7 @@
 - `resolution:benedictus-antiphon=commons`
 - `resolution:benedictus-antiphon=ordinary`
 - `resolution:benedictus-antiphon=proper`
+- `resolution:benedictus-antiphon=seasonal`
 - `resolution:chapter-ferial=ordinary`
 - `resolution:chapter=commons`
 - `resolution:chapter=ordinary`

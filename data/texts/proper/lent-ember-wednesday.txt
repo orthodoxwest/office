@@ -1,8 +1,10 @@
 [benedictus-antiphon]
-This evil and adulterous generation seeketh after a sign; * and there shall no sign be given to it, but the sign of the Prophet Jonas.
+# SOURCE: diurnal p. 252
+This crooked * and perverse generation seeketh after a sign: and there shall no sign be given it, but the sign of the prophet Jonas.
 
 [magnificat-antiphon]
-As Jonas was three days and three nights in the whale's belly, * so shall the Son of man be three days and three nights in the heart of the earth.
+# SOURCE: diurnal p. 253
+For as Jonas * was three days and three nights in the whale's belly, so shall the Son of Man be in the heart of the earth.
 
 [commemoration-antiphon]
 @use proper/lent-ember-wednesday/benedictus-antiphon

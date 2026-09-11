@@ -417,7 +417,7 @@ MARCH
            Lauds   v · Ben. Through the tender mercy · No Preces · Suff.
            Hours   Preces
            Vespers r · I fol. (St Perpetua & Felicitas, Martyrs) · Mag. For theirs is the kingdom of heaven · No Suff.
-               Com. Friday after Septuagesima ("My soul doth magnify the Lord, and my spirit…")
+               Com. Friday after Septuagesima ("So the last")
   6  Sat     St Perpetua & Felicitas, Martyrs           [d]   r
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
                Com. Saturday after Septuagesima ("Blessed be the Lord God of Israel, for he…")
@@ -451,13 +451,13 @@ MARCH
            Lauds   v · Ben. Let us serve · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (St. Gregory the Great) · Mag. O Teacher right excellent · No Suff.
-               Com. Thursday after Sexagesima ("My soul doth magnify the Lord, and my spirit…")
+               Com. Thursday after Sexagesima ("Some seed")
  12  Fri  L  St. Gregory the Great                      [2cl] w
            Lauds   w · Ben. Gregory · No Preces · No Suff.
                Com. Friday after Sexagesima ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
-               Com. Friday after Sexagesima ("My soul doth magnify the Lord, and my spirit…")
+               Com. Friday after Sexagesima ("They who keep the word of God")
  13  Sat     Feria                                            v
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
            Hours   Preces
@@ -528,7 +528,7 @@ MARCH
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
  24  Wed  L§ Lent Ember Wednesday                       [f2]  v
            St. Gabriel the Archangel (gd)
-           Lauds   v · Ben. This evil and adulterous generation seeketh after a sign · No Preces · No Suff.
+           Lauds   v · Ben. This crooked · No Preces · No Suff.
                Com. St. Gabriel the Archangel ("The Angel Gabriel was sent")
            Hours   No Preces
            Vespers w · I fol. (Annunciation of the Blessed Virgin Mary) · Mag. The Holy Ghost · No Suff.
@@ -719,10 +719,10 @@ APRIL
                Com. St Vitalis, Martyr ("Whosoever will come after me")
  28  Wed  L§ HOLY WEDNESDAY                             [1cl] v
            St Vitalis, Martyr (com)
-           Lauds   v · Ben. Simon, do you sleep? · No Preces · No Suff.
+           Lauds   v · Ben. Simon, sleepest thou? · No Preces · No Suff.
                Com. St Vitalis, Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers v · Mag. The handmaid said to Peter · No Suff.
+           Vespers v · Mag. A maid said unto Peter · No Suff.
                Com. Thursday after Palm Sunday ("My soul doth magnify the Lord, and my spirit…")
  29  Thu  L§ HOLY THURSDAY                              [1cl] w
            Thursday after Palm Sunday (f2)
@@ -746,17 +746,17 @@ MAY
            Lauds   w · Ben. There were women sitting over against the sepulchre · No Preces · No Suff.
                Com. Saturday after Palm Sunday ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers w · I fol. (Sunday of the Resurrection) · Mag. And looking · No Suff.
+           Vespers w · I fol. (Sunday of the Resurrection) · Mag. And when they looked · No Suff.
                Com. St. Athanasius ("O Teacher right excellent")
   2  Sun     SUNDAY OF THE RESURRECTION                 [1cl] w
            St. Athanasius (d)
            Lauds   w · Ben. And very early in the morning · No Preces · No Suff.
                Com. St. Athanasius ("Well done")
            Hours   No Preces
-           Vespers w · II prec. · Mag. And looking · No Suff.
+           Vespers w · II prec. · Mag. And when they looked · No Suff.
   3  Mon     EASTER MONDAY                              [1cl] w
            Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve- (com)
-           Lauds   w · Ben. While they walked · No Preces · No Suff.
+           Lauds   w · Ben. Jesus himself · No Preces · No Suff.
                Com. Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve- ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. What manner of communications are these · No Suff.
@@ -880,11 +880,11 @@ MAY
            Lauds   w · Ben. Blessed · No Preces · No Suff.
                Com. St Vincent of Lerins, Confessor ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers w · Mag. My soul · No Suff.
+           Vespers w · Mag. Your sorrow · No Suff.
                Com. St Urban, Bishop & Martyr ("Whosoever will come after me")
  25  Tue     Feria                                            w
            St Urban, Bishop & Martyr (com)
-           Lauds   w · Ben. The Lord hath raised up for us · No Preces · No Suff.
+           Lauds   w · Ben. And they constrained him · No Preces · No Suff.
                Com. St Urban, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
@@ -2288,7 +2288,7 @@ DECEMBER
            Hours   Preces
            Vespers v · Mag. O King of Nations · No Suff.
  23  Thu  L  Feria                                            v
-           Lauds   v · Ben. Comfort ye · No Preces · No Suff.
+           Lauds   v · Ben. Behold all things are fulfilled · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O Emmanuel · No Suff.
  24  Fri  L§ VIGIL OF THE NATIVITY OF OUR LORD          [1cl] v
