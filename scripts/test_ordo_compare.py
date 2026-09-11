@@ -3,6 +3,8 @@
 
 import importlib.util
 import pathlib
+import tempfile
+import datetime
 import unittest
 
 
@@ -92,6 +94,71 @@ class CommemorationComparisonTest(unittest.TestCase):
         )
         self.assertEqual(missing, ["Innocents"])
         self.assertEqual(extra, ["St. Paul, Apostle"])
+
+
+class ReferenceParsingTest(unittest.TestCase):
+    def parse(self, text, year=None):
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "reference.txt"
+            path.write_text(text)
+            return ORDO_COMPARE.pdf_days(path, year=year)
+
+    def test_december_typo_and_next_year_boundary(self):
+        # Synthetic offices exercise the layout without embedding a book page.
+        text = "Pro Anno Domini MMXXVI\n" + "\n".join(ORDO_COMPARE.MONTHS) + "\n"
+        for day in range(1, 24):
+            weekday = datetime.date(2026, 12, day).strftime("%a")
+            text += f"{day} {weekday} Feria\nHours Preces\nVespers / II of prec. / No Comm.\n"
+        text += ("23 Thu Vigil of the Nativity of Our Lord    V1\n"
+                 "Hours No Preces\nVespers / I of fol. / No Comm.\n")
+        for day in range(25, 32):
+            weekday = datetime.date(2026, 12, day).strftime("%a")
+            text += f"{day} {weekday} Feast\nVespers / No Comm.\n"
+        text += "JANUARY\n1 Fri Next year\nVespers / Comm. Somebody\nAppendix\n"
+        days = self.parse(text)
+        self.assertEqual(len(days), 31)
+        self.assertIn("Hours Preces", days[12, 23]["Hours"])
+        self.assertIn("Hours No Preces", days[12, 24]["Hours"])
+        self.assertEqual(days[12, 31]["Vespers"], "Vespers / No Comm.")
+        self.assertNotIn((12, 24), self.parse(text, year=2025))
+
+    def test_default_office_excludes_optional_scope_and_page_furniture(self):
+        text = ("JANUARY\n1 Thu Feria\n"
+                "Lauds / Comm. HC\n    25\n\fJANUARY\nP\n"
+                "Announcements Remembrances Seasonal Notes\nA table\n"
+                "2 Fri Feast\nHours Preces // Solemnity: No Preces\n"
+                "Vespers / Suff. // Solem-\nnity: No Suff.\n")
+        days = self.parse(text)
+        self.assertEqual(ORDO_COMPARE.pdf_commemorations(days[1, 1]["Lauds"]), [])
+        self.assertEqual(days[1, 2]["Hours"], "Hours Preces")
+        self.assertEqual(days[1, 2]["Vespers"], "Vespers / Suff.")
+
+    def test_recovers_title_above_date(self):
+        days = self.parse("JANUARY\n1 Thu A feast\nVespers / No Comm.\n"
+                          "     Day II within the Octave    Sd\n2 Fri\nLauds / No Comm.\n")
+        self.assertEqual(ORDO_COMPARE.clean_title(days[1, 2][""]), "Day II within the Octave")
+        self.assertNotIn("Day II", days[1, 1]["Vespers"])
+
+    def test_normalization_does_not_hide_special_feria(self):
+        self.assertTrue(ORDO_COMPARE.is_ferial("L§ Feria"))
+        self.assertFalse(ORDO_COMPARE.is_ferial("Friday after the Octave of Ascension"))
+        self.assertEqual(ORDO_COMPARE.clean_title("Lord's Feast"), "Lord's Feast")
+
+    def test_unclosed_quote_and_extraneous_parenthesis(self):
+        for text in ['Vespers / Mag. Ant. “The king (123) / Col. Another',
+                     'Vespers / Mag. Ant. (“The king” (123) / Col. Another']:
+            self.assertEqual(ORDO_COMPARE.antiphon_incipit(text, "Mag"), "The king")
+        self.assertTrue(ORDO_COMPARE.incipit_matches("He remem- bered", "He remembered his mercy"))
+        self.assertFalse(ORDO_COMPARE.incipit_matches("Ask…a much longer fragment", "Ask now"))
+
+    def test_slash_ampersand_commemoration_and_specific_matching(self):
+        names = ORDO_COMPARE.pdf_commemorations(
+            'Vespers / Comm. Oct. (“Today” 123) / & Damasus (“Well done” 4*) / No Suff.')
+        self.assertEqual(names, ["Oct.", "Damasus"])
+        self.assertEqual(ORDO_COMPARE.match_commemorations(
+            ["Oct.", "Sun."], ["Sunday within the Nativity Octave"]), (["Oct."], []))
+        self.assertEqual(ORDO_COMPARE.match_commemorations(
+            ["Oct.", "Sun."], ["Sunday within the Nativity Octave", "Day IV within the Nativity Octave"]), ([], []))
 
 
 if __name__ == "__main__":

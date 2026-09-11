@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"testing"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 )
@@ -733,5 +734,45 @@ func TestConcurrenceSecondClassDoubleVsLesserSunday(t *testing.T) {
 	}
 	if got := concurrenceWinner(feast, sunday); got != models.VespersIIOfPreceding {
 		t.Errorf("II Class Double vs Lesser Sunday: got %d, want VespersIIOfPreceding", got)
+	}
+}
+
+func TestFirstVespersRetainsFreeSeasonalFeria(t *testing.T) {
+	for _, tc := range []struct {
+		name, date, week string
+		season           models.Season
+		rank             models.Rank
+		want             bool
+	}{
+		{"Scholastica", "2026-02-09", "septuagesima", models.Septuagesima, models.Double2ndClass, true},
+		{"Advent weekday", "2026-12-03", "advent-sunday-1", models.Advent, models.Double, true},
+		{"first class exclusion", "2026-02-09", "septuagesima", models.Septuagesima, models.Double1stClass, false},
+		{"ordinary feria", "2026-09-07", "pentecost-sunday-14", models.Pentecost, models.Double, false},
+		{"Sunday is not a feria", "2026-02-08", "septuagesima", models.Septuagesima, models.Double, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			date, _ := time.Parse("2006-01-02", tc.date)
+			preceding := &models.CalendarDay{Date: date, Season: tc.season, TemporalWeekID: tc.week}
+			following := &models.CalendarDay{Date: date.AddDate(0, 0, 1), Celebration: &models.Feast{ID: "following", Rank: tc.rank, Category: models.CategoryVirgin}}
+			result := resolveConcurrence(preceding, following)
+			if got := len(result.Commemorations) == 1; got != tc.want {
+				t.Fatalf("commemorations = %v, want feria=%v", result.Commemorations, tc.want)
+			}
+			if tc.want && (result.Commemorations[0].ID != models.FeriaCommemorationID || result.Commemorations[0].ProperID != tc.week) {
+				t.Errorf("wrong outgoing feria: %+v", result.Commemorations[0])
+			}
+			if preceding.FeriaCommemoration != nil {
+				t.Error("concurrence must not add a Lauds commemoration to the free feria")
+			}
+		})
+	}
+}
+
+func TestFreeSeasonalFeriaEndsBeforeSundayVespers(t *testing.T) {
+	date, _ := time.Parse("2006-01-02", "2026-02-21")
+	result := resolveConcurrence(&models.CalendarDay{Date: date, Season: models.Septuagesima, TemporalWeekID: "sexagesima"},
+		&models.CalendarDay{Date: date.AddDate(0, 0, 1), Celebration: &models.Feast{ID: "quinquagesima", Rank: models.SemiDouble, Category: models.CategorySunday}})
+	if len(result.Commemorations) != 0 {
+		t.Errorf("Sunday must not commemorate the free Saturday feria: %+v", result.Commemorations)
 	}
 }

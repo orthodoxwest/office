@@ -1613,3 +1613,32 @@ func TestParishLaudsProperCorpusRegression(t *testing.T) {
 		})
 	}
 }
+
+func TestFirstVespersCommonDoesNotOverrideOwnProper(t *testing.T) {
+	for _, tc := range []struct {
+		name, id, properID, ownKey, firstKey, want string
+		season                                     models.Season
+	}{
+		{"shared proper", "bvm", "", "proper/bvm/magnificat-antiphon", "", "proper/bvm/magnificat-antiphon", models.Pentecost},
+		{"own first wins", "bvm", "", "proper/bvm/magnificat-antiphon", "proper/bvm/magnificat-antiphon-first", "proper/bvm/magnificat-antiphon-first", models.Pentecost},
+		{"redirect", "bvm", "bvm-christmas", "proper/bvm-christmas/magnificat-antiphon", "", "proper/bvm-christmas/magnificat-antiphon", models.Christmas},
+		{"paschal variant", "bvm", "", "proper/bvm-paschal/magnificat-antiphon", "", "proper/bvm-paschal/magnificat-antiphon", models.Easter},
+		{"common remains fallback", "unknown", "", "", "", "commons/blessed-virgin/magnificat-antiphon-first", models.Pentecost},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			entries := map[string]string{"commons/blessed-virgin/magnificat-antiphon-first": "Common first"}
+			if tc.ownKey != "" {
+				entries[tc.ownKey] = "Own shared"
+			}
+			if tc.firstKey != "" {
+				entries[tc.firstKey] = "Own first"
+			}
+			day := &models.CalendarDay{Date: time.Date(2026, 9, 26, 0, 0, 0, 0, time.UTC), Season: tc.season, FirstVespers: true,
+				Celebration: &models.Feast{ID: tc.id, ProperID: tc.properID, Category: models.CategoryBlessedVirgin}}
+			_, ref := resolveProperText(day, "vespers", "magnificat-antiphon", texts.NewTestCorpus(entries))
+			if ref != tc.want {
+				t.Errorf("resolved %q, want %q", ref, tc.want)
+			}
+		})
+	}
+}

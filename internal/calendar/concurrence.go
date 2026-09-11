@@ -2,6 +2,7 @@ package calendar
 
 import (
 	"strings"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/models"
 )
@@ -71,6 +72,9 @@ func splitsVespersAtChapter(fol *models.Feast) bool {
 func hasSecondVespers(f *models.Feast) bool {
 	if f == nil {
 		return false
+	}
+	if f.ID == "friday-after-ascension-octave" {
+		return true // Diurnal p. 394: II Vespers of the preceding Sunday.
 	}
 	if f.Category == models.CategorySunday {
 		return true // IV.7
@@ -521,7 +525,16 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	// commemorations at the boundary follow their own policy and are not
 	// collected here.
 	if !secondVespers && preceding != nil {
-		if c := preceding.FeriaCommemoration; c != nil {
+		c := preceding.FeriaCommemoration
+		// A free seasonal feria has no occurrence commemoration because
+		// it already owns Lauds. It still survives at the next feast's
+		// I Vespers (Scholastica, Diurnal p. 476; 2026 ordo Feb 9).
+		if c == nil && preceding.Celebration == nil && winner != nil &&
+			winner.Category != models.CategorySunday &&
+			preceding.Date.Weekday() != time.Sunday && isPenitentialFeriaSeason(preceding.Season) {
+			c = seasonalFeriaCommemoration(preceding, JulianEaster(preceding.Date.Year()))
+		}
+		if c != nil {
 			if included, rule := outgoingCommemoratedAtFirstVespers(winner, c); included {
 				comms = append(comms, c)
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: c.ID})

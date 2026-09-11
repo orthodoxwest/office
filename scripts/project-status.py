@@ -156,11 +156,7 @@ def run(command: list[str], *, cwd: pathlib.Path = ROOT, check: bool = True) -> 
 
 
 def clean_pdf_title(raw: str) -> str:
-    title = raw.splitlines()[0]
-    title = ORDO_COMPARE.RANK_RE.sub(
-        "", re.sub(r"^[L§†‡\s]+", "", title)
-    ).strip()
-    return title
+    return ORDO_COMPARE.clean_title(raw.splitlines()[0])
 
 
 def add_finding(findings: list[Finding], year: int, aspect: str,
@@ -174,7 +170,7 @@ def add_finding(findings: list[Finding], year: int, aspect: str,
 def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
                  rubrics_path: pathlib.Path) -> Comparison:
     """Return one finding per comparable date/aspect assertion."""
-    pdf = ORDO_COMPARE.pdf_days(pdf_path)
+    pdf = ORDO_COMPARE.pdf_days(pdf_path, year=year)
     ours_ordo = ORDO_COMPARE.our_ordo_days(ordo_path)
     ours_rubrics = ORDO_COMPARE.read_rubrics(rubrics_path)
     totals: dict[str, int] = {}
@@ -189,7 +185,9 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
         if not raw:
             continue
         pdf_title = clean_pdf_title(raw)
-        our_title = ours_ordo[key]["title"]
+        if not pdf_title:
+            continue
+        our_title = ORDO_COMPARE.clean_title(ours_ordo[key]["title"])
         compared("calendar")
         if (ORDO_COMPARE.similar(pdf_title, our_title) < 0.5
                 and not (ORDO_COMPARE.is_ferial(pdf_title)
@@ -238,18 +236,15 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
                 add_finding(findings, year, aspect, key, " | ".join(pieces))
 
     # Gospel-canticle antiphon incipits.
-    for field, section, pattern, aspect in (
-            ("ben", "Lauds", r"Ben\.?\s*Ant\.?\s*[“\"]([^”\"]+)",
-             "benedictus-antiphon"),
-            ("mag", "Vespers", r"Mag\.?\s*Ant\.?\s*[“\"]([^”\"]+)",
-             "magnificat-antiphon")):
+    for field, section, canticle, aspect in (
+            ("ben", "Lauds", "Ben", "benedictus-antiphon"),
+            ("mag", "Vespers", "Mag", "magnificat-antiphon")):
         for key in sorted(ours_rubrics):
-            match = re.search(pattern, pdf.get(key, {}).get(section, ""))
+            reference = ORDO_COMPARE.antiphon_incipit(pdf.get(key, {}).get(section), canticle)
             actual = ours_rubrics[key][field]
-            if not match or not actual:
+            if not reference or not actual:
                 continue
             compared(aspect)
-            reference = match.group(1)
             if not ORDO_COMPARE.incipit_matches(reference, actual):
                 add_finding(findings, year, aspect, key,
                             f"ours={actual} | reference={reference}")
@@ -270,8 +265,8 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
                 add_finding(findings, year, aspect, key,
                             f"ours={actual} | reference={reference}")
 
-    # Vespers ownership. A day with a parsed Vespers section is comparable
-    # even when neither side designates I/II Vespers.
+    # Only explicit I/II notation asserts ownership. Its absence is not
+    # evidence that the app selected a different office.
     for key in sorted(set(pdf) & set(ours_ordo)):
         if "Vespers" not in pdf[key]:
             continue
@@ -281,6 +276,8 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
             reference = "fol"
         elif re.search(r"II of prec", text):
             reference = "prec"
+        if reference is None:
+            continue
         actual = ours_ordo[key].get("vespers")
         compared("vespers-ownership")
         if reference != actual:

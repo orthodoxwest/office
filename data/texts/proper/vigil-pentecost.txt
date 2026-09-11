@@ -2,9 +2,9 @@
 # SOURCE: monastic diurnal, p. 394 (Vigil of Pentecost; Lauds as on the preceding Sunday, p. 392)
 @use proper/ascension-sunday-within-octave/collect
 
-# Whitsun Eve is a ferial paschal office until None; antiphons come from the
-# seasonal/ordinary tiers, and vespers belong to I Vespers of Pentecost.
-# See data/audit-ok.txt.
+# Diurnal p. 394 appoints the preceding Sunday's Lauds without the
+# Ascension commemoration. The feast's ProperID redirects to that office;
+# Vespers belongs to Pentecost.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.

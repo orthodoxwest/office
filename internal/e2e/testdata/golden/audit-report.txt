@@ -1,8 +1,10 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 1 feast(s) ===
+=== Missing propers: 2 feast(s) ===
 
   [base]
+  [sd] Friday after the Octave of Ascension (friday-after-ascension-octave)
+    missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon, commemoration-versicle
   [f2] Rogation Monday (rogation-monday)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon, commemoration-versicle
 

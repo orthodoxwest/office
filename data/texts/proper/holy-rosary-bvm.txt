@@ -22,9 +22,10 @@ To-day let us celebrate * devoutly the Solemnity of the holy Rosary of Mary, Mot
 # SOURCE: diurnal p. 622
 O blessed Mother * and spotless Virgin, thou glorious Queen of the world, may all acknowledge the help of thy prayer who celebrate the solemnity of thy holy Rosary.
 
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
-#
+[magnificat-antiphon-first]
+# SOURCE: diurnal p. 619
+Blessed art thou, * O Virgin Mary, Mother of God, for thou hast believed the Lord: for those things are accomplished in thee which were told thee: intercede for us unto the Lord our God.
+
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #

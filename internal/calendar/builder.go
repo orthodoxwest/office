@@ -779,6 +779,10 @@ func feriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast
 		}
 	}
 
+	return seasonalFeriaCommemoration(day, easter)
+}
+
+func seasonalFeriaCommemoration(day *models.CalendarDay, easter time.Time) *models.Feast {
 	return &models.Feast{
 		ID:       models.FeriaCommemorationID,
 		Name:     feriaCommemorationName(day.Date, easter, day.Season, day.TemporalWeekID),

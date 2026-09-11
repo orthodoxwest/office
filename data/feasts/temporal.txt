@@ -186,6 +186,16 @@ Color = violet
 Category = feria
 DateRule = easter+36
 
+# Diurnal p. 394: Semidouble; the preceding Sunday's office without the
+# Ascension commemoration, including its II Vespers.
+[friday-after-ascension-octave]
+Name = Friday after the Octave of Ascension
+Rank = semi-double
+Color = white
+Category = feria
+DateRule = easter+47
+ProperID = ascension-sunday-within-octave
+
 [vigil-pentecost]
 Name = Vigil of Pentecost
 Rank = double-1st-class
@@ -194,6 +204,8 @@ Category = feria
 DateRule = easter+48
 IsVigil = true
 VigilOf = pentecost
+# Diurnal p. 394: Lauds as the preceding Sunday, without the Ascension commemoration.
+ProperID = ascension-sunday-within-octave
 
 [pentecost]
 Name = Whitsunday — Pentecost
