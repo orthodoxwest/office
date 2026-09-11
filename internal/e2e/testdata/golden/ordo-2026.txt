@@ -270,7 +270,7 @@ FEBRUARY
                Com. St Dorothy, Virgin & Martyr ("The kingdom of heaven")
                Com. St Photius, Bishop and Confessor ("Well done")
            Hours   Preces
-           Vespers g · I fol. (Office of the V Sunday after Epiphany) · Mag. God hath holpen · No Suff.
+           Vespers g · I fol. (Office of the V Sunday after Epiphany) · Mag. He hath put down the mighty · No Suff.
                Com. St Romuald, Abbot ("The world, and all things earthly")
   7  Sat     Office of the V Sunday after Epiphany      [sd]  g
            St Romuald, Abbot (d)
@@ -311,7 +311,7 @@ FEBRUARY
  13  Fri  L  Feria                                            v
            Lauds   v · Ben. Through the tender mercy · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. He hath put down the mighty · Suff.
+           Vespers v · Mag. So the last · Suff.
                Com. St Valentine, Priest & Martyr ("Whosoever will come after me")
  14  Sat     Feria                                            v
            St Valentine, Priest & Martyr (com)
@@ -344,11 +344,11 @@ FEBRUARY
  19  Thu     Feria                                            v
            Lauds   v · Ben. Let us serve · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. Show strength, O God · Suff.
+           Vespers v · Mag. Some seed · Suff.
  20  Fri  L  Feria                                            v
            Lauds   v · Ben. Through the tender mercy · No Preces · Suff.
            Hours   Preces
-           Vespers v · Mag. He hath put down the mighty · Suff.
+           Vespers v · Mag. They who keep the word of God · Suff.
  21  Sat     Feria                                            v
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
            Hours   Preces
@@ -426,10 +426,10 @@ MARCH
                Com. St Lucius I, Bishop & Martyr ("Whosoever will come after me")
   4  Wed  L§ Lent Ember Wednesday                       [f2]  v
            St Lucius I, Bishop & Martyr (com)
-           Lauds   v · Ben. This evil and adulterous generation seeketh after a sign · No Preces · Suff.
+           Lauds   v · Ben. This crooked · No Preces · Suff.
                Com. St Lucius I, Bishop & Martyr ("He that hateth his life")
            Hours   Preces
-           Vespers v · Mag. As Jonas was three days and three nights in… · Suff.
+           Vespers v · Mag. For as Jonas · Suff.
   5  Thu  L§ Thursday after Lent I                      [f2]  v
            Lauds   v · Ben. Jesus went thence · No Preces · Suff.
            Hours   Preces
@@ -632,9 +632,9 @@ APRIL
            Hours   Preces
            Vespers v · Mag. I have power · No Suff.
   8  Wed  L§ HOLY WEDNESDAY                             [1cl] v
-           Lauds   v · Ben. Simon, do you sleep? · No Preces · No Suff.
+           Lauds   v · Ben. Simon, sleepest thou? · No Preces · No Suff.
            Hours   Preces
-           Vespers v · Mag. The handmaid said to Peter · No Suff.
+           Vespers v · Mag. A maid said unto Peter · No Suff.
                Com. Thursday after Palm Sunday ("My soul doth magnify the Lord, and my spirit…")
   9  Thu  L§ HOLY THURSDAY                              [1cl] w
            Thursday after Palm Sunday (f2)
@@ -657,14 +657,14 @@ APRIL
                Com. St Leo the Great, Bishop, Confessor & Doctor ("Well done")
                Com. Saturday after Palm Sunday ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
-           Vespers w · I fol. (Sunday of the Resurrection) · Mag. And looking · No Suff.
+           Vespers w · I fol. (Sunday of the Resurrection) · Mag. And when they looked · No Suff.
  12  Sun     SUNDAY OF THE RESURRECTION                 [1cl] w
            Lauds   w · Ben. And very early in the morning · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. And looking · No Suff.
+           Vespers w · II prec. · Mag. And when they looked · No Suff.
  13  Mon     EASTER MONDAY                              [1cl] w
            St Hermengild, Martyr (com)
-           Lauds   w · Ben. While they walked · No Preces · No Suff.
+           Lauds   w · Ben. Jesus himself · No Preces · No Suff.
                Com. St Hermengild, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. What manner of communications are these · No Suff.
@@ -790,9 +790,9 @@ MAY
            Lauds   w · Ben. Blessed · No Preces · No Suff.
                Com. St. Monica, Widow ("Well done, good and faithful servant")
            Hours   Preces
-           Vespers w · Mag. My soul · No Suff.
+           Vespers w · Mag. Your sorrow · No Suff.
   5  Tue     Feria                                            w
-           Lauds   w · Ben. The Lord hath raised up for us · No Preces · No Suff.
+           Lauds   w · Ben. And they constrained him · No Preces · No Suff.
            Hours   Preces
            Vespers r · I fol. (St. John before the Latin Gate) · Mag. John the Apostle · No Suff.
                Com. Octave of the Solemnity of St Joseph ("The world, and all things earthly")
@@ -801,7 +801,7 @@ MAY
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
                Com. Octave of the Solemnity of St Joseph ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+           Vespers r · II prec. · Mag. John the Apostle · No Suff.
                Com. St. Alexis Toth, Priest & Confessor ("The world, and all things earthly")
   7  Thu     Feria                                            w
            St. Alexis Toth, Priest & Confessor (com)
@@ -2290,7 +2290,7 @@ DECEMBER
            Hours   Preces
            Vespers v · Mag. O King of Nations · No Suff.
  23  Wed  L§ Feria                                            v
-           Lauds   v · Ben. I will place salvation · No Preces · No Suff.
+           Lauds   v · Ben. Behold all things are fulfilled · No Preces · No Suff.
            Hours   Preces
            Vespers v · Mag. O Emmanuel · No Suff.
  24  Thu  L§ VIGIL OF THE NATIVITY OF OUR LORD          [1cl] v

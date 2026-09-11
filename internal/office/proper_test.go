@@ -1540,7 +1540,8 @@ func TestProperResolutionReasonMatrix(t *testing.T) {
 		name, hour, selected, want string
 		day                        *models.CalendarDay
 	}{
-		{"greater antiphon", "lauds", "seasonal/advent/benedictus-antiphon-december-17", "greater-antiphon", nil},
+		{"greater antiphon", "vespers", "seasonal/advent/magnificat-antiphon-december-17", "greater-antiphon", nil},
+		{"fixed Benedictus antiphon", "lauds", "seasonal/advent/benedictus-antiphon-december-23", "date-fixed-benedictus", nil},
 		{"advent without December date", "lauds", "seasonal/advent/collect", "normal", nil},
 		{"December outside Advent", "lauds", "proper/feast/collect-december-17", "normal", nil},
 		{"historia", "vespers", "proper/historia-august-1/magnificat-antiphon", "historia-first-vespers", nil},

@@ -22,7 +22,8 @@ And behold, * there was a great earthquake: for the Angel of the Lord descended 
 @use proper/easter-sunday/easter-antiphon-5
 
 [benedictus-antiphon]
-While they walked * Jesus drew near, and went with His disciples: but their eyes were holden that they should not know Him: and He rebuked them, saying: O fools, and slow of heart to believe all that the Prophets have spoken! Alleluia.
+# SOURCE: diurnal p. 367
+Jesus himself * drew near to his disciples in the way, and went with them: but their eyes were holden that they should not know him: and he rebuked them, saying, O fools and slow of heart to believe all that the prophets have spoken, alleluia.
 
 [magnificat-antiphon]
 What manner of communications are these * that ye have one to another, as ye walk, and are sad? Alleluia.

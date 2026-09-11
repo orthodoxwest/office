@@ -306,6 +306,20 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		strings.HasPrefix(baseProperRef(ref), "psalm-antiphon") &&
 		usesWeekdayVespersAntiphons(day, corpus)
 
+	// On the last day before the Nativity vigil, the fixed Benedictus
+	// antiphon replaces the Advent Sunday/weekday appointment (Diurnal
+	// p. 176). A saint's own office keeps its antiphon; an Advent feria
+	// commemorated there resolves separately with a ferial celebration.
+	if hourName == "lauds" && ref == "benedictus-antiphon" &&
+		day.Season == models.Advent && day.Date.Month() == time.December && day.Date.Day() == 23 &&
+		(day.Celebration == nil || day.Celebration.Category == models.CategorySunday ||
+			day.Celebration.Category == models.CategoryFeria) {
+		const key = "seasonal/advent/benedictus-antiphon-december-23"
+		if text := corpus.Get(key); text != "" {
+			return text, key
+		}
+	}
+
 	// 0. The Greater ("O") Antiphons: at Vespers of December 17-23 the
 	// date-fixed O antiphon supersedes the Advent Sunday's or feria's own
 	// Magnificat antiphon, and (per the ordo, e.g. the Expectation of the
@@ -314,7 +328,8 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// vidisti). The antiphon follows the calendar day the Vespers is sung
 	// on: at I Vespers the office day carries tomorrow's date, so step back.
 	greaterAntiphon := func() (string, string) {
-		if hourName != "vespers" || day.Season != models.Advent || day.Date.Month() != time.December {
+		if hourName != "vespers" || !strings.HasPrefix(ref, "magnificat-antiphon") ||
+			day.Season != models.Advent || day.Date.Month() != time.December {
 			return "", ""
 		}
 		oDay := day.Date.Day()
@@ -347,22 +362,26 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// Sunday's -first proper, and otherwise the ferial Saturday antiphon
 	// from the psalter (2026 ordo: "God hath holpen" on the free Saturdays
 	// of Epiphanytide, the historia antiphons through summer and autumn).
+	// An anticipated Sunday celebrated on Saturday instead begins with
+	// Friday's ferial antiphon (2026 ordo, February 6).
 	if hourName == "vespers" && day.FirstVespers &&
 		strings.HasPrefix(ref, "magnificat-antiphon") && strings.HasSuffix(ref, "-first") &&
 		isPerAnnumSunday(day.Celebration) {
-		if id := calendar.HistoriaWeekID(day.Date); id != "" {
-			key := "proper/historia-" + id + "/magnificat-antiphon-first"
-			if text := corpus.Get(key); text != "" {
-				return text, key
+		if isSundayFirstVespers(day) {
+			if id := calendar.HistoriaWeekID(day.Date); id != "" {
+				key := "proper/historia-" + id + "/magnificat-antiphon-first"
+				if text := corpus.Get(key); text != "" {
+					return text, key
+				}
+			}
+			for _, feastID := range feastProperIDs(day.Celebration) {
+				key := "proper/" + feastID + "/magnificat-antiphon-first"
+				if text := corpus.Get(key); text != "" {
+					return text, key
+				}
 			}
 		}
-		for _, feastID := range feastProperIDs(day.Celebration) {
-			key := "proper/" + feastID + "/magnificat-antiphon-first"
-			if text := corpus.Get(key); text != "" {
-				return text, key
-			}
-		}
-		const ferial = "ordinary/vespers/magnificat-antiphon-saturday"
+		ferial := "ordinary/vespers/magnificat-antiphon-" + weekday
 		if text := corpus.Get(ferial); text != "" {
 			return text, ferial
 		}
@@ -641,6 +660,9 @@ func properResolutionTier(selected string, properIDs []string, day *models.Calen
 }
 
 func properResolutionReason(day *models.CalendarDay, hourName, ref, selected string) string {
+	if strings.HasPrefix(selected, "seasonal/advent/benedictus-antiphon-december-") {
+		return "date-fixed-benedictus"
+	}
 	if strings.HasPrefix(selected, "seasonal/advent/") && strings.Contains(selected, "-december-") {
 		return "greater-antiphon"
 	}

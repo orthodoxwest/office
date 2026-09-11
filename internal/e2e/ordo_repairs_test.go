@@ -106,3 +106,39 @@ func Test2026OrdoRepairAppointments(t *testing.T) {
 		}
 	}
 }
+
+func TestAntiphonParityAppointments(t *testing.T) {
+	eng, err := office.NewEngine(dataDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	yd := buildYear(t, 2026)
+	for _, tc := range []struct{ date, hour, ref string }{
+		{"2026-02-06", "vespers", "ordinary/vespers/magnificat-antiphon-friday"},
+		{"2026-02-13", "vespers", "proper/septuagesima/magnificat-antiphon-friday"},
+		{"2026-02-19", "vespers", "proper/sexagesima/magnificat-antiphon-thursday"},
+		{"2026-02-20", "vespers", "proper/sexagesima/magnificat-antiphon-friday"},
+		{"2026-05-04", "vespers", "proper/easter-sunday-3/magnificat-antiphon-monday"},
+		{"2026-05-05", "lauds", "proper/easter-sunday-3/benedictus-antiphon-tuesday"},
+		{"2026-05-05", "vespers", "proper/st-john-latin-gate/magnificat-antiphon-first"},
+		{"2026-05-06", "vespers", "proper/st-john-latin-gate/magnificat-antiphon-first"},
+		{"2026-12-22", "lauds", "proper/advent-sunday-4/benedictus-antiphon-tuesday"},
+		{"2026-12-23", "lauds", "proper/advent-sunday-4/benedictus-antiphon-friday"},
+		{"2026-12-23", "vespers", "seasonal/advent/magnificat-antiphon-december-23"},
+	} {
+		t.Run(tc.date+"/"+tc.hour, func(t *testing.T) {
+			hour, err := eng.ComposeHour(tc.hour, dayFor(t, yd, tc.date), yd.moveable)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, section := range hour.Sections {
+				for _, elem := range section.Elements {
+					if elem.SourceRef == tc.ref || slices.Contains(elem.SourceRefs, tc.ref) {
+						return
+					}
+				}
+			}
+			t.Errorf("missing appointed antiphon %s", tc.ref)
+		})
+	}
+}

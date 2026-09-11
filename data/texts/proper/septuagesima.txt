@@ -87,6 +87,10 @@ Take that thine is * and go thy way: because I am good, saith the Lord.
 # SOURCE: monastic diurnal, p. 238 (Week of Septuagesima, Thursday)
 Is it not lawful * for me to do what I will? Is thine eye evil, because I am good? saith the Lord.
 
+[magnificat-antiphon-friday]
+# SOURCE: diurnal p. 238
+So the last * shall be first, and the first shall be last: for many are called, but few are chosen.
+
 [magnificat-antiphon-first]
 # SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 1 (Dixit Dominus)
 The Lord said * unto Adam, Of the tree which is in the midst of the garden thou shalt not eat: for in the day that thou eatest thereof, thou shalt surely die.

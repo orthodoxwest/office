@@ -158,6 +158,10 @@ O Day-spring, * Brightness of the Light everlasting, and Sun of righteousness: C
 # SOURCE: monastic diurnal, p. 173 (The Great Antiphons, Dec. 22, O Rex gentium)
 O King of Nations, * and their Desire; the Cornerstone, who makest both one: Come and save mankind, whom thou formedst of clay.
 
+[benedictus-antiphon-december-23]
+# SOURCE: monastic diurnal, p. 176 (last day before the Nativity vigil; overrides the weekday appointment)
+@use proper/advent-sunday-4/benedictus-antiphon-friday
+
 [magnificat-antiphon-december-23]
 # SOURCE: monastic diurnal, p. 173 (The Great Antiphons, Dec. 23, O Emmanuel)
 O Emmanuel, * our King and Lawgiver, the Desire of all nations and their Salvation: Come and save us, O Lord our God.
