@@ -31,8 +31,8 @@ Let us live righteously and godly, * looking for that blessed hope, and the comi
 @use proper/advent-sunday-3/psalm-antiphon-1
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 38, 27 (The Third Sunday in Advent)
-Incline thine ear to our prayers, we beseech thee, O Lord; and enlighten the darkness of our minds by the grace of thy visitation.
+# SOURCE: diurnal p. 170
+Incline thine ear to our prayers, O Lord, we beseech thee; and lighten the darkness of our minds by the grace of thy visitation.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 35 (The Third Sunday in Advent)

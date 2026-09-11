@@ -79,9 +79,11 @@ R. Thanks be to God.
 V. Behold, thou art fair, my love.
 R. Behold, thou art fair; thou hast dove's eyes.
 
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
+[versicle-vespers]
+# SOURCE: diurnal p. 476
+V. Who is this that flieth as a cloud?
+R. And as a dove to her windows?
+
 [versicle-first-vespers]
 # SOURCE: diurnal p. 476
 V. Who is this that flieth as a cloud?

@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 224 (XIX Sunday after Pentecost)
-O Almighty and most merciful God: of thy bountiful goodness keep us from all things that may hurt us; that we, being ready both in mind and body, may freely accomplish thy will.
+# SOURCE: diurnal p. 438
+O Almighty and most merciful God, of thy bountiful goodness keep us, we beseech thee, from all things that may hurt us; that we, being ready both in body and soul, may cheerfully accomplish those things which thou commandest.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 9 (Dicite invitatis)

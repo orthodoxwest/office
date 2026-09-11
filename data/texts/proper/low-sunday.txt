@@ -35,8 +35,8 @@ Now when it was late * the same day, the first of the week, and the doors were s
 @use proper/easter-sunday/commemoration-versicle
 
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 161 (Saturday before Low Sunday)
-Grant, we beseech thee, Almighty God: that we who have celebrated the paschal feasts, may, through thy bounty, ever keep them in our life and conduct.
+# SOURCE: diurnal p. 371
+Grant, we beseech thee, Almighty God: that we who have fulfilled the Paschal feast, may, by thy bounty, shew forth its effects in our life and actions.
 
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 370 (Low Sunday, At Lauds)
