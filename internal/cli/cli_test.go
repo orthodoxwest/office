@@ -167,7 +167,8 @@ func TestUsageErrors(t *testing.T) {
 		{"tex without hour", func(e env) error { return cmdTeX(e, []string{"--chant"}) }, "usage: office tex"},
 		{"review without subcommand", func(e env) error { return cmdReview(e, nil) }, "Subcommands:"},
 		{"review with unknown subcommand", func(e env) error { return cmdReview(e, []string{"frobnicate"}) }, "Subcommands:"},
-		{"review sign without reviewer", func(e env) error { return cmdReview(e, []string{"sign", "lauds", "2026-06-07"}) }, "usage: office review sign"},
+		{"retired review sign", func(e env) error { return cmdReview(e, []string{"sign", "lauds", "2026-06-07", "tester"}) }, "office review sign is retired"},
+		{"retired review status", func(e env) error { return cmdReview(e, []string{"status"}) }, "office review status is retired"},
 	}
 
 	for _, tt := range tests {

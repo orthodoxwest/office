@@ -20,7 +20,7 @@ data/
     shared/        texts reused across several files (Marian texts, formulas)
     chant/         GABC chant scores (psalms/, canticles/, hymns/)
   office/          hour structure definitions
-  review/          sign-offs, provenance attestations, assurance baseline
+  review/          provenance attestations, prescreen flags, assurance baseline
 ```
 
 ## File format

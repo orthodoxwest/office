@@ -1,132 +1,108 @@
 # Reviewing the Office
 
-This guide is for volunteers checking the rendered hours against the printed
-books: the diurnal and the archdiocese supplement. You do not need to know
-anything about the code or about git — you need the books, a web browser, and
-your assigned rows from the review checklist.
+This guide covers checking corpus wording against the printed books and
+checking composed hours against the Diurnal, supplements, rubrics, and current
+archdiocesan ordo. Findings need a source citation and a reproducible example.
 
-## How review is organized
+## Composition review
 
-There are two complementary review tracks:
+Start from a requirement in the sources, then inspect what the app renders.
+A correct page does not certify a rule on other dates. Engine-generated feature
+counts and sample-page counts are not a measure of liturgical completeness.
+The former structural signoff workflow and its coverage score are retired.
 
-1. **Text provenance** certifies an individual corpus entry once against a
-   named source and page/section locator. Queue: fan-out × suspicion
-   (`make review-provenance-queue` / `make review-suspects`).
-2. **Structural review** checks that the engine selected and assembled the
-   right elements — occurrence/concurrence, commemorations, preces/suffrage
-   *reasons*, Marian selection, and proper/common/ordinary resolution tiers.
-   Queue: a fan-out-weighted set-cover plan over those structural features
-   (`make review-plan`), reduced by pages already signed off.
+Keep a short checklist in the relevant audit issue or PR. For each check, record:
 
-This distinction prevents a wording check from being repeated merely because
-the same text appears in several calendar contexts, and prevents structural
-review from expanding into a full re-read of every calendar day.
+- **Requirement and source:** the appointment or rubric being checked, with
+  edition and page/section. Paraphrase the requirement; keep scans and extracted
+  book contents outside Git, and generated evidence under ignored `output/`.
+- **Cases and expected behavior:** civil date, hour, prayer form, calendar scope,
+  expected selections/omissions/order, and relevant boundary or collision cases.
+- **Result:** observed behavior and a link to the regression test, confirmed
+  defect, or unresolved source/clergy question. Name the reviewer, including
+  when the review was performed by an agent.
 
-You do **not** need to proofread every hour of every day. The structural plan
-selects a small ordered set of representative pages so that every observed
-structural branch is exercised, preferring pages whose branches affect the
-most real date-hours first. After you sign a page off, those branches are
-credited and drop out of the next plan.
+These are useful starting areas, not a completed or exhaustive rubric inventory:
 
-Each row in the structural plan has:
+| Area | Examples to check |
+|---|---|
+| Psalmody | Weekday, Sunday, and festal appointments at the affected hours |
+| Seasonal changes | Preces, suffrages, Marian antiphons, doxologies, and boundary dates |
+| Text selection | Proper/common/seasonal/ordinary appointments, hour-specific limits, redirects |
+| Prayer forms | Private, deacon, and priest openings, greetings, confession, and endings |
+| Calendar interactions | Occurrence, transfers, I/II Vespers, commemorations, octaves, and vigils |
 
-- a **link** — the exact page to open (e.g. `/lauds/2026-06-07`)
-- a **priority** — A (Sundays and 1st/2nd class feasts), B (greater doubles
-  and doubles), C (everything else)
-- a **context** note — commemorations or octave the page should reflect
-- **new_impact** — how many date-hours the newly covered branches touch
-- **new_features** — the structural branches this page is meant to check
-- **primary_year** — `yes` if the date is in the plan’s start year (prefer
-  these; you can check them against that year’s printed ordo). `no` means the
-  branch never occurs in the start year, so the plan had to use a later date.
-- **signoff_status** — unreviewed / stale / current
+Keep the known incomplete Triduum composition work separate from an assessment
+of the rest of the year. A narrow passing check does not close an entire area.
+Turn confirmed defects into repairs with direct appointment or boundary tests.
+Regression snapshots detect changes; they do not independently establish that
+an existing appointment is correct.
 
-Work top down. The link's hour and date identify the page for sign-off. If its
-contents later change, the sign-off is automatically marked stale. Signing a
-page records a structural feature schema so residual planning can credit the
-decision/resolution branches present on that composition **when signed under
-the current schema**. Legacy sign-offs (no `schema=N`) still mark content
-status but do not shrink the structural residual until re-signed. Reviewers
-do not need to manage hashes or schema numbers.
+Use the newest local archdiocesan ordo for current practice. If it conflicts
+with the Diurnal, normative rubrics, or older ordos, document the conflict for
+clergy and leave the affected entries unapplied. A difference from the ordo
+may be an app defect, a printed error, or an unresolved source conflict.
 
-## What to look for
+### Optional sample dates
 
-Open the linked page side by side with the books and check, in this order:
+`review plan` selects representative pages from decisions and source tiers
+already observed in the engine, weighted by their frequency in the sweep.
+It helps find examples to inspect. It cannot discover an unmodeled rubric or
+prove that other appointments and combinations of rules are correct.
 
-### 1. Missing propers
+The CSV includes the page URL, priority, context, `primary_year`,
+`sampled_features`, and `feature_exposure`. Features listed on a row are those
+not represented by earlier samples. Exposure sums their date-hour-form
+occurrences; the same composition can contribute to several features, so it
+is not a count of distinct affected offices or review progress. Primary-year
+examples are preferred; later dates provide examples absent from that year,
+and cannot be verified against an unpublished future ordo.
 
-The most common seeded error: the app silently falls back to a generic text
-where the diurnal or supplement gives a specific one. Warning signs:
+The default sample uses selected engine decisions and proper-slot resolution
+tiers. Descriptive context and pure weekday psalmody gates are excluded, so
+check weekday appointments explicitly when a source requirement calls for them.
+`-include-sources` also samples corpus keys; it does not attest their wording.
+Samples never shrink because a page was reviewed. Record the specific checked
+requirement in tests and issues rather than signing off a whole page.
 
-- A major feast whose psalm antiphons look like the ordinary Sunday or
-  weekday psalter.
-- A hymn that is the ordinary weekday hymn rather than the feast's own
-  (check the first line against the book).
-- A chapter, versicle, or Benedictus/Magnificat antiphon that reads like a
-  general default while the book has one proper to the day.
+### Reporting a problem
 
-If the book has something more specific than what the page shows, that is a
-finding — even if what the page shows is not "wrong" in itself.
+Every hour page has a **"Report a problem"** link. Describe what the cited
+source requires and what the app shows, with the date, hour, and prayer form.
+Distinguish incorrect wording from incorrect selection or assembly. A proper
+may exist in the corpus yet be selected for the wrong day or hour; a generic
+fallback may hide a missing proper.
 
-### 2. Incorrect translations
+## Text provenance
 
-The project was seeded from Divinum Officium, whose translations sometimes
-differ from our diocesan books. Compare **word for word**, not just gist:
-
-- Collects especially — small differences in wording are still findings.
-- Watch for modern pronouns (you/your) where the books use thou/thee/thy,
-  and for mixed registers within a single text.
-- Psalm texts should match the Coverdale psalter as printed.
-
-### 3. Logic and rubric errors
-
-Check the **structure** of the hour, not just the texts:
-
-- Are the right psalms appointed for this day and hour?
-- On special days (Sundays coinciding with feasts, days within octaves,
-  vigils, penitential seasons): does the page add, omit, and substitute what
-  the rubrics direct? E.g. preces said or omitted, proper doxologies,
-  I Vespers belonging to the following feast.
-- Anything present that should be absent, or absent that should be present.
-
-## Reporting what you find
-
-Every hour page has a **"Report a problem"** link at the bottom. It opens a
-GitHub issue already filled in with the page, date, and celebration — tick
-the category, then write two things:
-
-1. **What the books say** — quote it, and cite the diurnal or supplement
-   page number if you can.
-2. **What the app shows** — paste the text from the page.
-
-If a page is fully correct, that is just as valuable: tell your coordinator
-which linked hour and date you checked so it can be signed off.
+Text provenance records verification of an individual corpus entry against a
+named source and page/section locator. It does not certify where that text is
+appointed. Compare wording against the printed page, following the
+[page-image workflow](scripts/DIURNAL-PIPELINE.md) for scanned sources.
+The provenance queue ranks entries by usage and suspicion; a wording check
+need not be repeated for every date on which the entry appears.
 
 ## For the maintainer
 
+Keep generated inventories beneath ignored `output/`:
+
 ```bash
-make review-manifest > manifest.csv   # regenerate the checklist (START=2026 YEARS=1)
-make review-status                    # coverage report: current / stale / unreviewed
-make review-provenance                # generated text-provenance coverage (flat + usage-weighted)
-make review-provenance-queue > provenance-queue.csv  # highest-leverage texts first
-make review-zero-occurrences START=2026 YEARS=30 > zero-occurrences.csv  # classification worklist
-make review-suspects > suspects.csv   # only pre-flagged texts — the findings-sprint list
-make review-plan > review-plan.csv    # residual structural checklist (default 28y fan-out)
-./office review plan -summary         # residual impact / credited features
-make review-plan YEARS=1              # single-year residual only
-make review-assurance                 # release coverage gates and summary
-./office review explain lauds 2026-06-07  # one page's assurance JSON
-./office review sign lauds 2026-06-07 REVIEWER [note...] # record a sign-off
+mkdir -p output/review
+make -s review-manifest > output/review/manifest.csv   # distinct rendered compositions
+make review-provenance                # source verification, flat and usage-weighted
+make -s review-provenance-queue > output/review/provenance-queue.csv
+make -s review-zero-occurrences START=2026 YEARS=30 > output/review/zero-occurrences.csv
+make -s review-suspects > output/review/suspects.csv
+make -s review-plan > output/review/samples.csv       # optional examples, default 28 years
+./office review plan -start 2026 -years 1 -summary
+make review-assurance                 # text-provenance floor and summary
+./office review explain lauds 2026-06-07 --form private
 ```
 
-Structural plan features are **tier A** only: calendar and hour decisions that
-change composition, plus resolution tiers for proper slots. Preces reasons are
-credited only from Prime/Compline pages; suffrage reasons only from
-Lauds/Vespers; Marian selection/boundary from Lauds/Vespers/Compline.
-Descriptive context tags (season/weekday/category labels) and pure weekday
-psalmody section gates are excluded so the queue stays rubric-shaped. Text
-provenance remains a separate track (`-include-sources` on `review plan` is for
-maintainers only).
+`review sign`, `review status`, and `make review-status` are retired. The
+historical ledger is available in Git history. Corpus `review attest`, the
+composition explanation, resolution inventory, and date-sensitive parity
+snapshot remain available.
 
 Explicit text attestations live in `data/review/provenance.csv`. The file
 records only citations, review metadata, the corpus key, and internal version
@@ -221,16 +197,21 @@ is verified" and is typically well above the flat corpus-wide count.
 
 ### Release assurance
 
-`./office review assurance` fails when modeled structural features are
-uncovered, modeled coverage drops below its intentional floor, or verified
-text coverage falls below its floor. It reports stale attestations separately
-so reviewers can see what changed. The floor lives in
-`data/review/assurance-baseline.json`; update it only as an intentional,
-reviewable change:
+`./office review assurance` reports text provenance and fails if the verified
+text count falls below the configured floor. It reports stale attestations
+separately. Structural feature counts and page signoffs do not participate.
+The report inventories dependencies from every composed date-hour form in the
+configured sweep, without using the optional sample plan.
+
+The floor lives in `data/review/assurance-baseline.json`; a zero floor enforces
+no minimum verified count. Update it only as an intentional, reviewable change:
 
 ```bash
 ./office review assurance --update-baseline
 ```
+
+Calendar, rendered content, selected sources, and decision traces remain
+protected by the date-sensitive parity snapshot described below.
 
 Each web hour also has a collapsed **Assurance** disclosure. It shows the same
 dependency states, fallback tiers, and stable rule identifiers without
@@ -261,11 +242,6 @@ inventory changes, review each new or altered pair before accepting the golden
 update; a false merge should be corrected narrowly and its behavior pinned in
 a dedicated test.
 
-Sign-offs live in `data/review/signoffs.txt`. The CLI binds each sign-off to
-the exact page contents automatically, so any later edit makes the unit show
-up as **stale** in `review-status` until re-reviewed. Sign-offs are committed
-to git like any other data change.
-
 ### Ingesting scanned diurnal pages
 
 Use the [page-image workflow](scripts/DIURNAL-PIPELINE.md) to transcribe entries
@@ -291,17 +267,12 @@ their meaning.
 
 ### Annual cadence
 
-The checklist deliberately covers only the current year — the archdiocese
-ordo for future years is not yet published, and most compositions recur, so
-coverage accumulates: sign-offs are date-independent, and when the manifest
-is regenerated each January the recurring units arrive already reviewed.
-Only that year's genuinely new variants (different commemoration and octave
-patterns) appear as unreviewed, so the annual ask shrinks over time.
-
-Calendar resolution itself (which feast wins each day, transfers,
-commemorations) is checked separately by diffing `make ordo YEAR=20XX`
-against the published ordo when it arrives — volunteers reviewing texts
-against the diurnal and supplement do not need the ordo.
+When a new archdiocesan ordo arrives, compare that year's appointments and
+revisit affected source requirements and unresolved questions. Use the ordo
+verification skill for a reproducible comparison and discrepancy triage.
+Existing regression tests preserve checked examples; they do not automatically
+certify appointments in a new ordo. Multi-year samples can help expose calendar
+interactions for examination against the applicable rubrics.
 
 ### Clergy-facing project status
 
@@ -361,14 +332,12 @@ calendar matches the annual ordo.”
 
 Review links include `?form=private|deacon|priest` so the selected prayers and
 source metadata remain reproducible regardless of a device's saved preference.
-Use the matching `--form` option for `office review explain`, `office review
-sign`, an hour command, or `office tex`. Omitting it selects Private.
+Use the matching `--form` option for `office review explain`, an hour command,
+or `office tex`. Omitting it selects Private.
 
-The manifest, provenance queue, and structural plan sweep every distinct
+The manifest, provenance queue, and sample plan sweep every distinct
 composition across the three forms. Identical Deacon and Priest compositions
-share one review unit; the parity snapshot checks all three explicitly.
-Structural schema 3 adds the prayer-form branches. Earlier schema signoffs
-retain their content status but do not credit the expanded structural universe.
+share one inventory unit; the parity snapshot checks all three explicitly.
 Dynamic proper-resolution inventory remains a calendar sweep: prayer forms
 only replace marked ordinary slots, after proper resolution.
 

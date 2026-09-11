@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-status review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
 
 YEAR ?= 2026
 
@@ -101,11 +101,8 @@ project-status: build ## Generate clergy-facing proper, assurance, and YEAR ordo
 verify-psalms: ## Compare the Coverdale psalter against the official 1662 BCP witness
 	go run scripts/verify-psalms.go
 
-review-manifest: build ## Print human-review checklist CSV for current year (START=2026 YEARS=1)
+review-manifest: build ## Inventory distinct rendered compositions for current year (START=2026 YEARS=1)
 	./office review manifest $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
-
-review-status: build ## Report human-review coverage vs data/review/signoffs.txt
-	./office review status $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
 review-provenance: build ## Report generated corpus provenance coverage (+ usage-weighted %; START/YEARS scope the sweep)
 	./office review provenance $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
@@ -122,10 +119,10 @@ review-resolution-inventory: build ## Inventory proper-resolution paths (default
 review-suspects: build ## Print only pre-flagged/lint-flagged texts — the findings-sprint list
 	./office review provenance-queue -suspect-only $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
-review-plan: build ## Print residual structural checklist CSV (default 28y fan-out; START/YEARS override)
+review-plan: build ## Sample observed engine behavior (default 28y; START/YEARS override)
 	./office review plan $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
 
-review-assurance: build ## Run release assurance coverage gates
+review-assurance: build ## Check text-provenance floor and print summary
 	./office review assurance
 
 DATE ?= $(shell date +%Y-%m-%d)

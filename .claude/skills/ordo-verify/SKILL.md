@@ -27,8 +27,7 @@ Read the printed page when an extracted instruction, scope, or wording is in
 doubt. Keep PDFs outside Git and generated evidence under ignored `output/`.
 Text discovery and transcription follow [the Diurnal pipeline](../../../scripts/DIURNAL-PIPELINE.md)
 and [AGENTS.md](../../../AGENTS.md), including independent readings and guarded
-corpus/attestation writes. Source verification does not certify an appointment
-or provide structural signoff.
+corpus/attestation writes. Source verification does not certify an appointment or composed office.
 
 ## Capture a reproducible comparison
 
@@ -107,7 +106,15 @@ uncertainty. Keep these measures distinct:
 - Static proper-slot coverage permits suppressions and fallbacks and may miss
   redirects. No unresolved text markers does not mean every proper is correct.
 - Hash-bound source attestations and usage-weighted coverage measure source
-  verification, not correct selection. Structural assurance is separate again.
+  verification, not correct selection.
+
+For composition review, follow the source-requirement checklist in
+[REVIEWING.md](../../../REVIEWING.md#composition-review): record the cited rule,
+expected behavior, representative/boundary cases, and linked tests or open
+questions. `review plan` only supplies examples of observed engine behavior;
+its feature and sample counts are not completion measures. Whole-page signoffs
+are retired. Keep known incomplete Triduum work separate from ordinary-year
+assessment.
 
 Do not turn the aggregate agreement percentage, old “known residue,” or the
 number of likely ordo typos into a claim of whole-office correctness.
