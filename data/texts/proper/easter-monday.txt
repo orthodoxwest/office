@@ -34,7 +34,8 @@ What manner of communications are these * that ye have one to another, as ye wal
 @use proper/easter-sunday/commemoration-versicle
 
 [collect]
-O God, Who dost heal the sick world by the solemn gladness of the Passover, continue, we beseech thee, to pour forth thine heavenly gifts upon thy people, till the same shall bring them into perfect liberty, and finally avail them unto life everlasting.
+# SOURCE: diurnal p. 367
+O God, who in the Paschal festival hast given unto the world thy healing remedies: continue, we beseech thee, to bestow thy heavenly gift upon thy people; that thereby they may be made worthy of perfect freedom, and may advance to everlasting life.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).

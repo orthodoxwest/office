@@ -30,7 +30,8 @@ V. Christ became obedient for us unto death.
 R. Yea, the death of the Cross.
 
 [collect]
-O Almighty God, Which knowest that we be set in such straits that we have no power of ourselves to help ourselves, we pray thee mercifully to relieve us, for whom continually pleadeth the suffering of thine Only Begotten Son.
+# SOURCE: diurnal p. 281
+Grant, we beseech thee, Almighty God: that we, who by reason of our weakness do falter amid so many adversities, may take heart again through the interceding Passion of thine only-begotten Son.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).

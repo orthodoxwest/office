@@ -31,8 +31,8 @@ Behold, * our Lord shall come with power, to enlighten the eyes of his servants,
 @use proper/advent-sunday-2/psalm-antiphon-1
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 27, 19 (The Second Sunday in Advent)
-Stir up our hearts, O Lord, to prepare the ways of thine only-begotten Son: that through his Advent, we may be found worthy to serve thee with purified minds.
+# SOURCE: diurnal p. 167
+Stir up our hearts, O Lord, to make ready the ways of thine Only-begotten; that by his coming we may be worthy to serve thee with purified minds.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 23 (The Second Sunday in Advent)

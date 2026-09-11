@@ -31,8 +31,8 @@ Thine Almighty Word, * O Lord, leapeth down from heaven out of thy royal throne,
 @use proper/advent-sunday-4/psalm-antiphon-1
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 48, 39 (The Fourth Sunday in Advent)
-Stir up, we beseech thee, O Lord, thy power and come: and with great might succour us; that by the help of thy grace, thy merciful pardon may hasten what our sins do hinder.
+# SOURCE: diurnal p. 179
+Stir up thy power, we beseech thee, O Lord, and come: and with great might succour us, that with the help of thy grace that which is hindered by our sins may be hastened by thy merciful forgiveness.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 45 (The Fourth Sunday in Advent)

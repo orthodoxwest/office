@@ -31,8 +31,8 @@ Lo, there cometh * a mighty Prophet: and he alone reneweth Jerusalem, alleluia.
 @use proper/advent-sunday-1/psalm-antiphon-1
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 15, 11 (The First Sunday in Advent)
-Stir up, we beseech thee, O Lord, thy power and come: that by thy protection, we may be found worthy to be set free from the dangers of our sins, and saved by thy deliverance.
+# SOURCE: diurnal p. 160
+Stir up thy might, we beseech thee, O Lord, and come; that we, who are ever threatened by the peril of our sins, may be counted worthy to be rescued by thy protection, and saved by thy deliverance.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 12 (The First Sunday in Advent)
