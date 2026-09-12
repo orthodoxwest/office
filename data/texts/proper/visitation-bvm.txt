@@ -43,7 +43,8 @@ All generations * shall call me blessed: for God hath regarded the lowliness of 
 @use shared/blessed-virgin/versicle-blessed-art-thou
 
 [collect]
-Grant, O Lord, we beseech thee, unto all thy servants, the gift of thine heavenly grace, that even as the Blessed Virgin being made a Mother hath been unto them the first step unto their salvation, so the godly and solemn memorial of her Visitation may be the bringer of an increase of peace.
+# SOURCE: diurnal p. 557
+We beseech thee, O Lord, bestow upon us thy servants the gift of thy heavenly grace: that as our salvation began by the Childbearing of the blessed Virgin, so this devout solemnity of her Visitation may afford us an increase of peace.
 
 [chapter-lauds]
 @use shared/blessed-virgin/chapter-sirach-24-9-10

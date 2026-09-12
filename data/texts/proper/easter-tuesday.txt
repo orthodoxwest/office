@@ -33,7 +33,8 @@ Behold My Hands * and my Feet, that it is I myself, alleluia, alleluia.
 @use proper/easter-sunday/commemoration-versicle
 
 [collect]
-O God, Who art ever multiplying the Children of thy Church, grant unto the same thy servants that they may lead the rest of their lives according to this beginning wherein Thou hast given them faith to receive the Sacrament of the New Birth.
+# SOURCE: diurnal p. 368
+O God, who dost continually multiply thy Church with new offspring: grant unto thy servants, that they may hold fast in their lives the mystery which by faith they have received.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).

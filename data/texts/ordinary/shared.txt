@@ -50,14 +50,8 @@ V. We adore thee, O Christ, and we bless thee, alleluia.
 R. For by thy holy Cross thou hast redeemed the world, alleluia.
 
 [cross-collect]
-# SOURCE: Monastic Diurnal.pdf, Commemoration of the Cross in Paschaltide,
-# printed p. 43 (PDF p. 89). Printed conclusion "Through the same."
-O God, who for our sake didst will thine only-begotten Son to undergo the gibbet
-of the Cross, that thou mightest drive thence from us the power of the enemy:
-grant unto us, thy servants, that we may attain the grace of his Resurrection.
-Through the same thy Son Jesus Christ our Lord, who with thee in the unity of
-the Holy Spirit, liveth and reigneth God, world without end.
-R. Amen.
+# SOURCE: diurnal p. 147
+O God, who didst will that thy Son should for us undergo the burden of the Cross, that he might deliver us from the power of the enemy: grant unto us thy servants that we may attain unto the joy of his resurrection.
 
 [our-father]
 Our Father, who art in heaven, Hallowed be thy Name.

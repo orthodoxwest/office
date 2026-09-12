@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: draft archdiocesan Vespers book, p. 221 (VI Saturday after the Epiphany)
-Grant, we beseech thee, Almighty God: that we, ever meditating on those things that be reasonable and pleasing unto thee, may both in word and deed accomplish them.
+# SOURCE: diurnal p. 234
+Grant, we beseech thee, Almighty God: that, ever thinking upon reasonable things, we may accomplish what is pleasing unto thee, both in word and deed.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 2 (Simile est regnum…grano)

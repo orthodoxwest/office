@@ -2,7 +2,8 @@
 @use proper/holy-tuesday/psalm-antiphon-1
 
 [psalm-antiphon-1]
-Behold, O Lord, and see, * for I am in trouble; hear me speedily.
+# SOURCE: diurnal p. 282
+See, O Lord, * and consider, for I am in trouble: O haste thee and hear me.
 
 [psalm-antiphon-2]
 Plead my cause, * O Lord; deliver me from the unjust and deceitful man.
@@ -29,7 +30,8 @@ I have power * to lay down my life: and to take it up again.
 @use proper/holy-monday/commemoration-versicle
 
 [collect]
-O Almighty and everlasting God, give us grace so to use the solemn and mysterious memorial of the Lord's Suffering, that the same may be unto us a mean whereby worthily to win thy forgiveness.
+# SOURCE: diurnal p. 282
+Almighty, everlasting God: grant us so to celebrate the mysteries of the Lord's Passion, that we may be worthy to receive thy forgiveness.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
