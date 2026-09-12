@@ -9,6 +9,20 @@ import (
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
+func TestEngineRejectsNilDay(t *testing.T) {
+	engine, err := NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range hourNames {
+		t.Run(name, func(t *testing.T) {
+			if _, err := engine.ComposeHour(name, nil, nil); err == nil {
+				t.Fatal("expected an error for a nil calendar day")
+			}
+		})
+	}
+}
+
 // --- titleCase ---
 
 func TestTitleCase(t *testing.T) {

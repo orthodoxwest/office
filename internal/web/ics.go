@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/render"
@@ -148,21 +149,20 @@ func escapeICS(s string) string {
 // foldLine folds a content line to lines of at most 75 octets, continued
 // with CRLF + space, breaking only at rune boundaries (RFC 5545 §3.1).
 func foldLine(sb *strings.Builder, line string) {
-	const limit = 75
+	limit := 75
 	for len(line) > limit {
 		cut := limit
-		for cut > 0 && !isRuneStart(line[cut]) {
+		for cut > 0 && !utf8.RuneStart(line[cut]) {
 			cut--
 		}
 		sb.WriteString(line[:cut])
 		sb.WriteString("\r\n ")
 		line = line[cut:]
+		limit = 74 // The continuation space counts toward the 75-octet limit.
 	}
 	sb.WriteString(line)
 	sb.WriteString("\r\n")
 }
-
-func isRuneStart(b byte) bool { return b&0xC0 != 0x80 }
 
 // celebrationName returns the display name for a day, mirroring the ordo:
 // the winning feast, else the tempora, else "<Season> feria".
@@ -194,7 +194,10 @@ func (s *Server) buildICS(cfg *icsConfig, baseURL string, now time.Time) (string
 	write("X-PUBLISHED-TTL:P1D")
 
 	dtstamp := now.UTC().Format("20060102T150405Z")
-	start := now.In(cfg.loc)
+	year, month, dayOfMonth := now.In(cfg.loc).Date()
+	// Iterate civil dates in UTC so a missing local clock time cannot move
+	// a date into its neighbour. Event times still use the requested zone.
+	start := time.Date(year, month, dayOfMonth, 0, 0, 0, 0, time.UTC)
 
 	for i := 0; i < cfg.horizon; i++ {
 		date := start.AddDate(0, 0, i)

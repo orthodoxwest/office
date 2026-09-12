@@ -518,9 +518,13 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 	path := strings.Trim(r.URL.Path, "/")
 	parts := strings.Split(path, "/")
 	// parts[0] == "calendar"; parts[1] (optional) == year
+	if len(parts) > 2 {
+		s.handle404(w, r)
+		return
+	}
 	now := time.Now().In(userLocation(r))
 	year := now.Year()
-	if len(parts) == 1 || parts[1] == "" {
+	if len(parts) == 1 {
 		// No year specified: redirect to current year anchored at today's row.
 		slug := "d-" + now.Format("2006-01-02")
 		formQuery := ""
@@ -533,13 +537,10 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, target, http.StatusFound)
 		return
 	}
-	if len(parts) == 2 && parts[1] != "" {
-		y, err := strconv.Atoi(parts[1])
-		if err != nil || y < 1 || y > 9999 {
-			s.handleError(w, r, http.StatusBadRequest, fmt.Sprintf("Invalid year %q.", parts[1]))
-			return
-		}
-		year = y
+	year, err := strconv.Atoi(parts[1])
+	if err != nil || year < 1 || year > 9999 {
+		s.handleError(w, r, http.StatusBadRequest, fmt.Sprintf("Invalid year %q.", parts[1]))
+		return
 	}
 
 	months, err := s.cache.getMonths(year, s.engine)

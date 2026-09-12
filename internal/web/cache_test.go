@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 	"github.com/orthodoxwest/office/internal/render"
 )
@@ -81,5 +82,41 @@ func TestYearCacheDoesNotCacheBuildFailures(t *testing.T) {
 	}
 	if len(cache.entries) != 0 || len(cache.order) != 0 {
 		t.Fatal("failed year consumed a cache entry")
+	}
+}
+
+func TestYearCacheBoundsRetentionAndKeepsRecentYears(t *testing.T) {
+	cache := newYearCache("../../data")
+	load := func(year int) []models.CalendarDay {
+		t.Helper()
+		days, moveable, err := cache.get(year)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(days) < 365 || days[0].Date.Year() != year || moveable.Easter.Year() != year {
+			t.Fatalf("wrong calendar returned for %d", year)
+		}
+		return days
+	}
+
+	first := load(2026)
+	second := load(2027)
+	for year := 2028; year < 2026+maxCachedYears; year++ {
+		load(year)
+	}
+	if hit := load(2026); &hit[0] != &first[0] {
+		t.Fatal("cached year was rebuilt")
+	}
+	load(2026 + maxCachedYears)
+	if hit := load(2026); &hit[0] != &first[0] {
+		t.Fatal("recently accessed year was evicted")
+	}
+	if reloaded := load(2027); &reloaded[0] == &second[0] {
+		t.Fatal("least recently used year was retained beyond the cache limit")
+	}
+	// Eviction releases only the cache's reference. An in-flight request
+	// must still be able to use the slice it received earlier.
+	if second[0].Date.Year() != 2027 {
+		t.Fatal("eviction changed the calendar held by a caller")
 	}
 }
