@@ -3,7 +3,6 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/orthodoxwest/office/internal/review"
@@ -13,8 +12,7 @@ const reviewUsage = `Usage: office review <subcommand> [args]
 
 Subcommands:
   manifest [-start YEAR] [-years N] [-base URL]
-                                         Print the review-unit checklist as CSV
-  status   [-start YEAR] [-years N]      Report coverage vs data/review/signoffs.txt
+                                         Inventory distinct rendered compositions as CSV
   provenance [-csv] [-start YEAR] [-years N]
                                          Report structured corpus provenance, plus (unless -csv)
                                          verified % of that sweep's rendered text weighted by
@@ -28,11 +26,10 @@ Subcommands:
                                          List effective dynamic-proper resolutions and fallbacks
   attest [flags] KEY REVIEWER            Record a source attestation for one text
   flag [flags] KEY                       Record a prescreen suspicion for one text
-  assurance [-markdown] [-update-baseline] Run release assurance gates and summary
+  assurance [-markdown] [-update-baseline] Check text-provenance floor and print summary
   explain HOUR YYYY-MM-DD               Print a composition assurance manifest as JSON
   plan [-start YEAR] [-years N] [-base URL] [-summary] [-include-sources]
-                                         Fan-out-weighted structural plan (default 28y; credits sign-offs)
-  sign HOUR YYYY-MM-DD REVIEWER [note...] Record a structural sign-off for one page`
+                                         Sample observed engine behavior (default 28y); no completion score`
 
 // cmdReview dispatches the review subcommands.
 func cmdReview(e env, args []string) error {
@@ -44,8 +41,8 @@ func cmdReview(e env, args []string) error {
 	switch name {
 	case "manifest":
 		return e.reviewManifest(rest)
-	case "status":
-		return e.reviewStatus(rest)
+	case "status", "sign":
+		return fmt.Errorf("office review %s is retired; record source-backed composition checks in tests and issues (see REVIEWING.md)", name)
 	case "provenance":
 		return e.reviewProvenance(rest)
 	case "provenance-queue":
@@ -64,8 +61,6 @@ func cmdReview(e env, args []string) error {
 		return e.reviewExplain(rest)
 	case "plan":
 		return e.reviewPlan(rest)
-	case "sign":
-		return e.reviewSign(rest)
 	default:
 		return fmt.Errorf("%s", reviewUsage)
 	}
@@ -101,23 +96,6 @@ func (e env) reviewManifest(args []string) error {
 	if err := review.WriteCSV(m, e.out, base); err != nil {
 		return fmt.Errorf("writing manifest: %w", err)
 	}
-	return nil
-}
-
-func (e env) reviewStatus(args []string) error {
-	start, years, _, err := e.sweepFlags("status", args)
-	if err != nil {
-		return err
-	}
-	m, err := e.buildManifest(start, years)
-	if err != nil {
-		return err
-	}
-	signoffs, err := review.LoadSignoffs(e.dataDir)
-	if err != nil {
-		return fmt.Errorf("loading sign-offs: %w", err)
-	}
-	review.PrintStatus(review.Classify(m, signoffs), e.out)
 	return nil
 }
 
@@ -285,7 +263,6 @@ func (e env) reviewAssurance(args []string) error {
 			return fmt.Errorf("updating assurance baseline: %w", err)
 		}
 		baseline.VerifiedMinimum = report.Verified
-		baseline.ModeledFeaturesMinimum = report.ModeledFeatures
 	}
 
 	failures := review.EvaluateAssurance(report, baseline)
@@ -324,12 +301,11 @@ func (e env) reviewExplain(args []string) error {
 func (e env) reviewPlan(args []string) error {
 	fs := e.newFlagSet("review plan")
 	start := fs.Int("start", time.Now().Year(), "first calendar year of the sweep")
-	// Default 28 years matches data/review/assurance-baseline.json so fan-out
-	// ranks include rare concurrence/octave edges that miss a single year.
+	// Include examples of rare concurrence/octave edges absent from one year.
 	years := fs.Int("years", 28, "number of calendar years to sweep")
 	base := fs.String("base", review.DefaultBaseURL, "base URL prefixed to checklist links")
 	summary := fs.Bool("summary", false, "print counts instead of the selected-page CSV")
-	includeSources := fs.Bool("include-sources", false, "also cover every rendered corpus key; text provenance is separate by default")
+	includeSources := fs.Bool("include-sources", false, "also sample every rendered corpus key; text provenance remains separate")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -345,36 +321,8 @@ func (e env) reviewPlan(args []string) error {
 	if err := review.WriteReviewPlanCSV(plan, e.out, *base); err != nil {
 		return fmt.Errorf("writing review plan: %w", err)
 	}
-	// The CSV is the output; the residual summary goes to stderr so
-	// `make review-plan > plan.csv` keeps the spreadsheet clean.
-	fmt.Fprintf(e.err, "structural plan: residual %d pages (full cover %d); features %d (%d credited); residual impact %d; uncovered %d\n",
-		len(plan.Selected), plan.FullCoverPages, plan.FeatureCount, plan.CreditedCount, plan.RemainingImpact, len(plan.Uncovered))
-	return nil
-}
-
-func (e env) reviewSign(args []string) error {
-	args, form, err := takePrayerForm(args)
-	if err != nil {
-		return err
-	}
-	if len(args) < 3 {
-		return fmt.Errorf("usage: office review sign HOUR YYYY-MM-DD REVIEWER [--form private|deacon|priest] [note...]")
-	}
-	hourName, reviewer := args[0], args[2]
-	date, err := parseDate(args[1])
-	if err != nil {
-		return err
-	}
-	note := strings.Join(args[3:], " ")
-
-	s, unit, err := review.SignoffForPage(e.dataDir, hourName, date, reviewer, note, form)
-	if err != nil {
-		return fmt.Errorf("resolving reviewed page: %w", err)
-	}
-	if err := review.AppendSignoff(e.dataDir, *s); err != nil {
-		return fmt.Errorf("writing sign-off: %w", err)
-	}
-	fmt.Fprintf(e.out, "Signed off: %s %s on %s by %s\n", unit.Hour, unit.Name, date.Format("2006-01-02"), reviewer)
+	// Keep the CSV machine-readable and describe its limited purpose on stderr.
+	fmt.Fprintf(e.err, "composition samples: %d pages, %d observed features; not a rubric checklist or correctness measure\n", len(plan.Selected), len(plan.Features))
 	return nil
 }
 

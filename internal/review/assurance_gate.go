@@ -6,17 +6,19 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/office"
 )
 
 const assuranceBaselineFile = "assurance-baseline.json"
 
-// AssuranceBaseline makes reductions in verified text coverage or modeled
-// structural coverage explicit in a reviewable data-file diff.
+// AssuranceBaseline makes reductions in verified text coverage explicit in a
+// reviewable data-file diff.
 type AssuranceBaseline struct {
-	StartYear              int `json:"start_year"`
-	Years                  int `json:"years"`
-	VerifiedMinimum        int `json:"verified_minimum"`
-	ModeledFeaturesMinimum int `json:"modeled_features_minimum"`
+	StartYear       int `json:"start_year"`
+	Years           int `json:"years"`
+	VerifiedMinimum int `json:"verified_minimum"`
 }
 
 // AssuranceReport is a source-content-free release assurance summary.
@@ -24,11 +26,6 @@ type AssuranceReport struct {
 	StartYear          int
 	Years              int
 	CandidateCount     int
-	ModeledFeatures    int
-	ModeledFeatureIDs  []string
-	FullCoverPages     int // greedy cover ignoring sign-off credit
-	SelectedPages      int // residual pages after schema-current sign-off credit
-	UncoveredFeatures  []string
 	Verified           int
 	NeedsReview        int
 	SourceUnknown      int
@@ -38,9 +35,10 @@ type AssuranceReport struct {
 	StaleAttestations  int
 }
 
-// BuildAssuranceReport generates the structural and provenance release facts.
+// BuildAssuranceReport generates text-provenance release facts. Composition
+// sampling and historical page signoffs do not participate in this gate.
 func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceReport, error) {
-	plan, err := BuildReviewPlan(dataDir, startYear, years, false)
+	rendered, count, err := renderedDependencies(dataDir, startYear, years)
 	if err != nil {
 		return nil, err
 	}
@@ -52,17 +50,7 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 	if err != nil {
 		return nil, err
 	}
-	rendered := make(map[string]bool, len(plan.RenderedKeys))
-	for _, key := range plan.RenderedKeys {
-		rendered[key] = true
-	}
-	report := &AssuranceReport{
-		StartYear: startYear, Years: years, CandidateCount: plan.CandidateCount,
-		ModeledFeatures: plan.FeatureCount,
-		FullCoverPages:  plan.FullCoverPages, SelectedPages: len(plan.Selected),
-		ModeledFeatureIDs: append([]string(nil), plan.Features...),
-		UncoveredFeatures: append([]string(nil), plan.Uncovered...),
-	}
+	report := &AssuranceReport{StartYear: startYear, Years: years, CandidateCount: count}
 	for _, entry := range provenance.Entries {
 		if entry.Status == ProvenanceVerified {
 			report.Verified++
@@ -87,28 +75,47 @@ func BuildAssuranceReport(dataDir string, startYear, years int) (*AssuranceRepor
 	return report, nil
 }
 
-// WriteAssuranceSnapshot writes the deterministic, source-content-free
-// review artifact checked in as a golden file. The summary makes count changes
-// obvious while the sorted feature inventory catches one-for-one structural
-// substitutions that a count alone would miss.
+// renderedDependencies inventories every composed date-hour form directly.
+// A sample of feature representatives cannot determine all rendered text usage.
+func renderedDependencies(dataDir string, startYear, years int) (map[string]bool, int, error) {
+	if years < 1 {
+		return nil, 0, fmt.Errorf("years must be at least 1")
+	}
+	eng, err := office.NewEngine(dataDir)
+	if err != nil {
+		return nil, 0, err
+	}
+	rendered := map[string]bool{}
+	count := 0
+	for year := startYear; year < startYear+years; year++ {
+		days, err := calendar.BuildCalendar(year, dataDir)
+		if err != nil {
+			return nil, 0, err
+		}
+		moveable := calendar.ComputeMoveableDates(year)
+		for i := range days {
+			day := &days[i]
+			for _, hourName := range HourNames {
+				forms, err := composeReviewForms(eng, hourName, day, moveable)
+				if err != nil {
+					return nil, 0, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
+				}
+				for _, hour := range forms {
+					count++
+					for _, key := range hourDependencies(hour) {
+						rendered[key] = true
+					}
+				}
+			}
+		}
+	}
+	return rendered, count, nil
+}
+
+// WriteAssuranceSnapshot records provenance counts without source contents.
+// Calendar, composition, source selections and decisions have their own parity snapshot.
 func WriteAssuranceSnapshot(report *AssuranceReport, w io.Writer) {
 	WriteAssuranceSummary(report, nil, w, true)
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "### Modeled structural features")
-	if len(report.ModeledFeatureIDs) == 0 {
-		fmt.Fprintln(w, "_None._")
-	} else {
-		for _, feature := range report.ModeledFeatureIDs {
-			fmt.Fprintf(w, "- `%s`\n", feature)
-		}
-	}
-	if len(report.UncoveredFeatures) > 0 {
-		fmt.Fprintln(w)
-		fmt.Fprintln(w, "### Uncovered structural features")
-		for _, feature := range report.UncoveredFeatures {
-			fmt.Fprintf(w, "- `%s`\n", feature)
-		}
-	}
 }
 
 // LoadAssuranceBaseline reads the intentional release floor.
@@ -132,31 +139,23 @@ func LoadAssuranceBaseline(dataDir string) (*AssuranceBaseline, error) {
 // become gate failures only when they reduce verified coverage below baseline.
 func EvaluateAssurance(report *AssuranceReport, baseline *AssuranceBaseline) []string {
 	var failures []string
-	if len(report.UncoveredFeatures) > 0 {
-		failures = append(failures, fmt.Sprintf("%d structural feature(s) are uncovered", len(report.UncoveredFeatures)))
-	}
 	if report.Verified < baseline.VerifiedMinimum {
 		failures = append(failures, fmt.Sprintf("verified provenance decreased: got %d, baseline requires %d", report.Verified, baseline.VerifiedMinimum))
-	}
-	if report.ModeledFeatures < baseline.ModeledFeaturesMinimum {
-		failures = append(failures, fmt.Sprintf("modeled structural features decreased: got %d, baseline requires %d", report.ModeledFeatures, baseline.ModeledFeaturesMinimum))
 	}
 	return failures
 }
 
 // WriteAssuranceSummary writes plain text or Markdown suitable for a CI job
-// summary. It includes counts and rule coverage only, never source contents.
+// summary. It reports source verification, not composition correctness.
 func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writer, markdown bool) {
 	if markdown {
-		fmt.Fprintln(w, "## Office assurance summary")
+		fmt.Fprintln(w, "## Text provenance assurance")
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "Source verification does not establish correct appointments or complete office structure.")
 		fmt.Fprintln(w)
 		fmt.Fprintln(w, "| Measure | Count |")
 		fmt.Fprintln(w, "|---|---:|")
 		fmt.Fprintf(w, "| Distinct date-hour forms (%d–%d) | %d |\n", report.StartYear, report.StartYear+report.Years-1, report.CandidateCount)
-		fmt.Fprintf(w, "| Modeled structural features | %d |\n", report.ModeledFeatures)
-		fmt.Fprintf(w, "| Full structural-cover pages | %d |\n", report.FullCoverPages)
-		fmt.Fprintf(w, "| Residual structural-review pages | %d |\n", report.SelectedPages)
-		fmt.Fprintf(w, "| Uncovered features | %d |\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "| Verified text entries | %d |\n", report.Verified)
 		fmt.Fprintf(w, "| Rendered text entries needing review | %d |\n", report.NeedsReview)
 		fmt.Fprintf(w, "| Rendered text entries with unknown source | %d |\n", report.SourceUnknown)
@@ -165,12 +164,9 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 		fmt.Fprintf(w, "| Stale zero-occurrence classifications | %d |\n", report.StaleZeroClasses)
 		fmt.Fprintf(w, "| Stale attestations | %d |\n", report.StaleAttestations)
 	} else {
-		fmt.Fprintf(w, "=== Office assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
+		fmt.Fprintf(w, "=== Text provenance assurance: %d-%d ===\n", report.StartYear, report.StartYear+report.Years-1)
+		fmt.Fprintln(w, "Source verification does not establish correct appointments or complete office structure.")
 		fmt.Fprintf(w, "  distinct date-hour forms: %d\n", report.CandidateCount)
-		fmt.Fprintf(w, "  modeled features:     %d\n", report.ModeledFeatures)
-		fmt.Fprintf(w, "  full-cover pages:     %d\n", report.FullCoverPages)
-		fmt.Fprintf(w, "  residual pages:       %d\n", report.SelectedPages)
-		fmt.Fprintf(w, "  uncovered features:   %d\n", len(report.UncoveredFeatures))
 		fmt.Fprintf(w, "  verified:             %d\n", report.Verified)
 		fmt.Fprintf(w, "  rendered needs review:%5d\n", report.NeedsReview)
 		fmt.Fprintf(w, "  rendered unknown:     %d\n", report.SourceUnknown)
@@ -194,7 +190,7 @@ func WriteAssuranceSummary(report *AssuranceReport, failures []string, w io.Writ
 func UpdateAssuranceBaseline(dataDir string, report *AssuranceReport) error {
 	baseline := AssuranceBaseline{
 		StartYear: report.StartYear, Years: report.Years,
-		VerifiedMinimum: report.Verified, ModeledFeaturesMinimum: report.ModeledFeatures,
+		VerifiedMinimum: report.Verified,
 	}
 	body, err := json.MarshalIndent(baseline, "", "  ")
 	if err != nil {

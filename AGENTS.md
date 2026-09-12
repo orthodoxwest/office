@@ -20,7 +20,7 @@ wording comes from reading the cited page images.
   `needs-human`. OCR and model confidence alone do not establish wording.
 - Corpus updates use `office corpus put`; source attestations use
   `office review attest`. Ingestion does not change feast metadata, hour
-  definitions, structural signoffs, or prescreen flags.
+  definitions, composition rules, or prescreen flags.
 - The newest local archdiocesan ordo is the authority for the current year.
   If it conflicts with older ordos or normative rubrics, flag the issue for
   clergy rather than selecting a side. Do not apply affected entries.

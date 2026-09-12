@@ -18,10 +18,12 @@ All my enemies have heard of my evil, * they have rejoiced that thou, O Lord, ha
 The Lord helpeth them * to right that suffer wrong, but as for the way of the ungodly, he turneth it upside down.
 
 [benedictus-antiphon]
-Simon, do you sleep? * Could you not watch one hour with me?
+# SOURCE: diurnal p. 283
+Simon, sleepest thou? * couldest not thou watch with me one hour?
 
 [magnificat-antiphon]
-The handmaid said to Peter: * Surely thou also art one of them; for even thy speech doth discover thee.
+# SOURCE: diurnal p. 284
+A maid said unto Peter, * Surely thou art one of them, for thy speech bewrayeth thee.
 
 [commemoration-antiphon]
 @use proper/holy-wednesday/benedictus-antiphon

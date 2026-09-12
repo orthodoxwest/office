@@ -9,9 +9,10 @@ John the Apostle, * being cast into a caldron of boiling oil, by virtue of prote
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, p. 525 (Magnificat antiphon at both Vespers)
+@use proper/st-john-latin-gate/magnificat-antiphon-first
+
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
 #

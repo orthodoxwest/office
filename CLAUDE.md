@@ -12,7 +12,7 @@ internal/
     ordo.go                ordo + rubrics (the ordo cross-check TSV; column order is a contract)
     hours.go               Per-hour text and TeX commands
     checks.go              validate, audit, lint
-    review.go              review subcommands (manifest, status, provenance, assurance, …)
+    review.go              review subcommands (manifest, plan, provenance, assurance, …)
     serve.go               serve
   models/                  Shared types (Feast, CalendarDay, Rank, Color, Season, OfficeHour)
   calendar/                Calendar engine (ported from Python reference at ../calendar/)
@@ -74,14 +74,13 @@ internal/
   scaffold/                Proper-file scaffolds (commented key catalogs for missing/sparse propers)
     keys.go                Core + optional section key catalog with one-line blurbs
     propers.go             EnsurePropers: create missing files, append missing keys, never rewrite live sections
-  review/                  Human review coverage tracking
-    review.go              Manifest sweep: dedupe identical composed hours into review units
-    signoff.go             Sign-off file (data/review/signoffs.txt) + current/stale/unreviewed classification
+  review/                  Composition diagnostics, sampling, and text provenance
+    review.go              Manifest sweep: inventory distinct rendered compositions
     provenance.go          Structured per-entry source inventory and attestations
     provenance_queue.go    Dependency-weighted atomic text review ordering (suspect tier first)
     prescreen.go           Durable prescreen-flag ledger + suspicion map (flags ∪ advisory lints)
-    assurance.go           Composition explanations and fan-out-weighted structural-review planning
-    assurance_gate.go      Release assurance baseline, gates, and CI summary
+    assurance.go           Composition explanations and optional engine-behavior samples
+    assurance_gate.go      Text-provenance baseline, gate, and CI summary
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
 data/
@@ -94,10 +93,9 @@ data/
                            one behind — the file header records the join/split mapping. Sits outside
                            data/texts/ (like collect-conclusions.txt) so it stays out of the corpus
                            provenance, zero-occurrence and Latin-lint sweeps.
-  review/signoffs.txt      Human review sign-offs with internal version binding (see REVIEWING.md)
   review/provenance.csv    Source/page attestations; citations only, never book contents
   review/prescreen.csv     Read-through suspicion flags bound to text versions (see REVIEWING.md)
-  review/assurance-baseline.json  Intentional verified/structural coverage floors
+  review/assurance-baseline.json  Intentional verified-text floor
   texts/chant/             GABC chant score files (psalms/, canticles/, hymns/)
 scripts/
   DIURNAL-PIPELINE.md      Supported scanned-diurnal ingestion workflow and attestation semantics
@@ -130,6 +128,15 @@ the Tabula Temporaria (computus figures, moveable feasts, Ember days) plus per-h
 and `scripts/ordo-compare.py` diffs headlines, preces/suffrage/commemorations, Ben/Mag antiphon
 incipits, colors, Vespers precedence, and moveable dates. Known divergence clusters are tracked
 in GitHub issues (#9–#13, #42 need rulings; #15–#17, #20, #40, #41 are engine/data work).
+
+## Composition checks
+
+Use the source-requirement checklist in REVIEWING.md. Record the cited rubric,
+expected behavior, representative/boundary dates and prayer forms, and linked
+tests or open questions. `review plan` provides sample dates from observed
+engine behavior; it does not measure correctness or completion. Whole-page
+signoffs and their coverage ledger are retired. Keep known incomplete Triduum
+work separate from an assessment of the rest of the year.
 
 ## Text provenance
 
@@ -172,18 +179,16 @@ make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed
 make pages       # Render and index diurnal/supplement pages under ignored output/
 make transcribe  # Prepare page-reading prompts; APPLY=1 enables readers and gated application
 make discover    # Prepare proper-discovery dossiers; APPLY=1 enables readers and gated application
-make review-manifest  # Print human-review checklist CSV for current year (START=2026 YEARS=1)
-make review-status    # Report review coverage vs data/review/signoffs.txt
+make review-manifest  # Inventory distinct rendered compositions as CSV for current year (START=2026 YEARS=1)
 make review-provenance # Report generated corpus source coverage
 make review-provenance-queue # Rank atomic text review by dependency fan-out (suspect tier first)
 make review-zero-occurrences # List unrendered corpus entries with classification heuristics
 make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-sprint list
-make review-plan      # Print residual fan-out-weighted structural checklist CSV (default 28y)
-make review-assurance # Run release assurance gates and summary
+make review-plan      # Sample observed engine behavior (default 28y); no completion score
+make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 ./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
-./office review sign HOUR DATE REVIEWER # Record structural sign-off
 
 Hour pages expose assurance metadata in a collapsed disclosure. Keep it
 source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,
