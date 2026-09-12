@@ -1636,7 +1636,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em 0.1em -0.1em calc(-1 * var(--verse-gutter));
+  margin: 0.05em var(--initial-gap, 0.06em) -0.1em calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
   color: var(--ornament);
 }
 
@@ -1653,7 +1653,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em 0.1em -0.1em 0;
+  margin: 0.05em var(--initial-gap, 0.06em) -0.1em var(--initial-hang, 0em);
   color: var(--ornament);
 }
 
@@ -1746,12 +1746,12 @@ footer::before {
 }
 
 /* Only the opening response of an explicitly modelled Short Responsory takes
-   this dropped initial. Later ℟. lines remain ordinary response lines. */
+   an ornamental initial; its modest raised size is set with the profiles below. */
 .short-responsory-opening .sigil-text::first-letter {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em 0.1em -0.1em 0;
+  margin: 0.05em var(--initial-gap, 0.06em) -0.1em var(--initial-hang, 0em);
   color: var(--ornament);
 }
 
@@ -4006,9 +4006,9 @@ body.season-eastertide {
   }
 }
 
-/* Let supporting browsers align the initial's cap height and second-line
-   baseline using the actual font metrics. The float rules above remain the
-   fallback; no script or font-load measurement is needed. */
+/* Native initial sizing follows the local leading (prose, psalm, or chant).
+   EB Garamond's initial sits optically high in that box: lower its ink without
+   extending the exclusion into a third row. Both margins scale with the type. */
 @supports (initial-letter: 2) {
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
@@ -4019,9 +4019,90 @@ body.season-eastertide {
   .corporate-lord-prayer-officiant::first-letter,
   .short-responsory-opening .sigil-text::first-letter {
     initial-letter: 2;
-    margin-top: 0;
-    margin-bottom: 0;
+    margin-top: 0.1em;
+    margin-bottom: -0.1em;
   }
+}
+
+/* Optical profiles for this EB Garamond face. Hang and gap are measured in
+   the enlarged initial's em; the opening-word tuck uses the body em. The
+   latter affects only the first word, leaving the next row clear of the cap.
+   Keep these separate: a standalone O needs a word space, not a word join. */
+.elements [data-initial="A"] {
+  --initial-hang: -0.02em;
+  --initial-gap: 0.07em;
+  --initial-tuck: -0.30em;
+}
+
+.elements :is([data-initial="C"], [data-initial="G"], [data-initial="O"], [data-initial="Q"]) {
+  --initial-hang: -0.025em;
+  --initial-gap: 0.045em;
+}
+
+.elements [data-initial="T"] {
+  --initial-hang: -0.06em;
+  --initial-gap: 0.035em;
+  --initial-tuck: -0.08em;
+  --initial-raised-tuck: -0.04em;
+}
+
+.elements [data-initial="L"] {
+  --initial-gap: 0.06em;
+  --initial-tuck: -0.45em;
+}
+
+.elements :is([data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
+  --initial-hang: -0.025em;
+  --initial-tuck: -0.12em;
+  --initial-raised-tuck: -0.04em;
+}
+
+.elements [data-initial="I"] {
+  --initial-gap: 0.045em;
+}
+
+.elements [data-initial="M"] {
+  --initial-gap: 0.04em;
+}
+
+.initial-word {
+  /* These are the font's drawn smcp/c2sc glyphs, not scaled-down capitals.
+     Keep source spelling intact for selection, copying and speech. */
+  font-variant-caps: all-small-caps;
+  font-synthesis: none;
+  letter-spacing: 0.025em;
+  margin-left: var(--initial-tuck, 0em);
+}
+
+.initial-raised > .initial-word,
+.short-responsory-opening .initial-word {
+  margin-left: var(--initial-raised-tuck, 0em);
+}
+
+[data-initial-standalone] > .initial-word {
+  margin-left: 0;
+}
+
+/* A complete opening that fits on one line gets a modest raised initial,
+   seated on that line's baseline. app.js checks the actual measure after
+   fonts load and when the reader changes width or text size. Hymns and the
+   paired Marian opening keep their two-line setting across source lines;
+   short responsories retain a raised initial even when their text wraps. */
+.psalm-verses .verse.initial-raised:first-child::first-letter,
+.chapter .liturgical-block .plain-line.initial-raised:first-child::first-letter,
+.chapter .liturgical-block .versicle-line:first-child .sigil-text.initial-raised::first-letter,
+.collect .liturgical-block .plain-line.initial-raised:first-child::first-letter,
+.corporate-lord-prayer-officiant.initial-raised::first-letter,
+.short-responsory-opening .sigil-text::first-letter {
+  initial-letter: normal;
+  float: none;
+  font-size: 1.65em;
+  line-height: 0;
+  margin: 0 0.035em 0 var(--initial-hang, 0em);
+}
+
+.psalm-verses .verse.initial-raised:first-child:not(.numbered) {
+  padding-left: 0;
 }
 
 /* The phone's title stack keeps a compact cadence even with several
