@@ -44,8 +44,13 @@ transcribe-report: ## Print markdown for RUN=<run-id-or-directory>
 	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
 	python3 scripts/diurnal-transcribe.py report "$(RUN)"
 
-discover: build ## Prepare silent-fallthrough dossiers; APPLY=1 invokes readers and applies gated propers
-	python3 scripts/diurnal-discover.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(MONTH),--month "$(MONTH)",) $(if $(LIMIT),--limit "$(LIMIT)",)
+discover: build ## Prepare a scan work queue; SLOTS=collect,chapter-lauds narrows the search
+	python3 scripts/diurnal-discover.py run --page-key "$(DIURNAL_PAGE_KEY)" $(if $(filter 1,$(APPLY)),--apply,--dry-run) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(MONTH),--month "$(MONTH)",) $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(SLOTS),--slots "$(SLOTS)",)
+
+.PHONY: discover-resume
+discover-resume: build ## Read the next 3 prepared tasks; APPLY=1 enables existing application checks
+	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
+	python3 scripts/diurnal-discover.py resume "$(RUN)" $(if $(LIMIT),--limit "$(LIMIT)",) $(if $(FEASTS),--feasts "$(FEASTS)",) $(if $(filter 1,$(RETRY)),--retry,) $(if $(filter 1,$(APPLY)),--apply,)
 
 discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
 	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)

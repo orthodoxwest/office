@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 import datetime as dt
+import fcntl
 import hashlib
 import importlib.util
 import json
@@ -216,6 +217,7 @@ def page_record(page: dict) -> dict:
     return {
         "pdf_page": page["pdf_page"], "printed_page": page.get("printed_page"),
         "inferred": bool(page.get("inferred", False)), "png": str(png.resolve()),
+        "png_sha256": diurnal_pages.sha256_file(png),
         "ocr_route": "pdftotext+pdftotext-layout",
         "ocr_text_sha256": hashlib.sha256(
             (page.get("text", "") + "\0" + page.get("layout_text", "")).encode("utf-8")
@@ -227,6 +229,8 @@ class FeastPageLocator:
     def __init__(self, page_key: str = DEFAULT_PAGE_KEY):
         self.page_key = page_key
         self.index = diurnal_pages.load_index(page_key)
+        self.index_path = (diurnal_pages.PAGES_ROOT / page_key / "index.json").resolve()
+        self.index_sha256 = diurnal_pages.sha256_file(self.index_path)
 
     def locate(self, dossier: dict) -> dict:
         names = [
@@ -268,6 +272,8 @@ class FeastPageLocator:
             "locate_name_score": best.get("name_score", 0),
             "source_witness": {
                 "page_key": self.page_key, "pdf_sha256": self.index.get("pdf_sha256", ""),
+                "source_pdf": self.index.get("source_pdf", ""), "dpi": self.index.get("dpi"),
+                "index_path": str(self.index_path), "index_sha256": self.index_sha256,
                 "locator_route": "ocr-running-head-date+fuzzy-title"
                 if dossier.get("kind") == "fixed" else "ocr-fuzzy-title",
                 "pages": [{
@@ -286,6 +292,8 @@ def packet_hash(dossier: dict) -> str:
 
 
 def build_prompt(dossier: dict) -> str:
+    date_hint = (f" (calendar month/day: {dossier['month']}/{dossier['day']})"
+                 if dossier.get("month") and dossier.get("day") else "")
     pages = ", ".join(
         f"printed {page.get('printed_page') or '?'} / PDF {page['pdf_page']} ({page['png']})"
         for page in dossier.get("pages", [])
@@ -306,12 +314,18 @@ def build_prompt(dossier: dict) -> str:
     return f"""You are a literal reader of the attached printed Monastic Diurnal pages for {dossier['name']}.
 Inspect all attached page images (at most eight): {pages}
 
+First locate this feast's own heading{date_hint}. Follow the printed column order and distinguish its entry from neighboring feasts. In notes, identify its heading and where its entry begins and ends on these images. If you cannot establish those boundaries, return low confidence.
+On a two-column page, an entry beginning near the bottom of the left column may continue at the top of the right column. Check that continuation before declaring the range incomplete or assigning the right-column text to another feast.
+
 For every requested id below, decide whether these pages print feast-specific proper text for that exact slot:
 {requests}
 
 Return one result per requested id. A cross-reference such as "Com. from p. 561" or "all from the Common of Confessors p. 47*" is printed=false, with the exact cross-reference summarized in note. Printed means that the Diurnal prints the actual proper text for this slot on these pages for this feast. Do not treat a common printed elsewhere, a nearby feast, a rubric, or a cross-reference as proper text.
 
 For printed=true, transcribe the text literally, report the printed page, and use confidence high, medium, or low. For printed=false, return text="", printed_page="", and explain the cross-reference or absence in note. Also list in extra every other feast-specific proper section visibly printed for this feast but absent from the request list; extra rows are discovery notes only and will not be applied.
+
+If the page, feast boundary, slot, or reading is uncertain, use confidence=low and explain why. An unreadable or incomplete page range does not establish absence.
+Before returning a negative reading, check that every cross-reference cited in its note belongs to this feast's own entry. If the entry prints only a collect and no chapter, say that; do not explain the absence using a neighboring feast's Common reference.
 
 {transcribe.CORPUS_GRAMMAR}
 
@@ -393,7 +407,7 @@ def resolved_corpus_text(key: str, proper_name: str = "", seen: set[str] | None 
 def gate_decision(primary: dict, fallback_text: str | list[str], secondary: dict | None = None,
                   applying: bool = False, target_key: str = "") -> tuple[str, float]:
     if not primary.get("printed"):
-        return "printed-false", 0.0
+        return ("needs-human" if primary.get("confidence") == "low" else "printed-false"), 0.0
     if primary.get("confidence") == "low" or not str(primary.get("text", "")).strip():
         return "needs-human", 0.0
     if transcribe.looks_like_incipit(target_key, str(primary["text"])):
@@ -499,9 +513,11 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
         record["status"] = "no-pages"
         return record
     prompt = build_prompt(dossier)
+    record.update(prompt=prompt, provider=provider,
+                  model=transcribe.PROVIDER_MODELS.get(provider, DEFAULT_MODEL))
     try:
         answer, seconds = runner.read_json(
-            provider, transcribe.PROVIDER_MODELS.get(provider, DEFAULT_MODEL), prompt, [Path(page["png"]) for page in dossier["pages"]],
+            provider, record["model"], prompt, [Path(page["png"]) for page in dossier["pages"]],
             SCHEMA, parse_discovery_output,
         )
     except (OSError, RuntimeError, ProviderError) as exc:
@@ -523,7 +539,8 @@ def process_dossier(dossier: dict, runner: ProviderRunner, *, apply: bool = Fals
             "first_text_sha256": hashlib.sha256(str(primary.get("text", "")).encode("utf-8")).hexdigest(),
         }
         if not primary.get("printed"):
-            slot_record.update(decision="printed-false", score=0.0)
+            decision, score = gate_decision(primary, [])
+            slot_record.update(decision=decision, score=score)
             record["slots"].append(slot_record)
             continue
         try:
@@ -607,6 +624,166 @@ def filter_dossiers(dossiers: list[dict], feast_ids: set[str], month: int | None
     return selected[:limit] if limit is not None else selected
 
 
+def select_slots(dossiers: list[dict], slots: set[str]) -> list[dict]:
+    if not slots:
+        return dossiers
+    return [{**dossier, "fallbacks": selected} for dossier in dossiers
+            if (selected := [r for r in dossier["fallbacks"] if r["target_section"] in slots])]
+
+
+def read_jsonl(path: Path) -> list[dict]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()] if path.exists() else []
+
+
+def latest_results(run_dir: Path) -> dict[str, dict]:
+    return {record["packet_sha256"]: record for record in read_jsonl(run_dir / "results.jsonl")}
+
+
+def task_result(dossier: dict, record: dict | None) -> str:
+    if not dossier.get("pages"):
+        return "No pages — source research needed"
+    if not record:
+        return "Unread — check the feast/page boundaries before starting"
+    decisions = sorted({slot.get("decision", "unknown") for slot in record.get("slots", [])})
+    if record.get("status") == "needs-human":
+        return "Needs review: " + (", ".join(decisions) or record.get("error", "reader failed"))
+    return "Read in this run: " + ", ".join(decisions)
+
+
+def write_queue(run_dir: Path, dossiers: list[dict]) -> None:
+    results = latest_results(run_dir)
+    lines = ["# Discovery work queue", "",
+             "Read the linked images for the named feast and requested slots. Return printed proper text with its page, "
+             "a Common cross-reference / no proper on these pages, or uncertainty. A negative reading completes only "
+             "this search; it does not approve the fallback. Positive readings still need the existing independent checks.", "",
+             "Preparation must check feast boundaries, I/II Vespers mapping and any source/ruling conflict. "
+             "OCR location and reader confidence do not perform that review.", "",
+             f"Resume up to three tasks: `python3 scripts/diurnal-discover.py resume {run_dir.name} --limit 3`.",
+             "This invokes readers without corpus writes. Add `--apply` for the existing gated application workflow. "
+             "Use `--feasts ID --retry` to deliberately revisit a held or completed task.", "",
+             "Results describe this prepared run; prepare a fresh batch after changing its appointments or source. "
+             "Raw prompts and results are in `prompts.jsonl` and `results.jsonl`.", "",
+             "| Feast | Slots | Result |", "|---|---:|---|"]
+    for d in dossiers:
+        result = task_result(d, results.get(d["packet_sha256"]))
+        lines.append(f"| [{d['feast_id']}](#{d['feast_id']}) | {len(d['fallbacks'])} | {result.replace('|', '/')} |")
+    for d in dossiers:
+        witness = d.get("source_witness", {})
+        result = results.get(d["packet_sha256"], {})
+        readings = {s.get("id"): s for s in result.get("slots", [])}
+        lines += ["", f"## {d['feast_id']}", "", d["name"], "",
+                  f"Source: `{witness.get('page_key', '')}`; PDF SHA-256 `{witness.get('pdf_sha256', '')}`.", ""]
+        for p in d.get("pages", []):
+            lines.append(f"- [Printed {p.get('printed_page') or '?'} / PDF {p['pdf_page']}](<{p['png']}>)")
+        if result.get("reader_notes"):
+            lines += ["", "Reader's scope notes: " + result["reader_notes"]]
+        for r in d["fallbacks"]:
+            examples = "; ".join(sorted({f"{c['date']} {c['hour']}" for c in r.get("contexts", [])}))
+            lines += ["", f"**{r['id']}: `{r['target_key']}`**", "",
+                      f"- Example appointments (private form): {examples}",
+                      f"- Current fallback(s): {', '.join('`' + key + '`' for key in r['current_keys'])}",
+                      f"- [Rendered example]({r['representative_url']}?form=private)"]
+            if reading := readings.get(r["id"]):
+                first = reading.get("first", {})
+                lines += [f"- Reading: **{reading['decision']}** — {first.get('note', reading.get('error', ''))}"]
+                if error := reading.get("error") or reading.get("apply_error"):
+                    lines.append(f"- Review needed: {error}")
+                if first.get("printed") and first.get("text"):
+                    lines += ["", f"First reading, printed page {first.get('printed_page') or '?'}:", ""]
+                    lines += ["    " + line for line in first["text"].splitlines()]
+    (run_dir / "queue.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def validate_source(dossier: dict, checked: dict[Path, str]) -> None:
+    """Bind saved tasks to their PDF, rendered images and page-label index."""
+    if packet_hash(dossier) != dossier.get("packet_sha256"):
+        raise ValueError("prepared dossier changed; prepare a new run")
+    witness = dossier["source_witness"]
+    files = [(witness.get("source_pdf", ""), witness.get("pdf_sha256")),
+             (witness.get("index_path", ""), witness.get("index_sha256"))]
+    files.extend((p["png"], p.get("png_sha256")) for p in dossier["pages"])
+    for filename, expected in files:
+        path = Path(filename)
+        if not expected or not path.is_file():
+            raise ValueError("prepared source file missing; prepare a new run")
+        if path not in checked:
+            checked[path] = diurnal_pages.sha256_file(path)
+        if checked[path] != expected:
+            raise ValueError("prepared source file changed; prepare a new run")
+
+
+def validate_appointments(dossier: dict, current: dict | None) -> None:
+    """Reusing a reading never certifies an appointment against changed inputs."""
+    if current is None:
+        raise ValueError("appointment no longer appears in the fallback inventory; prepare a new run")
+    for field in ("name", "proper_name", "month", "day", "rank", "category", "kind"):
+        if dossier.get(field) != current.get(field):
+            raise ValueError("feast context changed; prepare a new run")
+    live = {r["target_key"]: r for r in current["fallbacks"]}
+    for request in dossier["fallbacks"]:
+        other = live.get(request["target_key"], {})
+        if {k: v for k, v in request.items() if k != "id"} != {k: v for k, v in other.items() if k != "id"}:
+            raise ValueError("appointment context changed; prepare a new run")
+        section = request["target_section"]
+        if dossier["live_sections"].get(section) != current["live_sections"].get(section):
+            raise ValueError("target corpus section changed; prepare a new run")
+    keys = {key for r in dossier["fallbacks"] for key in r["current_keys"]}
+    if keys != set(dossier.get("fallback_hashes", {})):
+        raise ValueError("fallback fingerprints missing; prepare a new run")
+    for key, expected in dossier["fallback_hashes"].items():
+        text = resolved_corpus_text(key, dossier.get("proper_name", ""))
+        if hashlib.sha256(text.encode()).hexdigest() != expected:
+            raise ValueError("fallback wording changed; prepare a new run")
+
+
+def resume_command(args: argparse.Namespace) -> int:
+    run_dir = resolve_run_path(args.run).resolve()
+    if not run_dir.is_relative_to((ROOT / "output").resolve()):
+        raise ValueError("resumed discovery runs must stay beneath this checkout's output/")
+    if args.limit < 1 or (args.retry and not args.feasts):
+        raise ValueError("use a positive --limit and select --feasts when using --retry")
+    if not (run_dir / "dossiers.jsonl").is_file():
+        raise ValueError("prepared dossiers.jsonl is missing")
+    with (run_dir / ".resume.lock").open("w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            raise ValueError("another reader is already working this run") from error
+        dossiers = read_jsonl(run_dir / "dossiers.jsonl")
+        selected = filter_dossiers(dossiers, parse_ids(args.feasts), None, None)
+        results = latest_results(run_dir)
+        current = {d["feast_id"]: d for d in build_dossiers(parse_inventory(None), load_feast_catalog())}
+        runner = ProviderRunner(args.timeout, args.max_output_bytes)
+        applier = CorpusApplier(run_dir) if args.apply else None
+        processed = 0
+        checked: dict[Path, str] = {}
+        for dossier in selected:
+            if not dossier.get("pages"):
+                continue
+            validate_source(dossier, checked)
+            previous = results.get(dossier["packet_sha256"])
+            positive = previous and any(s.get("decision") == "printed-proper" for s in previous.get("slots", []))
+            applied = previous and any(s.get("decision") == "put-and-attest" for s in previous.get("slots", []))
+            # Applied results are history: their successful writes change the inventory.
+            # Any deliberate retry still requires a current appointment.
+            if not applied or args.retry:
+                validate_appointments(dossier, current.get(dossier["feast_id"]))
+            if previous and not args.retry and not (args.apply and positive and previous.get("status") == "processed"):
+                continue
+            if applied:
+                validate_appointments(dossier, current.get(dossier["feast_id"]))
+            record = process_dossier(dossier, runner, provider=args.provider, apply=args.apply,
+                                     corpus_get=resolved_corpus_text, apply_text=applier)
+            write_jsonl(run_dir / "results.jsonl", record)
+            write_queue(run_dir, dossiers)
+            processed += 1
+            if processed == args.limit:
+                break
+        write_queue(run_dir, dossiers)
+    print(json.dumps({"run": str(run_dir), "processed": processed, "apply": args.apply}))
+    return 0
+
+
 def run_command(args: argparse.Namespace) -> int:
     if args.apply and args.dry_run:
         raise ValueError("--apply and --dry-run are mutually exclusive")
@@ -614,10 +791,12 @@ def run_command(args: argparse.Namespace) -> int:
         raise ValueError("--month must be 1 through 12")
     if args.limit is not None and args.limit < 1:
         raise ValueError("--limit must be positive")
-    run_dir = DISCOVER_ROOT / (args.run_id or default_run_id())
+    run_dir = (DISCOVER_ROOT / (args.run_id or default_run_id())).resolve()
+    if not run_dir.is_relative_to((ROOT / "output").resolve()):
+        raise ValueError("discovery artifacts must stay beneath this checkout's output/")
     run_dir.mkdir(parents=True, exist_ok=False)
     dossiers = filter_dossiers(
-        build_dossiers(parse_inventory(args.inventory), load_feast_catalog()),
+        select_slots(build_dossiers(parse_inventory(args.inventory), load_feast_catalog()), parse_ids(args.slots)),
         parse_ids(args.feasts), args.month, args.limit,
     )
     locator = FeastPageLocator(args.page_key)
@@ -626,8 +805,14 @@ def run_command(args: argparse.Namespace) -> int:
     dossier_path = run_dir / "dossiers.jsonl"
     prompt_path = run_dir / "prompts.jsonl"
     results_path = run_dir / "results.jsonl"
+    dossier_path.touch()
+    prepared = []
     for dossier in dossiers:
         dossier.update(locator.locate(dossier))
+        dossier["fallback_hashes"] = {
+            key: hashlib.sha256(resolved_corpus_text(key, dossier.get("proper_name", "")).encode()).hexdigest()
+            for request in dossier["fallbacks"] for key in request["current_keys"]
+        }
         dossier["packet_sha256"] = packet_hash(dossier)
         write_jsonl(dossier_path, dossier)
         prompt_record = {
@@ -638,10 +823,14 @@ def run_command(args: argparse.Namespace) -> int:
             "packet_sha256": dossier["packet_sha256"],
         }
         write_jsonl(prompt_path, prompt_record)
+        prepared.append(dossier)
+        write_queue(run_dir, prepared)
         if not args.dry_run:
             write_jsonl(results_path, process_dossier(
                 dossier, runner, provider=args.provider, apply=args.apply, apply_text=applier,
             ))
+            write_queue(run_dir, prepared)
+    write_queue(run_dir, prepared)
     print(json.dumps({
         "run": str(run_dir), "feasts": len(dossiers),
         "dry_run": args.dry_run, "apply": args.apply,
@@ -666,7 +855,7 @@ def render_report(records: list[dict], run_name: str) -> str:
              f"- Feasts processed: {len(records)}",
              f"- Slots added and attested: {decisions['put-and-attest']}",
              f"- Printed false: {decisions['printed-false']}",
-             f"- Extra unmodelled sections: {len(extras)}",
+             f"- Other observed sections: {len(extras)}",
              f"- Needs human: {decisions['needs-human'] + len(dossier_needs)}",
              f"- Same as fallback: {decisions['same-as-fallback']}",
              f"- Incipit cross-references: {decisions['incipit-crossref']}",
@@ -680,7 +869,7 @@ def render_report(records: list[dict], run_name: str) -> str:
         f"- `{slot['target_key']}` — {slot.get('first', {}).get('note', '')}"
         for slot in slots if slot.get("decision") == "printed-false"
     ])
-    section("Extra unmodelled sections", [
+    section("Other observed sections (not missing-proper claims)", [
         f"- `{record['feast_id']}` / {item.get('hour') or '?'} / {item.get('section') or '?'} — {item.get('note', '')}"
         for record, item in extras
     ])
@@ -711,7 +900,7 @@ def report_command(value: str) -> int:
     path = run_dir / "results.jsonl"
     if not path.is_file():
         raise FileNotFoundError(path)
-    records = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
+    records = list(latest_results(run_dir).values())
     print(render_report(records, run_dir.name), end="")
     return 0
 
@@ -723,6 +912,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--inventory", type=Path, help="fixture inventory JSON instead of invoking office")
     run.add_argument("--page-key", default=DEFAULT_PAGE_KEY)
     run.add_argument("--feasts", action="append", default=[], metavar="ID[,ID]")
+    run.add_argument("--slots", action="append", default=[], help="exact target sections, e.g. collect,chapter-lauds")
     run.add_argument("--month", type=int)
     run.add_argument("--limit", type=int)
     run.add_argument("--run-id")
@@ -733,13 +923,24 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--max-output-bytes", type=int, default=transcribe.MAX_OUTPUT_BYTES)
     report = subparsers.add_parser("report", help="print PR-body markdown for a completed run")
     report.add_argument("run")
+    resume = subparsers.add_parser("resume", help="read the next few tasks in an inspected prepared run")
+    resume.add_argument("run")
+    resume.add_argument("--feasts", action="append", default=[], metavar="ID[,ID]")
+    resume.add_argument("--limit", type=int, default=3)
+    resume.add_argument("--retry", action="store_true", help="revisit selected held/completed tasks")
+    resume.add_argument("--apply", action="store_true")
+    resume.add_argument("--provider", choices=("codex", "claude", "grok", "muse"), default="codex")
+    resume.add_argument("--timeout", type=int, default=transcribe.DEFAULT_TIMEOUT)
+    resume.add_argument("--max-output-bytes", type=int, default=transcribe.MAX_OUTPUT_BYTES)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        return report_command(args.run) if args.command == "report" else run_command(args)
+        if args.command == "report":
+            return report_command(args.run)
+        return resume_command(args) if args.command == "resume" else run_command(args)
     except (OSError, ValueError, RuntimeError, ProviderError, json.JSONDecodeError) as exc:
         print(f"diurnal-discover: {exc}", file=sys.stderr)
         return 1

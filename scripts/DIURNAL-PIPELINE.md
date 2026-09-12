@@ -71,15 +71,65 @@ Prepare dossiers and prompts without readers or corpus writes:
 make discover
 make discover FEASTS=st-stephen-hungary
 make discover MONTH=9 LIMIT=10
+make discover SLOTS=collect,chapter-lauds LIMIT=10
 ```
 
-After inspecting `output/discover/<run-id>/dossiers.jsonl` and
-`prompts.jsonl`, run the gated pilot explicitly:
+Each run writes `output/discover/<run-id>/queue.md`: one task per feast, with
+linked scan images, exact requested corpus keys, current fallbacks, example
+appointments and reading results. Start with a small, curated set of feasts and
+one or two section types. `SLOTS` uses exact section names; for example,
+`chapter-first-vespers` and `chapter-vespers` are separate appointments.
+
+Before handing off the batch, inspect the linked pages and prompts. Check that
+the range contains the right feast and its boundaries, that the requested
+sections correspond to the office being examined, and that no pending clergy
+question or ordo/source conflict affects the proposed appointment. Page location
+uses OCR and does not perform this review. Tasks without located pages need
+source research before they can become simple reading tasks.
+
+A volunteer can take a named task from `queue.md` and return its slot ID, a
+literal reading and printed page, or the visible cross-reference/absence, or
+an uncertainty note. Keep that evidence in ignored `output/` for review; the
+queue itself is not permission to write or attest a proper.
+
+To use the bounded model reader on the **same prepared batch**, read the next
+three unread tasks without corpus writes:
 
 ```bash
-make discover APPLY=1 FEASTS=st-stephen-hungary
+make discover-resume RUN=20260902T190000Z LIMIT=3
+```
+
+Repeat the command to advance through the batch. Completed and uncertain
+readings and the actual prompt used are retained in `results.jsonl`; `queue.md`
+shows the latest result, scope notes and slot explanations for each task.
+Review those explanations too: a correct negative can still cite a neighboring
+feast by mistake; retry it explicitly before accepting that search.
+Low-confidence absence is `needs-human`, not a
+completed negative search. A negative reading closes only that page search:
+it does **not** establish that the runtime fallback is correct. Missing-page and
+uncertain tasks are held rather than automatically retried. To deliberately
+retry a selected task, use `FEASTS=<id> RETRY=1`.
+
+Resume checks the prepared PDF, page images, page-label index, feast context,
+appointments and fallback wording. If they changed, prepare and inspect a fresh
+batch. Successful application results remain history, since their writes change
+the fallback inventory; retrying those also requires fresh preparation. Older
+runs without these source fingerprints must be prepared again. Wait for initial
+preparation to finish before resuming. A per-run lock prevents two resume
+processes from taking the same tasks concurrently.
+
+After reviewing a printed-proper candidate, enable gated application. Resume
+reads the candidate again and obtains the existing independent second reading;
+a saved positive result never authorizes a write by itself:
+
+```bash
+make discover-resume RUN=20260902T190000Z FEASTS=st-stephen-hungary APPLY=1
 make discover-report RUN=20260902T190000Z
 ```
+
+The original fresh-run command, `make discover APPLY=1 FEASTS=<id>`, is also
+available. Both paths use the same application checks below. Queue files and
+reports describe a particular search, not an authoritative missing-proper count.
 
 The first reader sees every located page for the feast in one call and must
 classify each fallback as actual printed proper text or as absent/cross-referred.
