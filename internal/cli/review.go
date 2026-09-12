@@ -24,6 +24,8 @@ Subcommands:
                                          List unverified entries never selected in a sweep
   resolution-inventory [-start YEAR] [-years N] [-json] [-fallback-only] [-summary]
                                          List effective dynamic-proper resolutions and fallbacks
+  repair-queue [-year YEAR] [-resources DIR] [-discovery FILE] [-json|-markdown|-summary]
+                                         Generate source-backed repair candidates and checks
   attest [flags] KEY REVIEWER            Record a source attestation for one text
   flag [flags] KEY                       Record a prescreen suspicion for one text
   assurance [-markdown] [-update-baseline] Check text-provenance floor and print summary
@@ -51,6 +53,8 @@ func cmdReview(e env, args []string) error {
 		return e.reviewZeroOccurrences(rest)
 	case "resolution-inventory":
 		return e.reviewResolutionInventory(rest)
+	case "repair-queue":
+		return e.reviewRepairQueue(rest)
 	case "attest":
 		return e.reviewAttest(rest)
 	case "flag":

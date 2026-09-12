@@ -17,6 +17,7 @@ test: ## Run all tests
 	python3 scripts/test_mutation_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
+	python3 scripts/test_repair_queue.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
@@ -115,6 +116,10 @@ review-zero-occurrences: build ## List unrendered atomic texts with classificati
 
 review-resolution-inventory: build ## Inventory proper-resolution paths (default 28y; START/YEARS override)
 	./office review resolution-inventory -json $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
+
+.PHONY: review-repair-queue
+review-repair-queue: build ## Generate YEAR repair queue; RESOURCES and DISCOVERY are optional paths
+	./office review repair-queue -year $(YEAR) -summary $(if $(RESOURCES),-resources "$(RESOURCES)",) $(if $(DISCOVERY),-discovery "$(DISCOVERY)",)
 
 review-suspects: build ## Print only pre-flagged/lint-flagged texts — the findings-sprint list
 	./office review provenance-queue -suspect-only $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)

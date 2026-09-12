@@ -62,6 +62,28 @@ func TestBuildResolutionInventoryRejectsNonpositiveYears(t *testing.T) {
 	}
 }
 
+func TestResolutionContextSeparatesAppointmentsAndSurvivesSourceRepair(t *testing.T) {
+	trace := office.ProperResolutionTrace{CanonicalOwner: "feria", ProperIDs: []string{"lent-2"}, ResolverHour: "lauds", ResolverSlot: "collect", SelectedRef: "ordinary/lauds/collect", Reason: "fallback"}
+	base := resolutionContextID(trace, "lent", "Monday", "principal")
+	repaired := trace
+	repaired.SelectedRef, repaired.Reason = "proper/lent-2/collect", "direct"
+	if resolutionContextID(repaired, "lent", "Monday", "principal") != base {
+		t.Fatal("a selected-source repair changed appointment identity")
+	}
+	otherWeek := trace
+	otherWeek.ProperIDs = []string{"lent-3"}
+	for _, changed := range []string{
+		resolutionContextID(otherWeek, "lent", "Monday", "principal"),
+		resolutionContextID(trace, "advent", "Monday", "principal"),
+		resolutionContextID(trace, "lent", "Tuesday", "principal"),
+		resolutionContextID(trace, "lent", "Monday", "appended-office-of-the-dead"),
+	} {
+		if changed == base {
+			t.Fatal("different appointments share a context")
+		}
+	}
+}
+
 func TestTraceInventoryElementEmptyCommemorationOwnerFailsClosed(t *testing.T) {
 	engine, err := office.NewEngine("../../data")
 	if err != nil {
@@ -97,6 +119,7 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 	totalOccurrences := 0
 	seenRepeated, seenMinorCollect, seenPrimeLauds := false, false, false
 	seenPriscaCollect, seenPriscaVespers := false, false
+	seenAppended := false
 	for _, row := range inventory.Rows {
 		if !strings.HasPrefix(row.Date, "2026-") {
 			t.Fatalf("row escaped requested year: %#v", row)
@@ -106,6 +129,22 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 		}
 		if row.Occurrences < 1 {
 			t.Fatalf("nonpositive occurrence count: %#v", row)
+		}
+		if row.Part == "appended-office-of-the-dead" {
+			seenAppended = true
+			if row.Hour != "vespers" || row.Date != "2026-11-01" {
+				t.Fatalf("appended office escaped All Saints Vespers: %#v", row)
+			}
+		} else if row.Part != "principal" {
+			t.Fatalf("missing appointment part: %#v", row)
+		}
+		if len(row.Dates) == 0 || row.Dates[0] != row.Date || len(row.Dates) > row.Occurrences {
+			t.Fatalf("missing or inconsistent distinct dates: %#v", row)
+		}
+		for i, date := range row.Dates {
+			if !strings.HasPrefix(date, "2026-") || (i > 0 && row.Dates[i-1] >= date) {
+				t.Fatalf("dates must be unique, sorted and within the sweep: %#v", row)
+			}
 		}
 		if row.Occurrences > 1 {
 			seenRepeated = true
@@ -130,7 +169,7 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 				seenPriscaVespers = true
 			}
 		}
-		key := fmt.Sprintf("%s\x1f%s\x1f%t\x1f%s\x1f%s\x1f%s", row.OwnerID, row.Hour, row.FirstVespers, row.SlotRef, row.SelectedRef, row.Reason)
+		key := fmt.Sprintf("%s\x1f%s\x1f%t\x1f%s\x1f%s\x1f%s\x1f%s", row.OwnerID, row.Hour, row.FirstVespers, row.SlotRef, row.SelectedRef, row.Reason, row.ContextID)
 		if keys[key] {
 			t.Fatalf("duplicate inventory row key: %q", key)
 		}
@@ -146,6 +185,9 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 	}
 	if !seenPriscaCollect || !seenPriscaVespers {
 		t.Fatalf("Prisca commemoration inventory rows absent: collect=%v vespers=%v", seenPriscaCollect, seenPriscaVespers)
+	}
+	if !seenAppended {
+		t.Fatal("appended Office of the Dead was not identified")
 	}
 	for _, tier := range []string{"proper", "common", "seasonal", "ordinary", "shared", "temporal-week", "special"} {
 		if !tiers[tier] {

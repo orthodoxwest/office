@@ -42,6 +42,8 @@ type CompositionAssurance struct {
 // text. It is derived after composition and deliberately remains outside the
 // OfficeElement/hash model.
 type ResolutionEvidence struct {
+	OwnerID          string   `json:"owner_id,omitempty"`
+	Part             string   `json:"part"`
 	RequestedSlot    string   `json:"requested_slot"`
 	ResolverHour     string   `json:"resolver_hour"`
 	ResolverSlot     string   `json:"resolver_slot"`
@@ -101,7 +103,9 @@ func ExplainComposition(dataDir, hourName string, date time.Time, forms ...model
 			File: e.File, Section: e.Section, Sources: e.Sources,
 		})
 	}
+	part := "principal"
 	for _, section := range hour.Sections {
+		part = resolutionPart(part, section)
 		for _, elem := range section.Elements {
 			if elem.SlotRef == "" {
 				continue
@@ -111,7 +115,7 @@ func ExplainComposition(dataDir, hourName string, date time.Time, forms ...model
 				continue
 			}
 			a.Resolutions = append(a.Resolutions, ResolutionEvidence{
-				RequestedSlot: trace.RequestedSlot, CanonicalOwner: trace.CanonicalOwner,
+				OwnerID: trace.OwnerID, Part: part, RequestedSlot: trace.RequestedSlot, CanonicalOwner: trace.CanonicalOwner,
 				ResolverHour: trace.ResolverHour, ResolverSlot: trace.ResolverSlot,
 				ProperIDs: trace.ProperIDs, DirectCandidates: trace.DirectCandidates,
 				DirectExisting: trace.DirectExisting, SelectedRef: trace.SelectedRef,
