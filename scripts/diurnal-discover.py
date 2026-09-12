@@ -315,6 +315,7 @@ def build_prompt(dossier: dict) -> str:
 Inspect all attached page images (at most eight): {pages}
 
 First locate this feast's own heading{date_hint}. Follow the printed column order and distinguish its entry from neighboring feasts. In notes, identify its heading and where its entry begins and ends on these images. If you cannot establish those boundaries, return low confidence.
+On a two-column page, an entry beginning near the bottom of the left column may continue at the top of the right column. Check that continuation before declaring the range incomplete or assigning the right-column text to another feast.
 
 For every requested id below, decide whether these pages print feast-specific proper text for that exact slot:
 {requests}
