@@ -48,6 +48,69 @@ class ProjectStatusTest(unittest.TestCase):
         PROJECT_STATUS.apply_triage([finding], [])
         self.assertEqual(finding.category, "untriaged")
 
+    def test_suspected_errata_receive_no_adjudicated_parity_credit(self):
+        findings = [
+            PROJECT_STATUS.Finding(2026, "calendar", "01-01", "detail"),
+            PROJECT_STATUS.Finding(
+                2026, "calendar", "01-02", "detail",
+                category="suspected-reference-error", confidence="provisional"),
+            PROJECT_STATUS.Finding(
+                2026, "calendar", "01-03", "detail",
+                category="reference-error", confidence="provisional"),
+        ]
+
+        def render():
+            comparison = PROJECT_STATUS.Comparison({"calendar": 10}, findings)
+            return PROJECT_STATUS.render_markdown(
+                2026, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0, 0),
+                PROJECT_STATUS.ProvenanceStatus(0, 0, 0, 0, 0), comparison,
+                PROJECT_STATUS.analyze_clusters(comparison, None), [], "", "test")
+
+        markdown = render()
+        self.assertIn("Suspected reference error | 1", markdown)
+        self.assertNotIn("Adjudicated ordo parity", markdown)
+        findings.append(PROJECT_STATUS.Finding(
+            2026, "calendar", "01-04", "detail",
+            category="reference-error", confidence="confirmed"))
+        markdown = render()
+        self.assertIn("Strict 2026 ordo parity: 60.0%", markdown)
+        self.assertIn("Adjudicated ordo parity: 70.0%", markdown)
+        self.assertIn("when 1 confirmed reference error(s)", markdown)
+        self.assertIn("1 confirmed; 1 unconfirmed", markdown)
+
+    def test_2026_triage_preserves_unanswered_aspects(self):
+        rules = PROJECT_STATUS.load_triage(
+            SCRIPT.parent.parent / "data/review/ordo-triage.csv")
+        for aspect, date, category, issue in [
+            ("hours-preces", "01-18", "suspected-reference-error", "15"),
+            ("hours-preces", "02-27", "suspected-reference-error", "15"),
+            ("hours-preces", "06-28", "suspected-reference-error", "15"),
+            ("hours-preces", "03-16", "open-question", "15"),
+            ("hours-preces", "07-16", "open-question", "11"),
+            ("hours-preces", "01-02", "untriaged", ""),
+            ("vespers-commemorations", "02-01", "suspected-reference-error", "93"),
+            ("vespers-ownership", "01-04", "suspected-reference-error", "62"),
+            ("vespers-ownership", "05-01", "suspected-reference-error", "62"),
+            ("vespers-ownership", "08-23", "suspected-reference-error", "62"),
+            ("magnificat-antiphon", "08-23", "open-question", "62"),
+            ("vespers-ownership", "04-24", "open-question", "62"),
+            ("vespers-ownership", "08-29", "open-question", "62"),
+            ("vespers-ownership", "11-29", "open-question", "62"),
+            ("lauds-commemorations", "02-23", "open-question", "138"),
+            ("lauds-commemorations", "08-22", "open-question", "138"),
+            ("magnificat-antiphon", "06-19", "suspected-reference-error", "248"),
+            ("vespers-suffrage", "06-19", "suspected-reference-error", "248"),
+            ("vespers-color", "07-10", "suspected-reference-error", "248"),
+            ("lauds-suffrage", "06-19", "untriaged", ""),
+        ]:
+            with self.subTest(aspect=aspect, date=date):
+                finding = PROJECT_STATUS.Finding(2026, aspect, date, "detail")
+                PROJECT_STATUS.apply_triage([finding], rules)
+                self.assertEqual(finding.category, category)
+                self.assertEqual(finding.issue, issue)
+                if category == "suspected-reference-error":
+                    self.assertEqual(finding.confidence, "provisional")
+
     def test_expected_proper_slots_honors_suppressions(self):
         with tempfile.TemporaryDirectory() as name:
             data = pathlib.Path(name)

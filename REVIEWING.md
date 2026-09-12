@@ -293,15 +293,26 @@ still generated and the ruling count is marked unavailable; use
 
 Ordo cause classifications are deliberately not inferred from symptoms.
 Durable rules live in `data/review/ordo-triage.csv` with these categories:
-`translation-mismatch`, `data-gap`, `engine-bug`, `open-question`, and
-`reference-error`. The `year`, `aspect`, and `date` fields accept shell-style
-wildcards, while a more-specific rule wins over a broad one. Use wildcard
-rules only for a genuinely uniform cluster; after diagnosing a finding,
-prefer an exact row with a GitHub issue number and a short reason. Anything
+`translation-mismatch`, `data-gap`, `engine-bug`, `open-question`,
+`suspected-reference-error`, and `reference-error`. The `year`, `aspect`, and
+`date` fields accept shell-style wildcards, while a more-specific rule wins
+over a broad one. Use wildcard rules only for a genuinely uniform cluster;
+after diagnosing a finding, prefer an exact row with a GitHub issue number
+and a short reason. Anything
 not covered by the ledger remains visibly `untriaged` and is never silently
 guessed. In particular, a mismatched canticle-antiphon incipit remains
 untriaged until review distinguishes a translation difference from selection
 of the wrong antiphon.
+
+Use `suspected-reference-error` with `provisional` confidence for a proposed
+printed error. Cite the source conflict and relevant discussion, and keep it
+in the strict difference count. Adjudicated parity credits only
+`reference-error` findings with `confirmed` confidence. An issue comment
+posted by an agent on someone's behalf does not by itself establish personal
+clergy endorsement. A confirmed `open-question` row confirms the existence
+of the question, not an answer to it. Keep exceptions and unanswered aspects
+as separate rows; a Vespers label decision does not settle an antiphon on the
+same date.
 
 The report also derives non-adjudicative diagnostic clusters from the current
 findings: Vespers share and aspect totals, ownership and commemoration
