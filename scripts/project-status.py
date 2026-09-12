@@ -418,6 +418,51 @@ def apply_triage(findings: list[Finding], rules: list[TriageRule]) -> None:
         finding.note = rule.note
 
 
+def load_repair_backlog(path: pathlib.Path) -> list[dict[str, str]]:
+    """Read curated open work; completion is handled in the fixing PR."""
+    fields = ["id", "scope", "problem", "examples", "expected", "source",
+              "finding_ids", "issue", "next_action"]
+    with path.open(newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != fields:
+            raise ValueError(f"{path}: expected repair backlog columns {fields}")
+        rows, seen = [], set()
+        for row in reader:
+            if None in row or any(row[field] is None for field in fields):
+                raise ValueError(f"{path}: malformed repair backlog row")
+            row = {key: value.strip() for key, value in row.items()}
+            if any(not row[field] for field in fields if field not in {"finding_ids", "issue"}):
+                raise ValueError(f"{path}: repair backlog row lacks a required field")
+            if row["id"] in seen or row["scope"] not in {"ordinary-year", "triduum"}:
+                raise ValueError(f"{path}: duplicate repair ID or invalid scope")
+            seen.add(row["id"])
+            rows.append(row)
+    return rows
+
+
+def render_repair_backlog(rows: list[dict[str, str]]) -> list[str]:
+    lines = ["", "## Open repair backlog", "",
+             "Curated open problems from `data/review/repair-backlog.csv`, including earlier-year examples. "
+             "Ordo classifications remain in the triage ledger. Rows are removed in resolving PRs; "
+             "report generation never certifies completion."]
+    for scope, label in [("ordinary-year", "Ordinary year"), ("triduum", "Triduum")]:
+        entries = [row for row in rows if row["scope"] == scope]
+        lines += ["", f"### {label}", ""]
+        if not entries:
+            lines.append("No curated open targets recorded; this does not establish completeness.")
+        for row in entries:
+            lines += [f"- **{row['problem']}** (`{row['id']}`)",
+                      f"  - Examples: {row['examples']}",
+                      f"  - Expected: {row['expected']}",
+                      f"  - Source: {row['source']}",
+                      f"  - Next action / blocker: {row['next_action']}"]
+            if row["finding_ids"]:
+                lines.append(f"  - Ordo finding IDs: {row['finding_ids']}")
+            if row["issue"]:
+                lines.append(f"  - Issue: {row['issue']}")
+    return lines
+
+
 def ruling_issues(repo: str, offline: bool) -> tuple[list[dict] | None, str]:
     if offline:
         return None, "offline mode"
@@ -862,7 +907,8 @@ def render_cluster_markdown(clusters: dict) -> list[str]:
 def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatus,
                     comparison: Comparison, clusters: dict,
                     issues: list[dict] | None,
-                    issue_warning: str, commit: str) -> str:
+                    issue_warning: str, commit: str,
+                    repair_backlog: list[dict[str, str]] | None = None) -> str:
     matched = comparison.total - comparison.mismatches
     reference_errors = sum(
         finding.category == "reference-error" and finding.confidence == "confirmed"
@@ -952,6 +998,7 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
         f"The {text_candidates} untriaged canticle-antiphon incipit differences are an upper "
         "bound on translation work: selecting the wrong antiphon produces the same symptom.",
     ])
+    lines.extend(render_repair_backlog(repair_backlog or []))
     lines.extend(render_cluster_markdown(clusters))
     lines.extend([
         "",
@@ -1040,6 +1087,7 @@ def main() -> int:
         parser.error(f"published ordo not found: {pdf}")
     if not args.office.exists():
         parser.error(f"office binary not found: {args.office}; run make build")
+    repair_backlog = load_repair_backlog(args.data / "review" / "repair-backlog.csv")
 
     with tempfile.TemporaryDirectory(prefix="office-status-") as temp_name:
         temp = pathlib.Path(temp_name)
@@ -1061,7 +1109,7 @@ def main() -> int:
 
     report = render_markdown(
         args.year, proper, provenance, comparison, clusters,
-        issues, issue_warning, commit)
+        issues, issue_warning, commit, repair_backlog)
     args.output.mkdir(parents=True, exist_ok=True)
     stem = args.output / f"project-status-{args.year}"
     (stem.with_suffix(".md")).write_text(report)
@@ -1072,6 +1120,7 @@ def main() -> int:
         "commit": commit,
         "proper": asdict(proper),
         "provenance": asdict(provenance),
+        "repair_backlog": repair_backlog,
         "ordo": {
             "comparable": comparison.comparable,
             "total": comparison.total,

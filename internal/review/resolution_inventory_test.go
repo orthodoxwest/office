@@ -64,19 +64,19 @@ func TestBuildResolutionInventoryRejectsNonpositiveYears(t *testing.T) {
 
 func TestResolutionContextSeparatesAppointmentsAndSurvivesSourceRepair(t *testing.T) {
 	trace := office.ProperResolutionTrace{CanonicalOwner: "feria", ProperIDs: []string{"lent-2"}, ResolverHour: "lauds", ResolverSlot: "collect", SelectedRef: "ordinary/lauds/collect", Reason: "fallback"}
-	base := resolutionContextID(trace, "lent", "Monday", "principal")
+	base := resolutionContextKey(trace, "lent", "Monday", "principal")
 	repaired := trace
 	repaired.SelectedRef, repaired.Reason = "proper/lent-2/collect", "direct"
-	if resolutionContextID(repaired, "lent", "Monday", "principal") != base {
+	if resolutionContextKey(repaired, "lent", "Monday", "principal") != base {
 		t.Fatal("a selected-source repair changed appointment identity")
 	}
 	otherWeek := trace
 	otherWeek.ProperIDs = []string{"lent-3"}
 	for _, changed := range []string{
-		resolutionContextID(otherWeek, "lent", "Monday", "principal"),
-		resolutionContextID(trace, "advent", "Monday", "principal"),
-		resolutionContextID(trace, "lent", "Tuesday", "principal"),
-		resolutionContextID(trace, "lent", "Monday", "appended-office-of-the-dead"),
+		resolutionContextKey(otherWeek, "lent", "Monday", "principal"),
+		resolutionContextKey(trace, "advent", "Monday", "principal"),
+		resolutionContextKey(trace, "lent", "Tuesday", "principal"),
+		resolutionContextKey(trace, "lent", "Monday", "appended-office-of-the-dead"),
 	} {
 		if changed == base {
 			t.Fatal("different appointments share a context")
@@ -169,7 +169,7 @@ func TestBuildResolutionInventoryTracesAndDeduplicates(t *testing.T) {
 				seenPriscaVespers = true
 			}
 		}
-		key := fmt.Sprintf("%s\x1f%s\x1f%t\x1f%s\x1f%s\x1f%s\x1f%s", row.OwnerID, row.Hour, row.FirstVespers, row.SlotRef, row.SelectedRef, row.Reason, row.ContextID)
+		key := fmt.Sprintf("%s\x1f%s\x1f%t\x1f%s\x1f%s\x1f%s\x1f%s", row.OwnerID, row.Hour, row.FirstVespers, row.SlotRef, row.SelectedRef, row.Reason, row.contextKey)
 		if keys[key] {
 			t.Fatalf("duplicate inventory row key: %q", key)
 		}

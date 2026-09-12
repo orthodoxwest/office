@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Focused tests for project-status parsing and triage."""
 
+import csv
 import importlib.util
 import pathlib
 import sys
@@ -16,6 +17,53 @@ SPEC.loader.exec_module(PROJECT_STATUS)
 
 
 class ProjectStatusTest(unittest.TestCase):
+    def repair_row(self):
+        return dict(id="chapter-example", scope="ordinary-year", problem="Chapter appointment",
+                    examples="2026-01-02, Lauds, private", expected="The cited proper chapter",
+                    source="Fixture Diurnal, p. 1", finding_ids="2026:calendar:01-02",
+                    issue="", next_action="Confirm the appointment with clergy.")
+
+    def test_backlog_keeps_open_examples_without_current_findings(self):
+        rows = [self.repair_row()]
+        comparison = PROJECT_STATUS.Comparison({"calendar": 10}, [])
+        markdown = PROJECT_STATUS.render_markdown(
+            2027, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0, 0),
+            PROJECT_STATUS.ProvenanceStatus(0, 0, 0, 0, 0), comparison,
+            PROJECT_STATUS.analyze_clusters(comparison, None), [], "", "test", rows)
+        self.assertIn("chapter-example", markdown)
+        self.assertIn("Confirm the appointment with clergy", markdown)
+        self.assertIn("2026:calendar:01-02", markdown)
+        self.assertEqual(comparison.mismatches, 0)
+        self.assertIn("Strict 2027 ordo parity: 100.0%", markdown)
+
+    def test_backlog_separates_triduum_and_does_not_retain_completed_rows(self):
+        row = self.repair_row()
+        triduum = {**row, "id": "triduum-example", "scope": "triduum", "problem": "Triduum example"}
+        markdown = "\n".join(PROJECT_STATUS.render_repair_backlog([row, triduum]))
+        ordinary, separate = markdown.split("### Triduum")
+        self.assertIn(row["id"], ordinary)
+        self.assertNotIn("triduum-example", ordinary)
+        self.assertIn("triduum-example", separate)
+        markdown = "\n".join(PROJECT_STATUS.render_repair_backlog([]))
+        self.assertNotIn(row["id"], markdown)
+        self.assertIn("does not establish completeness", markdown)
+
+    def test_backlog_rejects_ambiguous_or_incomplete_rows(self):
+        row = self.repair_row()
+        with tempfile.TemporaryDirectory() as directory:
+            path = pathlib.Path(directory) / "backlog.csv"
+            for rows in [[], [row], [row, row], [{**row, "scope": "all"}], [{**row, "source": ""}]]:
+                with self.subTest(rows=rows):
+                    with path.open("w", newline="") as handle:
+                        writer = csv.DictWriter(handle, fieldnames=list(row))
+                        writer.writeheader()
+                        writer.writerows(rows)
+                    if rows in ([], [row]):
+                        self.assertEqual(PROJECT_STATUS.load_repair_backlog(path), rows)
+                    else:
+                        with self.assertRaises(ValueError):
+                            PROJECT_STATUS.load_repair_backlog(path)
+
     def test_only_explicit_vespers_ownership_is_compared(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)

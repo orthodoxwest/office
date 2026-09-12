@@ -339,126 +339,35 @@ This makes the headline stable without conflating “the page renders,” “we
 have no known proper gap,” “the wording was checked against a book,” and “the
 calendar matches the annual ordo.”
 
-### Repair queue
+### Open repair backlog
 
-The repair queue joins fresh proper-resolution observations, the current ordo
-comparison, and optional Diurnal discovery evidence. It tracks concrete
-appointments separately from the provenance queue's checks of corpus wording.
+`data/review/repair-backlog.csv` is a small table of concrete open problems.
+`make project-status YEAR=2026` includes it in the existing Markdown report and
+JSON snapshot. In a worktree, run `scripts/project-status.py --year 2026
+--resources /path/to/resources --offline` after building the binary.
 
-```bash
-make review-repair-queue YEAR=2026 RESOURCES=../resources
-./office review repair-queue -year 2026 -resources ../resources -json
-./office review repair-queue -year 2026 -resources ../resources \
-  -discovery output/discover/RUN/results.jsonl -summary
-```
+Add a row when a specific discrepancy or source evidence establishes work to
+do. Record the problem, dated examples (hour, form, owner and relevant boundary),
+expected behavior, edition/page citation, linked finding IDs or issue, and next
+action or blocker. Keep Triduum rows separate with `scope=triduum`; other rows
+use `ordinary-year`. The initial BVM row awaits confirmation of proposed ordo
+errata; it is not a confirmed app defect.
 
-The command needs the repository checkout, Python 3, `pdftotext`, and the local
-year's ordo PDF. In a worktree, pass the actual external resources directory.
-The Make target rebuilds the binary. Each run composes fresh resolutions,
-ordo and rubrics with that binary, then reuses `project-status.py`'s comparator
-and `data/review/ordo-triage.csv` classifications. It does not import saved
-status reports or independently adjudicate source conflicts. A run fails if
-its binary, data, ledger, or source inputs change during the sweep.
+Ordo classifications remain in `ordo-triage.csv`. The backlog does not infer a
+cause, approve a corpus change, or close a row when a finding disappears. All
+open rows remain visible, including examples from earlier years. Keep source
+conflicts blocked for clergy under the existing composition-review rules.
 
-Artifacts go beneath ignored `output/repair-queue/YEAR/`: `repair-queue.csv`,
-`repair-queue.json`, `repair-queue.md`, and the comparison inputs. Use `-output`
-with another directory under `output/` to retain a separate run. CSV is the
-default stdout format; `-json`, `-markdown`, and `-summary` select alternatives.
-`-scope ordinary-year` or `-scope triduum` filters the entries; summary counts
-still describe the complete run. Triduum is the three civil dates before
-Easter in the generated calendar. It is not an assessment of all Holy Week.
+Remove a row in the PR that resolves it, retaining the relevant regression tests
+and any continuing ordo classification. Git preserves the backlog history; do
+not accumulate completed targets or fallback signoffs. Source-backed absence
+and boundary requirements belong in ordinary tests alongside their repairs.
 
-The states are:
-
-| State | Next action |
-|---|---|
-| `needs-diagnosis` | Establish the printed appointment or recheck stale evidence |
-| `ready-to-repair` | Repair a confirmed defect and verify the expected appointment |
-| `awaiting-clergy` | Obtain the missing ruling before changing the appointment |
-| `suspected-reference-error` | Confirm the proposed erratum; retain the current default |
-| `reference-error` | Retain the existing confirmed reference classification |
-| `supported-fallback` | Retain a cited fallback while its executable checks pass |
-| `resolved` | The tracked appointment checks pass and no linked ordo finding remains |
-
-Fallback candidates use the discovery workflow's slot filter, plus unresolved
-owned slots. Selecting a common or ordinary text is only a diagnosis candidate.
-The resolution inventory covers rendered dynamic slots with an identifiable
-owner; it cannot inventory every omitted element, unowned failure, or rubric.
-Discovery `extra` sections and explicit source requirements can add work the
-engine never emits. Reader results, including `printed-false`, `same-as-fallback`
-and `put-and-attest`, never approve a fallback or mark a repair complete. They
-remain linked evidence for review. The queue invokes no readers or corpus writes.
-Empty and unsuccessful discovery runs do not establish coverage. Unmatched
-slots and records without slot evidence remain explicit diagnosis work.
-
-Candidates outside the discovery feast catalog are `source-mapping` work;
-establish their owner and source namespace before attempting discovery. The
-appended Office of the Dead is also separated from the principal office: its
-current trace does not establish an independent owner, so these source checks
-cannot certify it as a principal-office appointment.
-
-#### Defining an appointment requirement
-
-`data/review/repair-targets.json` is the small durable ledger. It stores source
-citations, exact scope, expectations and links, without copied book text or
-historical signoffs. The initial BVM target groups five existing date/aspect
-findings while preserving their provisional classifications. Add a target
-when review establishes a shared cause or a requirement absent from the engine.
-
-Every target needs a stable `id`, `year`, `title`, `kind`, `scope`, `evidence`,
-`next_action`, and `sources`. Each source has a resources-relative `path`, its
-`sha256`, and the printed page/section in `locator`. A changed or unavailable
-source returns the target to diagnosis. Check the newest local ordo before
-declaring a source-only defect confirmed; link conflicting findings and ruling
-issues. Queue readiness is not authorization for a corpus change: transcription,
-independent readings, `office corpus put` and `office review attest` still follow
-the Diurnal pipeline.
-
-Optional `finding_ids` reference exact existing ordo IDs, such as
-`2026:magnificat-antiphon:06-19`. Those targets take their classifications from
-the ordo ledger; do not add a second `disposition`. A group remains blocked if
-any part needs a ruling or further diagnosis. Without ordo links, use a reviewed
-`disposition`: `confirmed-defect`, `supported-fallback`, `needs-diagnosis`, or
-`awaiting-clergy`. `issue` may link the supporting discussion.
-
-Executable `checks` use one of these forms:
-
-```json
-{"date":"2026-06-19","hour":"vespers","owner_id":"saturday-office-bvm","first_vespers":true,"slot":"magnificat-antiphon","expected_ref":"proper/saturday-office-bvm/magnificat-antiphon"}
-{"date":"2026-06-19","hour":"vespers","unit_key":"saturday-office-bvm-1v"}
-{"date":"2026-03-16","hour":"prime","rule":"preces","outcome":"said"}
-```
-
-These examples illustrate check syntax; they do not resolve March 16's ruling.
-Use `absent: true` instead of `expected_ref` to assert that a specified slot/owner
-is omitted. An absence assertion requires an explicit date and a companion
-`unit_key` check for the same date, hour and form; an empty hour cannot pass.
-`form` defaults to `private`; it also accepts `deacon` and `priest`.
-Source checks compare the exact resolved key at the requested slot and owner,
-requiring an explicit `owner_id` and, at Vespers, a boolean `first_vespers`.
-Office checks compare `review explain`'s
-unit key; decision checks require the exact rule outcome. They verify only the
-stated appointment, not its wording or every aspect of the hour. Add ordinary
-Go regressions when a repair also needs ordering or boundary checks.
-
-Optional `resolution_ids` bind generated owner/hour/slot groups to one repair.
-Group identity also preserves canonical owner, proper IDs, resolver coordinates,
-effective season, weekday, and principal versus appended office. A selection
-change does not change the group's identity.
-For each, add a check with `resolution_id` and `expected_ref`; it expands over
-every live date in that group. Capture the target's generated `context_hash`
-and `observation_hash` **after reviewing its scope and evidence**. Calendar or
-slot-context changes invalidate that binding. A change to a third unexpected
-selection requires diagnosis; a change to the appointed source can satisfy the
-check. A missing resolution never counts as a passing check. An explicit
-date/hour check can represent a requirement even when no slot is rendered.
-
-The report retains exact finding IDs and counts affected dates separately from
-targets. An antiphon appearing before and after its canticle counts as one
-affected date, and grouping five symptoms does not alter the strict ordo
-difference count. Ready repairs, diagnosis candidates, blocked questions and
-reference discrepancies have separate totals. A zero repair count is not a
-claim of complete liturgical coverage.
+Speculative fallback candidates stay in the existing resolution inventory and
+Diurnal discovery reports. Add a backlog row after identifying a concrete
+problem; do not turn every fallback or unsuccessful page search into a task.
+The backlog is not a completeness score. Corpus wording verification and
+application still follow the provenance queue and Diurnal pipeline.
 
 ### Prayer forms
 

@@ -2,7 +2,6 @@
 package review
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"sort"
 	"strings"
@@ -23,7 +22,7 @@ type ResolutionInventoryRow struct {
 	Season           string   `json:"season"`
 	Weekday          string   `json:"weekday"`
 	Part             string   `json:"part"`
-	ContextID        string   `json:"context_id"`
+	contextKey       string
 	RequestedSlot    string   `json:"requested_slot"`
 	SlotRef          string   `json:"slot_ref"`
 	ResolverHour     string   `json:"resolver_hour"`
@@ -62,13 +61,10 @@ func traceInventoryElement(eng *office.Engine, day *models.CalendarDay, hourName
 	return eng.TraceProperResolution(day, hourName, element.SlotRef, element.SourceRef)
 }
 
-// Context identity excludes the selected source and fallback reason, which
-// normally change when a missing proper is repaired. Preserve the calendar
-// and resolver distinctions before aggregation, rather than borrowing the
-// first date's metadata for other seasons or temporal-week appointments.
-func resolutionContextID(trace office.ProperResolutionTrace, season, weekday, part string) string {
-	value := strings.Join([]string{trace.CanonicalOwner, strings.Join(trace.ProperIDs, "\x1e"), trace.ResolverHour, trace.ResolverSlot, season, weekday, part}, "\x1f")
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(value)))
+// Preserve calendar and resolver distinctions before aggregation rather than
+// borrowing the first date's metadata for other appointments.
+func resolutionContextKey(trace office.ProperResolutionTrace, season, weekday, part string) string {
+	return strings.Join([]string{trace.CanonicalOwner, strings.Join(trace.ProperIDs, "\x1e"), trace.ResolverHour, trace.ResolverSlot, season, weekday, part}, "\x1f")
 }
 
 func resolutionPart(previous string, section models.OfficeSection) string {
@@ -128,8 +124,8 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 							continue
 						}
 						first := trace.FirstVespers
-						contextID := resolutionContextID(trace, string(hour.Season), day.Date.Weekday().String(), part)
-						key := trace.OwnerID + "\x1f" + hourName + "\x1f" + fmt.Sprint(first) + "\x1f" + trace.SlotRef + "\x1f" + trace.SelectedRef + "\x1f" + trace.Reason + "\x1f" + contextID
+						contextKey := resolutionContextKey(trace, string(hour.Season), day.Date.Weekday().String(), part)
+						key := trace.OwnerID + "\x1f" + hourName + "\x1f" + fmt.Sprint(first) + "\x1f" + trace.SlotRef + "\x1f" + trace.SelectedRef + "\x1f" + trace.Reason + "\x1f" + contextKey
 						if old := byKey[key]; old != nil {
 							old.Occurrences++
 							date := day.Date.Format("2006-01-02")
@@ -143,7 +139,7 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 						byKey[key].Season = string(hour.Season)
 						byKey[key].Weekday = day.Date.Weekday().String()
 						byKey[key].Part = part
-						byKey[key].ContextID = contextID
+						byKey[key].contextKey = contextKey
 					}
 				}
 			}
@@ -170,7 +166,7 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 		if a.Date != b.Date {
 			return a.Date < b.Date
 		}
-		return a.ContextID < b.ContextID
+		return a.contextKey < b.contextKey
 	})
 	return &ResolutionInventory{StartYear: startYear, Years: years, Rows: rows}, nil
 }

@@ -61,8 +61,9 @@ python3 scripts/diurnal-transcribe.py run --dry-run --status needs-review
 The discovery command sweeps the 2026 fallback resolution inventory and groups
 eligible sanctoral, commemoration, and explicitly modelled temporal rows into
 one dossier per feast. It considers only the kinds of sections printed in a
-feast proper and excludes weekday/temporal-week fallthroughs. OCR date lines,
-running heads, and titles locate a run of at most eight cached pages; OCR never
+feast proper and excludes weekday/temporal-week fallthroughs. Appended-office
+rows also wait for an independent owner mapping before discovery. OCR date
+lines, running heads, and titles locate a run of at most eight cached pages; OCR never
 supplies corpus wording.
 
 Prepare dossiers and prompts without readers or corpus writes:

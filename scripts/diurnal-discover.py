@@ -97,6 +97,9 @@ def live_sections(feast_id: str, data_dir: Path = ROOT / "data") -> dict[str, st
 
 
 def slot_is_printed(row: dict) -> bool:
+    # Appended offices need their own owner mapping before proper discovery.
+    if row.get("part", "principal") != "principal":
+        return False
     if row.get("selected_tier") in EXCLUDED_TIERS or row.get("selected_tier") not in ALLOWED_TIERS:
         return False
     slot = row.get("resolver_slot") or row.get("slot_ref") or row.get("requested_slot", "")
