@@ -1,4 +1,4 @@
-{{define "title"}}Calendar {{.Year}}{{end}}
+{{define "title"}}Ordo {{.Year}}{{end}}
 {{/* One symbol definition; instances use <use href="#icon-fish"> so the path
      data is not repeated hundreds of times in the year table. */}}
 {{define "fish"}}<svg class="fish-flag" width="18" height="9" fill="currentColor" aria-hidden="true" focusable="false"><use href="#icon-fish"/></svg>{{end}}
@@ -15,17 +15,21 @@
     <div class="calendar-title">
       {{template "headpiece" true}}
       <h1>{{.Year}} Ordo</h1>
+      <p class="calendar-subtitle">Feasts &amp; daily observances</p>
     </div>
-    <nav class="year-nav">
-      <a href="{{calendarYearLink .PrevYear $theme}}">&laquo; {{.PrevYear}}</a>
-      <a id="calendar-today-link" class="calendar-today-link" href="#" hidden>Today</a>
-      <a href="{{calendarYearLink .NextYear $theme}}">{{.NextYear}} &raquo;</a>
+    <nav class="year-nav" aria-label="Calendar year">
+      {{if gt .Year 1}}<a href="{{calendarYearLink .PrevYear $theme}}" aria-label="Previous year, {{.PrevYear}}">&lsaquo; {{.PrevYear}}</a>{{else}}<span></span>{{end}}
+      <a id="calendar-today-link" class="calendar-today-link" href="/calendar">Today</a>
+      {{if lt .Year 9999}}<a href="{{calendarYearLink .NextYear $theme}}" aria-label="Next year, {{.NextYear}}">{{.NextYear}} &rsaquo;</a>{{else}}<span></span>{{end}}
     </nav>
   </div>
   <nav class="month-jump" aria-label="Jump to month">
-    {{range .Months}}<a href="#{{.Slug}}">{{printf "%.3s" .Name}}</a>{{end}}
+    {{range .Months}}<a href="#{{.Slug}}" aria-label="{{.Name}}">{{printf "%.3s" .Name}}</a>{{end}}
   </nav>
+  <div class="calendar-tools">
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{template "fish"}} Abstinence</p>
+  <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
+  </div>
   {{range .Months}}
   <section class="month" id="{{.Slug}}">
     {{/* The heading is sticky, so its jump link stays reachable all year. */}}
@@ -62,12 +66,12 @@
                 {{if .Rank}}{{if .RankFull}}<abbr class="day-mobile-rank" tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}<span class="day-mobile-rank">{{.Rank}}</span>{{end}}{{end}}
               </span>
             </div>
-            <span class="day-feast-name">{{.FeastName}}</span>
+            <a class="day-feast-name" href="{{homeLink .DateSlug $theme}}">{{.FeastName}}</a>
             {{/* On cards both disclosures share one line; see .day-disclosures. */}}
             <div class="day-disclosures">
-            {{if .Commemorations}}<details class="day-commemorations" open><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
-            {{if or .BenedictusAntiphon .MagnificatAntiphon .LaudsPreces .LaudsSuffrage .HoursPreces .VespersPreces .VespersSuffrage .VespersNote}}
-            <details class="day-office-details" open>
+            {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
+            {{if or .BenedictusAntiphon .MagnificatAntiphon .LaudsPreces .LaudsSuffrage .HoursPreces .VespersPreces .VespersSuffrage .VespersNote .LaudsComms .VespersComms}}
+            <details class="day-office-details">
               <summary>Office details</summary>
               <dl class="day-office-digest">
               {{if or .BenedictusAntiphon .LaudsPreces .LaudsSuffrage .LaudsComms}}

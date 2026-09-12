@@ -542,7 +542,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		year = y
 	}
 
-	days, moveable, err := s.cache.get(year)
+	months, err := s.cache.getMonths(year, s.engine)
 	if err != nil {
 		s.handleError(w, r, http.StatusInternalServerError, fmt.Sprintf("error building calendar: %v", err))
 		return
@@ -554,7 +554,7 @@ func (s *Server) handleCalendar(w http.ResponseWriter, r *http.Request) {
 		Year:       year,
 		PrevYear:   year - 1,
 		NextYear:   year + 1,
-		Months:     buildMonthData(days, s.engine, moveable),
+		Months:     months,
 		NavDate:    navDate,
 		UsageWhen:  strconv.Itoa(year),
 		Theme:      themeParam(r),

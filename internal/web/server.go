@@ -98,7 +98,7 @@ func (s *Server) ListenAndServe() error {
 	}
 	go func() {
 		year := time.Now().Year()
-		if _, _, err := s.cache.get(year); err != nil {
+		if _, err := s.cache.getMonths(year, s.engine); err != nil {
 			log.Printf("warn: pre-warming cache for %d: %v", year, err)
 		}
 	}()
