@@ -1714,6 +1714,91 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
   await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
 });
 
+// Delay the font itself: delaying app.js alone misses a late face rewrapping
+// the title and every feast above a deep link. All geometric readings happen
+// in-page, so Playwright's font-waiting screenshot helper cannot mask the swap.
+for (const [width, size, hash] of [
+  [320, "default", ""],
+  [390, "default", ""],
+  [430, "large", ""],
+  [390, "default", "#d-2026-09-12"],
+  [1280, "default", "#d-2026-09-12"],
+]) {
+  test(`ordo keeps its layout with late fonts at ${width}px, ${size}, ${hash || "year top"}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
+    let releaseFonts;
+    const ready = new Promise((resolve) => { releaseFonts = resolve; });
+    await page.route("**/*.woff2", async (route) => { await ready; await route.continue(); });
+    await page.exposeBinding("releaseOrdoFonts", () => releaseFonts());
+    await page.addInitScript(() => {
+      const geometry = () => ({
+        header: document.querySelector(".calendar-header").getBoundingClientRect().height,
+        january: document.getElementById("january").getBoundingClientRect().top + scrollY,
+        day: document.getElementById("d-2026-09-12").getBoundingClientRect().top,
+        height: document.documentElement.scrollHeight,
+        scrollY,
+        width: document.documentElement.scrollWidth,
+      });
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(async () => {
+          window.ordoBeforeFonts = geometry();
+          await window.releaseOrdoFonts();
+          await document.fonts.ready;
+          setTimeout(() => { window.ordoAfterFonts = geometry(); }, 150);
+        }, 350);
+      }, { once: true });
+    });
+    // Release the fonts from inside the page so tracing cannot insert a
+    // font-waiting snapshot between navigation and the release action.
+    await page.goto(`/calendar/2026${hash}`);
+    await page.waitForFunction(() => window.ordoAfterFonts);
+    const { before, after } = await page.evaluate(() => ({ before: window.ordoBeforeFonts, after: window.ordoAfterFonts }));
+    expect(before.width).toBe(width);
+    expect(after).toEqual(before);
+    if (hash) await expect(page.locator(hash)).toBeInViewport();
+  });
+}
+
+test("ordo small labels share a readable size and today's marker adds no height", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
+  await openDatedPage(page, "/calendar/2026#d-2026-07-29");
+  const labels = await page.locator("#d-2026-07-29 .day-mobile-weekday, #d-2026-07-29 .day-mobile-flags, #d-2026-07-29 .day-disclosures summary")
+    .evaluateAll((items) => items.map((item) => ({ size: parseFloat(getComputedStyle(item).fontSize), family: getComputedStyle(item).fontFamily })));
+  expect(labels.length).toBeGreaterThanOrEqual(3);
+  for (const label of labels) {
+    expect(label.size).toBeGreaterThanOrEqual(12);
+    expect(label.family).toContain("Georgia");
+  }
+  const marker = (date) => page.locator(`#d-${date} .day-mobile-date`).evaluate((node) => {
+    const style = getComputedStyle(node, "::after");
+    return { text: style.content, visibility: style.visibility };
+  });
+  expect(await marker("2026-07-29")).toEqual({ text: '"Today"', visibility: "visible" });
+  expect((await marker("2026-07-30")).visibility).toBe("hidden");
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  await page.clock.fastForward("02:00");
+  expect((await marker("2026-07-29")).visibility).toBe("hidden");
+  expect((await marker("2026-07-30")).visibility).toBe("visible");
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
+});
+
+test("ordo hover shading is reserved for a mouse", async ({ browser, baseURL }) => {
+  for (const hasTouch of [true, false]) {
+    const context = await browser.newContext({ baseURL, hasTouch, isMobile: hasTouch, viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.goto("/calendar/2026#d-2026-03-01");
+    await page.evaluate(() => document.fonts.ready);
+    const row = page.locator("#d-2026-03-01");
+    if (hasTouch) await row.locator(".day-office-details summary").tap();
+    else await row.hover();
+    const background = await row.locator(".day-feast").evaluate((node) => getComputedStyle(node).backgroundImage);
+    if (hasTouch) expect(background).toBe("none");
+    else expect(background).toContain("linear-gradient");
+    await context.close();
+  }
+});
+
 test("ordo first layout and day anchors stay put when the deferred app loads", async ({ page }) => {
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });

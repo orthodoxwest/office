@@ -148,9 +148,9 @@ func TestOnlyOrnamentsAreSeasonallyRetinted(t *testing.T) {
 
 	// Functional gold, which the seasons must not reach.
 	for _, want := range []string{
-		"outline: 2px solid var(--gold);",                  // focus ring
-		"color: var(--gold-line);\n  font-size: 0.85em",    // hour date-nav disclosure marker
-		"color-mix(in srgb, var(--gold) 14%, transparent)", // today's ordo row
+		"outline: 2px solid var(--gold);",                 // focus ring
+		"color: var(--gold-line);\n  font-size: 0.85em",   // hour date-nav disclosure marker
+		"color-mix(in srgb, var(--gold) 6%, transparent)", // today's ordo row
 	} {
 		if !strings.Contains(style, want) {
 			t.Errorf("style.css no longer keeps functional gold %q", want)
