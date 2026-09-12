@@ -670,34 +670,18 @@ function usageBeaconBody(scope) {
     }
   }
 
-  // Ordo day details are disclosures only where the layout has no room to
-  // show them outright. They ship open — a closed <details> contributes no
-  // height, so CSS alone cannot re-reveal the contents on a wide screen, and
-  // the no-JS document should show the day in full. Collapse them where the
-  // toggle is visible, same trade as the site menu above.
-  if ("matchMedia" in window) {
-    [
-      { selector: "details.day-commemorations", collapseBelow: "(max-width: 700px)" },
-      { selector: "details.day-office-details", collapseBelow: "(max-width: 919px)" },
-    ].forEach(function (spec) {
-      var items = document.querySelectorAll(spec.selector);
-      if (!items.length) {
-        return;
-      }
-      var narrow = window.matchMedia(spec.collapseBelow);
-      var sync = function () {
-        items.forEach(function (item) {
-          if (narrow.matches) {
-            item.removeAttribute("open");
-          } else {
-            item.setAttribute("open", "");
-          }
-        });
-      };
-      sync();
-      if (narrow.addEventListener) {
-        narrow.addEventListener("change", sync);
-      }
+  // Native disclosures start closed at every width, including without JS.
+  // A deliberate bulk action is useful for comparing offices across the year.
+  var calendarExpand = document.querySelector(".calendar-expand");
+  if (calendarExpand) {
+    calendarExpand.hidden = false;
+    calendarExpand.addEventListener("click", function () {
+      var expand = calendarExpand.getAttribute("aria-pressed") !== "true";
+      document.querySelectorAll(".day-disclosures details").forEach(function (item) {
+        item.open = expand;
+      });
+      calendarExpand.setAttribute("aria-pressed", String(expand));
+      calendarExpand.textContent = expand ? "Hide office details" : "Show office details";
     });
   }
 
@@ -1041,11 +1025,11 @@ function usageBeaconBody(scope) {
   syncChromeIfNeeded();
   scheduleTimedChromeRefresh();
 
-  // markCalendarToday highlights today's row on the ordo page and reveals
+  // markCalendarToday highlights today's row on the ordo page and updates
   // the header "Today" jump link. Applied client-side because calendar pages
   // are served from the service-worker cache, so a server-rendered marker
-  // would freeze on whichever day the page was fetched. The jump link stays
-  // hidden when today's row isn't on the displayed year.
+  // would freeze on whichever day the page was fetched. The link always has
+  // a reserved place, and leads to the current year when browsing another.
   function markCalendarToday() {
     document.querySelectorAll(".calendar tr.day.is-today").forEach(function (previous) {
       previous.classList.remove("is-today");
@@ -1053,8 +1037,7 @@ function usageBeaconBody(scope) {
     });
     var todayLink = document.getElementById("calendar-today-link");
     if (todayLink) {
-      todayLink.hidden = true;
-      todayLink.removeAttribute("href");
+      todayLink.setAttribute("href", "/calendar/" + new Date().getFullYear() + "#d-" + localDateSlug(new Date()));
     }
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
@@ -1062,7 +1045,6 @@ function usageBeaconBody(scope) {
       row.setAttribute("aria-current", "date");
       if (todayLink) {
         todayLink.setAttribute("href", "#" + row.id);
-        todayLink.hidden = false;
       }
     }
   }
@@ -1073,6 +1055,28 @@ function usageBeaconBody(scope) {
   // behavior, and selecting text never navigates.
   var calendarEl = document.querySelector(".calendar");
   if (calendarEl) {
+    var monthLinks = calendarEl.querySelectorAll(".month-jump a");
+    var monthHeadings = calendarEl.querySelectorAll(".month h2");
+    var monthFrame = null;
+    var markVisibleMonth = function () {
+      monthFrame = null;
+      var current = monthHeadings[0];
+      monthHeadings.forEach(function (heading) {
+        if (heading.getBoundingClientRect().top <= 100) current = heading;
+      });
+      monthLinks.forEach(function (link) {
+        if (current && link.hash === "#" + current.parentElement.id) {
+          link.setAttribute("aria-current", "location");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+    };
+    window.addEventListener("scroll", function () {
+      if (monthFrame === null) monthFrame = requestAnimationFrame(markVisibleMonth);
+    }, { passive: true });
+    markVisibleMonth();
+
     calendarEl.addEventListener("click", function (e) {
       if (e.target.closest("a, abbr, details")) {
         return;

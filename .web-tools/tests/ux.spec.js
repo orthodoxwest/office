@@ -1697,24 +1697,111 @@ test("dated hour navigation keeps the selected liturgical day", async ({ page })
   await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
 });
 
-test("ordo day details collapse on a phone and stay open on a wide screen", async ({ page }) => {
+test("ordo disclosures are deliberate and survive a change in screen width", async ({ page }) => {
   await openDatedPage(page, "/calendar/2026");
+  const day = page.locator("#d-2026-03-01");
+  const details = day.locator(".day-office-details");
+  await expect(details).not.toHaveAttribute("open", "");
+  await details.getByText("Office details", { exact: true }).click();
+  await expect(day.locator(".day-office-digest")).toBeVisible();
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(details).toHaveAttribute("open", "");
+  await expect(page.locator("#d-2026-03-02 .day-office-details")).not.toHaveAttribute("open", "");
+  await page.getByRole("button", { name: "Show office details" }).click();
+  await expect(page.locator(".day-disclosures details:not([open])")).toHaveCount(0);
+  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  await page.getByRole("button", { name: "Hide office details" }).click();
+  await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
+});
 
-  const digest = page.locator("#d-2026-03-01 details.day-office-details");
-  await expect(digest).not.toHaveAttribute("open", "");
-  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeHidden();
+test("ordo first layout and day anchors stay put when the deferred app loads", async ({ page }) => {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    let release;
+    const ready = new Promise((resolve) => { release = resolve; });
+    await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
+    await page.goto("/calendar/2026#d-2026-09-14", { waitUntil: "commit" });
+    const row = page.locator("#d-2026-09-14");
+    await expect(row).toBeAttached();
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator("#december")).toBeAttached();
+    const geometry = () => page.evaluate(() => ({
+      height: document.documentElement.scrollHeight,
+      dayTop: document.getElementById("d-2026-09-14").getBoundingClientRect().top + scrollY,
+      header: document.querySelector(".calendar-header").getBoundingClientRect().height,
+    }));
+    const before = await geometry();
+    await expect(page.locator(".day-disclosures details[open]")).toHaveCount(0);
+    release();
+    await page.waitForLoadState("load");
+    await expect(page.locator(".calendar-expand")).toBeVisible();
+    expect(await geometry()).toEqual(before);
+    await expect(row).toBeInViewport();
+    await page.unroute("**/static/app.js*");
+  }
+});
 
-  await digest.getByText("Office details", { exact: true }).click();
-  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeVisible();
+test("ordo month navigation and full details work without JavaScript", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/calendar/2026`);
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  const day = page.locator("#d-2026-03-01");
+  await expect(day).toBeInViewport();
+  await day.locator(".day-office-details > summary").click();
+  await expect(day.locator(".day-office-digest")).toBeVisible();
+  await expect(day.locator(".day-office-comm").first()).toBeVisible();
+  await day.locator(".day-feast-name").click();
+  await expect(page).toHaveURL(/date=2026-03-01/);
+  await context.close();
+});
 
-  // A closed <details> contributes no height, so the wide layout has to open
-  // them rather than reveal the contents with CSS.
+for (const theme of ["light", "dark"]) {
+  for (const width of [320, 390, 768, 1280]) {
+    test(`ordo navigation fits ${width}px in ${theme} and follows a day link`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await openDatedPage(page, "/calendar/2026#d-2026-09-14", theme);
+      await expect(page.locator('.month-jump [aria-current="location"]')).toHaveText("Sep");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+      for (const selector of [".year-nav a", ".month-jump a", ".calendar-expand"]) {
+        const boxes = await page.locator(selector).evaluateAll((items) => items.map((item) => ({ width: item.getBoundingClientRect().width, height: item.getBoundingClientRect().height })));
+        for (const box of boxes) {
+          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.height).toBeGreaterThanOrEqual(44);
+        }
+      }
+    });
+  }
+}
+
+test("ordo print reveals the office digest without changing screen disclosures", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, "/calendar/2026");
+  const day = page.locator("#d-2026-03-01");
+  await expect(day.locator(".day-office-digest")).toBeHidden();
+  await page.emulateMedia({ media: "print" });
+  await expect(day.locator(".day-office-digest")).toBeVisible();
+  await expect(day.locator(".day-commemoration").first()).toBeVisible();
+  await expect(page.locator(".calendar-tools")).toBeHidden();
+  await page.emulateMedia({ media: "screen" });
+  await expect(day.locator(".day-office-digest")).toBeHidden();
+});
 
-  await expect(digest).toHaveAttribute("open", "");
-  await expect(page.locator("#d-2026-03-01 .day-office-digest")).toBeVisible();
-  await expect(page.locator("#d-2026-03-01 .day-commemoration").first()).toBeVisible();
+for (const theme of ["light", "dark"]) {
+  test(`ordo navigation and day rows are accessible in ${theme}`, async ({ page }) => {
+    await openDatedPage(page, "/calendar/2026", theme);
+    // A representative month covers the repeated table and disclosure markup.
+    const results = await new AxeBuilder({ page })
+      .include(".calendar-header").include(".month-jump").include(".calendar-tools").include("#january")
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+    expect(violationFingerprints(results)).toEqual([]);
+  });
+}
+
+test("ordo Today leads back to the current year from an archive", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-09-12T12:00:00-04:00") });
+  await page.goto("/calendar/2025");
+  await expect(page.locator("#calendar-today-link")).toHaveAttribute("href", "/calendar/2026#d-2026-09-12");
 });
 
 test("the foreground Ordo moves rather than duplicates its today marker at midnight", async ({

@@ -149,8 +149,8 @@ type DayRow struct {
 	Abstinence     bool
 	Commemorations []string
 
-	// Desktop-only office digest (hidden on narrow viewports; see .day-office-digest
-	// in style.css). Sourced from the same composed-hour summaries as `office rubrics`
+	// Office digest, revealed by the day's native disclosure at every width.
+	// Sourced from the same composed-hour summaries as `office rubrics`
 	// and FormatDay, so per-hour commemorations (with antiphon incipits) are kept
 	// separate from the calendar-level Commemorations list above, since a
 	// commemoration can appear at one hour and not the other.
