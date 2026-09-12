@@ -169,7 +169,7 @@ class ReportTests(unittest.TestCase):
             "extra": [{"section": "proper-rubric", "hour": "lauds", "note": "special rubric"}],
         }
         report = discover.render_report([record], "pilot")
-        for wanted in ("Feasts processed: 1", "Extra unmodelled sections: 1",
+        for wanted in ("Feasts processed: 1", "Other observed sections: 1",
                        "https://office.fly.dev/lauds/2026-07-17", "## Same as fallback"):
             self.assertIn(wanted, report)
 

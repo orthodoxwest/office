@@ -855,7 +855,7 @@ def render_report(records: list[dict], run_name: str) -> str:
              f"- Feasts processed: {len(records)}",
              f"- Slots added and attested: {decisions['put-and-attest']}",
              f"- Printed false: {decisions['printed-false']}",
-             f"- Extra unmodelled sections: {len(extras)}",
+             f"- Other observed sections: {len(extras)}",
              f"- Needs human: {decisions['needs-human'] + len(dossier_needs)}",
              f"- Same as fallback: {decisions['same-as-fallback']}",
              f"- Incipit cross-references: {decisions['incipit-crossref']}",
@@ -869,7 +869,7 @@ def render_report(records: list[dict], run_name: str) -> str:
         f"- `{slot['target_key']}` — {slot.get('first', {}).get('note', '')}"
         for slot in slots if slot.get("decision") == "printed-false"
     ])
-    section("Extra unmodelled sections", [
+    section("Other observed sections (not missing-proper claims)", [
         f"- `{record['feast_id']}` / {item.get('hour') or '?'} / {item.get('section') or '?'} — {item.get('note', '')}"
         for record, item in extras
     ])
