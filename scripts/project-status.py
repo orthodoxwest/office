@@ -51,13 +51,15 @@ CATEGORIES = {
     "engine-bug",
     "open-question",
     "reference-error",
+    "suspected-reference-error",
 }
 CATEGORY_LABELS = {
     "translation-mismatch": "Confirmed translation mismatch",
     "data-gap": "Confirmed data gap",
     "engine-bug": "Confirmed engine bug",
     "open-question": "Open question / ruling",
-    "reference-error": "Known reference error",
+    "reference-error": "Reference error",
+    "suspected-reference-error": "Suspected reference error",
     "untriaged": "Untriaged",
 }
 VESPERS_ASPECTS = {
@@ -863,7 +865,8 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
                     issue_warning: str, commit: str) -> str:
     matched = comparison.total - comparison.mismatches
     reference_errors = sum(
-        finding.category == "reference-error" for finding in comparison.findings)
+        finding.category == "reference-error" and finding.confidence == "confirmed"
+        for finding in comparison.findings)
     proper_filled = proper.expected_slots - proper.missing_slots
     category_counts = {
         category: sum(f.category == category for f in comparison.findings)
@@ -924,12 +927,14 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
     ])
     ordered = [
         "translation-mismatch", "data-gap", "engine-bug", "open-question",
-        "reference-error", "untriaged",
+        "reference-error", "suspected-reference-error", "untriaged",
     ]
     for category in ordered:
         count = category_counts[category]
         note = ""
-        if provisional.get(category):
+        if category == "reference-error":
+            note = f"{reference_errors} confirmed; {count - reference_errors} unconfirmed"
+        elif provisional.get(category):
             note = f"{provisional[category]} provisional"
         elif category == "untriaged":
             note = f"includes {text_candidates} text/selection candidate(s)"
@@ -942,7 +947,8 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
         "",
         "Each finding is one date/aspect assertion, so a date with three wrong "
         "commemoration names counts once rather than three times. Provisional classifications "
-        "are useful queue estimates and should be replaced by exact triage rows after diagnosis. "
+        "remain hypotheses pending source or clergy review. Suspected reference errors "
+        "remain strict differences and receive no adjudicated-parity credit. "
         f"The {text_candidates} untriaged canticle-antiphon incipit differences are an upper "
         "bound on translation work: selecting the wrong antiphon produces the same symptom.",
     ])
