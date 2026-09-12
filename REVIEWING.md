@@ -339,6 +339,40 @@ This makes the headline stable without conflating “the page renders,” “we
 have no known proper gap,” “the wording was checked against a book,” and “the
 calendar matches the annual ordo.”
 
+### Open repair backlog
+
+`data/review/repair-backlog.csv` is a small table of concrete open problems.
+`make project-status YEAR=2026` includes it in the existing Markdown report and
+JSON snapshot. In a worktree, run `scripts/project-status.py --year 2026
+--resources /path/to/resources --offline` after building the binary.
+
+Add a row when a specific discrepancy or source evidence establishes work to
+do. Record the problem, dated examples (hour, form, owner and relevant boundary),
+expected behavior, edition/page citation, linked finding IDs or issue, and next
+action or blocker. Keep Triduum rows separate with `scope=triduum`; other rows
+use `ordinary-year`. Rows may cover a documented missing proper, a source-selection
+question or a pending ruling. The next action must distinguish a confirmed repair
+from diagnosis or a source conflict awaiting clergy.
+
+Ordo classifications remain in `ordo-triage.csv`. The backlog does not infer a
+cause, approve a corpus change, or close a row when a finding disappears. All
+open rows remain visible, including examples from earlier years. Keep source
+conflicts blocked for clergy under the existing composition-review rules.
+
+Remove a row in the PR that resolves it, retaining the relevant regression tests
+and any continuing ordo classification. Git preserves the backlog history; do
+not accumulate completed targets or fallback signoffs. Source-backed absence
+and boundary requirements belong in ordinary tests alongside their repairs.
+
+Speculative fallback candidates stay in the existing resolution inventory and
+Diurnal discovery reports. Add a backlog row after identifying a concrete
+problem; do not turn every fallback or unsuccessful page search into a task.
+The backlog is a curated subset of open work, not a total defect count or a
+completeness score. Other untriaged discrepancies remain in the full ordo finding
+CSV; the static audit's feast count also does not count all open issues.
+Corpus wording verification and
+application still follow the provenance queue and Diurnal pipeline.
+
 ### Prayer forms
 
 Review links include `?form=private|deacon|priest` so the selected prayers and

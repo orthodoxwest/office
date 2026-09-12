@@ -4,6 +4,7 @@ package review
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -18,6 +19,10 @@ type ResolutionInventoryRow struct {
 	ProperIDs        []string `json:"proper_ids,omitempty"`
 	Hour             string   `json:"hour"`
 	FirstVespers     bool     `json:"first_vespers,omitempty"`
+	Season           string   `json:"season"`
+	Weekday          string   `json:"weekday"`
+	Part             string   `json:"part"`
+	contextKey       string
 	RequestedSlot    string   `json:"requested_slot"`
 	SlotRef          string   `json:"slot_ref"`
 	ResolverHour     string   `json:"resolver_hour"`
@@ -28,6 +33,7 @@ type ResolutionInventoryRow struct {
 	SelectedTier     string   `json:"selected_tier"`
 	Reason           string   `json:"reason"`
 	Date             string   `json:"date"`
+	Dates            []string `json:"dates"`
 	Occurrences      int      `json:"occurrences"`
 }
 
@@ -53,6 +59,21 @@ func traceInventoryElement(eng *office.Engine, day *models.CalendarDay, hourName
 		return eng.TraceCommemorationResolution(day, hourName, element.SlotRef, element.SourceRef, element.CommemorationOwnerID)
 	}
 	return eng.TraceProperResolution(day, hourName, element.SlotRef, element.SourceRef)
+}
+
+// Preserve calendar and resolver distinctions before aggregation rather than
+// borrowing the first date's metadata for other appointments.
+func resolutionContextKey(trace office.ProperResolutionTrace, season, weekday, part string) string {
+	return strings.Join([]string{trace.CanonicalOwner, strings.Join(trace.ProperIDs, "\x1e"), trace.ResolverHour, trace.ResolverSlot, season, weekday, part}, "\x1f")
+}
+
+func resolutionPart(previous string, section models.OfficeSection) string {
+	for _, element := range section.Elements {
+		if strings.HasPrefix(element.SourceRef, "shared/formulas/appended-vespers-of-the-dead-rubric") {
+			return "appended-office-of-the-dead"
+		}
+	}
+	return previous
 }
 
 // BuildResolutionInventory sweeps composed hours and records the selected
@@ -82,7 +103,9 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 				if err != nil {
 					return nil, fmt.Errorf("composing %s for %s: %w", hourName, day.Date.Format("2006-01-02"), err)
 				}
+				part := "principal"
 				for _, section := range hour.Sections {
+					part = resolutionPart(part, section)
 					for _, element := range section.Elements {
 						if element.SlotRef == "" {
 							continue
@@ -101,12 +124,22 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 							continue
 						}
 						first := trace.FirstVespers
-						key := trace.OwnerID + "\x1f" + hourName + "\x1f" + fmt.Sprint(first) + "\x1f" + trace.SlotRef + "\x1f" + trace.SelectedRef + "\x1f" + trace.Reason
+						contextKey := resolutionContextKey(trace, string(hour.Season), day.Date.Weekday().String(), part)
+						key := trace.OwnerID + "\x1f" + hourName + "\x1f" + fmt.Sprint(first) + "\x1f" + trace.SlotRef + "\x1f" + trace.SelectedRef + "\x1f" + trace.Reason + "\x1f" + contextKey
 						if old := byKey[key]; old != nil {
 							old.Occurrences++
+							date := day.Date.Format("2006-01-02")
+							if old.Dates[len(old.Dates)-1] != date {
+								old.Dates = append(old.Dates, date)
+							}
 							continue
 						}
 						byKey[key] = &ResolutionInventoryRow{OwnerID: trace.OwnerID, CanonicalOwner: trace.CanonicalOwner, ProperIDs: trace.ProperIDs, Hour: hourName, FirstVespers: first, RequestedSlot: trace.RequestedSlot, SlotRef: trace.SlotRef, ResolverHour: trace.ResolverHour, ResolverSlot: trace.ResolverSlot, DirectCandidates: trace.DirectCandidates, DirectExisting: trace.DirectExisting, SelectedRef: trace.SelectedRef, SelectedTier: trace.SelectedTier, Reason: trace.Reason, Date: day.Date.Format("2006-01-02"), Occurrences: 1}
+						byKey[key].Dates = []string{day.Date.Format("2006-01-02")}
+						byKey[key].Season = string(hour.Season)
+						byKey[key].Weekday = day.Date.Weekday().String()
+						byKey[key].Part = part
+						byKey[key].contextKey = contextKey
 					}
 				}
 			}
@@ -130,7 +163,10 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 		if a.SelectedRef != b.SelectedRef {
 			return a.SelectedRef < b.SelectedRef
 		}
-		return a.Date < b.Date
+		if a.Date != b.Date {
+			return a.Date < b.Date
+		}
+		return a.contextKey < b.contextKey
 	})
 	return &ResolutionInventory{StartYear: startYear, Years: years, Rows: rows}, nil
 }

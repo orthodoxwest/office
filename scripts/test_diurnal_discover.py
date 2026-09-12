@@ -79,6 +79,8 @@ class SelectionTests(unittest.TestCase):
             inventory_row(),
             inventory_row(slot_ref="alleluia", resolver_slot="alleluia"),
             inventory_row(slot_ref="hymn", resolver_slot="hymn", selected_tier="ordinary-weekday"),
+            inventory_row(part="appended-office-of-the-dead", hour="vespers", resolver_hour="vespers",
+                          slot_ref="chapter", resolver_slot="chapter"),
             inventory_row(owner_id="unknown-feast"),
             inventory_row(owner_id="easter-sunday", hour="terce", resolver_hour="terce",
                           slot_ref="short-responsory", resolver_slot="short-responsory",
@@ -91,6 +93,7 @@ class SelectionTests(unittest.TestCase):
         self.assertEqual([item["feast_id"] for item in found], ["easter-sunday", "st-example"])
         self.assertEqual(found[0]["fallbacks"][0]["target_section"], "short-responsory-terce")
         self.assertEqual(found[1]["fallbacks"][0]["target_key"], "proper/st-example/collect")
+        self.assertEqual(len(found[1]["fallbacks"]), 1)
 
     def test_exact_section_names_for_first_vespers_and_commemorations(self):
         self.assertEqual(discover.target_section(inventory_row(
