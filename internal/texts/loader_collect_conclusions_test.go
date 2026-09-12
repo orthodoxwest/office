@@ -115,6 +115,30 @@ func TestLoadCollectConclusionsMissingFileIsNotAnError(t *testing.T) {
 	}
 }
 
+func TestCollectConclusionFormResolvesAliases(t *testing.T) {
+	dir := writeCorpusFixture(t, "shared/formulas/a-collect who-liveth\nshared/aliases/override through\n")
+	aliases := "[direct]\n@use shared/formulas/a-collect\n" +
+		"[chained]\n@use shared/aliases/direct\n" +
+		"[override]\n@use shared/formulas/a-collect\n"
+	if err := os.WriteFile(filepath.Join(dir, "texts", "shared", "aliases.txt"), []byte(aliases), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	corpus, err := LoadTexts(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for key, want := range map[string]string{
+		"shared/formulas/a-collect": "who-liveth",
+		"shared/aliases/direct":     "who-liveth",
+		"shared/aliases/chained":    "who-liveth",
+		"shared/aliases/override":   "through",
+	} {
+		if got, ok := corpus.CollectConclusionForm(key); !ok || got != want {
+			t.Errorf("CollectConclusionForm(%q) = (%q, %v), want (%q, true)", key, got, ok, want)
+		}
+	}
+}
+
 // A corpus built for tests must not report forms it was never given.
 func TestNewTestCorpusHasEmptyConclusionMap(t *testing.T) {
 	corpus := NewTestCorpus(map[string]string{"proper/x/collect": "body"})
