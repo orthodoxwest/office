@@ -442,7 +442,9 @@ def load_repair_backlog(path: pathlib.Path) -> list[dict[str, str]]:
 
 def render_repair_backlog(rows: list[dict[str, str]]) -> list[str]:
     lines = ["", "## Open repair backlog", "",
-             "Curated open problems from `data/review/repair-backlog.csv`, including earlier-year examples. "
+             f"{len(rows)} curated open targets from `data/review/repair-backlog.csv`, including earlier-year examples. "
+             "This is a selected work list, not the total number of defects: other untriaged ordo findings "
+             "remain in the diagnostic report and finding CSV, and wording review remains in the provenance queue. "
              "Ordo classifications remain in the triage ledger. Rows are removed in resolving PRs; "
              "report generation never certifies completion."]
     for scope, label in [("ordinary-year", "Ordinary year"), ("triduum", "Triduum")]:
@@ -937,8 +939,8 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
         "## Executive summary",
         "",
         (f"- **Known proper-slot coverage: {percent(proper_filled, proper.expected_slots):.1f}%** "
-         f"({proper_filled}/{proper.expected_slots}). There are {proper.missing_slots} known "
-         f"missing slot(s) across {proper.missing_feasts} feast(s)."),
+         f"({proper_filled}/{proper.expected_slots}). The static audit flags {proper.missing_slots} "
+         f"slot(s) across {proper.missing_feasts} feast(s); this is not a count of all missing appointments or open issues."),
         (f"- **Rendered completeness: {percent(proper.expected_slots - proper.unresolved_rendered, proper.expected_slots):.1f}%** "
          f"({proper.unresolved_rendered} unresolved annual-sweep finding(s)); "
          f"{proper.ordinary_fallback_candidates} ordinary-fallback candidate(s) still need "

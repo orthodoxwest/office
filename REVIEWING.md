@@ -350,8 +350,9 @@ Add a row when a specific discrepancy or source evidence establishes work to
 do. Record the problem, dated examples (hour, form, owner and relevant boundary),
 expected behavior, edition/page citation, linked finding IDs or issue, and next
 action or blocker. Keep Triduum rows separate with `scope=triduum`; other rows
-use `ordinary-year`. The initial BVM row awaits confirmation of proposed ordo
-errata; it is not a confirmed app defect.
+use `ordinary-year`. Rows may cover a documented missing proper, a source-selection
+question or a pending ruling. The next action must distinguish a confirmed repair
+from diagnosis or a source conflict awaiting clergy.
 
 Ordo classifications remain in `ordo-triage.csv`. The backlog does not infer a
 cause, approve a corpus change, or close a row when a finding disappears. All
@@ -366,7 +367,10 @@ and boundary requirements belong in ordinary tests alongside their repairs.
 Speculative fallback candidates stay in the existing resolution inventory and
 Diurnal discovery reports. Add a backlog row after identifying a concrete
 problem; do not turn every fallback or unsuccessful page search into a task.
-The backlog is not a completeness score. Corpus wording verification and
+The backlog is a curated subset of open work, not a total defect count or a
+completeness score. Other untriaged discrepancies remain in the full ordo finding
+CSV; the static audit's feast count also does not count all open issues.
+Corpus wording verification and
 application still follow the provenance queue and Diurnal pipeline.
 
 ### Prayer forms
