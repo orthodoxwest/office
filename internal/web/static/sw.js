@@ -102,7 +102,7 @@ function precacheURLs(cache, urls) {
 
 function todayShellURLs() {
   var today = localDateSlug(new Date());
-  var urls = ["/?date=" + today, "/reminders"];
+  var urls = ["/?date=" + today, "/reminders", "/share"];
   for (var h = 0; h < HOURS.length; h++) {
     urls.push("/" + HOURS[h] + "/" + today);
   }
@@ -208,7 +208,7 @@ function datedEquivalent(url) {
 // from the versioned Cache bucket immediately (revalidated in background).
 function isSWRPage(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
+  if (path === "/reminders" || path === "/share") {
     return true;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
@@ -227,8 +227,8 @@ function isSWRPage(url) {
 // trailing-slash and theme variants land on the same precache entry.
 function canonicalCacheKey(url) {
   var path = normalizePathname(url.pathname);
-  if (path === "/reminders") {
-    return "/reminders";
+  if (path === "/reminders" || path === "/share") {
+    return path;
   }
   if (path === "/" && DATE_RE.test(url.searchParams.get("date") || "")) {
     return "/?date=" + url.searchParams.get("date");

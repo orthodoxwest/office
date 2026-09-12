@@ -1,0 +1,52 @@
+{{define "title"}}Divine Office — Share{{end}}
+{{define "content"}}
+<div class="share">
+  {{template "headpiece" true}}
+  <h1>Share the Office</h1>
+  {{/* The printed card is read by someone standing at a noticeboard, not by
+       the person doing the sharing, so it names the thing instead of giving
+       an instruction. Screen-hidden with display:none, which keeps it out of
+       the accessibility tree without an aria-hidden that would be wrong the
+       moment the page is printed. */}}
+  <p class="share-card-title">Daily Office</p>
+  <p class="share-card-line">The hours of the Benedictine Office in English —
+    Lauds through Compline, every day of the year.</p>
+  <p class="share-intro">
+    Point a phone camera at the code and the Office opens. The link carries no
+    date, so it always arrives at today's hours — a printed card on a
+    noticeboard will not go stale.
+  </p>
+
+  {{/* The plate and its quiet zone are drawn inside the SVG, so the frame
+       below only mounts it. QRCode is generated markup, not user content:
+       see render.QRCodeSVG. */}}
+  <figure class="share-plate">
+    {{.QRCode}}
+    <figcaption class="share-plate-address">{{.ShareURL}}</figcaption>
+  </figure>
+
+  {{/* Every control here starts hidden and is revealed by app.js only once
+       the API behind it is known to exist. Without script — or in an
+       insecure context, where navigator.clipboard is undefined — none of
+       them appear, and the address printed under the code is the fallback. */}}
+  <p class="share-actions">
+    <button type="button" id="share-send" class="share-send" hidden>Share&hellip;</button>
+    <button type="button" id="share-copy" class="share-copy" hidden>Copy link</button>
+    <button type="button" id="share-print" class="share-print-button" hidden>Print a card</button>
+  </p>
+  <p id="share-status" class="share-status" role="status" aria-live="polite" hidden></p>
+
+  <details class="share-help">
+    <summary>Putting it on a noticeboard</summary>
+    <div class="share-help-content">
+      <p><em>Print a card</em> lays this page out as a half-page notice: the
+        cross, the code, and the address, with the site navigation left off.
+        Print it at any size down to about an inch and a half square — below
+        that phone cameras start to struggle.</p>
+      <p>The code is drawn as vector artwork, so it stays sharp however large
+        it is printed. Photocopying is fine; keep the pale border around the
+        code, as scanners use it to find the edge.</p>
+    </div>
+  </details>
+</div>
+{{end}}

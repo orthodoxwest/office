@@ -99,6 +99,18 @@
   --page-gutter: 1.5rem;
   --touch-target: max(2.75rem, 44px);
   --verse-gutter: 1.8rem;
+  /* The share code's own plate and ink. Deliberately its own pair rather
+     than --surface/--text: a QR is read by a camera before it is read by a
+     person, so the two need a contrast ratio no seasonal or thematic shift
+     is allowed to erode. The plate stays light in BOTH themes — a code with
+     light modules on a dark ground defeats scanners that do not try the
+     inverted polarity — so Apse dims the vellum instead of flipping it.
+     internal/render/qr.go names these as var() with literal fallbacks, so a
+     saved or printed copy of the SVG still renders without this file. */
+  --qr-plate: #fdfaf3;
+  --qr-ink: #2b2520;
+  --qr-emblem-line: var(--gold-line);
+  --qr-emblem-ink: var(--gold);
 }
 
 :root[data-theme="light"] {
@@ -354,6 +366,31 @@ summary:focus-visible {
   width: 1px;
   margin: 0.45rem 0.15rem;
   background: var(--border);
+}
+
+/* The beam carries ten items. Between the width at which the menu expands
+   (701px) and about 820px there is not room for all of them at full tracking,
+   and the header would drop to two rows on a portrait tablet — the one
+   geometry the beam is not allowed to have. Tighten the gap and tracking
+   across that band only; everything wider keeps the roomier setting.
+   Vertical padding is untouched, so tap targets do not shrink. */
+@media (min-width: 701px) and (max-width: 819px) {
+  .site-menu > nav {
+    gap: 0.1rem 0.1rem;
+  }
+
+  .site-menu nav a {
+    padding-inline: 0.15rem;
+    letter-spacing: 0.03em;
+  }
+
+  .site-menu nav a.nav-secondary {
+    letter-spacing: 0.02em;
+  }
+
+  .nav-divider {
+    margin-inline: 0.1rem;
+  }
 }
 
 /* Home keeps the same header rhythm as hour pages — avoid an empty band
@@ -2615,6 +2652,12 @@ footer::before {
        colours serves both — see "Seasonal ornament". */
     --oak-line: rgba(208, 176, 106, 0.16);
     --inscription-ground: #262f3d;
+    /* Vellum by lamplight, and the night sky itself as the ink: dimmer than
+       Nave's plate so the card does not glare out of the apse, still about
+       11:1 against the modules. See the :root block for why it is not
+       inverted. */
+    --qr-plate: #ded1b9;
+    --qr-ink: #1b2330;
   }
 }
 
@@ -2654,6 +2697,9 @@ footer::before {
      set of leaf colours serves both — see "Seasonal ornament". */
   --oak-line: rgba(208, 176, 106, 0.16);
   --inscription-ground: #262f3d;
+  /* See the prefers-color-scheme block above. */
+  --qr-plate: #ded1b9;
+  --qr-ink: #1b2330;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -3929,6 +3975,234 @@ body.season-eastertide {
 
   .reminder-copy {
     flex: 0 0 auto;
+  }
+}
+
+/* ── Share page ──
+   One object on the page: a vellum plate carrying the code, mounted with a
+   gilt hairline, with the address set beneath it as a caption. The plate is
+   the only bright field the Apse theme allows, so nothing else here competes
+   with it — the actions are the same quiet buttons Reminders uses. */
+
+.share {
+  max-width: 38rem;
+  margin: 0 auto;
+}
+
+.share .ornament-headpiece {
+  width: 5rem;
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+}
+
+.share h1 {
+  margin-bottom: 0.55rem;
+  color: var(--text);
+  font-size: 1.8rem;
+  font-weight: normal;
+  line-height: 1.2;
+}
+
+.share-card-title,
+.share-card-line {
+  display: none;
+}
+
+.share-intro {
+  max-width: 36rem;
+  margin-bottom: 1.9rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Three tiers, mount to ink: the panel is one of the app's ordinary gilt-edged
+   surfaces, the vellum inside it is the SVG's own plate, and the modules are
+   the ink. The middle tier is what a camera needs — it must stay paler than
+   any surface a theme puts behind it — so the panel earns the separation
+   rather than the plate being pushed brighter than the room. Capped so the
+   code never outgrows a phone screen or becomes a poster on a desktop. */
+.share-plate {
+  width: min(20rem, 100%);
+  margin: 0 auto 1.5rem;
+  padding: 0.85rem;
+  border: 1px solid var(--ornament-line);
+  border-radius: 4px;
+  background-color: var(--surface);
+  background-image: var(--surface-material);
+}
+
+.share-plate .qr-code {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The address is a string someone may have to read off a wall and retype, so
+   it takes lining figures: EB Garamond's default text figures set a port
+   number as "8o8o". */
+.share-plate-address {
+  margin-top: 0.7rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-variant-numeric: lining-nums;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.4rem;
+}
+
+.share-send,
+.share-copy,
+.share-print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target);
+  padding: 0.55rem 0.9rem;
+  border-radius: 2px;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.share-send {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.share-copy,
+.share-print-button {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+}
+
+.share-send:hover,
+.share-copy:hover,
+.share-print-button:hover {
+  border-color: var(--text);
+}
+
+.share-status {
+  margin-bottom: 1.4rem;
+  color: var(--accent);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.share-help {
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.share-help > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: var(--touch-target);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.07em;
+  list-style: none;
+}
+
+.share-help > summary::-webkit-details-marker {
+  display: none;
+}
+
+.share-help > summary::after {
+  content: " \25BE";
+  margin-left: 0.3em;
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.share-help[open] > summary::after {
+  content: " \25B4";
+}
+
+.share-help-content {
+  padding-bottom: 0.4rem;
+}
+
+.share-help p {
+  max-width: 38em;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+@media (max-width: 540px) {
+  .share h1 {
+    font-size: 1.6rem;
+  }
+}
+
+/* Printing a card: the plate, the address and the title, with the chrome and
+   the controls left off. The intro and the printing instructions are screen
+   guidance about the card and have no business being on it. */
+@media print {
+  .page-share .site-header,
+  .page-share footer,
+  .share h1,
+  .share-intro,
+  .share-actions,
+  .share-status,
+  .share-help {
+    display: none;
+  }
+
+  .share-card-title {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #000;
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+
+  .share-card-line {
+    display: block;
+    max-width: 26em;
+    margin: 0 auto 1.4rem;
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .share {
+    text-align: center;
+  }
+
+  .share .ornament-headpiece {
+    margin-inline: auto;
+  }
+
+  .share-plate {
+    /* Printers cannot be relied on to reproduce a background fill, so the
+       mount prints as bare paper with a hairline. The SVG's own plate is
+       likewise a fill the printer may drop — harmless, since dark modules on
+       unprinted paper is exactly the polarity a scanner wants. */
+    width: 3.6in;
+    border-color: #b5a47c;
+    background: none;
+  }
+
+  .share-plate-address {
+    color: #000;
+    opacity: 1;
   }
 }
 

@@ -29,6 +29,7 @@ type Pages struct {
 	notFound  *template.Template
 	errorPage *template.Template
 	reminders *template.Template
+	share     *template.Template
 	usage     *template.Template
 }
 
@@ -48,6 +49,7 @@ func New(version string) (*Pages, error) {
 		{"404.html", &p.notFound},
 		{"error.html", &p.errorPage},
 		{"reminders.html", &p.reminders},
+		{"share.html", &p.share},
 		{"usage.html", &p.usage},
 	} {
 		tmpl, err := template.New("").Funcs(funcs).ParseFS(templates,
@@ -96,6 +98,11 @@ func (p *Pages) Calendar(w io.Writer, data CalendarData) error {
 // Reminders renders the reminder-subscription settings page.
 func (p *Pages) Reminders(w io.Writer, data RemindersData) error {
 	return p.reminders.ExecuteTemplate(w, "layout", data)
+}
+
+// Share renders the QR-code page for passing the app along.
+func (p *Pages) Share(w io.Writer, data ShareData) error {
+	return p.share.ExecuteTemplate(w, "layout", data)
 }
 
 // NotFound renders the styled 404 page.

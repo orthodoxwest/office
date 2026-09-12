@@ -417,7 +417,7 @@ test("the apse vault appears only over the night, and veils with the season", as
   // Present behind the Apse home at every width, absent in working rooms.
   expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
   expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
-  for (const path of ["/calendar/2026", "/reminders"]) {
+  for (const path of ["/calendar/2026", "/reminders", "/share"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
   }
 
@@ -765,11 +765,18 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
 
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
   // The nav used to inherit the 46rem prose column, which fits the brand and
-  // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so
+  // the links only if "Reminders" wraps — but the ordo widens to 62rem, so
   // the same header sat on two lines everywhere except there. Both the single
-  // line and the shared shell width are the point.
+  // line and the shared shell width are the point. The count is stated so a
+  // link added to the beam has to come and check it still fits on one line.
   const shellWidths = [];
   for (const [width, path] of [
+    // 701px is the width at which the menu stops collapsing, and 768px is a
+    // portrait tablet: the tightest the expanded beam ever gets, and where a
+    // tenth link first threatens the single line. See the narrow-band
+    // tracking rule in style.css.
+    [701, `/?date=${testDate}`],
+    [768, `/?date=${testDate}`],
     [1024, `/?date=${testDate}`],
     [1280, `/?date=${testDate}`],
     [1280, `/lauds/${testDate}`],
@@ -786,13 +793,14 @@ test("the header beam holds one line and one geometry on every page", async ({ p
         shell: Math.round(document.querySelector(".site-nav-shell").getBoundingClientRect().width),
       };
     });
-    expect(header.links).toBe(9);
+    expect(header.links).toBe(10);
     expect(header.rows).toBe(1);
     shellWidths.push(`${width}:${header.shell}`);
   }
   // Same viewport ⇒ same header, whichever room you are in.
-  expect(shellWidths[1]).toBe(shellWidths[2]);
-  expect(shellWidths[2]).toBe(shellWidths[3]);
+  // Indices 3-5 are the three 1280px rows: home, an hour, the ordo.
+  expect(shellWidths[3]).toBe(shellWidths[4]);
+  expect(shellWidths[4]).toBe(shellWidths[5]);
 });
 
 test("the inscription band carries the frontispiece heading in both themes", async ({ page }) => {
@@ -1715,6 +1723,7 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       "/calendar/2026",
       [".year-nav a:not([hidden])", ".month-jump a", ".day-disclosures summary"],
     ],
+    ["/share", [".share-copy", ".share-print-button", ".share-help > summary"]],
     [
       "/reminders",
       [
@@ -1760,6 +1769,12 @@ for (const { name, path, theme, knownViolations } of [
   {
     name: "Reminders in the Apse theme",
     path: "/reminders",
+    theme: "dark",
+    knownViolations: [],
+  },
+  {
+    name: "Share in the Apse theme",
+    path: "/share",
     theme: "dark",
     knownViolations: [],
   },
@@ -2349,4 +2364,141 @@ test('private greetings are not repeated after preces when switching offline or 
     await expect(omittedGreeting).not.toBeVisible();
     await page.emulateMedia({ media: 'screen' });
   }
+});
+
+// ── Share page ──
+//
+// The point of the page is a code a camera can read, so the tests decode it
+// the way a phone would: rasterise the rendered SVG and run a real QR decoder
+// over the pixels. Geometry assertions in internal/render/qr_test.go prove the
+// right modules are painted; these prove the artwork around them — rounded
+// modules, bespoke corner bosses, the cross knockout, and the theme's plate
+// and ink colours — has not eaten the code.
+async function decodeSharePlate(page, px) {
+  return page.evaluate(async (size) => {
+    const svg = document.querySelector(".qr-code").cloneNode(true);
+    svg.setAttribute("width", size);
+    svg.setAttribute("height", size);
+    // Inline the computed plate and ink so the serialised copy carries the
+    // theme's colours: the custom properties they resolve through live on
+    // :root, which does not come along with the cloned node.
+    const root = getComputedStyle(document.documentElement);
+    for (const prop of ["--qr-plate", "--qr-ink", "--qr-emblem-line", "--qr-emblem-ink"]) {
+      svg.style.setProperty(prop, root.getPropertyValue(prop));
+    }
+    const url = URL.createObjectURL(
+      new Blob([new XMLSerializer().serializeToString(svg)], { type: "image/svg+xml" }),
+    );
+    try {
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = url;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      // Mid grey, so a plate or ink that failed to paint cannot pass by
+      // borrowing a white or black default from the canvas.
+      ctx.fillStyle = "#808080";
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      const pixels = ctx.getImageData(0, 0, size, size);
+      const result = window.jsQR(pixels.data, size, size);
+      return result ? result.data : null;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }, px);
+}
+
+for (const theme of ["light", "dark"]) {
+  test(`the share code scans in the ${theme === "light" ? "Nave" : "Apse"} theme`, async ({
+    page,
+  }) => {
+    await openDatedPage(page, "/share", theme);
+    await page.addScriptTag({ path: "./node_modules/jsqr/dist/jsQR.js" });
+
+    const expected = await page.locator(".share-plate-address").innerText();
+    expect(expected).toMatch(/^https?:\/\/.+\/$/);
+
+    // 512px is a comfortable on-screen read; 128px is about the smallest a
+    // card can be printed and still be worth hanging up. Both must decode to
+    // the address printed beneath the code — a code that scans to the wrong
+    // place is worse than one that does not scan.
+    for (const px of [512, 256, 128]) {
+      expect(await decodeSharePlate(page, px), `${theme} theme at ${px}px`).toBe(expected);
+    }
+  });
+}
+
+test("the share page works without its optional scripts", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto("/share");
+
+  // The code and the address are server-rendered, so they survive with no JS.
+  await expect(page.locator(".qr-code")).toBeVisible();
+  await expect(page.locator(".share-plate-address")).toHaveText(/^https?:\/\/.+\/$/);
+
+  // Every control is a progressive enhancement and stays hidden until the
+  // script that gives it behaviour has confirmed the API it needs.
+  for (const id of ["#share-send", "#share-copy", "#share-print"]) {
+    await expect(page.locator(id)).toBeHidden();
+  }
+  await context.close();
+});
+
+test("the share page copies the address and reveals no share sheet without one", async ({
+  page,
+}) => {
+  await openDatedPage(page, "/share");
+
+  // navigator.share is absent in this browser, so the sheet button must stay
+  // hidden rather than offering a control that would throw.
+  await expect(page.locator("#share-send")).toBeHidden();
+
+  const copy = page.getByRole("button", { name: "Copy link" });
+  await expect(copy).toBeVisible();
+  await expect(page.locator("#share-status")).toBeHidden();
+
+  await page.evaluate(() => {
+    window.__copied = null;
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (text) => {
+          window.__copied = text;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  await copy.click();
+
+  await expect(page.locator("#share-status")).toHaveText("Copied.");
+  const address = await page.locator(".share-plate-address").innerText();
+  expect(await page.evaluate(() => window.__copied)).toBe(address);
+});
+
+test("the printed share card names the office instead of the instruction", async ({ page }) => {
+  await openDatedPage(page, "/share");
+
+  await expect(page.locator(".share-card-title")).toBeHidden();
+  await expect(page.getByRole("heading", { name: "Share the Office" })).toBeVisible();
+
+  await page.emulateMedia({ media: "print" });
+  // A card on a noticeboard is read by someone who is not sharing anything.
+  await expect(page.locator(".share-card-title")).toBeVisible();
+  await expect(page.locator(".share-card-title")).toHaveText("Daily Office");
+  await expect(page.getByRole("heading", { name: "Share the Office" })).toBeHidden();
+  // The code, the address and nothing operable.
+  await expect(page.locator(".qr-code")).toBeVisible();
+  await expect(page.locator(".share-plate-address")).toBeVisible();
+  for (const selector of [".share-actions", ".share-help", "header.site-header", "footer"]) {
+    await expect(page.locator(selector)).toBeHidden();
+  }
+  await page.emulateMedia({ media: "screen" });
 });

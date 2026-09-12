@@ -1,6 +1,8 @@
 package render
 
 import (
+	"html/template"
+
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/review"
 )
@@ -195,6 +197,25 @@ type ReminderHour struct {
 // ReminderDay is one weekday toggle in the reminder schedule form.
 type ReminderDay struct {
 	Name, Slug string
+}
+
+// ShareData is the page that hands the app on to someone else: a QR code
+// for the homepage, the bare address, and the controls to pass either along.
+type ShareData struct {
+	// ShareURL is the absolute homepage address the code encodes. It is
+	// derived from the incoming request, so a parish running its own copy
+	// shares its own host rather than this one.
+	ShareURL string
+	// QRCode is the inline SVG for ShareURL (see QRCodeSVG). Rendered
+	// server-side so the page needs no script to show the code, and the
+	// service worker can hand the whole thing back offline.
+	QRCode                            template.HTML
+	NavDate, Theme, Page, SeasonClass string
+	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
+	UsageWhen  string
+	ShowBanner bool
+	// ShowToday is always false here (layout brand current-state reads it).
+	ShowToday bool
 }
 
 // NotFoundData is the styled 404 page.

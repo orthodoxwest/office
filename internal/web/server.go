@@ -112,6 +112,7 @@ func (s *Server) ListenAndServe() error {
 	mux.HandleFunc("/sw.js", s.handleServiceWorker)
 	mux.HandleFunc("/office.ics", s.handleICS)
 	mux.HandleFunc("/reminders", s.handleReminders)
+	mux.HandleFunc("/share", s.handleShare)
 	mux.HandleFunc("/calendar/", s.handleCalendar)
 	mux.HandleFunc("/calendar", s.handleCalendar)
 	mux.HandleFunc("/", s.handleRoot)

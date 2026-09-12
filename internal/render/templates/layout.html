@@ -77,6 +77,7 @@
           <span class="nav-divider" aria-hidden="true"></span>
           <a href="{{navLink "/calendar" $t $d}}" data-nav="calendar"{{if eq $p "calendar"}} class="active" aria-current="page"{{end}}>Ordo</a>
           <a class="nav-secondary{{if eq $p "reminders"}} active{{end}}" href="{{navLink "/reminders" $t $d}}" data-nav="reminders"{{if eq $p "reminders"}} aria-current="page"{{end}}>Reminders</a>
+          <a class="nav-secondary{{if eq $p "share"}} active{{end}}" href="{{navLink "/share" $t $d}}" data-nav="share"{{if eq $p "share"}} aria-current="page"{{end}}>Share</a>
         </nav>
       </details>
     </div>

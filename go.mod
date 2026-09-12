@@ -2,7 +2,10 @@ module github.com/orthodoxwest/office
 
 go 1.26.3
 
-require modernc.org/sqlite v1.58.0
+require (
+	modernc.org/sqlite v1.58.0
+	rsc.io/qr v0.2.0
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect

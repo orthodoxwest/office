@@ -51,6 +51,10 @@ internal/
     view.go                View models the templates read (HomeData, HourData, CalendarData, …)
     html.go                Text-to-HTML conversion (psalm verses, liturgical blocks, hymns)
     links.go               Nav/asset URL construction (navLink, hourLink, static stamping)
+    qr.go                  QR code → inline SVG in the app's idiom (rsc.io/qr encodes;
+                           all artwork is ours). Self-contained <style> so the code
+                           renders and scans without style.css — printed, saved, or
+                           served before CSS lands.
     templates/             Embedded HTML templates (layout, home, hour, calendar)
                            UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
   usage/                   Approximate daily usage counts (not request logs)
@@ -63,6 +67,7 @@ internal/
     cache.go               Per-year CalendarDay + MoveableDates cache
     pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
+    share.go               /share page: QR code for the requesting host's homepage
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
   e2e/                     End-to-end golden-file tests
     golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests

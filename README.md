@@ -11,8 +11,10 @@ archdiocesan ordo governs current-year practice.
 
 The web app includes a browsable calendar, an installable PWA with cached
 pages available offline, and a subscribable prayer-reminder calendar at
-`/reminders`. Each hour has a collapsed Assurance disclosure for source and
-composition metadata. Corpus verification is ongoing; see
+`/reminders`. `/share` carries a QR code for the homepage, with a print
+layout for a noticeboard card; the code is undated, so a printed card always
+opens on the reader's own today. Each hour has a collapsed Assurance
+disclosure for source and composition metadata. Corpus verification is ongoing; see
 [REVIEWING.md](REVIEWING.md) for how to help.
 
 Each hour has a **Prayer form** selector near the date control: **Praying privately**,

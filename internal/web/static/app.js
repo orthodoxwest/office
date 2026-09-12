@@ -777,6 +777,57 @@ function usageBeaconBody(scope) {
     });
   }
 
+  // ── Share page ──
+  // The QR code and the address are rendered server-side and need no script;
+  // everything here is an optional convenience layered on top, so each piece
+  // stays hidden until its API is known to exist.
+  var sharePlate = document.querySelector(".share-plate-address");
+  if (sharePlate) {
+    var shareURL = sharePlate.textContent.trim();
+    var shareStatus = document.getElementById("share-status");
+    var shareSend = document.getElementById("share-send");
+    var shareCopy = document.getElementById("share-copy");
+    var sharePrint = document.getElementById("share-print");
+
+    var announce = function (message) {
+      shareStatus.textContent = message;
+      shareStatus.hidden = false;
+    };
+
+    if (typeof navigator.share === "function") {
+      shareSend.hidden = false;
+      shareSend.addEventListener("click", function () {
+        navigator.share({ title: "Daily Office", url: shareURL }).catch(function () {
+          // AbortError when the sheet is dismissed; nothing to recover from.
+        });
+      });
+    }
+
+    // navigator.clipboard is undefined outside a secure context, so this
+    // check is what keeps the button off an http:// copy of the site rather
+    // than offering one that always fails.
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      shareCopy.hidden = false;
+      shareCopy.addEventListener("click", function () {
+        navigator.clipboard.writeText(shareURL).then(function () {
+          announce("Copied.");
+        }).catch(function () {
+          // Permission refused or the document lost focus mid-write.
+          announce("Copy unavailable. The address is printed under the code.");
+        });
+      });
+    }
+
+    // Offered only where a print dialog is reachable; the browser's own print
+    // command remains the path everywhere else.
+    if (typeof window.print === "function") {
+      sharePrint.hidden = false;
+      sharePrint.addEventListener("click", function () {
+        window.print();
+      });
+    }
+  }
+
   document.querySelectorAll(".date-jump-form").forEach(function (form) {
     var input = form.querySelector(".date-jump");
     if (!input) {
