@@ -1091,7 +1091,11 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
         const px = (selector, property) => parseFloat(style(selector)[property]);
         const firstLetter = (selector) => {
           const cap = style(selector, "::first-letter");
-          return { float: cap.float, size: parseFloat(cap.fontSize) };
+          return {
+            float: cap.float,
+            size: parseFloat(cap.fontSize),
+            raised: document.querySelector(selector).classList.contains("initial-raised"),
+          };
         };
         const hymnLine = style(".hymn-stanza-opening .hymn-line:nth-child(3)");
         return {
@@ -1179,8 +1183,10 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
         `${label} hymn opening glyph clears the drop cap`,
       ).toBeGreaterThanOrEqual(metrics.hymnOpening.cap.right - 0.5);
       for (const cap of metrics.caps) {
-        expect(cap.float, `${label} approved opening drop cap`).toBe("left");
-        expect(cap.size, `${label} approved opening drop cap size`).toBeGreaterThan(metrics.prayer * 2);
+        expect(cap.float, `${label} approved opening initial`).toBe(cap.raised ? "none" : "left");
+        expect(cap.size, `${label} approved opening initial size`).toBeGreaterThan(
+          metrics.prayer * (cap.raised ? 1.5 : 2),
+        );
       }
       expect(metrics.secretCap.float, `${label} secret prayer never gets a drop cap`).not.toBe("left");
     }
@@ -1200,6 +1206,56 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
       exact: true,
     }),
   ).toBeVisible();
+});
+
+test("short openings keep one baseline and adapt to the reading measure", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openDatedPage(page, "/lauds/2026-06-18", theme);
+    const opening = page.locator(".short-responsory-opening .sigil-text");
+    const originalText = await opening.textContent();
+    for (const [width, raised] of [[1280, true], [320, false], [460, true]]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-raised"))).toBe(raised);
+      const geometry = await opening.evaluate(el => {
+        const style = getComputedStyle(el);
+        const capStyle = getComputedStyle(el, "::first-letter");
+        const ctx = document.createElement("canvas").getContext("2d");
+        const glyph = (index, font) => {
+          const range = document.createRange();
+          range.setStart(el.firstChild, index);
+          range.setEnd(el.firstChild, index + 1);
+          const rect = range.getBoundingClientRect();
+          ctx.font = font;
+          return {
+            left: rect.left, right: rect.right,
+            baseline: rect.top + ctx.measureText("H").fontBoundingBoxAscent,
+          };
+        };
+        return {
+          height: el.getBoundingClientRect().height,
+          leading: parseFloat(style.lineHeight),
+          cap: glyph(0, capStyle.font),
+          following: glyph(1, style.font),
+          overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        };
+      });
+      expect(geometry.overflow, `${theme}/${width} overflow`).toBe(false);
+      expect(geometry.following.left).toBeGreaterThanOrEqual(geometry.cap.right - .5);
+      if (raised) {
+        expect(Math.abs(geometry.cap.baseline - geometry.following.baseline)).toBeLessThan(1.5);
+        expect(geometry.height).toBeCloseTo(geometry.leading, 0);
+      } else {
+        expect(geometry.height).toBeGreaterThan(geometry.leading * 1.9);
+      }
+    }
+    // At this measure the normal setting fits; Large needs two lines.
+    await page.getByRole("button", { name: "Larger text", exact: true }).click();
+    await expect(opening).not.toHaveClass(/initial-raised/);
+    await page.getByRole("button", { name: "Default text size", exact: true }).click();
+    await expect(opening).toHaveClass(/initial-raised/);
+    expect(await opening.textContent()).toBe(originalText);
+  }
 });
 
 test("Prime hymn initial clears its second metrical line on narrow pages", async ({ page }) => {

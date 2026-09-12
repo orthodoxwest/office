@@ -1,5 +1,69 @@
 document.documentElement.classList.add("js");
 
+// Match the initial to the space the opening actually occupies. Verse/chant
+// pairs have a deliberate second line; prose openings may fit on just one.
+// Measure with the compact initial first so the decoration cannot itself
+// force a short sentence to wrap. Text and source line breaks stay untouched.
+(function () {
+  var openings = Array.from(document.querySelectorAll([
+    ".psalm-verses .verse:first-child:not(.numbered)",
+    ".chapter .liturgical-block .plain-line:first-child",
+    ".chapter .liturgical-block .versicle-line:first-child .sigil-text",
+    ".collect .liturgical-block .plain-line:first-child",
+    ".corporate-lord-prayer-officiant",
+    ".short-responsory-opening .sigil-text",
+  ].join(",")));
+  if (!openings.length) return;
+
+  var measures = new WeakMap();
+  var frame = 0;
+  function typeset() {
+    frame = 0;
+    var changed = openings.filter(function (opening) {
+      var style = getComputedStyle(opening);
+      var width = opening.getBoundingClientRect().width;
+      var key = [width, style.fontSize, style.lineHeight].join("/");
+      if (measures.get(opening) === key) return false;
+      measures.set(opening, key);
+      return width > 0;
+    });
+    // Batch writes and reads: one layout measures every candidate. Remember
+    // width and font metrics, not height, so our own changes do not cause a
+    // ResizeObserver loop or toggle between two competing line breaks.
+    changed.forEach(function (opening) { opening.classList.add("initial-raised"); });
+    var singleLines = changed.map(function (opening) {
+      return opening.getBoundingClientRect().height <=
+        parseFloat(getComputedStyle(opening).lineHeight) + 1;
+    });
+    changed.forEach(function (opening, index) {
+      opening.classList.toggle("initial-raised", singleLines[index]);
+    });
+  }
+  function schedule() {
+    if (!frame) frame = window.requestAnimationFrame(typeset);
+  }
+  function refresh() {
+    measures = new WeakMap();
+    schedule();
+  }
+  typeset();
+  if (document.fonts) {
+    document.fonts.ready.then(refresh);
+    document.fonts.addEventListener("loadingdone", refresh);
+  }
+  if ("ResizeObserver" in window) {
+    var observer = new ResizeObserver(schedule);
+    openings.forEach(function (opening) { observer.observe(opening); });
+  }
+  window.addEventListener("resize", schedule);
+  window.addEventListener("officeleaderchange", refresh);
+  window.addEventListener("beforeprint", function () {
+    measures = new WeakMap();
+    typeset();
+  });
+  window.addEventListener("afterprint", refresh);
+})();
+
 // Appearance and screen dimensions accompany every usage beacon; office pages
 // also report the selected prayer form. These describe how the page
 // is being rendered rather than which page it is: the appearance actually on
