@@ -26,6 +26,34 @@
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
+/* The long ordo keeps its first font choice for the entire visit. A late
+   download must not rewrap hundreds of rows above a day anchor. The preload
+   and the existing offline font cache still give ready visits EB Garamond.
+   These faces share the same files as prayer pages, which retain swap. */
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+}
+
 /* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
@@ -1984,16 +2012,19 @@ footer::before {
 
 /* ── Calendar page ── */
 
+.page-calendar {
+  font-family: "Ordo Garamond", Georgia, "Times New Roman", serif;
+}
+
 .page-calendar main { max-width: 56rem; }
 .calendar {
   display: grid;
   gap: 1rem;
 }
 .calendar-header {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem 2rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--border);
@@ -2003,9 +2034,14 @@ footer::before {
   font-weight: normal;
   line-height: 1.15;
 }
+.calendar-title {
+  width: fit-content;
+  max-width: 100%;
+  text-align: center;
+}
 .calendar-title .ornament-headpiece {
   width: 6rem;
-  margin: 0 0 0.5rem;
+  margin: 0 auto 0.5rem;
   font-size: 0.7rem;
 }
 .calendar-title .ornament-sprig { height: 0.75rem; }
@@ -2021,6 +2057,7 @@ footer::before {
   gap: 0.4rem;
 }
 .year-nav a {
+  position: relative;
   min-width: var(--touch-target);
   display: inline-flex;
   align-items: center;
@@ -2029,10 +2066,38 @@ footer::before {
   padding: 0.25rem 0.45rem;
   color: var(--accent);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 .year-nav a:hover { text-decoration: underline; }
-.year-nav .calendar-today-link { font-size: 0.78rem; }
+/* The same short dividers used in the home hour index finish the year
+   control without enclosing its three touch targets in separate boxes. */
+.year-nav a + a::before {
+  content: "";
+  position: absolute;
+  left: -0.2rem;
+  top: 50%;
+  width: 1px;
+  height: 0.8rem;
+  background: var(--border);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.year-nav .calendar-today-link {
+  text-decoration: underline;
+  text-decoration-color: var(--gold-line);
+  text-underline-offset: 0.3em;
+}
+
+/* Small working labels keep one immediately available, legible face. */
+.year-nav,
+.calendar-tools,
+.day-disclosures summary,
+.day-mobile-weekday,
+.day-mobile-flags,
+.day-wk,
+.day-rank {
+  font-family: Georgia, "Times New Roman", serif;
+}
 .month-jump {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -2103,9 +2168,26 @@ footer::before {
   padding: 0.4rem 0;
   background: var(--bg);
   color: var(--accent);
-  border-bottom: 1px solid var(--gold-line);
+  border-bottom: 3px double var(--ornament-line);
   font-size: 1.35rem;
   font-weight: normal;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+}
+/* A small lozenge completes each month's rule, echoing the hour title. It
+   lives inside the sticky heading's existing space and carries no content. */
+.month h2::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1.5px;
+  width: 0.22rem;
+  height: 0.22rem;
+  background: var(--ornament);
+  box-shadow: 0 0 0 2px var(--bg);
+  transform: translate(-50%, 50%) rotate(45deg);
+  pointer-events: none;
 }
 .month-top {
   display: inline-flex;
@@ -2122,7 +2204,7 @@ footer::before {
 .month-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 1rem;
   table-layout: fixed;
 }
 .month-table th {
@@ -2153,9 +2235,33 @@ footer::before {
   background: var(--day-color, var(--border));
 }
 .js .month-table tr.day { cursor: pointer; }
-.js .month-table tr.day:hover > td { background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash)); }
+/* Touch browsers may retain :hover after a tap. Keep that extra wash on
+   devices that can hover, so opening a disclosure doesn't darken the day. */
+@media (hover: hover) and (pointer: fine) {
+  .js .month-table tr.day:hover > td {
+    background-image: linear-gradient(var(--pressed-wash), var(--pressed-wash));
+  }
+}
 .month-table tr:target > td,
-.month-table tr.is-today > td { background: color-mix(in srgb, var(--gold) 14%, transparent); }
+.month-table tr.is-today > td {
+  background: color-mix(in srgb, var(--gold) 6%, transparent);
+}
+
+/* The marker occupies an existing line in the date column. It never adds
+   height when the local date is stamped onto a cached page or rolls over. */
+.month-table .day-num::after,
+.day-mobile-date::after {
+  content: "Today";
+  display: block;
+  visibility: hidden;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.7rem;
+  font-weight: normal;
+  line-height: 1.4;
+  color: var(--accent);
+}
+.month-table .is-today .day-num::after,
+.is-today .day-mobile-date::after { visibility: visible; }
 .month-table tr:target > td { border-bottom-color: var(--gold-line); }
 .day-mobile-head { display: none; }
 .day-feast-name {
@@ -2169,7 +2275,11 @@ footer::before {
   text-underline-offset: 0.2em;
 }
 .month-table th:nth-child(1), .month-table td.day-num { width: 2.8rem; }
-.month-table td.day-num { padding-left: 0.65rem; }
+.month-table th:first-child,
+.month-table td.day-num {
+  padding-left: 0.65rem;
+  text-align: center;
+}
 .month-table th:nth-child(2), .month-table td.day-wk { width: 3rem; }
 .month-table th:nth-child(4), .month-table th:nth-child(5), .month-table td.day-penitential-flag {
   width: 2.6rem;
@@ -2180,6 +2290,7 @@ footer::before {
   text-align: right;
 }
 .day-wk, .day-rank, .day-penitential-flag { white-space: nowrap; }
+.day-rank { font-size: 0.78rem; }
 .day-wk {
   color: var(--muted);
   font-size: 0.8rem;
@@ -2187,7 +2298,10 @@ footer::before {
 .month-table .day-num a {
   color: var(--accent);
   text-decoration: none;
-  font-weight: bold;
+  font-size: 1.2rem;
+  font-weight: normal;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.2;
 }
 .month-table .day-num a:hover { text-decoration: underline; }
 .month-table abbr {
@@ -2228,7 +2342,7 @@ footer::before {
   width: fit-content;
   list-style: none;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 .day-disclosures summary::-webkit-details-marker { display: none; }
@@ -2241,7 +2355,7 @@ footer::before {
 .day-disclosures details[open] > summary::after { content: "▴"; }
 .day-commemoration {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   color: var(--muted);
   font-style: italic;
   line-height: 1.5;
@@ -2251,20 +2365,22 @@ footer::before {
   margin: 0 0 0.5rem;
   padding: 0.6rem 0.75rem;
   border-left: 1px solid var(--gold-line);
-  background: var(--surface);
 }
 .day-office-hour {
   display: flex;
   gap: 0.5rem;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   line-height: 1.5;
   color: var(--muted);
 }
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
-  flex: 0 0 3.4rem;
-  font-variant-caps: small-caps;
-  letter-spacing: 0.04em;
+  flex: 0 0 4.4rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
 }
 .day-office-hour dd {
   display: flex;
@@ -2300,7 +2416,11 @@ footer::before {
 @media (max-width: 700px) {
   .page-home .site-header { margin-bottom: 1rem; }
   .calendar { gap: 0.65rem; }
-  .calendar-header { gap: 0.65rem; }
+  .calendar-header {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .calendar-title { justify-self: center; }
   .calendar-header h1 { font-size: 1.85rem; }
   .calendar-subtitle { font-size: 0.78rem; }
   .month-jump { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -2344,12 +2464,13 @@ footer::before {
     text-decoration: none;
   }
   .day-mobile-num {
+    font-variant-numeric: lining-nums tabular-nums;
     font-size: 1.35rem;
     line-height: 1.1;
   }
   .day-mobile-weekday {
     color: var(--muted);
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
   }
@@ -2360,7 +2481,7 @@ footer::before {
     align-items: baseline;
     gap: 0.4rem;
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     white-space: nowrap;
   }
   .day-mobile-flags:empty { display: none; }
@@ -2372,10 +2493,11 @@ footer::before {
     line-height: 1.35;
   }
   .day-disclosures {
+    column-gap: 0.6rem;
     grid-column: 2 / -1;
     grid-row: 2;
   }
-  .day-disclosures summary { font-size: 0.7rem; }
+  .day-disclosures summary { font-size: 0.75rem; }
   .day-office-digest { padding: 0.5rem; }
   .day-office-hour { display: block; }
   .day-office-hour dt {
@@ -3747,8 +3869,8 @@ body.season-eastertide {
    controls (date picker, time inputs, the reminder select) keep lining
    figures, which is what a control is expected to show.
 
-   The bold face is subset without OpenType features, so bold numerals — the
-   calendar's day numbers — keep lining figures regardless. */
+   The bold face is subset without OpenType features, so bold numerals keep
+   lining figures. Calendar dates request lining figures explicitly. */
 .hour-meta,
 .item-label,
 .chapter-ref,
