@@ -1,9 +1,10 @@
 document.documentElement.classList.add("js");
 
-// Match the initial to the space the opening actually occupies. Verse/chant
-// pairs have a deliberate second line; prose openings may fit on just one.
-// Measure with the compact initial first so the decoration cannot itself
-// force a short sentence to wrap. Text and source line breaks stay untouched.
+// Initials have two independent decisions: their place in the prayer's
+// hierarchy, and their optical fit. CSS holds the font-specific letter
+// profiles; this enhancement identifies the letter and opening word without
+// changing the text. Prose can adapt to its measure, while short responses
+// stay modest and metrical/chant openings keep their deliberate two-line cap.
 (function () {
   var openings = Array.from(document.querySelectorAll([
     ".psalm-verses .verse:first-child:not(.numbered)",
@@ -12,14 +13,49 @@ document.documentElement.classList.add("js");
     ".collect .liturgical-block .plain-line:first-child",
     ".corporate-lord-prayer-officiant",
     ".short-responsory-opening .sigil-text",
+    ".hymn-stanza-opening .hymn-line:first-child",
+    ".marian-antiphon .chant-line-opening",
   ].join(",")));
   if (!openings.length) return;
+
+  openings.forEach(function (opening) {
+    var node = opening.firstChild;
+    if (!node || node.nodeType !== Node.TEXT_NODE) return;
+    var match = /^(\s*)([\p{L}][\p{L}\p{M}'’-]*)/u.exec(node.textContent);
+    if (!match) return;
+    var letter = /^\p{L}\p{M}*/u.exec(match[2])[0];
+    opening.dataset.initial = letter.normalize("NFC").toUpperCase();
+    // A standalone O or I keeps its actual word space. Give the next word
+    // the small-cap transition instead of treating it as a kerned suffix.
+    var start = match[1].length + letter.length;
+    var end = match[0].length;
+    if (start === end) {
+      opening.dataset.initialStandalone = "true";
+      var next = /^(\s+)([\p{L}][\p{L}\p{M}'’-]*)/u.exec(node.textContent.slice(end));
+      if (!next) return;
+      start = end + next[1].length;
+      end += next[0].length;
+    }
+    var word = node.splitText(start);
+    word.splitText(end - start);
+    var span = document.createElement("span");
+    span.className = "initial-word";
+    word.parentNode.insertBefore(span, word);
+    span.appendChild(word);
+  });
+
+  openings.filter(function (opening) {
+    return opening.matches(".short-responsory-opening .sigil-text");
+  }).forEach(function (opening) { opening.classList.add("initial-raised"); });
+  var adaptive = openings.filter(function (opening) {
+    return !opening.matches(".hymn-line, .chant-line-opening, .short-responsory-opening .sigil-text");
+  });
 
   var measures = new WeakMap();
   var frame = 0;
   function typeset() {
     frame = 0;
-    var changed = openings.filter(function (opening) {
+    var changed = adaptive.filter(function (opening) {
       var style = getComputedStyle(opening);
       var width = opening.getBoundingClientRect().width;
       var key = [width, style.fontSize, style.lineHeight].join("/");
@@ -53,7 +89,7 @@ document.documentElement.classList.add("js");
   }
   if ("ResizeObserver" in window) {
     var observer = new ResizeObserver(schedule);
-    openings.forEach(function (opening) { observer.observe(opening); });
+    adaptive.forEach(function (opening) { observer.observe(opening); });
   }
   window.addEventListener("resize", schedule);
   window.addEventListener("officeleaderchange", refresh);

@@ -1121,17 +1121,17 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
           },
           hymnOpening: (() => {
             const opening = document.querySelector(".hymn-stanza-opening .hymn-line");
-            const text = opening.firstChild;
-            const glyph = (start, end) => {
+            const glyph = (following) => {
+              const text = following ? opening.querySelector(".initial-word").firstChild : opening.firstChild;
               const range = document.createRange();
-              range.setStart(text, start);
-              range.setEnd(text, end);
+              range.setStart(text, 0);
+              range.setEnd(text, 1);
               const { left, right } = range.getBoundingClientRect();
               return { left, right };
             };
             return {
-              cap: glyph(0, 1),
-              following: glyph(1, 2),
+              cap: glyph(false),
+              following: glyph(true),
               padding: parseFloat(getComputedStyle(opening).paddingLeft),
               indent: parseFloat(getComputedStyle(opening).textIndent),
             };
@@ -1212,9 +1212,9 @@ test("short openings keep one baseline and adapt to the reading measure", async 
   for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openDatedPage(page, "/lauds/2026-06-18", theme);
-    const opening = page.locator(".short-responsory-opening .sigil-text");
+    const opening = page.locator(".psalm-verses .verse").filter({ hasText: /^O God, thou art my God/ });
     const originalText = await opening.textContent();
-    for (const [width, raised] of [[1280, true], [320, false], [460, true]]) {
+    for (const [width, raised] of [[1280, true], [320, false], [430, true]]) {
       await page.setViewportSize({ width, height: 900 });
       await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-raised"))).toBe(raised);
       const geometry = await opening.evaluate(el => {
@@ -1223,8 +1223,9 @@ test("short openings keep one baseline and adapt to the reading measure", async 
         const ctx = document.createElement("canvas").getContext("2d");
         const glyph = (index, font) => {
           const range = document.createRange();
-          range.setStart(el.firstChild, index);
-          range.setEnd(el.firstChild, index + 1);
+          const node = index ? el.querySelector(".initial-word").firstChild : el.firstChild;
+          range.setStart(node, 0);
+          range.setEnd(node, 1);
           const rect = range.getBoundingClientRect();
           ctx.font = font;
           return {
@@ -1255,6 +1256,100 @@ test("short openings keep one baseline and adapt to the reading measure", async 
     await page.getByRole("button", { name: "Default text size", exact: true }).click();
     await expect(opening).toHaveClass(/initial-raised/);
     expect(await opening.textContent()).toBe(originalText);
+  }
+});
+
+test("short responsories retain a raised initial when their text wraps", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/lauds/2026-06-18", theme);
+    const opening = page.locator(".short-responsory-opening .sigil-text");
+    const original = await opening.textContent();
+    for (const width of [1280, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const size of ["normal", "large"]) {
+        await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+        const geometry = await opening.evaluate(el => ({
+          float: getComputedStyle(el, "::first-letter").float,
+          height: el.getBoundingClientRect().height,
+          leading: parseFloat(getComputedStyle(el).lineHeight),
+        }));
+        expect(geometry.float).toBe("none");
+        if (width === 320) expect(geometry.height).toBeGreaterThan(geometry.leading * 1.9);
+        else expect(geometry.height).toBeCloseTo(geometry.leading, 0);
+        expect(await opening.textContent()).toBe(original);
+      }
+    }
+  }
+});
+
+test("optical initial profiles preserve words and give subsequent lines their own clearance", async ({ page }) => {
+  const words = ["Almighty", "Lord", "The", "O Lord", "I will", "With", "Come"];
+  const sentence = " hear our prayer, and let our cry come unto thee. Be merciful unto us, O Lord, and guide our steps in the way of peace.";
+  const fixture = words.map(word => `<div class="chapter"><div class="liturgical-block"><p class="plain-line">${word}${sentence}</p></div></div>`).join("");
+  await page.route("**/vespers/2026-06-18", async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      `$1<div class="elements">${fixture}</div>$2`,
+    ) });
+  });
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-06-18", theme);
+    for (const width of [320, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      const openings = page.locator(".chapter .plain-line");
+      for (let i = 0; i < words.length; i++) {
+        const opening = openings.nth(i);
+        await expect(opening).not.toHaveClass(/initial-raised/);
+        expect(await opening.textContent()).toBe(words[i] + sentence);
+        const geometry = await opening.evaluate(el => {
+          const glyph = (node, index) => {
+            const range = document.createRange();
+            range.setStart(node, index);
+            range.setEnd(node, index + 1);
+            return range.getBoundingClientRect();
+          };
+          const cap = glyph(el.firstChild, 0);
+          const word = el.querySelector(".initial-word");
+          const first = glyph(word.firstChild, 0);
+          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+          const rows = new Map();
+          let node;
+          while ((node = walker.nextNode())) {
+            for (let j = 0; j < node.length; j++) {
+              if ((node === el.firstChild && j === 0) || /\s/.test(node.textContent[j])) continue;
+              const rect = glyph(node, j);
+              const y = Math.round(rect.top);
+              rows.set(y, Math.min(rows.get(y) ?? Infinity, rect.left));
+            }
+          }
+          return {
+            initial: el.dataset.initial,
+            standalone: el.dataset.initialStandalone === "true",
+            caps: getComputedStyle(word).fontVariantCaps,
+            first: first.left,
+            capRight: cap.right,
+            capLeft: cap.left,
+            edge: el.getBoundingClientRect().left,
+            rows: [...rows.entries()].sort((a, b) => a[0] - b[0]).map(row => row[1]),
+          };
+        });
+        expect(geometry.caps).toBe("all-small-caps");
+        expect(geometry.rows.length).toBeGreaterThanOrEqual(2);
+        expect(geometry.rows[1]).toBeGreaterThanOrEqual(geometry.capRight - .5);
+        if (["A", "L"].includes(geometry.initial)) {
+          // First-word tucking does not pull the second row under the foot.
+          expect(geometry.first).toBeLessThan(geometry.rows[1] - 1);
+        }
+        if (geometry.standalone) {
+          expect(geometry.first).toBeGreaterThan(geometry.capRight + 1);
+        }
+        if (["O", "T", "C"].includes(geometry.initial)) {
+          expect(geometry.capLeft).toBeLessThan(geometry.edge);
+        }
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+    }
   }
 });
 
@@ -1405,7 +1500,7 @@ test("Marian antiphon initial clears its second chant line", async ({ page }) =>
       };
       return {
         cap: glyph(firstText, 0, 1),
-        following: glyph(firstText, 1, 2),
+        following: glyph(opening.querySelector(".initial-word").firstChild),
         second: glyph(secondText, 0, 1),
         secondSnippet: secondText?.textContent?.slice(0, 24) ?? "",
         openingLeft: opening.getBoundingClientRect().left,
@@ -2186,6 +2281,7 @@ test("wide and narrow initials clear text in native and fallback layouts", async
             // Deliberate layout fixture: exercise the extremes of the font's
             // initial widths without depending on a particular day's psalms.
             opening.textContent = letter + "ith all my heart I will give thanks unto the Lord, and tell of all his wonderful works. With all my heart I will give thanks unto the Lord.";
+            opening.dataset.initial = letter;
             const node = opening.firstChild;
             const glyph = index => {
               const range = document.createRange();
