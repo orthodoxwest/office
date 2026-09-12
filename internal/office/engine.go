@@ -72,6 +72,9 @@ type ComposeOptions struct {
 // ComposeHourWithOptions keeps preview choices local to this composition;
 // the shared engine and calendar remain immutable across requests.
 func (e *Engine) ComposeHourWithOptions(hourName string, day *models.CalendarDay, moveable *calendar.MoveableDates, options ComposeOptions) (*models.OfficeHour, error) {
+	if day == nil {
+		return nil, fmt.Errorf("calendar day is nil")
+	}
 	leader, err := models.ParsePrayerForm(string(options.Form))
 	if err != nil {
 		return nil, err

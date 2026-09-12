@@ -234,10 +234,13 @@ func (c *TextCorpus) MissingIncipits() []string {
 }
 
 // CollectConclusionForm returns the conclusion form recorded for a collect's
-// corpus key, and whether one was recorded. Collects with no entry take the
-// default form.
+// corpus key, falling back to its canonical text for aliases. An explicit
+// alias entry takes precedence. Collects with no entry take the default form.
 func (c *TextCorpus) CollectConclusionForm(key string) (string, bool) {
-	form, ok := c.collectConclusions[key]
+	if form, ok := c.collectConclusions[key]; ok {
+		return form, true
+	}
+	form, ok := c.collectConclusions[c.CanonicalRef(key)]
 	return form, ok
 }
 

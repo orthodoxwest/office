@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 )
 
 func TestParseDays(t *testing.T) {
@@ -188,5 +189,59 @@ func TestEscapeICS(t *testing.T) {
 	got := escapeICS("a;b,c\\d\ne")
 	if got != `a\;b\,c\\d\ne` {
 		t.Errorf("unexpected escaping: %q", got)
+	}
+}
+
+func TestFoldLine(t *testing.T) {
+	for _, line := range []string{
+		"",
+		strings.Repeat("a", 75),
+		strings.Repeat("a", 150),
+		strings.Repeat("a", 225),
+		strings.Repeat("a", 74) + strings.Repeat("é", 100),
+		strings.Repeat("🕯", 80),
+	} {
+		var folded strings.Builder
+		foldLine(&folded, line)
+		for _, physical := range strings.Split(folded.String(), "\r\n") {
+			if len(physical) > 75 {
+				t.Errorf("physical line has %d bytes, want at most 75", len(physical))
+			}
+			if !utf8.ValidString(physical) {
+				t.Errorf("fold split a UTF-8 character: %q", physical)
+			}
+		}
+		unfolded := strings.ReplaceAll(strings.TrimSuffix(folded.String(), "\r\n"), "\r\n ", "")
+		if unfolded != line {
+			t.Errorf("unfolding changed the original line")
+		}
+	}
+}
+
+func TestBuildICSDatesAcrossMidnightDST(t *testing.T) {
+	s := &Server{cache: newYearCache("../../data")}
+	q, _ := url.ParseQuery("lauds=06:45&tz=America/Santiago&horizon=3")
+	cfg, err := parseICSConfig(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// September 6 begins at 01:00 locally. Carrying the request's 00:30
+	// clock into AddDate normalizes it back to September 5, duplicating
+	// that day's UID and omitting September 6 altogether.
+	now := time.Date(2026, 9, 5, 0, 30, 0, 0, cfg.loc)
+	body, err := s.buildICS(cfg, "https://office.example", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, date := range []string{"2026-09-05", "2026-09-06", "2026-09-07"} {
+		uid := "UID:lauds-" + date + "@awrv-office\r\n"
+		if got := strings.Count(body, uid); got != 1 {
+			t.Errorf("%s occurs %d times, want once", strings.TrimSpace(uid), got)
+		}
+	}
+	for _, start := range []string{"20260905T104500Z", "20260906T094500Z", "20260907T094500Z"} {
+		if !strings.Contains(body, "DTSTART:"+start+"\r\n") {
+			t.Errorf("missing local 06:45 start %s", start)
+		}
 	}
 }

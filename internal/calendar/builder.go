@@ -75,10 +75,7 @@ func OctaveDisplayName(feastID string) string {
 func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 	epiphany := time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)
 	// Find the first Sunday after Epiphany
-	daysUntilSunday := (7 - int(epiphany.Weekday())) % 7
-	if daysUntilSunday == 0 {
-		daysUntilSunday = 7 // Epiphany itself is Sunday; first Sunday after is next week
-	}
+	daysUntilSunday := 7 - int(epiphany.Weekday())
 	firstSunday := epiphany.AddDate(0, 0, daysUntilSunday)
 
 	var feasts []*models.Feast
@@ -133,10 +130,7 @@ func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 // only if one exists.
 func anticipatedEpiphanySundayFeast(moveable *MoveableDates) []*models.Feast {
 	epiphany := time.Date(moveable.Septuagesima.Year(), 1, 6, 0, 0, 0, 0, time.UTC)
-	daysUntilSunday := (7 - int(epiphany.Weekday())) % 7
-	if daysUntilSunday == 0 {
-		daysUntilSunday = 7
-	}
+	daysUntilSunday := 7 - int(epiphany.Weekday())
 	firstSunday := epiphany.AddDate(0, 0, daysUntilSunday)
 	fitted := int(moveable.Septuagesima.Sub(firstSunday) / (24 * time.Hour * 7))
 	n := fitted + 1 // first displaced Sunday
@@ -192,8 +186,7 @@ func eastertideSundayFeasts(easter time.Time) []*models.Feast {
 }
 
 // adventSundayFeasts generates Feast objects for the 4 Advent Sundays.
-func adventSundayFeasts(moveable *MoveableDates) []*models.Feast {
-	dates := []time.Time{moveable.Advent1, moveable.Advent2, moveable.Advent3, moveable.Advent4}
+func adventSundayFeasts() []*models.Feast {
 	names := []string{
 		"I Sunday of Advent",
 		"II Sunday of Advent",
@@ -204,7 +197,6 @@ func adventSundayFeasts(moveable *MoveableDates) []*models.Feast {
 
 	feasts := make([]*models.Feast, 4)
 	for i := range 4 {
-		_ = dates[i]
 		feasts[i] = &models.Feast{
 			ID:       fmt.Sprintf("advent-sunday-%d", i+1),
 			Name:     names[i],
@@ -492,55 +484,35 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 
 // remainingEmberFeasts generates Advent and September Ember Days.
 func remainingEmberFeasts(moveable *MoveableDates, year int) []*models.Feast {
-	var feasts []*models.Feast
-
 	// Advent Ember Days: Wed, Fri, Sat after 3rd Sunday of Advent (Gaudete)
 	adventEmberWed := moveable.Advent3.AddDate(0, 0, 3)
-	adventEmberFri := moveable.Advent3.AddDate(0, 0, 5)
-	adventEmberSat := moveable.Advent3.AddDate(0, 0, 6)
-	for _, pair := range [][2]any{
-		{"advent-ember-wednesday", adventEmberWed},
-		{"advent-ember-friday", adventEmberFri},
-		{"advent-ember-saturday", adventEmberSat},
-	} {
-		label := pair[0].(string)
-		dt := pair[1].(time.Time)
-		feasts = append(feasts, &models.Feast{
-			ID:       label,
-			Name:     titleCase(strings.ReplaceAll(label, "-", " ")),
-			Rank:     models.PrivilegedFeria,
-			Color:    models.Violet,
-			Category: models.CategoryFeria,
-			Month:    int(dt.Month()),
-			Day:      dt.Day(),
-		})
-	}
 
 	// September Ember Days: Wed, Fri, Sat after Sep 14 (Holy Cross)
 	sep15 := time.Date(year, 9, 15, 0, 0, 0, 0, time.UTC)
-	daysToWed := (3 - int(sep15.Weekday()) + 7) % 7 // Wednesday = 3 in Go
-	if daysToWed == 0 && sep15.Weekday() != time.Wednesday {
-		daysToWed = 7
-	}
+	daysToWed := (int(time.Wednesday) - int(sep15.Weekday()) + 7) % 7
 	sepEmberWed := sep15.AddDate(0, 0, daysToWed)
-	sepEmberFri := sepEmberWed.AddDate(0, 0, 2)
-	sepEmberSat := sepEmberWed.AddDate(0, 0, 3)
-	for _, pair := range [][2]any{
-		{"september-ember-wednesday", sepEmberWed},
-		{"september-ember-friday", sepEmberFri},
-		{"september-ember-saturday", sepEmberSat},
+
+	var feasts []*models.Feast
+	for _, ember := range []struct {
+		season    string
+		wednesday time.Time
+	}{
+		{"advent", adventEmberWed},
+		{"september", sepEmberWed},
 	} {
-		label := pair[0].(string)
-		dt := pair[1].(time.Time)
-		feasts = append(feasts, &models.Feast{
-			ID:       label,
-			Name:     titleCase(strings.ReplaceAll(label, "-", " ")),
-			Rank:     models.PrivilegedFeria,
-			Color:    models.Violet,
-			Category: models.CategoryFeria,
-			Month:    int(dt.Month()),
-			Day:      dt.Day(),
-		})
+		for _, offset := range []int{0, 2, 3} {
+			date := ember.wednesday.AddDate(0, 0, offset)
+			label := ember.season + "-ember-" + strings.ToLower(date.Weekday().String())
+			feasts = append(feasts, &models.Feast{
+				ID:       label,
+				Name:     titleCase(strings.ReplaceAll(label, "-", " ")),
+				Rank:     models.PrivilegedFeria,
+				Color:    models.Violet,
+				Category: models.CategoryFeria,
+				Month:    int(date.Month()),
+				Day:      date.Day(),
+			})
+		}
 	}
 
 	return feasts
@@ -570,7 +542,7 @@ func isLeapYear(year int) bool {
 // Roman bissextile handling: in leap years, fixed feasts from Feb 24-28
 // are observed one civil day later.
 func adjustFixedDateForLeapYear(year, month, day int, feastID string) (int, int) {
-	if strings.HasPrefix(feastID, "vigil-") || strings.HasPrefix(feastID, "vigil-of-") {
+	if strings.HasPrefix(feastID, "vigil-") {
 		return month, day
 	}
 	if month == 2 && day >= 24 && day <= 28 && isLeapYear(year) {
@@ -615,10 +587,7 @@ func resolveFeastDate(feast *models.Feast, year int, easter time.Time, moveable 
 			parts := strings.Split(feast.DateRule, "-")
 			idx, _ := strconv.Atoi(parts[len(parts)-1])
 			epiphany := time.Date(year, 1, 6, 0, 0, 0, 0, time.UTC)
-			daysUntilSunday := (7 - int(epiphany.Weekday())) % 7
-			if daysUntilSunday == 0 {
-				daysUntilSunday = 7
-			}
+			daysUntilSunday := 7 - int(epiphany.Weekday())
 			return epiphany.AddDate(0, 0, daysUntilSunday+(idx-1)*7)
 		}
 
@@ -873,7 +842,7 @@ func buildCalendarYear(year int, feasts []*models.Feast, penitentialRules []peni
 	// Generate computed Sundays
 	computedSundays := epiphanySundayFeasts(year, moveable.Septuagesima)
 	computedSundays = append(computedSundays, anticipatedEpiphanySundayFeast(moveable)...)
-	computedSundays = append(computedSundays, adventSundayFeasts(moveable)...)
+	computedSundays = append(computedSundays, adventSundayFeasts()...)
 	computedSundays = append(computedSundays, eastertideSundayFeasts(moveable.Easter)...)
 	computedSundays = append(computedSundays, pentecostSundayFeasts(moveable.Easter, moveable.Advent1)...)
 	computedSundays = append(computedSundays, nativityOctaveSundayFeast(year))

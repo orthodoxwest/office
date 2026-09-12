@@ -3,6 +3,7 @@ package office
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -48,6 +49,29 @@ func TestConclusionRefForUsesRecordedForm(t *testing.T) {
 				t.Errorf("conclusionRefFor(%q) = %q, want %q", tt.sourceRef, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestCorpusChristiVespersCollectInheritsConclusion(t *testing.T) {
+	corpus, err := texts.LoadTexts("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := &models.CalendarDay{
+		Date:        time.Date(2026, 6, 11, 0, 0, 0, 0, time.UTC),
+		Season:      models.Pentecost,
+		Celebration: &models.Feast{ID: "corpus-christi", Category: models.CategoryLord},
+	}
+	const conclusion = "shared/formulas/collect-conclusion-who-livest"
+	for _, first := range []bool{true, false} {
+		day.FirstVespers = first
+		collect := resolveHourElement(day, "vespers", HourElement{Type: "proper-collect", Ref: "collect"}, corpus)
+		if collect.SourceRef != "proper/corpus-christi/collect-vespers" {
+			t.Fatalf("first=%v: unexpected collect source %q", first, collect.SourceRef)
+		}
+		if !strings.HasSuffix(collect.Text, "\n"+corpus.Get(conclusion)) || !slices.Contains(collect.SourceRefs, conclusion) {
+			t.Errorf("first=%v: aliased collect must render and record the canonical collect's conclusion", first)
+		}
 	}
 }
 

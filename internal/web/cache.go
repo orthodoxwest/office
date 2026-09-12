@@ -1,6 +1,7 @@
 package web
 
 import (
+	"slices"
 	"sync"
 
 	"github.com/orthodoxwest/office/internal/calendar"
@@ -59,6 +60,10 @@ func (c *yearCache) entry(year int) (*yearEntry, error) {
 	defer c.mu.Unlock()
 
 	if e, ok := c.entries[year]; ok {
+		// A frequently read year should survive browsing older years.
+		i := slices.Index(c.order, year)
+		copy(c.order[i:], c.order[i+1:])
+		c.order[len(c.order)-1] = year
 		return e, nil
 	}
 

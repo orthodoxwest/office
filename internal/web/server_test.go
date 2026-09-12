@@ -155,3 +155,17 @@ func TestHandle404DoesNotShowVettingBanner(t *testing.T) {
 		t.Fatal("404 page should not show the vetting banner")
 	}
 }
+
+func TestCalendarRejectsExtraPathSegments(t *testing.T) {
+	s, err := New("../../data", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{"/calendar/2026/extra", "/calendar/not-a-year/extra"} {
+		rec := httptest.NewRecorder()
+		s.handleCalendar(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		if rec.Code != http.StatusNotFound {
+			t.Errorf("%s: status = %d, want 404", path, rec.Code)
+		}
+	}
+}
