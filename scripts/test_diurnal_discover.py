@@ -2,10 +2,15 @@
 """Offline unit tests for diurnal-discover.py."""
 
 import importlib.util
+import copy
+import hashlib
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).with_name("diurnal-discover.py")
@@ -103,11 +108,22 @@ class PromptTests(unittest.TestCase):
     def test_prompt_defines_printed_cross_references_and_extra(self):
         prompt_text = discover.build_prompt(dossier())
         for wanted in ("slot-1", "proper/st-example/collect", "printed=false",
-                       "all from the Common", "extra", "stop before its conclusion cue"):
+                       "all from the Common", "extra", "stop before its conclusion cue",
+                       "own heading", "neighboring feast's Common reference"):
             self.assertIn(wanted, prompt_text)
+        temporal = {**dossier(), "month": None, "day": None}
+        self.assertNotIn("None/None", discover.build_prompt(temporal))
 
 
 class GateTests(unittest.TestCase):
+    def test_uncertain_absence_is_held_for_review(self):
+        runner = FakeRunner(primary("", printed=False, confidence="low"))
+        result = discover.process_dossier(dossier(), runner, apply=True,
+                                          apply_text=lambda *a: self.fail("uncertain absence must not write"))
+        self.assertEqual(result["status"], "needs-human")
+        self.assertEqual(result["slots"][0]["decision"], "needs-human")
+        self.assertEqual(runner.secondary_calls, [])
+
     def test_agreement_puts_and_attests_through_applier(self):
         text = "Grant, we beseech thee, a singular grace unto thy servants."
         second = {"found": True, "text": text, "printed_page": "566", "pdf_page": 11,
@@ -158,10 +174,6 @@ class ReportTests(unittest.TestCase):
             self.assertIn(wanted, report)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class NoRenderedEffectTests(unittest.TestCase):
     """The Little Hours derive their versicle from the hour's short responsory,
     so a versicle section written beside one is duplication the engine ignores."""
@@ -203,3 +215,149 @@ class NoRenderedEffectTests(unittest.TestCase):
                 self.assertNotIn("proper/st-example/versicle-terce", ledger.read_text(encoding="utf-8"))
             finally:
                 discover.ROOT, discover.render_hour = original_root, original_render
+
+
+class QueueTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.root = Path(self.directory.name)
+        self.run = self.root / "output" / "discover" / "pilot"
+        self.run.mkdir(parents=True)
+        for name in ("source.pdf", "index.json", "page.png"):
+            (self.root / name).write_text(name)
+        self.dossiers = []
+        for number in range(3):
+            d = dossier()
+            d["feast_id"] = f"st-example-{number}"
+            d["live_sections"] = {}
+            request = d["fallbacks"][0]
+            request["target_key"] = f"proper/{d['feast_id']}/collect"
+            request["current_keys"] = [request["current_key"]]
+            request["contexts"] = [{"date": request["date"], "hour": "lauds", "key": request["current_key"], "tier": "common"}]
+            d["fallback_hashes"] = {request["current_key"]: hashlib.sha256(b"fallback").hexdigest()}
+            d["pages"][0].update(png=str(self.root / "page.png"),
+                                   png_sha256=discover.diurnal_pages.sha256_file(self.root / "page.png"))
+            d["source_witness"] = {
+                "source_pdf": str(self.root / "source.pdf"), "page_key": "test",
+                "pdf_sha256": discover.diurnal_pages.sha256_file(self.root / "source.pdf"),
+                "index_path": str(self.root / "index.json"),
+                "index_sha256": discover.diurnal_pages.sha256_file(self.root / "index.json"),
+            }
+            d["packet_sha256"] = discover.packet_hash(d)
+            discover.write_jsonl(self.run / "dossiers.jsonl", d)
+            self.dossiers.append(d)
+        self.current = copy.deepcopy(self.dossiers)
+        self.runner = FakeRunner(primary("", printed=False))
+        for name, value in (("ROOT", self.root), ("DISCOVER_ROOT", self.run.parent)):
+            p = patch.object(discover, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        for name, value in (("parse_inventory", {}), ("load_feast_catalog", {}),
+                            ("build_dossiers", self.current), ("resolved_corpus_text", "fallback"),
+                            ("ProviderRunner", self.runner)):
+            p = patch.object(discover, name, return_value=value)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def resume(self, *flags):
+        args = discover.build_parser().parse_args(["resume", "pilot", *flags])
+        with redirect_stdout(io.StringIO()):
+            return discover.resume_command(args)
+
+    def test_small_batches_skip_finished_and_hold_uncertainty_until_explicit_retry(self):
+        self.resume("--limit", "1")
+        self.runner.first = primary("", printed=False, confidence="low")
+        self.resume("--limit", "1")
+        self.runner.first = primary("", printed=False)
+        self.resume()
+        self.resume()
+        self.assertEqual(len(self.runner.primary_calls), 3)
+        queue = (self.run / "queue.md").read_text()
+        for wanted in ("Needs review", "proper/st-example-1/collect", "commons/confessor/collect",
+                       "2026-07-17 lauds", "Printed 566 / PDF 11", "page.png", "does not approve the fallback"):
+            self.assertIn(wanted, queue)
+        with self.assertRaises(ValueError):
+            self.resume("--retry")
+        self.resume("--feasts", "st-example-1", "--retry")
+        self.assertEqual(len(self.runner.primary_calls), 4)
+        self.assertEqual(len(discover.latest_results(self.run)), 3)
+        with redirect_stdout(io.StringIO()) as output:
+            discover.report_command("pilot")
+        self.assertIn("Feasts processed: 3", output.getvalue())
+
+    def test_source_changes_invalidate_even_completed_searches(self):
+        self.resume()
+        for name in ("source.pdf", "index.json", "page.png"):
+            path = self.root / name
+            original = path.read_bytes()
+            path.write_text("changed")
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "source file changed"):
+                self.resume()
+            path.write_bytes(original)
+        self.assertEqual(len(self.runner.primary_calls), 3)
+
+    def test_missing_pages_are_visible_but_do_not_consume_readers(self):
+        d = self.dossiers[0]
+        d["pages"] = []
+        d["packet_sha256"] = discover.packet_hash(d)
+        (self.run / "dossiers.jsonl").write_text("".join(json.dumps(d) + "\n" for d in self.dossiers))
+        self.resume()
+        self.resume()
+        self.assertEqual(len(self.runner.primary_calls), 2)
+        self.assertIn("No pages — source research needed", (self.run / "queue.md").read_text())
+
+    def test_changed_saved_task_or_concurrent_reader_is_rejected(self):
+        with (self.run / ".resume.lock").open("w") as lock:
+            discover.fcntl.flock(lock, discover.fcntl.LOCK_EX | discover.fcntl.LOCK_NB)
+            with self.assertRaisesRegex(ValueError, "another reader"):
+                self.resume()
+        self.dossiers[0]["name"] = "Changed saved request"
+        (self.run / "dossiers.jsonl").write_text("".join(json.dumps(d) + "\n" for d in self.dossiers))
+        with self.assertRaisesRegex(ValueError, "dossier changed"):
+            self.resume()
+        self.assertEqual(self.runner.primary_calls, [])
+
+    def test_changed_appointment_or_wording_blocks_reader(self):
+        d = self.current[0]
+        for field, changed in (("proper_name", "Different"), ("live_sections", {"collect": "new proper"})):
+            original = d[field]
+            d[field] = changed
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                self.resume()
+            d[field] = original
+        d["fallbacks"][0]["contexts"][0]["hour"] = "vespers"
+        with self.assertRaisesRegex(ValueError, "appointment context"):
+            self.resume()
+        self.current[0] = copy.deepcopy(self.dossiers[0])
+        with patch.object(discover, "resolved_corpus_text", return_value="changed"), self.assertRaisesRegex(ValueError, "fallback wording"):
+            self.resume()
+        self.assertEqual(self.runner.primary_calls, [])
+
+    def test_saved_positive_still_needs_new_readers_and_agreement_to_apply(self):
+        d = self.dossiers[0]
+        discover.write_jsonl(self.run / "results.jsonl", {
+            "packet_sha256": d["packet_sha256"], "status": "processed",
+            "slots": [{"decision": "printed-proper"}],
+        })
+        self.runner.first = primary("Grant a singular grace to thy servants.")
+        self.runner.second = {"found": True, "text": "An entirely different reading.",
+                              "printed_page": "566", "pdf_page": 11, "confidence": "high"}
+        with patch.object(discover, "CorpusApplier") as applier:
+            self.resume("--feasts", d["feast_id"], "--apply")
+            applier.return_value.assert_not_called()
+        self.assertEqual(len(self.runner.primary_calls), 1)
+        self.assertEqual(len(self.runner.secondary_calls), 1)
+        self.assertEqual(discover.latest_results(self.run)[d["packet_sha256"]]["status"], "needs-human")
+
+    def test_slot_filter_does_not_confuse_first_and_second_vespers(self):
+        d = self.dossiers[0]
+        d["fallbacks"] = [{"target_section": section} for section in (
+            "chapter-lauds", "chapter-first-vespers", "chapter-vespers")]
+        selected = discover.select_slots([d], {"chapter-vespers"})
+        self.assertEqual(selected[0]["fallbacks"], [{"target_section": "chapter-vespers"}])
+        self.assertEqual(discover.select_slots([d], {"collect"}), [])
+
+
+if __name__ == "__main__":
+    unittest.main()
