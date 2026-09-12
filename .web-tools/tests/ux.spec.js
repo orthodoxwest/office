@@ -2383,7 +2383,7 @@ async function decodeSharePlate(page, px) {
     // theme's colours: the custom properties they resolve through live on
     // :root, which does not come along with the cloned node.
     const root = getComputedStyle(document.documentElement);
-    for (const prop of ["--qr-plate", "--qr-ink", "--qr-emblem-line", "--qr-emblem-ink"]) {
+    for (const prop of ["--qr-plate", "--qr-ink", "--qr-emblem-line", "--qr-emblem-hi", "--qr-emblem-lo"]) {
       svg.style.setProperty(prop, root.getPropertyValue(prop));
     }
     const url = URL.createObjectURL(

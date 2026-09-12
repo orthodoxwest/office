@@ -109,8 +109,14 @@
      saved or printed copy of the SVG still renders without this file. */
   --qr-plate: #fdfaf3;
   --qr-ink: #2b2520;
-  --qr-emblem-line: var(--gold-line);
-  --qr-emblem-ink: var(--gold);
+  /* The medallion's rules and its gold leaf. Declared here and deliberately
+     NOT restated in either dark block: the plate they sit on is light in both
+     themes, so they take the Nave gilding in both. Following --ornament would
+     hand them Apse's brighter leaf — which is tuned for a dark ground and
+     goes pale on vellum. Same reasoning as the plate above. */
+  --qr-emblem-line: #c9ac72;
+  --qr-emblem-hi: #b98d3c;
+  --qr-emblem-lo: #7d5c1c;
 }
 
 :root[data-theme="light"] {

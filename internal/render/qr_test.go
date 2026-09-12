@@ -2,7 +2,9 @@ package render
 
 import (
 	"fmt"
+	"math"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -11,26 +13,97 @@ import (
 
 const testShareURL = "https://office.fly.dev/"
 
-// moduleRect matches one data module's <rect x="N" y="N"/>. Geometry comes
-// from the SVG's own stylesheet, so the element carries coordinates only.
-var moduleRect = regexp.MustCompile(`<rect x="(\d+)" y="(\d+)"/>`)
+// moduleMove matches the absolute move that opens each module's subpath.
+// Modules are merged into continuous strokes, so there is no per-module
+// element to count: the subpaths of the single <path> are the modules.
+var moduleMove = regexp.MustCompile(`M(\d*\.?\d+) (\d*\.?\d+)`)
 
 // drawnModules reads back the set of data modules the SVG actually paints,
-// in plate coordinates.
+// in plate coordinates. Each subpath opens at the module's top edge — x is
+// px or px+radius, y is px exactly — so flooring both recovers the cell.
+// See the contract on qrModulePath.
 func drawnModules(t *testing.T, svg string) map[[2]int]bool {
 	t.Helper()
+	start := strings.Index(svg, `class="qr-modules" d="`)
+	if start < 0 {
+		t.Fatal("no module path in the SVG")
+	}
+	d := svg[start:]
+	d = d[:strings.Index(d, `"/>`)]
+
 	drawn := make(map[[2]int]bool)
-	for _, m := range moduleRect.FindAllStringSubmatch(svg, -1) {
-		var x, y int
-		if _, err := fmt.Sscan(m[1], &x); err != nil {
+	for _, m := range moduleMove.FindAllStringSubmatch(d, -1) {
+		x, err := strconv.ParseFloat(m[1], 64)
+		if err != nil {
 			t.Fatalf("parsing x from %q: %v", m[0], err)
 		}
-		if _, err := fmt.Sscan(m[2], &y); err != nil {
+		y, err := strconv.ParseFloat(m[2], 64)
+		if err != nil {
 			t.Fatalf("parsing y from %q: %v", m[0], err)
 		}
-		drawn[[2]int{x, y}] = true
+		if y != math.Trunc(y) {
+			t.Fatalf("subpath %q should open on a module's top edge, but y is fractional", m[0])
+		}
+		drawn[[2]int{int(math.Floor(x)), int(y)}] = true
 	}
 	return drawn
+}
+
+// TestQRModulesMergeIntoStrokes guards the artwork's defining property: a
+// corner is rounded only where the ink actually turns. If every corner
+// rounded, adjacent modules would pinch into beads instead of reading as one
+// stroke; if none did, this would be a plain grid again.
+func TestQRModulesMergeIntoStrokes(t *testing.T) {
+	svg, err := QRCodeSVG(testShareURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	code, err := qr.Encode(testShareURL, qr.H)
+	if err != nil {
+		t.Fatal(err)
+	}
+	emblemLow := (code.Size-qrEmblemSize)/2 + qrQuietZone
+
+	// An isolated module is a disc: four arcs. A module in the middle of a
+	// horizontal run turns nowhere along that run and has none.
+	var isolated, interior int
+	for y := range code.Size {
+		for x := range code.Size {
+			if !qrDark(code, emblemLow, x, y) {
+				continue
+			}
+			up := qrDark(code, emblemLow, x, y-1)
+			down := qrDark(code, emblemLow, x, y+1)
+			left := qrDark(code, emblemLow, x-1, y)
+			right := qrDark(code, emblemLow, x+1, y)
+			switch {
+			case !up && !down && !left && !right:
+				isolated++
+			case left && right && !up && !down:
+				interior++
+			}
+		}
+	}
+	if isolated == 0 || interior == 0 {
+		t.Fatalf("test needs both shapes present in the sample symbol "+
+			"(isolated=%d, run-interior=%d)", isolated, interior)
+	}
+
+	// Four arcs per isolated module, none for a run interior. Counting arcs
+	// in the whole path pins the rule without re-deriving the geometry.
+	start := strings.Index(string(svg), `class="qr-modules" d="`)
+	d := string(svg)[start:]
+	d = d[:strings.Index(d, `"/>`)]
+	arcs := strings.Count(d, "A")
+	if arcs < 4*isolated {
+		t.Errorf("path has %d arcs, fewer than the %d the %d isolated modules alone require",
+			arcs, 4*isolated, isolated)
+	}
+	// Every module would carry four arcs if corners rounded unconditionally.
+	if ceiling := 4 * len(drawnModules(t, string(svg))); arcs >= ceiling {
+		t.Errorf("path has %d arcs of a possible %d: corners are rounding even where "+
+			"a run continues, so modules will pinch instead of merging", arcs, ceiling)
+	}
 }
 
 // TestQRCodeSVGPaintsTheSymbol is the correctness test for the artwork: every
@@ -134,9 +207,17 @@ func TestQRCodeSVGFindersAndEmblem(t *testing.T) {
 		t.Errorf("expected 3 finder pupils, got %d", n)
 	}
 
+	// The medallion is inscribed in the knockout: concentric with it, and
+	// never wider, or it would cover live modules.
 	emblemLow := (code.Size-qrEmblemSize)/2 + qrQuietZone
-	if want := fmt.Sprintf(`class="qr-emblem-ground" x="%.3f" y="%.3f"`, float64(emblemLow), float64(emblemLow)); !strings.Contains(string(svg), want) {
-		t.Errorf("emblem should sit on the knockout (%s)", want)
+	centre := float64(emblemLow) + qrEmblemSize/2.0
+	for _, want := range []string{
+		fmt.Sprintf(`class="qr-medallion" cx="%.3f" cy="%.3f" r="%.3f"`, centre, centre, qrEmblemSize/2.0),
+		fmt.Sprintf(`class="qr-medallion-inner" cx="%.3f" cy="%.3f" r="%.3f"`, centre, centre, qrEmblemSize/2.0-qrMedallionGap),
+	} {
+		if !strings.Contains(string(svg), want) {
+			t.Errorf("medallion should sit concentric in the knockout (%s)", want)
+		}
 	}
 	// The knockout is centred, so the margin either side must be equal.
 	if lead, trail := emblemLow-qrQuietZone, code.Size-qrEmblemSize-(emblemLow-qrQuietZone); lead != trail {
@@ -173,7 +254,10 @@ func TestQRCodeSVGSelfContained(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"<style>", "var(--qr-plate,#", "var(--qr-ink,#", "width:1px;height:1px"} {
+	for _, want := range []string{
+		"<style>", "var(--qr-plate,#", "var(--qr-ink,#",
+		"var(--qr-emblem-line,#", "<defs>", "var(--qr-emblem-hi,#", "url(#qr-leaf)",
+	} {
 		if !strings.Contains(string(svg), want) {
 			t.Errorf("SVG should carry %q so it renders without the site stylesheet", want)
 		}
