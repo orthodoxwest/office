@@ -22,6 +22,69 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// Contour-fitting deliberately puts text inside the initial's rectangular
+// advance box. Compare the two painted layers instead of treating that box
+// as ink. Decode screenshots in the browser using public canvas APIs.
+async function expectInitialInkClear(page, specimen, capSelector, label) {
+  await specimen.evaluate(el => el.setAttribute("data-ink-specimen", ""));
+  const root = "[data-ink-specimen]";
+  const layers = [];
+  try {
+    for (const cap of [true, false]) {
+      const style = await page.addStyleTag({ content: `
+        ${root}, ${root} * { color: ${cap ? "transparent" : "#0000ff"} !important; }
+        ${root} ${capSelector}::first-letter { background: none !important; color: ${cap ? "#ff0000" : "transparent"} !important; }
+        header, nav, .hour-progress { visibility: hidden !important; }
+      ` });
+      try {
+        // Whole-page coordinates remain stable when a specimen exceeds the
+        // mobile visual viewport; a clipped element screenshot can scroll it.
+        layers.push((await page.screenshot({ fullPage: true, animations: "disabled" })).toString("base64"));
+      } finally {
+        await style.evaluate(el => el.remove());
+      }
+    }
+    const result = await page.evaluate(async encoded => {
+      const decode = async data => {
+        const img = new Image();
+        img.src = "data:image/png;base64," + data;
+        await img.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const context = canvas.getContext("2d");
+        context.drawImage(img, 0, 0);
+        return context.getImageData(0, 0, img.width, img.height);
+      };
+      const [cap, text] = await Promise.all(encoded.map(decode));
+      if (cap.width !== text.width || cap.height !== text.height) return { changed: true };
+      const red = (x, y) => {
+        if (x < 0 || y < 0 || x >= cap.width || y >= cap.height) return false;
+        const i = (y * cap.width + x) * 4;
+        return cap.data[i] > 170 && cap.data[i + 1] < 100 && cap.data[i + 2] < 100;
+      };
+      let contacts = 0, capPixels = 0, textPixels = 0;
+      for (let y = 0; y < text.height; y++) {
+        for (let x = 0; x < text.width; x++) {
+          const i = (y * text.width + x) * 4;
+          if (red(x, y)) capPixels++;
+          if (text.data[i] < 100 && text.data[i + 1] < 100 && text.data[i + 2] > 170) {
+            textPixels++;
+            if (red(x, y) || red(x - 1, y) || red(x + 1, y) || red(x, y - 1) || red(x, y + 1)) contacts++;
+          }
+        }
+      }
+      return { contacts, capPixels, textPixels };
+    }, layers);
+    expect(result.changed, label).toBeUndefined();
+    expect(result.capPixels, label).toBeGreaterThan(50);
+    expect(result.textPixels, label).toBeGreaterThan(50);
+    expect(result.contacts, label).toBe(0);
+  } finally {
+    await specimen.evaluate(el => el.removeAttribute("data-ink-specimen"));
+  }
+}
+
 // The server renders an undated home request for its own current local day.
 // Read that rendered value before installing a browser clock, so tests of a
 // foreground page crossing midnight do not assume a particular CI date.
@@ -1208,11 +1271,18 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
   ).toBeVisible();
 });
 
-test("short openings keep one baseline and adapt to the reading measure", async ({ page }) => {
+test("short prose openings keep one baseline and adapt to the reading measure", async ({ page }) => {
+  await page.route("**/lauds/2026-06-18", async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      '$1<div class="elements"><div class="chapter"><div class="liturgical-block"><p class="plain-line">O God, thou art my God <span class="mediant">*</span> early will I seek thee.</p></div></div></div>$2',
+    ) });
+  });
   for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openDatedPage(page, "/lauds/2026-06-18", theme);
-    const opening = page.locator(".psalm-verses .verse").filter({ hasText: /^O God, thou art my God/ });
+    const opening = page.locator(".chapter .plain-line");
     const originalText = await opening.textContent();
     for (const [width, raised] of [[1280, true], [320, false], [430, true]]) {
       await page.setViewportSize({ width, height: 900 });
@@ -1259,6 +1329,63 @@ test("short openings keep one baseline and adapt to the reading measure", async 
   }
 });
 
+test("short psalm openings keep the same initial rank as adjacent psalms", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-09-12", theme);
+    const psalms = page.locator(".psalm");
+    const opening = psalms.nth(0).locator(".verse").first();
+    const following = psalms.nth(1).locator(".verse").first();
+    const original = await opening.textContent();
+    await expect(psalms.nth(0)).toContainText("Psalm 145b");
+    await expect(psalms.nth(1)).toContainText("Psalm 146");
+    // Returning to wide after narrow exercises removal and restoration of
+    // the discretionary break, including font-size changes at each width.
+    for (const width of [1280, 390, 768, 320, 1280]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const size of ["normal", "large"]) {
+        await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+        await expect.poll(() => opening.evaluate(el => ({
+          divided: el.classList.contains("initial-divided"),
+          raised: el.classList.contains("initial-raised"),
+        }))).toEqual({ divided: width >= 768, raised: false });
+        await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
+        const geometry = await opening.evaluate(el => {
+          const cap = getComputedStyle(el, "::first-letter");
+          const mediant = el.querySelector(".mediant");
+          const range = document.createRange();
+          const after = mediant.nextSibling;
+          const start = after.textContent.search(/\S/);
+          range.setStart(after, start);
+          range.setEnd(after, start + 1);
+          const secondHalf = range.getBoundingClientRect();
+          range.selectNodeContents(el.querySelector(".initial-word"));
+          const firstWord = range.getBoundingClientRect();
+          const rect = el.getBoundingClientRect();
+          return {
+            size: cap.fontSize,
+            initial: cap.initialLetter,
+            height: rect.height,
+            leading: parseFloat(getComputedStyle(el).lineHeight),
+            halfVerseGap: secondHalf.top - firstWord.top,
+            nextTop: el.nextElementSibling.getBoundingClientRect().top,
+            bottom: rect.bottom,
+          };
+        });
+        expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
+        expect(geometry.initial).toBe("2");
+        expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading * 1.9);
+        expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
+        if (width >= 768) {
+          expect(geometry.height).toBeCloseTo(geometry.leading * 2, 0);
+          expect(geometry.halfVerseGap).toBeCloseTo(geometry.leading, 0);
+        }
+        expect(await opening.textContent()).toBe(original);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+      }
+    }
+  }
+});
+
 test("short responsories retain a raised initial when their text wraps", async ({ page }) => {
   for (const theme of ["light", "dark"]) {
     await openDatedPage(page, "/lauds/2026-06-18", theme);
@@ -1283,7 +1410,7 @@ test("short responsories retain a raised initial when their text wraps", async (
 });
 
 test("optical initial profiles preserve words and give subsequent lines their own clearance", async ({ page }) => {
-  const words = ["Almighty", "Lord", "The", "O Lord", "I will", "With", "Come"];
+  const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
   const sentence = " hear our prayer, and let our cry come unto thee. Be merciful unto us, O Lord, and guide our steps in the way of peace.";
   const fixture = words.map(word => `<div class="chapter"><div class="liturgical-block"><p class="plain-line">${word}${sentence}</p></div></div>`).join("");
   await page.route("**/vespers/2026-06-18", async route => {
@@ -1336,10 +1463,17 @@ test("optical initial profiles preserve words and give subsequent lines their ow
         });
         expect(geometry.caps).toBe("all-small-caps");
         expect(geometry.rows.length).toBeGreaterThanOrEqual(2);
-        expect(geometry.rows[1]).toBeGreaterThanOrEqual(geometry.capRight - .5);
         if (["A", "L"].includes(geometry.initial)) {
           // First-word tucking does not pull the second row under the foot.
           expect(geometry.first).toBeLessThan(geometry.rows[1] - 1);
+        }
+        if (["F", "P", "T", "V", "W", "Y"].includes(geometry.initial)) {
+          expect(geometry.rows[1]).toBeLessThan(geometry.first - 2);
+        }
+        if (geometry.initial === "Q" && width === 320) {
+          // The tail continues below the second baseline; keep the next row
+          // beside it before later rows return to the paragraph edge.
+          expect(geometry.rows[2]).toBeGreaterThanOrEqual(geometry.capRight - .5);
         }
         if (geometry.standalone) {
           expect(geometry.first).toBeGreaterThan(geometry.capRight + 1);
@@ -1349,6 +1483,7 @@ test("optical initial profiles preserve words and give subsequent lines their ow
         }
       }
       expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+      await expectInitialInkClear(page, page.locator(".elements"), ".chapter .plain-line:first-child", `${theme}/${width} alphabet ink clearance`);
     }
   }
 });
@@ -1395,11 +1530,7 @@ test("Prime hymn initial clears its second metrical line on narrow pages", async
           geometry.secondLine.top < geometry.cap.bottom - 0.5 &&
           geometry.secondLine.bottom > geometry.cap.top + 0.5;
         if (yOverlap) {
-          // Cap still occupies this row; the glyph must sit to its right.
-          expect(
-            geometry.secondLine.left,
-            `${label} second-line glyph clears cap`,
-          ).toBeGreaterThanOrEqual(geometry.cap.right - 0.5);
+          await expectInitialInkClear(page, page.locator(".hymn-stanza-opening").first(), ".hymn-line:first-child", `${label} second-line ink clears cap`);
         } else {
           // First metrical line wrapped through both drop-cap rows; line 2
           // returns to the stanza edge, not the ordinary hang inset.
@@ -2455,18 +2586,24 @@ test("wide and narrow initials clear text in native and fallback layouts", async
             opening.textContent = letter + "ith all my heart I will give thanks unto the Lord, and tell of all his wonderful works. With all my heart I will give thanks unto the Lord.";
             opening.dataset.initial = letter;
             const node = opening.firstChild;
-            const glyph = index => {
+            const word = node.splitText(1);
+            word.splitText(3);
+            const incipit = document.createElement("span");
+            incipit.className = "initial-word";
+            opening.insertBefore(incipit, word);
+            incipit.appendChild(word);
+            const glyph = (text, index) => {
               const range = document.createRange();
-              range.setStart(node, index);
-              range.setEnd(node, index + 1);
+              range.setStart(text, index);
+              range.setEnd(text, index + 1);
               const { left, right, top, bottom } = range.getBoundingClientRect();
               return { left, right, top, bottom };
             };
-            const cap = glyph(0);
-            const following = glyph(1);
+            const cap = glyph(node, 0);
+            const following = glyph(word, 0);
             return {
               cap, following,
-              last: glyph(node.length - 1),
+              last: glyph(opening.lastChild, opening.lastChild.length - 1),
               next: psalm.querySelector(".verse.numbered").getBoundingClientRect().top,
               gloria: psalm.parentElement.querySelector(".gloria-patri").getBoundingClientRect().left +
                 parseFloat(getComputedStyle(psalm.parentElement.querySelector(".gloria-patri")).paddingLeft),
