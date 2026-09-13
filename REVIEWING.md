@@ -52,10 +52,12 @@ owner explicitly so a correct principal-office text cannot hide an incorrect
 commemoration. Add a source citation and representative and boundary cases with
 each repair; never regenerate these expectations from current output.
 
-Run `go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration'`.
+Run `go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration|TestCalendarCompositionRequirements'`.
 The Sunday commemoration rule also traverses complete calendars for 2026, 2027,
 and 2032, with the Trinity/Corpus Christi octave exceptions kept outside its
-ordinary-Sunday scope. These tests run in `make check`. Their passing assertions
+ordinary-Sunday scope. `TestCalendarCompositionRequirements` also composes all seven hours on every
+date in those years, including unnamed ferias, and checks the reviewed ordinary
+weekday Vespers rule. These tests run in `make check`. Their passing assertions
 do not certify untested requirements or future-ordo agreement.
 
 The ingestion resolution inventory deliberately excludes unnamed owners. A

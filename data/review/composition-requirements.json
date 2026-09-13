@@ -76,5 +76,67 @@
         "before_slot": "commemoration-collect"
       }
     ]
+  },
+  {
+    "id": "ordinary-vespers-responsories",
+    "source": "Monastic Diurnal pp. 114, 121, 125, 131, 135, 139, 144, 246; 2026 ordo p. 80. Weekdays Monday-Friday share the response; Saturday and seasons retain their appointments.",
+    "cases": [
+      {
+        "date": "2026-07-13",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-monday",
+        "contains": "I will bless the Lord"
+      },
+      {
+        "date": "2026-08-11",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-tuesday",
+        "contains": "I will bless the Lord"
+      },
+      {
+        "date": "2026-09-09",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-wednesday",
+        "contains": "I will bless the Lord"
+      },
+      {
+        "date": "2026-09-17",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-thursday",
+        "contains": "I will bless the Lord"
+      },
+      {
+        "date": "2026-11-27",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-friday",
+        "contains": "I will bless the Lord"
+      },
+      {
+        "date": "2026-09-13",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory",
+        "contains": "R. O Lord."
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "ordinary/vespers/short-responsory-saturday",
+        "contains": "Great is our Lord"
+      },
+      {
+        "date": "2026-03-07",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "seasonal/lent/short-responsory-first-vespers",
+        "contains": "He shall defend thee"
+      }
+    ]
   }
 ]
