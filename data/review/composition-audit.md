@@ -20,10 +20,11 @@ and calendar collisions; they do not establish agreement with future ordos.
 | All Saints and its octave use their proper little-hour versicles | Diurnal pp. 640–641; 2026 ordo pp. 112–113. November 1 and 3–7, with November 8 Sunday as an exclusion control. November 2 Office of the Dead is separate. |
 | II Sunday after Easter Sext and None use their explicit chapters | Diurnal p. 378; 2026 ordo p. 58. April 26 source and chapter-before-versicle assertions. Terce is excluded pending clarification. |
 
+| Sunday within the Nativity octave retains its proper Vespers, including when observed on a weekday | Diurnal pp. 184–185, 205–206; 2026 ordo p. 128. December 29 chapter/responsory/hymn/versicle and December 28 following-office commemoration antiphon. |
+
 The earlier Sunday Lauds repair (#332) has its own direct appointment tests.
 No row above certifies the entire hour or the entire source page.
 
-| Sunday within the Nativity octave retains its proper Vespers, including when observed on a weekday | Diurnal pp. 184–185, 205–206; 2026 ordo p. 128. December 29 chapter/responsory/hymn/versicle and December 28 following-office commemoration antiphon. |
 
 ## Source questions held separately
 
