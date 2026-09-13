@@ -447,5 +447,252 @@
         "ref": "proper/st-joseph/chapter-terce"
       }
     ]
+  },
+  {
+    "id": "feast-little-hour-propers",
+    "source": "Monastic Diurnal pp. 377-378 (II Easter Sunday), 610-611 (St Michael), 640-641 (All Saints); 2026 ordo pp. 58, 102, 112-113. November 2 has the separate Office of the Dead and November 8 the Sunday office. April 26 Terce remains pending #335.",
+    "cases": [
+      {
+        "date": "2026-09-29",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-09-29",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2032-09-29",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-11-01",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-03",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-04",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-05",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-06",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-07",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-terce"
+      },
+      {
+        "date": "2026-11-08",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "ordinary/terce/versicle-sunday"
+      },
+      {
+        "date": "2026-09-29",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-09-29",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2032-09-29",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-11-01",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-03",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-04",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-05",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-06",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-07",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-sext"
+      },
+      {
+        "date": "2026-11-08",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "ordinary/sext/versicle"
+      },
+      {
+        "date": "2026-09-29",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-09-29",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2032-09-29",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/dedication-st-michael/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-11-01",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-03",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-04",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-05",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-06",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-07",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/all-saints/versicle-none"
+      },
+      {
+        "date": "2026-11-08",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "ordinary/none/versicle"
+      },
+      {
+        "date": "2026-04-26",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/easter-sunday-2/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-26",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/easter-sunday-2/chapter-none",
+        "before_slot": "versicle"
+      }
+    ]
+  },
+  {
+    "id": "nativity-octave-sunday-vespers",
+    "source": "Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128, December 29 Vespers of the Sunday within the octave. Proper texts must not fall through to the weekday ordinary.",
+    "cases": [
+      {
+        "date": "2026-12-29",
+        "hour": "vespers",
+        "slot": "chapter",
+        "ref": "proper/nativity-sunday-within-octave/chapter-vespers"
+      },
+      {
+        "date": "2026-12-29",
+        "hour": "vespers",
+        "slot": "short-responsory",
+        "ref": "proper/nativity-sunday-within-octave/short-responsory-vespers"
+      },
+      {
+        "date": "2026-12-29",
+        "hour": "vespers",
+        "slot": "hymn",
+        "ref": "proper/nativity-sunday-within-octave/hymn-vespers"
+      },
+      {
+        "date": "2026-12-29",
+        "hour": "vespers",
+        "slot": "versicle",
+        "ref": "proper/nativity-sunday-within-octave/versicle-vespers"
+      },
+      {
+        "date": "2026-12-28",
+        "hour": "vespers",
+        "commemoration_owner": "nativity-sunday-within-octave",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/nativity-sunday-within-octave/magnificat-antiphon-first",
+        "contains": "While all things"
+      }
+    ]
   }
 ]

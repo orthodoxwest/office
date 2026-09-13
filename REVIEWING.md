@@ -45,6 +45,9 @@ may be an app defect, a printed error, or an unresolved source conflict.
 
 ### Executable composition requirements
 
+The [composition audit checklist](data/review/composition-audit.md) records the
+requirements checked in the repair series and the remaining source-review passes.
+
 `data/review/composition-requirements.json` stores source-backed appointment
 cases. `TestCompositionRequirements` checks the actual composed slot, source,
 optional wording, omission, and relative order. Cases identify a commemoration

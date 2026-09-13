@@ -54,3 +54,15 @@ R. Thanks be to God.
 [collect]
 # SOURCE: draft archdiocesan Vespers book, p. 161 (Second Saturday after Easter)
 O God, who in the humility of thy Son hast raised up a fallen world: grant unto thy faithful people perpetual gladness; that those, whom thou hast delivered from the peril of eternal death, may be brought to the fruition of everlasting joys.
+
+[chapter-sext]
+# SOURCE: diurnal p. 378
+!1 Peter 2:23,24
+But he committed himself to him that judgeth righteously: who his own self bare our sins in his own body on the tree, that we, being dead to sins, should live unto righteousness: * by whose stripes ye were healed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 378
+!1 Peter 2:25
+For ye were as sheep going astray; * but are now returned unto the Shepherd and Bishop of your souls.
+R. Thanks be to God.

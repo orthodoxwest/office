@@ -470,6 +470,9 @@ proper/all-saints/psalm-antiphon-1,8638dd5a4117,draft archdiocesan Vespers book,
 proper/all-saints/psalm-antiphon-2,21e3380a4dde,diurnal,,638,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0682.png
 proper/all-saints/psalm-antiphon-3,e0d099e79783,draft archdiocesan Vespers book,,533,verified,codex,2026-07-18,
 proper/all-saints/psalm-antiphon-5,587d8ce4ce82,draft archdiocesan Lauds book,,596,verified,codex,2026-07-18,
+proper/all-saints/versicle-none,61902d934a08,diurnal,,641,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0685.png
+proper/all-saints/versicle-sext,d391726ed90e,diurnal,,640,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0684.png
+proper/all-saints/versicle-terce,6e4d900a617f,diurnal,,640,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0684.png
 proper/all-souls/benedictus-antiphon,c3836c77f5ad,diurnal,"Lauds of the Dead, Ant. on Benedictus",104*,verified,claude,2026-08-21,
 proper/all-souls/collect,da4ecabf7176,draft archdiocesan Commons Vespers book,,165,verified,codex,2026-07-17,
 proper/all-souls/magnificat-antiphon,5591cbb1c834,diurnal,"Vespers of the Dead, Ant. on Magnificat",75*,verified,claude,2026-08-21,
@@ -662,6 +665,8 @@ proper/corpus-christi/short-responsory-sext,1e4e93b9b52c,diurnal,"Corpus Christi
 proper/corpus-christi/short-responsory-terce,210b7848f3c7,draft Temporal Cycle Vespers book,Saturday within the Octave of Corpus Christi,200-201,verified,codex,2026-07-18,
 proper/corpus-christi/short-responsory-vespers,979bb8cb3d04,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (rubric)
 proper/corpus-christi/versicle-lauds,89b7ed1d753b,Propers of Lauds & Vespers in the Octave of Corpus Christi,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+proper/dedication-st-michael/chapter-none,e2b9014839ad,diurnal,,611,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0655.png
+proper/dedication-st-michael/chapter-sext,f419450c09b6,diurnal,,611,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0655.png
 proper/dedication-st-michael/magnificat-antiphon,0d3e615a365a,diurnal,,612,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0656.png
 proper/dedication-st-michael/versicle-none,9c50d614fe3b,diurnal,,611,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0655.png
 proper/dedication-st-michael/versicle-sext,5798ff53811a,diurnal,,611,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0655.png
@@ -674,6 +679,8 @@ proper/easter-sunday-2/benedictus-antiphon-monday,8e739d29441e,diurnal,"II Week 
 proper/easter-sunday-2/benedictus-antiphon-thursday,24371ce11db7,diurnal,"II Week after the Octave of Easter, Thursday",379,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/benedictus-antiphon-tuesday,966b81b03d41,diurnal,"II Week after the Octave of Easter, Tuesday",379,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/benedictus-antiphon-wednesday,ba67ecaba518,diurnal,"II Week after the Octave of Easter, Wednesday",379,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-2/chapter-none,f9775ece8222,diurnal,,378,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0424.png
+proper/easter-sunday-2/chapter-sext,c476e4044418,diurnal,,378,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0424.png
 proper/easter-sunday-2/magnificat-antiphon,276d1c977e29,diurnal,"II Sunday after Easter, At II Vespers",378,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/magnificat-antiphon-monday,987ff2a205c2,diurnal,"II Week after the Octave of Easter, Monday",379,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/magnificat-antiphon-thursday,fe197f2eaab6,diurnal,"II Week after the Octave of Easter, Thursday",379,verified,grok,2026-08-22,word-for-word from printed page image
@@ -954,6 +961,7 @@ proper/nativity-john-baptist/short-responsory-sext,8ea4d9f01e6c,diurnal,"Nativit
 proper/nativity-john-baptist/short-responsory-terce,5c39815ce1d1,draft archdiocesan Lauds book,Nativity of Saint John Baptist,474,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/benedictus-antiphon,7b5b259fc4af,draft archdiocesan Lauds book,,69,verified,codex,2026-07-18,
 proper/nativity-sunday-within-octave/collect,28a91cdd7e5e,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,73,verified,codex,2026-07-18,Sunday-specific collect checked word for word; distinct 'made worthy' wording preserved
+proper/nativity-sunday-within-octave/short-responsory-vespers,8f9cd55881f4,diurnal,,205,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0251.png
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,71,verified,codex,2026-07-18,Sunday-specific versicle checked word for word
 proper/octave-day-holy-innocents/magnificat-antiphon-first,d0fecbb41021,diurnal,"Octave of the Holy Innocents, At I Vespers",221,verified,grok,2026-08-23,word-for-word from printed page image
 proper/octave-day-st-stephen/collect,de4d55dabcbf,diurnal,Octave of St Stephen,220,verified,grok,2026-08-23,word-for-word from printed page image

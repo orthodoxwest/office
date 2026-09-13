@@ -193,15 +193,22 @@ R. I will worship toward thy holy temple, and praise thy Name.
 # [chapter-ferial-prime]
 # Proper ferial chapter at Prime when the office explicitly supplies one.
 #
-# [chapter-terce]
-# Proper chapter at Terce.
-#
-# [chapter-sext]
-# Proper chapter at Sext.
-#
-# [chapter-none]
-# Proper chapter at None.
-#
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 610: at Terce, Chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
+@use proper/dedication-st-michael/chapter-lauds
+
+[chapter-sext]
+# SOURCE: diurnal p. 611
+!Rev 5:11,12; 7:10
+I heard the voice of many Angels round about the throne and the beasts and the elders: and the number of them was ten thousand times ten thousand, and thousands of thousands; * saying with a loud voice, Salvation to our God.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 611
+!Rev 12:7,8
+There was war in heaven: Michael and his Angels fought against the dragon; and the dragon fought and his angels, and prevailed not; * neither was their place found any more in heaven.
+R. Thanks be to God.
+
 # [chapter-compline]
 # Proper chapter at Compline.
 #
