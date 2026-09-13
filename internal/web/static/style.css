@@ -1590,6 +1590,14 @@ footer::before {
   padding-left: var(--verse-gutter);
 }
 
+/* Short openings use their existing half-verse division to give the same
+   two-line initial a natural home. Longer verses retain ordinary wrapping.
+   The generated newline changes layout only; the source text stays intact. */
+.psalm-verses .verse.initial-divided > .mediant::after {
+  content: "\A";
+  white-space: pre;
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter */
 .psalm-verses .verse.numbered {
   display: flex;
@@ -4009,11 +4017,13 @@ body.season-eastertide {
   margin-left: 0;
 }
 
-/* A complete opening that fits on one line gets a modest raised initial,
+/* A complete prose opening that fits on one line gets a modest raised initial,
    seated on that line's baseline. app.js checks the actual measure after
    fonts load and when the reader changes width or text size. Hymns and the
    paired Marian opening keep their two-line setting across source lines;
-   short responsories retain a raised initial even when their text wraps. */
+   short responsories retain a raised initial even when their text wraps.
+   Psalms use this compact setting only during synchronous measurement;
+   their finished setting always keeps the full two-line initial. */
 .psalm-verses .verse.initial-raised:first-child::first-letter,
 .chapter .liturgical-block .plain-line.initial-raised:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text.initial-raised::first-letter,

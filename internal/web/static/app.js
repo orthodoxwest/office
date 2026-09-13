@@ -4,7 +4,7 @@ document.documentElement.classList.add("js");
 // hierarchy, and their optical fit. CSS holds the font-specific letter
 // profiles; this enhancement identifies the letter and opening word without
 // changing the text. Prose can adapt to its measure, while short responses
-// stay modest and metrical/chant openings keep their deliberate two-line cap.
+// stay modest and psalm/metrical/chant openings keep their two-line cap.
 (function () {
   var openings = Array.from(document.querySelectorAll([
     ".psalm-verses .verse:first-child:not(.numbered)",
@@ -66,13 +66,22 @@ document.documentElement.classList.add("js");
     // Batch writes and reads: one layout measures every candidate. Remember
     // width and font metrics, not height, so our own changes do not cause a
     // ResizeObserver loop or toggle between two competing line breaks.
-    changed.forEach(function (opening) { opening.classList.add("initial-raised"); });
+    changed.forEach(function (opening) {
+      opening.classList.remove("initial-divided");
+      opening.classList.add("initial-raised");
+    });
     var singleLines = changed.map(function (opening) {
       return opening.getBoundingClientRect().height <=
         parseFloat(getComputedStyle(opening).lineHeight) + 1;
     });
     changed.forEach(function (opening, index) {
-      opening.classList.toggle("initial-raised", singleLines[index]);
+      // A short first verse does not make its psalm a lesser opening. Give
+      // the full-size initial two lines by breaking at the existing mediant.
+      // Measure without that break each time, so resizing can undo it.
+      var psalm = opening.matches(".psalm-verses .verse");
+      opening.classList.toggle("initial-divided",
+        psalm && singleLines[index] && !!opening.querySelector(".mediant"));
+      opening.classList.toggle("initial-raised", !psalm && singleLines[index]);
     });
   }
   function schedule() {

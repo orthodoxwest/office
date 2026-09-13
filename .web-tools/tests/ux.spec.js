@@ -1208,11 +1208,18 @@ test("hour typography keeps the liturgical hierarchy across themes and narrow ph
   ).toBeVisible();
 });
 
-test("short openings keep one baseline and adapt to the reading measure", async ({ page }) => {
+test("short prose openings keep one baseline and adapt to the reading measure", async ({ page }) => {
+  await page.route("**/lauds/2026-06-18", async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      '$1<div class="elements"><div class="chapter"><div class="liturgical-block"><p class="plain-line">O God, thou art my God <span class="mediant">*</span> early will I seek thee.</p></div></div></div>$2',
+    ) });
+  });
   for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openDatedPage(page, "/lauds/2026-06-18", theme);
-    const opening = page.locator(".psalm-verses .verse").filter({ hasText: /^O God, thou art my God/ });
+    const opening = page.locator(".chapter .plain-line");
     const originalText = await opening.textContent();
     for (const [width, raised] of [[1280, true], [320, false], [430, true]]) {
       await page.setViewportSize({ width, height: 900 });
@@ -1256,6 +1263,63 @@ test("short openings keep one baseline and adapt to the reading measure", async 
     await page.getByRole("button", { name: "Default text size", exact: true }).click();
     await expect(opening).toHaveClass(/initial-raised/);
     expect(await opening.textContent()).toBe(originalText);
+  }
+});
+
+test("short psalm openings keep the same initial rank as adjacent psalms", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-09-12", theme);
+    const psalms = page.locator(".psalm");
+    const opening = psalms.nth(0).locator(".verse").first();
+    const following = psalms.nth(1).locator(".verse").first();
+    const original = await opening.textContent();
+    await expect(psalms.nth(0)).toContainText("Psalm 145b");
+    await expect(psalms.nth(1)).toContainText("Psalm 146");
+    // Returning to wide after narrow exercises removal and restoration of
+    // the discretionary break, including font-size changes at each width.
+    for (const width of [1280, 390, 768, 320, 1280]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const size of ["normal", "large"]) {
+        await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+        await expect.poll(() => opening.evaluate(el => ({
+          divided: el.classList.contains("initial-divided"),
+          raised: el.classList.contains("initial-raised"),
+        }))).toEqual({ divided: width >= 768, raised: false });
+        await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
+        const geometry = await opening.evaluate(el => {
+          const cap = getComputedStyle(el, "::first-letter");
+          const mediant = el.querySelector(".mediant");
+          const range = document.createRange();
+          const after = mediant.nextSibling;
+          const start = after.textContent.search(/\S/);
+          range.setStart(after, start);
+          range.setEnd(after, start + 1);
+          const secondHalf = range.getBoundingClientRect();
+          range.selectNodeContents(el.querySelector(".initial-word"));
+          const firstWord = range.getBoundingClientRect();
+          const rect = el.getBoundingClientRect();
+          return {
+            size: cap.fontSize,
+            initial: cap.initialLetter,
+            height: rect.height,
+            leading: parseFloat(getComputedStyle(el).lineHeight),
+            halfVerseGap: secondHalf.top - firstWord.top,
+            nextTop: el.nextElementSibling.getBoundingClientRect().top,
+            bottom: rect.bottom,
+          };
+        });
+        expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
+        expect(geometry.initial).toBe("2");
+        expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading * 1.9);
+        expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
+        if (width >= 768) {
+          expect(geometry.height).toBeCloseTo(geometry.leading * 2, 0);
+          expect(geometry.halfVerseGap).toBeCloseTo(geometry.leading, 0);
+        }
+        expect(await opening.textContent()).toBe(original);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
+      }
+    }
   }
 });
 
