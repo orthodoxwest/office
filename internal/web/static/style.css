@@ -1590,6 +1590,14 @@ footer::before {
   padding-left: var(--verse-gutter);
 }
 
+/* Short openings use their existing half-verse division to give the same
+   two-line initial a natural home. Longer verses retain ordinary wrapping.
+   The generated newline changes layout only; the source text stays intact. */
+.psalm-verses .verse.initial-divided > .mediant::after {
+  content: "\A";
+  white-space: pre;
+}
+
 /* Numbered verses — flex so the number sits in a fixed-width gutter */
 .psalm-verses .verse.numbered {
   display: flex;
@@ -1664,7 +1672,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) -0.1em calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
   color: var(--ornament);
 }
 
@@ -1681,7 +1689,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) -0.1em var(--initial-hang, 0em);
+  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
   color: var(--ornament);
 }
 
@@ -1779,7 +1787,7 @@ footer::before {
   font-size: 3.05em;
   line-height: 1;
   float: left;
-  margin: 0.05em var(--initial-gap, 0.06em) -0.1em var(--initial-hang, 0em);
+  margin: 0.05em var(--initial-gap, 0.06em) calc(-0.1em + var(--initial-depth, 0em)) var(--initial-hang, 0em);
   color: var(--ornament);
 }
 
@@ -3934,7 +3942,8 @@ body.season-eastertide {
 
 /* Native initial sizing follows the local leading (prose, psalm, or chant).
    EB Garamond's initial sits optically high in that box: lower its ink without
-   extending the exclusion into a third row. Both margins scale with the type. */
+   extending the exclusion into a third row, except where a long tail needs
+   additional clearance. Both margins scale with the type. */
 @supports (initial-letter: 2) {
   .psalm-verses .verse:first-child::first-letter,
   .chapter .liturgical-block .plain-line:first-child::first-letter,
@@ -3946,49 +3955,48 @@ body.season-eastertide {
   .short-responsory-opening .sigil-text::first-letter {
     initial-letter: 2;
     margin-top: 0.1em;
-    margin-bottom: -0.1em;
+    margin-bottom: calc(-0.1em + var(--initial-depth, 0em));
   }
 }
 
-/* Optical profiles for this EB Garamond face. Hang and gap are measured in
-   the enlarged initial's em; the opening-word tuck uses the body em. The
-   latter affects only the first word, leaving the next row clear of the cap.
-   Keep these separate: a standalone O needs a word space, not a word join. */
-.elements [data-initial="A"] {
-  --initial-hang: -0.02em;
-  --initial-gap: 0.07em;
-  --initial-tuck: -0.30em;
-}
+/* Optical profiles for every Latin capital in the bundled EB Garamond.
+   The float gap reserves space beside the lower line; the word adjustment
+   independently fits the upper line. Both follow the painted glyph contour,
+   with a common breathing space. Gap/hang use the initial em; word uses the
+   body em. A negative gap lets text sit below a bowl or beside a narrow stem.
+   Calibrated against two-line initials, then checked at other leading/sizes.
+   Depth keeps a descending tail clear of a following row (notably Q).
+   Recalibrate these values when changing the initial face. */
+.elements [data-initial="A"] { --initial-gap: 0.06em; --initial-tuck: -0.8em; --initial-hang: -0.02em; }
+.elements [data-initial="B"] { --initial-gap: 0.08em; --initial-tuck: -0.2em; }
+.elements [data-initial="C"] { --initial-gap: 0.08em; --initial-tuck: -0.05em; --initial-hang: -0.025em; }
+.elements [data-initial="D"] { --initial-gap: 0.03em; --initial-tuck: 0.1em; }
+.elements [data-initial="E"] { --initial-gap: 0.08em; --initial-tuck: -0.15em; }
+.elements [data-initial="F"] { --initial-gap: -0.135em; --initial-tuck: 0.65em; }
+.elements [data-initial="G"] { --initial-gap: -0.005em; --initial-tuck: 0em; --initial-hang: -0.025em; }
+.elements [data-initial="H"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
+.elements [data-initial="I"] { --initial-gap: 0.03em; --initial-tuck: 0em; }
+.elements [data-initial="J"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
+.elements [data-initial="K"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
+.elements [data-initial="L"] { --initial-gap: 0.06em; --initial-tuck: -0.9em; }
+.elements [data-initial="M"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
+.elements [data-initial="N"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
+.elements [data-initial="O"] { --initial-gap: 0.045em; --initial-tuck: 0em; --initial-hang: -0.025em; }
+.elements [data-initial="P"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; }
+.elements [data-initial="Q"] { --initial-gap: 0.06em; --initial-tuck: -0.2em; --initial-hang: -0.025em; --initial-depth: 0.1em; }
+.elements [data-initial="R"] { --initial-gap: 0.08em; --initial-tuck: -0.8em; }
+.elements [data-initial="S"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
+.elements [data-initial="T"] { --initial-gap: -0.15em; --initial-tuck: 0.65em; --initial-hang: -0.06em; }
+.elements [data-initial="U"] { --initial-gap: -0.055em; --initial-tuck: 0.35em; }
+.elements [data-initial="V"] { --initial-gap: -0.265em; --initial-tuck: 1em; --initial-hang: -0.025em; }
+.elements [data-initial="W"] { --initial-gap: -0.215em; --initial-tuck: 0.85em; --initial-hang: -0.025em; }
+.elements [data-initial="X"] { --initial-gap: 0.06em; --initial-tuck: 0em; }
+.elements [data-initial="Y"] { --initial-gap: -0.1em; --initial-tuck: 0.6em; --initial-hang: -0.025em; }
+.elements [data-initial="Z"] { --initial-gap: 0.06em; --initial-tuck: -0.05em; }
 
-.elements :is([data-initial="C"], [data-initial="G"], [data-initial="O"], [data-initial="Q"]) {
-  --initial-hang: -0.025em;
-  --initial-gap: 0.045em;
-}
-
-.elements [data-initial="T"] {
-  --initial-hang: -0.06em;
-  --initial-gap: 0.035em;
-  --initial-tuck: -0.08em;
+/* A raised initial sits on one baseline; its join uses a much smaller fit. */
+.elements :is([data-initial="T"], [data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
   --initial-raised-tuck: -0.04em;
-}
-
-.elements [data-initial="L"] {
-  --initial-gap: 0.06em;
-  --initial-tuck: -0.45em;
-}
-
-.elements :is([data-initial="V"], [data-initial="W"], [data-initial="Y"]) {
-  --initial-hang: -0.025em;
-  --initial-tuck: -0.12em;
-  --initial-raised-tuck: -0.04em;
-}
-
-.elements [data-initial="I"] {
-  --initial-gap: 0.045em;
-}
-
-.elements [data-initial="M"] {
-  --initial-gap: 0.04em;
 }
 
 .initial-word {
@@ -4009,11 +4017,13 @@ body.season-eastertide {
   margin-left: 0;
 }
 
-/* A complete opening that fits on one line gets a modest raised initial,
+/* A complete prose opening that fits on one line gets a modest raised initial,
    seated on that line's baseline. app.js checks the actual measure after
    fonts load and when the reader changes width or text size. Hymns and the
    paired Marian opening keep their two-line setting across source lines;
-   short responsories retain a raised initial even when their text wraps. */
+   short responsories retain a raised initial even when their text wraps.
+   Psalms use this compact setting only during synchronous measurement;
+   their finished setting always keeps the full two-line initial. */
 .psalm-verses .verse.initial-raised:first-child::first-letter,
 .chapter .liturgical-block .plain-line.initial-raised:first-child::first-letter,
 .chapter .liturgical-block .versicle-line:first-child .sigil-text.initial-raised::first-letter,
