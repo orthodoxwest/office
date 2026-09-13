@@ -242,6 +242,7 @@ ordinary/lauds/benedictus-antiphon-thursday,c64c5b80d6be,diurnal,"Thursday at La
 ordinary/lauds/benedictus-antiphon-tuesday,83818a7992ca,diurnal,"Tuesday at Lauds, Throughout the Year",55,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/benedictus-antiphon-wednesday,1fa1db35ec86,diurnal,"Wednesday at Lauds, Throughout the Year",60,verified,grok,2026-08-24,word-for-word from printed page image
 ordinary/lauds/chapter,421368055f67,Copy of OCP Ferial Lauds.pdf,The Chapter PER ANNUM,14,verified,grok,2026-07-20,Word-for-word after normalizing accents and pointing; ferial chapter.
+ordinary/lauds/chapter-sunday,c4e0dfefd694,diurnal,"Sunday at Lauds, Throughout the Year",39,verified,codex,2026-09-13,Word-for-word after normalization; independently checked with Claude Sonnet; page image output/pages/monastic-diurnal/0085.png
 ordinary/lauds/hymn-friday,858389bf289d,diurnal,Friday at Lauds,72,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0118.png
 ordinary/lauds/hymn-saturday,e123de5d9cb1,diurnal,Saturday at Lauds,80,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0126.png
 ordinary/lauds/hymn-sunday,c99fc1014e0c,office-hymns.zip,"Maker of All, Eternal King, Thru the Year, Lauds Winter Hymn.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
@@ -282,7 +283,9 @@ ordinary/lauds/psalm-antiphon-5-thursday,bac7bfd010c5,Copy of OCP Ferial Lauds.p
 ordinary/lauds/psalm-antiphon-5-tuesday,f0edaf80ca03,Copy of OCP Ferial Lauds.pdf,,28,verified,codex,2026-07-18,
 ordinary/lauds/psalm-antiphon-5-wednesday,d12bdd529e0f,draft archdiocesan Lauds book,Ash Wednesday,183,verified,codex,2026-07-18,
 ordinary/lauds/short-responsory,a7d33830d539,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/short-responsory,"14, 30, 47, 65, 85, 108",verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/short-responsory-sunday,eb011de8422d,diurnal,"Sunday at Lauds, Throughout the Year",39,verified,codex,2026-09-13,Word-for-word after normalization; independently checked with Claude Sonnet; page image output/pages/monastic-diurnal/0085.png
 ordinary/lauds/versicle,ac568d1bc2e1,Copy of OCP Ferial Lauds.pdf,ordinary/lauds/versicle,"15, 31, 48, 66, 86, 109",verified,grok,2026-07-20,"Word-for-word after normalizing chant pointing (†/*), hyphenation, and typography."
+ordinary/lauds/versicle-sunday,af550144ee46,diurnal,"Sunday at Lauds, Throughout the Year",41,verified,codex,2026-09-13,Word-for-word after normalization; independently checked with Claude Sonnet; page image output/pages/monastic-diurnal/0087.png
 ordinary/marian/alma-redemptoris-advent,03099b8ea0aa,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/alma-redemptoris-christmas,7e2a049236ad,Final Antiphons of the Blessed Virgin Mary.pdf,,1-3,verified,codex,2026-07-18,
 ordinary/marian/ave-regina-caelorum,8093c39100a2,Final Antiphons of the Blessed Virgin Mary.pdf,,6-7,verified,codex,2026-07-18,
