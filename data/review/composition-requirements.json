@@ -138,5 +138,314 @@
         "contains": "He shall defend thee"
       }
     ]
+  },
+  {
+    "id": "seasonal-little-hours-and-boundaries",
+    "source": "Monastic Diurnal pp. 163-164 (Advent), 250-251 (ferial Lent, after Lent I), 365 (Easter octave through Saturday None), 371-374 (Low Sunday and ferial Paschaltide), 378; 2026 ordo pp. 44, 58, 125. April 26 Terce chapter remains an unresolved ordo cross-reference and is not assigned a replacement.",
+    "cases": [
+      {
+        "date": "2026-03-11",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "seasonal/lent/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "seasonal/advent/chapter-terce"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "seasonal/easter/chapter-terce"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "seasonal/lent/versicle-terce"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "seasonal/advent/versicle-terce"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-terce"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "terce",
+        "slot": "psalm-antiphon-2",
+        "ref": "seasonal/lent/psalm-antiphon-terce"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "ordinary/terce/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "ordinary/terce/versicle"
+      },
+      {
+        "date": "2026-03-01",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/lent-sunday-1/chapter-terce"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/easter-sunday/chapter-terce"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-terce",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-terce",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/low-sunday/chapter-terce"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-terce"
+      },
+      {
+        "date": "2026-04-26",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-terce"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "seasonal/lent/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "seasonal/advent/chapter-sext"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "seasonal/easter/chapter-sext"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "seasonal/lent/versicle-sext"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "seasonal/advent/versicle-sext"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-sext"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "sext",
+        "slot": "psalm-antiphon-3",
+        "ref": "seasonal/lent/psalm-antiphon-sext"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "ordinary/sext/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "ordinary/sext/versicle"
+      },
+      {
+        "date": "2026-03-01",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/lent-sunday-1/chapter-sext"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/easter-sunday/chapter-sext"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-sext",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-sext",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "proper/low-sunday/chapter-sext"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-sext"
+      },
+      {
+        "date": "2026-04-26",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-sext"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "seasonal/lent/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "seasonal/advent/chapter-none"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "seasonal/easter/chapter-none"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "seasonal/lent/versicle-none"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "seasonal/advent/versicle-none"
+      },
+      {
+        "date": "2026-05-04",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-none"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "none",
+        "slot": "psalm-antiphon-5",
+        "ref": "seasonal/lent/psalm-antiphon-none"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "ordinary/none/chapter"
+      },
+      {
+        "date": "2026-02-26",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "ordinary/none/versicle"
+      },
+      {
+        "date": "2026-03-01",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/lent-sunday-1/chapter-none"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/easter-sunday/chapter-none"
+      },
+      {
+        "date": "2026-04-12",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-none",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-18",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/easter-sunday/versicle-none",
+        "contains": "This is the day"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/low-sunday/chapter-none"
+      },
+      {
+        "date": "2026-04-19",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-none"
+      },
+      {
+        "date": "2026-04-26",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "seasonal/easter/versicle-none"
+      },
+      {
+        "date": "2026-03-19",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "proper/st-joseph/chapter-terce"
+      }
+    ]
   }
 ]

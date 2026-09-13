@@ -206,15 +206,22 @@ R. Thanks be to God.
 # [chapter-ferial-prime]
 # Proper ferial chapter at Prime when the office explicitly supplies one.
 #
-# [chapter-terce]
-# Proper chapter at Terce.
-#
-# [chapter-sext]
-# Proper chapter at Sext.
-#
-# [chapter-none]
-# Proper chapter at None.
-#
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/chapter-lauds
+
+[chapter-sext]
+# SOURCE: diurnal p. 365
+!1 Cor 5:8
+Therefore let us keep the feast, not with old leaven, neither with the leaven of malice and wickedness; * but with the unleavened bread of sincerity and truth.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 365
+!Col 3:1,2
+If ye then be risen with Christ, seek those things which are above, where Christ sitteth on the right hand of God. * Set your affection on things above, not on things on the earth.
+R. Thanks be to God.
+
 # [chapter-compline]
 # Proper chapter at Compline.
 #
@@ -239,15 +246,19 @@ R. Thanks be to God.
 # [versicle-prime]
 # Proper versicle at Prime.
 #
-# [versicle-terce]
-# Proper versicle at Terce.
-#
-# [versicle-sext]
-# Proper versicle at Sext.
-#
-# [versicle-none]
-# Proper versicle at None.
-#
+[versicle-terce]
+# SOURCE: diurnal p. 365
+V. This is the day which the Lord hath made, alleluia.
+R. We will rejoice and be glad in it, alleluia.
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/versicle-terce
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/versicle-terce
+
 # [versicle-compline]
 # Proper versicle at Compline.
 #

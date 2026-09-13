@@ -97,3 +97,27 @@ O God, who in the Paschal festival hast given unto the world thy healing remedie
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/chapter-terce
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/versicle-terce
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/chapter-sext
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/versicle-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/chapter-none
+
+[versicle-none]
+# SOURCE: Monastic Diurnal p. 365: Easter Day little-hour chapters and versicle continue through None of Saturday before Low Sunday (page image reviewed by Codex 2026-09-13).
+@use proper/easter-sunday/versicle-none

@@ -121,3 +121,48 @@ V. And thou shalt be safe under his feathers.
 R. Under his wings.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. He shall defend thee * under his wings.
+
+[chapter-terce]
+# SOURCE: diurnal p. 250
+!Joel 2:12,13
+Turn ye even to me with all your heart, and with fasting, and with weeping, and with mourning; * and rend your heart, and not your garments, saith the Lord Almighty.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: diurnal p. 251
+!Isa 55:7
+Let the wicked forsake his way, and the unrighteous man his thoughts; † and let him return unto the Lord, and he will have mercy upon him: * and to our God, for he will abundantly pardon.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 251
+!Isa 58:7
+Deal thy bread to the hungry, and bring the poor that are cast out to thy house: * when thou seest the naked, cover him; and hide not thyself from thine own flesh.
+R. Thanks be to God.
+
+[versicle-terce]
+# SOURCE: diurnal p. 251
+V. He shall deliver thee from the snare of the hunter.
+R. And from the noisome pestilence.
+
+[versicle-sext]
+# SOURCE: diurnal p. 251
+V. He shall defend thee under his wings.
+R. And thou shalt be safe under his feathers.
+
+[versicle-none]
+# SOURCE: diurnal p. 251
+V. His faithfulness and truth shall be thy shield and buckler.
+R. Thou shalt not be afraid for any terror by night.
+
+[psalm-antiphon-terce]
+# SOURCE: diurnal p. 250
+The days of penitence * are come to us, for the redemption of our sins, and the saving of our souls.
+
+[psalm-antiphon-sext]
+# SOURCE: diurnal p. 251
+Let us approve ourselves * in much patience, in many fastings, by the armour of righteousness.
+
+[psalm-antiphon-none]
+# SOURCE: diurnal p. 251
+By the armour of the righteousness * of the power of God, let us approve ourselves in much patience.

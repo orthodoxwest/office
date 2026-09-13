@@ -475,7 +475,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// they must not displace a weekday feast's own generic Vespers text merely
 	// because that feast is also celebrating first Vespers.
 	seasonalSundayFirst := strings.HasSuffix(ref, "-first") && hourName == "vespers"
-	if day.Season != "" && (!seasonalSundayFirst || isSundayFirstVespers(day)) {
+	if day.Season != "" && (!seasonalSundayFirst || isSundayFirstVespers(day)) && seasonalMinorOrdinaryApplies(day, hourName, ref) {
 		prefix := "seasonal/" + string(day.Season) + "/"
 		if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
 			return substituteProperName(text, properName), resolved
@@ -516,6 +516,34 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	return "[Proper text not found: " + ref + "]", ref
+}
+
+// seasonalMinorOrdinaryApplies scopes the ferial chapters/antiphons to their
+// printed appointments (Diurnal pp. 250-251, 372-374). Ordinary Lent begins
+// after Lent I; its versicles also serve the Sundays beginning with Lent I.
+// The Easter ferial chapter must not replace a missing Sunday/feast chapter.
+func seasonalMinorOrdinaryApplies(day *models.CalendarDay, hourName, ref string) bool {
+	if hourName != "terce" && hourName != "sext" && hourName != "none" {
+		return true
+	}
+	base := baseProperRef(ref)
+	ferialSlot := base == "chapter" || strings.HasPrefix(base, "psalm-antiphon")
+	if day.Season == models.Lent && (ferialSlot || base == "versicle") {
+		lent1 := calendar.ComputeMoveableDates(day.Date.Year()).Lent1
+		if day.Date.Before(lent1) {
+			return false
+		}
+		if ferialSlot && (civilWeekday(day) == time.Sunday || (day.Celebration != nil && day.Celebration.Category != models.CategoryFeria)) {
+			return false
+		}
+	}
+	if day.Season == models.Easter && base == "chapter" {
+		if civilWeekday(day) == time.Sunday || (day.Celebration != nil && day.Celebration.Category != models.CategoryFeria) {
+			return false
+		}
+		return !day.Date.Before(calendar.ComputeMoveableDates(day.Date.Year()).LowSunday.AddDate(0, 0, 1))
+	}
+	return true
 }
 
 // ProperResolutionTrace describes how a dynamic proper slot was resolved. It

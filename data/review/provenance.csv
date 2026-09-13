@@ -713,6 +713,8 @@ proper/easter-sunday-octave-day-6/benedictus-antiphon,6764ee86adeb,diurnal,Frida
 proper/easter-sunday-octave-day-6/magnificat-antiphon,9d21a60462ed,diurnal,Friday in Easter Week,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-octave-day-7/benedictus-antiphon,2fab5d856f06,diurnal,Saturday before Low Sunday,369,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday/chapter-lauds,da32f941aa7b,diurnal,,363,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
+proper/easter-sunday/chapter-none,3fa75ba8f340,diurnal,,365,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0411.png
+proper/easter-sunday/chapter-sext,eb30a7e7fd11,diurnal,,365,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0411.png
 proper/easter-sunday/collect,d4c84d31f16b,diurnal,,364,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0410.png
 proper/easter-sunday/easter-antiphon-1,b27a56d3f7f1,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/easter-antiphon-2,9d6c31357293,diurnal,,363,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
@@ -721,6 +723,7 @@ proper/easter-sunday/easter-antiphon-4,520571fe3063,diurnal,,363,verified,codex,
 proper/easter-sunday/easter-antiphon-5,50efa59c4ed7,diurnal,,363,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0409.png
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/easter-sunday/magnificat-antiphon,157a3af20a00,diurnal,,367,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0413.png
+proper/easter-sunday/versicle-terce,ad2ba3365887,diurnal,,365,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0411.png
 proper/easter-tuesday/collect,51f5a3568b5e,diurnal,,368,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0414.png; cited p. 369 was Thursday/Friday
 proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,diurnal,"Within the Octave of the Epiphany, II Day",227,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,diurnal,"Within the Octave of the Epiphany, II Day",227-228,verified,grok,2026-08-24,word-for-word from printed page image
@@ -1526,6 +1529,9 @@ psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 seasonal/advent/chapter-lauds,348103f4a71a,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+seasonal/advent/chapter-none,58cbc9ca496e,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0210.png
+seasonal/advent/chapter-sext,c16b4a5f9bf7,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0210.png
+seasonal/advent/chapter-terce,9aab3f3fc337,diurnal,,163,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0209.png
 seasonal/advent/chapter-vespers,f899ee3c15ba,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/hymn-lauds,421bb218f240,draft archdiocesan Lauds book,The First Sunday in Advent,13,verified,codex,2026-07-18,
 seasonal/advent/hymn-vespers,42dc965d6005,draft archdiocesan Vespers book,Saturday before the First Sunday in Advent,8,verified,codex,2026-07-18,
@@ -1543,24 +1549,42 @@ seasonal/advent/psalm-antiphon-1-prime-wednesday,38ba9482bab8,diurnal,"Antiphons
 seasonal/advent/short-responsory-lauds,00c9d2455ecd,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/short-responsory-vespers,458552f095f0,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/versicle-lauds,beea678300ae,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+seasonal/advent/versicle-none,71078e816915,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0210.png
+seasonal/advent/versicle-sext,ca85d13522a4,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0210.png
+seasonal/advent/versicle-terce,1b57842c0808,diurnal,,163,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0209.png
 seasonal/advent/versicle-vespers,d563a41a8c8b,Propers of Lauds & Vespers During Advent,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/christmas/hymn-doxology,d869f10d67f2,diurnal,,3,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0049.png
+seasonal/easter/chapter-none,815413d8cd89,diurnal,,374,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0420.png
+seasonal/easter/chapter-sext,7256411014a3,diurnal,,374,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0420.png
+seasonal/easter/chapter-terce,4b8142a87fa5,diurnal,,374,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0420.png
 seasonal/easter/hymn-doxology-ascension,71ffa0281fca,diurnal,,388,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0434.png
 seasonal/easter/hymn-lauds,6dd05bf37cbd,Propers of Lauds & Vespers in Paschaltide,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
 seasonal/easter/pre-collect-versicle-prime,991eed765c77,st patrick prayer book,,41,verified,bwaldrep,2026-07-16,
 seasonal/easter/short-responsory-lauds,a9a1e5a8a092,Propers of Lauds & Vespers in Paschaltide,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (gl0ry)
 seasonal/easter/versicle-lauds,ab7fa11bb4af,Propers of Lauds & Vespers in Paschaltide,"Propers for Lauds, The Versicle (In Paschaltide)",,verified,bwaldrep,2026-07-24,verified against the Paschaltide variant
+seasonal/easter/versicle-none,f6774de5642f,diurnal,,378,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0424.png
+seasonal/easter/versicle-sext,294a311782b7,diurnal,,378,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0424.png
+seasonal/easter/versicle-terce,646091f41f34,diurnal,,378,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0424.png
 seasonal/easter/versicle-vespers,c757c63437ca,Propers of Lauds & Vespers in Paschaltide,"Propers for Vespers, The Versicle (In Paschaltide)",,verified,bwaldrep,2026-07-24,verified; replaced the ordinary Vespers versicle with the paschal proper
 seasonal/epiphany/hymn-doxology,27acff27073f,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 seasonal/lent/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 seasonal/lent/chapter-lauds,7d4853ed8399,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,"verified against the propers booklet (""shew""; corrected from OCP ""show"")"
+seasonal/lent/chapter-none,331d89c63a7b,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/chapter-sext,beb561d14030,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/chapter-terce,da8e8a9a0588,diurnal,,250,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0296.png
 seasonal/lent/chapter-vespers,ee8fdda43c83,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/hymn-lauds,a1cd6fa9808c,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,"verified; residual diffs typographic only (bow, ae)"
 seasonal/lent/hymn-vespers,a6e9d352f90b,draft archdiocesan Vespers book,,138,verified,codex,2026-07-18,
 seasonal/lent/psalm-antiphon-1-prime,492ea426f595,diurnal,"The Ordinary of the Ferial Office in Lent, At Prime",250,verified,grok,2026-08-25,word-for-word from printed page image
+seasonal/lent/psalm-antiphon-none,27a2d2c3df23,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/psalm-antiphon-sext,aeaa9ba45bf8,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/psalm-antiphon-terce,375bcbc74083,diurnal,,250,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0296.png
 seasonal/lent/short-responsory-lauds,59e89b66ebbf,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/short-responsory-vespers,64b473edaf1b,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/lent/versicle-lauds,6adcce448c1a,Propers of Lauds & Vespers During Lent,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+seasonal/lent/versicle-none,12bd556439d9,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/versicle-sext,901e5c584b1d,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
+seasonal/lent/versicle-terce,d89d46c19604,diurnal,,251,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0297.png
 seasonal/lent/versicle-vespers,95b4efc1b9db,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word; Passiontide is within the source rubric’s through-Lent span.
 seasonal/passiontide/chapter-lauds,1365a3cf647c,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,"verified against the propers booklet (restored dropped ""may"")"

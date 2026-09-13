@@ -165,3 +165,36 @@ O King of Nations, * and their Desire; the Cornerstone, who makest both one: Com
 [magnificat-antiphon-december-23]
 # SOURCE: monastic diurnal, p. 173 (The Great Antiphons, Dec. 23, O Emmanuel)
 O Emmanuel, * our King and Lawgiver, the Desire of all nations and their Salvation: Come and save us, O Lord our God.
+
+[chapter-terce]
+# SOURCE: diurnal p. 163
+!Jer 23:5
+Behold, the days come, saith the Lord, that I will raise unto David a righteous Branch, * and a King shall reign and prosper, and shall execute judgment and justice in the earth.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: diurnal p. 164
+!Jer 23:6
+In his days Judah shall be saved, and Israel shall dwell safely: * and this is his name whereby he shall be called, The Lord our Righteousness.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 164
+!Isa 13:22–14:1
+Her time is near to come, and her days shall not be prolonged: * for the Lord will have mercy on Jacob, and will yet choose Israel.
+R. Thanks be to God.
+
+[versicle-terce]
+# SOURCE: diurnal p. 163
+V. Come and save us, O Lord God of hosts.
+R. Shew the light of thy countenance, and we shall be whole.
+
+[versicle-sext]
+# SOURCE: diurnal p. 164
+V. Shew us thy mercy, O Lord.
+R. And grant us thy salvation.
+
+[versicle-none]
+# SOURCE: diurnal p. 164
+V. The Lord shall arise upon thee, O Jerusalem.
+R. And his glory shall be seen upon thee.

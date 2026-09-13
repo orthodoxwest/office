@@ -149,3 +149,36 @@ R. For it is toward evening, alleluia.
 
 [psalm-antiphon-5]
 @use shared/formulas/paschal-psalm-antiphon
+
+[versicle-terce]
+# SOURCE: diurnal p. 378
+V. The Lord is risen from the tomb, alleluia.
+R. Who for our sakes hung upon the tree, alleluia.
+
+[versicle-sext]
+# SOURCE: diurnal p. 378
+V. The Lord is risen indeed, alleluia.
+R. And hath appeared to Simon, alleluia.
+
+[versicle-none]
+# SOURCE: diurnal p. 378
+V. Then were the disciples glad, alleluia.
+R. When they saw the Lord, alleluia.
+
+[chapter-terce]
+# SOURCE: diurnal p. 374
+!Rom 6:9,10
+Christ being raised from the dead dieth no more; death hath no more dominion over him. † For in that he died, he died unto sin once: * but in that he liveth, he liveth unto God.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: diurnal p. 374
+!1 Cor 15:20–22
+Now is Christ risen from the dead, and become the firstfruits of them that slept. † For since by man came death, by man came also the resurrection of the dead. * For as in Adam all die, even so in Christ shall all be made alive.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 374
+!1 Peter 3:18
+For Christ also hath once suffered for sins, the just for the unjust, † that he might bring us to God, being put to death in the flesh, * but quickened by the Spirit.
+R. Thanks be to God.
