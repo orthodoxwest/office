@@ -22,17 +22,37 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// The raised initial increases the line box without adding a line of text.
+async function openingTextLines(opening) {
+  return opening.evaluate(el => {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const tops = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node === el.firstChild || node.parentElement.closest(".mediant") || !node.textContent.trim()) continue;
+      const range = document.createRange();
+      range.setStart(node, node.textContent.search(/\S/));
+      range.setEnd(node, node.textContent.trimEnd().length);
+      for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
+    }
+    return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
+  });
+}
+
 // Contour-fitting deliberately puts text inside the initial's rectangular
 // advance box. Compare the two painted layers instead of treating that box
 // as ink. Decode screenshots in the browser using public canvas APIs.
-async function expectInitialInkClear(page, specimen, capSelector, label) {
+async function expectInitialInkClear(page, specimen, capSelector, label, baselineWord = null) {
   await specimen.evaluate(el => el.setAttribute("data-ink-specimen", ""));
   const root = "[data-ink-specimen]";
   const layers = [];
   try {
     for (const cap of [true, false]) {
       const style = await page.addStyleTag({ content: `
-        ${root}, ${root} * { color: ${cap ? "transparent" : "#0000ff"} !important; }
+        body, body * { color: transparent !important; }
+        body ::first-letter { background: none !important; color: transparent !important; }
+        ${root}, ${root} * { color: ${cap || baselineWord ? "transparent" : "#0000ff"} !important; }
+        ${!cap && baselineWord ? `${root} ${baselineWord} { color: #0000ff !important; }` : ""}
         ${root} ${capSelector}::first-letter { background: none !important; color: ${cap ? "#ff0000" : "transparent"} !important; }
         header, nav, .hour-progress { visibility: hidden !important; }
       ` });
@@ -63,23 +83,25 @@ async function expectInitialInkClear(page, specimen, capSelector, label) {
         const i = (y * cap.width + x) * 4;
         return cap.data[i] > 170 && cap.data[i + 1] < 100 && cap.data[i + 2] < 100;
       };
-      let contacts = 0, capPixels = 0, textPixels = 0;
+      let contacts = 0, capPixels = 0, textPixels = 0, capBottom = 0, textBottom = 0;
       for (let y = 0; y < text.height; y++) {
         for (let x = 0; x < text.width; x++) {
           const i = (y * text.width + x) * 4;
-          if (red(x, y)) capPixels++;
+          if (red(x, y)) { capPixels++; capBottom = y; }
           if (text.data[i] < 100 && text.data[i + 1] < 100 && text.data[i + 2] > 170) {
             textPixels++;
+            textBottom = y;
             if (red(x, y) || red(x - 1, y) || red(x + 1, y) || red(x, y - 1) || red(x, y + 1)) contacts++;
           }
         }
       }
-      return { contacts, capPixels, textPixels };
+      return { contacts, capPixels, textPixels, capBottom, textBottom };
     }, layers);
     expect(result.changed, label).toBeUndefined();
     expect(result.capPixels, label).toBeGreaterThan(50);
     expect(result.textPixels, label).toBeGreaterThan(50);
     expect(result.contacts, label).toBe(0);
+    if (baselineWord) expect(Math.abs(result.capBottom - result.textBottom), `${label} ink baseline`).toBeLessThanOrEqual(2);
   } finally {
     await specimen.evaluate(el => el.removeAttribute("data-ink-specimen"));
   }
@@ -1344,10 +1366,12 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
       await page.setViewportSize({ width, height: 1000 });
       for (const size of ["normal", "large"]) {
         await page.evaluate(value => document.documentElement.setAttribute("data-text-size", value), size);
+        const divided = width === 1280 && size === "normal";
+        const elevated = width >= 768 && !divided;
         await expect.poll(() => opening.evaluate(el => ({
           divided: el.classList.contains("initial-divided"),
           raised: el.classList.contains("initial-raised"),
-        }))).toEqual({ divided: false, raised: false });
+        }))).toEqual({ divided, raised: false });
         await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
         const geometry = await opening.evaluate(el => {
           const cap = getComputedStyle(el, "::first-letter");
@@ -1372,12 +1396,12 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
           };
         });
         expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
-        expect(geometry.initial).toBe("2");
+        expect(geometry.initial).toBe(elevated ? "2 1" : "2");
         expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading - 1);
         expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
         if (width >= 768) {
-          expect(geometry.height).toBeCloseTo(geometry.leading, 0);
-          expect(geometry.halfVerseGap).toBeCloseTo(0, 0);
+          expect(await openingTextLines(opening)).toBeCloseTo(divided ? 2 : 1, 1);
+          expect(geometry.halfVerseGap).toBeCloseTo(divided ? geometry.leading : 0, 0);
         }
         expect(await opening.textContent()).toBe(original);
         expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
@@ -1399,8 +1423,10 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
         const divided = [390, 414].includes(width) || (width === 430 && size === "large");
         await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
         await expect(opening).not.toHaveClass(/initial-raised/);
-        const lines = await opening.evaluate(el => el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight));
-        expect(lines).toBeCloseTo(width === 1280 || (width === 430 && size === "normal") ? 1 : 2, 1);
+        const lines = await openingTextLines(opening);
+        const elevated = width === 1280 || (width === 430 && size === "normal");
+        expect(lines).toBeCloseTo(elevated ? 1 : 2, 1);
+        expect(await opening.evaluate(el => el.classList.contains("initial-elevated"))).toBe(elevated);
         expect(await opening.textContent()).toBe(original);
         // Repeated measurement (also used for printing/font changes) must not
         // alternate between natural and divided settings at the same measure.
@@ -1415,6 +1441,13 @@ test("Psalm 63 balances short tails but lets a complete opening stay on one line
     await page.evaluate(() => document.documentElement.dataset.textSize = "normal");
     await expect(opening).not.toHaveClass(/initial-divided/);
     await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
+    await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} full-size O sits on the first baseline`, ".initial-word");
+    await page.setViewportSize({ width: 768, height: 900 });
+    const fallback = await page.addStyleTag({ content: ".initial-elevated::first-letter { initial-letter: normal !important; }" });
+    await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+    await expect(opening).toHaveClass(/initial-elevated/);
+    await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} fallback O sits on the first baseline`, ".initial-word");
+    await fallback.evaluate(el => el.remove());
   }
 });
 
@@ -1461,13 +1494,10 @@ test("single-line initials clear the following verse across the alphabet and fal
         ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
       }) : null;
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-      const lines = await page.locator(".verse:first-child").evaluateAll(els => els.map(el => ({
-        raised: el.classList.contains("initial-raised"),
-        lines: el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight),
-      })));
-      for (const line of lines) {
-        expect(line.raised).toBe(false);
-        expect(line.lines).toBeCloseTo(1, 1);
+      for (const opening of await page.locator(".verse:first-child").all()) {
+        await expect(opening).toHaveClass(/initial-elevated/);
+        await expect(opening).not.toHaveClass(/initial-raised/);
+        expect(await openingTextLines(opening)).toBeCloseTo(1, 1);
       }
       await expectInitialInkClear(page, page.locator(".elements"), ".verse:first-child", `${size}/${fallback} alphabet clears numbered verses`);
       if (override) await override.evaluate(el => el.remove());

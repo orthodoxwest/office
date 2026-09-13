@@ -4040,6 +4040,26 @@ body.season-eastertide {
   padding-left: 0;
 }
 
+/* A single text line has no second row to support a dropped initial.
+   Keep the full-size letter, seated on its first baseline instead. Native
+   initial-letter reserves the ascent; an inline initial's line box supplies
+   the equivalent room in browsers without that feature. */
+.psalm-verses .verse.initial-elevated:first-child::first-letter {
+  initial-letter: normal;
+  float: none;
+  line-height: 1;
+  vertical-align: baseline;
+  margin: 0 var(--initial-gap, 0.06em) 0 calc(-1 * var(--verse-gutter) + var(--initial-hang, 0em));
+}
+.psalm-verses .verse.initial-elevated > .initial-word {
+  margin-left: 0;
+}
+@supports (initial-letter: 2 1) {
+  .psalm-verses .verse.initial-elevated:first-child::first-letter {
+    initial-letter: 2 1;
+  }
+}
+
 /* The phone's title stack keeps a compact cadence even with several
    commemorations. Text size and all date/prayer touch targets stay intact. */
 @media (max-width: 700px) {

@@ -104,13 +104,15 @@ document.documentElement.classList.add("js");
     // Measure psalms in their finished initial size. Short prose still uses
     // its compact setting to decide whether a raised initial is appropriate.
     changed.forEach(function (opening) {
-      opening.classList.remove("initial-divided");
+      opening.classList.remove("initial-divided", "initial-elevated");
       opening.classList.toggle("initial-raised", !opening.matches(".psalm-verses .verse"));
     });
     var candidates = [];
+    var elevated = [];
     var singleLines = changed.map(function (opening) {
       var leading = parseFloat(getComputedStyle(opening).lineHeight);
       var height = opening.getBoundingClientRect().height;
+      if (opening.matches(".psalm-verses .verse") && height <= leading + 1) elevated.push(opening);
       if (opening.matches(".psalm-verses .verse") && opening.querySelector(".mediant") &&
           height > leading * 1.5 && height < leading * 2.5) {
         var rows = textRows(opening);
@@ -136,6 +138,27 @@ document.documentElement.classList.add("js");
     });
     candidates.forEach(function (candidate, index) {
       candidate.opening.classList.toggle("initial-divided", keep[index]);
+    });
+    // A drop cap needs text beneath its first line. When the whole opening
+    // fits, raise the same full-size letter to that line's baseline instead.
+    // Use the lower contour's clearance: the old upper-line word tuck would
+    // collide with the foot of letters such as A or L in a raised setting.
+    elevated.forEach(function (opening) { opening.classList.add("initial-elevated"); });
+    var reflowed = elevated.filter(function (opening) {
+      return textRows(opening).length > 1 && opening.querySelector(".mediant");
+    });
+    // Raising can make the first word wider. At that narrow boundary, prefer
+    // two complete half-verses beside a dropped initial to a new short tail.
+    reflowed.forEach(function (opening) {
+      opening.classList.remove("initial-elevated");
+      opening.classList.add("initial-divided");
+    });
+    var dividedFits = reflowed.map(function (opening) { return textRows(opening).length === 2; });
+    reflowed.forEach(function (opening, index) {
+      if (!dividedFits[index]) {
+        opening.classList.remove("initial-divided");
+        opening.classList.add("initial-elevated");
+      }
     });
   }
 
