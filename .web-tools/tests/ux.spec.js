@@ -1338,8 +1338,8 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
     const original = await opening.textContent();
     await expect(psalms.nth(0)).toContainText("Psalm 145b");
     await expect(psalms.nth(1)).toContainText("Psalm 146");
-    // Returning to wide after narrow exercises removal and restoration of
-    // the discretionary break, including font-size changes at each width.
+    // A one-line verse keeps its full-size initial and natural text flow.
+    // Returning to wide after narrow also exercises font-size changes.
     for (const width of [1280, 390, 768, 320, 1280]) {
       await page.setViewportSize({ width, height: 1000 });
       for (const size of ["normal", "large"]) {
@@ -1347,7 +1347,7 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         await expect.poll(() => opening.evaluate(el => ({
           divided: el.classList.contains("initial-divided"),
           raised: el.classList.contains("initial-raised"),
-        }))).toEqual({ divided: width >= 768, raised: false });
+        }))).toEqual({ divided: false, raised: false });
         await expect(following).not.toHaveClass(/initial-raised|initial-divided/);
         const geometry = await opening.evaluate(el => {
           const cap = getComputedStyle(el, "::first-letter");
@@ -1373,15 +1373,104 @@ test("short psalm openings keep the same initial rank as adjacent psalms", async
         });
         expect(geometry.size).toBe(await following.evaluate(el => getComputedStyle(el, "::first-letter").fontSize));
         expect(geometry.initial).toBe("2");
-        expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading * 1.9);
+        expect(geometry.height).toBeGreaterThanOrEqual(geometry.leading - 1);
         expect(geometry.nextTop).toBeGreaterThanOrEqual(geometry.bottom);
         if (width >= 768) {
-          expect(geometry.height).toBeCloseTo(geometry.leading * 2, 0);
-          expect(geometry.halfVerseGap).toBeCloseTo(geometry.leading, 0);
+          expect(geometry.height).toBeCloseTo(geometry.leading, 0);
+          expect(geometry.halfVerseGap).toBeCloseTo(0, 0);
         }
         expect(await opening.textContent()).toBe(original);
         expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(false);
       }
+    }
+  }
+});
+
+test("Psalm 63 balances short tails but lets a complete opening stay on one line", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/lauds/2026-09-13", theme);
+    const psalm = page.locator(".psalm").filter({ hasText: "Psalm 63" });
+    const opening = psalm.locator(".verse").first();
+    const original = await opening.textContent();
+    for (const size of ["normal", "large"]) {
+      await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
+      for (const width of [320, 390, 414, 430, 1280, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        const divided = [390, 414].includes(width) || (width === 430 && size === "large");
+        await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
+        await expect(opening).not.toHaveClass(/initial-raised/);
+        const lines = await opening.evaluate(el => el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight));
+        expect(lines).toBeCloseTo(width === 1280 || (width === 430 && size === "normal") ? 1 : 2, 1);
+        expect(await opening.textContent()).toBe(original);
+        // Repeated measurement (also used for printing/font changes) must not
+        // alternate between natural and divided settings at the same measure.
+        await page.evaluate(() => {
+          window.dispatchEvent(new Event("beforeprint"));
+          window.dispatchEvent(new Event("beforeprint"));
+        });
+        await expect.poll(() => opening.evaluate(el => el.classList.contains("initial-divided"))).toBe(divided);
+      }
+    }
+    await page.setViewportSize({ width: 430, height: 900 });
+    await page.evaluate(() => document.documentElement.dataset.textSize = "normal");
+    await expect(opening).not.toHaveClass(/initial-divided/);
+    await expectInitialInkClear(page, psalm.locator(".psalm-verses"), ".verse:first-child", `${theme} single-line O clears the numbered verse`);
+  }
+});
+
+test("a half-verse break is rejected when it would add a third line", async ({ page }) => {
+  await page.route("**/vespers/2026-06-18", async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      '$1<div class="elements"><div class="psalm"><div class="psalm-verses"><p class="verse">O <span class="mediant">*</span> God, thou art my God early will I seek thee.</p><p class="verse numbered"><span class="verse-num">2</span><span class="verse-body">My soul thirsteth for thee.</span></p></div></div></div>$2',
+    ) });
+  });
+  await page.setViewportSize({ width: 375, height: 900 });
+  await openDatedPage(page, "/vespers/2026-06-18");
+  const opening = page.locator(".verse").first();
+  await expect(opening).not.toHaveClass(/initial-divided|initial-raised/);
+  const lineCount = () => opening.evaluate(el => el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight));
+  expect(await lineCount()).toBeCloseTo(2, 1);
+  // Establish that this fixture really would become longer with the break.
+  expect(await opening.evaluate(el => {
+    el.classList.add("initial-divided");
+    return el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight);
+  })).toBeCloseTo(3, 1);
+  await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+  await expect(opening).not.toHaveClass(/initial-divided|initial-raised/);
+  expect(await lineCount()).toBeCloseTo(2, 1);
+});
+
+test("single-line initials clear the following verse across the alphabet and fallback layout", async ({ page }) => {
+  const words = ["All", "Blessed", "Come", "Deliver", "Every", "For", "Glory", "Hear", "I will", "Jesus", "King", "Lord", "Make", "Now", "O Lord", "Praise", "Quicken", "Remember", "Save", "The", "Unto", "Vouchsafe", "With", "Xavier", "Ye", "Zion"];
+  const fixture = words.map(word => `<div class="psalm"><div class="psalm-verses"><p class="verse">${word} hear our prayer.</p><p class="verse numbered"><span class="verse-num">2</span><span class="verse-body">And let our cry come unto thee.</span></p></div></div>`).join("");
+  await page.route("**/vespers/2026-06-18", async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace(
+      /(<main\b[^>]*>)[\s\S]*?(<\/main>)/,
+      `$1<div class="elements">${fixture}</div>$2`,
+    ) });
+  });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, "/vespers/2026-06-18", "dark");
+  for (const size of ["normal", "large"]) {
+    await page.evaluate(value => document.documentElement.dataset.textSize = value, size);
+    for (const fallback of [false, true]) {
+      const override = fallback ? await page.addStyleTag({ content:
+        ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
+      }) : null;
+      await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
+      const lines = await page.locator(".verse:first-child").evaluateAll(els => els.map(el => ({
+        raised: el.classList.contains("initial-raised"),
+        lines: el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight),
+      })));
+      for (const line of lines) {
+        expect(line.raised).toBe(false);
+        expect(line.lines).toBeCloseTo(1, 1);
+      }
+      await expectInitialInkClear(page, page.locator(".elements"), ".verse:first-child", `${size}/${fallback} alphabet clears numbered verses`);
+      if (override) await override.evaluate(el => el.remove());
     }
   }
 });

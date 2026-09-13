@@ -51,6 +51,44 @@ document.documentElement.classList.add("js");
     return !opening.matches(".hymn-line, .chant-line-opening, .short-responsory-opening .sigil-text");
   });
 
+  // Measure the words rather than the paragraph's box: the initial can extend
+  // below a single text line, and the mediant sits above the text baseline.
+  function textRows(opening) {
+    var leading = parseFloat(getComputedStyle(opening).lineHeight);
+    var walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
+    var range = document.createRange();
+    var rows = [];
+    var node;
+    while ((node = walker.nextNode())) {
+      var start = node === opening.firstChild ?
+        (/^\s*\p{L}\p{M}*/u.exec(node.textContent) || [""])[0].length : 0;
+      var words = node.textContent.slice(start).matchAll(/\S+/g);
+      for (var word of words) {
+        range.setStart(node, start + word.index);
+        range.setEnd(node, start + word.index + word[0].length);
+        for (var rect of range.getClientRects()) {
+          if (!rect.width || !rect.height) continue;
+          var row = rows.find(function (line) { return Math.abs(line.top - rect.top) < leading / 2; });
+          if (!row) {
+            row = { top: rect.top, left: rect.left, right: rect.right, words: 0 };
+            rows.push(row);
+          }
+          row.left = Math.min(row.left, rect.left);
+          row.right = Math.max(row.right, rect.right);
+          row.words++;
+        }
+      }
+    }
+    return rows.sort(function (a, b) { return a.top - b.top; });
+  }
+  function balance(rows) {
+    if (rows.length !== 2) return 0;
+    var widths = rows.map(function (row) { return row.right - row.left; });
+    return Math.min.apply(null, widths) / Math.max.apply(null, widths);
+  }
+
+  // Cache width and font metrics, not height: our own line-break changes
+  // must not restart the ResizeObserver cycle. Layout writes stay batched.
   var measures = new WeakMap();
   var frame = 0;
   function typeset() {
@@ -63,27 +101,44 @@ document.documentElement.classList.add("js");
       measures.set(opening, key);
       return width > 0;
     });
-    // Batch writes and reads: one layout measures every candidate. Remember
-    // width and font metrics, not height, so our own changes do not cause a
-    // ResizeObserver loop or toggle between two competing line breaks.
+    // Measure psalms in their finished initial size. Short prose still uses
+    // its compact setting to decide whether a raised initial is appropriate.
     changed.forEach(function (opening) {
       opening.classList.remove("initial-divided");
-      opening.classList.add("initial-raised");
+      opening.classList.toggle("initial-raised", !opening.matches(".psalm-verses .verse"));
     });
+    var candidates = [];
     var singleLines = changed.map(function (opening) {
-      return opening.getBoundingClientRect().height <=
-        parseFloat(getComputedStyle(opening).lineHeight) + 1;
+      var leading = parseFloat(getComputedStyle(opening).lineHeight);
+      var height = opening.getBoundingClientRect().height;
+      if (opening.matches(".psalm-verses .verse") && opening.querySelector(".mediant") &&
+          height > leading * 1.5 && height < leading * 2.5) {
+        var rows = textRows(opening);
+        // Avoid a one- or two-word tail occupying less than 30% of line one.
+        // Ordinary wrapping and genuinely single-line openings need no break.
+        if (rows.length === 2 && rows[1].words <= 2 &&
+            rows[1].right - rows[1].left < (rows[0].right - rows[0].left) * 0.3) {
+          candidates.push({ opening: opening, balance: balance(rows) });
+        }
+      }
+      return height <= leading + 1;
     });
     changed.forEach(function (opening, index) {
-      // A short first verse does not make its psalm a lesser opening. Give
-      // the full-size initial two lines by breaking at the existing mediant.
-      // Measure without that break each time, so resizing can undo it.
-      var psalm = opening.matches(".psalm-verses .verse");
-      opening.classList.toggle("initial-divided",
-        psalm && singleLines[index] && !!opening.querySelector(".mediant"));
-      opening.classList.toggle("initial-raised", !psalm && singleLines[index]);
+      opening.classList.toggle("initial-raised",
+        !opening.matches(".psalm-verses .verse") && singleLines[index]);
+    });
+    // Compare a real alternate setting, keeping the semantic break only if
+    // both halves still occupy two lines and their balance clearly improves.
+    candidates.forEach(function (candidate) { candidate.opening.classList.add("initial-divided"); });
+    var keep = candidates.map(function (candidate) {
+      var rows = textRows(candidate.opening);
+      return rows.length === 2 && balance(rows) > candidate.balance + 0.15;
+    });
+    candidates.forEach(function (candidate, index) {
+      candidate.opening.classList.toggle("initial-divided", keep[index]);
     });
   }
+
   function schedule() {
     if (!frame) frame = window.requestAnimationFrame(typeset);
   }
