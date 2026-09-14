@@ -198,3 +198,17 @@ R. Exceedingly honoured are * thy friends, O God.
 
 [chapter-terce]
 @use commons/apostle/chapter-lauds
+
+[versicle-terce]
+# SOURCE: diurnal p. 12*
+@use commons/apostle/versicle-first-vespers
+
+[versicle-sext]
+# SOURCE: diurnal p. 12*
+V. Thou shalt make them princes in all lands.
+R. They shall remember thy Name, O Lord.
+
+[versicle-none]
+# SOURCE: diurnal p. 12*
+V. Exceedingly honoured are thy friends, O God.
+R. Firmly stablished is their princedom.

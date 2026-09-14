@@ -1431,5 +1431,119 @@
         "ref": "proper/finding-holy-cross/chapter-terce"
       }
     ]
+  },
+  {
+    "id": "apostle-little-hours-ordinary",
+    "source": "Monastic Diurnal pp. 11*-12*; 2026 ordo p. 92, August 24 Hours.",
+    "cases": [
+      {
+        "date": "2026-08-24",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/apostle/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-08-24",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/apostle/versicle-terce"
+      },
+      {
+        "date": "2026-08-24",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/apostle/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-08-24",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/apostle/versicle-sext"
+      },
+      {
+        "date": "2026-08-24",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/apostle/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-08-24",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/apostle/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "apostle-little-hours-paschal",
+    "source": "Monastic Diurnal pp. 18*-19*; 2026 ordo p. 59, May 1 Hours.",
+    "cases": [
+      {
+        "date": "2026-05-01",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/apostle-paschal/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-01",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/apostle-paschal/versicle-terce"
+      },
+      {
+        "date": "2026-05-01",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/apostle-paschal/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-01",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/apostle-paschal/versicle-sext"
+      },
+      {
+        "date": "2026-05-01",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/apostle-paschal/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-01",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/apostle-paschal/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "apostle-pilot-retains-proper-and-unmigrated-precedence",
+    "source": "Compatibility controls: Conversion of St Paul retains its explicit proper responsories. These assert preservation, not new source verification.",
+    "cases": [
+      {
+        "date": "2027-01-25",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/conversion-st-paul/short-responsory-terce"
+      },
+      {
+        "date": "2027-01-25",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/conversion-st-paul/short-responsory-sext"
+      },
+      {
+        "date": "2027-01-25",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/conversion-st-paul/short-responsory-none"
+      }
+    ]
   }
 ]
