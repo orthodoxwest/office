@@ -151,6 +151,22 @@ All changes must go through a pull request — do not push directly to `master`.
 3. Push the branch: `git push -u origin your-branch-name`
 4. Open a PR against `master` and ensure CI passes before merging
 
+### The `update-golden` label
+
+Adding `update-golden` to a PR makes CI merge `master` into the branch, run `make golden`,
+verify the merged tree (`go test ./...` + `make validate`), and push the result. Use it both
+when an intentional data/logic change moved the golden files and when the PR is blocked on
+merge conflicts.
+
+Conflicts are auto-settled **only** inside `internal/e2e/testdata/golden/`. Those files are
+whole-corpus rollups — `parity-snapshot.json` digests an entire year per row and
+`assurance-report.md` is a table of global counts — so two PRs fixing unrelated corpus entries
+always collide there, and the correct merged value is neither side's: it has to be recomputed.
+A conflict anywhere else aborts the merge untouched and the job comments with the paths that
+need a human. In particular `data/review/provenance.csv` (sorted by key, so it usually
+auto-merges) and `data/review/assurance-baseline.json` (the intentional coverage floor) are
+never resolved automatically.
+
 ## Issue labeling
 
 Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly every issue worth filing here. Apply based on where the defect actually lives, not the symptom:
