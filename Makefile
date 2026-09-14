@@ -1,4 +1,4 @@
-.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff mutate-ratchet
+.PHONY: help install-hooks build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff test-coverage
 
 YEAR ?= 2026
 
@@ -14,12 +14,20 @@ build: ## Build the binary
 
 test: ## Run all tests
 	go test ./...
-	python3 scripts/test_mutation_threshold.py
+	python3 scripts/test_coverage_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
+
+# Keep package-local coverage: integration/golden tests must not hide unit-test gaps.
+COVERAGE_PROFILE ?= output/coverage/unit.out
+
+test-coverage: ## Run unit tests and enforce per-package statement coverage floors
+	mkdir -p $(dir $(COVERAGE_PROFILE))
+	go test -count=1 -covermode=set -coverprofile=$(COVERAGE_PROFILE) $$(go list ./... | grep -v '/e2e$$')
+	python3 scripts/check_coverage_threshold.py $(COVERAGE_PROFILE)
 
 diurnal-test: ## Run page-image, transcription, and discovery unit tests
 	python3 scripts/test_diurnal_pages.py
@@ -151,12 +159,6 @@ endif
 GREMLINS = $(GREMLINS_BIN)/gremlins
 MUTATE_PKGS ?= ./internal/models/ ./internal/calendar/ ./internal/office/ ./internal/texts/
 MUTATE_DIFF_BASE ?= master
-MUTATE_RATCHET ?=
-MUTATE_RATCHETS ?= \
-	models:./internal/models/:100:100 \
-	calendar:./internal/calendar/:86:92 \
-	office:./internal/office/:86:92
-
 # In --diff mode gremlins measures its baseline over the whole suite (~30s)
 # rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
 # would yield a ~15-minute per-mutant timeout. Override it here; the large
@@ -173,7 +175,7 @@ install-gremlins: ## Install the pinned mutation-testing tool if missing or stal
 
 # Note: thresholds are 0, so gremlins exits 0 regardless of efficacy. The
 # `|| exit 1` catches hard failures (compile errors, crashes), not bad scores.
-mutate: install-gremlins ## Mutation-test whole packages without enforcing the CI ratchets
+mutate: install-gremlins ## Mutation-test whole packages for targeted test review
 	@for pkg in $(MUTATE_PKGS); do \
 		echo "==> $$pkg"; \
 		$(GREMLINS) unleash $$pkg || exit 1; \
@@ -185,36 +187,6 @@ mutate: install-gremlins ## Mutation-test whole packages without enforcing the C
 mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
 	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
 		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
-
-mutate-ratchet: install-gremlins ## Enforce core mutation floors (MUTATE_RATCHET=models selects one package)
-	@selected='$(MUTATE_RATCHET)'; \
-	found=0; \
-	report=''; \
-	trap 'test -z "$$report" || rm -f "$$report"' EXIT HUP INT TERM; \
-	for spec in $(MUTATE_RATCHETS); do \
-		package=$${spec%%:*}; \
-		values=$${spec#*:}; \
-		path=$${values%%:*}; \
-		values=$${values#*:}; \
-		efficacy=$${values%%:*}; \
-		mcover=$${values#*:}; \
-		if test -n "$$selected" && test "$$selected" != "$$package"; then \
-			continue; \
-		fi; \
-		found=1; \
-		echo "==> mutation ratchet: $$package"; \
-		report=$$(mktemp); \
-		$(GREMLINS) unleash "$$path" --output "$$report" || exit 1; \
-		python3 scripts/check_mutation_threshold.py "$$report" \
-			--min-efficacy "$$efficacy" \
-			--min-mutant-coverage "$$mcover" || exit 1; \
-		rm -f "$$report"; \
-		report=''; \
-	done; \
-	if test "$$found" -eq 0; then \
-		echo "Unknown mutation ratchet: $$selected" >&2; \
-		exit 2; \
-	fi
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

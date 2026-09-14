@@ -10,21 +10,56 @@ This matters here because the calendar and office engines are dense conditional
 logic implementing rubrics, and a silently wrong boundary produces a plausible
 but incorrect office rather than a crash.
 
-## Running it
+## Routine CI: unit-test coverage
+
+PRs and pushes run `make test-coverage` in the existing **Check** job. It runs
+all Go unit-test packages once with `-count=1 -covermode=set`, checks per-package
+statement coverage, and uploads `output/coverage/unit.out` for 14 days. The job
+summary lists covered/total statements and each floor. Golden tests still run
+separately; neither their executions nor other packages' tests contribute to a
+package's unit-test coverage (`-coverpkg=./...` is deliberately not used).
+
+The floors in `scripts/coverage-floors.json` cover every currently tested
+internal package. They start at the measured percentage rounded **down** to
+one decimal place on commit `95326da`. These are regression baselines, not
+claims of adequate coverage. Raise a floor when tests improve; add a floor when
+introducing an internal package, and explain any intentional reduction in the
+PR. The checker compares exact statement ratios before rounding for display
+and rejects missing packages or malformed reports. Improved coverage in one
+package cannot compensate for a regression in another.
+
+Coverage only proves code was exercised. Removing an assertion while keeping
+its execution can pass this gate. Behavioral tests, review of changed
+assertions, and focused mutation investigations remain necessary to protect
+what tests actually verify. For calendar and office changes, describe the
+boundary or rubric behavior in the test and demonstrate that the test fails
+when that behavior is broken.
+
+```bash
+make test-coverage
+# Inspect uncovered code in a browser:
+go tool cover -html=output/coverage/unit.out
+```
+
+## Running mutation investigations
 
 ```bash
 make mutate                              # models, calendar, office, texts; report only
-make mutate-ratchet                      # enforce models/calendar/office floors
-make mutate-ratchet MUTATE_RATCHET=models     # enforce one package's floors
 make mutate MUTATE_PKGS=./internal/calendar/   # one package
 make mutate-diff                         # only lines your branch changes vs master
 ```
 
-CI runs full-package ratchets for `models`, `calendar`, and `office` in parallel
-on every PR and push to `master`. It also runs `make mutate-diff` on every PR.
-The changed-line run is **reporting only** — the global thresholds in
-`.gremlins.yaml` are 0 — and posts a comment listing surviving mutants on lines
-the PR touched.
+Mutation testing is on demand. In Actions, run **Mutation review**, choose a
+branch and one of `models`, `calendar`, `office`, or `texts`, then inspect the
+`mutation-review` artifact (log and JSON report if completed). It uses one
+worker to limit simultaneous runaway mutants, a 20-minute command budget,
+and a 25-minute job limit. Large packages may require a longer local run.
+A failed or incomplete run is visible as a failed investigation, not a passing
+score. Reports are retained for 14 days. There are no scheduled runs or PR bot
+comments, and routine CI does not install Gremlins.
+
+Local commands remain available for full-package and changed-line inspection.
+Their scores are informational; inspect the individual survivors and timeouts.
 
 The tool is [gremlins](https://github.com/go-gremlins/gremlins), pinned in the
 Makefile and installed on demand into the configured `GOBIN` or `GOPATH/bin`.
@@ -44,8 +79,7 @@ sharply between the two modes:
   initial corrected run reported the credible 79.4% baseline recorded below.
 - `make mutate-diff` measures the *whole suite* (~30s), so that same
   coefficient would mean a ~15-minute timeout per mutant. The target overrides
-  it to `MUTATE_DIFF_COEFFICIENT` (5), and the CI job carries a
-  `timeout-minutes` bound in case a loop-counter mutant spins.
+  it to `MUTATE_DIFF_COEFFICIENT` (5), so bound long local runs with an external timeout if needed.
 
 If you see a wall of `TIMED OUT`, raise the coefficient and ignore the efficacy
 figure printed alongside it. Note also that gremlins does not pass `-count=1`,
@@ -88,30 +122,53 @@ The mutants worth acting on are the ones where you can state the bug in rubric
 terms: "if this boundary were off by one, the suffrage would be wrong on
 January 13."
 
-## Ratchet gates
+## Why automatic mutation ratchets were retired
 
-Both mutation efficacy and mutant coverage are gated. Efficacy measures whether
-tests notice changes to logic they execute; mutant coverage measures how much
-mutable logic the tests execute at all. Gating only efficacy would allow new
-untested logic to be classified as `NOT COVERED` without lowering the score.
+The September 14 investigation found:
 
-| Package | Minimum efficacy | Minimum mutant coverage |
-|---|---:|---:|
-| `internal/models` | 100% | 100% |
-| `internal/calendar` | 86% | 92% |
-| `internal/office` | 86% | 92% |
+- [Master run 34900508837](https://github.com/orthodoxwest/office/actions/runs/34900508837)
+  completed Check in 3m42s and UX in 4m58s, while office mutation took 19m33s
+  (720 killed, 76 lived, 35 uncovered, plus three timeouts). The
+  [preceding PR run](https://github.com/orthodoxwest/office/actions/runs/34900369342)
+  spent another 16m30s on office mutation. Any Go change triggered every
+  full-package ratchet, and PRs also ran a separate changed-line scan.
+- Calendar jobs failed after runner shutdown signals, before producing scores.
+  [An earlier run](https://github.com/orthodoxwest/office/actions/runs/34855845561)
+  also panicked in Gremlins' signal handling. The logs establish interrupted
+  execution, not a test-quality regression; they do not establish why the
+  runner shut down.
+- The changed-line job claimed to never fail the build, but its job timeout
+  could still fail CI. Its comment was only updated when survivors existed,
+  leaving stale warnings after a clean run. Full-package JSON reports were
+  temporary files deleted by the Make target, including on failure.
+- Static percentage floors were manually maintained baselines, not an automatic
+  comparison against the PR base. Gremlins v0.6.0 excludes timed-out mutants
+  from both score denominators, so timing changes can change the scores without
+  any test edits. `models`' historic 100% mutation result also did not imply
+  full statement coverage: the new baseline measures 42/91 statements (46.15%).
 
-For the three mutable predicates currently in `models`, this requires every
-mutant to be both covered and killed. Calendar and office start roughly one
-percentage point below their fresh baselines to avoid making small timing
-variations into CI flakes.
+Routine CI now collects coverage during its existing unit-test run, retains the
+profile, and cancels superseded PR runs. The `mutate-ratchet` target and mutation
+threshold checker have been removed. Mutation testing remains a useful way to
+find missing assertions when a developer can review the evidence.
 
-The package paths and floors live in the Makefile's `MUTATE_RATCHETS` entries.
-Raise them after tests improve the full-package result. The Make target checks
-Gremlins' JSON output with `scripts/check_mutation_threshold.py`; Gremlins
-v0.6.0 does not reliably apply its nested threshold CLI flags. Do not put these
-floors in `.gremlins.yaml`: its global values also apply to the reporting-only,
-changed-line subset, whose score is not comparable to a whole package.
+### Other CI bottlenecks
+
+The same run spent 71s on unit tests, 66s on golden tests, and 44s on the
+provenance command, sequentially. **Check**, **Golden tests**, and **Text
+provenance** now run as independent jobs. All three still fail CI on errors;
+golden mismatch comments and the provenance summary remain available. Go build
+cache keys include source hashes and restore from the previous source version,
+so new compilations can be saved instead of repeatedly restoring the first
+cache created for a module version.
+
+UX previously downloaded and compiled Go dependencies on every run (~26s), then
+ran 89 behavior tests on one worker (~197s). It now caches Go dependencies and
+builds, and runs behavior tests with two workers. Visual comparisons retain one
+worker and the pinned browser container. Behavior and visual reports go into
+separate artifact directories so the second invocation cannot erase the first
+report or its failure traces. No test cases, golden comparisons, or provenance
+checks are skipped by these optimizations.
 
 ## Original baseline
 
@@ -128,8 +185,8 @@ Circumcision concurrence, and malformed `DateRule` gaps that were originally
 listed here. The feria concurrence finding proved to be unreachable code and
 was removed. Do not use an old copy of that list as the current work queue.
 
-Most recent trustworthy full-package results, measured before introducing the
-CI ratchets:
+Historical full-package results measured before introducing the former CI
+ratchets (these are not the current baseline):
 
 | Package | Killed | Lived | Not covered | Timed out | Efficacy | Mutant coverage |
 |---|---:|---:|---:|---:|---:|---:|
@@ -140,10 +197,9 @@ CI ratchets:
 
 ## Focused follow-up status
 
-The initial high-value mutation queue is complete. The full-package table above
-remains the most recent directly measured package baseline; the focused
-file-level runs below verify their target clusters but do not replace a full
-package measurement.
+The initial high-value mutation queue is complete. The historical full-package table above
+records the original follow-up work; the focused file-level runs below verify
+their target clusters but do not replace a current package measurement.
 
 For anticipated/resumed Sunday arithmetic, concrete years now cover zero, one,
 and two autumn resumptions; equality at the anticipation cutoff; Epiphany

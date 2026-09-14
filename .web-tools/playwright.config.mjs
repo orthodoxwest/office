@@ -3,17 +3,21 @@ import { defineConfig } from "@playwright/test";
 const goFlags = [process.env.GOFLAGS, "-buildvcs=false"].filter(Boolean).join(" ");
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:18159";
 const externalServer = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
+// Separate CI invocations must retain both reports and their failure traces.
+const outputRoot = process.env.PLAYWRIGHT_SUITE
+  ? `../output/playwright/${process.env.PLAYWRIGHT_SUITE}`
+  : "../output/playwright";
 
 export default defineConfig({
   testDir: "./tests",
-  outputDir: "../output/playwright/test-results",
+  outputDir: `${outputRoot}/test-results`,
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [
     ["line"],
-    ["html", { outputFolder: "../output/playwright/report", open: "never" }],
+    ["html", { outputFolder: `${outputRoot}/report`, open: "never" }],
   ],
   expect: {
     toHaveScreenshot: {

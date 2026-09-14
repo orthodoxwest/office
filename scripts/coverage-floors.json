@@ -1,0 +1,14 @@
+{
+  "github.com/orthodoxwest/office/internal/audit": 57.7,
+  "github.com/orthodoxwest/office/internal/calendar": 91.3,
+  "github.com/orthodoxwest/office/internal/cli": 49.5,
+  "github.com/orthodoxwest/office/internal/models": 46.1,
+  "github.com/orthodoxwest/office/internal/office": 90.4,
+  "github.com/orthodoxwest/office/internal/output": 74.2,
+  "github.com/orthodoxwest/office/internal/render": 85.0,
+  "github.com/orthodoxwest/office/internal/review": 73.7,
+  "github.com/orthodoxwest/office/internal/scaffold": 85.2,
+  "github.com/orthodoxwest/office/internal/texts": 92.6,
+  "github.com/orthodoxwest/office/internal/usage": 83.8,
+  "github.com/orthodoxwest/office/internal/web": 81.1
+}

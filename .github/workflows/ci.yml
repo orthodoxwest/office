@@ -6,13 +6,17 @@ on:
   pull_request:
     branches: [master]
 
+# Superseded PR revisions should not keep consuming runners.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -30,9 +34,9 @@ jobs:
             ~/go/pkg/mod
             ~/.cache/go-build
             ~/go/bin
-          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-staticcheck-v0.7.0
+          key: go-${{ runner.os }}-check-${{ hashFiles('go.mod', 'go.sum') }}-staticcheck-v0.7.0-${{ hashFiles('**/*.go') }}
           restore-keys: |
-            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
+            go-${{ runner.os }}-check-${{ hashFiles('go.mod', 'go.sum') }}-staticcheck-v0.7.0-
 
       - name: Install staticcheck
         run: |
@@ -53,8 +57,44 @@ jobs:
       - name: Lint and vet
         run: make fmt-check vet lint lint-js
 
-      - name: Run unit tests
-        run: go test -count=1 $(go list ./... | grep -v '/e2e$')
+      - name: Test coverage checker
+        run: python3 scripts/test_coverage_threshold.py
+
+      - name: Run unit tests and enforce coverage floors
+        run: make test-coverage
+
+      - name: Upload unit-test coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: output/coverage/
+          retention-days: 14
+
+  golden:
+    name: Golden tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-${{ runner.os }}-golden-${{ hashFiles('go.mod', 'go.sum') }}-${{ hashFiles('**/*.go') }}
+          restore-keys: |
+            go-${{ runner.os }}-golden-${{ hashFiles('go.mod', 'go.sum') }}-
 
       - name: Run golden tests
         id: golden
@@ -159,9 +199,32 @@ jobs:
         if: steps.golden.outcome == 'failure'
         run: exit 1
 
+  assurance:
+    name: Text provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Cache Go build and modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-${{ runner.os }}-assurance-${{ hashFiles('go.mod', 'go.sum') }}-${{ hashFiles('**/*.go') }}
+          restore-keys: |
+            go-${{ runner.os }}-assurance-${{ hashFiles('go.mod', 'go.sum') }}-
+
       - name: Check text provenance baseline
         id: assurance
-        if: steps.golden.outcome == 'success'
         run: |
           go build -o office ./cmd/server
           set +e
@@ -249,7 +312,7 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-          cache: false
+          cache: true
 
       - name: Set up Node
         if: steps.ux_changes.outputs.run == 'true'
@@ -264,10 +327,14 @@ jobs:
         run: npm ci --prefix .web-tools
 
       - name: Run UX behavior and accessibility tests
+        env:
+          PLAYWRIGHT_SUITE: behavior
         if: steps.ux_changes.outputs.run == 'true'
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=2
 
       - name: Run UX visual regression tests
+        env:
+          PLAYWRIGHT_SUITE: visual
         if: steps.ux_changes.outputs.run == 'true'
         id: visual
         run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js
@@ -362,279 +429,3 @@ jobs:
       - name: Record skipped UX suite
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
-
-  go-changes:
-    name: Go changes
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      run: ${{ steps.detect.outputs.run }}
-    steps:
-      - name: Determine whether Go code changed
-        id: detect
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Mutation testing only says something about Go code. A data-only
-            // change (feast/text files plus the golden output they move) can
-            // never alter a mutant's fate, so the mutation jobs are gated on
-            // this. Anything that can change how the Go code is built or
-            // measured — sources, module files, the gremlins config, the
-            // Makefile targets, this workflow — counts as a Go change.
-            const isGoChange = filename =>
-              filename.endsWith('.go') ||
-              filename === 'go.mod' ||
-              filename === 'go.sum' ||
-              filename === '.gremlins.yaml' ||
-              filename === 'Makefile' ||
-              filename === '.github/workflows/ci.yml';
-
-            let files;
-            if (context.eventName === 'pull_request') {
-              files = await github.paginate(github.rest.pulls.listFiles, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.payload.pull_request.number,
-                per_page: 100,
-              });
-              files = files.map(file => file.filename);
-            } else if (context.eventName === 'push') {
-              const before = context.payload.before;
-              if (!before || /^0+$/.test(before)) {
-                core.notice('Running mutation jobs because this push has no comparison base.');
-                core.setOutput('run', 'true');
-                return;
-              }
-
-              const comparison = await github.rest.repos.compareCommits({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                base: before,
-                head: context.sha,
-                per_page: 100,
-              });
-              files = (comparison.data.files || []).map(file => file.filename);
-
-              // GitHub truncates very large comparisons. Run conservatively if
-              // the result may not include every changed path.
-              if (files.length >= 300) {
-                core.notice('Running mutation jobs because the changed-file list may be truncated.');
-                core.setOutput('run', 'true');
-                return;
-              }
-            } else {
-              core.setOutput('run', 'true');
-              return;
-            }
-
-            const run = files.length === 0 || files.some(isGoChange);
-            core.notice(run
-              ? 'Running mutation jobs because the change includes Go code.'
-              : 'Skipping mutation jobs because no Go code changed.');
-            core.setOutput('run', run ? 'true' : 'false');
-
-  mutation-ratchet:
-    name: Mutation ratchet (${{ matrix.package }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    needs: go-changes
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - models
-          - calendar
-          - office
-
-    steps:
-      - uses: actions/checkout@v4
-        if: needs.go-changes.outputs.run == 'true'
-
-      - name: Set up Go
-        if: needs.go-changes.outputs.run == 'true'
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - name: Cache Go build and module cache
-        if: needs.go-changes.outputs.run == 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-            ~/go/bin
-          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-gremlins-v0.6.0
-          restore-keys: |
-            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
-
-      - name: Enforce mutation ratchet
-        if: needs.go-changes.outputs.run == 'true'
-        run: make mutate-ratchet MUTATE_RATCHET=${{ matrix.package }}
-
-      - name: Record skipped mutation ratchet
-        if: needs.go-changes.outputs.run == 'false'
-        run: echo "Mutation ratchet skipped because no Go code changed." >> "$GITHUB_STEP_SUMMARY"
-
-  mutation:
-    name: Mutation
-    runs-on: ubuntu-latest
-    needs: go-changes
-    # Reporting-only and pull-request-only, so it can be skipped outright
-    # rather than gated step by step the way the ratchet jobs are.
-    if: github.event_name == 'pull_request' && needs.go-changes.outputs.run == 'true'
-    # Mutants that alter loop counters can spin until their per-mutant timeout,
-    # which is derived from the baseline test run and can reach several minutes
-    # in --diff mode. Bound the job so a pathological PR can't burn the 6-hour
-    # default; without this, a timed-out job would fail the workflow and break
-    # the reporting-only contract.
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      # --diff needs the base commit present locally, so fetch full history.
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - name: Cache Go build and module cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-            ~/go/bin
-          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-gremlins-v0.6.0
-          restore-keys: |
-            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
-
-      - name: Install gremlins
-        continue-on-error: true
-        run: make install-gremlins
-
-      # Reporting only: thresholds are 0 in .gremlins.yaml, so this step is not
-      # a gate. It surfaces mutants that survive on lines this PR touches.
-      #
-      # `shell: bash` is required, not cosmetic. The default run shell is
-      # `bash -e` WITHOUT pipefail, so `make ... | tee` would exit 0 even when
-      # make fails, and the summary below would report "No surviving mutants"
-      # for a run that never happened. `shell: bash` supplies -o pipefail.
-      - name: Run mutation testing on changed lines
-        id: mutate
-        shell: bash
-        continue-on-error: true
-        run: |
-          git fetch --no-tags origin '${{ github.event.pull_request.base.sha }}'
-          make mutate-diff MUTATE_DIFF_BASE='${{ github.event.pull_request.base.sha }}' \
-            2>&1 | tee mutation.log
-
-      - name: Report failed mutation run
-        if: steps.mutate.outcome != 'success'
-        run: |
-          {
-            echo "## Mutation testing did not complete"
-            echo
-            echo "The mutation run failed, so no conclusion can be drawn about"
-            echo "surviving mutants. Last output:"
-            echo
-            echo '```'
-            tail -20 mutation.log 2>/dev/null || echo "(no output captured)"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Summarize surviving mutants
-        id: summary
-        if: steps.mutate.outcome == 'success'
-        continue-on-error: true
-        run: |
-          # gremlins prints one line per mutant; LIVED means no test failed when
-          # that line's logic was altered.
-          grep -E '^\s+LIVED ' mutation.log | sed 's/^[[:space:]]*//' > lived.txt || true
-          COUNT=$(wc -l < lived.txt | tr -d ' ')
-          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
-          {
-            echo "## Mutation testing (changed lines)"
-            echo
-            tail -5 mutation.log | sed 's/^/    /'
-            echo
-            if [ "$COUNT" -gt 0 ]; then
-              echo "### $COUNT surviving mutant(s)"
-              echo '```'
-              cat lived.txt
-              echo '```'
-            else
-              echo "No surviving mutants on changed lines."
-            fi
-          } > mutation-summary.md
-          cat mutation-summary.md >> "$GITHUB_STEP_SUMMARY"
-          {
-            echo 'body<<MUTATION_EOF'
-            cat mutation-summary.md
-            echo 'MUTATION_EOF'
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Upload mutation results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mutation-results
-          path: |
-            mutation.log
-            mutation-summary.md
-
-      # An unset count means the summary step failed or was skipped; '' != '0'
-      # would otherwise post a comment with no findings in it. Fork PRs get a
-      # read-only token and the API call 403s, so this must not fail the job.
-      - name: Post or update mutation comment
-        if: steps.summary.outputs.count != '' && steps.summary.outputs.count != '0'
-        continue-on-error: true
-        uses: actions/github-script@v7
-        env:
-          MUTATION_BODY: ${{ steps.summary.outputs.body }}
-        with:
-          script: |
-            const marker = '<!-- mutation-test-result -->';
-            const body =
-              process.env.MUTATION_BODY +
-              '\n\nA surviving mutant means this line\'s logic can be changed without ' +
-              'failing any test. Some are equivalent mutants that cannot be killed — ' +
-              'see `MUTATION-TESTING.md`. This check never fails the build.\n\n' +
-              marker;
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-            });
-
-            const existing = comments.find(c =>
-              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
-            );
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body,
-              });
-            }
