@@ -457,3 +457,9 @@ type CalendarDay struct {
 	// context without encoding it in feast data.
 	FollowingOfficeCommemorationID string
 }
+
+// IsFerial reports the office owner's category, including unnamed and
+// synthesized ferias. It does not classify by the mere presence of a feast.
+func (d *CalendarDay) IsFerial() bool {
+	return d != nil && (d.Celebration == nil || d.Celebration.Category == CategoryFeria)
+}

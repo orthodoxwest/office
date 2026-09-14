@@ -164,3 +164,19 @@ O Father, glorify thou me * with thine own self with the glory which I had with 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon-prime]
+# SOURCE: diurnal p. 272
+I have not a devil, * but I honour my Father, saith the Lord.
+
+[psalm-antiphon-terce]
+# SOURCE: diurnal p. 272
+I seek not * mine own glory: there is one that seeketh and judgeth.
+
+[psalm-antiphon-sext]
+# SOURCE: diurnal p. 272
+Verily, verily, * I say unto you, If a man keep my saying, he shall never taste of death.
+
+[psalm-antiphon-none]
+# SOURCE: diurnal p. 273
+The Jews took up stones * to cast at him: but Jesus hid himself, and went out of the temple.

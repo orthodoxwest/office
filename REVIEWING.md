@@ -48,6 +48,9 @@ may be an app defect, a printed error, or an unresolved source conflict.
 The [composition audit checklist](data/review/composition-audit.md) records the
 requirements checked in the repair series and the remaining source-review passes.
 
+[Seasonal appointment scopes](data/APPOINTMENT-SCOPES.md) document the validated
+data that limits seasonal fallbacks, including date bounds and precedence.
+
 `data/review/composition-requirements.json` stores source-backed appointment
 cases. `TestCompositionRequirements` checks the actual composed slot, source,
 optional wording, omission, and relative order. Cases identify a commemoration

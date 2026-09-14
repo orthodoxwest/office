@@ -155,7 +155,7 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 	case conditionFestalVespersPsalmody:
 		return usesFestalVespersPsalmody(day, corpus)
 	case conditionIsFerial:
-		return day.Celebration == nil || day.Celebration.Category == models.CategoryFeria
+		return day.IsFerial()
 	case conditionOfficeOfTheDead:
 		return isOfficeOfTheDead(day)
 	case conditionAppendedOfficeOfTheDead:

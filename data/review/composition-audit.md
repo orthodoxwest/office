@@ -19,12 +19,20 @@ and calendar collisions; they do not establish agreement with future ordos.
 | St Michael's little hours use their feast chapters | Diurnal pp. 610–611; 2026 ordo p. 102. Terce/Sext/None cases in 2026, 2027 and 2032. |
 | All Saints and its octave use their proper little-hour versicles | Diurnal pp. 640–641; 2026 ordo pp. 112–113. November 1 and 3–7, with November 8 Sunday as an exclusion control. November 2 Office of the Dead is separate. |
 | II Sunday after Easter Sext and None use their explicit chapters | Diurnal p. 378; 2026 ordo p. 58. April 26 source and chapter-before-versicle assertions. Terce is excluded pending clarification. |
-
 | Sunday within the Nativity octave retains its proper Vespers, including when observed on a weekday | Diurnal pp. 184–185, 205–206; 2026 ordo p. 128. December 29 chapter/responsory/hymn/versicle and December 28 following-office commemoration antiphon. |
+| Passiontide little hours use their printed chapters, direct versicles and antiphons, with Sunday and Holy Week exceptions | Diurnal pp. 272–275, 279–280; 2026 ordo pp. 50–53. Passion/Palm Sunday Prime–None antiphons, ferial Passion-week antiphons, chapters through Holy Wednesday, Holy Monday–Wednesday Lauds antiphon mapping controls, Lent/Triduum boundaries, and calendar-wide versicle/chapter/antiphon rules in three years. |
+| III and IV Sundays after Easter keep their own chapters, including Lauds and II Vespers cross-references | Diurnal pp. 380–383; 2026 ordo p. 62. May 10 five-hour chapter checks, III Sunday cases in 2027/2032, the May 3, 2026 Holy Cross precedence control and following ferial little hours. |
+| V Sunday after Easter Lauds and II Vespers use their explicit chapter appointment | Diurnal pp. 385–386; 2026 ordo p. 64. May 17 Lauds/Vespers; little-hour chapters remain excluded pending #339. |
 
 The earlier Sunday Lauds repair (#332) has its own direct appointment tests.
 No row above certifies the entire hour or the entire source page.
 
+The seasonal follow-up adds 118 explicit cases (220 total) and checks 78 Passiontide
+slots in 2026 and 69 each in 2027/2032. A frozen before/after comparison of all
+2,555 date/hours in 2026 finds 93 changed source selections and two existing
+I Vespers chapters with added printed pointing. These are scoped regression
+counts, not whole-office certification. Independent Codex and Sonnet image
+readings agree on the 18 new canonical texts and three reused chapters.
 
 ## Source questions held separately
 
@@ -35,6 +43,42 @@ No row above certifies the entire hour or the entire source page.
   Lauds. Neither reference supports the app's ordinary 1 John 4:16. No
   replacement has been selected while the intended appointment is unresolved.
 
+- **May 17 little-hour chapter references:** [#339](https://github.com/orthodoxwest/office/issues/339).
+  The ordo cites p. 383 (IV Sunday), while V Sunday has distinct chapters on
+  pp. 385–386. All three little-hour chapters remain unchanged pending
+  clarification; the Lauds/Vespers p. 385 references are unambiguous.
+
+## Apostle little-hour data pilot
+
+Reviewed on 2026-09-14: Diurnal pp. 11*-12* and 18*-19*, with the
+2026 ordo's May 1 Hours (p. 59) and August 24 Hours (p. 92) as appointment
+controls. Six explicit little-hour versicles now replace runtime responsory
+reduction for the ordinary and Paschal Apostle commons. Terce reuses existing
+identical verses through aliases; four entries store the other printed pairs.
+The chapter references remain unchanged, including Terce's return to Lauds.
+The bounded Codex and Sonnet page readers agree on the six pairs; two slots
+required a fresh reading at 300 dpi to preserve archaic spelling and follow
+a column break. Existing canonical source evidence is retained, with five
+new hash-bound wording attestations. These do not certify other appointments
+that happen to use the same canonical texts.
+
+`TestApostleLittleHourAppointmentsAcrossCalendars` checks the common-appointed
+Apostle versicles in all three prayer forms throughout 2026, 2027, and 2032.
+Twelve new source-backed cases check chapters, versicles and their order;
+three compatibility controls preserve Conversion of St Paul's proper priority.
+The comparison of 23,016 complete offices found no rendered content or
+structure changes. Source metadata changed for 405 offices (135 date/hours
+in three forms), all in the intended Apostle little hours.
+
+The compatibility reducer remains necessary: Evangelist, Paschal Martyr,
+and Conversion of St Paul entries still reference the legacy responsories.
+In the same three-year sweep, private-form reductions fell from 1,374 to
+1,239. These are migration counts, not percentages of liturgical correctness.
+Independent adversarial review confirmed that this pilot needs no engine
+branch or scope-schema extension. The next migration should follow these
+dependencies, checking their printed cross-references before retiring the
+legacy entries. Other common families remain unreviewed by this pilot.
+
 ## Next source-review passes
 
 These are uncompleted requirements, not passing checks or adjudicated defects.
@@ -42,27 +86,26 @@ For each pass, record the cited requirement, expected behavior, representative
 and boundary cases, then add an executable assertion or a linked unresolved
 question. Expand the existing checks without deriving expectations from output.
 
-1. **Remaining seasonal little-hour appointments:** Passiontide chapters and
-   versicles (ordinary Passion week, Holy Monday–Wednesday, and the transition
-   into the separate Triduum); remaining Easter Sunday chapter appointments,
-   particularly May 10 and May 17, 2026. Complete the unreviewed scope of #314.
-2. **Commons and proper inheritance:** the little-hour chapters and versicles
+1. **Commons and proper inheritance:** the little-hour chapters and versicles
    of Apostles, Martyrs, Confessors, and the BVM, in and outside Paschaltide.
    Check printed cross-references, hour-specific exceptions, and octaves. A
    plausible reduction of a seeded responsory is not sufficient evidence.
-3. **Ordinary structure at every weekday/hour:** openings, hymn placement,
+   Include the May 3, 2026 Holy Cross None ordinary-chapter fallback as an
+   unreviewed candidate; this pass checked only its Terce precedence control.
+2. **Ordinary structure at every weekday/hour:** openings, hymn placement,
    psalm/antiphon assignments, ferial versus festal canticles, repeated
    antiphons, chapter/versicle order, collects and conclusions. Prime and
    Compline received limited chapter/versicle controls in this audit only.
-4. **Seasonal and concurrence boundaries at the major hours:** preces,
+3. **Seasonal and concurrence boundaries at the major hours:** preces,
    suffrages, alleluias, doxologies, Marian antiphons, I/II Vespers, incoming
    versus outgoing commemorations, and season changes while another feast
    owns the office. Existing snapshots alone do not establish these rules.
-5. **Prayer forms:** compare the private, deacon, and priest openings,
+4. **Prayer forms:** compare the private, deacon, and priest openings,
    greetings, confession, and endings against their actual appointments.
 
-Known incomplete Triduum and All Souls little-hour work remains separate from
-ordinary-year review. Follow the existing repair backlog and clergy questions;
+The merged Triduum little-hour structure is a boundary control in this pass;
+remaining Triduum and All Souls work stays separate from ordinary-year review. Follow the existing repair backlog and clergy
+questions;
 do not silently resolve an ordo/source conflict by changing the calendar.
 
 ## Audit measurement correction
@@ -79,3 +122,8 @@ inventory's owner filter intact for its own proposal-safety purpose.
 Report checked requirements, outstanding defects, and unresolved source
 questions separately. Counts of compositions, source attestations, and test
 cases are not percentages of liturgical correctness.
+
+The Passiontide chapter/versicle appointment scope of #314 is now covered.
+Its remaining source-accounting work concerns the legacy seeded responsory
+entries and Paschal Compline; this repair does not attest those unused
+little-hour responsories as if the Diurnal printed them.
