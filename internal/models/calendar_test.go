@@ -34,3 +34,27 @@ func TestRankIsDouble(t *testing.T) {
 		}
 	}
 }
+
+func TestCalendarDayIsFerial(t *testing.T) {
+	// A synthesized office-day carries no Celebration at all, so the nil
+	// Celebration case is a real ferial day rather than missing data.
+	if !(&CalendarDay{}).IsFerial() {
+		t.Error("day without a Celebration should be ferial")
+	}
+
+	feria := &CalendarDay{Celebration: &Feast{ID: "feria", Category: CategoryFeria}}
+	if !feria.IsFerial() {
+		t.Error("day celebrating a feria should be ferial")
+	}
+
+	feast := &CalendarDay{Celebration: &Feast{ID: "christmas", Category: CategoryLord}}
+	if feast.IsFerial() {
+		t.Error("day celebrating a Lord feast should not be ferial")
+	}
+
+	// Callers reach this through a possibly-absent office day.
+	var absent *CalendarDay
+	if absent.IsFerial() {
+		t.Error("nil day should not be ferial")
+	}
+}
