@@ -136,6 +136,33 @@ three St Stephen compatibility cases, and all-form common tests cover this
 migration. These counts do not certify proper or octave inheritance, the full
 major hours, or future-ordo agreement.
 
+## Blessed Virgin common little-hour migration
+
+Diurnal p. 67* prints the three Blessed Virgin feast-common V./R. pairs;
+Terce returns to the Lauds chapter and Sext/None have their own chapters.
+The Saturday office explicitly borrows these chapters and verses on p. 69*.
+Its After Christmas and Paschal variants do not replace them (pp. 70*-71*);
+p. 72* begins the Office of the Dead. The 2026 ordo confirms the common Hours
+for January 31, May 16, and June 20 Saturdays (pp. 33, 63, 73), the Visitation
+(p. 77), Nativity BVM (p. 96), and Holy Name of Mary (p. 97).
+
+Three direct appointments replace the BVM little-hour responsory aliases.
+Terce reuses an existing attested canonical verse; Sext and None have two
+new canonical bodies and hash-bound attestations. Bounded Codex and Sonnet
+image readings agree on the pairs and Saturday cross-references. The initial
+None reading selected the neighboring Sext verse; a corrected bounded reading
+agrees with Sonnet and the page image. The three old aliases are retired;
+their Virgin-Martyr targets remain required by other commons.
+
+The comparison of 23,016 complete offices in 2026, 2027, and 2032 finds 666
+source-metadata changes (222 date/hours in three forms), with no rendered
+content or structure changes. Removing the aliases changes no complete-office
+hash after the direct migration. Private-form reductions fall from 1,065 to
+843. Thirty-six appointment/order cases, six proper-priority controls, and
+all-form verse checks cover the named dates, including the existing Paschal
+alleluia decoration. This does not certify the full Saturday office, Marian
+feast propers, octave inheritance, or future-ordo agreement.
+
 ## Next source-review passes
 
 These are uncompleted requirements, not passing checks or adjudicated defects.
