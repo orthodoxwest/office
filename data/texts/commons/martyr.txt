@@ -119,15 +119,6 @@ Amen.
 [chapter-none]
 @use commons/bishop-martyr/chapter-none
 
-[short-responsory-terce]
-@use commons/bishop-martyr/short-responsory-terce
-
-[short-responsory-sext]
-@use commons/bishop-martyr/short-responsory-sext
-
-[short-responsory-none]
-@use commons/bishop-martyr/short-responsory-none
-
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 628 (Common of One Martyr out of Paschaltide)
 R. Thou hast crowned him * with glory and honour, O Lord.
@@ -191,3 +182,15 @@ And to the Holy Paraclete,
 For endless ages as is meet.
 
 Amen.
+
+[versicle-terce]
+# SOURCE: diurnal pp. 22*-23* (One Martyr; the Bishop distinction changes the collect, not these little-hour pairs)
+@use commons/bishop-martyr/versicle-terce
+
+[versicle-sext]
+# SOURCE: diurnal pp. 22*-23* (One Martyr; the Bishop distinction changes the collect, not these little-hour pairs)
+@use commons/bishop-martyr/versicle-sext
+
+[versicle-none]
+# SOURCE: diurnal pp. 22*-23* (One Martyr; the Bishop distinction changes the collect, not these little-hour pairs)
+@use commons/bishop-martyr/versicle-none

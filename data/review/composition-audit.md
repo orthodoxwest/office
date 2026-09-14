@@ -104,6 +104,38 @@ St George octave; proper priority and omission controls remain in place.
 These checks cover the named little-hour appointments, not the major-hour
 exceptions, all remaining commons, or future-ordo agreement.
 
+## Ordinary Martyr little-hour migration
+
+Diurnal pp. 21*-23* and 25*-27* appoint the One Martyr and Many Martyrs
+little hours. The distinction between a Bishop and a non-Bishop changes the
+collect, not these chapter/versicle appointments. Terce returns to the Lauds
+chapter; Sext and None print their own chapters and simple V./R. pairs. The
+2026 ordo confirms these Hours for Fabian and Sebastian (p. 30), Timothy
+(p. 31), and Alban (p. 74).
+
+The three ordinary Martyr commons now have nine direct verse appointments:
+four canonical bodies and five aliases, reusing the existing Terce pairs.
+Bounded Codex and Sonnet readings establish all six distinct pairs. Fresh
+300 dpi readings resolve a Terce preposition disagreement and the two Sext
+column crossings; the initial readings are retained in ignored run artifacts.
+Five hash-bound source attestations cover the newly stored or reused wording.
+
+Nine obsolete little-hour responsory entries and their four obsolete
+attestations are retired. Those older attestations attributed full responsory
+bodies to pp. 23* and 27*, which print only the simple pairs at those hours.
+The new attestations concern the actual canonical verse bodies. Major-hour
+responsories, proper overrides, and Paschal appointments remain intact.
+
+Across 23,016 complete offices in 2026, 2027, and 2032, the direct appointments
+change source metadata in 387 offices (129 date/hours in three forms), with
+no rendered content or structure changes. Deleting the obsolete entries and
+attestations changes no complete-office hash after that migration. Private-form
+compatibility reductions fall from 1,194 to 1,065. Static dependency review,
+proper-priority and omission controls, 18 source appointment/order cases,
+three St Stephen compatibility cases, and all-form common tests cover this
+migration. These counts do not certify proper or octave inheritance, the full
+major hours, or future-ordo agreement.
+
 ## Next source-review passes
 
 These are uncompleted requirements, not passing checks or adjudicated defects.

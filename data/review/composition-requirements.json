@@ -1749,5 +1749,161 @@
         "ref": "commons/martyr-paschal/versicle-none"
       }
     ]
+  },
+  {
+    "id": "ordinary-martyr-little-hour-appointments",
+    "source": "Monastic Diurnal pp. 21*-23* and 25*-27*; Terce returns to Lauds, Sext and None have their own chapters and simple V./R. pairs. The 2026 ordo appoints these Hours on January 20 (p. 30), January 24 (p. 31), and June 22 (p. 74).",
+    "cases": [
+      {
+        "date": "2026-01-20",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/martyrs/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/martyrs/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/martyrs/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/martyrs/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/martyrs/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-20",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/martyrs/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-24",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/martyr/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/martyr/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/martyr/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/martyr/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/martyr/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-22",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/martyr/versicle-none",
+        "before_slot": "collect"
+      }
+    ]
+  },
+  {
+    "id": "ordinary-martyr-proper-priority-control",
+    "source": "Compatibility control: St Stephen retains its explicit proper little-hour responsories ahead of the new common verses. This migration does not certify the proper wording or its octave inheritance.",
+    "cases": [
+      {
+        "date": "2026-12-26",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/st-stephen/short-responsory-terce"
+      },
+      {
+        "date": "2026-12-26",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/st-stephen/short-responsory-sext"
+      },
+      {
+        "date": "2026-12-26",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/st-stephen/short-responsory-none"
+      }
+    ]
   }
 ]

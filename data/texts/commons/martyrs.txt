@@ -144,23 +144,6 @@ R. Thanks be to God.
 [chapter-terce]
 @use commons/martyrs/chapter-lauds
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Terce)
-@use commons/martyrs/short-responsory-lauds
-
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At Sext)
-@use commons/martyrs/short-responsory-vespers
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 27* (Common of Many Martyrs out of Paschaltide, At None)
-R. The righteous live * for evermore.
-R. The righteous live * for evermore.
-V. Their reward also is with the Lord.
-R. For evermore.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The righteous live * for evermore.
-
 [short-responsory-lauds]
 # SOURCE: monastic diurnal, p. 26* (Common of Many Martyrs out of Paschaltide, At Lauds)
 R. Be glad, O ye righteous, * and rejoice in the Lord.
@@ -250,3 +233,17 @@ Hereafter glad release,
 And pleasures that shall never cease.
 
 Amen.
+
+[versicle-terce]
+# SOURCE: diurnal p. 27*
+@use commons/martyrs/versicle-first-vespers
+
+[versicle-sext]
+# SOURCE: diurnal p. 27*
+V. Let the righteous rejoice before God.
+R. Let them also be merry and joyful.
+
+[versicle-none]
+# SOURCE: diurnal p. 27*
+V. The righteous live for evermore.
+R. Their reward also is with the Lord.
