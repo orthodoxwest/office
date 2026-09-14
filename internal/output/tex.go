@@ -69,14 +69,24 @@ func texPreamble(hour *models.OfficeHour) string {
 \usepackage{lettrine}
 \usepackage{microtype}
 \microtypesetup{verbose=silent}
+\usepackage{setspace}
 
+% Fonts — requires EB Garamond to be installed on the system.
+% Small caps carry web-like tracking everywhere (\scshape, \textsc), matching
+% the letterspaced section headings, psalm labels, and Ant. sigils online.
+\setmainfont{EB Garamond}[Ligatures=TeX,SmallCapsFeatures={LetterSpace=8.0}]
 
-% Fonts — requires EB Garamond to be installed on the system
-\setmainfont{EB Garamond}[Ligatures=TeX]
+% Prayer leading sits a touch deeper than LaTeX's default, as the web hour
+% sets body text at 1.6 and psalm/hymn verse at 1.75.
+\linespread{1.25}
 
-% Colors
-\definecolor{rubricred}{rgb}{0.65,0.08,0.08}
-\definecolor{ornamentgold}{rgb}{0.60,0.45,0.15}
+% Colors — the web Nave palette, so print and screen share one set of inks:
+% rubric red, gilding gold with its hairline, and muted grey for verse
+% numbers, labels, and pointing marks.
+\definecolor{rubricred}{rgb}{0.545,0.102,0.102}
+\definecolor{ornamentgold}{rgb}{0.604,0.451,0.157}
+\definecolor{goldline}{rgb}{0.788,0.675,0.447}
+\definecolor{mutedgray}{rgb}{0.420,0.365,0.333}
 
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
@@ -90,46 +100,78 @@ func texPreamble(hour *models.OfficeHour) string {
 \newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}
 
 % Gilded two-line initials. All call sites are semantic spoken openings, never
-% private/secret prayer text.
+% private/secret prayer text. Only the initial itself is gilt: the rest of the
+% opening word stays ordinary prose, as ::first-letter does on the web hour.
+\renewcommand{\LettrineTextFont}{\normalfont}
 \newcommand{\dropcap}[2]{\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
 
-% Section heading (small caps)
+% Section heading: centered small caps with open air, as the web hour centers
+% each transition in tracked small caps.
 \newcommand{\sectionheading}[1]{%
-  \bigskip\noindent{\small\scshape #1}\par\smallskip\noindent%
+  \bigskip\begin{center}{\scshape #1}\end{center}\smallskip\noindent%
+}
+
+% Mid-canticle section break (e.g. the two-part structure of Deut 32):
+% centered muted italic, as the web canticle-section line.
+\newcommand{\canticlesection}[1]{%
+  \smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\smallskip\noindent%
 }
 
 % Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
 % recorded, in which case the label stands alone.
 \newcommand{\psalmlabel}[2]{%
-  \noindent{\scshape #1}%
-  \if\relax\detokenize{#2}\relax\else{\itshape\enspace$\cdot$\enspace #2}\fi%
-  \par\smallskip%
+  \begin{center}{\color{mutedgray}\scshape #1}%
+  \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi%
+  \end{center}\smallskip%
 }
 
-% Psalm mediant marker
-\newcommand{\mediant}{\,{\small *}\,}
+% Pointing mediant: muted and raised to the optical middle of the line, as the
+% web verse renderer lifts the asterisk clear of the ascenders.
+\newcommand{\mediant}{\,\raisebox{0.25em}{\small\color{mutedgray}*}\,}
 
-% Psalm verses environment and command
+% Psalm verses environment and command. Verses breathe a little deeper than
+% prose, as psalm-verses does online.
 \newenvironment{psalmverses}{%
   \setlength{\parindent}{0pt}%
   \setlength{\parskip}{2pt}%
-}{}
+  \setstretch{1.35}%
+}{%
+  \par%
+}
 
-% \psalmverse{num}{text} — num is empty for unnumbered first verse
+% Hymn stanza environment: deeper verse leading, as hymn-verses does.
+\newenvironment{hymnverses}{%
+  \setstretch{1.35}%
+}{%
+  \par%
+}
+
+% \psalmverse{num}{text} — num is empty for unnumbered first verse.
+% Numbered verses hang from a muted right-aligned gutter so every spoken line
+% shares one left edge, as verse-num does on the web hour.
 \newcommand{\psalmverse}[2]{%
   \if\relax\detokenize{#1}\relax%
     \noindent #2\par%
   \else%
-    \noindent\hangindent=1.5em\hangafter=1\makebox[1.5em][l]{{\small\textbf{#1}}}#2\par%
+    \noindent\hangindent=2em\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
   \fi%
 }
 
-% Gloria Patri: two verses, each pointed at its own mediant, on their own lines
-\newcommand{\gloriapatri}[2]{\noindent #1\\#2\par}
+% Gloria Patri: two verses, each pointed at its own mediant, on their own
+% lines, standing a little apart from the verses above as its own stanza.
+\newcommand{\gloriapatri}[2]{\medskip\noindent #1\\#2\par}
 
-% Antiphon
-\newcommand{\ant}[1]{\noindent\textit{Ant.}\enspace\textit{#1}\par}
+% Spoken-role sigils set in rubric red, as the web sigil column does.
+% \Vbar/\Rbar come from gregoriotex, which the preamble loads above.
+\newcommand{\Vsig}{{\color{rubricred}\Vbar{}}}
+\newcommand{\Rsig}{{\color{rubricred}\Rbar{}}}
+\newcommand{\allsig}{{\color{rubricred}\scshape All:}\kern0.3em{}}
+\newcommand{\blessingsig}{{\color{rubricred}Blessing.}\kern0.3em{}}
+
+% Antiphon: a red small-cap sigil with the body in ordinary roman, hanging so
+% a wrapped remainder tucks under its own line, as body antiphons do online.
+\newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
 % Opening acclamation (not an antiphon)
 \newcommand{\acclamation}[1]{\noindent #1\par}
 % Initial response of a Short Responsory. No \par here — call sites append the
@@ -145,19 +187,25 @@ func texPreamble(hour *models.OfficeHour) string {
 	return b.String()
 }
 
-// texTitleBlock returns the title block for the hour.
+// texTitleBlock returns the title block for the hour: the hour name framed by
+// double gold hairlines with a lozenge, as the web hour-header frames its
+// title, with the day and season kept quiet beneath it.
 func texTitleBlock(hour *models.OfficeHour) string {
 	var b strings.Builder
 	b.WriteString("\\begin{center}\n")
+	b.WriteString("  {\\color{goldline}\\rule{\\linewidth}{0.6pt}}\\\\[1pt]\n")
+	b.WriteString("  {\\color{goldline}\\rule{\\linewidth}{0.6pt}}\\\\[6pt]\n")
 	fmt.Fprintf(&b, "  {\\Large\\scshape The Order for %s}\\\\[4pt]\n", escapeTeX(hour.Hour))
 	fmt.Fprintf(&b, "  {\\normalsize %s}\\\\[2pt]\n", escapeTeX(hour.Date.Format("Monday, January 2, 2006")))
 	if hour.Feast != "" {
 		fmt.Fprintf(&b, "  {\\normalsize\\itshape %s}\\\\[2pt]\n", escapeTeX(hour.Feast))
 	}
-	fmt.Fprintf(&b, "  {\\small\\itshape Season: %s \\quad$\\cdot$\\quad Color: %s}\n",
+	fmt.Fprintf(&b, "  {\\small\\color{mutedgray}Season: %s \\quad$\\cdot$\\quad Color: %s}\\\\[6pt]\n",
 		escapeTeX(string(hour.Season)), escapeTeX(string(hour.Color)))
+	b.WriteString("  {\\color{goldline}\\rule{\\linewidth}{0.6pt}}\\\\[1pt]\n")
+	b.WriteString("  {\\color{goldline}\\rule{\\linewidth}{0.6pt}}\\\\[4pt]\n")
+	b.WriteString("  {\\color{ornamentgold}\\small$\\diamond$}\n")
 	b.WriteString("\\end{center}\n\n")
-	b.WriteString("\\bigskip\\hrule\\bigskip\n\n")
 	return b.String()
 }
 
@@ -194,7 +242,7 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 				// formatMultilineAntiphonTeX; announced forms are single-line.
 				b.WriteString(formatMultilineAntiphonTeX(elem))
 			} else {
-				fmt.Fprintf(&b, "\\ant{%s}\n\n", texLine(text))
+				fmt.Fprintf(&b, "\\ant{%s}\n\n", texMediantLine(text))
 			}
 		}
 	case models.OpeningAcclamation:
@@ -209,7 +257,7 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 
 	case models.Hymn:
 		if elem.Label != "" {
-			fmt.Fprintf(&b, "\n{\\small\\itshape %s}\n\n", escapeTeX(elem.Label))
+			fmt.Fprintf(&b, "\n\\begin{center}{\\small\\itshape %s}\\end{center}\n\n", escapeTeX(elem.Label))
 		}
 		b.WriteString(formatHymnTeX(elem.Text, dataDir, elem.Label, chant))
 
@@ -226,10 +274,11 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 			b.WriteString(formatLiturgicalBlockTeX(elem.Text))
 		}
 	case models.Doxology, models.Versicle, models.Response, models.Dialogue,
-		models.Chapter,
 		models.Blessing, models.Preces:
 		b.WriteString(formatLiturgicalBlockTeX(elem.Text))
-	case models.Collect:
+	// A chapter's opening paragraph takes the spoken initial like a collect's,
+	// matching the web chapter's dropped first letter.
+	case models.Collect, models.Chapter:
 		b.WriteString(formatCollectTeX(elem.Text))
 	case models.ShortResponsory:
 		b.WriteString(formatShortResponsoryTeX(elem.Text))
@@ -274,27 +323,48 @@ func formatPsalmTeX(text, dataDir, label string, elemType models.ElementType, ch
 	var b strings.Builder
 
 	if psalm.ScriptureRef != "" {
-		fmt.Fprintf(&b, "\\scriptureref{%s}\n\n", escapeTeX(psalm.ScriptureRef))
+		fmt.Fprintf(&b, "{\\centering\\scriptureref{%s}\\par}\n\n", escapeTeX(psalm.ScriptureRef))
 	}
 
 	b.WriteString("\\begin{psalmverses}\n")
+
+	// The opening verse of each psalm-verses block takes the gilt initial, as
+	// the web hour drops the first letter of every first verse. A Gloria is
+	// never the dropped verse; a section break re-arms the opening.
+	firstVerse := true
 
 	for _, item := range psalm.Items {
 		switch item.Kind {
 		case texts.PsalmSection:
 			b.WriteString("\\end{psalmverses}\n")
-			fmt.Fprintf(&b, "\\sectionheading{%s}\n", escapeTeX(item.Heading))
+			fmt.Fprintf(&b, "\\canticlesection{%s}\n", escapeTeX(item.Heading))
 			b.WriteString("\\begin{psalmverses}\n")
+			firstVerse = true
 
 		case texts.PsalmGloria:
+			firstVerse = false
 			if item.Second == "" {
 				// Malformed Gloria (missing second line) — emit what we have.
-				fmt.Fprintf(&b, "\\psalmverse{}{%s}\n", texLine(item.First))
+				fmt.Fprintf(&b, "\\psalmverse{}{%s}\n", texMediantLine(item.First))
 				continue
 			}
-			fmt.Fprintf(&b, "\\gloriapatri{%s}{%s}\n", texLine(item.First), texLine(item.Second))
+			fmt.Fprintf(&b, "\\gloriapatri{%s}{%s}\n", texMediantLine(item.First), texMediantLine(item.Second))
 
 		default:
+			if firstVerse {
+				firstVerse = false
+				if item.Number == "" {
+					if item.Second == "" {
+						fmt.Fprintf(&b, "\\psalmverse{}{%s}\n", texDropCap(item.First))
+						continue
+					}
+					fmt.Fprintf(&b, "\\psalmverse{}{%s\\mediant{}%s}\n",
+						texDropCap(item.First), texLine(item.Second))
+					continue
+				}
+				// A numbered opening keeps plain text: with no unnumbered
+				// paragraph the gilt initial has no home, as online.
+			}
 			if item.Second == "" {
 				fmt.Fprintf(&b, "\\psalmverse{%s}{%s}\n", item.Number, texLine(item.First))
 				continue
@@ -325,16 +395,17 @@ func formatHymnTeX(text, dataDir, label string, chant bool) string {
 	var b strings.Builder
 	if hymn.Title != "" {
 		if rubric, ok := texts.HymnRubricText(hymn.Title); ok {
-			fmt.Fprintf(&b, "\\rubric{%s}\n\n", escapeTeX(rubric))
+			fmt.Fprintf(&b, "{\\centering\\rubric{%s}\\par}\n\n", escapeTeX(rubric))
 		} else {
-			fmt.Fprintf(&b, "{\\small\\itshape %s}\n\n", escapeTeX(hymn.Title))
+			fmt.Fprintf(&b, "\\begin{center}{\\small\\itshape %s}\\end{center}\n\n", escapeTeX(hymn.Title))
 		}
 	}
+	b.WriteString("\\begin{hymnverses}\n")
 	dropped := false
 	for _, stanza := range hymn.Stanzas {
 		if rubrics, ok := texts.HymnRubricStanza(stanza); ok {
 			for _, rubric := range rubrics {
-				fmt.Fprintf(&b, "\\rubric{%s}\\par\\smallskip\n", escapeTeX(rubric))
+				fmt.Fprintf(&b, "{\\centering\\rubric{%s}\\par}\\smallskip\n", escapeTeX(rubric))
 			}
 			continue
 		}
@@ -355,7 +426,7 @@ func formatHymnTeX(text, dataDir, label string, chant bool) string {
 		b.WriteString("\\par\\smallskip\n")
 	}
 
-	b.WriteString("\n")
+	b.WriteString("\\end{hymnverses}\n\n")
 	return b.String()
 }
 
@@ -366,7 +437,7 @@ func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
 	var b strings.Builder
 
 	if elem.Label != "" {
-		fmt.Fprintf(&b, "\n{\\small\\itshape %s}\n\n", escapeTeX(elem.Label))
+		fmt.Fprintf(&b, "\n\\begin{center}{\\small\\itshape %s}\\end{center}\n\n", escapeTeX(elem.Label))
 	}
 
 	anthem, rest, _ := strings.Cut(elem.Text, "\n\n")
@@ -381,7 +452,7 @@ func formatMultilineAntiphonTeX(elem models.OfficeElement) string {
 		b.WriteString(texDropCap(anthemLines[0]))
 		if len(anthemLines) > 1 {
 			b.WriteByte(' ')
-			b.WriteString(strings.Join(texLines(anthemLines[1:]), " "))
+			b.WriteString(strings.Join(texMediantLines(anthemLines[1:]), " "))
 		}
 		b.WriteString("}\\par\n")
 	}
@@ -413,24 +484,24 @@ func formatShortResponsoryTeX(text string) string {
 		case texts.BlockResponse:
 			flushProse()
 			if firstResponse {
-				initial, firstWordRest, tail := splitDropCap(line.Text)
+				initial, firstWordRest, tail := splitDropCap(softenTeXOpening(line.Text))
 				fmt.Fprintf(&b, "\\shortresponse{%s}{%s}%s\\par\n", texLine(initial), texLine(firstWordRest), texMediantLine(tail))
 				firstResponse = false
 			} else {
-				fmt.Fprintf(&b, "\\noindent\\Rbar{}%s\\par\n", texMediantLine(line.Text))
+				fmt.Fprintf(&b, "\\noindent\\Rsig{}%s\\par\n", texMediantLine(line.Text))
 			}
 		case texts.BlockVersicle:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texMediantLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\Vsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockAll:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\textsc{All:}\\kern0.3em{}%s\\par\n", texMediantLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\allsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockBlessing:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texMediantLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\blessingsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockScriptureRef:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\scriptureref{%s}\\par\n", escapeTeX(line.Text))
+			fmt.Fprintf(&b, "{\\centering\\scriptureref{%s}\\par}\n", escapeTeX(line.Text))
 		default:
 			proseLines = append(proseLines, texMediantLine(line.Text))
 		}
@@ -449,11 +520,89 @@ func splitInitial(text string) (initial, rest string) {
 }
 
 func texDropCap(text string) string {
-	initial, firstWordRest, tail := splitDropCap(text)
+	initial, firstWordRest, tail := splitDropCap(softenTeXOpening(text))
 	if initial == "" {
 		return texLine(text)
 	}
 	return fmt.Sprintf("\\dropcap{%s}{%s}%s", texLine(initial), texLine(firstWordRest), texMediantLine(tail))
+}
+
+// softenTeXOpening mirrors render.softenDropCapOpening for print: it
+// title-cases a run of leading ALL-CAPS words so the gilt initial takes only
+// the first letter and the rest of the word reads as prose. Without this,
+// Coverdale openings like "GOD be merciful" set a gilt "G" beside full-caps
+// "OD". Single-letter words (O, I) are left alone; multi-letter ALL-CAPS
+// words are title-cased until a mixed-case word stops the run.
+func softenTeXOpening(s string) string {
+	if s == "" {
+		return s
+	}
+	var b strings.Builder
+	b.Grow(len(s))
+	i := 0
+	changed := false
+	for i < len(s) {
+		for i < len(s) {
+			r, size := utf8.DecodeRuneInString(s[i:])
+			if !unicode.IsSpace(r) {
+				break
+			}
+			b.WriteRune(r)
+			i += size
+		}
+		if i >= len(s) {
+			break
+		}
+		wordStart := i
+		for i < len(s) {
+			r, size := utf8.DecodeRuneInString(s[i:])
+			if unicode.IsSpace(r) {
+				break
+			}
+			i += size
+		}
+		word := s[wordStart:i]
+		letterEnd := len(word)
+		for letterEnd > 0 {
+			r, size := utf8.DecodeLastRuneInString(word[:letterEnd])
+			if unicode.IsLetter(r) {
+				break
+			}
+			letterEnd -= size
+		}
+		if letterEnd == 0 {
+			b.WriteString(s[wordStart:])
+			return b.String()
+		}
+		letters := word[:letterEnd]
+		trail := word[letterEnd:]
+		runes := []rune(letters)
+		allCaps := true
+		for _, r := range runes {
+			if !unicode.IsLetter(r) || !unicode.IsUpper(r) {
+				allCaps = false
+				break
+			}
+		}
+		if !allCaps {
+			b.WriteString(s[wordStart:])
+			return b.String()
+		}
+		if len(runes) >= 2 {
+			b.WriteRune(runes[0])
+			for _, r := range runes[1:] {
+				b.WriteRune(unicode.ToLower(r))
+			}
+			b.WriteString(trail)
+			changed = true
+		} else {
+			b.WriteString(word)
+		}
+	}
+	if !changed {
+		return s
+	}
+	return b.String()
 }
 
 // splitDropCap gives lettrine only the remainder of the opening word; its
@@ -471,10 +620,13 @@ func splitDropCap(text string) (initial, firstWordRest, tail string) {
 	return initial, rest[:i], rest[i:]
 }
 
-func texLines(lines []string) []string {
+// texMediantLines maps texMediantLine over sense-lines joined into a flowing
+// paragraph, so pointed prose keeps the \mediant{} mark instead of a literal
+// asterisk.
+func texMediantLines(lines []string) []string {
 	formatted := make([]string, len(lines))
 	for i, line := range lines {
-		formatted[i] = texLine(line)
+		formatted[i] = texMediantLine(line)
 	}
 	return formatted
 }
@@ -493,7 +645,7 @@ func formatCorporateLordPrayerTeX(elem models.OfficeElement) string {
 		return formatLiturgicalBlockTeX(elem.Text)
 	}
 	flow := func(s string) string { return strings.Join(strings.Fields(s), " ") }
-	return fmt.Sprintf("%s\\par\n\\noindent\\Rbar{}%s\\par\n\n",
+	return fmt.Sprintf("%s\\par\n\\noindent\\Rsig{}%s\\par\n\n",
 		texDropCap(flow(officiant.String())), texMediantLine(flow(response.String())))
 }
 
@@ -524,12 +676,12 @@ func formatLiturgicalBlockTeXWithOpeningDropCap(text string, openingDropCap bool
 			b.WriteString(texDropCap(proseLines[0]))
 			if len(proseLines) > 1 {
 				b.WriteByte(' ')
-				b.WriteString(strings.Join(texLines(proseLines[1:]), " "))
+				b.WriteString(strings.Join(texMediantLines(proseLines[1:]), " "))
 			}
 			droppedOpening = true
 		} else {
 			b.WriteString("\\noindent ")
-			b.WriteString(strings.Join(texLines(proseLines), " "))
+			b.WriteString(strings.Join(texMediantLines(proseLines), " "))
 		}
 		b.WriteString("\\par\n")
 		proseLines = nil
@@ -542,19 +694,19 @@ func formatLiturgicalBlockTeXWithOpeningDropCap(text string, openingDropCap bool
 			b.WriteString("\\smallskip\n")
 		case texts.BlockScriptureRef:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\scriptureref{%s}\\par\n", escapeTeX(line.Text))
+			fmt.Fprintf(&b, "{\\centering\\scriptureref{%s}\\par}\n", escapeTeX(line.Text))
 		case texts.BlockVersicle:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\Vbar{}%s\\par\n", texLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\Vsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockResponse:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\Rbar{}%s\\par\n", texLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\Rsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockBlessing:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\textbf{Blessing.}\\kern0.3em{}%s\\par\n", texLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\blessingsig{}%s\\par\n", texMediantLine(line.Text))
 		case texts.BlockAll:
 			flushProse()
-			fmt.Fprintf(&b, "\\noindent\\textsc{All:}\\kern0.3em{}%s\\par\n", texLine(line.Text))
+			fmt.Fprintf(&b, "\\noindent\\allsig{}%s\\par\n", texMediantLine(line.Text))
 		default:
 			proseLines = append(proseLines, line.Text)
 		}
@@ -583,10 +735,16 @@ func formatGloriaPatriTeX(text string) string {
 }
 
 // texMediantLine escapes a line for TeX, rendering an embedded " * " pointing
-// mediant as \mediant{} rather than a literal asterisk.
+// mediant as \mediant{} rather than a literal asterisk. A trailing " * "
+// (the first half of a pointed pair whose remainder follows on the next
+// source line, as in the Ave Regina opening) keeps the mark with no second
+// half, mirroring chantLineHTML on the web hour.
 func texMediantLine(s string) string {
 	before, after, found := strings.Cut(s, " * ")
 	if !found {
+		if before, ok := strings.CutSuffix(s, " *"); ok {
+			return texLine(before) + `\mediant{}`
+		}
 		return texLine(s)
 	}
 	return texLine(before) + `\mediant{}` + texLine(after)

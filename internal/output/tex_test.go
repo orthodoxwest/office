@@ -135,11 +135,11 @@ as it was in the beginning, is now, and ever shall be, world without end. Amen.`
 
 	got := formatLiturgicalBlockTeX(text)
 
-	if !strings.Contains(got, `\Vbar{}`) {
-		t.Error("expected \\Vbar{}")
+	if !strings.Contains(got, `\Vsig{}`) {
+		t.Error("expected red \\Vsig{} versicle sigil")
 	}
-	if !strings.Contains(got, `\Rbar{}`) {
-		t.Error("expected \\Rbar{}")
+	if !strings.Contains(got, `\Rsig{}`) {
+		t.Error("expected red \\Rsig{} response sigil")
 	}
 	if !strings.Contains(got, `\crux{}`) {
 		t.Error("expected \\crux{} for cross character")
@@ -152,18 +152,18 @@ func TestSemanticOfficeElementsTeX(t *testing.T) {
 		t.Fatalf("opening acclamation must not use antiphon macro:\n%s", acclamation)
 	}
 	short := texElement(models.OfficeElement{Type: models.ShortResponsory, Text: "R. The Lord hath set his love upon me.\nV. He shall deliver me.\nR. The Lord hath set his love upon me."}, "", false)
-	if !strings.Contains(short, `\shortresponse{T}{he} Lord`) || strings.Count(short, `\Rbar{}`) != 1 {
+	if !strings.Contains(short, `\shortresponse{T}{he} Lord`) || strings.Count(short, `\Rsig{}`) != 1 {
 		t.Fatalf("short responsory must drop only its first response sigil:\n%s", short)
 	}
 	dialogue := formatLiturgicalBlockTeX("V. Kyrie, eleison.\nR. Christe, eleison.\nAll: Kyrie, eleison.")
-	if !strings.Contains(dialogue, `\textsc{All:}`) {
+	if !strings.Contains(dialogue, `\allsig{}`) {
 		t.Fatalf("expected All speaker mark:\n%s", dialogue)
 	}
 	prayer := texElement(models.OfficeElement{Type: models.CorporateLordPrayer, Voice: []models.VoiceSpan{
 		{Text: "Our Father.\nAnd lead us not into temptation,\n", Spoken: true, Role: models.VoiceOfficiant},
 		{Text: "But deliver us from evil. Amen.", Spoken: true, Role: models.VoiceResponse},
 	}}, "", false)
-	if !strings.Contains(prayer, `\dropcap{O}{ur} Father.`) || !strings.Contains(prayer, `\Rbar{}But deliver us from evil. Amen.`) {
+	if !strings.Contains(prayer, `\dropcap{O}{ur} Father.`) || !strings.Contains(prayer, `\Rsig{}But deliver us from evil. Amen.`) {
 		t.Fatalf("expected corporate response with Amen:\n%s", prayer)
 	}
 }
@@ -172,12 +172,23 @@ func TestTeXTypographyParity(t *testing.T) {
 	preamble := texPreamble(&models.OfficeHour{})
 	for _, want := range []string{
 		`\definecolor{ornamentgold}`,            // gilded drop caps
+		`\definecolor{mutedgray}`,               // verse numbers, labels, mediants
+		`\definecolor{goldline}`,                // title hairlines
 		`\newcommand{\crux}{{\color{rubricred}`, // rubric-red crosses
 		`\newcommand{\rubric}[1]{{\color{rubricred}\small\normalfont #1}}`,
 		`\newcommand{\rubricprayed}[1]{{\color{black}\normalfont #1}}`,
 		`\newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}`,
+		`\renewcommand{\LettrineTextFont}{\normalfont}`, // gilt initial only, rest prose
 		`\newcommand{\dropcap}[2]{\lettrine`,
 		`\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}`,
+		`\newcommand{\Vsig}{{\color{rubricred}\Vbar{}}}`,
+		`\newcommand{\Rsig}{{\color{rubricred}\Rbar{}}}`,
+		`\newcommand{\allsig}{{\color{rubricred}\scshape All:}`,
+		`\newcommand{\blessingsig}{{\color{rubricred}Blessing.}`,
+		`\newcommand{\canticlesection}[1]{`,
+		`\setstretch{1.35}`, // verse leading deeper than prose
+		`\newcommand{\gloriapatri}[2]{\medskip\noindent`,
+		`\newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}`,
 	} {
 		if !strings.Contains(preamble, want) {
 			t.Errorf("preamble is missing %q", want)
@@ -186,9 +197,43 @@ func TestTeXTypographyParity(t *testing.T) {
 	if strings.Contains(preamble, `\newcommand{\rubric}[1]{{\color{rubricred}\small\itshape`) {
 		t.Error("rubrics must be roman, not italic")
 	}
-	psalmLabel := preamble[strings.Index(preamble, `\newcommand{\psalmlabel}`):strings.Index(preamble, `% Psalm mediant marker`)]
+	sectionHeading := preamble[strings.Index(preamble, `\newcommand{\sectionheading}`):strings.Index(preamble, `\newcommand{\canticlesection}`)]
+	if !strings.Contains(sectionHeading, `\begin{center}{\scshape #1}\end{center}`) {
+		t.Error("section headings must be centered small caps")
+	}
+	if strings.Contains(sectionHeading, `\small\scshape`) {
+		t.Error("section headings must be body-sized rather than small")
+	}
+	psalmLabel := preamble[strings.Index(preamble, `\newcommand{\psalmlabel}`):strings.Index(preamble, `% Pointing mediant`)]
+	if !strings.Contains(psalmLabel, `\begin{center}`) || !strings.Contains(psalmLabel, `\color{mutedgray}`) {
+		t.Error("psalm/canticle labels must be centered and muted")
+	}
 	if strings.Contains(psalmLabel, `{\small\scshape #1}`) || strings.Contains(psalmLabel, `{\small\itshape\enspace`) {
 		t.Error("psalm/canticle labels must be body-sized rather than small")
+	}
+	mediant := preamble[strings.Index(preamble, `\newcommand{\mediant}`):strings.Index(preamble, `% Psalm verses environment`)]
+	if !strings.Contains(mediant, `\raisebox{0.25em}`) || !strings.Contains(mediant, `\color{mutedgray}`) {
+		t.Error("mediant must be muted and raised")
+	}
+	verse := preamble[strings.Index(preamble, `\newcommand{\psalmverse}`):strings.Index(preamble, `% Gloria Patri`)]
+	if !strings.Contains(verse, `\makebox[1.4em][r]`) || !strings.Contains(verse, `\color{mutedgray}`) {
+		t.Error("numbered verses must hang from a muted right-aligned gutter")
+	}
+	if strings.Contains(verse, `\textbf`) {
+		t.Error("verse numbers must not be bold")
+	}
+	title := texTitleBlock(&models.OfficeHour{})
+	for _, want := range []string{
+		`{\color{goldline}\rule{\linewidth}{0.6pt}}`,
+		`{\color{ornamentgold}\small$\diamond$}`,
+		`{\small\color{mutedgray}Season:`,
+	} {
+		if !strings.Contains(title, want) {
+			t.Errorf("title block is missing %q", want)
+		}
+	}
+	if strings.Contains(title, `\hrule`) {
+		t.Error("title rules must be gold, not a black \\hrule")
 	}
 
 	rubric := formatRubricTeX(models.OfficeElement{
@@ -315,7 +360,7 @@ func TestTeXMarianAndShortResponsoryOpeningBranches(t *testing.T) {
 	if strings.Count(marian, `\dropcap{`) != 1 || !strings.Contains(marian, `\dropcap{H}{ail,} holy Queen. Our life and sweetness.`) {
 		t.Fatalf("only the Marian anthem opening should be dropped:\n%s", marian)
 	}
-	if !strings.Contains(marian, `\Vbar{}Pray for us.`) || !strings.Contains(marian, `\Rbar{}That we may be worthy.`) {
+	if !strings.Contains(marian, `\Vsig{}Pray for us.`) || !strings.Contains(marian, `\Rsig{}That we may be worthy.`) {
 		t.Fatalf("Marian antiphon's remaining liturgical block must be retained:\n%s", marian)
 	}
 
@@ -328,11 +373,11 @@ func TestTeXMarianAndShortResponsoryOpeningBranches(t *testing.T) {
 	if strings.Contains(short, `\shortresponse{A}{lpha}\par`) {
 		t.Fatalf("shortresponse must not end the paragraph after the first word:\n%s", short)
 	}
-	if strings.Count(short, `\shortresponse{`) != 1 || !strings.Contains(short, `\Rbar{}A later response.`) {
+	if strings.Count(short, `\shortresponse{`) != 1 || !strings.Contains(short, `\Rsig{}A later response.`) {
 		t.Fatalf("later short-responsory response must retain its sigil:\n%s", short)
 	}
 	noResponse := formatShortResponsoryTeX("Opening prose.\nV. A versicle.")
-	if strings.Contains(noResponse, `\shortresponse{`) || !strings.Contains(noResponse, `\Vbar{}A versicle.`) {
+	if strings.Contains(noResponse, `\shortresponse{`) || !strings.Contains(noResponse, `\Vsig{}A versicle.`) {
 		t.Fatalf("a block without a response must not invent a dropped initial:\n%s", noResponse)
 	}
 }
@@ -379,7 +424,7 @@ Almighty, everlasting God, grant unto us thy servants health of mind and body.`,
 	if !strings.Contains(got, `{\itshape \dropcap{H}{ail,} holy Queen, Mother of mercy, our life, our sweetness, and our hope.}`) {
 		t.Errorf("anthem paragraph should be italic and flowed:\n%s", got)
 	}
-	if !strings.Contains(got, `\Vbar{}`) || !strings.Contains(got, `\Rbar{}`) {
+	if !strings.Contains(got, `\Vsig{}`) || !strings.Contains(got, `\Rsig{}`) {
 		t.Error("versicle/response after the anthem should use liturgical block markup")
 	}
 	if !strings.Contains(got, "Almighty, everlasting God") {
@@ -430,8 +475,8 @@ R. Thanks be to God.`
 			t.Error("scripture ref content should be present")
 		}
 	}
-	if !strings.Contains(got, `\Rbar{}`) {
-		t.Error("expected \\Rbar{} in response")
+	if !strings.Contains(got, `\Rsig{}`) {
+		t.Error("expected \\Rsig{} in response")
 	}
 }
 
@@ -645,13 +690,125 @@ func TestTexEmptyAntiphonEmitsNothing(t *testing.T) {
 	}
 }
 
+func TestSoftenTeXOpening(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"", ""},
+		{"GOD be merciful unto us,", "God be merciful unto us,"},
+		{"HAVE mercy upon me,", "Have mercy upon me,"},
+		{"MY SOUL cleaveth to the dust,", "My Soul cleaveth to the dust,"},
+		{"O GIVE thanks unto the Lord,", "O Give thanks unto the Lord,"},
+		{"O God, thou art my God,", "O God, thou art my God,"},
+		{"Almighty God, who hast", "Almighty God, who hast"},
+		{"I said, I will take heed", "I said, I will take heed"},
+	}
+	for _, tt := range tests {
+		if got := softenTeXOpening(tt.in); got != tt.want {
+			t.Errorf("softenTeXOpening(%q) = %q, want %q", tt.in, got, tt.want)
+		}
+	}
+}
+
+func TestFormatPsalmTeXOpeningDropCap(t *testing.T) {
+	psalmText := `Psalm 67
+
+GOD be merciful unto us, and bless us * and shew us the light of his countenance:
+2. That thy way may be known upon earth * thy saving health among all nations.
+Glory be to the Father, and to the Son, and to the Holy Ghost;
+as it was in the beginning, is now, and ever shall be, world without end. Amen.
+`
+	got := formatPsalmTeX(psalmText, "", "Psalm 67", models.Psalm, false)
+	if !strings.Contains(got, `\psalmverse{}{\dropcap{G}{od} be merciful unto us, and bless us\mediant{}and shew us`) {
+		t.Errorf("opening verse needs a softened gilt initial:\n%s", got)
+	}
+	if strings.Count(got, `\dropcap{`) != 1 {
+		t.Errorf("only the opening verse takes the initial:\n%s", got)
+	}
+	if strings.Contains(got, "GOD be merciful") {
+		t.Error("ALL-CAPS opening must be softened beside the initial")
+	}
+
+	// A psalm whose first verse is numbered has no unnumbered paragraph for
+	// the initial, so it stays plain.
+	numbered := formatPsalmTeX("2. That thy way may be known * among all nations.\n", "", "Psalm 67", models.Psalm, false)
+	if strings.Contains(numbered, `\dropcap{`) {
+		t.Errorf("numbered opening must not take the initial:\n%s", numbered)
+	}
+
+	// A canticle section break re-arms the opening for the second block.
+	sectioned := formatPsalmTeX("Canticle\n\nFirst opening * alpha.\n\n[section: Part II]\n\nSECOND opening * beta.\n", "", "Canticle", models.Canticle, false)
+	if strings.Count(sectioned, `\dropcap{`) != 2 {
+		t.Errorf("each canticle block needs its own opening initial:\n%s", sectioned)
+	}
+	if !strings.Contains(sectioned, `\canticlesection{Part II}`) {
+		t.Errorf("section break must use the centered muted macro:\n%s", sectioned)
+	}
+	if !strings.Contains(sectioned, `\dropcap{S}{econd} opening`) {
+		t.Errorf("second block opening must be softened:\n%s", sectioned)
+	}
+}
+
+func TestTeXAntiphonRendersPointedMediant(t *testing.T) {
+	got := texElement(models.OfficeElement{
+		Type: models.Antiphon,
+		Text: "Wash me throughly, * O Lord, from my wickedness.",
+	}, "", false)
+	if !strings.Contains(got, `\mediant{}`) {
+		t.Fatalf("antiphon pointing must use the mediant mark, not a literal asterisk:\n%s", got)
+	}
+	if strings.Contains(got, " * ") {
+		t.Fatalf("literal asterisk must not survive in the antiphon:\n%s", got)
+	}
+	if !strings.HasPrefix(strings.TrimSpace(got), `\ant{`) {
+		t.Fatalf("antiphon must use the hanging red-sigil macro:\n%s", got)
+	}
+	// A trailing mediant (first half of a pair continued on the next source
+	// line, as in the Ave Regina opening) keeps the mark with no second half.
+	if got := texMediantLine("Queen of the heavens, we hail thee *"); got != `Queen of the heavens, we hail thee\mediant{}` {
+		t.Fatalf("trailing mediant = %q", got)
+	}
+}
+
+func TestTeXChapterTakesCollectInitial(t *testing.T) {
+	chapter := texElement(models.OfficeElement{Type: models.Chapter, Text: "Brethren, the night is far spent."}, "", false)
+	if !strings.Contains(chapter, `\dropcap{B}{rethren,} the night is far spent.`) {
+		t.Fatalf("chapter opening needs the spoken initial:\n%s", chapter)
+	}
+	collect := texElement(models.OfficeElement{Type: models.Collect, Text: "Brethren, the night is far spent."}, "", false)
+	if collect != chapter {
+		t.Fatalf("chapter and collect openings must match:\n%s\n%s", chapter, collect)
+	}
+}
+
+func TestTeXFlowingProseRendersMediant(t *testing.T) {
+	got := formatLiturgicalBlockTeX("Glory be to the Father, and to the Son, * and to the Holy Ghost;\nas it was in the beginning, is now, and ever shall be, * world without end. Amen.")
+	if !strings.Contains(got, `\mediant{}`) {
+		t.Fatalf("pointed prose must use the mediant mark:\n%s", got)
+	}
+	if strings.Contains(got, " * ") {
+		t.Fatalf("literal asterisk must not survive in flowing prose:\n%s", got)
+	}
+}
+
+func TestTeXHymnTitlesAreCentered(t *testing.T) {
+	got := formatHymnTeX("Aeterne rerum conditor\n\nO Framer of the earth and sky.", "", "", false)
+	if !strings.Contains(got, `\begin{center}{\small\itshape Aeterne rerum conditor}\end{center}`) {
+		t.Fatalf("hymn Latin title must be centered:\n%s", got)
+	}
+	if !strings.Contains(got, `\begin{hymnverses}`) || !strings.Contains(got, `\end{hymnverses}`) {
+		t.Fatalf("hymn stanzas must sit in the verse-leading environment:\n%s", got)
+	}
+}
+
 func TestTeXPrayerSpeakerLabelsAndAmen(t *testing.T) {
 	elem := models.OfficeElement{Type: models.Prayer, Text: "Have mercy upon thee.\nR. Amen.", Voice: []models.VoiceSpan{
 		{Text: "Have mercy upon thee.\n", Spoken: true, Role: models.VoiceResponse},
 		{Text: "R. Amen.", Spoken: true, Role: models.VoicePriest},
 	}}
 	got := texElement(elem, "", false)
-	for _, want := range []string{`\rubric{\scshape People}\par\nopagebreak`, `\rubric{\scshape Priest}\par\nopagebreak`, `\Rbar{}Amen.`} {
+	for _, want := range []string{`\rubric{\scshape People}\par\nopagebreak`, `\rubric{\scshape Priest}\par\nopagebreak`, `\Rsig{}Amen.`} {
 		if !strings.Contains(got, want) {
 			t.Errorf("missing %q: %s", want, got)
 		}
