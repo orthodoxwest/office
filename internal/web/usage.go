@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/rand"
-	"encoding/csv"
 	"encoding/hex"
 	"io"
 	"net/http"
@@ -106,8 +105,8 @@ func (s *Server) handleUsageDashboard(w http.ResponseWriter, r *http.Request) {
 	if raw := r.URL.Query().Get("days"); raw != "" {
 		var err error
 		days, err = strconv.Atoi(raw)
-		if err != nil || (days != 7 && days != 30 && days != 90 && days != 366) {
-			http.Error(w, "Choose 7, 30, 90 or 366 days", http.StatusBadRequest)
+		if err != nil || (days != 7 && days != 30 && days != 90 && days != 365) {
+			http.Error(w, "Choose 7, 30, 90 or 365 days", http.StatusBadRequest)
 			return
 		}
 	}
@@ -116,38 +115,6 @@ func (s *Server) handleUsageDashboard(w http.ResponseWriter, r *http.Request) {
 	rows, err := s.usage.Daily(ctx, time.Now(), days)
 	if err != nil {
 		http.Error(w, "Usage temporarily unavailable", http.StatusServiceUnavailable)
-		return
-	}
-	if r.URL.Query().Get("format") == "csv" {
-		var buf bytes.Buffer
-		csvWriter := csv.NewWriter(&buf)
-		header := []string{"date_america_new_york", "all_visitors"}
-		header = append(header, usage.Hours...)
-		header = append(header, "ordo", "reminders")
-		var scopes []string
-		for _, dimension := range usage.Dimensions {
-			for _, value := range dimension.Values {
-				scopes = append(scopes, dimension.Scope(value))
-			}
-		}
-		_ = csvWriter.Write(append(header, scopes...))
-		for _, row := range rows {
-			record := []string{row.Day, strconv.Itoa(row.Users)}
-			for _, count := range row.Hours {
-				record = append(record, strconv.Itoa(count))
-			}
-			record = append(record, strconv.Itoa(row.Ordo), strconv.Itoa(row.Reminders))
-			for _, scope := range scopes {
-				record = append(record, strconv.Itoa(row.Dimensions[scope]))
-			}
-			_ = csvWriter.Write(record)
-		}
-		csvWriter.Flush() // bytes.Buffer writes cannot fail.
-		w.Header().Set("Content-Type", "text/csv; charset=utf-8")
-		w.Header().Set("Content-Disposition", `attachment; filename="office-usage-`+strconv.Itoa(days)+`-days.csv"`)
-		if r.Method == http.MethodGet {
-			_, _ = w.Write(buf.Bytes())
-		}
 		return
 	}
 	data := render.NewUsageData(rows, days)

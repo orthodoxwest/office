@@ -4734,7 +4734,6 @@ body.page-home::before {
 .usage-notes p { font-size: .9rem; margin: .6rem 0 1rem; }
 .usage-range { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1rem; margin: .8rem 0 0; font-size: .9rem; }
 .usage-range span { color: var(--muted); font-size: .82rem; }
-.usage-export { color: var(--accent); display: inline-flex; align-items: center; gap: .65rem; min-height: 2.75rem; font-size: .9rem; text-underline-offset: .2em; }
 .usage-jump { display: flex; flex-wrap: wrap; gap: 0 1.5rem; margin-top: -1rem; }
 .usage-jump a { color: var(--accent); display: inline-flex; align-items: center; min-height: 2.75rem; font-size: .85rem; text-underline-offset: .2em; }
 .usage-page h2 { scroll-margin-top: 1.5rem; }
@@ -4782,7 +4781,7 @@ body.page-home::before {
   .usage-table th, .usage-table td { padding: .7rem .55rem; }
 }
 @media print {
-  .usage-export, .usage-jump, .usage-table-hint { display: none; }
+  .usage-jump, .usage-table-hint { display: none; }
   .usage-overview { display: block; }
   .usage-table { font-size: .7rem; }
   .usage-table th, .usage-table td { padding: .35rem; }

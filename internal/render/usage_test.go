@@ -77,12 +77,12 @@ func TestUsageSplitsCarryPeriodTotalsAndDailyMix(t *testing.T) {
 			t.Fatalf("band does not span the plot: %v", width)
 		}
 	}
-	// A window that reaches back into last year dates its far end, so the two
-	// ends of a 366-day band cannot read as the same "Sep 9".
+	// A window that reaches back into last year includes the year at its
+	// far end, keeping the reporting range unambiguous.
 	crossing := NewUsageData([]usage.Daily{
 		{Day: "2026-01-02", Users: 1, Dimensions: mix(1, 0, 0, 0)},
 		{Day: "2025-12-31", Users: 1, Dimensions: mix(0, 1, 0, 0)},
-	}, 366)
+	}, 365)
 	if crossing.FirstDate != "Dec 31, 2025" || crossing.LastDate != "Jan 2" {
 		t.Fatalf("ambiguous window labels: %q to %q", crossing.FirstDate, crossing.LastDate)
 	}

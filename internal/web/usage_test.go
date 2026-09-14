@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"encoding/csv"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -128,45 +127,17 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 	if strings.Contains(w.Body.String(), cookies[0].Value) {
 		t.Fatal("dashboard exposes identifier")
 	}
+	// The year preset is a fixed 365-day window, including today.
+	w = httptest.NewRecorder()
+	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=365", nil))
+	if w.Code != 200 || strings.Count(w.Body.String(), `class="usage-total"`) != 365 || !strings.Contains(w.Body.String(), "364 completed days") {
+		t.Fatalf("year preset: %d", w.Code)
+	}
 	w = httptest.NewRecorder()
 	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=999999", nil))
 	if w.Code != 400 {
 		t.Fatal(w.Code)
 	}
-	for _, days := range []string{"7", "30", "90", "366"} {
-		w = httptest.NewRecorder()
-		s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days="+days+"&format=csv", nil))
-		if w.Code != 200 || w.Header().Get("Content-Type") != "text/csv; charset=utf-8" || w.Header().Get("Cache-Control") != "no-store" || w.Header().Get("X-Robots-Tag") == "" || !strings.Contains(w.Header().Get("Content-Disposition"), "office-usage-"+days+"-days.csv") {
-			t.Fatalf("CSV response: %d %+v", w.Code, w.Header())
-		}
-		records, err := csv.NewReader(strings.NewReader(w.Body.String())).ReadAll()
-		wantRows := map[string]int{"7": 8, "30": 31, "90": 91, "366": 367}[days]
-		if err != nil || len(records) != wantRows {
-			t.Fatalf("CSV rows: %d, %v", len(records), err)
-		}
-		if records[0][0] != "date_america_new_york" || records[1][0] != rows[0].Day || records[1][1] != "7" || records[1][2] != "1" || records[1][9] != "1" || records[1][10] != "1" {
-			t.Fatalf("CSV does not match dashboard counts: %v", records[:2])
-		}
-		for i, column := range records[0] {
-			if column == "appearance:apse" && records[1][i] != "1" {
-				t.Fatalf("CSV dimension: %v", records[1])
-			}
-		}
-		if strings.Contains(w.Body.String(), cookies[0].Value) {
-			t.Fatal("CSV exposes browser identifier")
-		}
-	}
-	w = httptest.NewRecorder()
-	s.handleUsageDashboard(w, httptest.NewRequest("HEAD", "/admin/usage?days=7&format=csv", nil))
-	if w.Code != 200 || w.Body.Len() != 0 || w.Header().Get("Content-Disposition") == "" {
-		t.Fatalf("CSV HEAD: %d %s", w.Code, w.Body)
-	}
-	w = httptest.NewRecorder()
-	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=0&format=csv", nil))
-	if w.Code != 400 {
-		t.Fatalf("CSV accepts invalid period: %d", w.Code)
-	}
-
 	s.usage = nil
 	if w = send("POST", "site", "https://office.test", nil); w.Code != 204 || len(w.Result().Cookies()) != 0 {
 		t.Fatal("disabled tracking sets cookie")

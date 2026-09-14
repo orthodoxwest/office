@@ -11,9 +11,8 @@
       <a href="?days=7"{{if eq .Days 7}} aria-current="page"{{end}}>7 days</a>
       <a href="?days=30"{{if eq .Days 30}} aria-current="page"{{end}}>30 days</a>
       <a href="?days=90"{{if eq .Days 90}} aria-current="page"{{end}}>90 days</a>
-      <a href="?days=366"{{if eq .Days 366}} aria-current="page"{{end}}>366 days</a>
+      <a href="?days=365"{{if eq .Days 365}} aria-current="page"{{end}}>365 days</a>
     </nav>
-    <a class="usage-export" href="?days={{.Days}}&amp;format=csv" download>Download CSV <span aria-hidden="true">↓</span></a>
   </div>
   <p class="usage-range">{{.FirstDate}} – {{.LastDate}} <span>Eastern time · Today in progress</span></p>
   <dl class="usage-summary">
@@ -55,7 +54,7 @@
         <tbody>{{range $i, $row := .Rows}}<tr{{if eq $i 0}} class="usage-today"{{end}}><th scope="row"><time datetime="{{.Day}}">{{.Day}}</time>{{if eq $i 0}}<span class="usage-today-label">Today</span>{{end}}</th><td class="usage-total">{{.Users}}</td>{{range .Hours}}<td{{if not .}} class="usage-zero"{{end}}>{{.}}</td>{{end}}<td{{if not .Ordo}} class="usage-zero"{{end}}>{{.Ordo}}</td><td{{if not .Reminders}} class="usage-zero"{{end}}>{{.Reminders}}</td></tr>{{end}}</tbody>
       </table>
     </div>
-    <p class="usage-splits-note">Period totals: <strong>{{.OrdoTotal}}</strong> Ordo browser-days · <strong>{{.RemindersTotal}}</strong> Reminders browser-days. CSV includes daily counts for every category.</p>
+    <p class="usage-splits-note">Period totals: <strong>{{.OrdoTotal}}</strong> Ordo browser-days · <strong>{{.RemindersTotal}}</strong> Reminders browser-days.</p>
   </section>
   <section class="usage-panel" aria-labelledby="usage-splits-title">
     <div class="usage-section-heading"><div><h2 id="usage-splits-title">Appearance &amp; screen</h2><p>Period shares and daily changes.</p></div><span class="usage-period">{{.Days}} days</span></div>

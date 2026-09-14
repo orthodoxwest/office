@@ -121,8 +121,8 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 	if len(rows) == 0 {
 		return d
 	}
-	// The 366-day window reaches back into last year, where a bare "Sep 9"
-	// cannot be told from this year's — so date the ones that need it.
+	// A year-long window can reach into last year, so include the year
+	// on dates outside the current reporting year.
 	year := rows[0].Day[:4]
 	label := func(day string) string {
 		t, err := time.Parse(time.DateOnly, day)
