@@ -29,6 +29,10 @@ type TextCorpus struct {
 	// sweeps — and out of the Latin lint, which would otherwise flag every
 	// entry.
 	incipits map[string]string
+
+	// Appointment scopes describe when a seasonal fallback is eligible;
+	// they are configuration, not transcribed corpus entries.
+	appointmentScopes map[appointmentScopeKey][]*AppointmentScope
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -97,6 +101,9 @@ func LoadTexts(dataDir string) (*TextCorpus, error) {
 		return nil, err
 	}
 	if err := corpus.loadIncipits(dataDir); err != nil {
+		return nil, err
+	}
+	if err := corpus.loadAppointmentScopes(dataDir); err != nil {
 		return nil, err
 	}
 

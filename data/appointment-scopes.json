@@ -1,0 +1,106 @@
+[
+  {
+    "id": "lent-ferial-chapters-antiphons",
+    "source": "Diurnal pp. 250-251: ferial chapters and antiphons begin after Lent I. Easter -42 is Lent I; Sunday exclusion makes the first applicable day Monday.",
+    "season": "lent",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "chapter",
+      "psalm-antiphon*"
+    ],
+    "require_ferial": true,
+    "exclude_weekdays": [
+      "sunday"
+    ],
+    "from_easter": -42
+  },
+  {
+    "id": "lent-little-hour-versicles",
+    "source": "Diurnal pp. 246, 248, 250-251: direct versicles begin on Lent I (Easter -42), including Sundays.",
+    "season": "lent",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "versicle"
+    ],
+    "from_easter": -42
+  },
+  {
+    "id": "passiontide-ferial-chapters",
+    "source": "Diurnal pp. 274-275: ferial chapters after Passion Sunday through Holy Wednesday. Easter -14 is Passion Sunday; -3 is Holy Thursday, excluded.",
+    "season": "passiontide",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "chapter"
+    ],
+    "require_ferial": true,
+    "exclude_weekdays": [
+      "sunday"
+    ],
+    "from_easter": -14,
+    "until_easter": -3
+  },
+  {
+    "id": "passion-week-ferial-antiphons",
+    "source": "Diurnal pp. 274-275: these antiphons serve ferias of Passion week; Holy Week takes the occurrent Lauds antiphons. Easter -7 is Palm Sunday, excluded.",
+    "season": "passiontide",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "psalm-antiphon*"
+    ],
+    "require_ferial": true,
+    "exclude_weekdays": [
+      "sunday"
+    ],
+    "from_easter": -14,
+    "until_easter": -7
+  },
+  {
+    "id": "passiontide-little-hour-versicles",
+    "source": "Diurnal pp. 272-275, 280: direct versicles from Passion Sunday through Holy Wednesday (Easter -14 inclusive to -3 exclusive). Proper/common precedence is unchanged.",
+    "season": "passiontide",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "versicle"
+    ],
+    "from_easter": -14,
+    "until_easter": -3
+  },
+  {
+    "id": "paschal-ferial-chapters",
+    "source": "Diurnal pp. 372-374: ferial chapters begin on Monday after Low Sunday (Easter +8). Sundays and feasts keep their own appointments.",
+    "season": "easter",
+    "hours": [
+      "terce",
+      "sext",
+      "none"
+    ],
+    "slots": [
+      "chapter"
+    ],
+    "require_ferial": true,
+    "exclude_weekdays": [
+      "sunday"
+    ],
+    "from_easter": 8
+  }
+]

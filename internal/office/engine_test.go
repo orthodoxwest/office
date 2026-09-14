@@ -1,6 +1,8 @@
 package office
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -8,6 +10,43 @@ import (
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/texts"
 )
+
+func TestEngineRequiresValidAppointmentScopes(t *testing.T) {
+	for _, tc := range []struct {
+		name, content, wantErr string
+	}{
+		{"missing", "", "missing required appointment scopes"},
+		{"invalid", `[{"unknown":true}]`, "unknown field"},
+		{"explicitly empty", "[]", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			for _, subdir := range []string{"texts", "office"} {
+				if err := os.Mkdir(filepath.Join(dir, subdir), 0755); err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, hour := range hourNames {
+				if err := os.WriteFile(filepath.Join(dir, "office", hour+".txt"), []byte("[Test]\nType = rubric\nRef = test\n"), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if tc.content != "" {
+				if err := os.WriteFile(filepath.Join(dir, "appointment-scopes.json"), []byte(tc.content), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			_, err := NewEngine(dir)
+			if tc.wantErr == "" {
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("NewEngine error = %v, want %q", err, tc.wantErr)
+			}
+		})
+	}
+}
 
 func TestEngineRejectsNilDay(t *testing.T) {
 	engine, err := NewEngine("../../data")

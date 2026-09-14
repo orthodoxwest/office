@@ -1,6 +1,20 @@
 # Paschal variant of the Common of Apostles and Evangelists.
 # Sections not present here fall through to the regular commons file.
 
+[versicle-terce]
+# SOURCE: diurnal p. 19*
+@use commons/martyr-paschal/versicle-first-vespers
+
+[versicle-sext]
+# SOURCE: diurnal p. 19*
+V. Light perpetual shall shine upon thy Saints, O Lord, alleluia.
+R. And an ageless eternity, alleluia.
+
+[versicle-none]
+# SOURCE: diurnal p. 19*
+V. Everlasting joy shall be upon their heads, alleluia.
+R. They shall obtain joy and gladness, alleluia.
+
 [psalm-antiphon]
 @use commons/apostle-paschal/psalm-antiphon-1
 

@@ -46,12 +46,35 @@ Now I go my way * to him that sent me; and none of you asketh me, Whither goest 
 @use proper/easter-sunday-4/benedictus-antiphon
 
 [chapter-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 156 (Fourth Saturday after Easter)
+# SOURCE: diurnal p. 382
 !Jas 1:17
-Dearly beloved: Every good gift and every perfect gift is from above, and cometh down from the Father of lights, with whom is no variableness, neither shadow of turning.
+Dearly beloved: Every good gift and every perfect gift is from above, and cometh down from the Father of lights, * with whom is no variableness, neither shadow of turning.
 R. Thanks be to God.
 
 [collect]
 # SOURCE: diurnal p. 383
 O Almighty God, who alone canst order the unruly wills and affections of sinful men; Grant unto thy people, that they may love the thing which thou commandest, and desire that which thou dost promise; that so, among the sundry and manifold changes of the world, our hearts may surely there be fixed, where true joys are to be found.
 
+[chapter-sext]
+# SOURCE: diurnal p. 383
+!Jas 1:19-20
+Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath: * for the wrath of man worketh not the righteousness of God.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 383
+!Jas 1:21
+Wherefore lay apart all filthiness and superfluity of naughtiness, * and receive with meekness the engrafted word, which is able to save your souls.
+R. Thanks be to God.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 382: I Vespers cross-refers to the printed Lauds chapter; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-4/chapter-first-vespers
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 383: II Vespers chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-4/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 383: Terce chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-4/chapter-lauds
