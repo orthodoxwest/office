@@ -96,8 +96,11 @@ jobs:
               'This usually means a data or logic edit changed a rendered hour, the audit report, or the assurance snapshot.' +
               diffSection + '\n\n' +
               '**If this change is intentional** — add the `update-golden` label to this PR. ' +
-              'GitHub Actions will regenerate the golden files and push the result automatically.\n\n' +
+              'GitHub Actions will merge `master`, regenerate the golden files and push the result automatically.\n\n' +
               '**If this is unexpected** — review the diff above and check the CI logs before adding the label.\n\n' +
+              '_The same label also unblocks this PR when merge conflicts are confined to the ' +
+              'generated golden files — those hold whole-corpus digests and counts, so the correct ' +
+              'merged value has to be recomputed rather than picked from either side._\n\n' +
               marker;
 
             const { data: comments } = await github.rest.issues.listComments({
