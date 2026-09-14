@@ -1905,5 +1905,305 @@
         "ref": "proper/st-stephen/short-responsory-none"
       }
     ]
+  },
+  {
+    "id": "bvm-common-little-hour-appointments",
+    "source": "Monastic Diurnal pp. 65*, 67*: Terce chapter returns to Lauds, Sext/None print their chapters and V./R.; pp. 69*-71* appoint these chapters/versicles for Saturday offices, including the After Christmas and Paschal variants. The 2026 ordo confirms these Hours on pp. 33, 63, 73, 77, 96, 97.",
+    "cases": [
+      {
+        "date": "2026-01-31",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-01-31",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-05-16",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-06-20",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-07-02",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-08",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-terce",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-sext",
+        "before_slot": "collect"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/blessed-virgin/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-09-12",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/blessed-virgin/versicle-none",
+        "before_slot": "collect"
+      }
+    ]
+  },
+  {
+    "id": "bvm-proper-priority-controls",
+    "source": "Compatibility controls: Assumption and Conception retain their explicit proper little-hour responsories ahead of the new common verses. This migration does not certify their wording or octave inheritance.",
+    "cases": [
+      {
+        "date": "2026-08-15",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/assumption-bvm/short-responsory-terce"
+      },
+      {
+        "date": "2026-08-15",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/assumption-bvm/short-responsory-sext"
+      },
+      {
+        "date": "2026-08-15",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/assumption-bvm/short-responsory-none"
+      },
+      {
+        "date": "2026-12-08",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "proper/conception-bvm/short-responsory-terce"
+      },
+      {
+        "date": "2026-12-08",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "proper/conception-bvm/short-responsory-sext"
+      },
+      {
+        "date": "2026-12-08",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "proper/conception-bvm/short-responsory-none"
+      }
+    ]
   }
 ]

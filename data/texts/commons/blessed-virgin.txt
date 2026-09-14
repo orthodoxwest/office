@@ -177,20 +177,22 @@ R. Hail Mary, full of grace, * the Lord is with thee.
 # Vespers except the Magnificat antiphon (p. 67*).
 @use commons/blessed-virgin/short-responsory-lauds
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Terce)
-@use commons/virgin-martyr/short-responsory-lauds
-
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At Sext)
-@use commons/virgin-martyr/short-responsory-vespers
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 67* (Common of Feasts B.V.M., At None)
-@use commons/virgin-martyr/short-responsory-none
-
 [chapter-vespers]
 @use commons/blessed-virgin/chapter-lauds
 
 [chapter-terce]
 @use commons/blessed-virgin/chapter-lauds
+
+[versicle-terce]
+# SOURCE: diurnal p. 67* (Common of Feasts B.V.M., At Terce)
+@use commons/virgin-martyr/versicle-first-vespers
+
+[versicle-sext]
+# SOURCE: diurnal p. 67*
+V. God shall help her with his countenance.
+R. God is in the midst of her, therefore shall she not be removed.
+
+[versicle-none]
+# SOURCE: diurnal p. 67*
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
