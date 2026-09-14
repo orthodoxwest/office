@@ -55,15 +55,6 @@
 [short-responsory-vespers]
 @use commons/apostle-paschal/short-responsory-vespers
 
-[short-responsory-terce]
-@use commons/apostle-paschal/short-responsory-terce
-
-[short-responsory-sext]
-@use commons/apostle-paschal/short-responsory-sext
-
-[short-responsory-none]
-@use commons/apostle-paschal/short-responsory-none
-
 [versicle-lauds]
 @use commons/apostle-paschal/versicle-lauds
 
@@ -78,3 +69,15 @@
 
 [hymn-vespers]
 @use commons/apostle-paschal/hymn-vespers
+
+[versicle-terce]
+# SOURCE: diurnal pp. 513, 19* (St Mark cross-reference)
+@use commons/apostle-paschal/versicle-terce
+
+[versicle-sext]
+# SOURCE: diurnal pp. 513, 19* (St Mark cross-reference)
+@use commons/apostle-paschal/versicle-sext
+
+[versicle-none]
+# SOURCE: diurnal pp. 513, 19* (St Mark cross-reference)
+@use commons/apostle-paschal/versicle-none

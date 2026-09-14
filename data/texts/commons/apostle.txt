@@ -175,14 +175,6 @@ R. In all lands.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou shalt make them princes * in all lands.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At Terce)
-@use commons/apostle/short-responsory-lauds
-
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 12* (Common of Apostles out of Paschaltide, At Sext)
-@use commons/apostle/short-responsory-vespers
-
 [short-responsory-none]
 # SOURCE: draft archdiocesan / diurnal Common of Apostles (None; reduced form is
 # V. Exceedingly honoured are thy friends, O God. / R. Firmly stablished is their princedom.)

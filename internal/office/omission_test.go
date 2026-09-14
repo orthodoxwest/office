@@ -54,6 +54,7 @@ func TestOmittedShortResponsoryDropsTheLittleHoursVersicle(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/good-friday/short-responsory-terce": texts.OmitMarker,
 		"ordinary/terce/short-responsory":           "R. Ordinary. * Responsory.",
+		"commons/lord/versicle-terce":               "V. Direct common verse.\nR. Common response.",
 	})
 
 	got := appendResolved(nil, resolveMinorHourVersicle(day, "terce", corpus))

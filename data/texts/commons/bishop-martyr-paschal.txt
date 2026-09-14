@@ -1,8 +1,7 @@
 # Paschal variant of the Common of a Bishop and Martyr. The Monastic Diurnal
-# has one Common of One or Many Martyrs in Paschaltide (pp. 31*-32*), which is
-# "All as in the Common of Apostles in Paschaltide, except the following" —
-# only the hymns vary with the number of martyrs. Every slot therefore takes
-# the martyr-paschal text.
+# has one Common of One or Many Martyrs in Paschaltide (pp. 31*-33*).
+# Its little-hour chapters and versicles inherit the Apostle appointments;
+# this file also shares its major-hour entries with martyr-paschal.
 # Sections not present here fall through to the regular commons file.
 
 [psalm-antiphon]
@@ -57,15 +56,6 @@
 [short-responsory-vespers]
 @use commons/martyr-paschal/short-responsory-vespers
 
-[short-responsory-terce]
-@use commons/martyr-paschal/short-responsory-terce
-
-[short-responsory-sext]
-@use commons/martyr-paschal/short-responsory-sext
-
-[short-responsory-none]
-@use commons/martyr-paschal/short-responsory-none
-
 [versicle-lauds]
 @use commons/martyr-paschal/versicle-lauds
 
@@ -80,3 +70,15 @@
 
 [hymn-vespers]
 @use commons/martyr-paschal/hymn-vespers
+
+[versicle-terce]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-terce
+
+[versicle-sext]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-sext
+
+[versicle-none]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-none

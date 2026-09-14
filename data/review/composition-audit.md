@@ -70,14 +70,39 @@ The comparison of 23,016 complete offices found no rendered content or
 structure changes. Source metadata changed for 405 offices (135 date/hours
 in three forms), all in the intended Apostle little hours.
 
-The compatibility reducer remains necessary: Evangelist, Paschal Martyr,
-and Conversion of St Paul entries still reference the legacy responsories.
-In the same three-year sweep, private-form reductions fell from 1,374 to
+At the end of that pilot, Evangelist, Paschal Martyr, and Conversion of St Paul
+entries still referenced the legacy responsories. In the same three-year
+sweep, private-form reductions fell from 1,374 to
 1,239. These are migration counts, not percentages of liturgical correctness.
 Independent adversarial review confirmed that this pilot needs no engine
-branch or scope-schema extension. The next migration should follow these
-dependencies, checking their printed cross-references before retiring the
-legacy entries. Other common families remain unreviewed by this pilot.
+branch or scope-schema extension. The dependent-common migration below follows
+these references before retiring legacy entries. Other common families were
+not reviewed by that pilot.
+
+## Dependent-common little-hour migration
+
+The dependent-common migration continues the Apostle pilot: Evangelist
+ordinary/Paschal and the One Martyr, Many Martyrs, and Bishop-Martyr Paschal
+commons now have 15 direct versicle aliases. Diurnal pp. 6*, 513, and 626
+establish Evangelist inheritance; pp. 31*-33* establish Paschal Martyr
+inheritance with no little-hour chapter/versicle exception. The 2026 ordo
+confirms the Hours for St George and St Mark (p. 57) and St Luke (p. 108).
+Codex and Sonnet reviewed these bounded cross-references; the canonical
+wording and its existing attestations are unchanged.
+
+The alias scan and a two-stage comparison permit removal of 20 legacy
+little-hour responsory entries, including the now-unused Apostle Paschal
+None body. Apostle None remains for Conversion of St Paul; all major-hour
+responsories remain. Across 23,016 complete offices in 2026, 2027, and 2032,
+the alias migration changes only source metadata in 135 offices (45
+date/hours in three forms). Subsequent deletion changes no complete-office
+hash. Private-form compatibility reductions fall from 1,239 to 1,194.
+The controlled common tests include Many Martyrs, which has no principal
+Paschal occurrence in that three-year default-calendar sample. Twenty-seven
+source-backed cases cover chapter/verse order, real appointments, and the
+St George octave; proper priority and omission controls remain in place.
+These checks cover the named little-hour appointments, not the major-hour
+exceptions, all remaining commons, or future-ordo agreement.
 
 ## Next source-review passes
 

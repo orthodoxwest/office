@@ -1545,5 +1545,209 @@
         "ref": "proper/conversion-st-paul/short-responsory-none"
       }
     ]
+  },
+  {
+    "id": "dependent-common-evangelist-ordinary",
+    "source": "Diurnal pp. 626, 11*-12*; 2026 ordo p. 108, St Luke Hours.",
+    "cases": [
+      {
+        "date": "2026-10-18",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/evangelist/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/evangelist/versicle-terce"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/evangelist/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/evangelist/versicle-sext"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/evangelist/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/evangelist/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "dependent-common-evangelist-paschal",
+    "source": "Diurnal pp. 513, 18*-19*; 2026 ordo p. 57, St Mark Hours.",
+    "cases": [
+      {
+        "date": "2026-04-25",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/evangelist-paschal/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-25",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/evangelist-paschal/versicle-terce"
+      },
+      {
+        "date": "2026-04-25",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/evangelist-paschal/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-25",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/evangelist-paschal/versicle-sext"
+      },
+      {
+        "date": "2026-04-25",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/evangelist-paschal/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-25",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/evangelist-paschal/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "dependent-common-martyr-paschal",
+    "source": "Diurnal pp. 31*-33*, 18*-19*; 2026 ordo p. 57, St George Hours.",
+    "cases": [
+      {
+        "date": "2026-04-23",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/martyr-paschal/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-23",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-terce"
+      },
+      {
+        "date": "2026-04-23",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/martyr-paschal/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-23",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-sext"
+      },
+      {
+        "date": "2026-04-23",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/martyr-paschal/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2026-04-23",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "dependent-common-bishop-martyr-paschal",
+    "source": "Diurnal pp. 31*-33*, 18*-19*: Common of One or Many Martyrs in Paschaltide, including a bishop. The 2027 date exercises this common appointment, not future-ordo agreement.",
+    "cases": [
+      {
+        "date": "2027-06-05",
+        "hour": "terce",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr-paschal/chapter-terce",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-06-05",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr-paschal/versicle-terce"
+      },
+      {
+        "date": "2027-06-05",
+        "hour": "sext",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr-paschal/chapter-sext",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-06-05",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr-paschal/versicle-sext"
+      },
+      {
+        "date": "2027-06-05",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "commons/bishop-martyr-paschal/chapter-none",
+        "before_slot": "versicle"
+      },
+      {
+        "date": "2027-06-05",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/bishop-martyr-paschal/versicle-none"
+      }
+    ]
+  },
+  {
+    "id": "dependent-common-martyr-octave",
+    "source": "2026 ordo p. 57, April 24 Hours as on the feast; Diurnal pp. 31*-33*, 19*.",
+    "cases": [
+      {
+        "date": "2026-04-24",
+        "hour": "terce",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-terce"
+      },
+      {
+        "date": "2026-04-24",
+        "hour": "sext",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-sext"
+      },
+      {
+        "date": "2026-04-24",
+        "hour": "none",
+        "slot": "versicle",
+        "ref": "commons/martyr-paschal/versicle-none"
+      }
+    ]
   }
 ]
