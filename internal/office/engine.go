@@ -31,6 +31,9 @@ func NewEngine(dataDir string) (*Engine, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading text corpus: %w", err)
 	}
+	if !corpus.HasAppointmentScopes() {
+		return nil, fmt.Errorf("missing required appointment scopes: %s", filepath.Join(dataDir, "appointment-scopes.json"))
+	}
 
 	e := &Engine{
 		corpus:      corpus,
