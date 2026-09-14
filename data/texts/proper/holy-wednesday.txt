@@ -6,10 +6,12 @@
 Deliver me * from blood-guiltiness, O God my God: and my tongue shall sing of thy righteousness.
 
 [psalm-antiphon-2]
-I received * injuries and terrors from them: but the Lord is with me as a strong warrior.
+# SOURCE: diurnal p. 283
+Reproaches * and terrors have I suffered of them: and the Lord is with me as a mighty terrible one.
 
 [psalm-antiphon-3]
-But thou, O Lord, * knowest all their plans to put me to death.
+# SOURCE: diurnal p. 283
+These also * that seek the hurt of my soul, they shall go under the earth.
 
 [psalm-antiphon-4]
 All my enemies have heard of my evil, * they have rejoiced that thou, O Lord, hast done it.

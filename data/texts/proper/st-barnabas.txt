@@ -1,5 +1,6 @@
 [collect]
-O God, Who dost gladden us through the worthy deeds and prayers of thy blessed apostle Barnabas, mercifully grant that all they which seek thy mercy through him may effectually obtain the gift of thy grace.
+# SOURCE: diurnal p. 535
+O God, who makest us glad through the merits and intercession of blessed Barnabas thine Apostle: mercifully grant that we who ask thy benefits through him may obtain them by the gift of thy grace.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
