@@ -59,3 +59,44 @@ The Child Jesus * increased in wisdom and stature in the sight of God and man.
 [collect]
 # SOURCE: draft archdiocesan Lauds book, p. 73 (Sunday within the Octave of the Nativity)
 Almighty and everlasting God, direct our actions according to thy good pleasure: that in the Name of thy well-beloved Son, we may be made worthy to abound in good works.
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/chapter-lauds
+
+[chapter-first-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/chapter-lauds
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/christmas/hymn-vespers
+
+[hymn-first-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/christmas/hymn-vespers
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/versicle-lauds
+
+[versicle-first-vespers]
+# SOURCE: Monastic Diurnal pp. 184-185, 205-206; 2026 ordo p. 128: Vespers chapter as at Lauds, Nativity hymn, own versicle; page images reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/versicle-lauds
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal p. 206: I Vespers While all things, repeated at Benedictus; 2026 ordo p. 128 appoints it for the December 28 commemoration; page image reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/benedictus-antiphon
+
+[short-responsory-vespers]
+# SOURCE: diurnal p. 205
+R. The Word was made flesh, * Alleluia, alleluia.
+R. The Word was made flesh, * Alleluia, alleluia.
+V. And dwelt among us.
+R. Alleluia.
+V. Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. The Word was made flesh, * Alleluia, alleluia.
+
+[short-responsory-first-vespers]
+# SOURCE: Monastic Diurnal p. 205: short responsory at I Vespers, retained at II Vespers; page image reviewed by Codex 2026-09-13.
+@use proper/nativity-sunday-within-octave/short-responsory-vespers

@@ -192,3 +192,18 @@ O ye Angels and Archangels, * O ye Thrones and Dominions, Principalities and Pow
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[versicle-terce]
+# SOURCE: diurnal p. 640
+V. Be glad, O ye righteous, and rejoice in the Lord.
+R. And be joyful, all ye that are true of heart.
+
+[versicle-sext]
+# SOURCE: diurnal p. 640
+V. Let the righteous rejoice before God.
+R. Let them also be merry and joyful.
+
+[versicle-none]
+# SOURCE: diurnal p. 641
+V. The righteous live for evermore.
+R. Their reward also is with the Lord.
