@@ -251,3 +251,32 @@ func TestMinorHourOrdinariesUseParishHymnsAndSingleOpeningAlleluia(t *testing.T)
 		t.Fatalf("ordinary opening Alleluia = %q", got)
 	}
 }
+
+func TestDirectMinorVersicleRespectsSourcePrecedence(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		entries map[string]string
+		want    string
+	}{
+		{"direct proper over proper responsory", map[string]string{
+			"proper/example/versicle-terce":         "V. Printed proper.\nR. Its response.",
+			"proper/example/short-responsory-terce": "R. Legacy proper.\nV. Its response.",
+		}, "proper/example/versicle-terce"},
+		{"proper responsory over seasonal direct verse", map[string]string{
+			"proper/example/short-responsory-terce": "R. Proper opening.\nV. Proper response.",
+			"seasonal/easter/versicle-terce":        "V. Seasonal.\nR. Response.",
+		}, "proper/example/short-responsory-terce"},
+		{"direct seasonal over seasonal legacy responsory", map[string]string{
+			"seasonal/easter/short-responsory-terce": "R. Seeded opening.\nV. Seeded response.",
+			"seasonal/easter/versicle-terce":         "V. Printed seasonal.\nR. Printed response.",
+		}, "seasonal/easter/versicle-terce"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			day := &models.CalendarDay{Date: time.Date(2026, 5, 4, 0, 0, 0, 0, time.UTC), Season: models.Easter, Celebration: &models.Feast{ID: "example", Category: models.CategoryLord}}
+			elem := resolveMinorHourVersicle(day, "terce", texts.NewTestCorpus(tc.entries))
+			if elem.SourceRef != tc.want {
+				t.Errorf("source = %s, want %s", elem.SourceRef, tc.want)
+			}
+		})
+	}
+}

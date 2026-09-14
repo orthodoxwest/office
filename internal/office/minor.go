@@ -75,9 +75,11 @@ func resolveMinorHourVersicle(day *models.CalendarDay, hourName string, corpus *
 			SourceRef: responsoryRef,
 		}, responsoryRef)
 	}
-	ordinaryResponsory := "ordinary/" + hourName + "/short-responsory"
-	if responsoryRef == ordinaryResponsory {
-		text, ref := resolveProperText(day, hourName, "versicle", corpus)
+	// A printed direct versicle wins within its own tier, but a seasonal
+	// verse cannot displace a feast/common responsory. This keeps the
+	// compatibility reduction for corpus entries still stored as responsories.
+	text, ref := resolveProperText(day, hourName, "versicle", corpus)
+	if minorTextTier(ref) <= minorTextTier(responsoryRef) {
 		text = decorateMinorHourVersicle(day, text)
 		return sourcedElement(models.OfficeElement{
 			Type:      models.Versicle,
@@ -99,6 +101,17 @@ func resolveMinorHourVersicle(day *models.CalendarDay, hourName string, corpus *
 		SlotRef:   "versicle",
 		SourceRef: responsoryRef,
 	}, responsoryRef)
+}
+
+// Source families follow the proper/common/seasonal/ordinary precedence
+// shared by resolveProperText. Unknown/missing references have no priority.
+func minorTextTier(ref string) int {
+	for i, prefix := range []string{"proper/", "commons/", "seasonal/", "ordinary/"} {
+		if strings.HasPrefix(ref, prefix) {
+			return i
+		}
+	}
+	return 4
 }
 
 func decorateMinorHourVersicle(day *models.CalendarDay, text string) string {
