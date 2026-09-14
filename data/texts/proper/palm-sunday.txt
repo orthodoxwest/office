@@ -121,3 +121,19 @@ Righteous Father, * the world hath not known thee: but I have known thee, becaus
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon-prime]
+# SOURCE: diurnal p. 279
+The children of the Hebrews, * carrying palms and olive branches, went forth to meet the Lord, crying out and saying: Hosanna in the highest.
+
+[psalm-antiphon-terce]
+# SOURCE: diurnal p. 280
+The children of the Hebrews * spread their garments in the way, and cried, saying: Hosanna to the Son of David; blessed is he that cometh in the Name of the Lord.
+
+[psalm-antiphon-sext]
+# SOURCE: diurnal p. 280
+Unto thee, O Lord, * have I revealed my cause: thou hast defended my life, O Lord my God.
+
+[psalm-antiphon-none]
+# SOURCE: diurnal p. 280
+I will call * upon thy Name, O Lord: turn not away thy face from my calling.

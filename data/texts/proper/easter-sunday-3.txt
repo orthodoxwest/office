@@ -32,12 +32,35 @@ Verily I say unto you, * that ye shall weep and lament, but the world shall rejo
 @use proper/easter-sunday-3/benedictus-antiphon
 
 [chapter-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 156 (Third Saturday after Easter)
+# SOURCE: diurnal p. 380
 !1 Pet 2:11
-Dearly beloved: I beseech you as strangers and pilgrims, abstain from fleshly lusts, which war against the soul.
+Dearly beloved: I beseech you as strangers and pilgrims, abstain from fleshly lusts, * which war against the soul.
 R. Thanks be to God.
 
 [collect]
 # SOURCE: diurnal p. 380
 Almighty God, who shewest to them that are in error the light of thy truth, to the intent that they may return into the way of righteousness; Grant unto all those who are admitted into the fellowship of Christ's Religion, that they may avoid those things that are contrary to their profession, and follow all such things as are agreeable to the same.
 
+[chapter-sext]
+# SOURCE: diurnal p. 380
+!1 Pet 2:13-14
+Submit yourselves to every ordinance of man for the Lord's sake: whether it be to the king, as supreme; or unto governors, as unto them that are sent by him for the punishment of evildoers, * and for the praise of them that do well.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 381
+!1 Pet 2:18-19
+Servants, be subject to your masters with all fear; not only to the good and gentle, but also to the froward, * for this is thankworthy in our Lord Jesus Christ.
+R. Thanks be to God.
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 380: I Vespers cross-refers to the printed Lauds chapter; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-3/chapter-first-vespers
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 381: II Vespers chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-3/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 380: Terce chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
+@use proper/easter-sunday-3/chapter-lauds

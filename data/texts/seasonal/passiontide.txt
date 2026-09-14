@@ -172,3 +172,48 @@ Redeem me, O Lord, and have mercy on me.
 V. My foot standeth in an even place.
 R. Have mercy on me.
 R. Redeem me, O Lord, and have mercy on me.
+
+[chapter-terce]
+# SOURCE: diurnal p. 274
+!Jer 17:13
+O Lord, all that forsake thee shall be ashamed, and they that depart from me shall be written in the earth, * because they have forsaken the Lord, the fountain of living waters.
+R. Thanks be to God.
+
+[chapter-sext]
+# SOURCE: diurnal p. 275
+!Jer 17:18
+Let them be confounded that persecute me, but let not me be confounded: let them be dismayed, but let not me be dismayed: * bring upon them the day of evil, and destroy them with double destruction, O Lord our God.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 275
+!Jer 18:20
+Remember that I stood before thee to speak good for them, * and to turn away thy wrath from them.
+R. Thanks be to God.
+
+[versicle-terce]
+# SOURCE: diurnal p. 274
+V. Deliver my soul, O God, from the sword.
+R. My darling from the power of the dog.
+
+[versicle-sext]
+# SOURCE: diurnal p. 275
+V. Save me, O Lord, from the lion's mouth.
+R. Thou hast heard me also from among the horns of the unicorns.
+
+[versicle-none]
+# SOURCE: diurnal p. 275
+V. O shut not up my soul with the sinners.
+R. Nor my life with the blood-thirsty.
+
+[psalm-antiphon-terce]
+# SOURCE: Monastic Diurnal pp. 274-275: ferial Passion-week antiphons at Terce, Sext and None; page images reviewed by Codex 2026-09-13.
+@use proper/passion-sunday/psalm-antiphon-3
+
+[psalm-antiphon-sext]
+# SOURCE: Monastic Diurnal pp. 274-275: ferial Passion-week antiphons at Terce, Sext and None; page images reviewed by Codex 2026-09-13.
+@use proper/passion-sunday/psalm-antiphon-4
+
+[psalm-antiphon-none]
+# SOURCE: Monastic Diurnal pp. 274-275: ferial Passion-week antiphons at Terce, Sext and None; page images reviewed by Codex 2026-09-13.
+@use proper/passion-sunday/psalm-antiphon-5

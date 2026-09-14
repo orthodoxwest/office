@@ -1382,6 +1382,22 @@ func TestTraceProperResolutionUsesPrimeFestalLaudsCoordinates(t *testing.T) {
 	}
 }
 
+func TestPrimeProperAntiphonRetainsPrimeResolutionCoordinates(t *testing.T) {
+	corpus := texts.NewTestCorpus(map[string]string{
+		"proper/prime-exception/psalm-antiphon-prime":   "Prime antiphon",
+		"proper/prime-exception/psalm-antiphon-1-lauds": "Lauds antiphon",
+	})
+	day := &models.CalendarDay{Celebration: &models.Feast{ID: "prime-exception", Category: models.CategorySunday}}
+	elem := resolvePrimePsalmAntiphon(day, corpus, nil)
+	if elem.Text != "Prime antiphon" {
+		t.Fatalf("explicit Prime appointment lost: %+v", elem)
+	}
+	trace := traceProperResolution(day, "prime", elem.SlotRef, elem.SourceRef, corpus)
+	if trace.ResolverHour != "prime" || len(trace.DirectExisting) != 1 || trace.DirectExisting[0] != elem.SourceRef {
+		t.Fatalf("Prime appointment traced through another hour: %+v", trace)
+	}
+}
+
 func TestTraceProperResolutionUsesLaudsCollectForMinorHours(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/trace-feast/collect-lauds": "Festal collect",

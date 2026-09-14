@@ -20,7 +20,7 @@ func TestCalendarCompositionRequirements(t *testing.T) {
 	names := []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
 	for _, year := range []int{2026, 2027, 2032} {
 		yd := buildYear(t, year)
-		hours, checked, seasonal := 0, 0, 0
+		hours, checked, seasonal, passion := 0, 0, 0, 0
 		for i := range yd.days {
 			day := &yd.days[i]
 			for _, name := range names {
@@ -40,6 +40,24 @@ func TestCalendarCompositionRequirements(t *testing.T) {
 					for _, slot := range []string{"chapter", "versicle"} {
 						assertPrincipalSource(t, hour, slot, "seasonal/"+string(day.Season)+"/"+slot+"-"+name)
 						seasonal++
+					}
+				}
+				// Diurnal pp. 272-275: the ferial chapter changes after Passion
+				// Sunday, while the direct verses also serve both Sundays.
+				inPassion := !day.Date.Before(yd.moveable.PassionSunday) && day.Date.Before(yd.moveable.HolyThursday)
+				holyWeekFeria := day.Celebration != nil && (day.Celebration.ID == "holy-monday" || day.Celebration.ID == "holy-tuesday" || day.Celebration.ID == "holy-wednesday")
+				passionSunday := day.Celebration != nil && (day.Celebration.ID == "passion-sunday" || day.Celebration.ID == "palm-sunday")
+				if little && inPassion && (feria || holyWeekFeria || passionSunday) {
+					assertPrincipalSource(t, hour, "versicle", "seasonal/passiontide/versicle-"+name)
+					passion++
+					if !passionSunday {
+						assertPrincipalSource(t, hour, "chapter", "seasonal/passiontide/chapter-"+name)
+						passion++
+						if day.Date.Before(yd.moveable.PalmSunday) {
+							slot := map[string]string{"terce": "psalm-antiphon-2", "sext": "psalm-antiphon-3", "none": "psalm-antiphon-5"}[name]
+							assertPrincipalSource(t, hour, slot, "seasonal/passiontide/psalm-antiphon-"+name)
+							passion++
+						}
 					}
 				}
 				// Diurnal pp. 121, 125, 131, 135, 139: per-annum Monday-Friday
@@ -68,7 +86,10 @@ func TestCalendarCompositionRequirements(t *testing.T) {
 		if checked == 0 {
 			t.Errorf("%d: weekday Vespers rule did not exercise any cases", year)
 		}
-		t.Logf("%d: composed %d date/hours; checked %d weekday Vespers responsories and %d seasonal little-hour slots", year, hours, checked, seasonal)
+		if passion == 0 {
+			t.Errorf("%d: Passiontide rule did not exercise any cases", year)
+		}
+		t.Logf("%d: composed %d date/hours; checked %d weekday Vespers responsories, %d Advent/Lent/Easter little-hour slots and %d Passiontide slots", year, hours, checked, seasonal, passion)
 	}
 }
 

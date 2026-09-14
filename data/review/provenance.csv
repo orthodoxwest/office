@@ -690,6 +690,9 @@ proper/easter-sunday-3/benedictus-antiphon,38c54b9c26d9,diurnal,"III Sunday afte
 proper/easter-sunday-3/benedictus-antiphon-friday,5c8ea5f3d66d,diurnal,"III Week after the Octave of Easter, Friday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/benedictus-antiphon-thursday,43950cf2ef70,diurnal,"III Week after the Octave of Easter, Thursday",382,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/benedictus-antiphon-tuesday,8ded86581439,diurnal,,381,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0427.png
+proper/easter-sunday-3/chapter-first-vespers,3de210d745f2,diurnal,,380,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0426.png
+proper/easter-sunday-3/chapter-none,c5d643f96183,diurnal,,381,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0427.png
+proper/easter-sunday-3/chapter-sext,8e19fb3f29a4,diurnal,,380,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0426.png
 proper/easter-sunday-3/collect,297841992205,diurnal,,380,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0426.png
 proper/easter-sunday-3/magnificat-antiphon,87eac0e355e0,diurnal,"III Sunday after Easter, At II Vespers",381,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-3/magnificat-antiphon-monday,a221888e9e66,diurnal,,381,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0427.png
@@ -699,6 +702,9 @@ proper/easter-sunday-4/benedictus-antiphon-monday,11577c39237b,diurnal,"IV Week 
 proper/easter-sunday-4/benedictus-antiphon-thursday,24519e135432,diurnal,"IV Week after the Octave of Easter, Thursday",384,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-4/benedictus-antiphon-tuesday,81b39a781d2f,diurnal,"IV Week after the Octave of Easter, Tuesday",384,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-4/benedictus-antiphon-wednesday,5b2aaa34dcb9,diurnal,"IV Week after the Octave of Easter, Wednesday",384,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-4/chapter-first-vespers,701b3bdffc44,diurnal,,382,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0428.png
+proper/easter-sunday-4/chapter-none,7689232eaad7,diurnal,,383,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0429.png
+proper/easter-sunday-4/chapter-sext,c5a17a91a540,diurnal,,383,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0429.png
 proper/easter-sunday-4/collect,55f2f2e12e35,diurnal,,383,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0429.png
 proper/easter-sunday-4/magnificat-antiphon-monday,77d50b0c2237,diurnal,"IV Week after the Octave of Easter, Monday",384,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-4/magnificat-antiphon-thursday,ff4fc7b153de,diurnal,"IV Week after the Octave of Easter, Thursday",384,verified,grok,2026-08-22,word-for-word from printed page image
@@ -708,6 +714,7 @@ proper/easter-sunday-5/benedictus-antiphon,9c2f89393672,diurnal,"V Sunday after 
 proper/easter-sunday-5/benedictus-antiphon-monday,b0dc83e2c628,diurnal,Rogation Monday,386,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/benedictus-antiphon-tuesday,73817e23081b,diurnal,Rogation Tuesday,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/benedictus-antiphon-wednesday,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
+proper/easter-sunday-5/chapter-first-vespers,1ba604333c54,diurnal,,385,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0431.png
 proper/easter-sunday-5/collect,1ed6ac486f79,draft archdiocesan Vespers book,,165,verified,codex,2026-07-17,
 proper/easter-sunday-5/magnificat-antiphon,83dadc803969,diurnal,"V Sunday after Easter, At II Vespers",386,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-5/magnificat-antiphon-monday,000c31e33c53,diurnal,Rogation Monday,387,verified,grok,2026-08-22,word-for-word from printed page image
@@ -971,6 +978,10 @@ proper/palm-sunday/chapter-sext,8a32745ad0c3,diurnal,"Palm Sunday, At Sext",280,
 proper/palm-sunday/collect,5be2536ae6a3,diurnal,,279,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
 proper/palm-sunday/magnificat-antiphon,3941f454fef6,diurnal,"Palm Sunday, At II Vespers",280-281,verified,grok,2026-08-22,word-for-word from printed page image
 proper/palm-sunday/magnificat-antiphon-first,578f824e8471,diurnal,"Palm Sunday, At I Vespers",278,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/psalm-antiphon-none,477117e4d63c,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
+proper/palm-sunday/psalm-antiphon-prime,fb5fc636ce87,diurnal,,279,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0325.png
+proper/palm-sunday/psalm-antiphon-sext,eedb9e253079,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
+proper/palm-sunday/psalm-antiphon-terce,e6aec764d679,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
 proper/passion-sunday/benedictus-antiphon-friday,3585bc400957,diurnal,"Passion Week, Friday",277,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-monday,64e1c02b16d7,diurnal,"Passion Week, Monday",276,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-saturday,4dcfcfceb329,diurnal,"Passion Week, Saturday",278,verified,grok,2026-08-22,word-for-word from printed page image
@@ -988,6 +999,10 @@ proper/passion-sunday/magnificat-antiphon-monday,7880b076e460,diurnal,"Passion W
 proper/passion-sunday/magnificat-antiphon-thursday,f33054d8d091,diurnal,"Passion Week, Thursday",277,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/magnificat-antiphon-tuesday,ef5b668e65d5,diurnal,"Passion Week, Tuesday",276,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/magnificat-antiphon-wednesday,3bad84f1c7fc,diurnal,"Passion Week, Wednesday",277,verified,grok,2026-08-22,word-for-word from printed page image
+proper/passion-sunday/psalm-antiphon-none,9fe954fde3e3,diurnal,,273,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0319.png
+proper/passion-sunday/psalm-antiphon-prime,4196994a25be,diurnal,,272,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0318.png
+proper/passion-sunday/psalm-antiphon-sext,5de71c890ebe,diurnal,,272,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0318.png
+proper/passion-sunday/psalm-antiphon-terce,06cf4bd97282,diurnal,,272,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0318.png
 proper/pentecost-octave-day-2/benedictus-antiphon,8e31039791a7,diurnal,Monday within the Octave of Pentecost,399,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-2/magnificat-antiphon,2baa30d13622,diurnal,Monday within the Octave of Pentecost,399,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-3/benedictus-antiphon,b7f0d13eb28b,diurnal,Tuesday within the Octave of Pentecost,400,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1596,6 +1611,9 @@ seasonal/lent/versicle-terce,d89d46c19604,diurnal,,251,verified,codex,2026-09-13
 seasonal/lent/versicle-vespers,95b4efc1b9db,Propers of Lauds & Vespers During Lent,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word; Passiontide is within the source rubric’s through-Lent span.
 seasonal/passiontide/chapter-lauds,1365a3cf647c,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,"verified against the propers booklet (restored dropped ""may"")"
+seasonal/passiontide/chapter-none,a8e2cc47c063,diurnal,,275,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0321.png
+seasonal/passiontide/chapter-sext,6f7562cf5ac7,diurnal,,275,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0321.png
+seasonal/passiontide/chapter-terce,66aa33e26640,diurnal,,274,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0320.png
 seasonal/passiontide/chapter-vespers,f2cffa7577a4,Propers of Lauds & Vespers During Passiontide,"Propers for Vespers, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/hymn-first-vespers,293490011298,office-hymns.zip,"The Royal Banners Forward Go, Passiontide Vespers.docx",,verified,grok,2026-07-20,Word-for-word after normalizing chant hyphenation and typography.
 seasonal/passiontide/hymn-lauds,02e3cda31166,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Hymn",,verified,bwaldrep,2026-07-24,verified; residual diffs typographic only (bow)
@@ -1603,6 +1621,9 @@ seasonal/passiontide/psalm-antiphon-1-prime,b4f355faef4f,diurnal,"The Ordinary o
 seasonal/passiontide/short-responsory-lauds,cc10440bf71b,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/passiontide/short-responsory-vespers,d5d8a4eca7ea,draft archdiocesan Vespers book,Saturdays in Passiontide,147,verified,codex,2026-07-18,
 seasonal/passiontide/versicle-lauds,51350cbce0ff,Propers of Lauds & Vespers During Passiontide,"Propers for Lauds, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
+seasonal/passiontide/versicle-none,523ce77a44e9,diurnal,,275,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0321.png
+seasonal/passiontide/versicle-sext,b5729c9e874e,diurnal,,275,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0321.png
+seasonal/passiontide/versicle-terce,ced2ef737259,diurnal,,274,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0320.png
 seasonal/passiontide/versicle-vespers,d5317e8b3923,Propers of Lauds & Vespers During Passiontide,"Propers for Vespers, The Versicle",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/septuagesima/alleluia,b98b82cd636b,01. None Sunday Alex edit 12-07 v.01.docx,The Opening Versicles; From Septuagesima through Lent,2,verified,codex,2026-07-20,Word-for-word after normalizing chant syllabification and typography.
 shared/blessed-virgin/hymn-vespers,b19cfaab2074,diurnal,"Common of Feasts B.V.M., At I Vespers",64*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0777.png

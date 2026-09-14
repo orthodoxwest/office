@@ -85,12 +85,19 @@ func resolvePrimeMartyrology(day *models.CalendarDay, corpus *texts.TextCorpus) 
 }
 
 // resolvePrimePsalmAntiphon follows Prime's antiphon rubric. Feasts and
-// Sundays use the first antiphon from their Lauds proper or common. Ferias use
+// Sundays normally use the first antiphon from their Lauds proper or common,
+// unless the proper appoints an antiphon specifically at Prime. Ferias use
 // the seasonal exceptions appointed for Prime, then the weekday psalter form.
 func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus, moveable *calendar.MoveableDates) models.OfficeElement {
 	const slot = "psalm-antiphon-1"
 	if day == nil {
 		return primePsalmAntiphonElement(slot, "", "")
+	}
+	// Passion and Palm Sundays print distinct Prime antiphons (Diurnal
+	// pp. 272, 279). Keep the normal proper/ProperID precedence, but accept
+	// only an explicit Prime entry before falling back to the Lauds rubric.
+	if text, key := lookupFeastProperText(day, "prime", slot, corpus); text != "" && isPrimeAntiphonRef(key, day.Season) {
+		return primePsalmAntiphonElement(slot, key, text)
 	}
 
 	// The Saturday Office has specially named festal Lauds slots in the
@@ -151,6 +158,10 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 	}
 
 	return primePsalmAntiphonElement(slot, key, corpus.Get(key))
+}
+
+func isPrimeAntiphonRef(ref string, season models.Season) bool {
+	return strings.HasSuffix(ref, "-prime") || (season != "" && strings.HasSuffix(ref, "-prime-"+string(season)))
 }
 
 func primePsalmAntiphonElement(slot, key, text string) models.OfficeElement {

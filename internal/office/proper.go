@@ -519,7 +519,7 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 }
 
 // seasonalMinorOrdinaryApplies scopes the ferial chapters/antiphons to their
-// printed appointments (Diurnal pp. 250-251, 372-374). Ordinary Lent begins
+// printed appointments (Diurnal pp. 250-251, 274-275, 372-374). Ordinary Lent begins
 // after Lent I; its versicles also serve the Sundays beginning with Lent I.
 // The Easter ferial chapter must not replace a missing Sunday/feast chapter.
 func seasonalMinorOrdinaryApplies(day *models.CalendarDay, hourName, ref string) bool {
@@ -528,6 +528,21 @@ func seasonalMinorOrdinaryApplies(day *models.CalendarDay, hourName, ref string)
 	}
 	base := baseProperRef(ref)
 	ferialSlot := base == "chapter" || strings.HasPrefix(base, "psalm-antiphon")
+	if day.Season == models.Passiontide && (ferialSlot || base == "versicle") {
+		moveable := calendar.ComputeMoveableDates(day.Date.Year())
+		// The direct versicles also appear on Passion and Palm Sundays.
+		// Ferial chapters run from Monday after Passion Sunday through
+		// Holy Wednesday; Holy Week has its own Lauds-derived antiphons.
+		if day.Date.Before(moveable.PassionSunday) || !day.Date.Before(moveable.HolyThursday) {
+			return false
+		}
+		if ferialSlot && (civilWeekday(day) == time.Sunday || (day.Celebration != nil && day.Celebration.Category != models.CategoryFeria)) {
+			return false
+		}
+		if strings.HasPrefix(base, "psalm-antiphon") && !day.Date.Before(moveable.PalmSunday) {
+			return false
+		}
+	}
 	if day.Season == models.Lent && (ferialSlot || base == "versicle") {
 		lent1 := calendar.ComputeMoveableDates(day.Date.Year()).Lent1
 		if day.Date.Before(lent1) {
@@ -609,6 +624,9 @@ func properResolutionCoordinates(day *models.CalendarDay, hourName, ref, selecte
 		return "lauds", "collect"
 	}
 	if hourName == "prime" && ref == "psalm-antiphon-1" {
+		if day != nil && isPrimeAntiphonRef(selected, day.Season) {
+			return hourName, ref
+		}
 		festal := day != nil && day.Celebration != nil && day.Celebration.Category != models.CategoryFeria
 		if festal || strings.HasPrefix(selected, "proper/") || strings.HasPrefix(selected, "commons/") ||
 			strings.HasPrefix(selected, "ordinary/lauds/") {
