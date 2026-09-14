@@ -221,12 +221,13 @@ O the depth of the riches both of the wisdom and knowledge of God! how unsearcha
 R. Thanks be to God.
 
 [short-responsory]
-R. How great are thy works, O Lord.
-How great are thy works, O Lord.
-V. Thou hast made all things in wisdom.
-R. Thy works, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. How great are thy works, O Lord.
+# SOURCE: diurnal p. 114
+R. How wonderful are thy works, * O Lord.
+R. How wonderful are thy works, * O Lord.
+V. In wisdom hast thou made them all.
+R. O Lord.
+V. Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. How wonderful are thy works, * O Lord.
 
 [short-responsory-saturday]
 # SOURCE: draft archdiocesan Vespers book, p. 214 (Saturdays Throughout the Year)
@@ -407,3 +408,33 @@ O how joyful * a thing it is to be thankful unto our God.
 [psalm-antiphon-4-saturday]
 # SOURCE: draft archdiocesan Vespers book, p. 213 (Saturdays Throughout the Year)
 Praise the Lord, * O Jerusalem.
+
+[short-responsory-monday]
+# SOURCE: diurnal p. 121
+R. I will bless the Lord * At all times.
+R. I will bless the Lord * At all times.
+V. His praise shall ever be in my mouth.
+R. At all times.
+V. Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. I will bless the Lord * At all times.
+
+
+[short-responsory-tuesday]
+# SOURCE: Monastic Diurnal p. 125; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
+@use ordinary/vespers/short-responsory-monday
+
+
+[short-responsory-wednesday]
+# SOURCE: Monastic Diurnal p. 131; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
+@use ordinary/vespers/short-responsory-monday
+
+
+[short-responsory-thursday]
+# SOURCE: Monastic Diurnal p. 135; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
+@use ordinary/vespers/short-responsory-monday
+
+
+[short-responsory-friday]
+# SOURCE: Monastic Diurnal p. 139; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
+@use ordinary/vespers/short-responsory-monday
+
