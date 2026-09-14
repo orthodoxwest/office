@@ -5,7 +5,7 @@ Source verification does not establish correct appointments or complete office s
 | Measure | Count |
 |---|---:|
 | Distinct date-hour forms (2026–2053) | 157916 |
-| Verified text entries | 1642 |
+| Verified text entries | 1643 |
 | Rendered text entries needing review | 682 |
 | Rendered text entries with unknown source | 134 |
 | Classified zero-occurrence entries | 34 |
