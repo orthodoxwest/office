@@ -12,7 +12,8 @@ V. Holy Virgin, my praise by thee accepted be.
 R. Give me strength against thine enemies.
 
 [collect]
-O God, Who wast pleased that the blessed Mary always a Virgin, being herself the dwelling-place of the Holy Ghost, should, as on this day, be presented in thine earthly Temple, grant, we beseech thee, that by her prayers we may worthily be presented in the heavenly Temple of thy glory.
+# SOURCE: diurnal p. 665
+O God, who didst will that blessed Mary, ever Virgin, the tabernacle of the Holy Ghost, should as on this day be presented in the temple: grant, we beseech thee, at her intercession, that we may be counted worthy to be presented in the dwelling-place of thy glory.
 
 [magnificat-antiphon-first]
 # SOURCE: diurnal p. 665
