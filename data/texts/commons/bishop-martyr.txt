@@ -118,35 +118,22 @@ R. And shall spread abroad like a cedar in Libanus.
 [short-responsory-vespers]
 @use commons/martyr/short-responsory-vespers
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Terce)
-R. Thou hast crowned him * with glory and honour, O Lord.
-R. Thou hast crowned him * with glory and honour, O Lord.
-V. And madest him to have dominion of the works of thy hands.
-R. With glory and honour, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast crowned him * with glory and honour, O Lord.
-
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At Sext)
-R. Thou hast set upon his head, * O Lord.
-R. Thou hast set upon his head, * O Lord.
-V. A crown of pure gold.
-R. O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou hast set upon his head, * O Lord.
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 23* (Common of One Martyr, At None)
-R. His honour is great * in thy salvation.
-R. His honour is great * in thy salvation.
-V. Glory and great worship shalt thou lay upon him.
-R. In thy salvation.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His honour is great * in thy salvation.
-
 [chapter-vespers]
 @use commons/bishop-martyr/chapter-lauds
 
 [chapter-terce]
 @use commons/bishop-martyr/chapter-lauds
+
+[versicle-terce]
+# SOURCE: diurnal p. 23*
+@use commons/bishop-martyr/commemoration-versicle
+
+[versicle-sext]
+# SOURCE: diurnal p. 23*
+V. Thou hast set upon his head, O Lord.
+R. A crown of pure gold.
+
+[versicle-none]
+# SOURCE: diurnal p. 23*
+V. His honour is great in thy salvation.
+R. Glory and great worship shalt thou lay upon him.

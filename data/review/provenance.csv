@@ -43,10 +43,9 @@ commons/bishop-martyr/psalm-antiphon-2,229457252426,diurnal,"Common of One Marty
 commons/bishop-martyr/psalm-antiphon-3,3eba22c63d65,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",21*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/psalm-antiphon-4,d45834f2b1a2,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",21*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/psalm-antiphon-5,cfb588b074a8,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",21*,verified,grok,2026-08-23,word-for-word from printed page image
-commons/bishop-martyr/short-responsory-none,081af4f09f23,diurnal,"Common of One Martyr, At None",23*,verified,grok,2026-08-23,word-for-word from printed page image
-commons/bishop-martyr/short-responsory-sext,32c679d43f1e,diurnal,"Common of One Martyr, At Sext",23*,verified,grok,2026-08-23,word-for-word from printed page image
-commons/bishop-martyr/short-responsory-terce,1981436935d4,diurnal,"Common of One Martyr, At Terce",23*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/versicle-lauds,56ebc77e9322,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",22*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/bishop-martyr/versicle-none,401daa23f493,diurnal,,23*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0736.png
+commons/bishop-martyr/versicle-sext,a0fd760cb864,diurnal,,23*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/ordinary-martyr-versicles/page-0736-300dpi.png
 commons/blessed-virgin/benedictus-antiphon,e699d2317449,diurnal,"Common of Feasts B.V.M., At Lauds",66*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/blessed-virgin/chapter-lauds,aa6ce83bb4fd,diurnal,"Common of Feasts B.V.M., At Lauds",65*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/blessed-virgin/chapter-none,97403831b5e6,diurnal,"Common of Feasts B.V.M., At None",67*,verified,grok,2026-08-23,word-for-word from printed page image
@@ -198,9 +197,11 @@ commons/martyrs/psalm-antiphon-3,0b5e3c354fce,diurnal,"Common of Many Martyrs ou
 commons/martyrs/psalm-antiphon-4,e08f91eaf1dd,diurnal,"Common of Many Martyrs out of Paschaltide, At Lauds",25*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/martyrs/psalm-antiphon-5,9781f2055d4a,diurnal,"Common of Many Martyrs out of Paschaltide, At Lauds",25*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/martyrs/short-responsory-lauds,d4c0e996bfd6,diurnal,"Common of Many Martyrs out of Paschaltide, At Lauds",26*,verified,grok,2026-08-23,word-for-word from printed page image
-commons/martyrs/short-responsory-none,015bfd7a2eac,diurnal,"Common of Many Martyrs out of Paschaltide, At None",27*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/martyrs/short-responsory-vespers,08dd03f9d2f2,draft archdiocesan Vespers book,,600,verified,codex,2026-07-17,
+commons/martyrs/versicle-first-vespers,6e4d900a617f,diurnal,,27*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0740.png
 commons/martyrs/versicle-lauds,f5807562ecaa,diurnal,"Common of Many Martyrs out of Paschaltide, At Lauds",26*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/martyrs/versicle-none,61902d934a08,diurnal,,27*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0740.png
+commons/martyrs/versicle-sext,d391726ed90e,diurnal,,27*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/ordinary-martyr-versicles/page-0740-300dpi.png
 commons/martyrs/versicle-vespers,f5807562ecaa,draft archdiocesan Vespers book,,602,verified,codex,2026-07-18,
 commons/virgin-martyr-paschal/short-responsory-lauds,2f4d830cb63e,Copy of OCP Ferial Lauds.pdf,,142,verified,codex,2026-07-18,
 commons/virgin-martyr-paschal/short-responsory-vespers,9618fe06f0aa,diurnal,"Common of Virgins, In Paschaltide",47*,verified,claude,2026-08-20,
