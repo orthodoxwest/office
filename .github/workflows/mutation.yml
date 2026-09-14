@@ -1,0 +1,72 @@
+name: Mutation review
+
+# Mutation is an investigation tool; routine PRs use unit coverage in CI.
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to inspect for missing assertions
+        type: choice
+        required: true
+        default: models
+        options:
+          - models
+          - calendar
+          - office
+          - texts
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}-${{ inputs.package }}
+  cancel-in-progress: true
+
+jobs:
+  mutation:
+    name: Review ${{ inputs.package }} mutants
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install Gremlins
+        run: make install-gremlins
+
+      - name: Run mutation review
+        env:
+          PACKAGE: ${{ inputs.package }}
+        run: |
+          set -o pipefail
+          mkdir -p output/mutation
+          # Validate before using input as a package path. One worker limits
+          # simultaneous runaway mutants and contention on the hosted runner.
+          case "$PACKAGE" in models|calendar|office|texts) ;; *) exit 2 ;; esac
+          timeout --signal=TERM --kill-after=15s 20m \
+            "$(go env GOPATH)/bin/gremlins" unleash "./internal/$PACKAGE/" \
+            --workers 1 --output output/mutation/report.json \
+            2>&1 | tee output/mutation/run.log
+
+      - name: Summarize review
+        if: ${{ !cancelled() }}
+        env:
+          OUTCOME: ${{ job.status }}
+        run: |
+          {
+            echo '## Mutation review'
+            echo
+            echo "Run status: $OUTCOME. See the mutation-review artifact for the log and any completed JSON report."
+            echo 'Incomplete runs provide no mutation score. Inspect survivors and timeouts before drawing conclusions about assertion quality.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload mutation evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-review
+          path: output/mutation/
+          retention-days: 14
