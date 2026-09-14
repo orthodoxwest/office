@@ -14,11 +14,23 @@ type UsageData struct {
 	UsageWhen                     string
 	ShowBanner, ShowToday         bool
 	Days, Max, Today, Yesterday   int
+	BrowserDays, CompleteDays     int
+	DailyAverage                  float64
+	OfficeTotals                  []UsageOffice
+	OrdoTotal, RemindersTotal     int
 	Hours                         []string
 	Rows                          []usage.Daily
 	Chart                         []UsageBar
 	Splits                        []UsageSplit
 	FirstDate, LastDate, PeakDate string
+}
+
+// UsageOffice compares office browser-days on a common scale, without
+// implying that overlapping office counts partition the site's visitors.
+type UsageOffice struct {
+	Name  string
+	Count int
+	Width float64
 }
 
 // UsageSplit is one two-valued dimension of how the Office was read — which
@@ -69,6 +81,36 @@ type UsageBar struct {
 // newest first. The peak is a daily count, never a sum of overlapping users.
 func NewUsageData(rows []usage.Daily, days int) UsageData {
 	d := UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours}
+	for h, name := range usage.Hours {
+		office := UsageOffice{Name: name}
+		for _, row := range rows {
+			office.Count += row.Hours[h]
+		}
+		d.OfficeTotals = append(d.OfficeTotals, office)
+	}
+	peakOffice := 0
+	for _, office := range d.OfficeTotals {
+		peakOffice = max(peakOffice, office.Count)
+	}
+	if peakOffice > 0 {
+		for i := range d.OfficeTotals {
+			d.OfficeTotals[i].Width = 100 * float64(d.OfficeTotals[i].Count) / float64(peakOffice)
+		}
+	}
+	for i, row := range rows {
+		d.BrowserDays += row.Users
+		d.OrdoTotal += row.Ordo
+		d.RemindersTotal += row.Reminders
+		// Today is still in progress. Include recorded zero days in the
+		// completed-day average so quiet days do not inflate it.
+		if i > 0 {
+			d.CompleteDays++
+			d.DailyAverage += float64(row.Users)
+		}
+	}
+	if d.CompleteDays > 0 {
+		d.DailyAverage /= float64(d.CompleteDays)
+	}
 	for i, value := range []string{"private", "deacon", "priest"} {
 		share := UsageShare{Label: []string{"Private", "Deacon", "Priest"}[i]}
 		for _, row := range rows {

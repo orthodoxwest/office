@@ -2571,10 +2571,35 @@ test("usage report is accessible and fits narrow and wide screens", async ({ pag
     for (const width of [320, 390, 540, 768, 1280, 1920]) {
       await page.setViewportSize({ width, height: 844 });
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      for (const control of await page.locator(".usage-window a, .usage-export, .usage-jump a").all()) {
+        const box = await control.boundingBox();
+        expect(box.height).toBeGreaterThanOrEqual(44);
+      }
     }
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);
   }
+});
+
+test("usage period controls keep summaries, daily rows and CSV export in sync", async ({ page }) => {
+  await page.goto("/admin/usage?days=7");
+  for (const days of [30, 90, 366, 7]) {
+    await page.getByRole("link", { name: `${days} days`, exact: true }).click();
+    await page.waitForLoadState("load");
+    await expect(page.locator('.usage-window [aria-current="page"]')).toHaveText(`${days} days`);
+    await expect(page.locator('.usage-summary')).toContainText(`${days - 1} completed days`);
+    await expect(page.locator('.usage-table .usage-total')).toHaveCount(days);
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("link", { name: "Download CSV" }).click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe(`office-usage-${days}-days.csv`);
+  }
+  await page.getByRole("link", { name: "Daily counts", exact: true }).click();
+  await expect(page).toHaveURL(/#usage-offices-title$/);
+  await page.getByText("What is counted?", { exact: true }).click();
+  await expect(page.getByText("A zero may also mean collection", { exact: false })).toBeVisible();
+  await page.getByText("Daily counts by prayer form", { exact: true }).click();
+  await expect(page.getByRole("region", { name: "Daily prayer form counts", exact: true })).toBeVisible();
 });
 
 test("service worker does not cache the usage report", async ({ browser, baseURL }) => {

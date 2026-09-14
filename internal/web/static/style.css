@@ -4680,13 +4680,13 @@ body.page-home::before {
 .usage-window { display: flex; gap: 1.3rem; }
 .usage-window a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-block: .35rem; color: var(--muted); text-decoration: none; }
 .usage-window a:hover, .usage-window [aria-current] { color: var(--text); box-shadow: inset 0 -2px 0 var(--gold); }
-.usage-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.8rem; border-bottom: 1px solid var(--border); }
-.usage-summary > div { padding-inline: 1.5rem; border-left: 1px solid var(--border); }
+.usage-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.8rem; border-bottom: 1px solid var(--border); }
+.usage-summary > div { padding-inline: 1.2rem; border-left: 1px solid var(--border); }
 .usage-summary > div:first-child { padding-left: 0; border-left: 0; }
 .usage-summary dt { font-size: .9rem; color: var(--muted); }
 .usage-summary dd { margin: .4rem 0; font-size: 3rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
 .usage-summary .usage-stat-note { margin: .6rem 0 0; color: var(--muted); font-size: .82rem; line-height: 1.4; }
-.usage-panel { margin-block: 1.5rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); }
+.usage-panel { min-width: 0; margin-block: 1.5rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); }
 .usage-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
 .usage-section-heading h2 { margin: 0; font-size: 1.5rem; font-weight: 400; }
 .usage-section-heading p { margin: .25rem 0 0; color: var(--muted); font-size: .92rem; }
@@ -4701,6 +4701,7 @@ body.page-home::before {
 .usage-empty { position: absolute; inset: 2.3rem 0 auto 2rem; text-align: center; color: var(--text); background: var(--surface); padding-block: .7rem; }
 .usage-empty span { font-size: .9rem; color: var(--muted); }
 .usage-splits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 2.5rem; }
+.usage-split-coverage { color: var(--muted); font-size: .8rem; margin: .6rem 0; }
 .usage-split-head h3 { margin: 0; font-size: 1.05rem; font-weight: 400; }
 .usage-split-head p { margin: .25rem 0 .9rem; color: var(--muted); font-size: .85rem; line-height: 1.4; }
 .usage-mix { margin: 0; }
@@ -4730,23 +4731,61 @@ body.page-home::before {
 .usage-today td, .usage-today th { border-bottom-color: var(--gold-line); }
 .usage-notes { max-width: 46rem; margin-top: 2rem; color: var(--muted); }
 .usage-notes h2 { font-size: 1.1rem; color: var(--text); font-weight: 400; margin-bottom: .6rem; }
-.usage-notes p { font-size: .95rem; margin: .6rem 0; }
+.usage-notes p { font-size: .9rem; margin: .6rem 0 1rem; }
+.usage-range { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1rem; margin: .8rem 0 0; font-size: .9rem; }
+.usage-range span { color: var(--muted); font-size: .82rem; }
+.usage-export { color: var(--accent); display: inline-flex; align-items: center; gap: .65rem; min-height: 2.75rem; font-size: .9rem; text-underline-offset: .2em; }
+.usage-jump { display: flex; flex-wrap: wrap; gap: 0 1.5rem; margin-top: -1rem; }
+.usage-jump a { color: var(--accent); display: inline-flex; align-items: center; min-height: 2.75rem; font-size: .85rem; text-underline-offset: .2em; }
+.usage-page h2 { scroll-margin-top: 1.5rem; }
+.usage-overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.5rem; }
+.usage-overview .usage-panel { margin-bottom: 0; }
+.usage-overview .usage-trend { margin-top: 2.2rem; }
+.usage-overview .usage-chart { height: 12rem; }
+.usage-overview .usage-chart-scale { height: 12.9rem; }
+.usage-office-totals { margin: 0; font-size: .9rem; font-variant-numeric: lining-nums tabular-nums; }
+.usage-office-totals > div { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); align-items: center; gap: .75rem; margin-block: .55rem; }
+.usage-office-totals dd { display: flex; align-items: center; gap: .7rem; margin: 0; }
+.usage-office-totals svg { display: block; min-width: 0; width: 100%; height: .45rem; background: var(--surface-edge); fill: var(--accent); }
+.usage-office-totals dd span { min-width: 3ch; text-align: right; }
+.usage-table-hint { margin: -.5rem 0 .7rem; color: var(--muted); font-size: .8rem; }
+.usage-table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (hover: hover) {
+  .usage-table tbody tr:hover > * { background: var(--bg); }
+}
+.usage-notes details { border-bottom: 1px solid var(--border); }
+.usage-notes summary, .usage-form-days summary { display: flex; align-items: center; gap: .7rem; min-height: 2.75rem; cursor: pointer; color: var(--text); font-size: .9rem; list-style: none; }
+.usage-notes summary::-webkit-details-marker, .usage-form-days summary::-webkit-details-marker { display: none; }
+.usage-notes summary::after, .usage-form-days summary::after { content: "▾"; color: var(--gold-line); }
+.usage-notes details[open] > summary::after, .usage-form-days[open] > summary::after { content: "▴"; }
+@media (max-width: 850px) {
+  .usage-overview { grid-template-columns: 1fr; gap: 0; }
+}
+
 @media (max-width: 540px) {
   .usage-page { padding-top: .5rem; }
   .usage-heading { margin-bottom: 1.4rem; }
   .usage-toolbar { gap: 0; padding-bottom: .4rem; }
-  .usage-summary { padding-block: 1.3rem; margin-bottom: 1.3rem; }
+  .usage-window { justify-content: space-between; gap: .8rem; width: 100%; }
+  .usage-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem 0; padding-block: 1.3rem; margin-bottom: 1.3rem; }
+  .usage-summary > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .usage-jump { gap: 0 1rem; }
+  .usage-range { flex-direction: column; }
   .usage-summary > div { padding-inline: .7rem; }
   .usage-summary dd { font-size: 2.3rem; }
   .usage-summary .usage-stat-note { font-size: .75rem; }
   .usage-panel { padding: 1rem .8rem; }
   .usage-section-heading { gap: .5rem; }
-  .usage-chart { height: 9rem; }
-  .usage-chart-scale { height: 9.9rem; }
+  .usage-overview .usage-chart { height: 9rem; }
+  .usage-overview .usage-chart-scale { height: 9.9rem; }
   .usage-splits { grid-template-columns: 1fr; gap: 1.3rem; }
   .usage-table th, .usage-table td { padding: .7rem .55rem; }
 }
 @media print {
+  .usage-export, .usage-jump, .usage-table-hint { display: none; }
+  .usage-overview { display: block; }
+  .usage-table { font-size: .7rem; }
+  .usage-table th, .usage-table td { padding: .35rem; }
   .usage-table-wrap { max-height: none; overflow: visible; }
   .usage-table th { position: static !important; }
 }

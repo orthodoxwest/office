@@ -122,3 +122,29 @@ func TestUsageSplitsCoverTheVocabulary(t *testing.T) {
 		}
 	}
 }
+
+func TestUsagePeriodTotalsAndCompletedDayAverage(t *testing.T) {
+	rows := []usage.Daily{
+		{Day: "2026-09-05", Users: 100, Hours: [7]int{4, 1}, Ordo: 2, Reminders: 1},
+		{Day: "2026-09-04", Users: 9, Hours: [7]int{3, 0, 0, 0, 0, 5}, Ordo: 3},
+		{Day: "2026-09-03"},
+	}
+	d := NewUsageData(rows, 3)
+	if d.DailyAverage != 4.5 || d.CompleteDays != 2 || d.BrowserDays != 109 {
+		t.Fatalf("average must exclude today and include zero days: %+v", d)
+	}
+	if d.OfficeTotals[0].Count != 7 || d.OfficeTotals[0].Width != 100 || d.OfficeTotals[5].Count != 5 || d.OfficeTotals[2].Width != 0 || d.OrdoTotal != 5 || d.RemindersTotal != 1 {
+		t.Fatalf("period totals: %+v", d)
+	}
+	for _, rows := range [][]usage.Daily{nil, {{Day: "2026-09-05"}}} {
+		d := NewUsageData(rows, 7)
+		if d.CompleteDays != 0 || d.DailyAverage != 0 || d.BrowserDays != 0 {
+			t.Fatalf("empty average: %+v", d)
+		}
+		for _, office := range d.OfficeTotals {
+			if office.Width != 0 {
+				t.Fatalf("empty office comparison: %+v", office)
+			}
+		}
+	}
+}
