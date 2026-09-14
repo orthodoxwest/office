@@ -578,6 +578,7 @@ proper/beheading-john-baptist/psalm-antiphon-5,1309d6a58700,diurnal,"Beheading o
 proper/chains-st-peter/benedictus-antiphon,da3f8f56db0b,diurnal,"St Peter’s Chains, At Lauds",579,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witnesses DI-6912d65ec4cd-P0620-P0623
 proper/chains-st-peter/chapter-lauds,582ddada56e6,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chains-st-peter/chapter-none,21bae413cd1f,diurnal,"St Peter’s Chains, At None",579,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0623
+proper/chains-st-peter/collect,ed754457ffca,diurnal,,579,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0623.png
 proper/chains-st-peter/psalm-antiphon-4,05828e814e65,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chains-st-peter/versicle-vespers,ea9cc7f6ba65,diurnal,"St Peter’s Chains, At II Vespers",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
@@ -824,6 +825,7 @@ proper/holy-innocents/magnificat-antiphon,964cf7d1099d,diurnal,"Holy Innocents, 
 proper/holy-innocents/magnificat-antiphon-first,d0fecbb41021,diurnal,"Holy Innocents, At I Vespers",201,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/short-responsory-none,015bfd7a2eac,diurnal,"Holy Innocents, At None",203,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-monday/collect,1e36e8c217d9,diurnal,,281,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png; first reader discarded as wrong-page because corpus was far
+proper/holy-monday/psalm-antiphon-1,0d5baaf36c3c,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
 proper/holy-name-jesus/chapter-none,e90f753d7d15,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/chapter-sext,2d1ae91c8b17,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
@@ -1061,6 +1063,7 @@ proper/pentecost/short-responsory-sext,3f43392d1d91,diurnal,"The Feast of Pentec
 proper/pentecost/short-responsory-terce,5a8be47397fb,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost/short-responsory-vespers,b998e2a4240e,Propers of Lauds and Vespers during the Octave of Pentecost,"Propers for Vespers, The Short Responsory",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 proper/pentecost/versicle-lauds,1717e2913fbc,draft archdiocesan Lauds book,The Feast of Pentecost,306,verified,codex,2026-07-18,
+proper/presentation-bvm/collect,a6b6a3c5ed12,diurnal,,665,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0709.png; readers disagreed on 'as on this day' word order
 proper/presentation-bvm/magnificat-antiphon-first,805ce5812e29,diurnal,,665,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0709.png
 proper/purification-bvm/benedictus-antiphon,a0b34d15012b,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
 proper/purification-bvm/chapter-lauds,f6f45853442e,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
