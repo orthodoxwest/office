@@ -1,0 +1,80 @@
+[
+  {
+    "id": "temporal-commemoration-versicles",
+    "source": "Monastic Diurnal General Rubrics X, p. xxix; Sunday Lauds p. 41; Lenten Lauds pp. 248, 250 and Vespers pp. 246, 251. 2026 ordo pp. 44, 84, 112.",
+    "cases": [
+      {
+        "date": "2026-07-26",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-8",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-08-16",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-11",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-10-11",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-19",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-10-18",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-20",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-10-25",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-21",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-11-01",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-22",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/lauds/versicle-sunday",
+        "contains": "The Lord is King",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-03-11",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-versicle",
+        "ref": "seasonal/lent/versicle-vespers",
+        "contains": "charge over thee",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-03-19",
+        "hour": "lauds",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-versicle",
+        "ref": "seasonal/lent/versicle-lauds",
+        "contains": "charge over thee",
+        "before_slot": "commemoration-collect"
+      }
+    ]
+  }
+]

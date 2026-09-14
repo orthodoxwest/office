@@ -43,6 +43,26 @@ with the Diurnal, normative rubrics, or older ordos, document the conflict for
 clergy and leave the affected entries unapplied. A difference from the ordo
 may be an app defect, a printed error, or an unresolved source conflict.
 
+### Executable composition requirements
+
+`data/review/composition-requirements.json` stores source-backed appointment
+cases. `TestCompositionRequirements` checks the actual composed slot, source,
+optional wording, omission, and relative order. Cases identify a commemoration
+owner explicitly so a correct principal-office text cannot hide an incorrect
+commemoration. Add a source citation and representative and boundary cases with
+each repair; never regenerate these expectations from current output.
+
+Run `go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration'`.
+The Sunday commemoration rule also traverses complete calendars for 2026, 2027,
+and 2032, with the Trinity/Corpus Christi octave exceptions kept outside its
+ordinary-Sunday scope. These tests run in `make check`. Their passing assertions
+do not certify untested requirements or future-ordo agreement.
+
+The ingestion resolution inventory deliberately excludes unnamed owners. A
+composition audit must include those hours: compose every date/hour directly,
+or supplement inventory gaps with `review explain`. Keep the ingestion filter
+intact; an unnamed feria is not a safe target for a feast-proper proposal.
+
 ### Optional sample dates
 
 `review plan` selects representative pages from decisions and source tiers

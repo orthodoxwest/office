@@ -45,7 +45,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	for i, comm := range comms {
 		lookup := func(ref string) (string, string) {
 			if isSynthesizedFeria(comm) {
-				return lookupFeriaCommemoration(day, comm, hourName, ref, corpus)
+				return lookupFeriaCommemoration(day, comm, day.Season, hourName, ref, corpus)
 			}
 			if isSaturdaySecondVespersSundayCommemoration(day, comm, hourName, ref) {
 				return lookupSundayFirstVespersCommemoration(day, comm, corpus)
@@ -163,10 +163,10 @@ func lookupFollowingOfficeCommemoration(feast *models.Feast, season models.Seaso
 // lookupFeriaCommemoration resolves the commemoration slots for the synthesized
 // occurring feria, which has no proper of its own: the gospel-canticle
 // antiphon comes from the governing week's Proper when available, the little
-// versicle from the Psalter, and the collect from the governing Sunday carried
-// on ProperID. Falls back to the generic ordinary slot when a preferred source
+// versicle from the seasonal ordinary or Psalter, and the collect from the
+// governing Sunday carried on ProperID. Falls back to the generic ordinary slot when a preferred source
 // is missing.
-func lookupFeriaCommemoration(day *models.CalendarDay, feast *models.Feast, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+func lookupFeriaCommemoration(day *models.CalendarDay, feast *models.Feast, season models.Season, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
 	switch ref {
 	case "commemoration-antiphon":
 		antSlot := "benedictus-antiphon"
@@ -185,8 +185,8 @@ func lookupFeriaCommemoration(day *models.CalendarDay, feast *models.Feast, hour
 			return text, antRef
 		}
 	case "commemoration-versicle":
-		if text := corpus.Get("ordinary/" + hourName + "/versicle"); text != "" {
-			return text, "ordinary/" + hourName + "/versicle"
+		if text, source := lookupTemporalCommemorationVersicle(feast, season, hourName, corpus); text != "" {
+			return text, source
 		}
 	case "commemoration-collect":
 		if feast.ProperID != "" {
@@ -212,7 +212,7 @@ func lookupFeriaCommemoration(day *models.CalendarDay, feast *models.Feast, hour
 // gospel-canticle antiphon (the feast's proper if it has one, else the
 // Psalter's), the versicle is the hour's little versicle, and the collect is the
 // feast's proper collect.
-func lookupTemporalCommemoration(feast *models.Feast, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+func lookupTemporalCommemoration(feast *models.Feast, season models.Season, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
 	// A de Tempore feast may carry its own dedicated commemoration slot (e.g. the
 	// Vigil of the Epiphany's "While all things were in quiet silence"); prefer it.
 	for _, feastID := range feastProperIDs(feast) {
@@ -239,8 +239,8 @@ func lookupTemporalCommemoration(feast *models.Feast, hourName, ref string, corp
 			return text, "ordinary/" + hourName + "/" + antSlot
 		}
 	case "commemoration-versicle":
-		if text := corpus.Get("ordinary/" + hourName + "/versicle"); text != "" {
-			return text, "ordinary/" + hourName + "/versicle"
+		if text, source := lookupTemporalCommemorationVersicle(feast, season, hourName, corpus); text != "" {
+			return text, source
 		}
 	case "commemoration-collect":
 		for _, feastID := range feastProperIDs(feast) {
@@ -257,6 +257,31 @@ func lookupTemporalCommemoration(feast *models.Feast, hourName, ref string, corp
 		return text, ordinaryRef
 	}
 	return fmt.Sprintf("[%s: %s]", ref, feast.ID), ref
+}
+
+// lookupTemporalCommemorationVersicle follows Diurnal General Rubrics X
+// (p. xxix): the commemorated office supplies its own versicle, from its
+// proper or otherwise its Psalter. A synthesized feria's ProperID identifies
+// its governing Sunday for collects; it must not borrow that Sunday's versicle.
+func lookupTemporalCommemorationVersicle(feast *models.Feast, season models.Season, hourName string, corpus *texts.TextCorpus) (string, string) {
+	if !isSynthesizedFeria(feast) {
+		for _, id := range feastProperIDs(feast) {
+			if text, source := lookupSectionText("proper/"+id+"/", season, hourName, "versicle", corpus); text != "" {
+				return text, source
+			}
+		}
+	}
+	if text, source := lookupSectionText("seasonal/"+string(season)+"/", season, hourName, "versicle", corpus); text != "" {
+		return text, source
+	}
+	if feast.Category == models.CategorySunday {
+		key := "ordinary/" + hourName + "/versicle-sunday"
+		if text := corpus.Get(key); text != "" {
+			return text, key
+		}
+	}
+	key := "ordinary/" + hourName + "/versicle"
+	return corpus.Get(key), key
 }
 
 // commemorationFallbackSlots returns the hour-appropriate content slots that
@@ -294,14 +319,14 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 	// from the governing Sunday. Ember days and vigils are real feasts with
 	// their own propers and are resolved by the generic path below.
 	if isSynthesizedFeria(feast) {
-		return lookupFeriaCommemoration(nil, feast, hourName, ref, corpus)
+		return lookupFeriaCommemoration(nil, feast, season, hourName, ref, corpus)
 	}
 
 	// Sundays, Ember days, and vigils are de Tempore: their commemoration takes
 	// the day's own gospel-canticle antiphon and the hour's little versicle, never
 	// the saint-shaped fallbacks (which would leave an unfilled "N.").
 	if feast.Category == models.CategorySunday || feast.Category == models.CategoryFeria {
-		return lookupTemporalCommemoration(feast, hourName, ref, corpus)
+		return lookupTemporalCommemoration(feast, season, hourName, ref, corpus)
 	}
 
 	properName := feastProperName(feast)
