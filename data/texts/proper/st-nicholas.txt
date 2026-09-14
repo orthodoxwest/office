@@ -1,5 +1,6 @@
 [collect]
-O God, who didst glorify the blessed Bishop Nicholas with innumerable miracles; grant, we beseech thee, that, by his merits and prayers, we may be saved from the fires of hell.
+# SOURCE: diurnal p. 447
+O God, who didst adorn blessed Nicholas thy Bishop with many wonderful works: grant, we beseech thee, that through his merits and prayers we may be delivered from the flames of hell.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
