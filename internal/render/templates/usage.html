@@ -21,7 +21,7 @@
     <div><dt>Daily average</dt><dd>{{if .CompleteDays}}{{printf "%.1f" .DailyAverage}}{{else}}—{{end}}</dd><dd class="usage-stat-note">{{.CompleteDays}} completed days · Excludes today</dd></div>
     <div><dt>Daily peak</dt><dd>{{.Max}}</dd><dd class="usage-stat-note">{{if .PeakDate}}{{.PeakDate}} · Selected period{{else}}No visits recorded yet{{end}}</dd></div>
   </dl>
-  <nav class="usage-jump" aria-label="Report sections"><a href="#usage-offices-title">Daily counts</a><a href="#usage-splits-title">Appearance &amp; screen</a><a href="#usage-forms-title">Prayer form</a><a href="#usage-notes-title">About the counts</a></nav>
+  <nav class="usage-jump" aria-label="Report sections"><a href="#usage-explore-title" class="usage-explore-link" hidden>Explore trends</a><a href="#usage-offices-title">Daily counts</a><a href="#usage-splits-title">Appearance &amp; screen</a><a href="#usage-forms-title">Prayer form</a><a href="#usage-notes-title">About the counts</a></nav>
   <div class="usage-overview">
   <section class="usage-panel" aria-labelledby="usage-trend-title">
     <div class="usage-section-heading"><div><h2 id="usage-trend-title">Daily visitors</h2><p>Unique browsers per day</p></div><span class="usage-period">{{.Days}} days</span></div>
@@ -44,6 +44,35 @@
     <p class="usage-splits-note">One browser using an office on three days counts as three browser-days. Offices overlap.</p>
   </section>
   </div>
+  <section class="usage-panel usage-explorer" aria-labelledby="usage-explore-title" hidden>
+    <div class="usage-section-heading"><div><h2 id="usage-explore-title">Explore trends</h2><p>Compare how the Office is used over time.</p></div></div>
+    <div class="usage-explore-controls">
+      <div><label for="usage-compare">Compare</label><select id="usage-compare">{{range .TrendGroups}}<option value="{{.Key}}">{{.Label}}</option>{{end}}</select></div>
+      <div><label for="usage-interval">Group by</label><select id="usage-interval"><option value="day">Day</option><option value="week">Week · Monday–Sunday</option></select></div>
+      <div><label for="usage-measure">Measure</label><select id="usage-measure"><option value="count">Browser-days</option><option value="share">Share of category</option></select></div>
+      <label class="usage-observed"><input id="usage-observed" type="checkbox" checked>Start at first observation</label>
+    </div>
+    <p id="usage-explore-coverage" class="usage-splits-note"></p>
+    <ul id="usage-explore-legend" class="usage-explore-legend" aria-label="Chart series"></ul>
+    <figure class="usage-explore-figure">
+      <div class="usage-explore-scale" aria-hidden="true"><span id="usage-explore-max"></span><span>0</span></div>
+      <svg id="usage-explore-chart" viewBox="0 0 720 220" preserveAspectRatio="none" role="img" aria-labelledby="usage-explore-chart-title usage-explore-chart-desc">
+        <title id="usage-explore-chart-title">Usage comparison over time</title>
+        <desc id="usage-explore-chart-desc">Exact counts and shares are available in the date selector and trend table below.</desc>
+        <path class="usage-grid" d="M0 10H720 M0 110H720 M0 210H720"/>
+        <g id="usage-explore-lines"></g>
+        <line id="usage-explore-cursor" y1="10" y2="210"/>
+      </svg>
+      <p id="usage-explore-empty" class="usage-empty" hidden>No observations in this period.</p>
+      <figcaption><span id="usage-explore-first"></span><span id="usage-explore-last"></span></figcaption>
+    </figure>
+    <p class="usage-explore-help">Tap or point at the chart, or choose a date below. Gaps mean no observations; lines stop across gaps.</p>
+    <div class="usage-inspector-controls"><button id="usage-explore-prev" type="button" aria-label="Previous time period">←</button><label for="usage-explore-date" class="sr-only">Inspect time period</label><input id="usage-explore-date" type="range" min="0" max="0" value="0" step="1"><button id="usage-explore-next" type="button" aria-label="Next time period">→</button></div>
+    <div class="usage-inspector" aria-live="polite" aria-atomic="true"><p id="usage-inspect-date"></p><dl id="usage-inspect-values"></dl><p id="usage-inspect-note"></p></div>
+    <p class="usage-splits-note">Browser-days count each browser once per category, per day. Shares use the sum of the displayed categories, which can overlap. They are not shares of unique people. Weekly shares use summed counts, not an average of daily percentages. Today and its week are still in progress.</p>
+    <details class="usage-trend-details"><summary>Trend data as a table</summary><div class="usage-table-wrap" role="region" aria-label="Trend data" tabindex="0"><table class="usage-table" id="usage-explore-table"></table></div></details>
+  </section>
+  <script id="usage-trend-data" type="application/json">{{.TrendGroups}}</script>
   <section class="usage-panel" aria-labelledby="usage-offices-title">
     <div class="usage-section-heading"><div><h2 id="usage-offices-title">Daily counts</h2><p>Newest first. Office, Ordo and Reminders counts overlap.</p></div></div>
     <p class="usage-table-hint">Scroll the table for more days and columns.</p>

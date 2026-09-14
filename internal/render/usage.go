@@ -8,6 +8,7 @@ import (
 )
 
 type UsageData struct {
+	TrendGroups                       []UsageTrendGroup
 	PrayerForms                       []UsageShare
 	NavDate, Theme, Page, SeasonClass string
 	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
@@ -80,7 +81,7 @@ type UsageBar struct {
 // NewUsageData keeps the chart chronological while the detail table stays
 // newest first. The peak is a daily count, never a sum of overlapping users.
 func NewUsageData(rows []usage.Daily, days int) UsageData {
-	d := UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours}
+	d := UsageData{Page: "usage", Days: days, Rows: rows, Hours: usage.Hours, TrendGroups: usageTrendGroups(rows)}
 	for h, name := range usage.Hours {
 		office := UsageOffice{Name: name}
 		for _, row := range rows {
