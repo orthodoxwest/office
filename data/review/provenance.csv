@@ -9,6 +9,8 @@ commons/apostle-paschal/psalm-antiphon-2,eebae0d7adbd,draft archdiocesan Lauds b
 commons/apostle-paschal/psalm-antiphon-3,2b1e1c6548ad,draft archdiocesan Vespers book,"Second Vespers, Common of Apostles in Paschaltide",565,verified,codex,2026-07-18,
 commons/apostle-paschal/psalm-antiphon-5,6e01446eb2d4,diurnal,,18*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0731.png
 commons/apostle-paschal/versicle-first-vespers,e3c6e91bb33f,draft archdiocesan Vespers book,,571,verified,codex,2026-07-17,
+commons/apostle-paschal/versicle-none,f462ce0817a4,diurnal,,19*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0732.png
+commons/apostle-paschal/versicle-sext,90ebce514506,diurnal,,19*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0732.png
 commons/apostle/benedictus-antiphon,b36a2f24d09c,diurnal,"Common of Apostles out of Paschaltide, At Lauds",12*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0725.png
 commons/apostle/chapter-lauds,4cb8e19d13a4,draft archdiocesan Lauds book,,608,verified,codex,2026-07-18,
 commons/apostle/chapter-none,3c0a5120bd29,diurnal,"Common of Apostles out of Paschaltide, At None",12*,verified,grok,2026-08-24,word-for-word from printed page image
@@ -29,6 +31,8 @@ commons/apostle/short-responsory-lauds,395c0e048b0d,diurnal,"Common of Apostles 
 commons/apostle/short-responsory-vespers,b2de766128db,draft archdiocesan Vespers book,,552,verified,codex,2026-07-18,
 commons/apostle/versicle-first-vespers,f886575e0617,diurnal,,10*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0723.png
 commons/apostle/versicle-lauds,c3fdc4e4c6fe,draft archdiocesan Lauds book,Common of Apostles and Evangelists out of Paschaltide,610,verified,codex,2026-07-18,
+commons/apostle/versicle-none,ae84a36d62ac,diurnal,,12*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/apostle-pilot/page-0725-300dpi.png
+commons/apostle/versicle-sext,081d346161c8,diurnal,,12*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0725.png
 commons/bishop-martyr/chapter-lauds,b659584a8eb7,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",21*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/chapter-none,2cca33a77d09,diurnal,"Common of One Martyr, At None",23*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/chapter-sext,923dc9141a72,diurnal,"Common of One Martyr, At Sext",23*,verified,grok,2026-08-23,word-for-word from printed page image
@@ -169,6 +173,7 @@ commons/holy-woman/versicle-first-vespers,b8f11348e186,diurnal,,51*,verified,cod
 commons/holy-woman/versicle-lauds,c2e21ab641bb,diurnal,,53*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0766.png
 commons/martyr-paschal/hymn-lauds,ba5bc629b13f,A Noted Hymnary for the Anglican Breviary,,102,verified,codex,2026-07-17,
 commons/martyr-paschal/hymn-vespers,d73c4ed00b9c,A Noted Hymnary for the Anglican Breviary,,98,verified,codex,2026-07-17,
+commons/martyr-paschal/versicle-first-vespers,8f0223c692d3,diurnal,,19*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/apostle-pilot/page-0732-300dpi.png
 commons/martyr/benedictus-antiphon,2cdcdf816c2e,draft archdiocesan Lauds book,,637,verified,codex,2026-07-17,
 commons/martyr/collect,a5af7d04dfff,diurnal,"Common of One Martyr out of Paschaltide, For a Martyr not a Bishop",22*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/martyr/hymn-lauds,95ae545aa7f1,draft archdiocesan Lauds book,,628,verified,codex,2026-07-17,

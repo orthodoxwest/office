@@ -48,6 +48,37 @@ readings agree on the 18 new canonical texts and three reused chapters.
   pp. 385–386. All three little-hour chapters remain unchanged pending
   clarification; the Lauds/Vespers p. 385 references are unambiguous.
 
+## Apostle little-hour data pilot
+
+Reviewed on 2026-09-14: Diurnal pp. 11*-12* and 18*-19*, with the
+2026 ordo's May 1 Hours (p. 59) and August 24 Hours (p. 92) as appointment
+controls. Six explicit little-hour versicles now replace runtime responsory
+reduction for the ordinary and Paschal Apostle commons. Terce reuses existing
+identical verses through aliases; four entries store the other printed pairs.
+The chapter references remain unchanged, including Terce's return to Lauds.
+The bounded Codex and Sonnet page readers agree on the six pairs; two slots
+required a fresh reading at 300 dpi to preserve archaic spelling and follow
+a column break. Existing canonical source evidence is retained, with five
+new hash-bound wording attestations. These do not certify other appointments
+that happen to use the same canonical texts.
+
+`TestApostleLittleHourAppointmentsAcrossCalendars` checks the common-appointed
+Apostle versicles in all three prayer forms throughout 2026, 2027, and 2032.
+Twelve new source-backed cases check chapters, versicles and their order;
+three compatibility controls preserve Conversion of St Paul's proper priority.
+The comparison of 23,016 complete offices found no rendered content or
+structure changes. Source metadata changed for 405 offices (135 date/hours
+in three forms), all in the intended Apostle little hours.
+
+The compatibility reducer remains necessary: Evangelist, Paschal Martyr,
+and Conversion of St Paul entries still reference the legacy responsories.
+In the same three-year sweep, private-form reductions fell from 1,374 to
+1,239. These are migration counts, not percentages of liturgical correctness.
+Independent adversarial review confirmed that this pilot needs no engine
+branch or scope-schema extension. The next migration should follow these
+dependencies, checking their printed cross-references before retiring the
+legacy entries. Other common families remain unreviewed by this pilot.
+
 ## Next source-review passes
 
 These are uncompleted requirements, not passing checks or adjudicated defects.
