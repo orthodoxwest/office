@@ -2547,13 +2547,13 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
   }
   expect(await today(reader)).toBe(before + 1);
 
-  // The same visit lands in the mix band for today — a light-scheme phone in
-  // this project, so the day is drawn and titled with both sides' counts.
+  // Real visits also reach the current-day breakdown readout.
   await reader.goto("/admin/usage?days=7");
-  for (const [name, side] of [["Nave vs Apse", "Nave"], ["Desktop vs Mobile", "Desktop"]]) {
-    const band = reader.locator(".usage-split", { hasText: name });
-    await expect(band.locator("rect > title").last())
-      .toHaveText(new RegExp(`^${easternDay()}: ${side} \\d+, `));
+  for (const [group, side] of [["appearance", "Nave"], ["screen", "Desktop"]]) {
+    await reader.getByLabel("Breakdown", { exact: true }).selectOption(group);
+    const value = reader.locator("#usage-inspect-values > div").filter({ has: reader.getByText(side, { exact: true }) });
+    expect(parseInt(await value.locator(".usage-value-primary").innerText(), 10)).toBeGreaterThan(0);
+    await expect(reader.locator("#usage-inspect-date")).toContainText("In progress");
   }
   await readerCtx.close();
 });
@@ -2563,9 +2563,9 @@ test("usage report is accessible and fits narrow and wide screens", async ({ pag
   expect(response.headers()["cache-control"]).toBe("no-store");
   expect(response.headers()["x-robots-tag"]).toContain("noindex");
   await expect(page.locator("tbody tr").filter({ has: page.locator(".usage-total") })).toHaveCount(7);
-  await expect(page.locator(".usage-form-days tbody tr")).toHaveCount(7);
-  await expect(page.getByRole("heading", { name: "Nave vs Apse" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Desktop vs Mobile" })).toBeVisible();
+  await expect(page.locator(".usage-explorer")).toBeVisible();
+  await expect(page.locator(".usage-breakdown-fallback")).toBeHidden();
+  await expect(page.getByLabel("Breakdown", { exact: true }).locator("option")).toHaveCount(3);
   for (const theme of ["light", "dark"]) {
     await page.evaluate(theme => document.documentElement.setAttribute("data-theme", theme), theme);
     for (const width of [320, 390, 540, 768, 1280, 1920]) {
@@ -2594,8 +2594,9 @@ test("usage period controls keep summaries and daily rows in sync", async ({ pag
   await expect(page).toHaveURL(/#usage-offices-title$/);
   await page.getByText("What is counted?", { exact: true }).click();
   await expect(page.getByText("A zero may also mean collection", { exact: false })).toBeVisible();
-  await page.getByText("Daily counts by prayer form", { exact: true }).click();
-  await expect(page.getByRole("region", { name: "Daily prayer form counts", exact: true })).toBeVisible();
+  await page.getByLabel("Breakdown", { exact: true }).selectOption("prayer-form");
+  await page.getByText("Trend data as a table", { exact: true }).click();
+  await expect(page.getByRole("region", { name: "Trend data", exact: true })).toBeVisible();
 });
 
 test("service worker does not cache the usage report", async ({ browser, baseURL }) => {

@@ -21,7 +21,7 @@ type UsageTrendPoint struct {
 
 func usageTrendGroups(rows []usage.Daily) []UsageTrendGroup {
 	var groups []UsageTrendGroup
-	for _, words := range usageSplitWords {
+	for _, words := range usageTrendDimensions {
 		dimension, ok := usage.DimensionByKey(words.Key)
 		if !ok {
 			continue
@@ -37,15 +37,19 @@ func usageTrendGroups(rows []usage.Daily) []UsageTrendGroup {
 		groups = append(groups, group)
 	}
 	forms := UsageTrendGroup{Key: "prayer-form", Label: "Prayer form", Series: []string{"Private", "Deacon", "Priest"}}
-	offices := UsageTrendGroup{Key: "offices", Label: "Offices"}
-	for _, hour := range usage.Hours {
-		offices.Series = append(offices.Series, strings.ToUpper(hour[:1])+hour[1:])
-	}
 	for i := len(rows) - 1; i >= 0; i-- {
 		forms.Points = append(forms.Points, UsageTrendPoint{Day: rows[i].Day, Counts: []int{
 			rows[i].Dimensions["prayer-form:private"], rows[i].Dimensions["prayer-form:deacon"], rows[i].Dimensions["prayer-form:priest"],
 		}})
-		offices.Points = append(offices.Points, UsageTrendPoint{Day: rows[i].Day, Counts: append([]int(nil), rows[i].Hours[:]...)})
 	}
-	return append(groups, forms, offices)
+	return append(groups, forms)
+}
+
+// Display names are kept in step with the stored dimension vocabulary.
+var usageTrendDimensions = []struct {
+	Key    string
+	Labels [2]string
+}{
+	{Key: "appearance", Labels: [2]string{"Nave", "Apse"}},
+	{Key: "screen", Labels: [2]string{"Desktop", "Mobile"}},
 }

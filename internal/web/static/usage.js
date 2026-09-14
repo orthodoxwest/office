@@ -7,13 +7,18 @@
   const groups = JSON.parse(document.getElementById("usage-trend-data").textContent);
   if (!groups.length || !groups[0].Points.length) return;
   const get = id => document.getElementById(`usage-${id}`);
-  const compare = get("compare"), interval = get("interval"), measure = get("measure"), observed = get("observed");
+  const compare = get("compare"), interval = get("interval"), measure = get("measure");
   const slider = get("explore-date"), chart = get("explore-chart");
+  const selected = control => control === compare ? control.value : control.querySelector("input:checked").value;
   const params = new URLSearchParams(location.search);
   for (const [control, key] of [[compare, "compare"], [interval, "interval"], [measure, "measure"]]) {
-    if (Array.from(control.options).some(option => option.value === params.get(key))) control.value = params.get(key);
+    if (control === compare) {
+      if (Array.from(control.options).some(option => option.value === params.get(key))) control.value = params.get(key);
+    } else {
+      const option = Array.from(control.querySelectorAll("input")).find(input => input.value === params.get(key));
+      if (option) option.checked = true;
+    }
   }
-  observed.checked = params.get("start") !== "window";
   const date = day => new Date(`${day}T12:00:00Z`);
   const format = day => date(day).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const total = counts => counts.reduce((sum, count) => sum + count, 0);
@@ -40,7 +45,7 @@
     for (const point of points) {
       const monday = date(point.Day);
       monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
-      const key = interval.value === "week" ? monday.toISOString().slice(0, 10) : point.Day;
+      const key = selected(interval) === "week" ? monday.toISOString().slice(0, 10) : point.Day;
       let bucket = result[result.length - 1];
       if (!bucket || bucket.key !== key) {
         bucket = { key, first: point.Day, last: point.Day, counts: point.Counts.map(() => 0), days: 0, reported: 0 };
@@ -54,13 +59,17 @@
     return result;
   }
 
+  function valueNodes(count, sum, compact = false) {
+    const counts = compact ? String(count) : `${count} ${count === 1 ? "browser-day" : "browser-days"}`;
+    const values = selected(measure) === "share" ? [share(count, sum), counts] : [counts, share(count, sum)];
+    return [node("span", values[0], "usage-value-primary"), node("span", ` (${values[1]})`, "usage-value-secondary")];
+  }
+
   function inspect(index) {
     current = Math.max(0, Math.min(index, buckets.length - 1));
     const bucket = buckets[current], sum = total(bucket.counts);
     slider.value = current;
     slider.setAttribute("aria-valuetext", range(bucket));
-    get("explore-prev").disabled = current === 0;
-    get("explore-next").disabled = current === buckets.length - 1;
     const cursor = get("explore-cursor");
     cursor.setAttribute("x1", x(current));
     cursor.setAttribute("x2", x(current));
@@ -70,17 +79,21 @@
     values.replaceChildren();
     group.Series.forEach((label, i) => {
       const item = node("div");
-      item.append(node("dt", label), node("dd", `${bucket.counts[i]} ${bucket.counts[i] === 1 ? "browser-day" : "browser-days"} · ${share(bucket.counts[i], sum)}`));
+      const value = node("dd");
+      value.append(...valueNodes(bucket.counts[i], sum));
+      item.append(node("dt", label), value);
       values.append(item);
     });
-    const partial = interval.value === "week" && bucket.days < 7 ? " Partial week in this view." : "";
-    get("inspect-note").textContent = (sum ? `${bucket.reported} of ${bucket.days} ${bucket.days === 1 ? "day has" : "days have"} observations.` : "No observations. Shares are unavailable.") + partial;
+    const partial = selected(interval) === "week" && bucket.days < 7 ? " Partial week in this view." : "";
+    const note = get("inspect-note");
+    note.textContent = (sum ? (selected(interval) === "week" ? `${bucket.reported} of ${bucket.days} days reported.` : "") : "No observations. Percentages are unavailable.") + partial;
+    note.hidden = !note.textContent;
   }
 
   function table() {
     const table = get("explore-table");
     table.replaceChildren();
-    table.append(node("caption", `${group.Label}: browser-days and share, newest first`));
+    table.append(node("caption", `${group.Label}: ${selected(measure) === "share" ? "percentages, with browser-days in parentheses" : "browser-days, with percentages in parentheses"}; newest first`));
     const head = node("thead"), header = node("tr");
     for (const label of ["Period", ...group.Series, "Days observed"]) {
       const th = node("th", label); th.scope = "col"; header.append(th);
@@ -91,7 +104,11 @@
       const row = node("tr"), th = node("th", range(bucket));
       th.scope = "row"; row.append(th);
       const sum = total(bucket.counts);
-      bucket.counts.forEach(count => row.append(node("td", `${count} · ${share(count, sum)}`)));
+      bucket.counts.forEach(count => {
+        const cell = node("td");
+        cell.append(...valueNodes(count, sum, true));
+        row.append(cell);
+      });
       row.append(node("td", `${bucket.reported} / ${bucket.days}`));
       body.append(row);
     });
@@ -101,18 +118,19 @@
   function remember() {
     const url = new URL(location.href);
     url.searchParams.set("compare", compare.value);
-    url.searchParams.set("interval", interval.value);
-    url.searchParams.set("measure", measure.value);
-    url.searchParams.set("start", observed.checked ? "observed" : "window");
+    url.searchParams.set("interval", selected(interval));
+    url.searchParams.set("measure", selected(measure));
+    url.searchParams.delete("start");
     history.replaceState(null, "", url);
     links();
   }
 
   function links() {
     // Preserve the exploration when the server supplies a different window.
-    const values = { compare: compare.value, interval: interval.value, measure: measure.value, start: observed.checked ? "observed" : "window" };
+    const values = { compare: compare.value, interval: selected(interval), measure: selected(measure) };
     document.querySelectorAll(".usage-window a").forEach(link => {
       const target = new URL(link.href);
+      target.searchParams.delete("start");
       Object.entries(values).forEach(([key, value]) => target.searchParams.set(key, value));
       link.href = `${target.pathname}${target.search}`;
     });
@@ -123,9 +141,9 @@
     group = groups.find(item => item.Key === compare.value);
     let points = group.Points;
     const first = points.findIndex(point => total(point.Counts) > 0);
-    if (observed.checked && first >= 0) points = points.slice(first);
+    if (first >= 0) points = points.slice(first);
     buckets = aggregate(points);
-    const shares = measure.value === "share";
+    const shares = selected(measure) === "share";
     const peak = Math.max(...buckets.flatMap(bucket => bucket.counts));
     const ceiling = shares ? 100 : Math.max(1, peak);
     const y = value => 210 - 200 * value / ceiling;
@@ -157,10 +175,10 @@
       item.append(key, node("span", label)); legend.append(item);
     });
     const reported = group.Points.filter(point => total(point.Counts)).length;
-    get("explore-coverage").textContent = `${reported} of ${group.Points.length} days in the selected window have ${group.Label.toLowerCase()} observations. ${observed.checked && first > 0 ? "Chart starts at the first observation. " : ""}${shares ? "Share of reported category browser-days." : "Counts are browser-days, summed within each period."}`;
+    get("explore-coverage").textContent = `${reported} of ${group.Points.length} days reported${first > 0 ? ` · Chart begins ${format(points[0].Day)}` : ""}`;
     get("explore-first").textContent = format(points[0].Day);
     get("explore-last").textContent = format(points[points.length - 1].Day);
-    get("explore-chart-title").textContent = `${group.Label}: ${shares ? "share of category" : "browser-days"} by ${interval.value}`;
+    get("explore-chart-title").textContent = `${group.Label}: ${shares ? "share of category" : "browser-days"} by ${selected(interval)}`;
     get("explore-empty").hidden = peak > 0;
     slider.max = buckets.length - 1;
     slider.disabled = buckets.length <= 1;
@@ -169,10 +187,8 @@
     inspect(matched >= 0 ? matched : buckets.length - 1);
   }
 
-  [compare, interval, measure, observed].forEach(control => control.addEventListener("change", () => { draw(); remember(); }));
+  [compare, interval, measure].forEach(control => control.addEventListener("change", () => { draw(); remember(); }));
   slider.addEventListener("input", () => inspect(Number(slider.value)));
-  get("explore-prev").addEventListener("click", () => inspect(current - 1));
-  get("explore-next").addEventListener("click", () => inspect(current + 1));
   function point(event) {
     const bounds = chart.getBoundingClientRect();
     const position = (event.clientX - bounds.left) / bounds.width * 720;
@@ -183,6 +199,7 @@
   draw();
   // Initial navigation leaves the URL alone, but restores bookmarked controls.
   links();
+  document.querySelector(".usage-breakdown-fallback").hidden = true;
   root.hidden = false;
   document.querySelector(".usage-explore-link").hidden = false;
 })();

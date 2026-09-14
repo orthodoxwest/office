@@ -12,7 +12,7 @@ func TestUsageTrendsKeepScopeCountsAndChronologicalDates(t *testing.T) {
 		{Day: "2026-09-13"},
 	}
 	groups := usageTrendGroups(rows)
-	if len(groups) != 4 {
+	if len(groups) != 3 {
 		t.Fatalf("groups: %+v", groups)
 	}
 	for _, group := range groups {
@@ -25,11 +25,28 @@ func TestUsageTrendsKeepScopeCountsAndChronologicalDates(t *testing.T) {
 			}
 		}
 	}
-	if groups[0].Points[1].Counts[1] != 5 || groups[1].Points[1].Counts[1] != 8 || groups[2].Points[1].Counts[2] != 2 || groups[3].Points[1].Counts[5] != 2 {
+	if groups[0].Points[1].Counts[1] != 5 || groups[1].Points[1].Counts[1] != 8 || groups[2].Points[1].Counts[2] != 2 {
 		t.Fatalf("scope mapping: %+v", groups)
 	}
-	groups[3].Points[1].Counts[0] = 99
-	if rows[0].Hours[0] != 3 {
+	groups[0].Points[1].Counts[0] = 99
+	if rows[0].Dimensions["appearance:nave"] != 4 {
 		t.Fatal("trend payload aliases stored rows")
+	}
+}
+
+func TestUsageTrendDimensionsCoverTheVocabulary(t *testing.T) {
+	if len(usageTrendDimensions)+1 != len(usage.Dimensions) {
+		t.Fatal("every stored dimension needs a report breakdown")
+	}
+	for _, words := range usageTrendDimensions {
+		dimension, ok := usage.DimensionByKey(words.Key)
+		if !ok || len(dimension.Values) != len(words.Labels) {
+			t.Fatalf("unmapped dimension: %+v", words)
+		}
+		for _, label := range words.Labels {
+			if label == "" {
+				t.Fatalf("unlabelled dimension: %s", words.Key)
+			}
+		}
 	}
 }

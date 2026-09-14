@@ -1,7 +1,6 @@
 package render
 
 import (
-	"math"
 	"time"
 
 	"github.com/orthodoxwest/office/internal/usage"
@@ -9,7 +8,6 @@ import (
 
 type UsageData struct {
 	TrendGroups                       []UsageTrendGroup
-	PrayerForms                       []UsageShare
 	NavDate, Theme, Page, SeasonClass string
 	// UsageWhen dates the page for the usage beacon (see HomeData.UsageWhen).
 	UsageWhen                     string
@@ -22,7 +20,6 @@ type UsageData struct {
 	Hours                         []string
 	Rows                          []usage.Daily
 	Chart                         []UsageBar
-	Splits                        []UsageSplit
 	FirstDate, LastDate, PeakDate string
 }
 
@@ -32,43 +29,6 @@ type UsageOffice struct {
 	Name  string
 	Count int
 	Width float64
-}
-
-// UsageSplit is one two-valued dimension of how the Office was read — which
-// appearance was rendered, and whether the reading was phone-shaped. The
-// period totals answer "which is more", and the daily mix answers "is that
-// changing": a single figure for the window cannot tell a settled 60/40 from
-// a migration that passed through it, and the longer the window the more of
-// that movement it hides.
-type UsageSplit struct {
-	Title, Note         string
-	Total               int
-	Left, Right         UsageShare
-	Mix                 []UsageMixDay
-	FirstDate, LastDate string
-	// Shares on the earliest and most recent days that reported anything, and
-	// how many days those were: the drift the period totals cannot show.
-	FirstShare, LastShare, Reported int
-}
-
-// UsageShare is one side of a UsageSplit over the whole period.
-type UsageShare struct {
-	Label   string
-	Count   int
-	Percent int
-}
-
-// UsageMixDay is one day's column of the mix band: the left side's share of
-// that day, drawn full height so the band reads as proportion rather than
-// volume — the daily totals above already carry volume. A day nobody reported
-// stays unreported and leaves a gap rather than being drawn as an even split.
-type UsageMixDay struct {
-	Day                  string
-	Left, Right, Percent int
-	Reported             bool
-	X, Width             float64
-	LeftHeight           float64
-	RightY, RightHeight  float64
 }
 
 type UsageBar struct {
@@ -112,13 +72,6 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 	if d.CompleteDays > 0 {
 		d.DailyAverage /= float64(d.CompleteDays)
 	}
-	for i, value := range []string{"private", "deacon", "priest"} {
-		share := UsageShare{Label: []string{"Private", "Deacon", "Priest"}[i]}
-		for _, row := range rows {
-			share.Count += row.Dimensions["prayer-form:"+value]
-		}
-		d.PrayerForms = append(d.PrayerForms, share)
-	}
 	if len(rows) == 0 {
 		return d
 	}
@@ -147,13 +100,6 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 			d.PeakDate = label(row.Day)
 		}
 	}
-	for _, words := range usageSplitWords {
-		// A dimension the vocabulary no longer declares simply stops being
-		// drawn; TestUsageSplitsCoverTheVocabulary keeps the two in step.
-		if dimension, ok := usage.DimensionByKey(words.Key); ok {
-			d.Splits = append(d.Splits, newUsageSplit(words, dimension, rows, label))
-		}
-	}
 	scale := d.Max
 	if scale == 0 {
 		scale = 1
@@ -166,61 +112,4 @@ func NewUsageData(rows []usage.Daily, days int) UsageData {
 			X: float64(len(rows)-1-i)*step + gap/2, Y: 160 - height, Width: step - gap, Height: height, Today: i == 0})
 	}
 	return d
-}
-
-// usageSplitWords binds each stored dimension to the words the report uses
-// for it, in the order the panel draws them. The keys and the two values are
-// the storage vocabulary (usage.Dimensions); only the wording lives here.
-var usageSplitWords = []usageSplitWord{
-	{Key: "appearance", Title: "Nave vs Apse", Labels: [2]string{"Nave", "Apse"},
-		Note: "The appearance actually rendered, whether chosen or inherited from the device"},
-	{Key: "screen", Title: "Desktop vs Mobile", Labels: [2]string{"Desktop", "Mobile"},
-		Note: "Phone-shaped reading: a narrow window, or any touch screen"},
-}
-
-type usageSplitWord struct {
-	Key, Title, Note string
-	Labels           [2]string
-}
-
-// newUsageSplit lays out one dimension: its period totals and its day-by-day
-// mix band, chronological like the trend chart above it. Percentages are made
-// to sum to 100 rather than rounded independently. A dimension nothing has
-// reported yet — a period before it was collected, or one served entirely to
-// clients still on a cached app.js — draws nothing at all, so the template can
-// say so instead of implying an even split.
-func newUsageSplit(words usageSplitWord, dimension usage.Dimension, rows []usage.Daily, label func(string) string) UsageSplit {
-	split := UsageSplit{Title: words.Title, Note: words.Note,
-		Left:      UsageShare{Label: words.Labels[0]},
-		Right:     UsageShare{Label: words.Labels[1]},
-		FirstDate: label(rows[len(rows)-1].Day), LastDate: label(rows[0].Day)}
-	leftScope, rightScope := dimension.Scope(dimension.Values[0]), dimension.Scope(dimension.Values[1])
-	step := 720 / float64(len(rows))
-	for i := len(rows) - 1; i >= 0; i-- {
-		left, right := rows[i].Dimensions[leftScope], rows[i].Dimensions[rightScope]
-		split.Left.Count += left
-		split.Right.Count += right
-		day := UsageMixDay{Day: rows[i].Day, Left: left, Right: right,
-			X: float64(len(rows)-1-i) * step, Width: step}
-		if total := left + right; total > 0 {
-			day.Reported = true
-			day.Percent = int(math.Round(100 * float64(left) / float64(total)))
-			day.LeftHeight = 40 * float64(left) / float64(total)
-			day.RightY = day.LeftHeight
-			day.RightHeight = 40 - day.LeftHeight
-			split.Reported++
-			if split.Reported == 1 {
-				split.FirstShare = day.Percent
-			}
-			split.LastShare = day.Percent
-		}
-		split.Mix = append(split.Mix, day)
-	}
-	split.Total = split.Left.Count + split.Right.Count
-	if split.Total == 0 {
-		return split
-	}
-	split.Left.Percent = int(math.Round(100 * float64(split.Left.Count) / float64(split.Total)))
-	split.Right.Percent = 100 - split.Left.Percent
-	return split
 }
