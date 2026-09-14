@@ -1,6 +1,6 @@
 # Paschal variant of the Common of Many Martyrs.
-# The local books provide one shared office for one or many martyrs in
-# Paschaltide; only the hymns vary with the number of martyrs.
+# The Diurnal borrows the Apostle office with the exceptions on pp. 31*-33*.
+# Its little-hour chapters and versicles have no separate exceptions.
 
 [psalm-antiphon]
 @use commons/martyrs-paschal/psalm-antiphon-1
@@ -37,15 +37,6 @@
 
 [chapter-none]
 @use commons/martyr-paschal/chapter-none
-
-[short-responsory-terce]
-@use commons/martyr-paschal/short-responsory-terce
-
-[short-responsory-sext]
-@use commons/martyr-paschal/short-responsory-sext
-
-[short-responsory-none]
-@use commons/martyr-paschal/short-responsory-none
 
 [short-responsory-lauds]
 @use commons/martyr-paschal/short-responsory-lauds
@@ -99,3 +90,15 @@ Amen.
 
 [magnificat-antiphon]
 @use commons/martyr-paschal/magnificat-antiphon
+
+[versicle-terce]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-terce
+
+[versicle-sext]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-sext
+
+[versicle-none]
+# SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
+@use commons/martyr-paschal/versicle-none

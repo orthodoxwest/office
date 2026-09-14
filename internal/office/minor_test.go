@@ -266,6 +266,10 @@ func TestDirectMinorVersicleRespectsSourcePrecedence(t *testing.T) {
 			"proper/example/short-responsory-terce": "R. Proper opening.\nV. Proper response.",
 			"seasonal/easter/versicle-terce":        "V. Seasonal.\nR. Response.",
 		}, "proper/example/short-responsory-terce"},
+		{"proper responsory over direct common verse", map[string]string{
+			"proper/example/short-responsory-terce": "R. Proper opening.\nV. Proper response.",
+			"commons/lord/versicle-terce":           "V. Common.\nR. Response.",
+		}, "proper/example/short-responsory-terce"},
 		{"direct seasonal over seasonal legacy responsory", map[string]string{
 			"seasonal/easter/short-responsory-terce": "R. Seeded opening.\nV. Seeded response.",
 			"seasonal/easter/versicle-terce":         "V. Printed seasonal.\nR. Printed response.",

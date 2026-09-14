@@ -134,11 +134,14 @@ R. And their words unto the ends of the world.
 # SOURCE: monastic diurnal, pp. 10*, 15* (Common of Apostles and Evangelists, At I and II Vespers)
 @use commons/apostle/short-responsory-vespers
 
-[short-responsory-terce]
-@use commons/apostle/short-responsory-terce
+[versicle-terce]
+# SOURCE: diurnal pp. 626, 12* (St Luke cross-reference)
+@use commons/apostle/versicle-terce
 
-[short-responsory-sext]
-@use commons/apostle/short-responsory-sext
+[versicle-sext]
+# SOURCE: diurnal pp. 626, 12* (St Luke cross-reference)
+@use commons/apostle/versicle-sext
 
-[short-responsory-none]
-@use commons/apostle/short-responsory-none
+[versicle-none]
+# SOURCE: diurnal pp. 626, 12* (St Luke cross-reference)
+@use commons/apostle/versicle-none
