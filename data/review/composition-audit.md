@@ -174,8 +174,8 @@ question. Expand the existing checks without deriving expectations from output.
    of Apostles, Martyrs, Confessors, and the BVM, in and outside Paschaltide.
    Check printed cross-references, hour-specific exceptions, and octaves. A
    plausible reduction of a seeded responsory is not sufficient evidence.
-   Include the May 3, 2026 Holy Cross None ordinary-chapter fallback as an
-   unreviewed candidate; this pass checked only its Terce precedence control.
+   The May 3 Holy Cross None fallback is repaired in the Cross pass below;
+   other proper and octave inheritance remains to be reviewed.
 2. **Ordinary structure at every weekday/hour:** openings, hymn placement,
    psalm/antiphon assignments, ferial versus festal canticles, repeated
    antiphons, chapter/versicle order, collects and conclusions. Prime and
@@ -211,3 +211,40 @@ The Passiontide chapter/versicle appointment scope of #314 is now covered.
 Its remaining source-accounting work concerns the legacy seeded responsory
 entries and Paschal Compline; this repair does not attest those unused
 little-hour responsories as if the Diurnal printed them.
+
+
+## Cross composition repairs
+
+Diurnal pp. 43 and 146–147 appoint distinct Paschal Cross antiphons at Lauds
+and Vespers, followed by a shared verse, invitation, collect, and abbreviated
+Through-the-same conclusion. The old shared antiphon and verse were wrong;
+the raw collect also omitted both its invitation and its conclusion. The hour
+definitions now appoint the two antiphons and reuse the already attested
+invitation and conclusion formulas. No additional engine mechanism is needed.
+Three new hash-bound attestations cover the antiphons and verse; the existing
+collect body and formula attestations remain intact. Bounded Codex and Sonnet
+readings, with rejected incomplete/column-crossing readings retained in ignored
+artifacts, establish the new wording and the printed conclusion appointment.
+
+Diurnal p. 524 appoints Philippians 2:8–9 at Finding of the Holy Cross None.
+The 2026 ordo p. 60 assigns the Hours of the feast to that page. The missing
+chapter now aliases the identical, already attested Exaltation chapter from
+p. 600. This replaces the ordinary fallback without duplicating the body.
+
+Across 23,016 complete offices in 2026, 2027, and 2032, 309 rendered offices
+change: 100 Lauds/Vespers date-hours and three Holy Cross None date-hours,
+each in private, deacon, and priest forms. Cross presence is unchanged.
+After excluding the Cross section and the repaired Holy Cross None chapter,
+all other composed content is identical. Tests assert the complete Cross
+sequence and text in both hours and all forms, and the proper None chapter.
+These comparisons establish repair scope, not whole-office correctness.
+
+Eligibility remains unresolved in [issue #356](https://github.com/orthodoxwest/office/issues/356).
+The Diurnal p. 146 suppresses Cross for a commemorated Double, including
+concurrence. The 2026 ordo p. 61 explicitly includes it at May 9 Vespers with
+Gregory Nazianzen (Double), while p. 64 omits it at May 17 Vespers with
+Venantius (Double). The engine also ends the seasonal interval three days
+early. Extending the interval alone would incorrectly add Cross on May 18;
+blanket suppression would contradict the newest ordo on May 9. The proposed
+eligibility changes are therefore deferred together pending clergy resolution.
+No calendar or eligibility rule is changed by this repair.

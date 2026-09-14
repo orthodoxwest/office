@@ -2205,5 +2205,19 @@
         "ref": "proper/conception-bvm/short-responsory-none"
       }
     ]
+  },
+  {
+    "id": "finding-holy-cross-none-chapter",
+    "source": "Monastic Diurnal p. 524 prints Philippians 2:8,9 at None, identical to the existing Exaltation chapter p. 600; 2026 ordo p. 60 appoints the feast Hours. This replaces the ordinary chapter fallback.",
+    "cases": [
+      {
+        "date": "2026-05-03",
+        "hour": "none",
+        "slot": "chapter",
+        "ref": "proper/finding-holy-cross/chapter-none",
+        "contains": "He humbled himself",
+        "before_slot": "versicle"
+      }
+    ]
   }
 ]

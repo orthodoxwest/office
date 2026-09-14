@@ -951,13 +951,19 @@ Condition = if-cross-commemoration
 Label = Commemoration of the Cross
 
 Type = antiphon
-Ref = ordinary/shared/cross-antiphon
+Ref = ordinary/shared/cross-antiphon-lauds
 
 Type = versicle
 Ref = ordinary/shared/cross-versicle
 
+Type = prayer
+Ref = shared/leader/let-us-pray
+
 Type = collect
 Ref = ordinary/shared/cross-collect
+
+Type = prayer
+Ref = shared/formulas/collect-conclusion-through-same
 
 [Closing]
 Condition = not-office-of-the-dead

@@ -35,8 +35,9 @@
 # The last-resort fallbacks behind proper-collect, reached on days with no proper
 # of their own. Not referenced directly by any hour definition, so the engine
 # concludes them. ordinary/prime/collect, ordinary/compline/collect and the
-# suffrage and cross collects ARE referenced directly, keep their conclusions
-# inline, and must NOT be listed here.
+# suffrage collects ARE referenced directly and keep their conclusions inline.
+# The Cross collect is also direct; its hour sections append the shared
+# through-same formula explicitly. These must NOT be listed here.
 # Note: resolveProperCollectText redirects terce/sext/none to the lauds collect
 # slot, so ordinary/{terce,sext,none}/collect are unreachable in practice (see
 # data/review/zero-occurrences.csv). They are classified anyway so that the data

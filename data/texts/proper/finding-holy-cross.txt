@@ -193,3 +193,7 @@ R. Thanks be to God.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-none]
+# SOURCE: diurnal p. 524 (Finding of the Holy Cross, At None; same chapter as Exaltation p. 600)
+@use proper/exaltation-holy-cross/chapter-none
