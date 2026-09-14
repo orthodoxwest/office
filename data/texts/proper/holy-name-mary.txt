@@ -3,9 +3,10 @@
 # Common of Feasts B.V.M. Magnificat antiphon (p. 65*).
 @use commons/blessed-virgin/magnificat-antiphon-first
 
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: Monastic Breviary Matins supplement, p. (35) (Holy Name of Mary, Collect); appointment per 2026 archdiocesan ordo, Sept 12
+Grant, we beseech thee, Almighty God: that thy faithful servants who rejoice under the protection and Name of the most holy Virgin Mary; may, by her devout intercession, be delivered from all evils upon earth, and be found worthy to attain unto everlasting joys in heaven.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

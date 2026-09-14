@@ -848,6 +848,7 @@ proper/holy-name-jesus/magnificat-antiphon,9f8473a1699e,draft Temporal Cycle Ves
 proper/holy-name-jesus/magnificat-antiphon-first,8af7f293a17d,draft Temporal Cycle Vespers book,,100,verified,codex,2026-07-17,
 proper/holy-name-jesus/short-responsory-none,198f7d31cd10,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/short-responsory-sext,dceee9df6644,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
+proper/holy-name-mary/collect,4fef18bb1d49,Monastic Breviary Matins supplement,"Holy Name of Mary, Collect",(35),verified,muse,2026-09-13,Two-reader agreement 1.0 (muse + claude-sonnet) on issue #323 photo; evidence output/issue-323/
 proper/holy-rosary-bvm/benedictus-antiphon,5a4585e3e62a,diurnal,,620,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0664.png
 proper/holy-rosary-bvm/chapter-lauds,c03335687ad3,diurnal,,619,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0663.png
 proper/holy-rosary-bvm/chapter-none,e1dc8946827a,diurnal,,621,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0665.png
