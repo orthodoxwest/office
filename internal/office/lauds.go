@@ -86,12 +86,19 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 			IsCommemoration:      true,
 		})
 
+		// XXXIII.3,5: each commemoration has its own invitation, including
+		// middle collects whose conclusion is omitted.
+		invitation := resolveElement(HourElement{Type: "prayer", Ref: "shared/leader/let-us-pray"}, corpus)
+		invitation.CommemorationOwnerID = comm.ID
+		invitation.IsCommemoration = true
+		elems = append(elems, invitation)
+
 		// Collect. Of a run of collects only the first and the last are
 		// concluded (XXXIII.5); the collect of the day has already taken the
 		// first, so here only the final commemoration is concluded — and only
 		// when no Suffrage or Commemoration of the Cross follows, since those
 		// belong to the same run and carry its last conclusion themselves.
-		// See collectRunContinues for the rubric and its printed witness.
+		// See collectFollows for the rubric and its printed witness.
 		collectText, collectSrc := lookup("commemoration-collect")
 		collectRefs := []string{collectSrc}
 		if i == len(comms)-1 && !moreCollects {

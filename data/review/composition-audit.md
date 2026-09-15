@@ -248,3 +248,33 @@ early. Extending the interval alone would incorrectly add Cross on May 18;
 blanket suppression would contradict the newest ordo on May 9. The proposed
 eligibility changes are therefore deferred together pending clergy resolution.
 No calendar or eligibility rule is changed by this repair.
+
+
+## Collect invitations and sequence
+
+The Diurnal General Rubrics XII (p. xxxi) concludes only the first and last
+collects. The ordinary of Lauds (pp. 42–43) and Vespers (pp. 144–147) places
+commemorations and the suffrage/Cross before the closing greeting, with
+Let us pray before each suffrage collect. Breviary General Rubrics
+XXXIII.3,5 (printed p. 50) explicitly requires that invitation before every
+collect, including intermediate commemorations without a conclusion.
+
+The app omitted the invitation in every generated commemoration and in both
+forms of the Suffrage of All Saints. The four static suffrage sections now
+reference the existing attested invitation. Generated commemorations resolve
+that same shared prayer and retain the commemoration owner. No corpus body,
+conclusion-selection rule, commemoration eligibility, or prayer-form rule changes.
+
+The before/after comparison covers 23,016 offices across 2026, 2027, and 2032
+in three forms. It adds 7,257 invitations in 4,911 offices: 2,490 Lauds and
+2,421 Vespers. Removing invitation elements from both captures leaves every
+complete-office hash identical, including all other text, sources, decisions,
+and commemorations. Thirteen calendar fixtures in all three forms assert
+invitations, commemoration ownership, and first/last-only conclusions, including
+multiple commemorations, ordinary/BVM suffrages, and the Cross. The full
+private-form collect-run audit finds no misplaced conclusions before or after.
+The sequence audit covers 2,189 private-form runs and 4,708 collects; the
+three All Souls Lauds offices, which lack that normal closing boundary, are
+excluded. Remaining Triduum structural work stays under its existing backlog. These checks
+establish ordering and repair scope, not the correctness of every appointment
+or collect's wording. Cross eligibility remains deferred in #356.

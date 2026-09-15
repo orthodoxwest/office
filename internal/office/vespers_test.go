@@ -674,8 +674,8 @@ func TestFollowingOfficeCommemorationUsesFirstVespersTexts(t *testing.T) {
 	})
 
 	elems := addCommemorations(day, "vespers", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("got %d elements, want 4", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("got %d elements, want 5", len(elems))
 	}
 	if elems[1].Text != "First Vespers antiphon for Matthias" ||
 		elems[1].SourceRef != "commons/apostle/magnificat-antiphon-first" {
