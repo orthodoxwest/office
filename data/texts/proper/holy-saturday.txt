@@ -137,3 +137,17 @@ R. And thou wilt not suffer thy Holy One to see corruption.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+# Vigil Vespers has its own fixed propers (Diurnal pp. 360–361).
+[vigil-magnificat-antiphon]
+# SOURCE: diurnal p. 360
+In the end of the sabbath, * as it began to dawn toward the first day of the week, came Mary Magdalene and the other Mary to see the sepulchre, alleluia.
+
+[vigil-collect]
+# SOURCE: diurnal p. 360
+Pour down upon us, O Lord, the Spirit of thy love, that they whom thou hast satisfied with the Paschal Sacraments may, of thy goodness, be made of one heart and of one mind.
+
+[vigil-dismissal]
+# SOURCE: diurnal p. 361
+V. Let us bless the Lord, alleluia, alleluia.
+R. Thanks be to God, alleluia, alleluia.

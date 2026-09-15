@@ -10,8 +10,13 @@ import (
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
-// hourNames lists the canonical hour names (stems of the office/*.txt files).
+// hourNames lists the seven supported hours.
 var hourNames = []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
+
+// hourDefinitionNames also includes exceptional forms of a supported hour.
+func hourDefinitionNames() []string {
+	return slices.Concat(hourNames, []string{holySaturdayVespersDefinition})
+}
 
 func isValidCondition(condition string) bool {
 	_, err := parseCondition(condition)
@@ -90,16 +95,20 @@ func ValidateHourDefinitions(dataDir string) []string {
 	// required maps corpus key → first source location for error messages
 	required := make(map[string]string)
 
-	for _, hour := range hourNames {
-		defPath := filepath.Join(dataDir, "office", hour+".txt")
+	for _, definition := range hourDefinitionNames() {
+		hour := definition
+		if definition == holySaturdayVespersDefinition {
+			hour = "vespers"
+		}
+		defPath := filepath.Join(dataDir, "office", definition+".txt")
 		sections, err := ParseHourDefinition(defPath)
 		if err != nil {
-			parseErrors = append(parseErrors, fmt.Sprintf("office/%s.txt: %v", hour, err))
+			parseErrors = append(parseErrors, fmt.Sprintf("office/%s.txt: %v", definition, err))
 			continue
 		}
 
 		for _, section := range sections {
-			src := fmt.Sprintf("office/%s.txt [%s]", hour, section.Name)
+			src := fmt.Sprintf("office/%s.txt [%s]", definition, section.Name)
 
 			if section.Condition != "" && !isValidCondition(section.Condition) {
 				parseErrors = append(parseErrors, fmt.Sprintf(
