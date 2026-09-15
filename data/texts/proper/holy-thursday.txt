@@ -1,6 +1,10 @@
 [vespers-psalmody]
-# The generic Lord profile is not evidence for the special Triduum office.
-@use psalmody/vespers/ferial
+# SOURCE: Monastic Diurnal p. 315: same five psalms on this and following day
+psalm-antiphon-1 = psalms/116b
+psalm-antiphon-2 = psalms/120
+psalm-antiphon-3 = psalms/140
+psalm-antiphon-4 = psalms/141
+psalm-antiphon-5 = psalms/142
 
 [psalm-antiphon]
 @use proper/holy-thursday/psalm-antiphon-1
@@ -40,8 +44,10 @@ R. Which did eat of my bread, hath lifted up his heel against me.
 Christ, ✠ for our sake, became obedient unto death.
 
 [collect]
-O God, from whom Judas received the punishment of his guilt, and the thief the reward of his confession: grant unto us the full effect of thy clemency; that as in his Passion our Lord Jesus Christ gave to each a recompense meet for his deserts, so having taken away our old sins, he may bestow on us the grace of his resurrection.
+# SOURCE: diurnal p. 313
+Almighty God, we beseech thee graciously to behold this thy family, for which our Lord Jesus Christ was contented to be betrayed, and given up into the hands of wicked men, and to suffer death upon the cross:
 
+[chapter-lauds]
 # The Triduum omits these at Lauds and Vespers; see the SCOPE note on
 # seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
 # slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
@@ -50,7 +56,6 @@ O God, from whom Judas received the punishment of his guilt, and the thief the r
 # the opening versicles and hymn outright and take a fixed psalmody, none of
 # which a proper slot can express.
 
-[chapter-lauds]
 @omit
 
 [chapter-vespers]
@@ -83,6 +88,14 @@ R. Who did also eat of my bread, hath laid wait for me.
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
 # [chapter-lauds]
+# The Triduum omits these at Lauds and Vespers; see the SCOPE note on
+# seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
+# slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers. The Little Hours have their own
+# rubric on p. 314, modelled in the hour definitions rather than here: they omit
+# the opening versicles and hymn outright and take a fixed psalmody, none of
+# which a proper slot can express.
+
 # Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
 #
 # [chapter-vespers]
@@ -112,18 +125,22 @@ R. Who did also eat of my bread, hath laid wait for me.
 # [vespers-psalmody-first]
 # I Vespers psalmody table when it differs from II Vespers.
 #
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
+[psalm-antiphon-1-vespers]
+# SOURCE: diurnal p. 315
+I will receive * the cup of salvation, and call upon the Name of the Lord.
+
+[psalm-antiphon-2-vespers]
+# SOURCE: diurnal p. 315
+I labour for peace, * but when I speak unto them thereof, they make them ready to battle.
+
+[psalm-antiphon-3-vespers]
+# SOURCE: diurnal p. 315
+Preserve me, * O Lord, from the wicked men.
+
+[psalm-antiphon-4-vespers]
+# SOURCE: diurnal p. 315
+Keep me * from the snare that they have laid for me, and from the traps of the wicked doers.
+
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
 #
@@ -135,3 +152,7 @@ R. Who did also eat of my bread, hath laid wait for me.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon-5-vespers]
+# SOURCE: diurnal p. 315
+I looked also * upon my right hand, and saw there was no man that would know me.

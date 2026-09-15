@@ -12,7 +12,7 @@ import (
 
 // TestVespers2026PsalmodySweep guards the annual adversarial-review sweep:
 // every hour must compose without leaking corpus annotations, and each
-// Vespers must contain exactly four psalms.
+// Vespers must contain its appointed psalms.
 func TestVespers2026PsalmodySweep(t *testing.T) {
 	t.Parallel()
 	eng, err := office.NewEngine(dataDir)
@@ -51,9 +51,14 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 			// Vespers sings four psalms, except the Office of the Dead, which
 			// sings five (Monastic Diurnal pp. 72*-75*). On the evening before
 			// All Souls those five are appended after the day's four.
+			// Triduum Vespers has five proper psalms (Diurnal p. 315),
+			// followed by the Miserere of the shared ending (p. 313).
 			wantPsalms := 4
 			if hour.Feast == "All Souls' Day" {
 				wantPsalms = 5
+			}
+			if id := feastID(day); id == "holy-thursday" || id == "good-friday" {
+				wantPsalms = 6
 			}
 			for _, sec := range hour.Sections {
 				if sec.Label == "Vespers of the Dead" {

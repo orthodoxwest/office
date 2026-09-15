@@ -213,6 +213,37 @@ entries and Paschal Compline; this repair does not attest those unused
 little-hour responsories as if the Diurnal printed them.
 
 
+## Triduum review of PR #360
+
+The shared `usesTriduumForm` policy bounds psalm doxology omission and the
+silent collect conclusion independently. All seven hour definitions keep the
+complete Christus factus est ending together in `[Triduum-Ending]`.
+
+Reviewed by Codex on 2026-09-15 against the Monastic Diurnal page images and
+2026 archdiocesan ordo pp. 15–16 and 53. This review is separate from the ordinary
+year assessment above.
+
+| Requirement and source | Cases, expected behavior, and regression |
+|---|---|
+| Lauds begins with its first antiphon and uses five proper frames (Diurnal pp. 305–311, 336–341, 356–359) | April 9–11, 2026: omit Psalm 67 and festal psalms; use each day's appointed psalms, canticle, and divided Laudate psalm. `TestTriduumPsalmodyAppointments` also checks 2027 and 2032. Existing Lauds antiphon wording remains subject to corpus verification. |
+| Thursday and Friday Vespers use the same five psalms and antiphons (p. 315; ordo p. 53) | April 9–10: Psalms 116b, 120, 140, 141, 142; five repeated proper antiphon frames. The ending adds Psalm 51 as the sixth psalm. `TestTriduumPsalmodyAppointments` and both Vespers sweep tests cover this distinction. New antiphons have independent Codex/Sonnet image readings. |
+| All hours end with the daily Christus factus est, entirely silent Our Father, Miserere, and the shared Almighty God collect with silent conclusion (p. 313; ordo Sacred Triduum notes) | All seven hours on April 9–10 and Lauds–None on April 11, in private/deacon/priest forms. `TestTriduumMajorHoursOpeningsEndings` checks the exact ending sequence, collect source and conclusion, voice partitions, and omission of ordinary greetings, commemorations and Marian endings. The three collect keys use the same independently agreed p. 313 reading, appointed to all three days by the printed rubric. |
+| Compline begins with confession/absolution, then Psalms 4, 91, 134 and Nunc dimittis (p. 316) | April 9–10, all forms: confession is the only opening prayer; the canticle immediately follows the three psalms before Christus factus est. The same sequence test includes priest and deacon substitutions. |
+| Lauds alone adds the candle/noise instruction (p. 313) | Exactly one rubric at each Triduum Lauds, none at other hours. Bounded readings distinguish this sentence from the preceding general ending instruction. |
+| The ending stops at Holy Saturday None (p. 313; #276) | Wednesday and Easter Sunday controls retain ordinary openings/endings; Holy Saturday Vespers keeps Easter ownership and Compline keeps its proper Nunc dimittis antiphon. HTML/TeX tests and the browser Triduum test check silent prayer presentation. |
+
+The ordo appoints the p. 313 ending and lists St Leo on April 11 without an
+explicit Lauds commemoration. That listing alone does not override the printed
+ending or establish a source conflict. The omitted feria/following-office
+commemorations were ordinary composition artifacts; the review found no
+contrary appointment for those hours.
+
+These checks do not certify all Triduum wording, Tenebrae ceremonies, or the
+Holy Saturday Vigil. In particular, the current Holy Saturday Vespers route
+still lacks the abbreviated Vigil office explicitly appointed by the ordo.
+That separate repair remains in `repair-backlog.csv`; the boundary tests above
+preserve the existing route rather than certify its complete appointment.
+
 ## Cross composition repairs
 
 Diurnal pp. 43 and 146–147 appoint distinct Paschal Cross antiphons at Lauds
@@ -314,3 +345,60 @@ catalog omits the computed Nativity Sunday owner, and its Circumcision dossier
 stops at p. 209 before the little hours on p. 213. The full resolution inventory
 and parent-verified page selection supplement those limited discovery results;
 neither negative searches nor discovery queue membership certify a fallback.
+
+
+## Sunday within the Corpus Christi octave
+
+Diurnal pp. 417–421 and the 2026 ordo pp. 71–72 appoint a distinct Sunday
+within this octave. Terce, Sext and None used ordinary antiphons, chapters
+and verses; I Vespers paired the proper antiphons with Saturday psalms, and
+II Vespers used ordinary psalmody, chapter, responsory, hymn and verse. Nineteen explicit
+data appointments repair those fallbacks with sixteen aliases and three new
+bodies: the Sext/None chapters (1 John 3:16 and 3:18) and None verse. No engine
+rule, feast metadata, shared psalm text or canonical alias target changes.
+
+Terce and II Vespers now refer to the Sunday Lauds chapter. The little hours
+reuse their appointed Lauds antiphons and existing simple verses. Both Vespers
+use Psalms 110, 111 and 116:10ff; I Vespers ends with 147:12ff, while II Vespers
+ends with 128. The existing Corpus Christi psalmody declarations supply these
+sequences, with the feast's II Vespers profile used for Sunday I Vespers and
+its I Vespers profile used for Sunday II Vespers. II Vespers also reuses the
+existing Pange lingua hymn, Vespers responsory and proper antiphons. Prime's
+already correct antiphon and psalms are regression controls.
+
+Bounded Codex and Sonnet readings agree on the new wording and printed
+appointment rubrics. Rejected readings include a punctuation disagreement,
+an adjacent-verse overrun, confusion about the name “II Sunday after
+Pentecost,” and a failed rubric reading. Corrected readings and a 300 dpi
+None image resolve them; all attempts and document/page identities remain
+in ignored run artifacts. Three new hash-bound attestations concern wording;
+the alias targets retain their existing evidence. These do not attest full
+psalm bodies or certify every inherited appointment.
+
+Across 23,016 complete offices in 2026, 2027 and 2032, 27 offices change:
+five principal date/hours on June 13–14, 2026, and four Vespers commemorations
+on July 3–4 in 2027/2032, each in three prayer forms. The latter now use the
+Sunday's own verse under General Rubrics X, p. xxix. All other elements and
+metadata compare identically after excluding the repaired slots and their
+psalmody decisions. Direct tests exercise the appointed Sunday in 2026 and
+2028 in all forms, its commemoration in 2027/2032, and its displacement by the
+transferred Visitation. Additional years exercise rule boundaries, not
+agreement with future ordos.
+
+The responsory citation required an additional boundary check, documented in
+[#362](https://github.com/orthodoxwest/office/issues/362). Diurnal p. 418 contains
+both the continuation of I Vespers' “He gave them” and the opening of Lauds'
+“He fed them.” The 2026 ordo p. 72's reference to p. 418 therefore does not
+establish a conflicting appointment. The explicit II Vespers responsory on
+p. 421 agrees with I Vespers on pp. 417–418; II Vespers now reuses that existing
+body. Independent adversarial review confirmed this pagination distinction.
+This pass does not certify the entire office, octave commemoration wording,
+or the wider octave.
+
+The audit also identified four missing Epiphany Sunday II Vespers appointments
+and a distinct little-hour source conflict, tracked in
+[#361](https://github.com/orthodoxwest/office/issues/361). Those remain separate.
+Ordinary Sunday Vespers' 2 Corinthians chapter agrees with Diurnal p. 114;
+ordinary numbered Sunday propers inspected on pp. 232 and 437 do not print
+replacement chapters. These negative findings are limited to those pages,
+not clearance of every ordinary fallback in the inventory.

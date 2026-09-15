@@ -492,9 +492,9 @@ func TestFestalVespersPsalmodyFullYearHasFourPsalms(t *testing.T) {
 		if !usesFestalVespersPsalmody(officeDay, engine.corpus) {
 			continue
 		}
-		// The Office of the Dead declares a psalmody table too, but it is not
-		// festal Vespers: it sings five psalms (Monastic Diurnal pp. 72*-75*).
-		if isOfficeOfTheDead(officeDay) {
+		// The Dead and Triduum offices also declare tables. Their different
+		// counts have dedicated appointment tests (Diurnal pp. 72*-75*, 315).
+		if isOfficeOfTheDead(officeDay) || isTriduum(officeDay) {
 			continue
 		}
 		festalEvenings++

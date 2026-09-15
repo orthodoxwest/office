@@ -25,7 +25,9 @@ Ref = ordinary/shared/hail-mary
 # The Office of the Dead has no opening versicles: after the Our Father and
 # Hail Mary said secretly above, "the Office begins at once with the Antiphon"
 # (Monastic Diurnal p. 72*, and p. 99* for Lauds).
-Condition = not-office-of-the-dead
+# During the Triduum Vespers is begun at once with the first Antiphon,
+# without musical note (Monastic Diurnal p. 315; 2026 ordo Sacred Triduum).
+Condition = not-office-of-the-dead,not-triduum
 Label = Opening Versicles
 
 Type = versicle
@@ -425,8 +427,32 @@ Ref = office
 Type = proper-antiphon
 Ref = magnificat-antiphon
 
+[Triduum-Ending]
+Condition = triduum
+# Monastic Diurnal, printed p. 313: the same ending closes every Hour of the
+# Triduum -- kneeling at the antiphon, the Our Father in secret, Psalm 51,
+# and the collect of the day said without Let us pray.
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
+Type = silent-prayer
+Ref = ordinary/shared/our-father
+
+Type = psalm
+Ref = psalms/051
+
+Type = rubric
+Ref = shared/formulas/triduum-collect-rubric
+
+Type = proper-collect
+Ref = collect
+
 [Pre-Collect]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 Label = The Prayers
 
 Type = dialogue
@@ -460,10 +486,12 @@ Type = prayer
 Ref = shared/leader/let-us-pray
 
 [Collect]
+Condition = not-triduum
 Type = proper-collect
 Ref = collect
 
 [Commemorations]
+Condition = not-triduum
 Type = commemorations
 Ref = commemorations
 
@@ -519,7 +547,7 @@ Type = prayer
 Ref = shared/formulas/collect-conclusion-through-same
 
 [Closing]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
@@ -531,7 +559,7 @@ Type = versicle
 Ref = shared/formulas/faithful-departed
 
 [Closing-Peace]
-Condition = not-appended-office-of-the-dead,not-office-of-the-dead
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 
 Type = rubric
 Ref = shared/formulas/closing-our-father
@@ -552,13 +580,13 @@ Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace
 
 [Marian]
-Condition = not-appended-office-of-the-dead,not-office-of-the-dead
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 
 Type = marian
 Ref = seasonal
 
 [Conclusion]
-Condition = not-appended-office-of-the-dead,not-office-of-the-dead
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 
 Type = versicle
 Ref = shared/formulas/divine-help
