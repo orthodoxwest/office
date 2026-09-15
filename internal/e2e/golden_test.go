@@ -165,7 +165,7 @@ var hourCases = []hourCase{
 	{"vespers", "2026-04-06", "Branch coverage from review-plan"},
 	{"lauds", "2026-04-07", "Branch coverage from review-plan"},
 	{"vespers", "2026-04-07", "Branch coverage from review-plan"},
-	{"vespers", "2026-04-11", "Branch coverage from review-plan"},
+	{"vespers", "2026-04-11", "Holy Saturday — abbreviated Vigil Vespers apart from Mass (Diurnal pp. 360–361)"},
 	{"vespers", "2026-04-29", "Branch coverage from review-plan"},
 	{"vespers", "2026-05-02", "Branch coverage from review-plan"},
 	{"lauds", "2026-05-30", "Branch coverage from review-plan"},

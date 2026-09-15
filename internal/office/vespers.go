@@ -8,6 +8,14 @@ import (
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
+const holySaturdayVespersDefinition = "vespers-holy-saturday"
+
+// The civil day selects the abbreviated Vigil form; vespersOfficeDay still
+// supplies Easter's liturgical ownership, season, and colour.
+func isHolySaturdayVespers(day *models.CalendarDay) bool {
+	return day != nil && day.Celebration != nil && day.Celebration.ID == "holy-saturday"
+}
+
 // VespersComposer composes the hour of Vespers.
 type VespersComposer struct{}
 

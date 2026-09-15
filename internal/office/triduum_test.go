@@ -315,7 +315,11 @@ func TestTriduumMajorHoursOpeningsEndings(t *testing.T) {
 						}
 					}
 				}
-				if !opening || !doxology || !marian {
+				if tc.date == "2026-04-11" && tc.name == "vespers" {
+					if opening || !doxology || marian {
+						t.Errorf("Vigil opening=%v, doxology=%v, Marian=%v", opening, doxology, marian)
+					}
+				} else if !opening || !doxology || !marian {
 					t.Errorf("ordinary opening=%v, doxology=%v, Marian=%v", opening, doxology, marian)
 				}
 				if tc.date == "2026-04-11" && tc.name == "compline" && !nunc {

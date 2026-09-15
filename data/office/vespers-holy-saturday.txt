@@ -1,0 +1,65 @@
+# Holy Saturday Vigil Vespers, prayed apart from Mass.
+# Diurnal pp. 360–361; 2026 archdiocesan ordo p. 53.
+# The civil evening selects this form while Easter owns the office.
+# The Mass-integrated form (including Ite missa est) is outside this app's scope.
+
+[Pre-Office]
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = secret-prayer
+Ref = ordinary/shared/hail-mary
+
+[Psalmody]
+Type = antiphon
+Ref = shared/formulas/paschal-psalm-antiphon
+
+Type = psalm
+Ref = psalms/117
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = shared/formulas/paschal-psalm-antiphon
+
+[Magnificat]
+Type = antiphon
+Ref = proper/holy-saturday/vigil-magnificat-antiphon
+
+Type = canticle
+Ref = canticles/magnificat
+
+Type = gloria-patri
+Ref = office
+
+Type = antiphon
+Ref = proper/holy-saturday/vigil-magnificat-antiphon
+
+[Collect]
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
+
+Type = collect
+Ref = proper/holy-saturday/vigil-collect
+
+# The printed conclusion is Through ... in the unity of the same Holy Spirit.
+Type = prayer
+Ref = shared/formulas/collect-conclusion-through-spirit
+
+[Closing]
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = versicle
+Ref = proper/holy-saturday/vigil-dismissal
+
+Type = versicle
+Ref = shared/formulas/faithful-departed
+
+# Diurnal p. 361 ends with the Our Father secretly, and nothing more.
+Type = silent-prayer
+Ref = ordinary/shared/our-father

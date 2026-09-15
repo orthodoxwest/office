@@ -38,7 +38,7 @@ func NewEngine(dataDir string) (*Engine, error) {
 	e := &Engine{
 		corpus:      corpus,
 		composers:   make(map[string]HourComposer),
-		definitions: make(map[string][]HourSection, len(hourNames)),
+		definitions: make(map[string][]HourSection, len(hourDefinitionNames())),
 	}
 
 	e.composers["compline"] = &ComplineComposer{}
@@ -48,7 +48,7 @@ func NewEngine(dataDir string) (*Engine, error) {
 	e.composers["terce"] = &MinorHourComposer{Name: "Terce"}
 	e.composers["sext"] = &MinorHourComposer{Name: "Sext"}
 	e.composers["none"] = &MinorHourComposer{Name: "None"}
-	for _, hourName := range hourNames {
+	for _, hourName := range hourDefinitionNames() {
 		defPath := filepath.Join(dataDir, "office", hourName+".txt")
 		sections, err := ParseHourDefinition(defPath)
 		if err != nil {
@@ -90,10 +90,20 @@ func (e *Engine) ComposeHourWithOptions(hourName string, day *models.CalendarDay
 		composer = &PrimeComposer{MartyrologyPreview: true}
 	}
 
-	sections := e.definitions[hourName]
+	definition := hourName
+	if hourName == "vespers" && isHolySaturdayVespers(day) {
+		definition = holySaturdayVespersDefinition
+	}
+	sections := e.definitions[definition]
 	hour, err := composer.Compose(day, sections, e.corpus, moveable)
 	if err != nil {
 		return nil, fmt.Errorf("composing %s: %w", hourName, err)
+	}
+	if definition != hourName {
+		hour.Decisions = append(hour.Decisions, models.CompositionDecision{
+			Rule: "context:office-form", Outcome: "holy-saturday-vigil",
+			Detail: "Diurnal pp. 360–361, Vespers apart from Mass",
+		})
 	}
 	if err := e.applyLeader(hour, leader); err != nil {
 		return nil, err
