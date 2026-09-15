@@ -1669,7 +1669,9 @@ shared/formulas/pre-collect-versicles,74d5b5f67c89,diurnal,,9,verified,bwaldrep,
 shared/formulas/rest-eternal,bf647dbb2752,diurnal,The Office of the Dead,72*,verified,claude,2026-08-21,
 shared/formulas/triduum-christus-factus-rubric,350831b66dad,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
 shared/formulas/triduum-collect-rubric,a0457aa7ced7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-compline-opening-rubric,eebcc2fb8533,Monastic Diurnal.pdf,At Compline,316,verified,codex,2026-09-14,Transcribed from the page image.
 shared/formulas/triduum-hours-opening-rubric,3419686e95a5,diurnal,Maundy Thursday at the Hours,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
+shared/formulas/triduum-lauds-noise-rubric,ef9ab614dca9,Monastic Diurnal.pdf,Maundy Thursday at Lauds,313,verified,codex,2026-09-14,Transcribed from the page image.
 shared/formulas/triduum-prime-ending-rubric,823815a296ed,diurnal,Maundy Thursday at Prime,314,verified,claude,2026-08-30,Transcribed from the page image; the OCR layer is unreliable.
 shared/leader/benedicamus-domino,cd0d899d7586,diurnal,,43,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0089.png
 shared/leader/compline-opening-choir,82f912acb36d,diurnal,,147,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0193.png

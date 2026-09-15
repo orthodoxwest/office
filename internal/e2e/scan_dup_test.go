@@ -51,8 +51,13 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 			// Vespers sings four psalms, except the Office of the Dead, which
 			// sings five (Monastic Diurnal pp. 72*-75*). On the evening before
 			// All Souls those five are appended after the day's four.
+			// During the Triduum Vespers takes a fifth psalm, the Miserere of
+			// the shared Christus factus est ending (Monastic Diurnal p. 313).
 			wantPsalms := 4
 			if hour.Feast == "All Souls' Day" {
+				wantPsalms = 5
+			}
+			if id := feastID(day); id == "holy-thursday" || id == "good-friday" {
 				wantPsalms = 5
 			}
 			for _, sec := range hour.Sections {

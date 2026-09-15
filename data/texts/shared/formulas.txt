@@ -194,3 +194,11 @@ Saturday.
 # SOURCE: Monastic Diurnal.pdf, printed p. 314 (Maundy Thursday at Prime)
 During this Triduum the Martyrology is not read, and the rest until the end of
 the Hour is not said.
+
+[triduum-lauds-noise-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+But at Lauds, after the Collect is ended, a little noise and clatter is made; the lighted candle is at once brought forth from beneath the Altar; and all rise and depart in silence.
+
+[triduum-compline-opening-rubric]
+# SOURCE: Monastic Diurnal.pdf, printed p. 316 (Good Friday at Matins, At Compline)
+Sir, ask a blessing is not said, nor the Short Lesson, nor Our help, nor the Lord's Prayer; but the Officiant begins the Confession immediately. After the Confession and Absolution the Psalms are begun at once.

@@ -24,7 +24,9 @@ Ref = ordinary/shared/hail-mary
 # The Office of the Dead has no opening versicles: after the Our Father and
 # Hail Mary said secretly above, "the Office begins at once with the Antiphon"
 # (Monastic Diurnal p. 72*, and p. 99* for Lauds).
-Condition = not-office-of-the-dead
+# During the Triduum Lauds is begun with the first Antiphon, without the
+# opening Versicles (Monastic Diurnal pp. 305-315; 2026 ordo Sacred Triduum).
+Condition = not-office-of-the-dead,not-triduum
 Label = Opening Versicles
 
 Type = versicle
@@ -878,8 +880,38 @@ Ref = office
 Type = proper-antiphon
 Ref = benedictus-antiphon
 
+[Triduum-Ending]
+Condition = triduum
+# Monastic Diurnal, printed p. 313: when the Antiphon Christ, for our sake is
+# begun all kneel; Our Father entirely in secret; then Ps. 51 in a somewhat
+# higher voice; then without Let us pray the Collect of the day in a low
+# voice, its conclusion in silence. Thus are ended all the Hours through None
+# of Holy Saturday. At Lauds a little noise is made and the lighted candle
+# brought forth (see triduum-lauds-noise-rubric).
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = psalm
+Ref = psalms/051
+
+Type = rubric
+Ref = shared/formulas/triduum-collect-rubric
+
+Type = proper-collect
+Ref = collect
+
+Type = rubric
+Ref = shared/formulas/triduum-lauds-noise-rubric
+
 [Pre-Collect]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 Label = The Prayers
 
 Type = dialogue
@@ -913,10 +945,12 @@ Type = prayer
 Ref = shared/leader/let-us-pray
 
 [Collect]
+Condition = not-triduum
 Type = proper-collect
 Ref = collect
 
 [Commemorations]
+Condition = not-triduum
 Type = commemorations
 Ref = commemorations
 
@@ -960,7 +994,7 @@ Type = collect
 Ref = ordinary/shared/cross-collect
 
 [Closing]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
@@ -990,13 +1024,13 @@ Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace
 
 [Marian]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = marian
 Ref = seasonal
 
 [Conclusion]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = versicle
 Ref = shared/formulas/divine-help

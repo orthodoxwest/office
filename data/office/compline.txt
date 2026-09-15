@@ -2,7 +2,7 @@
 # Same structure every day; only preces and Marian antiphon vary.
 
 [Opening]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = officiant-opening
 Ref = ordinary/compline/opening-versicle
@@ -34,6 +34,18 @@ Ref = shared/formulas/dead-compline-confiteor-rubric
 Type = officiant-confession
 Ref = ordinary/shared/confiteor
 
+[Triduum-Opening]
+Condition = triduum
+# Monastic Diurnal, p. 316: Sir, ask a blessing is not said, nor the Short
+# Lesson, nor Our help, nor the Lord's Prayer; but the Officiant begins the
+# Confession immediately.
+
+Type = rubric
+Ref = shared/formulas/triduum-compline-opening-rubric
+
+Type = officiant-confession
+Ref = ordinary/shared/confiteor
+
 [Psalmody]
 
 Type = psalm
@@ -54,8 +66,40 @@ Ref = psalms/134
 Type = gloria-patri
 Ref = office
 
+[Triduum-Nunc-Dimittis]
+Condition = triduum
+# Monastic Diurnal, p. 316: after the Psalms at once is said the Canticle
+# Nunc dimittis, followed by the Antiphon Christ for our sake and the rest.
+
+Type = canticle
+Ref = canticles/nunc-dimittis
+
+[Triduum-Ending]
+Condition = triduum
+# Monastic Diurnal, printed p. 313: the same ending closes every Hour of the
+# Triduum -- kneeling at the antiphon, the Our Father in secret, Psalm 51,
+# and the collect of the day said without Let us pray.
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = psalm
+Ref = psalms/051
+
+Type = rubric
+Ref = shared/formulas/triduum-collect-rubric
+
+Type = proper-collect
+Ref = collect
+
 [Hymn]
-Condition = not-feast-holy-saturday,not-office-of-the-dead
+Condition = not-feast-holy-saturday,not-office-of-the-dead,not-triduum
 Type = proper-hymn
 Ref = hymn
 
@@ -84,7 +128,7 @@ Type = gloria-patri
 Ref = office
 
 [Chapter]
-Condition = not-feast-holy-saturday,not-office-of-the-dead
+Condition = not-feast-holy-saturday,not-office-of-the-dead,not-triduum
 Type = proper-chapter
 Ref = chapter
 
@@ -114,7 +158,7 @@ Type = preces
 Ref = ordinary/compline/preces
 
 [Collect]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 Label = Collect
 
 Type = officiant-greeting
@@ -164,14 +208,14 @@ Type = versicle
 Ref = shared/formulas/may-they-rest-in-peace
 
 [Marian]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 Label = Final Antiphon of the Blessed Virgin Mary
 
 Type = marian
 Ref = seasonal
 
 [Closing]
-Condition = not-office-of-the-dead
+Condition = not-office-of-the-dead,not-triduum
 
 Type = blessing
 Ref = ordinary/compline/conclusion
