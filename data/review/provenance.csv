@@ -1065,8 +1065,11 @@ proper/pentecost-sunday-18/collect,cd77bdd1d19c,diurnal,,438,verified,codex,2026
 proper/pentecost-sunday-18/magnificat-antiphon,016fdf9272e1,diurnal,XVIII Sunday after Pentecost,438,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-sunday-19/collect,dcb47ddbe9c3,diurnal,,438,verified,codex,2026-09-10,"Word-for-word after normalization; page images output/pages/monastic-diurnal/0484.png and 0485.png; first reader matched, second read XVIII on the same spread"
 proper/pentecost-sunday-19/magnificat-antiphon,0414c8d652e6,diurnal,XIX Sunday after Pentecost,439,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-2/chapter-none,d0244c5cd4e1,diurnal,,420,verified,codex,2026-09-15,Word-for-word after normalization; page image output/sunday-chapter-review/page-466-300dpi.png
+proper/pentecost-sunday-2/chapter-sext,70081f7a4c30,diurnal,,420,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0466.png
 proper/pentecost-sunday-2/collect,cee2a778c40e,diurnal,,419,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0465.png
 proper/pentecost-sunday-2/magnificat-antiphon,773dc88cf364,diurnal,II Sunday after Pentecost,421,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-2/versicle-none,ff93e2f83559,diurnal,,420,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0466.png
 proper/pentecost-sunday-20/collect,f70cda00e659,diurnal,,439,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0485.png
 proper/pentecost-sunday-20/magnificat-antiphon,1998a3b3303a,diurnal,XX Sunday after Pentecost,439,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-sunday-21/collect,5d7aac8bc0e9,diurnal,,439,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0485.png
