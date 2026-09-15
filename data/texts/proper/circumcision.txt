@@ -203,3 +203,11 @@ R. The Word was made flesh, * alleluia, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 213; reuses the existing chapter wording
+@use proper/christmas/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 213; reuses the existing chapter wording
+@use proper/christmas/chapter-none

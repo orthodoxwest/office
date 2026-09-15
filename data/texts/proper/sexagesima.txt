@@ -155,9 +155,12 @@ The Lord * said unto Noah: The end of all flesh is come before me: Make thee an 
 Thrice was I beaten with rods, once was I stoned, * thrice I suffered shipwreck, * a night and a day I have been in the deep.
 R. Thanks be to God.
 
-# [chapter-none]
-# Proper chapter at None.
-#
+[chapter-none]
+# SOURCE: diurnal p. 240
+!2 Cor 12:9
+Most gladly therefore will I rather glory in my infirmities, * that the power of Christ may rest upon me.
+R. Thanks be to God.
+
 # [chapter-compline]
 # Proper chapter at Compline.
 #

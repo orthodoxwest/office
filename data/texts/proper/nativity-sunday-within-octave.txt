@@ -100,3 +100,15 @@ R. The Word was made flesh, * Alleluia, alleluia.
 [short-responsory-first-vespers]
 # SOURCE: Monastic Diurnal p. 205: short responsory at I Vespers, retained at II Vespers; page image reviewed by Codex 2026-09-13.
 @use proper/nativity-sunday-within-octave/short-responsory-vespers
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 207 (Terce refers to Lauds p. 206); reuses the existing chapter wording
+@use proper/nativity-sunday-within-octave/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 207; reuses the existing chapter wording
+@use proper/vigil-epiphany/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 207; reuses the existing chapter wording
+@use proper/vigil-epiphany/chapter-none

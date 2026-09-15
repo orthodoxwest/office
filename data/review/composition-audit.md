@@ -278,3 +278,39 @@ three All Souls Lauds offices, which lack that normal closing boundary, are
 excluded. Remaining Triduum structural work stays under its existing backlog. These checks
 establish ordering and repair scope, not the correctness of every appointment
 or collect's wording. Cross eligibility remains deferred in #356.
+
+
+## Proper little-hour chapter fallbacks
+
+Seven missing appointments used ordinary little-hour chapters despite printed
+propers. Circumcision Sext/None (Diurnal p. 213; 2026 ordo p. 25) now reuse
+the existing Christmas Hebrews chapters. Transfiguration None (p. 584;
+ordo p. 87) now supplies Revelation 21:10,11,23. Sexagesima None (pp. 239–240)
+now supplies 2 Corinthians 12:9; the ordo p. 38 references the Sunday psalter
+without appointing a different chapter. Nativity Sunday's Terce/Sext/None
+(pp. 206–207; ordo p. 128) now supply Galatians 4:1–2, 4:4–5, and 4:7,
+including when that Sunday office is observed on a weekday.
+
+Five aliases reuse existing attested chapter wording and its current pointing;
+only the Transfiguration and Sexagesima chapters add new bodies and hash-bound
+attestations. Bounded Codex and Sonnet readings agree after comparison
+normalization. Initial word-order and opening-word disagreements were resolved
+by corrected readings; rejected readings and page identities remain in ignored
+artifacts. No canonical alias target, engine rule, or feast metadata changes.
+
+The comparison of 23,016 complete offices in 2026, 2027, and 2032 finds exactly
+63 changes: these seven appointments in three years and three forms. Removing
+chapter elements from both captures leaves every complete-office hash identical.
+`TestProperLittleHourChapters` checks all 63 cases, including source selection,
+chapter wording, response, and chapter-before-versicle order. These cases fail
+against the pre-repair corpus. Additional years exercise the appointed office,
+not agreement with future ordos.
+
+The initial candidate inventory contains 130 ordinary chapter resolution rows
+outside Prime/Compline, including legitimate weekday/vigil/Sunday fallbacks
+and unresolved source questions. It is not a defect count. This pass reviews
+only the seven appointments above; #335 and #339 remain untouched. The discovery
+catalog omits the computed Nativity Sunday owner, and its Circumcision dossier
+stops at p. 209 before the little hours on p. 213. The full resolution inventory
+and parent-verified page selection supplement those limited discovery results;
+neither negative searches nor discovery queue membership certify a fallback.
