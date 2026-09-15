@@ -121,11 +121,17 @@ func TestUsageEndpointAndDashboard(t *testing.T) {
 	}
 	w := httptest.NewRecorder()
 	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=7", nil))
-	if w.Code != 200 || !strings.Contains(w.Body.String(), "Daily usage") || !strings.Contains(w.Body.String(), "Ordo") || !strings.Contains(w.Body.String(), "Reminders") || !strings.Contains(w.Body.String(), "Nave vs Apse") || !strings.Contains(w.Body.String(), "Desktop vs Mobile") || w.Header().Get("Cache-Control") != "no-store" || w.Header().Get("X-Robots-Tag") == "" {
+	if w.Code != 200 || !strings.Contains(w.Body.String(), "Daily usage") || !strings.Contains(w.Body.String(), "Ordo") || !strings.Contains(w.Body.String(), "Reminders") || !strings.Contains(w.Body.String(), "Appearance daily counts") || !strings.Contains(w.Body.String(), "Screen daily counts") || w.Header().Get("Cache-Control") != "no-store" || w.Header().Get("X-Robots-Tag") == "" {
 		t.Fatalf("dashboard: %d %s", w.Code, w.Body)
 	}
 	if strings.Contains(w.Body.String(), cookies[0].Value) {
 		t.Fatal("dashboard exposes identifier")
+	}
+	// The year preset is a fixed 365-day window, including today.
+	w = httptest.NewRecorder()
+	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=365", nil))
+	if w.Code != 200 || strings.Count(w.Body.String(), `class="usage-total"`) != 365 || !strings.Contains(w.Body.String(), "364 completed days") {
+		t.Fatalf("year preset: %d", w.Code)
 	}
 	w = httptest.NewRecorder()
 	s.handleUsageDashboard(w, httptest.NewRequest("GET", "/admin/usage?days=999999", nil))

@@ -4,24 +4,27 @@
   <header class="usage-heading">
     <p class="usage-eyebrow">The Daily Office · Usage report</p>
     <h1 id="usage-title">Daily usage</h1>
-    <p>A small window into how the Office is being used.</p>
+    <p>Recorded visits to the Office, day by day.</p>
   </header>
   <div class="usage-toolbar">
     <nav class="usage-window" aria-label="Reporting period">
       <a href="?days=7"{{if eq .Days 7}} aria-current="page"{{end}}>7 days</a>
       <a href="?days=30"{{if eq .Days 30}} aria-current="page"{{end}}>30 days</a>
       <a href="?days=90"{{if eq .Days 90}} aria-current="page"{{end}}>90 days</a>
-      <a href="?days=366"{{if eq .Days 366}} aria-current="page"{{end}}>366 days</a>
+      <a href="?days=365"{{if eq .Days 365}} aria-current="page"{{end}}>365 days</a>
     </nav>
-    <p>Eastern time · Today in progress</p>
   </div>
+  <p class="usage-range">{{.FirstDate}} – {{.LastDate}} <span>Eastern time · Today in progress</span></p>
   <dl class="usage-summary">
     <div><dt>Today</dt><dd>{{.Today}}</dd><dd class="usage-stat-note">Unique browsers so far</dd></div>
     <div><dt>Yesterday</dt><dd>{{.Yesterday}}</dd><dd class="usage-stat-note">Unique browsers</dd></div>
+    <div><dt>Daily average</dt><dd>{{if .CompleteDays}}{{printf "%.1f" .DailyAverage}}{{else}}—{{end}}</dd><dd class="usage-stat-note">{{.CompleteDays}} completed days · Excludes today</dd></div>
     <div><dt>Daily peak</dt><dd>{{.Max}}</dd><dd class="usage-stat-note">{{if .PeakDate}}{{.PeakDate}} · Selected period{{else}}No visits recorded yet{{end}}</dd></div>
   </dl>
+  <nav class="usage-jump" aria-label="Report sections"><a href="#usage-explore-title" class="usage-explore-link" hidden>Explore trends</a><a href="#usage-offices-title">Daily counts</a><a href="#usage-notes-title">About the counts</a></nav>
+  <div class="usage-overview">
   <section class="usage-panel" aria-labelledby="usage-trend-title">
-    <div class="usage-section-heading"><div><h2 id="usage-trend-title">The daily rhythm</h2><p>Unique browsers per day</p></div><span class="usage-period">{{.Days}} days</span></div>
+    <div class="usage-section-heading"><div><h2 id="usage-trend-title">Daily visitors</h2><p>Unique browsers per day</p></div><span class="usage-period">{{.Days}} days</span></div>
     <figure class="usage-trend">
       <div class="usage-chart-scale" aria-hidden="true"><span>{{.Max}}</span><span>0</span></div>
       <svg class="usage-chart" viewBox="0 0 720 160" preserveAspectRatio="none" role="img" aria-labelledby="usage-chart-title usage-chart-desc">
@@ -33,40 +36,49 @@
       {{if not .Max}}<p class="usage-empty">No visits recorded in this period.<br><span>Counts will appear as readers open the app.</span></p>{{end}}
       <figcaption><span>{{.FirstDate}}</span><span>{{.LastDate}} · Today</span></figcaption>
     </figure>
+    <p class="usage-splits-note"><strong>{{.BrowserDays}} browser-days</strong> in this period. A returning browser counts again each day.</p>
   </section>
-  <section class="usage-panel" aria-labelledby="usage-splits-title">
-    <div class="usage-section-heading"><div><h2 id="usage-splits-title">Appearance &amp; screen</h2><p>How the Office was met, day by day.</p></div><span class="usage-period">{{.Days}} days</span></div>
-    <div class="usage-splits">
-      {{range $i, $split := .Splits}}<div class="usage-split">
-        <div class="usage-split-head"><h3>{{$split.Title}}</h3><p>{{$split.Note}}</p></div>
-        {{if $split.Total}}<figure class="usage-mix">
-          <svg class="usage-mix-band" viewBox="0 0 720 40" preserveAspectRatio="none" role="img" aria-labelledby="usage-mix-{{$i}}-title usage-mix-{{$i}}-desc">
-            <title id="usage-mix-{{$i}}-title">{{$split.Left.Label}} against {{$split.Right.Label}}, day by day</title>
-            <desc id="usage-mix-{{$i}}-desc">{{$split.Reported}} of {{$.Days}} days reported, from {{$split.FirstDate}} to {{$split.LastDate}}. Over the whole period {{$split.Left.Percent}} percent {{$split.Left.Label}}. On the earliest day that reported, {{$split.FirstShare}} percent; on the most recent, {{$split.LastShare}} percent.</desc>
-            {{range $split.Mix}}{{if .Reported}}<rect class="usage-share usage-share-left" x="{{.X}}" y="0" width="{{.Width}}" height="{{.LeftHeight}}"><title>{{.Day}}: {{$split.Left.Label}} {{.Left}}, {{$split.Right.Label}} {{.Right}} — {{.Percent}}% {{$split.Left.Label}}</title></rect><rect class="usage-share usage-share-right" x="{{.X}}" y="{{.RightY}}" width="{{.Width}}" height="{{.RightHeight}}"><title>{{.Day}}: {{$split.Left.Label}} {{.Left}}, {{$split.Right.Label}} {{.Right}} — {{.Percent}}% {{$split.Left.Label}}</title></rect>{{end}}{{end}}
-          </svg>
-          <figcaption><span>{{$split.FirstDate}}</span><span>{{$split.LastDate}}</span></figcaption>
-        </figure>
-        <p class="usage-split-legend"><span><span class="usage-key usage-key-left" aria-hidden="true"></span>{{$split.Left.Label}} <span class="usage-share-pct">{{$split.Left.Percent}}%</span> · {{$split.Left.Count}}</span><span><span class="usage-key usage-key-right" aria-hidden="true"></span>{{$split.Right.Label}} <span class="usage-share-pct">{{$split.Right.Percent}}%</span> · {{$split.Right.Count}}</span></p>
-        {{else}}<p class="usage-split-empty">Nothing reported in this period.<br><span>Counts begin once readers load the current app.</span></p>{{end}}
-      </div>{{end}}
+  <section class="usage-panel" aria-labelledby="usage-popular-title">
+    <div class="usage-section-heading"><div><h2 id="usage-popular-title">Office use</h2><p>Browser-days in this period</p></div></div>
+    <dl class="usage-office-totals">{{range .OfficeTotals}}<div><dt>{{titleCase .Name}}</dt><dd><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="{{.Width}}" height="8"/></svg><span>{{.Count}}</span></dd></div>{{end}}</dl>
+    <p class="usage-splits-note">One browser using an office on three days counts as three browser-days. Offices overlap.</p>
+  </section>
+  </div>
+  <section class="usage-panel usage-breakdown-fallback" aria-labelledby="usage-fallback-title">
+    <h2 id="usage-fallback-title">Breakdown data</h2>
+    {{range .TrendGroups}}<details class="usage-trend-details"><summary>{{.Label}} daily counts</summary><div class="usage-table-wrap" role="region" aria-label="{{.Label}} daily counts" tabindex="0"><table class="usage-table"><caption>Browser-days, oldest first</caption><thead><tr><th scope="col">Date</th>{{range .Series}}<th scope="col">{{.}}</th>{{end}}</tr></thead><tbody>{{range .Points}}<tr><th scope="row">{{.Day}}</th>{{range .Counts}}<td>{{.}}</td>{{end}}</tr>{{end}}</tbody></table></div></details>{{end}}
+  </section>
+  <section class="usage-panel usage-explorer" aria-labelledby="usage-explore-title" hidden>
+    <div class="usage-section-heading"><div><h2 id="usage-explore-title">Explore trends</h2><p>Compare how the Office is used over time.</p></div></div>
+    <div class="usage-explore-controls">
+      <div><label for="usage-compare">Breakdown</label><select id="usage-compare">{{range .TrendGroups}}<option value="{{.Key}}">{{.Label}}</option>{{end}}</select></div>
+      <fieldset id="usage-interval" class="usage-segments"><legend>Interval</legend><div><label><input class="sr-only" type="radio" name="usage-interval" value="day" checked>Daily</label><label><input class="sr-only" type="radio" name="usage-interval" value="week">Weekly</label></div></fieldset>
+      <fieldset id="usage-measure" class="usage-segments"><legend>Measure</legend><div><label><input class="sr-only" type="radio" name="usage-measure" value="count" checked>Counts</label><label><input class="sr-only" type="radio" name="usage-measure" value="share">%</label></div></fieldset>
     </div>
-    <p class="usage-splits-note">Each column is one day&rsquo;s mix, not its size; a day nobody reported leaves a gap. The percentages beside each name are the whole period, which is the steadier figure — a single day&rsquo;s share swings easily at these volumes.</p>
+    <p id="usage-explore-coverage" class="usage-splits-note"></p>
+    <ul id="usage-explore-legend" class="usage-explore-legend" aria-label="Chart series"></ul>
+    <figure class="usage-explore-figure">
+      <div class="usage-explore-scale" aria-hidden="true"><span id="usage-explore-max"></span><span>0</span></div>
+      <svg id="usage-explore-chart" viewBox="0 0 720 220" preserveAspectRatio="none" role="img" aria-labelledby="usage-explore-chart-title usage-explore-chart-desc">
+        <title id="usage-explore-chart-title">Usage comparison over time</title>
+        <desc id="usage-explore-chart-desc">Exact counts and shares are available in the date selector and trend table below.</desc>
+        <path class="usage-grid" d="M0 10H720 M0 110H720 M0 210H720"/>
+        <g id="usage-explore-lines"></g>
+        <line id="usage-explore-cursor" y1="10" y2="210"/>
+      </svg>
+      <p id="usage-explore-empty" class="usage-empty" hidden>No observations in this period.</p>
+      <figcaption><span id="usage-explore-first"></span><span id="usage-explore-last"></span></figcaption>
+    </figure>
+    <p class="usage-explore-help">Tap the chart or move the date slider for exact values.</p>
+    <div class="usage-inspector-controls"><label for="usage-explore-date" class="sr-only">Inspect time period</label><input id="usage-explore-date" type="range" min="0" max="0" value="0" step="1"></div>
+    <div class="usage-inspector" aria-live="polite" aria-atomic="true"><p id="usage-inspect-date"></p><dl id="usage-inspect-values"></dl><p id="usage-inspect-note"></p></div>
+    <p class="usage-splits-note">Counts are browser-days. Categories can overlap. <a href="#usage-notes-title">How counting works</a>.</p>
+    <details class="usage-trend-details"><summary>Trend data as a table</summary><div class="usage-table-wrap" role="region" aria-label="Trend data" tabindex="0"><table class="usage-table" id="usage-explore-table"></table></div></details>
   </section>
-  <section class="usage-panel" aria-labelledby="usage-forms-title">
-    <div class="usage-section-heading"><div><h2 id="usage-forms-title">Prayer form</h2><p>The form used on an Office page, including changes during a visit.</p></div></div>
-    <dl class="usage-form-counts">{{range .PrayerForms}}<div><dt>{{.Label}}</dt><dd>{{.Count}} <span>browser-days</span></dd></div>{{end}}</dl>
-    <p class="usage-splits-note">Each browser counts once per form, per day. Someone using private prayer at home and following clergy-led prayer later counts in both forms. These counts describe prayer forms, not the reader&rsquo;s ordination.</p>
-    <details class="usage-form-days"><summary>Daily counts by prayer form</summary>
-      <div class="usage-table-wrap"><table class="usage-table">
-        <caption class="sr-only">Browsers using each prayer form, newest day first</caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">Private</th><th scope="col">Deacon</th><th scope="col">Priest</th></tr></thead>
-        <tbody>{{range .Rows}}<tr><th scope="row">{{.Day}}</th><td>{{index .Dimensions "prayer-form:private"}}</td><td>{{index .Dimensions "prayer-form:deacon"}}</td><td>{{index .Dimensions "prayer-form:priest"}}</td></tr>{{end}}</tbody>
-      </table></div>
-    </details>
-  </section>
+  <script id="usage-trend-data" type="application/json">{{.TrendGroups}}</script>
   <section class="usage-panel" aria-labelledby="usage-offices-title">
-    <div class="usage-section-heading"><div><h2 id="usage-offices-title">By day &amp; office</h2><p>Each browser counts once per office, per day.</p></div></div>
+    <div class="usage-section-heading"><div><h2 id="usage-offices-title">Daily counts</h2><p>Newest first. Office, Ordo and Reminders counts overlap.</p></div></div>
+    <p class="usage-table-hint">Scroll the table for more days and columns.</p>
     <div class="usage-table-wrap" role="region" aria-label="Daily office counts; scroll for more days and offices" tabindex="0">
       <table class="usage-table">
         <caption class="sr-only">Unique browsers per day and office, newest first</caption>
@@ -74,13 +86,22 @@
         <tbody>{{range $i, $row := .Rows}}<tr{{if eq $i 0}} class="usage-today"{{end}}><th scope="row"><time datetime="{{.Day}}">{{.Day}}</time>{{if eq $i 0}}<span class="usage-today-label">Today</span>{{end}}</th><td class="usage-total">{{.Users}}</td>{{range .Hours}}<td{{if not .}} class="usage-zero"{{end}}>{{.}}</td>{{end}}<td{{if not .Ordo}} class="usage-zero"{{end}}>{{.Ordo}}</td><td{{if not .Reminders}} class="usage-zero"{{end}}>{{.Reminders}}</td></tr>{{end}}</tbody>
       </table>
     </div>
+    <p class="usage-splits-note">Period totals: <strong>{{.OrdoTotal}}</strong> Ordo browser-days · <strong>{{.RemindersTotal}}</strong> Reminders browser-days.</p>
   </section>
   <aside class="usage-notes" aria-labelledby="usage-notes-title">
-    <h2 id="usage-notes-title">Reading these numbers</h2>
-    <p>These are approximate browser counts, not completed prayers. Office, Ordo and Reminders columns overlap; they do not add up to the daily total. Ordo counts a viewed calendar page; Reminders counts a generated feed link, not a visit to the reminders page. Home also contributes to the total but has no column of its own.</p>
-    <p>Appearance and screen are recorded as the page was rendered at the moment it counted, once per browser per day, each under its own named dimension so a pair added or retired later cannot disturb the others. The band shows each day&rsquo;s mix and the percentages beside it sum the period as browser-days, so both compare with each other rather than with the daily totals above. Apse covers a dark appearance whether chosen or inherited from the device; Mobile covers a viewport under 700px or any touch-primary pointer, so tablets and a phone in landscape count there too. A reader who switches appearance or rotates a phone on different days counts on both sides.</p>
-    <p>Only today&rsquo;s Office counts, and only once someone touches the page or lingers on it. Reading the dated archive, preloading, and self-identifying crawlers are all excluded, so the site stays open to scraping without it showing up here.</p>
-    <p>Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again. Zero means no recorded visits. All reporting days use America/New_York.</p>
+    <h2 id="usage-notes-title">About the counts</h2>
+    <p>Approximate browser counts, not people or completed prayers. All reporting days use America/New_York. Zero means no recorded visits.</p>
+    <details><summary>What is counted?</summary>
+      <p>A browser counts once per day in each category it uses. Home contributes to all visitors; office counts overlap. Ordo counts a calendar page view. Reminders counts a generated feed link.</p>
+      <p>Only today&rsquo;s Office counts, after someone interacts with the page or lingers on it. Dated archives, preloads and self-identifying crawlers are excluded. Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again.</p>
+      <p>The daily average includes zero days and excludes today. A zero may also mean collection was not yet active; the report cannot distinguish this from a quiet day.</p>
+    </details>
+    <details><summary>How are breakdowns measured?</summary>
+      <p>Each browser using a category on three days contributes three browser-days. Percentages divide each category&rsquo;s count by the sum for that breakdown. Weekly totals cover Monday–Sunday; weekly percentages use summed counts, not averages of daily percentages. Today and its week are still in progress. Gaps mean no observations.</p>
+      <p>Prayer forms describe the form used, not the reader&rsquo;s ordination. A browser using multiple forms in one day counts in each.</p>
+      <p>Appearance and screen describe the page when a visit counted. Nave is light; Apse is dark, whether chosen or inherited from the device. Mobile means a viewport under 700px or a touch-primary pointer, including tablets and phones in landscape.</p>
+      <p>Each browser counts once per value per day. Switching appearance or screen category can count on both sides. Percentages use the reported browser-days for that pair; they do not partition all visitors. Older app versions may not report these categories.</p>
+    </details>
   </aside>
 </section>
 {{end}}
