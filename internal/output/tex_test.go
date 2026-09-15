@@ -817,3 +817,21 @@ func TestTeXPrayerSpeakerLabelsAndAmen(t *testing.T) {
 		t.Errorf("Amen assigned before speaker: %s", got)
 	}
 }
+
+func TestTeXSilentTriduumPrayers(t *testing.T) {
+	prayer := models.OfficeElement{Type: models.Prayer, Text: "Our Father, who art in heaven."}
+	prayer.Voice = []models.VoiceSpan{{Text: prayer.Text, Spoken: false}}
+	got := texElement(prayer, "", false)
+	if !strings.Contains(got, "{\\color{mutedgray}\n") || !strings.Contains(got, prayer.Text) {
+		t.Fatalf("silent prayer: %s", got)
+	}
+	collect := models.OfficeElement{Type: models.Collect, Text: "Almighty God, behold thy family.\nWho with thee liveth.\nAmen.", Voice: []models.VoiceSpan{
+		{Text: "Almighty God, behold thy family.\n", Spoken: true},
+		{Text: "Who with thee liveth.\nAmen.", Spoken: false},
+	}}
+	got = texElement(collect, "", false)
+	silent := strings.Index(got, "{\\color{mutedgray}\n")
+	if silent < 0 || !strings.Contains(got[:silent], "behold thy family") || !strings.Contains(got[silent:], "Who with thee liveth.") || !strings.Contains(got[silent:], "Amen.") {
+		t.Fatalf("collect delivery: %s", got)
+	}
+}

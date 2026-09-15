@@ -215,7 +215,11 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(string(renderCorporateLordPrayer(elem)))
 	case models.Collect:
 		sb.WriteString(`<div class="collect">`)
-		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
+		if len(elem.Voice) > 0 {
+			sb.WriteString(string(renderVoiceLiturgicalBlock(elem.Voice, flowProseLines)))
+		} else {
+			sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
+		}
 		sb.WriteString(`</div>`)
 	case models.Prayer, models.Reading:
 		if turns := elem.SpeakerTurns(); len(turns) > 0 {

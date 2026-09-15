@@ -213,6 +213,37 @@ entries and Paschal Compline; this repair does not attest those unused
 little-hour responsories as if the Diurnal printed them.
 
 
+## Triduum review of PR #360
+
+The shared `usesTriduumForm` policy bounds psalm doxology omission and the
+silent collect conclusion independently. All seven hour definitions keep the
+complete Christus factus est ending together in `[Triduum-Ending]`.
+
+Reviewed by Codex on 2026-09-15 against the Monastic Diurnal page images and
+2026 archdiocesan ordo pp. 15–16 and 53. This review is separate from the ordinary
+year assessment above.
+
+| Requirement and source | Cases, expected behavior, and regression |
+|---|---|
+| Lauds begins with its first antiphon and uses five proper frames (Diurnal pp. 305–311, 336–341, 356–359) | April 9–11, 2026: omit Psalm 67 and festal psalms; use each day's appointed psalms, canticle, and divided Laudate psalm. `TestTriduumPsalmodyAppointments` also checks 2027 and 2032. Existing Lauds antiphon wording remains subject to corpus verification. |
+| Thursday and Friday Vespers use the same five psalms and antiphons (p. 315; ordo p. 53) | April 9–10: Psalms 116b, 120, 140, 141, 142; five repeated proper antiphon frames. The ending adds Psalm 51 as the sixth psalm. `TestTriduumPsalmodyAppointments` and both Vespers sweep tests cover this distinction. New antiphons have independent Codex/Sonnet image readings. |
+| All hours end with the daily Christus factus est, entirely silent Our Father, Miserere, and the shared Almighty God collect with silent conclusion (p. 313; ordo Sacred Triduum notes) | All seven hours on April 9–10 and Lauds–None on April 11, in private/deacon/priest forms. `TestTriduumMajorHoursOpeningsEndings` checks the exact ending sequence, collect source and conclusion, voice partitions, and omission of ordinary greetings, commemorations and Marian endings. The three collect keys use the same independently agreed p. 313 reading, appointed to all three days by the printed rubric. |
+| Compline begins with confession/absolution, then Psalms 4, 91, 134 and Nunc dimittis (p. 316) | April 9–10, all forms: confession is the only opening prayer; the canticle immediately follows the three psalms before Christus factus est. The same sequence test includes priest and deacon substitutions. |
+| Lauds alone adds the candle/noise instruction (p. 313) | Exactly one rubric at each Triduum Lauds, none at other hours. Bounded readings distinguish this sentence from the preceding general ending instruction. |
+| The ending stops at Holy Saturday None (p. 313; #276) | Wednesday and Easter Sunday controls retain ordinary openings/endings; Holy Saturday Vespers keeps Easter ownership and Compline keeps its proper Nunc dimittis antiphon. HTML/TeX tests and the browser Triduum test check silent prayer presentation. |
+
+The ordo appoints the p. 313 ending and lists St Leo on April 11 without an
+explicit Lauds commemoration. That listing alone does not override the printed
+ending or establish a source conflict. The omitted feria/following-office
+commemorations were ordinary composition artifacts; the review found no
+contrary appointment for those hours.
+
+These checks do not certify all Triduum wording, Tenebrae ceremonies, or the
+Holy Saturday Vigil. In particular, the current Holy Saturday Vespers route
+still lacks the abbreviated Vigil office explicitly appointed by the ordo.
+That separate repair remains in `repair-backlog.csv`; the boundary tests above
+preserve the existing route rather than certify its complete appointment.
+
 ## Cross composition repairs
 
 Diurnal pp. 43 and 146–147 appoint distinct Paschal Cross antiphons at Lauds

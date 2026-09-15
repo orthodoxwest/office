@@ -173,11 +173,8 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 	}
 }
 
-// isTriduum reports whether the office is one of the three days of the Sacred
-// Triduum, which share a single set of rubrics ("during this Triduum") rather
-// than three per-day ones: no opening versicles, no hymn, no Gloria Patri, a
-// fixed psalmody at the Little Hours, and the common ending at Christus factus
-// est (Monastic Diurnal, printed pp. 313-316).
+// isTriduum identifies the celebration. Use usesTriduumForm for rules whose
+// scope ends at None of Holy Saturday.
 func isTriduum(day *models.CalendarDay) bool {
 	if day == nil || day.Celebration == nil {
 		return false
@@ -187,6 +184,17 @@ func isTriduum(day *models.CalendarDay) bool {
 		return true
 	}
 	return false
+}
+
+// usesTriduumForm reports whether this hour follows the common Triduum
+// rubrics, which end at None of Holy Saturday (Diurnal p. 313). Holy Saturday
+// evening has its own form, even when resolution retains the civil day's
+// celebration, as it does for the proper sections of Compline.
+func usesTriduumForm(day *models.CalendarDay, hourName string) bool {
+	if !isTriduum(day) {
+		return false
+	}
+	return day.Celebration.ID != "holy-saturday" || (hourName != "vespers" && hourName != "compline")
 }
 
 // usesBVMSuffrageForm reports whether the current office or one of its

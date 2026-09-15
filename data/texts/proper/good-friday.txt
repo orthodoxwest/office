@@ -1,6 +1,10 @@
 [vespers-psalmody]
-# The generic Lord profile is not evidence for the special Triduum office.
-@use psalmody/vespers/ferial
+# SOURCE: Monastic Diurnal p. 315: same five psalms on this and following day
+psalm-antiphon-1 = psalms/116b
+psalm-antiphon-2 = psalms/120
+psalm-antiphon-3 = psalms/140
+psalm-antiphon-4 = psalms/141
+psalm-antiphon-5 = psalms/142
 
 [psalm-antiphon]
 @use proper/good-friday/psalm-antiphon-1
@@ -40,8 +44,10 @@ R. As they that be dead of old.
 Christ, ✠ for our sake, became obedient unto death, even the death of the cross.
 
 [collect]
-Look down, we beseech thee, O Lord, on this thy family, for which our Lord Jesus Christ did not hesitate to be delivered up into the hands of wicked men, and to suffer the torment of the Cross.
+# SOURCE: diurnal p. 313
+Almighty God, we beseech thee graciously to behold this thy family, for which our Lord Jesus Christ was contented to be betrayed, and given up into the hands of wicked men, and to suffer death upon the cross:
 
+[chapter-lauds]
 # The Triduum omits these at Lauds and Vespers; see the SCOPE note on
 # seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
 # slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
@@ -50,7 +56,6 @@ Look down, we beseech thee, O Lord, on this thy family, for which our Lord Jesus
 # the opening versicles and hymn outright and take a fixed psalmody, none of
 # which a proper slot can express.
 
-[chapter-lauds]
 @omit
 
 [chapter-vespers]
@@ -83,6 +88,14 @@ R. As the men that have been long dead.
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
 # [chapter-lauds]
+# The Triduum omits these at Lauds and Vespers; see the SCOPE note on
+# seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
+# slots stay hour-qualified because those two rubrics (Monastic Diurnal pp. 311
+# and 315) speak only for Lauds and Vespers. The Little Hours have their own
+# rubric on p. 314, modelled in the hour definitions rather than here: they omit
+# the opening versicles and hymn outright and take a fixed psalmody, none of
+# which a proper slot can express.
+
 # Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
 #
 # [chapter-vespers]
@@ -112,18 +125,22 @@ R. As the men that have been long dead.
 # [vespers-psalmody-first]
 # I Vespers psalmody table when it differs from II Vespers.
 #
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
+[psalm-antiphon-1-vespers]
+# SOURCE: Monastic Diurnal p. 315: same psalm antiphons on this and following day
+@use proper/holy-thursday/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+# SOURCE: Monastic Diurnal p. 315: same psalm antiphons on this and following day
+@use proper/holy-thursday/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+# SOURCE: Monastic Diurnal p. 315: same psalm antiphons on this and following day
+@use proper/holy-thursday/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+# SOURCE: Monastic Diurnal p. 315: same psalm antiphons on this and following day
+@use proper/holy-thursday/psalm-antiphon-4-vespers
+
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
 #
@@ -135,3 +152,7 @@ R. As the men that have been long dead.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon-5-vespers]
+# SOURCE: Monastic Diurnal p. 315: same psalm antiphons on this and following day
+@use proper/holy-thursday/psalm-antiphon-5-vespers

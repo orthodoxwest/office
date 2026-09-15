@@ -32,6 +32,7 @@ var validElementTypes = map[string]bool{
 	"response":                   true,
 	"prayer":                     true,
 	"secret-prayer":              true,
+	"silent-prayer":              true,
 	"partly-secret-prayer":       true,
 	"corporate-lord-prayer":      true,
 	"dialogue":                   true,

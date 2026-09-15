@@ -456,6 +456,10 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 		oe.LeaderSlot = "opening"
 	case "secret-prayer":
 		oe.Voice = buildPrayerVoice(elem.Ref, text, false)
+	case "silent-prayer":
+		// Unlike a secret prayer with an aloud incipit, the Triduum's
+		// concluding Our Father is entirely silent (Diurnal p. 313).
+		oe.Voice = []models.VoiceSpan{{Text: text, Spoken: false}}
 	case "partly-secret-prayer":
 		oe.Voice = buildPrayerVoice(elem.Ref, text, true)
 	case "corporate-lord-prayer":
@@ -569,11 +573,23 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return sourcedElement(models.OfficeElement{Type: models.OpeningAcclamation, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-collect":
 		text, src := resolveProperCollectText(day, hourName, corpus)
+		body := strings.TrimRight(text, "\n")
 		// The collect of the day is always the first of the hour's run, so it
 		// is always concluded (XXXIII.5).
 		text, refs := applyConclusion(text, src, corpus)
 		elem := sourcedElement(models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}, src)
 		elem.SourceRefs = compactRefs(refs)
+		if usesTriduumForm(day, hourName) && len(refs) == 2 {
+			// The body is said in a low voice, but the conclusion is silent
+			// (Diurnal p. 313). There is no aloud congregational response.
+			conclusion := strings.TrimPrefix(text, body+"\n")
+			conclusion = strings.ReplaceAll(conclusion, "\nR. Amen.", "\nAmen.")
+			elem.Text = body + "\n" + conclusion
+			elem.Voice = []models.VoiceSpan{
+				{Text: body + "\n", Spoken: true},
+				{Text: conclusion, Spoken: false},
+			}
+		}
 		return elem
 	case "proper-hymn":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
@@ -656,7 +672,7 @@ func mapElementType(t string) models.ElementType {
 		return models.Versicle
 	case "response":
 		return models.Response
-	case "prayer", "secret-prayer", "partly-secret-prayer", "officiant-confession":
+	case "prayer", "secret-prayer", "silent-prayer", "partly-secret-prayer", "officiant-confession":
 		return models.Prayer
 	case "corporate-lord-prayer":
 		return models.CorporateLordPrayer

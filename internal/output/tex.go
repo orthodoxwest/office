@@ -265,7 +265,11 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 		b.WriteString(formatGloriaPatriTeX(elem.Text))
 
 	case models.Prayer, models.Reading:
-		if turns := elem.SpeakerTurns(); len(turns) > 0 {
+		if len(elem.Voice) == 1 && !elem.Voice[0].Spoken && elem.Voice[0].Text == elem.Text {
+			b.WriteString("{\\color{mutedgray}\n")
+			b.WriteString(formatLiturgicalBlockTeX(elem.Text))
+			b.WriteString("}\n")
+		} else if turns := elem.SpeakerTurns(); len(turns) > 0 {
 			for _, turn := range turns {
 				fmt.Fprintf(&b, "\\noindent\\rubric{\\scshape %s}\\par\\nopagebreak\n", turn.Role.Label())
 				b.WriteString(formatLiturgicalBlockTeX(turn.Text))
@@ -278,7 +282,17 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 		b.WriteString(formatLiturgicalBlockTeX(elem.Text))
 	// A chapter's opening paragraph takes the spoken initial like a collect's,
 	// matching the web chapter's dropped first letter.
-	case models.Collect, models.Chapter:
+	case models.Collect:
+		if len(elem.Voice) == 2 && elem.Voice[0].Spoken && !elem.Voice[1].Spoken &&
+			elem.Voice[0].Text+elem.Voice[1].Text == elem.Text {
+			b.WriteString(formatCollectTeX(elem.Voice[0].Text))
+			b.WriteString("{\\color{mutedgray}\n")
+			b.WriteString(formatLiturgicalBlockTeX(elem.Voice[1].Text))
+			b.WriteString("}\n")
+		} else {
+			b.WriteString(formatCollectTeX(elem.Text))
+		}
+	case models.Chapter:
 		b.WriteString(formatCollectTeX(elem.Text))
 	case models.ShortResponsory:
 		b.WriteString(formatShortResponsoryTeX(elem.Text))

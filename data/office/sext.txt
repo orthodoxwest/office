@@ -62,12 +62,6 @@ Ref = psalms/119-xv
 Type = psalm
 Ref = psalms/119-xvi
 
-Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
-
-Type = proper-antiphon
-Ref = triduum-antiphon
-
 [Psalmody-Sunday]
 Condition = weekday-sunday,not-triduum
 
@@ -292,7 +286,13 @@ Condition = triduum
 # the Triduum -- kneeling at the antiphon, the Our Father in secret,
 # Psalm 51, and the collect of the day said without Let us pray.
 
-Type = secret-prayer
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
+
+Type = silent-prayer
 Ref = ordinary/shared/our-father
 
 Type = psalm
