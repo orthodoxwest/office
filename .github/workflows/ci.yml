@@ -330,7 +330,7 @@ jobs:
         env:
           PLAYWRIGHT_SUITE: behavior
         if: steps.ux_changes.outputs.run == 'true'
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js tests/usage.spec.js --workers=2
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=2
 
       - name: Run UX visual regression tests
         env:

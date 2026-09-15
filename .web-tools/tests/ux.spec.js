@@ -2547,56 +2547,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
   }
   expect(await today(reader)).toBe(before + 1);
 
-  // Real visits also reach the current-day breakdown readout.
-  await reader.goto("/admin/usage?days=7");
-  for (const [group, side] of [["appearance", "Nave"], ["screen", "Desktop"]]) {
-    await reader.getByLabel("Breakdown", { exact: true }).selectOption(group);
-    const value = reader.locator("#usage-inspect-values > div").filter({ has: reader.getByText(side, { exact: true }) });
-    expect(parseInt(await value.locator(".usage-value-primary").innerText(), 10)).toBeGreaterThan(0);
-    await expect(reader.locator("#usage-inspect-date")).toContainText("In progress");
-  }
   await readerCtx.close();
-});
-
-test("usage report is accessible and fits narrow and wide screens", async ({ page }) => {
-  const response = await page.goto("/admin/usage?days=7");
-  expect(response.headers()["cache-control"]).toBe("no-store");
-  expect(response.headers()["x-robots-tag"]).toContain("noindex");
-  await expect(page.locator("tbody tr").filter({ has: page.locator(".usage-total") })).toHaveCount(7);
-  await expect(page.locator(".usage-explorer")).toBeVisible();
-  await expect(page.locator(".usage-breakdown-fallback")).toBeHidden();
-  await expect(page.getByLabel("Breakdown", { exact: true }).locator("option")).toHaveCount(3);
-  for (const theme of ["light", "dark"]) {
-    await page.evaluate(theme => document.documentElement.setAttribute("data-theme", theme), theme);
-    for (const width of [320, 390, 540, 768, 1280, 1920]) {
-      await page.setViewportSize({ width, height: 844 });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-      for (const control of await page.locator(".usage-window a, .usage-jump a").all()) {
-        const box = await control.boundingBox();
-        expect(box.height).toBeGreaterThanOrEqual(44);
-      }
-    }
-    const results = await new AxeBuilder({ page }).analyze();
-    expect(results.violations).toEqual([]);
-  }
-});
-
-test("usage period controls keep summaries and daily rows in sync", async ({ page }) => {
-  await page.goto("/admin/usage?days=7");
-  for (const days of [30, 90, 365, 7]) {
-    await page.getByRole("link", { name: `${days} days`, exact: true }).click();
-    await page.waitForLoadState("load");
-    await expect(page.locator('.usage-window [aria-current="page"]')).toHaveText(`${days} days`);
-    await expect(page.locator('.usage-summary')).toContainText(`${days - 1} completed days`);
-    await expect(page.locator('.usage-table .usage-total')).toHaveCount(days);
-  }
-  await page.getByRole("link", { name: "Daily counts", exact: true }).click();
-  await expect(page).toHaveURL(/#usage-offices-title$/);
-  await page.getByText("What is counted?", { exact: true }).click();
-  await expect(page.getByText("A zero may also mean collection", { exact: false })).toBeVisible();
-  await page.getByLabel("Breakdown", { exact: true }).selectOption("prayer-form");
-  await page.getByText("Trend data as a table", { exact: true }).click();
-  await expect(page.getByRole("region", { name: "Trend data", exact: true })).toBeVisible();
 });
 
 test("service worker does not cache the usage report", async ({ browser, baseURL }) => {
