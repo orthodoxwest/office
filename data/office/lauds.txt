@@ -930,6 +930,9 @@ Ref = ordinary/shared/suffrage-antiphon
 Type = versicle
 Ref = ordinary/shared/suffrage-versicle
 
+Type = prayer
+Ref = shared/leader/let-us-pray
+
 Type = collect
 Ref = ordinary/shared/suffrage-collect
 
@@ -942,6 +945,9 @@ Ref = ordinary/shared/suffrage-antiphon-bvm
 
 Type = versicle
 Ref = ordinary/shared/suffrage-versicle
+
+Type = prayer
+Ref = shared/leader/let-us-pray
 
 Type = collect
 Ref = ordinary/shared/suffrage-collect-bvm

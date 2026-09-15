@@ -123,6 +123,7 @@ func TestResolveProperText(t *testing.T) {
 
 func TestLaudsCommemorations(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
+		"shared/leader/let-us-pray":               "Let us pray.",
 		"ordinary/lauds/commemoration-antiphon":   "Default antiphon",
 		"ordinary/lauds/commemoration-versicle":   "Default versicle",
 		"ordinary/lauds/commemoration-collect":    "Default collect",
@@ -139,8 +140,8 @@ func TestLaudsCommemorations(t *testing.T) {
 
 	elems := addCommemorations(day, "lauds", corpus, false)
 
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 elements, got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 elements, got %d", len(elems))
 	}
 
 	// Heading
@@ -166,9 +167,13 @@ func TestLaudsCommemorations(t *testing.T) {
 		t.Errorf("element 2 text = %q, want default versicle", elems[2].Text)
 	}
 
+	if elems[3].Type != models.Prayer || elems[3].Text != "Let us pray." || elems[3].SourceRef != "shared/leader/let-us-pray" {
+		t.Errorf("invitation = %#v, want shared Let us pray before collect", elems[3])
+	}
+
 	// Collect — should use default
-	if elems[3].Text != "Default collect" {
-		t.Errorf("element 3 text = %q, want default collect", elems[3].Text)
+	if elems[4].Text != "Default collect" {
+		t.Errorf("element 4 text = %q, want default collect", elems[4].Text)
 	}
 }
 
@@ -198,8 +203,8 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 	}
 
 	elems := addCommemorations(day, "lauds", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 elements (feria commemoration), got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 elements (feria commemoration), got %d", len(elems))
 	}
 	if elems[0].Text != "Commemoration of Saturday after Lent III" {
 		t.Errorf("heading = %q", elems[0].Text)
@@ -210,8 +215,8 @@ func TestLaudsFeriaCommemoration(t *testing.T) {
 	if elems[2].Text != "Ferial versicle" {
 		t.Errorf("versicle = %q, want ferial versicle", elems[2].Text)
 	}
-	if elems[3].Text != "Collect of the preceding Sunday" {
-		t.Errorf("collect = %q, want preceding Sunday collect", elems[3].Text)
+	if elems[4].Text != "Collect of the preceding Sunday" {
+		t.Errorf("collect = %q, want preceding Sunday collect", elems[4].Text)
 	}
 
 	// Concurrence places the feria in Vespers.Commemorations. The raw
@@ -241,8 +246,8 @@ func TestLaudsPrivilegedFeriaCommemorationUsesFerialTexts(t *testing.T) {
 	}
 
 	elems := addCommemorations(day, "lauds", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 commemoration elements, got %d", len(elems))
 	}
 	if got := elems[1].Text; got != "Ferial Benedictus antiphon" {
 		t.Errorf("antiphon = %q, want ferial Benedictus antiphon", got)
@@ -250,7 +255,7 @@ func TestLaudsPrivilegedFeriaCommemorationUsesFerialTexts(t *testing.T) {
 	if got := elems[2].Text; got != "Ferial versicle" {
 		t.Errorf("versicle = %q, want ferial versicle", got)
 	}
-	if got := elems[3].Text; got != "Governing Sunday collect" {
+	if got := elems[4].Text; got != "Governing Sunday collect" {
 		t.Errorf("collect = %q, want governing Sunday collect", got)
 	}
 }
@@ -274,8 +279,8 @@ func TestLaudsNamedPrivilegedFeriaCommemorationUsesOwnProper(t *testing.T) {
 	}
 
 	elems := addCommemorations(day, "lauds", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 commemoration elements, got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 commemoration elements, got %d", len(elems))
 	}
 	if got := elems[1].Text; got != "Ember Benedictus antiphon" {
 		t.Errorf("antiphon = %q, want named Ember proper", got)
@@ -283,7 +288,7 @@ func TestLaudsNamedPrivilegedFeriaCommemorationUsesOwnProper(t *testing.T) {
 	if got := elems[2].Text; got != "Ferial versicle" {
 		t.Errorf("versicle = %q, want ferial versicle", got)
 	}
-	if got := elems[3].Text; got != "Ember collect" {
+	if got := elems[4].Text; got != "Ember collect" {
 		t.Errorf("collect = %q, want named Ember proper", got)
 	}
 }
@@ -333,8 +338,8 @@ func TestLaudsTemporalCommemorationUsesCanticleAntiphon(t *testing.T) {
 	}
 
 	elems := addCommemorations(day, "lauds", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 elements, got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 elements, got %d", len(elems))
 	}
 	if elems[1].Text != "So the father knew" {
 		t.Errorf("antiphon = %q, want the Sunday's own Benedictus antiphon", elems[1].Text)
@@ -656,8 +661,8 @@ func TestAddCommemorationsUsesProperIDAlias(t *testing.T) {
 	}
 
 	elems := addCommemorations(day, "lauds", corpus, false)
-	if len(elems) != 4 {
-		t.Fatalf("expected 4 elements, got %d", len(elems))
+	if len(elems) != 5 {
+		t.Fatalf("expected 5 elements, got %d", len(elems))
 	}
 	if elems[1].Text != "XXIII Pentecost antiphon" {
 		t.Fatalf("element 1 text = %q, want ProperID-backed antiphon", elems[1].Text)
