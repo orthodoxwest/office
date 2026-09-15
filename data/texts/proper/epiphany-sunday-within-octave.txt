@@ -59,6 +59,22 @@ R. They shall bring gold and incense, alleluia.
 V. We have seen his star in the east, alleluia.
 R. And are come with gifts to worship the Lord, alleluia.
 
+[chapter-vespers]
+# SOURCE: monastic diurnal, p. 231 (Sunday within the Octave of the Epiphany, At II Vespers); chapter as at Lauds p. 229; 2026 ordo p. 28
+@use proper/epiphany-sunday-within-octave/chapter-lauds
+
+[short-responsory-vespers]
+# SOURCE: monastic diurnal, p. 231 (All as on the Feast, p. 223); 2026 ordo p. 28 Short + &c. (223f)
+@use proper/epiphany/short-responsory-vespers
+
+[hymn-vespers]
+# SOURCE: monastic diurnal, p. 231 (All as on the Feast, p. 223); 2026 ordo p. 28 Short + &c. (223f)
+@use proper/epiphany/hymn-vespers
+
+[versicle-vespers]
+# SOURCE: monastic diurnal, p. 231 (Sunday within the Octave of the Epiphany, At II Vespers; Y. We have seen); 2026 ordo p. 28 (= & Mag. Ant. "Son" (231))
+@use proper/epiphany-sunday-within-octave/versicle-first-vespers
+
 [magnificat-antiphon-first]
 @use proper/epiphany-sunday-within-octave/benedictus-antiphon
 
