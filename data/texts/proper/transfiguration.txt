@@ -187,3 +187,9 @@ R. His honour is great in thy salvation, * alleluia, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[chapter-none]
+# SOURCE: diurnal p. 584
+!Rev 21:10,11,23
+And he carried me away in the spirit to a great and high mountain, * and shewed me that great city, the holy Jerusalem, descending out of heaven from God, having the glory of God; * and the Lamb is the light thereof.
+R. Thanks be to God.
