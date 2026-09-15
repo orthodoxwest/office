@@ -238,11 +238,9 @@ ending or establish a source conflict. The omitted feria/following-office
 commemorations were ordinary composition artifacts; the review found no
 contrary appointment for those hours.
 
-These checks do not certify all Triduum wording, Tenebrae ceremonies, or the
-Holy Saturday Vigil. In particular, the current Holy Saturday Vespers route
-still lacks the abbreviated Vigil office explicitly appointed by the ordo.
-That separate repair remains in `repair-backlog.csv`; the boundary tests above
-preserve the existing route rather than certify its complete appointment.
+These checks do not certify all Triduum wording or Tenebrae ceremonies.
+The subsequent Holy Saturday Vigil review below addresses the abbreviated
+Vespers form that was outside PR #360's scope.
 
 ## Cross composition repairs
 
@@ -402,3 +400,33 @@ Ordinary Sunday Vespers' 2 Corinthians chapter agrees with Diurnal p. 114;
 ordinary numbered Sunday propers inspected on pp. 232 and 437 do not print
 replacement chapters. These negative findings are limited to those pages,
 not clearance of every ordinary fallback in the inventory.
+
+
+## Holy Saturday Vigil Vespers
+
+The 2026 archdiocesan ordo p. 53 appoints abbreviated Vespers at the Vigil.
+Diurnal pp. 360–361 also give its form apart from Mass, which is the form
+supplied by the app. The civil Holy Saturday evening selects
+`office/vespers-holy-saturday.txt`; Easter retains liturgical ownership, colour
+and season. The separate definition is preloaded and validated with the seven
+ordinary definitions, and `review explain` records its office-form decision.
+
+| Source requirement | Appointment and verification |
+| --- | --- |
+| Psalm 117 with the triple Alleluia, then Magnificat with its proper antiphon; Gloria Patri follows each (p. 360) | `TestHolySaturdayVigilVespers` checks the exact complete sequence in private/deacon/priest forms in 2026, 2027 and 2032. The existing shared triple-Alleluia text matches the page. The Magnificat antiphon has independent Codex/Sonnet agreement. |
+| The first printed collect, with the conclusion naming the same Holy Spirit (p. 360) | The new `vigil-collect` uses the independently agreed Diurnal text and the existing through-spirit formula. The ordo's “Pour forth” names this appointment; it does not print a competing text. The alternative P B Collect is excluded. |
+| Apart from Mass: Benedicamus with two Alleluias in both versicle and response, Fidelium, then Our Father secretly and nothing more (p. 361) | Exact sequence and fully silent final-prayer assertions; independently agreed dismissal text. The ordinary opening, chapter, hymn, responsory, extra psalms, commemorations, Marian antiphon and final peace are absent. |
+| The special form belongs to Holy Saturday Vespers | Adjacent evenings and all six other hours on Holy Saturday are boundary controls. Concurrent composition preserves the cached calendar and definitions. The annual Vespers count expects one psalm here. |
+
+The ordo summary reads the actual fixed Magnificat frame, so direct corpus
+references remain visible in its antiphon column. These references appear in
+composition and provenance evidence; the dynamic resolution inventory covers
+resolver-selected slots and does not enumerate this fixed form's references.
+
+The 2026 before/after comparison changes only April 11 Vespers among the 21
+rendered hours checked on April 10–12. Calendar, colour, ownership and
+commemoration comparisons use the same reference and comparator before and
+after. Goldens include the complete rendered April 11 Vespers and the 28-year
+parity snapshot. Broader corpus wording remains a separate source-review task:
+in particular, Holy Saturday Compline's current Nunc dimittis antiphon differs
+from the p. 361–362 appointment and is recorded in the repair backlog.
