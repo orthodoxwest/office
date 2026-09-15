@@ -310,8 +310,158 @@ Ref = canticles/benedicite
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Psalmody-Holy-Thursday]
+Condition = feast-holy-thursday
+Label = The Psalms
+# Monastic Diurnal pp. 305–311: five proper antiphon frames, no Psalm 67.
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/090
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/036
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/exodus-15
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/147a
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+[Psalmody-Good-Friday]
+Condition = feast-good-friday
+Label = The Psalms
+# Monastic Diurnal pp. 336–341: five proper antiphon frames, no Psalm 67.
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/143
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/085
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/habakkuk-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/147b
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+[Psalmody-Holy-Saturday]
+Condition = feast-holy-saturday
+Label = The Psalms
+# Monastic Diurnal pp. 356–359: five proper antiphon frames, no Psalm 67.
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/092
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = psalm
+Ref = psalms/064
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/isaiah-38
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
+Type = psalm
+Ref = psalms/150
+
+Type = proper-antiphon
+Ref = psalm-antiphon-5
+
 [Psalmody-Festal]
-Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead
+Condition = festal-lauds-psalmody,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead,not-triduum
 Label = The Psalms
 
 Type = psalm
@@ -762,7 +912,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Laudate-Saturday-Festal]
-Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead
+Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5
@@ -825,7 +975,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-5
 
 [Laudate-Non-Saturday]
-Condition = not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead
+Condition = not-feast-easter-sunday,not-weekday-saturday,not-office-of-the-dead,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5
@@ -895,7 +1045,7 @@ Ref = shared/formulas/triduum-christus-factus-rubric
 Type = proper-antiphon
 Ref = triduum-antiphon
 
-Type = secret-prayer
+Type = silent-prayer
 Ref = ordinary/shared/our-father
 
 Type = psalm

@@ -2930,3 +2930,23 @@ test('private greetings are not repeated after preces when switching offline or 
     await page.emulateMedia({ media: 'screen' });
   }
 });
+
+// Diurnal p. 313: the Our Father is entirely silent; the collect's body is
+// spoken, and its conclusion is silent. These cues must survive both themes.
+test("Triduum distinguishes silent prayers and the collect conclusion", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/lauds/2026-04-09?form=priest", theme);
+    const collect = page.locator(".collect");
+    await expect(collect).toHaveCount(1);
+    await expect(collect.locator(".spoken-text")).toContainText("Almighty God");
+    await expect(collect.locator(".secret-text").first()).toContainText("Who with thee");
+    await expect(page.locator(".secret-text").filter({ hasText: /^Our Father/ })).toHaveCount(1);
+    const colors = await collect.evaluate(el => ({
+      spoken: getComputedStyle(el.querySelector(".spoken-text")).color,
+      silent: getComputedStyle(el.querySelector(".secret-text")).color,
+    }));
+    expect(colors.silent).not.toBe(colors.spoken);
+  }
+  await page.goto("/compline/2026-04-11?form=priest");
+  await expect(page.locator(".collect .secret-text")).toHaveCount(0);
+});

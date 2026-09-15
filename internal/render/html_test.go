@@ -501,3 +501,22 @@ func TestCommemorationHeadingPreservesNameAndEscapesMarkup(t *testing.T) {
 		t.Fatalf("ordinary heading changed: %s", got)
 	}
 }
+
+func TestRenderSilentTriduumPrayers(t *testing.T) {
+	prayer := models.OfficeElement{Type: models.Prayer, Text: "Our Father, who art in heaven."}
+	prayer.Voice = []models.VoiceSpan{{Text: prayer.Text, Spoken: false}}
+	html := renderOfficeElement(prayer, "")
+	if strings.Contains(html, `class="spoken-text"`) || !strings.Contains(html, `<span class="secret-text">Our Father, who art in heaven.</span>`) {
+		t.Fatalf("silent Our Father rendering: %s", html)
+	}
+	collect := models.OfficeElement{Type: models.Collect, Text: "Almighty God, behold thy family.\nWho with thee liveth.\nAmen.", Voice: []models.VoiceSpan{
+		{Text: "Almighty God, behold thy family.\n", Spoken: true},
+		{Text: "Who with thee liveth.\nAmen.", Spoken: false},
+	}}
+	html = renderOfficeElement(collect, "")
+	for _, want := range []string{`class="collect"`, `<span class="spoken-text">Almighty God, behold thy family.</span>`, `<span class="secret-text">Who with thee liveth.</span>`, `<span class="secret-text">Amen.</span>`} {
+		if !strings.Contains(html, want) {
+			t.Errorf("missing %s: %s", want, html)
+		}
+	}
+}

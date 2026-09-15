@@ -439,7 +439,7 @@ Ref = shared/formulas/triduum-christus-factus-rubric
 Type = proper-antiphon
 Ref = triduum-antiphon
 
-Type = secret-prayer
+Type = silent-prayer
 Ref = ordinary/shared/our-father
 
 Type = psalm

@@ -75,6 +75,7 @@ proper/circumcision/collect who-liveth
 proper/good-friday/collect who-liveth
 proper/holy-monday/collect who-liveth
 proper/holy-thursday/collect who-liveth
+proper/holy-saturday/collect who-liveth
 proper/holy-wednesday/collect who-liveth
 # The restored final Christ clauses are printed on pp. 265, 430, and 441.
 proper/laetare-sunday/collect who-liveth
@@ -101,7 +102,6 @@ proper/easter-sunday-2/collect through-same
 proper/easter-sunday-3/collect through-same
 proper/epiphany/collect through-same
 proper/holy-name-jesus/collect through-same
-proper/holy-saturday/collect through-same
 proper/motherhood-bvm/collect through-same
 proper/nativity-sunday-within-octave/collect through-same
 proper/palm-sunday/collect through-same

@@ -1,9 +1,12 @@
 package office
 
 import (
+	"fmt"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
@@ -157,201 +160,235 @@ func TestTriduumLittleHours(t *testing.T) {
 	})
 }
 
-// TestTriduumMajorHoursOpeningsEndings covers issue #276: Lauds and Vespers
-// omit the opening versicles and close with the shared Christus factus est
-// ending (p. 313), and Maundy Thursday/Good Friday Compline begins with the
-// Confession and takes the Nunc dimittis and ending (p. 316). Holy Saturday
-// Vespers (Easter) and Compline (Easter-Eve) are preserved.
+// TestTriduumMajorHoursOpeningsEndings checks the actual sequence, rather than
+// the presence of an antiphon or Psalm 51 (which also opens Lauds). Sources:
+// Diurnal pp. 305, 313-316; 2026 ordo Sacred Triduum notes and April 8-11.
 func TestTriduumMajorHoursOpeningsEndings(t *testing.T) {
-	dataDir := filepath.Join("..", "..", "data")
-	days, err := calendar.BuildCalendar(2026, dataDir)
+	engine, err := NewEngine("../../data")
 	if err != nil {
-		t.Fatalf("BuildCalendar: %v", err)
+		t.Fatal(err)
 	}
-	engine, err := NewEngine(dataDir)
+	days, err := calendar.BuildCalendar(2026, "../../data")
 	if err != nil {
-		t.Fatalf("NewEngine: %v", err)
+		t.Fatal(err)
 	}
 	moveable := calendar.ComputeMoveableDates(2026)
-	byDate := make(map[string]*models.CalendarDay, len(days))
-	for i := range days {
-		byDate[days[i].Date.Format("2006-01-02")] = &days[i]
-	}
-	wantAntiphon := map[string]string{
-		"2026-04-09": "Christ, ✠ for our sake, became obedient unto death.",
-		"2026-04-10": "Christ, ✠ for our sake, became obedient unto death, even the death of the cross.",
-		"2026-04-11": "Christ, ✠ for our sake, became obedient unto death, even the death of the cross. Wherefore God also hath highly exalted him, and given him a Name which is above every name.",
-	}
-
-	for _, date := range []string{"2026-04-09", "2026-04-10"} {
-		for _, hourName := range []string{"lauds", "vespers"} {
-			t.Run(date+"/"+hourName, func(t *testing.T) {
-				hour, err := engine.ComposeHour(hourName, byDate[date], moveable)
-				if err != nil {
-					t.Fatalf("ComposeHour: %v", err)
-				}
-				var sawOpening, sawHymn, sawChapter, sawMarian bool
-				var sawTriduum, sawPs51 bool
-				for _, section := range hour.Sections {
-					for _, elem := range section.Elements {
-						for _, ref := range elem.SourceRefs {
-							if strings.HasSuffix(ref, "/opening-versicle") {
-								sawOpening = true
+	for _, date := range []string{"2026-04-09", "2026-04-10", "2026-04-11"} {
+		d, err := time.Parse(time.DateOnly, date)
+		if err != nil {
+			t.Fatal(err)
+		}
+		day := &days[d.YearDay()-1]
+		for _, name := range hourNames {
+			if date == "2026-04-11" && (name == "vespers" || name == "compline") {
+				continue
+			}
+			for _, form := range models.PrayerForms {
+				t.Run(date+"/"+name+"/"+string(form), func(t *testing.T) {
+					hour, err := engine.ComposeHourWithOptions(name, day, moveable, ComposeOptions{Form: form})
+					if err != nil {
+						t.Fatal(err)
+					}
+					var elements []models.OfficeElement
+					for _, section := range hour.Sections {
+						if !section.Collapsible {
+							elements = append(elements, section.Elements...)
+						}
+					}
+					antiphon := -1
+					noise := 0
+					for i, elem := range elements {
+						switch elem.Type {
+						case models.Hymn, models.Chapter, models.ShortResponsory, models.PsalmDoxology, models.OpeningAcclamation, models.CorporateLordPrayer, models.Preces:
+							t.Errorf("unexpected %s: %s", elem.Type, elem.SourceRef)
+						}
+						if elem.IsCommemoration || elem.LeaderSlot == "greeting" || strings.HasPrefix(elem.SourceRef, "ordinary/marian/") || elem.SourceRef == "shared/leader/let-us-pray" {
+							t.Errorf("unexpected ordinary ending: %s", elem.SourceRef)
+						}
+						if elem.SourceRef == "proper/"+day.Celebration.ID+"/triduum-antiphon" {
+							if antiphon >= 0 {
+								t.Error("duplicate Christus factus est")
 							}
-							if strings.HasPrefix(ref, "ordinary/marian/") {
-								sawMarian = true
+							antiphon = i
+						}
+						if elem.SourceRef == "shared/formulas/triduum-lauds-noise-rubric" {
+							noise++
+						}
+					}
+					if antiphon < 0 {
+						t.Fatal("missing Christus factus est")
+					}
+					var ending []models.OfficeElement
+					for _, elem := range elements[antiphon+1:] {
+						if elem.Type != models.Rubric {
+							ending = append(ending, elem)
+						}
+					}
+					if len(ending) != 3 {
+						t.Fatalf("ending has %d prayers, want Our Father, Miserere, collect", len(ending))
+					}
+					if ending[0].SourceRef != "ordinary/shared/our-father" || ending[1].SourceRef != "psalms/051" || ending[2].SourceRef != "proper/"+day.Celebration.ID+"/collect" {
+						t.Fatalf("wrong ending sources: %s / %s / %s", ending[0].SourceRef, ending[1].SourceRef, ending[2].SourceRef)
+					}
+					assertVoice(t, ending[0].Voice, []models.VoiceSpan{{Text: ending[0].Text, Spoken: false}})
+					collect := ending[2]
+					if !strings.HasPrefix(collect.Text, "Almighty God, we beseech thee graciously to behold this thy family") {
+						t.Errorf("wrong Triduum collect: %s", collect.Text)
+					}
+					if len(collect.Voice) != 2 {
+						t.Fatalf("collect has no spoken/silent partition: %+v", collect.Voice)
+					}
+					if !collect.Voice[0].Spoken || collect.Voice[1].Spoken || !strings.HasPrefix(collect.Voice[1].Text, "Who with thee") || collect.Voice[0].Text+collect.Voice[1].Text != collect.Text {
+						t.Errorf("incorrect collect delivery: %+v", collect.Voice)
+					}
+					if strings.Contains(collect.Text, "R. Amen") {
+						t.Error("silent conclusion presents a congregational response")
+					}
+					if !slices.Contains(collect.SourceRefs, "shared/formulas/collect-conclusion-who-liveth") {
+						t.Errorf("missing conclusion provenance: %v", collect.SourceRefs)
+					}
+					if name == "lauds" || name == "vespers" {
+						first := elements[0]
+						if first.Type != models.Antiphon {
+							t.Errorf("first element is %s (%s), want first antiphon", first.Type, first.SourceRef)
+						}
+						if name == "lauds" && (elements[1].SourceRef != "psalms/051" || noise != 1) {
+							t.Errorf("Lauds first psalm=%s, noise rubrics=%d", elements[1].SourceRef, noise)
+						}
+					}
+					if name != "lauds" && noise != 0 {
+						t.Error("Lauds candle/noise rubric at another hour")
+					}
+					if name == "compline" {
+						var before []models.OfficeElement
+						for _, elem := range elements[:antiphon] {
+							if elem.Type != models.Rubric {
+								before = append(before, elem)
 							}
 						}
-						switch elem.Type {
-						case models.Hymn:
-							sawHymn = true
-						case models.Chapter:
-							sawChapter = true
-						case models.Antiphon:
-							if elem.Text == wantAntiphon[date] {
-								sawTriduum = true
+						if len(before) < 5 || before[0].LeaderSlot != "confession" {
+							t.Fatal("Compline does not begin with confession")
+						}
+						last := before[len(before)-4:]
+						want := []string{"psalms/004", "psalms/091", "psalms/134", "canticles/nunc-dimittis"}
+						for i, elem := range last {
+							if elem.SourceRef != want[i] {
+								t.Errorf("Compline psalm/canticle %d=%s, want %s", i, elem.SourceRef, want[i])
 							}
-						case models.Psalm:
-							if elem.SourceRef == "psalms/051" {
-								sawPs51 = true
+						}
+						for _, elem := range before[:len(before)-4] {
+							if elem.LeaderSlot != "confession" {
+								t.Errorf("extra Compline opening: %s", elem.SourceRef)
 							}
 						}
 					}
+				})
+			}
+		}
+	}
+	// Opening/ending omissions stop at None on Saturday and do not reach back
+	// into Wednesday. Check both civil-day Compline and Easter-owned Vespers.
+	for _, tc := range []struct{ date, name string }{
+		{"2026-04-08", "lauds"}, {"2026-04-08", "vespers"}, {"2026-04-08", "compline"},
+		{"2026-04-11", "vespers"}, {"2026-04-11", "compline"},
+		{"2026-04-12", "lauds"}, {"2026-04-12", "compline"},
+	} {
+		for _, form := range models.PrayerForms {
+			t.Run(tc.date+"/"+tc.name+"/"+string(form)+"/boundary", func(t *testing.T) {
+				d, _ := time.Parse(time.DateOnly, tc.date)
+				hour, err := engine.ComposeHourWithOptions(tc.name, &days[d.YearDay()-1], moveable, ComposeOptions{Form: form})
+				if err != nil {
+					t.Fatal(err)
 				}
-				if sawOpening {
-					t.Error("opening versicles rendered; Triduum begins with the first antiphon")
+				var opening, doxology, marian, nunc bool
+				for _, section := range hour.Sections {
+					for _, elem := range section.Elements {
+						if strings.Contains(elem.SourceRef, "triduum") || elem.SlotRef == "triduum-antiphon" {
+							t.Errorf("Triduum element beyond boundary: %s", elem.SourceRef)
+						}
+						opening = opening || strings.HasSuffix(elem.SourceRef, "/opening-versicle") || elem.LeaderSlot == "opening"
+						doxology = doxology || elem.Type == models.PsalmDoxology
+						marian = marian || strings.HasPrefix(elem.SourceRef, "ordinary/marian/")
+						nunc = nunc || elem.SourceRef == "proper/holy-saturday/nunc-dimittis-antiphon"
+						if elem.Type == models.Collect && len(elem.Voice) > 0 {
+							t.Error("ordinary collect acquired silent conclusion")
+						}
+					}
 				}
-				if sawHymn || sawChapter {
-					t.Errorf("hymn=%v chapter=%v; the Triduum omits them", sawHymn, sawChapter)
+				if !opening || !doxology || !marian {
+					t.Errorf("ordinary opening=%v, doxology=%v, Marian=%v", opening, doxology, marian)
 				}
-				if !sawTriduum {
-					t.Errorf("missing Triduum antiphon %q", wantAntiphon[date])
-				}
-				if !sawPs51 {
-					t.Error("missing Psalm 51 of the Triduum ending")
-				}
-				if sawMarian {
-					t.Error("Marian antiphon rendered; the Triduum ends at the collect")
+				if tc.date == "2026-04-11" && tc.name == "compline" && !nunc {
+					t.Error("Holy Saturday Compline lost proper Nunc dimittis antiphon")
 				}
 			})
 		}
-		t.Run(date+"/compline", func(t *testing.T) {
-			hour, err := engine.ComposeHour("compline", byDate[date], moveable)
-			if err != nil {
-				t.Fatalf("ComposeHour: %v", err)
-			}
-			var sawBlessing, sawConfession, sawNunc, sawTriduum, sawHymn bool
-			var psalms []string
-			for _, section := range hour.Sections {
-				for _, elem := range section.Elements {
-					for _, ref := range elem.SourceRefs {
-						if ref == "ordinary/compline/opening-versicle" {
-							sawBlessing = true
-						}
-						if ref == "ordinary/shared/confiteor" {
-							sawConfession = true
-						}
-					}
-					switch elem.Type {
-					case models.Hymn:
-						sawHymn = true
-					case models.Canticle:
-						if elem.SourceRef == "canticles/nunc-dimittis" {
-							sawNunc = true
-						}
-					case models.Antiphon:
-						if elem.Text == wantAntiphon[date] {
-							sawTriduum = true
-						}
-					case models.Psalm:
-						psalms = append(psalms, elem.SourceRef)
-					}
-				}
-			}
-			if sawBlessing {
-				t.Error("Compline blessing rendered; p. 316 omits it")
-			}
-			if !sawConfession {
-				t.Error("missing Confession at Triduum Compline")
-			}
-			for _, want := range []string{"psalms/004", "psalms/091", "psalms/134", "psalms/051"} {
-				found := false
-				for _, got := range psalms {
-					if got == want {
-						found = true
-					}
-				}
-				if !found {
-					t.Errorf("missing %s at Triduum Compline", want)
-				}
-			}
-			if !sawNunc {
-				t.Error("missing Nunc dimittis at Triduum Compline")
-			}
-			if !sawTriduum {
-				t.Errorf("missing Triduum antiphon %q", wantAntiphon[date])
-			}
-			if sawHymn {
-				t.Error("hymn rendered; the Triduum omits it")
-			}
-		})
 	}
+}
 
-	t.Run("2026-04-11/lauds keeps the ending", func(t *testing.T) {
-		hour, err := engine.ComposeHour("lauds", byDate["2026-04-11"], moveable)
+// Diurnal pp. 305–311, 336–341 and 356–359 give the Lauds frames;
+// pp. 315–316 give the same five Vespers frames on Thursday and Friday.
+// Psalm 51 appears again only in the common ending (p. 313).
+func TestTriduumPsalmodyAppointments(t *testing.T) {
+	engine, err := NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases := []struct {
+		offset int
+		hour   string
+		refs   []string
+	}{
+		{-3, "lauds", []string{"psalms/051", "psalms/090", "psalms/036", "canticles/exodus-15", "psalms/147a", "canticles/benedictus", "psalms/051"}},
+		{-2, "lauds", []string{"psalms/051", "psalms/143", "psalms/085", "canticles/habakkuk-3", "psalms/147b", "canticles/benedictus", "psalms/051"}},
+		{-1, "lauds", []string{"psalms/051", "psalms/092", "psalms/064", "canticles/isaiah-38", "psalms/150", "canticles/benedictus", "psalms/051"}},
+		{-3, "vespers", []string{"psalms/116b", "psalms/120", "psalms/140", "psalms/141", "psalms/142", "canticles/magnificat", "psalms/051"}},
+		{-2, "vespers", []string{"psalms/116b", "psalms/120", "psalms/140", "psalms/141", "psalms/142", "canticles/magnificat", "psalms/051"}},
+	}
+	for _, year := range []int{2026, 2027, 2032} {
+		days, err := calendar.BuildCalendar(year, "../../data")
 		if err != nil {
-			t.Fatalf("ComposeHour: %v", err)
+			t.Fatal(err)
 		}
-		var sawTriduum bool
-		for _, section := range hour.Sections {
-			for _, elem := range section.Elements {
-				if elem.Type == models.Antiphon && elem.Text == wantAntiphon["2026-04-11"] {
-					sawTriduum = true
+		dates := calendar.ComputeMoveableDates(year)
+		for _, tc := range cases {
+			date := dates.Easter.AddDate(0, 0, tc.offset)
+			day := &days[date.YearDay()-1]
+			t.Run(date.Format(time.DateOnly)+"/"+tc.hour, func(t *testing.T) {
+				hour, err := engine.ComposeHour(tc.hour, day, dates)
+				if err != nil {
+					t.Fatal(err)
 				}
-			}
-		}
-		if !sawTriduum {
-			t.Error("Holy Saturday Lauds missing the Triduum ending")
-		}
-	})
-
-	t.Run("2026-04-11/vespers stays Easter", func(t *testing.T) {
-		hour, err := engine.ComposeHour("vespers", byDate["2026-04-11"], moveable)
-		if err != nil {
-			t.Fatalf("ComposeHour: %v", err)
-		}
-		for _, section := range hour.Sections {
-			for _, elem := range section.Elements {
-				if elem.Type == models.Antiphon && elem.Text == wantAntiphon["2026-04-11"] {
-					t.Error("Holy Saturday Vespers (Easter) renders the Triduum antiphon")
-				}
-			}
-		}
-	})
-
-	t.Run("2026-04-11/compline stays Easter-Eve", func(t *testing.T) {
-		hour, err := engine.ComposeHour("compline", byDate["2026-04-11"], moveable)
-		if err != nil {
-			t.Fatalf("ComposeHour: %v", err)
-		}
-		var sawTriduum, sawNuncAntiphon bool
-		for _, section := range hour.Sections {
-			for _, elem := range section.Elements {
-				if elem.Type == models.Antiphon && elem.Text == wantAntiphon["2026-04-11"] {
-					sawTriduum = true
-				}
-				for _, ref := range elem.SourceRefs {
-					if ref == "proper/holy-saturday/nunc-dimittis-antiphon" {
-						sawNuncAntiphon = true
+				var refs []string
+				var psalmody []models.OfficeElement
+				for _, section := range hour.Sections {
+					for _, elem := range section.Elements {
+						if elem.Type == models.Psalm || elem.Type == models.Canticle {
+							refs = append(refs, elem.SourceRef)
+						}
+						if elem.Type != models.Rubric && !section.Collapsible {
+							psalmody = append(psalmody, elem)
+						}
 					}
 				}
-			}
+				if !slices.Equal(refs, tc.refs) {
+					t.Fatalf("psalms/canticles=%v, want %v", refs, tc.refs)
+				}
+				for i := 0; i < 5; i++ {
+					before, after := psalmody[i*3], psalmody[i*3+2]
+					if before.Type != models.Antiphon || after.Type != models.Antiphon || before.SourceRef != after.SourceRef {
+						t.Fatalf("psalmody frame %d is not bounded by its own antiphon", i+1)
+					}
+					slot := fmt.Sprintf("psalm-antiphon-%d", i+1)
+					expected := "proper/" + day.Celebration.ID + "/" + slot
+					if tc.hour == "vespers" {
+						expected += "-vespers"
+					}
+					if before.SourceRef != expected {
+						t.Errorf("frame %d antiphon=%s, want %s", i+1, before.SourceRef, expected)
+					}
+				}
+			})
 		}
-		if sawTriduum {
-			t.Error("Holy Saturday Compline renders the Triduum antiphon")
-		}
-		if !sawNuncAntiphon {
-			t.Error("Holy Saturday Compline lost its Nunc dimittis antiphon")
-		}
-	})
+	}
 }

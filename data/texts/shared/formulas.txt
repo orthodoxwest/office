@@ -196,7 +196,7 @@ During this Triduum the Martyrology is not read, and the rest until the end of
 the Hour is not said.
 
 [triduum-lauds-noise-rubric]
-# SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
+# SOURCE: diurnal p. 313
 But at Lauds, after the Collect is ended, a little noise and clatter is made; the lighted candle is at once brought forth from beneath the Altar; and all rise and depart in silence.
 
 [triduum-compline-opening-rubric]
