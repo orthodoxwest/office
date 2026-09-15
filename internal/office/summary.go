@@ -61,6 +61,15 @@ func SummarizeHour(hour *models.OfficeHour) HourSummary {
 			case s.GospelAnt == "" && (el.SlotRef == "benedictus-antiphon" || el.SlotRef == "magnificat-antiphon"):
 				s.GospelAnt = incipit(el.Text)
 				s.GospelAntFull = strings.ReplaceAll(el.Text, "\n", " ")
+			case s.GospelAnt == "" && el.Type == models.Canticle &&
+				(el.SourceRef == "canticles/benedictus" || el.SourceRef == "canticles/magnificat"):
+				// Fixed office forms can name their antiphon directly instead
+				// of resolving a proper slot. Read the actual canticle frame.
+				if i > 0 && sec.Elements[i-1].Type == models.Antiphon {
+					antiphon := sec.Elements[i-1].Text
+					s.GospelAnt = incipit(antiphon)
+					s.GospelAntFull = strings.ReplaceAll(antiphon, "\n", " ")
+				}
 			}
 		}
 	}

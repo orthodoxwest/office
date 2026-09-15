@@ -60,6 +60,10 @@ func TestVespers2026PsalmodySweep(t *testing.T) {
 			if id := feastID(day); id == "holy-thursday" || id == "good-friday" {
 				wantPsalms = 6
 			}
+			// The abbreviated Holy Saturday Vigil has only Psalm 117 (p. 360).
+			if feastID(day) == "holy-saturday" {
+				wantPsalms = 1
+			}
 			for _, sec := range hour.Sections {
 				if sec.Label == "Vespers of the Dead" {
 					wantPsalms += 5

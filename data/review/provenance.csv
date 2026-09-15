@@ -874,6 +874,9 @@ proper/holy-rosary-bvm/versicle-lauds,9cef917b4788,diurnal,,620,verified,codex,2
 proper/holy-saturday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
 proper/holy-saturday/triduum-antiphon,3498be524a99,diurnal,"Maundy Thursday at Lauds, addition on the third night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/holy-saturday/vigil-collect,ae5554075fbf,diurnal,,360,verified,codex,2026-09-15,Word-for-word after normalization; page image /tmp/office-triduum-hours/output/pages/monastic-diurnal/0406.png
+proper/holy-saturday/vigil-dismissal,d76079ea1ace,diurnal,,361,verified,codex,2026-09-15,Word-for-word after normalization; page image /tmp/office-triduum-hours/output/pages/monastic-diurnal/0407.png
+proper/holy-saturday/vigil-magnificat-antiphon,82d4b222c6f1,diurnal,,360,verified,codex,2026-09-15,Word-for-word after normalization; page image /tmp/office-triduum-hours/output/pages/monastic-diurnal/0406.png
 proper/holy-thursday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
 proper/holy-thursday/psalm-antiphon-1-vespers,f990b575c93a,diurnal,,315,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0361.png
 proper/holy-thursday/psalm-antiphon-2-vespers,af474bb3718b,diurnal,,315,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0361.png
