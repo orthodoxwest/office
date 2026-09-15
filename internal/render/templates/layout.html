@@ -35,6 +35,9 @@
   {{/* Start the ordo font fetch early to reduce reflow in the long year table. */}}
   {{if eq .Page "calendar"}}<link rel="preload" href="/static/fonts/eb-garamond-regular.woff2" as="font" type="font/woff2" crossorigin>{{end}}
   <link rel="stylesheet" href="{{static "style.css"}}">
+  {{/* Report filters should refresh immediately. A cross-document snapshot
+       can hold a dense report's controls while its new view is rendering. */}}
+  {{if eq .Page "usage"}}<style>@view-transition { navigation: none; }</style>{{end}}
   <link rel="icon" type="image/svg+xml" href="{{static "favicon.svg"}}">
   <link rel="manifest" href="{{static "manifest.webmanifest"}}">
   <link rel="apple-touch-icon" href="{{static "icons/apple-touch-icon.png"}}">
@@ -43,6 +46,7 @@
   <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
   <script src="{{static "leader.js"}}" defer></script>
   <script src="{{static "app.js"}}" defer></script>
+  {{if eq .Page "usage"}}<script src="{{static "usage.js"}}" defer></script>{{end}}
 </head>
 {{/* SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages

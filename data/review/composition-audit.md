@@ -174,8 +174,8 @@ question. Expand the existing checks without deriving expectations from output.
    of Apostles, Martyrs, Confessors, and the BVM, in and outside Paschaltide.
    Check printed cross-references, hour-specific exceptions, and octaves. A
    plausible reduction of a seeded responsory is not sufficient evidence.
-   Include the May 3, 2026 Holy Cross None ordinary-chapter fallback as an
-   unreviewed candidate; this pass checked only its Terce precedence control.
+   The May 3 Holy Cross None fallback is repaired in the Cross pass below;
+   other proper and octave inheritance remains to be reviewed.
 2. **Ordinary structure at every weekday/hour:** openings, hymn placement,
    psalm/antiphon assignments, ferial versus festal canticles, repeated
    antiphons, chapter/versicle order, collects and conclusions. Prime and
@@ -239,3 +239,105 @@ Holy Saturday Vigil. In particular, the current Holy Saturday Vespers route
 still lacks the abbreviated Vigil office explicitly appointed by the ordo.
 That separate repair remains in `repair-backlog.csv`; the boundary tests above
 preserve the existing route rather than certify its complete appointment.
+
+## Cross composition repairs
+
+Diurnal pp. 43 and 146–147 appoint distinct Paschal Cross antiphons at Lauds
+and Vespers, followed by a shared verse, invitation, collect, and abbreviated
+Through-the-same conclusion. The old shared antiphon and verse were wrong;
+the raw collect also omitted both its invitation and its conclusion. The hour
+definitions now appoint the two antiphons and reuse the already attested
+invitation and conclusion formulas. No additional engine mechanism is needed.
+Three new hash-bound attestations cover the antiphons and verse; the existing
+collect body and formula attestations remain intact. Bounded Codex and Sonnet
+readings, with rejected incomplete/column-crossing readings retained in ignored
+artifacts, establish the new wording and the printed conclusion appointment.
+
+Diurnal p. 524 appoints Philippians 2:8–9 at Finding of the Holy Cross None.
+The 2026 ordo p. 60 assigns the Hours of the feast to that page. The missing
+chapter now aliases the identical, already attested Exaltation chapter from
+p. 600. This replaces the ordinary fallback without duplicating the body.
+
+Across 23,016 complete offices in 2026, 2027, and 2032, 309 rendered offices
+change: 100 Lauds/Vespers date-hours and three Holy Cross None date-hours,
+each in private, deacon, and priest forms. Cross presence is unchanged.
+After excluding the Cross section and the repaired Holy Cross None chapter,
+all other composed content is identical. Tests assert the complete Cross
+sequence and text in both hours and all forms, and the proper None chapter.
+These comparisons establish repair scope, not whole-office correctness.
+
+Eligibility remains unresolved in [issue #356](https://github.com/orthodoxwest/office/issues/356).
+The Diurnal p. 146 suppresses Cross for a commemorated Double, including
+concurrence. The 2026 ordo p. 61 explicitly includes it at May 9 Vespers with
+Gregory Nazianzen (Double), while p. 64 omits it at May 17 Vespers with
+Venantius (Double). The engine also ends the seasonal interval three days
+early. Extending the interval alone would incorrectly add Cross on May 18;
+blanket suppression would contradict the newest ordo on May 9. The proposed
+eligibility changes are therefore deferred together pending clergy resolution.
+No calendar or eligibility rule is changed by this repair.
+
+
+## Collect invitations and sequence
+
+The Diurnal General Rubrics XII (p. xxxi) concludes only the first and last
+collects. The ordinary of Lauds (pp. 42–43) and Vespers (pp. 144–147) places
+commemorations and the suffrage/Cross before the closing greeting, with
+Let us pray before each suffrage collect. Breviary General Rubrics
+XXXIII.3,5 (printed p. 50) explicitly requires that invitation before every
+collect, including intermediate commemorations without a conclusion.
+
+The app omitted the invitation in every generated commemoration and in both
+forms of the Suffrage of All Saints. The four static suffrage sections now
+reference the existing attested invitation. Generated commemorations resolve
+that same shared prayer and retain the commemoration owner. No corpus body,
+conclusion-selection rule, commemoration eligibility, or prayer-form rule changes.
+
+The before/after comparison covers 23,016 offices across 2026, 2027, and 2032
+in three forms. It adds 7,257 invitations in 4,911 offices: 2,490 Lauds and
+2,421 Vespers. Removing invitation elements from both captures leaves every
+complete-office hash identical, including all other text, sources, decisions,
+and commemorations. Thirteen calendar fixtures in all three forms assert
+invitations, commemoration ownership, and first/last-only conclusions, including
+multiple commemorations, ordinary/BVM suffrages, and the Cross. The full
+private-form collect-run audit finds no misplaced conclusions before or after.
+The sequence audit covers 2,189 private-form runs and 4,708 collects; the
+three All Souls Lauds offices, which lack that normal closing boundary, are
+excluded. Remaining Triduum structural work stays under its existing backlog. These checks
+establish ordering and repair scope, not the correctness of every appointment
+or collect's wording. Cross eligibility remains deferred in #356.
+
+
+## Proper little-hour chapter fallbacks
+
+Seven missing appointments used ordinary little-hour chapters despite printed
+propers. Circumcision Sext/None (Diurnal p. 213; 2026 ordo p. 25) now reuse
+the existing Christmas Hebrews chapters. Transfiguration None (p. 584;
+ordo p. 87) now supplies Revelation 21:10,11,23. Sexagesima None (pp. 239–240)
+now supplies 2 Corinthians 12:9; the ordo p. 38 references the Sunday psalter
+without appointing a different chapter. Nativity Sunday's Terce/Sext/None
+(pp. 206–207; ordo p. 128) now supply Galatians 4:1–2, 4:4–5, and 4:7,
+including when that Sunday office is observed on a weekday.
+
+Five aliases reuse existing attested chapter wording and its current pointing;
+only the Transfiguration and Sexagesima chapters add new bodies and hash-bound
+attestations. Bounded Codex and Sonnet readings agree after comparison
+normalization. Initial word-order and opening-word disagreements were resolved
+by corrected readings; rejected readings and page identities remain in ignored
+artifacts. No canonical alias target, engine rule, or feast metadata changes.
+
+The comparison of 23,016 complete offices in 2026, 2027, and 2032 finds exactly
+63 changes: these seven appointments in three years and three forms. Removing
+chapter elements from both captures leaves every complete-office hash identical.
+`TestProperLittleHourChapters` checks all 63 cases, including source selection,
+chapter wording, response, and chapter-before-versicle order. These cases fail
+against the pre-repair corpus. Additional years exercise the appointed office,
+not agreement with future ordos.
+
+The initial candidate inventory contains 130 ordinary chapter resolution rows
+outside Prime/Compline, including legitimate weekday/vigil/Sunday fallbacks
+and unresolved source questions. It is not a defect count. This pass reviews
+only the seven appointments above; #335 and #339 remain untouched. The discovery
+catalog omits the computed Nativity Sunday owner, and its Circumcision dossier
+stops at p. 209 before the little hours on p. 213. The full resolution inventory
+and parent-verified page selection supplement those limited discovery results;
+neither negative searches nor discovery queue membership certify a fallback.

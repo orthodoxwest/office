@@ -105,8 +105,8 @@ func (s *Server) handleUsageDashboard(w http.ResponseWriter, r *http.Request) {
 	if raw := r.URL.Query().Get("days"); raw != "" {
 		var err error
 		days, err = strconv.Atoi(raw)
-		if err != nil || (days != 7 && days != 30 && days != 90 && days != 366) {
-			http.Error(w, "Choose 7, 30, 90 or 366 days", http.StatusBadRequest)
+		if err != nil || (days != 7 && days != 30 && days != 90 && days != 365) {
+			http.Error(w, "Choose 7, 30, 90 or 365 days", http.StatusBadRequest)
 			return
 		}
 	}

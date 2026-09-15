@@ -1114,6 +1114,9 @@ Ref = ordinary/shared/suffrage-antiphon
 Type = versicle
 Ref = ordinary/shared/suffrage-versicle
 
+Type = prayer
+Ref = shared/leader/let-us-pray
+
 Type = collect
 Ref = ordinary/shared/suffrage-collect
 
@@ -1127,6 +1130,9 @@ Ref = ordinary/shared/suffrage-antiphon-bvm
 Type = versicle
 Ref = ordinary/shared/suffrage-versicle
 
+Type = prayer
+Ref = shared/leader/let-us-pray
+
 Type = collect
 Ref = ordinary/shared/suffrage-collect-bvm
 
@@ -1135,13 +1141,19 @@ Condition = if-cross-commemoration
 Label = Commemoration of the Cross
 
 Type = antiphon
-Ref = ordinary/shared/cross-antiphon
+Ref = ordinary/shared/cross-antiphon-lauds
 
 Type = versicle
 Ref = ordinary/shared/cross-versicle
 
+Type = prayer
+Ref = shared/leader/let-us-pray
+
 Type = collect
 Ref = ordinary/shared/cross-collect
+
+Type = prayer
+Ref = shared/formulas/collect-conclusion-through-same
 
 [Closing]
 Condition = not-office-of-the-dead,not-triduum

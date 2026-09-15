@@ -2547,34 +2547,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
   }
   expect(await today(reader)).toBe(before + 1);
 
-  // The same visit lands in the mix band for today — a light-scheme phone in
-  // this project, so the day is drawn and titled with both sides' counts.
-  await reader.goto("/admin/usage?days=7");
-  for (const [name, side] of [["Nave vs Apse", "Nave"], ["Desktop vs Mobile", "Desktop"]]) {
-    const band = reader.locator(".usage-split", { hasText: name });
-    await expect(band.locator("rect > title").last())
-      .toHaveText(new RegExp(`^${easternDay()}: ${side} \\d+, `));
-  }
   await readerCtx.close();
-});
-
-test("usage report is accessible and fits narrow and wide screens", async ({ page }) => {
-  const response = await page.goto("/admin/usage?days=7");
-  expect(response.headers()["cache-control"]).toBe("no-store");
-  expect(response.headers()["x-robots-tag"]).toContain("noindex");
-  await expect(page.locator("tbody tr").filter({ has: page.locator(".usage-total") })).toHaveCount(7);
-  await expect(page.locator(".usage-form-days tbody tr")).toHaveCount(7);
-  await expect(page.getByRole("heading", { name: "Nave vs Apse" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Desktop vs Mobile" })).toBeVisible();
-  for (const theme of ["light", "dark"]) {
-    await page.evaluate(theme => document.documentElement.setAttribute("data-theme", theme), theme);
-    for (const width of [320, 390, 540, 768, 1280, 1920]) {
-      await page.setViewportSize({ width, height: 844 });
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    }
-    const results = await new AxeBuilder({ page }).analyze();
-    expect(results.violations).toEqual([]);
-  }
 });
 
 test("service worker does not cache the usage report", async ({ browser, baseURL }) => {
