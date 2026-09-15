@@ -579,7 +579,7 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		text, refs := applyConclusion(text, src, corpus)
 		elem := sourcedElement(models.OfficeElement{Type: models.Collect, Text: text, SlotRef: "collect", SourceRef: src}, src)
 		elem.SourceRefs = compactRefs(refs)
-		if isTriduum(day) && !saysPsalmDoxology(day, hourName) && len(refs) == 2 {
+		if usesTriduumForm(day, hourName) && len(refs) == 2 {
 			// The body is said in a low voice, but the conclusion is silent
 			// (Diurnal p. 313). There is no aloud congregational response.
 			conclusion := strings.TrimPrefix(text, body+"\n")

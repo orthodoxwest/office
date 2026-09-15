@@ -62,12 +62,6 @@ Ref = psalms/119-xxi
 Type = psalm
 Ref = psalms/119-xxii
 
-Type = rubric
-Ref = shared/formulas/triduum-christus-factus-rubric
-
-Type = proper-antiphon
-Ref = triduum-antiphon
-
 [Psalmody-Sunday]
 Condition = weekday-sunday,not-triduum
 
@@ -291,6 +285,12 @@ Condition = triduum
 # Monastic Diurnal, printed p. 313: the same ending closes every Hour of
 # the Triduum -- kneeling at the antiphon, the Our Father in secret,
 # Psalm 51, and the collect of the day said without Let us pray.
+
+Type = rubric
+Ref = shared/formulas/triduum-christus-factus-rubric
+
+Type = proper-antiphon
+Ref = triduum-antiphon
 
 Type = silent-prayer
 Ref = ordinary/shared/our-father

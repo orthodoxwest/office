@@ -353,20 +353,8 @@ func psalmDoxologyRef(day *models.CalendarDay) string {
 // on p. 314). The choice belongs to the office rather than to the hour
 // definition, so definitions that name the Gloria Patri outright still defer
 // here and one rubric governs every hour.
-//
-// The rubric bounds itself: "Thus are ended all the Hours during this Triduum
-// through None of Holy Sabbath" (p. 313). Holy Saturday's evening belongs to
-// Easter, which says the Gloria Patri again — its Vespers already resolves
-// against Easter, but Compline keeps the civil day for the sections proper to
-// Holy Saturday, so the bound has to be stated rather than inferred.
 func saysPsalmDoxology(day *models.CalendarDay, hourName string) bool {
-	if !isTriduum(day) {
-		return true
-	}
-	if day.Celebration.ID == "holy-saturday" && (hourName == "vespers" || hourName == "compline") {
-		return true
-	}
-	return false
+	return !usesTriduumForm(day, hourName)
 }
 
 func usesFestalVespersPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {

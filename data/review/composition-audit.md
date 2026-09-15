@@ -215,6 +215,10 @@ little-hour responsories as if the Diurnal printed them.
 
 ## Triduum review of PR #360
 
+The shared `usesTriduumForm` policy bounds psalm doxology omission and the
+silent collect conclusion independently. All seven hour definitions keep the
+complete Christus factus est ending together in `[Triduum-Ending]`.
+
 Reviewed by Codex on 2026-09-15 against the Monastic Diurnal page images and
 2026 archdiocesan ordo pp. 15–16 and 53. This review is separate from the ordinary
 year assessment above.
