@@ -26,7 +26,7 @@ func TestEngineRequiresValidAppointmentScopes(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			for _, hour := range hourNames {
+			for _, hour := range hourDefinitionNames() {
 				if err := os.WriteFile(filepath.Join(dir, "office", hour+".txt"), []byte("[Test]\nType = rubric\nRef = test\n"), 0644); err != nil {
 					t.Fatal(err)
 				}

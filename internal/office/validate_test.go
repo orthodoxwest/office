@@ -1,6 +1,9 @@
 package office
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/orthodoxwest/office/internal/texts"
@@ -110,5 +113,44 @@ func TestHasAnyKeySuffix(t *testing.T) {
 	}
 	if hasAnyKeySuffix(corpus, []string{"collect-2", "collect"}) {
 		t.Fatal("unexpected match for unrelated refs")
+	}
+}
+
+func TestValidateExceptionalVespersDefinition(t *testing.T) {
+	for _, tc := range []struct{ name, definition, want string }{
+		{"missing form", "", "office/vespers-holy-saturday.txt"},
+		{"missing fixed proper", "[Psalmody]\nType = antiphon\nRef = proper/test/missing\n", "proper/test/missing"},
+		{"valid fixed proper", "[Psalmody]\nType = antiphon\nRef = proper/test/antiphon\n", ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			for _, sub := range []string{"office", "texts/proper", "texts/ordinary"} {
+				if err := os.MkdirAll(filepath.Join(dir, sub), 0755); err != nil {
+					t.Fatal(err)
+				}
+			}
+			write := func(name, body string) {
+				t.Helper()
+				if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			write("texts/proper/test.txt", "[antiphon]\nTest antiphon.\n")
+			write("texts/ordinary/vespers.txt", "[festal-psalmody]\nferial\n")
+			for _, hour := range hourNames {
+				write("office/"+hour+".txt", "# Empty ordinary fixture\n")
+			}
+			if tc.definition != "" {
+				write("office/vespers-holy-saturday.txt", tc.definition)
+			}
+			errors := ValidateHourDefinitions(dir)
+			if tc.want == "" {
+				if len(errors) != 0 {
+					t.Fatalf("valid fixed form rejected: %v", errors)
+				}
+			} else if !strings.Contains(strings.Join(errors, "\n"), tc.want) {
+				t.Fatalf("errors = %v, want %q", errors, tc.want)
+			}
+		})
 	}
 }

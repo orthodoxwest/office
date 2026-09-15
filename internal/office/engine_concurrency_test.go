@@ -21,7 +21,7 @@ func TestEnginePreloadsHourDefinitions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, hourName := range hourNames {
+	for _, hourName := range hourDefinitionNames() {
 		want, err := ParseHourDefinition(filepath.Join(dataDir, "office", hourName+".txt"))
 		if err != nil {
 			t.Fatalf("ParseHourDefinition(%s): %v", hourName, err)
@@ -52,6 +52,7 @@ func TestEngineConcurrentCompositionIsDeterministicAndDoesNotMutateDays(t *testi
 	}{
 		{hour: "lauds", date: time.Date(2026, 3, 11, 0, 0, 0, 0, time.UTC)},
 		{hour: "vespers", date: time.Date(2026, 3, 18, 0, 0, 0, 0, time.UTC)},
+		{hour: "vespers", date: time.Date(2026, 4, 11, 0, 0, 0, 0, time.UTC)},
 		{hour: "prime", date: time.Date(2027, 4, 17, 0, 0, 0, 0, time.UTC)},
 		{hour: "compline", date: time.Date(2027, 12, 25, 0, 0, 0, 0, time.UTC)},
 	}
