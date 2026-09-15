@@ -176,3 +176,84 @@ R. So man did eat angels' food, alleluia.
 # SOURCE: draft archdiocesan Vespers book, p. 207 (Saturday within the Octave of Corpus Christi)
 V. He fed them with the finest wheat flour, alleluia.
 R. And with honey out of the stony rock did he satisfy them, alleluia.
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 420 refers Terce to the Lauds chapter on p. 418
+@use proper/pentecost-sunday-2/chapter-lauds
+
+[chapter-sext]
+# SOURCE: diurnal p. 420
+!1 John 3:16
+Hereby perceive we the love of God, * because he laid down his life for us: * and we ought to lay down our lives for the brethren.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: diurnal p. 420
+!1 John 3:18
+My little children, * let us not love in word, neither in tongue; * but in deed and in truth.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 420 refers II Vespers to the Lauds chapter on p. 418
+@use proper/pentecost-sunday-2/chapter-lauds
+
+[versicle-terce]
+# SOURCE: Monastic Diurnal pp. 420; reuses existing corpus wording
+@use proper/pentecost-sunday-2/versicle-lauds
+
+[versicle-sext]
+# SOURCE: Monastic Diurnal pp. 420; reuses existing corpus wording
+@use proper/pentecost-sunday-2/versicle-first-vespers
+
+[versicle-none]
+# SOURCE: diurnal p. 420
+V. Thou bringest bread out of the earth, alleluia.
+R. And wine that maketh glad the heart of man, alleluia.
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal pp. 421; reuses existing corpus wording
+@use proper/pentecost-sunday-2/versicle-first-vespers
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal pp. 421 (hymn reference to p. 413); reuses existing corpus wording
+@use proper/pentecost-sunday-2/hymn-first-vespers
+
+[vespers-psalmody-first]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use psalmody/vespers/corpus-christi
+
+[vespers-psalmody]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use psalmody/vespers/corpus-christi-first
+
+[psalm-antiphon-1-vespers]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-1-first-vespers
+
+[psalm-antiphon-2-vespers]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-2-first-vespers
+
+[psalm-antiphon-3-vespers]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-3-first-vespers
+
+[psalm-antiphon-4-vespers]
+# SOURCE: Monastic Diurnal pp. 417, 420 (psalmody refers to pp. 409–412); reuses existing corpus wording
+@use proper/corpus-christi/psalm-antiphon-4-first-vespers
+
+[psalm-antiphon-terce]
+# SOURCE: Monastic Diurnal pp. 420 (little-hour antiphons refer to Lauds); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-2-lauds
+
+[psalm-antiphon-sext]
+# SOURCE: Monastic Diurnal pp. 420 (little-hour antiphons refer to Lauds); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-3-lauds
+
+[psalm-antiphon-none]
+# SOURCE: Monastic Diurnal pp. 420 (little-hour antiphons refer to Lauds); reuses existing corpus wording
+@use proper/pentecost-sunday-2/psalm-antiphon-5-lauds
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal p. 421; II Vespers repeats the I Vespers responsory on pp. 417–418
+@use proper/pentecost-sunday-2/short-responsory-first-vespers

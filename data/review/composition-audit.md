@@ -314,3 +314,60 @@ catalog omits the computed Nativity Sunday owner, and its Circumcision dossier
 stops at p. 209 before the little hours on p. 213. The full resolution inventory
 and parent-verified page selection supplement those limited discovery results;
 neither negative searches nor discovery queue membership certify a fallback.
+
+
+## Sunday within the Corpus Christi octave
+
+Diurnal pp. 417–421 and the 2026 ordo pp. 71–72 appoint a distinct Sunday
+within this octave. Terce, Sext and None used ordinary antiphons, chapters
+and verses; I Vespers paired the proper antiphons with Saturday psalms, and
+II Vespers used ordinary psalmody, chapter, responsory, hymn and verse. Nineteen explicit
+data appointments repair those fallbacks with sixteen aliases and three new
+bodies: the Sext/None chapters (1 John 3:16 and 3:18) and None verse. No engine
+rule, feast metadata, shared psalm text or canonical alias target changes.
+
+Terce and II Vespers now refer to the Sunday Lauds chapter. The little hours
+reuse their appointed Lauds antiphons and existing simple verses. Both Vespers
+use Psalms 110, 111 and 116:10ff; I Vespers ends with 147:12ff, while II Vespers
+ends with 128. The existing Corpus Christi psalmody declarations supply these
+sequences, with the feast's II Vespers profile used for Sunday I Vespers and
+its I Vespers profile used for Sunday II Vespers. II Vespers also reuses the
+existing Pange lingua hymn, Vespers responsory and proper antiphons. Prime's
+already correct antiphon and psalms are regression controls.
+
+Bounded Codex and Sonnet readings agree on the new wording and printed
+appointment rubrics. Rejected readings include a punctuation disagreement,
+an adjacent-verse overrun, confusion about the name “II Sunday after
+Pentecost,” and a failed rubric reading. Corrected readings and a 300 dpi
+None image resolve them; all attempts and document/page identities remain
+in ignored run artifacts. Three new hash-bound attestations concern wording;
+the alias targets retain their existing evidence. These do not attest full
+psalm bodies or certify every inherited appointment.
+
+Across 23,016 complete offices in 2026, 2027 and 2032, 27 offices change:
+five principal date/hours on June 13–14, 2026, and four Vespers commemorations
+on July 3–4 in 2027/2032, each in three prayer forms. The latter now use the
+Sunday's own verse under General Rubrics X, p. xxix. All other elements and
+metadata compare identically after excluding the repaired slots and their
+psalmody decisions. Direct tests exercise the appointed Sunday in 2026 and
+2028 in all forms, its commemoration in 2027/2032, and its displacement by the
+transferred Visitation. Additional years exercise rule boundaries, not
+agreement with future ordos.
+
+The responsory citation required an additional boundary check, documented in
+[#362](https://github.com/orthodoxwest/office/issues/362). Diurnal p. 418 contains
+both the continuation of I Vespers' “He gave them” and the opening of Lauds'
+“He fed them.” The 2026 ordo p. 72's reference to p. 418 therefore does not
+establish a conflicting appointment. The explicit II Vespers responsory on
+p. 421 agrees with I Vespers on pp. 417–418; II Vespers now reuses that existing
+body. Independent adversarial review confirmed this pagination distinction.
+This pass does not certify the entire office, octave commemoration wording,
+or the wider octave.
+
+The audit also identified four missing Epiphany Sunday II Vespers appointments
+and a distinct little-hour source conflict, tracked in
+[#361](https://github.com/orthodoxwest/office/issues/361). Those remain separate.
+Ordinary Sunday Vespers' 2 Corinthians chapter agrees with Diurnal p. 114;
+ordinary numbered Sunday propers inspected on pp. 232 and 437 do not print
+replacement chapters. These negative findings are limited to those pages,
+not clearance of every ordinary fallback in the inventory.
