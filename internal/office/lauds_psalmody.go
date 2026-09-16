@@ -73,8 +73,7 @@ func weekdayLaudsAntiphon(day *models.CalendarDay, ref string, corpus *texts.Tex
 		return corpus.Get(key), key
 	}
 	if day.Season == models.Easter {
-		key := "seasonal/easter/" + ref
-		return corpus.Get(key), key
+		return lookupSeasonalText(day, "lauds", ref, corpus)
 	}
 	key := "ordinary/lauds/" + ref + "-" + weekday
 	return corpus.Get(key), key

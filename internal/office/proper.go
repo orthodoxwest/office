@@ -97,6 +97,21 @@ func firstText(corpus *texts.TextCorpus, prefix string, refs []string) (string, 
 	return "", ""
 }
 
+// A weekday appointment within a season outranks that season's shared text,
+// while remaining below the proper and Common tiers. Hour qualification keeps
+// e.g. a Lauds canticle antiphon from replacing a little-hour psalm antiphon.
+func lookupSeasonalText(day *models.CalendarDay, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	prefix := "seasonal/" + string(day.Season) + "/"
+	weekday := strings.ToLower(civilWeekday(day).String())
+	for _, candidate := range hourRefCandidates(hourName, ref) {
+		key := prefix + candidate + "-" + weekday
+		if text := corpus.Get(key); text != "" {
+			return text, key
+		}
+	}
+	return lookupSectionText(prefix, "", hourName, ref, corpus)
+}
+
 func seasonRefCandidates(refs []string, season models.Season) []string {
 	if season == "" {
 		return nil
@@ -470,17 +485,13 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		}
 	}
 
-	// 3. Seasonal default (hour-qualified, then generic)
+	// 3. Seasonal default (hour/weekday-qualified, then hour, then generic)
 	// The seasonal "-first" entries model the Saturday books before Sundays;
 	// they must not displace a weekday feast's own generic Vespers text merely
 	// because that feast is also celebrating first Vespers.
 	seasonalSundayFirst := strings.HasSuffix(ref, "-first") && hourName == "vespers"
 	if day.Season != "" && (!seasonalSundayFirst || isSundayFirstVespers(day)) && seasonalAppointmentApplies(day, hourName, ref, corpus) {
-		prefix := "seasonal/" + string(day.Season) + "/"
-		if text, resolved := firstText(corpus, prefix, hourCandidates); text != "" {
-			return substituteProperName(text, properName), resolved
-		}
-		if text, resolved := firstText(corpus, prefix, refCands); text != "" {
+		if text, resolved := lookupSeasonalText(day, hourName, ref, corpus); text != "" {
 			return substituteProperName(text, properName), resolved
 		}
 	}

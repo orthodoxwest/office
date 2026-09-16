@@ -183,3 +183,30 @@ R. Thanks be to God.
 !1 Peter 3:18
 For Christ also hath once suffered for sins, the just for the unjust, † that he might bring us to God, being put to death in the flesh, * but quickened by the Spirit.
 R. Thanks be to God.
+
+# Ferial canticle antiphons: the surrounding psalm groups use the shared
+# Alleluia, but the canticle retains its own antiphon with the P.T. addition.
+
+[psalm-antiphon-4-lauds-monday]
+# SOURCE: Monastic Diurnal p. 46 (ferial canticle, P.T. antiphon)
+Thine anger * is turned away, O Lord, and thou comfortedst me. Alleluia.
+
+[psalm-antiphon-4-lauds-tuesday]
+# SOURCE: Monastic Diurnal p. 52 (ferial canticle, P.T. antiphon)
+Be thou ready * to save us all the days of our life, O Lord. Alleluia.
+
+[psalm-antiphon-4-lauds-wednesday]
+# SOURCE: Monastic Diurnal p. 57 (ferial canticle, P.T. antiphon)
+The Lord shall judge * the ends of the earth. Alleluia.
+
+[psalm-antiphon-4-lauds-thursday]
+# SOURCE: Monastic Diurnal p. 63 (ferial canticle, P.T. antiphon)
+I will sing * unto the Lord, for he hath triumphed gloriously. Alleluia.
+
+[psalm-antiphon-4-lauds-friday]
+# SOURCE: Monastic Diurnal p. 69 (ferial canticle, P.T. antiphon)
+O Lord, * I have heard thy speech, and was afraid, alleluia.
+
+[psalm-antiphon-3-lauds-saturday]
+# SOURCE: Monastic Diurnal p. 75 (ferial canticle, P.T. antiphon)
+Ascribe ye greatness * unto our God. Alleluia.

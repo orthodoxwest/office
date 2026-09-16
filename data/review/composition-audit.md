@@ -684,3 +684,54 @@ The 28-year parity calendars, commemoration-merge digests and all non-Lauds
 hour digests are unchanged. `make golden`, `make check` and
 `make test-coverage` validate the repair; independent adversarial review found
 no blocker in the Lauds-only boundary or the explicit conflict holds.
+
+## Paschaltide ferial and Saturday BVM psalmody (2026-09-16)
+
+Diurnal pp.44,46,48 distinguishes the psalm groups' shared Alleluia from the
+weekday canticle's own antiphon with its P.T. addition. Six ferial canticle
+antiphons are now recorded from pp.46,52,57,63,69,75; direct page-image readings
+agree with independent Sonnet readings. The new bodies have hash-bound source
+attestations. The 2026 ordo pp.56,60–64 confirms the corresponding weekday
+ferial canticles, including Rogation Monday and the Ascension vigil.
+
+Seasonal lookup now accepts an hour-and-weekday-qualified entry before its
+shared hour/generic entries. Proper and Common precedence and seasonal scope
+gates remain in place. The Lauds-only weekday helper shares this lookup for
+ordinary Simple offices, while lesser Doubles retain their festal weekday
+canticle antiphons. Tests cover all six weekdays and prayer forms, proper and
+Common precedence, explicit omission, wrong season/weekday/hour, source traces,
+and the separation of the two Alleluia psalm groups around the canticle.
+
+The Saturday BVM office also had an explicit Paschaltide fallback to Sunday
+psalms and Benedicite. Diurnal pp.68*–69*,71* directs it to the Saturday psalter;
+p.79 appoints the festal Sirach canticle and Psalm143 divided at verse8. The
+current ordo agrees on May16 (p.63). The two fallback sections are removed;
+the existing Saturday sections now apply in every season. Four seasonal
+proper aliases reuse existing Alleluia and festal canticle texts. Actual
+calendar and synthetic tests protect Psalm67/51/143a/143b, Sirach, the joined
+Laudate group, seven Glorias including Benedictus, and the non-Paschal office.
+No new feast branch or psalmody abstraction is introduced.
+
+The **23,016-office** before/after sweep across 2026,2027,2032 and all three
+forms finds **150 offices with changed elements** (42,54,54): 13 ferial dates
+plus Saturday BVM on May16 in 2026, and 15 ferial plus three Saturday BVM dates
+in each other sampled year. All **19,728 other hours are byte-identical**;
+Lauds elements from the chapter onward and calendar metadata are unchanged.
+Deleting the obsolete sections changes Lauds decision traces even on days
+with unchanged prayers. The 28-year calendar, commemoration-merge and
+non-Lauds parity digests are unchanged. The 2026 ordo findings CSV remains
+byte-identical at **3443/3626**; that comparator does not assess these psalmody
+and canticle-antiphon distinctions.
+
+Validation: `make golden`, `make check`, `make test-coverage`, and independent
+adversarial review. Evidence and frozen comparisons remain under ignored
+`output/paschal-ferial/`. Existing clergy-held appointments are unchanged.
+
+A separate Sunday appointment gap was identified while checking the boundary:
+Diurnal p.370 prints a distinct Benedicite antiphon and a ninefold Alleluia
+for the first psalm group on Low Sunday, whereas the current Low Sunday data
+aliases every slot to the shared threefold Alleluia. The current ordo p.56
+cites that appointment. Follow its use on the subsequent Easter Sundays,
+check the exact texts independently, and preserve Vespers/little-hour
+appointments when repairing the Lauds aliases. This is recorded in the repair
+backlog and is not certified by the weekday repair.
