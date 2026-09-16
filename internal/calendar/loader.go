@@ -128,10 +128,21 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 			return nil, fmt.Errorf("%s: feast %q: HasVigil: %w", sourceFile, f.ID, err)
 		}
 	}
-	if v, ok := m["HasPrivilegedOctave"]; ok {
-		f.HasPrivilegedOctave, err = parseDataBool(v)
-		if err != nil {
-			return nil, fmt.Errorf("%s: feast %q: HasPrivilegedOctave: %w", sourceFile, f.ID, err)
+	if v, ok := m["OctaveClass"]; ok {
+		f.OctaveClass = models.OctaveClass(v)
+		if !f.OctaveClass.Valid() {
+			return nil, fmt.Errorf("%s: feast %q: invalid OctaveClass %q", sourceFile, f.ID, v)
+		}
+	}
+	if v, ok := m["CommemorationClass"]; ok {
+		f.CommemorationClass = models.CommemorationClass(v)
+		switch f.CommemorationClass {
+		case models.CommemorationDefault, models.CommemorationEpiphanyVigil, models.CommemorationPostAscensionFeria:
+		default:
+			return nil, fmt.Errorf("%s: feast %q: invalid CommemorationClass %q", sourceFile, f.ID, v)
+		}
+		if f.CommemorationClass != models.CommemorationDefault && f.Category != models.CategoryFeria {
+			return nil, fmt.Errorf("%s: feast %q: CommemorationClass requires feria category", sourceFile, f.ID)
 		}
 	}
 	if v, ok := m["IsVigil"]; ok {
@@ -143,11 +154,8 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	if v, ok := m["VigilOf"]; ok {
 		f.VigilOf = v
 	}
-	if v, ok := m["IsApostolicCompanion"]; ok {
-		f.IsApostolicCompanion, err = parseDataBool(v)
-		if err != nil {
-			return nil, fmt.Errorf("%s: feast %q: IsApostolicCompanion: %w", sourceFile, f.ID, err)
-		}
+	if v, ok := m["CompanionOf"]; ok {
+		f.CompanionOf = v
 	}
 	if v, ok := m["OnlyWith"]; ok {
 		f.OnlyWith = v
@@ -176,10 +184,11 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"_id": true, "Name": true, "Rank": true, "Color": true,
 		"Category": true, "ProperName": true, "ProperID": true, "DateRule": true,
 		"Month": true, "Day": true, "HasOctave": true, "HasVigil": true, "IsVigil": true,
-		"VigilOf":              true,
-		"HasPrivilegedOctave":  true,
-		"IsApostolicCompanion": true,
-		"OnlyWith":             true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
+		"VigilOf":            true,
+		"CommemorationClass": true,
+		"OctaveClass":        true,
+		"CompanionOf":        true,
+		"OnlyWith":           true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}
 	for key := range m {
 		if !knownKeys[key] {
@@ -214,8 +223,9 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	if !f.IsVigil && f.VigilOf != "" {
 		return nil, fmt.Errorf("%s: feast %q specifies VigilOf but is not a vigil", sourceFile, f.ID)
 	}
-	if f.HasPrivilegedOctave && !f.HasOctave {
-		return nil, fmt.Errorf("%s: feast %q specifies HasPrivilegedOctave without HasOctave", sourceFile, f.ID)
+	if f.OctaveClass != models.OctaveCommon && !f.HasOctave &&
+		!(f.OctaveClass == models.OctaveSimple && f.Rank == models.Simple) {
+		return nil, fmt.Errorf("%s: feast %q specifies OctaveClass without HasOctave (except a Simple octave day)", sourceFile, f.ID)
 	}
 
 	return f, nil

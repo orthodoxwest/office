@@ -46,15 +46,6 @@ var shortNames = map[string]string{
 	"st-bartholomew":        "St. Bartholomew",
 }
 
-var privilegedOctaves = map[string]bool{
-	"easter-sunday": true,
-	"pentecost":     true,
-}
-
-var simpleOctaves = map[string]bool{
-	"nativity-bvm": true,
-}
-
 func getShortName(feast *models.Feast) string {
 	if short, ok := shortNames[feast.ID]; ok {
 		return short
@@ -368,8 +359,8 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 			continue
 		}
 
-		isPrivileged := privilegedOctaves[feast.ID]
-		isSimple := simpleOctaves[feast.ID]
+		isPrivileged := feast.OctaveClass == models.OctavePrivilegedFirst
+		isSimple := feast.OctaveClass == models.OctaveSimple
 		isChristmas := feast.ID == "christmas"
 
 		for dayNum := 2; dayNum <= 8; dayNum++ {
@@ -462,7 +453,8 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 					Color:                 feast.Color,
 					Category:              feast.Category,
 					ProperID:              properID,
-					IsPrivilegedOctaveDay: feast.HasPrivilegedOctave && !isOctaveDay,
+					OctaveClass:           feast.OctaveClass,
+					IsPrivilegedOctaveDay: feast.OctaveClass.Privileged() && !isOctaveDay,
 					Month:                 int(octaveDate.Month()),
 					Day:                   octaveDate.Day(),
 				})
@@ -475,7 +467,8 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 					Color:                 feast.Color,
 					Category:              feast.Category,
 					ProperID:              properID,
-					IsPrivilegedOctaveDay: feast.HasPrivilegedOctave && !isOctaveDay,
+					OctaveClass:           feast.OctaveClass,
+					IsPrivilegedOctaveDay: feast.OctaveClass.Privileged() && !isOctaveDay,
 					DateRule:              fmt.Sprintf("easter+%d", delta),
 				})
 			}

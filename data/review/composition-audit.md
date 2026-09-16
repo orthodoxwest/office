@@ -837,3 +837,35 @@ review. The 28-year calendars, commemoration digests, Lauds, Vespers and Complin
 parity digests remain unchanged. The 2026 ordo finding CSV remains byte-identical
 at 3443/3626; this comparator does not assess these antiphon repetition counts.
 Existing clergy-held questions are unchanged.
+
+
+### Commemoration hierarchy (September 2026)
+
+General Rubrics XIV.14 (pp.26–27) orders occurrence commemorations by office
+class, with the concurrent office first at Vespers. VII.3 distinguishes the
+privileged octave groups: Corpus/Epiphany precede Doubles, while
+Nativity/Ascension follow them. Diurnal pp.463 and 577 keep the Peter/Paul
+companion with its office before other occurrence prayers. The 2026 ordo
+confirms representative orders on Jan11, May24/26/27, Jun14/26/28, Nov8,
+and Dec13. Source pages were read by Codex; an independent adversarial agent
+reviewed the engine changes and boundary cases.
+
+`TestCommemorationHierarchyIndependentOfInputOrder` covers the hierarchy and
+seasonal feria; `TestCommemorationCompanionGroupsAndConcurrentOffice` and
+`TestCommemorationOrphanNilAndConcurrentCompanion` protect grouping and priority.
+`TestComposedCommemorationOrderAndConclusions` checks actual Lauds/Vespers
+collect order and final conclusions in private, deacon, and priest forms.
+The existing concurrent-octave tests retain today's text-selection identity.
+
+Same-tier dignity is only resolved by represented rank; full title-X metadata
+remains #403. Equal-rank I-before-II ordering is held under #402: the current
+ordo p.46 prints Patrick before Cyril on March17, opposite a direct application
+of XIV.14's tie-break. The new test preserves that appointment. Existing
+commemoration eligibility and text-selection disputes remain separate.
+
+Frozen calendars for 2024–2051 (10,227 days) show 291 occurrence-list and 108
+Vespers-list reorderings, with no membership, identity, ownership, transfer,
+color, or other calendar-field changes. Diagnostic ordering changes on 502
+evenings. The 2026 finding CSV is unchanged at 162 findings (3466/3628 headline
+assertions agree); the existing comparator does not measure commemoration order.
+Evidence is retained under ignored `output/order-review/` in the repair worktree.

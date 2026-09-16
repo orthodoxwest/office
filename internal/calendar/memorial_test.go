@@ -26,7 +26,7 @@ func TestFirstClassFeastMemorialSuppression(t *testing.T) {
 		{"later Pentecost octave weekday", traceFeast("pentecost-octave-day-5", models.Double1stClass, models.CategoryLord), memorial, false},
 		{"Low Sunday is Greater Double", traceFeast("low-sunday", models.Double1stClass, models.CategoryLord), memorial, false},
 		{"no principal feast", nil, memorial, false},
-		{"perpetual apostolic companion separate", traceFeast("lord", models.Double1stClass, models.CategoryLord), &models.Feast{ID: "companion", Rank: models.Commemoration, IsApostolicCompanion: true}, false},
+		{"perpetual apostolic companion separate", traceFeast("lord", models.Double1stClass, models.CategoryLord), &models.Feast{ID: "companion", Rank: models.Commemoration, CompanionOf: "example-apostle"}, false},
 		{"Double rule separate", traceFeast("lord", models.Double1stClass, models.CategoryLord), traceFeast("double", models.Double, models.CategoryMartyr), false},
 		{"protected Sunday", traceFeast("lord", models.Double1stClass, models.CategoryLord), traceFeast("sunday", models.Commemoration, models.CategorySunday), false},
 		{"protected feria", traceFeast("lord", models.Double1stClass, models.CategoryLord), traceFeast("feria", models.Commemoration, models.CategoryFeria), false},

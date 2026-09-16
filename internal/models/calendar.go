@@ -247,6 +247,41 @@ const (
 // versicle "from the Psalter" and the collect of the governing Sunday.
 const FeriaCommemorationID = "penitential-feria"
 
+// OctaveClass distinguishes the groups in General Rubrics VII.1-3. The
+// privileged classes correspond to Easter/Pentecost, Epiphany/Corpus Christi,
+// and Nativity/Ascension/Sacred Heart respectively. Empty means common.
+type OctaveClass string
+
+const (
+	OctaveCommon           OctaveClass = ""
+	OctavePrivilegedFirst  OctaveClass = "privileged-first"
+	OctavePrivilegedSecond OctaveClass = "privileged-second"
+	OctavePrivilegedThird  OctaveClass = "privileged-third"
+	OctaveSimple           OctaveClass = "simple"
+)
+
+func (c OctaveClass) Valid() bool {
+	switch c {
+	case OctaveCommon, OctavePrivilegedFirst, OctavePrivilegedSecond, OctavePrivilegedThird, OctaveSimple:
+		return true
+	}
+	return false
+}
+
+func (c OctaveClass) Privileged() bool {
+	return c == OctavePrivilegedFirst || c == OctavePrivilegedSecond || c == OctavePrivilegedThird
+}
+
+// CommemorationClass identifies named ferial exceptions in XIV.14. Ordinary
+// Sundays, ferias, feasts, and octaves derive their tier from their own traits.
+type CommemorationClass string
+
+const (
+	CommemorationDefault            CommemorationClass = ""
+	CommemorationEpiphanyVigil      CommemorationClass = "epiphany-vigil"
+	CommemorationPostAscensionFeria CommemorationClass = "post-ascension-feria"
+)
+
 // Feast represents a liturgical feast or observance.
 type Feast struct {
 	ID       string
@@ -272,9 +307,10 @@ type Feast struct {
 
 	HasOctave bool
 	HasVigil  bool
-	// HasPrivilegedOctave classifies the parent's octave under Rubrics VII.3.
-	// It governs commemoration entitlement, not the rank of generated offices.
-	HasPrivilegedOctave bool `json:"-"`
+	// OctaveClass is assigned to the parent and inherited by generated days.
+	// Explicit Simple octave days also carry OctaveSimple without HasOctave.
+	OctaveClass        OctaveClass        `json:"-"`
+	CommemorationClass CommemorationClass `json:"-"`
 	// IsPrivilegedOctaveDay is derived by the builder for non-terminal days
 	// of a privileged octave. The parent feast and terminal day stay distinct.
 	IsPrivilegedOctaveDay bool `json:"-"`
@@ -286,9 +322,10 @@ type Feast struct {
 	// Explicit and generated vigils use the same relationship so validation
 	// can enforce single ownership without comparing display names.
 	VigilOf string `json:"-"`
-	// IsApostolicCompanion marks the perpetual Peter/Paul commemoration kept
-	// at the other apostle's II Vespers. This rule trait is not presentation data.
-	IsApostolicCompanion bool `json:"-"`
+	// CompanionOf links the perpetual Peter/Paul commemoration to its office.
+	// It retains the companion's II-Vespers entitlement and keeps the pair
+	// together when that office is itself commemorated (Diurnal pp.463,577).
+	CompanionOf string `json:"-"`
 
 	// OnlyWith restricts this feast/commemoration to days where the winning
 	// celebration has the given feast ID.

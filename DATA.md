@@ -47,7 +47,7 @@ Valid `Color` values: `white`, `red`, `green`, `violet`, `rose`, `black`
 
 Valid `Category` values: `lord`, `blessed-virgin`, `angel`, `apostle`, `evangelist`, `martyr`, `martyrs`, `bishop-martyr`, `virgin-martyr`, `confessor-bishop`, `confessor-doctor`, `confessor`, `virgin`, `holy-woman`, `dedication`, `sunday`, `feria`
 
-Optional keys: `HasOctave = true`, `HasVigil = true` (generate a preceding vigil), `IsVigil = true` with `VigilOf = feast-id` (this observance is an explicit vigil of the canonical feast), `IsApostolicCompanion = true` (the Peter/Paul companion retained at II Vespers), `ProperName = Andrew` (saint's given name, substituted for `N.` in common texts), `ProperID` (use another feast's proper texts), `DateRule` (for moveable feasts instead of `Month`/`Day`), `OnlyWith` (only kept on days where the named feast wins the day), `SkipRomanLeapShift = true` (keep a fixed late-February feast on its civil date in leap years), `Source` and `Notes` (documentation).
+Optional keys: `HasOctave = true`, `HasVigil = true` (generate a preceding vigil), `IsVigil = true` with `VigilOf = feast-id` (this observance is an explicit vigil of the canonical feast), `CompanionOf = feast-id` (the Peter/Paul companion retained at II Vespers and ordered with its parent office), `ProperName = Andrew` (saint's given name, substituted for `N.` in common texts), `ProperID` (use another feast's proper texts), `DateRule` (for moveable feasts instead of `Month`/`Day`), `OnlyWith` (only kept on days where the named feast wins the day), `SkipRomanLeapShift = true` (keep a fixed late-February feast on its civil date in leap years), `Source` and `Notes` (documentation).
 
 **Feast proper** (`data/texts/proper/st-andrew.txt`):
 
@@ -150,3 +150,11 @@ psalm; the engine does not convert the number for you.
 ## Psalm text verification
 
 Run `make verify-psalms` to compare every file in `data/texts/psalms/` with the [Church of England's official 1662 BCP Psalter](https://www.churchofengland.org/prayer-and-worship/worship-texts-and-resources/book-common-prayer/psalter). The check covers wording, punctuation, verse numbering, and chant separators; local `*` separators are retained as the project's representation. Historical readings are checked against the [official 1662 Book of Common Prayer PDF](https://www.churchofengland.org/sites/default/files/2019-10/the-book-of-common-prayer-1662.pdf) where the online transcription differs.
+
+Octave parents may specify `OctaveClass = privileged-first`, `privileged-second`,
+or `privileged-third` for the groups in General Rubrics VII.3 (Easter/Pentecost;
+Epiphany/Corpus; Nativity/Ascension/Sacred Heart). Omission means a common octave.
+`simple` identifies simple octaves or explicit Simple octave days. Generated days
+inherit the class; terminal days do not inherit weekday commemoration privilege.
+`CommemorationClass` identifies the two named ferial ordering exceptions in XIV.14:
+`epiphany-vigil` and `post-ascension-feria`. These fields describe liturgical classes rather than individual-date overrides.

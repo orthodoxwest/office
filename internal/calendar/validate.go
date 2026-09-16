@@ -86,6 +86,18 @@ func validateSemantics(feasts []*models.Feast) []string {
 		}
 	}
 
+	// Companions attach to an existing non-companion office, never to
+	// themselves or another companion (which would permit cycles).
+	for _, f := range feasts {
+		if f.CompanionOf == "" {
+			continue
+		}
+		parent := feastByID[f.CompanionOf]
+		if parent == nil || parent == f || parent.CompanionOf != "" {
+			errs = append(errs, fmt.Sprintf("Feast '%s' has invalid CompanionOf target '%s'", f.ID, f.CompanionOf))
+		}
+	}
+
 	// A vigil has exactly one owner. HasVigil makes the builder generate the
 	// preceding vigil (including leap-year and Sunday anticipation), so an
 	// explicit IsVigil entry with the same VigilOf target would create a
@@ -163,7 +175,7 @@ func validateSemantics(feasts []*models.Feast) []string {
 				f.ID, f.Rank,
 			))
 		}
-		if f.IsApostolicCompanion && f.Rank != models.Commemoration {
+		if f.CompanionOf != "" && f.Rank != models.Commemoration {
 			errs = append(errs, fmt.Sprintf(
 				"Feast '%s' is an apostolic companion but is ranked %s instead of commemoration",
 				f.ID, f.Rank,
