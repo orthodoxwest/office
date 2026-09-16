@@ -13,7 +13,7 @@ Ref = ordinary/compline/short-lesson
 Type = rubric
 Ref = ordinary/compline/confiteor-rubric
 
-Type = secret-prayer
+Type = silent-prayer
 Ref = ordinary/shared/our-father
 
 Type = officiant-confession
@@ -145,7 +145,7 @@ Ref = ordinary/shared/our-father
 Condition = if-preces
 Label = Preces
 
-Type = prayer
+Type = partly-secret-prayer
 Ref = ordinary/shared/apostles-creed
 
 Type = preces

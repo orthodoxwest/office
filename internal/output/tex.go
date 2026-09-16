@@ -274,6 +274,8 @@ func texElement(elem models.OfficeElement, dataDir string, chant bool) string {
 				fmt.Fprintf(&b, "\\noindent\\rubric{\\scshape %s}\\par\\nopagebreak\n", turn.Role.Label())
 				b.WriteString(formatLiturgicalBlockTeX(turn.Text))
 			}
+		} else if voiced := formatPrayerVoiceTeX(elem); voiced != "" {
+			b.WriteString(voiced)
 		} else {
 			b.WriteString(formatLiturgicalBlockTeX(elem.Text))
 		}
@@ -866,4 +868,39 @@ func slugify(s string) string {
 		}
 	}
 	return strings.TrimRight(b.String(), "-")
+}
+
+// formatPrayerVoiceTeX preserves inline spoken/silent transitions in plain
+// prayers. Invalid or role-bearing partitions use the ordinary renderer.
+func formatPrayerVoiceTeX(elem models.OfficeElement) string {
+	var joined strings.Builder
+	silent := false
+	for _, span := range elem.Voice {
+		if span.Role != "" {
+			return ""
+		}
+		joined.WriteString(span.Text)
+		silent = silent || !span.Spoken
+	}
+	if !silent || joined.String() != elem.Text {
+		return ""
+	}
+	var b strings.Builder
+	b.WriteString("\\noindent ")
+	for _, span := range elem.Voice {
+		if !span.Spoken {
+			b.WriteString("{\\color{mutedgray} ")
+		}
+		for i, paragraph := range strings.Split(span.Text, "\n\n") {
+			if i > 0 {
+				b.WriteString("\\par\n\\noindent ")
+			}
+			b.WriteString(texMediantLine(strings.ReplaceAll(paragraph, "\n", " ")))
+		}
+		if !span.Spoken {
+			b.WriteString("}")
+		}
+	}
+	b.WriteString("\\par\n\n")
+	return b.String()
 }

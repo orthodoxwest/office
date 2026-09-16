@@ -835,3 +835,27 @@ func TestTeXSilentTriduumPrayers(t *testing.T) {
 		t.Fatalf("collect delivery: %s", got)
 	}
 }
+
+func TestTeXPartlySecretCreed(t *testing.T) {
+	elem := models.OfficeElement{Type: models.Prayer, Text: "I believe in God.\n\nThe Resurrection of the body, And the Life everlasting. Amen.", Voice: []models.VoiceSpan{
+		{Text: "I believe", Spoken: true},
+		{Text: " in God.\n\n", Spoken: false},
+		{Text: "The Resurrection of the body, And the Life everlasting. Amen.", Spoken: true},
+	}}
+	got := texElement(elem, "", false)
+	for _, want := range []string{`\noindent I believe{\color{mutedgray}  in God.`, `}The Resurrection of the body, And the Life everlasting. Amen.`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in %s", want, got)
+		}
+	}
+	for _, spans := range [][]models.VoiceSpan{
+		{{Text: "Different text", Spoken: false}},
+		{{Text: elem.Text, Spoken: true}},
+		{{Text: elem.Text, Spoken: false, Role: models.VoiceOfficiant}},
+	} {
+		elem.Voice = spans
+		if formatPrayerVoiceTeX(elem) != "" {
+			t.Error("accepted invalid or non-secret plain prayer partition")
+		}
+	}
+}

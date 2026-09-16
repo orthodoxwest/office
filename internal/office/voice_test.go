@@ -115,3 +115,22 @@ func assertVoice(t *testing.T, got, want []models.VoiceSpan) {
 		}
 	}
 }
+
+func TestPartlySecretCreedPreservesTextAndFallsBackWithoutSeam(t *testing.T) {
+	for _, text := range []string{"I believe in God. The Resurrection of the body, And the Life everlasting. Amen.", "I believe in God. Amen."} {
+		spans := buildPrayerVoice("ordinary/shared/apostles-creed", text, true)
+		var joined strings.Builder
+		for _, span := range spans {
+			joined.WriteString(span.Text)
+		}
+		if joined.String() != text {
+			t.Fatalf("prayer text changed: %q", joined.String())
+		}
+		if !strings.Contains(text, "The Resurrection") {
+			assertVoice(t, spans, buildPrayerVoice("ordinary/shared/apostles-creed", text, false))
+		}
+	}
+	if got := buildPrayerVoice("ordinary/shared/hail-mary", "Hail, Mary, full of grace.", true); len(got) != 2 || got[1].Spoken {
+		t.Fatalf("unknown partly-secret seam: %+v", got)
+	}
+}

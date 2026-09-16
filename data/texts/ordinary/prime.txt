@@ -35,6 +35,10 @@ Amen.
 [psalm-antiphon]
 O God, thou art my God; early will I seek thee.
 
+[psalm-antiphon-1-sunday]
+# SOURCE: Monastic Diurnal p. 83: three alleluias outside Paschaltide
+@use ordinary/terce/psalm-antiphon-sunday
+
 [psalm-antiphon-1-monday]
 Serve the Lord in fear: * and rejoice unto him with reverence.
 

@@ -17,6 +17,12 @@ var prayerIncipits = map[string]string{
 // people's response.
 const ourFatherAloudSeam = "And lead us not into temptation"
 
+// The preces Creed resumes aloud at its final articles (Diurnal pp. 7, 152).
+var prayerAloudSeams = map[string]string{
+	"ordinary/shared/our-father":     ourFatherAloudSeam,
+	"ordinary/shared/apostles-creed": "The Resurrection of the body",
+}
+
 // buildPrayerVoice partitions a full prayer text into spoken/silent spans.
 //
 // secret (partly=false): spoken incipit + silent remainder.
@@ -41,7 +47,11 @@ func buildPrayerVoice(ref, text string, partly bool) []models.VoiceSpan {
 		}
 	}
 
-	seamIdx := strings.Index(text, ourFatherAloudSeam)
+	seam, ok := prayerAloudSeams[ref]
+	if !ok {
+		return buildPrayerVoice(ref, text, false)
+	}
+	seamIdx := strings.Index(text, seam)
 	if seamIdx < len(incipit) {
 		// Missing or degenerate seam: fall back to typical secret delivery.
 		return buildPrayerVoice(ref, text, false)

@@ -60,6 +60,8 @@ proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest
 proper/solemnity-st-joseph/collect who-livest
+# Diurnal p. 560 explicitly prints Who with God the Father ... livest.
+proper/ss-peter-paul-octave-day/collect who-livest
 # Directly printed in the Diurnal with the second-person ending (pp. 492, 500).
 proper/st-gabriel-archangel/collect who-livest
 proper/st-joseph/collect who-livest

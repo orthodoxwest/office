@@ -153,6 +153,7 @@ func TestPrimePreces(t *testing.T) {
 
 func TestResolvePrimePsalmAntiphon(t *testing.T) {
 	corpusTexts := map[string]string{
+		"ordinary/prime/psalm-antiphon-1-sunday":               "Sunday Prime",
 		"ordinary/prime/psalm-antiphon":                        "Prime generic fallback",
 		"ordinary/prime/psalm-antiphon-1-monday":               "Monday",
 		"ordinary/prime/psalm-antiphon-1-wednesday":            "Wednesday",
@@ -264,14 +265,14 @@ func TestResolvePrimePsalmAntiphon(t *testing.T) {
 			// Per-annum Sundays have no Prime-local ordinary antiphon; the
 			// generic ordinary/prime/psalm-antiphon must not steal the first
 			// Lauds antiphon that the festal rubric appoints.
-			name: "Sunday without proper takes first Lauds antiphon",
+			name: "Sunday without proper takes the Prime Sunday antiphon",
 			day: &models.CalendarDay{
 				Date:        time.Date(2026, 1, 18, 0, 0, 0, 0, time.UTC),
 				Season:      models.Epiphany,
 				Celebration: &models.Feast{ID: "epiphany-sunday-2", Category: models.CategorySunday},
 			},
-			want: "Sunday Lauds I",
-			ref:  "ordinary/lauds/psalm-antiphon-1-sunday",
+			want: "Sunday Prime",
+			ref:  "ordinary/prime/psalm-antiphon-1-sunday",
 		},
 		{
 			name: "weekday feast without proper takes first Lauds antiphon",
