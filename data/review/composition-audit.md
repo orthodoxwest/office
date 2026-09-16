@@ -428,5 +428,40 @@ rendered hours checked on April 10–12. Calendar, colour, ownership and
 commemoration comparisons use the same reference and comparator before and
 after. Goldens include the complete rendered April 11 Vespers and the 28-year
 parity snapshot. Broader corpus wording remains a separate source-review task:
-in particular, Holy Saturday Compline's current Nunc dimittis antiphon differs
-from the p. 361–362 appointment and is recorded in the repair backlog.
+the Holy Saturday Compline follow-up below repairs its Nunc dimittis antiphon
+and the transition to the collect.
+
+
+## Holy Saturday Compline antiphon and collect transition
+
+Diurnal pp. 361–362 prints the Nunc dimittis antiphon “In the end of the
+sabbath,” also printed at Vigil Vespers on p. 360. The 2026 ordo p. 53 appoints
+that proper Compline. Its antiphon now aliases the already reviewed Vigil
+body, replacing the unrelated “Now Thou dost dismiss Thy servant” text.
+Independent bounded Codex and Sonnet page readings agree on every word;
+the existing canonical punctuation, pointing and attestation are retained.
+The independent readings differ only in punctuation after “sabbath.”
+No new canonical body, wording attestation or engine rule is introduced.
+
+After the repeated antiphon, p. 362 directs the greeting, invitation and
+collect at once. The extra Kyrie came from a dedicated `Chapter-Easter-Eve`
+section; removing that section restores the printed transition. Compline's
+opening, three psalms, four doxologies, Easter ownership, Regina caeli and
+closing prayers remain intact. The Marian reference includes the ordinary
+“May the divine help” conclusion appointed on p. 156; its position and wording
+are explicit regression controls.
+
+The comparison covers 23,016 complete offices across 2026, 2027 and 2032 in
+private, deacon and priest forms. Only nine rendered offices change: Holy
+Saturday Compline in each year/form, with two antiphon occurrences replaced
+and one Kyrie removed. The other 3,279 Compline compositions lose only the
+obsolete section's omitted decision-trace entry. After excluding these two
+repairs and that trace entry, every composed-office comparison is identical.
+All other hours retain identical complete-office hashes.
+
+`TestHolySaturdayComplineAppointments` checks the exact canticle-to-collect
+sequence, full antiphon and canonical source, retained psalmody and Marian
+conclusion, evening ownership and adjacent-day boundaries. It fails against
+the pre-repair data. These checks establish the repaired appointments and
+retained structure, not complete wording or prayer-form certification. The
+resolved antiphon item is removed from the outstanding repair backlog.

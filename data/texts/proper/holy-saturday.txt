@@ -42,7 +42,8 @@ Christ, ✠ for our sake, became obedient unto death, even the death of the cros
 Almighty God, we beseech thee graciously to behold this thy family, for which our Lord Jesus Christ was contented to be betrayed, and given up into the hands of wicked men, and to suffer death upon the cross:
 
 [nunc-dimittis-antiphon]
-Now Thou dost dismiss Thy servant, O Lord, * according to Thy word in peace, alleluia.
+# SOURCE: Monastic Diurnal pp. 361–362; repeats the Vigil antiphon on p. 360
+@use proper/holy-saturday/vigil-magnificat-antiphon
 
 # The Triduum omits these at Lauds and Vespers; see the SCOPE note on
 # seasonal/passiontide/chapter-vespers for the rubric and its witnesses. The
