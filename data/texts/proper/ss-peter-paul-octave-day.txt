@@ -1,0 +1,23 @@
+# Gospel antiphons appointed within the octave and on its octave day.
+# Monastic Diurnal pp. 558–560. Other appointments are reviewed separately.
+
+[benedictus-antiphon]
+# SOURCE: diurnal p. 558
+Glorious princes * over all the earth, as in life they loved one another, so even in death they were not divided.
+
+[magnificat-antiphon]
+# SOURCE: diurnal p. 558
+Peter the Apostle * and Paul the Doctor of the Gentiles: these have taught us thy law, O Lord.
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal p. 558; 2026 ordo pp. 77–78
+@use proper/ss-peter-paul-octave-day/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: Monastic Diurnal p. 558; 2026 ordo pp. 77–78
+@use proper/ss-peter-paul-octave-day/magnificat-antiphon
+
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal p. 559, At I and II Vespers: rest as within octave p. 558
+@use proper/ss-peter-paul-octave-day/magnificat-antiphon

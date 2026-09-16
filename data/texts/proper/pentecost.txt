@@ -45,7 +45,8 @@ The Apostles * did speak with other tongues the wonderful works of God, alleluia
 Receive ye * the Holy Ghost: whosesoever sins ye remit, they are remitted unto them, alleluia.
 
 [magnificat-antiphon]
-This day * the day of Pentecost is fully come, alleluia. This day the Holy Ghost appeared in fire unto the disciples, and gave unto them gifts of grace. He sent them into all the world, to preach and to testify that he who believeth, and is baptized, shall be saved, alleluia.
+# SOURCE: diurnal p. 399
+To-day * are fulfilled the days of Pentecost, alleluia: to-day the Holy Spirit appeared in fire to the disciples, and bestowed upon them his manifold graces: sending them into all the world, to preach the gospel, and to testify: He that believeth and is baptized shall be saved, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 187 (I Vespers, The Feast of Pentecost)
@@ -235,3 +236,8 @@ R. They were all filled with the Holy Ghost. * Alleluia, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[short-responsory-compline]
+# SOURCE: Monastic Diurnal p. 151; 2026 ordo p. 18, alleluias through Pentecost octave Saturday None
+# Inherited by the octave; Compline follows Trinity from its I Vespers.
+@use seasonal/easter/short-responsory-compline

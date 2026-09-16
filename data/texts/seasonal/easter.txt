@@ -111,8 +111,9 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Redeem me, O Lord, and have mercy on me, alleluia, alleluia.
 
 [short-responsory-compline]
-V. Keep us, O Lord, as the apple of an eye, alleluia.
-R. Hide us under the shadow of thy wings, alleluia.
+# SOURCE: diurnal p. 151
+V. Keep us, O Lord, as the apple of an eye. Alleluia.
+R. Hide us under the shadow of thy wings. Alleluia.
 
 [versicle-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 129

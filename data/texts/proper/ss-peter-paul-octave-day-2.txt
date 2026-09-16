@@ -1,0 +1,19 @@
+# Gospel antiphons appointed within the octave and on its octave day.
+# Monastic Diurnal pp. 558–560. Other appointments are reviewed separately.
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal pp. 558–560; octave antiphons, distinct from the feast
+@use proper/ss-peter-paul-octave-day/benedictus-antiphon
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal pp. 558–560; octave antiphons, distinct from the feast
+@use proper/ss-peter-paul-octave-day/magnificat-antiphon
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal p. 558; 2026 ordo pp. 77–78
+@use proper/ss-peter-paul-octave-day/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: Monastic Diurnal p. 558; 2026 ordo pp. 77–78
+@use proper/ss-peter-paul-octave-day/magnificat-antiphon
+
