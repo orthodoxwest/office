@@ -433,6 +433,11 @@ type VespersDesignation struct {
 	// this context to take its Antiphon and versicle from I Vespers (XIV.14).
 	FollowingOfficeCommemorationID string
 
+	// FollowingOfficeOctaveOf identifies the octave whose office is celebrated
+	// tomorrow when this evening is II Vespers. Unlike WithinOctaveOf, an
+	// occurring feast inside the octave does not qualify (Diurnal pp.393,421).
+	FollowingOfficeOctaveOf string `json:"-"`
+
 	// PsalmodyFromPreceding marks a Vespers split at the Chapter. When a Simple
 	// Office falls on the following day, the outgoing office "ends at the
 	// Chapter at Vespers, at which point the Office of the Simple begins to be

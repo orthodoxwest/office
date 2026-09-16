@@ -115,9 +115,9 @@ func isPrivilegedOctaveCommemoration(f *models.Feast) bool {
 	return f != nil && f.IsPrivilegedOctaveDay
 }
 
-// octaveParentID returns the parent feast ID for a generated octave-day feast,
+// OctaveParentID returns the parent feast ID for a generated octave-day feast,
 // e.g. "all-saints-octave-day-2" → "all-saints". Empty when f is not an octave day.
-func octaveParentID(f *models.Feast) string {
+func OctaveParentID(f *models.Feast) string {
 	if f == nil {
 		return ""
 	}
@@ -132,8 +132,8 @@ func octaveParentID(f *models.Feast) string {
 }
 
 func sameOctaveDays(a, b *models.Feast) bool {
-	parent := octaveParentID(a)
-	return parent != "" && parent == octaveParentID(b)
+	parent := OctaveParentID(a)
+	return parent != "" && parent == OctaveParentID(b)
 }
 
 // isDoubleOrAbove returns true if the feast rank is Double or higher.
@@ -587,7 +587,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 		// An octave represented by the office being sung is not added again
 		// through tomorrow's occurrence list (Christmas -> St Stephen).
 		if secondVespers && isDayWithinOctave(c) &&
-			octaveCelebrationParent(preceding) == octaveParentID(c) {
+			octaveCelebrationParent(preceding) == OctaveParentID(c) {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: c.ID})
 			continue
 		}
@@ -840,13 +840,14 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
 		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, following, boundary, boundaryDecisions)
 		return models.VespersDesignation{
-			Owner:          models.VespersIIOfPreceding,
-			Feast:          precFeast,
-			Color:          preceding.Color,
-			Season:         preceding.Season,
-			Commemorations: comms,
-			Rule:           "concurrence:preceding-only",
-			Decisions:      decisions,
+			FollowingOfficeOctaveOf: octaveCelebrationParent(following),
+			Owner:                   models.VespersIIOfPreceding,
+			Feast:                   precFeast,
+			Color:                   preceding.Color,
+			Season:                  preceding.Season,
+			Commemorations:          comms,
+			Rule:                    "concurrence:preceding-only",
+			Decisions:               decisions,
 		}
 	}
 
@@ -866,6 +867,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 			Season:                         preceding.Season,
 			Commemorations:                 comms,
 			FollowingOfficeCommemorationID: followingOfficeCommemorationID,
+			FollowingOfficeOctaveOf:        octaveCelebrationParent(following),
 			Rule:                           rule,
 			Decisions:                      decisions,
 		}

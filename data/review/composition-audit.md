@@ -869,3 +869,43 @@ color, or other calendar-field changes. Diagnostic ordering changes on 502
 evenings. The 2026 finding CSV is unchanged at 162 findings (3466/3628 headline
 assertions agree); the existing comparator does not measure commemoration order.
 Evidence is retained under ignored `output/order-review/` in the repair worktree.
+
+### Sunday octave commemorations at Vespers (September 2026)
+
+Diurnal pp.391,418,421 and the 2026 ordo pp.65,71–72 appoint the octave's
+Magnificat antiphon and verse at Sunday Vespers: Ascension Sunday I uses
+O King of glory; Corpus Sunday I uses O sacred banquet; Corpus Sunday II uses
+O how sweet. The p.421 footnote repeats the I-Vespers form if the following
+day's **office** is not of the octave. Falling inside the octave's calendar
+window does not establish that office. General Rubrics XIV.10–11 supplies the
+commemoration text-selection framework. Codex read the cited page images;
+an independent adversarial agent reviewed the source requirements and diff.
+
+Optional `commemoration-antiphon-` and `commemoration-versicle-` slots on the
+parent proper take three context suffixes: `sunday-first-vespers`,
+`sunday-second-vespers`, and `sunday-second-vespers-before-other-office`.
+They apply only when a Sunday actually owns Vespers within that same octave.
+Each context requires its own entry; a missing slot retains the existing
+lookup without inheriting another context. This preserves Ascension Sunday II
+under #398, including its unresolved fallback. The eight new entries are
+aliases of existing texts, not fresh transcriptions or wording attestations.
+
+`TestAscensionAndCorpusSundayOctaveCommemorations` and the executable
+`sunday-octave-vespers-commemorations` requirement cover the agreed 2026
+appointments in all prayer forms, with ownership and resolution tracing.
+`TestSundayOctaveVespersContextAndFootnote` and
+`TestSecondVespersRetainsFollowingOctaveOffice` cover the footnote, missing
+appointments, and actual office versus calendar window.
+`TestOctaveSundayAppointmentsDoNotLeakToOtherOffices` protects Bede I Vespers
+(2028), Peter–Paul II (2030), and transferred Visitation II (2027,2032,2043),
+as well as the #398 hold. These scope checks do not certify their fallback
+wording.
+
+The default-calendar 2024–2051 sweep compares 71,589 private-form hours:
+62 Vespers offices change, all owned by the relevant Sundays. Only the octave
+antiphons, verses, and their source references change; principal offices and
+all 10,227 calendar days remain unchanged. The 2026 changes are exactly May23,
+June13, and June14 Vespers. The existing headline comparator does not compare
+these commemoration texts, so its 162 findings (3466/3628 agreeing assertions)
+remain unchanged. Evidence is retained under ignored `output/evening-review/`
+in the repair worktree.

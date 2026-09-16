@@ -260,3 +260,32 @@ R. Thou bringest bread out of the earth. * Alleluia, alleluia.
 [commemoration-versicle-lauds]
 # SOURCE: Monastic Diurnal p. 419 (octave commemoration at Lauds)
 @use proper/corpus-christi/versicle-lauds
+
+[commemoration-antiphon-sunday-first-vespers]
+# SOURCE: Monastic Diurnal p. 418; 2026 ordo p. 71 (octave commemoration at Sunday I Vespers)
+@use proper/corpus-christi/magnificat-antiphon
+
+
+[commemoration-versicle-sunday-first-vespers]
+# SOURCE: Monastic Diurnal p. 418; 2026 ordo p. 71 (octave commemoration at Sunday I Vespers)
+@use proper/corpus-christi/versicle-vespers
+
+
+[commemoration-antiphon-sunday-second-vespers]
+# SOURCE: Monastic Diurnal p. 421; 2026 ordo p. 72 (octave commemoration at Sunday II Vespers before an octave office)
+@use proper/corpus-christi/magnificat-antiphon-first
+
+
+[commemoration-versicle-sunday-second-vespers]
+# SOURCE: Monastic Diurnal p. 421; 2026 ordo p. 72 (octave commemoration at Sunday II Vespers before an octave office)
+@use proper/corpus-christi/versicle-vespers
+
+
+[commemoration-antiphon-sunday-second-vespers-before-other-office]
+# SOURCE: Monastic Diurnal p. 421 footnote (Sunday II Vespers when tomorrow is not the octave office)
+@use proper/corpus-christi/magnificat-antiphon
+
+
+[commemoration-versicle-sunday-second-vespers-before-other-office]
+# SOURCE: Monastic Diurnal p. 421 footnote (Sunday II Vespers when tomorrow is not the octave office)
+@use proper/corpus-christi/versicle-vespers

@@ -2219,5 +2219,65 @@
         "before_slot": "versicle"
       }
     ]
+  },
+  {
+    "id": "sunday-octave-vespers-commemorations",
+    "source": "Monastic Diurnal pp.391,418,421 and p.421 footnote; General Rubrics XIV.10–11; 2026 ordo pp.65,71–72. Ascension Sunday II remains held under #398.",
+    "cases": [
+      {
+        "date": "2026-05-23",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-3",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/ascension/commemoration-antiphon-sunday-first-vespers",
+        "contains": "O King of glory",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-05-23",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-3",
+        "slot": "commemoration-versicle",
+        "ref": "proper/ascension/commemoration-versicle-sunday-first-vespers",
+        "contains": "God is gone up",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-06-13",
+        "hour": "vespers",
+        "commemoration_owner": "corpus-christi-octave-day-3",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/corpus-christi/commemoration-antiphon-sunday-first-vespers",
+        "contains": "O sacred banquet",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-06-13",
+        "hour": "vespers",
+        "commemoration_owner": "corpus-christi-octave-day-3",
+        "slot": "commemoration-versicle",
+        "ref": "proper/corpus-christi/commemoration-versicle-sunday-first-vespers",
+        "contains": "Thou gavest them bread from heaven",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-06-14",
+        "hour": "vespers",
+        "commemoration_owner": "corpus-christi-octave-day-4",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/corpus-christi/commemoration-antiphon-sunday-second-vespers",
+        "contains": "O how sweet",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-06-14",
+        "hour": "vespers",
+        "commemoration_owner": "corpus-christi-octave-day-4",
+        "slot": "commemoration-versicle",
+        "ref": "proper/corpus-christi/commemoration-versicle-sunday-second-vespers",
+        "contains": "Thou gavest them bread from heaven",
+        "before_slot": "commemoration-collect"
+      }
+    ]
   }
 ]

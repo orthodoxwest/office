@@ -41,6 +41,11 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	var elems []models.OfficeElement
 	for i, comm := range comms {
 		lookup := func(ref string) (string, string) {
+			if key := sundayOctaveCommemorationRef(day, comm, hourName, ref); key != "" {
+				if text := corpus.Get(key); text != "" {
+					return text, key
+				}
+			}
 			if isSynthesizedFeria(comm) {
 				return lookupFeriaCommemoration(day, comm, day.Season, hourName, ref, corpus)
 			}
@@ -112,6 +117,37 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 		})
 	}
 	return elems
+}
+
+// sundayOctaveCommemorationRef selects an optional appointment on the octave
+// parent's proper, scoped to the Sunday that actually owns Vespers. A generated
+// day's ordinal cannot identify this context: the same day may be commemorated
+// under a saint's office instead. At Sunday II Vespers the following day's
+// office, not merely its date inside the octave, determines the form (Diurnal
+// pp.391,393,418,421; General Rubrics XIV.10–11).
+//
+// Each context is opt-in. In particular, a missing II-Vespers appointment must
+// not inherit the I-Vespers one: a source disagreement may leave it held (#398).
+func sundayOctaveCommemorationRef(day *models.CalendarDay, comm *models.Feast, hourName, ref string) string {
+	if day == nil || hourName != "vespers" || day.Celebration == nil ||
+		day.Celebration.Category != models.CategorySunday || day.WithinOctaveOf == "" ||
+		calendar.OctaveParentID(comm) != day.WithinOctaveOf ||
+		(ref != "commemoration-antiphon" && ref != "commemoration-versicle") {
+		return ""
+	}
+	var context string
+	switch day.Vespers.Owner {
+	case models.VespersIOfFollowing:
+		context = "sunday-first-vespers"
+	case models.VespersIIOfPreceding:
+		context = "sunday-second-vespers"
+		if day.Vespers.FollowingOfficeOctaveOf != day.WithinOctaveOf {
+			context += "-before-other-office"
+		}
+	default:
+		return ""
+	}
+	return "proper/" + day.WithinOctaveOf + "/" + ref + "-" + context
 }
 
 // isSaturdaySecondVespersSundayCommemoration identifies a Sunday which is
