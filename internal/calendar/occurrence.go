@@ -239,6 +239,28 @@ func suppressesStGeorgeOctave(winner *models.Feast) bool {
 	return strings.HasPrefix(winner.ID, "easter-sunday-octave-day-")
 }
 
+// Diurnal VIII (pp. xxviii-xxix): a Memorial is not commemorated on a
+// Double I Class feast. Rank also expresses precedence in this calendar:
+// Greater Sundays, privileged ferias and generated octave weekdays are not
+// thereby Double I Class feasts. Low Sunday is printed Gd in the 2026 ordo
+// (p. 56), despite its first-class Sunday precedence here.
+func suppressesMemorials(winner *models.Feast) bool {
+	if winner == nil || winner.Rank != models.Double1stClass ||
+		winner.Category == models.CategorySunday || winner.Category == models.CategoryFeria ||
+		winner.IsVigil || isDayWithinOctave(winner) {
+		return false
+	}
+	switch winner.ID {
+	case "low-sunday":
+		return false
+	case "easter-monday", "easter-tuesday", "solemnity-st-joseph":
+		// Preserve the appointments awaiting scope rulings in #380/#378.
+		// Pentecost Monday/Tuesday are generated octave weekdays above.
+		return false
+	}
+	return true
+}
+
 func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.CompositionDecision) {
 	if comm == nil {
 		return false, models.CompositionDecision{}
@@ -252,6 +274,13 @@ func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.
 
 	if winner == nil {
 		return false, models.CompositionDecision{}
+	}
+
+	// Perpetual Peter/Paul companions have their own eligibility rules.
+	if comm.Rank == models.Commemoration && !isApostolicCompanionCommemoration(comm) &&
+		comm.Category != models.CategorySunday &&
+		comm.Category != models.CategoryFeria && !comm.IsVigil && suppressesMemorials(winner) {
+		return true, models.CompositionDecision{Rule: "commemoration:memorial-under-first-class-feast", Outcome: "suppressed", Detail: comm.ID}
 	}
 
 	// Within the Pentecost octave, the current day takes precedence over the
