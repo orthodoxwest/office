@@ -228,6 +228,13 @@ def page_record(page: dict) -> dict:
     }
 
 
+LENT_EMBER_NAMES = {
+    f"lent-ember-{day}": f"Lent Ember {day.title()}"
+    for day in ("wednesday", "friday", "saturday")
+}
+LENT_EMBER_LOCATOR_ROUTE = "ocr-lent-ember-weekday-v1"
+
+
 class FeastPageLocator:
     def __init__(self, page_key: str = DEFAULT_PAGE_KEY):
         self.page_key = page_key
@@ -236,6 +243,10 @@ class FeastPageLocator:
         self.index_sha256 = diurnal_pages.sha256_file(self.index_path)
 
     def locate(self, dossier: dict) -> dict:
+        lent_ember_name = LENT_EMBER_NAMES.get(dossier.get("feast_id", ""))
+        route = LENT_EMBER_LOCATOR_ROUTE if lent_ember_name else (
+            "ocr-running-head-date+fuzzy-title" if dossier.get("kind") == "fixed"
+            else "ocr-fuzzy-title")
         names = [
             dossier.get("name", ""), dossier.get("proper_name", ""),
             transcribe.humanize(dossier.get("feast_id", "")),
@@ -251,7 +262,11 @@ class FeastPageLocator:
             }.get(dossier.get("feast_id", ""))
             if alias:
                 names.append(alias)
-        if dossier.get("kind") == "fixed":
+        if lent_ember_name:
+            # Bind the season and weekday to the feast ID. A shorter alias
+            # must not compete with, or retry after, the strict locator.
+            attempts = [diurnal_pages.locate_named_pages(self.index, lent_ember_name)]
+        elif dossier.get("kind") == "fixed":
             attempts = [diurnal_pages.locate_feast_pages(
                 self.index, dossier["month"], dossier["day"], name,
             ) for name in names if name]
@@ -263,8 +278,7 @@ class FeastPageLocator:
                 "pages": [], "locate_confidence": "none", "locate_status": "no-pages",
                 "source_witness": {
                     "page_key": self.page_key, "pdf_sha256": self.index.get("pdf_sha256", ""),
-                    "locator_route": "ocr-running-head-date+fuzzy-title"
-                    if dossier.get("kind") == "fixed" else "ocr-fuzzy-title",
+                    "locator_route": route,
                 },
             }
         best = max(found, key=lambda item: (item.get("name_score", 0), len(item["pages"])))
@@ -277,8 +291,7 @@ class FeastPageLocator:
                 "page_key": self.page_key, "pdf_sha256": self.index.get("pdf_sha256", ""),
                 "source_pdf": self.index.get("source_pdf", ""), "dpi": self.index.get("dpi"),
                 "index_path": str(self.index_path), "index_sha256": self.index_sha256,
-                "locator_route": "ocr-running-head-date+fuzzy-title"
-                if dossier.get("kind") == "fixed" else "ocr-fuzzy-title",
+                "locator_route": route,
                 "pages": [{
                     key: page[key] for key in (
                         "pdf_page", "printed_page", "inferred", "ocr_route", "ocr_text_sha256",
@@ -702,6 +715,9 @@ def validate_source(dossier: dict, checked: dict[Path, str]) -> None:
     if packet_hash(dossier) != dossier.get("packet_sha256"):
         raise ValueError("prepared dossier changed; prepare a new run")
     witness = dossier["source_witness"]
+    if (dossier.get("feast_id") in LENT_EMBER_NAMES
+            and witness.get("locator_route") != LENT_EMBER_LOCATOR_ROUTE):
+        raise ValueError("Lent Ember locator changed; prepare a new run")
     files = [(witness.get("source_pdf", ""), witness.get("pdf_sha256")),
              (witness.get("index_path", ""), witness.get("index_sha256"))]
     files.extend((p["png"], p.get("png_sha256")) for p in dossier["pages"])

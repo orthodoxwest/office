@@ -88,6 +88,17 @@ question or ordo/source conflict affects the proposed appointment. Page location
 uses OCR and does not perform this review. Tasks without located pages need
 source research before they can become simple reading tasks.
 
+Lent Ember searches require both a Lent running head and an explicit Ember
+weekday heading, which may appear below the top of a page. The search includes
+a continuation leaf through the next weekday boundary and keeps the eight-page
+cap. Ambiguous or unreadable identities remain unresolved; they do not fall
+back to an Advent or Pentecost title match. A located leaf can contain parts
+of neighboring offices, so the named feast and slot still require page-image
+review before reading or applying. Discovery binds these searches to the feast
+ID; shorter aliases cannot bypass the season and weekday checks. Saved Lent
+Ember dossiers from the older fuzzy locator must be prepared again before
+resuming readers or application, even when their source files are unchanged.
+
 A volunteer can take a named task from `queue.md` and return its slot ID, a
 literal reading and printed page, or the visible cross-reference/absence, or
 an uncertainty note. Keep that evidence in ignored `output/` for review; the

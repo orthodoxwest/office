@@ -107,6 +107,35 @@ class SelectionTests(unittest.TestCase):
         )), "commemoration-antiphon-lauds")
 
 
+class LocatorTests(unittest.TestCase):
+    def test_lent_ember_identity_cannot_be_broadened_or_retried_by_alias(self):
+        def page(number, header):
+            return {"pdf_page": number, "printed_page": str(number),
+                    "layout_text": header + "\nEMBER FRIDAY", "text": ""}
+
+        lent = page(10, "I Week in Lent")
+        pentecost = page(20, "Within the Octave of Pentecost")
+        for source, expected in (([lent, pentecost], [10]), ([pentecost], []),
+                                 ([lent, page(11, "I Week in Lent"), pentecost], [])):
+            for alias in ("Ember Friday", "Pentecost Ember Friday", ""):
+                with self.subTest(source=source, alias=alias):
+                    locator = object.__new__(discover.FeastPageLocator)
+                    locator.index = {"pages": source}
+                    locator.index_path = Path("/synthetic/index.json")
+                    locator.index_sha256 = "synthetic"
+                    locator.page_key = "synthetic"
+                    d = {"feast_id": "lent-ember-friday", "kind": "temporal",
+                         "name": "Lent Ember Friday", "proper_name": alias}
+                    with patch.object(discover, "page_record", side_effect=lambda p: {
+                        **p, "inferred": False, "ocr_route": "synthetic", "ocr_text_sha256": "synthetic",
+                    }):
+                        found = locator.locate(d)
+                    self.assertEqual([p["pdf_page"] for p in found["pages"]], expected)
+                    self.assertEqual(found["locate_status"], "matched" if expected else "no-pages")
+                    self.assertEqual(found["source_witness"]["locator_route"],
+                                     discover.LENT_EMBER_LOCATOR_ROUTE)
+
+
 class PromptTests(unittest.TestCase):
     def test_prompt_defines_printed_cross_references_and_extra(self):
         prompt_text = discover.build_prompt(dossier())
@@ -299,6 +328,28 @@ class QueueTests(unittest.TestCase):
                 self.resume()
             path.write_bytes(original)
         self.assertEqual(len(self.runner.primary_calls), 3)
+
+    def test_old_lent_ember_packets_require_preparation_before_reading_or_applying(self):
+        d = self.dossiers[0]
+        d.update(feast_id="lent-ember-friday", name="Lent Ember Friday", kind="temporal")
+        self.current[0] = copy.deepcopy(d)
+        for route in (None, "ocr-fuzzy-title"):
+            d["source_witness"]["locator_route"] = route
+            d["packet_sha256"] = discover.packet_hash(d)
+            (self.run / "dossiers.jsonl").write_text(json.dumps(d) + "\n")
+            for flags in ((), ("--apply",)):
+                with self.subTest(route=route, flags=flags), patch.object(discover, "CorpusApplier") as applier:
+                    with self.assertRaisesRegex(ValueError, "Lent Ember locator changed; prepare a new run"):
+                        self.resume(*flags)
+                    applier.return_value.assert_not_called()
+        self.assertEqual(self.runner.primary_calls, [])
+        self.assertEqual(self.runner.secondary_calls, [])
+
+        d["source_witness"]["locator_route"] = discover.LENT_EMBER_LOCATOR_ROUTE
+        d["packet_sha256"] = discover.packet_hash(d)
+        (self.run / "dossiers.jsonl").write_text(json.dumps(d) + "\n")
+        self.resume()
+        self.assertEqual(len(self.runner.primary_calls), 1)
 
     def test_missing_pages_are_visible_but_do_not_consume_readers(self):
         d = self.dossiers[0]

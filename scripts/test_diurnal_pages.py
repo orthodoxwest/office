@@ -181,5 +181,75 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(found["pages"][0]["pdf_page"], 350)
 
 
+class LentEmberLocatorTests(unittest.TestCase):
+    @staticmethod
+    def page(number, header, body):
+        return {"pdf_page": number, "printed_page": str(number), "png": f"{number}.png",
+                "inferred": False, "layout_text": header + "\n" + body, "text": ""}
+
+    def lent_run(self):
+        # Synthetic two-column headings, with the requested section below
+        # the old sixteen-line search window and a collect across a leaf.
+        filler = "ordinary body line\n" * 20
+        return [
+            self.page(40, "I Week in Lent", filler + "TUESDAY\n    EMBER WEDNESDAY\ncontinued"),
+            self.page(41, "I Week in Lent", "continuation\n" + filler + "THURSDAY    EMBER FRIDAY"),
+            self.page(42, "II Sunday in Lent", "continuation\n" + filler + "EMBER SATURDAY\ncollect"),
+            self.page(43, "II Sunday in Lent", "Sunday material"),
+        ]
+
+    def test_uses_season_and_exact_ember_day_with_bounded_continuations(self):
+        distractors = [
+            self.page(10, "III Week in Advent", "EMBER WEDNESDAY\nEMBER FRIDAY"),
+            self.page(20, "I Saturday in Lent", "AT VESPERS"),
+            self.page(60, "Within the Octave of Pentecost", "EMBER WEDNESDAY\nEMBER FRIDAY"),
+        ]
+        index = {"pages": distractors[:2] + self.lent_run() + distractors[2:]}
+        for day, expected in [("Wednesday", [40, 41]), ("Friday", [41, 42]), ("Saturday", [42])]:
+            for query in (f"Lent Ember {day}", f"Ember {day} in Lent"):
+                with self.subTest(query=query):
+                    found = pages.locate_named_pages(index, query)
+                    self.assertEqual([p["pdf_page"] for p in found["pages"]], expected)
+                    self.assertEqual(found["locate_confidence"], "high")
+
+    def test_rejects_wrong_season_missing_day_and_prose_references(self):
+        for page in [
+            self.page(10, "III Week in Advent", "EMBER FRIDAY\nSee Lent for another appointment"),
+            self.page(10, "Within the Octave of Pentecost", "EMBER FRIDAY"),
+            self.page(10, "I Week in Lent", "FRIDAY"),
+            self.page(10, "I Week in Lent", "This rubric refers to EMBER FRIDAY elsewhere."),
+            self.page(10, "UNKNOWN SEASON", "EMBER FRIDAY"),
+            {**self.page(10, "I Week in Lent", "EMBER FRIDAY"), "printed_page": "x"},
+        ]:
+            with self.subTest(page=page):
+                found = pages.locate_named_pages({"pages": [page]}, "Lent Ember Friday")
+                self.assertEqual(found["pages"], [])
+                self.assertEqual(found["locate_confidence"], "none")
+
+    def test_ambiguous_identity_does_not_choose_first_match(self):
+        index = {"pages": [self.page(n, "I Week in Lent", "EMBER FRIDAY") for n in (10, 20)]}
+        found = pages.locate_named_pages(index, "Ember Friday in Lent")
+        self.assertEqual(found["pages"], [])
+        self.assertEqual(found["reason"], "ambiguous-pages")
+
+    def test_incomplete_query_does_not_fall_through_to_fuzzy_search(self):
+        found = pages.locate_named_pages({"pages": self.lent_run()}, "Ember in Lent")
+        self.assertEqual(found["pages"], [])
+
+    def test_range_stops_at_season_boundary_or_missing_pdf_leaf(self):
+        for following in [self.page(41, "Pentecost", "EMBER FRIDAY"),
+                          self.page(42, "I Week in Lent", "THURSDAY")]:
+            index = {"pages": [self.lent_run()[0], following]}
+            self.assertEqual([p["pdf_page"] for p in pages.locate_named_pages(
+                index, "Lent Ember Wednesday")["pages"]], [40])
+
+    def test_page_cap_remains_enforced(self):
+        index = {"pages": self.lent_run()}
+        self.assertEqual(len(pages.locate_named_pages(index, "Lent Ember Wednesday", cap=1)["pages"]), 1)
+        for cap in (0, 9):
+            with self.assertRaises(ValueError):
+                pages.locate_named_pages(index, "Lent Ember Wednesday", cap=cap)
+
+
 if __name__ == "__main__":
     unittest.main()
