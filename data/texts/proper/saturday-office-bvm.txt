@@ -71,3 +71,22 @@ To Father and to Paraclete.
 Amen.
 [versicle-lauds]
 @use shared/blessed-virgin/versicle-blessed-art-thou
+
+# Paschaltide retains the Saturday psalter and festal canticle
+# (Diurnal pp.68*,71*,79; 2026 ordo May16, p.63).
+
+[saturday-psalm-antiphon-1-easter]
+# SOURCE: Monastic Diurnal pp. 68*,71*,73–79 (Paschaltide Saturday psalmody)
+@use shared/formulas/paschal-psalm-antiphon
+
+[saturday-psalm-antiphon-2-easter]
+# SOURCE: Monastic Diurnal pp. 68*,71*,73–79 (Paschaltide Saturday psalmody)
+@use shared/formulas/paschal-psalm-antiphon
+
+[saturday-psalm-antiphon-3-easter]
+# SOURCE: Monastic Diurnal pp. 68*,71*,73–79 (Paschaltide Saturday psalmody)
+@use ordinary/lauds/festal-canticle-antiphon-saturday-easter
+
+[saturday-psalm-antiphon-4-easter]
+# SOURCE: Monastic Diurnal pp. 68*,71*,73–79 (Paschaltide Saturday psalmody)
+@use shared/formulas/paschal-psalm-antiphon
