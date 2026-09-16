@@ -19,6 +19,7 @@ const (
 	conditionCrossCommemoration
 	conditionIsFeast
 	conditionFestalLaudsPsalmody
+	conditionFestalWeekdayLaudsCanticle
 	conditionFestalVespersPsalmody
 	conditionIsFerial
 	conditionOfficeOfTheDead
@@ -82,6 +83,8 @@ func parseConditionAtom(atom string) (conditionClause, error) {
 		return conditionClause{kind: conditionCrossCommemoration}, nil
 	case "is-feast":
 		return conditionClause{kind: conditionIsFeast}, nil
+	case "festal-weekday-lauds-canticle":
+		return conditionClause{kind: conditionFestalWeekdayLaudsCanticle}, nil
 	case "festal-lauds-psalmody":
 		return conditionClause{kind: conditionFestalLaudsPsalmody}, nil
 	case "festal-vespers-psalmody":
@@ -151,7 +154,9 @@ func (c conditionClause) evaluate(day *models.CalendarDay, moveable *calendar.Mo
 			day.Celebration.Category != models.CategoryFeria &&
 			day.Celebration.Category != models.CategorySunday
 	case conditionFestalLaudsPsalmody:
-		return usesFestalLaudsPsalmody(day)
+		return usesFestalLaudsPsalmody(day, corpus)
+	case conditionFestalWeekdayLaudsCanticle:
+		return usesFestalWeekdayLaudsCanticle(day, corpus)
 	case conditionFestalVespersPsalmody:
 		return usesFestalVespersPsalmody(day, corpus)
 	case conditionIsFerial:

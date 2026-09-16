@@ -260,3 +260,10 @@ psalms/148a      = Laudate Dominum de cælis
 psalms/148b      = Laudate Dominum de terra
 psalms/149       = Cantate Domino canticum novum
 psalms/150       = Laudate Dominum in sanctis
+
+# Weekday festal Lauds canticles, Diurnal pp.47–72.
+canticles/1-chronicles-29 = Benedictus es, Domine
+canticles/tobit-13 = Magnus es, Domine
+canticles/judith-16 = Hymnum cantemus
+canticles/jeremiah-31 = Audite verbum Domini
+canticles/isaiah-45 = Vere tu es Deus absconditus

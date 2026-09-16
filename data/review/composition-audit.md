@@ -624,3 +624,63 @@ II Vespers psalmody conflict or the other clergy questions in the backlog.
 Validation: `make golden`, `make check` and `make test-coverage` pass. The
 post-change 2026 ordo findings CSV matches the merged baseline byte-for-byte.
 Independent review of the final preces data and TeX changes found no blocker.
+
+## Weekday Lauds on lesser feasts (2026-09-16)
+
+Lauds had treated almost every saint's office as having Sunday festal psalmody.
+Diurnal pp.44,46 instead retain the weekday psalter on lesser Doubles without
+proper psalm antiphons. Their weekday festal canticle is also appointed on
+Simple octave days and anticipated Saturday Sundays (p.79). The 2026 ordo
+explicitly confirms the weekday psalter with festal canticle on 27 affected
+dates, including simple octave days (p.25), lesser Doubles (pp.29–30), and
+St Sylvester within the Nativity octave (p.129). Being within another feast's
+octave does not itself change this lesser Double appointment.
+
+The hour definition now selects the weekday psalms and canticle frame. Five
+missing festal canticles are supplied from pp.47–48,53–54,58–59,65,71–72,
+along with their antiphons and printed Paschaltide additions. Direct page-image
+readings were compared with independent Sonnet readings; two Judith details
+were adjudicated by re-reading p.59. Saturday uses the existing Sirach canticle
+and Psalm143 divisions, with its p.79 antiphon independently read. These 17
+new text bodies have hash-bound source attestations. No source pages or reader
+output are committed; evidence remains under `output/ordinary-lauds/`.
+
+The selection rule distinguishes proper antiphons from Common fallbacks;
+resolved proper aliases count as explicit appointments, so those aliases must
+represent printed directions. Greater feasts, proper psalmody, ordinary ferias,
+and the separate Saturday BVM office retain their previous selection. The
+antiphon override is confined to composing Lauds: Prime still borrows the
+Feast/Common's Lauds antiphon. No feast-ID list is added to the engine.
+
+The Saturday Laudate group now follows the selected psalmody, rather than the
+`is-feast` flag. This also repairs Pentecost vigil: its existing Ascension
+psalmody was followed by antiphon4 instead of antiphon5. Diurnal pp.392,394 and
+2026 ordo p.67 agree on its festal appointment.
+
+**Two new source conflicts remain held.** The current ordo appoints Friday
+Lauds on Saturday May2 (Athanasius, p.59), and Tuesday Lauds on Wednesday
+December2 (Peter Chrysologus, p.121). Both feast files explicitly retain their
+previous festal selection through a validated data declaration. These holds
+apply in every year until clergy settle the appointment and its scope; they
+are neither source attestations nor a claim that the preserved selection is
+correct. The repair backlog records both questions.
+
+A before/after comparison of **23,016 offices** across 2026, 2027 and 2032 in
+all three forms finds **252 Lauds with changed elements** (84,81,87); this is
+28 dates in 2026, including the vigil fix. Every one of the **19,728 other
+hours is byte-identical**, as are Lauds elements from the chapter onward and
+all calendar metadata. The new conditional section boundaries change decision
+traces on every Lauds, including days with unchanged prayers. The unchanged
+2026 ordo comparator remains **3443/3626**; its finding CSV matches the merged
+baseline byte-for-byte. That comparator does not check this psalmody distinction.
+
+The remaining Paschaltide ferial canticle-antiphon fallback is a separate
+source-review target: ordinary Lauds currently gives it the shared Alleluia,
+whereas the psalter prints canticle antiphons with a P.T. addition. This PR does
+not certify every ordinary or seasonal antiphon. Other clergy-held repairs in
+the backlog remain unresolved.
+
+The 28-year parity calendars, commemoration-merge digests and all non-Lauds
+hour digests are unchanged. `make golden`, `make check` and
+`make test-coverage` validate the repair; independent adversarial review found
+no blocker in the Lauds-only boundary or the explicit conflict holds.

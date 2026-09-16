@@ -576,6 +576,12 @@ func resolveHourElement(day *models.CalendarDay, hourName string, elem HourEleme
 		return resolveElement(elem, corpus)
 	case "proper-antiphon":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)
+		if hourName == "lauds" && strings.HasPrefix(elem.Ref, "psalm-antiphon-") && usesWeekdayLaudsPsalmody(day, corpus) {
+			text, src = weekdayLaudsAntiphon(day, elem.Ref, corpus)
+			if text == "" {
+				text = "[Weekday Lauds antiphon not found: " + src + "]"
+			}
+		}
 		return sourcedElement(models.OfficeElement{Type: models.Antiphon, Text: text, SlotRef: elem.Ref, SourceRef: src}, src)
 	case "proper-opening-acclamation":
 		text, src := resolveProperText(day, hourName, elem.Ref, corpus)

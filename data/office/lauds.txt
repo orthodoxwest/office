@@ -516,7 +516,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Monday]
-Condition = not-is-feast,weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead
 Label = The Psalms
 
 Type = psalm
@@ -561,6 +561,9 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Canticle-Monday-Ferial]
+Condition = weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -573,8 +576,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Canticle-Monday-Festal]
+# Diurnal p.46: the weekday festal canticle replaces only the ferial canticle.
+Condition = weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/1-chronicles-29
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Tuesday]
-Condition = not-is-feast,weekday-tuesday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-tuesday,not-festal-lauds-psalmody,not-office-of-the-dead
 Label = The Psalms
 
 Type = psalm
@@ -619,6 +638,9 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Canticle-Tuesday-Ferial]
+Condition = weekday-tuesday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -631,8 +653,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Canticle-Tuesday-Festal]
+# Diurnal p.46: the weekday festal canticle replaces only the ferial canticle.
+Condition = weekday-tuesday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/tobit-13
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Wednesday]
-Condition = not-is-feast,weekday-wednesday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-wednesday,not-festal-lauds-psalmody,not-office-of-the-dead
 Label = The Psalms
 
 Type = psalm
@@ -677,6 +715,9 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Canticle-Wednesday-Ferial]
+Condition = weekday-wednesday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -689,8 +730,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Canticle-Wednesday-Festal]
+# Diurnal p.46: the weekday festal canticle replaces only the ferial canticle.
+Condition = weekday-wednesday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/judith-16
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Thursday]
-Condition = not-is-feast,weekday-thursday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-thursday,not-festal-lauds-psalmody,not-office-of-the-dead
 Label = The Psalms
 
 Type = psalm
@@ -735,6 +792,9 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Canticle-Thursday-Ferial]
+Condition = weekday-thursday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -747,8 +807,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Canticle-Thursday-Festal]
+# Diurnal p.46: the weekday festal canticle replaces only the ferial canticle.
+Condition = weekday-thursday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/jeremiah-31
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Friday]
-Condition = not-is-feast,weekday-friday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-friday,not-festal-lauds-psalmody,not-office-of-the-dead
 Label = The Psalms
 
 Type = psalm
@@ -793,6 +869,9 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-3
 
+[Canticle-Friday-Ferial]
+Condition = weekday-friday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
+
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
@@ -805,8 +884,24 @@ Ref = ordinary/shared/gloria-patri
 Type = proper-antiphon
 Ref = psalm-antiphon-4
 
+[Canticle-Friday-Festal]
+# Diurnal p.46: the weekday festal canticle replaces only the ferial canticle.
+Condition = weekday-friday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
+Type = canticle
+Ref = canticles/isaiah-45
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-4
+
 [Psalmody-Saturday]
-Condition = not-is-feast,weekday-saturday,not-festal-lauds-psalmody,not-office-of-the-dead
+Condition = weekday-saturday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle
 Label = The Psalms
 
 Type = psalm
@@ -844,6 +939,59 @@ Ref = psalm-antiphon-3
 
 Type = canticle
 Ref = canticles/deuteronomy-32
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+[Psalmody-Saturday-Weekday-Festal]
+# Diurnal pp.73–79: one antiphon, Psalm143 divided before O let me hear.
+Condition = weekday-saturday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle
+Label = The Psalms
+
+Type = psalm
+Ref = psalms/067
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = psalm
+Ref = psalms/051
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-1
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = psalm
+Ref = psalms/143a
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = psalm
+Ref = psalms/143b
+
+Type = gloria-patri
+Ref = ordinary/shared/gloria-patri
+
+Type = proper-antiphon
+Ref = psalm-antiphon-2
+
+Type = proper-antiphon
+Ref = psalm-antiphon-3
+
+Type = canticle
+Ref = canticles/sirach-36
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -891,7 +1039,7 @@ Type = proper-antiphon
 Ref = easter-antiphon-5
 
 [Laudate-Saturday]
-Condition = not-is-feast,weekday-saturday,not-office-of-the-dead
+Condition = weekday-saturday,not-festal-lauds-psalmody,not-office-of-the-dead
 
 Type = proper-antiphon
 Ref = psalm-antiphon-4
@@ -912,7 +1060,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Laudate-Saturday-Festal]
-Condition = is-feast,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead,not-triduum
+Condition = festal-lauds-psalmody,weekday-saturday,not-feast-easter-sunday,not-feast-saturday-office-bvm,not-office-of-the-dead,not-triduum
 
 Type = proper-antiphon
 Ref = psalm-antiphon-5

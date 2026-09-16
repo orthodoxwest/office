@@ -186,3 +186,10 @@ O God, who didst point out blessed Peter Chrysologus the illustrious Doctor, and
 #
 # [psalm-antiphon-5-first-vespers]
 # I Vespers override for psalm antiphon 5.
+
+[lauds-psalmody]
+# HOLD: 2026 ordo p.121 appoints Tuesday Lauds on Wednesday; Diurnal p.46
+# instead appoints the weekday psalter and festal canticle. Preserve the existing
+# festal selection for this feast in all years pending clergy clarification.
+# This does not assert that the preserved selection is correct.
+@use psalmody/lauds/festal
