@@ -2,6 +2,34 @@ package models
 
 import "testing"
 
+func TestOctaveClassValidationAndPrivilege(t *testing.T) {
+	// Rubrics VII.1-3: all three privileged groups retain privilege despite
+	// their different precedence. Common and Simple octaves do not.
+	for _, tc := range []struct {
+		name       string
+		class      OctaveClass
+		valid      bool
+		privileged bool
+	}{
+		{"default common octave", OctaveCommon, true, false},
+		{"Easter and Pentecost", OctavePrivilegedFirst, true, true},
+		{"Epiphany and Corpus Christi", OctavePrivilegedSecond, true, true},
+		{"Nativity Ascension and Sacred Heart", OctavePrivilegedThird, true, true},
+		{"simple octave", OctaveSimple, true, false},
+		{"unknown class", "privileged-fourth", false, false},
+		{"malformed source value", "Privileged-first", false, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := tc.class.Valid(); got != tc.valid {
+				t.Errorf("%q Valid() = %v, want %v", tc.class, got, tc.valid)
+			}
+			if got := tc.class.Privileged(); got != tc.privileged {
+				t.Errorf("%q Privileged() = %v, want %v", tc.class, got, tc.privileged)
+			}
+		})
+	}
+}
+
 func TestFeastDateClassification(t *testing.T) {
 	fixedTemporalCycleFeast := &Feast{ID: "christmas", Month: 12, Day: 25}
 	if !fixedTemporalCycleFeast.IsFixed() {
