@@ -86,7 +86,6 @@ JANUARY
                Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
-               Com. Day VII within the Octave of the Epiphany ("When the wise men saw the star")
                Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Benedict Biscop, Abbot ("The world, and all things earthly")
  12  Mon     Day VII within the Octave of the Epiphany  [sd]  w
@@ -730,7 +729,6 @@ APRIL
                Com. Day IV within the Octave of St. George ("Whosoever shall confess Me")
            Hours   No Preces
            Vespers w · II prec. · Mag. I am · No Suff.
-               Com. Day V within the Octave of St. George ("Whosoever shall confess Me")
                Com. Day IV within the Octave of St. George ("Whosoever shall confess Me")
  27  Mon     Day V within the Octave of St. George      [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
@@ -1102,38 +1100,37 @@ JUNE
            Lauds   w · Ben. The mouth of Zacharias · No Preces · No Suff.
            Hours   No Preces
            Vespers r · I fol. (Ss. John & Paul, Martyrs) · Mag. The righteous · No Suff.
-               Com. Day II within the Octave of St John Baptist ("He shall go before him")
+               Com. Day II within the Octave of St John Baptist ("The child")
                Com. Octave of the Compassion of Our Lord Jesus Christ ("The world, and all things earthly")
  26  Fri  L  Ss. John & Paul, Martyrs                   [d]   r
            Octave of the Compassion of Our Lord Jesus Christ (com)
            Day III within the Octave of St John Baptist (sd)
            Lauds   r · Ben. These are the holy ones · No Preces · No Suff.
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
-               Com. Day III within the Octave of St John Baptist ("He shall go before him")
+               Com. Day III within the Octave of St John Baptist ("The mouth of Zacharias")
            Hours   No Preces
            Vespers r · II prec. · Mag. In the heavenly kingdom · No Suff.
-               Com. Day IV within the Octave of St John Baptist ("He shall go before him")
-               Com. Day III within the Octave of St John Baptist ("He shall go before him")
+               Com. Day III within the Octave of St John Baptist ("The child")
  27  Sat     Day IV within the Octave of St John Baptist [sd]  w
            Vigil of Ss Peter & Paul (s)
            Lauds   w · Ben. The mouth of Zacharias · No Preces · No Suff.
                Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers g · I fol. (IV Sunday after Pentecost) · Mag. So David prevailed · No Suff.
-               Com. Day IV within the Octave of St John Baptist ("He shall go before him")
+               Com. Day IV within the Octave of St John Baptist ("The child")
                Com. St Leo II, Bishop & Confessor ("The Lord loved him")
  28  Sun     IV Sunday after Pentecost                  [sd]  g
            St Leo II, Bishop & Confessor (com)
            Day V within the Octave of St John Baptist (sd)
            Lauds   g · Ben. And Jesus entered · No Preces · No Suff.
                Com. St Leo II, Bishop & Confessor ("Well done")
-               Com. Day V within the Octave of St John Baptist ("He shall go before him")
+               Com. Day V within the Octave of St John Baptist ("The mouth of Zacharias")
            Hours   No Preces
            Vespers r · I fol. (Ss. Peter and Paul, Apostles) · Mag. Thou art the shepherd of the sheep · No Suff.
  29  Mon     SS. PETER AND PAUL, APOSTLES               [1cl] r
            Day VI within the Octave of St John Baptist (sd)
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
-               Com. Day VI within the Octave of St John Baptist ("He shall go before him")
+               Com. Day VI within the Octave of St John Baptist ("The mouth of Zacharias")
            Hours   No Preces
            Vespers r · II prec. · Mag. Today · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
@@ -1143,7 +1140,7 @@ JUNE
            Day II within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
-               Com. Day VII within the Octave of St John Baptist ("He shall go before him")
+               Com. Day VII within the Octave of St John Baptist ("The mouth of Zacharias")
                Com. Day II within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Octave of St John Baptist) · Mag. When Zacharias · No Suff.
@@ -1159,7 +1156,7 @@ JULY
                Com. Day III within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
-               Com. Octave of St John Baptist ("He shall go before him")
+               Com. Octave of St John Baptist ("The child")
                Com. Ss. Processus & Martinian, Martyrs ("In the heavenly kingdom")
                Com. St John of San Francisco, Bishop & Confessor ("The Lord loved him")
   2  Thu     Visitation of the Blessed Virgin Mary      [2cl] w
@@ -1179,7 +1176,6 @@ JULY
                Com. Day V within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
-               Com. Day VI within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. Day V within the Octave of Ss Peter & Paul ("Peter the Apostle")
   4  Sat     Day VI within the Octave of Ss Peter & Paul [sd]  r
            Lauds   r · Ben. Glorious princes · No Preces · No Suff.
@@ -1478,7 +1474,6 @@ AUGUST
                Com. Day II within the Octave of the Assumption ("Through thee have the gates of Paradise been thrown…")
            Hours   No Preces
            Vespers w · II prec. · Mag. The world, and all things earthly · No Suff.
-               Com. Day III within the Octave of the Assumption ("Through thee have the gates of Paradise been thrown…")
                Com. XI Sunday after Pentecost ("He hath done all things well")
  17  Mon     Day III within the Octave of the Assumption [sd]  w
            Octave of St Laurence (com)
@@ -2297,6 +2292,7 @@ DECEMBER
            Hours   No Preces
            Vespers r · II prec. · Mag. Devout men · No Suff.
                Com. St. John, Apostle and Evangelist ("This is the same John")
+               Com. Day II within the Nativity Octave ("Today")
  27  Sun     St. John, Apostle and Evangelist           [2cl] w
            Day III within the Nativity Octave (sd)
            Lauds   w · Ben. This is the same John · No Preces · No Suff.
@@ -2304,6 +2300,7 @@ DECEMBER
            Hours   No Preces
            Vespers w · II prec. · Mag. There went this saying abroad · No Suff.
                Com. Holy Innocents ("These are they")
+               Com. Day III within the Nativity Octave ("Today")
  28  Mon     Holy Innocents                             [2cl] r
            Day IV within the Nativity Octave (sd)
            Lauds   r · Ben. These are they · No Preces · No Suff.
@@ -2311,19 +2308,19 @@ DECEMBER
            Hours   No Preces
            Vespers r · II prec. · Mag. Then were innocent children · No Suff.
                Com. Sunday within the Octave of the Nativity ("While all things")
+               Com. Day IV within the Nativity Octave ("Today")
  29  Tue     Sunday within the Octave of the Nativity   [sd]  w
            Day V within the Nativity Octave (sd)
            Lauds   w · Ben. While all things · No Preces · No Suff.
                Com. Day V within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers w · II prec. · Mag. The Child Jesus · No Suff.
-               Com. Day VI within the Nativity Octave ("The King of Peace")
-               Com. Day V within the Nativity Octave ("The King of Peace")
+               Com. Day V within the Nativity Octave ("Today")
  30  Wed     Day VI within the Nativity Octave          [sd]  w
            Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (St. Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
-               Com. Day VI within the Nativity Octave ("The King of Peace")
+               Com. Day VI within the Nativity Octave ("Today")
  31  Thu     St. Sylvester I, Bishop                    [d]   w
            Day VII within the Nativity Octave (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.

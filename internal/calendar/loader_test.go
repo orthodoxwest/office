@@ -293,6 +293,51 @@ func TestSectionToFeastIsApostolicCompanion(t *testing.T) {
 	}
 }
 
+func TestSectionToFeastPrivilegedOctave(t *testing.T) {
+	section := map[string]string{
+		"_id": "example", "Name": "Example", "Rank": "double-1st-class",
+		"Color": "white", "Category": "lord", "Month": "1", "Day": "1",
+		"HasOctave": "true", "HasPrivilegedOctave": "true",
+	}
+	feast, err := sectionToFeast(section, "test.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !feast.HasPrivilegedOctave || feast.IsPrivilegedOctaveDay {
+		t.Fatalf("parent octave privilege lost or mistaken for a generated day: %+v", feast)
+	}
+	for _, value := range []string{"", "false"} {
+		delete(section, "HasOctave")
+		if value != "" {
+			section["HasOctave"] = value
+		}
+		if _, err := sectionToFeast(section, "test.txt"); err == nil || !strings.Contains(err.Error(), "HasPrivilegedOctave without HasOctave") {
+			t.Fatalf("HasOctave=%q: got %v, want invalid octave privilege", value, err)
+		}
+	}
+}
+
+func TestSourcePrivilegedOctaves(t *testing.T) {
+	feasts, err := LoadFeasts(findDataDir(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Rubrics VII.3, distinct from the rank of the octave's offices.
+	want := map[string]bool{
+		"christmas": true, "epiphany": true, "easter-sunday": true,
+		"ascension": true, "pentecost": true, "corpus-christi": true,
+	}
+	for _, feast := range feasts {
+		if feast.HasPrivilegedOctave != want[feast.ID] {
+			t.Errorf("%s HasPrivilegedOctave = %v, want %v", feast.ID, feast.HasPrivilegedOctave, want[feast.ID])
+		}
+		delete(want, feast.ID)
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing privileged-octave parents: %v", want)
+	}
+}
+
 func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -301,6 +346,7 @@ func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 		wantErr string
 	}{
 		{name: "invalid boolean", key: "HasOctave", value: "yes", wantErr: "expected true or false"},
+		{name: "invalid octave privilege boolean", key: "HasPrivilegedOctave", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid vigil boolean", key: "IsVigil", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid companion boolean", key: "IsApostolicCompanion", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid month", key: "Month", value: "13", wantErr: "invalid fixed date"},

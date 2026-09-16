@@ -140,6 +140,8 @@ Color = white
 Category = lord
 DateRule = easter+0
 HasOctave = true
+# Rubrics VII.3; commemoration privilege under XIV.4,7-8.
+HasPrivilegedOctave = true
 
 [easter-monday]
 Name = Easter Monday
@@ -169,6 +171,8 @@ Color = white
 Category = lord
 DateRule = easter+39
 HasOctave = true
+# Rubrics VII.3; commemoration privilege under XIV.4,7-8.
+HasPrivilegedOctave = true
 
 [vigil-ascension]
 Name = Vigil of the Ascension
@@ -214,6 +218,8 @@ Color = red
 Category = lord
 DateRule = easter+49
 HasOctave = true
+# Rubrics VII.3; commemoration privilege under XIV.4,7-8.
+HasPrivilegedOctave = true
 
 [whit-ember-wednesday]
 Name = Whit Ember Wednesday
@@ -250,6 +256,8 @@ Color = white
 Category = lord
 DateRule = easter+60
 HasOctave = true
+# Rubrics VII.3; commemoration privilege under XIV.4,7-8.
+HasPrivilegedOctave = true
 
 [our-lady-of-sorrows-passion]
 Name = Our Lady of Sorrows
