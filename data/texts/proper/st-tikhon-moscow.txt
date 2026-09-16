@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: St Tikhon of Moscow supplement, April 7 proper, Collect (unnumbered); appointed by 2026 ordo p. 56
+O Lord God of the nations, who for the defence of the Orthodox Faith didst raise up and strengthen blessed Saint Tikhon, thy Bishop and Confessor, with great courage and self-denial: mercifully grant that, by his example and intercessions, the hearts of the erring may be turned to the wisdom of the just, and the faithful may ever persevere in confession of thy true Religion.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
