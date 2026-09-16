@@ -332,6 +332,72 @@ def locate_feast_pages(index: dict, month: int, day: int, name: str = "",
     }
 
 
+def printed_heading_weekdays(page: dict, ember_only: bool = False) -> set[str]:
+    """Find explicit weekday headings, including below the running head.
+
+    Layout OCR separates columns with spaces. Keep matches at a column/line
+    start and in capitals so prose references cannot establish an appointment.
+    Unreadable headings remain unresolved rather than receiving a fuzzy guess.
+    """
+    prefix = r"EMBER\s+" if ember_only else r"(?:(?:EMBER|[IVX]+)\s+)?"
+    pattern = re.compile(
+        r"(?:^|\s{2,})" + prefix
+        + r"(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)\b")
+    return {
+        match.group(1).lower()
+        for field in ("layout_text", "text")
+        for line in page.get(field, "").splitlines()
+        for match in pattern.finditer(line)
+    }
+
+
+def locate_lent_ember_pages(source: list[dict], name: str, cap: int) -> dict:
+    """Require the Lent running head and the exact Ember weekday heading.
+
+    Ember titles can occur low in a column, and their collect may continue on
+    the next leaf. Include that boundary leaf, then stop at a later weekday's
+    heading. Sunday sorts after Saturday for this within-week search.
+    """
+    missing = {"pages": [], "locate_confidence": "none", "reason": "no-pages"}
+    match = re.search(r"\bember (wednesday|friday|saturday)\b", normalize_search(name))
+    if not match:
+        return missing
+    weekday = match.group(1)
+
+    def in_lent(page: dict) -> bool:
+        heads = normalize_search(" ".join(heading_lines(page, 2))).split()
+        return "lent" in heads and not {"advent", "pentecost", "septuagesima"}.intersection(heads)
+
+    anchors = [
+        i for i, page in enumerate(source)
+        if (series := label_series(str(page.get("printed_page", "")))) and series[0] == "arabic"
+        and in_lent(page) and weekday in printed_heading_weekdays(page, ember_only=True)
+    ]
+    if len(anchors) != 1:
+        return {**missing, "reason": "ambiguous-pages"} if anchors else missing
+
+    weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    later_days = set(weekdays[weekdays.index(weekday) + 1:])
+    selected = []
+    for page in source[anchors[0]:]:
+        if not in_lent(page):
+            break
+        if selected and page["pdf_page"] != selected[-1]["pdf_page"] + 1:
+            break
+        selected.append(page)
+        # A shared Saturday/Sunday leaf can already carry Sunday's running
+        # head, even when OCR merges its body title into the other column.
+        running_days = set(re.findall(
+            r"\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
+            normalize_search(" ".join(heading_lines(page, 2)))))
+        if len(selected) == cap or later_days.intersection(printed_heading_weekdays(page) | running_days):
+            break
+    return {
+        "pages": selected, "locate_confidence": "high",
+        "name_score": 1.0, "reason": "matched",
+    }
+
+
 def locate_named_pages(index: dict, name: str, cap: int = 8) -> dict:
     """Locate a temporal proper by title/running head when it has no fixed date."""
     if not name.strip():
@@ -339,6 +405,9 @@ def locate_named_pages(index: dict, name: str, cap: int = 8) -> dict:
     if cap < 1 or cap > 8:
         raise ValueError("feast page cap must be between 1 and 8")
     source = repair_label_runs(index.get("pages", []))
+    tokens = normalize_search(name).split()
+    if "lent" in tokens and "ember" in tokens:
+        return locate_lent_ember_pages(source, name, cap)
     # Roman-numbered front matter contains a table of contents whose exact
     # feast titles would otherwise outrank the actual proper.
     scored = [
