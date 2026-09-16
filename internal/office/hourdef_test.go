@@ -597,11 +597,6 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 	}) {
 		t.Fatalf("Compline Chapter private prayers = %+v", got)
 	}
-	if got := byName["Chapter-Easter-Eve"].Elements; !reflect.DeepEqual(got, []HourElement{
-		{Type: "prayer", Ref: "ordinary/shared/kyrie"},
-	}) {
-		t.Fatalf("Holy Saturday Compline private prayers = %+v", got)
-	}
 }
 
 func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {

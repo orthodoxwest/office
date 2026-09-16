@@ -141,12 +141,6 @@ Ref = ordinary/shared/kyrie
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
 
-[Chapter-Easter-Eve]
-Condition = feast-holy-saturday
-
-Type = prayer
-Ref = ordinary/shared/kyrie
-
 [Preces]
 Condition = if-preces
 Label = Preces
