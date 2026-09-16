@@ -290,14 +290,6 @@ func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.
 		return true, models.CompositionDecision{Rule: "commemoration:pentecost-ember", Outcome: "suppressed", Detail: comm.ID}
 	}
 
-	// The Sunday-within-octave office does not also commemorate Day IV of the
-	// same Ascension/Corpus octave.
-	if winner.Category == models.CategorySunday &&
-		(strings.HasPrefix(comm.ID, "ascension-octave-day-4") ||
-			strings.HasPrefix(comm.ID, "corpus-christi-octave-day-4")) {
-		return true, models.CompositionDecision{Rule: "commemoration:same-octave-sunday", Outcome: "suppressed", Detail: comm.ID}
-	}
-
 	// Privileged days suppress St George octave commemorations in the years
 	// where the octave overlaps Holy Week or the Easter octave.
 	if suppressesStGeorgeOctave(winner) && strings.HasPrefix(comm.ID, "st-george-octave-day") {

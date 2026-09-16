@@ -641,6 +641,7 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 	// tomorrow's ordinal as a second prayer. Terminal octave days remain
 	// separate: their concurrence has its own rank and ordering rules.
 	filteredBoundary := make([]*models.Feast, 0, len(boundary))
+	var concurrentOctave *models.Feast
 	for _, comm := range boundary {
 		duplicateOctave := false
 		if comm != nil && isDayWithinOctave(comm) {
@@ -648,6 +649,9 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 				if current != nil && isDayWithinOctave(current) && sameOctaveDays(current, comm) {
 					if included, _ := occurrenceCommemoratedAtSecondVespers(winner, current); included {
 						duplicateOctave = true
+						if comm.ID == followingOfficeID {
+							concurrentOctave = current
+						}
 						break
 					}
 				}
@@ -668,9 +672,17 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 			comms = append(comms, comm)
 		}
 	}
+	// A continuing octave still has the concurrent office's priority under
+	// XIV.14 when today's occurrence replaces tomorrow's duplicate. Keep
+	// today's identity for text selection, without moving it behind saints.
+	if concurrentOctave != nil {
+		comms = append(comms, concurrentOctave)
+	}
 	for _, comm := range occurrenceCommemorations {
 		if included, rule := occurrenceCommemoratedAtSecondVespers(winner, comm); included {
-			comms = append(comms, comm)
+			if comm != concurrentOctave {
+				comms = append(comms, comm)
+			}
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: comm.ID})
 		} else {
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: comm.ID})

@@ -252,3 +252,11 @@ R. Thou bringest bread out of the earth. * Alleluia, alleluia.
 #
 # [psalm-antiphon-3-first-vespers]
 # I Vespers override for psalm antiphon 3.
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal p. 419; 2026 ordo p. 72 (octave commemoration at Lauds)
+@use proper/corpus-christi/benedictus-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: Monastic Diurnal p. 419 (octave commemoration at Lauds)
+@use proper/corpus-christi/versicle-lauds

@@ -191,3 +191,11 @@ R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal p. 392; 2026 ordo pp. 66-67 (octave commemoration at Lauds)
+@use proper/ascension/benedictus-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: Monastic Diurnal p. 392 (octave commemoration at Lauds)
+@use proper/ascension/versicle-lauds
