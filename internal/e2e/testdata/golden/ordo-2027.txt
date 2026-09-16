@@ -968,11 +968,8 @@ JUNE
            Hours   No Preces
            Vespers w · I fol. (Ascension of Our Lord) · Mag. Father · No Suff.
                Com. St Columba of Iona, Abbot ("The world, and all things earthly")
-               Com. St Margaret of Scotland, Queen & Widow ("The world, and all things earthly")
  10  Thu     ASCENSION OF OUR LORD                      [1cl] w
-           St Margaret of Scotland, Queen & Widow (com)
            Lauds   w · Ben. I ascend · No Preces · No Suff.
-               Com. St Margaret of Scotland, Queen & Widow ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. O King of glory · No Suff.
                Com. St. Barnabas, Apostle ("Light perpetual")
@@ -1039,11 +1036,8 @@ JUNE
                Com. Ss. Gervase & Protase, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers r · I fol. (Whitsunday — Pentecost) · Mag. I will not leave you · No Suff.
-               Com. St Silverius, Bishop & Martyr ("Whosoever will come after me")
  20  Sun     WHITSUNDAY — PENTECOST                     [1cl] r
-           St Silverius, Bishop & Martyr (com)
            Lauds   r · Ben. Receive ye · No Preces · No Suff.
-               Com. St Silverius, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers r · II prec. · Mag. To-day · No Suff.
  21  Mon     DAY II WITHIN THE OCTAVE OF PENTECOST      [1cl] r
@@ -1101,11 +1095,9 @@ JUNE
                Com. Nativity of St. John the Baptist ("When Zacharias")
                Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
  28  Mon     NATIVITY OF ST. JOHN THE BAPTIST           [1cl] w
-           St Leo II, Bishop & Confessor (com)
            Vigil of Ss Peter & Paul (s)
            Day V within the Octave of St John Baptist (sd)
            Lauds   w · Ben. The mouth of Zacharias · No Preces · No Suff.
-               Com. St Leo II, Bishop & Confessor ("Well done")
                Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
                Com. Day V within the Octave of St John Baptist ("He shall go before him")
            Hours   No Preces
@@ -2289,11 +2281,8 @@ DECEMBER
            Lauds   v · Ben. The Saviour · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Nativity of Our Lord Jesus Christ) · Mag. When the sun hath risen · No Suff.
-               Com. St Anastasia, Virgin & Martyr ("Come, thou Bride of Christ")
  25  Sat     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
-           St Anastasia, Virgin & Martyr (com)
            Lauds   w · Ben. Glory · No Preces · No Suff.
-               Com. St Anastasia, Virgin & Martyr ("The kingdom of heaven")
            Hours   No Preces
            Vespers w · II prec. · Mag. Today · No Suff.
                Com. St. Stephen, Protomartyr ("And Stephen, full of faith and power")
