@@ -428,7 +428,7 @@ MARCH
   7  Sun     Sexagesima Sunday                          [2cl] v
            Lauds   v · Ben. When much people · No Preces · Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. Jesus said to His disciples · Suff.
+           Vespers v · II prec. · Mag. Unto you it is given · Suff.
   8  Mon     Feria                                            v
            Lauds   v · Ben. Blessed · No Preces · Suff.
            Hours   Preces
@@ -1045,7 +1045,7 @@ JUNE
            Lauds   r · Ben. Receive ye · No Preces · No Suff.
                Com. St Silverius, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
-           Vespers r · II prec. · Mag. This day · No Suff.
+           Vespers r · II prec. · Mag. To-day · No Suff.
  21  Mon     DAY II WITHIN THE OCTAVE OF PENTECOST      [1cl] r
            Lauds   r · Ben. God so loved the world · No Preces · No Suff.
            Hours   No Preces
@@ -1125,7 +1125,7 @@ JUNE
            Lauds   w · Ben. Ye which have forsaken all · No Preces · No Suff.
                Com. St Peter, Apostle ("Thou art the shepherd of the sheep")
                Com. Day VII within the Octave of St John Baptist ("He shall go before him")
-               Com. Day II within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day II within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Corpus Christi) · Mag. O how sweet · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
@@ -1139,7 +1139,7 @@ JULY
            Day III within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. Octave of St John Baptist ("He shall go before him")
-               Com. Day III within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day III within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · II prec. · Mag. O sacred banquet · No Suff.
   2  Fri  L  Day II within the Octave of Corpus Christi [sd]  w
@@ -1149,18 +1149,18 @@ JULY
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. Ss. Processus & Martinian, Martyrs ("The very hairs of your head")
                Com. St John of San Francisco, Bishop & Confessor ("Well done")
-               Com. Day IV within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day IV within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · Mag. O how sweet · No Suff.
-               Com. Day IV within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day IV within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. St Irenaeus of Lyons, Bishop & Martyr ("Whosoever will come after me")
-               Com. Day V within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day V within the Octave of Ss Peter & Paul ("Peter the Apostle")
   3  Sat     Day III within the Octave of Corpus Christi [sd]  w
            St Irenaeus of Lyons, Bishop & Martyr (d)
            Day V within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
                Com. St Irenaeus of Lyons, Bishop & Martyr ("He that hateth his life")
-               Com. Day V within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day V within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
                Com. All Saints of Antioch ("The world, and all things earthly")
@@ -1174,7 +1174,7 @@ JULY
                Com. All Saints of Antioch ("Well done, good and faithful servant")
                Com. Sunday within the Octave of Corpus Christi ("A certain man")
                Com. Day IV within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
-               Com. Day VI within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day VI within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · II prec. · Mag. All generations · No Suff.
                Com. Day V within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
@@ -1182,10 +1182,10 @@ JULY
   5  Mon     Day V within the Octave of Corpus Christi  [sd]  w
            Day VII within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
-               Com. Day VII within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day VII within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · Mag. O sacred banquet · No Suff.
-               Com. Day VII within the Octave of Ss Peter & Paul ("Peter and John")
+               Com. Day VII within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. The Octave of Ss Peter & Paul ("The world, and all things earthly")
   6  Tue     Day VI within the Octave of Corpus Christi [sd]  w
            The Octave of Ss Peter & Paul (com)

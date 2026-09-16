@@ -66,15 +66,90 @@ When holy Benedict * had withdrawn himself in his cell for three days, he lifted
 Rise up, my love, my fair one, and come away. * O my dove, that art in the clefts of the rock, in the secret places of the stairs, let me see thy countenance, let me hear thy voice; * for sweet is the voice, and thy countenance is comely.
 R. Thanks be to God.
 
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
-# [hymn-lauds]
-# Hymn at Lauds. First line may be a Latin incipit title.
-#
-# [hymn-vespers]
-# Hymn at Vespers.
-#
+[chapter-vespers]
+# SOURCE: Monastic Diurnal pp. 475, 478–479; 2026 ordo p. 36
+@use proper/st-scholastica/chapter-lauds
+
+[hymn-lauds]
+# SOURCE: diurnal p. 477
+Jam noctis umbrae concidunt
+
+The shades of night are fled away,
+The long desired day is born;
+The changing wheel of time has brought
+Scholastica her wedding morn.
+
+The winter's weariness is past,
+Tempests no longer doth she see;
+The fields of heaven bloom with stars,
+The blossoms of eternity.
+
+He calls her forth, the Source of love,
+He gives her wings that she may rise,
+And to the kisses of his mouth
+A shining dove she swiftly flies.
+
+O royal child, how fair thy course!
+O maid, how beautiful thy way!
+Thy brother marks thy upward flight,
+Then turns to God his thanks to pay.
+
+Locked in the Bridegroom's close embrace,
+She takes the crown to virtue owed,
+Sunk in a glorious stream of bliss,
+Inebriated with her God.
+
+Thou lily of the valley, Christ,
+To thee our homage meet we pay:
+To Father and to Paraclete,
+While endless ages roll away. Amen.
+
+[hymn-vespers]
+# SOURCE: diurnal p. 475
+Te beata sponsa Christi
+
+Blessed bride of Christ the Bridegroom,
+Dove of virgins, holy maid,
+Starry hosts proclaim thy praises,
+Praise the crown to virtue paid,
+While our joyful hearts and voices
+Join the anthem unafraid.
+
+Wise wert thou to spurn the riches
+And the crowns that heaven miss,
+Wise to choose thy brother's teachings,
+Change thy way of life for his:
+In the savour of thine ointments
+Didst thou enter heavenly bliss.
+
+Oh, the might of love unbounded!
+Victory of all most meet!
+At thy tears the heavens opened,
+Poured their floods about thy feet,
+While his soul to thine made answer
+All night long in converse sweet.
+
+Crash of tempest, roll of thunder,
+Lightning flash from pole to pole,
+But the storm of love is stronger,
+Brighter flashes in the soul,
+While the peace of Christ the Bridegroom
+Holds thee still and keeps thee whole.
+
+Now a gleaming cloud in heaven,
+Now a sun with golden rays,
+Never darkling, never fading,
+Shining still through all our days,
+Fill the hearts of all the faithful
+With the joy of heavenly lays.
+
+Glory to the Father sing we,
+Glory to the only Son;
+To the Paraclete in glory,
+Equal tribute be begun,
+At whose pleasure made and governed
+All the ages' course is run. Amen.
+
 [versicle-lauds]
 # SOURCE: diurnal p. 478
 V. Behold, thou art fair, my love.
@@ -93,9 +168,15 @@ R. And as a dove to her windows?
 # [short-responsory-lauds]
 # Short responsory at Lauds.
 #
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
+[short-responsory-vespers]
+# SOURCE: diurnal p. 475
+R. In the likeness of a dove * The soul of Scholastica was seen in a vision.
+In the likeness.
+V. The heart of her brother rejoiced.
+The soul.
+Glory be.
+In the likeness.
+
 # [vespers-psalmody]
 # Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
 #
@@ -111,9 +192,10 @@ R. And as a dove to her windows?
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
 #
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
+[psalm-antiphon-4-vespers]
+# SOURCE: Monastic Diurnal pp. 475, 478–479; 2026 ordo p. 36
+@use proper/st-scholastica/psalm-antiphon-5
+
 # [psalm-antiphon-1-first-vespers]
 # I Vespers override for psalm antiphon 1.
 #
@@ -135,9 +217,10 @@ R. And as a dove to her windows?
 # [chapter-ferial-prime]
 # Proper ferial chapter at Prime when the office explicitly supplies one.
 #
-# [chapter-terce]
-# Proper chapter at Terce.
-#
+[chapter-terce]
+# SOURCE: Monastic Diurnal pp. 475, 478–479; 2026 ordo p. 36
+@use proper/st-scholastica/chapter-lauds
+
 [chapter-sext]
 # SOURCE: diurnal p. 478
 !Cant 6:9
@@ -209,3 +292,11 @@ R. Thanks be to God.
 #
 # [psalm-antiphon-5-first-vespers]
 # I Vespers override for psalm antiphon 5.
+
+[hymn-doxology-lauds]
+# SOURCE: Monastic Diurnal p. 478: this proper ending is never changed.
+@omit
+
+[hymn-doxology-vespers]
+# Keep the proper six-line ending printed on pp. 475–476.
+@omit

@@ -16,16 +16,16 @@ commons/holy-woman/collect,d2fe96f65918,shadowed-fallback,Both current holy-woma
 commons/holy-woman/commemoration-antiphon,b49ca8362e05,shadowed-fallback,Both current holy-woman feasts have feast-specific commemoration antiphons; retain the common fallback,
 commons/holy-woman/commemoration-versicle,a3d6974ea6c9,shadowed-fallback,Both current holy-woman feasts have feast-specific commemoration versicles; retain the common fallback,
 commons/holy-woman/magnificat-antiphon-first,bc006942d0e8,displaced,St Anne is the only potential user and her first Vespers is displaced by St James every year,
-commons/martyrs-paschal/hymn-lauds,b674972c1f1b,dormant-policy,No many-martyr celebration selects this Paschaltide common hymn in the standard sweep,
+commons/martyrs-paschal/hymn-lauds,6c124895fd56,dormant-policy,No many-martyr celebration selects this Paschaltide common hymn in the standard sweep,
 commons/virgin-martyr-paschal/short-responsory-lauds,72802d9219ef,dormant-policy,No virgin-martyr celebration selects this Paschaltide common responsory in the standard sweep,
 ordinary/compline/psalm-antiphon,469eaf34e4b5,shadowed-fallback,Every Compline psalm-antiphon slot has a numbered ordinary section; retain the generic safety fallback,
 ordinary/lauds/psalm-antiphon,cf79728c6547,shadowed-fallback,Every Lauds psalm-antiphon slot has a numbered or weekday section; retain the generic safety fallback,
-ordinary/none/collect,5778aa712ca1,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
+ordinary/none/collect,70c9b738dcb1,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
 ordinary/none/short-responsory,5e75d5065a23,shadowed-fallback,The parish Little Hours appoint a simple versicle after the chapter; the direct ordinary versicle displaces this legacy Responsory Breve fallback,
 ordinary/prime/psalm-antiphon,05d6c0d38c7f,shadowed-fallback,Prime ferias use weekday sections and feasts/Sundays take the first Lauds antiphon; retain the generic safety fallback,
-ordinary/sext/collect,587f391e4dd8,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
+ordinary/sext/collect,5df32a6270c0,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
 ordinary/sext/short-responsory,f7c43c9d06ec,shadowed-fallback,The parish Little Hours appoint a simple versicle after the chapter; the direct ordinary versicle displaces this legacy Responsory Breve fallback,
-ordinary/terce/collect,bdf2165ee05e,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
+ordinary/terce/collect,c557945d300e,dead,Minor hours intentionally resolve the collect through the Lauds collect slot; this legacy section has no production selector,
 ordinary/terce/short-responsory,d2cfa17b889b,shadowed-fallback,The parish Little Hours appoint a simple versicle after the chapter; the direct ordinary versicle displaces this legacy Responsory Breve fallback,
 ordinary/vespers/psalm-antiphon,73ad4d74a8bd,shadowed-fallback,Every Vespers psalm-antiphon slot has a numbered or weekday section; retain the generic safety fallback,
 proper/advent-sunday-2/benedictus-antiphon-friday,066976d5b875,displaced,Every matching feria is won by a sanctoral or Advent Ember office in the standard sweep,
@@ -53,8 +53,6 @@ proper/historia-october-5/magnificat-antiphon-first,f406d0f9bfdf,unclassified,No
 proper/holy-innocents/magnificat-antiphon-first,4bc6a32f5db3,displaced,The fixed December 27 boundary is owned by second Vespers of St John,
 proper/holy-name-jesus/commemoration-antiphon,5b2d17b0a694,dormant-policy,The moveable second-class feast is never reduced to a commemoration under current occurrence policy,
 proper/holy-name-jesus/commemoration-versicle,4c6b3083b850,dormant-policy,The moveable second-class feast is never reduced to a commemoration under current occurrence policy,
-proper/holy-name-jesus/hymn-doxology-lauds,8a39a0f176dd,dead,The proper hymn already contains this final stanza and the doxology substitution path accepts seasonal sections only,
-proper/holy-name-jesus/hymn-doxology-vespers,fed4cd0a305a,dead,The proper hymn already contains this final stanza and the doxology substitution path accepts seasonal sections only,
 proper/holy-thursday/commemoration-antiphon,b9d16ad171a8,dormant-policy,This privileged Triduum office is not reduced to a commemoration under current occurrence policy,
 proper/holy-thursday/commemoration-versicle,3445b30bcb2b,dormant-policy,This privileged Triduum office is not reduced to a commemoration under current occurrence policy,
 proper/lent-ember-saturday/magnificat-antiphon,00051a0aac52,displaced,First Vespers of Lent II always owns the Saturday evening boundary,
@@ -108,3 +106,9 @@ shared/formulas/commemoration-versicle,c938aef4987d,shadowed-fallback,Feast prop
 shared/formulas/collect-conclusion-through-same-spirit,c3e8144202c8,dormant-policy,No collect currently names the Son mid-text and the Holy Spirit together; the form is kept so XXXIII.4 is representable without a code change,
 shared/formulas/collect-conclusion-who-liveth-spirit,20ba82cf9a8d,suppressed,Reached only by the Whit Ember Wednesday collect; the Pentecost octave office suppresses the coincident Whit Ember proper under current local policy,
 shared/formulas/collect-conclusion-who-livest-spirit,d7048b38bdf8,dormant-policy,No collect addressed to the Son also names the Holy Spirit; the form is kept so XXXIII.4 is representable without a code change,
+seasonal/easter/short-responsory-terce,ea858f8084a7,shadowed-fallback,The direct seasonal terce versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314
+seasonal/easter/short-responsory-sext,dd972b1142bc,shadowed-fallback,The direct seasonal sext versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314
+seasonal/easter/short-responsory-none,d6337b401874,shadowed-fallback,The direct seasonal none versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314
+seasonal/passiontide/short-responsory-terce,4ed31f42612e,shadowed-fallback,The direct seasonal terce versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314
+seasonal/passiontide/short-responsory-sext,881e45a94a2d,shadowed-fallback,The direct seasonal sext versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314
+seasonal/passiontide/short-responsory-none,045ed0ef5f5d,shadowed-fallback,The direct seasonal none versicle is appointed by the Diurnal; this legacy responsory has no selected occurrence in the 2026–2053 sweep. Wording remains unattested.,314

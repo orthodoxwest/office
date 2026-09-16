@@ -395,7 +395,9 @@ or the wider octave.
 
 The audit also identified four missing Epiphany Sunday II Vespers appointments
 and a distinct little-hour source conflict, tracked in
-[#361](https://github.com/orthodoxwest/office/issues/361). Those remain separate.
+[#361](https://github.com/orthodoxwest/office/issues/361). The II Vespers
+appointments were repaired by #364; the little-hour chapter question remains
+in the repair backlog pending clergy clarification.
 Ordinary Sunday Vespers' 2 Corinthians chapter agrees with Diurnal p. 114;
 ordinary numbered Sunday propers inspected on pp. 232 and 437 do not print
 replacement chapters. These negative findings are limited to those pages,
@@ -465,3 +467,82 @@ conclusion, evening ownership and adjacent-day boundaries. It fails against
 the pre-repair data. These checks establish the repaired appointments and
 retained structure, not complete wording or prayer-form certification. The
 resolved antiphon item is removed from the outstanding repair backlog.
+
+
+## Scholastica, octave antiphons, and seasonal cleanup
+
+This pass repairs source-backed appointments with corpus bodies and aliases;
+no production engine or ingestion code changes. The local 2026 archdiocesan
+ordo remains the calendar authority. Additional years exercise boundaries,
+not agreement with future ordos.
+
+| Source requirement | Repair and verification |
+|---|---|
+| Scholastica I Vespers takes the Lauds chapter and antiphons, omitting the fourth Lauds antiphon; II Vespers repeats I except Magnificat (Diurnal pp. 475, 477, 479; ordo p. 36) | Vespers chapter aliases Lauds and the fourth Vespers antiphon aliases the fifth Lauds antiphon. Existing Common psalms 110, 113, 122, 127 remain. |
+| Scholastica has full proper hymns and a Vespers responsory; Terce repeats the Lauds chapter (pp. 475–478) | Added both six-stanza hymns and the printed abbreviated Vespers responsory; Terce chapter aliases Lauds. Lauds' Common responsory already agrees with the scan. |
+| Scholastica's Lauds ending never changes (p. 478); Vespers has its own six-line ending (pp. 475–476) | Hour-specific `@omit` doxology declarations protect the inline endings in Epiphany years, without suppressing seasonal endings at Prime, Terce, Sext, None or Compline. |
+| Peter and Paul within-octave gospel antiphons differ from the feast; the terminal octave day retains them (pp. 558–559; ordo pp. 77–78) | Two canonical texts, with aliases for all six within-octave days, principal offices and commemorations. An explicit octave-day I Vespers alias also handles its anticipated commemoration on July 5, 2026. The parent feast stays unchanged. |
+| Sexagesima and Pentecost have specific Magnificat wording (pp. 240, 399; ordo pp. 38, 68) | Replaced the unsupported wording with the printed texts. |
+| Compline's Keep us verse adds alleluias in Paschaltide (p. 151), continuing through Pentecost octave Saturday None (2026 ordo p. 18) | Aligned the Easter verse's punctuation and added one Pentecost alias inherited throughout its octave. Compline had lost the alleluias from Pentecost I Vespers onward; Trinity I Vespers now ends the appointment at the correct boundary. |
+
+The new hymn, responsory and antiphon readings have independent Codex and
+Claude Sonnet readings with cited page images. Eight canonical bodies receive
+hash-bound source attestations; aliases do not duplicate those bodies.
+Artifacts, including a corrected hymn continuation reading, are retained under
+ignored `output/composition-cleanup/`. The Scholastica responsory retains the
+book's abbreviated repeated lines, as elsewhere in the corpus.
+
+`TestScholasticaAppointments`, `TestScholasticaSmallHourHymnEndings`,
+`TestPeterPaulOctaveGospelAntiphons`, `TestReviewedSundayAntiphonWording`, and
+`TestPaschalComplineVerse` check text, source, principal/commemorated ownership,
+and neighboring boundaries in all three prayer forms. They use 2026, 2027 and
+2032, including the Epiphany hymn-ending cases and daily Compline from Easter
+through Trinity Monday. Peter/Paul day II Vespers is not selected in that
+calendar sample; a direct resolver check covers its data appointments.
+
+A before/after comparison of all **23,016** seven-hour compositions in those
+three years and forms finds **633 changed / 22,383 identical**: 63 Vespers,
+66 Lauds, 9 Terce and 495 Compline. Full saved snapshots for Lauds, Vespers,
+Scholastica and 2026 Compline have changes only in the repaired elements;
+calendar metadata, section structure, decisions and all other elements match.
+The remaining Compline changes are covered by the daily focused tests.
+Holy Name outputs are identical after replacing two duplicated doxology
+bodies with `@omit`: those declarations preserve the proper inline ending
+and must not simply be deleted.
+
+The unchanged 2026 ordo comparator clears five canticle-incipit findings and
+introduces none: February 15, May 31, July 4 Benedictus, and both July 6
+canticles. Strict comparable assertions improve from 3438/3626 to 3443/3626;
+remaining mismatches fall from 188 to 183. These are incipit/appointment
+measurements, not whole-office certification.
+
+The fourteen remaining canticle-incipit differences are now explicitly
+classified. February 23 matches the locally supplied Chair of Peter supplement
+(II Vespers, final page), despite a different ordo incipit. September 4 is a
+spelling error in the ordo's incipit; its cited Diurnal p. 23* agrees with the
+app. April 1's apostolic I Vespers entry conflicts with the next day's feria
+(ordo pp. 50–51), and September 18 repeats Thursday Vespers on Friday (ordo
+p. 99 versus Diurnal pp. 136, 140). Those two appointment conflicts remain
+unchanged and are recorded for clergy. Six previously unclassified antiphon
+findings are consequences of the already tracked Vespers-concurrence (#62)
+and Einsiedeln calendar-scope (#11) questions, not separate wording repairs.
+
+A fresh 2026–2053 zero-occurrence inventory identifies the six legacy Easter
+and Passiontide little-hour responsories as shadowed by their direct verses.
+Their hash-bound dispositions are recorded; their wording is neither deleted
+nor newly attested. Four stale disposition hashes are refreshed, and the two
+Holy Name duplicate-body classifications are removed with those bodies.
+
+The backlog drops completed Scholastica/seasonal targets and the stale Holy
+Name of Mary collect target, replaces the general antiphon bucket with specific
+source conflicts, and restores the unresolved Epiphany Sunday little-hour
+question. **Peter and Paul's other octave appointments remain a concrete repair
+target**: Common psalmody, chapters, hymns, responsories, verses, commemoration
+verses and the terminal collect still require appointment-by-appointment review
+against pp. 558–560. The gospel-antiphon fix does not certify those slots.
+
+Validation: `make golden`, `make check`, and `make test-coverage` pass.
+The 28-year parity snapshot changes only Lauds, Terce, Vespers and Compline
+content/source digests; all calendar, composition-decision and
+commemoration-merge digests match. Assurance reports eight additional verified
+bodies, zero stale attestations, and zero stale zero-occurrence classifications.
