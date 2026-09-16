@@ -109,6 +109,22 @@ func isDayWithinOctave(f *models.Feast) bool {
 	return len(suffix) > 0
 }
 
+// isPrivilegedOctaveCommemoration distinguishes the privileged octaves in
+// VII.3 from common octaves for XIV.4,7-8. The builder's privilegedOctaves
+// table serves a different purpose: the I Class precedence of Easter and
+// Pentecost weekdays. Nativity, Epiphany, Ascension and Corpus weekdays also
+// retain their commemoration under an occurring I/II Class feast.
+func isPrivilegedOctaveCommemoration(f *models.Feast) bool {
+	if f == nil || !isDayWithinOctave(f) {
+		return false
+	}
+	switch octaveParentID(f) {
+	case "christmas", "epiphany", "easter-sunday", "ascension", "pentecost", "corpus-christi":
+		return true
+	}
+	return false
+}
+
 // octaveParentID returns the parent feast ID for a generated octave-day feast,
 // e.g. "all-saints-octave-day-2" → "all-saints". Empty when f is not an octave day.
 func octaveParentID(f *models.Feast) string {
@@ -214,6 +230,9 @@ func occurrenceCommemoratedAtSecondVespers(winner, comm *models.Feast) (bool, st
 		}
 		return false, "commemoration:second-vespers-memorial-or-simple"
 	}
+	if isPrivilegedOctaveCommemoration(comm) {
+		return true, "commemoration:second-vespers-privileged-octave"
+	}
 	if winner != nil && winner.Rank == models.Double1stClass && comm.Category != models.CategorySunday {
 		return false, "commemoration:second-vespers-first-class-exclusion"
 	}
@@ -227,11 +246,18 @@ func occurrenceCommemoratedAtSecondVespers(winner, comm *models.Feast) (bool, st
 // hour coverage does not extend to the preceding evening. Simples and
 // Memorials have no II-Vespers boundary commemoration (XIV.7-9); common
 // vigils are Simple offices and are covered by the same rule.
-func followingOfficeCommemoratedAtSecondVespers(following *models.CalendarDay) (bool, string) {
+func followingOfficeCommemoratedAtSecondVespers(winner *models.Feast, following *models.CalendarDay) (bool, string) {
 	if following == nil || following.Celebration == nil {
 		return false, "commemoration:following-office-at-second-vespers-nil"
 	}
 	feast := following.Celebration
+	// XIV.7-8 exclude a following common octave weekday at II Vespers of
+	// a I/II Class feast; a privileged octave retains its own entitlement.
+	if winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
+		winner.Category != models.CategorySunday &&
+		isDayWithinOctave(feast) && !isPrivilegedOctaveCommemoration(feast) {
+		return false, "commemoration:following-common-octave-at-second-vespers"
+	}
 	if incomingFeriaExcludedAtVespers(feast) {
 		return false, "commemoration:following-feria-not-at-second-vespers"
 	}
@@ -505,7 +531,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: loser.ID})
 			}
 		} else {
-			if included, rule := followingOfficeCommemoratedAtSecondVespers(following); included {
+			if included, rule := followingOfficeCommemoratedAtSecondVespers(winner, following); included {
 				comms = append(comms, loser)
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: loser.ID})
 			} else {
@@ -564,6 +590,13 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 		}
 	}
 	for _, c := range following.Commemorations {
+		// An octave represented by the office being sung is not added again
+		// through tomorrow's occurrence list (Christmas -> St Stephen).
+		if secondVespers && isDayWithinOctave(c) &&
+			octaveCelebrationParent(preceding) == octaveParentID(c) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: c.ID})
+			continue
+		}
 		// A displaced seasonal feria belongs to the following civil day and
 		// does not begin at I Vespers. The outgoing civil-day feria, when
 		// privileged, has already been considered above (2026 ordo: St
@@ -612,6 +645,31 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 	}
 	comms := make([]*models.Feast, 0, len(occurrenceCommemorations)+len(boundary))
 	decisions := append([]models.CompositionDecision{}, boundaryDecisions...)
+	// The current and following civil days may both supply a commemoration
+	// of the same continuing octave. At II Vespers retain the current day's
+	// commemoration once (2026 ordo Jun 26, Jul 3, Dec 29), rather than add
+	// tomorrow's ordinal as a second prayer. Terminal octave days remain
+	// separate: their concurrence has its own rank and ordering rules.
+	filteredBoundary := make([]*models.Feast, 0, len(boundary))
+	for _, comm := range boundary {
+		duplicateOctave := false
+		if comm != nil && isDayWithinOctave(comm) {
+			for _, current := range occurrenceCommemorations {
+				if current != nil && isDayWithinOctave(current) && sameOctaveDays(current, comm) {
+					if included, _ := occurrenceCommemoratedAtSecondVespers(winner, current); included {
+						duplicateOctave = true
+						break
+					}
+				}
+			}
+		}
+		if duplicateOctave {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:duplicate-octave-boundary", Outcome: "suppressed", Detail: comm.ID})
+		} else {
+			filteredBoundary = append(filteredBoundary, comm)
+		}
+	}
+	boundary = filteredBoundary
 	// The concurrent following office itself is commemorated first (XIV.14).
 	// Other following-day occurrence commemorations remain after the current
 	// day's occurrence commemorations.

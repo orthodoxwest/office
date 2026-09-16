@@ -210,3 +210,11 @@ When Zacharias * went into the temple, there appeared unto him the Angel Gabriel
 #
 # [psalm-antiphon-3-vespers]
 # Vespers-only override for psalm antiphon 3.
+
+[commemoration-antiphon-lauds]
+# SOURCE: 2026 ordo pp. 75-76; Monastic Diurnal pp. 541-542 (octave commemoration at Lauds)
+@use proper/nativity-john-baptist/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: 2026 ordo pp. 75-76; Monastic Diurnal pp. 541-542 (octave commemoration at Vespers)
+@use proper/nativity-john-baptist/magnificat-antiphon

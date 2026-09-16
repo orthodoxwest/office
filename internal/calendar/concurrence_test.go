@@ -390,7 +390,7 @@ func TestOccurrenceCommemoratedAtSecondVespers(t *testing.T) {
 		{"Peter name without trait is an ordinary memorial", greaterDouble, &models.Feast{ID: "named-companion", Name: "Commemoration of St Peter", Rank: models.Commemoration}, false},
 		{"Sunday remains at II Vespers of first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
 		{"Double excluded by first class winner", firstClass, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, false},
-		{"day within octave excluded by second class", secondClass, &models.Feast{ID: "epiphany-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
+		{"common day within octave excluded by second class", secondClass, &models.Feast{ID: "ss-peter-paul-octave-day-3", Rank: models.SemiDouble, Category: models.CategoryMartyr}, false},
 		{"Double retained under greater double", greaterDouble, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, true},
 		{"seasonal privileged feria retained", greaterDouble, &models.Feast{ID: "privileged-lenten-feria", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, true},
 		{"synthetic displaced seasonal feria retained", secondClass, &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}, true},
