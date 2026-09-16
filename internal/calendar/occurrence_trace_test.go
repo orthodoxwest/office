@@ -84,7 +84,6 @@ func TestCommemorationTraceRules(t *testing.T) {
 	onlyWith.OnlyWith = "someone-else"
 	pentecostWinner := traceFeast("pentecost-octave-day-3", models.Double1stClass, models.CategoryLord)
 	ember := traceFeast("whit-ember-wednesday", models.Commemoration, models.CategoryFeria)
-	octave := traceFeast("ascension-octave-day-4", models.Commemoration, models.CategoryLord)
 	privileged := traceFeast("ash-wednesday", models.Double1stClass, models.CategoryFeria)
 	stGeorge := traceFeast("st-george-octave-day-2", models.Commemoration, models.CategoryMartyr)
 
@@ -96,7 +95,6 @@ func TestCommemorationTraceRules(t *testing.T) {
 	}{
 		{"only-with", winner, onlyWith, "commemoration:only-with"},
 		{"pentecost ember", pentecostWinner, ember, "commemoration:pentecost-ember"},
-		{"same octave Sunday", winner, octave, "commemoration:same-octave-sunday"},
 		{"St George octave", privileged, stGeorge, "commemoration:st-george-octave"},
 	}
 	for _, tt := range tests {

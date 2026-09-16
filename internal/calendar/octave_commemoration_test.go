@@ -46,6 +46,8 @@ func TestOctaveVespersCommemorations2026(t *testing.T) {
 	}{
 		{1, 11, []string{"epiphany-octave-day-6", "comm-01-12-st-benedict-biscop-abbot"}},
 		{4, 26, []string{"st-george-octave-day-4"}},
+		{5, 24, []string{"ascension-octave-day-4", "comm-extra-05-25-st-urban-pope-and-martyr"}},
+		{6, 14, []string{"corpus-christi-octave-day-4", "st-basil-great", "comm-06-15-ss-vitus-modestus-and-crescentia-martyrs"}},
 		{6, 26, []string{"nativity-john-baptist-octave-day-3"}},
 		{7, 3, []string{"ss-peter-paul-octave-day-5"}},
 		{8, 16, []string{"pentecost-sunday-11"}},
@@ -63,6 +65,9 @@ func TestOctaveVespersCommemorations2026(t *testing.T) {
 		if !slices.Equal(got, tc.want) {
 			t.Errorf("%s commemorations = %v, want %v", d.Date.Format("2006-01-02"), got, tc.want)
 		}
+	}
+	if got := findDay(days, 2026, 6, 14).Vespers.FollowingOfficeCommemorationID; got != "" {
+		t.Errorf("Corpus Sunday retained following-office text context %q for the current octave", got)
 	}
 }
 
@@ -87,5 +92,28 @@ func TestFollowingOctaveAtSecondVespers(t *testing.T) {
 				t.Fatalf("included = %v, want %v (%s)", got, tc.want, rule)
 			}
 		})
+	}
+}
+
+func TestContinuingOctaveKeepsConcurrentPriority(t *testing.T) {
+	// XIV.14: the concurrent office remains first when its duplicate
+	// octave day is merged with the current day's occurrence.
+	winner := traceFeast("sunday", models.SemiDouble, models.CategorySunday)
+	saint := traceFeast("saint", models.GreaterDouble, models.CategoryConfessor)
+	current := traceFeast("example-octave-day-4", models.SemiDouble, models.CategoryLord)
+	following := traceFeast("example-octave-day-5", models.SemiDouble, models.CategoryLord)
+	current.IsPrivilegedOctaveDay = true
+	following.IsPrivilegedOctaveDay = true
+	day := &models.CalendarDay{Celebration: winner, Commemorations: []*models.Feast{saint, current}}
+	got, _ := secondVespersCommemorationsWithDecisions(winner, day, following.ID, []*models.Feast{following}, nil)
+	if len(got) != 2 || got[0] != current || got[1] != saint {
+		t.Fatalf("commemorations = %v, want current octave then saint", feastIDs(got))
+	}
+	// If a different feast is the concurrent office, the octave remains
+	// an ordinary occurrence party; do not promote it above that feast.
+	concurrent := traceFeast("other-feast", models.Double, models.CategoryMartyr)
+	got, _ = secondVespersCommemorationsWithDecisions(winner, day, concurrent.ID, []*models.Feast{concurrent, following}, nil)
+	if len(got) != 3 || got[0] != concurrent || got[1] != saint || got[2] != current {
+		t.Fatalf("commemorations = %v, want concurrent feast then existing occurrence order", feastIDs(got))
 	}
 }

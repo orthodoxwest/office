@@ -456,7 +456,9 @@ func TestResolveDaySuppressWhitEmberCommemorationWithinPentecostOctave(t *testin
 	}
 }
 
-func TestResolveDaySuppressDayIVCommemorationOnSundayWithinOctave(t *testing.T) {
+func TestResolveDaySundayRetainsOctaveCommemoration(t *testing.T) {
+	// Diurnal p.419 and 2026 ordo p.72 distinguish the Sunday office from
+	// its commemoration of the octave, even though they share festal psalmody.
 	m := ComputeMoveableDates(2026)
 	date := time.Date(2026, 6, 14, 0, 0, 0, 0, time.UTC)
 
@@ -498,8 +500,8 @@ func TestResolveDaySuppressDayIVCommemorationOnSundayWithinOctave(t *testing.T) 
 	if day.Celebration != sunday {
 		t.Fatal("expected Sunday to win")
 	}
-	if len(day.Commemorations) != 1 || day.Commemorations[0] != otherCommemoration {
-		t.Fatal("expected day IV octave commemoration to be suppressed on Sunday")
+	if len(day.Commemorations) != 2 || day.Commemorations[0] != dayIVCorpus || day.Commemorations[1] != otherCommemoration {
+		t.Fatal("expected octave followed by the occurring saint")
 	}
 }
 

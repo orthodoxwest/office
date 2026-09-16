@@ -892,11 +892,13 @@ MAY
                Com. St Vincent of Lerins, Confessor ("The world, and all things earthly")
  24  Sun     Sunday within the Octave of the Ascension  [sd]  w
            St Vincent of Lerins, Confessor (com)
+           Day IV within the Octave of the Ascension (sd)
            Lauds   w · Ben. When the Comforter is come · No Preces · No Suff.
                Com. St Vincent of Lerins, Confessor ("Well done, good and faithful servant")
+               Com. Day IV within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers w · II prec. · Mag. These things have I told you · No Suff.
-               Com. Day V within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day IV within the Octave of the Ascension ("Ye men of Galilee")
                Com. St Urban, Bishop & Martyr ("Whosoever will come after me")
  25  Mon     Day V within the Octave of the Ascension   [sd]  w
            St Urban, Bishop & Martyr (com)
@@ -911,7 +913,7 @@ MAY
            Day VI within the Octave of the Ascension (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St Eleutherius, Bishop & Martyr ("He that hateth his life")
-               Com. Day VI within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day VI within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers w · I fol. (St Bede the Venerable, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Augustine of Canterbury, Bishop & Confessor ("The Lord loved him")
@@ -922,7 +924,7 @@ MAY
            Day VII within the Octave of the Ascension (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St John I, Bishop & Martyr ("He that hateth his life")
-               Com. Day VII within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day VII within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers w · I fol. (Octave Day of the Ascension) · Mag. Father · No Suff.
                Com. St Bede the Venerable, Confessor & Doctor ("O Teacher right excellent")
@@ -1026,12 +1028,14 @@ JUNE
            II Sunday after Pentecost
            St Basil the Great, Bishop, Confessor & Doctor (gd)
            All Saints of Antioch (com)
+           Day IV within the Octave of Corpus Christi (sd)
            Lauds   w · Ben. A certain man · No Preces · No Suff.
                Com. St Basil the Great, Bishop, Confessor & Doctor ("Well done")
                Com. All Saints of Antioch ("Well done, good and faithful servant")
+               Com. Day IV within the Octave of Corpus Christi ("I am")
            Hours   No Preces
            Vespers w · II prec. · Mag. Go out quickly · No Suff.
-               Com. Day V within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
+               Com. Day IV within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
                Com. St Basil the Great, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. Ss Vitus, Modestus & Crescentia, Martyrs ("In the heavenly kingdom")
  15  Mon     Day V within the Octave of Corpus Christi  [sd]  w

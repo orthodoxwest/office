@@ -975,7 +975,7 @@ JUNE
  11  Fri  L  St. Barnabas, Apostle                      [gd]  r
            Day II within the Octave of the Ascension (sd)
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
-               Com. Day II within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day II within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
                Com. Day II within the Octave of the Ascension ("Ye men of Galilee")
@@ -988,15 +988,17 @@ JUNE
            Vespers w · I fol. (Sunday within the Octave of the Ascension) · Mag. When the Comforter is come · No Suff.
                Com. Day III within the Octave of the Ascension ("Ye men of Galilee")
  13  Sun     Sunday within the Octave of the Ascension  [sd]  w
+           Day IV within the Octave of the Ascension (sd)
            Lauds   w · Ben. When the Comforter is come · No Preces · No Suff.
+               Com. Day IV within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers w · II prec. · Mag. These things have I told you · No Suff.
                Com. St Basil the Great, Bishop, Confessor & Doctor ("O Teacher right excellent")
-               Com. Day V within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day IV within the Octave of the Ascension ("Ye men of Galilee")
  14  Mon     St Basil the Great, Bishop, Confessor & Doctor [gd]  w
            Day V within the Octave of the Ascension (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
-               Com. Day V within the Octave of the Ascension ("Ye men of Galilee")
+               Com. Day V within the Octave of the Ascension ("I ascend")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
                Com. Day V within the Octave of the Ascension ("Ye men of Galilee")
@@ -1162,12 +1164,12 @@ JULY
            Lauds   w · Ben. When Elisabeth · No Preces · No Suff.
                Com. All Saints of Antioch ("Well done, good and faithful servant")
                Com. Sunday within the Octave of Corpus Christi ("A certain man")
-               Com. Day IV within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
+               Com. Day IV within the Octave of Corpus Christi ("I am")
                Com. Day VI within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · II prec. · Mag. All generations · No Suff.
-               Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
                Com. Day IV within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
+               Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
   5  Mon     Day V within the Octave of Corpus Christi  [sd]  w
            Day VII within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
