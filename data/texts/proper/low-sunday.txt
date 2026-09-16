@@ -165,3 +165,39 @@ The same day * at evening, being the first day of the week, when the doors were 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[psalm-antiphon-1-lauds]
+# SOURCE: Monastic Diurnal p. 370 (Lauds)
+@use seasonal/easter/psalm-antiphon-1-lauds-sunday
+
+[psalm-antiphon-2-lauds]
+# SOURCE: Monastic Diurnal p. 370 (Lauds)
+@use seasonal/easter/psalm-antiphon-2-lauds-sunday
+
+[psalm-antiphon-3-lauds]
+# SOURCE: Monastic Diurnal p. 370 (Lauds)
+@use seasonal/easter/psalm-antiphon-3-lauds-sunday
+
+[psalm-antiphon-4-lauds]
+# SOURCE: Monastic Diurnal p. 370 (Lauds)
+@use seasonal/easter/psalm-antiphon-4-lauds-sunday
+
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-2-terce]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-3-sext]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-5-none]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 370 (Lauds psalmody)
+@use psalmody/lauds/festal

@@ -1,4 +1,4 @@
-# Explicit retention of the existing festal Lauds psalmody.
-# A hold is not source attestation: see data/review/repair-backlog.csv.
+# Festal Lauds psalmody: Psalms93,100,63 and Benedicite.
+# Proper files cite appointments, or explicitly document a clergy-review hold.
 [festal]
 festal

@@ -125,3 +125,7 @@ Almighty, everlasting God: grant that we may always devote our wills to thy serv
 [short-responsory-none]
 # SOURCE: monastic diurnal, p. 393 (Sunday within the Ascension octave; little-hour versicle)
 @use proper/ascension/short-responsory-none
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 392 (Lauds psalmody)
+@use psalmody/lauds/festal

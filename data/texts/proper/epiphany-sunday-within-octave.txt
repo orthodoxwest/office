@@ -89,3 +89,7 @@ Son, * why hast thou thus dealt with us? behold, thy father and I have sought th
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 141, 122 (Sunday within the Octave of the Epiphany)
 O Lord, we beseech thee mercifully to receive the prayers of thy people who call upon thee; and grant that they may both perceive and know what things they ought to do, and also may have grace and power faithfully to fulfil the same.
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 229 (Lauds psalmody)
+@use psalmody/lauds/festal

@@ -66,3 +66,23 @@ R. Thanks be to God.
 !1 Peter 2:25
 For ye were as sheep going astray; * but are now returned unto the Shepherd and Bishop of your souls.
 R. Thanks be to God.
+
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-2-terce]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-3-sext]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-5-none]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 377 (Lauds psalmody)
+@use psalmody/lauds/festal

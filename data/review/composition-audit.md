@@ -735,3 +735,60 @@ cites that appointment. Follow its use on the subsequent Easter Sundays,
 check the exact texts independently, and preserve Vespers/little-hour
 appointments when repairing the Lauds aliases. This is recorded in the repair
 backlog and is not certified by the weekday repair.
+
+## Paschaltide Sunday psalmody and antiphons (2026-09-16)
+
+Low Sunday through V Sunday after Easter now follow the appointments in
+Diurnal pp.34–37,370–371,377,380,382,385. Lauds has Psalms93,100,63 after
+Psalm67, followed by Benedicite and the joined Laudate psalms. The first three
+main psalms share a ninefold Alleluia, Benedicite has its own “Christ is risen”
+antiphon, and Laudate keeps the threefold Alleluia. Previously Low Sunday used
+the threefold form throughout, while II–V Sundays also retained the ordinary
+Sunday Psalms51 and118 and lacked the separate canticle antiphon frame.
+
+The Sunday little hours take a fourfold Alleluia (pp.83,371). Explicit
+proper-hour aliases prevent Prime from borrowing the new Lauds ninefold form.
+The 2026 ordo pp.56,58,62,64 agrees on these Sunday psalter and Paschaltide
+antiphon appointments. Its separate II/V Easter chapter-reference conflicts
+remain held in the backlog; no chapter is changed here.
+
+Direct Codex page-image readings agree with an independent Sonnet reading of
+the three new text bodies, including Alleluia counts and grouping. Their source
+attestations are hash-bound; evidence, page identities and reader results remain
+under ignored `output/paschal-sunday/`. Pointing is normalized to the corpus's
+asterisk convention. These attestations verify wording, not entire offices.
+
+The existing `lauds-psalmody` declaration now supplies the explicit Sunday
+appointments. The three formerly hardcoded octave-Sunday exceptions move into
+their proper files (Nativity p.206, Epiphany p.229, Ascension p.392). This removes
+the engine's feast-ID list and preserves ProperID redirects, including the
+Friday after Ascension's octave and Pentecost vigil. Existing clergy-held
+weekday appointments retain their declarations.
+
+Source requirement checks, reviewed by Codex with an independent adversarial
+agent review:
+
+- Lauds structure and counts: `TestPaschalSundayPsalmody` checks all five proper
+  IDs in actual 2026/2027/2032 calendars and all three prayer forms, including
+  Psalm67, Benedicite without a Gloria, and six antiphon frames.
+- Little-hour distinction: the same test checks fourfold antiphons in
+  Prime/Terce/Sext/None, their hour-specific source selection and canonical alias.
+- Data selection: `TestExplicitSundayLaudsPsalmody` checks direct declarations,
+  ProperID redirects, the three migrated appointments, and ordinary Sunday
+  fallback when no declaration exists.
+- Boundaries: the frozen 23,016-office sweep changes exactly 210 offices on
+  14 dates: Lauds and four little hours, in three forms. There are four affected
+  Sundays in 2026 (April19/26, May10/17); Finding of the Cross displaces III
+  Sunday on May3. All five Sundays occur in both other sampled years.
+  The remaining 22,806 offices are byte-identical, including every Vespers and
+  Compline and all migrated octave appointments. Calendar metadata is unchanged.
+  Little hours change only psalm antiphons; Lauds changes only those antiphons
+  and frames and the two wrongly selected psalms. All chapter conflicts remain
+  byte-identical to the baseline.
+
+Validation includes `make golden`, `make check` and `make test-coverage`.
+The unchanged 2026 ordo comparator still reports 3443/3626, with a byte-identical
+finding CSV; it does not inspect these psalmody/antiphon distinctions. The
+28-year parity review preserves calendar, commemoration, Vespers and Compline
+digests. This closes the Paschal Sunday backlog row, without certifying other
+Paschaltide appointments or resolving the clergy-held questions.
