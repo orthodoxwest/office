@@ -52,6 +52,45 @@ class CommemorationComparisonTest(unittest.TestCase):
         )
         self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), ["Walburga"])
 
+    def test_extracts_appointments_without_comm_prefix(self):
+        # Printed appointments: 2026 ordo pp. 32, 37, 56, 61. In particular,
+        # the HC flag must not hide the preceding named commemoration.
+        for name, quotation, ending in [
+            ("Polycarp", "He that hateth", "Suff. (42f)"),
+            ("Martyrs", "For theirs", "Suff. (145f)"),
+            ("Soter & Caius", "Daughters of Jerusalem", "Comm. HC (43)"),
+            ("Boniface", "O thou Priest", "No Comm. HC"),
+        ]:
+            with self.subTest(name=name):
+                section = f'Lauds W / Col. (371) / {name} (\u201c{quotation}\u201d 2*; Col. suppl.) / {ending}'
+                self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), [name])
+
+    def test_does_not_infer_commemoration_from_an_ordinary_slot(self):
+        for section in [
+            'Lauds / Ben. Ant. \u201cThe Lord\u201d / Col. (371)',
+            'Vespers / Ant. (\u201cThe Lord\u201d 2*; Col. suppl.)',
+            'Lauds / Polycarp (32)',
+            'Lauds / Polycarp (\u201cHe that hateth\u201d 1*)',
+        ]:
+            with self.subTest(section=section):
+                self.assertIsNone(ORDO_COMPARE.pdf_commemorations(section))
+
+    def test_extracts_separate_slash_delimited_commemorations(self):
+        # May 9, 2026: the second name is both unprefixed and abbreviated.
+        section = ('Vespers / Comm. Gregory (\u201cO Teacher\u201d 35*; Col. 37*) '
+                   '/ Gordian &c. (\u201cLight perpetual\u201d 2*; Col. 526)/ Comm. HC (146f)')
+        self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), ["Gregory", "Gordian &c."])
+        self.assertEqual(
+            ORDO_COMPARE.pdf_commemorations(section.replace('/ Gordian', '/ Comm. Gordian')),
+            ["Gregory", "Gordian &c."],
+        )
+
+    def test_redundant_comm_prefix_does_not_duplicate_a_name(self):
+        self.assertEqual(
+            ORDO_COMPARE.pdf_commemorations('Lauds / Comm. Comm. Walburga (\u201cThe kingdom\u201d 4*) / Suff.'),
+            ["Walburga"],
+        )
+
     def test_ignores_holy_cross_flag_not_present_in_name_column(self):
         section = 'Lauds / Comm. HC (“O Cross” 12*) / No Suff.'
         self.assertEqual(ORDO_COMPARE.pdf_commemorations(section), [])
@@ -70,6 +109,7 @@ class CommemorationComparisonTest(unittest.TestCase):
             ("Oct.", "Day IV within the Octave of Easter"),
             ("Khashas", "Ss Nicholas & Habib Khasha, Martyrs"),
             ("Dorothea", "St Dorothy, Virgin & Martyr"),
+            ("St Savior", "Dedication of the Basilica of St Saviour"),
             ("Alexan- der &c.", "Ss. Alexander, Eventius & Theodulus, Martyrs"),
             ("BVM", "Saturday Office of the B.V.M."),
             ("BMV", "Saturday Office of the B.V.M."),

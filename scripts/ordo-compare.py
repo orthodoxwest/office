@@ -254,28 +254,35 @@ def pdf_commemorations(section):
     """
     if section is None:
         return None
-    starts = list(re.finditer(r"(?<!No )\bComm\.\s*", section))
+    # Some appointments omit "Comm." entirely (2026: Jan 26, Feb 14,
+    # Apr 22, May 7 and 9). A bare name followed by a parenthesized antiphon
+    # quotation and collect citation still identifies a commemoration.
+    # Require that complete shape, not just a name or a page reference;
+    # ordinary slot labels (Col., Ant., etc.) contain periods and do not
+    # match. Normalize before looking for Comm. HC later in the section.
+    section = re.sub(
+        r'(?<=/)(\s*)([A-Z][A-Za-z &\u2019\x27-]*?(?:&c\.)?)(?=\s*\([\u201c"][^()/]*\bCol\.)',
+        r'\1Comm. \2', section,
+    )
+    starts = list(re.finditer(r"(?<!No )\b(?:Comm\.\s*)+", section))
     if not starts:
         return [] if re.search(r"\bNo Comm\.", section) else None
 
-    block = section[starts[0].end():]
-    block = re.split(r"\s+/\s*(?:No )?(?:Comm\.|Suff\.)", block, maxsplit=1)[0]
-    # The ordo's parenthetical references are occasionally unbalanced after
-    # text extraction. A closing page-reference parenthesis followed by "&"
-    # is nevertheless a stable item boundary.
-    parts = re.split(r"\)\s*(?:/\s*)?&\s*(?=(?:Comm\.\s*)?[A-Z])", block)
     names = []
-    for part in parts:
-        name = re.split(r'[(/“"]', part, maxsplit=1)[0]
-        # Subsequent items often begin "Comm."; Ash Wednesday can even be
-        # printed as the redundant "Comm. Comm. Walburga".
-        name = re.sub(r"^(?:Comm\.\s*)+", "", name)
-        name = re.sub(r"^[\s&;/]+", "", name).strip()
-        name = re.sub(r"\s+only$", "", name, flags=re.I).strip()
-        # Holy Cross commemorations are reported through a separate rubrics
-        # flag and are not present in the TSV's feast-name column.
-        if name and not re.match(r"^HC(?:\s|$)", name, re.I):
-            names.append(name)
+    for i, start in enumerate(starts):
+        end = starts[i + 1].start() if i + 1 < len(starts) else len(section)
+        block = section[start.end():end]
+        block = re.split(r"\s*/\s*(?:No Comm\.|(?:No )?Suff\.)", block, maxsplit=1)[0]
+        # A closing page-reference parenthesis followed by "&" remains
+        # an item boundary even when extracted parentheses are unbalanced.
+        parts = re.split(r"\)\s*(?:/\s*)?&\s*(?=[A-Z])", block)
+        for part in parts:
+            name = re.split(r'[(/“"]', part, maxsplit=1)[0]
+            name = re.sub(r"^[\s&;/]+", "", name).strip()
+            name = re.sub(r"\s+only$", "", name, flags=re.I).strip()
+            # Holy Cross has its own rubrics flag, not a TSV feast name.
+            if name and not re.match(r"^HC(?:\s|$)", name, re.I):
+                names.append(name)
     return names
 
 
@@ -300,6 +307,7 @@ def commemoration_tokens(name):
     generic_bvm = bool(re.fullmatch(r"(?:the\s+)?" + BVM_RE, text.strip()))
     text = re.sub(r"\b" + BVM_RE, " blessed virgin mary ", text)
     text = re.sub(r"\bdorothea\b", "dorothy", text)
+    text = re.sub(r"\bsavior\b", "saviour", text)
     text = re.sub(r"\bcommemoration of\b", " ", text)
     text = re.sub(r"\b(?:ss?|st)\.?(?=\s)", " saint ", text)
     text = re.sub(r"\bsun\.?(?=\s|$)", " sunday ", text)
