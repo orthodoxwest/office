@@ -113,6 +113,13 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 		// first Lauds antiphon (e.g. ordinary/lauds/psalm-antiphon-1-sunday),
 		// not ordinary/prime's generic safety fallback.
 		text, key := resolveProperText(day, "lauds", slot, corpus)
+		// The ordinary Sunday psalter has its own threefold Alleluia at
+		// Prime (Diurnal p. 83), distinct from Lauds' twofold antiphon.
+		// Proper, common and seasonal Lauds appointments still take precedence.
+		if key == "ordinary/lauds/psalm-antiphon-1-sunday" {
+			key = "ordinary/prime/psalm-antiphon-1-sunday"
+			text = corpus.Get(key)
+		}
 		return primePsalmAntiphonElement(slot, key, text)
 	}
 

@@ -480,7 +480,7 @@ func TestPrimeDataKeepsOptionalPrecesBlock(t *testing.T) {
 				"ordinary/prime/preces-vouchsafe",
 				"shared/leader/greeting-lay",
 			}
-			wantTypes := []string{"preces", "prayer", "officiant-confession", "prayer", "versicle"}
+			wantTypes := []string{"partly-secret-prayer", "prayer", "officiant-confession", "preces", "versicle"}
 			if len(section.Elements) != len(wantRefs) {
 				t.Fatalf("Prime Preces elements = %d, want %d", len(section.Elements), len(wantRefs))
 			}
@@ -586,7 +586,7 @@ func TestOfficeDataExpandsModeledSecretPrayers(t *testing.T) {
 		{Type: "officiant-opening", Ref: "ordinary/compline/opening-versicle"},
 		{Type: "chapter", Ref: "ordinary/compline/short-lesson"},
 		{Type: "rubric", Ref: "ordinary/compline/confiteor-rubric"},
-		{Type: "secret-prayer", Ref: "ordinary/shared/our-father"},
+		{Type: "silent-prayer", Ref: "ordinary/shared/our-father"},
 		{Type: "officiant-confession", Ref: "ordinary/shared/confiteor"},
 	}) {
 		t.Fatalf("Compline Opening private prayers = %+v", got)
@@ -631,6 +631,9 @@ func TestSecretPrayerRubricsAreFollowedByFullTexts(t *testing.T) {
 				for j, ref := range want {
 					got := section.Elements[i+1+j]
 					wantType := "secret-prayer"
+					if elem.Ref == "ordinary/compline/confiteor-rubric" {
+						wantType = "silent-prayer"
+					}
 					if got.Type != wantType || got.Ref != ref {
 						t.Errorf("%s %s after %q[%d] = %+v, want %s %q", file, section.Name, elem.Ref, j, got, wantType, ref)
 					}

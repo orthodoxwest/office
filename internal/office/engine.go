@@ -432,10 +432,9 @@ func resolveElement(elem HourElement, corpus *texts.TextCorpus) models.OfficeEle
 	if text == "" {
 		text = fmt.Sprintf("[Text not found: %s]", elem.Ref)
 	}
-	// Retain the legacy partly-secret form for callers outside the office
-	// definitions. The corporate form owns its complete response, including
-	// Amen, and is intentionally not trimmed.
-	if elem.Type == "partly-secret-prayer" {
+	// Only the legacy partly-secret Pater omits its final Amen. The preces
+	// Creed and corporate Pater both retain their complete endings.
+	if elem.Type == "partly-secret-prayer" && strings.HasSuffix(elem.Ref, "/our-father") {
 		text = strings.TrimSuffix(text, " Amen.")
 	}
 	elemType := mapElementType(elem.Type)

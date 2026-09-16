@@ -160,7 +160,6 @@ And forgive us our trespasses, As we forgive those who trespass against us.
 And lead us not into temptation,
 R. But deliver us from evil. Amen.
 
---- Preces ---
 I believe in God the Father Almighty, Maker of heaven and earth:
 
 And in Jesus Christ his only Son our Lord: Who was conceived by the Holy Ghost,
@@ -192,6 +191,7 @@ May the Almighty and Merciful Lord grant unto us pardon, ✠ absolution, and
 remission of our sins.
 R. Amen.
 
+--- Preces ---
 V. Vouchsafe, O Lord, this day.
 R. To keep us without sin.
 
@@ -207,8 +207,6 @@ Through Jesus Christ thy Son, our Lord, who with thee in the unity of the Holy G
 liveth and reigneth God, world without end.
 R. Amen.
 
-Then the Martyrology is read in Choir, and this may laudably be done also in the private recitation of the Office out of Choir.
-
 V. O Lord, hear my prayer.
 R. And let my cry come unto thee.
 
@@ -217,6 +215,8 @@ R. Thanks be to God.
 
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
+
+Then the Martyrology is read in Choir, and this may laudably be done also in the private recitation of the Office out of Choir.
 
 To the holy and undivided Trinity, to the humanity of our crucified Lord,
 Jesus Christ, to the fruitful Virginity of the blessed and glorious ever Virgin Mary,

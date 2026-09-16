@@ -241,3 +241,7 @@ R. They were all filled with the Holy Ghost. * Alleluia, alleluia.
 # SOURCE: Monastic Diurnal p. 151; 2026 ordo p. 18, alleluias through Pentecost octave Saturday None
 # Inherited by the octave; Compline follows Trinity from its I Vespers.
 @use seasonal/easter/short-responsory-compline
+
+[pre-collect-versicle-prime]
+# SOURCE: Monastic Diurnal p. 6; 2026 ordo p. 18: Paschal alleluias through Saturday None
+@use seasonal/easter/pre-collect-versicle-prime

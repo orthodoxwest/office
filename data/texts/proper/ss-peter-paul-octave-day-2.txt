@@ -1,5 +1,5 @@
-# Gospel antiphons appointed within the octave and on its octave day.
-# Monastic Diurnal pp. 558–560. Other appointments are reviewed separately.
+# Monastic Diurnal pp. 558–560: Common of Apostles with octave exceptions.
+# Explicit aliases keep the octave distinct from the parent feast.
 
 [benedictus-antiphon]
 # SOURCE: Monastic Diurnal pp. 558–560; octave antiphons, distinct from the feast
@@ -17,3 +17,94 @@
 # SOURCE: Monastic Diurnal p. 558; 2026 ordo pp. 77–78
 @use proper/ss-peter-paul-octave-day/magnificat-antiphon
 
+[psalm-antiphon-1]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/psalm-antiphon-1
+
+[psalm-antiphon-2]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/psalm-antiphon-2
+
+[psalm-antiphon-3]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/psalm-antiphon-3
+
+[psalm-antiphon-4]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/psalm-antiphon-4
+
+[psalm-antiphon-5]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/psalm-antiphon-5
+
+[psalm-antiphon-1-vespers]
+# SOURCE: Monastic Diurnal p. 558: antiphons and psalms as II Vespers, pp. 12*–16*
+@use commons/apostle/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+# SOURCE: Monastic Diurnal p. 558: antiphons and psalms as II Vespers, pp. 12*–16*
+@use commons/apostle/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+# SOURCE: Monastic Diurnal p. 558: antiphons and psalms as II Vespers, pp. 12*–16*
+@use commons/apostle/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+# SOURCE: Monastic Diurnal p. 558: antiphons and psalms as II Vespers, pp. 12*–16*
+@use commons/apostle/psalm-antiphon-4-vespers
+
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/chapter-lauds
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/chapter-vespers
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/chapter-terce
+
+[chapter-sext]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/chapter-sext
+
+[chapter-none]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/chapter-none
+
+[hymn-lauds]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/hymn-lauds
+
+[hymn-vespers]
+# SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
+@use commons/apostle/hymn-vespers
+
+[short-responsory-lauds]
+# SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes (Common p. 10*)
+@use commons/apostle/short-responsory-vespers
+
+[short-responsory-vespers]
+# SOURCE: Monastic Diurnal p. 558: Their sound (Common p. 11*)
+@use commons/apostle/short-responsory-lauds
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal p. 558: Their sound
+@use commons/apostle/versicle-first-vespers
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes
+@use commons/apostle/versicle-sext
+
+[versicle-first-vespers]
+# SOURCE: Monastic Diurnal pp. 558–559; octave Vespers exception, including anticipated commemoration
+@use commons/apostle/versicle-sext
+
+[commemoration-versicle-lauds]
+# SOURCE: Monastic Diurnal p. 558: Their sound
+@use commons/apostle/versicle-first-vespers
+
+[commemoration-versicle-vespers]
+# SOURCE: Monastic Diurnal p. 558: Thou shalt make them princes
+@use commons/apostle/versicle-sext

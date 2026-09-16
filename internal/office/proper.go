@@ -592,7 +592,7 @@ func properResolutionCoordinates(day *models.CalendarDay, hourName, ref, selecte
 		return "lauds", "collect"
 	}
 	if hourName == "prime" && ref == "psalm-antiphon-1" {
-		if day != nil && isPrimeAntiphonRef(selected, day.Season) {
+		if strings.HasPrefix(selected, "ordinary/prime/") || (day != nil && isPrimeAntiphonRef(selected, day.Season)) {
 			return hourName, ref
 		}
 		festal := day != nil && day.Celebration != nil && day.Celebration.Category != models.CategoryFeria

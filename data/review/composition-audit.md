@@ -546,3 +546,81 @@ The 28-year parity snapshot changes only Lauds, Terce, Vespers and Compline
 content/source digests; all calendar, composition-decision and
 commemoration-merge digests match. Assurance reports eight additional verified
 bodies, zero stale attestations, and zero stale zero-occurrence classifications.
+
+## Peter and Paul octave; ordinary Prime and Compline (2026-09-15)
+
+The remaining explicit octave appointments are checked against Diurnal
+pp. 558–560 and Common of Apostles pp. 7*–16*, alongside the 2026 ordo
+pp. 77–78. Existing per-day files now alias the Common for Lauds/little-hour
+antiphons, within-octave Vespers antiphons, chapters and hymns. The octave
+reverses the Common's Lauds/Vespers responsories and uses its own verse
+appointments, including commemorations. The terminal day has the p. 560
+collect and its second-person conclusion. Its I Vespers antiphons are explicit.
+No new octave inheritance layer or feast-specific engine branch is added.
+
+**Terminal II Vespers psalmody remains held.** The 2026 ordo p. 78 appoints
+antiphons and psalms from Common I Vespers (7*); Diurnal p. 559 directs I and
+II Vespers to 7* and 12*, respectively. Existing terminal II Vespers psalmody
+is preserved pending clergy clarification. Hour-qualified terminal aliases
+prevent the repaired Lauds appointments from changing that held selection.
+The remaining octave backlog row now names this specific conflict.
+
+The new collect body has independent Codex and Sonnet readings and a
+hash-bound attestation. Sonnet agrees on the body but abbreviates the printed
+conclusion differently; the attestation covers the body only. The conclusion
+registration follows direct inspection of the printed abbreviation.
+
+Prime and Compline were checked against Diurnal pp. 1–10, 14, 17, 20, 24,
+29, 81–84 and 147–152, with the locally supplied parish drafts and printing
+feedback as additional witnesses. Repairs are:
+
+- Ordinary Sunday Prime uses its threefold Alleluia, preserving proper,
+  Common and seasonal precedence. Paschal Prime retains the O Christ arise
+  alleluias through Pentecost octave Saturday; Trinity restores the ordinary.
+- The preces Creed at both hours has a spoken incipit, silent middle and
+  spoken final articles, retaining Amen. Compline's opening Pater is entirely
+  silent; its closing secret prayers retain their spoken incipits.
+- The optional Martyrology notice/preview follows ordinary Prime's closing
+  versicles. This does not implement the book's complete Capitular Office;
+  the existing optional supplement follows the completed ordinary hour.
+
+The weekly Prime psalter, Wednesday's joined Psalms 9b/10, ordinary Compline's
+three psalms without antiphons or Nunc dimittis, and its omission of Faithful
+departed already agree. The parish Prime draft supports the existing hymn
+ending; later corporate-prayer feedback supports the modeled Lord's Prayer.
+Those differences from the Diurnal are preserved. This is an appointment and
+structure audit, not a fresh transcription of every ordinary text.
+
+Tests exercise all seven generated octave identities, real principal and
+commemorated offices in 2026/2027/2032, terminal I Vespers, all prayer forms,
+Prime antiphon precedence, the complete Easter-to-Trinity Prime verse boundary,
+weekly psalmody, secret-prayer spans and Martyrology placement. The independent
+engine reviewer found no substantive blocker. Evidence and before/after
+snapshots remain under ignored `output/octave-prime-compline/`.
+
+The web renderer's existing voice spans now receive the correct prayer data.
+TeX additionally honors valid inline silent spans, fixing the same Creed
+presentation and the pre-existing omission of secret continuations in print.
+Malformed partitions retain ordinary rendering; corporate speaker roles and
+fully silent/collect handling keep their existing paths. Focused HTML and TeX
+checks protect the spoken ending and its Amen.
+
+The before/after sweep covers **23,016 offices** across 2026, 2027 and 2032 in
+all three forms: **6,651 changed / 16,365 identical** (3,288 Prime, 3,261
+Compline, 57 Lauds, 27 Vespers, and 6 each Terce/Sext/None). Prime's declaration
+reordering also changes decision order, including on days where those sections
+are omitted; the decision sets themselves match. Saved snapshots confirm
+unchanged calendar metadata, element counts and all unrelated Prime/Compline
+elements. Every changed office outside Prime/Compline falls June 30–July 6.
+The 28-year parity calendars and commemoration-merge digests are unchanged;
+only Prime's reordered declarations change decision digests.
+
+The unchanged 2026 ordo comparator remains **3443/3626**, with 183 differences;
+its incipit/appointment checks do not certify these newly reviewed ordinary
+and octave slots. Source assurance has one additional verified body and zero
+stale attestations. These measurements do not resolve the held terminal
+II Vespers psalmody conflict or the other clergy questions in the backlog.
+
+Validation: `make golden`, `make check` and `make test-coverage` pass. The
+post-change 2026 ordo findings CSV matches the merged baseline byte-for-byte.
+Independent review of the final preces data and TeX changes found no blocker.
