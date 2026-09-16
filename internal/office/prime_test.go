@@ -165,7 +165,7 @@ func TestResolvePrimePsalmAntiphon(t *testing.T) {
 		"seasonal/advent/psalm-antiphon-1-prime-monday":        "Greater Advent feria",
 		"seasonal/lent/psalm-antiphon-1-prime":                 "Lent",
 		"seasonal/passiontide/psalm-antiphon-1-prime":          "Passion Week",
-		"seasonal/easter/psalm-antiphon-1":                     "Paschaltide",
+		"seasonal/easter/psalm-antiphon-1-prime":               "Paschaltide",
 		"proper/holy-monday/psalm-antiphon-1":                  "Holy Monday",
 		"proper/saturday-office-bvm/saturday-psalm-antiphon-1": "Saturday BVM",
 	}
@@ -243,7 +243,7 @@ func TestResolvePrimePsalmAntiphon(t *testing.T) {
 			name: "Monday after Low Sunday begins Paschal form",
 			day:  &models.CalendarDay{Date: time.Date(2026, 4, 20, 0, 0, 0, 0, time.UTC), Season: models.Easter},
 			want: "Paschaltide",
-			ref:  "seasonal/easter/psalm-antiphon-1",
+			ref:  "seasonal/easter/psalm-antiphon-1-prime",
 		},
 		{
 			name: "after Ascension returns to weekday form",

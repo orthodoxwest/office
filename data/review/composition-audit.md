@@ -792,3 +792,48 @@ finding CSV; it does not inspect these psalmody/antiphon distinctions. The
 28-year parity review preserves calendar, commemoration, Vespers and Compline
 digests. This closes the Paschal Sunday backlog row, without certifying other
 Paschaltide appointments or resolving the clergy-held questions.
+
+## Paschaltide ferial little-hour antiphons (2026-09-16)
+
+Diurnal p.374 explicitly gives four Alleluias at Prime, Terce, Sext and None,
+while Vespers keeps three. The 2026 ordo pp.62–64 appoints these Paschaltide
+Hours on the ferias, Rogation Monday and the Ascension vigil. The app previously
+used its generic threefold seasonal antiphon at each little hour.
+
+Four hour-specific seasonal aliases now reuse the independently verified
+fourfold formula added in the Sunday repair. Prime's existing seasonal window
+(Monday after Low Sunday through the Ascension vigil) now selects its qualified
+key. No new branch, scope rule, canonical wording or source attestation is
+introduced. Proper and Common precedence, Sunday appointments and major-hour
+antiphons retain their previous behavior.
+
+Codex read p.374 directly and compared the little-hour wording with a bounded
+independent Sonnet reading. The initial independent reader miscounted Vespers;
+a focused 300-dpi re-reading agrees with the threefold antiphon visible on the
+page. Both results and the adjudication are retained under ignored
+`output/paschal-weekday/`; unsolicited contextual claims in reader notes are
+not adopted as source evidence. The existing canonical formula's hash-bound
+attestation is unchanged, and the aliases cite the new appointment page.
+
+Requirement checks, reviewed by Codex and an independent adversarial agent:
+
+- `TestPaschalFerialLittleHourAntiphons` checks all applicable default-calendar
+  ferias in 2026/2027/2032, including named ferias, all four hours and all three
+  forms: four Alleluias, two antiphon frames, hour-qualified selected source,
+  and the canonical alias target.
+- `TestPaschalFerialAntiphonHourBoundaries` exercises all six weekdays,
+  threefold Vespers, and proper/Common precedence. The existing
+  `TestResolvePrimePsalmAntiphon` continues to protect Prime's seasonal boundary.
+- A frozen 23,016-office comparison changes exactly 516 offices on 43 dates:
+  13 dates in 2026, 15 in 2027 and 15 in 2032, each at four hours in three forms.
+  Changes are confined to the psalm antiphons and their resolution evidence;
+  section structure, all other elements and calendar metadata are unchanged.
+  All other 22,500 offices are byte-identical, including Lauds, Vespers,
+  Compline, Sundays, Saturday BVM, feasts and the post-Ascension appointments.
+  This preserves those boundaries without certifying their entire offices.
+
+Validation: `make golden`, `make check`, `make test-coverage`, and adversarial
+review. The 28-year calendars, commemoration digests, Lauds, Vespers and Compline
+parity digests remain unchanged. The 2026 ordo finding CSV remains byte-identical
+at 3443/3626; this comparator does not assess these antiphon repetition counts.
+Existing clergy-held questions are unchanged.

@@ -160,7 +160,7 @@ func resolvePrimePsalmAntiphon(day *models.CalendarDay, corpus *texts.TextCorpus
 		// the Vigil of the Ascension, not throughout the engine's broader
 		// Easter season.
 		if !day.Date.Before(moveable.LowSunday.AddDate(0, 0, 1)) && day.Date.Before(moveable.Ascension) {
-			key = "seasonal/easter/" + slot
+			key = "seasonal/easter/" + slot + "-prime"
 		}
 	}
 
