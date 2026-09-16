@@ -385,8 +385,8 @@ func TestOccurrenceCommemoratedAtSecondVespers(t *testing.T) {
 		{"Ember day is Lauds only", greaterDouble, &models.Feast{ID: "september-ember-wednesday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
 		{"Rogation is Lauds only", greaterDouble, &models.Feast{ID: "rogation-monday", Rank: models.PrivilegedFeria, Category: models.CategoryFeria}, false},
 		{"common vigil is Lauds only", greaterDouble, &models.Feast{ID: "vigil-st-lawrence", Rank: models.Simple, Category: models.CategoryFeria, IsVigil: true}, false},
-		{"apostolic companion remains at II Vespers", greaterDouble, &models.Feast{ID: "companion", Rank: models.Commemoration, IsApostolicCompanion: true}, true},
-		{"apostolic companion excluded by first class", firstClass, &models.Feast{ID: "companion", Rank: models.Commemoration, IsApostolicCompanion: true}, false},
+		{"apostolic companion remains at II Vespers", greaterDouble, &models.Feast{ID: "companion", Rank: models.Commemoration, CompanionOf: "example-apostle"}, true},
+		{"apostolic companion excluded by first class", firstClass, &models.Feast{ID: "companion", Rank: models.Commemoration, CompanionOf: "example-apostle"}, false},
 		{"Peter name without trait is an ordinary memorial", greaterDouble, &models.Feast{ID: "named-companion", Name: "Commemoration of St Peter", Rank: models.Commemoration}, false},
 		{"Sunday remains at II Vespers of first class", firstClass, &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}, true},
 		{"Double excluded by first class winner", firstClass, &models.Feast{ID: "double", Rank: models.Double, Category: models.CategoryMartyr}, false},
@@ -447,7 +447,7 @@ func TestResolveConcurrenceOrdersFollowingOfficeBeforeOccurrenceCommemorations(t
 	winner := &models.Feast{ID: "chair-peter", Rank: models.Double2ndClass, Category: models.CategoryApostle}
 	following := &models.Feast{ID: "st-matthias", Rank: models.Double2ndClass, Category: models.CategoryApostle}
 	doctor := &models.Feast{ID: "generic-confessor-doctor", Rank: models.Double, Category: models.CategoryConfessorDoctor}
-	companion := &models.Feast{ID: "commemoration-st-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	companion := &models.Feast{ID: "commemoration-st-paul", Rank: models.Commemoration, Category: models.CategoryApostle, CompanionOf: winner.ID}
 	feria := &models.Feast{ID: models.FeriaCommemorationID, Rank: models.Commemoration, Category: models.CategoryFeria}
 
 	result := resolveConcurrence(
@@ -459,7 +459,7 @@ func TestResolveConcurrenceOrdersFollowingOfficeBeforeOccurrenceCommemorations(t
 		&models.CalendarDay{Celebration: following},
 	)
 
-	want := []*models.Feast{following, doctor, companion, feria}
+	want := []*models.Feast{following, companion, doctor, feria}
 	if len(result.Commemorations) != len(want) {
 		t.Fatalf("commemorations = %v, want %v", result.Commemorations, want)
 	}
@@ -548,7 +548,7 @@ func TestResolveConcurrenceRetainsVigilOfEpiphanyException(t *testing.T) {
 
 func TestResolveConcurrenceCarriesOutgoingApostolicCompanion(t *testing.T) {
 	outgoing := &models.Feast{ID: "chair-peter", Rank: models.GreaterDouble, Category: models.CategoryApostle}
-	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, CompanionOf: "example-apostle"}
 	ordinary := &models.Feast{ID: "named-only-companion", Name: "Commemoration of St Paul", Rank: models.Commemoration, Category: models.CategoryApostle}
 	sunday := &models.Feast{ID: "lesser-sunday", Rank: models.SemiDouble, Category: models.CategorySunday}
 
@@ -568,7 +568,7 @@ func TestResolveConcurrenceCarriesOutgoingApostolicCompanion(t *testing.T) {
 
 func TestResolveConcurrenceDoesNotOrphanOutgoingApostolicCompanion(t *testing.T) {
 	outgoing := &models.Feast{ID: "second-class", Rank: models.Double2ndClass, Category: models.CategoryApostle}
-	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, IsApostolicCompanion: true}
+	companion := &models.Feast{ID: "commemoration-paul", Rank: models.Commemoration, Category: models.CategoryApostle, CompanionOf: "example-apostle"}
 	incoming := &models.Feast{ID: "first-class", Rank: models.Double1stClass, Category: models.CategoryLord}
 
 	result := resolveConcurrence(

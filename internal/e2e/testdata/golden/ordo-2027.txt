@@ -70,11 +70,11 @@ JANUARY
                Com. Day IV within the Octave of the Epiphany ("When the wise men saw the star")
                Com. St. Paul the First Hermit ("The world, and all things earthly")
  10  Sun     Sunday within the Octave of Epiphany       [sd]  w
-           St. Paul the First Hermit (com)
            Day V within the Octave of the Epiphany (sd)
+           St. Paul the First Hermit (com)
            Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
-               Com. St. Paul the First Hermit ("Well done, good and faithful servant")
                Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. St. Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
                Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
@@ -124,8 +124,8 @@ JANUARY
            Hours   No Preces
            Vespers g · II prec. · Mag. And when they wanted wine · No Suff.
                Com. Chair of St Peter in Rome ("They will deliver you up")
-               Com. St. Anthony of Egypt ("The world, and all things earthly")
                Com. St Paul ("The world, and all things earthly")
+               Com. St. Anthony of Egypt ("The world, and all things earthly")
                Com. St. Prisca of Rome, Virgin Martyr ("Come, thou Bride of Christ")
  18  Mon     Chair of St Peter in Rome                  [gd]  w
            St Paul (com)
@@ -177,8 +177,8 @@ JANUARY
            Hours   No Preces
            Vespers g · II prec. · Mag. Lord, if thou wilt · No Suff.
                Com. Conversion of St. Paul ("Go forth, Ananias")
-               Com. St Timothy, Bishop & Martyr ("Whosoever will come after me")
                Com. St. Peter ("Thou art the shepherd of the sheep, O chief…")
+               Com. St Timothy, Bishop & Martyr ("Whosoever will come after me")
  25  Mon     Conversion of St. Paul                     [gd]  w
            St. Peter (com)
            Lauds   w · Ben. Ye which have followed me · No Preces · No Suff.
@@ -687,11 +687,11 @@ APRIL
            Vespers r · I fol. (St. George) · Mag. This is a Martyr · No Suff.
                Com. Our Lady of Sorrows ("All generations")
  23  Fri  L§ ST. GEORGE                                 [1cl] r
-           Our Lady of Sorrows (gd)
            Friday after Passion Sunday (f2)
+           Our Lady of Sorrows (gd)
            Lauds   r · Ben. He that hateth his life · No Preces · No Suff.
-               Com. Our Lady of Sorrows ("Blessed art thou")
                Com. Friday after Passion Sunday ("Now the feast day of the Jews")
+               Com. Our Lady of Sorrows ("Blessed art thou")
            Hours   No Preces
            Vespers r · II prec. · Mag. Whosoever will come after me · No Suff.
  24  Sat  L§ Saturday after Passion Sunday              [f2]  v
@@ -1074,12 +1074,12 @@ JUNE
                Com. Day VII within the Octave of Pentecost ("I will not leave you")
  26  Sat  L§ Day VII within the Octave of Pentecost     [sd]  r
            Ss. John & Paul, Martyrs (d)
-           Octave of the Compassion of Our Lord Jesus Christ (com)
            Day III within the Octave of St John Baptist (sd)
+           Octave of the Compassion of Our Lord Jesus Christ (com)
            Lauds   r · Ben. The love of God is shed · No Preces · No Suff.
                Com. Ss. John & Paul, Martyrs ("These are the holy ones")
-               Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
                Com. Day III within the Octave of St John Baptist ("The mouth of Zacharias")
+               Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · I fol. (Trinity Sunday) · Mag. Thanks, O God · No Suff.
                Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
@@ -1094,11 +1094,11 @@ JUNE
                Com. Nativity of St. John the Baptist ("When Zacharias")
                Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
  28  Mon     NATIVITY OF ST. JOHN THE BAPTIST           [1cl] w
-           Vigil of Ss Peter & Paul (s)
            Day V within the Octave of St John Baptist (sd)
+           Vigil of Ss Peter & Paul (s)
            Lauds   w · Ben. The mouth of Zacharias · No Preces · No Suff.
-               Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
                Com. Day V within the Octave of St John Baptist ("The mouth of Zacharias")
+               Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
            Hours   No Preces
            Vespers w · II prec. · Mag. The child · No Suff.
                Com. Ss. Peter and Paul, Apostles ("Thou art the shepherd of the sheep")
@@ -1134,17 +1134,17 @@ JULY
            Hours   No Preces
            Vespers w · II prec. · Mag. O sacred banquet · No Suff.
   2  Fri  L  Day II within the Octave of Corpus Christi [sd]  w
+           Day IV within the Octave of Ss Peter & Paul (sd)
            Ss. Processus & Martinian, Martyrs (com)
            St John of San Francisco, Bishop & Confessor (com)
-           Day IV within the Octave of Ss Peter & Paul (sd)
            Lauds   w · Ben. I am · No Preces · No Suff.
+               Com. Day IV within the Octave of Ss Peter & Paul ("Glorious princes")
                Com. Ss. Processus & Martinian, Martyrs ("The very hairs of your head")
                Com. St John of San Francisco, Bishop & Confessor ("Well done")
-               Com. Day IV within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · Mag. O how sweet · No Suff.
-               Com. Day IV within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. St Irenaeus of Lyons, Bishop & Martyr ("Whosoever will come after me")
+               Com. Day IV within the Octave of Ss Peter & Paul ("Peter the Apostle")
                Com. Day V within the Octave of Ss Peter & Paul ("Peter the Apostle")
   3  Sat     Day III within the Octave of Corpus Christi [sd]  w
            St Irenaeus of Lyons, Bishop & Martyr (d)
@@ -1154,18 +1154,18 @@ JULY
                Com. Day V within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
-               Com. All Saints of Antioch ("The world, and all things earthly")
                Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
+               Com. All Saints of Antioch ("The world, and all things earthly")
   4  Sun     Visitation of the Blessed Virgin Mary      [2cl] w
-           All Saints of Antioch (com)
            Sunday within the Octave of Corpus Christi (sd)
            Day IV within the Octave of Corpus Christi (sd)
            Day VI within the Octave of Ss Peter & Paul (sd)
+           All Saints of Antioch (com)
            Lauds   w · Ben. When Elisabeth · No Preces · No Suff.
-               Com. All Saints of Antioch ("Well done, good and faithful servant")
                Com. Sunday within the Octave of Corpus Christi ("A certain man")
                Com. Day IV within the Octave of Corpus Christi ("I am")
                Com. Day VI within the Octave of Ss Peter & Paul ("Glorious princes")
+               Com. All Saints of Antioch ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. All generations · No Suff.
                Com. Day IV within the Octave of Corpus Christi ("Christ the Lord, being made an High Priest for…")
@@ -1312,14 +1312,14 @@ JULY
                Com. St Christina, Virgin & Martyr ("The kingdom of heaven")
            Hours   Preces
            Vespers r · I fol. (St. James the Greater, Apostle) · Mag. They will deliver you up · No Suff.
-               Com. St Christopher, Martyr ("Whosoever will come after me")
                Com. V Sunday after Pentecost ("If thou bring")
+               Com. St Christopher, Martyr ("Whosoever will come after me")
  25  Sun     St. James the Greater, Apostle             [2cl] r
-           St Christopher, Martyr (com)
            V Sunday after Pentecost (sd)
+           St Christopher, Martyr (com)
            Lauds   r · Ben. Ye which have forsaken all · No Preces · No Suff.
-               Com. St Christopher, Martyr ("He that hateth his life")
                Com. V Sunday after Pentecost ("Ye have heard that it was said")
+               Com. St Christopher, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers r · II prec. · Mag. Be ye valiant in warfare · No Suff.
                Com. St. Anne, Mother of the Blessed Virgin Mary ("The kingdom of heaven")
@@ -1501,11 +1501,11 @@ AUGUST
                Com. Day VII within the Octave of the Assumption ("Through thee have the gates of Paradise been thrown…")
                Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("For theirs is the kingdom of heaven")
  22  Sun     IX Sunday after Pentecost                  [sd]  g
-           Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
            Octave Day of the Assumption (gd)
+           Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm (com)
            Lauds   g · Ben. When the Lord was come near to Jerusalem · No Preces · No Suff.
-               Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("The very hairs of your head")
                Com. Octave Day of the Assumption ("Through thee have the gates of Paradise been thrown…")
+               Com. Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm ("The very hairs of your head")
            Hours   No Preces
            Vespers g · II prec. · Mag. Is it not written · No Suff.
                Com. Octave Day of the Assumption ("Through thee have the gates of Paradise been thrown…")
@@ -1649,11 +1649,11 @@ SEPTEMBER
                Com. Exaltation of the Holy Cross ("Thou alone")
                Com. St Nicomedes, Martyr ("Whosoever will come after me")
  15  Wed  L§ Seven Sorrows of the B.V.M                 [2cl] w
-           St Nicomedes, Martyr (com)
            September Ember Wednesday (f2)
+           St Nicomedes, Martyr (com)
            Lauds   w · Ben. Come ye · No Preces · No Suff.
-               Com. St Nicomedes, Martyr ("He that hateth his life")
                Com. September Ember Wednesday ("This kind")
+               Com. St Nicomedes, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Sorrow oppresseth me · No Suff.
                Com. Ss. Cornelius (Bishop) & Cyprian (Bishop), Martyrs ("For theirs is the kingdom of heaven")
@@ -1961,11 +1961,11 @@ NOVEMBER
                Com. Day VI within the Octave of All Saints ("I beheld a great multitude")
                Com. St Willibrord, Bishop & Confessor ("The Lord loved him")
   7  Sun     XX Sunday after Pentecost                  [sd]  g
-           St Willibrord, Bishop & Confessor (com)
            Day VII within the Octave of All Saints (sd)
+           St Willibrord, Bishop & Confessor (com)
            Lauds   g · Ben. There was a certain nobleman · No Preces · No Suff.
-               Com. St Willibrord, Bishop & Confessor ("Well done")
                Com. Day VII within the Octave of All Saints ("I beheld a great multitude")
+               Com. St Willibrord, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers g · II prec. · Mag. So the father knew · No Suff.
                Com. Octave Day of All Saints ("O ye Angels and Archangels")
@@ -2198,8 +2198,8 @@ DECEMBER
                Com. St Damasus, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
-               Com. Saturday after Advent Sunday 2 ("My soul doth magnify the Lord, and my spirit…")
                Com. Day V within Conception Octave ("Thou art all fair, O Mary")
+               Com. Saturday after Advent Sunday 2 ("My soul doth magnify the Lord, and my spirit…")
  12  Sun  L  III Sunday of Advent (Gaudete)             [2cl] p
            Day V within Conception Octave (sd)
            Lauds   p · Ben. He shall sit upon the throne · No Preces · No Suff.
@@ -2207,15 +2207,15 @@ DECEMBER
            Hours   No Preces
            Vespers p · II prec. · Mag. Blessed art thou · No Suff.
                Com. St Lucy, Virgin & Martyr ("In thy patience")
-               Com. St Herman of Alaska, Priest & Confessor ("The world, and all things earthly")
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
+               Com. St Herman of Alaska, Priest & Confessor ("The world, and all things earthly")
  13  Mon  L§ St Lucy, Virgin & Martyr                   [gd]  r
-           St Herman of Alaska, Priest & Confessor (com)
            Day VI within Conception Octave (sd)
+           St Herman of Alaska, Priest & Confessor (com)
            Lauds   r · Ben. A pillar art thou · No Preces · No Suff.
+               Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
                Com. Monday after Advent Sunday 3 ("There shall come forth")
                Com. St Herman of Alaska, Priest & Confessor ("Well done, good and faithful servant")
-               Com. Day VI within Conception Octave ("Thou art all fair, O Mary")
            Hours   No Preces
            Vespers r · II prec. · Mag. With such gravity · No Suff.
                Com. Day VI within Conception Octave ("Thou art all fair, O Mary")

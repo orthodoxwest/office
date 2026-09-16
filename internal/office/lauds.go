@@ -34,11 +34,8 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	}
 	comms := day.Commemorations
 
-	// The occurring privileged feria is commemorated at Lauds when a feast takes
-	// the office on a penitential weekday, ahead of any sanctoral commemoration.
-	// Its Vespers commemoration is concurrence-dependent and handled separately.
-	if hourName == "lauds" && day.FeriaCommemoration != nil {
-		comms = append([]*models.Feast{day.FeriaCommemoration}, comms...)
+	if hourName == "lauds" {
+		comms = calendar.LaudsCommemorations(day)
 	}
 
 	var elems []models.OfficeElement

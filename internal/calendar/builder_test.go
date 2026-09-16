@@ -294,9 +294,10 @@ func TestOctaveFeastsPrivilegedExclusions(t *testing.T) {
 		{
 			name: "Easter excludes explicit Monday Tuesday and Low Sunday",
 			feast: &models.Feast{
-				ID:        "easter-sunday",
-				DateRule:  "easter+0",
-				HasOctave: true,
+				ID:          "easter-sunday",
+				OctaveClass: models.OctavePrivilegedFirst,
+				DateRule:    "easter+0",
+				HasOctave:   true,
 			},
 			wantKeys: []string{
 				"easter-sunday-octave-day-4|easter+3",
@@ -308,9 +309,10 @@ func TestOctaveFeastsPrivilegedExclusions(t *testing.T) {
 		{
 			name: "Pentecost excludes Trinity Sunday",
 			feast: &models.Feast{
-				ID:        "pentecost",
-				DateRule:  "easter+49",
-				HasOctave: true,
+				ID:          "pentecost",
+				OctaveClass: models.OctavePrivilegedFirst,
+				DateRule:    "easter+49",
+				HasOctave:   true,
 			},
 			wantKeys: []string{
 				"pentecost-octave-day-2|easter+50",
@@ -472,7 +474,10 @@ func TestOctaveFeastsDeriveCommemorationPrivilege(t *testing.T) {
 		for _, privileged := range []bool{true, false} {
 			parent := &models.Feast{
 				ID: "arbitrary-parent", Name: "Example", Rank: models.Double1stClass,
-				Category: models.CategoryLord, HasOctave: true, HasPrivilegedOctave: privileged,
+				Category: models.CategoryLord, HasOctave: true,
+			}
+			if privileged {
+				parent.OctaveClass = models.OctavePrivilegedThird
 			}
 			if fixed {
 				parent.Month, parent.Day = 1, 6
@@ -485,6 +490,9 @@ func TestOctaveFeastsDeriveCommemorationPrivilege(t *testing.T) {
 			}
 			for i, day := range generated {
 				terminal := i == 6
+				if day.OctaveClass != parent.OctaveClass {
+					t.Errorf("%s: octave class not inherited", day.ID)
+				}
 				if day.IsPrivilegedOctaveDay != (privileged && !terminal) {
 					t.Errorf("fixed=%v privileged=%v: %s privilege = %v", fixed, privileged, day.ID, day.IsPrivilegedOctaveDay)
 				}

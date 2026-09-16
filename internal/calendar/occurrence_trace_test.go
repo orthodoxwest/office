@@ -111,7 +111,7 @@ func TestCommemorationTraceRules(t *testing.T) {
 	duplicateA := traceFeast("duplicate-a", models.Commemoration, models.CategoryMartyr)
 	duplicateB := traceFeast("duplicate-b", models.Commemoration, models.CategoryMartyr)
 	duplicateA.Name, duplicateB.Name = "St Example", "St. Example"
-	_, decisions := finalizeCommemorationsWithDecisions(winner, []*models.Feast{matching, duplicateA, duplicateB})
+	_, decisions := orderedCommemorationsWithDecisions(winner, []*models.Feast{matching, duplicateA, duplicateB}, commemorationOrderContext{})
 	assertTraceRule(t, decisions, "commemoration:matches-winner")
 	assertTraceRule(t, decisions, "commemoration:duplicate-name")
 
@@ -119,7 +119,7 @@ func TestCommemorationTraceRules(t *testing.T) {
 	for _, id := range []string{"one", "two", "three", "four", "five", "six", "seven"} {
 		many = append(many, traceFeast(id, models.Commemoration, models.CategoryMartyr))
 	}
-	got, decisions := finalizeCommemorationsWithDecisions(nil, many)
+	got, decisions := orderedCommemorationsWithDecisions(nil, many, commemorationOrderContext{})
 	if len(got) != maxCommemorationsPerDay {
 		t.Fatalf("got %d commemorations", len(got))
 	}

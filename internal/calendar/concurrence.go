@@ -191,7 +191,7 @@ func occurrenceCommemoratedAtFirstVespers(comm *models.Feast) (bool, string) {
 // "Comm. ... & Paul" at the II Vespers of the Chair of St Peter (Jan 18) and
 // "& Peter" at the Conversion of St Paul (Jan 25).
 func isApostolicCompanionCommemoration(f *models.Feast) bool {
-	return f != nil && f.IsApostolicCompanion
+	return f != nil && f.CompanionOf != ""
 }
 
 // occurrenceCommemoratedAtSecondVespers reports whether an observance
@@ -481,7 +481,7 @@ func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, st
 // through the Easter and Pentecost octaves, while a privileged feria
 // (Lent, Embertide, Advent) is still commemorated ("Comm. Fer." at
 // St Joseph's and the Conception's Vespers). The winner and duplicates are
-// filtered by finalizeCommemorationsWithDecisions.
+// filtered by orderedCommemorationsWithDecisions.
 func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding, following *models.CalendarDay, secondVespers, sameOctave bool) ([]*models.Feast, []models.CompositionDecision) {
 	suppressIncoming := secondVespers && winner != nil &&
 		winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
@@ -509,6 +509,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	var comms []*models.Feast
 	var decisions []models.CompositionDecision
 	loserIncluded := false
+	concurrent := loser
 	if loser != nil {
 		if sameOctave {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: loser.ID})
@@ -553,6 +554,9 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 		if c != nil {
 			if included, rule := outgoingCommemoratedAtFirstVespers(winner, c); included {
 				comms = append(comms, c)
+				if preceding.Celebration == nil {
+					concurrent = c
+				}
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "included", Detail: c.ID})
 			} else {
 				decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: c.ID})
@@ -624,11 +628,23 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:incoming-at-second-vespers", Outcome: "suppressed", Detail: c.ID})
 		}
 	}
-	finalized, finalDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+	season := following.Season
+	if preceding != nil {
+		season = preceding.Season
+	}
+	finalized, finalDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{
+		season: season, concurrent: concurrent,
+		incoming: append([]*models.Feast{following.Celebration}, following.Commemorations...), incomingSeason: following.Season,
+	})
 	return finalized, append(decisions, finalDecisions...)
 }
 
-func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.CalendarDay, followingOfficeID string, boundary []*models.Feast, boundaryDecisions []models.CompositionDecision) ([]*models.Feast, []models.CompositionDecision) {
+func secondVespersCommemorationsWithDecisions(winner *models.Feast, day, following *models.CalendarDay, boundary []*models.Feast, boundaryDecisions []models.CompositionDecision) ([]*models.Feast, []models.CompositionDecision) {
+	followingOfficeID := ""
+	if following.Celebration != nil {
+		followingOfficeID = following.Celebration.ID
+	}
+
 	occurrenceCommemorations := append([]*models.Feast(nil), day.Commemorations...)
 	if day.FeriaCommemoration != nil {
 		occurrenceCommemorations = append(occurrenceCommemorations, day.FeriaCommemoration)
@@ -649,7 +665,7 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 				if current != nil && isDayWithinOctave(current) && sameOctaveDays(current, comm) {
 					if included, _ := occurrenceCommemoratedAtSecondVespers(winner, current); included {
 						duplicateOctave = true
-						if comm.ID == followingOfficeID {
+						if comm != nil && comm.ID == followingOfficeID {
 							concurrentOctave = current
 						}
 						break
@@ -665,8 +681,8 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 	}
 	boundary = filteredBoundary
 	// The concurrent following office itself is commemorated first (XIV.14).
-	// Other following-day occurrence commemorations remain after the current
-	// day's occurrence commemorations.
+	// The remaining parties are ordered together by XIV.14 after eligibility
+	// and duplicate selection have finished.
 	for _, comm := range boundary {
 		if comm != nil && comm.ID == followingOfficeID {
 			comms = append(comms, comm)
@@ -693,7 +709,15 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day *models.
 			comms = append(comms, comm)
 		}
 	}
-	finalized, finalDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+	concurrent := concurrentOctave
+	for _, comm := range boundary {
+		if comm != nil && comm.ID == followingOfficeID {
+			concurrent = comm
+		}
+	}
+	finalized, finalDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{
+		season: day.Season, concurrent: concurrent, incoming: boundary, incomingSeason: following.Season,
+	})
 	return finalized, append(decisions, finalDecisions...)
 }
 
@@ -733,11 +757,14 @@ func noOwnerCommemorationsWithDecisions(preceding, following *models.CalendarDay
 			decisions = append(decisions, models.CompositionDecision{Rule: rule, Outcome: "suppressed", Detail: comm.ID})
 		}
 	}
-	current, currentDecisions := finalizeCommemorationsWithDecisions(preceding.Celebration, current)
-	incoming, incomingDecisions := finalizeCommemorationsWithDecisions(following.Celebration, incoming)
+	current, currentDecisions := orderedCommemorationsWithDecisions(preceding.Celebration, current, commemorationOrderContext{season: preceding.Season})
+	incoming, incomingDecisions := orderedCommemorationsWithDecisions(following.Celebration, incoming, commemorationOrderContext{season: following.Season})
 	decisions = append(decisions, currentDecisions...)
 	decisions = append(decisions, incomingDecisions...)
 	combined, dedupeDecisions := dedupeCommemorationsWithDecisions(nil, append(current, incoming...))
+	combined = orderCommemorations(combined, commemorationOrderContext{
+		season: preceding.Season, winner: preceding.Celebration, incoming: incoming, incomingSeason: following.Season,
+	})
 	combined, capDecisions := capCommemorationsWithDecisions(combined)
 	decisions = append(decisions, dedupeDecisions...)
 	decisions = append(decisions, capDecisions...)
@@ -777,10 +804,6 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 
 	precFeast := preceding.Celebration
 	folFeast := following.Celebration
-	followingOfficeID := ""
-	if folFeast != nil {
-		followingOfficeID = folFeast.ID
-	}
 
 	precHasII := precFeast != nil && hasSecondVespers(precFeast)
 	folHasI := folFeast != nil && hasFirstVespers(folFeast)
@@ -815,7 +838,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	// If following has no I Vespers, preceding wins by default
 	if !folHasI {
 		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
-		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, followingOfficeID, boundary, boundaryDecisions)
+		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, following, boundary, boundaryDecisions)
 		return models.VespersDesignation{
 			Owner:          models.VespersIIOfPreceding,
 			Feast:          precFeast,
@@ -831,7 +854,7 @@ func resolveConcurrence(preceding, following *models.CalendarDay) models.Vespers
 	winner, rule := concurrenceWinnerWithRule(precFeast, folFeast)
 	if winner == models.VespersIIOfPreceding {
 		boundary, boundaryDecisions := boundaryCommemorationsWithDecisions(precFeast, folFeast, preceding, following, true, sameOctave)
-		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, followingOfficeID, boundary, boundaryDecisions)
+		comms, decisions := secondVespersCommemorationsWithDecisions(precFeast, preceding, following, boundary, boundaryDecisions)
 		followingOfficeCommemorationID := ""
 		if containsCommemoration(comms, folFeast.ID) {
 			followingOfficeCommemorationID = folFeast.ID

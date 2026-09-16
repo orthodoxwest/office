@@ -141,7 +141,7 @@ Category = lord
 DateRule = easter+0
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-first
 
 [easter-monday]
 Name = Easter Monday
@@ -172,7 +172,7 @@ Category = lord
 DateRule = easter+39
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-third
 
 [vigil-ascension]
 Name = Vigil of the Ascension
@@ -193,6 +193,7 @@ DateRule = easter+36
 # Diurnal p. 394: Semidouble; the preceding Sunday's office without the
 # Ascension commemoration, including its II Vespers.
 [friday-after-ascension-octave]
+CommemorationClass = post-ascension-feria
 Name = Friday after the Octave of Ascension
 Rank = semi-double
 Color = white
@@ -219,7 +220,7 @@ Category = lord
 DateRule = easter+49
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-first
 
 [whit-ember-wednesday]
 Name = Whit Ember Wednesday
@@ -257,7 +258,7 @@ Category = lord
 DateRule = easter+60
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-second
 
 [our-lady-of-sorrows-passion]
 Name = Our Lady of Sorrows

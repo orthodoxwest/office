@@ -299,7 +299,8 @@ func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.
 	return false, models.CompositionDecision{}
 }
 
-func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
+func orderedCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast, ctx commemorationOrderContext) ([]*models.Feast, []models.CompositionDecision) {
+	ctx.winner = winner
 	filtered := make([]*models.Feast, 0, len(comms))
 	var decisions []models.CompositionDecision
 	for _, comm := range comms {
@@ -312,6 +313,7 @@ func finalizeCommemorationsWithDecisions(winner *models.Feast, comms []*models.F
 
 	deduped, dedupeDecisions := dedupeCommemorationsWithDecisions(winner, filtered)
 	decisions = append(decisions, dedupeDecisions...)
+	deduped = orderCommemorations(deduped, ctx)
 	capped, capDecisions := capCommemorationsWithDecisions(deduped)
 	return capped, append(decisions, capDecisions...)
 }
@@ -397,7 +399,7 @@ func ResolveDay(
 	}
 
 	if allCommemorations(allCandidates) {
-		comms, commDecisions := finalizeCommemorationsWithDecisions(nil, allCandidates)
+		comms, commDecisions := orderedCommemorationsWithDecisions(nil, allCandidates, commemorationOrderContext{season: season})
 		_, colorDecision := resolvedDayColorWithDecision(nil, season, seasonColor)
 		decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:resolution-mode", Outcome: "commemorations-only"})
 		decisions = append(decisions, commDecisions...)
@@ -448,7 +450,7 @@ func ResolveDay(
 				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 			}
 		}
-		comms, commDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+		comms, commDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{season: season})
 		decisions = append(decisions, commDecisions...)
 		color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
 		decisions = append(decisions, colorDecision)
@@ -488,7 +490,7 @@ func ResolveDay(
 			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 		}
 	}
-	comms, commDecisions := finalizeCommemorationsWithDecisions(winner, comms)
+	comms, commDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{season: season})
 	decisions = append(decisions, commDecisions...)
 	color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
 	decisions = append(decisions, colorDecision)

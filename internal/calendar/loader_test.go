@@ -172,16 +172,16 @@ func TestLoadFeastsApostolicCompanionTraits(t *testing.T) {
 		"commemoration-st-peter-apostle":                     true,
 	}
 	for _, feast := range feasts {
-		if !feast.IsApostolicCompanion {
+		if feast.CompanionOf == "" {
 			continue
 		}
 		if !want[feast.ID] {
-			t.Errorf("unexpected IsApostolicCompanion trait on %q", feast.ID)
+			t.Errorf("unexpected CompanionOf trait on %q", feast.ID)
 		}
 		delete(want, feast.ID)
 	}
 	for id := range want {
-		t.Errorf("missing IsApostolicCompanion trait on %q", id)
+		t.Errorf("missing CompanionOf trait on %q", id)
 	}
 }
 
@@ -279,17 +279,17 @@ func TestSectionToFeastRejectsNonFerialVigil(t *testing.T) {
 	}
 }
 
-func TestSectionToFeastIsApostolicCompanion(t *testing.T) {
+func TestSectionToFeastCompanionOf(t *testing.T) {
 	feast, err := sectionToFeast(map[string]string{
 		"_id": "companion", "Name": "Companion", "Rank": "commemoration",
 		"Color": "white", "Category": "apostle", "Month": "1", "Day": "1",
-		"IsApostolicCompanion": "true",
+		"CompanionOf": "example-apostle",
 	}, "test.txt")
 	if err != nil {
 		t.Fatalf("sectionToFeast returned error: %v", err)
 	}
-	if !feast.IsApostolicCompanion {
-		t.Fatal("IsApostolicCompanion = false, want true")
+	if feast.CompanionOf == "" {
+		t.Fatal("CompanionOf missing")
 	}
 }
 
@@ -297,13 +297,13 @@ func TestSectionToFeastPrivilegedOctave(t *testing.T) {
 	section := map[string]string{
 		"_id": "example", "Name": "Example", "Rank": "double-1st-class",
 		"Color": "white", "Category": "lord", "Month": "1", "Day": "1",
-		"HasOctave": "true", "HasPrivilegedOctave": "true",
+		"HasOctave": "true", "OctaveClass": "privileged-third",
 	}
 	feast, err := sectionToFeast(section, "test.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !feast.HasPrivilegedOctave || feast.IsPrivilegedOctaveDay {
+	if !feast.OctaveClass.Privileged() || feast.IsPrivilegedOctaveDay {
 		t.Fatalf("parent octave privilege lost or mistaken for a generated day: %+v", feast)
 	}
 	for _, value := range []string{"", "false"} {
@@ -311,30 +311,32 @@ func TestSectionToFeastPrivilegedOctave(t *testing.T) {
 		if value != "" {
 			section["HasOctave"] = value
 		}
-		if _, err := sectionToFeast(section, "test.txt"); err == nil || !strings.Contains(err.Error(), "HasPrivilegedOctave without HasOctave") {
+		if _, err := sectionToFeast(section, "test.txt"); err == nil || !strings.Contains(err.Error(), "OctaveClass without HasOctave") {
 			t.Fatalf("HasOctave=%q: got %v, want invalid octave privilege", value, err)
 		}
 	}
 }
 
-func TestSourcePrivilegedOctaves(t *testing.T) {
+func TestSourceOctaveClasses(t *testing.T) {
 	feasts, err := LoadFeasts(findDataDir(t))
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Rubrics VII.3, distinct from the rank of the octave's offices.
-	want := map[string]bool{
-		"christmas": true, "epiphany": true, "easter-sunday": true,
-		"ascension": true, "pentecost": true, "corpus-christi": true,
+	want := map[string]models.OctaveClass{
+		"christmas": models.OctavePrivilegedThird, "epiphany": models.OctavePrivilegedSecond,
+		"easter-sunday": models.OctavePrivilegedFirst, "ascension": models.OctavePrivilegedThird,
+		"pentecost": models.OctavePrivilegedFirst, "corpus-christi": models.OctavePrivilegedSecond,
+		"octave-day-st-stephen": models.OctaveSimple, "octave-day-st-john": models.OctaveSimple,
+		"octave-day-holy-innocents": models.OctaveSimple,
 	}
-	for _, feast := range feasts {
-		if feast.HasPrivilegedOctave != want[feast.ID] {
-			t.Errorf("%s HasPrivilegedOctave = %v, want %v", feast.ID, feast.HasPrivilegedOctave, want[feast.ID])
+	for _, f := range feasts {
+		if f.OctaveClass != want[f.ID] {
+			t.Errorf("%s: class %q, want %q", f.ID, f.OctaveClass, want[f.ID])
 		}
-		delete(want, feast.ID)
+		delete(want, f.ID)
 	}
-	if len(want) != 0 {
-		t.Fatalf("missing privileged-octave parents: %v", want)
+	if len(want) > 0 {
+		t.Fatalf("missing source classes: %v", want)
 	}
 }
 
@@ -346,9 +348,10 @@ func TestSectionToFeastRejectsInvalidScalarValues(t *testing.T) {
 		wantErr string
 	}{
 		{name: "invalid boolean", key: "HasOctave", value: "yes", wantErr: "expected true or false"},
-		{name: "invalid octave privilege boolean", key: "HasPrivilegedOctave", value: "yes", wantErr: "expected true or false"},
+		{name: "invalid octave class", key: "OctaveClass", value: "yes", wantErr: "invalid OctaveClass"},
+		{name: "invalid commemoration class", key: "CommemorationClass", value: "arbitrary", wantErr: "invalid CommemorationClass"},
+		{name: "ferial class on saint", key: "CommemorationClass", value: "post-ascension-feria", wantErr: "requires feria category"},
 		{name: "invalid vigil boolean", key: "IsVigil", value: "yes", wantErr: "expected true or false"},
-		{name: "invalid companion boolean", key: "IsApostolicCompanion", value: "yes", wantErr: "expected true or false"},
 		{name: "invalid month", key: "Month", value: "13", wantErr: "invalid fixed date"},
 		{name: "invalid day", key: "Day", value: "30", wantErr: "invalid fixed date"},
 	}

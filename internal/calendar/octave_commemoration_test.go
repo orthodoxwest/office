@@ -105,14 +105,14 @@ func TestContinuingOctaveKeepsConcurrentPriority(t *testing.T) {
 	current.IsPrivilegedOctaveDay = true
 	following.IsPrivilegedOctaveDay = true
 	day := &models.CalendarDay{Celebration: winner, Commemorations: []*models.Feast{saint, current}}
-	got, _ := secondVespersCommemorationsWithDecisions(winner, day, following.ID, []*models.Feast{following}, nil)
+	got, _ := secondVespersCommemorationsWithDecisions(winner, day, &models.CalendarDay{Celebration: following}, []*models.Feast{following}, nil)
 	if len(got) != 2 || got[0] != current || got[1] != saint {
 		t.Fatalf("commemorations = %v, want current octave then saint", feastIDs(got))
 	}
 	// If a different feast is the concurrent office, the octave remains
 	// an ordinary occurrence party; do not promote it above that feast.
 	concurrent := traceFeast("other-feast", models.Double, models.CategoryMartyr)
-	got, _ = secondVespersCommemorationsWithDecisions(winner, day, concurrent.ID, []*models.Feast{concurrent, following}, nil)
+	got, _ = secondVespersCommemorationsWithDecisions(winner, day, &models.CalendarDay{Celebration: concurrent}, []*models.Feast{concurrent, following}, nil)
 	if len(got) != 3 || got[0] != concurrent || got[1] != saint || got[2] != current {
 		t.Fatalf("commemorations = %v, want concurrent feast then existing occurrence order", feastIDs(got))
 	}

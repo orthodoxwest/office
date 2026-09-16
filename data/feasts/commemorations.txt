@@ -63,7 +63,7 @@ Category = confessor
 Month = 1
 Day = 18
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = chair-peter-rome
 
 [comm-01-18-st-prisca-of-rome-virgin-martyr]
 Name = St. Prisca of Rome, Virgin Martyr
@@ -118,7 +118,7 @@ Category = confessor
 Month = 1
 Day = 25
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = conversion-st-paul
 
 [comm-01-26-st-polycarp-of-smyrna-bishop-and-martyr]
 Name = St. Polycarp of Smyrna, Bishop & Martyr
@@ -560,7 +560,7 @@ Category = apostle
 Month = 8
 Day = 1
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = chains-st-peter
 
 [comm-08-01-holy-maccabees-martyrs]
 Name = Holy Maccabees, Martyrs
@@ -1191,7 +1191,7 @@ Month = 2
 Day = 22
 OnlyWith = chair-peter-antioch
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = chair-peter-antioch
 
 [comm-extra-03-04-st-lucius-i-pope-and-martyr]
 Name = St Lucius I, Bishop & Martyr
@@ -1364,7 +1364,7 @@ Category = apostle
 Month = 6
 Day = 30
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = commemoration-st-paul-apostle
 
 [comm-extra-07-06-the-octave-of-ss-peter-and-paul]
 Name = The Octave of Ss Peter & Paul
@@ -1586,7 +1586,7 @@ Day = 23
 ProperID = commemoration-st-paul-apostle
 OnlyWith = chair-peter-antioch
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = chair-peter-antioch
 
 [comm-extra-02-25-st-walburga-of-heidenheim-virgin]
 Name = St Walburga of Heidenheim, Virgin
@@ -1774,7 +1774,7 @@ Category = apostle
 Month = 6
 Day = 30
 Source = awrv
-IsApostolicCompanion = true
+CompanionOf = commemoration-st-paul-apostle
 
 [comm-extra-07-10-st-joseph-of-damascus-priest-and-companions-martyrs]
 Name = St. Joseph of Damascus (Priest) & companions, Martyrs

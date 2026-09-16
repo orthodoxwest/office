@@ -18,6 +18,7 @@ DateRule = holy-name
 [octave-day-st-stephen]
 Name = Octave Day of St Stephen
 Rank = simple
+OctaveClass = simple
 Color = red
 Category = martyr
 ProperName = Stephen
@@ -27,6 +28,7 @@ Day = 2
 [octave-day-st-john]
 Name = Octave Day of St. John, Apostle & Evangelist
 Rank = simple
+OctaveClass = simple
 Color = white
 Category = apostle
 Month = 1
@@ -35,6 +37,7 @@ Day = 3
 [octave-day-holy-innocents]
 Name = Octave Day of the Holy Innocents
 Rank = simple
+OctaveClass = simple
 Color = red
 Category = martyr
 ProperName = the Holy Innocents
@@ -50,7 +53,7 @@ Month = 1
 Day = 6
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-second
 
 [st-anthony-egypt]
 Name = St. Anthony of Egypt
@@ -302,7 +305,7 @@ Color = red
 Category = apostle
 Month = 6
 Day = 30
-IsApostolicCompanion = true
+CompanionOf = commemoration-st-paul-apostle
 
 [our-lady-einsiedeln]
 Name = Our Lady of Einsiedeln
@@ -594,7 +597,7 @@ Month = 12
 Day = 25
 HasOctave = true
 # Rubrics VII.3; commemoration privilege under XIV.4,7-8.
-HasPrivilegedOctave = true
+OctaveClass = privileged-third
 
 [st-stephen]
 Name = St. Stephen, Protomartyr
@@ -632,6 +635,7 @@ Month = 12
 Day = 31
 
 [vigil-epiphany]
+CommemorationClass = epiphany-vigil
 Name = The Vigil of the Epiphany
 Rank = semi-double
 Color = white
