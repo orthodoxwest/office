@@ -226,3 +226,19 @@ Christ is risen * from the grave, who delivered the three children from the burn
 [psalm-antiphon-3-lauds-sunday]
 # SOURCE: Monastic Diurnal pp. 35,370 (first three psalms under one antiphon)
 @use shared/formulas/paschal-sunday-psalm-antiphon
+
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal p. 374 (ferial Paschaltide little hour)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-2-terce]
+# SOURCE: Monastic Diurnal p. 374 (ferial Paschaltide little hour)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-3-sext]
+# SOURCE: Monastic Diurnal p. 374 (ferial Paschaltide little hour)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-5-none]
+# SOURCE: Monastic Diurnal p. 374 (ferial Paschaltide little hour)
+@use shared/formulas/paschal-little-hour-antiphon
