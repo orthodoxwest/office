@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic diurnal, pp. 534–535 (June 9, St Columba, Abbot)
+We pray thee, O Lord, pour into our hearts the desire of heavenly glory: and grant that we, bringing our sheaves with us, may enter into that place where thy holy Abbot Columba shineth like a star before thee.
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

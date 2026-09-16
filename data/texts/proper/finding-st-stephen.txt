@@ -6,9 +6,10 @@
 # SOURCE: draft archdiocesan Vespers book, p. 66 (proper of St. Stephen, Protomartyr; Devout men)
 @use proper/st-stephen/magnificat-antiphon
 
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: monastic diurnal, pp. 194–195; birthday changed to finding per 2026 ordo, p. 86
+Grant us, we beseech thee, O Lord, so to imitate what we honour: that we may learn to love our enemies; since we celebrate the finding of him who knew how to pray even for his persecutors to our Lord Jesus Christ, thy Son.
+
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
