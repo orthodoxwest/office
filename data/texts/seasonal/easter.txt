@@ -210,3 +210,19 @@ O Lord, * I have heard thy speech, and was afraid, alleluia.
 [psalm-antiphon-3-lauds-saturday]
 # SOURCE: Monastic Diurnal p. 75 (ferial canticle, P.T. antiphon)
 Ascribe ye greatness * unto our God. Alleluia.
+
+[psalm-antiphon-4-lauds-sunday]
+# SOURCE: Monastic Diurnal pp. 35, 370 (Paschaltide Sunday antiphon)
+Christ is risen * from the grave, who delivered the three children from the burning fiery furnace, alleluia.
+
+[psalm-antiphon-1-lauds-sunday]
+# SOURCE: Monastic Diurnal pp. 35,370 (first three psalms under one antiphon)
+@use shared/formulas/paschal-sunday-psalm-antiphon
+
+[psalm-antiphon-2-lauds-sunday]
+# SOURCE: Monastic Diurnal pp. 35,370 (first three psalms under one antiphon)
+@use shared/formulas/paschal-sunday-psalm-antiphon
+
+[psalm-antiphon-3-lauds-sunday]
+# SOURCE: Monastic Diurnal pp. 35,370 (first three psalms under one antiphon)
+@use shared/formulas/paschal-sunday-psalm-antiphon

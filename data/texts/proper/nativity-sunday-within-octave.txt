@@ -112,3 +112,7 @@ R. The Word was made flesh, * Alleluia, alleluia.
 [chapter-none]
 # SOURCE: Monastic Diurnal p. 207; reuses the existing chapter wording
 @use proper/vigil-epiphany/chapter-none
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 206 (Lauds psalmody)
+@use psalmody/lauds/festal

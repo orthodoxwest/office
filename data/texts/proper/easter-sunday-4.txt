@@ -78,3 +78,23 @@ R. Thanks be to God.
 [chapter-terce]
 # SOURCE: Monastic Diurnal p. 383: Terce chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
 @use proper/easter-sunday-4/chapter-lauds
+
+[psalm-antiphon-1-prime]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-2-terce]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-3-sext]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[psalm-antiphon-5-none]
+# SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
+@use shared/formulas/paschal-little-hour-antiphon
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal p. 382 (Lauds psalmody)
+@use psalmody/lauds/festal
