@@ -93,6 +93,8 @@ proper/purification-bvm/collect who-liveth
 proper/octave-day-st-stephen/collect who-liveth
 proper/st-stephen/collect who-liveth
 proper/st-stephen/commemoration-collect who-liveth
+# Same collect with the August wording adaptation (2026 ordo p. 86).
+proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
 
 # --- The Son is mentioned before, but not at, the ending ---

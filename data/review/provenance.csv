@@ -115,6 +115,7 @@ commons/confessor/chapter-lauds,32a75b5b5032,diurnal,"Common of a Confessor not 
 commons/confessor/chapter-none,9ec177618dbf,diurnal,"Common of a Confessor not a Bishop, At None",46*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/chapter-sext,2cca33a77d09,diurnal,"Common of a Confessor not a Bishop, At Sext",45*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/collect,47a946a04680,diurnal,"Common of a Confessor not a Bishop, At Lauds",45*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/confessor/collect-abbot,eedca13c52e8,Monastic Diurnal,"Common of a Confessor not a Bishop, For an Abbot",45*,verified,codex,2026-09-16,Page-image reading with independent Claude Sonnet agreement; conclusion supplied by composer. Primary punctuation resolved by 400-dpi image reinspection.
 commons/confessor/hymn-lauds,99e3cf6f5463,A Noted Hymnary for the Anglican Breviary,,110,verified,codex,2026-07-17,
 commons/confessor/hymn-vespers,a6720922767d,A Noted Hymnary for the Anglican Breviary,,109,verified,codex,2026-07-17,
 commons/confessor/magnificat-antiphon,45aa1c5fe883,diurnal,"Common of a Confessor not a Bishop, At II Vespers",46*,verified,grok,2026-08-23,word-for-word from printed page image
@@ -830,6 +831,7 @@ proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archd
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
 proper/finding-holy-cross/short-responsory-none,77d82c235c70,diurnal,"Finding of the Holy Cross, At None",524,verified,grok,2026-08-23,word-for-word from printed page image
+proper/finding-st-stephen/collect,9a9ae065ac8a,Monastic Diurnal; 2026 Ordo,"St Stephen, At Lauds; adaptation ordered by 2026 ordo p. 86",194–195,verified,codex,2026-09-16,"Base collect independently read from page images; only birthday → finding as explicitly ordered in 2026 ordo p. 86. Appointed adaptation, not a verbatim Diurnal reading. Who with thee conclusion recorded separately."
 proper/good-friday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
 proper/good-friday/triduum-antiphon,0d63c19a3d66,diurnal,"Maundy Thursday at Lauds, addition on the second night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/good-friday/versicle-lauds,c0f024283763,diurnal,Good Friday at Lauds,341,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
@@ -1265,6 +1267,7 @@ proper/st-clement-i/psalm-antiphon-2,dd705c23ef07,diurnal,"St Clement, At Lauds"
 proper/st-clement-i/psalm-antiphon-3,899da7986f84,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-clement-i/psalm-antiphon-4,b46ac4194402,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-clement-i/psalm-antiphon-5,5197faf5b4eb,diurnal,"St Clement, At Lauds",667,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-columba-iona/collect,d4b4a293cbd9,Monastic Diurnal,"June 9, St Columba, Abbot",534–535,verified,codex,2026-09-16,Page-image reading with independent Claude Sonnet agreement; conclusion supplied by composer.
 proper/st-cuthbert/commemoration-collect,4fdc0e968c26,diurnal,,493,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0539.png
 proper/st-cyril-alexandria/collect,0b93aa232fe2,diurnal,,466,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0512.png
 proper/st-edmund/collect,71181805e937,diurnal,,664,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0708.png
