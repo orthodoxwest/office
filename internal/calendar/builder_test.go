@@ -466,6 +466,43 @@ func TestOctaveFeastsMoveableDateRules(t *testing.T) {
 	}
 }
 
+func TestOctaveFeastsDeriveCommemorationPrivilege(t *testing.T) {
+	easter := time.Date(2026, 4, 5, 0, 0, 0, 0, time.UTC)
+	for _, fixed := range []bool{true, false} {
+		for _, privileged := range []bool{true, false} {
+			parent := &models.Feast{
+				ID: "arbitrary-parent", Name: "Example", Rank: models.Double1stClass,
+				Category: models.CategoryLord, HasOctave: true, HasPrivilegedOctave: privileged,
+			}
+			if fixed {
+				parent.Month, parent.Day = 1, 6
+			} else {
+				parent.DateRule = "easter+39"
+			}
+			generated := octaveFeasts([]*models.Feast{parent}, 2026, easter, nil)
+			if len(generated) != 7 {
+				t.Fatalf("generated %d days, want 7", len(generated))
+			}
+			for i, day := range generated {
+				terminal := i == 6
+				if day.IsPrivilegedOctaveDay != (privileged && !terminal) {
+					t.Errorf("fixed=%v privileged=%v: %s privilege = %v", fixed, privileged, day.ID, day.IsPrivilegedOctaveDay)
+				}
+				wantRank := models.SemiDouble
+				if terminal {
+					wantRank = models.GreaterDouble
+				}
+				if day.Rank != wantRank {
+					t.Errorf("%s rank = %s, want %s; commemoration privilege must not change precedence", day.ID, day.Rank, wantRank)
+				}
+			}
+			if parent.IsPrivilegedOctaveDay {
+				t.Fatal("parent mistaken for its octave day")
+			}
+		}
+	}
+}
+
 func mustFindOctaveFeast(t *testing.T, feasts []*models.Feast, id string) *models.Feast {
 	t.Helper()
 	for _, feast := range feasts {

@@ -252,4 +252,4 @@ Month = 12
 Day = 25
 ```
 
-Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, HasVigil, IsVigil with VigilOf, IsApostolicCompanion, Source, Notes.
+Keys: Name, Rank, Color, Category, DateRule (moveable), Month/Day (fixed), HasOctave, HasPrivilegedOctave (requires HasOctave; Rubrics VII.3 commemoration privilege), HasVigil, IsVigil with VigilOf, IsApostolicCompanion, Source, Notes.

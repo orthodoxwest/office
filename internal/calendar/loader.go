@@ -128,6 +128,12 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 			return nil, fmt.Errorf("%s: feast %q: HasVigil: %w", sourceFile, f.ID, err)
 		}
 	}
+	if v, ok := m["HasPrivilegedOctave"]; ok {
+		f.HasPrivilegedOctave, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: HasPrivilegedOctave: %w", sourceFile, f.ID, err)
+		}
+	}
 	if v, ok := m["IsVigil"]; ok {
 		f.IsVigil, err = parseDataBool(v)
 		if err != nil {
@@ -171,6 +177,7 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"Category": true, "ProperName": true, "ProperID": true, "DateRule": true,
 		"Month": true, "Day": true, "HasOctave": true, "HasVigil": true, "IsVigil": true,
 		"VigilOf":              true,
+		"HasPrivilegedOctave":  true,
 		"IsApostolicCompanion": true,
 		"OnlyWith":             true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}
@@ -206,6 +213,9 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 	}
 	if !f.IsVigil && f.VigilOf != "" {
 		return nil, fmt.Errorf("%s: feast %q specifies VigilOf but is not a vigil", sourceFile, f.ID)
+	}
+	if f.HasPrivilegedOctave && !f.HasOctave {
+		return nil, fmt.Errorf("%s: feast %q specifies HasPrivilegedOctave without HasOctave", sourceFile, f.ID)
 	}
 
 	return f, nil

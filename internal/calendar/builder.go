@@ -456,25 +456,27 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 			}
 			if feast.IsFixed() {
 				generated = append(generated, &models.Feast{
-					ID:       feastID,
-					Name:     name,
-					Rank:     rank,
-					Color:    feast.Color,
-					Category: feast.Category,
-					ProperID: properID,
-					Month:    int(octaveDate.Month()),
-					Day:      octaveDate.Day(),
+					ID:                    feastID,
+					Name:                  name,
+					Rank:                  rank,
+					Color:                 feast.Color,
+					Category:              feast.Category,
+					ProperID:              properID,
+					IsPrivilegedOctaveDay: feast.HasPrivilegedOctave && !isOctaveDay,
+					Month:                 int(octaveDate.Month()),
+					Day:                   octaveDate.Day(),
 				})
 			} else {
 				delta := int(octaveDate.Sub(easter).Hours() / 24)
 				generated = append(generated, &models.Feast{
-					ID:       feastID,
-					Name:     name,
-					Rank:     rank,
-					Color:    feast.Color,
-					Category: feast.Category,
-					ProperID: properID,
-					DateRule: fmt.Sprintf("easter+%d", delta),
+					ID:                    feastID,
+					Name:                  name,
+					Rank:                  rank,
+					Color:                 feast.Color,
+					Category:              feast.Category,
+					ProperID:              properID,
+					IsPrivilegedOctaveDay: feast.HasPrivilegedOctave && !isOctaveDay,
+					DateRule:              fmt.Sprintf("easter+%d", delta),
 				})
 			}
 		}

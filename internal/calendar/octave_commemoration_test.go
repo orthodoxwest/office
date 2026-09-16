@@ -8,27 +8,30 @@ import (
 )
 
 func TestPrivilegedOctaveCommemorationsAtSecondVespers(t *testing.T) {
-	// VII.3 and XIV.4,7-8 distinguish octave privileges from the synthetic
-	// precedence rank used by the calendar builder.
-	for _, parent := range []string{"christmas", "epiphany", "easter-sunday", "ascension", "pentecost", "corpus-christi"} {
+	// Entitlement follows the builder's trait, independent of names, ID
+	// spelling, category, and the synthetic precedence rank.
+	for _, id := range []string{"unrelated-id", "christmas-octave-day-3"} {
 		for _, rank := range []models.Rank{models.Double1stClass, models.Double2ndClass} {
-			t.Run(parent+"/"+string(rank), func(t *testing.T) {
+			t.Run(id+"/"+string(rank), func(t *testing.T) {
 				winner := traceFeast("feast", rank, models.CategoryMartyr)
-				comm := traceFeast(parent+"-octave-day-3", models.SemiDouble, models.CategoryLord)
+				comm := traceFeast(id, models.SemiDouble, models.CategoryLord)
+				comm.IsPrivilegedOctaveDay = true
 				if included, rule := occurrenceCommemoratedAtSecondVespers(winner, comm); !included {
 					t.Fatalf("privileged octave suppressed: %s", rule)
-				}
-				common := traceFeast("ss-peter-paul-octave-day-3", models.SemiDouble, models.CategoryApostle)
-				if included, _ := occurrenceCommemoratedAtSecondVespers(winner, common); included {
-					t.Fatal("common octave admitted as privileged")
 				}
 			})
 		}
 	}
-	for _, id := range []string{"christmas", "christmas-octave-day", "christmas-octave-day-not-a-number", "ss-peter-paul-octave-day-3"} {
-		if isPrivilegedOctaveCommemoration(traceFeast(id, models.SemiDouble, models.CategoryLord)) {
-			t.Errorf("%s is not a privileged day within an octave", id)
+	for _, id := range []string{"christmas-octave-day-3", "ss-peter-paul-octave-day-3"} {
+		for _, rank := range []models.Rank{models.Double1stClass, models.Double2ndClass} {
+			comm := traceFeast(id, models.SemiDouble, models.CategoryLord)
+			if included, _ := occurrenceCommemoratedAtSecondVespers(traceFeast("feast", rank, models.CategoryMartyr), comm); included {
+				t.Errorf("unmarked %s admitted as privileged under %s", id, rank)
+			}
 		}
+	}
+	if isPrivilegedOctaveCommemoration(nil) {
+		t.Fatal("nil commemoration admitted as privileged")
 	}
 }
 
@@ -64,6 +67,8 @@ func TestOctaveVespersCommemorations2026(t *testing.T) {
 }
 
 func TestFollowingOctaveAtSecondVespers(t *testing.T) {
+	privileged := traceFeast("example-octave-day-3", models.SemiDouble, models.CategoryLord)
+	privileged.IsPrivilegedOctaveDay = true
 	for _, tc := range []struct {
 		name      string
 		winner    *models.Feast
@@ -72,7 +77,7 @@ func TestFollowingOctaveAtSecondVespers(t *testing.T) {
 	}{
 		{"common excluded by first class", traceFeast("feast", models.Double1stClass, models.CategoryMartyr), traceFeast("all-saints-octave-day-3", models.SemiDouble, models.CategoryMartyrs), false},
 		{"common excluded by second class", traceFeast("feast", models.Double2ndClass, models.CategoryConfessor), traceFeast("assumption-bvm-octave-day-3", models.SemiDouble, models.CategoryBlessedVirgin), false},
-		{"privileged retained", traceFeast("feast", models.Double2ndClass, models.CategoryMartyr), traceFeast("christmas-octave-day-3", models.SemiDouble, models.CategoryLord), true},
+		{"privileged retained", traceFeast("feast", models.Double2ndClass, models.CategoryMartyr), privileged, true},
 		{"common retained under ordinary Double", traceFeast("feast", models.Double, models.CategoryMartyr), traceFeast("ss-peter-paul-octave-day-3", models.SemiDouble, models.CategoryApostle), true},
 		{"terminal day has its own concurrence", traceFeast("feast", models.Double2ndClass, models.CategoryMartyr), traceFeast("ss-peter-paul-octave-day", models.GreaterDouble, models.CategoryApostle), true},
 	} {

@@ -272,6 +272,12 @@ type Feast struct {
 
 	HasOctave bool
 	HasVigil  bool
+	// HasPrivilegedOctave classifies the parent's octave under Rubrics VII.3.
+	// It governs commemoration entitlement, not the rank of generated offices.
+	HasPrivilegedOctave bool `json:"-"`
+	// IsPrivilegedOctaveDay is derived by the builder for non-terminal days
+	// of a privileged octave. The parent feast and terminal day stay distinct.
+	IsPrivilegedOctaveDay bool `json:"-"`
 	// IsVigil identifies an observance which is itself a vigil. It is distinct
 	// from HasVigil, which generates a vigil for the feast on the preceding day.
 	// This rule trait is composition input, not rendered calendar output.

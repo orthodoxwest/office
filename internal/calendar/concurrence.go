@@ -109,20 +109,10 @@ func isDayWithinOctave(f *models.Feast) bool {
 	return len(suffix) > 0
 }
 
-// isPrivilegedOctaveCommemoration distinguishes the privileged octaves in
-// VII.3 from common octaves for XIV.4,7-8. The builder's privilegedOctaves
-// table serves a different purpose: the I Class precedence of Easter and
-// Pentecost weekdays. Nativity, Epiphany, Ascension and Corpus weekdays also
-// retain their commemoration under an occurring I/II Class feast.
+// isPrivilegedOctaveCommemoration applies the source-defined octave privilege
+// (VII.3) to non-terminal octave-day commemorations under XIV.4,7-8.
 func isPrivilegedOctaveCommemoration(f *models.Feast) bool {
-	if f == nil || !isDayWithinOctave(f) {
-		return false
-	}
-	switch octaveParentID(f) {
-	case "christmas", "epiphany", "easter-sunday", "ascension", "pentecost", "corpus-christi":
-		return true
-	}
-	return false
+	return f != nil && f.IsPrivilegedOctaveDay
 }
 
 // octaveParentID returns the parent feast ID for a generated octave-day feast,
