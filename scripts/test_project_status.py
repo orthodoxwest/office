@@ -126,26 +126,30 @@ class ProjectStatusTest(unittest.TestCase):
         self.assertIn("when 1 confirmed reference error(s)", markdown)
         self.assertIn("1 confirmed; 1 unconfirmed", markdown)
 
-    def test_2026_triage_preserves_unanswered_aspects(self):
+    def test_2026_triage_distinguishes_confirmed_rulings_and_unanswered_aspects(self):
         rules = PROJECT_STATUS.load_triage(
             SCRIPT.parent.parent / "data/review/ordo-triage.csv")
         for aspect, date, category, issue in [
-            ("hours-preces", "01-18", "suspected-reference-error", "15"),
-            ("hours-preces", "02-27", "suspected-reference-error", "15"),
-            ("hours-preces", "06-28", "suspected-reference-error", "15"),
+            ("hours-preces", "01-18", "reference-error", "15"),
+            ("hours-preces", "02-27", "reference-error", "15"),
+            ("hours-preces", "06-28", "reference-error", "15"),
             ("hours-preces", "03-16", "open-question", "15"),
             ("hours-preces", "07-16", "open-question", "11"),
             ("hours-preces", "01-02", "untriaged", ""),
-            ("vespers-commemorations", "02-01", "suspected-reference-error", "93"),
-            ("vespers-ownership", "01-04", "suspected-reference-error", "62"),
-            ("vespers-ownership", "05-01", "suspected-reference-error", "62"),
-            ("vespers-ownership", "08-23", "suspected-reference-error", "62"),
-            ("magnificat-antiphon", "08-23", "open-question", "62"),
+            ("vespers-commemorations", "02-01", "reference-error", "93"),
+            ("vespers-ownership", "01-04", "reference-error", "62"),
+            ("vespers-ownership", "05-01", "reference-error", "62"),
+            ("vespers-ownership", "08-23", "reference-error", "62"),
+            ("magnificat-antiphon", "08-23", "open-question", "376"),
             ("vespers-ownership", "04-24", "open-question", "62"),
             ("vespers-ownership", "08-29", "open-question", "62"),
             ("vespers-ownership", "11-29", "open-question", "62"),
-            ("lauds-commemorations", "02-23", "open-question", "138"),
-            ("lauds-commemorations", "08-22", "open-question", "138"),
+            ("lauds-commemorations", "02-23", "open-question", "381"),
+            ("lauds-commemorations", "08-22", "open-question", "381"),
+            ("vespers-commemorations", "02-23", "open-question", "377"),
+            ("magnificat-antiphon", "04-01", "suspected-reference-error", "373"),
+            ("magnificat-antiphon", "04-21", "open-question", "374"),
+            ("magnificat-antiphon", "09-18", "suspected-reference-error", "375"),
             ("magnificat-antiphon", "06-19", "suspected-reference-error", "248"),
             ("vespers-suffrage", "06-19", "suspected-reference-error", "248"),
             ("vespers-color", "07-10", "suspected-reference-error", "248"),
@@ -158,6 +162,8 @@ class ProjectStatusTest(unittest.TestCase):
                 self.assertEqual(finding.issue, issue)
                 if category == "suspected-reference-error":
                     self.assertEqual(finding.confidence, "provisional")
+                elif category == "reference-error":
+                    self.assertEqual(finding.confidence, "confirmed")
 
     def test_expected_proper_slots_honors_suppressions(self):
         with tempfile.TemporaryDirectory() as name:
