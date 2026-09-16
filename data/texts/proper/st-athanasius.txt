@@ -108,3 +108,10 @@ O Lord, we beseech thee, hear the prayers which we offer thee on the solemnity o
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[lauds-psalmody]
+# HOLD: 2026 ordo p.59 appoints Friday Lauds on Saturday; Diurnal p.46
+# instead appoints the weekday psalter and festal canticle. Preserve the existing
+# festal selection for this feast in all years pending clergy clarification.
+# This does not assert that the preserved selection is correct.
+@use psalmody/lauds/festal

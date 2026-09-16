@@ -100,7 +100,7 @@ func nearPsalmodySectionName(relPath, section string) string {
 	if !strings.HasPrefix(relPath, "texts/proper/") && !strings.HasPrefix(relPath, "texts/commons/") {
 		return ""
 	}
-	reserved := []string{"vespers-psalmody", "vespers-psalmody-first"}
+	reserved := []string{"lauds-psalmody", "vespers-psalmody", "vespers-psalmody-first"}
 	if slices.Contains(reserved, section) {
 		return ""
 	}

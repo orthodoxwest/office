@@ -7,6 +7,7 @@ import (
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/texts"
 )
 
 const saturdayOfficeBVMID = "saturday-office-bvm"
@@ -21,7 +22,7 @@ var doubleFeriaOfficeIDs = map[string]bool{
 // Sunday offices retain the Sunday psalter, but the printed offices for the
 // Sundays within the Nativity, Epiphany, and Ascension octaves share the
 // corresponding feast's psalmody.
-func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
+func usesFestalLaudsPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
 	if day == nil || day.Celebration == nil {
 		return false
 	}
@@ -32,7 +33,8 @@ func usesFestalLaudsPsalmody(day *models.CalendarDay) bool {
 			return true
 		}
 	}
-	return day.Celebration.Category != models.CategoryFeria &&
+	return !usesWeekdayLaudsPsalmody(day, corpus) &&
+		day.Celebration.Category != models.CategoryFeria &&
 		day.Celebration.Category != models.CategorySunday
 }
 

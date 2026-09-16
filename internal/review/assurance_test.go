@@ -244,6 +244,11 @@ func TestReviewPlanCSVIsReviewerFacing(t *testing.T) {
 
 func TestIsSampleFeature(t *testing.T) {
 	cases := map[string]bool{
+		// Legacy weekday-only selectors can be suppressed, but the new
+		// ferial/festal canticle choices must remain review-plan features.
+		"decision:condition:not-is-feast,weekday-monday,not-festal-lauds-psalmody=included":                                             false,
+		"decision:condition:weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead,festal-weekday-lauds-canticle=included":     true,
+		"decision:condition:weekday-monday,not-festal-lauds-psalmody,not-office-of-the-dead,not-festal-weekday-lauds-canticle=included": true,
 		"decision:preces=said": true,
 		"decision:marian:boundary=purification-vespers-override":                  true,
 		"decision:occurrence:higher-rank=challenger-wins":                         true,

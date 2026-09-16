@@ -674,6 +674,9 @@ func properResolutionTier(selected string, properIDs []string, day *models.Calen
 }
 
 func properResolutionReason(day *models.CalendarDay, hourName, ref, selected string) string {
+	if hourName == "lauds" && strings.HasPrefix(ref, "psalm-antiphon-") && strings.Contains(selected, "festal-canticle-antiphon-") {
+		return "festal-weekday-canticle"
+	}
 	if strings.HasPrefix(selected, "seasonal/advent/benedictus-antiphon-december-") {
 		return "date-fixed-benedictus"
 	}

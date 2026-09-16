@@ -500,3 +500,51 @@ R. Incline my heart, O God, * Unto thy testimonies.
 # SOURCE: diurnal p. 41
 V. The Lord is King, and hath put on glorious apparel.
 R. The Lord hath put on his apparel, and girded himself with strength.
+
+[festal-canticle-antiphon-monday]
+# SOURCE: Monastic Diurnal pp. 47–48
+We praise * thy glorious Name, O our God.
+
+[festal-canticle-antiphon-monday-easter]
+# SOURCE: Monastic Diurnal pp. 47–48 (P.T. addition)
+We praise * thy glorious Name, O our God. Alleluia.
+
+[festal-canticle-antiphon-tuesday]
+# SOURCE: Monastic Diurnal pp. 53–54
+Extol * the everlasting King in all your doings.
+
+[festal-canticle-antiphon-tuesday-easter]
+# SOURCE: Monastic Diurnal pp. 53–54 (P.T. addition)
+Extol * the everlasting King in all your doings. Alleluia.
+
+[festal-canticle-antiphon-wednesday]
+# SOURCE: Monastic Diurnal pp. 58–59
+O Lord, thou art great and glorious, wonderful in strength and invincible.
+
+[festal-canticle-antiphon-wednesday-easter]
+# SOURCE: Monastic Diurnal pp. 58–59 (P.T. addition)
+O Lord, thou art great and glorious, wonderful in strength and invincible. Alleluia.
+
+[festal-canticle-antiphon-thursday]
+# SOURCE: Monastic Diurnal pp. 65
+My people * shall be satisfied with my goodness, saith the Lord.
+
+[festal-canticle-antiphon-thursday-easter]
+# SOURCE: Monastic Diurnal pp. 65 (P.T. addition)
+My people * shall be satisfied with my goodness, saith the Lord. Alleluia.
+
+[festal-canticle-antiphon-friday]
+# SOURCE: Monastic Diurnal pp. 71–72
+In the Lord * shall all the seed of Israel be justified, and shall glory.
+
+[festal-canticle-antiphon-friday-easter]
+# SOURCE: Monastic Diurnal pp. 71–72 (P.T. addition)
+In the Lord * shall all the seed of Israel be justified, and shall glory. Alleluia.
+
+[festal-canticle-antiphon-saturday]
+# SOURCE: Monastic Diurnal p. 79 (festal canticle antiphon)
+Shew us, O Lord, * the light of thy mercy.
+
+[festal-canticle-antiphon-saturday-easter]
+# SOURCE: Monastic Diurnal p. 79 (festal canticle antiphon; P.T. addition)
+Shew us, O Lord, * the light of thy mercy. Alleluia.

@@ -1,0 +1,4 @@
+# Explicit retention of the existing festal Lauds psalmody.
+# A hold is not source attestation: see data/review/repair-backlog.csv.
+[festal]
+festal

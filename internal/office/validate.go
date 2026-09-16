@@ -90,6 +90,7 @@ func ValidateHourDefinitions(dataDir string) []string {
 		return []string{fmt.Sprintf("loading text corpus: %v", err)}
 	}
 	declarationErrors := validateVespersPsalmodyDeclarations(corpus)
+	declarationErrors = append(declarationErrors, validateLaudsPsalmodyDeclarations(corpus)...)
 
 	var parseErrors []string
 	// required maps corpus key → first source location for error messages
