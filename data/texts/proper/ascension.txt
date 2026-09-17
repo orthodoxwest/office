@@ -199,3 +199,12 @@ R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 [commemoration-versicle-lauds]
 # SOURCE: Monastic Diurnal p. 392 (octave commemoration at Lauds)
 @use proper/ascension/versicle-lauds
+
+[commemoration-antiphon-sunday-first-vespers]
+# SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 65 (octave commemoration at Sunday I Vespers)
+@use proper/ascension/magnificat-antiphon
+
+
+[commemoration-versicle-sunday-first-vespers]
+# SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 65 (octave commemoration at Sunday I Vespers)
+@use proper/ascension/versicle-vespers

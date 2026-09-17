@@ -776,3 +776,29 @@ func TestFreeSeasonalFeriaEndsBeforeSundayVespers(t *testing.T) {
 		t.Errorf("Sunday must not commemorate the free Saturday feria: %+v", result.Commemorations)
 	}
 }
+
+func TestSecondVespersRetainsFollowingOctaveOffice(t *testing.T) {
+	// Diurnal pp.393,421: the next day's office controls the octave
+	// commemoration form; merely falling inside the octave is insufficient.
+	sunday := &models.Feast{ID: "sunday", Rank: models.SemiDouble, Category: models.CategorySunday}
+	for _, tc := range []struct {
+		name      string
+		following *models.Feast
+		want      string
+	}{
+		{"weekday without I Vespers", &models.Feast{ID: "example-octave-day-5", Rank: models.SemiDouble, Category: models.CategoryLord}, "example"},
+		{"terminal day with I Vespers", &models.Feast{ID: "example-octave-day", Rank: models.Double, Category: models.CategoryLord}, "example"},
+		{"occurring saint inside octave", &models.Feast{ID: "saint", Rank: models.Double, Category: models.CategoryConfessor}, ""},
+		{"unnamed feria", nil, ""},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			result := resolveConcurrence(
+				&models.CalendarDay{Celebration: sunday, WithinOctaveOf: "example"},
+				&models.CalendarDay{Celebration: tc.following, WithinOctaveOf: "example"},
+			)
+			if result.Owner != models.VespersIIOfPreceding || result.FollowingOfficeOctaveOf != tc.want {
+				t.Fatalf("Vespers owner = %v, following octave office = %q, want Sunday II / %q", result.Owner, result.FollowingOfficeOctaveOf, tc.want)
+			}
+		})
+	}
+}

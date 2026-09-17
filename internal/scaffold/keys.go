@@ -31,6 +31,12 @@ var CoreKeys = []Key{
 // OptionalKeys are common hour-qualified spellings. Bare base slots (chapter,
 // hymn, …) also resolve; these preferred forms match existing proper files.
 var OptionalKeys = []Key{
+	{Key: "commemoration-antiphon-sunday-first-vespers", Blurb: "Antiphon for this octave at I Vespers of the Sunday within this octave. No implicit fallback between these contexts.", Tier: "optional"},
+	{Key: "commemoration-antiphon-sunday-second-vespers", Blurb: "Antiphon for this octave at Sunday II Vespers when tomorrow celebrates this octave. No implicit fallback between these contexts.", Tier: "optional"},
+	{Key: "commemoration-antiphon-sunday-second-vespers-before-other-office", Blurb: "Antiphon for this octave at Sunday II Vespers when tomorrow celebrates another office. No implicit fallback between these contexts.", Tier: "optional"},
+	{Key: "commemoration-versicle-sunday-first-vespers", Blurb: "Versicle pair for this octave at I Vespers of the Sunday within this octave. No implicit fallback between these contexts.", Tier: "optional"},
+	{Key: "commemoration-versicle-sunday-second-vespers", Blurb: "Versicle pair for this octave at Sunday II Vespers when tomorrow celebrates this octave. No implicit fallback between these contexts.", Tier: "optional"},
+	{Key: "commemoration-versicle-sunday-second-vespers-before-other-office", Blurb: "Versicle pair for this octave at Sunday II Vespers when tomorrow celebrates another office. No implicit fallback between these contexts.", Tier: "optional"},
 	{Key: "chapter-first-vespers", Blurb: "Chapter at I Vespers when it differs from II Vespers.", Tier: "optional"},
 	{Key: "chapter-lauds", Blurb: "Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.", Tier: "optional"},
 	{Key: "chapter-prime", Blurb: "Proper chapter at Prime.", Tier: "optional"},
