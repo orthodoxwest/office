@@ -1,6 +1,10 @@
 # Proper commemoration routing for St Helen, Empress.
 # SOURCE: 2026 archdiocesan ordo, Aug. 17-18
 
+[collect]
+# SOURCE: monastic diurnal, p. 591 (St Helen)
+O Lord Jesus Christ, who didst reveal to blessed Helena the place where thy Cross lay hidden, that through her thy Church might be enriched with the precious treasure: grant us, at her intercession, that by the ransom of that life-giving wood, we may obtain the reward of everlasting life.
+
 [commemoration-antiphon-lauds]
 @use commons/holy-woman/benedictus-antiphon
 

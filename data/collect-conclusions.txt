@@ -64,6 +64,8 @@ proper/solemnity-st-joseph/collect who-livest
 proper/ss-peter-paul-octave-day/collect who-livest
 # Directly printed in the Diurnal with the second-person ending (pp. 492, 500).
 proper/st-gabriel-archangel/collect who-livest
+# Diurnal p.591 addresses Christ and prints Who with God the Father ... livest.
+proper/st-helen/collect who-livest
 proper/st-joseph/collect who-livest
 # The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
