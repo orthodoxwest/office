@@ -79,6 +79,10 @@ I will liken him * unto a wise man, which built his house upon a rock.
 # SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, At Lauds)
 O God, who makest us glad by the yearly solemnity of thy blessed Confessor N.: mercifully grant that we who honour his birthday may also imitate his good deeds.
 
+[collect-alternate]
+# SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, Another Collect)
+Attend, O Lord, upon our supplications, which we offer to thee on the solemnity of blessed N., thy Confessor: that we who put no trust in our own righteousness, may be holpen by the prayers of him who was well-pleasing unto thee.
+
 [collect-abbot]
 # SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, For an Abbot)
 We beseech thee, O Lord, let the intercession of blessed N. thine Abbot, obtain for us thy favour: that those things which we are not able to attain by our own merits, we may gain at his petition.

@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: 2026 archdiocesan ordo, p. 89: Attend; monastic diurnal, p. 45*
+@use commons/confessor/collect-alternate
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

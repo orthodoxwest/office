@@ -1,6 +1,22 @@
 # Paschal variants of the Common of Holy Women not Virgins.
 # Sections not present here fall through to the regular commons file.
 
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, p. 5* (Holy Women commemorations, Paschaltide Alleluias)
+@use commons/holy-woman-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, p. 5* (Holy Women commemorations, Paschaltide Alleluias)
+@use commons/holy-woman-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, p. 5* (Holy Women commemorations, Paschaltide Alleluias)
+@use commons/holy-woman-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, p. 5* (Holy Women commemorations, Paschaltide Alleluias)
+@use commons/holy-woman-paschal/versicle-vespers
+
 [psalm-antiphon]
 @use commons/holy-woman-paschal/psalm-antiphon-1
 

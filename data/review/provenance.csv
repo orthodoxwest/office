@@ -116,6 +116,7 @@ commons/confessor/chapter-none,9ec177618dbf,diurnal,"Common of a Confessor not a
 commons/confessor/chapter-sext,2cca33a77d09,diurnal,"Common of a Confessor not a Bishop, At Sext",45*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/collect,47a946a04680,diurnal,"Common of a Confessor not a Bishop, At Lauds",45*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor/collect-abbot,eedca13c52e8,Monastic Diurnal,"Common of a Confessor not a Bishop, For an Abbot",45*,verified,codex,2026-09-16,Page-image reading with independent Claude Sonnet agreement; conclusion supplied by composer. Primary punctuation resolved by 400-dpi image reinspection.
+commons/confessor/collect-alternate,75de7899ce3e,diurnal,,45*,verified,codex,2026-09-17,Independent page-image readings agree after normalization; cache monastic-diurnal/0758.png; comparison in output/saint-propers-review.
 commons/confessor/hymn-lauds,99e3cf6f5463,A Noted Hymnary for the Anglican Breviary,,110,verified,codex,2026-07-17,
 commons/confessor/hymn-vespers,a6720922767d,A Noted Hymnary for the Anglican Breviary,,109,verified,codex,2026-07-17,
 commons/confessor/magnificat-antiphon,45aa1c5fe883,diurnal,"Common of a Confessor not a Bishop, At II Vespers",46*,verified,grok,2026-08-23,word-for-word from printed page image
