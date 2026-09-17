@@ -2,3 +2,15 @@
 # Proper files cite appointments, or explicitly document a clergy-review hold.
 [festal]
 festal
+
+
+# Monastic Diurnal pp.99*-104*: Lauds of the Dead, including its
+# separate Laudate (Psalm150 alone). Doxology remains an office-wide rule.
+[dead]
+psalm-antiphon-1 = psalms/051
+psalm-antiphon-2 = psalms/065
+psalm-antiphon-3 = psalms/063
+psalm-antiphon-4 = canticles/isaiah-38
+
+[dead-laudate]
+psalm-antiphon-5 = psalms/150

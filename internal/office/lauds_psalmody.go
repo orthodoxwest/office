@@ -36,7 +36,7 @@ func usesWeekdayLaudsPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus)
 		for _, prefix := range prefixes {
 			// Explicit data may retain the previous festal selection while a
 			// conflicting source appointment awaits clergy review.
-			if corpus.Get(prefix+"lauds-psalmody") == "festal" {
+			if corpus.Get(prefix+laudsPsalmodyRef) != "" {
 				return false
 			}
 			text, _ := lookupSectionText(prefix, day.Season, "lauds", "psalm-antiphon-1", corpus)
@@ -79,11 +79,85 @@ func weekdayLaudsAntiphon(day *models.CalendarDay, ref string, corpus *texts.Tex
 	return corpus.Get(key), key
 }
 
+const (
+	laudsPsalmodyRef        = "lauds-psalmody"
+	laudsLaudatePsalmodyRef = "lauds-laudate-psalmody"
+)
+
+// A proper may retain the standard festal form or declare the main psalmody
+// and Laudate separately. Keeping the latter separate preserves the hour's
+// section boundaries and allows Psalm150 alone in the Office of the Dead.
+func lookupLaudsPsalmody(day *models.CalendarDay, ref string, corpus *texts.TextCorpus) (string, string) {
+	if day == nil || day.Celebration == nil || corpus == nil {
+		return "", ""
+	}
+	for _, id := range feastProperIDs(day.Celebration) {
+		if day.Season == models.Easter {
+			if body, key := firstText(corpus, "proper/"+id+"-paschal/", []string{ref}); body != "" {
+				return body, key
+			}
+		}
+		if body, key := firstText(corpus, "proper/"+id+"/", []string{ref}); body != "" {
+			return body, key
+		}
+	}
+	return "", ""
+}
+
+func usesDeclaredLaudsPsalmody(day *models.CalendarDay, corpus *texts.TextCorpus) bool {
+	body, _ := lookupLaudsPsalmody(day, laudsPsalmodyRef, corpus)
+	return body != "" && body != "festal"
+}
+
+func validHourPsalmodyRef(hour, ref string) bool {
+	return (hour == "vespers" && ref == vespersPsalmodyRef) ||
+		(hour == "lauds" && (ref == laudsPsalmodyRef || ref == laudsLaudatePsalmodyRef))
+}
+
+func resolveHourPsalmody(day *models.CalendarDay, hour, ref string, corpus *texts.TextCorpus) ([]psalmodyItem, string, error) {
+	if !validHourPsalmodyRef(hour, ref) {
+		return nil, "", fmt.Errorf("unsupported %s psalmody ref %q", hour, ref)
+	}
+	if hour == "vespers" {
+		return resolveVespersPsalmody(day, corpus)
+	}
+	body, source := lookupLaudsPsalmody(day, ref, corpus)
+	items, ferial, err := parsePsalmodyDeclaration(body)
+	if err != nil {
+		return nil, source, fmt.Errorf("invalid Lauds psalmody %q: %w", ref, err)
+	}
+	if ferial {
+		return nil, source, fmt.Errorf("lauds psalmody %q does not support ferial markers", source)
+	}
+	items, err = selectPsalmodyItems(items, day.Date)
+	return items, source, err
+}
+
 func validateLaudsPsalmodyDeclarations(corpus *texts.TextCorpus) []string {
 	var errs []string
 	for _, key := range corpus.References() {
-		if (strings.HasSuffix(key, "/lauds-psalmody") || strings.HasPrefix(key, "psalmody/lauds/")) && corpus.Get(key) != "festal" {
-			errs = append(errs, fmt.Sprintf("%s: invalid Lauds psalmody declaration (expected festal)", key))
+		if !strings.HasSuffix(key, "/"+laudsPsalmodyRef) && !strings.HasSuffix(key, "/"+laudsLaudatePsalmodyRef) && !strings.HasPrefix(key, "psalmody/lauds/") {
+			continue
+		}
+		body := corpus.Get(key)
+		if body == "festal" && !strings.HasSuffix(key, "/"+laudsLaudatePsalmodyRef) {
+			continue
+		}
+		items, ferial, err := parsePsalmodyDeclaration(body)
+		if err != nil || ferial {
+			errs = append(errs, fmt.Sprintf("%s: invalid Lauds psalmody declaration (expected festal or antiphon/psalm rows)", key))
+			continue
+		}
+		for _, item := range items {
+			if (!strings.HasPrefix(item.psalm, "psalms/") && !strings.HasPrefix(item.psalm, "canticles/")) || !corpus.Has(item.psalm) {
+				errs = append(errs, fmt.Sprintf("%s: psalm or canticle ref not found: %s", key, item.psalm))
+			}
+			if !corpus.HasKeySuffix(item.antiphon) {
+				errs = append(errs, fmt.Sprintf("%s: antiphon ref not found: %s", key, item.antiphon))
+			}
+		}
+		if strings.HasSuffix(key, "/"+laudsPsalmodyRef) && !corpus.Has(strings.TrimSuffix(key, laudsPsalmodyRef)+laudsLaudatePsalmodyRef) {
+			errs = append(errs, fmt.Sprintf("%s: declared Lauds psalmody requires a Laudate declaration", key))
 		}
 	}
 	return errs

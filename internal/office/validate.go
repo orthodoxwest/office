@@ -125,9 +125,9 @@ func ValidateHourDefinitions(dataDir string) []string {
 				}
 				switch elem.Type {
 				case "proper-psalmody":
-					if hour != "vespers" || elem.Ref != vespersPsalmodyRef {
+					if !validHourPsalmodyRef(hour, elem.Ref) {
 						parseErrors = append(parseErrors, fmt.Sprintf(
-							"%s: proper-psalmody must use Ref %q in Vespers", src, vespersPsalmodyRef,
+							"%s: unsupported %s proper-psalmody Ref %q", src, hour, elem.Ref,
 						))
 					}
 				case "proper-antiphon", "proper-opening-acclamation", "proper-collect", "proper-hymn", "proper-responsory", "proper-short-responsory", "proper-versicle", "proper-chapter":

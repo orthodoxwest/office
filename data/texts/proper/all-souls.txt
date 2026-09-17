@@ -6,7 +6,7 @@
 @use proper/all-souls/psalm-antiphon-1
 
 # Lauds of the Dead, antiphons 1-5 (Monastic Diurnal pp. 99*-104*).
-# The psalms they carry are laid out in data/office/lauds.txt [Psalmody-Dead].
+# The psalms are appointed by the Lauds psalmody declarations below.
 
 [psalm-antiphon-1]
 # SOURCE: Monastic Diurnal.pdf, p. 99* (Lauds of the Dead)
@@ -164,3 +164,12 @@ R. Amen.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[lauds-psalmody]
+# SOURCE: Monastic Diurnal pp. 99*-104*; preserves the existing Lauds of the Dead appointment
+@use psalmody/lauds/dead
+
+
+[lauds-laudate-psalmody]
+# SOURCE: Monastic Diurnal pp. 99*-104*; preserves the existing Lauds of the Dead appointment
+@use psalmody/lauds/dead-laudate
