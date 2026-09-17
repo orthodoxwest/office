@@ -951,3 +951,42 @@ and office owner is unchanged. The 2026 changes are exactly May25 and May26;
 the existing headline comparison remains at 162 findings (3466/3628 agreeing
 assertions), since it does not compare these commemoration texts. Evidence is
 retained under ignored `output/weekday-review/` in the repair worktree.
+
+### Memorial I-Vespers and Paschal martyr commemoration texts (September 2026)
+
+Diurnal General Rubrics VIII and X (p.xxix) give Memorials their own
+I-Vespers commemoration on the preceding evening and Lauds on the day.
+The Common's appointments appear on pp.1*–3*. Codex read those page images
+and the 2026 ordo witnesses: Marcellus at Maurus II Vespers (Jan15, p.29),
+and Eleutherius and John at Augustine/Bede I Vespers (May25–26, p.66).
+
+The composer and resolution trace now share the Memorial's I-Vespers
+context, excluding perpetual apostolic companions. Dedicated feast-proper
+commemoration slots remain first; otherwise the Common supplies its
+I-Vespers antiphon and versicle. Non-Memorial following offices retain their
+existing first-specific proper precedence. Collect selection and all calendar
+membership, suppression, and ordering rules remain unchanged.
+
+Twelve aliases in the Paschal martyr, bishop-martyr, and many-martyrs
+Commons prevent their Lauds and II-Vespers commemorations falling through
+to the non-Paschal Common. They reuse existing wording; this repair does not
+claim fresh transcription or source attestation. Corpus aliases were applied
+with `office corpus put`.
+
+`TestMemorialCommemorationAppointments` checks the named ordo witnesses in
+all prayer forms, including incoming Memorials at another feast's I Vespers.
+`TestMemorialProperAndCompanionBoundaries` protects named propers, collects,
+outgoing Doubles, and apostolic companions.
+`TestPaschalMartyrCommemorationsKeepTheirCommon` covers all three categories
+at Lauds and II Vespers. An adversarial reviewer inspected the new branches.
+
+The 2024–2051 sweep compares 71,589 private-form offices: 3,620 Vespers and
+326 Lauds offices change. Only commemoration antiphons, versicles, and their
+source references differ; every principal office, owner, collect, and element
+ordering is unchanged. The headline comparator does not measure these texts;
+its findings are unchanged. Generated evidence is under ignored
+`output/memorial-review/` in the repair worktree.
+
+Issue #138 remains open for occurrence/suppression and the same-Common
+variation rule in X (p.xxix). This change establishes the normal I-Vespers
+and seasonal selection; it does not certify every commemoration appointment.

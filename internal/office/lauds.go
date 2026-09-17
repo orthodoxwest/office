@@ -52,7 +52,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 			if isSaturdaySecondVespersSundayCommemoration(day, comm, hourName, ref) {
 				return lookupSundayFirstVespersCommemoration(day, comm, corpus)
 			}
-			if hourName == "vespers" && comm.ID == day.FollowingOfficeCommemorationID {
+			if hourName == "vespers" && commemorationTakesFirstVespers(day, comm, ref) {
 				return lookupFollowingOfficeCommemoration(comm, day.Season, ref, corpus)
 			}
 			return lookupCommemoration(comm, day.Season, hourName, ref, corpus)
@@ -188,10 +188,12 @@ func lookupSundayFirstVespersCommemoration(day *models.CalendarDay, feast *model
 	return lookupCommemoration(feast, day.Season, "vespers", "magnificat-antiphon-first", corpus)
 }
 
-// lookupFollowingOfficeCommemoration resolves a following celebration
-// commemorated at II Vespers. Its Antiphon and versicle are those of I
-// Vespers, while its collect follows the normal commemoration lookup (XIV.14).
+// lookupFollowingOfficeCommemoration resolves the I-Vespers texts of an
+// incoming office or Memorial (Diurnal General Rubrics VIII, X, p.xxix).
 func lookupFollowingOfficeCommemoration(feast *models.Feast, season models.Season, ref string, corpus *texts.TextCorpus) (string, string) {
+	if feast.Rank == models.Commemoration && feast.CompanionOf == "" {
+		return lookupCommemorationOffice(feast, season, "vespers", ref, true, corpus)
+	}
 	var candidates []string
 	switch ref {
 	case "commemoration-antiphon":
@@ -200,8 +202,7 @@ func lookupFollowingOfficeCommemoration(feast *models.Feast, season models.Seaso
 		candidates = []string{"versicle-first-vespers", "versicle-vespers"}
 	}
 	for _, candidate := range candidates {
-		if text, source := lookupCommemoration(feast, season, "vespers", candidate, corpus); text != "" &&
-			!strings.HasPrefix(text, "[") {
+		if text, source := lookupCommemoration(feast, season, "vespers", candidate, corpus); text != "" && !strings.HasPrefix(text, "[") {
 			return text, source
 		}
 	}
@@ -337,14 +338,20 @@ func lookupTemporalCommemorationVersicle(feast *models.Feast, season models.Seas
 // missing. Per the ferial office books, each commemoration is the proper
 // gospel-canticle antiphon, the hour's little versicle, and the collect of
 // the feast or common.
-func commemorationFallbackSlots(hourName, ref string) []string {
+func commemorationFallbackSlots(hourName, ref string, firstVespers bool) []string {
 	switch ref {
 	case "commemoration-antiphon":
+		if firstVespers {
+			return []string{"magnificat-antiphon-first", "magnificat-antiphon"}
+		}
 		if hourName == "vespers" {
 			return []string{"magnificat-antiphon", "magnificat-antiphon-first"}
 		}
 		return []string{"benedictus-antiphon"}
 	case "commemoration-versicle":
+		if firstVespers {
+			return []string{"versicle-first-vespers", "versicle-vespers"}
+		}
 		if hourName == "vespers" {
 			return []string{"versicle-vespers", "versicle-lauds", "versicle"}
 		}
@@ -361,6 +368,10 @@ func commemorationFallbackSlots(hourName, ref string) []string {
 // Applies N. substitution using the feast's ProperName.
 // Returns the text and the corpus ref it was resolved from.
 func lookupCommemoration(feast *models.Feast, season models.Season, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	return lookupCommemorationOffice(feast, season, hourName, ref, false, corpus)
+}
+
+func lookupCommemorationOffice(feast *models.Feast, season models.Season, hourName, ref string, firstVespers bool, corpus *texts.TextCorpus) (string, string) {
 	// The synthesized occurring feria has no proper of its own and must never
 	// fall through to the saint-shaped fallbacks (which would leave an unfilled
 	// "N."). It takes its Antiphon and versicle from the Psalter and its collect
@@ -388,7 +399,8 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 	}
 
 	// 1b. Feast-specific content fallbacks (gospel antiphon / hour versicle / collect).
-	for _, fallback := range commemorationFallbackSlots(hourName, ref) {
+	fallbacks := commemorationFallbackSlots(hourName, ref, firstVespers)
+	for _, fallback := range fallbacks {
 		for _, feastID := range feastProperIDs(feast) {
 			prefix := "proper/" + feastID + "/"
 			if text, resolved := lookupSectionText(prefix, season, hourName, fallback, corpus); text != "" {
@@ -397,14 +409,15 @@ func lookupCommemoration(feast *models.Feast, season models.Season, hourName, re
 		}
 	}
 
-	// 2. Commons dedicated slot (paschal, then regular).
-	if text, resolved := lookupCommonsText(feast.Category, season, hourName, ref, corpus); text != "" {
-		return substituteProperName(text, properName), resolved
+	// Dedicated Common slots normally precede content fallbacks. Its generic
+	// Vespers slots describe II Vespers; a Memorial instead begins with the
+	// Common's I-Vespers appointment (Diurnal p.xxix, VIII and X).
+	commonSlots := append([]string{ref}, fallbacks...)
+	if firstVespers {
+		commonSlots = append(fallbacks, ref)
 	}
-
-	// 2b. Commons content fallbacks.
-	for _, fallback := range commemorationFallbackSlots(hourName, ref) {
-		if text, resolved := lookupCommonsText(feast.Category, season, hourName, fallback, corpus); text != "" {
+	for _, slot := range commonSlots {
+		if text, resolved := lookupCommonsText(feast.Category, season, hourName, slot, corpus); text != "" {
 			return substituteProperName(text, properName), resolved
 		}
 	}

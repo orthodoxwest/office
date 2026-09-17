@@ -82,3 +82,22 @@
 [versicle-none]
 # SOURCE: diurnal pp. 31*-33*, 19* (Common of One or Many Martyrs)
 @use commons/martyr-paschal/versicle-none
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/bishop-martyr-paschal/benedictus-antiphon
+
+
+[commemoration-antiphon-vespers]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/bishop-martyr-paschal/magnificat-antiphon
+
+
+[commemoration-versicle-lauds]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/bishop-martyr-paschal/versicle-lauds
+
+
+[commemoration-versicle-vespers]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/bishop-martyr-paschal/versicle-vespers
