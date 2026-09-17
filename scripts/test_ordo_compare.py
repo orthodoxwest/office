@@ -135,8 +135,39 @@ class CommemorationComparisonTest(unittest.TestCase):
         self.assertEqual(missing, ["Innocents"])
         self.assertEqual(extra, ["St. Paul, Apostle"])
 
+    def test_bvm_shorthand_uses_the_printed_feast_context(self):
+        section = 'Vespers / Comm. BVM ("O ever blessed"; Col. 665) / No Suff.'
+        title = "The Presentation of the B.V.M.                 Gd\nSt Gelasius M"
+        self.assertEqual(ORDO_COMPARE.pdf_commemorations(section, title),
+                         ["The Presentation of the B.V.M."])
+        for title in ("", "Holy Guardian Angels                 Gd", "St Mary Magdalene",
+                      "Solemnity of St Joseph, Spouse of the Blessed Virgin Mary",
+                      "St Anne, Mother of the B.V.M."):
+            self.assertEqual(ORDO_COMPARE.pdf_commemorations(section, title), ["BVM"])
+        names = ORDO_COMPARE.pdf_commemorations(section, "The Most Holy Name of Mary")
+        self.assertEqual(ORDO_COMPARE.match_commemorations(names, ["Presentation of the B.V.M."]),
+                         (["The Most Holy Name of Mary"], ["Presentation of the B.V.M."]))
+
 
 class ReferenceParsingTest(unittest.TestCase):
+    def test_octave_weekday_names_preserve_day_and_season(self):
+        for number, weekday in zip(("II", "III", "IV", "V", "VI", "VII"),
+                                   ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")):
+            for season in ("Easter", "Pentecost"):
+                numbered = f"Day {number} within the Octave of {season}"
+                named = f"{weekday} in Easter Week" if season == "Easter" else f"Ember {weekday} in Pentecost"
+                self.assertTrue(ORDO_COMPARE.calendar_titles_match(numbered, named))
+                self.assertTrue(ORDO_COMPARE.calendar_titles_match(numbered, f"{weekday} within the Octave of {season}"))
+                self.assertFalse(ORDO_COMPARE.calendar_titles_match(numbered, "Feria"))
+        self.assertTrue(ORDO_COMPARE.calendar_titles_match("EASTER MONDAY", "Monday in Easter Week"))
+        self.assertTrue(ORDO_COMPARE.calendar_titles_match("EASTER TUESDAY", "Tuesday in Easter Week"))
+        self.assertTrue(ORDO_COMPARE.calendar_titles_match(
+            "Day VII within the Octave of Easter", "Saturday before Low Sunday (Sabbato in Albis)"))
+        self.assertFalse(ORDO_COMPARE.calendar_titles_match(
+            "Day IV within the Octave of Easter", "Friday in Easter Week"))
+        self.assertFalse(ORDO_COMPARE.calendar_titles_match(
+            "Day IV within the Octave of Easter", "Ember Wednesday in Pentecost"))
+
     def parse(self, text, year=None):
         with tempfile.TemporaryDirectory() as directory:
             path = pathlib.Path(directory) / "reference.txt"

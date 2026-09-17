@@ -191,9 +191,7 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
             continue
         our_title = ORDO_COMPARE.clean_title(ours_ordo[key]["title"])
         compared("calendar")
-        if (ORDO_COMPARE.similar(pdf_title, our_title) < 0.5
-                and not (ORDO_COMPARE.is_ferial(pdf_title)
-                         and ORDO_COMPARE.is_ferial(our_title))):
+        if not ORDO_COMPARE.calendar_titles_match(pdf_title, our_title):
             add_finding(findings, year, "calendar", key,
                         f"ours={our_title} | reference={pdf_title}")
 
@@ -223,7 +221,7 @@ def compare_ordo(year: int, pdf_path: pathlib.Path, ordo_path: pathlib.Path,
             ("v_comms", "Vespers", "vespers-commemorations")):
         for key in sorted(ours_rubrics):
             reference_names = ORDO_COMPARE.pdf_commemorations(
-                pdf.get(key, {}).get(section))
+                pdf.get(key, {}).get(section), pdf.get(key, {}).get("", ""))
             if reference_names is None:
                 continue
             compared(aspect)
