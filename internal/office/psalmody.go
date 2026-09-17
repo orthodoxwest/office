@@ -371,9 +371,13 @@ func composeResolvedPsalmody(day *models.CalendarDay, hourName string, items []p
 	elems := make([]models.OfficeElement, 0, len(items)*4)
 	for _, item := range items {
 		antiphon := resolveHourElement(day, hourName, HourElement{Type: "proper-antiphon", Ref: item.antiphon}, corpus)
+		elementType := "psalm"
+		if strings.HasPrefix(item.psalm, "canticles/") {
+			elementType = "canticle"
+		}
 		elems = append(elems,
 			antiphon,
-			resolveElement(HourElement{Type: "psalm", Ref: item.psalm}, corpus),
+			resolveElement(HourElement{Type: elementType, Ref: item.psalm}, corpus),
 		)
 		if saysPsalmDoxology(day, hourName) {
 			elems = append(elems, resolveElement(HourElement{Type: "gloria-patri", Ref: psalmDoxologyRef(day)}, corpus))

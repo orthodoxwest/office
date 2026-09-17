@@ -81,7 +81,7 @@ func composeMajorHour(
 				moreCollects := collectFollows(sections, included, i)
 				elems = append(elems, addCommemorations(officeDay, opts.hourName, corpus, moreCollects)...)
 			case "proper-psalmody":
-				psalmody, _, err := resolveVespersPsalmody(psalmodyDay, corpus)
+				psalmody, _, err := resolveHourPsalmody(psalmodyDay, opts.hourName, elem.Ref, corpus)
 				if err != nil {
 					return nil, err
 				}
