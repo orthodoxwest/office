@@ -133,7 +133,7 @@ V. The kings of Tharsis and of the isles shall give presents.
 R. The kings of Arabia and Saba shall bring gifts.
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 137 (The Epiphany of Our Lord and Sunday within the Octave)
+# SOURCE: diurnal p. 225
 R. The kings of Tharsis and of the isles shall give presents, * alleluia, alleluia.
 R. The kings of Tharsis and of the isles shall give presents, * alleluia, alleluia.
 V. The kings of Arabia and Saba shall bring gifts.
@@ -142,7 +142,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The kings of Tharsis and of the isles shall give presents, * alleluia, alleluia.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 118 (The Epiphany of Our Lord and Saturday within the Octave)
+# SOURCE: diurnal p. 223
 R. All they from Sheba shall come, * alleluia, alleluia.
 R. All they from Sheba shall come, * alleluia, alleluia.
 V. They shall bring gold and incense.

@@ -1618,7 +1618,7 @@ func TestParishLaudsProperCorpusRegression(t *testing.T) {
 		{"assumption-bvm", "collect", "proper/assumption-bvm/collect", "Forgive, we beseech thee", false},
 		{"assumption-bvm", "psalm-antiphon-3", "proper/assumption-bvm/psalm-antiphon-3", "We will run after thee, * because of the savour of thine ointments: exceedingly do the virgins love thee.", true},
 		{"assumption-bvm", "psalm-antiphon-4", "proper/assumption-bvm/psalm-antiphon-4", "Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.", true},
-		{"assumption-bvm", "psalm-antiphon-5", "proper/assumption-bvm/psalm-antiphon-5", "Thou art fair and comely, O daughter of Jerusalem: * thou art terrible as an army with banners.", true},
+		{"assumption-bvm", "psalm-antiphon-5", "proper/assumption-bvm/psalm-antiphon-5", "Thou art fair * and comely, O daughter of Jerusalem: thou art terrible as an army with banners.", true},
 		{"st-joseph", "hymn", "proper/st-joseph/hymn-lauds", "He, whom the faithful", false},
 		{"st-joseph", "short-responsory", "proper/st-joseph/short-responsory-lauds", "He made him * lord of his house", false},
 		{"st-joseph", "versicle", "proper/st-joseph/versicle-lauds", "mouth of the righteous", false},

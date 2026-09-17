@@ -66,7 +66,7 @@ R. Thanks be to God.
 @use commons/apostle-paschal/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 616–617 (Common of Apostles and Evangelists in Paschaltide)
+# SOURCE: diurnal p. 18*
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 V. God hath chosen you to him to be his inheritance.
@@ -75,7 +75,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 559, 568 (I and II Vespers, Common of Apostles in Paschaltide)
+# SOURCE: diurnal p. 16*
 R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
 R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
 V. And an ageless eternity.
