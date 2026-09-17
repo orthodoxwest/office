@@ -199,6 +199,30 @@ def is_ferial(title):
          "saturday", "ember")) or title == ""
 
 
+def octave_weekday(title):
+    """Recognize alternate names for the weekdays of Easter/Pentecost week."""
+    title = clean_title(title).lower()
+    numbered = re.fullmatch(r"day (ii|iii|iv|v|vi|vii) within the octave of (easter|pentecost)", title)
+    if numbered:
+        return numbered[2], ("ii", "iii", "iv", "v", "vi", "vii").index(numbered[1])
+    weekdays = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday")
+    named = re.fullmatch(r"(?:ember )?(" + "|".join(weekdays) + r") (?:in |(?:in|within) the octave of )(easter|pentecost)(?: week)?", title)
+    if named:
+        return named[2], weekdays.index(named[1])
+    if title in ("easter monday", "easter tuesday"):
+        return "easter", weekdays.index(title.split()[1])
+    if title in ("saturday before low sunday", "saturday before low sunday (sabbato in albis)"):
+        return "easter", 5
+    return None
+
+
+def calendar_titles_match(a, b):
+    oa, ob = octave_weekday(a), octave_weekday(b)
+    if oa is not None or ob is not None:
+        return oa == ob
+    return similar(a, b) >= 0.5 or (is_ferial(a) and is_ferial(b))
+
+
 def cmd_calendar(pdf_path, ours_path):
     pdf = pdf_days(pdf_path)
     ours = our_ordo_days(ours_path)
@@ -211,7 +235,7 @@ def cmd_calendar(pdf_path, ours_path):
         if not p_title:
             continue
         o_title = clean_title(ours[k]["title"])
-        if similar(p_title, o_title) < 0.5 and not (is_ferial(p_title) and is_ferial(o_title)):
+        if not calendar_titles_match(p_title, o_title):
             n += 1
             print(f"{k[0]:02d}-{k[1]:02d}  ours: {o_title}")
             print(f"        pdf: {p_title}")
@@ -243,7 +267,7 @@ def split_our_commemorations(value):
     return [name.strip() for name in value.split(";") if name.strip()]
 
 
-def pdf_commemorations(section):
+def pdf_commemorations(section, day_title=""):
     """Extract commemoration names from one printed-or-do office section.
 
     The PDF writes the first item as ``Comm. Name (...)`` and commonly omits
@@ -282,6 +306,14 @@ def pdf_commemorations(section):
             name = re.sub(r"\s+only$", "", name, flags=re.I).strip()
             # Holy Cross has its own rubrics flag, not a TSV feast name.
             if name and not re.match(r"^HC(?:\s|$)", name, re.I):
+                # On a named Marian feast, "Comm. BVM" refers to that feast.
+                # Without that context the existing Saturday-Office reading
+                # remains; two differently named Marian feasts stay distinct.
+                title = clean_title(day_title.splitlines()[0]) if day_title else ""
+                if (re.fullmatch(BVM_RE, name, re.I)
+                        and not re.search(r"\b(?:st\.?|saint)\s", title, re.I)
+                        and re.search(r"\b(?:" + BVM_RE + r"|of mary|our lady|blessed virgin)\b", title, re.I)):
+                    name = title
                 names.append(name)
     return names
 
@@ -421,7 +453,7 @@ def cmd_commemorations(pdf_path, tsv_path):
         bad = []
         missing_total = extra_total = 0
         for key in sorted(ours):
-            pdf_names = pdf_commemorations(pdf.get(key, {}).get(sect))
+            pdf_names = pdf_commemorations(pdf.get(key, {}).get(sect), pdf.get(key, {}).get("", ""))
             if pdf_names is None:
                 continue
             compared += 1

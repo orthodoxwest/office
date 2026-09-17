@@ -153,7 +153,7 @@ class ProjectStatusTest(unittest.TestCase):
             ("magnificat-antiphon", "06-19", "suspected-reference-error", "248"),
             ("vespers-suffrage", "06-19", "suspected-reference-error", "248"),
             ("vespers-color", "07-10", "suspected-reference-error", "248"),
-            ("lauds-suffrage", "06-19", "untriaged", ""),
+            ("lauds-suffrage", "06-19", "suspected-reference-error", "416"),
         ]:
             with self.subTest(aspect=aspect, date=date):
                 finding = PROJECT_STATUS.Finding(2026, aspect, date, "detail")
