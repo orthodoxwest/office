@@ -93,8 +93,11 @@ func isOctaveDay(f *models.Feast) bool {
 	return strings.HasSuffix(f.ID, "-octave-day")
 }
 
-// isDayWithinOctave returns true if the feast is a non-terminal day within an octave.
-func isDayWithinOctave(f *models.Feast) bool {
+// IsDayWithinOctave returns true if the feast is a non-terminal day within an octave.
+func IsDayWithinOctave(f *models.Feast) bool {
+	if f == nil {
+		return false
+	}
 	// IDs like "epiphany-octave-day-2" through "epiphany-octave-day-7"
 	idx := strings.LastIndex(f.ID, "-octave-day-")
 	if idx < 0 {
@@ -125,7 +128,7 @@ func OctaveParentID(f *models.Feast) string {
 		return strings.TrimSuffix(f.ID, "-octave-day")
 	}
 	idx := strings.LastIndex(f.ID, "-octave-day-")
-	if idx >= 0 && isDayWithinOctave(f) {
+	if idx >= 0 && IsDayWithinOctave(f) {
 		return f.ID[:idx]
 	}
 	return ""
@@ -226,7 +229,7 @@ func occurrenceCommemoratedAtSecondVespers(winner, comm *models.Feast) (bool, st
 	if winner != nil && winner.Rank == models.Double1stClass && comm.Category != models.CategorySunday {
 		return false, "commemoration:second-vespers-first-class-exclusion"
 	}
-	if isDayWithinOctave(comm) && winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() {
+	if IsDayWithinOctave(comm) && winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() {
 		return false, "commemoration:second-vespers-day-within-octave-exclusion"
 	}
 	return true, "commemoration:second-vespers-included"
@@ -245,7 +248,7 @@ func followingOfficeCommemoratedAtSecondVespers(winner *models.Feast, following 
 	// a I/II Class feast; a privileged octave retains its own entitlement.
 	if winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
 		winner.Category != models.CategorySunday &&
-		isDayWithinOctave(feast) && !isPrivilegedOctaveCommemoration(feast) {
+		IsDayWithinOctave(feast) && !isPrivilegedOctaveCommemoration(feast) {
 		return false, "commemoration:following-common-octave-at-second-vespers"
 	}
 	if incomingFeriaExcludedAtVespers(feast) {
@@ -311,7 +314,7 @@ func outgoingCommemoratedAtFirstVespers(winner, loser *models.Feast) (bool, stri
 	if !hasSecondVespers(loser) {
 		// A day within an octave may still be commemorated under XIII.13;
 		// ferias in the penitential seasons are handled as privileged ferias.
-		if isDayWithinOctave(loser) {
+		if IsDayWithinOctave(loser) {
 			if winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() {
 				return false, "commemoration:first-vespers-day-within-octave-exclusion"
 			}
@@ -343,7 +346,7 @@ func outgoingCommemoratedAtFirstVespers(winner, loser *models.Feast) (bool, stri
 			(loser.Category == models.CategorySunday || loser.Rank.Weight() >= models.GreaterDouble.Weight()) {
 			return false, "commemoration:first-vespers-circumcision-exclusion"
 		}
-		if isDayWithinOctave(loser) {
+		if IsDayWithinOctave(loser) {
 			return false, "commemoration:first-vespers-second-class-octave-exclusion"
 		}
 	}
@@ -439,10 +442,10 @@ func concurrenceWinnerWithRule(prec, fol *models.Feast) (models.VespersOwner, st
 	}
 
 	// 7. Double vs day-within-Octave / Saturday BVM — Double wins (XIII.12,13)
-	if isDoubleOrAbove(prec) && (isDayWithinOctave(fol) || isSaturdayBVM(fol)) {
+	if isDoubleOrAbove(prec) && (IsDayWithinOctave(fol) || isSaturdayBVM(fol)) {
 		return models.VespersIIOfPreceding, "concurrence:double-vs-octave-or-saturday-bvm"
 	}
-	if isDoubleOrAbove(fol) && (isDayWithinOctave(prec) || isSaturdayBVM(prec)) {
+	if isDoubleOrAbove(fol) && (IsDayWithinOctave(prec) || isSaturdayBVM(prec)) {
 		return models.VespersIOfFollowing, "concurrence:double-vs-octave-or-saturday-bvm"
 	}
 
@@ -563,7 +566,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 			}
 		}
 		for _, c := range preceding.Commemorations {
-			if c.Category == models.CategoryFeria || isDayWithinOctave(c) || isOctaveDay(c) {
+			if c.Category == models.CategoryFeria || IsDayWithinOctave(c) || isOctaveDay(c) {
 				continue
 			}
 			if isApostolicCompanionCommemoration(c) && loserIncluded {
@@ -586,7 +589,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 	for _, c := range following.Commemorations {
 		// An octave represented by the office being sung is not added again
 		// through tomorrow's occurrence list (Christmas -> St Stephen).
-		if secondVespers && isDayWithinOctave(c) &&
+		if secondVespers && IsDayWithinOctave(c) &&
 			octaveCelebrationParent(preceding) == OctaveParentID(c) {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:same-octave-boundary", Outcome: "suppressed", Detail: c.ID})
 			continue
@@ -605,7 +608,7 @@ func boundaryCommemorationsWithDecisions(winner, loser *models.Feast, preceding,
 		// Ascension octave is commemorated at St Bede's, May 26). Sundays
 		// still admit it (the Conception octave at Gaudete's I Vespers,
 		// Dec 12).
-		if !secondVespers && isDayWithinOctave(c) &&
+		if !secondVespers && IsDayWithinOctave(c) &&
 			winner != nil && winner.Rank.Weight() >= models.Double2ndClass.Weight() &&
 			winner.Category != models.CategorySunday {
 			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:first-vespers-day-within-octave-exclusion", Outcome: "suppressed", Detail: c.ID})
@@ -660,9 +663,9 @@ func secondVespersCommemorationsWithDecisions(winner *models.Feast, day, followi
 	var concurrentOctave *models.Feast
 	for _, comm := range boundary {
 		duplicateOctave := false
-		if comm != nil && isDayWithinOctave(comm) {
+		if comm != nil && IsDayWithinOctave(comm) {
 			for _, current := range occurrenceCommemorations {
-				if current != nil && isDayWithinOctave(current) && sameOctaveDays(current, comm) {
+				if current != nil && IsDayWithinOctave(current) && sameOctaveDays(current, comm) {
 					if included, _ := occurrenceCommemoratedAtSecondVespers(winner, current); included {
 						duplicateOctave = true
 						if comm != nil && comm.ID == followingOfficeID {

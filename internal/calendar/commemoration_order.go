@@ -126,10 +126,10 @@ func commemorationTier(f *models.Feast, season models.Season, preferLord bool) i
 	if isEpiphanyVigil(f) {
 		return 2
 	}
-	if preferLord && f.Category == models.CategoryLord && isDoubleOrAbove(f) && !isOctaveDay(f) && !isDayWithinOctave(f) {
+	if preferLord && f.Category == models.CategoryLord && isDoubleOrAbove(f) && !isOctaveDay(f) && !IsDayWithinOctave(f) {
 		return 1
 	}
-	if isDayWithinOctave(f) && f.OctaveClass == models.OctavePrivilegedSecond {
+	if IsDayWithinOctave(f) && f.OctaveClass == models.OctavePrivilegedSecond {
 		return 3
 	}
 	if isEmberDay(f) || isRogationDay(f) || (f.Category == models.CategoryFeria && !isVigil(f) && (season == models.Lent || season == models.Passiontide)) {
@@ -144,13 +144,13 @@ func commemorationTier(f *models.Feast, season models.Season, preferLord bool) i
 	if f.Rank == models.Double {
 		return 7
 	}
-	if isDayWithinOctave(f) && f.OctaveClass == models.OctavePrivilegedThird {
+	if IsDayWithinOctave(f) && f.OctaveClass == models.OctavePrivilegedThird {
 		return 8
 	}
 	if f.CommemorationClass == models.CommemorationPostAscensionFeria {
 		return 9
 	}
-	if isDayWithinOctave(f) {
+	if IsDayWithinOctave(f) {
 		return 10
 	}
 	if f.Category == models.CategoryFeria && !isVigil(f) && (season == models.Advent || season == models.Septuagesima) {

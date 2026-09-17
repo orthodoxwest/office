@@ -31,6 +31,8 @@ var CoreKeys = []Key{
 // OptionalKeys are common hour-qualified spellings. Bare base slots (chapter,
 // hymn, …) also resolve; these preferred forms match existing proper files.
 var OptionalKeys = []Key{
+	{Key: "commemoration-antiphon-at-first-vespers", Blurb: "Antiphon for nonterminal days of this octave at I Vespers of another feast. Sundays use their separate context appointments.", Tier: "optional"},
+	{Key: "commemoration-versicle-at-first-vespers", Blurb: "Verse for nonterminal days of this octave at I Vespers of another feast. Sundays use their separate context appointments.", Tier: "optional"},
 	{Key: "commemoration-antiphon-sunday-first-vespers", Blurb: "Antiphon for this octave at I Vespers of the Sunday within this octave. No implicit fallback between these contexts.", Tier: "optional"},
 	{Key: "commemoration-antiphon-sunday-second-vespers", Blurb: "Antiphon for this octave at Sunday II Vespers when tomorrow celebrates this octave. No implicit fallback between these contexts.", Tier: "optional"},
 	{Key: "commemoration-antiphon-sunday-second-vespers-before-other-office", Blurb: "Antiphon for this octave at Sunday II Vespers when tomorrow celebrates another office. No implicit fallback between these contexts.", Tier: "optional"},

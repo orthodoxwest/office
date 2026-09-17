@@ -247,7 +247,7 @@ func suppressesStGeorgeOctave(winner *models.Feast) bool {
 func suppressesMemorials(winner *models.Feast) bool {
 	if winner == nil || winner.Rank != models.Double1stClass ||
 		winner.Category == models.CategorySunday || winner.Category == models.CategoryFeria ||
-		winner.IsVigil || isDayWithinOctave(winner) {
+		winner.IsVigil || IsDayWithinOctave(winner) {
 		return false
 	}
 	switch winner.ID {

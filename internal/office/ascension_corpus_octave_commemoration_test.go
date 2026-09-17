@@ -25,6 +25,8 @@ func TestAscensionAndCorpusSundayOctaveCommemorations(t *testing.T) {
 	for _, tc := range []struct {
 		date, hour, owner, antiphon, verse, collect string
 	}{
+		{"05-25", "vespers", "ascension-octave-day-5", "O King of glory", "V. God is gone up with a merry noise", "Grant, we beseech thee, Almighty God"},
+		{"05-26", "vespers", "ascension-octave-day-7", "O King of glory", "V. God is gone up with a merry noise", "Grant, we beseech thee, Almighty God"},
 		{"05-23", "vespers", "ascension-octave-day-3", "O King of glory", "V. God is gone up with a merry noise", "Grant, we beseech thee, Almighty God"},
 		{"06-13", "vespers", "corpus-christi-octave-day-3", "O sacred banquet", "V. Thou gavest them bread from heaven", "O God, who under a wonderful Sacrament"},
 		{"06-14", "vespers", "corpus-christi-octave-day-4", "O how sweet", "V. Thou gavest them bread from heaven", "O God, who under a wonderful Sacrament"},
@@ -57,7 +59,7 @@ func TestAscensionAndCorpusSundayOctaveCommemorations(t *testing.T) {
 							seen[element.SlotRef]++
 							if tc.hour == "vespers" && element.SlotRef != "commemoration-collect" {
 								trace := engine.TraceCommemorationResolution(day, tc.hour, element.SlotRef, element.SourceRef, tc.owner)
-								if trace.OwnerID != tc.owner || trace.SelectedTier != "proper" || trace.Reason != "sunday-octave-commemoration" || !slices.Contains(trace.DirectExisting, element.SourceRef) || trace.ResolverSlot == element.SlotRef {
+								if trace.OwnerID != tc.owner || trace.SelectedTier != "proper" || trace.Reason != "octave-commemoration-context" || !slices.Contains(trace.DirectExisting, element.SourceRef) || trace.ResolverSlot == element.SlotRef {
 									t.Errorf("context appointment trace = %#v", trace)
 								}
 							}
@@ -141,16 +143,16 @@ func TestSundayOctaveVespersContextAndFootnote(t *testing.T) {
 }
 
 func TestOctaveSundayAppointmentsDoNotLeakToOtherOffices(t *testing.T) {
-	// #398 remains held; #400's ordinal-only proposal also altered Bede,
-	// Peter–Paul, and transferred Visitation. These are scope boundaries,
+	// #398 remains held; Corpus appointments remain limited to Sundays,
+	// not Peter–Paul or transferred Visitation. These are scope boundaries,
 	// not source attestations of the existing generic fallback wording.
 	engine, err := NewEngine("../../data")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, tc := range []struct{ date, office, comm, parent string }{
+		{"2024-06-14", "st-basil-great", "ascension-octave-day-2", "ascension"},
 		{"2026-05-24", "ascension-sunday-within-octave", "ascension-octave-day-4", "ascension"},
-		{"2028-05-26", "st-bede-venerable", "ascension-octave-day-3", "ascension"},
 		{"2030-06-29", "ss-peter-paul", "corpus-christi-octave-day-3", "corpus-christi"},
 		{"2027-07-04", "visitation-bvm", "corpus-christi-octave-day-4", "corpus-christi"},
 		{"2032-07-04", "visitation-bvm", "corpus-christi-octave-day-4", "corpus-christi"},
@@ -190,5 +192,100 @@ func TestOctaveSundayAppointmentsDoNotLeakToOtherOffices(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestOctaveCommemorationAtFirstVespersScope(t *testing.T) {
+	// Parent appointments for days within an octave do not prescribe the
+	// terminal day, another hour, Sunday, or a following-octave commemoration
+	// at II Vespers (XIV.11). No date-window inference is needed at I Vespers.
+	for _, tc := range []struct {
+		name, id, hour string
+		vespers        models.VespersOwner
+		category       models.FeastCategory
+		want           string
+	}{
+		{"I of another feast outside the octave window", "example-octave-day-7", "vespers", models.VespersIOfFollowing, models.CategoryConfessor, "Appointed antiphon"},
+		{"terminal octave day", "example-octave-day", "vespers", models.VespersIOfFollowing, models.CategoryConfessor, "Existing fallback"},
+		{"Sunday has its own appointments", "example-octave-day-3", "vespers", models.VespersIOfFollowing, models.CategorySunday, "Existing fallback"},
+		{"II before following octave office", "example-octave-day-5", "vespers", models.VespersIIOfPreceding, models.CategoryConfessor, "Existing fallback"},
+		{"Lauds", "example-octave-day-5", "lauds", models.VespersIOfFollowing, models.CategoryConfessor, "Existing fallback"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			corpus := texts.NewTestCorpus(map[string]string{
+				"proper/example/commemoration-antiphon-at-first-vespers": "Appointed antiphon",
+				"proper/example/commemoration-antiphon":                  "Existing fallback",
+			})
+			comm := &models.Feast{ID: tc.id, ProperID: "example", Category: models.CategoryLord}
+			feast := &models.Feast{ID: "other-feast", Category: tc.category}
+			day := &models.CalendarDay{Celebration: feast, WithinOctaveOf: "example", Commemorations: []*models.Feast{comm},
+				Vespers: models.VespersDesignation{Owner: tc.vespers, Feast: feast, FollowingOfficeOctaveOf: "example", Commemorations: []*models.Feast{comm}},
+			}
+			if tc.category == models.CategorySunday {
+				day.Vespers.WithinOctaveOf = "example"
+			}
+			officeDay := day
+			if tc.hour == "vespers" {
+				officeDay = vespersOfficeDay(day)
+			}
+			elems := addCommemorations(officeDay, tc.hour, corpus, false)
+			if elems[1].Text != tc.want {
+				t.Fatalf("antiphon = %q, want %q", elems[1].Text, tc.want)
+			}
+			if elems[1].Text == "Appointed antiphon" {
+				engine := &Engine{corpus: corpus}
+				trace := engine.TraceCommemorationResolution(day, tc.hour, elems[1].SlotRef, elems[1].SourceRef, comm.ID)
+				if trace.OwnerID != comm.ID || trace.ResolverSlot != "commemoration-antiphon-at-first-vespers" || !slices.Contains(trace.DirectExisting, elems[1].SourceRef) {
+					t.Errorf("outside-window trace = %#v", trace)
+				}
+			}
+		})
+	}
+}
+
+func TestAscensionOctaveAtBedeFirstVespers(t *testing.T) {
+	// The same ordinal belongs to Sunday I Vespers in 2026 and Bede I in
+	// 2028; the appointment is established by the actual evening context.
+	engine, err := NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	days, err := calendar.BuildCalendar(2028, "../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	date := time.Date(2028, 5, 26, 0, 0, 0, 0, time.UTC)
+	day := &days[date.YearDay()-1]
+	if day.Vespers.Owner != models.VespersIOfFollowing || day.Vespers.Feast.ID != "st-bede-venerable" {
+		t.Fatal("fixture must be Bede I Vespers")
+	}
+	for _, form := range models.PrayerForms {
+		hour, err := engine.ComposeHourWithOptions("vespers", day, calendar.ComputeMoveableDates(2028), ComposeOptions{Form: form})
+		if err != nil {
+			t.Fatal(err)
+		}
+		seen := 0
+		for _, section := range hour.Sections {
+			for _, e := range section.Elements {
+				if e.CommemorationOwnerID != "ascension-octave-day-3" {
+					continue
+				}
+				switch e.SlotRef {
+				case "commemoration-antiphon":
+					seen++
+					if !strings.HasPrefix(e.Text, "O King of glory") || e.SourceRef != "proper/ascension/commemoration-antiphon-at-first-vespers" {
+						t.Errorf("%s antiphon = %q (%s)", form, e.Text, e.SourceRef)
+					}
+				case "commemoration-versicle":
+					seen++
+					if !strings.HasPrefix(e.Text, "V. God is gone up with a merry noise") || e.SourceRef != "proper/ascension/commemoration-versicle-at-first-vespers" {
+						t.Errorf("%s versicle = %q (%s)", form, e.Text, e.SourceRef)
+					}
+				}
+			}
+		}
+		if seen != 2 {
+			t.Errorf("%s found %d octave antiphons/versicles, want 2", form, seen)
+		}
 	}
 }

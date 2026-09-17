@@ -41,7 +41,7 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	var elems []models.OfficeElement
 	for i, comm := range comms {
 		lookup := func(ref string) (string, string) {
-			if key := sundayOctaveCommemorationRef(day, comm, hourName, ref); key != "" {
+			if key := octaveCommemorationRef(day, comm, hourName, ref); key != "" {
 				if text := corpus.Get(key); text != "" {
 					return text, key
 				}
@@ -119,20 +119,28 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 	return elems
 }
 
-// sundayOctaveCommemorationRef selects an optional appointment on the octave
-// parent's proper, scoped to the Sunday that actually owns Vespers. A generated
-// day's ordinal cannot identify this context: the same day may be commemorated
-// under a saint's office instead. At Sunday II Vespers the following day's
-// office, not merely its date inside the octave, determines the form (Diurnal
-// pp.391,393,418,421; General Rubrics XIV.10–11).
+// octaveCommemorationRef selects an optional appointment on the octave
+// parent's proper using the actual Vespers owner. At another feast's I Vespers,
+// nonterminal octave days may use a shared commemoration form (Diurnal p.391;
+// 2026 ordo p.66). Terminal days have separate propers and are not covered.
+// Sunday appointments also distinguish the following day's actual office
+// (Diurnal pp.391,393,418,421; General Rubrics XIV.10–11).
 //
-// Each context is opt-in. In particular, a missing II-Vespers appointment must
-// not inherit the I-Vespers one: a source disagreement may leave it held (#398).
-func sundayOctaveCommemorationRef(day *models.CalendarDay, comm *models.Feast, hourName, ref string) string {
-	if day == nil || hourName != "vespers" || day.Celebration == nil ||
-		day.Celebration.Category != models.CategorySunday || day.WithinOctaveOf == "" ||
-		calendar.OctaveParentID(comm) != day.WithinOctaveOf ||
+// Each context is opt-in. A missing appointment retains the existing lookup;
+// it must not inherit another context, which may be held for a ruling (#398).
+func octaveCommemorationRef(day *models.CalendarDay, comm *models.Feast, hourName, ref string) string {
+	parent := calendar.OctaveParentID(comm)
+	if day == nil || hourName != "vespers" || day.Celebration == nil || parent == "" ||
 		(ref != "commemoration-antiphon" && ref != "commemoration-versicle") {
+		return ""
+	}
+	if day.Celebration.Category != models.CategorySunday {
+		if day.Vespers.Owner == models.VespersIOfFollowing && calendar.IsDayWithinOctave(comm) {
+			return "proper/" + parent + "/" + ref + "-at-first-vespers"
+		}
+		return ""
+	}
+	if day.WithinOctaveOf != parent {
 		return ""
 	}
 	var context string
@@ -147,7 +155,7 @@ func sundayOctaveCommemorationRef(day *models.CalendarDay, comm *models.Feast, h
 	default:
 		return ""
 	}
-	return "proper/" + day.WithinOctaveOf + "/" + ref + "-" + context
+	return "proper/" + parent + "/" + ref + "-" + context
 }
 
 // isSaturdaySecondVespersSundayCommemoration identifies a Sunday which is

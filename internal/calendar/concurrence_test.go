@@ -802,3 +802,23 @@ func TestSecondVespersRetainsFollowingOctaveOffice(t *testing.T) {
 		})
 	}
 }
+
+func TestIsDayWithinOctaveExcludesTerminalAndMalformedIDs(t *testing.T) {
+	for _, tc := range []struct {
+		id   string
+		want bool
+	}{
+		{"ascension-octave-day-3", true},
+		{"ascension-octave-day", false},
+		{"ascension-octave-day-", false},
+		{"ascension-octave-day-first", false},
+		{"ascension", false},
+	} {
+		if got := IsDayWithinOctave(&models.Feast{ID: tc.id}); got != tc.want {
+			t.Errorf("IsDayWithinOctave(%q)=%v, want %v", tc.id, got, tc.want)
+		}
+	}
+	if IsDayWithinOctave(nil) {
+		t.Error("nil feast is not a day within an octave")
+	}
+}
