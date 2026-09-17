@@ -154,8 +154,8 @@ V. Right dear in the sight of the Lord, alleluia.
 R. Is the death of his Saints, alleluia.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 561 (I Vespers, Common of Apostles in Paschaltide)
-V. O ye holy and righteous, rejoice in the Lord.
+# SOURCE: monastic diurnal, p. 17* (Common of Apostles and Evangelists in Paschaltide, I Vespers)
+V. O ye holy and righteous, rejoice in the Lord, alleluia.
 R. God hath chosen you to him to be his inheritance, alleluia.
 
 [versicle-vespers]
@@ -172,3 +172,19 @@ Light perpetual * shall shine upon thy Saints, O Lord, and an ageless eternity, 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 570 (II Vespers, Common of Apostles in Paschaltide)
 O ye holy and righteous, * rejoice in the Lord, alleluia: God hath chosen you to him to be his inheritance, alleluia.
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/apostle-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/apostle-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/apostle-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/apostle-paschal/versicle-vespers

@@ -1213,6 +1213,8 @@ Day = 17
 Source = awrv
 
 [comm-extra-03-17-st-joseph-of-arimathea-c]
+ProperID = st-joseph-arimathea
+ProperName = Joseph
 Name = St Joseph of Arimathea, C
 Rank = commemoration
 Color = white
@@ -1610,6 +1612,8 @@ Source = awrv
 
 
 [comm-extra-03-17-st-joseph-of-arimathea-confessor]
+ProperID = st-joseph-arimathea
+ProperName = Joseph
 Name = St. Joseph of Arimathea, Confessor
 Rank = commemoration
 Color = white
@@ -1675,6 +1679,8 @@ Day = 6
 Source = awrv
 
 [comm-extra-05-07-st-alexis-toth-priest-and-confessor]
+ProperID = st-alexis-toth
+ProperName = Alexis
 Name = St. Alexis Toth, Priest & Confessor
 Rank = commemoration
 Color = white

@@ -13,7 +13,7 @@ commons/apostle-paschal/psalm-antiphon-1,80f901dabab2,draft archdiocesan Lauds b
 commons/apostle-paschal/psalm-antiphon-2,eebae0d7adbd,draft archdiocesan Lauds book,Common of Apostles and Evangelists in Paschaltide,613,verified,codex,2026-07-18,
 commons/apostle-paschal/psalm-antiphon-3,2b1e1c6548ad,draft archdiocesan Vespers book,"Second Vespers, Common of Apostles in Paschaltide",565,verified,codex,2026-07-18,
 commons/apostle-paschal/psalm-antiphon-5,6e01446eb2d4,diurnal,,18*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0731.png
-commons/apostle-paschal/versicle-first-vespers,e3c6e91bb33f,draft archdiocesan Vespers book,,571,verified,codex,2026-07-17,
+commons/apostle-paschal/versicle-first-vespers,8f0223c692d3,diurnal,,17*,verified,codex,2026-09-17,Independent page-image readings agree; monastic-diurnal/0730.png; replaces draft-book reading missing first Alleluia.
 commons/apostle-paschal/versicle-none,f462ce0817a4,diurnal,,19*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0732.png
 commons/apostle-paschal/versicle-sext,90ebce514506,diurnal,,19*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0732.png
 commons/apostle/benedictus-antiphon,b36a2f24d09c,diurnal,"Common of Apostles out of Paschaltide, At Lauds",12*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0725.png
@@ -71,6 +71,7 @@ commons/blessed-virgin/versicle-none,9cef917b4788,diurnal,,67*,verified,codex,20
 commons/blessed-virgin/versicle-sext,e29a17c77619,diurnal,,67*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/bvm-common-versicles/page-0780-300dpi.png
 commons/blessed-virgin/versicle-vespers,f5e74029e94f,diurnal,"Common of Feasts B.V.M., At I Vespers",64*,verified,claude,2026-08-20,
 commons/confessor-bishop-paschal/benedictus-antiphon,5602d31978b4,draft archdiocesan Lauds book,,669,verified,codex,2026-07-17,
+commons/confessor-bishop-paschal/magnificat-antiphon,26bdad7be3d3,diurnal,,3*,verified,codex,2026-09-17,Independent page-image readings agree after normalization; monastic-diurnal/0716.png; identity and seasonal typography documented in output/paschal-common-review.
 commons/confessor-bishop-paschal/magnificat-antiphon-first,40c77326378c,draft archdiocesan Vespers book,,641,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/psalm-antiphon-1,39ee5e2c335f,draft archdiocesan Lauds book,,660,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/psalm-antiphon-2,bed0e77e0e15,draft archdiocesan Lauds book,,661,verified,codex,2026-07-17,

@@ -90,3 +90,19 @@ R. He clothed him with a robe of glory, alleluia.
 
 [hymn-vespers]
 @use commons/confessor/hymn-vespers
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-paschal/versicle-vespers

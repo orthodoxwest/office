@@ -1,0 +1,5 @@
+# Appointed Memorial collect.
+[collect]
+# SOURCE: 2026 archdiocesan ordo, p. 46: Attend; monastic diurnal, p. 45*
+@use commons/confessor/collect-alternate
+

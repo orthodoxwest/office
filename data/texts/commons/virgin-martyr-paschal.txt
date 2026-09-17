@@ -78,3 +78,19 @@ R. Go forth, ride prosperously, and reign, alleluia.
 
 [hymn-vespers]
 @use commons/virgin-martyr/hymn-lauds
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/virgin-martyr-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/virgin-martyr-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/virgin-martyr-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/virgin-martyr-paschal/versicle-vespers

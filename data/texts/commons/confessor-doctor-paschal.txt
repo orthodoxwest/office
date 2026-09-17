@@ -77,3 +77,19 @@ R. The Lord chose him for a priest unto himself, alleluia, alleluia.
 
 [benedictus-antiphon]
 @use commons/confessor-bishop-paschal/benedictus-antiphon
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-doctor-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-doctor-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-doctor-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-doctor-paschal/versicle-vespers
