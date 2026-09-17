@@ -146,3 +146,22 @@ R. God hath chosen you to him to be his inheritance, alleluia.
 [versicle-none]
 # SOURCE: diurnal pp. 31*-33*, 19* (little hours inherited from the Apostle common)
 @use commons/apostle-paschal/versicle-none
+
+[commemoration-antiphon-lauds]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/martyr-paschal/benedictus-antiphon
+
+
+[commemoration-antiphon-vespers]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/martyr-paschal/magnificat-antiphon
+
+
+[commemoration-versicle-lauds]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/martyr-paschal/versicle-lauds
+
+
+[commemoration-versicle-vespers]
+# SOURCE: Monastic Diurnal pp. 2*-3* (Common of Martyrs in Paschaltide, commemorations); alias to existing Common text
+@use commons/martyr-paschal/versicle-vespers
