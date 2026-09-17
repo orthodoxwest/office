@@ -35,6 +35,9 @@ func (v *VespersComposer) Compose(day *models.CalendarDay, sections []HourSectio
 	if err != nil {
 		return nil, err
 	}
+	if day != nil && day.Celebration != nil && day.Celebration.ID == "holy-thursday" {
+		hour.Color = models.Violet // 2026 ordo p. 53: Vespers after the white Mass.
+	}
 	if day != nil && day.Vespers.AppendedOfficeOfTheDead {
 		if err := appendVespersOfTheDead(hour, day, sections, corpus, moveable); err != nil {
 			return nil, err
@@ -101,11 +104,11 @@ func vespersOfficeDay(day *models.CalendarDay) *models.CalendarDay {
 		// but its occurrence commemorations belong to tomorrow rather than
 		// carrying today's Lauds commemorations one evening late (XIV.9).
 		officeDay.Commemorations = day.Vespers.Commemorations
-		// September Ember propers end at None. The free evening returns
-		// to the seasonal feria (Diurnal p. 426; 2026 ordo Sep 16/18).
+		// Rogation and September Ember propers end at None; the free evening
+		// returns to the seasonal feria (General Rubrics XIII.18).
 		if day.Celebration != nil {
 			switch day.Celebration.ID {
-			case "september-ember-wednesday", "september-ember-friday", "september-ember-saturday":
+			case "rogation-monday", "september-ember-wednesday", "september-ember-friday", "september-ember-saturday":
 				officeDay.Celebration = nil
 				officeDay.Color = calendar.SeasonColors[day.Season]
 			}
