@@ -125,3 +125,32 @@ func TestPaschalMartyrCommemorationsKeepTheirCommon(t *testing.T) {
 		}
 	}
 }
+
+func TestPaschalCommonCommemorationsKeepSeasonalTexts(t *testing.T) {
+	// Dedicated ordinary slots must not shadow seasonal Common texts.
+	engine, err := NewEngine("../../data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, category := range []models.FeastCategory{
+		models.CategoryApostle, models.CategoryEvangelist, models.CategoryConfessor,
+		models.CategoryConfessorBishop, models.CategoryConfessorDoctor,
+		models.CategoryVirgin, models.CategoryVirginMartyr, models.CategoryHolyWoman,
+	} {
+		feast := &models.Feast{ID: "example", Rank: models.Commemoration, Category: category}
+		for _, hour := range []string{"lauds", "vespers"} {
+			for _, slot := range []string{"commemoration-antiphon", "commemoration-versicle"} {
+				text, source := lookupCommemoration(feast, models.Easter, hour, slot, engine.corpus)
+				if !strings.Contains(strings.ToLower(text), "alleluia") || !strings.HasPrefix(source, "commons/"+string(category)+"-paschal/") {
+					t.Errorf("%s %s %s lost its Paschal form: %q (%s)", category, hour, slot, text, source)
+				}
+				if hour == "vespers" {
+					text, source = lookupFollowingOfficeCommemoration(feast, models.Easter, slot, engine.corpus)
+					if !strings.Contains(strings.ToLower(text), "alleluia") || !strings.HasPrefix(source, "commons/"+string(category)+"-paschal/") {
+						t.Errorf("%s first Vespers %s lost its Paschal form: %q (%s)", category, slot, text, source)
+					}
+				}
+			}
+		}
+	}
+}
