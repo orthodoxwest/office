@@ -2279,5 +2279,65 @@
         "before_slot": "commemoration-collect"
       }
     ]
+  },
+  {
+    "id": "ascension-octave-at-feast-first-vespers",
+    "source": "Monastic Diurnal p.391 (daily Office or commemoration as on the feast); General Rubrics XIV.10; 2026 ordo p.66 (May25/26). The 2028 case tests the same I-Vespers context, not a future ordo.",
+    "cases": [
+      {
+        "date": "2026-05-25",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-5",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/ascension/commemoration-antiphon-at-first-vespers",
+        "contains": "O King of glory",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-05-25",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-5",
+        "slot": "commemoration-versicle",
+        "ref": "proper/ascension/commemoration-versicle-at-first-vespers",
+        "contains": "God is gone up with a merry noise",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-7",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/ascension/commemoration-antiphon-at-first-vespers",
+        "contains": "O King of glory",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2026-05-26",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-7",
+        "slot": "commemoration-versicle",
+        "ref": "proper/ascension/commemoration-versicle-at-first-vespers",
+        "contains": "God is gone up with a merry noise",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2028-05-26",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-3",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/ascension/commemoration-antiphon-at-first-vespers",
+        "contains": "O King of glory",
+        "before_slot": "commemoration-collect"
+      },
+      {
+        "date": "2028-05-26",
+        "hour": "vespers",
+        "commemoration_owner": "ascension-octave-day-3",
+        "slot": "commemoration-versicle",
+        "ref": "proper/ascension/commemoration-versicle-at-first-vespers",
+        "contains": "God is gone up with a merry noise",
+        "before_slot": "commemoration-collect"
+      }
+    ]
   }
 ]

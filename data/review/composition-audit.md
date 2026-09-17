@@ -909,3 +909,45 @@ June13, and June14 Vespers. The existing headline comparator does not compare
 these commemoration texts, so its 162 findings (3466/3628 agreeing assertions)
 remain unchanged. Evidence is retained under ignored `output/evening-review/`
 in the repair worktree.
+
+### Ascension octave at another feast's I Vespers (September 2026)
+
+The 2026 ordo p.66 appoints O King of glory for the Ascension octave
+commemorated at Augustine's I Vespers on May25 and Bede's on May26.
+Diurnal p.391 directs the daily octave Office or commemoration as on the
+feast; General Rubrics XIV.10 takes the appropriate canticle antiphon and
+verse. The previous generic selections were Ye men of Galilee and a different
+verse. Both printed appointments were read as page images by Codex.
+
+The existing context resolver now also recognizes nonterminal octave days
+commemorated at I Vespers of a non-Sunday owner. Optional parent-proper slots
+`commemoration-antiphon-at-first-vespers` and
+`commemoration-versicle-at-first-vespers` select this context; only Ascension
+has entries, both aliases of existing texts. The commemoration's own identity
+supplies the octave parent. Terminal octave days, Sunday-specific appointments,
+Lauds, and II Vespers keep their existing resolution. No calendar membership,
+ordering, or additional feast/date conditions are introduced.
+
+The source-backed requirement `ascension-octave-at-feast-first-vespers` and
+`TestAscensionAndCorpusSundayOctaveCommemorations` cover the 2026 appointments
+in all prayer forms. `TestAscensionOctaveAtBedeFirstVespers` covers the 2028
+collision previously held outside the Sunday-only repair's scope.
+`TestOctaveCommemorationAtFirstVespersScope` checks terminal-day, Sunday,
+Lauds, II-Vespers, and missing-window controls. An adversarial agent reviewed
+the added engine branch and source scope and found no actionable issue.
+
+The unresolved II-Vespers question #398 also has a weekday comparison witness:
+2024 ordo p.73 appoints O King of glory at Basil's II Vespers on June14, with
+the octave office following on June15. XIV.11 instead points to the feast's
+I-Vespers form when commemorating a following octave day, subject to its
+exceptions. This older witness does not settle the current local rule; both
+that weekday case and the disputed 2026 Sunday remain unchanged pending the
+ruling. No Corpus Christi weekday or terminal-day text is inferred here.
+
+A 2024–2051 comparison of 71,589 private-form hours changes 15 Vespers offices,
+all I Vespers of non-Sunday owners. Only the Ascension octave antiphon, verse,
+and corresponding source references change. Every principal-office element
+and office owner is unchanged. The 2026 changes are exactly May25 and May26;
+the existing headline comparison remains at 162 findings (3466/3628 agreeing
+assertions), since it does not compare these commemoration texts. Evidence is
+retained under ignored `output/weekday-review/` in the repair worktree.

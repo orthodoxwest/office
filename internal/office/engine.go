@@ -830,14 +830,14 @@ func (e *Engine) TraceCommemorationResolution(day *models.CalendarDay, hourName,
 	}
 	trace := traceProperResolution(ownerDay, hourName, ref, selectedRef, e.corpus)
 	if found {
-		if key := sundayOctaveCommemorationRef(day, ownerDay.Celebration, hourName, ref); key != "" && key == selectedRef {
-			trace.ResolverSlot = strings.TrimPrefix(key, "proper/"+day.WithinOctaveOf+"/")
+		if key := octaveCommemorationRef(day, ownerDay.Celebration, hourName, ref); key != "" && key == selectedRef {
+			trace.ResolverSlot = strings.TrimPrefix(key, "proper/"+calendar.OctaveParentID(ownerDay.Celebration)+"/")
 			trace.DirectCandidates = []string{key}
 			trace.DirectExisting = nil
 			if e.corpus.Has(key) {
 				trace.DirectExisting = []string{key}
 			}
-			trace.Reason = "sunday-octave-commemoration"
+			trace.Reason = "octave-commemoration-context"
 		}
 	}
 	if !found {
