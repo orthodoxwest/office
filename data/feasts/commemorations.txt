@@ -1653,10 +1653,11 @@ Day = 26
 Source = awrv
 
 [comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve]
-Name = Ss. Alexander (Bp), Eventius, Theodulus (Mm) & Juve-
+ProperName = Alexander, Eventius & Theodulus
+Name = Ss. Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
 Rank = commemoration
-Color = white
-Category = confessor
+Color = red
+Category = martyrs
 Month = 5
 Day = 3
 Source = awrv
@@ -1807,19 +1808,21 @@ Source = awrv
 
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
-Name = Ss. Nazarius, Celsus, Martyrs; St Victor, Bishop & Martyr
+ProperName = Nazarius, Celsus & Victor
+Name = Ss. Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
 Rank = commemoration
 Color = red
-Category = bishop-martyr
+Category = martyrs
 Month = 7
 Day = 28
 Source = awrv
 
 [comm-extra-07-29-ss-felix-ii-bishop-simplicius-faustinus-and-beatrice]
+ProperName = Felix, Simplicius, Faustinus & Beatrice
 Name = Ss. Felix II (Bishop), Simplicius, Faustinus & Beatrice, Martyrs
 Rank = commemoration
-Color = white
-Category = confessor-bishop
+Color = red
+Category = martyrs
 Month = 7
 Day = 29
 Source = awrv
