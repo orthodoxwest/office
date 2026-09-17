@@ -685,6 +685,7 @@ Day = 28
 Source = awrv
 
 [comm-08-29-st-sabina-martyr]
+ProperID = st-sabina
 Name = St Sabina, Martyr
 Rank = commemoration
 Color = red
@@ -1028,6 +1029,7 @@ Day = 21
 Source = awrv
 
 [comm-11-23-st-felicitas-martyr]
+ProperID = st-felicitas
 Name = St Felicitas, Martyr
 Rank = commemoration
 Color = red

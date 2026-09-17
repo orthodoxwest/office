@@ -1,0 +1,17 @@
+# Appointed Memorial antiphons and versicles; collect remains a separate source question.
+# The approved Office collect/supplement is tracked in issue413.
+[commemoration-antiphon-lauds]
+# SOURCE: 2026 archdiocesan ordo, p. 118; monastic diurnal, p. 5* (Holy Women commemoration)
+@use commons/holy-woman/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: 2026 archdiocesan ordo, p. 118; monastic diurnal, p. 5* (Holy Women commemoration)
+@use commons/holy-woman/magnificat-antiphon-first
+
+[commemoration-versicle-lauds]
+# SOURCE: 2026 archdiocesan ordo, p. 118; monastic diurnal, p. 5* (Holy Women commemoration)
+@use commons/holy-woman/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: 2026 archdiocesan ordo, p. 118; monastic diurnal, p. 5* (Holy Women commemoration)
+@use commons/holy-woman/versicle-first-vespers
