@@ -81,3 +81,19 @@
 [versicle-none]
 # SOURCE: diurnal pp. 513, 19* (St Mark cross-reference)
 @use commons/apostle-paschal/versicle-none
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/evangelist-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/evangelist-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/evangelist-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 17*-19* (Apostles and Evangelists in Paschaltide)
+@use commons/evangelist-paschal/versicle-vespers

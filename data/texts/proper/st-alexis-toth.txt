@@ -1,0 +1,3 @@
+[collect]
+# SOURCE: 2026 archdiocesan ordo, p. 61: Attend; monastic diurnal, p. 45*
+@use commons/confessor/collect-alternate

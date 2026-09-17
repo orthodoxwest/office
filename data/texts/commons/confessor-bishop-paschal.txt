@@ -1,7 +1,10 @@
 # Paschal variant of the Common of a Confessor and Bishop.
 # Add sections here that differ during Paschaltide (Easter season).
 # Sections not present here fall through to the regular commons file.
-# See the regular commons file for available section names.
+
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, pp. 3*,41* (Confessor and Bishop, II Vespers; Paschaltide Alleluia)
+The Lord loved him * and adorned him; he clothed him with a robe of glory, and at the gates of Paradise he crowned him, alleluia.
 
 [psalm-antiphon]
 @use commons/confessor-bishop-paschal/psalm-antiphon-1
@@ -67,3 +70,19 @@ R. And shewed him the kingdom of God, alleluia.
 # SOURCE: draft archdiocesan Vespers book, p. 631 (I Vespers, Common of a Confessor and Bishop, Paschaltide)
 V. The Lord loved him and adorned him, alleluia.
 R. He clothed him with a robe of glory, alleluia.
+
+[commemoration-antiphon-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-bishop-paschal/benedictus-antiphon
+
+[commemoration-antiphon-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-bishop-paschal/magnificat-antiphon
+
+[commemoration-versicle-lauds]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-bishop-paschal/versicle-lauds
+
+[commemoration-versicle-vespers]
+# SOURCE: monastic diurnal, pp. 3*-5* (commemoration antiphons and versicles, Paschaltide Alleluias)
+@use commons/confessor-bishop-paschal/versicle-vespers
