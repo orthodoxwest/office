@@ -1289,6 +1289,7 @@ proper/st-gabriel-archangel/psalm-antiphon-4,6b23bb2bef20,diurnal,"St Gabriel, A
 proper/st-gabriel-archangel/psalm-antiphon-5,5680eec9c7c2,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/short-responsory-terce,1571f3a59379,diurnal,"St Gabriel, At Terce",500,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-george/collect,60e7f9750312,diurnal,,512,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0558.png
+proper/st-helen/collect,594bd6fed864,diurnal,,591,verified,codex,2026-09-17,Independent page-image readings agree; cache monastic-diurnal/0635.png; comparison in output/holy-women-review.
 proper/st-hilary/collect,8483582f0bc8,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0501.png
 proper/st-irenaeus/collect,71b31cf79e32,diurnal,,558,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0603.png
 proper/st-james-greater/collect,68d83e618674,diurnal,,571,verified,bwaldrep,2026-07-25,
@@ -1357,6 +1358,7 @@ proper/st-maurus/magnificat-antiphon-first,1d349bf4eaeb,diurnal,,456,verified,co
 proper/st-maurus/psalm-antiphon-4,f0188bcb29e7,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0503.png
 proper/st-maurus/psalm-antiphon-5,741f866aacaa,diurnal,,457,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0503.png
 proper/st-maurus/short-responsory-first-vespers,76db5a052506,diurnal,,455,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0501.png
+proper/st-monica/collect,66636a918b2c,diurnal,,525,verified,codex,2026-09-17,Independent page-image readings agree; cache monastic-diurnal/0571.png; comparison in output/holy-women-review.
 proper/st-nicholas/collect,94851d58c59b,diurnal,,447,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0493.png
 proper/st-patrick/collect,db004999ed23,diurnal,,488,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0534.png
 proper/st-perpetua-felicitas/commemoration-collect,495f24ade6bd,diurnal,,483,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0529.png
