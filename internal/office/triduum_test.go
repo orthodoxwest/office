@@ -189,6 +189,13 @@ func TestTriduumMajorHoursOpeningsEndings(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
+					wantColor := day.Color
+					if date == "2026-04-09" && name == "vespers" {
+						wantColor = models.Violet
+					}
+					if hour.Color != wantColor {
+						t.Errorf("color = %s, want %s", hour.Color, wantColor)
+					}
 					var elements []models.OfficeElement
 					for _, section := range hour.Sections {
 						if !section.Collapsible {
