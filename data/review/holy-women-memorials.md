@@ -32,3 +32,6 @@ The independent readings, source-page references, before/after hashes and
 report remain under ignored `output/holy-women-review/`; source images and
 the hash-bound Diurnal cache remain in the original workspace's output.
 This continues issue124's proper/fallback audit.
+
+Local validation: `make golden`, `make check`, and `make test-coverage`
+passed, and the pre-push hook repeated `make check` successfully.
