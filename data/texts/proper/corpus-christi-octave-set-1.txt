@@ -2,8 +2,8 @@
 @use psalmody/vespers/corpus-christi-first
 
 [psalm-antiphon-4-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 201 (Friday within the Octave of Corpus Christi)
-May the children * of the Church be like the olive branches, round about the table of the Lord.
+# SOURCE: diurnal p. 411
+May the children * of the Church be like the olive-branches, round about the table of the Lord.
 
 [magnificat-antiphon]
 # SOURCE: draft Temporal Cycle Vespers book, p. 203 (I Vespers of Corpus Christi)
