@@ -1,481 +1,165 @@
 name: Update golden files
 
 on:
-  # pull_request_target — NOT pull_request. A `pull_request` run is tied to
-  # the ephemeral refs/pull/N/merge commit, which GitHub cannot compute while
-  # the PR has merge conflicts, so a `pull_request`-triggered label workflow
-  # silently never starts on exactly the conflicted PRs that need it most
-  # (observed on PR #426: re-adding the label while conflicted fired the
-  # pull_request_target-based UX workflow but started no golden run at all).
-  # This event loads the workflow definition from the default branch, so
-  # labeled PRs always run the current merge logic. Jobs that execute
-  # pull-request code must therefore remain read-only; only the
-  # artifact-applying job holds write access (same split as Update UX
-  # snapshots).
+  # Unlike pull_request, this fires even when the PR has merge conflicts.
   pull_request_target:
     types: [labeled]
 
-# Two runs regenerating and pushing at once would race on the head branch.
 concurrency:
   group: update-golden-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
+# Both jobs use event SHAs, so PR code cannot choose the commits to publish.
+env:
+  HEAD_REF: ${{ github.event.pull_request.head.ref }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+  BASE_REF: ${{ github.event.pull_request.base.ref }}
+  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
 jobs:
-  authorize:
-    name: Authorize golden update
+  generate:
+    name: Merge base and regenerate goldens
     if: >-
       github.event.label.name == 'update-golden' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    defaults:
+      run:
+        working-directory: pr
 
     steps:
       - name: Require a trusted label actor
         uses: actions/github-script@v7
         with:
           script: |
-            if (context.actor === 'github-actions[bot]') {
-              core.setFailed('Workflow tokens cannot authorize golden updates.');
-              return;
-            }
-
             const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              ...context.repo,
               username: context.actor,
             });
-            const trusted = new Set(['admin', 'maintain', 'write']);
-            if (!trusted.has(data.permission)) {
-              core.setFailed(
-                `@${context.actor} has ${data.permission} permission; write access is required.`
-              );
-              return;
+            if (context.actor === 'github-actions[bot]' ||
+                !['admin', 'maintain', 'write'].includes(data.permission)) {
+              core.setFailed('The update-golden label must be added by a collaborator with write access.');
             }
-            core.notice(`Golden update authorized by @${context.actor}.`);
 
-  generate:
-    name: Merge base and regenerate goldens
-    needs: authorize
-    if: >-
-      needs.authorize.result == 'success' &&
-      github.event.label.name == 'update-golden' &&
-      github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    outputs:
-      status: ${{ steps.merge.outputs.status }}
-      unexpected: ${{ steps.merge.outputs.unexpected }}
-      head_sha: ${{ steps.merge.outputs.head_sha }}
-      base_sha: ${{ steps.merge.outputs.base_sha }}
+      # Load the helper from the workflow revision, outside the PR checkout.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: workflow
+          sparse-checkout: scripts/update_golden.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
-    steps:
-      # No credentials here: this job executes the PR's own Go code
-      # (`make golden`, `go test`). The write job below only copies the
-      # resulting files after validating them.
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-          # Merging the base branch needs its history, not just the head tip.
+          path: pr
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: pr/go.mod
           cache: false
 
-      - name: Cache Go build and module cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-${{ runner.os }}-${{ hashFiles('go.mod') }}-staticcheck-v0.7.0
-          restore-keys: |
-            go-${{ runner.os }}-${{ hashFiles('go.mod') }}-
-
-      # The golden files under internal/e2e/testdata/golden/ are whole-corpus
-      # rollups: parity-snapshot.json digests a whole year per row, and
-      # assurance-report.md is a table of global counts. Two pull requests that
-      # fix unrelated corpus entries therefore collide on the same few lines,
-      # and the correct post-merge value is neither side's — only regeneration
-      # can produce it. So merge the base branch here and let `make golden`
-      # settle those files, instead of asking a human to hand-resolve digests.
       - name: Merge the base branch
-        id: merge
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: python3 "$GITHUB_WORKSPACE/workflow/scripts/update_golden.py" merge
+
+      - name: Regenerate and verify
         run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # `git fetch origin <branch>` only refreshes FETCH_HEAD, leaving the
-          # tracking ref stale, so fetch with an explicit refspec and merge the
-          # tracking ref it maintains. The pinned SHAs let the push job redo
-          # this exact merge and detect a moved base or head first.
-          git fetch origin "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF"
-          {
-            echo "head_sha=$(git rev-parse HEAD)"
-            echo "base_sha=$(git rev-parse "origin/$BASE_REF")"
-          } >> "$GITHUB_OUTPUT"
-
-          if git merge --no-edit "origin/$BASE_REF"; then
-            echo "status=clean" >> "$GITHUB_OUTPUT"
-            echo "Merged origin/$BASE_REF with no conflicts."
-            exit 0
-          fi
-
-          conflicts="$(git diff --name-only --diff-filter=U)"
-          if [ -z "$conflicts" ]; then
-            echo "::error::Merge failed without file conflicts."
-            exit 1
-          fi
-          echo "Conflicted paths:"
-          printf '%s\n' "$conflicts"
-
-          # Only files that `make golden` rewrites from scratch are safe to
-          # settle automatically. A conflict anywhere else is a real edit that
-          # two people made differently, and it needs a human.
-          unexpected="$(printf '%s\n' "$conflicts" | grep -v '^internal/e2e/testdata/golden/' || true)"
-          if [ -n "$unexpected" ]; then
-            git merge --abort
-            {
-              echo "status=unresolvable"
-              echo "unexpected<<CONFLICT_EOF"
-              printf '%s\n' "$unexpected"
-              echo "CONFLICT_EOF"
-            } >> "$GITHUB_OUTPUT"
-            echo "::error::Merge conflicts outside the generated golden files; resolve this merge by hand."
-            exit 0
-          fi
-
-          # Take either side purely to clear the index. The regeneration step
-          # overwrites these files with the real post-merge value, so which
-          # side wins here has no bearing on the result.
-          printf '%s\n' "$conflicts" | while IFS= read -r path; do
-            [ -n "$path" ] || continue
-            git checkout --ours -- "$path"
-            git add -- "$path"
-          done
-          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
-            echo "::error::Conflicts remain after staging the generated files."
-            exit 1
-          fi
-          echo "status=resolved" >> "$GITHUB_OUTPUT"
-          echo "Staged generated-file conflicts for regeneration."
-
-      - name: Regenerate golden files
-        if: steps.merge.outputs.status != 'unresolvable'
-        run: make golden
-
-      # The push below uses the default GITHUB_TOKEN, which does not retrigger
-      # CI, so the merged tree is verified here or nowhere.
-      - name: Verify the merged tree
-        if: steps.merge.outputs.status != 'unresolvable'
-        run: |
-          set -euo pipefail
+          make golden
           go test ./...
           make validate
 
-      - name: Upload regenerated golden files
-        if: steps.merge.outputs.status != 'unresolvable'
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: golden-candidates
-          path: internal/e2e/testdata/golden/
+          path: pr/internal/e2e/testdata/golden/
+          if-no-files-found: error
           retention-days: 1
 
-  commit:
-    name: Apply goldens and push
+  publish:
+    name: Publish and report golden update
     needs: generate
-    if: needs.generate.result == 'success' && needs.generate.outputs.status != 'unresolvable'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    outputs:
-      pushed: ${{ steps.push.outputs.pushed }}
-      detail: ${{ steps.push.outputs.detail }}
-
-    steps:
-      # Pin the exact head commit the generate job verified, so a push that
-      # lands in between cannot change what gets merged or pushed.
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.generate.outputs.head_sha }}
-          fetch-depth: 0
-
-      - name: Download regenerated golden files
-        uses: actions/download-artifact@v4
-        with:
-          name: golden-candidates
-          path: ${{ runner.temp }}/golden-candidates
-
-      # The artifact was produced by untrusted PR code, so only narrow,
-      # validated content may reach the branch: regular text files that stay
-      # inside the golden directory. This job never executes PR code.
-      - name: Validate golden candidates
-        env:
-          ARTIFACT_DIR: ${{ runner.temp }}/golden-candidates
-        run: |
-          set -euo pipefail
-          GOLDEN_DIR=internal/e2e/testdata/golden
-
-          if [ -L "$GOLDEN_DIR" ] || [ ! -d "$GOLDEN_DIR" ]; then
-            echo "::error::$GOLDEN_DIR must be a real directory."
-            exit 1
-          fi
-
-          UNEXPECTED=$(find "$ARTIFACT_DIR" -mindepth 1 \
-            \( ! -type f -a ! -type d \) -print -quit)
-          if [ -n "$UNEXPECTED" ]; then
-            echo "::error::Golden artifact contains an unexpected entry: $UNEXPECTED"
-            exit 1
-          fi
-
-          mapfile -t CANDIDATES < <(
-            find "$ARTIFACT_DIR" -type f -print | LC_ALL=C sort
-          )
-          if [ "${#CANDIDATES[@]}" -lt 1 ] || [ "${#CANDIDATES[@]}" -gt 1000 ]; then
-            echo "::error::Expected between 1 and 1000 golden files; found ${#CANDIDATES[@]}."
-            exit 1
-          fi
-
-          for CANDIDATE in "${CANDIDATES[@]}"; do
-            case "$CANDIDATE" in
-              *.txt | *.md | *.json) ;;
-              *)
-                echo "::error::Unexpected golden file type: $CANDIDATE"
-                exit 1
-                ;;
-            esac
-            SIZE=$(stat -c '%s' "$CANDIDATE")
-            if [ "$SIZE" -gt 8388608 ]; then
-              echo "::error::Golden file too large: $CANDIDATE"
-              exit 1
-            fi
-          done
-
-          echo "Golden candidates valid: ${#CANDIDATES[@]} files."
-
-      - name: Merge base, commit and push
-        id: push
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          EXPECTED_BASE_SHA: ${{ needs.generate.outputs.base_sha }}
-          EXPECTED_HEAD_SHA: ${{ needs.generate.outputs.head_sha }}
-          ARTIFACT_DIR: ${{ runner.temp }}/golden-candidates
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          GOLDEN_DIR=internal/e2e/testdata/golden
-          git fetch origin \
-            "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF" \
-            "+refs/heads/$HEAD_REF:refs/remotes/origin/$HEAD_REF"
-
-          actual_base="$(git rev-parse "origin/$BASE_REF")"
-          if [ "$actual_base" != "$EXPECTED_BASE_SHA" ]; then
-            echo "::error::Base branch $BASE_REF moved during regeneration (verified $EXPECTED_BASE_SHA, found $actual_base). Remove and re-add the update-golden label to retry."
-            exit 1
-          fi
-          if [ "$(git rev-parse "origin/$HEAD_REF")" != "$EXPECTED_HEAD_SHA" ]; then
-            echo "::error::Head branch $HEAD_REF moved during regeneration. Remove and re-add the update-golden label to retry."
-            exit 1
-          fi
-
-          # Redo the generate job's merge exactly (same pinned parents, so the
-          # same conflicts appear) and settle golden conflicts the same way.
-          # The validated artifact overwrites those files below.
-          if git merge --no-edit "origin/$BASE_REF"; then
-            :
-          else
-            conflicts="$(git diff --name-only --diff-filter=U)"
-            if [ -z "$conflicts" ]; then
-              echo "::error::Merge failed without file conflicts."
-              exit 1
-            fi
-            unexpected="$(printf '%s\n' "$conflicts" | grep -v '^internal/e2e/testdata/golden/' || true)"
-            if [ -n "$unexpected" ]; then
-              git merge --abort
-              echo "::error::Merge conflicts outside the generated golden files on push; refusing to push."
-              exit 1
-            fi
-            printf '%s\n' "$conflicts" | while IFS= read -r path; do
-              [ -n "$path" ] || continue
-              git checkout --ours -- "$path"
-              git add -- "$path"
-            done
-            if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
-              echo "::error::Conflicts remain after staging the generated files."
-              exit 1
-            fi
-          fi
-          # Overwrite the merged golden files with the verified regeneration.
-          # Staging stays scoped to the golden directory: the merge may
-          # legitimately stage auto-merged non-golden files as part of the
-          # merge commit, but artifact bytes must never reach other paths.
-          while IFS= read -r -d '' CANDIDATE; do
-            REL="${CANDIDATE#"$ARTIFACT_DIR"/}"
-            mkdir -p "$GOLDEN_DIR/$(dirname "$REL")"
-            cp -- "$CANDIDATE" "$GOLDEN_DIR/$REL"
-          done < <(find "$ARTIFACT_DIR" -type f -print0 | LC_ALL=C sort -z)
-          git add -A -- "$GOLDEN_DIR"
-
-          pushed=true
-          detail=merged-regenerated
-          if git rev-parse -q --verify MERGE_HEAD >/dev/null; then
-            # Completing a merge always commits, even when regeneration was a
-            # no-op — the merge itself is the change worth pushing. (A clean
-            # generate merge never leaves MERGE_HEAD set here, so this commit
-            # always settles regenerated golden conflicts.)
-            git commit --no-edit
-          elif git diff --cached --quiet; then
-            if [ "$(git rev-parse HEAD)" != "$EXPECTED_HEAD_SHA" ]; then
-              # Fast-forwarded past the pinned head with golden files already
-              # current: the merge advance itself is worth pushing.
-              detail=merged
-            else
-              echo "Already up to date; golden files verified current, nothing to push."
-              pushed=false
-              detail=noop
-            fi
-          else
-            git commit -m "chore: regenerate golden files"
-          fi
-          echo "pushed=$pushed" >> "$GITHUB_OUTPUT"
-          echo "detail=$detail" >> "$GITHUB_OUTPUT"
-          if [ "$pushed" = true ]; then
-            git push origin "HEAD:refs/heads/$HEAD_REF"
-          fi
-
-  report:
-    name: Report golden update
-    needs: [authorize, generate, commit]
     if: >-
       always() &&
       github.event.label.name == 'update-golden' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
     steps:
-      - name: Remove label
-        uses: actions/github-script@v7
+      # This job executes only the trusted helper, never the PR's scripts.
+      - uses: actions/checkout@v4
+        if: needs.generate.result == 'success'
         with:
-          script: |
-            try {
-              await github.rest.issues.removeLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                name: 'update-golden',
-              });
-            } catch (_) {
-              // label may have already been removed — that's fine
-            }
+          ref: ${{ github.workflow_sha }}
+          path: workflow
+          sparse-checkout: scripts/update_golden.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
-      - name: Comment unresolvable conflicts
-        if: needs.generate.outputs.status == 'unresolvable'
+      - uses: actions/checkout@v4
+        if: needs.generate.result == 'success'
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        if: needs.generate.result == 'success'
+        with:
+          name: golden-candidates
+          path: ${{ runner.temp }}/golden-candidates
+
+      - name: Apply goldens and push
+        id: push
+        if: needs.generate.result == 'success'
+        working-directory: pr
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/golden-candidates
+        run: python3 "$GITHUB_WORKSPACE/workflow/scripts/update_golden.py" publish "$ARTIFACT_DIR"
+
+      - name: Remove label and report result
+        if: always()
         uses: actions/github-script@v7
         env:
-          UNEXPECTED: ${{ needs.generate.outputs.unexpected }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          SUCCEEDED: ${{ needs.generate.result == 'success' && steps.push.outcome == 'success' }}
+          PUSHED: ${{ steps.push.outputs.pushed }}
         with:
           script: |
-            const paths = (process.env.UNEXPECTED || '').trim();
-            const list = paths
-              ? '\n\n```\n' + paths + '\n```\n'
-              : '\n\n';
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body:
-                '## Merge conflicts need a human\n\n' +
-                'Merging `' + process.env.BASE_REF + '` conflicted outside the generated ' +
-                'golden files, so nothing was changed and the merge was aborted. ' +
-                'These paths need to be resolved by hand:' + list +
-                '\nResolve the merge locally, push, and add the `update-golden` label again ' +
-                'if the golden files still need regenerating.',
-            });
-            core.setFailed('Merge conflicts outside the generated golden files.');
-
-      - name: Comment result
-        if: needs.generate.outputs.status != 'unresolvable'
-        uses: actions/github-script@v7
-        env:
-          AUTH_RESULT: ${{ needs.authorize.result }}
-          UPDATE_SUCCEEDED: ${{ needs.generate.result == 'success' && needs.commit.result == 'success' }}
-          PUSH_DETAIL: ${{ needs.commit.outputs.detail }}
-          MERGE_STATUS: ${{ needs.generate.outputs.status }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-        with:
-          script: |
+            const issue = { ...context.repo, issue_number: context.payload.pull_request.number };
             const marker = '<!-- golden-test-result -->';
             const runURL = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const succeeded = process.env.UPDATE_SUCCEEDED === 'true';
-
-            let body;
-            if (process.env.AUTH_RESULT !== 'success') {
-              body = `## Golden file update not authorized\n\nThe \`update-golden\` label must be added by a collaborator ` +
-                `with write access. Check the [workflow run](${runURL}) for details, then have a maintainer ` +
-                `remove and re-add the label.`;
-            } else if (!succeeded) {
-              body = `## Golden file update failed\n\nThe attempt to merge ` +
-                `\`${process.env.BASE_REF}\` and regenerate golden files failed. ` +
-                `Check the [workflow run](${runURL}) for details. ` +
-                `If the base or head branch moved mid-run, remove and re-add the ` +
-                `\`update-golden\` label to retry.`;
-            } else if (process.env.PUSH_DETAIL === 'noop') {
-              body = `## Golden files already current\n\nThis branch was already up to date with ` +
-                `\`${process.env.BASE_REF}\` and regeneration produced no changes, so nothing was pushed. ` +
-                `If this PR still shows merge conflicts, they appeared after this run (the base branch moved) — ` +
-                `remove and re-add the \`update-golden\` label to retry.\n\n${marker}`;
-            } else if (process.env.MERGE_STATUS === 'resolved') {
-              body = `## Golden files updated\n\nCI merged \`${process.env.BASE_REF}\`, settled the conflicting ` +
-                `generated files by regenerating them, and pushed the result to this branch. ` +
-                `The full Go test suite and data validation passed on the merged tree.\n\n${marker}`;
+            const succeeded = process.env.SUCCEEDED === 'true';
+            let result;
+            if (!succeeded) {
+              result = '## Golden file update failed\n\n' +
+                'Check the workflow run for authorization, merge conflicts, test failures, or a moved branch. ' +
+                'Resolve any conflicts outside the generated goldens by hand, then re-add `update-golden` to retry.';
+            } else if (process.env.PUSHED === 'true') {
+              result = '## Golden files updated\n\n' +
+                'CI merged the base branch, regenerated the golden files, and pushed the result. ' +
+                'The Go tests and data validation passed before publishing.';
             } else {
-              body = `## Golden files updated\n\nCI merged \`${process.env.BASE_REF}\`, regenerated the golden files, ` +
-                `and pushed the result to this branch. ` +
-                `The full Go test suite and data validation passed on the merged tree.\n\n${marker}`;
+              result = '## Golden files already current\n\n' +
+                'The branch was up to date and regeneration produced no changes. Nothing was pushed.';
             }
-
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-            });
-
-            const existing = comments.find(c =>
-              c.user.login === 'github-actions[bot]' && c.body.includes(marker)
-            );
-
-            if (succeeded && existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else if (succeeded) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body,
-              });
+            const body = `${result}\n\n[Workflow run](${runURL})\n\n${marker}`;
+            try {
+              await github.rest.issues.removeLabel({ ...issue, name: 'update-golden' });
+            } catch (error) {
+              if (error.status !== 404) core.warning(`Could not remove label: ${error.message}`);
+            }
+            const comments = await github.paginate(github.rest.issues.listComments, issue);
+            const existing = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
             } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: body + `\n\n${marker}`,
-              });
+              await github.rest.issues.createComment({ ...issue, body });
             }
+            if (!succeeded) core.setFailed('Golden update failed; see the workflow run for details.');

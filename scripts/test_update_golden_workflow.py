@@ -1,164 +1,230 @@
 #!/usr/bin/env python3
-"""Focused tests for the update-golden label workflow.
+"""Exercise the golden updater against disposable local Git repositories."""
 
-Regression coverage for PR #426: the workflow used `on: pull_request`,
-whose runs are tied to the ephemeral refs/pull/N/merge commit. GitHub
-cannot compute that merge while the PR is conflicted, so re-adding the
-label to a conflicted PR silently started no run at all (the
-pull_request_target-based UX workflow fired for the same event). The
-workflow must therefore stay on `pull_request_target`, keep PR-code
-execution in credential-free jobs, and merge the base branch through an
-explicit refspec rather than a possibly stale tracking ref.
-"""
-
-import pathlib
-import re
+import importlib.util
+import os
+from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
-WORKFLOW = (
-    pathlib.Path(__file__).resolve().parent.parent
-    / ".github"
-    / "workflows"
-    / "update-golden.yml"
-)
-GOLDEN_PREFIX = "internal/e2e/testdata/golden/"
+HELPER = Path(__file__).with_name("update_golden.py").resolve()
+GOLDEN = Path("internal/e2e/testdata/golden")
 
 
-def read_workflow():
-    return WORKFLOW.read_text(encoding="utf-8")
+class GoldenUpdateTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.remote = self.root / "remote.git"
+        self.source = self.root / "source"
+        self.env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+        self.git(self.root, "init", "--bare", str(self.remote))
+        self.git(self.root, "init", "-b", "master", str(self.source))
+        self.git(self.source, "config", "user.name", "Test")
+        self.git(self.source, "config", "user.email", "test@example.com")
+        self.git(self.source, "remote", "add", "origin", str(self.remote))
+        self.change({str(GOLDEN / "a.txt"): "original\n", str(GOLDEN / "b.txt"): "keep\n", "data.txt": "original\n"})
+        self.git(self.source, "branch", "feature")
+        self.git(self.source, "push", "origin", "master", "feature")
+        self.artifact = self.root / "artifact"
+        self.artifact.mkdir()
+        (self.artifact / "a.txt").write_text("original\n")
+        (self.artifact / "b.txt").write_text("keep\n")
+        self.work = self.checkout("work")
+        self.refresh_event()
 
+    def git(self, cwd, *args):
+        return subprocess.run(
+            ["git", "-c", "core.hooksPath=/dev/null", *args], cwd=cwd,
+            env=self.env, check=True, capture_output=True, text=True,
+        ).stdout.strip()
 
-def job_section(text, name):
-    """Return the raw text of one top-level job body."""
-    starts = [match for match in re.finditer(r"(?m)^  (\S+):\s*$", text)]
-    for index, match in enumerate(starts):
-        if match.group(1) == name:
-            begin = match.end()
-            end = starts[index + 1].start() if index + 1 < len(starts) else len(text)
-            return text[begin:end]
-    raise AssertionError(f"job {name!r} not found")
+    def change(self, files):
+        for name, text in files.items():
+            path = self.source / name
+            if text is None:
+                path.unlink()
+            else:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text)
+        self.git(self.source, "add", "-A")
+        self.git(self.source, "commit", "-m", "fixture change")
 
+    def advance(self, branch, files):
+        self.git(self.source, "checkout", branch)
+        self.change(files)
+        self.git(self.source, "push", "origin", branch)
 
-def run_blocks(text):
-    """Yield embedded shell scripts from `run:` steps (block and inline)."""
-    lines = text.splitlines()
-    index = 0
-    while index < len(lines):
-        match = re.match(r"^(\s*)run:\s*(\|)?\s*(.*?)\s*$", lines[index])
-        if not match:
-            index += 1
-            continue
-        indent, pipe, inline = match.groups()
-        if pipe:
-            base = len(indent)
-            body = []
-            index += 1
-            while index < len(lines) and (
-                lines[index].strip() == "" or len(lines[index]) - len(lines[index].lstrip()) > base
-            ):
-                body.append(lines[index][base + 2 :] if lines[index].strip() else "")
-                index += 1
-            yield "\n".join(body)
-        else:
-            yield inline
-            index += 1
+    def checkout(self, name):
+        work = self.root / name
+        self.git(self.root, "clone", "--branch", "feature", str(self.remote), str(work))
+        return work
 
-
-class UpdateGoldenWorkflowTest(unittest.TestCase):
-    def test_label_trigger_fires_on_conflicted_prs(self):
-        text = read_workflow()
-        self.assertRegex(text, r"(?m)^  pull_request_target:\s*$")
-        header = text.split("jobs:")[0] if "jobs:" in text else text
-        self.assertIn("labeled", header)
-        # A bare `pull_request:` trigger (as opposed to pull_request_target or
-        # github.event.pull_request references) would silently skip conflicted
-        # PRs again.
-        self.assertIsNone(
-            re.search(r"(?m)^\s*pull_request:\s*(#.*)?$", text),
-            "update-golden must trigger on pull_request_target, not pull_request",
+    def refresh_event(self):
+        self.env.update(
+            HEAD_REF="feature", BASE_REF="master",
+            HEAD_SHA=self.git(self.source, "rev-parse", "feature"),
+            BASE_SHA=self.git(self.source, "rev-parse", "master"),
+            GITHUB_OUTPUT=str(self.root / "outputs"),
         )
+        self.git(self.work, "fetch", "origin")
+        self.git(self.work, "checkout", "--detach", self.env["HEAD_SHA"])
 
-    def test_expected_jobs_exist(self):
-        text = read_workflow()
-        for name in ("authorize", "generate", "commit", "report"):
-            with self.subTest(job=name):
-                job_section(text, name)
+    def run_helper(self, command="publish", work=None, success=True):
+        args = [sys.executable, str(HELPER), command]
+        if command == "publish":
+            args.append(str(self.artifact))
+        result = subprocess.run(args, cwd=work or self.work, env=self.env, capture_output=True, text=True)
+        self.assertEqual(result.returncode == 0, success, result.stderr)
+        return result
 
-    def test_pr_code_never_runs_with_write_access(self):
-        text = read_workflow()
-        generate = job_section(text, "generate")
-        self.assertIn("contents: read", generate)
-        self.assertNotIn("contents: write", generate)
-        self.assertIn("persist-credentials: false", generate)
-        for command in ("make golden", "go test"):
-            self.assertIn(command, generate)
-        commit = job_section(text, "commit")
-        self.assertIn("contents: write", commit)
-        for command in ("make golden", "go test", "make validate", "npm "):
-            self.assertNotIn(
-                command, commit, f"write-access job must not execute PR code via {command!r}"
-            )
+    def remote_head(self):
+        return self.git(self.remote, "rev-parse", "feature")
 
-    def test_merge_uses_explicit_refspec_not_tracking_ref(self):
-        text = read_workflow()
-        # `git fetch origin <branch>` only refreshes FETCH_HEAD, so merging
-        # origin/<branch> afterwards can merge a stale commit. The workflow
-        # must maintain the tracking ref with an explicit refspec first.
-        self.assertIn(
-            "+refs/heads/$BASE_REF:refs/remotes/origin/$BASE_REF", text
-        )
-        generate = job_section(text, "generate")
-        self.assertIn('git merge --no-edit "origin/$BASE_REF"', generate)
+    def test_noop_does_not_push(self):
+        self.run_helper()
+        self.assertEqual(self.remote_head(), self.env["HEAD_SHA"])
+        self.assertEqual((self.root / "outputs").read_text(), "pushed=false\n")
 
-    def test_only_golden_conflicts_resolve_automatically(self):
-        text = read_workflow()
-        for name in ("generate", "commit"):
-            with self.subTest(job=name):
-                section = job_section(text, name)
-                self.assertIn(f"grep -v '^{GOLDEN_PREFIX}'", section)
+    def test_artifact_replaces_files_including_deletions(self):
+        (self.artifact / "a.txt").unlink()
+        (self.artifact / "new.json").write_text('{"new": true}\n')
+        self.run_helper()
+        files = self.git(self.remote, "ls-tree", "--name-only", "feature", f"{GOLDEN}/").splitlines()
+        self.assertEqual(set(files), {str(GOLDEN / "b.txt"), str(GOLDEN / "new.json")})
+        self.assertEqual((self.root / "outputs").read_text(), "pushed=true\n")
+        self.assertEqual(self.git(self.remote, "show", "feature:data.txt"), "original")
 
-    def test_write_job_validates_untrusted_artifact(self):
-        commit = job_section(read_workflow(), "commit")
-        self.assertIn("golden-candidates", commit)
-        self.assertIn(GOLDEN_PREFIX, commit)
-        self.assertIn("*.txt", commit)
+    def check_merge_roundtrip(self):
+        self.refresh_event()
+        self.run_helper("merge")
+        (self.work / GOLDEN / "a.txt").write_text("regenerated\n")
+        (self.artifact / "a.txt").write_text("regenerated\n")
+        self.git(self.work, "add", "-A")
+        tested_tree = self.git(self.work, "write-tree")
+        self.run_helper(work=self.checkout("publisher"))
+        self.assertEqual(self.git(self.remote, "rev-parse", "feature^{tree}"), tested_tree)
+        self.git(self.remote, "merge-base", "--is-ancestor", self.env["BASE_SHA"], "feature")
+        self.git(self.remote, "merge-base", "--is-ancestor", self.env["HEAD_SHA"], "feature")
 
-    def test_noop_reports_honestly_instead_of_claiming_a_push(self):
-        text = read_workflow()
-        self.assertIn("detail=noop", text)
-        self.assertIn("nothing to push", text)
+    def test_golden_conflict_roundtrip_preserves_merged_tree(self):
+        self.advance("master", {str(GOLDEN / "a.txt"): "base\n", "base.txt": "base\n"})
+        self.advance("feature", {str(GOLDEN / "a.txt"): "head\n", "head.txt": "head\n"})
+        self.check_merge_roundtrip()
 
-    def test_embedded_shell_parses(self):
-        if shutil.which("bash") is None:
-            self.skipTest("bash not available")
-        blocks = [
-            re.sub(r"\$\{\{.*?\}\}", "__EXPR__", block) for block in run_blocks(read_workflow())
-        ]
-        self.assertGreater(len(blocks), 3, "expected several embedded shell scripts")
-        for index, block in enumerate(blocks):
-            with self.subTest(block=index):
-                with tempfile.NamedTemporaryFile(
-                    "w", suffix=".sh", delete=False, encoding="utf-8"
-                ) as handle:
-                    handle.write(block + "\n")
-                    path = handle.name
-                try:
-                    completed = subprocess.run(
-                        ["bash", "-n", path],
-                        capture_output=True,
-                        text=True,
-                        timeout=30,
-                    )
-                finally:
-                    pathlib.Path(path).unlink(missing_ok=True)
-                self.assertEqual(
-                    completed.returncode,
-                    0,
-                    f"shell syntax error in run block {index}:\n{completed.stderr}\n{block}",
-                )
+    def test_clean_merge_roundtrip_preserves_merged_tree(self):
+        self.advance("master", {"base.txt": "base\n"})
+        self.advance("feature", {"head.txt": "head\n"})
+        self.check_merge_roundtrip()
+
+    def test_fast_forward_is_pushed_without_golden_changes(self):
+        self.advance("master", {"base.txt": "base\n"})
+        self.refresh_event()
+        self.run_helper()
+        self.assertEqual(self.remote_head(), self.env["BASE_SHA"])
+        self.assertEqual((self.root / "outputs").read_text(), "pushed=true\n")
+
+    def test_non_golden_conflicts_abort_without_push(self):
+        self.advance("master", {"data.txt": "base\n"})
+        self.advance("feature", {"data.txt": "head\n"})
+        self.refresh_event()
+        result = self.run_helper(success=False)
+        self.assertIn("Resolve conflicts outside generated goldens", result.stderr)
+        self.assertEqual(self.remote_head(), self.env["HEAD_SHA"])
+        self.assertFalse((self.work / ".git/MERGE_HEAD").exists())
+
+    def test_golden_modify_delete_conflict(self):
+        self.advance("master", {str(GOLDEN / "a.txt"): "base\n"})
+        self.advance("feature", {str(GOLDEN / "a.txt"): None})
+        self.refresh_event()
+        (self.artifact / "a.txt").unlink()
+        self.run_helper()
+        self.assertFalse((self.work / GOLDEN / "a.txt").exists())
+        self.git(self.remote, "merge-base", "--is-ancestor", self.env["BASE_SHA"], "feature")
+
+    def test_moved_branch_is_rejected(self):
+        for branch in ("master", "feature"):
+            with self.subTest(branch=branch):
+                self.refresh_event()
+                self.advance(branch, {f"{branch}.txt": "advance\n"})
+                before = self.remote_head()
+                self.assertIn("branch moved", self.run_helper(success=False).stderr)
+                self.assertEqual(self.remote_head(), before)
+
+    def test_lease_rejects_head_rewound_after_fetch(self):
+        ancestor = self.env["HEAD_SHA"]
+        self.advance("feature", {"head.txt": "advance\n"})
+        self.refresh_event()
+        (self.artifact / "a.txt").write_text("regenerated\n")
+        spec = importlib.util.spec_from_file_location("updater", HELPER)
+        updater = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(updater)
+        real_git = updater.git
+
+        def rewind_before_push(*args, **kwargs):
+            if args[0] == "push":
+                self.git(self.remote, "update-ref", "refs/heads/feature", ancestor)
+            return real_git(*args, **kwargs)
+
+        previous = Path.cwd()
+        try:
+            os.chdir(self.work)
+            with patch.dict(os.environ, self.env), patch.object(updater, "git", rewind_before_push):
+                with self.assertRaises(subprocess.CalledProcessError):
+                    updater.publish(self.artifact)
+        finally:
+            os.chdir(previous)
+        self.assertEqual(self.remote_head(), ancestor)
+
+    def test_invalid_artifacts_are_rejected_before_merging(self):
+        for kind in ("empty", "nested", "symlink", "extension", "large", "binary"):
+            with self.subTest(kind=kind):
+                shutil.rmtree(self.artifact)
+                self.artifact.mkdir()
+                path = self.artifact / "a.txt"
+                if kind == "nested":
+                    path.mkdir()
+                elif kind == "symlink":
+                    path.symlink_to(self.source / "data.txt")
+                elif kind == "extension":
+                    (self.artifact / "script.sh").write_text("invalid")
+                elif kind == "large":
+                    with path.open("wb") as handle:
+                        handle.truncate(8 * 1024 * 1024 + 1)
+                elif kind == "binary":
+                    path.write_bytes(b"\0")
+                self.run_helper(success=False)
+                self.assertEqual(self.remote_head(), self.env["HEAD_SHA"])
+
+    def test_destination_symlinks_are_rejected_without_writing_outside(self):
+        for name in ("internal", str(GOLDEN), str(GOLDEN / "a.txt")):
+            with self.subTest(path=name):
+                work = self.checkout("symlink-" + name.replace("/", "-"))
+                target = work / name
+                outside = self.root / ("outside-" + name.replace("/", "-"))
+                target.rename(outside)
+                target.symlink_to(outside)
+                self.run_helper(work=work, success=False)
+                original = outside / "e2e/testdata/golden/a.txt" if name == "internal" else outside / "a.txt" if name == str(GOLDEN) else outside
+                self.assertEqual(original.read_text(), "original\n")
+
+    def test_symlink_introduced_by_base_merge_is_rejected(self):
+        self.git(self.source, "checkout", "master")
+        path = self.source / GOLDEN / "a.txt"
+        path.unlink()
+        path.symlink_to("../../../../data.txt")
+        self.git(self.source, "add", "-A")
+        self.git(self.source, "commit", "-m", "symlink in base")
+        self.git(self.source, "push", "origin", "master")
+        self.refresh_event()
+        self.run_helper(success=False)
+        self.assertEqual((self.work / "data.txt").read_text(), "original\n")
+        self.assertEqual(self.remote_head(), self.env["HEAD_SHA"])
 
 
 if __name__ == "__main__":
