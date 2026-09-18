@@ -148,10 +148,14 @@ classify each fallback as actual printed proper text or as absent/cross-referred
 It also records unrequested printed sections as `extra`; those are never
 applied. A high/medium printed candidate is rejected as `same-as-fallback` when
 it is at least 0.9 similar to the currently resolved fallback. Otherwise one
-Claude Sonnet reading of the named slot and page must agree at 0.985 before
-`office corpus put` and a Diurnal attestation. Disagreement, low confidence,
-an unrecognised printed page, or an apply error remains `needs-human` with a
-representative web URL in the report. All dossiers, prompts, reader output,
+Claude Sonnet reading of the named slot and page must agree exactly after the
+comparison normalization below before `office corpus put` and a Diurnal
+attestation. Reader-agreement similarity scores are diagnostic and do not
+authorize application.
+Word disagreements remain `needs-human` even when aggregate similarity is high.
+Disagreement, low confidence, an unrecognised printed page, or an apply error
+remains `needs-human` with a representative web URL in the report.
+All dossiers, prompts, reader output,
 and body files remain under ignored `output/`.
 
 For page diagnostics, the underlying helpers are also useful directly:
@@ -166,21 +170,24 @@ python3 scripts/diurnal-pages.py feast-pages 7 17 "Translation of St. Osmund"
 ## Classification and application
 
 - `exact`: the trimmed transcription and corpus strings are identical.
-- `near`: comparison normalization makes them equal, or their normalized
-  similarity is at least 0.985. Normalization covers whitespace, quote forms,
-  ligatures, soft and line-end hyphens, terminal punctuation, response sigils,
-  leading printed slot labels, flex/mediant mark variants, and case; it does
-  not supply words.
-- `different`: the first readable transcription is below that threshold.
+- `near`: comparison normalization makes them equal. Normalization covers
+  whitespace, quote forms, ligatures, soft and line-end hyphens, terminal
+  punctuation, response sigils, leading printed slot labels, flex/mediant mark
+  variants, and case; it does
+  not supply words. For collect bodies, it also omits the conclusion cue, which
+  is stored separately in the corpus.
+- `different`: the first readable transcription differs after normalization,
+  regardless of its similarity score.
 - `not-found`: the requested section is absent, empty, or its page cannot be
   resolved.
 - `low-confidence`: the reader reports low confidence or cannot return a
   bounded, schema-valid result.
 
 With `--apply`, exact and near rows are attested. A different row goes to a
-second independent reader; only transcriptions agreeing at 0.985 or better may
-replace the section and then be attested. Disagreement, unreadable text, missing
-pages, and automatic psalter replacements remain `needs-human`. Page images,
+second independent reader; only nonempty transcriptions agreeing exactly after
+normalization may replace the section and then be attested. Disagreement,
+unreadable text, missing pages, and automatic psalter replacements remain
+`needs-human`. Page images,
 transcriptions, diffs, and prompts stay under ignored `output/` and must not be
 committed.
 

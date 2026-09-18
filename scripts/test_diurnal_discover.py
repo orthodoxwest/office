@@ -182,6 +182,41 @@ class GateTests(unittest.TestCase):
         )
         self.assertEqual(result["slots"][0]["decision"], "needs-human")
 
+    def test_high_similarity_word_disagreements_never_apply(self):
+        # Synthetic context for the July 29 / p. 575 disagreement in #424.
+        context = "Grant thy servants grace and mercy throughout all the days of their lives. " * 5
+        first_text = context + "May they thereafter attain unto peace."
+        for ending in ("May they thereat attain to peace.",
+                       "May they thereafter attain to peace.",
+                       "May they not thereafter attain unto peace."):
+            with self.subTest(ending=ending):
+                second = {"found": True, "text": context + ending, "printed_page": "566",
+                          "pdf_page": 11, "confidence": "high", "notes": "visible"}
+                result = discover.process_dossier(
+                    dossier(), FakeRunner(primary(first_text), second), apply=True,
+                    corpus_get=lambda key, name: "The common collect has unrelated wording.",
+                    apply_text=lambda *args: self.fail("word disagreement must not write or attest"),
+                )
+                slot = result["slots"][0]
+                self.assertGreaterEqual(slot["score"], 0.985)
+                self.assertEqual(slot["decision"], "needs-human")
+                self.assertEqual(result["status"], "needs-human")
+                self.assertEqual(slot["first"]["text"], first_text)
+                self.assertEqual(slot["second"], second)
+
+    def test_normalized_typography_agreement_applies(self):
+        first_text = "Grant thy servants œternal grace * and everlast-\ning peace."
+        second = {"found": True, "text": "Collect GRANT thy servants oeternal grace † and everlasting peace",
+                  "printed_page": "566", "pdf_page": 11, "confidence": "high", "notes": "visible"}
+        applied = []
+        result = discover.process_dossier(
+            dossier(), FakeRunner(primary(first_text), second), apply=True,
+            corpus_get=lambda key, name: "The common collect has unrelated wording.",
+            apply_text=lambda *args: applied.append(args[2]["text"]),
+        )
+        self.assertEqual(result["slots"][0]["decision"], "put-and-attest")
+        self.assertEqual(applied, [first_text])
+
     def test_same_as_fallback_skips_second_reader_and_attestation(self):
         text = "The common collect has the same wording."
         runner = FakeRunner(primary(text))

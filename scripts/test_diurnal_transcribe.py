@@ -6,6 +6,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).with_name("diurnal-transcribe.py")
@@ -181,6 +182,32 @@ def answer(text, confidence="high"):
 
 
 class ApplyDecisionTests(unittest.TestCase):
+    def test_high_similarity_word_disagreements_never_attest_or_replace(self):
+        # Synthetic context for the July 29 / p. 575 disagreement in #424.
+        context = "Grant thy servants grace and mercy throughout all the days of their lives. " * 5
+        first = answer(context + "May they thereafter attain unto peace.")
+        for ending in ("May they thereat attain to peace.",
+                       "May they thereafter attain to peace.",
+                       "May they not thereafter attain unto peace."):
+            with self.subTest(ending=ending), tempfile.TemporaryDirectory() as directory:
+                corpus = context + ending
+                classification, score = transcribe.classify_transcription(corpus, first, "proper/x/collect")
+                self.assertGreaterEqual(score, 0.985)
+                self.assertEqual(classification, "different")
+                runner = FakeProvider([first, answer(corpus)])
+                with patch.object(transcribe, "corpus_text", return_value=corpus), \
+                     patch.object(transcribe, "attest") as attest, \
+                     patch.object(transcribe, "replace_and_attest") as replace:
+                    result = transcribe.process_row(
+                        {"key": "proper/x/collect", "page": "595", "source": "Monastic Diurnal"},
+                        transcribe.RunOptions(Path(directory), apply=True), FakeResolver(), runner, {},
+                    )
+                self.assertEqual(result["decision"], "needs-human")
+                self.assertEqual(len(runner.calls), 2)
+                self.assertEqual(runner.calls[1][0:2], ("claude", "sonnet"))
+                attest.assert_not_called()
+                replace.assert_not_called()
+
     def test_pure_apply_decisions(self):
         first = answer("O Lord, hear us.")
         self.assertEqual(transcribe.apply_decision("proper/x/collect", "near", first), "attest")
