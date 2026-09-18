@@ -60,6 +60,9 @@ jobs:
       - name: Test coverage checker
         run: python3 scripts/test_coverage_threshold.py
 
+      - name: Test golden updater
+        run: python3 scripts/test_update_golden_workflow.py
+
       - name: Run unit tests and enforce coverage floors
         run: make test-coverage
 

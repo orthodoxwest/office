@@ -1198,6 +1198,39 @@ func TestVespersCommemoratesIncomingOfficeAtSecondVespersOfPreceding(t *testing.
 	}
 }
 
+func TestDaytimeFeriaReturnsToSeasonalEvening(t *testing.T) {
+	for _, tt := range []struct {
+		id     string
+		season models.Season
+		color  models.Color
+	}{
+		{"rogation-monday", models.Easter, models.White},
+		{"september-ember-wednesday", models.Pentecost, models.Green},
+		{"september-ember-friday", models.Pentecost, models.Green},
+		{"september-ember-saturday", models.Pentecost, models.Green},
+	} {
+		t.Run(tt.id, func(t *testing.T) {
+			day := &models.CalendarDay{
+				Celebration: &models.Feast{ID: tt.id, Category: models.CategoryFeria},
+				Season:      tt.season, Color: models.Violet,
+			}
+			for _, evening := range []*models.CalendarDay{vespersOfficeDay(day), complineOfficeDay(day)} {
+				if evening.Celebration != nil || evening.Color != tt.color {
+					t.Fatalf("evening context = %#v, want seasonal %s feria", evening, tt.color)
+				}
+			}
+			if day.Color != models.Violet || day.Celebration == nil {
+				t.Fatal("evening resolution mutated the daytime office")
+			}
+			incoming := &models.Feast{ID: "incoming-feast", Color: models.Red}
+			day.Vespers = models.VespersDesignation{Owner: models.VespersIOfFollowing, Feast: incoming, Color: models.Red}
+			if evening := vespersOfficeDay(day); evening.Celebration != incoming || evening.Color != models.Red {
+				t.Fatal("daytime feria displaced the incoming feast's evening")
+			}
+		})
+	}
+}
+
 func TestVespersUsesPrecedingOfficeWhenConcurrenceSaysSecondVespers(t *testing.T) {
 	corpus := texts.NewTestCorpus(map[string]string{
 		"proper/st-joseph/psalm-antiphon-1-vespers":   "Joseph psalm antiphon",
