@@ -24,7 +24,7 @@ Rich is the bread of Christ, * and he shall yield royal dainties, alleluia.
 Consecrated priests * offer bread and incense unto God, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 324 (Corpus Christi)
+# SOURCE: diurnal p. 415
 To him that overcometh * will I give the hidden manna, and a new name, alleluia.
 
 [psalm-antiphon-1-vespers]
@@ -71,8 +71,8 @@ R. Bread able to content every man's delight, alleluia.
 O God, who under a wonderful Sacrament hast left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
 
 [collect-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 330 (Corpus Christi)
-O God, who in a wonderful Sacrament has left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
+# SOURCE: diurnal p. 414
+O God, who in a wonderful Sacrament hast left unto us a memorial of thy Passion: grant us, we beseech thee, so to venerate the sacred mysteries of thy Body and Blood, that we may ever perceive within ourselves the fruit of thy redemption.
 
 [collect-vespers]
 @use proper/corpus-christi/collect
@@ -207,7 +207,7 @@ V. He maketh peace in thy borders, alleluia.
 R. And filleth thee with the flour of wheat, alleluia.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 207 (I and II Vespers for Corpus Christi)
+# SOURCE: diurnal p. 414
 V. Thou gavest them bread from heaven, alleluia.
 R. Containing in itself all sweetness, alleluia.
 

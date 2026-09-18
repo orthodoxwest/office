@@ -20,7 +20,7 @@ And all the Angels * stood round about the throne, and fell before the throne on
 Thou hast redeemed us * O Lord our God, by thy blood out of every kindred, and tongue, and people, and nation; and hast made us unto our God a kingdom.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 595 (The Feast of All Saints)
+# SOURCE: diurnal p. 638
 O bless the Lord, * all ye his chosen; keep a day of rejoicing, and give thanks unto him.
 
 [psalm-antiphon-5]
@@ -40,7 +40,7 @@ All his Saints * shall praise him, even the children of Israel, even the people 
 @use proper/all-saints/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 600 (The Feast of All Saints)
+# SOURCE: diurnal p. 639
 The glorious company * of the Apostles praise thee; the goodly fellowship of the Prophets praise thee; the white-robed army of Martyrs praise thee; with one heart and voice do all the elect acknowledge thee: O blessed Trinity, one only God.
 
 [magnificat-antiphon]
@@ -58,9 +58,9 @@ O how glorious * is the kingdom wherein all the Saints rejoice with Christ; arra
 Almighty everlasting God, by whose favour we venerate the merits of all thy Saints in one solemnity: we beseech thee to bestow upon us, through so many intercessors, the abundance of thy mercy which we desire.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 598 (The Feast of All Saints)
-!Rev 7:2-3
-Behold, I John saw another Angel ascending from the east, having the seal of the living God: and he cried with a loud voice to the four Angels to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, till we have sealed the servants of our God in their foreheads.
+# SOURCE: diurnal p. 638
+!Rev 7:2, 3
+Behold, I John saw another Angel ascending from the east, having the seal of the living God: * and he cried with a loud voice to the four Angels, to whom it was given to hurt the earth and the sea, saying, Hurt not the earth, neither the sea, nor the trees, * till we have sealed the servants of our God in their foreheads.
 R. Thanks be to God.
 
 [chapter-sext]

@@ -31,7 +31,7 @@ In the heavenly kingdom * the Blessed have their dwelling-place, alleluia: and t
 Thy blessed Saints, O Lord, * cried out within the veil, alleluia, alleluia, alleluia.
 
 [psalm-antiphon-4]
-# SOURCE: draft archdiocesan Lauds book, p. 614 (Common of Apostles and Evangelists in Paschaltide)
+# SOURCE: diurnal p. 18*
 O ye spirits and souls * of the righteous, sing a hymn unto the Lord our God, alleluia, alleluia.
 
 [psalm-antiphon-5]
@@ -42,22 +42,22 @@ Then shall the righteous * shine forth as the sun in the presence of God, allelu
 @use commons/apostle-paschal/psalm-antiphon-5
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 616 (Common of Apostles and Evangelists in Paschaltide)
+# SOURCE: diurnal p. 18*
 !Wis 5:1
-Then shall the righteous man stand in great boldness before the face of such as have afflicted him, and made no account of his labours.
+Then shall the righteous man stand in great boldness * before the face of such as have afflicted him, * and made no account of his labours.
 R. Thanks be to God.
 
 [chapter-terce]
 @use commons/apostle-paschal/chapter-lauds
 
 [chapter-sext]
-# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At Sext)
+# SOURCE: diurnal p. 19*
 !Wis 5:5
 How is he numbered among the children of God, * and his lot is among the Saints!
 R. Thanks be to God.
 
 [chapter-none]
-# SOURCE: monastic diurnal, p. 19* (Common of Apostles in Paschaltide, At None)
+# SOURCE: diurnal p. 19*
 !Rom 8:28
 We know that all things work together for good to them that love God, * to them who are the called according to his purpose.
 R. Thanks be to God.
@@ -66,7 +66,7 @@ R. Thanks be to God.
 @use commons/apostle-paschal/chapter-lauds
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 616–617 (Common of Apostles and Evangelists in Paschaltide)
+# SOURCE: diurnal p. 18*
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 V. God hath chosen you to him to be his inheritance.
@@ -75,7 +75,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. O ye holy and righteous, rejoice in the Lord, * alleluia, alleluia.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 559, 568 (I and II Vespers, Common of Apostles in Paschaltide)
+# SOURCE: diurnal p. 16*
 R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
 R. Light perpetual shall shine upon thy Saints, O Lord, * alleluia, alleluia.
 V. And an ageless eternity.
@@ -149,7 +149,7 @@ To Father and to Paraclete.
 
 Amen.
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 619 (Common of Apostles and Evangelists in Paschaltide)
+# SOURCE: diurnal p. 19*
 V. Right dear in the sight of the Lord, alleluia.
 R. Is the death of his Saints, alleluia.
 
@@ -162,12 +162,12 @@ R. God hath chosen you to him to be his inheritance, alleluia.
 @use commons/apostle-paschal/versicle-lauds
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 620 (Common of Apostles and Evangelists in Paschaltide)
-Daughters of Jerusalem * come forth and behold the Martyrs with the diadems wherewith the Lord hath crowned them in the day of solemnity and rejoicing, alleluia, alleluia.
+# SOURCE: diurnal p. 19*
+Daughters of Jerusalem, * come forth and behold the Martyrs with the diadems wherewith the Lord hath crowned them in the day of solemnity and rejoicing, alleluia, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 562 (I Vespers, Common of Apostles in Paschaltide)
-Light perpetual * shall shine upon thy Saints, O Lord, and an ageless eternity, alleluia.
+# SOURCE: diurnal p. 17*
+Light perpetual * shall shine upon thy Saints, O Lord; and an ageless eternity, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 570 (II Vespers, Common of Apostles in Paschaltide)

@@ -16,7 +16,7 @@ Whosoever shall confess me * before men, him will I confess also before my Fathe
 He that followeth me * shall not walk in darkness, but shall have the light of life, saith the Lord.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 623 (Common of One Martyr out of Paschaltide)
+# SOURCE: diurnal p. 21*
 If any man serve me, * let him follow me; and where I am, there shall also my servant be.
 
 [psalm-antiphon-4]
@@ -48,7 +48,7 @@ He that hateth his life * in this world shall keep it unto life eternal.
 Whosoever will come after me * let him deny himself, and take up his cross, and follow me.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 578 (I Vespers, Common of One Martyr out of Paschaltide)
+# SOURCE: diurnal p. 21*
 This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was stablished on a sure foundation.
 
 [commemoration-antiphon]
@@ -148,7 +148,7 @@ V. The righteous shall flourish like a palm tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 577 (I Vespers, Common of One Martyr out of Paschaltide)
+# SOURCE: diurnal p. 21*
 V. Thou hast crowned him with glory and honour, O Lord.
 R. And madest him to have dominion of the works of thy hands.
 

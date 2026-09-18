@@ -18,11 +18,11 @@ We will run after thee, * because of the savour of thine ointments: exceedingly 
 Blessed art thou, O daughter, * from the Lord: for by thee we have partaken of the fruit of life.
 
 [psalm-antiphon-5]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 175 (The Assumption of the B.V.M.; Pulchra es)
-Thou art fair and comely, O daughter of Jerusalem: * thou art terrible as an army with banners.
+# SOURCE: diurnal p. 589
+Thou art fair * and comely, O daughter of Jerusalem: thou art terrible as an army with banners.
 
 [benedictus-antiphon]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 178 (The Assumption of the B.V.M.; Quae est ista)
+# SOURCE: diurnal p. 589
 Who is she * that riseth up as the morning, fair as the moon, clear as the sun, and terrible as an army with banners?
 
 [magnificat-antiphon-first]
@@ -30,8 +30,8 @@ Who is she * that riseth up as the morning, fair as the moon, clear as the sun, 
 O most prudent Virgin, * whither goest thou, shining resplendent like the glowing dawn? Daughter of Sion, thou art all comely and beautiful, fair as the moon, clear as the sun.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 472 (Assumption BVM; Et audientes, II Vespers)
-On this day, * the Virgin Mary went up into heaven: rejoice, because she reigneth with Christ for ever and ever.
+# SOURCE: diurnal p. 590
+On this day * the Virgin Mary went up into heaven: rejoice, because she reigneth with Christ for ever and ever.
 
 [commemoration-antiphon]
 Through thee have the gates of Paradise been thrown open to us, * O thou who this day dost triumph so gloriously among the Angels.
@@ -45,9 +45,9 @@ R. Intercede for us, O Mother of God.
 Forgive, we beseech thee, O Lord, the offences of thy servants: and grant that we who by our own deeds are unable to please thee, may be saved through the intercession of her who brought forth thy Son our Lord Jesus Christ.
 
 [chapter-lauds]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 176 (The Assumption of the B.V.M.)
+# SOURCE: diurnal p. 589
 !Sir 24:7-8
-In all things I sought rest, and I shall abide in the Lord's inheritance. So the Creator of all things gave me a commandment, and he that made me caused my tabernacle to rest.
+In all things I sought rest, and I shall abide in the Lord's inheritance. So the Creator of all things gave me a commandment, * and he that made me caused my tabernacle to rest.
 R. Thanks be to God.
 
 [chapter-sext]
@@ -117,8 +117,7 @@ R. Above choirs of Angels to the heavenly kingdom.
 @use proper/assumption-bvm/versicle-lauds
 
 [short-responsory-lauds]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 177 (The Assumption of the B.V.M.)
-# SOURCE: draft archdiocesan Lauds book, p. 527 (The Assumption of the B.V.M.)
+# SOURCE: diurnal p. 589
 R. The Virgin Mary is taken up * into heavenly chambers.
 R. The Virgin Mary is taken up * into heavenly chambers.
 V. Wherein the King of kings sitteth upon a starry throne.
@@ -127,13 +126,13 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Virgin Mary is taken up * into heavenly chambers.
 
 [short-responsory-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 464 (The Assumption of the B.V.M.)
-R. Mary is taken up into heaven * the Angels triumph.
-R. Mary is taken up into heaven * the Angels triumph.
+# SOURCE: diurnal p. 588
+R. Mary is taken up into heaven: * the Angels triumph.
+R. Mary is taken up into heaven: * the Angels triumph.
 V. Exalting and blessing the Lord.
 R. The Angels triumph.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Mary is taken up into heaven * the Angels triumph.
+R. Mary is taken up into heaven: * the Angels triumph.
 
 [short-responsory-terce]
 # SOURCE: monastic diurnal, p. 589 (Assumption of the B.V.M., At Terce)
