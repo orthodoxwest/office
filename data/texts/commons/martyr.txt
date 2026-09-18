@@ -49,7 +49,7 @@ Whosoever will come after me * let him deny himself, and take up his cross, and 
 
 [magnificat-antiphon-first]
 # SOURCE: diurnal p. 21*
-This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was stablished on a sure foundation.
+This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was established on a sure foundation.
 
 [commemoration-antiphon]
 Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
@@ -143,8 +143,8 @@ V. The righteous shall flourish like a palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 585 (II Vespers, Common of One Martyr out of Paschaltide)
-V. The righteous shall flourish like a palm tree.
+# SOURCE: diurnal p. 2*
+V. The righteous shall flourish like a palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-first-vespers]

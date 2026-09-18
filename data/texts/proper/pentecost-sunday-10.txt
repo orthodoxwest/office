@@ -1,6 +1,6 @@
 [collect]
-# SOURCE: diurnal pp435
-O God, who declarest thy almighty power most chiefly in showing mercy and pity; Mercifully grant unto us such a measure of thy grace, that we, running the way of thy commandments, may obtain thy gracious promises, and be made partakers of thy heavenly treasure.
+# SOURCE: diurnal p. 435
+O God, who declarest thy almighty power chiefly in shewing mercy and pity; Mercifully grant unto us such a measure of thy grace, that we, running the way of thy commandments, may obtain thy gracious promises, and be made partakers of thy heavenly treasure.
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Stans a longe)
