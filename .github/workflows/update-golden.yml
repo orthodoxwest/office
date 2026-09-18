@@ -9,12 +9,12 @@ concurrency:
   group: update-golden-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
-# Both jobs use event SHAs, so PR code cannot choose the commits to publish.
+# The PR head stays pinned to the labeled revision. The base is resolved below:
+# a conflicted PR's event can retain an old base.sha even after master advances.
 env:
   HEAD_REF: ${{ github.event.pull_request.head.ref }}
   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
   BASE_REF: ${{ github.event.pull_request.base.ref }}
-  BASE_SHA: ${{ github.event.pull_request.base.sha }}
 
 jobs:
   generate:
@@ -25,12 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      base_sha: ${{ steps.authorize.outputs.base_sha }}
     defaults:
       run:
         working-directory: pr
 
     steps:
-      - name: Require a trusted label actor
+      - name: Authorize update and pin the current base
+        id: authorize
         uses: actions/github-script@v7
         with:
           script: |
@@ -41,7 +44,13 @@ jobs:
             if (context.actor === 'github-actions[bot]' ||
                 !['admin', 'maintain', 'write'].includes(data.permission)) {
               core.setFailed('The update-golden label must be added by a collaborator with write access.');
+              return;
             }
+            const { data: base } = await github.rest.git.getRef({
+              ...context.repo,
+              ref: `heads/${context.payload.pull_request.base.ref}`,
+            });
+            core.setOutput('base_sha', base.object.sha);
 
       # Load the helper from the workflow revision, outside the PR checkout.
       - uses: actions/checkout@v4
@@ -65,6 +74,8 @@ jobs:
           cache: false
 
       - name: Merge the base branch
+        env:
+          BASE_SHA: ${{ steps.authorize.outputs.base_sha }}
         run: python3 "$GITHUB_WORKSPACE/workflow/scripts/update_golden.py" merge
 
       - name: Regenerate and verify
@@ -122,6 +133,7 @@ jobs:
         working-directory: pr
         env:
           ARTIFACT_DIR: ${{ runner.temp }}/golden-candidates
+          BASE_SHA: ${{ needs.generate.outputs.base_sha }}
         run: python3 "$GITHUB_WORKSPACE/workflow/scripts/update_golden.py" publish "$ARTIFACT_DIR"
 
       - name: Remove label and report result
