@@ -2,17 +2,49 @@
 """Exercise the golden updater against disposable local Git repositories."""
 
 import importlib.util
+import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 import unittest
 from unittest.mock import patch
 
 HELPER = Path(__file__).with_name("update_golden.py").resolve()
 GOLDEN = Path("internal/e2e/testdata/golden")
+
+
+def authorize(stale_base, current_base, permission="write"):
+    workflow = HELPER.parent.parent / ".github/workflows/update-golden.yml"
+    script = re.search(r"(?m)^          script: \|\n((?:            .*\n|\n)+)", workflow.read_text())[1]
+    # Execute the workflow's JavaScript, including its API lookup and outputs.
+    harness = """
+        const input = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+        const result = { outputs: {}, errors: [], refs: [] };
+        const context = { actor: 'maintainer', repo: {owner: 'test', repo: 'office'},
+            payload: {pull_request: {base: {ref: 'master', sha: input.stale_base}}} };
+        const github = { rest: {
+            repos: { getCollaboratorPermissionLevel: async () => ({data: {permission: input.permission}}) },
+            git: { getRef: async args => {
+                result.refs.push(args.ref);
+                return {data: {object: {sha: input.current_base}}};
+            } },
+        } };
+        const core = {setOutput: (k,v) => result.outputs[k] = v, setFailed: e => result.errors.push(e)};
+        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        new AsyncFunction('github', 'context', 'core', input.script)(github, context, core)
+            .then(() => process.stdout.write(JSON.stringify(result)));
+    """
+    result = subprocess.run(
+        ["node", "-e", harness], check=True, text=True, capture_output=True,
+        input=json.dumps(dict(script=textwrap.dedent(script), stale_base=stale_base,
+                             current_base=current_base, permission=permission)),
+    )
+    return json.loads(result.stdout)
 
 
 class GoldenUpdateTest(unittest.TestCase):
@@ -128,6 +160,27 @@ class GoldenUpdateTest(unittest.TestCase):
         self.run_helper()
         self.assertEqual(self.remote_head(), self.env["BASE_SHA"])
         self.assertEqual((self.root / "outputs").read_text(), "pushed=true\n")
+
+    def test_stale_pr_event_pins_and_merges_current_base(self):
+        stale_base = self.env["BASE_SHA"]
+        self.advance("master", {str(GOLDEN / "a.txt"): "base\n", "base.txt": "base\n"})
+        self.advance("feature", {str(GOLDEN / "a.txt"): "head\n"})
+        self.refresh_event()
+        result = authorize(stale_base, self.env["BASE_SHA"])
+        self.assertEqual(result["refs"], ["heads/master"])
+        self.assertEqual(result["errors"], [])
+        self.assertNotEqual(result["outputs"]["base_sha"], stale_base)
+        self.env["BASE_SHA"] = result["outputs"]["base_sha"]
+        (self.artifact / "a.txt").write_text("regenerated\n")
+        self.run_helper()
+        self.git(self.remote, "merge-base", "--is-ancestor", self.env["BASE_SHA"], "feature")
+        self.assertEqual(self.git(self.remote, "show", "feature:base.txt"), "base")
+
+    def test_unauthorized_actor_cannot_pin_base(self):
+        result = authorize("stale", "current", permission="read")
+        self.assertTrue(result["errors"])
+        self.assertEqual(result["refs"], [])
+        self.assertEqual(result["outputs"], {})
 
     def test_non_golden_conflicts_abort_without_push(self):
         self.advance("master", {"data.txt": "base\n"})
