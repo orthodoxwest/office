@@ -441,7 +441,9 @@ def gate_decision(primary: dict, fallback_text: str | list[str], secondary: dict
             or not str(secondary.get("text", "")).strip()):
         return "needs-human", fallback_score
     agreement = transcribe.similarity(str(primary["text"]), str(secondary["text"]), target_key)
-    return ("put-and-attest" if agreement >= 0.985 else "needs-human"), agreement
+    first_text = transcribe.normalize_text(str(primary["text"]), target_key)
+    second_text = transcribe.normalize_text(str(secondary["text"]), target_key)
+    return ("put-and-attest" if first_text and first_text == second_text else "needs-human"), agreement
 
 
 def exact_page(pages: list[dict], printed_page: str) -> dict | None:

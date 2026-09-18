@@ -134,7 +134,7 @@ def classify_transcription(corpus_text: str, transcription: dict, key: str = "")
     if corpus_text.replace("\r\n", "\n").strip() == observed.replace("\r\n", "\n").strip():
         return "exact", 1.0
     score = similarity(corpus_text, observed, key)
-    if normalize_text(corpus_text, key) == normalize_text(observed, key) or score >= 0.985:
+    if normalize_text(corpus_text, key) == normalize_text(observed, key):
         return "near", score
     return "different", score
 
@@ -154,9 +154,9 @@ def apply_decision(key: str, classification: str, first: dict, second: dict | No
         return "needs-human"
     if corpus_text is None or similarity(str(first.get("text", "")), corpus_text, key) < 0.6:
         return "needs-human"
-    return "replace-and-attest" if similarity(
-        str(first.get("text", "")), str(second.get("text", "")), key,
-    ) >= 0.985 else "needs-human"
+    first_text = normalize_text(str(first.get("text", "")), key)
+    second_text = normalize_text(str(second.get("text", "")), key)
+    return "replace-and-attest" if first_text and first_text == second_text else "needs-human"
 
 
 def safe_key(key: str) -> str:
