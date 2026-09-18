@@ -81,7 +81,7 @@ func TestCorpusSundayAppointments(t *testing.T) {
 								if tc.hour == "vespers" {
 									want := vespersAntiphons[e.SlotRef]
 									if e.SlotRef == "psalm-antiphon-4" {
-										want = "May the children of the Church be like the olive branches, round about the table of the Lord."
+										want = "May the children of the Church be like the olive-branches, round about the table of the Lord."
 										if tc.date == fixture.eve {
 											want = "He that maketh peace in the Church's borders is the Lord, who filleth us with the flour of wheat."
 										}

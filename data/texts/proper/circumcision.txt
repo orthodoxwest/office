@@ -46,13 +46,13 @@ O wondrous interchange! * the Creator of mankind, taking upon him a living body,
 @use proper/circumcision/versicle-lauds
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 111, 97; older Temporal-cycle books
-O God, who by virgin child-bearing of blessed Mary hast bestowed upon mankind the rewards of eternal salvation: grant, we beseech thee, that we perceive her intercession for us, through whom we have been accounted worthy to receive the Author of Life, Jesus Christ, thy Son, our Lord.
+# SOURCE: diurnal p. 212
+O God, who by the fruitful virginity of blessed Mary hast bestowed upon mankind the reward of eternal salvation: grant, we beseech thee, that we may know the help of her intercession, through whom we have been accounted worthy to receive the Author of our life, Jesus Christ thy Son our Lord.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 108 (Circumcision)
+# SOURCE: diurnal p. 211
 !Titus 2:11-12
-The grace of God that bringeth salvation hath appeared to all men, teaching us that, denying ungodliness and worldly lusts, we should live soberly, righteously, and godly in this present world.
+The grace of God that bringeth salvation hath appeared to all men, * teaching us that, denying ungodliness and worldly lusts, * we should live soberly, righteously, and godly in this present world.
 R. Thanks be to God.
 
 [hymn-lauds]
