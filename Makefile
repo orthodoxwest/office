@@ -17,6 +17,7 @@ test: ## Run all tests
 	python3 scripts/test_coverage_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
+	python3 scripts/test_update_golden_workflow.py
 	python3 scripts/test_diurnal_pages.py
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
