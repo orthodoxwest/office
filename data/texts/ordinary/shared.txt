@@ -32,8 +32,7 @@ R. Amen.
 May all the Saints * intercede for us to the Lord.
 
 [suffrage-collect-bvm]
-# SOURCE: Monastic Diurnal.pdf Suffrage in an Office of the B.V.M., printed p. 146 (PDF p. 192)
-# SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
+# SOURCE: diurnal p. 68*
 Defend us, we beseech thee, O Lord, from all perils of mind and body: and at the
 intercession of blessed Joseph, of thy blessed Apostles Peter and Paul, of our
 blessed Father Benedict and all Saints, graciously bestow upon us both peace and

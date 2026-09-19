@@ -71,8 +71,8 @@ Lift up your heads, * for behold, your redemption draweth nigh.
 Glory * to God in the highest, and on earth peace to men of good will, alleluia, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 60 (II Vespers of Christmas; the Saturday-within-the-Octave antiphon differs)
-Today * the Christ is born; today hath a Saviour appeared: today on earth Angels are singing, Archangels rejoicing: today the righteous exult and say, Glory to God in the highest, alleluia.
+# SOURCE: diurnal p. 193
+To-day * the Christ is born; to-day hath a Saviour appeared: to-day on earth Angels are singing, Archangels rejoicing: to-day the righteous exult and say, Glory to God in the highest, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 49 (I Vespers of Christmas)

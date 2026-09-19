@@ -42,7 +42,7 @@ func TestChristmasOctaveVespersCommemoration(t *testing.T) {
 						switch e.SlotRef {
 						case "commemoration-antiphon":
 							seen++
-							if !strings.HasPrefix(e.Text, "Today * the Christ is born") {
+							if !strings.HasPrefix(e.Text, "To-day * the Christ is born") {
 								t.Errorf("%s/%s antiphon = %q", day.Date.Format("2006-01-02"), form, e.Text)
 							}
 						case "commemoration-versicle":
