@@ -2287,7 +2287,7 @@ DECEMBER
  25  Fri     NATIVITY OF OUR LORD JESUS CHRIST          [1cl] w
            Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
-           Vespers w · II prec. · Mag. Today · No Suff.
+           Vespers w · II prec. · Mag. To-day · No Suff.
                Com. St. Stephen, Protomartyr ("And Stephen, full of faith and power")
  26  Sat     St. Stephen, Protomartyr                   [2cl] r
            Day II within the Nativity Octave (sd)
@@ -2296,7 +2296,7 @@ DECEMBER
            Hours   No Preces
            Vespers r · II prec. · Mag. Devout men · No Suff.
                Com. St. John, Apostle and Evangelist ("This is the same John")
-               Com. Day II within the Nativity Octave ("Today")
+               Com. Day II within the Nativity Octave ("To-day")
  27  Sun     St. John, Apostle and Evangelist           [2cl] w
            Day III within the Nativity Octave (sd)
            Lauds   w · Ben. This is the same John · No Preces · No Suff.
@@ -2304,7 +2304,7 @@ DECEMBER
            Hours   No Preces
            Vespers w · II prec. · Mag. There went this saying abroad · No Suff.
                Com. Holy Innocents ("These are they")
-               Com. Day III within the Nativity Octave ("Today")
+               Com. Day III within the Nativity Octave ("To-day")
  28  Mon     Holy Innocents                             [2cl] r
            Day IV within the Nativity Octave (sd)
            Lauds   r · Ben. These are they · No Preces · No Suff.
@@ -2312,19 +2312,19 @@ DECEMBER
            Hours   No Preces
            Vespers r · II prec. · Mag. Then were innocent children · No Suff.
                Com. Sunday within the Octave of the Nativity ("While all things")
-               Com. Day IV within the Nativity Octave ("Today")
+               Com. Day IV within the Nativity Octave ("To-day")
  29  Tue     Sunday within the Octave of the Nativity   [sd]  w
            Day V within the Nativity Octave (sd)
            Lauds   w · Ben. While all things · No Preces · No Suff.
                Com. Day V within the Nativity Octave ("Glory")
            Hours   No Preces
            Vespers w · II prec. · Mag. The Child Jesus · No Suff.
-               Com. Day V within the Nativity Octave ("Today")
+               Com. Day V within the Nativity Octave ("To-day")
  30  Wed     Day VI within the Nativity Octave          [sd]  w
            Lauds   w · Ben. Glory · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (St. Sylvester I, Bishop) · Mag. O thou Priest and Bishop · No Suff.
-               Com. Day VI within the Nativity Octave ("Today")
+               Com. Day VI within the Nativity Octave ("To-day")
  31  Thu     St. Sylvester I, Bishop                    [d]   w
            Day VII within the Nativity Octave (sd)
            Lauds   w · Ben. Well done · No Preces · No Suff.
