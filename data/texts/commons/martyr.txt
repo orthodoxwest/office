@@ -143,8 +143,8 @@ V. The righteous shall flourish like a palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 585 (II Vespers, Common of One Martyr out of Paschaltide)
-V. The righteous shall flourish like a palm tree.
+# SOURCE: diurnal p. 2*
+V. The righteous shall flourish like a palm-tree.
 R. And shall spread abroad like a cedar in Libanus.
 
 [versicle-first-vespers]
