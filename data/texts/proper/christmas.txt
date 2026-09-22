@@ -28,8 +28,8 @@ There was * with the Angel a multitude of the heavenly host, praising God, and s
 Unto us this day * a Child is born, a Son is given: and his Name shall be the mighty God, alleluia, alleluia.
 
 [psalm-antiphon-1-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 51 (II Vespers and within the Octave of Christmas)
-In the day of thy power * shall the people offer thee free-will offerings with an holy worship: the dew of thy birth is of the womb of the morning.
+# SOURCE: diurnal p. 188
+In the day of thy power * shall the people offer thee freewill offerings with an holy worship: the dew of thy birth is of the womb of the morning.
 
 [psalm-antiphon-2-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 52 (II Vespers and within the Octave of Christmas)
@@ -97,9 +97,9 @@ When the sun hath risen * in the heavens, ye shall see the King of kings, procee
 Grant, we beseech thee, Almighty God: that we, who through our ancient bondage are held beneath the yoke of sin, may by the new Birth of thy only-begotten Son in the flesh obtain deliverance.
 
 [chapter-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 68 (Nativity; the Sunday-within-the-Octave chapter differs)
+# SOURCE: diurnal p. 186
 !Heb 1:1-2
-God, who at sundry times and in divers manner spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by his Son, whom he hath appointed heir of all things, by whom also he made the worlds.
+God, who at sundry times and in divers manners spake in time past unto the fathers by the prophets, hath in these last days spoken unto us by his Son, whom he hath appointed heir of all things, by whom also he made the worlds.
 R. Thanks be to God.
 
 [short-responsory-lauds]
