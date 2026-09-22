@@ -1536,7 +1536,13 @@ proper/st-joseph/versicle-vespers,353bc4f12fbc,diurnal,"St Joseph, At II Vespers
 proper/st-lawrence/chapter-none,b8ad85897a02,diurnal,"St Lawrence, At None",587,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lawrence/chapter-sext,03da4b907828,diurnal,"St Lawrence, At Sext",587,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lawrence/collect,e516c6d325b6,diurnal,,586,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0630.png
+proper/st-lawrence/magnificat-antiphon-first,2a74f78dd648,diurnal,,585,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0629.png
+proper/st-lawrence/psalm-antiphon-1,e20d167552db,diurnal,,586,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0630.png
+proper/st-lawrence/psalm-antiphon-2,85eb38971fd6,diurnal,,586,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0630.png
 proper/st-lawrence/psalm-antiphon-3,441ca5cf4bc3,draft archdiocesan Lauds book,,517,verified,codex,2026-07-17,
+proper/st-lawrence/psalm-antiphon-4,d78365d864c5,diurnal,,586,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0630.png
+proper/st-lawrence/versicle-lauds,79ab01c744eb,diurnal,,586,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0630.png
+proper/st-lawrence/versicle-vespers,b6e308ad2d77,diurnal,,587,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0631.png
 proper/st-lucy/benedictus-antiphon,e9e023ffde47,diurnal,"St Lucy, At Lauds",452,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lucy/collect,de6a4fa4d3fe,diurnal,"St Lucy, At Lauds",452,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-lucy/magnificat-antiphon,cfe9113ec7bd,diurnal,"St Lucy, At II Vespers",452,verified,grok,2026-08-23,word-for-word from printed page image
