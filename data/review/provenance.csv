@@ -1189,16 +1189,23 @@ proper/nativity-sunday-within-octave/short-responsory-vespers,8f9cd55881f4,diurn
 proper/nativity-sunday-within-octave/versicle-lauds,29cbb5407fdc,draft archdiocesan Lauds book,Sunday within the Octave of the Nativity,71,verified,codex,2026-07-18,Sunday-specific versicle checked word for word
 proper/octave-day-holy-innocents/magnificat-antiphon-first,d0fecbb41021,diurnal,"Octave of the Holy Innocents, At I Vespers",221,verified,grok,2026-08-23,word-for-word from printed page image
 proper/octave-day-st-stephen/collect,de4d55dabcbf,diurnal,Octave of St Stephen,220,verified,grok,2026-08-23,word-for-word from printed page image
+proper/palm-sunday/benedictus-antiphon,314d75b181a6,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
 proper/palm-sunday/chapter-lauds,1dcfd46af767,diurnal,"Palm Sunday, At Lauds",279,verified,grok,2026-08-22,word-for-word from printed page image
 proper/palm-sunday/chapter-none,eb0ef07d9b7b,diurnal,"Palm Sunday, At None",280,verified,grok,2026-08-22,word-for-word from printed page image
 proper/palm-sunday/chapter-sext,8a32745ad0c3,diurnal,"Palm Sunday, At Sext",280,verified,grok,2026-08-22,word-for-word from printed page image
 proper/palm-sunday/collect,5be2536ae6a3,diurnal,,279,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
 proper/palm-sunday/magnificat-antiphon,3941f454fef6,diurnal,"Palm Sunday, At II Vespers",280-281,verified,grok,2026-08-22,word-for-word from printed page image
 proper/palm-sunday/magnificat-antiphon-first,578f824e8471,diurnal,"Palm Sunday, At I Vespers",278,verified,grok,2026-08-22,word-for-word from printed page image
+proper/palm-sunday/psalm-antiphon-1,9368faa1f266,diurnal,,278,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0324.png
+proper/palm-sunday/psalm-antiphon-2,c454ee8de1f6,diurnal,,278,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0324.png
+proper/palm-sunday/psalm-antiphon-3,722e8fbcd7af,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
+proper/palm-sunday/psalm-antiphon-4,5710a1f6a5a5,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
+proper/palm-sunday/psalm-antiphon-5,b1abede0b3a3,diurnal,,279,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0325.png
 proper/palm-sunday/psalm-antiphon-none,477117e4d63c,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
 proper/palm-sunday/psalm-antiphon-prime,fb5fc636ce87,diurnal,,279,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0325.png
 proper/palm-sunday/psalm-antiphon-sext,eedb9e253079,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
 proper/palm-sunday/psalm-antiphon-terce,e6aec764d679,diurnal,,280,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0326.png
+proper/passion-sunday/benedictus-antiphon,4f576fdf092b,diurnal,,272,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0318.png
 proper/passion-sunday/benedictus-antiphon-friday,3585bc400957,diurnal,"Passion Week, Friday",277,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-monday,64e1c02b16d7,diurnal,"Passion Week, Monday",276,verified,grok,2026-08-22,word-for-word from printed page image
 proper/passion-sunday/benedictus-antiphon-saturday,4dcfcfceb329,diurnal,"Passion Week, Saturday",278,verified,grok,2026-08-22,word-for-word from printed page image
