@@ -169,3 +169,29 @@ func TestCalendarRejectsExtraPathSegments(t *testing.T) {
 		}
 	}
 }
+
+// A feria has no celebration or tempora name, but home must still name the day
+// before its "Also" commemorations, matching the ordo row.
+func TestHomeNamesFeriaBeforeCommemorations(t *testing.T) {
+	s, err := New("../../data", ":0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	s.handleHome(rec, httptest.NewRequest(http.MethodGet, "/?date=2026-09-22", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	body := rec.Body.String()
+	feast := strings.Index(body, `<p class="feast">Pentecost feria</p>`)
+	also := strings.Index(body, `class="commemorations-label"`)
+	if feast < 0 {
+		t.Fatal(`home for a Pentecost feria should name the day "Pentecost feria"`)
+	}
+	if also < 0 || also < feast {
+		t.Errorf("feria name should precede the commemorations (feast at %d, Also at %d)", feast, also)
+	}
+	if strings.Contains(body, `class="home-season"`) {
+		t.Error("season is already named by the feria title and should not repeat")
+	}
+}

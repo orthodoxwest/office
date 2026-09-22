@@ -214,17 +214,12 @@ footer {
   padding-right: max(var(--page-gutter), env(safe-area-inset-right));
 }
 
-/* Compact supporting text uses system Georgia, which remains legible at the
-   smaller sizes used by ordo details, rubrics, and scripture references.
-   Prayer-body italics (hymn titles, Latin incipits, large display quotes)
-   keep EB Garamond via the body stack. */
-.assurance-detail,
-.home .commemorations-label,
-.home .octave-note,
-.rubric,
-.canticle-section,
-.chapter-ref,
-.scripture-ref,
+/* The ordo's compact detail lines use system Georgia, which stays legible at
+   their small working-page sizes. Prayer pages do not: rubrics, scripture
+   references and home labels keep EB Garamond, as a printed diurnal sets its
+   red rubrics in the text face. Georgia is absent on Android and Linux, where
+   this stack falls through to the platform serif (Noto/DejaVu), and a second
+   face inside the prayer reads as a mistake rather than as an instruction. */
 .day-commemorations .day-commemoration,
 .day-commemorations summary,
 .day-office-incipit,
@@ -1354,8 +1349,9 @@ footer::before {
   font-style: normal;
   /* Rubrics are instructions within the prayer, not miniature chrome. This
      follows the printed convention of red roman type, while the em sizing
-     keeps the instruction subordinate and honors reader text-size choices. */
-  font-size: 0.85em;
+     keeps the instruction subordinate and honors reader text-size choices.
+     0.9em, not Georgia's 0.85em: Garamond's smaller x-height needs the step. */
+  font-size: 0.9em;
   line-height: 1.5;
 }
 
@@ -1425,6 +1421,15 @@ footer::before {
   border: none;
 }
 
+/* Auto inline margins stop a grid item from stretching, so a one-line
+   antiphon shrank to its text and centred while a longer one filled the
+   measure: closing antiphons wandered between the left edge and the middle
+   from psalm to psalm. Only the opening announcement, which sits over a
+   centred psalm heading, keeps its centred fit. */
+.elements > .antiphon:not(.antiphon-announce) {
+  width: 100%;
+}
+
 /* ── Antiphon grouping ──
    An antiphon belongs to the psalm it frames, and spacing has to say so. The
    .elements grid gives every child the same 0.9rem gap, so a psalm's closing
@@ -1479,6 +1484,13 @@ footer::before {
   font-variant: normal;
   font-style: italic;
   letter-spacing: 0.02em;
+}
+
+/* lang="la" is for pronunciation, not an epigraphic style. EB Garamond's
+   Latin localized forms swap u for v ("De profvndis", "Dominvm"), which a lay
+   reader takes for a typo, so the tag must not reach the shaper as locl. */
+:lang(la) {
+  font-feature-settings: "locl" 0;
 }
 
 .hymn-title {
@@ -3680,8 +3692,12 @@ body.season-eastertide {
   color: var(--text);
 }
 
+/* Sized to its content: a fixed width clipped "06:45 AM" behind Chrome's
+   picker icon at the body type size. The min-width sits just above the
+   widest 12-hour value, so every row's field shares one left edge. */
 .reminder-hour-row input[type="time"] {
-  width: 8.4rem;
+  width: auto;
+  min-width: 9rem;
   padding: 0.3rem 0.5rem;
   transition:
     border-color 140ms ease,
@@ -3851,10 +3867,6 @@ body.season-eastertide {
 @media (max-width: 540px) {
   .reminders h1 {
     font-size: 1.6rem;
-  }
-
-  .reminder-hour-row input[type="time"] {
-    width: 7.8rem;
   }
 
   .reminder-subscribe {
