@@ -1359,6 +1359,7 @@ proper/seven-sorrows-bvm/short-responsory-lauds,bfa5a9d0b269,diurnal,"Seven Sorr
 proper/seven-sorrows-bvm/short-responsory-vespers,83bc59b477fd,diurnal,"Seven Sorrows of the B.V.M., At I Vespers",601,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0645.png
 proper/seven-sorrows-bvm/versicle-lauds,d6f9ea59010f,diurnal,"Seven Sorrows of the B.V.M., At Lauds",604,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0648.png
 proper/seven-sorrows-bvm/versicle-vespers,945703ca89d8,diurnal,"Seven Sorrows of the B.V.M., At II Vespers",605,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0649.png
+proper/sexagesima/benedictus-antiphon,ef4ad91e171a,diurnal,,239,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
 proper/sexagesima/chapter-none,4bd4a94afac8,diurnal,,240,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0286.png
 proper/sexagesima/chapter-sext,883f6dc5173c,diurnal,,239,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
 proper/sexagesima/collect,237405793c15,diurnal,,239,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
@@ -1369,6 +1370,9 @@ proper/sexagesima/magnificat-antiphon-monday,0a4fbc150e23,diurnal,"Week of Sexag
 proper/sexagesima/magnificat-antiphon-thursday,dc56bc39c796,diurnal,,240,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0286.png
 proper/sexagesima/magnificat-antiphon-tuesday,74d72b1e8e2c,diurnal,"Week of Sexagesima, Tuesday",240,verified,grok,2026-08-22,word-for-word from printed page image
 proper/sexagesima/magnificat-antiphon-wednesday,009d14d4200a,diurnal,"Week of Sexagesima, Wednesday",240,verified,grok,2026-08-22,word-for-word from printed page image
+proper/sexagesima/psalm-antiphon-1,eec2c43c72b5,diurnal,,238,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0284.png
+proper/sexagesima/psalm-antiphon-2,1f086d0d2eb7,diurnal,,238,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0284.png
+proper/sexagesima/psalm-antiphon-5,aac9752d760a,diurnal,,238,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0284.png
 proper/solemnity-st-joseph/hymn-vespers,d60c25ccf291,draft archdiocesan Vespers book,,168,verified,codex,2026-07-18,
 proper/ss-cyril-methodius/collect,95132b3cff85,diurnal,Ss. Cyril and Methodius,559,verified,grok,2026-08-23,word-for-word from printed page image
 proper/ss-fabian-sebastian/collect,d3e8c2302506,diurnal,,459,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0505.png
