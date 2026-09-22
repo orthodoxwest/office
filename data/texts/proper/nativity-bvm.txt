@@ -38,11 +38,13 @@ Thy Nativity, * O Virgin Mother of God, hath proclaimed joyful tidings unto all 
 Let us celebrate * the worshipful Nativity of the blessed and glorious Virgin Mary: for she hath obtained the dignity of Motherhood, and yet lost not her maiden purity.
 
 [commemoration-antiphon]
-This day was born the glorious Virgin Mary, * a child of the seed of Abraham, a daughter of the tribe of Judah, a Princess of the lineage of David.
+# SOURCE: diurnal p. 596
+The Nativity * of the glorious Virgin Mary, of the seed of Abraham, sprung from the tribe of Juda, of the noble stem of David.
 
 [commemoration-versicle]
-V. This day is the Birthday of the holy Virgin Mary.
-R. Whose famous life still sheddeth lustre upon all the Churches.
+# SOURCE: diurnal p. 595
+V. To-day is the Nativity of the holy Virgin Mary.
+R. Whose glorious life illumineth all the churches.
 
 [collect]
 # SOURCE: monastic diurnal, p. 596 (Nativity of the B.V.M., At Lauds)
