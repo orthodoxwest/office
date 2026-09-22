@@ -1510,12 +1510,12 @@ func TestVespersBoundaryCommemorations2026(t *testing.T) {
 		desc       string
 	}{
 		{1, 18, "Commemoration of St Paul", true, "companion of the Chair of St Peter at II Vespers"},
-		{1, 25, "Commemoration of St. Peter", true, "companion of the Conversion of St Paul at II Vespers"},
+		{1, 25, "Commemoration of St Peter", true, "companion of the Conversion of St Paul at II Vespers"},
 		{8, 1, "Commemoration of St Paul, Apostle", true, "companion accompanies the displaced Chains of St Peter"},
-		{3, 24, "St. Gabriel the Archangel", true, "displaced Greater Double at the Annunciation's I Vespers"},
-		{3, 19, "St. Cuthbert, Bishop & Confessor", true, "incoming Double at St Joseph's II Vespers"},
+		{3, 24, "St Gabriel the Archangel", true, "displaced Greater Double at the Annunciation's I Vespers"},
+		{3, 19, "St Cuthbert, Bishop & Confessor", true, "incoming Double at St Joseph's II Vespers"},
 		{2, 23, "Monday after Quinquagesima", true, "displaced seasonal feria retained at the Chair of St Peter's II Vespers"},
-		{3, 20, "St. Cuthbert, Bishop & Confessor", false, "displaced plain Double not carried to St Benedict's I Vespers"},
+		{3, 20, "St Cuthbert, Bishop & Confessor", false, "displaced plain Double not carried to St Benedict's I Vespers"},
 		{7, 1, "Day IV within the Octave of Ss Peter & Paul", false, "octave day excluded at the Visitation's I Vespers"},
 		{12, 12, "Day VI within Conception Octave", true, "octave day admitted at Gaudete Sunday's I Vespers"},
 	}

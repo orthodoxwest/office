@@ -1,7 +1,7 @@
 # AWRV-specific additions — Eastern saints
 
 [st-raphael-of-brooklyn]
-Name = St. Raphael of Brooklyn
+Name = St Raphael of Brooklyn
 Rank = greater-double
 Color = white
 Category = confessor-bishop
@@ -24,7 +24,7 @@ Source = awrv
 Notes = Eastern saint added by the AWRV
 
 [st-tikhon-moscow]
-Name = St. Tikhon of Moscow
+Name = St Tikhon of Moscow
 Rank = double-1st-class
 Color = white
 Category = confessor-bishop
