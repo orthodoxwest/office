@@ -18,6 +18,7 @@ import tempfile
 import time
 import unicodedata
 from collections import Counter
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -388,8 +389,8 @@ def build_read_prompt(prompt: str, images: list[Path]) -> str:
 
 
 class PageResolver:
-    def __init__(self, root: Path = ROOT):
-        self.root = root
+    def __init__(self, root: Path | None = None):
+        self.root = root or ROOT
         self._indexes: dict[str, dict] = {}
 
     def _index(self, key: str) -> dict:
@@ -447,17 +448,24 @@ class PageResolver:
         }
 
 
-def run_office(args: list[str], *, capture: bool = True) -> str:
-    """Run the office binary; ledger and corpus writes are serialized across processes."""
+@contextmanager
+def office_write_lock():
+    """Serialize corpus checks and writes with other ingestion processes."""
     import fcntl
     lock_path = ROOT / "output" / ".office-write.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with open(lock_path, "w", encoding="utf-8") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
-            return _run_office_unlocked(args, capture=capture)
+            yield
         finally:
             fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def run_office(args: list[str], *, capture: bool = True) -> str:
+    """Run the office binary; ledger and corpus writes are serialized across processes."""
+    with office_write_lock():
+        return _run_office_unlocked(args, capture=capture)
 
 
 def _run_office_unlocked(args: list[str], *, capture: bool = True) -> str:
@@ -623,15 +631,15 @@ def write_jsonl(path: Path, record: dict) -> None:
         handle.write(json.dumps(record, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def attest(key: str, printed_page: str, png: str) -> None:
+def attest(key: str, printed_page: str, png: str, *, office_runner=None) -> None:
     png_path = Path(png)
     try:
         note_path = png_path.resolve().relative_to(ROOT)
     except ValueError:
         note_path = png_path
     note = f"Word-for-word after normalization; page image {note_path}"
-    run_office(["review", "attest", "--source", "diurnal", "--page", printed_page,
-                "--note", note, "--replace", key, "codex"])
+    (office_runner or run_office)(["review", "attest", "--source", "diurnal", "--page", printed_page,
+                                  "--note", note, "--replace", key, "codex"])
 
 
 SMALL_CAPS_WORD = re.compile(r"^([A-Z]{2,}(?:[’'][A-Z]+)?)(\b)")
@@ -691,13 +699,14 @@ def conform_section_body(key: str, text: str) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def replace_and_attest(options: RunOptions, key: str, printed_page: str, png: str, text: str) -> None:
+def replace_and_attest(options: RunOptions, key: str, printed_page: str, png: str, text: str,
+                       *, office_runner=None) -> None:
     bodies = options.run_dir / "bodies"
     bodies.mkdir(exist_ok=True)
     body_path = bodies / f"{safe_key(key)}.txt"
     body_path.write_text(conform_section_body(key, text), encoding="utf-8")
-    run_office(["corpus", "put", key, "--file", str(body_path), "--source", f"diurnal p. {printed_page}"])
-    attest(key, printed_page, png)
+    (office_runner or run_office)(["corpus", "put", key, "--file", str(body_path), "--source", f"diurnal p. {printed_page}"])
+    attest(key, printed_page, png, office_runner=office_runner)
 
 
 def process_row(row: dict, options: RunOptions, resolver: PageResolver,
@@ -928,6 +937,209 @@ def process_row(row: dict, options: RunOptions, resolver: PageResolver,
     return record
 
 
+def replacement_packet_hash(packet: dict) -> str:
+    payload = {k: v for k, v in packet.items() if k != "packet_sha256"}
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False,
+                                     separators=(",", ":")).encode()).hexdigest()
+
+
+def replacement_context(key: str) -> dict:
+    # Bind the reviewed appointment to the engine and its non-text inputs.
+    paths = [ROOT / "office", *(ROOT / "data").glob("*.txt"),
+             *(ROOT / "data").glob("*.json"),
+             *(ROOT / "data" / "feasts").glob("*.txt"),
+             *(ROOT / "data" / "office").glob("*.txt")]
+    return {
+        "description": describe_key(key, ROOT / "data"),
+        "source_lines": corpus_source_lines(key, ROOT / "data"),
+        "files": {str(p.relative_to(ROOT)): diurnal_pages.sha256_file(p) for p in sorted(paths)},
+    }
+
+
+def replacement_witness(pdf_pages: list[int]) -> dict:
+    # This recovery path attests the Diurnal, not an arbitrary supplement.
+    resolver = PageResolver()
+    directory = ROOT / "output" / "pages" / DEFAULT_PAGE_KEY
+    index_path, manifest_path = directory / "index.json", directory / "manifest.json"
+    index = resolver._index(DEFAULT_PAGE_KEY)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if any(index.get(k) != manifest.get(k) or index.get(k) is None
+           for k in ("key", "source_pdf", "pdf_sha256", "dpi", "page_count")):
+        raise ValueError("page cache and render manifest disagree; rebuild the cache")
+    pdf = Path(index["source_pdf"])
+    if diurnal_pages.sha256_file(pdf) != index["pdf_sha256"]:
+        raise ValueError("source PDF changed; rebuild the cache")
+    pages = []
+    for number in pdf_pages:
+        page = resolver.page(DEFAULT_PAGE_KEY, number)
+        if not page.get("printed_page"):
+            raise ValueError("reviewed page has no resolved printed label")
+        # Ambiguous labels cannot be settled by the readers' own page claims.
+        located = diurnal_pages.locate_page(index, page["printed_page"])
+        if located["pdf_page"] != number:
+            raise ValueError("reviewed printed label does not uniquely locate this PDF page")
+        pages.append({**page, "png_sha256": diurnal_pages.sha256_file(Path(page["png"]))})
+    return {"source_pdf": str(pdf), "pdf_sha256": index["pdf_sha256"], "dpi": index["dpi"],
+            "index_sha256": diurnal_pages.sha256_file(index_path),
+            "manifest_sha256": diurnal_pages.sha256_file(manifest_path), "pages": pages}
+
+
+def reading_on_reviewed_page(reading: dict, page: dict) -> bool:
+    return (reading.get("found") is True and reading.get("confidence") in {"high", "medium"}
+            and bool(str(reading.get("text", "")).strip())
+            and reading.get("pdf_page") == page["pdf_page"]
+            and reading.get("printed_page") == page["printed_page"])
+
+
+def replacement_body(key: str, text: str) -> str:
+    body = conform_section_body(key, text)
+    compared = body
+    if key.rsplit("/", 1)[-1].startswith("chapter") and "thanks be to god" not in text.lower():
+        compared = body.removesuffix("R. Thanks be to God.\n")
+    if normalize_text(compared) != normalize_text(text):
+        raise ValueError("formatting would change the reading's words; obtain a complete corpus-format reading")
+    return body
+
+
+def output_path(path: Path) -> Path:
+    path = path.resolve()
+    if not path.is_relative_to((ROOT / "output").resolve()):
+        raise ValueError("replacement artifacts must stay beneath this checkout's output/")
+    return path
+
+
+def prepare_replacement_command(args: argparse.Namespace) -> int:
+    run_dir = output_path(resolve_run_path(args.run))
+    key = args.key
+    if key.startswith(("psalms/", "canticles/")):
+        raise ValueError("psalm and canticle replacements remain needs-human")
+    if not args.context.strip():
+        raise ValueError("describe the reviewed feast, slot, and appointment source in --context")
+    records = [json.loads(line) for line in (run_dir / "results.jsonl").read_text().splitlines() if line.strip()]
+    matches = [r for r in records if r.get("key") == key]
+    if len(matches) != 1:
+        raise ValueError("select a key with exactly one saved result in this run")
+    record = matches[0]
+    if replacement_packet_hash(record) != record.get("packet_sha256"):
+        raise ValueError("saved result changed or lacks a fingerprint; run transcription again")
+    if record.get("decision") not in {"needs-human", "record-only"}:
+        raise ValueError("only held readings can enter replacement review")
+    existing = corpus_text(key)
+    if existing != record.get("corpus_text"):
+        raise ValueError("corpus changed since the reading; run transcription again")
+    first = record.get("first") or {}
+    classification, score = classify_transcription(existing, first, key)
+    if classification != "different" or score >= 0.6:
+        raise ValueError("this recovery path requires a readable, low-similarity replacement")
+    if is_collect_key(key) and normalize_text(first["text"]) != normalize_text(first["text"], key):
+        raise ValueError("collect reading includes a conclusion cue; reread the body without its conclusion")
+    recorded_pages = record.get("pages", [])
+    numbers = [p["pdf_page"] for p in recorded_pages]
+    if not (1 <= len(numbers) <= 2) or numbers != list(range(numbers[0], numbers[0] + len(numbers))):
+        raise ValueError("saved reading must identify one page and at most its continuation")
+    witness = replacement_witness(numbers)
+    for old, page in zip(recorded_pages, witness["pages"]):
+        if any(old.get(k) != page[k] for k in ("pdf_sha256", "page_key", "printed_page", "png")):
+            raise ValueError("saved page identity changed; run transcription again")
+    page = next((p for p in witness["pages"] if reading_on_reviewed_page(first, p)), None)
+    if page is None:
+        raise ValueError("reader page identity disagrees with the cache")
+    packet = {"version": 1, "key": key, "corpus_text": existing, "candidate": first,
+              "body": replacement_body(key, first["text"]),
+              "source_witness": witness, "context": replacement_context(key),
+              "appointment_context": args.context.strip(), "prepared_from": str(run_dir),
+              "result_sha256": record["packet_sha256"]}
+    packet["packet_sha256"] = replacement_packet_hash(packet)
+    target = output_path(run_dir / "replacements" / f"{safe_key(key)}.json")
+    target.parent.mkdir(exist_ok=True)
+    with target.open("x", encoding="utf-8") as handle:
+        handle.write(json.dumps(packet, indent=2, ensure_ascii=False) + "\n")
+    print(json.dumps({"packet": str(target), "packet_sha256": packet["packet_sha256"], "decision": "needs-review",
+                      "instruction": "Inspect the page images, candidate wording, feast/slot boundaries and appointment context before apply-replacement."}))
+    return 0
+
+
+def validate_replacement_packet(packet: dict, *, read_corpus=None) -> None:
+    if packet.get("version") != 1 or replacement_packet_hash(packet) != packet.get("packet_sha256"):
+        raise ValueError("replacement packet changed; prepare and review again")
+    key = packet["key"]
+    if key.startswith(("psalms/", "canticles/")) or not packet["appointment_context"].strip():
+        raise ValueError("replacement is outside the reviewed recovery scope")
+    if packet["body"] != replacement_body(key, packet["candidate"]["text"]):
+        raise ValueError("reviewed output body changed; prepare and review again")
+    if (read_corpus or corpus_text)(key) != packet["corpus_text"]:
+        raise ValueError("reviewed corpus changed; prepare and review again")
+    if replacement_context(key) != packet["context"]:
+        raise ValueError("reviewed appointment context changed; prepare and review again")
+    witness = packet["source_witness"]
+    if replacement_witness([p["pdf_page"] for p in witness["pages"]]) != witness:
+        raise ValueError("reviewed source changed; prepare and review again")
+
+
+def reviewed_replacement_decision(packet: dict, first: dict, second: dict) -> str:
+    key, candidate = packet["key"], packet["candidate"]
+    page = next((p for p in packet["source_witness"]["pages"]
+                 if reading_on_reviewed_page(candidate, p)), None)
+    if key.startswith(("psalms/", "canticles/")) or page is None:
+        return "needs-human"
+    if not all(reading_on_reviewed_page(r, page) for r in (first, second)):
+        return "needs-human"
+    readings = [normalize_text(r["text"], key) for r in (candidate, first, second)]
+    # Compare the final bodies without collect-cue elision: normalization must
+    # never hide an added conclusion in the text that corpus put will receive.
+    bodies = [normalize_text(conform_section_body(key, r["text"])) for r in (first, second)]
+    return ("replace-and-attest" if readings[0] and len(set(readings)) == 1
+            and all(body == normalize_text(packet["body"]) for body in bodies) else "needs-human")
+
+
+def apply_replacement_command(args: argparse.Namespace) -> int:
+    packet_path = output_path(args.packet)
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    if args.packet_sha256 != replacement_packet_hash(packet):
+        raise ValueError("reviewed packet digest does not match; inspect the packet again")
+    if not args.reviewer.strip() or not args.review_note.strip():
+        raise ValueError("identify the reviewer and the page/appointment checks in --review-note")
+    validate_replacement_packet(packet)
+    run_dir = output_path(TRANSCRIBE_ROOT / (args.run_id or default_run_id()))
+    run_dir.mkdir(parents=True, exist_ok=False)
+    options = RunOptions(run_dir, provider=args.provider,
+                         model=PROVIDER_MODELS[args.provider], timeout=args.timeout,
+                         max_output_bytes=args.max_output_bytes, apply=True)
+    runner = ProviderRunner(options.timeout, options.max_output_bytes)
+    pages = packet["source_witness"]["pages"]
+    candidate = packet["candidate"]
+    record = {"key": packet["key"], "replacement_packet": str(packet_path),
+              "replacement_packet_sha256": packet["packet_sha256"],
+              "reviewer": args.reviewer.strip(), "review_note": args.review_note.strip(),
+              "provider": options.provider, "model": options.model,
+              "decision": "needs-human", "first": None, "second": None}
+    try:
+        # Fresh readers see the named slot and images, never the reviewed wording.
+        for field, provider, model in (("first", options.provider, options.model),
+                                       ("second", "claude", "sonnet")):
+            prompt = build_prompt(packet["key"], packet["context"]["description"],
+                                  candidate["printed_page"], pages, paths_for_read=provider == "claude")
+            (run_dir / f"{field}-prompt.txt").write_text(prompt + "\n", encoding="utf-8")
+            record[field], seconds = runner.transcribe(provider, model, prompt, [Path(p["png"]) for p in pages])
+            record[field + "_seconds"] = seconds
+        record["decision"] = reviewed_replacement_decision(packet, record["first"], record["second"])
+        if record["decision"] == "replace-and-attest":
+            # Hold the existing ingestion lock through revalidation, corpus put,
+            # and attestation; a second attempt must not overwrite newer text.
+            with office_write_lock():
+                validate_replacement_packet(packet, read_corpus=lambda key: _run_office_unlocked(["corpus", "show", key]).rstrip("\n"))
+                if json.loads(packet_path.read_text(encoding="utf-8")) != packet:
+                    raise ValueError("replacement packet changed during reading")
+                page = next(p for p in pages if p["pdf_page"] == candidate["pdf_page"])
+                replace_and_attest(options, packet["key"], page["printed_page"], page["png"],
+                                   packet["body"], office_runner=_run_office_unlocked)
+    except (OSError, ValueError, LookupError, RuntimeError) as exc:
+        record["decision"], record["error"] = "needs-human", str(exc)
+    write_jsonl(run_dir / "results.jsonl", record)
+    print(json.dumps({"run": str(run_dir), "decision": record["decision"]}))
+    return 0 if record["decision"] == "replace-and-attest" else 1
+
+
 def parse_keys(values: list[str]) -> set[str]:
     return {key.strip() for value in values for key in value.split(",") if key.strip()}
 
@@ -1024,14 +1236,31 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--apply", action="store_true", help="attest matches and gate agreed replacements")
     report = subparsers.add_parser("report", help="print a markdown report for a completed run")
     report.add_argument("run")
+    prepare = subparsers.add_parser("prepare-replacement", help="freeze a held low-similarity reading for page/appointment review")
+    prepare.add_argument("run")
+    prepare.add_argument("--key", required=True)
+    prepare.add_argument("--context", required=True, help="reviewed feast, slot, appointment source and scope")
+    apply = subparsers.add_parser("apply-replacement", help="reread and apply one inspected replacement packet")
+    apply.add_argument("packet", type=Path)
+    apply.add_argument("--reviewer", required=True)
+    apply.add_argument("--packet-sha256", required=True, help="digest recorded when inspecting this exact packet")
+    apply.add_argument("--review-note", required=True, help="confirm page identity, section boundaries, wording and appointment")
+    apply.add_argument("--provider", choices=("codex", "grok", "muse"), default="codex")
+    apply.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
+    apply.add_argument("--max-output-bytes", type=int, default=MAX_OUTPUT_BYTES)
+    apply.add_argument("--run-id")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.command == "prepare-replacement":
+            return prepare_replacement_command(args)
+        if args.command == "apply-replacement":
+            return apply_replacement_command(args)
         return report_command(args.run) if args.command == "report" else run_command(args)
-    except (OSError, ValueError, RuntimeError, csv.Error, json.JSONDecodeError) as exc:
+    except (OSError, ValueError, LookupError, RuntimeError, csv.Error, json.JSONDecodeError) as exc:
         print(f"diurnal-transcribe: {exc}", file=sys.stderr)
         return 1
 
