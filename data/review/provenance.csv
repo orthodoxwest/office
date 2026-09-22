@@ -917,12 +917,21 @@ proper/exaltation-holy-cross/short-responsory-terce,9d6ddd30af86,draft archdioce
 proper/exaltation-holy-cross/short-responsory-vespers,46b962a8e2c1,draft archdiocesan Vespers book,,481,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/versicle-lauds,38c10f530995,draft archdiocesan Lauds book,,554,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/versicle-vespers,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
+proper/finding-holy-cross/benedictus-antiphon,abcbf7ea7379,diurnal,,524,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0570.png
 proper/finding-holy-cross/chapter-terce,b8e38372d58d,draft archdiocesan Lauds book,,458,verified,codex,2026-07-18,
+proper/finding-holy-cross/collect,0c55839936ff,diurnal,,524,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0570.png
 proper/finding-holy-cross/commemoration-antiphon,2e2b3e7f742a,draft archdiocesan Lauds book,,541,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archdiocesan Lauds book,,453,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
+proper/finding-holy-cross/magnificat-antiphon,21e34a68dfe0,diurnal,,525,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0571.png
+proper/finding-holy-cross/psalm-antiphon-1,6457229ee88d,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
+proper/finding-holy-cross/psalm-antiphon-2,aad920150db2,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
+proper/finding-holy-cross/psalm-antiphon-4,917eb558798a,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
+proper/finding-holy-cross/psalm-antiphon-5,28c8ba5d14c8,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
 proper/finding-holy-cross/short-responsory-none,77d82c235c70,diurnal,"Finding of the Holy Cross, At None",524,verified,grok,2026-08-23,word-for-word from printed page image
+proper/finding-holy-cross/versicle-lauds,06012edd3d34,diurnal,,523,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0569.png
+proper/finding-holy-cross/versicle-vespers,b3a8fd311c36,diurnal,,525,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0571.png
 proper/finding-st-stephen/collect,9a9ae065ac8a,Monastic Diurnal; 2026 Ordo,"St Stephen, At Lauds; adaptation ordered by 2026 ordo p. 86",194–195,verified,codex,2026-09-16,"Base collect independently read from page images; only birthday → finding as explicitly ordered in 2026 ordo p. 86. Appointed adaptation, not a verbatim Diurnal reading. Who with thee conclusion recorded separately."
 proper/good-friday/benedictus-antiphon,07f5f90ba92c,diurnal,,341,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0387.png
 proper/good-friday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
