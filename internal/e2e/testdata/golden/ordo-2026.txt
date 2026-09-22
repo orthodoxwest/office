@@ -54,7 +54,7 @@ JANUARY
            Hours   No Preces
            Vespers w · I fol. (Epiphany of Our Lord) · Mag. The wise men · No Suff.
   6  Tue     EPIPHANY OF OUR LORD                       [1cl] w
-           Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
+           Lauds   w · Ben. To-day · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
   7  Wed     Day II within the Octave of the Epiphany   [sd]  w
@@ -76,17 +76,17 @@ JANUARY
                Com. St. Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The Child Jesus · No Suff.
-               Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day V within the Octave of the Epiphany ("The wise men")
                Com. St. Hyginus of Rome, Bishop & Martyr ("This is a Martyr")
  11  Sun     Sunday within the Octave of Epiphany       [sd]  w
            Day VI within the Octave of the Epiphany (sd)
            St. Hyginus of Rome, Bishop & Martyr (com)
            Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
-               Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day VI within the Octave of the Epiphany ("The wise men")
                Com. St. Hyginus of Rome, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
-               Com. Day VI within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day VI within the Octave of the Epiphany ("The wise men")
                Com. St. Benedict Biscop, Abbot ("I will liken him")
  12  Mon     Day VII within the Octave of the Epiphany  [sd]  w
            St. Benedict Biscop, Abbot (com)
@@ -95,7 +95,7 @@ JANUARY
            Hours   No Preces
            Vespers w · I fol. (Octave Day of the Epiphany) · Mag. The wise men · No Suff.
  13  Tue     Octave Day of the Epiphany                 [gd]  w
-           Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
+           Lauds   w · Ben. To-day · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("O Teacher right excellent")
@@ -281,7 +281,7 @@ FEBRUARY
   8  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. The kingdom · No Preces · Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. The householder saith unto his labourers · Suff.
+           Vespers v · II prec. · Mag. The householder · Suff.
                Com. St Apollonia of Alexandria, Virgin & Martyr ("Come, thou Bride of Christ")
   9  Mon     Feria                                            v
            St Apollonia of Alexandria, Virgin & Martyr (com)
@@ -356,7 +356,7 @@ FEBRUARY
            Lauds   v · Ben. Behold, we go up · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Chair of St. Peter at Antioch) · Mag. Thou art the shepherd of the sheep · No Suff.
-               Com. Quinquagesima Sunday ("The father of our faith")
+               Com. Quinquagesima Sunday ("Mighty Abraham")
                Com. St Paul ("O holy Apostle Paul")
  23  Mon     Chair of St. Peter at Antioch              [2cl] w
            St Paul (com)
@@ -381,7 +381,7 @@ FEBRUARY
            Lauds   v · Ben. When ye fast · No Preces · Suff.
                Com. St Walburga of Heidenheim, Virgin ("The kingdom of heaven")
            Hours   Preces
-           Vespers v · Mag. Lay up for yourselves treasures in heaven · Suff.
+           Vespers v · Mag. Lay up for yourselves · Suff.
                Com. St. Alexander of Alexandria, Bishop & Confessor ("O thou Priest and Bishop")
  26  Thu  L§ Thursday after Ash Wednesday               [f2]  v
            St. Alexander of Alexandria, Bishop & Confessor (com)
