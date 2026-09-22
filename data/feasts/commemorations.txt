@@ -2,7 +2,7 @@
 # These are modeled as rank=commemoration so they do not displace principal observances.
 
 [comm-01-04-st-titus-bishop-and-confessor]
-Name = St. Titus, Bishop & Confessor
+Name = St Titus, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -11,7 +11,7 @@ Day = 4
 Source = awrv
 
 [comm-01-05-st-telesphorus-of-rome-bishop-and-martyr]
-Name = St. Telesphorus of Rome, Bishop & Martyr
+Name = St Telesphorus of Rome, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -20,7 +20,7 @@ Day = 5
 Source = awrv
 
 [comm-01-10-st-paul-the-first-hermit]
-Name = St. Paul the First Hermit
+Name = St Paul the First Hermit
 Rank = commemoration
 Color = white
 Category = confessor
@@ -29,7 +29,7 @@ Day = 10
 Source = awrv
 
 [comm-01-11-st-hyginus-of-rome-bishop-and-martyr]
-Name = St. Hyginus of Rome, Bishop & Martyr
+Name = St Hyginus of Rome, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -38,7 +38,7 @@ Day = 11
 Source = awrv
 
 [comm-01-12-st-benedict-biscop-abbot]
-Name = St. Benedict Biscop, Abbot
+Name = St Benedict Biscop, Abbot
 Rank = commemoration
 Color = white
 Category = confessor
@@ -47,7 +47,7 @@ Day = 12
 Source = awrv
 
 [comm-01-14-st-felix-of-nola-priest-and-martyr]
-Name = St. Felix of Nola, Priest & Martyr
+Name = St Felix of Nola, Priest & Martyr
 Rank = commemoration
 Color = red
 Category = martyr
@@ -66,7 +66,7 @@ Source = awrv
 CompanionOf = chair-peter-rome
 
 [comm-01-18-st-prisca-of-rome-virgin-martyr]
-Name = St. Prisca of Rome, Virgin Martyr
+Name = St Prisca of Rome, Virgin Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -75,7 +75,7 @@ Day = 18
 Source = awrv
 
 [comm-01-19-ss-marius-martha-audifax-and-abachum-martyrs]
-Name = Ss. Marius, Martha, Audifax, & Abachum, Martyrs
+Name = Ss Marius, Martha, Audifax, & Abachum, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -84,7 +84,7 @@ Day = 19
 Source = awrv
 
 [comm-01-19-st-mark-of-ephesus-bishop-and-confessor]
-Name = St. Mark of Ephesus, Bishop & Confessor
+Name = St Mark of Ephesus, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -102,7 +102,7 @@ Day = 22
 Source = awrv
 
 [comm-01-23-st-emerentiana-virgin-and-martyr]
-Name = St. Emerentiana, Virgin & Martyr
+Name = St Emerentiana, Virgin & Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -111,7 +111,7 @@ Day = 23
 Source = awrv
 
 [comm-01-25-commemoration-of-st-peter]
-Name = Commemoration of St. Peter
+Name = Commemoration of St Peter
 Rank = commemoration
 Color = white
 Category = confessor
@@ -121,7 +121,7 @@ Source = awrv
 CompanionOf = conversion-st-paul
 
 [comm-01-26-st-polycarp-of-smyrna-bishop-and-martyr]
-Name = St. Polycarp of Smyrna, Bishop & Martyr
+Name = St Polycarp of Smyrna, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -130,7 +130,7 @@ Day = 26
 Source = awrv
 
 [comm-01-28-the-second-feast-of-st-agnes-virgin-martyr]
-Name = The Second Feast of St. Agnes, Virgin Martyr
+Name = The Second Feast of St Agnes, Virgin Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -139,7 +139,7 @@ Day = 28
 Source = awrv
 
 [comm-01-30-st-martina-virgin-and-martyr]
-Name = St. Martina, Virgin & Martyr
+Name = St Martina, Virgin & Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -193,7 +193,7 @@ Day = 9
 Source = awrv
 
 [comm-02-15-ss-faustinus-and-jovita-martyrs]
-Name = Ss. Faustinus & Jovita, Martyrs
+Name = Ss Faustinus & Jovita, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -409,7 +409,7 @@ Day = 22
 Source = awrv
 
 [comm-07-02-ss-processus-and-martinian-martyrs]
-Name = Ss. Processus & Martinian, Martyrs
+Name = Ss Processus & Martinian, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -427,7 +427,7 @@ Day = 2
 Source = awrv
 
 [comm-07-12-ss-nabor-and-felix-martyrs]
-Name = Ss. Nabor & Felix, Martyrs
+Name = Ss Nabor & Felix, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -590,7 +590,7 @@ Day = 7
 Source = awrv
 
 [comm-08-08-ss-cyriacus-largus-and-smaragdus-martyrs]
-Name = Ss. Cyriacus, Largus & Smaragdus, Martyrs
+Name = Ss Cyriacus, Largus & Smaragdus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -617,7 +617,7 @@ Day = 11
 Source = awrv
 
 [comm-08-13-ss-hippolytus-and-cassian-martyrs]
-Name = Ss. Hippolytus & Cassian, Martyrs
+Name = Ss Hippolytus & Cassian, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -666,7 +666,7 @@ Day = 18
 Source = awrv
 
 [comm-08-22-ss-timothy-bishop-hippolytus-and-symphorian-mm]
-Name = Ss. Timothy (Bishop), Hippolytus & Symphorian, Mm
+Name = Ss Timothy (Bishop), Hippolytus & Symphorian, Mm
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -803,7 +803,7 @@ Day = 23
 Source = awrv
 
 [comm-09-26-ss-cyprian-and-justina-martyrs]
-Name = Ss. Cyprian & Justina, Martyrs
+Name = Ss Cyprian & Justina, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -812,7 +812,7 @@ Day = 26
 Source = awrv
 
 [comm-09-27-ss-cosmas-and-damian-martyrs]
-Name = Ss. Cosmas & Damian, Martyrs
+Name = Ss Cosmas & Damian, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -839,7 +839,7 @@ Day = 1
 Source = awrv
 
 [comm-10-07-ss-sergius-bacchus-marcellus-and-apuleius-martyrs]
-Name = Ss. Sergius, Bacchus, Marcellus & Apuleius, Martyrs
+Name = Ss Sergius, Bacchus, Marcellus & Apuleius, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -848,7 +848,7 @@ Day = 7
 Source = awrv
 
 [comm-10-07-st-mark-of-rome-bishop-and-confessor]
-Name = St. Mark of Rome, Bishop & Confessor
+Name = St Mark of Rome, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -857,7 +857,7 @@ Day = 7
 Source = awrv
 
 [comm-10-09-ss-denys-rusticus-and-eleutherius-martyrs]
-Name = Ss. Denys, Rusticus & Eleutherius, Martyrs
+Name = Ss Denys, Rusticus & Eleutherius, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -875,7 +875,7 @@ Day = 12
 Source = awrv
 
 [comm-10-19-st-frideswide-virgin]
-Name = St. Frideswide, Virgin
+Name = St Frideswide, Virgin
 Rank = commemoration
 Color = white
 Category = virgin
@@ -893,7 +893,7 @@ Day = 21
 Source = awrv
 
 [comm-10-21-st-hilarion-abbot]
-Name = St. Hilarion, Abbot
+Name = St Hilarion, Abbot
 Rank = commemoration
 Color = white
 Category = confessor
@@ -957,7 +957,7 @@ Day = 9
 Source = awrv
 
 [comm-11-10-ss-tryphon-respicius-and-nympha-martyrs]
-Name = Ss. Tryphon, Respicius & Nympha, Martyrs
+Name = Ss Tryphon, Respicius & Nympha, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1132,7 +1132,7 @@ Source = awrv
 # Additional non-recurring commemorations from 2024/2026 reference diff
 
 [comm-extra-01-02-octave-day-of-st-stephen-protomartyr]
-Name = Octave Day of St. Stephen, Protomartyr
+Name = Octave Day of St Stephen, Protomartyr
 Rank = commemoration
 Color = red
 Category = martyr
@@ -1141,7 +1141,7 @@ Day = 2
 Source = awrv
 
 [comm-extra-01-14-st-hilary-bishop-confessor-and-doctor]
-Name = St. Hilary, Bishop, Confessor & Doctor
+Name = St Hilary, Bishop, Confessor & Doctor
 Rank = commemoration
 Color = white
 Category = confessor-doctor
@@ -1150,7 +1150,7 @@ Day = 14
 Source = awrv
 
 [comm-extra-01-16-st-marcellus-i-of-rome-pope-and-martyr]
-Name = St. Marcellus I of Rome, Bishop & Martyr
+Name = St Marcellus I of Rome, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1159,7 +1159,7 @@ Day = 16
 Source = awrv
 
 [comm-extra-01-21-st-agnes-of-rome-virgin-and-martyr]
-Name = St. Agnes of Rome, Virgin & Martyr
+Name = St Agnes of Rome, Virgin & Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -1435,7 +1435,7 @@ Day = 2
 Source = awrv
 
 [comm-extra-08-06-ss-sixtus-ii-pope-and-martyr-felicissimus-and-agapitus]
-Name = Ss. Sixtus II (Bishop & Martyr), Felicissimus & Agapitus
+Name = Ss Sixtus II (Bishop & Martyr), Felicissimus & Agapitus
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1453,7 +1453,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-09-23-st-linus-pope-and-martyr]
-Name = St. Linus, Bishop & Martyr
+Name = St Linus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1472,7 +1472,7 @@ Day = 25
 Source = awrv
 
 [comm-extra-10-26-st-evaristus-pope-and-martyr]
-Name = St. Evaristus, Bishop & Martyr
+Name = St Evaristus, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1508,7 +1508,7 @@ Day = 10
 Source = awrv
 
 [comm-extra-12-15-octave-of-the-conception-of-the-blessed-virgin-mary]
-Name = Octave of the Conception of the B.V.M
+Name = Octave of the Conception of the B.V.M.
 Rank = commemoration
 Color = white
 Category = blessed-virgin
@@ -1518,7 +1518,7 @@ Source = awrv
 
 
 [comm-extra-01-18-chair-of-st-peter-in-rome]
-Name = Chair of St. Peter in Rome
+Name = Chair of St Peter in Rome
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1527,7 +1527,7 @@ Day = 18
 Source = awrv
 
 [comm-extra-01-25-the-conversion-of-st-paul-the-apostle]
-Name = The Conversion of St. Paul The Apostle
+Name = The Conversion of St Paul The Apostle
 Rank = commemoration
 Color = white
 Category = apostle
@@ -1536,7 +1536,7 @@ Day = 25
 Source = awrv
 
 [comm-extra-02-01-st-ignatius-of-antioch-bishop-and-martyr]
-Name = St. Ignatius of Antioch, Bishop & Martyr
+Name = St Ignatius of Antioch, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1563,7 +1563,7 @@ Day = 6
 Source = awrv
 
 [comm-extra-02-07-st-romuald-abbot]
-Name = St. Romuald, Abbot
+Name = St Romuald, Abbot
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1603,7 +1603,7 @@ Day = 25
 Source = awrv
 
 [comm-extra-02-26-st-alexander-of-alexandria-bishop-and-confessor]
-Name = St. Alexander of Alexandria, Bishop & Confessor
+Name = St Alexander of Alexandria, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1616,7 +1616,7 @@ Source = awrv
 [comm-extra-03-17-st-joseph-of-arimathea-confessor]
 ProperID = st-joseph-arimathea
 ProperName = Joseph
-Name = St. Joseph of Arimathea, Confessor
+Name = St Joseph of Arimathea, Confessor
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1625,7 +1625,7 @@ Day = 17
 Source = awrv
 
 [comm-extra-04-14-st-tiburtius-valerian-and-maximus-martyrs]
-Name = St. Tiburtius, Valerian & Maximus, Martyrs
+Name = St Tiburtius, Valerian & Maximus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1635,7 +1635,7 @@ Source = awrv
 
 
 [comm-extra-04-22-ss-soter-and-caius-martyrs]
-Name = Ss. Soter & Caius, Martyrs
+Name = Ss Soter & Caius, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1644,7 +1644,7 @@ Day = 22
 Source = awrv
 
 [comm-extra-04-26-st-cletus-and-marcellinus-martyrs]
-Name = St. Cletus & Marcellinus, Martyrs
+Name = St Cletus & Marcellinus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1654,7 +1654,7 @@ Source = awrv
 
 [comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve]
 ProperName = Alexander, Eventius & Theodulus
-Name = Ss. Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
+Name = Ss Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1663,7 +1663,7 @@ Day = 3
 Source = awrv
 
 [comm-extra-05-04-st-monica-widow]
-Name = St. Monica, Widow
+Name = St Monica, Widow
 Rank = commemoration
 Color = white
 Category = holy-woman
@@ -1684,7 +1684,7 @@ Source = awrv
 [comm-extra-05-07-st-alexis-toth-priest-and-confessor]
 ProperID = st-alexis-toth
 ProperName = Alexis
-Name = St. Alexis Toth, Priest & Confessor
+Name = St Alexis Toth, Priest & Confessor
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1693,7 +1693,7 @@ Day = 7
 Source = awrv
 
 [comm-extra-05-22-st-romanus-abbot]
-Name = St. Romanus, Abbot
+Name = St Romanus, Abbot
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1706,7 +1706,7 @@ Source = awrv
 
 
 [comm-extra-06-02-ss-marcellinus-peter-and-erasmus-martyrs]
-Name = Ss. Marcellinus, Peter & Erasmus, Martyrs
+Name = Ss Marcellinus, Peter & Erasmus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1715,7 +1715,7 @@ Day = 2
 Source = awrv
 
 [comm-extra-06-05-st-boniface-bishop-and-martyr]
-Name = St. Boniface, Bishop & Martyr
+Name = St Boniface, Bishop & Martyr
 Rank = commemoration
 Color = red
 Category = bishop-martyr
@@ -1724,7 +1724,7 @@ Day = 5
 Source = awrv
 
 [comm-extra-06-14-st-basil-the-great-bishop-confessor-and-doctor]
-Name = St. Basil the Great, Bishop, Confessor & Doctor
+Name = St Basil the Great, Bishop, Confessor & Doctor
 Rank = commemoration
 Color = white
 Category = confessor-doctor
@@ -1741,7 +1741,7 @@ DateRule = pentecost-sunday-2
 Source = awrv
 
 [comm-extra-06-18-st-ephrem-the-syrian-deacon-confessor-and-doctor]
-Name = St. Ephrem the Syrian, Deacon, Confessor & Doctor
+Name = St Ephrem the Syrian, Deacon, Confessor & Doctor
 Rank = commemoration
 Color = white
 Category = confessor-doctor
@@ -1750,7 +1750,7 @@ Day = 18
 Source = awrv
 
 [comm-extra-06-19-ss-gervase-and-protase-martyrs]
-Name = Ss. Gervase & Protase, Martyrs
+Name = Ss Gervase & Protase, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1760,7 +1760,7 @@ Source = awrv
 
 
 [comm-extra-06-23-st-etheldreda-queen-and-virgin]
-Name = St. Etheldreda, Queen & Virgin
+Name = St Etheldreda, Queen & Virgin
 Rank = commemoration
 Color = white
 Category = virgin
@@ -1778,7 +1778,7 @@ Day = 26
 Source = awrv
 
 [comm-extra-06-30-commemoration-of-st-peter-apostle]
-Name = Commemoration of St. Peter, Apostle
+Name = Commemoration of St Peter, Apostle
 Rank = commemoration
 Color = white
 Category = apostle
@@ -1788,7 +1788,7 @@ Source = awrv
 CompanionOf = commemoration-st-paul-apostle
 
 [comm-extra-07-10-st-joseph-of-damascus-priest-and-companions-martyrs]
-Name = St. Joseph of Damascus (Priest) & companions, Martyrs
+Name = St Joseph of Damascus (Priest) & companions, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1809,7 +1809,7 @@ Source = awrv
 
 [comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and]
 ProperName = Nazarius, Celsus & Victor
-Name = Ss. Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
+Name = Ss Nazarius & Celsus, Martyrs, St Victor, Bishop & Martyr, and St Innocent, Bishop & Confessor
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1819,7 +1819,7 @@ Source = awrv
 
 [comm-extra-07-29-ss-felix-ii-bishop-simplicius-faustinus-and-beatrice]
 ProperName = Felix, Simplicius, Faustinus & Beatrice
-Name = Ss. Felix II (Bishop), Simplicius, Faustinus & Beatrice, Martyrs
+Name = Ss Felix II (Bishop), Simplicius, Faustinus & Beatrice, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1830,7 +1830,7 @@ Source = awrv
 
 
 [comm-extra-08-30-ss-felix-and-adauctus-martyrs]
-Name = Ss. Felix & Adauctus, Martyrs
+Name = Ss Felix & Adauctus, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1839,7 +1839,7 @@ Day = 30
 Source = awrv
 
 [comm-extra-09-20-st-eustace-and-companions-martyrs]
-Name = St. Eustace & companions, Martyrs
+Name = St Eustace & companions, Martyrs
 Rank = commemoration
 Color = red
 Category = martyrs
@@ -1849,7 +1849,7 @@ Source = awrv
 
 
 [comm-extra-09-28-st-wenceslaus-duke-martyr]
-Name = St. Wenceslaus, Duke, Martyr
+Name = St Wenceslaus, Duke, Martyr
 Rank = commemoration
 Color = red
 Category = martyr
@@ -1858,7 +1858,7 @@ Day = 28
 Source = awrv
 
 [comm-extra-10-13-st-edward-king-and-confessor]
-Name = St. Edward, King & Confessor
+Name = St Edward, King & Confessor
 Rank = commemoration
 Color = white
 Category = confessor
@@ -1870,7 +1870,7 @@ Source = awrv
 
 
 [comm-extra-11-22-st-cecilia-virgin-and-martyr]
-Name = St. Cecilia, Virgin & Martyr
+Name = St Cecilia, Virgin & Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr
@@ -1879,7 +1879,7 @@ Day = 22
 Source = awrv
 
 [comm-extra-12-06-st-nicholas-bishop-and-confessor]
-Name = St. Nicholas, Bishop & Confessor
+Name = St Nicholas, Bishop & Confessor
 Rank = commemoration
 Color = white
 Category = confessor-bishop
@@ -1889,7 +1889,7 @@ Source = awrv
 
 
 [comm-extra-12-13-st-lucy-virgin-and-martyr]
-Name = St. Lucy, Virgin & Martyr
+Name = St Lucy, Virgin & Martyr
 Rank = commemoration
 Color = red
 Category = virgin-martyr

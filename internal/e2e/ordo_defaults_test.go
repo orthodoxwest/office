@@ -168,8 +168,8 @@ func Test2026SourceBackedDefaults(t *testing.T) {
 		color       models.Color
 		comms       []string
 	}{
-		{"2026-01-04", "holy-name-jesus", models.VespersIIOfPreceding, models.White, []string{"The Vigil of the Epiphany", "St. Telesphorus of Rome, Bishop & Martyr"}},
-		{"2026-05-01", "ss-philip-james", models.VespersIIOfPreceding, models.Red, []string{"St. Athanasius"}},
+		{"2026-01-04", "holy-name-jesus", models.VespersIIOfPreceding, models.White, []string{"The Vigil of the Epiphany", "St Telesphorus of Rome, Bishop & Martyr"}},
+		{"2026-05-01", "ss-philip-james", models.VespersIIOfPreceding, models.Red, []string{"St Athanasius"}},
 		{"2026-08-23", "st-bartholomew", models.VespersIOfFollowing, models.Red, []string{"XII Sunday after Pentecost"}},
 	} {
 		t.Run("ownership-label/"+tc.date, func(t *testing.T) {
