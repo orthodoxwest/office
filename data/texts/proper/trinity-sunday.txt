@@ -59,8 +59,8 @@ Thanks, O God, * be unto thee, thanks be unto thee, one and very Trinity, one an
 @use proper/trinity-sunday/versicle-lauds
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 318, 196 (The Feast of the Most Holy Trinity; recovered directly from DOCX text flow)
-Almighty and everlasting God, who hast given unto us thy servants in the confession of a true faith to acknowledge the glory of the eternal Trinity, and in the power of the Majesty to worship the Unity: we beseech thee; that through steadfastness in the same Faith, we may evermore be defended from all adversities.
+# SOURCE: diurnal p. 404
+Almighty and everlasting God, who hast given unto us thy servants grace, by the confession of a true faith, to acknowledge the glory of the eternal Trinity, and in the power of the Divine Majesty to worship the Unity: we beseech thee that thou wouldest keep us stedfast in this faith, and evermore defend us from all adversities.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 315 (The Feast of the Most Holy Trinity)

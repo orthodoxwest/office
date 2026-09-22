@@ -60,8 +60,8 @@ V. Blessed be the Name of the Lord, alleluia.
 R. From this time forth, and for evermore, alleluia.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 120, 105 (Holy Name of Jesus)
-O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst command that he should be called Jesus: mercifully grant; that we, who venerate his holy Name on earth, may rejoice to behold him in heaven.
+# SOURCE: diurnal p. 217
+O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst bid that he should be called Jesus: mercifully grant that we, who reverence his holy Name on earth, may also be filled with the joy of beholding him in heaven.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 117 (Holy Name of Jesus)
