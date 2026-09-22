@@ -13,7 +13,8 @@ V. O Lord, have mercy upon us.
 R. For we have sinned against thee.
 
 [collect]
-Look down mercifully, O Lord, we beseech thee, upon thy people, and graciously turn away from them the scourges of thy wrath.
+# SOURCE: diurnal p. 254
+Look graciously upon thy people, we beseech thee, O Lord: and mercifully turn away from them the scourges of thy wrath.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).

@@ -10,25 +10,32 @@ psalm-antiphon-5 = psalms/142
 @use proper/holy-thursday/psalm-antiphon-1
 
 [psalm-antiphon-1]
-O Lord, Thou shalt be justified * when Thou speakest, and be clear when Thou art judged.
+# SOURCE: diurnal p. 305
+Mayest thou * be justified, O Lord, in thy saying, and clear when thou art judged.
 
 [psalm-antiphon-2]
-The Lord was brought as a lamb * to the slaughter, and He opened not His mouth.
+# SOURCE: diurnal p. 307
+The Lord * was led as a lamb to the slaughter: and he opened not his mouth.
 
 [psalm-antiphon-3]
-Mine heart is broken within me * all my bones tremble.
+# SOURCE: diurnal p. 308
+My heart * within me is broken: and trembling maketh all my bones to shake.
 
 [psalm-antiphon-4]
-O Lord, Thou hast spoken unto us * in thy strength, and in thy Holy Banquet.
+# SOURCE: diurnal p. 309
+Thou dost encourage us * by thy might, O Lord, and by thy holy refreshment.
 
 [psalm-antiphon-5]
-He was offered up because He willed it * and He bore our sins.
+# SOURCE: diurnal p. 311
+He was offered * because he willed it: and himself hath borne our iniquities.
 
 [benedictus-antiphon]
-Now he that betrayed Him * gave them a sign, saying: Whomsoever I shall kiss, That Same is He: hold Him fast.
+# SOURCE: diurnal p. 311
+Now he that betrayed him * gave them a sign, saying: Whomsoever I shall kiss, that same is he; hold him fast.
 
 [magnificat-antiphon]
-And, as they were eating * Jesus took bread, and blessed, and broke it, and gave to His disciples.
+# SOURCE: diurnal p. 315
+As they were eating, * Jesus took bread, and blessed it, and brake it, and gave it to his disciples.
 
 [commemoration-antiphon]
 I will take the cup of salvation; * and call upon the Name of the Lord.

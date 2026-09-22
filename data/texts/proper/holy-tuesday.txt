@@ -14,16 +14,20 @@ Defend thou * my cause, O Lord: O deliver me from the deceitful and wicked man.
 When I was in trouble * I cried unto the Lord out of the belly of hell, and he heard me.
 
 [psalm-antiphon-4]
-O Lord, I am oppressed, * undertake Thou for me; for I know not what to say unto mine enemies.
+# SOURCE: diurnal p. 282
+Lord, I am oppressed, * undertake for me: for I know not what I shall say unto mine enemies.
 
 [psalm-antiphon-5]
-The ungodly said Let us oppress the righteous man, * because he is clean contrary to our doings.
+# SOURCE: diurnal p. 282
+The ungodly said, * Let us oppress the righteous man, because he is clean contrary to our doings.
 
 [benedictus-antiphon]
-Now, before the Feast of the Passover, as Jesus knew that His hour was come, * having loved His Own which were in the world, He loved them unto the end.
+# SOURCE: diurnal p. 282
+Now before the feast * of the Passover, when Jesus knew that his hour was come, having loved his own, he loved them unto the end.
 
 [magnificat-antiphon]
-I have power * to lay down my life: and to take it up again.
+# SOURCE: diurnal p. 283
+I have power * to lay down my life, and I have power to take it again.
 
 [commemoration-antiphon]
 @use proper/holy-tuesday/benedictus-antiphon

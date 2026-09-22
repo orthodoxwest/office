@@ -26,10 +26,12 @@ All ye Angels of his, * O praise the Lord of heaven.
 Behold, we go up * to Jerusalem, and all things that are written concerning the Son of man shall be accomplished: for he shall be delivered unto the Gentiles, and shall be mocked, and spitted on; and they shall scourge him, and put him to death; and the third day he shall rise again.
 
 [magnificat-antiphon]
-And Jesus stood, * and commanded the blind man to be brought unto Him, and He asked him, saying: What wilt thou that I shall do unto thee? Lord, that I may receive my sight. And Jesus said unto him: Receive thy sight, thy faith hath saved thee. And immediately he received his sight, and followed Him, glorifying God.
+# SOURCE: diurnal p. 243
+And Jesus stood, * and commanded him to be brought unto him, and asked him, saying: What wilt thou that I shall do unto thee? Lord, that I may receive my sight. And Jesus said unto him, Receive thy sight, thy faith hath saved thee. And straightway he received his sight, and followed him, glorifying God.
 
 [commemoration-antiphon]
-The father of our faith, * the mighty Abraham, offered a burnt offering on the altar for his son.
+# SOURCE: diurnal p. 240
+Mighty Abraham, * the father of our faith, offered a burnt offering upon the altar, instead of his son.
 
 [commemoration-versicle]
 V. O Lord, have mercy upon us.

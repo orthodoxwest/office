@@ -14,7 +14,8 @@ V. O Lord, have mercy upon us.
 R. For we have sinned against thee.
 
 [collect]
-O Lord, we beseech thee mercifully to hear our prayers, and to stretch forth the right hand of thy power against all things that fight against us.
+# SOURCE: diurnal p. 253
+Mercifully hear our prayers, O Lord, we beseech thee: and stretch forth the right hand of thy Majesty against all things that withstand us.
 
 # [magnificat-antiphon-first]
 # Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).

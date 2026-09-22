@@ -52,7 +52,7 @@ JANUARY
            Hours   No Preces
            Vespers w · I fol. (Epiphany of Our Lord) · Mag. The wise men · No Suff.
   6  Wed     EPIPHANY OF OUR LORD                       [1cl] w
-           Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
+           Lauds   w · Ben. To-day · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
   7  Thu     Day II within the Octave of the Epiphany   [sd]  w
@@ -67,17 +67,17 @@ JANUARY
            Lauds   w · Ben. We have seen his star · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Sunday within the Octave of Epiphany) · Mag. The Child Jesus · No Suff.
-               Com. Day IV within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day IV within the Octave of the Epiphany ("The wise men")
                Com. St. Paul the First Hermit ("I will liken him")
  10  Sun     Sunday within the Octave of Epiphany       [sd]  w
            Day V within the Octave of the Epiphany (sd)
            St. Paul the First Hermit (com)
            Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
-               Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day V within the Octave of the Epiphany ("The wise men")
                Com. St. Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
-               Com. Day V within the Octave of the Epiphany ("When the wise men saw the star")
+               Com. Day V within the Octave of the Epiphany ("The wise men")
                Com. St. Hyginus of Rome, Bishop & Martyr ("This is a Martyr")
  11  Mon     Day VI within the Octave of the Epiphany   [sd]  w
            St. Hyginus of Rome, Bishop & Martyr (com)
@@ -93,7 +93,7 @@ JANUARY
            Hours   No Preces
            Vespers w · I fol. (Octave Day of the Epiphany) · Mag. The wise men · No Suff.
  13  Wed     Octave Day of the Epiphany                 [gd]  w
-           Lauds   w · Ben. This day is the Church joined unto the Heavenly… · No Preces · No Suff.
+           Lauds   w · Ben. To-day · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Now do we celebrate · No Suff.
                Com. St. Hilary, Bishop, Confessor & Doctor ("O Teacher right excellent")
@@ -383,7 +383,7 @@ FEBRUARY
  28  Sun     Septuagesima Sunday                        [2cl] v
            Lauds   v · Ben. The kingdom · No Preces · Suff.
            Hours   Preces
-           Vespers v · II prec. · Mag. The householder saith unto his labourers · Suff.
+           Vespers v · II prec. · Mag. The householder · Suff.
                Com. St David of Wales, Bishop & Confessor ("O thou Priest and Bishop")
 
 MARCH
@@ -482,7 +482,7 @@ MARCH
                Com. St. Patrick ("Well done")
                Com. St Joseph of Arimathea, C ("Well done, good and faithful servant")
            Hours   No Preces
-           Vespers v · Mag. Lay up for yourselves treasures in heaven · No Suff.
+           Vespers v · Mag. Lay up for yourselves · No Suff.
                Com. St Cyril of Jerusalem, Bishop, Confessor & Doctor ("O Teacher right excellent")
                Com. St Edward, King & Martyr ("This is a Martyr")
  18  Thu  L§ Thursday after Ash Wednesday               [f2]  v
@@ -539,7 +539,7 @@ MARCH
            Hours   No Preces
            Vespers w · II prec. · Mag. The Angel Gabriel · No Suff.
  26  Fri  L§ Lent Ember Friday                          [f2]  v
-           Lauds   v · Ben. The Angel of the Lord · No Preces · Suff.
+           Lauds   v · Ben. An Angel of the Lord · No Preces · Suff.
            Hours   Preces
            Vespers v · Mag. He that made me whole · No Suff.
                Com. St. John Damascene, Confessor & Doctor ("O Teacher right excellent")
@@ -707,12 +707,12 @@ APRIL
                Com. St. Cletus & Marcellinus, Martyrs ("For theirs is the kingdom of heaven")
  26  Mon  L§ HOLY MONDAY                                [1cl] v
            St. Cletus & Marcellinus, Martyrs (com)
-           Lauds   v · Ben. And now, O Father, glorify Thou Me · No Preces · No Suff.
+           Lauds   v · Ben. O Father, glorify thou me · No Preces · No Suff.
                Com. St. Cletus & Marcellinus, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers v · Mag. Thou couldest have no power · No Suff.
  27  Tue  L§ HOLY TUESDAY                               [1cl] v
-           Lauds   v · Ben. Now, before the Feast of the Passover, as Jesus… · No Preces · No Suff.
+           Lauds   v · Ben. Now before the feast · No Preces · No Suff.
            Hours   No Preces
            Vespers v · Mag. I have power · No Suff.
                Com. St Vitalis, Martyr ("This is a Martyr")
@@ -725,20 +725,20 @@ APRIL
                Com. Thursday after Palm Sunday ("My soul doth magnify the Lord, and my spirit…")
  29  Thu  L§ HOLY THURSDAY                              [1cl] w
            Thursday after Palm Sunday (f2)
-           Lauds   w · Ben. Now he that betrayed Him · No Preces · No Suff.
+           Lauds   w · Ben. Now he that betrayed him · No Preces · No Suff.
            Hours   No Preces
-           Vespers v · II prec. · Mag. And, as they were eating · No Suff.
+           Vespers v · II prec. · Mag. As they were eating · No Suff.
  30  Fri  L§ GOOD FRIDAY                                [1cl] b
            Friday after Palm Sunday (f2)
-           Lauds   b · Ben. They set up over his head his accusation written · No Preces · No Suff.
+           Lauds   b · Ben. They set up · No Preces · No Suff.
            Hours   No Preces
-           Vespers b · II prec. · Mag. When He had received the vinegar · No Suff.
+           Vespers b · II prec. · Mag. When he had received · No Suff.
 
 MAY
 ------------------------------------------------------------
   1  Sat  L§ HOLY SATURDAY                              [1cl] w
            Saturday after Palm Sunday (f2)
-           Lauds   w · Ben. There were women sitting over against the sepulchre · No Preces · No Suff.
+           Lauds   w · Ben. The women · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Sunday of the Resurrection) · Mag. In the end of the sabbath · No Suff.
   2  Sun     SUNDAY OF THE RESURRECTION                 [1cl] w
@@ -752,10 +752,10 @@ MAY
            Lauds   w · Ben. Jesus himself · No Preces · No Suff.
                Com. Ss. Alexander, Eventius & Theodulus, Martyrs, and St Juvenalis, Bishop & Confessor ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers w · II prec. · Mag. What manner of communications are these · No Suff.
+           Vespers w · II prec. · Mag. What manner of communications · No Suff.
   4  Tue     EASTER TUESDAY                             [1cl] w
            St. Monica, Widow (com)
-           Lauds   w · Ben. Jesus stood in the midst of His disciples · No Preces · No Suff.
+           Lauds   w · Ben. Jesus stood · No Preces · No Suff.
                Com. St. Monica, Widow ("Give her")
            Hours   No Preces
            Vespers w · II prec. · Mag. Behold My Hands · No Suff.
@@ -793,7 +793,7 @@ MAY
                Com. St. Gregory Nazianzen, Bishop, Confessor & Doctor ("Well done")
            Hours   No Preces
            Vespers r · I fol. (Finding of the Holy Cross) · Mag. O Cross · No Suff.
-               Com. Low Sunday (Octave of Easter) ("Now when it was late")
+               Com. Low Sunday (Octave of Easter) ("The same day")
                Com. Ss Gordian & Epimachus, Martyrs ("Light perpetual")
  10  Mon     Finding of the Holy Cross                  [2cl] r
            Ss Gordian & Epimachus, Martyrs (com)

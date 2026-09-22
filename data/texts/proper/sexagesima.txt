@@ -30,7 +30,8 @@ When much people * were gathered together to Jesus, and were come to him out of 
 Unto you it is given * to know the mysteries of the kingdom of heaven: but to others in parables, said Jesus to his disciples.
 
 [commemoration-antiphon]
-The Lord said unto Noah: * The end of all flesh is come before Me, make thee an ark of planed timber, that seed of all flesh may be saved therein.
+# SOURCE: diurnal p. 238
+The Lord * said unto Noah: The end of all flesh is come before me: make thee an ark of gopher wood, that therein the seed of all flesh may be saved.
 
 [commemoration-versicle]
 V. Lord, thou hast been our refuge.

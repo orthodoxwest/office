@@ -1,5 +1,6 @@
 [collect]
-Grant, we beseech thee, almighty God, that the venerable feast of thy blessed Confessor and Bishop Sylvester may increase our devotion and promote our salvation.
+# SOURCE: diurnal p. 208
+Grant, we beseech thee, Almighty God: that the reverend solemnity of blessed Sylvester, thy Confessor and Bishop, may both increase our devotion and set forward our salvation.
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
