@@ -61,7 +61,7 @@ R. From this time forth, and for evermore, alleluia.
 
 [collect]
 # SOURCE: diurnal p. 217
-O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst bid that he should be called Jesus: mercifully grant that we, who reverence his holy Name on earth, may also be filled with the joy of beholding him in heaven.
+O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst bid that he be called Jesus: mercifully grant that we, who reverence his holy Name on earth, may also be filled with the joy of beholding him in heaven.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 117 (Holy Name of Jesus)
