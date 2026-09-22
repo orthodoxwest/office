@@ -1107,6 +1107,7 @@ proper/lent-sunday-2/magnificat-antiphon-tuesday,af0995b26a2b,diurnal,"II Week i
 proper/lent-sunday-2/magnificat-antiphon-wednesday,6b23ccee113b,diurnal,"II Week in Lent, Wednesday",258,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-2/psalm-antiphon-2,931c09905c5d,diurnal,,254,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0300.png
 proper/lent-sunday-2/versicle-none,12bd556439d9,diurnal,,256,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0302.png
+proper/lent-sunday-3/benedictus-antiphon,0364104a2270,diurnal,,260,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
 proper/lent-sunday-3/benedictus-antiphon-friday,6265db3ff38b,diurnal,"III Week in Lent, Friday",263,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/benedictus-antiphon-monday,06e2948f068c,diurnal,"III Week in Lent, Monday",261,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/benedictus-antiphon-saturday,d024d8bc25ea,diurnal,"III Week in Lent, Saturday",264,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1124,6 +1125,10 @@ proper/lent-sunday-3/magnificat-antiphon-monday,250588240508,diurnal,"III Week i
 proper/lent-sunday-3/magnificat-antiphon-thursday,a13ecc3960e6,diurnal,"III Week in Lent, Thursday",263,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-tuesday,a6bd74b7d5d3,diurnal,"III Week in Lent, Tuesday",262,verified,grok,2026-08-22,word-for-word from printed page image
 proper/lent-sunday-3/magnificat-antiphon-wednesday,90a3229826b7,diurnal,"III Week in Lent, Wednesday",262,verified,grok,2026-08-22,word-for-word from printed page image
+proper/lent-sunday-3/psalm-antiphon-1,92d104afb7a1,diurnal,,260,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
+proper/lent-sunday-3/psalm-antiphon-2,d4b8a471e4e7,diurnal,,260,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
+proper/lent-sunday-3/psalm-antiphon-3,760abccf0ce2,diurnal,,260,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
+proper/lent-sunday-3/psalm-antiphon-5,e8effcff012a,diurnal,,260,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0306.png
 proper/lent-sunday-3/versicle-none,12bd556439d9,diurnal,,261,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0307.png
 proper/lent-sunday-3/versicle-sext,901e5c584b1d,diurnal,,261,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0307.png
 proper/low-sunday/benedictus-antiphon-friday,89acbaf408b8,diurnal,"I Week after the Octave of Easter, Friday",377,verified,grok,2026-08-22,word-for-word from printed page image
