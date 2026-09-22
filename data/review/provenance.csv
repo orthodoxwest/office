@@ -1703,7 +1703,13 @@ proper/vigil-nativity/short-responsory-none,52ea7635a9d6,diurnal,"Christmas Eve,
 proper/vigil-nativity/short-responsory-sext,e715b85b58da,diurnal,"Christmas Eve, At Sext",183,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-nativity/short-responsory-terce,16415e791824,diurnal,"Christmas Eve, At Terce",183,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-st-james/collect,9c1c987bd0bf,diurnal,On Vigils of Apostles; assigned on p. 570 to the Vigil of St James,7*,verified,grok,2026-08-23,word-for-word from printed page image
+proper/visitation-bvm/benedictus-antiphon,c4425f8988c1,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
 proper/visitation-bvm/collect,a286c1d28616,diurnal,,557,verified,codex,2026-09-11,"Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png; dual readers agreed, auto-apply blocked because corpus similarity 0.59"
+proper/visitation-bvm/magnificat-antiphon,28a9a22edb7d,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
+proper/visitation-bvm/magnificat-antiphon-first,e699d2317449,diurnal,,556,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0601.png
+proper/visitation-bvm/psalm-antiphon-3,092b8f2348c3,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
+proper/visitation-bvm/psalm-antiphon-4,8ccf7fea9b4f,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
+proper/visitation-bvm/psalm-antiphon-5,d53d9445057b,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
 proper/whit-ember-friday/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/whit-ember-friday/psalm-antiphon-2,55916376dd89,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
 proper/whit-ember-friday/psalm-antiphon-4,6288bf850fd5,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
