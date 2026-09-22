@@ -917,7 +917,14 @@ proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
 proper/finding-holy-cross/short-responsory-none,77d82c235c70,diurnal,"Finding of the Holy Cross, At None",524,verified,grok,2026-08-23,word-for-word from printed page image
 proper/finding-st-stephen/collect,9a9ae065ac8a,Monastic Diurnal; 2026 Ordo,"St Stephen, At Lauds; adaptation ordered by 2026 ordo p. 86",194–195,verified,codex,2026-09-16,"Base collect independently read from page images; only birthday → finding as explicitly ordered in 2026 ordo p. 86. Appointed adaptation, not a verbatim Diurnal reading. Who with thee conclusion recorded separately."
+proper/good-friday/benedictus-antiphon,07f5f90ba92c,diurnal,,341,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0387.png
 proper/good-friday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
+proper/good-friday/magnificat-antiphon,dbb2f3e94afd,diurnal,,341,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0387.png
+proper/good-friday/psalm-antiphon-1,7350838a12ae,diurnal,,336,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0382.png
+proper/good-friday/psalm-antiphon-2,b54fb4fc5a29,diurnal,,336,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0382.png
+proper/good-friday/psalm-antiphon-3,408ba7e5343d,diurnal,,337,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0383.png
+proper/good-friday/psalm-antiphon-4,cde2e4e08772,diurnal,,338,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0384.png
+proper/good-friday/psalm-antiphon-5,3990907f50a0,diurnal,,340,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0386.png
 proper/good-friday/triduum-antiphon,0d63c19a3d66,diurnal,"Maundy Thursday at Lauds, addition on the second night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/good-friday/versicle-lauds,c0f024283763,diurnal,Good Friday at Lauds,341,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/guardian-angels/benedictus-antiphon,8b93e3d0650e,diurnal,"Holy Guardian Angels, At Lauds",615,verified,grok,2026-08-23,word-for-word from printed page image

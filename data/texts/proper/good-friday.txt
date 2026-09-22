@@ -10,25 +10,32 @@ psalm-antiphon-5 = psalms/142
 @use proper/good-friday/psalm-antiphon-1
 
 [psalm-antiphon-1]
-God spared not His Own Son * but delivered Him up for us all.
+# SOURCE: diurnal p. 336
+God spared not * his own Son: but delivered him up for us all.
 
 [psalm-antiphon-2]
-My spirit is overwhelmed within me; * my heart within me is troubled.
+# SOURCE: diurnal p. 336
+My spirit * is vexed within me: and my heart within me is desolate.
 
 [psalm-antiphon-3]
-One thief said unto the other: * We indeed receive the due reward of our deeds, but what hath this man done? Lord, remember me, when thou comest into thy kingdom.
+# SOURCE: diurnal p. 337
+Said the one thief to the other, * We indeed receive the due reward of our deeds; but this man, what hath he done? Remember me, O Lord, when thou comest into thy kingdom.
 
 [psalm-antiphon-4]
-Lord, when my soul is troubled, * thou wilt remember mercy.
+# SOURCE: diurnal p. 338
+When my spirit is disquieted * within me, thou, O Lord, wilt remember mercy.
 
 [psalm-antiphon-5]
-Lord, remember me * when thou comest into thy kingdom.
+# SOURCE: diurnal p. 340
+Remember me, * O Lord my God, when thou comest into thy kingdom.
 
 [benedictus-antiphon]
-They set up over his head his accusation written: * Jesus of Nazareth, King of the Jews.
+# SOURCE: diurnal p. 341
+They set up * over his head his accusation written: Jesus of Nazareth, the King of the Jews.
 
 [magnificat-antiphon]
-When He had received the vinegar, * he said: It is finished! and he bowed his Head, and gave up the Ghost.
+# SOURCE: diurnal p. 341
+When he had received * the vinegar, he said, It is finished: and he bowed his head, and gave up the ghost.
 
 [commemoration-antiphon]
 @use proper/good-friday/psalm-antiphon-1
