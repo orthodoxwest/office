@@ -21,7 +21,8 @@
 @use proper/easter-sunday/easter-antiphon-5
 
 [benedictus-antiphon]
-Jesus stood in the midst of His disciples * and said unto them: Peace be unto you, alleluia, alleluia.
+# SOURCE: diurnal p. 368
+Jesus stood * in the midst of his disciples and said unto them, Peace be unto you, alleluia, alleluia.
 
 [magnificat-antiphon]
 Behold My Hands * and my Feet, that it is I myself, alleluia, alleluia.

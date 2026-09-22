@@ -788,6 +788,7 @@ proper/dedication-st-michael/versicle-sext,5798ff53811a,diurnal,,611,verified,co
 proper/dedication-st-michael/versicle-terce,d0fa20313df6,diurnal,,611,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0655.png
 proper/easter-monday/benedictus-antiphon,196ae1d7d94b,diurnal,,367,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0413.png
 proper/easter-monday/collect,2b98ddaf87a1,diurnal,,367,verified,codex,2026-09-10,"Word-for-word after normalization; page image output/pages/monastic-diurnal/0413.png; dual readers agreed, auto-apply blocked because corpus similarity 0.57"
+proper/easter-monday/magnificat-antiphon,559bb7b20041,diurnal,,367,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0413.png
 proper/easter-sunday-2/benedictus-antiphon,5b731c59f074,diurnal,"II Sunday after Easter, At Lauds",377,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/benedictus-antiphon-friday,a18932afce3f,diurnal,"II Week after the Octave of Easter, Friday",379,verified,grok,2026-08-22,word-for-word from printed page image
 proper/easter-sunday-2/benedictus-antiphon-monday,8e739d29441e,diurnal,"II Week after the Octave of Easter, Monday",379,verified,grok,2026-08-22,word-for-word from printed page image
@@ -853,7 +854,9 @@ proper/easter-sunday/easter-antiphon-5,50efa59c4ed7,diurnal,,363,verified,codex,
 proper/easter-sunday/hymn-vespers,80fa6851263a,A Noted Hymnary for the Anglican Breviary,,18,verified,codex,2026-07-17,
 proper/easter-sunday/magnificat-antiphon,157a3af20a00,diurnal,,367,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0413.png
 proper/easter-sunday/versicle-terce,ad2ba3365887,diurnal,,365,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0411.png
+proper/easter-tuesday/benedictus-antiphon,e54412b41854,diurnal,,368,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0414.png
 proper/easter-tuesday/collect,51f5a3568b5e,diurnal,,368,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0414.png; cited p. 369 was Thursday/Friday
+proper/easter-tuesday/magnificat-antiphon,a60dac1e818a,diurnal,,368,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0414.png
 proper/epiphany-octave-set-1/benedictus-antiphon,bdc16dc7acc3,diurnal,"Within the Octave of the Epiphany, II Day",227,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-1/magnificat-antiphon,2ff6dca77b64,diurnal,"Within the Octave of the Epiphany, II Day",227-228,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-2/benedictus-antiphon,21939f821bc9,diurnal,"Within the Octave of the Epiphany, III Day",228,verified,grok,2026-08-24,word-for-word from printed page image

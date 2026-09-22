@@ -26,7 +26,8 @@ And behold, * there was a great earthquake: for the Angel of the Lord descended 
 Jesus himself * drew near to his disciples in the way, and went with them: but their eyes were holden that they should not know him: and he rebuked them, saying, O fools and slow of heart to believe all that the prophets have spoken, alleluia.
 
 [magnificat-antiphon]
-What manner of communications are these * that ye have one to another, as ye walk, and are sad? Alleluia.
+# SOURCE: diurnal p. 367
+What manner of communications * are these that ye have one to another, as ye walk, and are sad? alleluia, alleluia.
 
 [commemoration-antiphon]
 @use proper/easter-sunday/easter-antiphon-5
