@@ -717,7 +717,9 @@ proper/comm-09-27-ss-cosmas-and-damian-martyrs/commemoration-collect,acd5ad4a859
 proper/comm-10-07-ss-sergius-bacchus-marcellus-and-apuleius-martyrs/commemoration-collect,892ff79cc386,diurnal,,621,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0665.png
 proper/comm-10-12-st-wilfrid-bishop-and-confessor/commemoration-collect,ca63ca45d92b,diurnal,,624,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0668.png
 proper/comm-10-19-st-frideswide-virgin/commemoration-collect,9499254c2736,diurnal,,627,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0671.png
+proper/comm-11-03-st-winifred-virgin-and-martyr/commemoration-collect,b7f5af2f057a,diurnal,,655,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0699.png
 proper/comm-11-09-st-theodore-tyro-martyr/commemoration-collect,66aa87a2b9cf,diurnal,,656,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0700.png
+proper/comm-11-29-st-saturninus-bishop-and-martyr/commemoration-collect,1735f57a0e75,diurnal,,669,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0713.png
 proper/comm-extra-02-06-st-dorothy-virgin-and-martyr/commemoration-collect,abb1faf5e6cd,diurnal,,474,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0520.png
 proper/comm-extra-07-29-ss-felix-ii-bishop-simplicius-faustinus-and-beatrice/commemoration-collect,2e37fc307c53,diurnal,,575,verified,codex,2026-09-17,Word-for-word after normalization; independent page-image readings.
 proper/commemoration-st-paul-apostle/magnificat-antiphon-first,a3387c079b23,diurnal,"Commemoration of St Paul, At I Vespers",548,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1367,6 +1369,7 @@ proper/st-athanasius/collect,23739796cf90,diurnal,,520,verified,codex,2026-09-02
 proper/st-augustine-canterbury/collect,de0d542e4abb,diurnal,,528,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0573.png
 proper/st-augustine-hippo/collect,ed403e8d947a,diurnal,,593,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0637.png
 proper/st-barnabas/collect,3aa7272a85d9,diurnal,,535,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0580.png
+proper/st-basil-great/collect,b0659f89131a,diurnal,,536,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0581.png
 proper/st-bede-venerable/collect,c3ee8aef7130,diurnal,,528,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0573.png
 proper/st-benedict/chapter-none,dcd2be32a3f5,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
@@ -1534,6 +1537,7 @@ proper/st-stephen/collect,6a08a8493887,diurnal,"St Stephen, At Lauds",194,verifi
 proper/st-stephen/magnificat-antiphon,f25ae17b18ac,diurnal,"St Stephen, At II Vespers",197,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-stephen/psalm-antiphon-1-vespers,8043562bf186,diurnal,,188,verified,grok,2026-09-21,Word-for-word after normalization; page image output/pages/monastic-diurnal/0234.png
 proper/st-stephen/short-responsory-none,081af4f09f23,diurnal,"St Stephen, At None",196,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-sylvester/collect,5fb72b00e888,diurnal,,208,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0254.png
 proper/st-tikhon-moscow/collect,73527f186561,St Tikhon of Moscow supplement,"April 7, Saint Tikhon of Moscow, COLLECT (unnumbered)",,verified,codex,2026-09-16,Page-image reading by Codex agrees exactly with independent Claude Sonnet reading; Through cue omitted for generated conclusion. Evidence: output/source-collects/; appointment: 2026 ordo p. 56.
 proper/transfiguration/chapter-none,408d1df78447,diurnal,,584,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0628.png
 proper/transfiguration/collect,55802e4274d6,diurnal,,583,verified,grok,2026-09-21,Word-for-word after normalization; page image output/pages/monastic-diurnal/0627.png
