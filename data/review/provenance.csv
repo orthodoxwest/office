@@ -1329,7 +1329,16 @@ proper/purification-bvm/chapter-sext,b4c2ab4c8165,diurnal,"Purification BVM, At 
 proper/purification-bvm/collect,6bf250c5c65f,diurnal,"Purification BVM, At Lauds",470,verified,grok,2026-08-23,word-for-word from printed page image
 proper/purification-bvm/magnificat-antiphon,4abaa2a2df15,diurnal,"Purification BVM, At II Vespers",471,verified,grok,2026-08-23,word-for-word from printed page image
 proper/purification-bvm/magnificat-antiphon-first,984b37f4b2d7,diurnal,"Purification BVM, At I Vespers",469,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/psalm-antiphon-1,a4c6e7895be1,diurnal,,469,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0515.png
+proper/purification-bvm/psalm-antiphon-1-first-vespers,6a94fd56810b,diurnal,,468,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0514.png
+proper/purification-bvm/psalm-antiphon-2,01733c642331,diurnal,,469,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0515.png
+proper/purification-bvm/psalm-antiphon-2-first-vespers,cbfa2f2ce7ef,diurnal,,468,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0514.png
+proper/purification-bvm/psalm-antiphon-3-first-vespers,ac1497469b7e,diurnal,,468,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0514.png
+proper/purification-bvm/psalm-antiphon-4,2ae9532c6fbc,diurnal,,469,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0515.png
+proper/purification-bvm/psalm-antiphon-4-first-vespers,5c62f7b4a6bf,diurnal,,469,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0515.png
+proper/purification-bvm/psalm-antiphon-5,1e93c62a741d,diurnal,,469,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0515.png
 proper/purification-bvm/short-responsory-none,706fcdc42c62,diurnal,"Purification BVM, At None",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/purification-bvm/versicle-vespers,bd21ff081924,diurnal,,471,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0517.png
 proper/quinquagesima/benedictus-antiphon,52ff82df3502,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
 proper/quinquagesima/benedictus-antiphon-friday,840d7154f1c0,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-saturday,7290fe599588,diurnal,Saturday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
