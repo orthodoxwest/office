@@ -404,13 +404,22 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
 }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 
+  // The limewash wall is one fixed layer on html::before, shared by Nave and
+  // Apse and coloured by their tokens.
+  const wall = () =>
+    page.evaluate(() => {
+      const field = getComputedStyle(document.documentElement, "::before");
+      return { image: field.backgroundImage, position: field.position, content: field.content };
+    });
+  const naveWall = await wall();
+  expect(naveWall.image).toContain("plaster.jpg");
+  expect(naveWall.position).toBe("fixed");
   const naveMaterial = await page.evaluate(() => ({
     page: getComputedStyle(document.body).backgroundImage,
     inscriptionBand: getComputedStyle(
       document.querySelector(".home-hour-group-label"),
     ).backgroundColor,
   }));
-  expect(naveMaterial.page).not.toBe("none");
   expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
@@ -418,31 +427,31 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   // crossfade, so app.js dips it invisible and applies the theme (and swaps
   // this image) only once that dip completes — poll instead of reading the
   // pre-swap Nave material on a fast single-worker CI run.
-  const readMaterial = () => page.evaluate(() => getComputedStyle(document.body).backgroundImage);
-  await expect.poll(readMaterial).not.toBe(naveMaterial.page);
-  const apseMaterial = await readMaterial();
-  expect(apseMaterial).not.toBe("none");
+  const readMaterial = () => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
+  await expect.poll(readMaterial).toBe("dark");
+  expect((await wall()).image).toContain("plaster.jpg");
 
   await page.goto(`/lauds/${testDate}`);
   const prayerMaterial = await page.evaluate(() => ({
     page: getComputedStyle(document.body).backgroundImage,
     prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
+    wall: getComputedStyle(document.documentElement, "::before").content,
   }));
-  expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
+  expect(prayerMaterial).toEqual({ page: "none", prayer: "none", wall: "none" });
 
   // Desktop. The theme persists in localStorage, so each half sets its own
   // explicitly rather than inheriting whatever the previous step left behind.
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  // Nave keeps the still, flat field: the broad wash reads as spotlighting on
-  // a wide canvas, and the nave ceiling is plaster, so there is nothing else
-  // for it to carry.
+  // The wall has no composition to become a spotlight on a wide canvas, so
+  // desktop Nave keeps it too; the body itself paints nothing over it.
   await page.getByRole("button", { name: "Nave", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
     "none",
   );
+  expect((await wall()).image).toContain("plaster.jpg");
 
   // Apse gets the vault instead — stars only, never the broad wash.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
@@ -684,7 +693,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         diamondVisible: diamond.visibility !== "hidden",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
-        pageBg: getComputedStyle(document.body).backgroundColor,
+        pageBg: getComputedStyle(document.documentElement).backgroundColor,
         cardShadow: card.boxShadow,
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,

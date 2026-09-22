@@ -58,6 +58,10 @@
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
+  /* Limewash wall (see "Parish material"): the lightest plaster, and the
+     multiply factor its darkest trowel strokes reach. Averages near --bg. */
+  --plaster-base: #fffbf4;
+  --plaster-tint: #f5ebe4;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
   --bg: #faf3e9;
@@ -2535,6 +2539,8 @@ footer::before {
     color-scheme: dark;
     --text: #e8e2d0;
     --bg: #121c28;
+    --plaster-base: #1a2638;
+    --plaster-tint: #7d949c;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
@@ -2576,6 +2582,8 @@ footer::before {
   color-scheme: dark;
   --text: #e8e2d0;
   --bg: #121c28;
+  --plaster-base: #1a2638;
+  --plaster-tint: #7d949c;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
@@ -4263,38 +4271,57 @@ body.season-eastertide {
    deliberately: prayer remains a flat diurnal page with no texture under its
    words.
 
-   The field is laid once and never tiled. A repeating tile is fine on a short
-   page and wrong on a long one: the ordo runs to roughly 39,000px at 390px
-   wide, so a 64rem tile recurred about thirty-nine times and its diagonal
-   band became a visible periodic stripe down the months — the same artifact
-   that took these washes off the desktop. `no-repeat` over the flat --bg
-   keeps the wash where the eye actually lands, at the head of the page. */
+   The wall is the parish's own nave plaster (tools/genplaster): a grey
+   field holding only the photograph's mottling and trowel marks, with its
+   lighting divided out. Colour comes from the tokens below, so Nave and Apse
+   share one 58 KB image. It is laid once, sized to the viewport and fixed,
+   never tiled: the earlier washes failed as a periodic stripe down the
+   39,000px ordo and as recognizable spotlight pools on a wide screen, and
+   a field that neither repeats nor carries a composition avoids both.
+
+   The layers compose inside one opaque background rather than blending with
+   the page: base × screen(texture, tint). Where the wall is at its mean the
+   result is about --bg; darker trowel strokes take on more of the tint, as
+   more wash sits in them. Being self-contained, the same layers can be
+   repeated on a sticky surface with a fixed attachment and meet the wall. */
+:root {
+  --plaster-layers:
+    linear-gradient(var(--plaster-base), var(--plaster-base)),
+    url("plaster.jpg"),
+    linear-gradient(var(--plaster-tint), var(--plaster-tint));
+}
+
+html:has(> body:is(.page-home, .page-calendar, .page-reminders)) {
+  background-color: var(--bg);
+}
+
 body.page-home,
 body.page-calendar,
 body.page-reminders {
-  background-color: var(--bg);
-  background-image: var(--page-material);
-  background-position: top center;
-  background-repeat: no-repeat;
-  /* Width-relative so the composition is the one that was authored. At a fixed
-     72rem the tile was far wider than a phone, and since a propagated body
-     background is positioned against the root box, a 390px screen only ever
-     showed the middle third of it — the pools at 14% and 88% fell off both
-     edges, and the slice shifted with device width. */
-  background-size: 100% 64rem;
+  background: transparent;
 }
 
-/* At desktop scale both themes read best as still fields. The broad tonal
-   tiles remain useful on a phone, where only one small portion is visible; on
-   a wide canvas their radial pools become recognizable spotlights and compete
-   with the framed content. Rose plaster or apse blue carries the atmosphere
-   here, while localized surfaces and rules retain the material detail. */
-@media (min-width: 701px) {
-  body.page-home,
-  body.page-calendar,
-  body.page-reminders {
-    background-image: none;
-  }
+html:has(> body:is(.page-home, .page-calendar, .page-reminders))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+html:has(> body:is(.page-home, .page-calendar, .page-reminders))::before,
+.page-calendar .month h2 {
+  background: var(--plaster-layers);
+  background-blend-mode: multiply, screen, normal;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* The sticky month heading hides the rows passing beneath it, so it stays
+   opaque; a fixed attachment lines its copy of the wall up with the wall. */
+.page-calendar .month h2 {
+  background-attachment: fixed;
 }
 
 /* Framed objects catch a little more light than the surrounding plaster.
@@ -4661,7 +4688,8 @@ body.page-home::before {
     box-shadow: none;
   }
 
-  body.page-home::before {
+  body.page-home::before,
+  html::before {
     content: none;
   }
 

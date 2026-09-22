@@ -63,6 +63,10 @@ or impose a redesign on an unrelated change.
   digest within reading measure. Avoid dotted underlines on abbreviations.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a flat field.
+- The threshold-page limewash is the parish nave photograph, high-passed to a
+  grey field by `tools/genplaster` and coloured by `--plaster-*` tokens. Tune
+  strength through those tokens; regenerate the image only to change source
+  or processing.
 
 ## Where to work
 

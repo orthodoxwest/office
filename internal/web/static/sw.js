@@ -51,7 +51,10 @@ var CORE_ASSETS = [
   // (office-VERSION), which is dropped on activate after a deploy.
   "/static/fonts/eb-garamond-regular.woff2",
   "/static/fonts/eb-garamond-italic.woff2",
-  "/static/fonts/eb-garamond-bold.woff2"
+  "/static/fonts/eb-garamond-bold.woff2",
+  // The limewash wall behind home, ordo and reminders is also a relative
+  // url() in style.css.
+  "/static/plaster.jpg"
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always
