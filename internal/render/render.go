@@ -123,6 +123,7 @@ func templateFuncs(version string) template.FuncMap {
 		// page's liturgical day (YYYY-MM-DD) so chrome hrefs hit the same URLs
 		// the service worker precaches.
 		"navLink":               NavLink,
+		"typeset":               Typeset,
 		"homeLink":              HomeLink,
 		"hourLink":              HourLink,
 		"calendarYearLink":      CalendarYearLink,
