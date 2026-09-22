@@ -1297,6 +1297,7 @@ proper/purification-bvm/collect,6bf250c5c65f,diurnal,"Purification BVM, At Lauds
 proper/purification-bvm/magnificat-antiphon,4abaa2a2df15,diurnal,"Purification BVM, At II Vespers",471,verified,grok,2026-08-23,word-for-word from printed page image
 proper/purification-bvm/magnificat-antiphon-first,984b37f4b2d7,diurnal,"Purification BVM, At I Vespers",469,verified,grok,2026-08-23,word-for-word from printed page image
 proper/purification-bvm/short-responsory-none,706fcdc42c62,diurnal,"Purification BVM, At None",470,verified,grok,2026-08-23,word-for-word from printed page image
+proper/quinquagesima/benedictus-antiphon,52ff82df3502,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
 proper/quinquagesima/benedictus-antiphon-friday,840d7154f1c0,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-saturday,7290fe599588,diurnal,Saturday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/benedictus-antiphon-thursday,e94b5c8a90b0,diurnal,Thursday after Ash Wednesday,244,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1311,6 +1312,10 @@ proper/quinquagesima/magnificat-antiphon-monday,39f235fbd99b,diurnal,"Week of Qu
 proper/quinquagesima/magnificat-antiphon-thursday,41ad9076c263,diurnal,Thursday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/magnificat-antiphon-tuesday,7ae43af98dad,diurnal,"Week of Quinquagesima, Tuesday",243,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/magnificat-antiphon-wednesday,230f98ddfca1,diurnal,"Ash Wednesday, At Vespers",244,verified,grok,2026-08-22,word-for-word from printed page image
+proper/quinquagesima/psalm-antiphon-1,d8434895f5e7,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
+proper/quinquagesima/psalm-antiphon-2,29cb78613a04,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
+proper/quinquagesima/psalm-antiphon-4,fb802586e7b8,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
+proper/quinquagesima/psalm-antiphon-5,eb8b20034ee4,diurnal,,241,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
 proper/saturday-office-bvm-christmastide/benedictus-antiphon,71723a27cb06,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Lauds",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-christmastide/magnificat-antiphon,e94affcbd982,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Vespers",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-paschal/magnificat-antiphon,420d7ab91a53,diurnal,"Office of Saint Mary on Saturday, III In Paschaltide, At Vespers",71*,verified,claude,2026-08-22,
