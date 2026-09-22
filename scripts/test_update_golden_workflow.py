@@ -54,7 +54,11 @@ class GoldenUpdateTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.remote = self.root / "remote.git"
         self.source = self.root / "source"
-        self.env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
+        # A pre-push hook exports the caller's repository location. Disposable
+        # fixtures must not inherit it and configure the caller's repository.
+        local_vars = subprocess.check_output(["git", "rev-parse", "--local-env-vars"], text=True).splitlines()
+        self.env = {key: value for key, value in os.environ.items() if key not in local_vars}
+        self.env.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
         self.git(self.root, "init", "--bare", str(self.remote))
         self.git(self.root, "init", "-b", "master", str(self.source))
         self.git(self.source, "config", "user.name", "Test")
@@ -227,7 +231,7 @@ class GoldenUpdateTest(unittest.TestCase):
         previous = Path.cwd()
         try:
             os.chdir(self.work)
-            with patch.dict(os.environ, self.env), patch.object(updater, "git", rewind_before_push):
+            with patch.dict(os.environ, self.env, clear=True), patch.object(updater, "git", rewind_before_push):
                 with self.assertRaises(subprocess.CalledProcessError):
                     updater.publish(self.artifact)
         finally:
