@@ -199,6 +199,49 @@ and full primary and secondary reader objects as `first` and `second`. Any
 attestation uses the found page's detected or inferred printed label from the
 cache index, never the queue's cited number.
 
+### Reviewed low-similarity replacements
+
+The normal wrong-page check (below 0.5 similarity) and replacement gate (below
+0.6) remain in force. When the old text is genuinely unrelated, prepare one
+saved held reading for explicit page and appointment review:
+
+```bash
+python3 scripts/diurnal-transcribe.py prepare-replacement RUN --key proper/FEAST/SLOT \
+  --context "Feast, exact slot, current Ordo/source appointment and scope checked"
+```
+
+This provider-free command writes a packet under that run's ignored
+`replacements/` directory and prints its SHA-256. It binds the existing corpus
+body and source citations, candidate reading, final formatted output body, engine/calendar inputs,
+PDF, render settings, page index and exact images. A stale saved reading,
+disputed printed label or collect containing its conclusion cue needs a fresh
+transcription. This path is limited to the main Diurnal and excludes psalm and
+canticle replacements.
+
+Inspect the packet's images, feast heading, neighboring section boundaries,
+candidate **and output body**, and appointment context. Check that the current
+Ordo supports that slot and that no unresolved ruling affects it. The generated
+description, reader confidence and agreement do not establish the appointment.
+Record the digest of the packet actually inspected, then apply it explicitly:
+
+```bash
+python3 scripts/diurnal-transcribe.py apply-replacement output/transcribe/RUN/replacements/PACKET.json \
+  --packet-sha256 DIGEST --reviewer codex \
+  --review-note "Page identity, feast/slot boundaries, wording and appointment checked against …"
+```
+
+Application makes exactly two bounded calls (unless a provider fails): a fresh
+primary reading, then independent Claude Sonnet. Neither sees the candidate
+wording. Both must identify the reviewed page and agree after normalization
+with each other, the inspected candidate and its final output body. Agreement
+on neighboring text, word disagreement, low confidence or missing text stays
+`needs-human`. Source and appointment changes invalidate the packet. Immediately
+before writing, the script rechecks the corpus and source under the ingestion
+write lock, then uses `office corpus put` and `office review attest`. Prompts,
+reviewer signoff and both fresh readings remain in the new run's artifacts.
+A failed attempt never silently selects another page; prepare and inspect a
+new packet when its source, context or candidate needs changing.
+
 “Attested by codex” means a mechanical, hash-bound statement that the current
 corpus entry agrees word-for-word after the documented normalization with the
 located printed page image. The provenance ledger stores the corpus hash, source,

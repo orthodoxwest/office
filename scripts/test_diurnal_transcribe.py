@@ -2,6 +2,8 @@
 """Offline unit tests for diurnal-transcribe.py."""
 
 import importlib.util
+import contextlib
+import io
 import json
 import tempfile
 import unittest
@@ -516,6 +518,247 @@ class ApplyDecisionTests(unittest.TestCase):
             self.assertEqual(record["decision"], "record-only")
         finally:
             transcribe.corpus_text = original_corpus
+
+
+class ReviewedReplacementTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.run = self.root / "output" / "transcribe" / "held"
+        self.run.mkdir(parents=True)
+        self.cache = self.root / "output" / "pages" / "monastic-diurnal"
+        self.cache.mkdir(parents=True)
+        self.pdf = self.root / "diurnal.pdf"
+        self.pdf.write_bytes(b"PDF witness")
+        (self.root / "office").write_bytes(b"compiled engine")
+        self.feasts = self.root / "data" / "feasts"
+        self.feasts.mkdir(parents=True)
+        (self.feasts / "fixed.txt").write_text("[example]\nName = Example Feast\nDate = 1-1\n")
+        self.text_file = self.root / "data" / "texts" / "proper" / "example.txt"
+        self.text_file.parent.mkdir(parents=True)
+        self.text_file.write_text("[collect]\n# SOURCE: diurnal p. 594\nAn unrelated text requiring replacement.\n")
+        self.index = {"version": 1, "key": "monastic-diurnal", "source_pdf": str(self.pdf),
+                      "pdf_sha256": transcribe.diurnal_pages.sha256_file(self.pdf),
+                      "dpi": 150, "page_count": 625}
+        (self.cache / "manifest.json").write_text(json.dumps(self.index))
+        self.index["pages"] = []
+        for number, label in ((624, "595"), (625, "596")):
+            png = self.cache / f"{number:04d}.png"
+            png.write_bytes(f"image of {label}".encode())
+            self.index["pages"].append({"pdf_page": number, "printed_page": label,
+                                        "png": str(png), "inferred": False})
+        self.save_index()
+        for name, value in (("ROOT", self.root), ("TRANSCRIBE_ROOT", self.run.parent)):
+            patcher = patch.object(transcribe, name, value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
+        self.key = "proper/example/collect"
+        self.old = self.current = "An unrelated text requiring replacement."
+        self.reading = answer("Almighty and everlasting God, mercifully grant us thy peace.")
+        self.assertLess(transcribe.similarity(self.old, self.reading["text"], self.key), 0.5)
+        self.calls = []
+        patcher = patch.object(transcribe, "_run_office_unlocked", side_effect=self.office)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.write_held()
+
+    def save_index(self):
+        (self.cache / "index.json").write_text(json.dumps(self.index))
+
+    def write_held(self):
+        result = {"key": self.key, "decision": "record-only", "classification": "not-found",
+                  "first": self.reading, "corpus_text": self.old,
+                  "pages": transcribe.PageResolver().resolve("monastic-diurnal", "595")}
+        (self.run / "results.jsonl").unlink(missing_ok=True)
+        transcribe.write_jsonl(self.run / "results.jsonl", result)
+
+    def office(self, args, **kwargs):
+        # Every call, including both writes, must hold the ingestion lock.
+        import fcntl
+        with (self.root / "output" / ".office-write.lock").open("a") as lock:
+            with self.assertRaises(BlockingIOError):
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self.calls.append(args)
+        if args[:2] == ["corpus", "show"]:
+            return self.current + "\n"
+        if args[:2] == ["corpus", "put"]:
+            self.current = Path(args[args.index("--file") + 1]).read_text().rstrip("\n")
+        return ""
+
+    def command(self, argv):
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            return transcribe.main(argv)
+
+    def prepare(self):
+        code = self.command(["prepare-replacement", str(self.run), "--key", self.key,
+                             "--context", "Example Feast collect, page heading and current Ordo appointment checked."])
+        self.assertEqual(code, 0)
+        path = self.run / "replacements" / f"{transcribe.safe_key(self.key)}.json"
+        return path, json.loads(path.read_text())
+
+    def apply(self, path, packet, runner):
+        self.calls.clear()
+        with patch.object(transcribe, "ProviderRunner", return_value=runner):
+            return self.command(["apply-replacement", str(path), "--packet-sha256", packet["packet_sha256"],
+                                 "--reviewer", "test-reviewer", "--review-note",
+                                 "Inspected the heading, slot boundaries, candidate and output body against the page.",
+                                 "--run-id", "recovery"])
+
+    def assert_no_write(self):
+        self.assertFalse(any(c[:2] in (["corpus", "put"], ["review", "attest"]) for c in self.calls))
+
+    def test_reviewed_unrelated_replacement_uses_two_blind_readers_and_locked_writes(self):
+        path, packet = self.prepare()
+        runner = FakeProvider([self.reading, {**self.reading, "text": self.reading["text"].upper()}])
+        self.assertEqual(self.apply(path, packet, runner), 0)
+        self.assertEqual([c[:2] for c in runner.calls], [("codex", "gpt-5.6-luna"), ("claude", "sonnet")])
+        for call in runner.calls:
+            self.assertNotIn(self.reading["text"], call[2])
+            self.assertEqual(call[3], [self.cache / "0624.png", self.cache / "0625.png"])
+        writes = [c for c in self.calls if c[:2] != ["corpus", "show"]]
+        self.assertEqual([c[:2] for c in writes], [["corpus", "put"], ["review", "attest"]])
+        self.assertEqual(self.current, packet["body"].rstrip("\n"))
+        self.assertEqual(writes[1][writes[1].index("--page") + 1], "595")
+        result = json.loads((self.run.parent / "recovery" / "results.jsonl").read_text())
+        self.assertEqual(result["replacement_packet_sha256"], packet["packet_sha256"])
+        self.assertEqual(result["reviewer"], "test-reviewer")
+        # The successful write invalidates the saved corpus fingerprint.
+        runner.calls.clear()
+        self.assertEqual(self.apply(path, packet, runner), 1)
+        self.assertEqual(runner.calls, [])
+        self.assert_no_write()
+
+    def test_changed_review_inputs_hold_before_readers(self):
+        path, packet = self.prepare()
+        changes = {
+            "corpus": lambda: setattr(self, "current", "A newer correction"),
+            "PDF": lambda: self.pdf.write_bytes(b"another PDF"),
+            "image": lambda: (self.cache / "0624.png").write_bytes(b"different image"),
+            "index": lambda: (self.cache / "index.json").write_text(json.dumps({**self.index, "dpi": 300})),
+            "manifest": lambda: (self.cache / "manifest.json").write_text("{}"),
+            "feast": lambda: (self.feasts / "fixed.txt").write_text("changed feast context"),
+            "old source citation": lambda: self.text_file.write_text(self.text_file.read_text().replace("594", "593")),
+            "engine": lambda: (self.root / "office").write_bytes(b"new engine"),
+            "context": lambda: path.write_text(json.dumps({**packet, "appointment_context": "new mapping"})),
+        }
+        for name, mutate in changes.items():
+            with self.subTest(name=name):
+                files = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+                mutate()
+                runner = FakeProvider([])
+                self.assertEqual(self.apply(path, packet, runner), 1)
+                self.assertEqual(runner.calls, [])
+                self.assert_no_write()
+                self.current = self.old
+                for p, body in files.items():
+                    p.write_bytes(body)
+
+    def test_rehashed_packet_cannot_reuse_old_review_digest(self):
+        path, packet = self.prepare()
+        changed = {**packet, "appointment_context": "different feast or neighboring slot"}
+        changed["packet_sha256"] = transcribe.replacement_packet_hash(changed)
+        path.write_text(json.dumps(changed))
+        runner = FakeProvider([])
+        self.assertEqual(self.apply(path, packet, runner), 1)
+        self.assertEqual(runner.calls, [])
+        self.assert_no_write()
+
+    def test_reread_disagreements_and_neighboring_text_remain_held(self):
+        _, packet = self.prepare()
+        variants = [
+            {**self.reading, "text": self.reading["text"].replace("peace", "grace")},
+            {**self.reading, "confidence": "low"},
+            {**self.reading, "found": False},
+            {**self.reading, "pdf_page": 625, "printed_page": "596"},
+            {**self.reading, "printed_page": "594"},
+            {**self.reading, "text": self.reading["text"] + " Through."},
+        ]
+        for other in variants:
+            for first, second in ((self.reading, other), (other, self.reading), (other, other)):
+                with self.subTest(first=first, second=second):
+                    self.assertEqual(transcribe.reviewed_replacement_decision(packet, first, second), "needs-human")
+        # Two readers agreeing on different text cannot supersede the reviewed candidate.
+        runner = FakeProvider([variants[0], variants[0]])
+        path = self.run / "replacements" / f"{transcribe.safe_key(self.key)}.json"
+        self.assertEqual(self.apply(path, packet, runner), 1)
+        self.assert_no_write()
+
+    def test_corpus_change_during_reading_holds_under_write_lock(self):
+        path, packet = self.prepare()
+        test = self
+
+        class RacingReader(FakeProvider):
+            def transcribe(self, *args):
+                result = super().transcribe(*args)
+                test.current = "Concurrent correction"
+                return result
+
+        runner = RacingReader([self.reading, self.reading])
+        self.assertEqual(self.apply(path, packet, runner), 1)
+        self.assertEqual(len(runner.calls), 2)
+        self.assert_no_write()
+
+    def test_prepare_rejects_disputed_page_unreadable_text_and_collect_cues(self):
+        for fields in ({"printed_page": "594"}, {"pdf_page": 623}, {"confidence": "low"},
+                       {"text": self.reading["text"] + " Through."},
+                       {"text": "GOD, mercifully grant thy servants an everlasting inheritance in heaven."}):
+            with self.subTest(fields=fields):
+                original = self.reading
+                self.reading = {**original, **fields}
+                self.write_held()
+                self.assertEqual(self.command(["prepare-replacement", str(self.run), "--key", self.key,
+                                               "--context", "reviewed"]), 1)
+                self.assert_no_write()
+                self.reading = original
+
+    def test_reviewed_chapter_body_includes_the_fixed_response(self):
+        self.key = "proper/example/chapter-lauds"
+        self.reading = answer("!Rom 13:11\nBrethren: it is high time to awake out of sleep.")
+        self.write_held()
+        path, packet = self.prepare()
+        self.assertTrue(packet["body"].endswith("R. Thanks be to God.\n"))
+        runner = FakeProvider([self.reading, self.reading])
+        self.assertEqual(self.apply(path, packet, runner), 0)
+        self.assertEqual(self.current, packet["body"].rstrip("\n"))
+
+    def test_second_reader_failure_records_first_without_writing(self):
+        path, packet = self.prepare()
+
+        class FailedSecondReader(FakeProvider):
+            def transcribe(self, *args):
+                if self.calls:
+                    raise transcribe.ProviderError("bounded reader failed")
+                return super().transcribe(*args)
+
+        runner = FailedSecondReader([self.reading])
+        self.assertEqual(self.apply(path, packet, runner), 1)
+        self.assert_no_write()
+        result = json.loads((self.run.parent / "recovery" / "results.jsonl").read_text())
+        self.assertEqual(result["first"], self.reading)
+        self.assertEqual(result["error"], "bounded reader failed")
+
+    def test_psalter_replacements_cannot_enter_recovery(self):
+        for key in ("psalms/001", "canticles/magnificat"):
+            self.assertEqual(self.command(["prepare-replacement", str(self.run), "--key", key,
+                                           "--context", "reviewed"]), 1)
+        _, packet = self.prepare()
+        for key in ("psalms/001", "canticles/magnificat"):
+            self.assertEqual(transcribe.reviewed_replacement_decision({**packet, "key": key},
+                                                                     self.reading, self.reading), "needs-human")
+
+    def test_cli_requires_signoff_and_independent_provider(self):
+        path, packet = self.prepare()
+        argv = ["apply-replacement", str(path), "--reviewer", "reviewer", "--review-note", "reviewed",
+                "--packet-sha256", packet["packet_sha256"]]
+        for flag in ("--reviewer", "--review-note", "--packet-sha256"):
+            incomplete = argv.copy()
+            index = incomplete.index(flag)
+            del incomplete[index:index + 2]
+            with self.subTest(flag=flag), self.assertRaises(SystemExit):
+                self.command(incomplete)
+        with self.assertRaises(SystemExit):
+            self.command(argv + ["--provider", "claude"])
 
 
 class ProviderCommandTests(unittest.TestCase):
