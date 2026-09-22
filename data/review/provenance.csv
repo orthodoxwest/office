@@ -950,10 +950,14 @@ proper/holy-innocents/magnificat-antiphon,964cf7d1099d,diurnal,"Holy Innocents, 
 proper/holy-innocents/magnificat-antiphon-first,d0fecbb41021,diurnal,"Holy Innocents, At I Vespers",201,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/psalm-antiphon-1-vespers,8043562bf186,diurnal,,188,verified,grok,2026-09-21,Word-for-word after normalization; page image output/pages/monastic-diurnal/0234.png
 proper/holy-innocents/short-responsory-none,015bfd7a2eac,diurnal,"Holy Innocents, At None",203,verified,grok,2026-08-23,word-for-word from printed page image
+proper/holy-monday/benedictus-antiphon,fa864f07f5c6,diurnal,,281,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
 proper/holy-monday/collect,1e36e8c217d9,diurnal,,281,verified,codex,2026-09-10,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png; first reader discarded as wrong-page because corpus was far
+proper/holy-monday/magnificat-antiphon,74b2f0ea93d2,diurnal,,282,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0328.png
 proper/holy-monday/psalm-antiphon-1,0d5baaf36c3c,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
 proper/holy-monday/psalm-antiphon-2,e6e34147754e,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
 proper/holy-monday/psalm-antiphon-3,919544333c2a,diurnal,,281,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
+proper/holy-monday/psalm-antiphon-4,be7bcc173a37,diurnal,,281,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
+proper/holy-monday/psalm-antiphon-5,1581fc149402,diurnal,,281,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0327.png
 proper/holy-name-jesus/chapter-lauds,71d4c93e07b2,diurnal,,216,verified,grok,2026-09-21,Word-for-word after normalization; page image output/pages/monastic-diurnal/0262.png
 proper/holy-name-jesus/chapter-none,e90f753d7d15,diurnal,"Holy Name of Jesus, At None",218,verified,grok,2026-08-24,word-for-word from printed page image
 proper/holy-name-jesus/chapter-sext,2d1ae91c8b17,diurnal,"Holy Name of Jesus, At Sext",217,verified,grok,2026-08-24,word-for-word from printed page image
@@ -997,6 +1001,7 @@ proper/holy-thursday/psalm-antiphon-4-vespers,803819353d5c,diurnal,,315,verified
 proper/holy-thursday/psalm-antiphon-5-vespers,c2c96bee9d5b,diurnal,,315,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0361.png
 proper/holy-thursday/triduum-antiphon,17ca8be312f7,diurnal,Maundy Thursday at Lauds,313,verified,claude,2026-08-30,First day's form; transcribed from the page image.
 proper/holy-thursday/versicle-lauds,a410286aeab3,diurnal,Maundy Thursday at Lauds,311,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
+proper/holy-tuesday/benedictus-antiphon,0528ed8de290,diurnal,,282,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0328.png
 proper/holy-tuesday/collect,e535931a938d,diurnal,,282,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0328.png
 proper/holy-tuesday/psalm-antiphon-1,7acbc3bdb4f7,diurnal,,282,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0328.png
 proper/holy-tuesday/psalm-antiphon-2,d63d59000eb9,diurnal,,282,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0328.png
