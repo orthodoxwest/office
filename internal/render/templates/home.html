@@ -41,7 +41,7 @@
           <a class="today-link not-today-link" href="{{.TodayLink}}">Go to today</a>
         </p>
         {{end}}
-        {{if .FeastName}}<p class="feast">{{.FeastName}}</p>{{end}}
+        {{if .FeastName}}<p class="feast">{{typeset .FeastName}}</p>{{end}}
         {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
         {{if .Penitential}}
         <p class="penitential">
@@ -52,7 +52,7 @@
         <div class="commemorations">
           <span class="commemorations-label">Also</span>
           <ul>
-            {{range .Commemorations}}<li>{{.}}</li>{{end}}
+            {{range .Commemorations}}<li>{{typeset .}}</li>{{end}}
           </ul>
         </div>
         {{end}}
@@ -122,14 +122,14 @@
       <details class="hour-date-nav home-date-nav">
         <summary>Change date</summary>
         <nav class="day-nav" aria-label="Date navigation">
-          <a href="{{.PrevLink}}" aria-label="Previous day">&laquo; Previous</a>
+          <a href="{{.PrevLink}}" aria-label="Previous day">&larr; Previous</a>
           <form class="date-jump-form" action="/" method="get">
             <label class="sr-only" for="home-date-jump">Jump to date</label>
             <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{.DateSlug}}">
             <button class="date-submit" type="submit">Go</button>
             {{if .ShowToday}}<a class="today-link" href="{{.TodayLink}}">Today</a>{{end}}
           </form>
-          <a href="{{.NextLink}}" aria-label="Next day">Next &raquo;</a>
+          <a href="{{.NextLink}}" aria-label="Next day">Next &rarr;</a>
         </nav>
       </details>
     </div>
