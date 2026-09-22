@@ -30,7 +30,8 @@ The kingdom * of heaven is like unto a man that is an householder, which went ou
 The householder * saith unto the labourers, Why stand ye here all the day idle? They say unto him, Because no man hath hired us. Go ye also into the vineyard, and whatsoever is right, I will give you.
 
 [commemoration-antiphon]
-The Lord said unto Adam: * Of the tree which is in the midst of the garden, thou shalt not eat; in the hour that thou eatest thereof, thou shalt surely die.
+# SOURCE: diurnal p. 235
+The Lord said * unto Adam, Of the tree which is in the midst of the garden thou shalt not eat: for in the day that thou eatest thereof, thou shalt surely die.
 
 [commemoration-versicle]
 V. O Lord, have mercy upon us.

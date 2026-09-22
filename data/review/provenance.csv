@@ -886,6 +886,7 @@ proper/epiphany/chapter-lauds,de310a2d710f,diurnal,"Epiphany, At Lauds",224,veri
 proper/epiphany/chapter-none,c8a77b00203c,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/chapter-sext,0462d501e782,diurnal,"Epiphany, At Sext",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
+proper/epiphany/commemoration-antiphon,fe9bf919d185,diurnal,,224,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/psalm-antiphon-1,7c5a7b1eeb8e,diurnal,,224,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png; first reader discarded as wrong-page because corpus was far
 proper/epiphany/psalm-antiphon-2,b5e68f2371e5,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/psalm-antiphon-3,f1b43827efea,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
@@ -1128,6 +1129,7 @@ proper/low-sunday/chapter-lauds,961b291efe92,diurnal,"Low Sunday, At Lauds",370,
 proper/low-sunday/chapter-none,400f028fef65,diurnal,"Low Sunday, At None",371-372,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/chapter-sext,8d410df9f426,diurnal,"Low Sunday, At Sext",371,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/collect,ac988f4e77f4,diurnal,,371,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0417.png
+proper/low-sunday/commemoration-antiphon,caba32c4f64b,diurnal,,370,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0416.png
 proper/low-sunday/magnificat-antiphon,dc570ffb0206,diurnal,"Low Sunday, At II Vespers",372,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/magnificat-antiphon-monday,81b39a781d2f,diurnal,"I Week after the Octave of Easter, Monday",376,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/magnificat-antiphon-thursday,9053ff34a3bf,diurnal,"I Week after the Octave of Easter, Thursday",376,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1302,6 +1304,7 @@ proper/quinquagesima/benedictus-antiphon-wednesday,e2d7e86f0e80,diurnal,Ash Wedn
 proper/quinquagesima/chapter-none,fa780e5b93e8,diurnal,,242,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0288.png
 proper/quinquagesima/chapter-sext,86bb94ae73bc,diurnal,,242,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0288.png
 proper/quinquagesima/collect,9198c1437479,diurnal,,241,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0287.png
+proper/quinquagesima/commemoration-antiphon,ab2b03eef584,diurnal,,240,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0286.png
 proper/quinquagesima/magnificat-antiphon,004791144722,diurnal,,243,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0289.png
 proper/quinquagesima/magnificat-antiphon-friday,01e176cce272,diurnal,Friday after Ash Wednesday,245,verified,grok,2026-08-22,word-for-word from printed page image
 proper/quinquagesima/magnificat-antiphon-monday,39f235fbd99b,diurnal,"Week of Quinquagesima, Monday",243,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1329,6 +1332,7 @@ proper/september-ember-wednesday/collect-lauds,01ebdd872bc8,diurnal,,426,verifie
 proper/septuagesima/chapter-none,fd64dac1aa24,diurnal,"Septuagesima Sunday, At None",237,verified,grok,2026-08-22,word-for-word from printed page image
 proper/septuagesima/chapter-sext,5fd6f89d10f3,diurnal,"Septuagesima Sunday, At Sext",236,verified,grok,2026-08-22,word-for-word from printed page image
 proper/septuagesima/collect,1cac84c06df1,diurnal,,236,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0282.png
+proper/septuagesima/commemoration-antiphon,3e409d8dc1fe,diurnal,,235,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0281.png
 proper/septuagesima/magnificat-antiphon,5a391de82892,diurnal,,237,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0283.png
 proper/septuagesima/magnificat-antiphon-friday,32fca8ae3ce8,diurnal,,238,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0284.png
 proper/septuagesima/magnificat-antiphon-monday,274bdf7cde5d,diurnal,"Week of Septuagesima, Monday",237,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1355,6 +1359,7 @@ proper/seven-sorrows-bvm/versicle-vespers,945703ca89d8,diurnal,"Seven Sorrows of
 proper/sexagesima/chapter-none,4bd4a94afac8,diurnal,,240,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0286.png
 proper/sexagesima/chapter-sext,883f6dc5173c,diurnal,,239,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
 proper/sexagesima/collect,237405793c15,diurnal,,239,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0285.png
+proper/sexagesima/commemoration-antiphon,1c65ba226994,diurnal,,238,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0284.png
 proper/sexagesima/magnificat-antiphon,46791546b729,diurnal,,240,verified,codex,2026-09-15,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0286.png
 proper/sexagesima/magnificat-antiphon-friday,c97abf0df273,diurnal,,240,verified,codex,2026-09-11,Word-for-word after normalization; page image output/pages/monastic-diurnal/0286.png
 proper/sexagesima/magnificat-antiphon-monday,0a4fbc150e23,diurnal,"Week of Sexagesima, Monday",240,verified,grok,2026-08-22,word-for-word from printed page image

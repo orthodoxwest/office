@@ -29,7 +29,8 @@ The same day * at evening, being the first day of the week, when the doors were 
 After eight days, * when the doors were shut, the Lord entered, and said unto them, Peace be unto you, alleluia, alleluia.
 
 [commemoration-antiphon]
-Now when it was late * the same day, the first of the week, and the doors were shut, where the disciples were gathered together, for fear of the Jews, Jesus came and stood in the midst and said to them: Peace be to you, alleluia.
+# SOURCE: diurnal p. 370
+The same day * at evening, being the first day of the week, when the doors were shut where the disciples were assembled, came Jesus and stood in the midst, and saith unto them, Peace be unto you, alleluia.
 
 [commemoration-versicle]
 @use proper/easter-sunday/commemoration-versicle

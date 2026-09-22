@@ -37,7 +37,8 @@ The wise men, * beholding the star, said one to another, This is the sign of a m
 Now do we celebrate * a holy day adorned by three miracles: today a star led the wise men to the manger; today water was made wine at the wedding feast; today Christ vouchsafed to be baptized of John in Jordan that he might save us, alleluia.
 
 [commemoration-antiphon]
-When the wise men saw the star * they said one unto another: This is the sign of the Great King; let us go and search diligently for Him, and present unto Him gifts, gold, and frankincense, and myrrh. Alleluia.
+# SOURCE: diurnal p. 224
+The wise men, * beholding the star, said one to another, This is the sign of a mighty King; forth fare we, and let us seek him: and let us offer him gifts, gold, incense and myrrh, alleluia.
 
 [commemoration-versicle]
 @use proper/epiphany/versicle-vespers
