@@ -25,7 +25,8 @@ O ye seas and floods, * bless ye the Lord: O ye wells, sing a hymn unto the Lord
 Like a flame of fire, * that star glittereth yonder, revealing God, the King of kings: the wise men, when they beheld it, offered presents unto the mighty Ruler.
 
 [benedictus-antiphon]
-This day is the Church joined unto the Heavenly Bridegroom, * since Christ hath washed away her sins in Jordan; the wise men hasten with gifts to the marriage supper of the King; and they that sit at meat together make merry with water turned into wine. Alleluia.
+# SOURCE: diurnal p. 225
+To-day * the Church is joined to her heavenly Bridegroom; because in Jordan Christ hath washed away her offences: the wise men with their offerings hasten to the royal marriage, and the guests are regaled with water made wine, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, pp. 122–123 (I Vespers, The Epiphany of Our Lord; Magi videntes stellam)
