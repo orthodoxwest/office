@@ -2619,6 +2619,19 @@ test("Martyrology preview stays opt-in and cannot enter the offline office cache
   }
 });
 
+test("closing antiphons share one left edge whatever their length", async ({ page }) => {
+  // Vespers of 2026-09-22 closes psalms with both one-line and wrapping antiphons.
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    await openDatedPage(page, "/vespers/2026-09-22");
+    const lefts = await page.locator(".elements > :is(.psalm, .canticle) + .antiphon").evaluateAll((antiphons) =>
+      antiphons.map((antiphon) => Math.round(antiphon.getBoundingClientRect().left)),
+    );
+    expect(lefts.length, `${width}px closing antiphons`).toBeGreaterThan(3);
+    expect(new Set(lefts).size, `${width}px closing antiphon edges ${lefts.join(", ")}`).toBe(1);
+  }
+});
+
 test("long opening verses return to the numbered text edge below the initial", async ({ page }) => {
   for (const width of [320, 390, 540]) {
     await page.setViewportSize({ width, height: 844 });

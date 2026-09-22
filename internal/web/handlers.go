@@ -341,6 +341,10 @@ func (s *Server) handleHome(w http.ResponseWriter, r *http.Request) {
 		feastName = day.Celebration.Name
 	} else if day.Tempora != "" {
 		feastName = day.Tempora
+	} else if day.Season != "" {
+		// Name the day as the ordo row does; otherwise a feria with a
+		// commemoration opened on "Also …" with nothing before it.
+		feastName = render.TitleCase(string(day.Season)) + " feria"
 	}
 	for _, c := range day.Commemorations {
 		commemorations = append(commemorations, c.Name)
