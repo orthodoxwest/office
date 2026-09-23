@@ -497,6 +497,49 @@ test("wide hour plaster clears the prayer without sideways scroll or stretching"
   expect((await wall()).image).toMatch(/plaster\.jpg/);
 });
 
+for (const [theme, minContrast] of [["light", 1.2], ["dark", 2.5]]) {
+  test(`the ${theme} wall is visible yet averages the page colour`, async ({ page }) => {
+    // Nave once rendered at 0.46% luminance contrast: mean-matched, and
+    // invisible. Sample the bare wall (content hidden) and hold both ends:
+    // visible, never loud, and averaging --bg so cleared fields show no edge.
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openDatedPage(page, "/calendar/2026", theme);
+      await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+      const png = (await page.screenshot()).toString("base64");
+      const wall = await page.evaluate(async (b64) => {
+        const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const context = canvas.getContext("2d");
+        context.drawImage(bitmap, 0, 0);
+        const data = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
+        const sums = [0, 0, 0];
+        let luminance = 0;
+        let luminance2 = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          sums[0] += data[i];
+          sums[1] += data[i + 1];
+          sums[2] += data[i + 2];
+          const l = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+          luminance += l;
+          luminance2 += l * l;
+        }
+        const n = data.length / 4;
+        const mean = luminance / n;
+        const bg = getComputedStyle(document.documentElement).backgroundColor.match(/\d+/g).map(Number);
+        return {
+          drift: Math.max(...sums.map((sum, i) => Math.abs(sum / n - bg[i]))),
+          contrast: (100 * Math.sqrt(luminance2 / n - mean * mean)) / mean,
+        };
+      }, png);
+      expect(wall.drift, `${width}px mean vs --bg`).toBeLessThan(1.5);
+      expect(wall.contrast, `${width}px contrast %`).toBeGreaterThan(minContrast);
+      expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
+    }
+  });
+}
+
 test("forced colours drop the wall for the system canvas", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.setViewportSize({ width: 1280, height: 900 });

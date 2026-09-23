@@ -58,13 +58,19 @@
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
-  /* Limewash wall (see "Parish material"): the lightest plaster, and the
-     multiply factor its darkest trowel strokes reach. The base is solved so
-     that the wall averages exactly --bg (the textures' mean is mid-grey):
-     base = bg / (0.5 + 0.5 × tint). The prayer's cleared field is painted in
-     --bg, so any other base shows its edge as a lighter or darker panel. */
-  --plaster-base: #fffdf6;
-  --plaster-tint: #f5ebe4;
+  /* Limewash wall (see "Parish material"). Nave sits within 5 levels of
+     white, too close for a symmetric texture to show, so it is set as real
+     limewash is: a flat ground (--plaster-base) with darker clouds of wash.
+     The knee clips the texture's lighter part to the ground; the clouds
+     below it deepen toward --plaster-tint. Knee and dodge sum to white.
+     Tint is solved per channel (scratch solver over the texture pixels) so
+     the wall averages exactly --bg: the prayer's cleared field and the iOS
+     month heading are --bg, and any other mean shows their edges. Result:
+     1.6% luminance contrast against Apse's 3.4%, where 0.5% was invisible. */
+  --plaster-base: #fffdf7;
+  --plaster-tint: #e9d3c0;
+  --plaster-knee: rgb(166 166 166);
+  --plaster-dodge: rgb(89 89 89);
   --hour-plaster-opacity: 0.7;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
@@ -2559,8 +2565,12 @@ footer::before {
     color-scheme: dark;
     --text: #e8e2d0;
     --bg: #121c28;
+    /* Apse's dark ground has headroom above it, so its knee is white:
+       the full texture, base × screen(texture, tint), solved to --bg. */
     --plaster-base: #182332;
     --plaster-tint: #7d949c;
+    --plaster-knee: #fff;
+    --plaster-dodge: #000;
     --hour-plaster-opacity: 0.52;
     --accent: #d0b06a;
     --gold: #d8bc74;
@@ -2603,8 +2613,12 @@ footer::before {
   color-scheme: dark;
   --text: #e8e2d0;
   --bg: #121c28;
+  /* Apse's dark ground has headroom above it, so its knee is white:
+     the full texture, base × screen(texture, tint), solved to --bg. */
   --plaster-base: #182332;
   --plaster-tint: #7d949c;
+  --plaster-knee: #fff;
+  --plaster-dodge: #000;
   --hour-plaster-opacity: 0.52;
   --accent: #d0b06a;
   --gold: #d8bc74;
@@ -4310,17 +4324,21 @@ body.season-eastertide {
    fixed and cover-fitted, so long pages never repeat a tile and the
    strokes never stretch out of true.
 
-   Every page composes the same layers inside one opaque background:
-   base × screen(texture, tint). Where the wall is at its mean the
-   result is about --bg; darker trowel strokes take on more of the tint, as
-   more wash sits in them. Being self-contained, the same layers can be
-   repeated on a sticky surface with a fixed attachment and meet the wall. */
+   Every page composes the same layers inside one opaque background,
+   bottom-up: min(texture, knee) ÷ knee (darken, then color-dodge by
+   1 − knee), screened with the tint, multiplied by the base. Darker trowel
+   strokes take on more of the tint, as more wash sits in them; the theme
+   tokens set how much of the texture is ground and how much is cloud.
+   Being self-contained, the same layers can be repeated on a sticky
+   surface with a fixed attachment and meet the wall. */
 :root {
   --plaster-image: url("plaster.jpg");
   --plaster-layers:
     linear-gradient(var(--plaster-base), var(--plaster-base)),
+    linear-gradient(var(--plaster-tint), var(--plaster-tint)),
+    linear-gradient(var(--plaster-dodge), var(--plaster-dodge)),
     var(--plaster-image),
-    linear-gradient(var(--plaster-tint), var(--plaster-tint));
+    linear-gradient(var(--plaster-knee), var(--plaster-knee));
 }
 
 /* Not preloaded. On a slow connection a preload arrived before first paint
@@ -4355,7 +4373,7 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hou
 html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
-  background-blend-mode: multiply, screen, normal;
+  background-blend-mode: multiply, screen, color-dodge, darken, normal;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
