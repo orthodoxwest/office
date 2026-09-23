@@ -24,7 +24,7 @@ const (
 
 // escCross replaces the ✠ cross character with a styled HTML span.
 func escCross(s string) string {
-	return strings.ReplaceAll(template.HTMLEscapeString(s), "✠", `<span class="cross">✠</span>`)
+	return strings.ReplaceAll(escText(s), "✠", `<span class="cross">✠</span>`)
 }
 
 // softenDropCapOpening title-cases a run of leading ALL-CAPS words so a CSS
@@ -131,9 +131,9 @@ func renderSectionElements(elems []models.OfficeElement) template.HTML {
 func renderSectionHeading(label string) template.HTML {
 	const prefix = "Commemoration of "
 	if name, ok := strings.CutPrefix(label, prefix); ok && name != "" {
-		return template.HTML(`<h2 class="section-heading commemoration-heading"><span class="commemoration-kicker">Commemoration of</span> <span class="commemoration-name">` + template.HTMLEscapeString(name) + `</span></h2>`)
+		return template.HTML(`<h2 class="section-heading commemoration-heading"><span class="commemoration-kicker">Commemoration of</span> <span class="commemoration-name">` + escText(name) + `</span></h2>`)
 	}
-	return template.HTML(`<h2 class="section-heading">` + template.HTMLEscapeString(label) + `</h2>`)
+	return template.HTML(`<h2 class="section-heading">` + escText(label) + `</h2>`)
 }
 
 func renderOfficeElement(elem models.OfficeElement, doxologyText string) string {
@@ -153,7 +153,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			// The label is the antiphon's Latin title ("Salve Regina"); the
 			// body beneath it is English. Marian antiphons are never announced.
 			sb.WriteString(`<div class="marian-antiphon"><h3 class="item-label" lang="la">`)
-			sb.WriteString(template.HTMLEscapeString(elem.Label))
+			sb.WriteString(escText(elem.Label))
 			sb.WriteString(`</h3>`)
 			sb.WriteString(string(renderMarianAntiphon(elem.Text)))
 			sb.WriteString(`</div>`)
@@ -182,11 +182,11 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			// vertical space on a phone; the separator is hidden from
 			// assistive technology, which reads label then incipit.
 			sb.WriteString(`<h3 class="item-label">`)
-			sb.WriteString(template.HTMLEscapeString(elem.Label))
+			sb.WriteString(escText(elem.Label))
 			if elem.Incipit != "" {
 				sb.WriteString(`<span class="label-sep" aria-hidden="true"> · </span>`)
 				sb.WriteString(`<span class="psalm-incipit" lang="la">`)
-				sb.WriteString(template.HTMLEscapeString(elem.Incipit))
+				sb.WriteString(escText(elem.Incipit))
 				sb.WriteString(`</span>`)
 			}
 			sb.WriteString(`</h3>`)
@@ -202,7 +202,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 			// A composed hymn's label is its Latin incipit (see
 			// texts.SplitHymnTitle); the stanzas below are English.
 			sb.WriteString(`<p class="hymn-title" lang="la">`)
-			sb.WriteString(template.HTMLEscapeString(elem.Label))
+			sb.WriteString(escText(elem.Label))
 			sb.WriteString(`</p>`)
 		}
 		sb.WriteString(string(renderHymnStanzas(elem.Text)))
@@ -239,7 +239,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(`<div class="chapter"><h2 class="section-heading">Chapter</h2>`)
 		if elem.Label != "" {
 			sb.WriteString(`<p class="chapter-ref">`)
-			sb.WriteString(template.HTMLEscapeString(elem.Label))
+			sb.WriteString(escText(elem.Label))
 			sb.WriteString(`</p>`)
 		}
 		sb.WriteString(string(renderFlowingLiturgicalBlock(elem.Text)))
@@ -252,7 +252,7 @@ func renderOfficeElement(elem models.OfficeElement, doxologyText string) string 
 		sb.WriteString(string(renderGloriaPatri(elem.Text)))
 	default:
 		sb.WriteString(`<p class="element">`)
-		sb.WriteString(template.HTMLEscapeString(elem.Text))
+		sb.WriteString(escText(elem.Text))
 		sb.WriteString(`</p>`)
 	}
 
@@ -270,7 +270,7 @@ func renderPsalmVerses(text string) template.HTML {
 
 	if psalm.ScriptureRef != "" {
 		sb.WriteString(`<p class="scripture-ref">`)
-		sb.WriteString(template.HTMLEscapeString(psalm.ScriptureRef))
+		sb.WriteString(escText(psalm.ScriptureRef))
 		sb.WriteString(`</p>`)
 	}
 
@@ -285,7 +285,7 @@ func renderPsalmVerses(text string) template.HTML {
 		case texts.PsalmSection:
 			sb.WriteString(`</div>`)
 			sb.WriteString(`<p class="canticle-section">`)
-			sb.WriteString(template.HTMLEscapeString(item.Heading))
+			sb.WriteString(escText(item.Heading))
 			sb.WriteString(`</p>`)
 			sb.WriteString(`<div class="psalm-verses">`)
 			dropCapNext = true
@@ -294,10 +294,10 @@ func renderPsalmVerses(text string) template.HTML {
 			// Pointed as a pair: the break falls between the two lines.
 			// Gloria is never the drop-cap verse (it follows real verses).
 			sb.WriteString(`<p class="verse">`)
-			sb.WriteString(template.HTMLEscapeString(item.First))
+			sb.WriteString(escText(item.First))
 			if item.Second != "" {
 				sb.WriteString(` <span class="mediant">*</span> `)
-				sb.WriteString(template.HTMLEscapeString(item.Second))
+				sb.WriteString(escText(item.Second))
 			}
 			sb.WriteString(`</p>`)
 			dropCapNext = false
@@ -310,7 +310,7 @@ func renderPsalmVerses(text string) template.HTML {
 			}
 			if item.Number != "" {
 				sb.WriteString(`<p class="verse numbered"><span class="verse-num">`)
-				sb.WriteString(template.HTMLEscapeString(item.Number))
+				sb.WriteString(escText(item.Number))
 				sb.WriteString(`</span><span class="verse-body">`)
 			} else {
 				sb.WriteString(`<p class="verse">`)
@@ -356,7 +356,7 @@ func renderRubric(elem models.OfficeElement) template.HTML {
 	var sb strings.Builder
 	sb.WriteString(`<p class="rubric">`)
 	if len(elem.RubricSpans) == 0 {
-		sb.WriteString(template.HTMLEscapeString(elem.Text))
+		sb.WriteString(escText(elem.Text))
 	} else {
 		for _, span := range elem.RubricSpans {
 			if span.Prayed {
@@ -364,7 +364,7 @@ func renderRubric(elem models.OfficeElement) template.HTML {
 				sb.WriteString(escCross(span.Text))
 				sb.WriteString(`</span>`)
 			} else {
-				sb.WriteString(template.HTMLEscapeString(span.Text))
+				sb.WriteString(escText(span.Text))
 			}
 		}
 	}
@@ -508,7 +508,7 @@ func renderLiturgicalBlockWithVoice(text string, spokenAt []bool, mode proseLine
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="scripture-ref">`)
-			sb.WriteString(template.HTMLEscapeString(line.Text))
+			sb.WriteString(escText(line.Text))
 			sb.WriteString(`</p>`)
 		case texts.BlockVersicle:
 			sigilLine("versicle-line", sigilClass, "℣.", line)
@@ -648,7 +648,7 @@ func renderLiturgicalBlockWithOptions(text string, mode proseLineMode, shortResp
 			flushProse()
 			emitGap()
 			sb.WriteString(`<p class="scripture-ref">`)
-			sb.WriteString(template.HTMLEscapeString(line.Text))
+			sb.WriteString(escText(line.Text))
 			sb.WriteString(`</p>`)
 		case texts.BlockVersicle:
 			sigilLine("versicle-line", sigilClass, "℣.", line.Text)
@@ -691,7 +691,7 @@ func renderHymnStanzas(text string) template.HTML {
 		} else {
 			// Latin incipit standing above English stanzas.
 			sb.WriteString(`<p class="hymn-latin" lang="la">`)
-			sb.WriteString(template.HTMLEscapeString(hymn.Title))
+			sb.WriteString(escText(hymn.Title))
 			sb.WriteString(`</p>`)
 		}
 	}
@@ -742,7 +742,7 @@ func renderHymnStanzas(text string) template.HTML {
 
 func writeHymnRubric(sb *strings.Builder, rubric string) {
 	sb.WriteString(`<p class="rubric hymn-rubric">`)
-	sb.WriteString(template.HTMLEscapeString(rubric))
+	sb.WriteString(escText(rubric))
 	sb.WriteString(`</p>`)
 }
 

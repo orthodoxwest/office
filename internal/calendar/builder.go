@@ -42,8 +42,8 @@ var shortNames = map[string]string{
 	"conception-bvm":        "the Conception of the B.V.M.",
 	"all-saints":            "All Saints",
 	"nativity-john-baptist": "St John the Baptist",
-	"st-matthias":           "St. Matthias",
-	"st-bartholomew":        "St. Bartholomew",
+	"st-matthias":           "St Matthias",
+	"st-bartholomew":        "St Bartholomew",
 }
 
 func getShortName(feast *models.Feast) string {
@@ -77,7 +77,7 @@ func epiphanySundayFeasts(year int, septuagesima time.Time) []*models.Feast {
 		var properID string
 		color := models.Green
 		if n == 1 {
-			name = "Sunday within the Octave of Epiphany"
+			name = "Sunday within the Octave of the Epiphany"
 			color = models.White
 			properID = "epiphany-sunday-within-octave"
 		} else {
@@ -404,7 +404,7 @@ func octaveFeasts(feasts []*models.Feast, year int, easter time.Time, moveable *
 				feastID = feast.ID + "-octave-day"
 				switch feast.ID {
 				case "conception-bvm":
-					name = "Octave of the Conception of the B.V.M"
+					name = "Octave of the Conception of the B.V.M."
 				case "nativity-john-baptist":
 					name = "Octave of St John Baptist"
 				case "ss-peter-paul":
@@ -778,7 +778,7 @@ func saturdayOfficeBVMFeast(date time.Time, season models.Season) *models.Feast 
 	}
 	return &models.Feast{
 		ID:       "saturday-office-bvm",
-		Name:     "Saturday Office of the B.V.M",
+		Name:     "Saturday Office of the B.V.M.",
 		Rank:     models.Simple,
 		Color:    models.White,
 		Category: models.CategoryBlessedVirgin,

@@ -671,7 +671,7 @@ footer::before {
 }
 
 .assurance-panel > summary::after {
-  content: " ▾";
+  content: "▾";
   margin-left: 0.3em;
   color: var(--gold-line);
   font-size: 0.85em;
@@ -680,7 +680,7 @@ footer::before {
 }
 
 .assurance-panel[open] > summary::after {
-  content: " ▴";
+  content: "▴";
 }
 
 .assurance-panel h2 {
@@ -1093,13 +1093,28 @@ footer::before {
 }
 
 .hour-date-nav > summary::after {
-  content: " ▾";
+  content: "▾";
+  margin-inline-start: 0.35em;
   color: var(--gold-line);
   font-size: 0.85em;
 }
 
 .hour-date-nav[open] > summary::after {
-  content: " ▴";
+  content: "▴";
+}
+
+/* Disclosure labels that are flex boxes (for their touch height) trim the
+   space in a " ▾" caret and centre the smaller caret glyph on the box, so it
+   floated above the label's baseline. Wrapping lets align-content centre the
+   single line in the tall box while the label and caret share a baseline,
+   as they do in the block-level disclosures elsewhere. */
+.hour-date-nav > summary,
+.leader-selector > summary,
+.session-prayers > summary,
+.assurance-panel > summary {
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: baseline;
 }
 
 .hour-date-nav[open] > summary {
@@ -1916,14 +1931,15 @@ footer::before {
 }
 
 .session-prayers summary::after {
-  content: " ▾";
+  content: "▾";
+  margin-inline-start: 0.35em;
   color: var(--gold-line);
   font-size: 0.75em;
   letter-spacing: 0;
 }
 
 .session-prayers[open] > summary::after {
-  content: " ▴";
+  content: "▴";
 }
 
 .elements > .session-prayers:first-child > summary {
@@ -3354,6 +3370,13 @@ body.season-eastertide {
   box-shadow: inset 0 -1px 0 var(--ornament);
 }
 
+/* The current hour's wash already divides it from its neighbours; a hairline
+   at its edge would sit half on the wash and half off it. */
+.page-home .home-hour-link.is-current::before,
+.page-home .home-hour-link.is-current + .home-hour-link::before {
+  visibility: hidden;
+}
+
 .page-home .home-hour-link-state {
   margin-left: 0;
 }
@@ -4636,9 +4659,29 @@ body.page-home::before {
     padding: 0;
   }
 
+  /* A book measure, not the sheet's: at 11pt the full letter width ran to
+     120-odd characters a line. 30em keeps the screen's ~70 characters, and
+     the antiphons' 34rem frame then sits inside the column as on screen. */
+  @page {
+    margin: 0.75in 0.9in;
+  }
+
   .elements {
-    max-width: none;
+    max-width: 30em;
+    margin-inline: auto;
     font-size: inherit;
+  }
+
+  /* An announced antiphon, heading or reference introduces what follows;
+     the psalm's keep-together rule otherwise stranded "Ant. Out of the
+     deep." alone at the foot of a page. */
+  .elements > .antiphon-announce,
+  .section-heading,
+  .item-label,
+  .hymn-title,
+  .scripture-ref,
+  .chapter-ref {
+    break-after: avoid;
   }
 
   .hour-header {
@@ -4903,15 +4946,15 @@ body.page-home::before {
   gap: .25rem;
   padding: .35rem .5rem;
   color: var(--muted);
-  font-size: .8rem;
-  font-variant-caps: all-small-caps;
-  letter-spacing: .035em;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
 }
 .leader-selector > summary [data-leaders] { color: var(--text); }
 .leader-selector[open] > summary { color: var(--accent); }
 .leader-selector > summary::-webkit-details-marker { display: none; }
-.leader-selector > summary::after { content: " ▾"; color: var(--gold-line); font-size: .85em; letter-spacing: 0; }
-.leader-selector[open] > summary::after { content: " ▴"; }
+.leader-selector > summary::after { content: "▾"; margin-inline-start: .1em; color: var(--gold-line); font-size: .85em; letter-spacing: 0; }
+.leader-selector[open] > summary::after { content: "▴"; }
 .leader-selector[open] { flex: 1 1 100%; }
 .leader-selector fieldset {
   text-align: left;

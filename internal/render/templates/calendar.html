@@ -66,10 +66,10 @@
                 {{if .Rank}}{{if .RankFull}}<abbr class="day-mobile-rank" tabindex="0" title="{{.RankFull}}">{{.Rank}}</abbr>{{else}}<span class="day-mobile-rank">{{.Rank}}</span>{{end}}{{end}}
               </span>
             </div>
-            <a class="day-feast-name" href="{{homeLink .DateSlug $theme}}">{{.FeastName}}</a>
+            <a class="day-feast-name" href="{{homeLink .DateSlug $theme}}">{{typeset .FeastName}}</a>
             {{/* On cards both disclosures share one line; see .day-disclosures. */}}
             <div class="day-disclosures">
-            {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{.}}</span>{{end}}</details>{{end}}
+            {{if .Commemorations}}<details class="day-commemorations"><summary>{{len .Commemorations}} commemoration{{if gt (len .Commemorations) 1}}s{{end}}</summary>{{range .Commemorations}}<span class="day-commemoration">{{typeset .}}</span>{{end}}</details>{{end}}
             {{if or .BenedictusAntiphon .MagnificatAntiphon .LaudsPreces .LaudsSuffrage .HoursPreces .VespersPreces .VespersSuffrage .VespersNote .LaudsComms .VespersComms}}
             <details class="day-office-details">
               <summary>Office details</summary>
@@ -81,7 +81,7 @@
                   {{if .BenedictusAntiphon}}<span class="day-office-incipit">Ben. &ldquo;{{.BenedictusAntiphon}}&rdquo;</span>{{end}}
                   {{if .LaudsPreces}}<span class="day-office-badge">Preces</span>{{end}}
                   {{if .LaudsSuffrage}}<span class="day-office-badge">Suffrage</span>{{end}}
-                  {{range .LaudsComms}}<span class="day-office-comm">Com. {{.Name}}{{if .Incipit}} &ldquo;{{.Incipit}}&rdquo;{{end}}</span>{{end}}
+                  {{range .LaudsComms}}<span class="day-office-comm">Com. {{typeset .Name}}{{if .Incipit}} &ldquo;{{typeset .Incipit}}&rdquo;{{end}}</span>{{end}}
                 </dd>
               </div>
               {{end}}
@@ -99,7 +99,7 @@
                   {{if .MagnificatAntiphon}}<span class="day-office-incipit">Mag. &ldquo;{{.MagnificatAntiphon}}&rdquo;</span>{{end}}
                   {{if .VespersPreces}}<span class="day-office-badge">Preces</span>{{end}}
                   {{if .VespersSuffrage}}<span class="day-office-badge">Suffrage</span>{{end}}
-                  {{range .VespersComms}}<span class="day-office-comm">Com. {{.Name}}{{if .Incipit}} &ldquo;{{.Incipit}}&rdquo;{{end}}</span>{{end}}
+                  {{range .VespersComms}}<span class="day-office-comm">Com. {{typeset .Name}}{{if .Incipit}} &ldquo;{{typeset .Incipit}}&rdquo;{{end}}</span>{{end}}
                 </dd>
               </div>
               {{end}}

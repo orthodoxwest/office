@@ -1983,7 +1983,9 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   // CSS px are 96/in; 11pt therefore computes to 14.666…px.
   expect(printStyles.bodyFont).toBeCloseTo(44 / 3, 1);
   expect(printStyles.prayerFont).toBeCloseTo(printStyles.bodyFont, 1);
-  expect(printStyles.prayerMaxWidth).toBe("none");
+  // Paper keeps a book measure (30em ≈ the screen's ~70 characters), not
+  // the full sheet width, which ran to 120-odd characters a line.
+  expect(parseFloat(printStyles.prayerMaxWidth)).toBeCloseTo(30 * printStyles.bodyFont, 0);
   expect(printStyles.headerDisplay).toBe("none");
   expect(printStyles.bannerDisplay).toBe("none");
   expect(printStyles.sessionSummaryDisplay).toBe("none");
@@ -2792,7 +2794,7 @@ async function choosePrayerForm(page, value) {
 test('prayer forms switch complete sequences and keep reports and print consistent', async ({ page, context }) => {
   await page.goto(`/compline/${testDate}`);
   const prayers = page.locator('.elements');
-  await expect(page.locator('.leader-selector > summary')).toHaveText('Prayer form: Private', { useInnerText: true });
+  await expect(page.locator('.leader-selector > summary')).toHaveText(/^Prayer form:\s+Private$/i, { useInnerText: true });
   expect((await prayers.innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
   await context.setOffline(true);
   await choosePrayerForm(page, 'deacon');
@@ -2826,7 +2828,7 @@ test('prayer form persists and explicit review links override it without changin
   await page.goto(`/compline/${testDate}`);
   await choosePrayerForm(page, 'priest');
   await page.reload();
-  await expect(page.locator('.leader-selector > summary')).toHaveText('Prayer form: Priest', { useInnerText: true });
+  await expect(page.locator('.leader-selector > summary')).toHaveText(/^Prayer form:\s+Priest$/i, { useInnerText: true });
   const other = await context.newPage();
   // Avoid Chromium cross-document transition stalls with multiple test tabs.
   await other.emulateMedia({ reducedMotion: 'reduce' });
@@ -2927,7 +2929,7 @@ test('prayer forms fall back safely with unavailable storage or scripting', asyn
   try {
     const reader = await plain.newPage();
     await reader.goto(`/compline/${testDate}?form=priest`);
-    await expect(reader.locator('.leader-selector > summary')).toHaveText('Prayer form: Private', { useInnerText: true });
+    await expect(reader.locator('.leader-selector > summary')).toHaveText(/^Prayer form:\s+Private$/i, { useInnerText: true });
     await reader.locator('.leader-selector > summary').click();
     await expect(reader.locator('.leader-selector input').first()).toBeDisabled();
     await expect(reader.locator('noscript p')).toContainText('The private form is shown');
