@@ -412,7 +412,7 @@ test("parish material stays off the mobile prayer page", async ({
       return { image: field.backgroundImage, position: field.position, content: field.content };
     });
   const naveWall = await wall();
-  expect(naveWall.image).toContain("plaster.jpg");
+  expect(naveWall.image).toMatch(/plaster(-wide)?\.jpg/);
   expect(naveWall.position).toBe("fixed");
   const naveMaterial = await page.evaluate(() => ({
     page: getComputedStyle(document.body).backgroundImage,
@@ -429,7 +429,7 @@ test("parish material stays off the mobile prayer page", async ({
   // pre-swap Nave material on a fast single-worker CI run.
   const readMaterial = () => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
   await expect.poll(readMaterial).toBe("dark");
-  expect((await wall()).image).toContain("plaster.jpg");
+  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
   await page.goto(`/lauds/${testDate}`);
   const prayerMaterial = await page.evaluate(() => ({
@@ -451,7 +451,7 @@ test("parish material stays off the mobile prayer page", async ({
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
     "none",
   );
-  expect((await wall()).image).toContain("plaster.jpg");
+  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
   // Apse adds the vault over the wall.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
@@ -466,6 +466,35 @@ test("parish material stays off the mobile prayer page", async ({
   // separately below.
   expect((vault.match(/radial-gradient/g) || []).length).toBe(10);
   expect((vault.match(/linear-gradient/g) || []).length).toBe(2);
+});
+
+test("wide hour plaster clears the prayer without sideways scroll or stretching", async ({ page }) => {
+  // The cleared field reaches 10rem past the column; with Large text at the
+  // 1000px threshold that once ran past the viewport.
+  for (const size of ["small", "default", "large"]) {
+    for (const width of [1000, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+      await openDatedPage(page, `/lauds/${testDate}`);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      expect(overflow, `${width}px ${size} text`).toBe(0);
+    }
+  }
+  // Landscape desktops take the wide crop, cover-fitted, never a distorting
+  // 100% 100%; phones keep the portrait field.
+  const wall = () =>
+    page.evaluate(() => {
+      const field = getComputedStyle(document.documentElement, "::before");
+      return { image: field.backgroundImage, size: field.backgroundSize };
+    });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const desktop = await wall();
+  expect(desktop.image).toContain("plaster-wide.jpg");
+  expect(desktop.size.split(", ").every((layer) => layer === "cover")).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect((await wall()).image).toMatch(/plaster\.jpg/);
 });
 
 test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {

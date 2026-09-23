@@ -59,11 +59,13 @@
 :root {
   --text: #241c17;
   /* Limewash wall (see "Parish material"): the lightest plaster, and the
-     multiply factor its darkest trowel strokes reach. Averages near --bg. */
-  --plaster-base: #fffbf4;
+     multiply factor its darkest trowel strokes reach. The base is solved so
+     that the wall averages exactly --bg (the textures' mean is mid-grey):
+     base = bg / (0.5 + 0.5 × tint). The prayer's cleared field is painted in
+     --bg, so any other base shows its edge as a lighter or darker panel. */
+  --plaster-base: #fffdf6;
   --plaster-tint: #f5ebe4;
-  --hour-plaster-opacity: 1;
-  --hour-plaster-size: 100% 100%;
+  --hour-plaster-opacity: 0.7;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
   --bg: #faf3e9;
@@ -2557,10 +2559,9 @@ footer::before {
     color-scheme: dark;
     --text: #e8e2d0;
     --bg: #121c28;
-    --plaster-base: #1a2638;
+    --plaster-base: #182332;
     --plaster-tint: #7d949c;
     --hour-plaster-opacity: 0.52;
-    --hour-plaster-size: cover;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
@@ -2602,10 +2603,9 @@ footer::before {
   color-scheme: dark;
   --text: #e8e2d0;
   --bg: #121c28;
-  --plaster-base: #1a2638;
+  --plaster-base: #182332;
   --plaster-tint: #7d949c;
   --hour-plaster-opacity: 0.52;
-  --hour-plaster-size: cover;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
@@ -4303,19 +4303,30 @@ body.season-eastertide {
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
-   lighting divided out. Nave and Apse share one 58 KB image, laid once at
-   viewport size and fixed so long pages never repeat a texture tile.
+   lighting divided out. Nave and Apse share one image per shape — a 54 KB
+   portrait field for phones and a 72 KB landscape crop for screens of
+   1000px and up, which the portrait one would reach only by enlarging
+   1.6-3x and blurring its marks. Either is laid once at viewport size,
+   fixed and cover-fitted, so long pages never repeat a tile and the
+   strokes never stretch out of true.
 
-   On threshold pages, the layers compose inside one opaque background:
+   Every page composes the same layers inside one opaque background:
    base × screen(texture, tint). Where the wall is at its mean the
    result is about --bg; darker trowel strokes take on more of the tint, as
    more wash sits in them. Being self-contained, the same layers can be
    repeated on a sticky surface with a fixed attachment and meet the wall. */
 :root {
+  --plaster-image: url("plaster.jpg");
   --plaster-layers:
     linear-gradient(var(--plaster-base), var(--plaster-base)),
-    url("plaster.jpg"),
+    var(--plaster-image),
     linear-gradient(var(--plaster-tint), var(--plaster-tint));
+}
+
+@media (min-width: 1000px) and (min-aspect-ratio: 1/1) {
+  :root {
+    --plaster-image: url("plaster-wide.jpg");
+  }
 }
 
 html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour))) {
@@ -4346,17 +4357,12 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hou
   background-repeat: no-repeat;
 }
 
-/* Hours share one neutral plaster field through the header and epilogue.
-   The clear field belongs to the prayer wrapper, so it follows disclosures
-   and text size without running through the opening or footer. */
+/* Hours carry the same wall, fainter, through the header and epilogue of
+   wide pages; phones keep a flat page. The clear field belongs to the
+   prayer wrapper, so it follows disclosures and text size without running
+   through the opening or footer. */
 html:where(:has(> body.page-hour))::before {
   content: none;
-  background-color: var(--bg);
-  background-image: url("plaster.jpg");
-  background-blend-mode: overlay;
-  /* Nave shows the whole photograph for finer marks; Apse keeps its softer
-     crop. Both are single viewport fields, with no tiling down the office. */
-  background-size: var(--hour-plaster-size);
   opacity: var(--hour-plaster-opacity);
 }
 
@@ -4366,29 +4372,38 @@ html:where(:has(> body.page-hour))::before {
   .page-hour .elements {
     position: relative;
     isolation: isolate;
+    /* Eight rem of eased feathering outside a two-rem clear text gutter.
+       The vertical feather eases through the surrounding whitespace, stays
+       opaque beneath every prayer, and ends before the continuation links. */
+    --clear-across: linear-gradient(to right,
+      transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
+      rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
+      #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
+      rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent);
+    --clear-down: linear-gradient(to bottom,
+      transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
+      rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
+      #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
+      rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
   }
 
   .page-hour .elements::before {
     content: "";
     position: absolute;
-    inset: -3rem -10rem;
+    /* Reach 10rem past the column, but never past the viewport: with Large
+       text at 1000px the full reach overflowed and the page scrolled
+       sideways. 50% - 50vw is the column edge's distance to the viewport
+       edge; the rem keeps a classic scrollbar's width inside it. */
+    inset-block: -3rem;
+    inset-inline: max(-10rem, calc(50% - 50vw + 1rem));
     z-index: -1;
     pointer-events: none;
     background-color: var(--bg);
-    /* Eight rem of eased feathering outside a two-rem clear text gutter.
-       The vertical feather eases through the surrounding whitespace, stays
-       opaque beneath every prayer, and ends before the continuation links. */
-    mask-image:
-      linear-gradient(to right,
-        transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
-        rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
-        #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
-        rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent),
-      linear-gradient(to bottom,
-        transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
-        rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
-        #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
-        rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
+    /* Prefixed first: an engine that knows only the prefixed mask would
+       otherwise paint this field as a hard-edged panel behind the prayer. */
+    -webkit-mask-image: var(--clear-across), var(--clear-down);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--clear-across), var(--clear-down);
     mask-composite: intersect;
   }
 }

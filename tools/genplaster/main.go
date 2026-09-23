@@ -3,7 +3,12 @@
 // generated file is checked in as internal/web/static/plaster.jpg; rerun this
 // tool only to change the source photograph or the processing:
 //
-//	go run ./tools/genplaster -src ../resources/design/parish/nave-wall-plaster.jpg
+//	go run ./tools/genplaster
+//	go run ./tools/genplaster -width 1600 -aspect 1.6 -soften 2 -out internal/web/static/plaster-wide.jpg
+//
+// The portrait field serves phones; the wide crop serves landscape screens
+// of 1000px and up, where the portrait one would be enlarged 1.6-3x and lose
+// its trowel marks to blur.
 //
 // The photograph is not used as a picture. Its brightness is divided by a
 // heavily blurred copy of itself, which removes the camera's light falloff and
@@ -29,18 +34,20 @@ func main() {
 	width := flag.Int("width", 800, "output width in pixels (height follows the photograph's aspect)")
 	radius := flag.Float64("radius", 0.06, "blur radius for the lighting estimate, as a fraction of the width")
 	gain := flag.Float64("gain", 5, "contrast applied to the wall's deviation from its local mean")
-	crop := flag.Float64("crop", 0.03, "border trimmed from each edge, as a fraction of the size")
+	crop := flag.Float64("crop", 0.06, "border trimmed from each edge, as a fraction of the size")
+	aspect := flag.Float64("aspect", 0, "crop to this width/height ratio around the centre (0 keeps the photograph's)")
+	limit := flag.Float64("limit", 2.5, "deviations beyond this many standard deviations are compressed")
 	soften := flag.Int("soften", 1, "box radius in output pixels that removes sensor noise before contrast")
 	quality := flag.Int("quality", 72, "JPEG quality")
 	flag.Parse()
 
-	if err := run(*src, *dst, *width, *radius, *gain, *crop, *soften, *quality); err != nil {
+	if err := run(*src, *dst, *width, *radius, *gain, *crop, *aspect, *limit, *soften, *quality); err != nil {
 		fmt.Fprintln(os.Stderr, "genplaster:", err)
 		os.Exit(1)
 	}
 }
 
-func run(src, dst string, width int, radius, gain, crop float64, soften, quality int) error {
+func run(src, dst string, width int, radius, gain, crop, aspect, limit float64, soften, quality int) error {
 	f, err := os.Open(src)
 	if err != nil {
 		return err
@@ -54,6 +61,18 @@ func run(src, dst string, width int, radius, gain, crop float64, soften, quality
 	b := photo.Bounds()
 	cx, cy := int(float64(b.Dx())*crop), int(float64(b.Dy())*crop)
 	b = image.Rect(b.Min.X+cx, b.Min.Y+cy, b.Max.X-cx, b.Max.Y-cy)
+	if aspect > 0 {
+		// A landscape crop, never a rotation: the trowel strokes keep the
+		// direction the plasterer laid them.
+		if w := int(float64(b.Dy()) * aspect); w < b.Dx() {
+			b.Min.X += (b.Dx() - w) / 2
+			b.Max.X = b.Min.X + w
+		} else {
+			h := int(float64(b.Dx()) / aspect)
+			b.Min.Y += (b.Dy() - h) / 2
+			b.Max.Y = b.Min.Y + h
+		}
+	}
 	height := int(math.Round(float64(width) * float64(b.Dy()) / float64(b.Dx())))
 
 	lum := downscaleLuminance(photo, b, width, height)
@@ -63,19 +82,29 @@ func run(src, dst string, width int, radius, gain, crop float64, soften, quality
 	}
 	mean := blur(lum, width, height, int(math.Round(radius*float64(width))))
 
-	out := image.NewGray(image.Rect(0, 0, width, height))
+	detail := make([]float64, len(lum))
 	var sum, sum2 float64
 	for i, l := range lum {
-		detail := l / math.Max(mean[i], 1e-3)
-		sum += detail
-		sum2 += detail * detail
-		// Darker than the local mean is more wash; mid-grey is the mean wall.
-		v := 0.5 + (detail-1)*gain*0.5
-		out.Pix[i] = uint8(math.Round(255 * math.Max(0, math.Min(1, v))))
+		detail[i] = l / math.Max(mean[i], 1e-3)
+		sum += detail[i]
+		sum2 += detail[i] * detail[i]
 	}
 	n := float64(len(lum))
 	mu := sum / n
-	fmt.Printf("detail mean %.4f sd %.4f\n", mu, math.Sqrt(sum2/n-mu*mu))
+	sd := math.Sqrt(sum2/n - mu*mu)
+	fmt.Printf("detail mean %.4f sd %.4f\n", mu, sd)
+
+	// A nail hole or grit speck is real, but fixed behind the page it reads
+	// as dirt on the screen. Compressing outliers beyond limit·sd (smoothly,
+	// so there is no plateau) keeps the mark and drops its sting.
+	lim := limit * sd
+	out := image.NewGray(image.Rect(0, 0, width, height))
+	for i, d := range detail {
+		dev := lim * math.Tanh((d-mu)/lim)
+		// Darker than the local mean is more wash; mid-grey is the mean wall.
+		v := 0.5 + dev*gain*0.5
+		out.Pix[i] = uint8(math.Round(255 * math.Max(0, math.Min(1, v))))
+	}
 
 	w, err := os.Create(dst)
 	if err != nil {
