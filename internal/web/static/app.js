@@ -312,11 +312,11 @@ function usageBeaconBody(scope) {
     }, 320);
   };
 
-  // The Apse starfield is a background-image, so it cannot ease alongside
-  // the color crossfade above — it can only snap. Dip it to transparent,
-  // swap the theme (and so the underlying image) while it's invisible, then
+  // The plaster wall and Apse starfield cannot ease alongside
+  // the color crossfade above. Dip these layers to transparent,
+  // swap their background images while invisible, then
   // let style.css's opacity transition climb it back to full: the swap
-  // itself never renders, so the vault fades rather than flashing on or off.
+  // itself never renders, so the material fades rather than flashing on or off.
   var VAULT_FADE_MS = 100;
   var vaultFadeTimer = null;
 

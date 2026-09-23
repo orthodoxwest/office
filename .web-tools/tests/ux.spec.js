@@ -399,7 +399,7 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
 });
 
-test("parish material stays in non-liturgical rooms and off the prayer page", async ({
+test("parish material stays off the mobile prayer page", async ({
   page,
 }) => {
   await openDatedPage(page, `/?date=${testDate}`);
@@ -453,7 +453,7 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   );
   expect((await wall()).image).toContain("plaster.jpg");
 
-  // Apse gets the vault instead — stars only, never the broad wash.
+  // Apse adds the vault over the wall.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const vault = await page.evaluate(
@@ -467,6 +467,50 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   expect((vault.match(/radial-gradient/g) || []).length).toBe(10);
   expect((vault.match(/linear-gradient/g) || []).length).toBe(2);
 });
+
+test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => {
+    window.wallAtThemeSwap = new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.theme !== "dark") return;
+        resolve(Number(getComputedStyle(document.documentElement, "::before").opacity));
+        observer.disconnect();
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    });
+  });
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  expect(await page.evaluate(() => window.wallAtThemeSwap)).toBeLessThan(0.1);
+  const opacity = () => page.evaluate(() => Number(getComputedStyle(document.documentElement, "::before").opacity));
+  await expect.poll(opacity).toBe(1);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  expect(await opacity()).toBe(1);
+});
+
+for (const theme of ["light", "dark"]) {
+  test(`print removes wall material and uses white paper in ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    for (const path of [`/?date=${testDate}`, "/calendar/2026", "/reminders", `/lauds/${testDate}`]) {
+      await openDatedPage(page, path, theme);
+      await page.emulateMedia({ media: "print" });
+      const paper = await page.evaluate(() => {
+        const heading = document.querySelector(".month h2");
+        return {
+          wall: getComputedStyle(document.documentElement, "::before").content,
+          background: getComputedStyle(document.documentElement).backgroundColor,
+          headingImage: heading ? getComputedStyle(heading).backgroundImage : "none",
+        };
+      });
+      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none" });
+      await page.emulateMedia({ media: "screen" });
+    }
+  });
+}
 
 test("the apse vault appears only over the night, and veils with the season", async ({
   page,

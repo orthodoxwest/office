@@ -2959,6 +2959,7 @@ body.season-eastertide {
      shorthand for all four longhands at once, so whichever rule wins the
      cascade wins outright, not per-property. */
   :root.theme-anim,
+  :root.theme-anim::before,
   :root.theme-anim *,
   :root.theme-anim *::before,
   :root.theme-anim *::after {
@@ -2970,8 +2971,8 @@ body.season-eastertide {
       opacity 100ms ease !important;
   }
 
-  /* The Apse vault (page-home's fixed starfield, and the hour-epilogue/footer
-     bands) is a background-image, which the crossfade above cannot ease the
+  /* The plaster wall and Apse vault (the home starfield and hour ending)
+     use background images, which the crossfade above cannot ease the
      way it eases background-color: two different gradient stacks, nothing to
      interpolate between. Left alone it pops in or out whole the instant the
      theme swaps — the one part of the room that still snapped instead of
@@ -2980,6 +2981,7 @@ body.season-eastertide {
      back to full — so what's visible is a soft fade rather than the stars
      slamming on. Only reachable inside .theme-anim, since app.js only ever
      toggles this alongside it. */
+  :root.theme-anim.vault-hidden::before,
   :root.theme-anim.vault-hidden body.page-home::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
@@ -4267,9 +4269,8 @@ body.season-eastertide {
    The church appears here as material and structure, not illustration.
 
    Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
-   because they are thresholds and working rooms. The hour body is omitted
-   deliberately: prayer remains a flat diurnal page with no texture under its
-   words.
+   because they are thresholds and working rooms. Hours carry a fainter wash
+   only in wide outer margins; prayer keeps a flat field beneath its words.
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
@@ -4291,17 +4292,18 @@ body.season-eastertide {
     linear-gradient(var(--plaster-tint), var(--plaster-tint));
 }
 
-html:has(> body:is(.page-home, .page-calendar, .page-reminders)) {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour))) {
   background-color: var(--bg);
 }
 
 body.page-home,
 body.page-calendar,
-body.page-reminders {
+body.page-reminders,
+body.page-hour {
   background: transparent;
 }
 
-html:has(> body:is(.page-home, .page-calendar, .page-reminders))::before {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -4309,13 +4311,27 @@ html:has(> body:is(.page-home, .page-calendar, .page-reminders))::before {
   pointer-events: none;
 }
 
-html:has(> body:is(.page-home, .page-calendar, .page-reminders))::before,
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
   background-blend-mode: multiply, screen, normal;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+/* On hours, keep the entire reading measure flat. Only wide outer margins
+   carry a faint trace of the same wall, fading away before the column. */
+html:where(:has(> body.page-hour))::before {
+  content: none;
+  opacity: 0.3;
+  mask-image: linear-gradient(to right,
+    #000, transparent calc(50% - 23rem),
+    transparent calc(50% + 23rem), #000);
+}
+
+@media (min-width: 1000px) {
+  html:where(:has(> body.page-hour))::before { content: ""; }
 }
 
 /* The sticky month heading hides the rows passing beneath it, so it stays
@@ -4597,6 +4613,8 @@ body.page-home::before {
   }
   .day-office-digest { background: none; }
 
+  html { background: #fff; }
+
   /* Paper ignores the reader's on-screen size choice. */
   html,
   html[data-text-size="small"],
@@ -4681,6 +4699,7 @@ body.page-home::before {
   body.page-reminders,
   .page-home .home-hero,
   .page-calendar .month-table tr,
+  .page-calendar .month h2,
   .page-reminders fieldset,
   .page-reminders .reminder-url {
     background-color: transparent;
