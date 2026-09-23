@@ -497,7 +497,7 @@ test("wide hour plaster clears the prayer without sideways scroll or stretching"
   expect((await wall()).image).toMatch(/plaster\.jpg/);
 });
 
-for (const [theme, minContrast] of [["light", 1.2], ["dark", 2.5]]) {
+for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
   test(`the ${theme} wall is visible yet averages the page colour`, async ({ page }) => {
     // Nave once rendered at 0.46% luminance contrast: mean-matched, and
     // invisible. Sample the bare wall (content hidden) and hold both ends:
@@ -540,6 +540,33 @@ for (const [theme, minContrast] of [["light", 1.2], ["dark", 2.5]]) {
   });
 }
 
+test("thresholds and usage share the hour wall in both themes", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const reference = {};
+  for (const path of [`/lauds/${testDate}`, `/?date=${testDate}`, "/calendar/2026", "/reminders", "/admin/usage?days=7"]) {
+    await page.goto(path);
+    for (const theme of ["light", "dark"]) {
+      const material = await page.evaluate((theme) => {
+        document.documentElement.dataset.theme = theme;
+        const wall = getComputedStyle(document.documentElement, "::before");
+        const heading = document.querySelector(".month h2");
+        const signature = (style) => [style.backgroundImage, style.backgroundBlendMode, style.backgroundSize, style.opacity];
+        return {
+          wall: signature(wall),
+          heading: heading ? signature(getComputedStyle(heading)) : null,
+          content: wall.content,
+          body: getComputedStyle(document.body).backgroundColor,
+        };
+      }, theme);
+      expect(material.content, path).toBe('""');
+      expect(material.body, path).toBe("rgba(0, 0, 0, 0)");
+      reference[theme] ??= material.wall;
+      expect(material.wall, `${path} ${theme}`).toEqual(reference[theme]);
+      if (material.heading) expect(material.heading, theme).toEqual(reference[theme]);
+    }
+  }
+});
+
 test("forced colours drop the wall for the system canvas", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -577,7 +604,7 @@ test("the wall fades out before a theme swap and respects reduced motion", async
 for (const theme of ["light", "dark"]) {
   test(`print removes wall material and uses white paper in ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    for (const path of [`/?date=${testDate}`, "/calendar/2026", "/reminders", `/lauds/${testDate}`]) {
+    for (const path of [`/?date=${testDate}`, "/calendar/2026", "/reminders", "/admin/usage?days=7", `/lauds/${testDate}`]) {
       await openDatedPage(page, path, theme);
       await page.emulateMedia({ media: "print" });
       const paper = await page.evaluate(() => {
