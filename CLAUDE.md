@@ -83,6 +83,8 @@ internal/
     assurance_gate.go      Text-provenance baseline, gate, and CI summary
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
+  genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)
+                           from the parish nave photo in ../resources/design/parish/
 data/
   feasts/                  Feast definitions (INI-like format)
   texts/                   Liturgical texts

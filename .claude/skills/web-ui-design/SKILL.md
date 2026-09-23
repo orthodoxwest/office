@@ -63,6 +63,16 @@ or impose a redesign on an unrelated change.
   digest within reading measure. Avoid dotted underlines on abbreviations.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a flat field.
+- The limewash wall is the parish nave photograph, high-passed to grey
+  fields by `tools/genplaster` (portrait for phones, a landscape crop from
+  1000px) and coloured by `--plaster-*` tokens. Always cover-fit; never
+  stretch or tile it. The tokens are solved against the texture's pixels
+  so the wall averages exactly `--bg` (see the token comment): retune one
+  and re-solve the others, or the flat clearings (wide hours, iOS sticky
+  headings) show edges. Near-white Nave needs its knee (flat ground, darker
+  clouds); a symmetric texture there is invisible. `ux.spec.js` measures
+  the rendered wall's mean and contrast in both themes.
+  Wide hours carry it at `--hour-plaster-opacity`, cleared beneath prayer.
 
 ## Where to work
 

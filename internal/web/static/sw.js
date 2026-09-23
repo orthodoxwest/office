@@ -51,7 +51,12 @@ var CORE_ASSETS = [
   // (office-VERSION), which is dropped on activate after a deploy.
   "/static/fonts/eb-garamond-regular.woff2",
   "/static/fonts/eb-garamond-italic.woff2",
-  "/static/fonts/eb-garamond-bold.woff2"
+  "/static/fonts/eb-garamond-bold.woff2",
+  // The limewash wall (portrait for phones, wide crop for large screens) is
+  // also a relative url() in style.css; precache both so an installed app
+  // looks the same offline whatever it is opened on.
+  "/static/plaster.jpg",
+  "/static/plaster-wide.jpg"
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always

@@ -58,6 +58,20 @@
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
   --text: #241c17;
+  /* Limewash wall (see "Parish material"). Nave sits within 5 levels of
+     white, too close for a symmetric texture to show, so it is set as real
+     limewash is: a flat ground (--plaster-base) with darker clouds of wash.
+     The knee clips the texture's lighter part to the ground; the clouds
+     below it deepen toward --plaster-tint. Knee and dodge sum to white.
+     Tint is solved per channel (scratch solver over the texture pixels) so
+     the wall averages exactly --bg: the prayer's cleared field and the iOS
+     month heading are --bg, and any other mean shows their edges. Result:
+     1.6% luminance contrast against Apse's 3.4%, where 0.5% was invisible. */
+  --plaster-base: #fffdf7;
+  --plaster-tint: #e9d3c0;
+  --plaster-knee: rgb(166 166 166);
+  --plaster-dodge: rgb(89 89 89);
+  --hour-plaster-opacity: 0.7;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
   --bg: #faf3e9;
@@ -2551,6 +2565,13 @@ footer::before {
     color-scheme: dark;
     --text: #e8e2d0;
     --bg: #121c28;
+    /* Apse's dark ground has headroom above it, so its knee is white:
+       the full texture, base × screen(texture, tint), solved to --bg. */
+    --plaster-base: #182332;
+    --plaster-tint: #7d949c;
+    --plaster-knee: #fff;
+    --plaster-dodge: #000;
+    --hour-plaster-opacity: 0.52;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
@@ -2592,6 +2613,13 @@ footer::before {
   color-scheme: dark;
   --text: #e8e2d0;
   --bg: #121c28;
+  /* Apse's dark ground has headroom above it, so its knee is white:
+     the full texture, base × screen(texture, tint), solved to --bg. */
+  --plaster-base: #182332;
+  --plaster-tint: #7d949c;
+  --plaster-knee: #fff;
+  --plaster-dodge: #000;
+  --hour-plaster-opacity: 0.52;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
@@ -2967,6 +2995,7 @@ body.season-eastertide {
      shorthand for all four longhands at once, so whichever rule wins the
      cascade wins outright, not per-property. */
   :root.theme-anim,
+  :root.theme-anim::before,
   :root.theme-anim *,
   :root.theme-anim *::before,
   :root.theme-anim *::after {
@@ -2978,8 +3007,8 @@ body.season-eastertide {
       opacity 100ms ease !important;
   }
 
-  /* The Apse vault (page-home's fixed starfield, and the hour-epilogue/footer
-     bands) is a background-image, which the crossfade above cannot ease the
+  /* The plaster wall and Apse vault (the home starfield and hour ending)
+     use background images, which the crossfade above cannot ease the
      way it eases background-color: two different gradient stacks, nothing to
      interpolate between. Left alone it pops in or out whole the instant the
      theme swaps — the one part of the room that still snapped instead of
@@ -2988,6 +3017,7 @@ body.season-eastertide {
      back to full — so what's visible is a soft fade rather than the stars
      slamming on. Only reachable inside .theme-anim, since app.js only ever
      toggles this alongside it. */
+  :root.theme-anim.vault-hidden::before,
   :root.theme-anim.vault-hidden body.page-home::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
@@ -4278,45 +4308,154 @@ body.season-eastertide {
   }
 }
 
-/* ── Parish material prototype ──
+/* ── Parish material ──
    The church appears here as material and structure, not illustration.
 
    Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
-   because they are thresholds and working rooms. The hour body is omitted
-   deliberately: prayer remains a flat diurnal page with no texture under its
-   words.
+   because they are thresholds and working rooms. Wide hour pages carry a
+   fainter wash, cleared only beneath the prayer itself.
 
-   The field is laid once and never tiled. A repeating tile is fine on a short
-   page and wrong on a long one: the ordo runs to roughly 39,000px at 390px
-   wide, so a 64rem tile recurred about thirty-nine times and its diagonal
-   band became a visible periodic stripe down the months — the same artifact
-   that took these washes off the desktop. `no-repeat` over the flat --bg
-   keeps the wash where the eye actually lands, at the head of the page. */
-body.page-home,
-body.page-calendar,
-body.page-reminders {
-  background-color: var(--bg);
-  background-image: var(--page-material);
-  background-position: top center;
-  background-repeat: no-repeat;
-  /* Width-relative so the composition is the one that was authored. At a fixed
-     72rem the tile was far wider than a phone, and since a propagated body
-     background is positioned against the root box, a 390px screen only ever
-     showed the middle third of it — the pools at 14% and 88% fell off both
-     edges, and the slice shifted with device width. */
-  background-size: 100% 64rem;
+   The wall is the parish's own nave plaster (tools/genplaster): a grey
+   field holding only the photograph's mottling and trowel marks, with its
+   lighting divided out. Nave and Apse share one image per shape — a 54 KB
+   portrait field for phones and a 72 KB landscape crop for screens of
+   1000px and up, which the portrait one would reach only by enlarging
+   1.6-3x and blurring its marks. Either is laid once at viewport size,
+   fixed and cover-fitted, so long pages never repeat a tile and the
+   strokes never stretch out of true.
+
+   Every page composes the same layers inside one opaque background,
+   bottom-up: min(texture, knee) ÷ knee (darken, then color-dodge by
+   1 − knee), screened with the tint, multiplied by the base. Darker trowel
+   strokes take on more of the tint, as more wash sits in them; the theme
+   tokens set how much of the texture is ground and how much is cloud.
+   Being self-contained, the same layers can be repeated on a sticky
+   surface with a fixed attachment and meet the wall. */
+:root {
+  --plaster-image: url("plaster.jpg");
+  --plaster-layers:
+    linear-gradient(var(--plaster-base), var(--plaster-base)),
+    linear-gradient(var(--plaster-tint), var(--plaster-tint)),
+    linear-gradient(var(--plaster-dodge), var(--plaster-dodge)),
+    var(--plaster-image),
+    linear-gradient(var(--plaster-knee), var(--plaster-knee));
 }
 
-/* At desktop scale both themes read best as still fields. The broad tonal
-   tiles remain useful on a phone, where only one small portion is visible; on
-   a wide canvas their radial pools become recognizable spotlights and compete
-   with the framed content. Rose plaster or apse blue carries the atmosphere
-   here, while localized surfaces and rules retain the material detail. */
-@media (min-width: 701px) {
-  body.page-home,
-  body.page-calendar,
-  body.page-reminders {
-    background-image: none;
+/* Not preloaded. On a slow connection a preload arrived before first paint
+   but pushed the prayer text ~300ms later, even at low fetch priority. The
+   wall averages exactly --bg, so arriving late costs only texture, never
+   tone; the service worker makes it immediate on every later visit. */
+@media (min-width: 1000px) and (orientation: landscape) {
+  :root {
+    --plaster-image: url("plaster-wide.jpg");
+  }
+}
+
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour))) {
+  background-color: var(--bg);
+}
+
+body.page-home,
+body.page-calendar,
+body.page-reminders,
+body.page-hour {
+  background: transparent;
+}
+
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before,
+.page-calendar .month h2 {
+  background: var(--plaster-layers);
+  background-blend-mode: multiply, screen, color-dodge, darken, normal;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* Hours carry the same wall, fainter, through the header and epilogue of
+   wide pages; phones keep a flat page. The clear field belongs to the
+   prayer wrapper, so it follows disclosures and text size without running
+   through the opening or footer. */
+html:where(:has(> body.page-hour))::before {
+  content: none;
+  opacity: var(--hour-plaster-opacity);
+}
+
+@media (min-width: 1000px) {
+  html:where(:has(> body.page-hour))::before { content: ""; }
+
+  .page-hour .elements {
+    position: relative;
+    isolation: isolate;
+    /* Eight rem of eased feathering outside a two-rem clear text gutter.
+       The vertical feather eases through the surrounding whitespace, stays
+       opaque beneath every prayer, and ends before the continuation links. */
+    --clear-across: linear-gradient(to right,
+      transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
+      rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
+      #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
+      rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent);
+    --clear-down: linear-gradient(to bottom,
+      transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
+      rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
+      #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
+      rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
+  }
+
+  .page-hour .elements::before {
+    content: "";
+    position: absolute;
+    /* Reach 10rem past the column, but never past the viewport: with Large
+       text at 1000px the full reach overflowed and the page scrolled
+       sideways. 50% - 50vw is the column edge's distance to the viewport
+       edge; the rem keeps a classic scrollbar's width inside it. */
+    inset-block: -3rem;
+    inset-inline: max(-10rem, calc(50% - 50vw + 1rem));
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--bg);
+    /* Prefixed first: an engine that knows only the prefixed mask would
+       otherwise paint this field as a hard-edged panel behind the prayer. */
+    -webkit-mask-image: var(--clear-across), var(--clear-down);
+    -webkit-mask-composite: source-in;
+    mask-image: var(--clear-across), var(--clear-down);
+    mask-composite: intersect;
+  }
+}
+
+/* The sticky month heading hides the rows passing beneath it, so it stays
+   opaque; a fixed attachment lines its copy of the wall up with the wall. */
+.page-calendar .month h2 {
+  background-attachment: fixed;
+}
+
+/* iOS Safari treats a fixed attachment as scroll, so the heading would show
+   its own copy of the wall at another scale and crop. The wall averages
+   exactly --bg, so a flat band is the one seam-free choice there, the same
+   clearing the prayer uses on wide hours. */
+@supports (-webkit-touch-callout: none) {
+  .page-calendar .month h2 {
+    background: var(--bg);
+  }
+}
+
+/* Forced colours keep background images but not their colours, so the wall
+   would sit behind the system backplates as a patchwork; the user's own
+   Canvas is the wall there. */
+@media (forced-colors: active) {
+  html::before {
+    content: none !important;
+  }
+
+  .page-calendar .month h2 {
+    background: Canvas;
   }
 }
 
@@ -4397,11 +4536,13 @@ body.page-reminders {
    the stars gold through Passiontide while every other ornament veils. */
 body {
   --apse-vault: none;
+  --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
+    --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
@@ -4426,6 +4567,7 @@ body {
 }
 
 :root[data-theme="dark"] body {
+  --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
@@ -4490,6 +4632,16 @@ body.page-hour footer::after {
   background-position: top center;
   -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+/* Where the desktop plaster and stars overlap, the vault's own mask also
+   eases in a quiet ground. Stars and texture therefore trade prominence
+   without another layer or a change to their phase. Nave stays transparent. */
+@media screen and (min-width: 1000px) {
+  body.page-hour .hour-epilogue::before,
+  body.page-hour footer::after {
+    background-color: var(--apse-ground);
+  }
 }
 
 /* Clear the small epilogue/footer lettering where it crosses the vault.
@@ -4592,6 +4744,8 @@ body.page-home::before {
     overflow: visible;
   }
   .day-office-digest { background: none; }
+
+  html { background: #fff; }
 
   /* Paper ignores the reader's on-screen size choice. */
   html,
@@ -4697,6 +4851,7 @@ body.page-home::before {
   body.page-reminders,
   .page-home .home-hero,
   .page-calendar .month-table tr,
+  .page-calendar .month h2,
   .page-reminders fieldset,
   .page-reminders .reminder-url {
     background-color: transparent;
@@ -4704,7 +4859,9 @@ body.page-home::before {
     box-shadow: none;
   }
 
-  body.page-home::before {
+  body.page-home::before,
+  .page-hour .elements::before,
+  html::before {
     content: none;
   }
 

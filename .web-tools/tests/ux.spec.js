@@ -399,18 +399,27 @@ test("the foreground home keeps previous-day Compline current across midnight", 
   await expect(page.getByRole("link", { name: "Go to today" })).toBeVisible();
 });
 
-test("parish material stays in non-liturgical rooms and off the prayer page", async ({
+test("parish material stays off the mobile prayer page", async ({
   page,
 }) => {
   await openDatedPage(page, `/?date=${testDate}`);
 
+  // The limewash wall is one fixed layer on html::before, shared by Nave and
+  // Apse and coloured by their tokens.
+  const wall = () =>
+    page.evaluate(() => {
+      const field = getComputedStyle(document.documentElement, "::before");
+      return { image: field.backgroundImage, position: field.position, content: field.content };
+    });
+  const naveWall = await wall();
+  expect(naveWall.image).toMatch(/plaster(-wide)?\.jpg/);
+  expect(naveWall.position).toBe("fixed");
   const naveMaterial = await page.evaluate(() => ({
     page: getComputedStyle(document.body).backgroundImage,
     inscriptionBand: getComputedStyle(
       document.querySelector(".home-hour-group-label"),
     ).backgroundColor,
   }));
-  expect(naveMaterial.page).not.toBe("none");
   expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
 
   await page.getByRole("button", { name: "Apse", exact: true }).click();
@@ -418,33 +427,33 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   // crossfade, so app.js dips it invisible and applies the theme (and swaps
   // this image) only once that dip completes — poll instead of reading the
   // pre-swap Nave material on a fast single-worker CI run.
-  const readMaterial = () => page.evaluate(() => getComputedStyle(document.body).backgroundImage);
-  await expect.poll(readMaterial).not.toBe(naveMaterial.page);
-  const apseMaterial = await readMaterial();
-  expect(apseMaterial).not.toBe("none");
+  const readMaterial = () => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme);
+  await expect.poll(readMaterial).toBe("dark");
+  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
   await page.goto(`/lauds/${testDate}`);
   const prayerMaterial = await page.evaluate(() => ({
     page: getComputedStyle(document.body).backgroundImage,
     prayer: getComputedStyle(document.querySelector(".elements")).backgroundImage,
+    wall: getComputedStyle(document.documentElement, "::before").content,
   }));
-  expect(prayerMaterial).toEqual({ page: "none", prayer: "none" });
+  expect(prayerMaterial).toEqual({ page: "none", prayer: "none", wall: "none" });
 
   // Desktop. The theme persists in localStorage, so each half sets its own
   // explicitly rather than inheriting whatever the previous step left behind.
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
 
-  // Nave keeps the still, flat field: the broad wash reads as spotlighting on
-  // a wide canvas, and the nave ceiling is plaster, so there is nothing else
-  // for it to carry.
+  // The wall has no composition to become a spotlight on a wide canvas, so
+  // desktop Nave keeps it too; the body itself paints nothing over it.
   await page.getByRole("button", { name: "Nave", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
     "none",
   );
+  expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
-  // Apse gets the vault instead — stars only, never the broad wash.
+  // Apse adds the vault over the wall.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const vault = await page.evaluate(
@@ -458,6 +467,134 @@ test("parish material stays in non-liturgical rooms and off the prayer page", as
   expect((vault.match(/radial-gradient/g) || []).length).toBe(10);
   expect((vault.match(/linear-gradient/g) || []).length).toBe(2);
 });
+
+test("wide hour plaster clears the prayer without sideways scroll or stretching", async ({ page }) => {
+  // The cleared field reaches 10rem past the column; with Large text at the
+  // 1000px threshold that once ran past the viewport.
+  for (const size of ["small", "default", "large"]) {
+    for (const width of [1000, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.addInitScript((s) => localStorage.setItem("office-text-size", s), size);
+      await openDatedPage(page, `/lauds/${testDate}`);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      expect(overflow, `${width}px ${size} text`).toBe(0);
+    }
+  }
+  // Landscape desktops take the wide crop, cover-fitted, never a distorting
+  // 100% 100%; phones keep the portrait field.
+  const wall = () =>
+    page.evaluate(() => {
+      const field = getComputedStyle(document.documentElement, "::before");
+      return { image: field.backgroundImage, size: field.backgroundSize };
+    });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  const desktop = await wall();
+  expect(desktop.image).toContain("plaster-wide.jpg");
+  expect(desktop.size.split(", ").every((layer) => layer === "cover")).toBe(true);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, `/?date=${testDate}`);
+  expect((await wall()).image).toMatch(/plaster\.jpg/);
+});
+
+for (const [theme, minContrast] of [["light", 1.2], ["dark", 2.5]]) {
+  test(`the ${theme} wall is visible yet averages the page colour`, async ({ page }) => {
+    // Nave once rendered at 0.46% luminance contrast: mean-matched, and
+    // invisible. Sample the bare wall (content hidden) and hold both ends:
+    // visible, never loud, and averaging --bg so cleared fields show no edge.
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await openDatedPage(page, "/calendar/2026", theme);
+      await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+      const png = (await page.screenshot()).toString("base64");
+      const wall = await page.evaluate(async (b64) => {
+        const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
+        const bitmap = await createImageBitmap(blob);
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const context = canvas.getContext("2d");
+        context.drawImage(bitmap, 0, 0);
+        const data = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
+        const sums = [0, 0, 0];
+        let luminance = 0;
+        let luminance2 = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          sums[0] += data[i];
+          sums[1] += data[i + 1];
+          sums[2] += data[i + 2];
+          const l = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+          luminance += l;
+          luminance2 += l * l;
+        }
+        const n = data.length / 4;
+        const mean = luminance / n;
+        const bg = getComputedStyle(document.documentElement).backgroundColor.match(/\d+/g).map(Number);
+        return {
+          drift: Math.max(...sums.map((sum, i) => Math.abs(sum / n - bg[i]))),
+          contrast: (100 * Math.sqrt(luminance2 / n - mean * mean)) / mean,
+        };
+      }, png);
+      expect(wall.drift, `${width}px mean vs --bg`).toBeLessThan(1.5);
+      expect(wall.contrast, `${width}px contrast %`).toBeGreaterThan(minContrast);
+      expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
+    }
+  });
+}
+
+test("forced colours drop the wall for the system canvas", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const path of [`/?date=${testDate}`, "/calendar/2026", `/lauds/${testDate}`]) {
+    await openDatedPage(page, path);
+    const wall = await page.evaluate(() => getComputedStyle(document.documentElement, "::before").content);
+    expect(wall, path).toBe("none");
+  }
+});
+
+test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.evaluate(() => {
+    window.wallAtThemeSwap = new Promise(resolve => {
+      const observer = new MutationObserver(() => {
+        if (document.documentElement.dataset.theme !== "dark") return;
+        resolve(Number(getComputedStyle(document.documentElement, "::before").opacity));
+        observer.disconnect();
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    });
+  });
+  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  expect(await page.evaluate(() => window.wallAtThemeSwap)).toBeLessThan(0.1);
+  const opacity = () => page.evaluate(() => Number(getComputedStyle(document.documentElement, "::before").opacity));
+  await expect.poll(opacity).toBe(1);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  expect(await opacity()).toBe(1);
+});
+
+for (const theme of ["light", "dark"]) {
+  test(`print removes wall material and uses white paper in ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    for (const path of [`/?date=${testDate}`, "/calendar/2026", "/reminders", `/lauds/${testDate}`]) {
+      await openDatedPage(page, path, theme);
+      await page.emulateMedia({ media: "print" });
+      const paper = await page.evaluate(() => {
+        const heading = document.querySelector(".month h2");
+        const prayers = document.querySelector(".elements");
+        return {
+          wall: getComputedStyle(document.documentElement, "::before").content,
+          background: getComputedStyle(document.documentElement).backgroundColor,
+          headingImage: heading ? getComputedStyle(heading).backgroundImage : "none",
+          prayerField: prayers ? getComputedStyle(prayers, "::before").content : "none",
+        };
+      });
+      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none", prayerField: "none" });
+      await page.emulateMedia({ media: "screen" });
+    }
+  });
+}
 
 test("the apse vault appears only over the night, and veils with the season", async ({
   page,
@@ -684,7 +821,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
         diamondVisible: diamond.visibility !== "hidden",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
-        pageBg: getComputedStyle(document.body).backgroundColor,
+        pageBg: getComputedStyle(document.documentElement).backgroundColor,
         cardShadow: card.boxShadow,
         scrolls: document.documentElement.scrollHeight > window.innerHeight + 1,
         scrollHeight: document.documentElement.scrollHeight,
