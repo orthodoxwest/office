@@ -72,7 +72,8 @@ or impose a redesign on an unrelated change.
   headings) show edges. Near-white Nave needs its knee (flat ground, darker
   clouds); a symmetric texture there is invisible. `ux.spec.js` measures
   the rendered wall's mean and contrast in both themes.
-  Wide hours carry it at `--hour-plaster-opacity`, cleared beneath prayer.
+  All textured pages share `--plaster-strength`, composed into the opaque
+  wall so sticky headings match. Wide hours clear it beneath prayer.
 
 ## Where to work
 

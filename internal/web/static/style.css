@@ -71,7 +71,7 @@
   --plaster-tint: #e9d3c0;
   --plaster-knee: rgb(166 166 166);
   --plaster-dodge: rgb(89 89 89);
-  --hour-plaster-opacity: 0.7;
+  --plaster-strength: 70%;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
   --bg: #faf3e9;
@@ -2571,7 +2571,7 @@ footer::before {
     --plaster-tint: #7d949c;
     --plaster-knee: #fff;
     --plaster-dodge: #000;
-    --hour-plaster-opacity: 0.52;
+    --plaster-strength: 52%;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
@@ -2619,7 +2619,7 @@ footer::before {
   --plaster-tint: #7d949c;
   --plaster-knee: #fff;
   --plaster-dodge: #000;
-  --hour-plaster-opacity: 0.52;
+  --plaster-strength: 52%;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
@@ -4311,9 +4311,8 @@ body.season-eastertide {
 /* ── Parish material ──
    The church appears here as material and structure, not illustration.
 
-   Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
-   because they are thresholds and working rooms. Wide hour pages carry a
-   fainter wash, cleared only beneath the prayer itself.
+   Home, Ordo, Reminders, Usage, and wide hour pages share one wall strength
+   per theme. Hours clear the wall only beneath the prayer itself.
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
@@ -4329,11 +4328,14 @@ body.season-eastertide {
    1 − knee), screened with the tint, multiplied by the base. Darker trowel
    strokes take on more of the tint, as more wash sits in them; the theme
    tokens set how much of the texture is ground and how much is cloud.
-   Being self-contained, the same layers can be repeated on a sticky
-   surface with a fixed attachment and meet the wall. */
+   A final veil of --bg sets the shared strength while keeping the result
+   opaque, so sticky month headings can repeat it without showing rows
+   passing beneath them. */
 :root {
   --plaster-image: url("plaster.jpg");
+  --plaster-veil: color-mix(in srgb, var(--bg), transparent var(--plaster-strength));
   --plaster-layers:
+    linear-gradient(var(--plaster-veil), var(--plaster-veil)),
     linear-gradient(var(--plaster-base), var(--plaster-base)),
     linear-gradient(var(--plaster-tint), var(--plaster-tint)),
     linear-gradient(var(--plaster-dodge), var(--plaster-dodge)),
@@ -4351,18 +4353,19 @@ body.season-eastertide {
   }
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour))) {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour))) {
   background-color: var(--bg);
 }
 
 body.page-home,
 body.page-calendar,
 body.page-reminders,
+body.page-usage,
 body.page-hour {
   background: transparent;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before {
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before {
   content: "";
   position: fixed;
   inset: 0;
@@ -4370,22 +4373,21 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hou
   pointer-events: none;
 }
 
-html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hour)))::before,
+html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usage, .page-hour)))::before,
 .page-calendar .month h2 {
   background: var(--plaster-layers);
-  background-blend-mode: multiply, screen, color-dodge, darken, normal;
+  background-blend-mode: normal, multiply, screen, color-dodge, darken, normal;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
-/* Hours carry the same wall, fainter, through the header and epilogue of
+/* Hours carry the shared wall through the header and epilogue of
    wide pages; phones keep a flat page. The clear field belongs to the
    prayer wrapper, so it follows disclosures and text size without running
    through the opening or footer. */
 html:where(:has(> body.page-hour))::before {
   content: none;
-  opacity: var(--hour-plaster-opacity);
 }
 
 @media (min-width: 1000px) {
