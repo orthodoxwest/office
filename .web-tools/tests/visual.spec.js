@@ -87,6 +87,16 @@ test("mobile hour ending — dark", async ({ page }) => {
   await expect(page).toHaveScreenshot("hour-ending-dark.png");
 });
 
+for (const theme of ["light", "dark"]) {
+  test(`desktop hour ending — ${theme}`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openForSnapshot(page, `/lauds/${testDate}`, theme);
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect(page.locator(".hour-epilogue")).toBeVisible();
+    await expect(page).toHaveScreenshot(`hour-ending-desktop-${theme}.png`);
+  });
+}
+
 test("desktop prayer transition — light", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openForSnapshot(page, `/lauds/${testDate}`, "light");

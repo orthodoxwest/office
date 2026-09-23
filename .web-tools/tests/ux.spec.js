@@ -500,13 +500,15 @@ for (const theme of ["light", "dark"]) {
       await page.emulateMedia({ media: "print" });
       const paper = await page.evaluate(() => {
         const heading = document.querySelector(".month h2");
+        const prayers = document.querySelector(".elements");
         return {
           wall: getComputedStyle(document.documentElement, "::before").content,
           background: getComputedStyle(document.documentElement).backgroundColor,
           headingImage: heading ? getComputedStyle(heading).backgroundImage : "none",
+          prayerField: prayers ? getComputedStyle(prayers, "::before").content : "none",
         };
       });
-      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none" });
+      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none", prayerField: "none" });
       await page.emulateMedia({ media: "screen" });
     }
   });

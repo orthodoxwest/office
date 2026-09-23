@@ -62,6 +62,8 @@
      multiply factor its darkest trowel strokes reach. Averages near --bg. */
   --plaster-base: #fffbf4;
   --plaster-tint: #f5ebe4;
+  --hour-plaster-opacity: 1;
+  --hour-plaster-size: 100% 100%;
   /* Warm ivory plaster: retain the parish's rose undertone without casting
      a peach wash over a full phone screen. Oak and rubric carry the colour. */
   --bg: #faf3e9;
@@ -2557,6 +2559,8 @@ footer::before {
     --bg: #121c28;
     --plaster-base: #1a2638;
     --plaster-tint: #7d949c;
+    --hour-plaster-opacity: 0.52;
+    --hour-plaster-size: cover;
     --accent: #d0b06a;
     --gold: #d8bc74;
     --gold-line: #6a5c3a;
@@ -2600,6 +2604,8 @@ footer::before {
   --bg: #121c28;
   --plaster-base: #1a2638;
   --plaster-tint: #7d949c;
+  --hour-plaster-opacity: 0.52;
+  --hour-plaster-size: cover;
   --accent: #d0b06a;
   --gold: #d8bc74;
   --gold-line: #6a5c3a;
@@ -4288,23 +4294,20 @@ body.season-eastertide {
   }
 }
 
-/* ── Parish material prototype ──
+/* ── Parish material ──
    The church appears here as material and structure, not illustration.
 
    Home, Ordo, and Reminders may carry the broad limewash / apse-light fields
-   because they are thresholds and working rooms. Hours carry a fainter wash
-   only in wide outer margins; prayer keeps a flat field beneath its words.
+   because they are thresholds and working rooms. Wide hour pages carry a
+   fainter wash, cleared only beneath the prayer itself.
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
-   lighting divided out. Colour comes from the tokens below, so Nave and Apse
-   share one 58 KB image. It is laid once, sized to the viewport and fixed,
-   never tiled: the earlier washes failed as a periodic stripe down the
-   39,000px ordo and as recognizable spotlight pools on a wide screen, and
-   a field that neither repeats nor carries a composition avoids both.
+   lighting divided out. Nave and Apse share one 58 KB image, laid once at
+   viewport size and fixed so long pages never repeat a texture tile.
 
-   The layers compose inside one opaque background rather than blending with
-   the page: base × screen(texture, tint). Where the wall is at its mean the
+   On threshold pages, the layers compose inside one opaque background:
+   base × screen(texture, tint). Where the wall is at its mean the
    result is about --bg; darker trowel strokes take on more of the tint, as
    more wash sits in them. Being self-contained, the same layers can be
    repeated on a sticky surface with a fixed attachment and meet the wall. */
@@ -4343,18 +4346,51 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-hou
   background-repeat: no-repeat;
 }
 
-/* On hours, keep the entire reading measure flat. Only wide outer margins
-   carry a faint trace of the same wall, fading away before the column. */
+/* Hours share one neutral plaster field through the header and epilogue.
+   The clear field belongs to the prayer wrapper, so it follows disclosures
+   and text size without running through the opening or footer. */
 html:where(:has(> body.page-hour))::before {
   content: none;
-  opacity: 0.3;
-  mask-image: linear-gradient(to right,
-    #000, transparent calc(50% - 23rem),
-    transparent calc(50% + 23rem), #000);
+  background-color: var(--bg);
+  background-image: url("plaster.jpg");
+  background-blend-mode: overlay;
+  /* Nave shows the whole photograph for finer marks; Apse keeps its softer
+     crop. Both are single viewport fields, with no tiling down the office. */
+  background-size: var(--hour-plaster-size);
+  opacity: var(--hour-plaster-opacity);
 }
 
 @media (min-width: 1000px) {
   html:where(:has(> body.page-hour))::before { content: ""; }
+
+  .page-hour .elements {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .page-hour .elements::before {
+    content: "";
+    position: absolute;
+    inset: -3rem -10rem;
+    z-index: -1;
+    pointer-events: none;
+    background-color: var(--bg);
+    /* Eight rem of eased feathering outside a two-rem clear text gutter.
+       The vertical feather eases through the surrounding whitespace, stays
+       opaque beneath every prayer, and ends before the continuation links. */
+    mask-image:
+      linear-gradient(to right,
+        transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
+        rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
+        #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
+        rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent),
+      linear-gradient(to bottom,
+        transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
+        rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
+        #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
+        rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
+    mask-composite: intersect;
+  }
 }
 
 /* The sticky month heading hides the rows passing beneath it, so it stays
@@ -4440,11 +4476,13 @@ html:where(:has(> body.page-hour))::before {
    the stars gold through Passiontide while every other ornament veils. */
 body {
   --apse-vault: none;
+  --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
+    --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
@@ -4469,6 +4507,7 @@ body {
 }
 
 :root[data-theme="dark"] body {
+  --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
@@ -4533,6 +4572,16 @@ body.page-hour footer::after {
   background-position: top center;
   -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
   mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+}
+
+/* Where the desktop plaster and stars overlap, the vault's own mask also
+   eases in a quiet ground. Stars and texture therefore trade prominence
+   without another layer or a change to their phase. Nave stays transparent. */
+@media screen and (min-width: 1000px) {
+  body.page-hour .hour-epilogue::before,
+  body.page-hour footer::after {
+    background-color: var(--apse-ground);
+  }
 }
 
 /* Clear the small epilogue/footer lettering where it crosses the vault.
@@ -4751,6 +4800,7 @@ body.page-home::before {
   }
 
   body.page-home::before,
+  .page-hour .elements::before,
   html::before {
     content: none;
   }
