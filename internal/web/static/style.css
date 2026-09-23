@@ -4323,7 +4323,11 @@ body.season-eastertide {
     linear-gradient(var(--plaster-tint), var(--plaster-tint));
 }
 
-@media (min-width: 1000px) and (min-aspect-ratio: 1/1) {
+/* Not preloaded. On a slow connection a preload arrived before first paint
+   but pushed the prayer text ~300ms later, even at low fetch priority. The
+   wall averages exactly --bg, so arriving late costs only texture, never
+   tone; the service worker makes it immediate on every later visit. */
+@media (min-width: 1000px) and (orientation: landscape) {
   :root {
     --plaster-image: url("plaster-wide.jpg");
   }
@@ -4412,6 +4416,29 @@ html:where(:has(> body.page-hour))::before {
    opaque; a fixed attachment lines its copy of the wall up with the wall. */
 .page-calendar .month h2 {
   background-attachment: fixed;
+}
+
+/* iOS Safari treats a fixed attachment as scroll, so the heading would show
+   its own copy of the wall at another scale and crop. The wall averages
+   exactly --bg, so a flat band is the one seam-free choice there, the same
+   clearing the prayer uses on wide hours. */
+@supports (-webkit-touch-callout: none) {
+  .page-calendar .month h2 {
+    background: var(--bg);
+  }
+}
+
+/* Forced colours keep background images but not their colours, so the wall
+   would sit behind the system backplates as a patchwork; the user's own
+   Canvas is the wall there. */
+@media (forced-colors: active) {
+  html::before {
+    content: none !important;
+  }
+
+  .page-calendar .month h2 {
+    background: Canvas;
+  }
 }
 
 /* Framed objects catch a little more light than the surrounding plaster.

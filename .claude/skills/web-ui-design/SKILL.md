@@ -63,10 +63,13 @@ or impose a redesign on an unrelated change.
   digest within reading measure. Avoid dotted underlines on abbreviations.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a flat field.
-- The threshold-page limewash is the parish nave photograph, high-passed to a
-  grey field by `tools/genplaster` and coloured by `--plaster-*` tokens. Tune
-  strength through those tokens; regenerate the image only to change source
-  or processing.
+- The limewash wall is the parish nave photograph, high-passed to grey
+  fields by `tools/genplaster` (portrait for phones, a landscape crop from
+  1000px) and coloured by `--plaster-*` tokens. Always cover-fit; never
+  stretch or tile it. `--plaster-base` is solved so the wall averages
+  exactly `--bg` (see the token comment): change the tint and re-solve the
+  base, or the flat clearings (wide hours, iOS sticky headings) show edges.
+  Wide hours carry it at `--hour-plaster-opacity`, cleared beneath prayer.
 
 ## Where to work
 

@@ -497,6 +497,16 @@ test("wide hour plaster clears the prayer without sideways scroll or stretching"
   expect((await wall()).image).toMatch(/plaster\.jpg/);
 });
 
+test("forced colours drop the wall for the system canvas", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  for (const path of [`/?date=${testDate}`, "/calendar/2026", `/lauds/${testDate}`]) {
+    await openDatedPage(page, path);
+    const wall = await page.evaluate(() => getComputedStyle(document.documentElement, "::before").content);
+    expect(wall, path).toBe("none");
+  }
+});
+
 test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await openDatedPage(page, `/?date=${testDate}`);
