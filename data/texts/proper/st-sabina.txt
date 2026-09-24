@@ -1,4 +1,7 @@
-# Collect citation unresolved: #412.
+[collect]
+# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF p. 763 (August 28, 2nd collect for St Sabina)
+O God, who among the manifold works of thy power hast bestowed even upon the weakness of women the victory of martyrdom: mercifully grant; that we, who celebrate the birthday of blessed Sabina, thy Martyr, may by her example draw nearer unto thee.
+
 [commemoration-antiphon-lauds]
 # SOURCE: 2026 archdiocesan ordo, p. 93; monastic diurnal, p. 5* (Holy Women commemoration)
 @use commons/holy-woman/benedictus-antiphon

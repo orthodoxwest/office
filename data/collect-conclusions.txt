@@ -86,6 +86,8 @@ proper/holy-wednesday/collect who-liveth
 proper/laetare-sunday/collect who-liveth
 proper/pentecost-sunday-3/collect who-liveth
 proper/pentecost-sunday-23/collect who-liveth
+# Vicariate Missal prints "Who liveth" (PDF p. 820): the collect ends on Christ.
+proper/st-catherine-alexandria/collect who-liveth
 # Diurnal p. 470 prints the body ending "...by the same thy Son Jesus Christ our
 # Lord. Who with thee..." — our text had dropped that trailing clause, which is
 # what makes this Son-at-the-end; restored with the collect.
