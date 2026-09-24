@@ -1,101 +1,111 @@
+# Ss Cyril and Methodius (July 7). The supplement appoints "All from the
+# Common of a Confessor Bishop, keeping the singular number, except the
+# following." The 2026 ordo (p. 78) takes the hymns, versicles and gospel
+# antiphons from that supplement and the collect from the Diurnal (p. 559).
+# July 6 is always the Peter and Paul octave day, so the I-Vespers antiphon and
+# versicle serve only its commemoration. That versicle (p. 1) is the same as
+# II Vespers (p. 3) but misprints "clother", so versicle-first-vespers aliases
+# the clean p. 3 printing.
+
 [magnificat-antiphon-first]
-# SOURCE: divinum-officium Sancti/07-07.txt [Ant 1] — check against diurnal
-# The diurnal prints only a memorial collect (p. 559); no gospel ants.
-How beautiful * are the feet of them that preach the gospel of peace, and bring glad tidings of good things, that say unto Sion thy God reigneth.
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 1 (At I Vespers, Ant. on Mag.)
+O how beautiful * are the feet of them that preach the Gospel of peace, that proclaim good things, saying unto Sion: behold, thy God reigneth.
 
 [benedictus-antiphon]
-# SOURCE: divinum-officium Sancti/07-07.txt [Ant 2] — check against diurnal
-In holiness * and righteousness before Him all the days of their life did they serve the Lord, and therefore the Lord God of Israel hath clothed them with a robe of glory.
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 2 (At Lauds, Ant. on Ben.)
+In holiness * and righteousness they served the Lord all their days: therefore the Lord God of Israel clothed them with a robe of glory.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Sancti/07-07.txt [Ant 3] — check against diurnal
-These are * the holy men become the friends of God and made glorious by the preaching of divine truth; their tongues have become the keys of heaven.
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 3 (At II Vespers, Ant. on Mag.)
+These are holy men, * who became friends of God, glorious in the proclamation of divine truth: their tongues became keys of heaven.
 
 [collect]
-# SOURCE: monastic diurnal, p. 559 (Ss. Cyril and Methodius)
+# SOURCE: monastic diurnal, p. 559 (Ss. Cyril and Methodius); appointed by the 2026 ordo p. 78
 Almighty everlasting God, who by thy blessed Bishops and Confessors Cyril and Methodius didst vouchsafe to call the Slavic peoples to the knowledge of thy Name: grant that we who glory in their festival may be joined unto their fellowship.
 
-#
-# [psalm-antiphon]
-# Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
-#
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
-# [commemoration-antiphon]
-# Antiphon when this feast is only commemorated (not the day's celebration).
-#
-# [commemoration-versicle]
-# Versicle pair (V. … / R. …) for the commemoration of this feast.
-#
-# [commemoration-collect]
-# Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
-# [hymn-lauds]
-# Hymn at Lauds. First line may be a Latin incipit title.
-#
-# [hymn-vespers]
-# Hymn at Vespers.
-#
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
-# [short-responsory-lauds]
-# Short responsory at Lauds.
-#
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
-# [vespers-psalmody]
-# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
-#
-# [vespers-psalmody-first]
-# I Vespers psalmody table when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
-# [psalm-antiphon-1-first-vespers]
-# I Vespers override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-first-vespers]
-# I Vespers override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-first-vespers]
-# I Vespers override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-first-vespers]
-# I Vespers override for psalm antiphon 4.
+[hymn-lauds]
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, pp. 1-2 (At Lauds, Hymn)
+O lovely light of fatherland!
+Kind beacon to Slavonic race,
+Brothers, all hail! Your festival
+With yearly canticle we grace.
+
+Whom Rome applauding did receive,
+As mother doth her sons embrace,
+With pontiff’s mitre deck your brows,
+Gird with new strength, new toil to face.
+
+To far-off barbrous lands ye hie,
+Knowledge and love of Christ to bear;
+Whom error vain had long deceived,
+Ye now with light replenish fair.
+
+In hearts unfettered from the grasp
+Of ill, doth heavenly ardor glow;
+Where horrid thorns the land devoured,
+The flowers of holiness now grow.
+
+At length in heavenly court enthroned,
+Ye rest securely; as we pray,
+Oh hear our cry: The Slavic race
+Vouchsafe from God may never stray.
+
+All wanderers plunged in errors dark
+May Christ’s one fold to union bring;
+While emulous of ancestral deeds
+May faith to newborn beauty spring.
+
+Do thou, O blissful Trinity
+Inflame us with thy heavenly fires,
+And grant the sons may ever tread
+The noble footsteps of their sires.
+
+Amen.
+
+[hymn-vespers]
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 2 (At II Vespers, Hymn)
+Faithful of Christ, acclaim these two great champions
+Duly received on glowing thrones in heaven;
+Twin shafts of strength, full ornament and glory
+Of Slavic nations.
+
+Same love of Christ united them as brothers,
+Same pious duty called them from their lone cells,
+So they might speed to bring to many peoples
+Pledges of blest life.
+
+With the pure light, which beams in God’s own temples,
+Fill they Moravians, Bulgars, and Bohemians;
+Soon these wild squadrons, one vast marching army,
+Lead they to heaven.
+
+Crowned with bright halos, due reward for merits,
+Still let your hearts be moved by tears of beggars;
+Slavs deeply need that you, who brought them Christ’s faith,
+Guard this prime treasure.
+
+May each fair land that calls for your protection
+Keep well the glow of faith that never faileth;
+God, who of old first gave them Christian favour,
+Always will grant it.
+
+Mankind’s Creator, merciful Redeemer,
+Who, in thy bounty, dost all blessings grant us,
+Thanks be to thee; through ages never ending
+Thine may be glory.
+
+Amen.
+
+[versicle-lauds]
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 2 (At Lauds)
+V. The people shall tell the wisdom of the Saints.
+R. And the congregation shall shew forth their praise.
+
+[versicle-vespers]
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 3 (At II Vespers)
+V. Let thy priests be clothed with righteousness.
+R. And thy Saints sing with joyfulness.
+
+[versicle-first-vespers]
+# SOURCE: Propers of Ss. Cyril and Methodius July 7.pdf, p. 1 (At I Vespers; misprinted "clother", as printed correctly on p. 3)
+@use proper/ss-cyril-methodius/versicle-vespers

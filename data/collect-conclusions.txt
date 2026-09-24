@@ -108,6 +108,8 @@ proper/easter-sunday/collect through-same
 proper/easter-sunday-2/collect through-same
 proper/easter-sunday-3/collect through-same
 proper/epiphany/collect through-same
+# Printed "Through the same" in the Expectation B.V.M. supplement, p. 1.
+proper/expectation-bvm/collect through-same
 proper/holy-name-jesus/collect through-same
 proper/motherhood-bvm/collect through-same
 proper/nativity-sunday-within-octave/collect through-same
