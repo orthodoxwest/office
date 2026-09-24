@@ -1924,6 +1924,7 @@ psalms/148a,9791f6b89cee,Coverdale Psalter,Psalm 148a,,verified,codex,2026-07-10
 psalms/148b,ccaf7316e1ae,Coverdale Psalter,Psalm 148b,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/149,7c554cf0a542,Coverdale Psalter,Psalm 149,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/150,a0e11bda5eb2,Coverdale Psalter,Psalm 150,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
+seasonal/advent/benedictus-antiphon-december-21,cfa9c60357cb,diurnal,"III Week in Advent, Dec. 21 Commemoration of Advent at Lauds",176,verified,claude,2026-09-23,Direct page-image reading (PDF p. 222); pointing normalized.
 seasonal/advent/chapter-lauds,348103f4a71a,Propers of Lauds & Vespers During Advent,"Propers for Lauds, The Chapter",,verified,bwaldrep,2026-07-24,verified against the propers booklet
 seasonal/advent/chapter-none,58cbc9ca496e,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0210.png
 seasonal/advent/chapter-sext,c16b4a5f9bf7,diurnal,,164,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0210.png
