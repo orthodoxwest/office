@@ -399,32 +399,33 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Preference groups wrap as units when the reader needs more room. The
-   touch targets stay generous without outlining each button. */
+/* Desktop retains its compact bordered footer controls. Mobile moves this
+   single preference group below the navigation links. */
 .footer-preferences {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem 0.75rem;
-  margin: 0.65rem auto 0;
   width: fit-content;
   max-width: 100%;
+  margin: 0 auto;
 }
 
-footer .theme-switch,
-footer .text-size-switch {
+.theme-switch,
+.text-size-switch {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
-  border: none;
-  margin: 0;
+  border-block: 1px solid var(--surface-edge);
+  margin: 0.85rem auto 0;
+}
+
+.text-size-switch {
+  margin-top: 0;
+  border-top: none;
 }
 
 .theme-option,
 .text-size-option {
   appearance: none;
   border: none;
+  border-right: 1px solid var(--surface-edge);
   background: transparent;
   color: var(--muted);
   font: inherit;
@@ -461,6 +462,11 @@ footer .text-size-switch {
   font-size: 1.3em;
 }
 
+.theme-option:last-child,
+.text-size-option:last-child {
+  border-right: none;
+}
+
 .theme-option:hover,
 .text-size-option:hover {
   color: var(--accent);
@@ -483,10 +489,27 @@ footer .text-size-switch {
 }
 
 @media (max-width: 700px) {
+  footer .footer-preferences {
+    display: none;
+  }
+
+  .site-menu .footer-preferences {
+    display: grid;
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 0.65rem;
+  }
+
+  .site-menu .theme-switch,
+  .site-menu .text-size-switch {
+    display: flex;
+    margin: 0;
+  }
+
   /* Match site menu / hour-chip touch floor (~44px). */
   .theme-option,
   .text-size-option {
-    flex: 0 0 auto;
+    flex: 1 1 0;
     min-height: 2.75rem;
     min-width: 2.75rem;
     font-size: 0.75rem;
@@ -556,6 +579,8 @@ footer .text-size-switch {
     display: grid;
     grid-template-columns: repeat(2, minmax(7rem, 1fr));
     width: min(21rem, calc(100vw - 2rem));
+    max-height: calc(100dvh - 5rem);
+    overflow-y: auto;
     padding: 0.65rem;
     gap: 0.15rem;
     background: var(--surface);
@@ -4657,7 +4682,7 @@ body.page-hour footer::after {
 /* Clear whole lines and controls, including the spaces between glyphs.
    The soft edge meets the surrounding Apse vault without shifting it. */
 body:is(.page-home, .page-hour) footer > p,
-body:is(.page-home, .page-hour) .footer-preferences,
+body:is(.page-home, .page-hour) footer .footer-preferences,
 body.page-hour .report-issue {
   background-color: var(--apse-ground);
   box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);

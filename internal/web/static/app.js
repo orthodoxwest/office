@@ -767,7 +767,15 @@ function usageBeaconBody(scope) {
   var siteMenu = document.querySelector(".site-menu");
   if (siteMenu && "matchMedia" in window) {
     var narrowMenu = window.matchMedia("(max-width: 700px)");
+    var preferences = document.querySelector(".footer-preferences");
+    var preferenceFooter = preferences && preferences.parentElement;
     var syncSiteMenu = function () {
+      // Move the existing controls so state, listeners, and accessible names
+      // remain unique when rotating a phone or resizing a desktop window.
+      if (preferences) {
+        var destination = narrowMenu.matches ? siteMenu.querySelector("nav") : preferenceFooter;
+        if (preferences.parentElement !== destination) destination.appendChild(preferences);
+      }
       if (narrowMenu.matches) {
         siteMenu.removeAttribute("open");
       } else {
