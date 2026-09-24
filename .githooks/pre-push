@@ -1,8 +1,0 @@
-#!/bin/sh
-
-set -eu
-
-repo_root=$(git rev-parse --show-toplevel)
-
-echo "pre-push: running make check"
-exec make -C "$repo_root" check
