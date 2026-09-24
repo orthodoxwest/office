@@ -3170,7 +3170,8 @@ test("home keeps feast and octave above the recovery link, including after midni
   await expect(page.getByText("Liturgical color:", { exact: false })).toHaveCount(1);
 
   const today = await serverTodaySlug(page);
-  await page.clock.install({ time: new Date(`${today}T23:59:00`) });
+  const beforeMidnight = await page.evaluate(slug => new Date(`${slug}T23:59:00`).getTime(), today);
+  await page.clock.install({ time: new Date(beforeMidnight) });
   await page.goto(`/?date=${today}`);
   await expect(page.locator(".not-today-notice")).toHaveCount(0);
   await page.clock.fastForward("02:00");
