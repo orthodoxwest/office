@@ -13,9 +13,8 @@ import (
 
 // Sigil column classes. Nearly every sigil is a single mark (℣. / ℟.) and takes
 // a narrow gutter, so the spoken text keeps the same left edge as psalm verses.
-// A spelled-out rubric word ("Blessing.", the corpus's only one) is four times
-// as wide and takes its own class; CSS widens the whole surrounding block to
-// match, so the few lines beside it still share one text edge.
+// Spelled-out rubric words take their own class so CSS can keep the narrow
+// marker column and move a long label above its text on small screens.
 const (
 	sigilClass     = "sigil"
 	sigilWordClass = "sigil sigil-word"
@@ -535,7 +534,18 @@ func renderFlowingLiturgicalBlock(text string) template.HTML {
 // renderMarianAntiphon preserves the verse lines in the antiphon's opening prose
 // block while allowing its versicles and concluding prayer to flow normally.
 func renderMarianAntiphon(text string) template.HTML {
-	return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
+	// All seasonal Marian forms separate their collect with this invitation.
+	// Keep the chant's preserved lines, and give its collect the same semantic
+	// wrapper and flowing typography as a standalone collect.
+	const invitation = "\n\nLet us pray.\n\n"
+	chant, collect, found := strings.Cut(text, invitation)
+	if !found || strings.TrimSpace(collect) == "" {
+		return renderLiturgicalBlockWithMode(text, preserveFirstProseBlock)
+	}
+	return template.HTML(string(renderLiturgicalBlockWithMode(chant, preserveFirstProseBlock)) +
+		`<div class="liturgical-gap"></div><p class="plain-line">Let us pray.</p>` +
+		`<div class="liturgical-gap"></div><div class="collect">` +
+		string(renderFlowingLiturgicalBlock(collect)) + `</div>`)
 }
 
 // chantLineHTML renders a line of liturgical text, styling a " * " pointing

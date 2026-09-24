@@ -50,33 +50,33 @@
   {{if .ShowBanner}}
   {{if .LeaderForms}}<div data-leaders="{{.BannerForms}}">{{end}}
   <aside class="site-banner" id="site-banner" aria-label="Review notice">
-    <p>This office has not yet been fully checked against the printed books and may contain errors.</p>
+    <p>Not fully checked against the printed books; may contain errors.</p>
     <button type="button" data-dismiss-banner aria-label="Dismiss review notice">Dismiss</button>
   </aside>
   {{if .LeaderForms}}</div>{{end}}
   {{end}}
   <div class="elements">
     {{if .LeaderForms}}
-    {{range .LeaderSections}}
+    {{range $index, $section := .LeaderSections}}
       {{if .Collapsible}}
       <details class="session-prayers"{{if or (eq $.HourName "lauds") (eq $.HourName "prime") (eq $.HourName "vespers")}} open{{end}}>
         <summary>{{.Label}}</summary>
-        {{.HTML}}
+        <div class="session-prayers-content">{{.HTML}}</div>
       </details>
       {{else}}
-      {{if .Label}}{{renderSectionHeading .Label}}{{end}}
+      {{if .Label}}{{renderSectionHeading .Label}}{{else if and (eq $.HourName "compline") (eq $index 0)}}{{renderSectionHeading "Opening"}}{{end}}
       {{.HTML}}
       {{end}}
     {{end}}
     {{else}}
-    {{range .Hour.Sections}}
+    {{range $index, $section := .Hour.Sections}}
       {{if .Collapsible}}
       <details class="session-prayers"{{if or (eq $.HourName "lauds") (eq $.HourName "prime") (eq $.HourName "vespers")}} open{{end}}>
         <summary>{{.Label}}</summary>
-        {{renderSectionElements .Elements}}
+        <div class="session-prayers-content">{{renderSectionElements .Elements}}</div>
       </details>
       {{else}}
-      {{if .Label}}{{renderSectionHeading .Label}}{{end}}
+      {{if .Label}}{{renderSectionHeading .Label}}{{else if and (eq $.HourName "compline") (eq $index 0)}}{{renderSectionHeading "Opening"}}{{end}}
       {{renderSectionElements .Elements}}
       {{end}}
     {{end}}
@@ -102,7 +102,7 @@
 
 {{define "leader-assurance"}}
     <details class="assurance-panel">
-      <summary>Assurance: {{.Assurance.Verified}} verified{{if .Assurance.NeedsReview}} &middot; {{.Assurance.NeedsReview}} need review{{end}}{{if .Assurance.SourceUnknown}} &middot; {{.Assurance.SourceUnknown}} source unknown{{end}}{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
+      <summary>Assurance: {{.Assurance.Verified}} verified{{if .Assurance.NeedsReview}} &middot; {{.Assurance.NeedsReview}} {{if eq .Assurance.NeedsReview 1}}needs{{else}}need{{end}} review{{end}}{{if .Assurance.SourceUnknown}} &middot; {{.Assurance.SourceUnknown}} source unknown{{end}}{{if .Assurance.Flagged}} &middot; {{.Assurance.Flagged}} pre-flagged{{end}}</summary>
       <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
       <h2>Text dependencies</h2>
       <ul class="assurance-list">

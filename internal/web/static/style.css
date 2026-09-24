@@ -399,39 +399,32 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Quiet footer preference controls (all pages): Default / Nave / Apse above,
-   Smaller / Default / Larger text below. Same hairline group, same weight —
-   neither should read louder than the other. */
+/* Preference groups wrap as units when the reader needs more room. The
+   touch targets stay generous without outlining each button. */
+.footer-preferences {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem 0.75rem;
+  margin: 0.65rem auto 0;
+  width: fit-content;
+  max-width: 100%;
+}
+
 footer .theme-switch,
 footer .text-size-switch {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
-  /* Hairline courses above and below rather than a boxed group. These are the
-     quietest thing on the page and were reading as the loudest — two outlined
-     segmented controls stacked under the day is the one piece of chrome in the
-     app that looked like a settings panel. */
-  border-block: 1px solid var(--surface-edge);
-  margin: 0.85rem auto 0;
-}
-
-/* Sits directly under its sibling sharing one hairline: a single preference
-   cluster, not two bands. The middle rule belongs to both rows, so the quiet
-   controls read as one instrument panel rather than two stacked boxes. */
-footer .theme-switch {
-  margin-bottom: 0;
-}
-
-footer .text-size-switch {
-  margin-top: 0;
-  border-top: none;
+  border: none;
+  margin: 0;
 }
 
 .theme-option,
 .text-size-option {
   appearance: none;
   border: none;
-  border-right: 1px solid var(--surface-edge);
   background: transparent;
   color: var(--muted);
   font: inherit;
@@ -468,11 +461,6 @@ footer .text-size-switch {
   font-size: 1.3em;
 }
 
-.theme-option:last-child,
-.text-size-option:last-child {
-  border-right: none;
-}
-
 .theme-option:hover,
 .text-size-option:hover {
   color: var(--accent);
@@ -484,7 +472,7 @@ footer .text-size-switch {
 .text-size-option[aria-pressed="true"] {
   background: transparent;
   color: var(--accent);
-  box-shadow: inset 0 -1px 0 var(--ornament);
+  box-shadow: inset 0 -1px 0 var(--gold-line);
 }
 
 .theme-option:focus-visible,
@@ -495,16 +483,12 @@ footer .text-size-switch {
 }
 
 @media (max-width: 700px) {
-  footer .theme-switch,
-  footer .text-size-switch {
-    width: min(18rem, 100%);
-  }
-
   /* Match site menu / hour-chip touch floor (~44px). */
   .theme-option,
   .text-size-option {
-    flex: 1 1 0;
+    flex: 0 0 auto;
     min-height: 2.75rem;
+    min-width: 2.75rem;
     font-size: 0.75rem;
     padding: 0.5rem 0.35rem;
   }
@@ -1321,7 +1305,8 @@ footer::before {
   white-space: nowrap;
 }
 
-.elements {
+.elements,
+.session-prayers-content {
   display: grid;
   gap: 0.9rem;
   /* Comfortable reading measure for the office text on wide screens */
@@ -1330,7 +1315,8 @@ footer::before {
   margin: 0 auto;
 }
 
-.elements > * {
+.elements > *,
+.session-prayers-content > * {
   margin-bottom: 0;
 }
 
@@ -1482,6 +1468,13 @@ footer::before {
 .elements > .psalm + .antiphon,
 .elements > .canticle + .antiphon {
   margin-top: -0.5rem;
+}
+
+/* Leave a clear threshold between complete psalm groups, including psalms
+   that share an antiphon and have no intervening announcement. */
+.elements > .antiphon + .antiphon:has(+ .psalm),
+.elements > .psalm + .psalm {
+  margin-top: 1.2rem;
 }
 
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
@@ -1794,15 +1787,27 @@ footer::before {
   user-select: none;
 }
 
-/* A spelled-out rubric word needs the wide column, and the lines around it
-   have to follow or the little block loses its text edge (Compline's opening
-   ℣. / Blessing. / ℟.). Scoped with :has() so it costs nothing anywhere else;
-   without :has() support the wide line simply keeps its own hanging indent,
-   which is how a printed diurnal sets it anyway. */
-.sigil-word,
-.liturgical-block:has(.sigil-word) .sigil {
+/* Keep ℣/℟ and the spoken text on their common edges. A long label hangs
+   into the desktop margin; on phones it gets a line above its blessing. */
+.sigil-word {
   flex-basis: 4.25rem;
   width: 4.25rem;
+  margin-left: calc(1.4rem - 4.25rem);
+}
+
+@media (max-width: 999px) {
+  .versicle-line:has(> .sigil-word) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 1.8rem;
+  }
+
+  .sigil-word {
+    flex-basis: 100%;
+    width: auto;
+    margin: 0;
+    text-align: left;
+  }
 }
 
 /* "All:" is wider than ℣./℟. Hang the extra width into the left margin so
@@ -1977,17 +1982,19 @@ footer::before {
   line-height: 1.45;
   padding: 0.35rem 0;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  text-align: center;
+  gap: 0.15rem 0.65rem;
+  text-align: left;
 }
 
 .site-banner p {
+  flex: 1 1 12rem;
   margin: 0;
 }
 
 .site-banner button {
+  margin-left: 0;
   background: none;
   border: none;
   color: var(--muted);
@@ -4064,6 +4071,10 @@ body.season-eastertide {
   --initial-raised-tuck: -0.04em;
 }
 
+.opening-small-caps {
+  font-variant-caps: all-small-caps;
+}
+
 .initial-word {
   /* These are the font's drawn smcp/c2sc glyphs, not scaled-down capitals.
      Keep source spelling intact for selection, copying and speech. */
@@ -4138,7 +4149,7 @@ body.season-eastertide {
   }
 
   .page-home .home-day-head .not-today-notice {
-    margin-block: 0 0.15rem;
+    margin-block: 0.4rem 0.15rem;
   }
 }
 
@@ -4539,13 +4550,11 @@ html:where(:has(> body.page-hour))::before {
 body {
   --apse-vault: none;
   --apse-ground: transparent;
-  --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
     --apse-ground: var(--bg);
-    --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
     --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
@@ -4570,7 +4579,6 @@ body {
 
 :root[data-theme="dark"] body {
   --apse-ground: var(--bg);
-  --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
   --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
@@ -4646,12 +4654,18 @@ body.page-hour footer::after {
   }
 }
 
-/* Clear the small epilogue/footer lettering where it crosses the vault.
-   Background-coloured shadows follow the glyphs without placing another
-   panel over the diaper or moving its fixed tile origin. */
-body:is(.page-home, .page-hour) footer,
+/* Clear whole lines and controls, including the spaces between glyphs.
+   The soft edge meets the surrounding Apse vault without shifting it. */
+body:is(.page-home, .page-hour) footer > p,
+body:is(.page-home, .page-hour) .footer-preferences,
 body.page-hour .report-issue {
-  text-shadow: var(--apse-copy-shadow);
+  background-color: var(--apse-ground);
+  box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
+}
+
+body:is(.page-home, .page-hour) footer > p {
+  width: fit-content;
+  margin-inline: auto;
 }
 
 @media (min-width: 701px) {
@@ -4846,6 +4860,10 @@ body.page-home::before {
 
   details.session-prayers > * {
     display: block;
+  }
+
+  details.session-prayers > .session-prayers-content {
+    display: grid;
   }
 
   body.page-home,

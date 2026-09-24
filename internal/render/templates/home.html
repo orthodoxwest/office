@@ -1,7 +1,7 @@
 {{define "title"}}Divine Office — {{.DateStr}}{{end}}
 {{define "content"}}
 <div class="home">
-  <div class="color-band color-band-{{.Color}}"><span class="sr-only">Liturgical color: {{.Color}}</span></div>
+  <span class="sr-only">Liturgical color: {{.Color}}</span>
   {{/* The source order is the frontispiece order at every width: day identity,
        prayer invitation, then the secondary date control. Keeping the visual
        and focus orders aligned makes the threshold equally clear by keyboard
@@ -31,6 +31,8 @@
         <h1 id="home-date-heading">
           <a class="home-date-link" href="{{.CalendarLink}}" title="See this day in the ordo">{{.DateStr}}</a>
         </h1>
+        {{if .FeastName}}<p class="feast">{{typeset .FeastName}}</p>{{end}}
+        {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
         {{/* Always visible when not local today — "Change date" keeps a secondary
              Today control, but overnight PWA resume must not require opening it. */}}
         {{/* No role=status here: intentional archive browsing should not
@@ -41,8 +43,6 @@
           <a class="today-link not-today-link" href="{{.TodayLink}}">Go to today</a>
         </p>
         {{end}}
-        {{if .FeastName}}<p class="feast">{{typeset .FeastName}}</p>{{end}}
-        {{if .OctaveNote}}<p class="octave-note">{{.OctaveNote}}</p>{{end}}
         {{if .Penitential}}
         <p class="penitential">
           {{range .Penitential}}<span class="penitential-badge">{{.}}</span>{{end}}

@@ -227,6 +227,13 @@ func TestRenderMarianAntiphonPreservesVerseAndReflowsPrayer(t *testing.T) {
 	text := "[Ave Regina Caelorum]\n\nQueen of the heavens, we hail thee,\nHail thee, Lady of all the Angels;\nTo thee the faithful send up their sighs.\n\nV. Vouchsafe that I may praise thee.\nR. Give me strength.\n\nLet us pray.\n\nGrant us, O merciful God, protection in our weakness:\nthat we may rise again from our sins."
 	html := string(renderMarianAntiphon(text))
 
+	if !strings.Contains(html, `<div class="collect"><div class="liturgical-block"><p class="plain-line">Grant us`) {
+		t.Fatalf("expected the Marian collect to share standalone collect typography: %s", html)
+	}
+	if strings.Contains(html, `<p class="chant-line">Grant us`) {
+		t.Fatalf("the collect must not inherit chant line wrapping: %s", html)
+	}
+
 	// The opening pair shares one block so a two-line drop cap can float
 	// across both source lines; later verse lines stay discrete chant lines.
 	if !strings.Contains(html, `<p class="chant-line chant-line-opening">Queen of the heavens, we hail thee,<br>Hail thee, Lady of all the Angels;</p>`) {

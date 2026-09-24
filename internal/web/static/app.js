@@ -1,10 +1,31 @@
 document.documentElement.classList.add("js");
 
+// Source capitals at prose openings use real small caps, preserving the text.
+// Ornamented openings are handled by the initial enhancement below instead.
+(function () {
+  document.querySelectorAll(".liturgical-block > .plain-line:first-child").forEach(function (opening) {
+    if (opening.closest(".collect, .chapter")) return;
+    var walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
+    var node = walker.nextNode();
+    if (!node) return;
+    var match = /^(\s*)([\p{Lu}][\p{Lu}\p{M}’'-]*(?:\s+[\p{Lu}][\p{Lu}\p{M}’'-]*)*)(?=[\s,;:.!?]|$)/u.exec(node.textContent);
+    if (!match || !/\p{Lu}{2}/u.test(match[2])) return;
+    var word = node.splitText(match[1].length);
+    word.splitText(match[2].length);
+    var span = document.createElement("span");
+    span.className = "opening-small-caps";
+    word.parentNode.insertBefore(span, word);
+    span.appendChild(word);
+  });
+})();
+
 // Initials have two independent decisions: their place in the prayer's
 // hierarchy, and their optical fit. CSS holds the font-specific letter
 // profiles; this enhancement identifies the letter and opening word without
 // changing the text. Prose can adapt to its measure, while short responses
 // stay modest and psalm/metrical/chant openings keep their two-line cap.
+// Chapters, collects (including Marian collects), and the corporate Lord's
+// Prayer share the prose profile; brief versicles receive no ornament.
 (function () {
   var openings = Array.from(document.querySelectorAll([
     ".psalm-verses .verse:first-child:not(.numbered)",
@@ -592,6 +613,8 @@ function usageBeaconBody(scope) {
     } else {
       var anchor =
         document.querySelector(".hour-meta") ||
+        document.querySelector(".home-day-head .octave-note") ||
+        document.querySelector(".home-day-head .feast") ||
         document.querySelector(".home-day-head h1") ||
         document.querySelector(".home-day-head");
       if (anchor) {

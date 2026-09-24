@@ -3156,3 +3156,122 @@ test("Triduum distinguishes silent prayers and the collect conclusion", async ({
   await page.goto("/compline/2026-04-11?form=priest");
   await expect(page.locator(".collect .secret-text")).toHaveCount(0);
 });
+
+test("home keeps feast and octave above the recovery link, including after midnight", async ({ page }) => {
+  await openDatedPage(page, "/?date=2026-12-25");
+  const order = () => page.locator(".home-day-head").evaluate(el => {
+    const notice = el.querySelector(".not-today-notice");
+    return [...el.querySelectorAll("h1, .feast, .octave-note")].every(item =>
+      Boolean(item.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+      item.getBoundingClientRect().bottom <= notice.getBoundingClientRect().top);
+  });
+  expect(await order()).toBe(true);
+  await expect(page.locator(".color-band")).toHaveCount(0);
+  await expect(page.getByText("Liturgical color:", { exact: false })).toHaveCount(1);
+
+  const today = await serverTodaySlug(page);
+  await page.clock.install({ time: new Date(`${today}T23:59:00`) });
+  await page.goto(`/?date=${today}`);
+  await expect(page.locator(".not-today-notice")).toHaveCount(0);
+  await page.clock.fastForward("02:00");
+  await expect(page.locator(".not-today-notice")).toHaveAttribute("role", "status");
+  expect(await order()).toBe(true);
+});
+
+test("footer preferences stay compact and wrap whole groups with generous phone targets", async ({ page }) => {
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/?date=2026-12-25");
+    for (const size of ["default", "large"]) {
+      await page.locator(`[data-text-size-choice="${size}"]`).click();
+      const geometry = await page.locator(".footer-preferences").evaluate(el => {
+        const box = el.getBoundingClientRect();
+        return {
+          left: box.left, right: box.right,
+          groups: [...el.children].map(group => {
+            const rect = group.getBoundingClientRect();
+            return rect.top + rect.height / 2;
+          }),
+          buttons: [...el.querySelectorAll("button")].map(button => {
+            const rect = button.getBoundingClientRect();
+            return { width: rect.width, height: rect.height };
+          }),
+          overflow: document.documentElement.scrollWidth > innerWidth + 1,
+        };
+      });
+      expect(geometry.overflow, `${width}/${size}`).toBe(false);
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
+      expect(geometry.right).toBeLessThanOrEqual(width);
+      if (width <= 700) for (const button of geometry.buttons) {
+        expect(button.width).toBeGreaterThanOrEqual(44);
+        expect(button.height).toBeGreaterThanOrEqual(44);
+      }
+      if (width >= 390) expect(geometry.groups[0]).toBeCloseTo(geometry.groups[1], 0);
+    }
+  }
+});
+
+test("Compline openings preserve words and align response columns around the blessing", async ({ page }) => {
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/compline/2026-12-25");
+    await expect(page.locator(".elements > .section-heading").first()).toHaveText("Opening");
+    const confession = page.locator(".opening-small-caps:visible").filter({ hasText: /^I CONFESS$/ });
+    await expect(confession).toHaveCount(1);
+    expect(await confession.evaluate(el => getComputedStyle(el).fontVariantCaps)).toBe("all-small-caps");
+    const lines = page.locator(".elements .sigil:visible:not(.sigil-word):not(.sigil-all)");
+    const edges = await lines.evaluateAll(els => els.slice(0, 5).map(el => el.getBoundingClientRect().left));
+    for (const edge of edges) expect(edge).toBeCloseTo(edges[0], 0);
+    const blessing = page.locator(".sigil-word:visible").first();
+    expect(await blessing.evaluate(el => el.getBoundingClientRect().left)).toBeGreaterThanOrEqual(0);
+    const blessingText = await blessing.evaluate(el => {
+      const rect = el.nextElementSibling.getBoundingClientRect();
+      const reference = el.parentElement.previousElementSibling.querySelector(".sigil-text").getBoundingClientRect();
+      return { left: rect.left, right: rect.right, width: rect.width, reference: reference.left };
+    });
+    expect(blessingText.left).toBeCloseTo(blessingText.reference, 0);
+    expect(blessingText.width).toBeGreaterThan(200);
+    expect(blessingText.right).toBeLessThanOrEqual(width);
+
+    const banner = page.locator(".site-banner:visible");
+    await expect(banner).toHaveCount(1);
+    expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
+    expect((await banner.boundingBox()).height).toBeLessThan(100);
+    await banner.getByRole("button", { name: "Dismiss review notice" }).click();
+    await expect(banner).toHaveCount(0);
+  }
+});
+
+test("Office prayer instructions retain spacing and Marian collects share initial treatment", async ({ page }) => {
+  for (const theme of ["light", "dark"]) {
+    await openDatedPage(page, "/vespers/2026-09-22", theme);
+    const rubric = page.locator(".session-prayers-content > .rubric").last();
+    const gap = await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom);
+    expect(gap).toBeGreaterThanOrEqual(14);
+    const collect = page.locator(".marian-antiphon .collect .plain-line").first();
+    await expect(collect).toHaveAttribute("data-initial", "A");
+    await expect(collect.locator(".initial-word")).toHaveText("lmighty");
+    await page.emulateMedia({ media: "print" });
+    await expect(rubric).toBeVisible();
+    expect(await rubric.evaluate(el => el.getBoundingClientRect().top - el.previousElementSibling.getBoundingClientRect().bottom)).toBeGreaterThanOrEqual(14);
+    await page.emulateMedia({ media: "screen" });
+  }
+});
+
+test("Apse clears whole epilogue lines and controls from the starfield", async ({ page }) => {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await openDatedPage(page, "/vespers/2026-09-22", "dark");
+    const grounds = await page.locator(".report-issue:visible, footer > p, .footer-preferences").evaluateAll(els => {
+      const ground = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+      const probe = document.createElement("span");
+      probe.style.backgroundColor = ground;
+      document.body.append(probe);
+      const expected = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return els.map(el => ({ background: getComputedStyle(el).backgroundColor, expected }));
+    });
+    expect(grounds.length).toBeGreaterThanOrEqual(3);
+    for (const ground of grounds) expect(ground.background).toBe(ground.expected);
+  }
+});
