@@ -145,6 +145,15 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 			return nil, fmt.Errorf("%s: feast %q: CommemorationClass requires feria category", sourceFile, f.ID)
 		}
 	}
+	if v, ok := m["PrimaryOfOurLord"]; ok {
+		f.PrimaryOfOurLord, err = parseDataBool(v)
+		if err != nil {
+			return nil, fmt.Errorf("%s: feast %q: PrimaryOfOurLord: %w", sourceFile, f.ID, err)
+		}
+		if f.PrimaryOfOurLord && (f.Rank != models.Double1stClass || f.Category != models.CategoryLord) {
+			return nil, fmt.Errorf("%s: feast %q: PrimaryOfOurLord requires a Double I Class feast of Our Lord", sourceFile, f.ID)
+		}
+	}
 	if v, ok := m["IsVigil"]; ok {
 		f.IsVigil, err = parseDataBool(v)
 		if err != nil {
@@ -187,6 +196,7 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"VigilOf":            true,
 		"CommemorationClass": true,
 		"OctaveClass":        true,
+		"PrimaryOfOurLord":   true,
 		"CompanionOf":        true,
 		"OnlyWith":           true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}

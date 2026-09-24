@@ -326,6 +326,12 @@ type Feast struct {
 	// It retains the companion's II-Vespers entitlement and keeps the pair
 	// together when that office is itself commemorated (Diurnal pp.463,577).
 	CompanionOf string `json:"-"`
+	// PrimaryOfOurLord marks the Primary Doubles I Class of Our Lord in the
+	// Diurnal's Table of the Rank of Feasts (pp. xxxix-xl): Nativity,
+	// Epiphany, Easter, Ascension, Pentecost, Trinity and Corpus Christi.
+	// General Rubrics X (p. xxx) excepts them from the Lauds commemoration of
+	// an occurring Greater or Lesser Double.
+	PrimaryOfOurLord bool `json:"-"`
 
 	// OnlyWith restricts this feast/commemoration to days where the winning
 	// celebration has the given feast ID.
