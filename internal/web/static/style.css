@@ -399,24 +399,30 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Desktop retains its compact bordered footer controls. Mobile moves this
-   single preference group below the navigation links. */
-.footer-preferences {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-.theme-switch,
-.text-size-switch {
+/* Quiet footer preference controls (all pages): Default / Nave / Apse above,
+   Smaller / Default / Larger text below. Same hairline group, same weight —
+   neither should read louder than the other. */
+footer .theme-switch,
+footer .text-size-switch {
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
+  /* Hairline courses above and below rather than a boxed group. These are the
+     quietest thing on the page and were reading as the loudest — two outlined
+     segmented controls stacked under the day is the one piece of chrome in the
+     app that looked like a settings panel. */
   border-block: 1px solid var(--surface-edge);
   margin: 0.85rem auto 0;
 }
 
-.text-size-switch {
+/* Sits directly under its sibling sharing one hairline: a single preference
+   cluster, not two bands. The middle rule belongs to both rows, so the quiet
+   controls read as one instrument panel rather than two stacked boxes. */
+footer .theme-switch {
+  margin-bottom: 0;
+}
+
+footer .text-size-switch {
   margin-top: 0;
   border-top: none;
 }
@@ -478,7 +484,7 @@ summary:focus-visible {
 .text-size-option[aria-pressed="true"] {
   background: transparent;
   color: var(--accent);
-  box-shadow: inset 0 -1px 0 var(--gold-line);
+  box-shadow: inset 0 -1px 0 var(--ornament);
 }
 
 .theme-option:focus-visible,
@@ -489,21 +495,9 @@ summary:focus-visible {
 }
 
 @media (max-width: 700px) {
-  footer .footer-preferences {
-    display: none;
-  }
-
-  .site-menu .footer-preferences {
-    display: grid;
-    grid-column: 1 / -1;
-    width: 100%;
-    margin-top: 0.65rem;
-  }
-
-  .site-menu .theme-switch,
-  .site-menu .text-size-switch {
-    display: flex;
-    margin: 0;
+  footer .theme-switch,
+  footer .text-size-switch {
+    width: min(18rem, 100%);
   }
 
   /* Match site menu / hour-chip touch floor (~44px). */
@@ -511,7 +505,6 @@ summary:focus-visible {
   .text-size-option {
     flex: 1 1 0;
     min-height: 2.75rem;
-    min-width: 2.75rem;
     font-size: 0.75rem;
     padding: 0.5rem 0.35rem;
   }
@@ -579,8 +572,6 @@ summary:focus-visible {
     display: grid;
     grid-template-columns: repeat(2, minmax(7rem, 1fr));
     width: min(21rem, calc(100vw - 2rem));
-    max-height: calc(100dvh - 5rem);
-    overflow-y: auto;
     padding: 0.65rem;
     gap: 0.15rem;
     background: var(--surface);
@@ -4575,11 +4566,13 @@ html:where(:has(> body.page-hour))::before {
 body {
   --apse-vault: none;
   --apse-ground: transparent;
+  --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
     --apse-ground: var(--bg);
+    --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
     --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
     --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
@@ -4604,6 +4597,7 @@ body {
 
 :root[data-theme="dark"] body {
   --apse-ground: var(--bg);
+  --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
   --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
   --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
@@ -4679,18 +4673,15 @@ body.page-hour footer::after {
   }
 }
 
-/* Clear whole lines and controls, including the spaces between glyphs.
-   The soft edge meets the surrounding Apse vault without shifting it. */
-body:is(.page-home, .page-hour) footer > p,
-body:is(.page-home, .page-hour) footer .footer-preferences,
+/* Keep the existing footer lettering treatment. */
+body:is(.page-home, .page-hour) footer {
+  text-shadow: var(--apse-copy-shadow);
+}
+
+/* Clear the complete report line, including spaces between its glyphs. */
 body.page-hour .report-issue {
   background-color: var(--apse-ground);
   box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
-}
-
-body:is(.page-home, .page-hour) footer > p {
-  width: fit-content;
-  margin-inline: auto;
 }
 
 @media (min-width: 701px) {

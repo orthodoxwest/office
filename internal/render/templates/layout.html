@@ -92,20 +92,18 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
-    {{/* One set of controls; app.js moves it below the links in the mobile menu. */}}
-    <div class="footer-preferences">
-      <div class="theme-switch" role="group" aria-label="Appearance">
-        <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
-        <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
-        <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
-      </div>
-      {{/* Text size: sibling of the appearance control, same quiet language.
-           Glyphs carry the meaning visually; aria-label/title carry the words. */}}
-      <div class="text-size-switch" role="group" aria-label="Text size">
-        <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
-        <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
-        <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
-      </div>
+    {{/* Appearance preference: quiet footer control on every page including hours. */}}
+    <div class="theme-switch" role="group" aria-label="Appearance">
+      <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
+      <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
+    </div>
+    {{/* Text size: sibling of the appearance control, same quiet language.
+         Glyphs carry the meaning visually; aria-label/title carry the words. */}}
+    <div class="text-size-switch" role="group" aria-label="Text size">
+      <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
     </div>
   </footer>
 </body>
