@@ -725,6 +725,8 @@ proper/comm-11-03-st-winifred-virgin-and-martyr/commemoration-collect,b7f5af2f05
 proper/comm-11-09-st-theodore-tyro-martyr/commemoration-collect,66aa87a2b9cf,diurnal,,656,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0700.png
 proper/comm-11-29-st-saturninus-bishop-and-martyr/commemoration-collect,1735f57a0e75,diurnal,,669,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0713.png
 proper/comm-extra-02-06-st-dorothy-virgin-and-martyr/commemoration-collect,abb1faf5e6cd,diurnal,,474,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0520.png
+proper/comm-extra-05-03-ss-alexander-bp-eventius-theodulus-mm-and-juve/commemoration-collect,9bb31cd1f9fb,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 670,,verified,claude,2026-09-23,Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day).
+proper/comm-extra-07-28-ss-nazarius-celsus-martyrs-st-victor-bishop-and/commemoration-collect,5f68794981ff,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 735,,verified,claude,2026-09-23,Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day).
 proper/comm-extra-07-29-ss-felix-ii-bishop-simplicius-faustinus-and-beatrice/commemoration-collect,2e37fc307c53,diurnal,,575,verified,codex,2026-09-17,Word-for-word after normalization; independent page-image readings.
 proper/commemoration-st-paul-apostle/magnificat-antiphon-first,a3387c079b23,diurnal,"Commemoration of St Paul, At I Vespers",548,verified,grok,2026-08-23,word-for-word from printed page image
 proper/commemoration-st-peter-apostle/commemoration-antiphon-lauds,52503eefbfc5,diurnal,,549,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0594.png
@@ -1536,6 +1538,7 @@ proper/st-benedict/psalm-antiphon-3,11b76cedfadb,diurnal,,495,verified,codex,202
 proper/st-benedict/psalm-antiphon-4,c1ebf0c51296,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/psalm-antiphon-5,01022ce96162,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-callistus/collect,990f8895f35b,diurnal,,624,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0668.png
+proper/st-catherine-alexandria/collect,a6bca7b5afd5,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 820,,verified,claude,2026-09-23,Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day).
 proper/st-cecilia/benedictus-antiphon,af8c0ad0700d,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/collect,edb1d4bb13fa,diurnal,"St Cecilia, At Lauds",666,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-cecilia/magnificat-antiphon,5e8a5a836590,diurnal,"St Cecilia, At II Vespers",666,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1574,6 +1577,7 @@ proper/st-elias-prophet/versicle-lauds,5197e171bf47,elias-propers-july20.pdf,"St
 proper/st-elias-prophet/versicle-sext,a240cbafcdba,elias-propers-july20.pdf,"St Elias the Prophet, versicle-sext",3,verified,claude,2026-09-23,Direct page-image reading; agrees with the PDF's born-digital text layer after normalizing pointing.
 proper/st-elias-prophet/versicle-terce,3e0173736729,elias-propers-july20.pdf,"St Elias the Prophet, versicle-terce",3,verified,claude,2026-09-23,Direct page-image reading; agrees with the PDF's born-digital text layer after normalizing pointing.
 proper/st-ephrem-syrian/commemoration-collect,06f1aabb16f7,diurnal,,536,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0581.png
+proper/st-felicitas/collect,59c9d18c6855,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 819,,verified,claude,2026-09-23,Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day).
 proper/st-gabriel-archangel/benedictus-antiphon,2e4ad4f31a8c,diurnal,"St Gabriel, At Lauds",500,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/chapter-lauds,fc229b9a822c,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/chapter-none,76299df121bf,diurnal,"St Gabriel, At None",501,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1697,6 +1701,7 @@ proper/st-raphael-archangel/versicle-lauds,d0fa20313df6,diurnal,"October 24, At 
 proper/st-raphael-archangel/versicle-sext,5798ff53811a,diurnal,,634,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0678.png
 proper/st-raphael-archangel/versicle-terce,d0fa20313df6,diurnal,,634,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0678.png
 proper/st-raphael-archangel/versicle-vespers,9c50d614fe3b,diurnal,"October 24, At II Vespers",635,verified,claude,2026-08-20,
+proper/st-sabina/collect,1cb7ba778b4c,"Full Vicariate Missal (Completed, Rough Draft)",PDF p. 763,,verified,claude,2026-09-23,Direct page-image reading of the draft Vicariate Missal; adopted as the Office collect per maintainer decision (Office collect = Mass collect of the day).
 proper/st-scholastica/benedictus-antiphon,136d0ae76054,diurnal,,478,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0524.png
 proper/st-scholastica/chapter-lauds,f6478f42b5ff,diurnal,,477,verified,grok,2026-09-21,Word-for-word after normalization; page image output/pages/monastic-diurnal/0523.png
 proper/st-scholastica/chapter-none,3ffd065cdb1f,diurnal,,479,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0525.png
