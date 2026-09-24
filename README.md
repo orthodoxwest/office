@@ -76,7 +76,6 @@ and npm. CI uses Node.js 22. Install the pinned tooling:
 ```bash
 go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
 npm ci --prefix .web-tools
-make install-hooks               # optional: pre-push runs make check
 make check
 ```
 
