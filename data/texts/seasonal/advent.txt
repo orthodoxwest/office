@@ -158,6 +158,10 @@ O Day-spring, * Brightness of the Light everlasting, and Sun of righteousness: C
 # SOURCE: monastic diurnal, p. 173 (The Great Antiphons, Dec. 22, O Rex gentium)
 O King of Nations, * and their Desire; the Cornerstone, who makest both one: Come and save mankind, whom thou formedst of clay.
 
+[benedictus-antiphon-december-21]
+# SOURCE: monastic diurnal, p. 176 (Dec. 21: for the Commemoration of Advent at Lauds, or on Sunday instead of Hail, Mary; replaces Thursday's antiphon, p. 177)
+Be not afraid, * for upon the fifth day our Lord shall come to you.
+
 [benedictus-antiphon-december-23]
 # SOURCE: monastic diurnal, p. 176 (last day before the Nativity vigil; overrides the weekday appointment)
 @use proper/advent-sunday-4/benedictus-antiphon-friday

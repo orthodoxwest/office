@@ -321,17 +321,18 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 		strings.HasPrefix(baseProperRef(ref), "psalm-antiphon") &&
 		usesWeekdayVespersAntiphons(day, corpus)
 
-	// On the last day before the Nativity vigil, the fixed Benedictus
-	// antiphon replaces the Advent Sunday/weekday appointment (Diurnal
-	// p. 176). A saint's own office keeps its antiphon; an Advent feria
-	// commemorated there resolves separately with a ferial celebration.
+	// On December 21 and on the last day before the Nativity vigil, a fixed
+	// Benedictus antiphon replaces the Advent Sunday/weekday appointment
+	// (Diurnal pp. 176-177). A saint's own office keeps its antiphon; an
+	// Advent day commemorated there takes it through
+	// adventDateCommemorationAntiphon.
 	if hourName == "lauds" && ref == "benedictus-antiphon" &&
-		day.Season == models.Advent && day.Date.Month() == time.December && day.Date.Day() == 23 &&
 		(day.Celebration == nil || day.Celebration.Category == models.CategorySunday ||
 			day.Celebration.Category == models.CategoryFeria) {
-		const key = "seasonal/advent/benedictus-antiphon-december-23"
-		if text := corpus.Get(key); text != "" {
-			return text, key
+		if key, ok := adventDateBenedictusRef(day); ok {
+			if text := corpus.Get(key); text != "" {
+				return text, key
+			}
 		}
 	}
 
@@ -343,15 +344,11 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	// vidisti). The antiphon follows the calendar day the Vespers is sung
 	// on: at I Vespers the office day carries tomorrow's date, so step back.
 	greaterAntiphon := func() (string, string) {
-		if hourName != "vespers" || !strings.HasPrefix(ref, "magnificat-antiphon") ||
-			day.Season != models.Advent || day.Date.Month() != time.December {
+		if hourName != "vespers" || !strings.HasPrefix(ref, "magnificat-antiphon") {
 			return "", ""
 		}
-		oDay := day.Date.Day()
-		if day.FirstVespers {
-			oDay--
-		}
-		if oDay < 17 || oDay > 23 {
+		oDay, ok := greaterAntiphonDay(day)
+		if !ok {
 			return "", ""
 		}
 		for _, cand := range refCands {
@@ -527,6 +524,69 @@ func resolveProperText(day *models.CalendarDay, hourName, ref string, corpus *te
 	}
 
 	return "[Proper text not found: " + ref + "]", ref
+}
+
+// greaterAntiphonDay reports the December date whose Greater ("O") Antiphon
+// belongs to this evening's Vespers, if it falls on December 17-23. The
+// antiphon follows the calendar day the Vespers is sung on: at I Vespers the
+// office day carries tomorrow's date, so step back.
+func greaterAntiphonDay(day *models.CalendarDay) (int, bool) {
+	if day == nil || day.Season != models.Advent || day.Date.Month() != time.December {
+		return 0, false
+	}
+	oDay := day.Date.Day()
+	if day.FirstVespers {
+		oDay--
+	}
+	return oDay, oDay >= 17 && oDay <= 23
+}
+
+// adventDateBenedictusRef names the date-fixed Benedictus antiphon of
+// December 21 ("Be not afraid") or 23 ("Behold all things are fulfilled"),
+// which displaces the Advent Sunday or weekday antiphon (Diurnal pp. 176-177).
+func adventDateBenedictusRef(day *models.CalendarDay) (string, bool) {
+	if day == nil || day.Season != models.Advent || day.Date.Month() != time.December {
+		return "", false
+	}
+	if d := day.Date.Day(); d == 21 || d == 23 {
+		return "seasonal/advent/benedictus-antiphon-december-" + strconv.Itoa(d), true
+	}
+	return "", false
+}
+
+// adventDateCommemorationAntiphon gives a de Tempore commemoration the
+// date-fixed Advent antiphon it would take as the office of the day: that
+// evening's O Antiphon at Vespers of December 17-23 (2026 ordo, December 20
+// and 21: "Comm. Fer. ('O Key of David' 173)", "Comm. Sun. ('O Day-Spring'
+// 173)"; Expectation supplement: "Com. Feria with Great Ant. of Adv."), and
+// the December 21 or 23 antiphon at Lauds (Diurnal p. 176: "On Dec. 21, if the
+// Office be of the occurrent Feast, for Commemoration of Advent at Lauds: Ant.
+// Be not afraid"; 2026 ordo, December 21).
+func adventDateCommemorationAntiphon(day *models.CalendarDay, comm *models.Feast, hourName, ref string, corpus *texts.TextCorpus) (string, string) {
+	if ref != "commemoration-antiphon" ||
+		(comm.Category != models.CategorySunday && comm.Category != models.CategoryFeria) {
+		return "", ""
+	}
+	var key string
+	switch hourName {
+	case "vespers":
+		oDay, ok := greaterAntiphonDay(day)
+		if !ok {
+			return "", ""
+		}
+		key = "seasonal/advent/magnificat-antiphon-december-" + strconv.Itoa(oDay)
+	case "lauds":
+		var ok bool
+		if key, ok = adventDateBenedictusRef(day); !ok {
+			return "", ""
+		}
+	default:
+		return "", ""
+	}
+	if text := corpus.Get(key); text != "" {
+		return text, key
+	}
+	return "", ""
 }
 
 // seasonalAppointmentApplies gates only the seasonal fallback tier. The data

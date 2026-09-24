@@ -1,28 +1,32 @@
 # Reviewing the Office
 
-This guide covers checking corpus wording against the printed books and
-checking composed hours against the Diurnal, supplements, rubrics, and current
-archdiocesan ordo. Findings need a source citation and a reproducible example.
+Two kinds of review: checking corpus **wording** against the printed books, and
+checking **composition** (which texts appear where) against the Diurnal,
+supplements, rubrics, and current archdiocesan ordo. Every finding needs a
+source citation and a reproducible example.
+
+The newest local ordo governs current practice. If it conflicts with the
+Diurnal, the normative rubrics, or older ordos, document the conflict for
+clergy and leave the affected entries alone. A difference from the ordo may be
+an app defect, a printed error, or an unresolved source conflict.
 
 ## Composition review
 
-Start from a requirement in the sources, then inspect what the app renders.
-A correct page does not certify a rule on other dates. Engine-generated feature
-counts and sample-page counts are not a measure of liturgical completeness.
-The former structural signoff workflow and its coverage score are retired.
+Start from a requirement in the sources, then check what the app renders. A
+correct page says nothing about other dates, and engine feature or sample
+counts are not a measure of completeness.
 
-Keep a short checklist in the relevant audit issue or PR. For each check, record:
+Keep a short checklist in the relevant issue or PR. For each check record:
 
-- **Requirement and source:** the appointment or rubric being checked, with
-  edition and page/section. Paraphrase the requirement; keep scans and extracted
-  book contents outside Git, and generated evidence under ignored `output/`.
-- **Cases and expected behavior:** civil date, hour, prayer form, calendar scope,
-  expected selections/omissions/order, and relevant boundary or collision cases.
-- **Result:** observed behavior and a link to the regression test, confirmed
-  defect, or unresolved source/clergy question. Name the reviewer, including
-  when the review was performed by an agent.
+- **Requirement and source:** the rubric or appointment, with edition and
+  page/section. Paraphrase; keep scans and extracted text out of Git and
+  generated evidence under ignored `output/`.
+- **Cases:** civil date, hour, prayer form, calendar scope, and the expected
+  selections, omissions, and order, including boundary and collision cases.
+- **Result:** observed behavior and a link to the regression test, defect, or
+  open source/clergy question. Name the reviewer, including agents.
 
-These are useful starting areas, not a completed or exhaustive rubric inventory:
+Starting areas (not an exhaustive inventory):
 
 | Area | Examples to check |
 |---|---|
@@ -32,120 +36,77 @@ These are useful starting areas, not a completed or exhaustive rubric inventory:
 | Prayer forms | Private, deacon, and priest openings, greetings, confession, and endings |
 | Calendar interactions | Occurrence, transfers, I/II Vespers, commemorations, octaves, and vigils |
 
-Keep the known incomplete Triduum composition work separate from an assessment
-of the rest of the year. A narrow passing check does not close an entire area.
-Turn confirmed defects into repairs with direct appointment or boundary tests.
-Regression snapshots detect changes; they do not independently establish that
-an existing appointment is correct.
-
-Use the newest local archdiocesan ordo for current practice. If it conflicts
-with the Diurnal, normative rubrics, or older ordos, document the conflict for
-clergy and leave the affected entries unapplied. A difference from the ordo
-may be an app defect, a printed error, or an unresolved source conflict.
+Keep the known-incomplete Triduum work separate from the rest of the year. Turn
+confirmed defects into repairs with direct appointment or boundary tests.
+Golden snapshots detect change; they don't show that an existing appointment
+is correct.
 
 ### Executable composition requirements
 
-The [composition audit checklist](data/review/composition-audit.md) records the
-requirements checked in the repair series and the remaining source-review passes.
+`data/review/composition-requirements.json` holds source-backed appointment
+cases; `TestCompositionRequirements` checks the composed slot, source, optional
+wording, omission, and relative order. Cases name a commemoration's owner
+explicitly so a correct principal-office text can't hide a wrong
+commemoration. Add a citation plus representative and boundary cases with each
+repair, and never regenerate expectations from current output.
 
-[Seasonal appointment scopes](data/APPOINTMENT-SCOPES.md) document the validated
-data that limits seasonal fallbacks, including date bounds and precedence.
+```bash
+go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration|TestCalendarCompositionRequirements'
+```
 
-`data/review/composition-requirements.json` stores source-backed appointment
-cases. `TestCompositionRequirements` checks the actual composed slot, source,
-optional wording, omission, and relative order. Cases identify a commemoration
-owner explicitly so a correct principal-office text cannot hide an incorrect
-commemoration. Add a source citation and representative and boundary cases with
-each repair; never regenerate these expectations from current output.
+The calendar tests compose all seven hours on every date of 2026, 2027, and
+2032, including unnamed ferias; all run in `make check`. See also the
+[composition audit](data/review/composition-audit.md) (requirements checked so
+far and remaining passes) and [seasonal appointment scopes](data/APPOINTMENT-SCOPES.md).
 
-Run `go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration|TestCalendarCompositionRequirements'`.
-The Sunday commemoration rule also traverses complete calendars for 2026, 2027,
-and 2032, with the Trinity/Corpus Christi octave exceptions kept outside its
-ordinary-Sunday scope. `TestCalendarCompositionRequirements` also composes all seven hours on every
-date in those years, including unnamed ferias, and checks the reviewed ordinary
-weekday Vespers rule. These tests run in `make check`. Their passing assertions
-do not certify untested requirements or future-ordo agreement.
-
-The ingestion resolution inventory deliberately excludes unnamed owners. A
-composition audit must include those hours: compose every date/hour directly,
-or supplement inventory gaps with `review explain`. Keep the ingestion filter
-intact; an unnamed feria is not a safe target for a feast-proper proposal.
+The ingestion resolution inventory deliberately excludes unnamed owners (an
+unnamed feria is never a feast-proper target), so a composition audit must
+compose those hours directly or use `review explain`.
 
 ### Optional sample dates
 
-`review plan` selects representative pages from decisions and source tiers
-already observed in the engine, weighted by their frequency in the sweep.
-It helps find examples to inspect. It cannot discover an unmodeled rubric or
-prove that other appointments and combinations of rules are correct.
+`review plan` picks representative pages from engine decisions and source
+tiers already observed in a sweep, weighted by frequency. It finds examples to
+inspect; it cannot find an unmodeled rubric. Its CSV gives the page URL,
+priority, context, `primary_year`, `sampled_features` (features not covered by
+earlier rows), and `feature_exposure` (their summed date-hour-form occurrences,
+which overlap and are not a progress measure). Later-year rows cover cases
+absent from the primary year and can't be checked against an unpublished ordo.
 
-The CSV includes the page URL, priority, context, `primary_year`,
-`sampled_features`, and `feature_exposure`. Features listed on a row are those
-not represented by earlier samples. Exposure sums their date-hour-form
-occurrences; the same composition can contribute to several features, so it
-is not a count of distinct affected offices or review progress. Primary-year
-examples are preferred; later dates provide examples absent from that year,
-and cannot be verified against an unpublished future ordo.
-
-The default sample uses selected engine decisions and proper-slot resolution
-tiers. Descriptive context and pure weekday psalmody gates are excluded, so
-check weekday appointments explicitly when a source requirement calls for them.
-`-include-sources` also samples corpus keys; it does not attest their wording.
-Samples never shrink because a page was reviewed. Record the specific checked
-requirement in tests and issues rather than signing off a whole page.
+Weekday psalmody gates are not sampled, so check those explicitly.
+`-include-sources` also samples corpus keys without attesting them. Samples
+never shrink as pages are reviewed; record the checked requirement in tests
+and issues rather than signing off a page.
 
 ### Reporting a problem
 
-Every hour page has a **"Report a problem"** link. Describe what the cited
-source requires and what the app shows, with the date, hour, and prayer form.
-Distinguish incorrect wording from incorrect selection or assembly. A proper
-may exist in the corpus yet be selected for the wrong day or hour; a generic
-fallback may hide a missing proper.
+Every hour page has a **Report a problem** link. Give the date, hour, prayer
+form, what the source requires, and what the app shows. Distinguish wrong
+wording from wrong selection: a proper can exist but be chosen on the wrong
+day, and a generic fallback can hide a missing proper.
 
 ## Text provenance
 
-Text provenance records verification of an individual corpus entry against a
-named source and page/section locator. It does not certify where that text is
-appointed. Compare wording against the printed page, following the
-[page-image workflow](scripts/DIURNAL-PIPELINE.md) for scanned sources.
-The provenance queue ranks entries by usage and suspicion; a wording check
-need not be repeated for every date on which the entry appears.
-
-## For the maintainer
-
-Keep generated inventories beneath ignored `output/`:
+A text attestation records that one corpus entry matches a named source and
+page; it says nothing about where the entry is appointed. For scanned sources
+use the [page-image workflow](scripts/DIURNAL-PIPELINE.md). One check covers
+every date the entry appears on.
 
 ```bash
 mkdir -p output/review
 make -s review-manifest > output/review/manifest.csv   # distinct rendered compositions
-make review-provenance                # source verification, flat and usage-weighted
+make review-provenance                                 # source coverage, flat and usage-weighted
 make -s review-provenance-queue > output/review/provenance-queue.csv
 make -s review-zero-occurrences START=2026 YEARS=30 > output/review/zero-occurrences.csv
 make -s review-suspects > output/review/suspects.csv
 make -s review-plan > output/review/samples.csv       # optional examples, default 28 years
-./office review plan -start 2026 -years 1 -summary
-make review-assurance                 # text-provenance floor and summary
+make review-assurance                                  # text-provenance floor and summary
 ./office review explain lauds 2026-06-07 --form private
 ```
 
-`review sign`, `review status`, and `make review-status` are retired. The
-historical ledger is available in Git history. Corpus `review attest`, the
-composition explanation, resolution inventory, and date-sensitive parity
-snapshot remain available.
-
-Explicit text attestations live in `data/review/provenance.csv`. The file
-records only citations, review metadata, the corpus key, and internal version
-metadata; it does not copy or embed source-book contents. If an entry later
-changes, its attestation automatically becomes stale without requiring
-reviewers to handle version identifiers.
-
-Some corpus sections carry
-`# SOURCE: … — agent-proposed, not attested`. Those came through
-the retired packet-apply pipeline from a gated diurnal witness. Treat them as
-current wording awaiting a human check, not as a finished verification. A later
-`review attest` is what flips the key to `verified`. Do not delete the hedge
-until that attestation lands.
-
-Prefer the safe CLI to manual CSV editing:
+Attestations live in `data/review/provenance.csv`: citations, reviewer, corpus
+key, and a content hash, never book text. Editing an entry makes its
+attestation stale automatically. Record one with:
 
 ```bash
 ./office review attest --source "Printed Diurnal" --page 123 \
@@ -153,22 +114,21 @@ Prefer the safe CLI to manual CSV editing:
   proper/example/collect reviewer
 ```
 
-The command resolves the corpus key to its current content, validates every
-field, and rewrites the ledger atomically; use `--replace` only when
-deliberately superseding an existing attestation.
+The command validates every field and rewrites the ledger atomically; pass
+`--replace` only to supersede an existing attestation deliberately.
 
-### Prescreen flags: sending book time where findings are likely
+Sections marked `# SOURCE: … — agent-proposed, not attested` came from a
+retired pipeline. Treat them as awaiting a human check and keep the hedge
+until `review attest` marks the key `verified`.
 
-The provenance queue ranks texts by exposure (how many pages a verification
-would cover). Exposure alone sends volunteers to hundreds of probably-fine
-texts first, so a second signal feeds the queue: **suspicion**. Entries with
-any suspicion flag form the queue's top tier, and `make review-suspects`
-prints only that tier — a short list where a book check is likely to yield a
-finding rather than a quick confirm. Suspicion comes from two places:
+### Prescreen flags
 
-1. **The prescreen ledger** (`data/review/prescreen.csv`) — durable
-   read-through findings ("this collect ends mid-sentence") recorded once and
-   tracked until resolved. Record one with:
+The provenance queue ranks by exposure (pages covered per check), which alone
+would send reviewers to hundreds of probably-fine texts. **Suspicion** forms a
+top tier, and `make review-suspects` prints only that tier. It comes from:
+
+1. **The prescreen ledger** (`data/review/prescreen.csv`): read-through
+   findings bound to the entry's current content.
 
    ```bash
    ./office review flag --severity high \
@@ -176,104 +136,58 @@ finding rather than a quick confirm. Suspicion comes from two places:
      proper/example/collect
    ```
 
-   The command binds the flag to the entry's current content version. A flag
-   resolves when the text is **attested** (verified word for word):
-   `review attest` prunes the flag's row from the ledger, and its history
-   stays in git. If the text is merely **edited** after flagging, the flag
-   shows as `(addressed)` — the fix still needs its book check — until an
-   attestation lands. The ledger records suspicions only, never source-book
-   contents.
+   Attesting the entry removes the flag. Editing it only marks the flag
+   `(addressed)` until the fix is attested.
 
-2. **Advisory corpus lints** (`./office lint`) — mechanical heuristics
-   (truncated text, unpointed antiphons, near-duplicate pairs, leftover
-   Latin) recomputed from the corpus on every run, so they clear themselves
-   when the text is fixed.
+2. **Advisory lints** (`./office lint`): truncation, unpointed antiphons,
+   near-duplicates, leftover Latin; recomputed each run.
 
-Both kinds appear in the queue's `flags` column and in each hour page's
-Assurance disclosure, so a reviewer on any page is pointed at the exact
-element most likely to be wrong. Record read-through findings directly in
-the ledger, keyed by corpus entry — narrative prescreen write-ups rot as
-items get fixed, with no way to tell which findings still apply.
+Both show in the queue's `flags` column and on each hour's Assurance
+disclosure. Record findings in the ledger, keyed by entry, not in narrative
+write-ups that go stale.
 
-Entries not selected anywhere in a sweep are classification work, not text
-attestation work. `review zero-occurrences` groups those entries by mechanical
-key-shape heuristics and joins the durable judgments in
-`data/review/zero-occurrences.csv`. The ledger dispositions are
-`shadowed-fallback`, `displaced`, `dormant-policy`, `suppressed`, `dead`,
-`defect`, and `unclassified`; a defect row must cite its issue. Rows are bound
-to the entry's content hash, so an edit makes the judgment stale. The standard
-provenance queue labels these rows `classified-zero` or
-`zero-needs-classification` and keeps current classified zeroes in a separate
-final tier. The assurance summary counts pending provenance only for rendered
-entries and reports classified and unclassified zeroes separately.
+### Zero-occurrence entries
 
-### Usage-weighted provenance: a status-update metric
+Entries never rendered in a sweep need classification, not attestation.
+`review zero-occurrences` groups them by key shape and joins the judgments in
+`data/review/zero-occurrences.csv`: `shadowed-fallback`, `displaced`,
+`dormant-policy`, `suppressed`, `dead`, `defect` (must cite its issue), or
+`unclassified`. Rows are hash-bound, so an edit makes them stale. The
+provenance queue puts classified zeroes in a final tier, and the assurance
+summary counts them apart from rendered entries.
 
-The headline count in `make review-provenance` weights every corpus entry
-equally — a once-a-year collect and a daily-recited psalm each count as one
-entry. That undersells practical coverage: common texts (ordinaries,
-psalter, frequently-used propers) tend to get verified first, so the entries
-still outstanding skew toward rarely-rendered ones.
+### Coverage figures
 
-To give a second, more honest number, `review provenance` also composes
-every hour of every day across a sweep (default: the current year; override
-with `START`/`YEARS`) and weights each rendered corpus entry by how many
-times it was actually prayed. It prints both the flat percentage among
-*rendered* entries and the usage-weighted percentage — verified renders over
-total renders — which answers "how much of what we actually pray each year
-is verified" and is typically well above the flat corpus-wide count.
+`make review-provenance` prints two figures. The flat count weights every
+rendered entry equally. The usage-weighted count composes every hour in the
+sweep (default: current year; override with `START`/`YEARS`) and reports
+verified renders over total renders — how much of what is actually prayed is
+verified. Common texts are verified first, so it runs well above the flat
+figure.
 
-### Release assurance
+`./office review assurance` fails if the verified-text count drops below the
+floor in `data/review/assurance-baseline.json` (zero enforces nothing), and
+reports stale attestations separately. Raise the floor deliberately with
+`./office review assurance --update-baseline`.
 
-`./office review assurance` reports text provenance and fails if the verified
-text count falls below the configured floor. It reports stale attestations
-separately. Structural feature counts and page signoffs do not participate.
-The report inventories dependencies from every composed date-hour form in the
-configured sweep, without using the optional sample plan.
+Each hour's collapsed **Assurance** disclosure shows the same dependency
+states, fallback tiers, and rule IDs without local paths or source text, and
+links unverified rows to a prefilled issue. `needs-review` means a source lead
+exists; `source-unknown` means provenance research comes first.
 
-The floor lives in `data/review/assurance-baseline.json`; a zero floor enforces
-no minimum verified count. Update it only as an intentional, reviewable change:
+## Date-sensitive parity
 
-```bash
-./office review assurance --update-baseline
-```
+`make parity` checks the 2026–2053 snapshot of calendar state, rendered
+content, selected sources, and decision traces. Its `commemoration_merges`
+array stays readable rather than digested, because fuzzy name matching
+deserves direct review. The full inventory (69 kept/dropped pairs: duplicates,
+title variants, and octave aliases) was human-reviewed on 2026-07-17 with no
+false merges. When it changes, review each new pair before accepting the
+golden update, and fix any false merge narrowly with a dedicated test.
 
-Calendar, rendered content, selected sources, and decision traces remain
-protected by the date-sensitive parity snapshot described below.
+## Ingesting scanned diurnal pages
 
-Each web hour also has a collapsed **Assurance** disclosure. It shows the same
-dependency states, fallback tiers, and stable rule identifiers without
-revealing local paths or source contents. Unverified dependency rows link to a
-prefilled review issue for that exact corpus key. `needs-review` means a source
-lead or explicit review task exists but still needs verification;
-`source-unknown` means provenance research must happen first.
-
-### Date-sensitive parity and commemoration dedupe
-
-`make parity` verifies the checked-in 2026–2053 snapshot of calendar state,
-rendered hour content, selected source references, and decision traces. Its
-`commemoration_merges` array remains deliberately readable rather than hidden
-inside a digest because fuzzy name containment deserves direct review.
-
-The complete inventory was human-reviewed on 2026-07-17:
-
-- 957 suppressions resolve to 69 unique kept/dropped pairs;
-- 61 pairs are duplicate records or title variants of the same observance;
-- 8 pairs are parent-feast/octave aliases on collision dates;
-- every dropped item resolves to the corresponding item retained on the final
-  occurrence or Vespers surface; and
-- no distinct observances, unmatched items, or ambiguous pairs were found.
-
-This evidence does not justify replacing the current dedupe with a typed
-commemoration pipeline or a new canonical-identity layer. If the readable
-inventory changes, review each new or altered pair before accepting the golden
-update; a false merge should be corrected narrowly and its behavior pinned in
-a dedicated test.
-
-### Ingesting scanned diurnal pages
-
-Use the [page-image workflow](scripts/DIURNAL-PIPELINE.md) to transcribe entries
-from the provenance queue or discover printed propers hidden behind fallbacks:
+See [scripts/DIURNAL-PIPELINE.md](scripts/DIURNAL-PIPELINE.md):
 
 ```bash
 make pages
@@ -281,162 +195,98 @@ make transcribe KEYS=proper/st-athanasius/collect
 make discover FEASTS=st-stephen-hungary
 ```
 
-Transcription and discovery prepare prompts without invoking readers or
-changing the corpus by default. After inspecting the prompts and cache, add
-`APPLY=1` to enable readers and application through `office corpus put` and
-`office review attest`. The pipeline documentation describes the comparison
-thresholds, independent second readings, and meaning of a Codex attestation.
-Unresolved rows remain `needs-human`; OCR only locates pages.
+Both prepare prompts only; add `APPLY=1` after inspecting them. Unresolved rows
+stay `needs-human`.
 
-The former intake, source-reconciliation, agent scheduler, and packet-apply
-tools have been retired. Existing local artifacts and decisions under ignored
-`output/` remain historical evidence, and existing provenance records retain
-their meaning.
+## Annual cadence
 
-### Annual cadence
+When a new ordo arrives, compare the year with the `/ordo-verify` skill and
+revisit affected requirements and open questions. Existing regression tests
+don't certify a new ordo.
 
-When a new archdiocesan ordo arrives, compare that year's appointments and
-revisit affected source requirements and unresolved questions. Use the ordo
-verification skill for a reproducible comparison and discrepancy triage.
-Existing regression tests preserve checked examples; they do not automatically
-certify appointments in a new ordo. Multi-year samples can help expose calendar
-interactions for examination against the applicable rubrics.
-
-### Clergy-facing project status
-
-Generate the repeatable high-level report with:
+## Project status
 
 ```bash
 make project-status YEAR=2026
 ```
 
-This rebuilds the app, extracts `../resources/2026-ordo.pdf`, composes the
-annual ordo and rubrics, runs the proper and provenance audits, and optionally
-queries GitHub for open `needs ruling` issues. It writes three ignored working
-artifacts under `output/status/`: a Markdown report suitable for forwarding,
-a JSON snapshot for automation, and `ordo-findings-2026.csv` as the complete
-date/aspect discrepancy queue. If GitHub is unavailable, every local metric is
-still generated and the ruling count is marked unavailable; use
-`scripts/project-status.py --year 2026 --offline` to request that behavior.
+Rebuilds the app, extracts `../resources/2026-ordo.pdf`, composes the ordo and
+rubrics, runs the proper and provenance audits, and (optionally) counts open
+`needs ruling` issues. It writes to ignored `output/status/`: a forwardable
+Markdown report, a JSON snapshot, and `ordo-findings-2026.csv` listing every
+date/aspect discrepancy. Offline, or in a worktree, run
+`scripts/project-status.py --year 2026 --resources /path/to/resources --offline`.
 
-Ordo cause classifications are deliberately not inferred from symptoms.
-Durable rules live in `data/review/ordo-triage.csv` with these categories:
+The report keeps these figures separate:
+
+- **known proper-slot coverage:** the six feast-proper slots audited by
+  `office audit`; accepted fallbacks count as covered and `data/audit-ok.txt`
+  exclusions leave the denominator;
+- **rendered completeness:** composing every hour of the year;
+- **text source verification:** the attestation rate;
+- **strict ordo parity:** each comparable date/aspect weighted equally, with a
+  commemoration set counted once per office and date.
+
+It also derives diagnostic clusters (Vespers shares, commemoration direction,
+co-occurring symptoms, repeated incipits, monthly hotspots, recurrence in the
+previous year's ordo) to help order the queue. They never assign a cause.
+
+### Ordo triage
+
+Causes are never inferred from symptoms. `data/review/ordo-triage.csv` assigns
 `translation-mismatch`, `data-gap`, `engine-bug`, `open-question`,
-`suspected-reference-error`, and `reference-error`. The `year`, `aspect`, and
-`date` fields accept shell-style wildcards, while a more-specific rule wins
-over a broad one. Use wildcard rules only for a genuinely uniform cluster;
-after diagnosing a finding, prefer an exact row with a GitHub issue number
-and a short reason. Anything
-not covered by the ledger remains visibly `untriaged` and is never silently
-guessed. In particular, a mismatched canticle-antiphon incipit remains
-untriaged until review distinguishes a translation difference from selection
-of the wrong antiphon.
+`suspected-reference-error`, or `reference-error`. `year`, `aspect`, and `date`
+accept shell wildcards, and the more specific rule wins; prefer an exact row
+with an issue number once a finding is diagnosed. Anything unmatched stays
+`untriaged`. A mismatched canticle-antiphon incipit stays untriaged until
+review separates a translation difference from a wrong antiphon.
 
-Use `suspected-reference-error` with `provisional` confidence for a proposed
-printed error. Cite the source conflict and relevant discussion, and keep it
-in the strict difference count. Adjudicated parity credits only
-`reference-error` findings with `confirmed` confidence. An issue comment
-posted by an agent on someone's behalf does not by itself establish personal
-clergy endorsement. A confirmed `open-question` row confirms the existence
-of the question, not an answer to it. Keep exceptions and unanswered aspects
-as separate rows; a Vespers label decision does not settle an antiphon on the
-same date.
+A proposed printed error is `suspected-reference-error` with `provisional`
+confidence and still counts as a difference; only `reference-error` with
+`confirmed` confidence is credited. An agent's comment on someone's behalf is
+not clergy endorsement. A confirmed `open-question` confirms the question, not
+an answer. Use separate rows per aspect: a Vespers label ruling doesn't settle
+an antiphon on the same date.
 
-The report also derives non-adjudicative diagnostic clusters from the current
-findings: Vespers share and aspect totals, ownership and commemoration
-direction, co-occurring symptoms, repeated generated incipits, multi-word
-reference incipits that occur later in the generated text, monthly hotspots,
-and same-date/aspect recurrence in the immediately preceding local ordo when
-that PDF is available. These clusters are written into the JSON snapshot as
-well as the Markdown report. They help order the queue but never assign a
-cause or turn a wording/boundary difference into an agreement.
+### Repair backlog
 
-The report keeps several percentages separate:
+`data/review/repair-backlog.csv` is a curated list of concrete open problems,
+included in the project-status report. It is not a defect count or a
+completeness score. Add a row once a specific discrepancy or source establishes
+work: the problem, dated examples (hour, form, owner, boundary), expected
+behavior, citation, linked findings or issue, and the next action or blocker —
+distinguishing a confirmed repair from diagnosis or a clergy question. Use
+`scope=triduum` for Triduum rows and `ordinary-year` otherwise.
 
-- **known proper-slot coverage** counts the six feast-proper lookup slots
-  audited by `office audit`; accepted common/seasonal fallbacks count as
-  covered, and acknowledged exclusions in `data/audit-ok.txt` leave the
-  denominator;
-- **rendered completeness** comes from composing every hour for the year;
-- **text source verification** is the explicit attestation rate from the
-  provenance inventory;
-- **strict ordo parity** gives equal weight to each comparable date/aspect
-  assertion, with exact commemoration sets counted once per office and date.
+Rows don't close when a finding disappears; remove a row in the PR that fixes
+it, keeping its regression tests. Speculative fallback candidates stay in the
+resolution inventory and discovery reports until a concrete problem is found.
 
-This makes the headline stable without conflating “the page renders,” “we
-have no known proper gap,” “the wording was checked against a book,” and “the
-calendar matches the annual ordo.”
+## Prayer forms
 
-### Open repair backlog
+Review links carry `?form=private|deacon|priest` so they reproduce regardless
+of a device's saved choice; CLI commands take `--form` (default private). The
+manifest, provenance queue, and sample plan sweep all three forms, sharing one
+unit where Deacon and Priest compose identically; the parity snapshot checks
+all three. Forms only replace marked ordinary slots after proper resolution.
 
-`data/review/repair-backlog.csv` is a small table of concrete open problems.
-`make project-status YEAR=2026` includes it in the existing Markdown report and
-JSON snapshot. In a worktree, run `scripts/project-status.py --year 2026
---resources /path/to/resources --offline` after building the binary.
+Sources:
 
-Add a row when a specific discrepancy or source evidence establishes work to
-do. Record the problem, dated examples (hour, form, owner and relevant boundary),
-expected behavior, edition/page citation, linked finding IDs or issue, and next
-action or blocker. Keep Triduum rows separate with `scope=triduum`; other rows
-use `ordinary-year`. Rows may cover a documented missing proper, a source-selection
-question or a pending ruling. The next action must distinguish a confirmed repair
-from diagnosis or a source conflict awaiting clergy.
-
-Ordo classifications remain in `ordo-triage.csv`. The backlog does not infer a
-cause, approve a corpus change, or close a row when a finding disappears. All
-open rows remain visible, including examples from earlier years. Keep source
-conflicts blocked for clergy under the existing composition-review rules.
-
-Remove a row in the PR that resolves it, retaining the relevant regression tests
-and any continuing ordo classification. Git preserves the backlog history; do
-not accumulate completed targets or fallback signoffs. Source-backed absence
-and boundary requirements belong in ordinary tests alongside their repairs.
-
-Speculative fallback candidates stay in the existing resolution inventory and
-Diurnal discovery reports. Add a backlog row after identifying a concrete
-problem; do not turn every fallback or unsuccessful page search into a task.
-The backlog is a curated subset of open work, not a total defect count or a
-completeness score. Other untriaged discrepancies remain in the full ordo finding
-CSV; the static audit's feast count also does not count all open issues.
-Corpus wording verification and
-application still follow the provenance queue and Diurnal pipeline.
-
-### Prayer forms
-
-Review links include `?form=private|deacon|priest` so the selected prayers and
-source metadata remain reproducible regardless of a device's saved preference.
-Use the matching `--form` option for `office review explain`, an hour command,
-or `office tex`. Omitting it selects Private.
-
-The manifest, provenance queue, and sample plan sweep every distinct
-composition across the three forms. Identical Deacon and Priest compositions
-share one inventory unit; the parity snapshot checks all three explicitly.
-Dynamic proper-resolution inventory remains a calendar sweep: prayer forms
-only replace marked ordinary slots, after proper resolution.
-
-The ordinary greetings and choir confession use the Monastic Diurnal's
-Prime (pp. 7–9), closing versicles (p. 43), and Compline (pp. 147–148).
-The All Souls Compline rubric (p. 643) retains Confession and Absolution while
-omitting the opening blessing, lesson, Our help, and Lord's Prayer.
-The priest-led form uses the longer choir confession and its exchanges, with
-“grant you … your sins” in the final absolution from the parish Compline draft
-(Compline Alex edit 10-24 v.08.docx, p. 5). The draft differs here from the
-older Diurnal's “grant us … our sins.” Its opening rubric also reserves “Sir,
-ask a blessing” for a priest; private and deacon-led forms use “Lord, grant a
-blessing.”
-
-The current application scope assigns the shared confession and “our sins”
-prayers to everyone together when led by a deacon. This mapping follows the
-feature's priest-only confession scope; the printed Out of Choir rubric does
-not explicitly name deacons. Speaker metadata labels every turn, including
-Amens, without changing the underlying source wording.
-
-The greeting audit checks both clergy and private formulas. “O Lord, hear my
-prayer” also occurs as a fixed preces response before the variable greeting:
-at Prime (Diurnal p. 9), Compline, and in the Office of the Dead. Those
-occurrences remain in every form. In private prayer, the substituted greeting
-is omitted when the preceding prayer already ends with that same pair
-(diurnal-tutorial.pdf, p. 8, note 21). This covers Prime and Compline with
-preces, and Lauds, Vespers, and Compline of the Dead. Later greetings remain;
-Psalm and antiphon occurrences are independent of the leader. The older combined collect-intro entries are no
-longer used by the hour definitions.
+- Greetings and choir confession: Monastic Diurnal Prime (pp. 7–9), closing
+  versicles (p. 43), and Compline (pp. 147–148). All Souls Compline (p. 643)
+  keeps Confession and Absolution but omits the opening blessing, lesson, Our
+  help, and Lord's Prayer.
+- The priest-led form uses the longer choir confession, with "grant you … your
+  sins" in the absolution from the parish Compline draft (Compline Alex edit
+  10-24 v.08.docx, p. 5), where the older Diurnal has "grant us … our sins".
+  That draft reserves "Sir, ask a blessing" for a priest; private and
+  deacon-led forms use "Lord, grant a blessing."
+- Deacon-led prayer assigns the shared confession and "our sins" prayers to
+  everyone, following the feature's priest-only confession scope; the printed
+  Out of Choir rubric doesn't name deacons. Speaker labels mark every turn,
+  including Amens, without changing wording.
+- "O Lord, hear my prayer" also occurs as a fixed preces response at Prime
+  (p. 9), Compline, and the Office of the Dead, and stays in every form. In
+  private prayer the substituted greeting is omitted when the preceding prayer
+  already ends with that pair (diurnal-tutorial.pdf, p. 8, note 21): Prime and
+  Compline with preces, and Lauds, Vespers, and Compline of the Dead.

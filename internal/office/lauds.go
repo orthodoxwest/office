@@ -46,6 +46,9 @@ func addCommemorations(day *models.CalendarDay, hourName string, corpus *texts.T
 					return text, key
 				}
 			}
+			if text, key := adventDateCommemorationAntiphon(day, comm, hourName, ref, corpus); text != "" {
+				return text, key
+			}
 			if isSynthesizedFeria(comm) {
 				return lookupFeriaCommemoration(day, comm, day.Season, hourName, ref, corpus)
 			}

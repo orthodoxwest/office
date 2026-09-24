@@ -1,17 +1,19 @@
 # Diurnal page transcription pipeline
 
-This is a narrow, page-first review loop. It maps corpus keys to cited printed
-pages, renders those pages into a content-bound cache under ignored `output/`,
-asks a vision reader for literal transcription, and compares that witness with
-the live corpus. OCR is retained only for locating pages; it is never accepted
-as wording. This is the supported ingestion workflow.
+The supported ingestion workflow. It maps corpus keys to cited printed pages,
+renders those pages into a content-bound cache under ignored `output/`, has a
+vision reader transcribe them literally, and compares that reading with the
+live corpus. OCR only locates pages; it is never accepted as wording.
 
-The cache records the PDF SHA-256 and render DPI. It stores one PNG per PDF page
-and an index containing plain and layout OCR plus detected printed labels
-(roman front matter, arabic body pages, and starred appendix pages). A missing
-label is inferred only inside a bounded, consecutive run of the same numbering
-series. Roman front matter and starred appendix runs are repaired from their
-sequence before lookup, so valid-looking OCR errors cannot split a run.
+The cache records the PDF SHA-256 and render DPI, one PNG per page, and an
+index of plain and layout OCR plus detected printed labels (roman front
+matter, arabic body pages, starred appendix pages). A missing label is
+inferred only inside a bounded consecutive run of the same series; roman and
+starred runs are repaired from their sequence so an OCR misread can't split a
+run.
+
+Source PDFs, page images, OCR, prompts, reader output, and reports all stay
+under ignored `output/` and must never be committed.
 
 ## Commands
 
@@ -23,142 +25,31 @@ make pages DPI=200
 make pages BOOKS_DIR=/secure/resources/books
 ```
 
-Prepare a provider-free pilot. This writes prompts under a new
-`output/transcribe/<run-id>/` directory and makes no corpus or review-ledger
-changes:
+Prepare a run. This writes prompts under `output/transcribe/<run-id>/` and
+calls no provider and changes nothing:
 
 ```bash
 make transcribe
 make transcribe KEYS=proper/st-athanasius/collect
 ```
 
-After inspecting the prompts and cache, explicitly enable provider execution
-and gated application:
+After inspecting the prompts and cache, enable readers and gated application,
+then print the PR summary for the reported run:
 
 ```bash
 make transcribe APPLY=1 KEYS=proper/st-athanasius/collect
-```
-
-Then print the PR-ready summary using the run path reported by the command:
-
-```bash
 make transcribe-report RUN=20260902T180000Z
 ```
 
-Rows whose queue status is `source-unknown` are included by default alongside
-`needs-review`. Since they have no citation to resolve, their search begins
-with the opening words of the live corpus entry and then tries the feast name
-plus slot description. Limit a run to either class with a repeatable status
-flag:
+Runs include queue rows in both `needs-review` and `source-unknown`. With no
+citation, `source-unknown` searches start from the entry's opening words, then
+the feast name and slot. Restrict with a repeatable flag:
 
 ```bash
 python3 scripts/diurnal-transcribe.py run --dry-run --status source-unknown
-python3 scripts/diurnal-transcribe.py run --dry-run --status needs-review
 ```
 
-## Discovering silent proper fallthroughs
-
-The discovery command sweeps the 2026 fallback resolution inventory and groups
-eligible sanctoral, commemoration, and explicitly modelled temporal rows into
-one dossier per feast. It considers only the kinds of sections printed in a
-feast proper and excludes weekday/temporal-week fallthroughs. Appended-office
-rows also wait for an independent owner mapping before discovery. OCR date
-lines, running heads, and titles locate a run of at most eight cached pages; OCR never
-supplies corpus wording.
-
-Prepare dossiers and prompts without readers or corpus writes:
-
-```bash
-make discover
-make discover FEASTS=st-stephen-hungary
-make discover MONTH=9 LIMIT=10
-make discover SLOTS=collect,chapter-lauds LIMIT=10
-```
-
-Each run writes `output/discover/<run-id>/queue.md`: one task per feast, with
-linked scan images, exact requested corpus keys, current fallbacks, example
-appointments and reading results. Start with a small, curated set of feasts and
-one or two section types. `SLOTS` uses exact section names; for example,
-`chapter-first-vespers` and `chapter-vespers` are separate appointments.
-
-Before handing off the batch, inspect the linked pages and prompts. Check that
-the range contains the right feast and its boundaries, that the requested
-sections correspond to the office being examined, and that no pending clergy
-question or ordo/source conflict affects the proposed appointment. Page location
-uses OCR and does not perform this review. Tasks without located pages need
-source research before they can become simple reading tasks.
-
-Lent Ember searches require both a Lent running head and an explicit Ember
-weekday heading, which may appear below the top of a page. The search includes
-a continuation leaf through the next weekday boundary and keeps the eight-page
-cap. Ambiguous or unreadable identities remain unresolved; they do not fall
-back to an Advent or Pentecost title match. A located leaf can contain parts
-of neighboring offices, so the named feast and slot still require page-image
-review before reading or applying. Discovery binds these searches to the feast
-ID; shorter aliases cannot bypass the season and weekday checks. Saved Lent
-Ember dossiers from the older fuzzy locator must be prepared again before
-resuming readers or application, even when their source files are unchanged.
-
-A volunteer can take a named task from `queue.md` and return its slot ID, a
-literal reading and printed page, or the visible cross-reference/absence, or
-an uncertainty note. Keep that evidence in ignored `output/` for review; the
-queue itself is not permission to write or attest a proper.
-
-To use the bounded model reader on the **same prepared batch**, read the next
-three unread tasks without corpus writes:
-
-```bash
-make discover-resume RUN=20260902T190000Z LIMIT=3
-```
-
-Repeat the command to advance through the batch. Completed and uncertain
-readings and the actual prompt used are retained in `results.jsonl`; `queue.md`
-shows the latest result, scope notes and slot explanations for each task.
-Review those explanations too: a correct negative can still cite a neighboring
-feast by mistake; retry it explicitly before accepting that search.
-Low-confidence absence is `needs-human`, not a
-completed negative search. A negative reading closes only that page search:
-it does **not** establish that the runtime fallback is correct. Missing-page and
-uncertain tasks are held rather than automatically retried. To deliberately
-retry a selected task, use `FEASTS=<id> RETRY=1`.
-
-Resume checks the prepared PDF, page images, page-label index, feast context,
-appointments and fallback wording. If they changed, prepare and inspect a fresh
-batch. Successful application results remain history, since their writes change
-the fallback inventory; retrying those also requires fresh preparation. Older
-runs without these source fingerprints must be prepared again. Wait for initial
-preparation to finish before resuming. A per-run lock prevents two resume
-processes from taking the same tasks concurrently.
-
-After reviewing a printed-proper candidate, enable gated application. Resume
-reads the candidate again and obtains the existing independent second reading;
-a saved positive result never authorizes a write by itself:
-
-```bash
-make discover-resume RUN=20260902T190000Z FEASTS=st-stephen-hungary APPLY=1
-make discover-report RUN=20260902T190000Z
-```
-
-The original fresh-run command, `make discover APPLY=1 FEASTS=<id>`, is also
-available. Both paths use the same application checks below. Queue files and
-reports describe a particular search, not an authoritative missing-proper count.
-
-The first reader sees every located page for the feast in one call and must
-classify each fallback as actual printed proper text or as absent/cross-referred.
-It also records unrequested printed sections as `extra`; those are never
-applied. A high/medium printed candidate is rejected as `same-as-fallback` when
-it is at least 0.9 similar to the currently resolved fallback. Otherwise one
-Claude Sonnet reading of the named slot and page must agree exactly after the
-comparison normalization below before `office corpus put` and a Diurnal
-attestation. Reader-agreement similarity scores are diagnostic and do not
-authorize application.
-Word disagreements remain `needs-human` even when aggregate similarity is high.
-Disagreement, low confidence, an unrecognised printed page, or an apply error
-remains `needs-human` with a representative web URL in the report.
-All dossiers, prompts, reader output,
-and body files remain under ignored `output/`.
-
-For page diagnostics, the underlying helpers are also useful directly:
+Page diagnostics:
 
 ```bash
 python3 scripts/diurnal-pages.py locate monastic-diurnal 595
@@ -169,60 +60,57 @@ python3 scripts/diurnal-pages.py feast-pages 7 17 "Translation of St. Osmund"
 
 ## Classification and application
 
-- `exact`: the trimmed transcription and corpus strings are identical.
-- `near`: comparison normalization makes them equal. Normalization covers
-  whitespace, quote forms, ligatures, soft and line-end hyphens, terminal
-  punctuation, response sigils, leading printed slot labels, flex/mediant mark
-  variants, and case; it does
-  not supply words. For collect bodies, it also omits the conclusion cue, which
-  is stored separately in the corpus.
-- `different`: the first readable transcription differs after normalization,
-  regardless of its similarity score.
-- `not-found`: the requested section is absent, empty, or its page cannot be
-  resolved.
-- `low-confidence`: the reader reports low confidence or cannot return a
-  bounded, schema-valid result.
+- `exact`: trimmed strings are identical.
+- `near`: equal after normalization of whitespace, quotes, ligatures, soft and
+  line-end hyphens, terminal punctuation, response sigils, leading slot labels,
+  flex/mediant marks, and case. Collect bodies also drop the conclusion cue,
+  which the corpus stores separately. Normalization never supplies words.
+- `different`: differs after normalization, whatever the similarity score.
+- `not-found`: section absent or empty, or page unresolvable.
+- `low-confidence`: reader reports low confidence or returns no valid result.
 
-With `--apply`, exact and near rows are attested. A different row goes to a
-second independent reader; only nonempty transcriptions agreeing exactly after
-normalization may replace the section and then be attested. Disagreement,
-unreadable text, missing pages, and automatic psalter replacements remain
-`needs-human`. Page images,
-transcriptions, diffs, and prompts stay under ignored `output/` and must not be
-committed.
+With `APPLY=1`, exact and near rows are attested. A `different` row goes to a
+second independent reader (Claude Sonnet); only non-empty readings that agree
+exactly after normalization replace the section and are then attested.
+Disagreement, unreadable text, missing pages, and psalm or canticle
+replacements stay `needs-human`.
 
-The reader tries the cited printed label, the same number as a PDF page, a
-short corpus-text OCR search, and a feast/slot OCR search in that order. It
-stops at the first found result and permits at most three reader calls per key.
-Results record the successful `locate_strategy`, the cited label separately,
-and full primary and secondary reader objects as `first` and `second`. Any
-attestation uses the found page's detected or inferred printed label from the
-cache index, never the queue's cited number.
+The reader tries, in order: the cited printed label, the same number as a PDF
+page, a short OCR search for the corpus text, and a feast/slot OCR search. It
+stops at the first hit, with at most three reader calls per key. Results record
+the `locate_strategy`, the cited label, and both readers as `first` and
+`second`. Attestations always cite the **found** page's printed label, never
+the queue's citation.
 
-### Reviewed low-similarity replacements
+"Attested by codex" is a mechanical, hash-bound statement that the corpus entry
+matches the located page image word-for-word after normalization. The ledger
+stores the corpus hash, source, printed page, reviewer, date, and a
+content-free note pointing to the cached PNG. It does not mean Codex supplied
+wording, resolved a rubric, or certified another edition.
 
-The normal wrong-page check (below 0.5 similarity) and replacement gate (below
-0.6) remain in force. When the old text is genuinely unrelated, prepare one
-saved held reading for explicit page and appointment review:
+## Reviewed low-similarity replacements
+
+The wrong-page check (similarity below 0.5) and replacement gate (below 0.6)
+normally block a replacement. When the old text is genuinely unrelated,
+prepare a held packet for explicit review:
 
 ```bash
 python3 scripts/diurnal-transcribe.py prepare-replacement RUN --key proper/FEAST/SLOT \
   --context "Feast, exact slot, current Ordo/source appointment and scope checked"
 ```
 
-This provider-free command writes a packet under that run's ignored
-`replacements/` directory and prints its SHA-256. It binds the existing corpus
-body and source citations, candidate reading, final formatted output body, engine/calendar inputs,
-PDF, render settings, page index and exact images. A stale saved reading,
-disputed printed label or collect containing its conclusion cue needs a fresh
-transcription. This path is limited to the main Diurnal and excludes psalm and
-canticle replacements.
+This calls no provider. It writes a packet under the run's `replacements/`
+directory, prints its SHA-256, and binds the current corpus body and
+citations, the candidate reading, the final formatted body, engine and
+calendar inputs, the PDF, render settings, page index, and images. It is
+limited to the main Diurnal and excludes psalms and canticles. A stale reading,
+a disputed printed label, or a collect containing its conclusion cue needs a
+fresh transcription.
 
-Inspect the packet's images, feast heading, neighboring section boundaries,
-candidate **and output body**, and appointment context. Check that the current
-Ordo supports that slot and that no unresolved ruling affects it. The generated
-description, reader confidence and agreement do not establish the appointment.
-Record the digest of the packet actually inspected, then apply it explicitly:
+Inspect the images, feast heading, neighboring section boundaries, the
+candidate **and output body**, and the appointment context. Confirm the current
+Ordo supports the slot and no open ruling affects it; reader confidence and
+agreement don't establish the appointment. Then apply the digest you inspected:
 
 ```bash
 python3 scripts/diurnal-transcribe.py apply-replacement output/transcribe/RUN/replacements/PACKET.json \
@@ -230,21 +118,87 @@ python3 scripts/diurnal-transcribe.py apply-replacement output/transcribe/RUN/re
   --review-note "Page identity, feast/slot boundaries, wording and appointment checked against …"
 ```
 
-Application makes exactly two bounded calls (unless a provider fails): a fresh
-primary reading, then independent Claude Sonnet. Neither sees the candidate
-wording. Both must identify the reviewed page and agree after normalization
-with each other, the inspected candidate and its final output body. Agreement
-on neighboring text, word disagreement, low confidence or missing text stays
-`needs-human`. Source and appointment changes invalidate the packet. Immediately
-before writing, the script rechecks the corpus and source under the ingestion
-write lock, then uses `office corpus put` and `office review attest`. Prompts,
-reviewer signoff and both fresh readings remain in the new run's artifacts.
-A failed attempt never silently selects another page; prepare and inspect a
-new packet when its source, context or candidate needs changing.
+Application makes two fresh readings (primary, then independent Claude Sonnet),
+neither shown the candidate. Both must identify the reviewed page and agree
+after normalization with each other, the candidate, and the output body;
+anything else stays `needs-human`. Any source or appointment change
+invalidates the packet. The script rechecks corpus and source under the
+ingestion write lock before `office corpus put` and `office review attest`. A
+failed attempt never tries another page; prepare a new packet instead.
 
-“Attested by codex” means a mechanical, hash-bound statement that the current
-corpus entry agrees word-for-word after the documented normalization with the
-located printed page image. The provenance ledger stores the corpus hash, source,
-printed page, reviewer name, date, and a content-free note pointing to the
-cached PNG. It does not mean that Codex supplied wording, resolved a rubric, or
-certified another edition.
+## Discovering silent proper fallthroughs
+
+Discovery sweeps the 2026 fallback resolution inventory and groups eligible
+sanctoral, commemoration, and explicitly modelled temporal rows into one
+dossier per feast. It considers only section kinds printed in feast propers,
+excludes weekday/temporal-week fallthroughs, and holds appended-office rows
+until an owner mapping exists. OCR date lines, running heads, and titles locate
+at most eight cached pages.
+
+```bash
+make discover
+make discover FEASTS=st-stephen-hungary
+make discover MONTH=9 LIMIT=10
+make discover SLOTS=collect,chapter-lauds LIMIT=10
+```
+
+Each run writes `output/discover/<run-id>/queue.md`: one task per feast, with
+linked scans, requested corpus keys, current fallbacks, example appointments,
+and reading results. Start with a few feasts and one or two slots. `SLOTS`
+takes exact names (`chapter-first-vespers` and `chapter-vespers` differ).
+
+Before running readers, inspect the pages and prompts: right feast and
+boundaries, sections matching the office, and no pending clergy question or
+ordo conflict. OCR location doesn't check any of this. Tasks with no located
+pages need source research first.
+
+Lent Ember searches need both a Lent running head and an explicit Ember
+weekday heading (possibly mid-page). They include a continuation leaf through
+the next weekday boundary within the eight-page cap and never fall back to an
+Advent or Pentecost match. Searches bind to the feast ID, so aliases can't
+bypass these checks. A located leaf can still contain neighboring offices, so
+the feast and slot need page-image review.
+
+A volunteer can take a task from `queue.md` and return the slot ID with a
+literal reading and printed page, the visible cross-reference or absence, or
+an uncertainty note. Keep that evidence in `output/`; the queue is not
+permission to write or attest.
+
+To run the model reader over the prepared batch, three tasks at a time and
+without corpus writes:
+
+```bash
+make discover-resume RUN=20260902T190000Z LIMIT=3
+```
+
+Repeat to advance. `results.jsonl` keeps every reading and its prompt;
+`queue.md` shows the latest result and slot explanations. Review those too: a
+correct negative can cite a neighboring feast. Low-confidence absence is
+`needs-human`, and a negative reading closes only that page search — it does
+**not** show the fallback is correct. Missing-page and uncertain tasks are held;
+retry deliberately with `FEASTS=<id> RETRY=1`.
+
+Resume verifies the PDF, images, label index, feast context, appointments, and
+fallback wording against the prepared batch; if any changed, or the run
+predates these fingerprints, prepare a fresh batch. Successful applications
+change the inventory, so retrying them also needs fresh preparation. A per-run
+lock prevents concurrent resumes; let preparation finish first.
+
+After reviewing a printed-proper candidate, enable gated application (or use
+`make discover APPLY=1 FEASTS=<id>` on a fresh run):
+
+```bash
+make discover-resume RUN=20260902T190000Z FEASTS=st-stephen-hungary APPLY=1
+make discover-report RUN=20260902T190000Z
+```
+
+The first reader sees all located pages in one call and classifies each
+fallback as printed proper text or absent/cross-referred; unrequested sections
+are recorded as `extra` and never applied. A high/medium candidate at least 0.9
+similar to the current fallback is rejected as `same-as-fallback`. Otherwise a
+Claude Sonnet reading of the named slot and page must agree exactly after
+normalization before `office corpus put` and attestation; similarity scores
+are diagnostic only. A saved positive result never authorizes a write by
+itself. Word disagreement, low confidence, an unrecognised page label, or an
+apply error stays `needs-human` with a web URL in the report. Queue files and
+reports describe one search, not an authoritative missing-proper count.
