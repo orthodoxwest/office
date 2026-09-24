@@ -61,6 +61,32 @@ R. Thanks be to God.
 [chapter-terce]
 @use proper/solemnity-st-joseph/chapter-lauds
 
+[chapter-sext]
+# SOURCE: md-solemnity-joseph.pdf, p. 3 (At Sext, Chapter, Gen. xlix. 25)
+!Gen 49:25
+The God of thy father shall help thee, † and the Almighty shall bless thee, * with the blessings of heaven above.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: md-solemnity-joseph.pdf, p. 3 (At None, Chapter, Gen. xlix. 22)
+!Gen 49:22
+Joseph is a growing son, † a growing son and comely to behold; * the daughters run to and fro upon the wall.
+R. Thanks be to God.
+
+[versicle-terce]
+# SOURCE: md-solemnity-joseph.pdf, p. 3 (At Terce)
+@use proper/solemnity-st-joseph/versicle-first-vespers
+
+[versicle-sext]
+# SOURCE: md-solemnity-joseph.pdf, p. 3 (At Sext)
+V. The righteous shall blossom as the lily, alleluia.
+R. He shall flourish for ever before the Lord, alleluia.
+
+[versicle-none]
+# SOURCE: md-solemnity-joseph.pdf, p. 3 (At None)
+V. Such as are planted in the house of the Lord, alleluia.
+R. Shall flourish in the courts of the house of our God, alleluia.
+
 [short-responsory-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 285 (The Solemnity of Saint Joseph)
 R. I do give praise unto thy name, * alleluia, alleluia.
