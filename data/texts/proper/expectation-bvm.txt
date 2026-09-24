@@ -1,109 +1,128 @@
-# Proper scaffold for [expectation-bvm]
-# Name: Expectation of the B.V.M
-# Rank: greater-double  Category: blessed-virgin
-#
-# Uncomment a section header and put text (or @use …) beneath it to activate.
-# Commented sections are not loaded. Do not leave an empty uncommented [key] —
-# that silences make audit without providing text.
-# Commons fallback: commons/blessed-virgin/{ref}
-# Intentional commons-only: add this feast id to data/audit-ok.txt
-#
-# --- core ---
-#
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
-# [benedictus-antiphon]
-# Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
-#
-# [psalm-antiphon]
-# Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
-#
-# [psalm-antiphon-1]
-# First psalm antiphon at Lauds (and Vespers unless a *-vespers override exists).
-#
-# [psalm-antiphon-2]
-# Second psalm antiphon at Lauds.
-#
-# [psalm-antiphon-3]
-# Third psalm antiphon at Lauds.
-#
-# [psalm-antiphon-4]
-# Fourth psalm antiphon at Lauds (often the canticle antiphon).
-#
-# [psalm-antiphon-5]
-# Fifth psalm antiphon at Lauds (Laudate psalms).
-#
-# [commemoration-antiphon]
-# Antiphon when this feast is only commemorated (not the day's celebration).
-#
-# [commemoration-versicle]
-# Versicle pair (V. … / R. …) for the commemoration of this feast.
-#
-# [commemoration-collect]
-# Collect for the commemoration (defaults to [collect] when omitted).
+# Expectation of the B.V.M. (December 18), Greater Double.
+# Source: "Expectation BVM MD Propers.pdf" (Monastic Diurnal-format supplement),
+# pp. 1-2. Slots the supplement leaves to the Common of Feasts B.V.M. (Lauds
+# short responsory "Hail Mary, full of grace") fall through to
+# commons/blessed-virgin. Lauds psalmody is the festal Sunday set ("Ps. 93
+# Dominus regnavit and the rest, p. 34"), which the engine already gives.
 
-# --- optional ---
-#
-# [chapter-lauds]
-# Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.
-#
-# [chapter-vespers]
-# Chapter at Vespers (often @use of chapter-lauds).
-#
-# [hymn-lauds]
-# Hymn at Lauds. First line may be a Latin incipit title.
-#
-# [hymn-vespers]
-# Hymn at Vespers.
-#
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
-# [versicle-vespers]
-# Versicle after the hymn at Vespers.
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
-# [short-responsory-lauds]
-# Short responsory at Lauds.
-#
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
-# [vespers-psalmody]
-# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
-#
-# [vespers-psalmody-first]
-# I Vespers psalmody table when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
-# [psalm-antiphon-1-first-vespers]
-# I Vespers override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-first-vespers]
-# I Vespers override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-first-vespers]
-# I Vespers override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-first-vespers]
-# I Vespers override for psalm antiphon 4.
+[psalm-antiphon]
+@use proper/expectation-bvm/psalm-antiphon-1
+
+[psalm-antiphon-1]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds and the Hours)
+The Angel * Gabriel was sent to Mary, a Virgin espoused to Joseph.
+
+[psalm-antiphon-2]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds and the Hours)
+Hail Mary, * thou that art full of grace, the Lord is with thee: blessed art thou among women, alleluia.
+
+[psalm-antiphon-3]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds and the Hours; prints "thou has found", corrected to "hast" per Luke 1:30)
+Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt conceive, and bring forth a Son, alleluia.
+
+[psalm-antiphon-4]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds and the Hours)
+The Lord shall give unto him * the throne of his father David, and he shall reign forever.
+
+[psalm-antiphon-5]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds and the Hours)
+Behold the handmaid of the Lord; * be it unto me according to thy word.
+
+[psalm-antiphon-4-first-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers: Ants. of Lauds, omitting 4th)
+@use proper/expectation-bvm/psalm-antiphon-5
+
+[psalm-antiphon-4-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At II Vespers: instead of the 4th Ant.)
+Of the fruit * of thy body shall I set upon thy seat.
+
+[vespers-psalmody-first]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers: Psalms as on Feasts B.V.M., p. 61*)
+@use psalmody/vespers/blessed-virgin
+
+[vespers-psalmody]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At II Vespers: in place of the last Ps., say Ps. 132)
+@use psalmody/vespers/expectation-bvm
+
+[chapter-lauds]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds, Chapter)
+!Isa 11:1-2
+There shall come forth a rod out of the stem of Jesse, † and a Branch shall grow out of his roots: * and the Spirit of the Lord shall rest upon him.
+R. Thanks be to God.
+
+[chapter-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers: Chapter as below at Lauds; II Vespers all as at I Vespers)
+@use proper/expectation-bvm/chapter-lauds
+
+[chapter-terce]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Terce: Chapter as above at Lauds)
+@use proper/expectation-bvm/chapter-lauds
+
+[chapter-sext]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At Sext, Chapter)
+!Isa 7:14-15
+Behold, a virgin shall conceive, and bear a son, † and shall call his name Immanuel. * Butter and honey shall he eat, that he may know to refuse the evil, and choose the good.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At None, Chapter; printed "Isaiah 45")
+!Isa 45:8
+Drop down, ye heavens, from above, and let the skies pour down righteousness: let the earth open, and let them bring forth salvation, and let righteousness spring up together; I the Lord have created it.
+R. Thanks be to God.
+
+[short-responsory-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers, Short R.; II Vespers all as at I Vespers)
+R. Drop down, ye heavens, from above, * and let the skies pour down righteousness.
+R. Drop down, ye heavens, from above, * and let the skies pour down righteousness.
+V. Let the earth open, and let them bring forth salvation.
+R. And let the skies pour down righteousness.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Drop down, ye heavens, from above, * and let the skies pour down righteousness.
+
+[hymn-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (Hymn Conditor, alme siderum, as on the I Sunday in Advent)
+@use seasonal/advent/hymn-vespers
+
+[hymn-lauds]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (Hymn Vox clara ecce intonat, as on the I Sunday in Advent)
+@use seasonal/advent/hymn-lauds
+
+[versicle-vespers]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers; II Vespers all as at I Vespers)
+V. Hail, Mary, full of grace.
+R. The Lord is with thee.
+
+[versicle-lauds]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds)
+V. The Holy Ghost shall come upon thee.
+R. And the power of the Highest shall overshadow thee.
+
+[versicle-terce]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Terce)
+V. The Angel of the Lord announced unto Mary.
+R. And she conceived by the Holy Ghost.
+
+[versicle-sext]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At Sext)
+V. Blessed art thou among women.
+R. And blessed is the fruit of thy womb.
+
+[versicle-none]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At None; same versicle as at Lauds)
+@use proper/expectation-bvm/versicle-lauds
+
+[magnificat-antiphon-first]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At I Vespers, Ant. on Magnificat)
+The Holy Ghost * shall come upon thee, Mary: and the power of the Highest shall overshadow thee, alleluia.
+
+[benedictus-antiphon]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds, Ant. on Benedictus)
+He shall sit upon the throne * of David, and of his kingdom there shall be no end.
+
+[magnificat-antiphon]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 2 (At II Vespers, Ant. on Magnificat)
+O Virgin of Virgins, * how shall this be? for neither before thee was any seen like thee, nor shall be after. Daughters of Jerusalem, why marvel ye at me? The thing which ye behold is a divine mystery.
+
+[collect]
+# SOURCE: Expectation BVM MD Propers.pdf, p. 1 (At Lauds, Collect; prints "who believer her", corrected to "believe")
+O God, who didst ordain that thy Word should take flesh in the womb of the blessed Virgin Mary, at the message of an Angel: grant that we thy suppliants, who believe her to be indeed the Mother of God, may be aided by her intercessions before thee.

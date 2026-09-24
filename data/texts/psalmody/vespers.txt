@@ -34,6 +34,14 @@ psalm-antiphon-2 = psalms/113
 psalm-antiphon-3 = psalms/122
 psalm-antiphon-4 = psalms/127
 
+# II Vespers of the Expectation B.V.M.: as on Feasts B.V.M., but "in place of
+# the last Ps., say Ps. 132" (Expectation B.V.M. supplement, p. 2).
+[expectation-bvm]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-2 = psalms/113
+psalm-antiphon-3 = psalms/122
+psalm-antiphon-4 = psalms/132
+
 [dedication]
 psalm-antiphon-1 = psalms/110
 psalm-antiphon-2 = psalms/111
