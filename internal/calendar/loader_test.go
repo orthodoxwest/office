@@ -418,3 +418,21 @@ func findDataDir(t *testing.T) string {
 		dir = parent
 	}
 }
+
+func TestSectionToFeastPrimaryOfOurLord(t *testing.T) {
+	base := func(rank, category string) map[string]string {
+		return map[string]string{
+			"_id": "example", "Name": "Example", "Rank": rank, "Color": "white",
+			"Category": category, "Month": "6", "Day": "1", "PrimaryOfOurLord": "true",
+		}
+	}
+	feast, err := sectionToFeast(base("double-1st-class", "lord"), "test.txt")
+	if err != nil || !feast.PrimaryOfOurLord {
+		t.Fatalf("Double I Class feast of Our Lord: %v, %+v", err, feast)
+	}
+	for _, m := range []map[string]string{base("double-2nd-class", "lord"), base("double-1st-class", "confessor")} {
+		if _, err := sectionToFeast(m, "test.txt"); err == nil {
+			t.Errorf("accepted PrimaryOfOurLord on %s %s", m["Rank"], m["Category"])
+		}
+	}
+}

@@ -299,6 +299,35 @@ func commemorationSuppressionDecision(winner, comm *models.Feast) (bool, models.
 	return false, models.CompositionDecision{}
 }
 
+// primaryFeastDoublesWithDecisions applies General Rubrics X (p. xxx) in
+// occurrence: "Commemoration is also made at Lauds only of any Double either
+// Greater or Lesser, except on Primary Feasts of Our Lord of universal
+// observance" (confirmed ruling, #138). A Double occurring on such a feast is
+// therefore not commemorated that day, nor at the feast's I Vespers: the 2018
+// ordo drops St Bede from Whitsunday and its I Vespers. Vespers concurrence
+// with the preceding or following day is not occurrence and is unaffected.
+// Apostles are kept: the 2017 and 2023 ordos commemorate St Barnabas on Trinity
+// Sunday and the 2026 ordo on Corpus Christi, a local practice whose scope is
+// #379. Octave days follow their own octave rules.
+func primaryFeastDoublesWithDecisions(winner *models.Feast, comms []*models.Feast) ([]*models.Feast, []models.CompositionDecision) {
+	if winner == nil || !winner.PrimaryOfOurLord {
+		return comms, nil
+	}
+	var kept []*models.Feast
+	var decisions []models.CompositionDecision
+	for _, comm := range comms {
+		if (comm.Rank == models.GreaterDouble || comm.Rank == models.Double) &&
+			comm.Category != models.CategoryApostle && comm.Category != models.CategorySunday &&
+			comm.Category != models.CategoryFeria && !comm.IsVigil &&
+			!IsDayWithinOctave(comm) && !isOctaveDay(comm) {
+			decisions = append(decisions, models.CompositionDecision{Rule: "commemoration:double-under-primary-feast-of-our-lord", Outcome: "suppressed", Detail: comm.ID})
+			continue
+		}
+		kept = append(kept, comm)
+	}
+	return kept, decisions
+}
+
 func orderedCommemorationsWithDecisions(winner *models.Feast, comms []*models.Feast, ctx commemorationOrderContext) ([]*models.Feast, []models.CompositionDecision) {
 	ctx.winner = winner
 	filtered := make([]*models.Feast, 0, len(comms))
@@ -450,6 +479,8 @@ func ResolveDay(
 				decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 			}
 		}
+		comms, primaryDecisions := primaryFeastDoublesWithDecisions(winner, comms)
+		decisions = append(decisions, primaryDecisions...)
 		comms, commDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{season: season})
 		decisions = append(decisions, commDecisions...)
 		color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
@@ -490,6 +521,8 @@ func ResolveDay(
 			decisions = append(decisions, models.CompositionDecision{Rule: "occurrence:loser-disposition", Outcome: "commemorated", Detail: f.ID})
 		}
 	}
+	comms, primaryDecisions := primaryFeastDoublesWithDecisions(winner, comms)
+	decisions = append(decisions, primaryDecisions...)
 	comms, commDecisions := orderedCommemorationsWithDecisions(winner, comms, commemorationOrderContext{season: season})
 	decisions = append(decisions, commDecisions...)
 	color, colorDecision := resolvedDayColorWithDecision(winner, season, seasonColor)
