@@ -55,6 +55,15 @@ or impose a redesign on an unrelated change.
   Current-hour markup exists in both the template and `setHourCurrent()`;
   keep both consistent. The hour directory has horizontal bands, not columns
   across the unequal 2/3/2 groups.
+- From 701px home's frontispiece is a niche set into the wall (round head,
+  stone moulding, day-colour trim, recess shadow), and the room is lit toward
+  it: `body.page-home::after` (warm pool, shaded edges) and `.home::before`
+  (a shaft from above). Large screens scale the whole niche with
+  `--niche-zoom` steps gated on width and height. Its background and shadows
+  are tokens (`--niche-background`, `--niche-shadows`) because the Apse card
+  rules outrank the base selector and must repeat them. Drawn architecture
+  around it (columns, sconces, sills, arches) has been tried and read as
+  illustration; prefer light and tone to objects.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
   and Assurance/reporting after the prayer. Print expands session prayers and
   hides navigation/progress controls. Don't add persistent mobile chrome

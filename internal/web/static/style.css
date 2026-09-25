@@ -3462,19 +3462,44 @@ body.season-eastertide {
 }
 
 @media (min-width: 701px) {
+  /* The niche is larger than the old card, and on big screens the whole of
+     it scales up (see "Home niche"); main widens to hold it. */
+  .page-home main {
+    --card-w: clamp(38rem, 10rem + 38vw, 48rem);
+    --niche-zoom: 1;
+    max-width: calc(var(--card-w) * var(--niche-zoom) + 3rem);
+  }
+
+  /* The niche: the frontispiece set into the wall. A low round head, a stone
+     moulding with dark edges, the day's colour as a trim just inside the
+     stone, and a shadow under the head so the panel reads as recessed.
+     Background and shadows are tokens because the Apse card rules below
+     outrank this selector and must repeat them. */
   .page-home .home-hero {
     --frontispiece-frame: rgba(87, 52, 33, 0.3);
     --frontispiece-rule: rgba(107, 58, 31, 0.22);
     --frontispiece-band: var(--inscription-wash);
-    max-width: 38rem;
-    padding: 1.45rem 1.75rem 1.25rem;
-    border-inline-width: 2px;
-    background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 32%),
+    --niche-head: clamp(5rem, 2rem + 6vw, 8rem);
+    --niche-background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, var(--niche-warm), transparent 72%),
+      linear-gradient(180deg, var(--niche-sheen), transparent 30%),
       var(--surface);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      0 0.3rem 1.25rem rgba(54, 31, 20, 0.045);
+    --niche-shadows:
+      inset 0 2.6rem 2.6rem -2rem var(--niche-recess),
+      0 0 0 2px var(--day-color, var(--niche-edge)),
+      0 0 0 0.75rem var(--niche-stone),
+      0 0 0 calc(0.75rem + 1px) var(--niche-edge),
+      0 0 0 calc(0.75rem + 0.5rem) var(--niche-clear),
+      0 1.5rem 3rem -0.75rem var(--chapel-shade),
+      0 0 1.8rem 1.4rem var(--niche-clear);
+    zoom: var(--niche-zoom);
+    max-width: var(--card-w);
+    padding: calc(var(--niche-head) * 0.5 + 1.1rem) 1.75rem 1.25rem;
+    border-width: 2px;
+    border-top-color: var(--frontispiece-frame);
+    border-radius: 50% 50% 0 0 / var(--niche-head) var(--niche-head) 0 0;
+    background: var(--niche-background);
+    box-shadow: var(--niche-shadows);
   }
 
   .page-home .home h1 {
@@ -3589,9 +3614,8 @@ body.season-eastertide {
     --frontispiece-frame: rgba(208, 176, 106, 0.34);
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
-    box-shadow:
-      0 0 0 0.5rem var(--bg),
-      0 0 1.6rem 0.55rem var(--bg);
+    background: var(--niche-background);
+    box-shadow: var(--niche-shadows);
   }
 }
 
@@ -3600,9 +3624,8 @@ body.season-eastertide {
     --frontispiece-frame: rgba(208, 176, 106, 0.34);
     --frontispiece-rule: rgba(208, 176, 106, 0.24);
     --frontispiece-band: rgba(208, 176, 106, 0.045);
-    box-shadow:
-      0 0 0 0.5rem var(--bg),
-      0 0 1.6rem 0.55rem var(--bg);
+    background: var(--niche-background);
+    box-shadow: var(--niche-shadows);
   }
 }
 
@@ -4517,6 +4540,107 @@ html:where(:has(> body.page-hour))::before {
 .page-calendar .calendar-header {
   padding-top: 0.65rem;
   border-top: 3px double var(--ornament-line);
+}
+
+/* ── Home niche ──
+   On a desktop the home frontispiece is a small object in a large field. It
+   is treated as a niche set into the wall: the card's rules above give it a
+   round head, stone moulding and recess; here the room is lit toward it (a
+   warm pool, the edges in shade, a faint shaft from a high window), and on
+   large screens the whole niche scales up so it keeps its presence. Phones
+   keep the plain card. */
+:root {
+  --niche-stone: #e5dac9;
+  --niche-edge: rgba(63, 55, 47, 0.3);
+  --niche-recess: rgba(70, 40, 20, 0.2);
+  --niche-sheen: rgba(255, 255, 255, 0.14);
+  --niche-warm: rgba(232, 176, 84, 0.2);
+  --niche-clear: transparent;
+  /* Nave is near-white plaster, so the room's shade has to be real for the
+     light to read at all. */
+  --chapel-pool: rgba(240, 188, 96, 0.2);
+  --chapel-shade: rgba(88, 60, 38, 0.36);
+  --chapel-beam: rgba(255, 251, 238, 0.62);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --niche-stone: #243040;
+    --niche-edge: rgba(208, 176, 106, 0.3);
+    --niche-recess: rgba(0, 0, 0, 0.42);
+    --niche-sheen: transparent;
+    --niche-warm: rgba(208, 176, 106, 0.09);
+    --niche-clear: var(--bg);
+    --chapel-pool: rgba(214, 168, 90, 0.08);
+    --chapel-shade: rgba(3, 7, 12, 0.62);
+    --chapel-beam: rgba(200, 214, 234, 0.08);
+  }
+}
+
+:root[data-theme="dark"] {
+  --niche-stone: #243040;
+  --niche-edge: rgba(208, 176, 106, 0.3);
+  --niche-recess: rgba(0, 0, 0, 0.42);
+  --niche-sheen: transparent;
+  --niche-warm: rgba(208, 176, 106, 0.09);
+  --niche-clear: var(--bg);
+  --chapel-pool: rgba(214, 168, 90, 0.08);
+  --chapel-shade: rgba(3, 7, 12, 0.62);
+  --chapel-beam: rgba(200, 214, 234, 0.08);
+}
+
+@media (min-width: 701px) {
+  .page-home .home-hero::before {
+    border-radius: 50% 50% 0 0 / calc(var(--niche-head) - 0.35rem) calc(var(--niche-head) - 0.35rem) 0 0;
+  }
+
+  /* The head's curve replaces the upper corner tooling. */
+  .page-home .home-frame-corner-start,
+  .page-home .home-frame-corner-end {
+    display: none;
+  }
+
+  /* Chapel light: a warm pool where the niche stands and the room's edges
+     in shade. One fixed layer over the wall (and the Apse vault), under the
+     page, sized to the viewport. */
+  body.page-home::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 40% 46% at 50% 54%, var(--chapel-pool), transparent 70%),
+      radial-gradient(ellipse 74% 80% at 50% 52%, transparent 34%, var(--chapel-shade) 100%);
+  }
+
+  /* A shaft of light from a high window, falling toward the niche and
+     spending itself before the floor. */
+  .page-home .home::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent 43%, var(--chapel-beam) 49%, transparent 57%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.55) 38%, transparent 74%);
+    mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.55) 38%, transparent 74%);
+  }
+}
+
+/* Large screens: the niche keeps its share of the room. Zoom scales the
+   whole object (text, rules, moulding) together; the steps need both
+   width and height so a wide but short window never pushes "Pray" off. */
+@media (min-width: 1700px) and (min-height: 1000px) {
+  .page-home main { --niche-zoom: 1.12; }
+}
+
+@media (min-width: 2100px) and (min-height: 1200px) {
+  .page-home main { --niche-zoom: 1.28; }
+}
+
+@media (min-width: 2500px) and (min-height: 1400px) {
+  .page-home main { --niche-zoom: 1.45; }
 }
 
 /* ── Apse starfield ──
