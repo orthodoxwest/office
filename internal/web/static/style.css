@@ -132,9 +132,13 @@
      structure. Used sparingly — the header beam and the inscription band. */
   --oak: #3f372f;
   --oak-line: rgba(63, 55, 47, 0.34);
-  /* Gold as it appears on the arch band and the wall inscription: leaf on a
-     dark ground, never a bright bar on a light one. */
-  --inscription-ground: #3f372f;
+  /* The nave's painted frieze (St Patrick's Breastplate, just under the wall
+     plate): gold lettering on a sage-green course between two thin oxblood
+     rules. Ground and edge are the photograph's lit end, darkened just enough
+     that the veiled Passiontide ink still clears 4.5:1 at the band's small
+     size (see "Seasonal ornament"). */
+  --inscription-ground: #34403a;
+  --inscription-edge: #5e2a27;
   --inscription-ink: #d7b878;
   /* Side gutter for the reading column. The measure lives on main/footer so
      the header beam can span the full width (see .site-header). */
@@ -2622,13 +2626,14 @@ footer::before {
       linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
     --material-highlight: rgba(208, 176, 106, 0.065);
     --inscription-wash: rgba(208, 176, 106, 0.04);
-    /* Apse lifts the band off the night rather than darkening it: oak brown on
-       a blue surface reads as a stain, but a lifted slate course carrying the
-       same gold reads as the same timber under a different light. The ink is
-       not restated here: the ground is dark in both themes, so one set of leaf
-       colours serves both — see "Seasonal ornament". */
+    /* Apse keeps the frieze's sage and oxblood, seen by night: the ground
+       lifts just off the blue surface and the edges deepen toward wine, so
+       the course still reads as the painted band rather than a slate bar.
+       The ink is not restated here: the ground is dark in both themes, so one
+       set of leaf colours serves both — see "Seasonal ornament". */
     --oak-line: rgba(208, 176, 106, 0.16);
-    --inscription-ground: #262f3d;
+    --inscription-ground: #263431;
+    --inscription-edge: #5c2b35;
   }
 }
 
@@ -2670,11 +2675,12 @@ footer::before {
     linear-gradient(155deg, rgba(216, 188, 116, 0.018), transparent 42%);
   --material-highlight: rgba(208, 176, 106, 0.065);
   --inscription-wash: rgba(208, 176, 106, 0.04);
-  /* See the prefers-color-scheme block above for why Apse lifts the band.
+  /* See the prefers-color-scheme block above for the band by night.
      The ink is not restated: the band's ground is dark in both themes, so one
      set of leaf colours serves both — see "Seasonal ornament". */
   --oak-line: rgba(208, 176, 106, 0.16);
-  --inscription-ground: #262f3d;
+  --inscription-ground: #263431;
+  --inscription-edge: #5c2b35;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -2815,18 +2821,17 @@ footer::before {
    gold seen through a filter. Paschal: light gains chroma at the same
    lightness and dark gains lightness, matching how --ornament itself moves. */
 
-/* The inscription band is gilding too — leaf lettering on a timber course —
+/* The inscription band is gilding too — leaf lettering on a painted frieze —
    so its ink keeps the season with everything else. It takes one pair of
    values rather than two, because unlike the rest of the gilding it always
-   sits on a dark ground: the course is oak in Nave and lifted slate in Apse,
-   never plaster. That makes the Apse leaf colours the right ones in both
-   themes, which is why these match the veiled/paschal --ornament in the dark
-   blocks below. The oak of the course itself does not move — the church veils
-   its images, not its timber.
+   sits on a dark ground: deep sage in both themes, never plaster. That makes
+   the Apse leaf colours the right ones in both themes, which is why these
+   match the veiled/paschal --ornament in the dark blocks below. The frieze's
+   sage and oxblood do not move — the church veils its images, not its walls.
 
    Contrast on the band, worst case:
-   nave ground #3f372f  veiled #b0a4c2 = 5.0:1   paschal #e6cf8c = 7.6:1
-   apse ground #262f3d  veiled #b0a4c2 = 5.7:1   paschal #e6cf8c = 8.8:1 */
+   nave ground #34403a  veiled #b0a4c2 = 4.6:1   paschal #e6cf8c = 7.0:1
+   apse ground #263431  veiled #b0a4c2 = 5.5:1   paschal #e6cf8c = 8.5:1 */
 body.season-passiontide {
   --ornament: #756a7e;
   --ornament-line: #b5aabd;
@@ -3231,8 +3236,9 @@ body.season-eastertide {
   box-shadow: none;
 }
 
-/* The inscription band. In the parish a dark timber course runs the full width
-   of the wall carrying gold uncial small-caps between raised points — it is the
+/* The inscription band. In the parish a painted frieze runs the full width of
+   the nave wall under the oak wall plate: gold lettering on sage between two
+   thin oxblood rules, its phrases parted by small gilt lozenges. It is the
    building's most distinctive mark, and this heading is the one piece of
    content that wants it. Full-bleed inside the frontispiece (hence the
    negative inline margin against the card's 1rem padding), because a band that
@@ -3244,10 +3250,13 @@ body.season-eastertide {
      out-shout "Pray {hour}", and the invitation has to lead the page. */
   padding: 0.2rem 1rem 0.16rem;
   background: var(--inscription-ground);
-  color: var(--inscription-ink);
+  /* The oxblood edges are painted inside the band, not added as borders: a
+     phone's home fits its viewport with nothing to spare, and four extra
+     pixels would make it scroll. */
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent),
-    inset 0 -1px 0 color-mix(in srgb, var(--inscription-ink) 25%, transparent);
+    inset 0 2px 0 var(--inscription-edge),
+    inset 0 -2px 0 var(--inscription-edge);
+  color: var(--inscription-ink);
   font-size: 0.8rem;
   font-weight: normal;
   font-variant-caps: all-small-caps;
@@ -3255,15 +3264,20 @@ body.season-eastertide {
   text-align: center;
 }
 
-/* Raised points either side, as on the wall. Dimmed so the words lead. */
+/* Gilt lozenges either side, as between the frieze's phrases. Empty boxes
+   rather than a glyph: ◆ is not in EB Garamond, and a fallback face would
+   set it at its own weight and height. Dimmed so the words lead. */
 .page-home .home-prayer-card h2::before,
 .page-home .home-prayer-card h2::after {
-  content: "✦";
-  margin-inline: 0.85em;
-  font-size: 0.62em;
-  letter-spacing: 0;
-  opacity: 0.62;
-  vertical-align: 0.12em;
+  content: "";
+  display: inline-block;
+  width: 0.26em;
+  height: 0.26em;
+  margin-inline: 0.95em;
+  background: currentColor;
+  opacity: 0.7;
+  transform: rotate(45deg);
+  vertical-align: 0.07em;
 }
 
 .page-home .pray-now-wrap {
@@ -4519,15 +4533,15 @@ html:where(:has(> body.page-hour))::before {
    blue into diamond panels, a boss where ribs cross, lesser stars floating in
    the panels. So this field is that diaper: two faint diagonal hairline
    families quilt the night, a principal star sits at every crossing, and a
-   smaller star floats at the centre of every panel.
+   smaller star floats at the centre of every panel. The stars themselves are
+   the parish's own: the apse half-dome is painted with eight-ray stars (four
+   long rays, four short diagonals) and small four-ray sparks, so the
+   principal stars take the first shape and the panel stars the second.
 
    Drawn as ONE REPEATING CELL. A quincunx diaper is periodic, so two stars,
-   two panel-stars and three rib stripes tile into the entire field.
+   two panel-stars and three rib lines tile into the entire field.
    Hand-placing every star instead cost 172 background layers and pushed first
-   contentful paint from 88ms to 696ms. Twelve gradients tile to the same
-   picture (measured against a bare page: ~24ms of FCP; the secondary stars'
-   core dots were cut because they cost a layer each and vanish under the
-   rays). Keep it a tile.
+   contentful paint from 88ms to 696ms. Keep it a tile.
 
    The cell geometry is exact, not eyeballed. In a square tile, the 45deg
    stripe at 50% of its gradient axis is the corner-to-corner diagonal, and
@@ -4540,11 +4554,14 @@ html:where(:has(> body.page-hour))::before {
    has no matching layer at 100% to complete it, so edge stars render sheared
    in half. Every feature stays interior to the cell.
 
-   Stars are crossed elliptical gradients rather than an SVG data URI on
-   purpose: an SVG cannot read var(--ornament), so it would silently break the
-   seasonal veil. Every layer — ribs included — reads --ornament through
-   color-mix, so the vault veils in Passiontide and warms in Paschaltide with
-   the rest of the gilding.
+   The cell is an SVG used as a MASK, never as a background image. An SVG
+   cannot read var(--ornament), so as an image it would silently break the
+   seasonal veil; as a mask it supplies only shape and alpha, and the colour
+   is the pseudo-element's own background, --apse-ink = --ornament. The vault
+   therefore veils in Passiontide and warms in Paschaltide with the rest of
+   the gilding. (CSS gradients, the earlier method, keep the colour too but
+   can only draw axis-aligned rays: no eight-ray star.) Each field's fade is
+   a second mask layer, intersected with the tile.
 
    Apse home carries one full-page field at every width. The frontispiece is
    the opaque lit surface above it; on a phone the narrow gutters reveal only
@@ -4563,8 +4580,18 @@ html:where(:has(> body.page-hour))::before {
    custom property's var() resolves against the element it is declared on,
    while the seasonal --ornament lands on body — declaring it higher freezes
    the stars gold through Passiontide while every other ornament veils. */
+:root {
+  /* One diaper cell, as a mask: the rib hairlines at 7%, the principal
+     eight-ray stars at 78% with a small boss, the lesser four-ray stars at
+     50%. Only alpha matters here — the colour is --apse-ink, painted through
+     it — so the file needs no tokens and can live on :root. Drawn in a
+     132-unit cell; the tile is 132px on phones and 176px wider. */
+  --apse-star-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 132 132'%3E%3Cpath d='M0 0L132 132M0 66L66 0M66 132L132 66' stroke='%23000' stroke-opacity='.07' stroke-width='1.2'/%3E%3Cpath d='M33 25.5L33.52 31.75L36.39 29.61L34.25 32.48L40.5 33L34.25 33.52L36.39 36.39L33.52 34.25L33 40.5L32.48 34.25L29.61 36.39L31.75 33.52L25.5 33L31.75 32.48L29.61 29.61L32.48 31.75ZM99 91.5L99.52 97.75L102.39 95.61L100.25 98.48L106.5 99L100.25 99.52L102.39 102.39L99.52 100.25L99 106.5L98.48 100.25L95.61 102.39L97.75 99.52L91.5 99L97.75 98.48L95.61 95.61L98.48 97.75Z' fill-opacity='.78'/%3E%3Ccircle cx='33' cy='33' r='1.7' fill-opacity='.78'/%3E%3Ccircle cx='99' cy='99' r='1.7' fill-opacity='.78'/%3E%3Cpath d='M99 28.2L99.64 32.36L102.2 33L99.64 33.64L99 37.8L98.36 33.64L95.8 33L98.36 32.36ZM33 94.2L33.64 98.36L36.2 99L33.64 99.64L33 103.8L32.36 99.64L29.8 99L32.36 98.36Z' fill-opacity='.5'/%3E%3C/svg%3E");
+}
+
 body {
   --apse-vault: none;
+  --apse-ink: transparent;
   --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
@@ -4573,50 +4600,16 @@ body {
   :root:not([data-theme="light"]) body {
     --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
-    --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
-    --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-    --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
-    --apse-vault:
-      radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
-      radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
-      radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
-      radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
-      radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-      radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
-      radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
-      radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
-      radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
-      linear-gradient(45deg,
-        transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
-      linear-gradient(135deg,
-        transparent calc(25% - 0.6px), var(--apse-line) calc(25% - 0.6px) calc(25% + 0.6px), transparent calc(25% + 0.6px) calc(75% - 0.6px),
-        var(--apse-line) calc(75% - 0.6px) calc(75% + 0.6px), transparent calc(75% + 0.6px));
+    --apse-ink: var(--ornament);
+    --apse-vault: var(--apse-star-tile);
   }
 }
 
 :root[data-theme="dark"] body {
   --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
-  --apse-star: color-mix(in srgb, var(--ornament) 78%, transparent);
-  --apse-star2: color-mix(in srgb, var(--ornament) 48%, transparent);
-  --apse-line: color-mix(in srgb, var(--ornament) 7%, transparent);
-  --apse-vault:
-    radial-gradient(ellipse 2px 7.5px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
-    radial-gradient(ellipse 7.5px 2px at 25% 25%, var(--apse-star) 0 46%, transparent 70%),
-    radial-gradient(circle 1.9px at 25% 25%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 2px 7.5px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
-    radial-gradient(ellipse 7.5px 2px at 75% 75%, var(--apse-star) 0 46%, transparent 70%),
-    radial-gradient(circle 1.9px at 75% 75%, var(--apse-star) 0 55%, transparent 100%),
-    radial-gradient(ellipse 1.4px 4.6px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
-    radial-gradient(ellipse 4.6px 1.4px at 75% 25%, var(--apse-star2) 0 46%, transparent 74%),
-    radial-gradient(ellipse 1.4px 4.6px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
-    radial-gradient(ellipse 4.6px 1.4px at 25% 75%, var(--apse-star2) 0 46%, transparent 74%),
-    linear-gradient(45deg,
-      transparent calc(50% - 0.6px), var(--apse-line) calc(50% - 0.6px) calc(50% + 0.6px), transparent calc(50% + 0.6px)),
-    linear-gradient(135deg,
-      transparent calc(25% - 0.6px), var(--apse-line) calc(25% - 0.6px) calc(25% + 0.6px), transparent calc(25% + 0.6px) calc(75% - 0.6px),
-      var(--apse-line) calc(75% - 0.6px) calc(75% + 0.6px), transparent calc(75% + 0.6px));
+  --apse-ink: var(--ornament);
+  --apse-vault: var(--apse-star-tile);
 }
 
 /* An hour remains a flat prayer page until the office has ended. The vault
@@ -4644,32 +4637,47 @@ body.page-hour footer::after {
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  background-image: var(--apse-vault);
-  background-repeat: repeat;
-  background-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile);
+  background-color: var(--apse-ink);
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile), 100% 100%;
+  mask-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile), 100% 100%;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
+/* The second mask layer is the fade. It is sized to the whole box, so
+   sharing the tile's position leaves it where it is and keeps every layer
+   reading the same phase. */
 body.page-hour .hour-epilogue::before {
   inset: 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-right))) 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
-  background-position: bottom center;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
-  mask-image: linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+  -webkit-mask-position: bottom center;
+  mask-position: bottom center;
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
 }
 
 body.page-hour footer::after {
   inset: calc(-1 * var(--footer-gap)) 0 0;
-  background-position: top center;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
-  mask-image: linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+  -webkit-mask-position: top center;
+  mask-position: top center;
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
 }
 
-/* Where the desktop plaster and stars overlap, the vault's own mask also
-   eases in a quiet ground. Stars and texture therefore trade prominence
-   without another layer or a change to their phase. Nave stays transparent. */
+/* Where the desktop plaster and stars overlap, a quiet ground eases in under
+   the vault so stars and texture trade prominence. The star layer paints only
+   through its mask, so the ground cannot share it: it is each host's own
+   border-image instead — outset to the viewport edges, following the same
+   fade, painting beneath the negative-z vault and adding no layout or
+   scrollable overflow. Nave's ground is transparent. */
 @media screen and (min-width: 1000px) {
-  body.page-hour .hour-epilogue::before,
-  body.page-hour footer::after {
-    background-color: var(--apse-ground);
+  body.page-hour .hour-epilogue {
+    border-image: linear-gradient(to bottom, transparent 0 7rem, color-mix(in srgb, var(--apse-ground) 28%, transparent) 11rem, var(--apse-ground) 16rem 100%) fill 0 / 0 / 0 100vw;
+  }
+
+  body.page-hour footer {
+    border-image: linear-gradient(to bottom, var(--apse-ground) 0, color-mix(in srgb, var(--apse-ground) 40%, transparent) 62%, transparent 94%) fill 0 / 0 / var(--footer-gap) 100vw 0;
   }
 }
 
@@ -4726,20 +4734,27 @@ body.page-home::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image: var(--apse-vault);
-  background-repeat: repeat;
-  background-size: 132px 132px;
-  background-position: top center;
+  background-color: var(--apse-ink);
   /* Clear the header beam, carry the field behind the frontispiece, then thin
-     the ornament toward the controls at the foot of the page. A mask thins
-     stars and ribs without tinting the night itself. */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-  mask-image: linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+     the ornament toward the controls at the foot of the page. The fade is a
+     second mask layer, intersected with the star tile, so it thins stars and
+     ribs without tinting the night itself. */
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-size: 132px 132px, 100% 100%;
+  mask-size: 132px 132px, 100% 100%;
+  -webkit-mask-position: top center;
+  mask-position: top center;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 @media (min-width: 701px) {
   body.page-home::before {
-    background-size: 176px 176px;
+    -webkit-mask-size: 176px 176px, 100% 100%;
+    mask-size: 176px 176px, 100% 100%;
   }
 }
 

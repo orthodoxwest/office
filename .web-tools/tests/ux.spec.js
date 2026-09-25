@@ -456,16 +456,18 @@ test("parish material stays off the mobile prayer page", async ({
   // Apse adds the vault over the wall.
   await page.getByRole("button", { name: "Apse", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const vault = await page.evaluate(
-    () => getComputedStyle(document.body, "::before").backgroundImage,
-  );
-  expect(vault).not.toBe("none");
-  // One diaper cell: a principal star (three gradients) at each rib crossing,
-  // a lesser star (two — its core dot drowned under the rays and cost a paint
-  // layer) in each panel. The two rib families are linear gradients, counted
-  // separately below.
-  expect((vault.match(/radial-gradient/g) || []).length).toBe(10);
-  expect((vault.match(/linear-gradient/g) || []).length).toBe(2);
+  const readVault = () =>
+    page.evaluate(() => {
+      const style = getComputedStyle(document.body, "::before");
+      return { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor };
+    });
+  // One diaper cell as a mask tile (ribs, eight-ray principal stars, four-ray
+  // panel stars) intersected with the page fade, painted in the gilding. The
+  // ink crossfades in with the theme, so poll past its transparent start.
+  await expect.poll(async () => vaultPaints(await readVault())).toBe(true);
+  const vault = await readVault();
+  expect((vault.mask.match(/data:image\/svg\+xml/g) || []).length).toBe(1);
+  expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
 });
 
 test("wide hour plaster clears the prayer without sideways scroll or stretching", async ({ page }) => {
@@ -642,19 +644,20 @@ test("the apse vault appears only over the night, and veils with the season", as
     await sheet.goto(path);
     const read = await sheet.evaluate(() => {
       const style = getComputedStyle(document.body, "::before");
-      const ink = style.backgroundImage.match(/color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)/);
-      const rgb = style.backgroundColor.match(/\d+/g).slice(0, 3).map(Number);
+      const rgb = getComputedStyle(document.documentElement)
+        .backgroundColor.match(/\d+/g)
+        .slice(0, 3)
+        .map(Number);
       return {
         // The vault has its own layer, so this cannot pick up
         // --page-material's broad radials, which live on body and legitimately
-        // remain on the phone. One diaper cell is exactly ten radials.
-        stars: (style.backgroundImage.match(/radial-gradient/g) || []).length,
+        // remain on the phone.
+        vault: { mask: style.maskImage || style.webkitMaskImage, ink: style.backgroundColor },
         pageIsDark: rgb.reduce((a, b) => a + b, 0) / 3 < 100,
-        ink: ink ? ink.slice(1).join(",") : null,
       };
     });
     await context.close();
-    return read;
+    return { stars: vaultPaints(read.vault), pageIsDark: read.pageIsDark, ink: read.vault.ink };
   };
 
   const home = `/?date=${testDate}`;
@@ -664,19 +667,19 @@ test("the apse vault appears only over the night, and veils with the season", as
   // would light up over the Nave.
   for (const scheme of ["light", "dark"]) {
     const seen = await vault({ width: 1280, theme: null, scheme, path: home });
-    if (!seen.pageIsDark) expect(seen.stars).toBe(0);
+    if (!seen.pageIsDark) expect(seen.stars).toBe(false);
   }
-  expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(0);
+  expect((await vault({ width: 1280, theme: "light", scheme: "dark", path: home })).stars).toBe(false);
 
   // Present behind the Apse home at every width, absent in working rooms.
-  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
-  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(10);
+  expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
+  expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
   for (const path of ["/calendar/2026", "/reminders"]) {
-    expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(0);
+    expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(false);
   }
 
   // Gold leaf is gilding, so the vault keeps the season. This only holds while
-  // --apse-vault is declared where the seasonal --ornament lands; hoisting it
+  // --apse-ink is declared where the seasonal --ornament lands; hoisting it
   // to :root freezes the stars gold through Passiontide.
   const ink = {};
   for (const [season, date] of [
@@ -771,6 +774,14 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
   }
 });
 
+// The Apse vault paints --ornament through an SVG star-tile mask. Nave leaves
+// the tile off and the ink transparent, so a field paints stars only when it
+// has both. Takes { mask, ink } read from a computed style.
+function vaultPaints({ mask, ink }) {
+  const transparent = /^transparent$|^rgba\(\d+, \d+, \d+, 0\)$/.test(String(ink));
+  return String(mask).includes("data:image/svg+xml") && !transparent;
+}
+
 // Multi-layer backgrounds serialize each layer's position/size (Chromium:
 // "50% 0%, 50% 0%, …"). Engines also differ on keywords vs percentages.
 // Compare every layer's components rather than the full string.
@@ -846,10 +857,10 @@ test("the mobile home vault is one stable full-page layer without scroll", async
       const diamond = getComputedStyle(footerElement, "::before");
       const card = getComputedStyle(document.querySelector(".home-hero"));
       return {
-        stars: (field.backgroundImage.match(/radial-gradient/g) || []).length,
+        stars: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
         position: field.position,
-        tileSize: field.backgroundSize,
-        phase: field.backgroundPosition,
+        tileSize: field.maskSize || field.webkitMaskSize,
+        phase: field.maskPosition || field.webkitMaskPosition,
         diamondVisible: diamond.visibility !== "hidden",
         // Probe the night token rather than hard-coding #121c28 — the halo must
         // use whatever --bg is, not a particular hex.
@@ -864,7 +875,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   };
 
   const apse = await read({ height: 844, theme: "dark", scheme: "dark" });
-  expect(apse.stars).toBe(10);
+  expect(vaultPaints(apse.stars)).toBe(true);
   expect(apse.position).toBe("fixed");
   expect(tileEdgePx(apse.tileSize)).toEqual({ w: 132, h: 132 });
   expect(isTopCenterPhase(apse.phase)).toBe(true);
@@ -878,7 +889,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
     [null, "light"],
   ]) {
     const nave = await read({ height: 844, theme, scheme });
-    expect(nave.stars).toBe(0);
+    expect(vaultPaints(nave.stars)).toBe(false);
     expect(nave.diamondVisible).toBe(true);
     expect(nave.scrolls).toBe(false);
     expect(nave.scrollHeight).toBe(apse.scrollHeight);
@@ -894,7 +905,7 @@ test("the mobile home vault is one stable full-page layer without scroll", async
   ]) {
     const field = await read({ width, height, theme: "dark", scheme: "dark" });
     const bare = await read({ width, height, theme: "light", scheme: "light" });
-    expect(field.stars).toBe(10);
+    expect(vaultPaints(field.stars)).toBe(true);
     expect(field.position).toBe("fixed");
     expect(tileEdgePx(field.tileSize)).toEqual({ w: 132, h: 132 });
     expect(isTopCenterPhase(field.phase)).toBe(true);
@@ -916,7 +927,7 @@ test("the mobile home vault survives browser-back viewport changes", async ({ pa
 
   const field = await page.evaluate(() => {
     const style = getComputedStyle(document.body, "::before");
-    return [style.content, style.backgroundImage, style.backgroundPosition];
+    return [style.content, style.maskImage || style.webkitMaskImage, style.maskPosition || style.webkitMaskPosition];
   });
   expect(field[0]).not.toBe("none");
   expect(field[1]).not.toBe("none");
@@ -950,8 +961,8 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
       return {
         pageClass: document.body.classList.contains("page-hour"),
         prayerField: getComputedStyle(prayer).backgroundImage,
-        fieldLayers: (field.backgroundImage.match(/radial-gradient/g) || []).length,
-        footerLayers: (footerField.backgroundImage.match(/radial-gradient/g) || []).length,
+        fieldLayers: { mask: field.maskImage || field.webkitMaskImage, ink: field.backgroundColor },
+        footerLayers: { mask: footerField.maskImage || footerField.webkitMaskImage, ink: footerField.backgroundColor },
         startsAfterPrayer: epilogueBox.top >= prayerBox.bottom,
         endsWithMain: Math.abs(epilogueBox.bottom - mainBox.bottom) < 0.5,
         joinsFooter:
@@ -965,7 +976,10 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
           Math.round(footerBox.right - parseFloat(footerField.right)),
         ],
         horizontalOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
-        phase: [field.backgroundPosition, footerField.backgroundPosition],
+        phase: [
+          field.maskPosition || field.webkitMaskPosition,
+          footerField.maskPosition || footerField.webkitMaskPosition,
+        ],
         diamond: diamond.content,
         diamondVisibility: diamond.visibility,
         assuranceBackground: getComputedStyle(assurance).backgroundColor,
@@ -978,8 +992,8 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   const apse = await read("dark");
   expect(apse.pageClass).toBe(true);
   expect(apse.prayerField).toBe("none");
-  expect(apse.fieldLayers).toBe(10);
-  expect(apse.footerLayers).toBe(10);
+  expect(vaultPaints(apse.fieldLayers)).toBe(true);
+  expect(vaultPaints(apse.footerLayers)).toBe(true);
   expect(apse.startsAfterPrayer).toBe(true);
   expect(apse.endsWithMain).toBe(true);
   expect(apse.joinsFooter).toBe(true);
@@ -999,8 +1013,8 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
 
   const nave = await read("light");
   expect(nave.prayerField).toBe("none");
-  expect(nave.fieldLayers).toBe(0);
-  expect(nave.footerLayers).toBe(0);
+  expect(vaultPaints(nave.fieldLayers)).toBe(false);
+  expect(vaultPaints(nave.footerLayers)).toBe(false);
   expect(nave.diamond).toContain("✦");
   expect(nave.diamondVisibility).toBe("visible");
   expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
