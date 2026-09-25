@@ -509,7 +509,8 @@ for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
       // Home, not the ordo: the wall is one fixed layer on every page, and
       // home loads in a fraction of the ordo's time.
       await openDatedPage(page, `/?date=${testDate}`, theme);
-      await page.addStyleTag({ content: "body > * { visibility: hidden !important; } body::before { display: none !important; }" });
+      // body::after is the home niche's room light, not the wall.
+      await page.addStyleTag({ content: "body > * { visibility: hidden !important; } body::before, body::after { display: none !important; }" });
       const png = (await page.screenshot()).toString("base64");
       const wall = await page.evaluate(async (b64) => {
         const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
@@ -769,8 +770,12 @@ test("the frontispiece holds its width whatever the day is called", async ({ pag
       );
     }
     expect(new Set(widths).size).toBe(1);
-    // And it is the declared measure, not whatever the content happened to need.
-    expect(widths[0]).toBe(38 * 16);
+    // And it is the declared measure, not whatever the content happened to
+    // need: clamp(38rem, 10rem + 38vw, 48rem), scaled by the niche's zoom
+    // step (1.12 from 1700x1000).
+    const zoom = width >= 1700 ? 1.12 : 1;
+    const declared = Math.min(48 * 16, Math.max(38 * 16, 10 * 16 + 0.38 * width)) * zoom;
+    expect(Math.abs(widths[0] - declared)).toBeLessThanOrEqual(1);
   }
 });
 
