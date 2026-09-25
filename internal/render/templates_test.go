@@ -19,7 +19,7 @@ func TestHourIncludesInlineConstructionBanner(t *testing.T) {
 		`id="site-banner"`,
 		`aria-label="Review notice"`,
 		`data-dismiss-banner`,
-		`not yet been fully checked against the printed books`,
+		`Not fully checked against the printed books`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hour is missing inline construction banner markup %q", want)

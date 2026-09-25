@@ -1321,7 +1321,8 @@ footer::before {
   white-space: nowrap;
 }
 
-.elements {
+.elements,
+.session-prayers-content {
   display: grid;
   gap: 0.9rem;
   /* Comfortable reading measure for the office text on wide screens */
@@ -1330,7 +1331,8 @@ footer::before {
   margin: 0 auto;
 }
 
-.elements > * {
+.elements > *,
+.session-prayers-content > * {
   margin-bottom: 0;
 }
 
@@ -1482,6 +1484,13 @@ footer::before {
 .elements > .psalm + .antiphon,
 .elements > .canticle + .antiphon {
   margin-top: -0.5rem;
+}
+
+/* Leave a clear threshold between complete psalm groups, including psalms
+   that share an antiphon and have no intervening announcement. */
+.elements > .antiphon + .antiphon:has(+ .psalm),
+.elements > .psalm + .psalm {
+  margin-top: 1.2rem;
 }
 
 /* "Psalm 67", "Salve Regina" — label-shaped, so both cases go to small caps
@@ -1794,15 +1803,27 @@ footer::before {
   user-select: none;
 }
 
-/* A spelled-out rubric word needs the wide column, and the lines around it
-   have to follow or the little block loses its text edge (Compline's opening
-   ℣. / Blessing. / ℟.). Scoped with :has() so it costs nothing anywhere else;
-   without :has() support the wide line simply keeps its own hanging indent,
-   which is how a printed diurnal sets it anyway. */
-.sigil-word,
-.liturgical-block:has(.sigil-word) .sigil {
+/* Keep ℣/℟ and the spoken text on their common edges. A long label hangs
+   into the desktop margin; on phones it gets a line above its blessing. */
+.sigil-word {
   flex-basis: 4.25rem;
   width: 4.25rem;
+  margin-left: calc(1.4rem - 4.25rem);
+}
+
+@media (max-width: 999px) {
+  .versicle-line:has(> .sigil-word) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 1.8rem;
+  }
+
+  .sigil-word {
+    flex-basis: 100%;
+    width: auto;
+    margin: 0;
+    text-align: left;
+  }
 }
 
 /* "All:" is wider than ℣./℟. Hang the extra width into the left margin so
@@ -1977,17 +1998,19 @@ footer::before {
   line-height: 1.45;
   padding: 0.35rem 0;
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  text-align: center;
+  gap: 0.15rem 0.65rem;
+  text-align: left;
 }
 
 .site-banner p {
+  flex: 1 1 12rem;
   margin: 0;
 }
 
 .site-banner button {
+  margin-left: 0;
   background: none;
   border: none;
   color: var(--muted);
@@ -4064,6 +4087,10 @@ body.season-eastertide {
   --initial-raised-tuck: -0.04em;
 }
 
+.opening-small-caps {
+  font-variant-caps: all-small-caps;
+}
+
 .initial-word {
   /* These are the font's drawn smcp/c2sc glyphs, not scaled-down capitals.
      Keep source spelling intact for selection, copying and speech. */
@@ -4646,12 +4673,15 @@ body.page-hour footer::after {
   }
 }
 
-/* Clear the small epilogue/footer lettering where it crosses the vault.
-   Background-coloured shadows follow the glyphs without placing another
-   panel over the diaper or moving its fixed tile origin. */
-body:is(.page-home, .page-hour) footer,
-body.page-hour .report-issue {
+/* Keep the existing footer lettering treatment. */
+body:is(.page-home, .page-hour) footer {
   text-shadow: var(--apse-copy-shadow);
+}
+
+/* Clear the complete report line, including spaces between its glyphs. */
+body.page-hour .report-issue {
+  background-color: var(--apse-ground);
+  box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
 }
 
 @media (min-width: 701px) {
@@ -4846,6 +4876,10 @@ body.page-home::before {
 
   details.session-prayers > * {
     display: block;
+  }
+
+  details.session-prayers > .session-prayers-content {
+    display: grid;
   }
 
   body.page-home,
