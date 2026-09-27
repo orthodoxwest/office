@@ -181,7 +181,7 @@ V. Be glad, O ye righteous, and rejoice in the Lord.
 R. And be joyful, all ye that are true of heart.
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (The Merits of the Saints.docx)
+# SOURCE: Monastic Diurnal.pdf, p. 24*, 25*
 Sanctorum meritis
 
 The merits of the Saints,
@@ -194,7 +194,7 @@ These victors win the noblest bay.
 
 They whom this world of ill,
 While it yet held, abhorred:
-Its withering flow'rs that still
+Its withering flowers that still
 They spurned with one accord:
 They knew them short-lived all,
 And followed at thy call,

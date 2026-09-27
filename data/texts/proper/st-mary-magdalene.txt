@@ -2,10 +2,12 @@
 Mary anointed * the Feet of Jesus, and wiped Them with her hair; and the house was filled with the odour of the ointment.
 
 [magnificat-antiphon]
-A woman * in the city, which was a sinner, brought an alabaster box of ointment, and stood at the Lord's feet, behind him, weeping, and began to wash his feet with tears, and did wipe them with the hairs of her head.
+# SOURCE: Monastic Diurnal.pdf, p. 570
+A woman * in the city, which was a sinner, brought an alabaster box of ointment, and stood at the Lord's feet, and began to wash his feet with tears, and did wipe them with the hairs of her head.
 
 [commemoration-antiphon]
-A woman in the city * which was a sinner, when she knew that Jesus sat at meat in the house of Simon the leper, brought an alabaster box of ointment, and stood at the Feet of Jesus, behind Him, weeping, and began to wash His Feet with tears, and did wipe them with the hairs of her head, and kissed His Feet, and anointed them with the ointment.
+# SOURCE: Monastic Diurnal.pdf, p. 568
+A woman * in the city which was a sinner, when she knew that Jesus sat at meat in the house of Simon the leper, brought an alabaster box of ointment, and stood behind at the feet of Jesus, and began to wash his feet with tears, and did wipe them with the hairs of her head, and kissed his feet, and anointed them with the ointment.
 
 [commemoration-versicle]
 @use proper/st-mary-magdalene/versicle-lauds

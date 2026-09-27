@@ -81,7 +81,7 @@ Jews and proselytes, Cretes and Arabians, we do hear them speak in our tongues *
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 305–306 (The Feast of Pentecost)
+# SOURCE: Monastic Diurnal.pdf, p. 397
 Beata nobis gaudia
 
 Blest joys for mighty wonders wrought
@@ -89,7 +89,7 @@ The year's revolving orb hath brought,
 What time the Holy Ghost in flame
 Upon the Lord's disciples came.
 
-The quiv'ring fire their heads bedew'd
+The quivering fire their heads bedewed
 In cloven tongues' similitude,
 That eloquent their words might be,
 And fervid all their charity.
@@ -106,27 +106,28 @@ The captive at the jubilee.
 
 And now, O holy God, this day
 Regard us, as we humbly pray,
-And send us from thy heav'nly seat
+And send us from thy heavenly seat
 The blessings of the Paraclete.
 
-Thou once in ev'ry holy breast
+Thou once in every holy breast
 Didst bid indwelling grace to rest:
 This day our sins, we pray, release,
 And in our time, O Lord, give peace.
 
-To God the Father and the Son,
-From death arisen praise be done:
-With God the holy Paraclete
-Henceforth to all eternity.
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+Whom with the Father we adore
+And Holy Ghost for evermore.
 
 Amen.
+
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 186–187; office-hymns.zip (Come, Holy Ghost Creator Blest.docx, stanzas 1–6)
+# SOURCE: Monastic Diurnal.pdf, p. 395, 396
 Veni, Creator Spiritus
 
 Come, Holy Ghost, Creator blest,
 Vouchsafe within our souls to rest;
-Come with thy grace and heav'nly aid,
+Come with thy grace and heavenly aid,
 And fill the hearts which thou hast made.
 
 To thee, the Comforter, we cry;
@@ -134,13 +135,13 @@ To thee, the Gift of God most high;
 The Fount of life, the Fire of love,
 The soul's Anointing from above.
 
-The sev'nfold gifts of grace are thine,
+The sevenfold gifts of grace are thine,
 O Finger of the Hand Divine;
 True Promise of the Father thou,
 Who dost the tongue with speech endow.
 
-Thy light to ev'ry sense impart,
-And shed thy love in ev'ry heart;
+Thy light to every sense impart,
+And shed thy love in every heart;
 Thine own unfailing might supply
 To strengthen our infirmity.
 
@@ -149,17 +150,18 @@ And thine abiding peace bestow;
 If thou be our preventing Guide,
 No evil can our steps betide.
 
-O let thy grace on us bestow,
-The Father and the Son to know,
-And thee, through endless time confessed,
-Of both th'eternal Spirit Blest.
+Make thou to us the Father known,
+Teach us the eternal Son to own,
+Be this our never-changing creed,
+That thou dost from them both proceed.
 
-To God the Father and the Son,
-From death arisen, praise be done:
-With God the holy Paraclete,
-Henceforth to all eternity.
+To thee who, dead, again dost live,
+All glory, Lord, thy people give;
+Whom with the Father we adore
+And Holy Ghost for evermore.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 306 (The Feast of Pentecost)
 V. They were all filled with the Holy Ghost, alleluia.
