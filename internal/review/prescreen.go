@@ -108,9 +108,9 @@ func validatePrescreenFlag(f PrescreenFlag) error {
 	if f.Severity != PrescreenHigh && f.Severity != PrescreenMedium {
 		return fmt.Errorf("flag for %q has invalid severity %q", f.Key, f.Severity)
 	}
-	for name, value := range map[string]string{"key": f.Key, "reason": f.Reason, "flagged": f.Flagged, "issue": f.Issue} {
-		if strings.ContainsAny(value, "\r\n") {
-			return fmt.Errorf("%s of flag for %q may not contain a newline", name, f.Key)
+	for _, field := range [][2]string{{"key", f.Key}, {"reason", f.Reason}, {"flagged", f.Flagged}, {"issue", f.Issue}} {
+		if strings.ContainsAny(field[1], "\r\n") {
+			return fmt.Errorf("%s of flag for %q may not contain a newline", field[0], f.Key)
 		}
 	}
 	return nil
@@ -242,7 +242,7 @@ func RecordPrescreenFlag(dataDir string, flag PrescreenFlag, replace bool) (*Pre
 		return nil, fmt.Errorf("entry %q already has a prescreen flag; use --replace to replace it", flag.Key)
 	}
 	kept = append(kept, flag)
-	sort.Slice(kept, func(i, j int) bool { return kept[i].Key < kept[j].Key })
+	sort.SliceStable(kept, func(i, j int) bool { return kept[i].Key < kept[j].Key })
 	if err := writePrescreen(dataDir, kept); err != nil {
 		return nil, err
 	}

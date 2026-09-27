@@ -322,7 +322,7 @@ func BuildReviewPlan(dataDir string, startYear, years int, includeSources bool) 
 	for _, c := range representatives {
 		candidates = append(candidates, c)
 	}
-	sort.Slice(candidates, func(i, j int) bool { return betterRepresentative(candidates[i], candidates[j], startYear) })
+	sort.SliceStable(candidates, func(i, j int) bool { return betterRepresentative(candidates[i], candidates[j], startYear) })
 	for f := range allFeatures {
 		plan.Features = append(plan.Features, f)
 	}

@@ -149,7 +149,7 @@ func BuildResolutionInventory(dataDir string, startYear, years int) (*Resolution
 	for _, row := range byKey {
 		rows = append(rows, *row)
 	}
-	sort.Slice(rows, func(i, j int) bool {
+	sort.SliceStable(rows, func(i, j int) bool {
 		a, b := rows[i], rows[j]
 		if a.OwnerID != b.OwnerID {
 			return a.OwnerID < b.OwnerID

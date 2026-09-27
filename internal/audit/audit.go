@@ -185,7 +185,7 @@ func findFlatProperAntiphons(corpus *texts.TextCorpus, feasts []*models.Feast) [
 		})
 	}
 
-	sort.Slice(flat, func(i, j int) bool {
+	sort.SliceStable(flat, func(i, j int) bool {
 		if flat[i].Source != flat[j].Source {
 			return flat[i].Source < flat[j].Source
 		}
@@ -318,7 +318,7 @@ func printGaps(w io.Writer, gaps []FeastGap, format func(FeastGap) string) {
 		if len(gs) == 0 {
 			continue
 		}
-		sort.Slice(gs, func(i, j int) bool {
+		sort.SliceStable(gs, func(i, j int) bool {
 			wi, wj := gs[i].Feast.Rank.Weight(), gs[j].Feast.Rank.Weight()
 			if wi != wj {
 				return wi > wj

@@ -84,7 +84,7 @@ func EnsurePropers(dataDir string, opts Options) ([]Result, error) {
 		return nil, fmt.Errorf("unknown feast id %q", opts.FeastID)
 	}
 
-	sort.Slice(results, func(i, j int) bool {
+	sort.SliceStable(results, func(i, j int) bool {
 		return results[i].FeastID < results[j].FeastID
 	})
 	return results, nil

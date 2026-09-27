@@ -167,13 +167,13 @@ func SweepYear(dataDir string, year int) (*SweepReport, error) {
 	// Both orderings below must be total: the rows come out of a map, so any
 	// pair the comparator calls equal lands in an arbitrary, run-to-run order,
 	// and the report stops being diffable.
-	sort.Slice(r.NotFound, func(i, j int) bool {
+	sort.SliceStable(r.NotFound, func(i, j int) bool {
 		return lessNotFound(&r.NotFound[i], &r.NotFound[j])
 	})
 	for _, f := range fallbacks {
 		r.OrdinaryFallbacks = append(r.OrdinaryFallbacks, *f)
 	}
-	sort.Slice(r.OrdinaryFallbacks, func(i, j int) bool {
+	sort.SliceStable(r.OrdinaryFallbacks, func(i, j int) bool {
 		return lessOrdinaryFallback(&r.OrdinaryFallbacks[i], &r.OrdinaryFallbacks[j])
 	})
 	return r, nil
