@@ -5,14 +5,14 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0–4 are complete, and Phase 5 is awaiting its CI gate.
-`office-rs dump` is byte-identical to Go: the corpus, calendar, and office
-groups for 1900–2199, and every hour in every prayer form for 2026–2053 (the
-parity snapshot). Every Go command has a Rust counterpart with the same
-output: the ordo, the rubrics TSV, the hours, the TeX booklet, validate,
-audit, lint, the review subcommands, the data-editing commands, and `serve`,
-whose pages match Go's server response for response. Nothing user-facing
-changes until the cutover in Phase 6.
+**Status:** Phases 0–5 are complete. `office-rs dump` is byte-identical to
+Go: the corpus, calendar, and office groups for 1900–2199, and every hour in
+every prayer form for 2026–2053 (the parity snapshot). Every Go command has a
+Rust counterpart with the same output: the ordo, the rubrics TSV, the hours,
+the TeX booklet, validate, audit, lint, the review subcommands, the
+data-editing commands, and `serve`, whose responses match Go's server on the
+crawl and which passes the Playwright suites, visual snapshots included. Next:
+Phase 6, the cutover. Nothing user-facing changes until then.
 
 ## Why Rust
 
@@ -416,9 +416,9 @@ until then.
       calendar years, `tz` cookies, the reminder feed and its errors, the
       usage beacon and report against a seeded database, static assets,
       HEAD and other methods, and Go's canonicalization of odd paths
-- [ ] The Playwright suites, visual snapshots included, pass unchanged
+- [x] The Playwright suites, visual snapshots included, pass unchanged
       against `office-rs` (CI job "UX (Rust server)"; `make test-ux-rust`
-      locally). The behavior suite matched Go's results locally
+      locally)
 
 Known differences, all outside what a page or feed shows a reader:
 
