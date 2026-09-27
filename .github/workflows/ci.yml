@@ -55,7 +55,7 @@ jobs:
         run: npm ci --prefix .web-tools
 
       - name: Lint and vet
-        run: make fmt-check vet lint lint-js
+        run: make go-check lint-js
 
       - name: Test coverage checker
         run: python3 scripts/test_coverage_threshold.py
@@ -97,6 +97,15 @@ jobs:
       - name: Format, lint, and test
         run: make rust-check
 
+      - name: Python tools
+        run: |
+          python3 scripts/test_ordo_compare.py
+          python3 scripts/test_project_status.py
+          make diurnal-test
+
+      - name: Validate and lint the corpus with Rust
+        run: make validate lint-texts
+
       - name: Cross-compile the core crates for iOS and Android
         run: |
           for target in aarch64-apple-ios aarch64-linux-android; do
@@ -110,6 +119,9 @@ jobs:
 
       - name: Go/Rust parity
         run: make rust-parity
+
+      - name: Full calendar and composition regression snapshot (2026–2053)
+        run: make parity
 
   golden:
     name: Golden tests
@@ -248,25 +260,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
+      - uses: dtolnay/rust-toolchain@1.94.1
 
-      - name: Cache Go build and modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-${{ runner.os }}-assurance-${{ hashFiles('go.mod', 'go.sum') }}-${{ hashFiles('**/*.go') }}
-          restore-keys: |
-            go-${{ runner.os }}-assurance-${{ hashFiles('go.mod', 'go.sum') }}-
+      - uses: Swatinem/rust-cache@v2
 
       - name: Check text provenance baseline
         id: assurance
         run: |
-          go build -o office ./cmd/server
+          make build
           set +e
           ./office review assurance -markdown > assurance-summary.md
           STATUS=$?
@@ -349,12 +350,19 @@ jobs:
       - uses: actions/checkout@v4
         if: steps.ux_changes.outputs.run == 'true'
 
-      - name: Set up Go
+      - name: Install Rust build tools
         if: steps.ux_changes.outputs.run == 'true'
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
+
+      - uses: dtolnay/rust-toolchain@1.94.1
+        if: steps.ux_changes.outputs.run == 'true'
+
+      - uses: Swatinem/rust-cache@v2
+        if: steps.ux_changes.outputs.run == 'true'
+
+      - name: Build the Rust server
+        if: steps.ux_changes.outputs.run == 'true'
+        run: make build
 
       - name: Set up Node
         if: steps.ux_changes.outputs.run == 'true'
@@ -472,60 +480,24 @@ jobs:
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
 
-  # The same suites against the Rust server (RUST-PORT.md, Phase 5 gate): the
-  # behavior tests and the visual snapshots must pass unchanged. Built inside
-  # the browser container so the binary matches its C library.
-  ux-rust:
-    name: UX (Rust server)
-    needs: ux
-    if: needs.ux.outputs.run == 'true'
+  container:
+    name: Rust runtime image
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-jammy
     permissions:
       contents: read
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install build tools
-        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
-
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.94.1
-
-      - name: Cache Cargo
-        uses: Swatinem/rust-cache@v2
-
-      - name: Build the Rust server
-        run: cargo build --release -p office-cli
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: .web-tools/package-lock.json
-
-      - name: Install UX test dependencies
-        run: npm ci --prefix .web-tools
-
-      - name: Run UX behavior and accessibility tests
-        env:
-          PLAYWRIGHT_SERVER: rust
-          PLAYWRIGHT_SUITE: rust-behavior
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=2
-
-      - name: Run UX visual regression tests
-        env:
-          PLAYWRIGHT_SERVER: rust
-          PLAYWRIGHT_SUITE: rust-visual
-        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js
-
-      - name: Upload UX test report
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-rust
-          path: output/playwright/
-          retention-days: 14
+      - name: Build runtime image
+        run: docker build -t office-cutover .
+      - name: Validate the packaged corpus and serve pages with usage enabled
+        run: |
+          docker run --rm office-cutover /app/run-app validate
+          docker run -d --name office-smoke -p 18080:8080 -e OFFICE_USAGE_DB=/tmp/usage.sqlite office-cutover
+          trap 'docker logs office-smoke; docker rm -f office-smoke' EXIT
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:18080/sw.js > /dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:18080/lauds/2026-03-11 > /dev/null
+          curl --fail --silent 'http://127.0.0.1:18080/office.ics?lauds=06:45&tz=America/New_York' | grep 'BEGIN:VCALENDAR'
+          curl --fail --silent http://127.0.0.1:18080/admin/usage > /dev/null

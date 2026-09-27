@@ -3220,12 +3220,18 @@ test("Compline openings preserve words and align response columns around the ble
     expect(blessingText.width).toBeGreaterThan(200);
     expect(blessingText.right).toBeLessThanOrEqual(width);
 
+    // Review progress can make this office fully verified. The warning
+    // follows the selected form's dependencies, not a fixed calendar date.
+    const statuses = await page.locator(".assurance-panel:visible .assurance-status").allTextContents();
+    const needsReview = statuses.length === 0 || statuses.some(status => status.trim() !== "verified");
     const banner = page.locator(".site-banner:visible");
-    await expect(banner).toHaveCount(1);
-    expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
-    expect((await banner.boundingBox()).height).toBeLessThan(100);
-    await banner.getByRole("button", { name: "Dismiss review notice" }).click();
-    await expect(banner).toHaveCount(0);
+    await expect(banner).toHaveCount(needsReview ? 1 : 0);
+    if (needsReview) {
+      expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
+      expect((await banner.boundingBox()).height).toBeLessThan(100);
+      await banner.getByRole("button", { name: "Dismiss review notice" }).click();
+      await expect(banner).toHaveCount(0);
+    }
   }
 });
 

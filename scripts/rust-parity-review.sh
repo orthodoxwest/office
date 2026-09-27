@@ -5,10 +5,10 @@
 # writers (flag, attest, assurance -update-baseline) on two copies of data/,
 # comparing their output and the resulting trees.
 # Stdout and exit statuses are compared; stderr is not (RUST-PORT.md).
-# Expects ./office and target/release/office-rs.
+# Expects output/office-go and target/release/office.
 set -euo pipefail
-go_bin=$(realpath "${GO_OFFICE:-./office}")
-rs_bin=$(realpath "${RUST_OFFICE:-target/release/office-rs}")
+go_bin=$(realpath "${GO_OFFICE:-output/office-go}")
+rs_bin=$(realpath "${RUST_OFFICE:-target/release/office}")
 year=2026
 for cmd in \
   "review provenance -csv" \

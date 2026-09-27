@@ -1,4 +1,4 @@
-//! `office-rs dump`: the canonical record stream the Go and Rust engines are
+//! `office dump`: the canonical record stream the Go and Rust engines are
 //! compared on (RUST-PORT.md, "Dump format"). The Go generator in
 //! `internal/dump/records.go` is the reference field list.
 
@@ -19,14 +19,14 @@ const GROUP_CALENDAR: &str = "calendar";
 const GROUP_OFFICE: &str = "office";
 const GROUP_HOURS: &str = "hours";
 const GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
-const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
-const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
+pub(super) const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub(super) const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 
 /// Groups this engine can produce so far.
 const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
 
-const USAGE: &str = "usage: office-rs dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
-       office-rs dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
+const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
+       office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
 
 /// A slice of the record stream: whole civil years or individual dates.
 #[derive(Clone, Debug, Default)]
@@ -105,6 +105,13 @@ impl Selection {
 }
 
 pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
+    if let Some((command, rest)) = args.split_first() {
+        match command.as_str() {
+            "digest" => return crate::dump_tools::cmd_digest(rest, out),
+            "diff" => return crate::dump_tools::cmd_diff(rest, out),
+            _ => {}
+        }
+    }
     let flags = Flags::parse(args, &["start", "years", "dates", "hours", "forms", "groups"]).map_err(|e| format!("{e}\n{USAGE}"))?;
     if !flags.rest.is_empty() {
         return Err(USAGE.to_string());

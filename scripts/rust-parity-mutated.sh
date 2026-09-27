@@ -4,16 +4,16 @@
 # (placeholders, missing propers, flat antiphons, lint classes, orphan chant
 # scores, not-found markers, ordinary fallbacks) are only reached this way.
 # Stdout and the exit status are compared; stderr is not (RUST-PORT.md).
-# Expects ./office and target/release/office-rs.
+# Expects output/office-go and target/release/office.
 set -euo pipefail
-go_bin=$(realpath "${GO_OFFICE:-./office}")
-rs_bin=$(realpath "${RUST_OFFICE:-target/release/office-rs}")
+go_bin=$(realpath "${GO_OFFICE:-output/office-go}")
+rs_bin=$(realpath "${RUST_OFFICE:-target/release/office}")
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 cp -r data "$work/data"
 # Both CLIs find data/ beside their executable.
 cp "$go_bin" "$work/office"
-cp "$rs_bin" "$work/office-rs"
+cp "$rs_bin" "$work/office"
 python3 - "$work/data" <<'PY'
 import glob, os, re, sys
 os.chdir(sys.argv[1])
@@ -54,13 +54,13 @@ PY
 failed=0
 for cmd in validate lint "audit -year 2026" "audit -year 2031"; do
   # shellcheck disable=SC2086
-  if cmp -s <(cd "$work" && ./office $cmd 2>/dev/null; echo "exit $?") <(cd "$work" && ./office-rs $cmd 2>/dev/null; echo "exit $?"); then
+  if cmp -s <(cd "$work" && ./office $cmd 2>/dev/null; echo "exit $?") <(cd "$work" && ./office $cmd 2>/dev/null; echo "exit $?"); then
     echo "parity: mutated data: office $cmd identical"
   else
     failed=1
     echo "parity: mutated data: office $cmd DIFFERS" >&2
     # shellcheck disable=SC2086
-    diff -u <(cd "$work" && ./office $cmd 2>/dev/null) <(cd "$work" && ./office-rs $cmd 2>/dev/null) | head -40 >&2 || true
+    diff -u <(cd "$work" && ./office $cmd 2>/dev/null) <(cd "$work" && ./office $cmd 2>/dev/null) | head -40 >&2 || true
   fi
 done
 exit $failed

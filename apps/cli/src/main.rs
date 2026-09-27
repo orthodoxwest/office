@@ -1,17 +1,18 @@
-//! `office-rs`: the command-line front end of the Rust engine. It mirrors the
+//! `office`: the command-line front end of the Rust engine. It mirrors the
 //! Go `office` commands as they are ported (RUST-PORT.md).
 
 mod args;
 mod checks;
 mod commands;
 mod dump;
+mod dump_tools;
 mod edit;
 mod review;
 
 use std::io::Write;
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: office-rs <command> [args]
+const USAGE: &str = "usage: office <command> [args]
 
 Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, lauds, prime, terce, sext, none, vespers, compline, tex, serve";
 
@@ -54,13 +55,21 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
-    let Some(data) = tools::fs::FsData::find() else {
-        eprintln!("Cannot find data directory");
-        return ExitCode::FAILURE;
-    };
     let stdout = std::io::stdout();
     let mut out = std::io::BufWriter::with_capacity(1 << 20, stdout.lock());
-    let result = command(&data, rest, &mut out).and_then(|()| out.flush().map_err(|e| e.to_string()));
+    // File inspection does not need an installed corpus.
+    let result = match (name.as_str(), rest.first().map(String::as_str)) {
+        ("dump", Some("diff")) => dump_tools::cmd_diff(&rest[1..], &mut out),
+        ("dump", Some("digest")) => dump_tools::cmd_digest(&rest[1..], &mut out),
+        _ => {
+            let Some(data) = tools::fs::FsData::find() else {
+                eprintln!("Cannot find data directory");
+                return ExitCode::FAILURE;
+            };
+            command(&data, rest, &mut out)
+        }
+    }
+    .and_then(|()| out.flush().map_err(|e| e.to_string()));
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {

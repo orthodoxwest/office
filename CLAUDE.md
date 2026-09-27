@@ -1,13 +1,15 @@
 # AWRV Benedictine Divine Office
 
-Go web application that renders the hours of the Benedictine Office, as used by the AWRV.
-The engine is being ported to Rust; see RUST-PORT.md for the plan, the target crate
-structure, and the rules while both engines exist (engine changes land in Go first).
+Rust web application that renders the hours of the Benedictine Office, as used by the AWRV.
+Cargo builds the deployed server and CLI. See RUST-PORT.md for the cutover and
+remaining test migration. Go under `internal/` is temporarily retained for
+reference tests and golden generation; `make go-build` writes output/office-go.
 
 ## Architecture
 
 ```
-cmd/server/main.go        Binary entry point; a shim over internal/cli
+apps/cli/src/main.rs     Production CLI and server entry point
+cmd/server/main.go        Retained Go reference entry point
 internal/
   cli/                     Command implementations (testable: io.Writer in, error out)
     cli.go                 Run dispatch, data-dir discovery, shared arg parsing
@@ -101,7 +103,7 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
                            corpus editing, proper scaffolds
 apps/
-  cli/                     office-rs: every Go command (stdout, exit status, and written files
+  cli/                     office: every Go command (stdout, exit status, and written files
                            compared byte for byte with Go; error wording is not); serve runs office-web
   office-web/              Go's internal/web + internal/usage on axum/rusqlite/jiff; reproduces ServeMux and
                            FileServer behavior; gonet.rs/gotime.rs hold the Go net/http and time semantics
@@ -248,14 +250,14 @@ make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make rust-parity # Go vs Rust: dump groups 1900–2199, hours + tex on 127 sample dates, ordo/rubrics,
                  # validate/lint/audit (live + mutated data), review reports and ledger writers,
                  # corpus/scaffold editing on data copies, and a crawl of both web servers
-make test-ux-rust # Playwright suites against office-rs serve (PLAYWRIGHT_SERVER=rust)
-make rust-parity-full # Rust 2026–2053 dump digest + assurance report vs their goldens (nightly in CI)
+make test-ux      # Playwright suites against the default Rust server
+make parity # Rust 2026–2053 dump digest + assurance report vs their goldens (in PR CI)
 make clean       # Remove artifacts
 ```
 
 ## PDF booklet pipeline
 
-`internal/output/tex.go` — `FormatOfficeHourTeX(*OfficeHour, dataDir string) string`
+`crates/render-tex/` — TeX document renderer
 
 Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `OfficeHour`. Mirrors `FormatOfficeHour` in `office.go` but emits LaTeX instead of plain text.
 

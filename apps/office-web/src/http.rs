@@ -1,10 +1,8 @@
-//! The parts of Go's `net/http` and `net/url` behavior the Go server exposes:
-//! query parsing, request-path unescaping and canonicalization, cookies, and
-//! the plain-text error and redirect responses. Reproducing them keeps the
-//! two servers' answers identical, malformed requests included.
+//! HTTP helpers shared by the handlers. Query and cookie interpretation
+//! preserve existing saved links and preferences during the cutover.
 
 use axum::body::Body;
-use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
+use axum::http::{HeaderMap, HeaderValue, Response, StatusCode, header};
 
 /// A request's query as `r.URL.Query()` reads it.
 #[derive(Clone, Debug, Default)]
@@ -85,75 +83,6 @@ pub fn unescape_path(raw: &str) -> Option<String> {
     unescape(raw, false).map(|b| String::from_utf8_lossy(&b).into_owned())
 }
 
-/// Go's `path.Clean`.
-pub fn path_clean(p: &str) -> String {
-    if p.is_empty() {
-        return ".".into();
-    }
-    let rooted = p.starts_with('/');
-    let mut parts: Vec<&str> = Vec::new();
-    for seg in p.split('/') {
-        match seg {
-            "" | "." => {}
-            ".." => {
-                if parts.last().is_some_and(|l| *l != "..") {
-                    parts.pop();
-                } else if !rooted {
-                    parts.push("..");
-                }
-            }
-            s => parts.push(s),
-        }
-    }
-    let joined = parts.join("/");
-    match (rooted, joined.is_empty()) {
-        (true, _) => format!("/{joined}"),
-        (false, true) => ".".into(),
-        (false, false) => joined,
-    }
-}
-
-/// Go's `ServeMux` `cleanPath`: `path.Clean`, keeping a trailing slash.
-pub fn clean_path(p: &str) -> String {
-    if p.is_empty() {
-        return "/".into();
-    }
-    let p = if p.starts_with('/') { p.to_string() } else { format!("/{p}") };
-    let mut np = path_clean(&p);
-    if p.ends_with('/') && np != "/" {
-        np.push('/');
-    }
-    np
-}
-
-/// Go's `shouldEscape` for a URL path.
-fn path_char_ok(c: u8) -> bool {
-    c.is_ascii_alphanumeric() || matches!(c, b'-' | b'_' | b'.' | b'~' | b'$' | b'&' | b'+' | b',' | b'/' | b':' | b';' | b'=' | b'@')
-}
-
-/// Go's `url.URL{Path: p}.EscapedPath()`.
-pub fn escape_path(p: &str) -> String {
-    let mut out = String::with_capacity(p.len());
-    for &c in p.as_bytes() {
-        if path_char_ok(c) {
-            out.push(c as char);
-        } else {
-            out.push_str(&format!("%{c:02X}"));
-        }
-    }
-    out
-}
-
-/// `url.URL{Path: path, RawQuery: query}.String()` for a rooted path.
-pub fn url_string(path: &str, raw_query: &str) -> String {
-    let mut s = escape_path(path);
-    if !raw_query.is_empty() {
-        s.push('?');
-        s.push_str(raw_query);
-    }
-    s
-}
-
 fn valid_cookie_value_byte(b: u8) -> bool {
     (0x20..0x7f).contains(&b) && b != b'"' && b != b';' && b != b'\\'
 }
@@ -190,26 +119,6 @@ pub fn header_value<'a>(headers: &'a HeaderMap, name: &str) -> &'a str {
     headers.get(name).and_then(|v| v.to_str().ok()).unwrap_or("")
 }
 
-/// Go's `htmlReplacer` in `net/http`.
-fn html_escape(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        match c {
-            '&' => out.push_str("&amp;"),
-            '<' => out.push_str("&lt;"),
-            '>' => out.push_str("&gt;"),
-            '"' => out.push_str("&#34;"),
-            '\'' => out.push_str("&#39;"),
-            c => out.push(c),
-        }
-    }
-    out
-}
-
-fn status_text(code: StatusCode) -> &'static str {
-    code.canonical_reason().unwrap_or("")
-}
-
 pub fn set(resp: &mut Response<Body>, name: header::HeaderName, value: &str) {
     if let Ok(v) = HeaderValue::from_str(value) {
         resp.headers_mut().insert(name, v);
@@ -244,35 +153,12 @@ pub fn bad_request() -> Response<Body> {
     resp
 }
 
-/// Go's `http.Redirect` for a URL without scheme or host.
-pub fn redirect(method: &Method, url: &str, code: StatusCode) -> Response<Body> {
-    let (path, query) = match url.find('?') {
-        Some(i) => (&url[..i], &url[i..]),
-        None => (url, ""),
-    };
-    let mut cleaned = path_clean(path);
-    if path.ends_with('/') && !cleaned.ends_with('/') {
-        cleaned.push('/');
-    }
-    let url = format!("{cleaned}{query}");
-    let body =
-        if method == Method::GET { format!("<a href=\"{}\">{}</a>.\n\n", html_escape(&url), status_text(code)) } else { String::new() };
-    let mut resp = response(code, body);
-    // Go hex-escapes non-ASCII bytes in the Location header.
-    let location: String = url.bytes().map(|b| if b.is_ascii() { (b as char).to_string() } else { format!("%{b:02X}") }).collect();
-    set(&mut resp, header::LOCATION, &location);
-    if method == Method::GET || method == Method::HEAD {
-        set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
-    }
-    resp
-}
-
-/// Go's `localRedirect` in the file server: a bare 301.
-pub fn local_redirect(new_path: &str, raw_query: &str) -> Response<Body> {
-    let location = if raw_query.is_empty() { new_path.to_string() } else { format!("{new_path}?{raw_query}") };
-    let mut resp = response(StatusCode::MOVED_PERMANENTLY, Body::empty());
-    set(&mut resp, header::LOCATION, &location);
-    resp
+/// Redirect to an application URL with Axum's standard response.
+pub fn redirect(url: &str, code: StatusCode) -> Response<Body> {
+    use axum::response::{IntoResponse, Redirect};
+    let mut response = Redirect::temporary(url).into_response();
+    *response.status_mut() = code;
+    response
 }
 
 #[cfg(test)]
@@ -292,15 +178,9 @@ mod tests {
 
     #[test]
     fn paths_follow_go() {
-        assert_eq!(clean_path("/lauds//2026-01-01"), "/lauds/2026-01-01");
-        assert_eq!(clean_path("/calendar/2026/"), "/calendar/2026/");
-        assert_eq!(clean_path("/a/../b/./c/"), "/b/c/");
-        assert_eq!(clean_path("/.."), "/");
-        assert_eq!(path_clean("a/../../b"), "../b");
         assert_eq!(unescape_path("/lauds/2026%2D01%2D01").as_deref(), Some("/lauds/2026-01-01"));
         assert_eq!(unescape_path("/a+b").as_deref(), Some("/a+b"));
         assert!(unescape_path("/a%2").is_none());
-        assert_eq!(url_string("/a b/%2D", "x=1"), "/a%20b/%252D?x=1");
     }
 
     #[test]

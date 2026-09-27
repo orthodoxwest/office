@@ -1,19 +1,15 @@
-ARG GO_VERSION=1.26.3
-FROM golang:${GO_VERSION}-alpine AS builder
-
+ARG RUST_VERSION=1.94.1
+FROM rust:${RUST_VERSION}-bookworm AS builder
 WORKDIR /usr/src/app
-COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download && go mod verify
 COPY . .
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux go build -o /run-app ./cmd/server
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/usr/src/app/target \
+    cargo build --locked --release -p office-cli && \
+    cp target/release/office /run-app
 
-
-FROM scratch
-
+FROM debian:bookworm-slim
+WORKDIR /app
 COPY --from=builder /run-app /app/run-app
 COPY --from=builder /usr/src/app/data /app/data
-
 CMD ["/app/run-app", "serve"]

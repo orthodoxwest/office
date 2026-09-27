@@ -3,10 +3,10 @@
 # between the Go and Rust CLIs: each runs the same sequence, error paths
 # included, on its own copy of data/, and the output and trees are diffed.
 # Stdout and exit statuses are compared; stderr is not (RUST-PORT.md).
-# Expects ./office and target/release/office-rs.
+# Expects output/office-go and target/release/office.
 set -euo pipefail
-go_bin=$(realpath "${GO_OFFICE:-./office}")
-rs_bin=$(realpath "${RUST_OFFICE:-target/release/office-rs}")
+go_bin=$(realpath "${GO_OFFICE:-output/office-go}")
+rs_bin=$(realpath "${RUST_OFFICE:-target/release/office}")
 work=$(mktemp -d)
 trap 'rm -rf "${work:?}"' EXIT
 scaffolded=$(grep -l '^# \[hymn-terce\]' data/texts/proper/*.txt | head -1 | xargs basename)

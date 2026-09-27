@@ -20,8 +20,8 @@ use render_html::view::{
 use tools::review::assurance::{dedupe_decisions, hour_dependencies};
 use tools::review::provenance::ProvenanceStatus;
 
-use crate::gonet::{Query, cookie, redirect, response, set};
 use crate::gotime::{date_slug, load_location, local, long_date, now_in, parse_date};
+use crate::http::{Query, cookie, redirect, response, set};
 use crate::{Review, Server};
 
 /// What a page handler reads from the request.
@@ -178,7 +178,7 @@ fn html(status: StatusCode, body: String) -> Response<Body> {
 }
 
 fn render_failed(e: &str) -> Response<Body> {
-    crate::gonet::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
+    crate::http::http_error(e, StatusCode::INTERNAL_SERVER_ERROR)
 }
 
 /// The day's display name, as the ordo row names it.
@@ -565,7 +565,7 @@ impl Server {
                 _ => String::new(),
             };
             let target = format!("/calendar/{}{form_query}#d-{}", now.year(), date_slug(now));
-            return redirect(req.method, &target, StatusCode::FOUND);
+            return redirect(&target, StatusCode::FOUND);
         }
         let year = match compat::atoi(parts[1]) {
             Ok(y) if (1..=9999).contains(&y) => y as i32,
@@ -696,9 +696,11 @@ mod tests {
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
-        let resp = test_server().handle(&Method::GET, &path.parse::<Uri>().unwrap(), &HeaderMap::new(), Some(Vec::new()));
-        let (parts, body) = resp.into_parts();
+        use tower::ServiceExt;
         let runtime = tokio::runtime::Builder::new_current_thread().build().unwrap();
+        let request = axum::extract::Request::builder().uri(path.parse::<Uri>().unwrap()).body(Body::empty()).unwrap();
+        let resp = runtime.block_on(test_server().router().oneshot(request)).unwrap();
+        let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
     }

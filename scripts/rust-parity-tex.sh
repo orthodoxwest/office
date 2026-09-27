@@ -3,10 +3,10 @@
 # sample date (scripts/rust-parity-dates.sh), cycling the prayer form and the
 # --chant flag across dates so every variant is exercised. Stdout and the
 # exit status are compared; stderr is not (RUST-PORT.md).
-# Expects ./office and target/release/office-rs.
+# Expects output/office-go and target/release/office.
 set -euo pipefail
-go_bin=${GO_OFFICE:-./office}
-rs_bin=${RUST_OFFICE:-target/release/office-rs}
+go_bin=${GO_OFFICE:-output/office-go}
+rs_bin=${RUST_OFFICE:-target/release/office}
 dates=${1:-$(scripts/rust-parity-dates.sh)}
 variants=("" "--chant" "--form priest" "--chant --form deacon")
 checked=0 failed=0 i=0

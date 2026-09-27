@@ -22,8 +22,8 @@ overrides it for that visit.
 
 ## Run locally
 
-Install Go at the version required by [go.mod](go.mod) (currently 1.26.3 or
-later) and Make. On Windows, use WSL.
+Install Rust 1.94.1 (including Cargo), a C compiler for bundled SQLite, and
+Make. On Windows, use WSL. CI and the deployment image use Rust 1.94.1.
 
 ```bash
 git clone https://github.com/orthodoxwest/office.git
@@ -70,24 +70,27 @@ make project-status YEAR=2026     # proper, assurance, and ordo reports
 
 ## Development
 
-The engine is being ported from Go to Rust; [RUST-PORT.md](RUST-PORT.md) has
-the plan, the target structure, and the comparison tooling (`office dump`).
+Rust is the default engine, CLI, and web server. [RUST-PORT.md](RUST-PORT.md)
+tracks the remaining test migration and Go removal. The retained Go code is
+a comparison reference, not part of the deployed image.
 
-The full check suite needs Go, Make, Python 3, `staticcheck`, Node.js 20.19+
-and npm. CI uses Node.js 22. Install the pinned tooling:
+The check suite needs Rust, Make, Python 3, Node.js 20.19+ and npm. CI uses
+Node.js 22. Install browser tooling with:
 
 ```bash
-go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
 npm ci --prefix .web-tools
 make check
 ```
 
-Ensure the Go binary directory (`go env GOBIN`, or `$(go env GOPATH)/bin`
-when unset) is on your `PATH`.
+The retained Go reference checks, `make golden`, `make verify-psalms`, and
+`make rust-parity` additionally need Go from [go.mod](go.mod).
+`make go-check` needs `staticcheck` v0.7.0. `make go-build` writes
+`output/office-go`; it never replaces the Rust `./office` executable.
 
 ```bash
-make test                        # Go and Python tests, including golden files
+make test                        # Rust and Python tests, including Rust goldens
 make check                       # formatting, analysis, tests, validation, lint
+make parity                      # full 2026–2053 calendar/composition snapshot (also in CI)
 make diurnal-test                # page/transcription/discovery tests; no providers
 make golden                      # update expected output after intentional changes
 make verify-psalms                # compare the psalter with its reference witness
@@ -119,7 +122,7 @@ make pdf HOUR=compline CHANT=1     # engrave available GABC scores
 
 Output goes under `output/`. Requires LuaLaTeX, GregorioTeX, EB Garamond,
 and Noto Sans Symbols; the symbol-font path assumes the Debian/Ubuntu layout
-([template](internal/output/tex.go)). `make pdf` enables shell escape for
+([template](crates/render-tex/src/preamble.tex)). `make pdf` enables shell escape for
 chant; elements without scores render as text. `./office tex [--chant] HOUR`
 emits the TeX alone. For saddle-stitch imposition:
 
@@ -130,8 +133,11 @@ pdfjam --booklet true --paper letter output/compline-2026-09-04.pdf
 ## Deployment
 
 The app runs on Fly.io ([fly.toml](fly.toml)). The [Dockerfile](Dockerfile)
-copies a static Go binary and `data/` into a `scratch` image. Maintainers with
-Fly access deploy with `fly deploy`.
+builds a Rust binary with bundled SQLite and time-zone data, then copies it
+and `data/` into a Debian slim runtime image. CI smoke-tests that image.
+Maintainers with Fly access deploy with `fly deploy`. Roll back by reverting
+the cutover PR, merging the revert, and deploying it; no separate Go tag is
+required. The usage database schema is unchanged.
 
 ### Usage metrics
 
@@ -183,7 +189,7 @@ only on the metrics endpoints. The parent directory must exist.
 fly volumes create office_usage --region iad --size 1 --app office
 # Local
 mkdir -p output/usage
-OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" go run ./cmd/server serve
+OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 ```
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID

@@ -4,7 +4,7 @@ members = ["crates/compat", "crates/calendar", "crates/corpus", "crates/liturgy"
 
 [workspace.package]
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.94"
 publish = false
 
 [workspace.dependencies]
