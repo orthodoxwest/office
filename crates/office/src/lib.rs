@@ -4,14 +4,43 @@
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
+pub mod commemoration;
+pub mod compline;
+pub mod conclusion;
 pub mod concurrence;
+pub mod day;
+pub mod engine;
+pub mod hourdef;
+pub mod hymn;
+pub mod lauds_psalmody;
+pub mod leader;
+pub mod major;
+pub mod minor;
+pub mod preces;
+pub mod prime;
+pub mod proper;
+pub mod psalmody;
+pub mod rubric;
 pub mod scopes;
 pub mod seasonal;
 pub mod texts;
+pub mod vespers;
+pub mod voice;
+
+#[cfg(test)]
+mod conclusion_tests;
+#[cfg(test)]
+mod preces_tests;
+#[cfg(test)]
+mod proper_tests;
+#[cfg(test)]
+mod testutil;
 
 use calendar::{CalendarDay, MoveableDates, YearCalendar};
 
 pub use concurrence::{VespersDesignation, VespersOwner};
+pub use day::Day;
+pub use engine::{Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.
 #[derive(Clone, Debug)]

@@ -63,6 +63,11 @@ pub struct VespersDesignation {
 }
 
 impl VespersDesignation {
+    /// An evening no office owns, with no commemorations: the zero value.
+    pub fn unowned() -> VespersDesignation {
+        VespersDesignation::new(VespersOwner::NotApplicable, "")
+    }
+
     fn new(owner: VespersOwner, rule: &str) -> VespersDesignation {
         VespersDesignation {
             owner,

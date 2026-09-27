@@ -5,11 +5,12 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0–2 are complete, and Phase 3 has begun with the Office
-day: `office-rs dump -groups corpus,calendar,office` is byte-identical to Go
-for 1900–2199, and the Rust validators reproduce Go's reports on every broken
-test corpus. Next: the hour composers. Nothing user-facing changes until the
-cutover in Phase 6.
+**Status:** Phases 0–3 are complete. `office-rs dump` is byte-identical to Go:
+the corpus, calendar, and office groups for 1900–2199, and every hour in
+every prayer form for 2026–2053 (the parity snapshot). The Rust validators
+reproduce Go's reports on every broken test corpus, and the text renderer
+reproduces every hour golden. Next: Phase 4. Nothing user-facing changes until
+the cutover in Phase 6.
 
 ## Why Rust
 
@@ -314,8 +315,23 @@ serde_json's wording rather than encoding/json's. Semantic errors match.
 - [x] `office` crate: Vespers concurrence (`concurrence.go`), the Marian
       antiphon, and the historia weeks; Go's concurrence unit tests ported
 - [x] `office_day` record identical for 1900–2199 (`make rust-parity`)
-- [ ] Hour composers: Compline, the minor hours, Prime, Lauds, Vespers
-      (needs the Phase 2 `corpus` crate)
+- [x] `liturgy` crate: the document model (element types, voice and rubric
+      spans, `OfficeHour`, `PrayerForm`)
+- [x] Hour composers: Compline, the minor hours, Prime, Lauds, Vespers (with
+      Vespers of the Dead), proper resolution, psalmody declarations,
+      commemorations, preces and suffrage, conclusions, and the prayer-form
+      pass; `office::Engine` loads the corpus and hour definitions
+- [x] `render-text` crate: Go's `FormatOfficeHour`
+- [x] Gate: `hours` group identical for 2026–2053 in every form
+      (`make rust-parity-full` digests the Rust dump and diffs it with
+      `parity-snapshot.json`; nightly in CI), a sample of 127 dates in PR CI
+      (`make rust-parity`: every golden date plus boundary dates), and every
+      hour golden byte-identical (`cargo test -p render-text`)
+- [ ] Port the Go `office` unit tests (the black-box gate covers the sweep;
+      the unit tests reach cases it cannot)
+- [ ] The Martyrology preview at Prime (unpublished; not in the dump)
+- [ ] Composition tracing (`TraceProperResolution`), used by the review tools
+      in Phase 4
 
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change

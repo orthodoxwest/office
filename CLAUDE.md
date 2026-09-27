@@ -90,7 +90,9 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   compat/                  Go-compatible %q / line scanning / Atoi (transitional)
   calendar/                Computus, seasons, feast loader, occurrence, builder (no file access)
   corpus/                  Text corpus format, loader, @use/@omit, sidecars, line grammar
-  office/                  Concurrence, Marian antiphon, historia, appointment scopes; composers to come
+  liturgy/                 Document model: element types, voice/rubric spans, OfficeHour
+  office/                  Concurrence, Marian, historia, scopes, hour composers, Engine
+  render-text/             Plain-text hour rendering (Go's FormatOfficeHour)
   tools/                   Filesystem DataSource and the calendar/texts validators
 apps/
   cli/                     office-rs: dump (compared byte for byte against Go's office dump)
@@ -234,7 +236,8 @@ make mutate-diff # Mutation-test only lines changed vs master (local review)
 make test-coverage # Run unit tests and enforce per-package coverage floors (also in CI)
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
-make rust-parity # Go vs Rust dump for the ported record groups (corpus, calendar, office: 1900–2199)
+make rust-parity # Go vs Rust dump: corpus/calendar/office 1900–2199, hours on 127 sample dates
+make rust-parity-full # Rust 2026–2053 dump digest vs parity-snapshot.json (nightly in CI)
 make clean       # Remove artifacts
 ```
 

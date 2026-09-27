@@ -5,6 +5,7 @@
 use std::io::Write;
 
 use calendar::{CalendarData, CalendarDay, Date, Decision, Feast, MoveableDates, Tabula, build_calendar};
+use liturgy::{OfficeElement, OfficeHour, PrayerForm};
 use office::texts::OfficeTexts;
 use serde_json::{Value, json};
 
@@ -22,7 +23,7 @@ const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespe
 const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 
 /// Groups this engine can produce so far.
-const PORTED_GROUPS: [&str; 3] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE];
+const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
 
 const USAGE: &str = "usage: office-rs dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
        office-rs dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
@@ -132,10 +133,13 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
     if let Some(g) = sel.groups.iter().find(|g| !PORTED_GROUPS.contains(&g.as_str())) {
         return Err(format!("the Rust engine does not produce the {g} record group yet (use -groups {})", PORTED_GROUPS.join(",")));
     }
-    let texts =
-        if sel.has(GROUP_CORPUS) { Some(office::texts::load_texts(data).map_err(|e| format!("loading text corpus: {e}"))?) } else { None };
+    let engine = if sel.has(GROUP_CORPUS) || sel.has(GROUP_HOURS) {
+        Some(office::Engine::load(data).map_err(|e| format!("creating office engine: {e}"))?)
+    } else {
+        None
+    };
     let data = CalendarData::load(data)?;
-    generate(&sel, &data, texts.as_ref(), &mut |record| {
+    generate(&sel, &data, engine.as_ref(), &mut |record| {
         let line = marshal(&record).map_err(|e| format!("{}: {e}", describe_record(&record)))?;
         out.write_all(line.as_bytes()).and_then(|()| out.write_all(b"\n")).map_err(|e| e.to_string())
     })
@@ -157,13 +161,13 @@ fn describe_record(r: &Value) -> String {
 pub fn generate(
     sel: &Selection,
     data: &CalendarData,
-    texts: Option<&OfficeTexts>,
+    engine: Option<&office::Engine>,
     emit: &mut dyn FnMut(Value) -> Result<(), String>,
 ) -> Result<(), String> {
     emit(sel.meta())?;
     if sel.has(GROUP_CORPUS) {
-        let texts = texts.ok_or("the corpus group needs the loaded texts")?;
-        for record in corpus_records(texts) {
+        let engine = engine.ok_or("the corpus group needs the loaded texts")?;
+        for record in corpus_records(&engine.texts) {
             emit(record)?;
         }
     }
@@ -172,7 +176,8 @@ pub fn generate(
         if sel.has(GROUP_CALENDAR) {
             emit(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year)))?;
         }
-        let office_days = if sel.has(GROUP_OFFICE) { office::resolve_office_days(&cal) } else { Vec::new() };
+        let office_days = if sel.has(GROUP_OFFICE) || sel.has(GROUP_HOURS) { office::resolve_office_days(&cal) } else { Vec::new() };
+        let moveable = MoveableDates::compute(year);
         let indices: Vec<usize> = match &dates {
             None => (0..cal.days.len()).collect(),
             Some(dates) => dates
@@ -193,6 +198,19 @@ pub fn generate(
             }
             if sel.has(GROUP_OFFICE) {
                 emit(office_day_record(&cal.days[i], &office_days[i]))?;
+            }
+            if sel.has(GROUP_HOURS) {
+                let engine = engine.ok_or("the hours group needs the office engine")?;
+                let day = office::Day::new(cal.days[i].clone(), office_days[i].clone());
+                for hour_name in &sel.hours {
+                    for form in &sel.forms {
+                        let form = PrayerForm::parse(form)?;
+                        let h = engine
+                            .compose_hour(hour_name, &day, &moveable, form)
+                            .map_err(|e| format!("composing {hour_name} {} for {}: {e}", form.as_str(), day.date))?;
+                        emit(hour_record(day.date, hour_name, form, &h)?)?;
+                    }
+                }
             }
         }
     }
@@ -240,8 +258,58 @@ fn feasts(list: &[calendar::FeastRef]) -> Value {
     Value::Array(list.iter().map(|f| feast(Some(f))).collect())
 }
 
+/// Go's `str`: the empty string is null.
+fn s(text: &str) -> Value {
+    if text.is_empty() { Value::Null } else { Value::String(text.to_string()) }
+}
+
 fn decisions(list: &[Decision]) -> Value {
-    Value::Array(list.iter().map(|d| json!({"rule": d.rule, "outcome": d.outcome, "detail": opt(&d.detail)})).collect())
+    Value::Array(list.iter().map(|d| json!({"rule": s(&d.rule), "outcome": s(&d.outcome), "detail": opt(&d.detail)})).collect())
+}
+
+/// One composed hour. Every field lands in exactly one parity digest.
+fn hour_record(date: Date, hour_name: &str, form: PrayerForm, h: &OfficeHour) -> Result<Value, String> {
+    if h.form != form || h.date != date {
+        return Err(format!("{date} {hour_name} {}: composer returned {} {}", form.as_str(), h.date, h.form.as_str()));
+    }
+    let sections: Vec<Value> = h
+        .sections
+        .iter()
+        .map(|sec| json!({"label": s(&sec.label), "collapsible": sec.collapsible, "elements": sec.elements.iter().map(element).collect::<Vec<_>>()}))
+        .collect();
+    Ok(json!({
+        "kind": "hour",
+        "date": day_str(date),
+        "hour": hour_name,
+        "form": form.as_str(),
+        "hour_label": s(&h.hour),
+        "title": s(&h.title),
+        "season": h.season.map(|x| x.as_str()),
+        "feast": s(&h.feast),
+        "color": h.color.map(|c| c.as_str()),
+        "sections": sections,
+        "decisions": decisions(&h.decisions),
+    }))
+}
+
+fn element(e: &OfficeElement) -> Value {
+    json!({
+        "type": e.kind.as_str(),
+        "text": s(&e.text),
+        "display_text": s(&e.display_text()),
+        "label": s(&e.label),
+        "incipit": s(&e.incipit),
+        "rubric": s(&e.rubric),
+        "voice": e.voice.iter().map(|v| json!({"text": s(&v.text), "spoken": v.spoken, "role": v.role.map(|r| r.as_str())})).collect::<Vec<_>>(),
+        "rubric_spans": e.rubric_spans.iter().map(|r| json!({"text": s(&r.text), "prayed": r.prayed})).collect::<Vec<_>>(),
+        "leader_slot": s(&e.leader_slot),
+        "slot_ref": s(&e.slot_ref),
+        "source_ref": s(&e.source_ref),
+        "source_refs": e.source_refs,
+        "commemoration_owner_id": s(&e.commemoration_owner_id),
+        "is_commemoration": e.is_commemoration,
+        "announce": e.announce,
+    })
 }
 
 /// Every resolvable corpus key in byte order with its directive and resolved

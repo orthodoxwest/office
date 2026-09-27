@@ -1,4 +1,4 @@
-.PHONY: help build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity clean install-gremlins mutate mutate-diff test-coverage
+.PHONY: help build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity rust-parity-full clean install-gremlins mutate mutate-diff test-coverage
 
 YEAR ?= 2026
 
@@ -190,9 +190,15 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-rust-parity: build ## Compare the Go and Rust dumps for the ported record groups
+rust-parity: build ## Compare the Go and Rust dumps: calendar/office 1900-2199, hours on sample dates
 	cargo build --release -p office-cli
 	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
+	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
+
+rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
+	cargo build --release -p office-cli
+	target/release/office-rs dump -start 2026 -years 28 | ./office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
+	@echo "parity: Rust 2026-2053 digest matches parity-snapshot.json"
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

@@ -1,0 +1,129 @@
+//! Prime. Ported from Go's `prime.go` (without the unpublished Martyrology
+//! preview, which the dump never selects).
+
+use calendar::{Category, MoveableDates, Season};
+use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};
+
+use crate::day::Day;
+use crate::engine::{append_hour_element, compact_refs};
+use crate::hourdef::HourSection;
+use crate::major::record_condition_decision;
+use crate::preces::SATURDAY_OFFICE_BVM_ID;
+use crate::proper::{lookup_feast_proper_text, resolve_proper_text};
+use crate::texts::OfficeTexts;
+
+pub fn compose_prime(day: &Day, sections: &[HourSection], t: &OfficeTexts, moveable: Option<&MoveableDates>) -> OfficeHour {
+    let mut hour = new_hour("Prime", day);
+    for section in sections {
+        if !section.condition.is_empty() {
+            let included = section.condition_holds(day, moveable, t);
+            record_condition_decision(&mut hour, &section.condition, included, &section.name);
+            if !included {
+                continue;
+            }
+        }
+        let mut elems = Vec::new();
+        for elem in &section.elements {
+            if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" {
+                elems.push(resolve_prime_psalm_antiphon(day, t, moveable));
+                continue;
+            }
+            append_hour_element(&mut elems, day, "prime", elem, t);
+        }
+        hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
+    }
+    hour
+}
+
+/// An hour titled `name` for the day's own office.
+pub fn new_hour(name: &str, day: &Day) -> OfficeHour {
+    OfficeHour {
+        form: PrayerForm::Private,
+        date: day.date,
+        hour: name.to_string(),
+        title: name.to_string(),
+        season: Some(day.season),
+        feast: day.celebration.as_deref().map(|c| c.name.clone()).unwrap_or_default(),
+        color: Some(day.color),
+        sections: Vec::new(),
+        decisions: Vec::new(),
+    }
+}
+
+/// Prime's antiphon rubric: feasts and Sundays take the first Lauds
+/// antiphon unless Prime has its own; ferias take the seasonal exceptions,
+/// then the weekday psalter.
+fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&MoveableDates>) -> OfficeElement {
+    const SLOT: &str = "psalm-antiphon-1";
+    // Passion and Palm Sundays print their own Prime antiphons.
+    let (text, key) = lookup_feast_proper_text(day, "prime", SLOT, t);
+    if !text.is_empty() && is_prime_antiphon_ref(&key, day.season) {
+        return prime_element(SLOT, &key, text);
+    }
+    if day.celebration_is(SATURDAY_OFFICE_BVM_ID) {
+        let key = "proper/saturday-office-bvm/saturday-psalm-antiphon-1";
+        return prime_element(SLOT, key, t.get(key).to_string());
+    }
+    let ferial = day.celebration.as_deref().is_none_or(|c| c.is_category(Category::Feria));
+    if !ferial {
+        let (mut text, mut key) = resolve_proper_text(day, "lauds", SLOT, t);
+        // The ordinary Sunday psalter has its own threefold Alleluia (p. 83).
+        if key == "ordinary/lauds/psalm-antiphon-1-sunday" {
+            key = "ordinary/prime/psalm-antiphon-1-sunday".to_string();
+            text = t.get(&key).to_string();
+        }
+        return prime_element(SLOT, &key, text);
+    }
+    let computed;
+    let m = match moveable {
+        Some(m) => m,
+        None => {
+            computed = MoveableDates::compute(day.date.year());
+            &computed
+        }
+    };
+    let weekday = day.civil_weekday_name();
+    let mut key = format!("ordinary/prime/{SLOT}-{weekday}");
+    match day.season {
+        Season::Advent => {
+            if day.date.month() == 12 && (17..=23).contains(&day.date.day()) {
+                key = format!("seasonal/advent/{SLOT}-prime-{weekday}");
+            } else if let Some(week) = day.temporal_week_id.as_deref().filter(|w| w.starts_with("advent-sunday-")) {
+                key = format!("proper/{week}/{SLOT}");
+            }
+        }
+        Season::Lent => {
+            if day.date >= m.lent1.add_days(1) {
+                key = format!("seasonal/lent/{SLOT}-prime");
+            }
+        }
+        Season::Passiontide => {
+            if day.date >= m.holy_monday {
+                let (text, proper_key) = resolve_proper_text(day, "lauds", SLOT, t);
+                return prime_element(SLOT, &proper_key, text);
+            }
+            key = format!("seasonal/passiontide/{SLOT}-prime");
+        }
+        Season::Easter => {
+            if day.date >= m.low_sunday.add_days(1) && day.date < m.ascension {
+                key = format!("seasonal/easter/{SLOT}-prime");
+            }
+        }
+        Season::Christmas | Season::Epiphany | Season::Septuagesima | Season::Pentecost => {}
+    }
+    let text = t.get(&key).to_string();
+    prime_element(SLOT, &key, text)
+}
+
+fn is_prime_antiphon_ref(reference: &str, season: Season) -> bool {
+    reference.ends_with("-prime") || reference.ends_with(&format!("-prime-{season}"))
+}
+
+fn prime_element(slot: &str, key: &str, text: String) -> OfficeElement {
+    let text = if text.is_empty() { format!("[Prime psalm antiphon not found: {key}]") } else { text };
+    let mut e = OfficeElement::new(ElementType::Antiphon, text);
+    e.slot_ref = slot.to_string();
+    e.source_ref = key.to_string();
+    e.source_refs = compact_refs(vec![key.to_string()]);
+    e
+}

@@ -42,3 +42,22 @@ pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
     };
     Ok(OfficeTexts { corpus, scopes })
 }
+
+impl std::ops::Deref for OfficeTexts {
+    type Target = Corpus;
+    fn deref(&self) -> &Corpus {
+        &self.corpus
+    }
+}
+
+impl OfficeTexts {
+    /// A corpus without appointment scopes, for tests.
+    pub fn from_corpus(corpus: Corpus) -> OfficeTexts {
+        OfficeTexts { corpus, scopes: None }
+    }
+
+    /// The appointment scope governing a seasonal fallback lookup, if any.
+    pub fn seasonal_appointment_scope(&self, season: calendar::Season, hour: &str, slot: &str) -> Option<&crate::scopes::AppointmentScope> {
+        self.scopes.as_ref()?.seasonal(season, hour, slot)
+    }
+}

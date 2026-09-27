@@ -1,0 +1,18 @@
+[package]
+name = "render-text"
+version = "0.1.0"
+description = "Plain-text rendering of a composed hour"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+liturgy.workspace = true
+
+[dev-dependencies]
+calendar.workspace = true
+office.workspace = true
+tools.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
