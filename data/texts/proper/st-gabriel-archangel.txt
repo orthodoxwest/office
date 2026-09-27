@@ -179,12 +179,6 @@ R. In the presence of the Angels * I will sing praise unto thee, O my God.
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
 #
-# [short-responsory-lauds]
-# Short responsory at Lauds.
-#
-# [short-responsory-vespers]
-# Short responsory at Vespers.
-#
 # [vespers-psalmody]
 # Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
 #

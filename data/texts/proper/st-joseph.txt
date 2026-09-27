@@ -203,9 +203,6 @@ Then Joseph, * being raised from sleep, did as the Angel of the Lord had bidden 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).
 #
-# [versicle-lauds]
-# Versicle after the hymn at Lauds (V. … / R. …).
-#
 # [versicle-first-vespers]
 # Versicle at I Vespers when it differs from II Vespers.
 #

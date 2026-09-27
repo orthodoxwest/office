@@ -89,6 +89,7 @@ commons/confessor-bishop-paschal/psalm-antiphon-4,d67ea0b829ab,draft archdiocesa
 commons/confessor-bishop-paschal/psalm-antiphon-5,a77262b0e20b,draft archdiocesan Lauds book,,664,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/short-responsory-lauds,eccb31f73ce4,draft archdiocesan Lauds book,,666,verified,codex,2026-07-17,
 commons/confessor-bishop-paschal/short-responsory-vespers,d106f702cff1,draft archdiocesan Vespers book,,637,verified,codex,2026-07-17,
+commons/confessor-bishop-paschal/versicle-first-vespers,fcffa4df66c9,Monastic Diurnal.pdf,commons/confessor-bishop-paschal/versicle-first-vespers,"35*, 6*",verified,codex,2026-09-27,"Direct page-image reading, normalized wording unchanged. Printed base versicle on p.35* and explicit Paschal Alleluia instruction on p.6* paragraph 3. Evidence: output/local-review/final-sweep/clear-readings.json"
 commons/confessor-bishop-paschal/versicle-lauds,fb23ade121df,draft archdiocesan Lauds book,,669,verified,codex,2026-07-17,
 commons/confessor-bishop/benedictus-antiphon,a666f036c5b9,diurnal,"Common of a Confessor and Bishop, At Lauds",36*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/confessor-bishop/chapter-lauds,2ff5129348ab,diurnal,"Common of a Confessor and Bishop, At Lauds",35*,verified,grok,2026-08-23,word-for-word from printed page image
@@ -181,6 +182,8 @@ commons/holy-woman-paschal/magnificat-antiphon-first,eb898de4ec06,draft archdioc
 commons/holy-woman-paschal/psalm-antiphon-1,62247eef5913,draft archdiocesan Lauds book,,688,verified,codex,2026-07-18,
 commons/holy-woman-paschal/psalm-antiphon-2,90f313572800,draft archdiocesan Lauds book,,689,verified,codex,2026-07-18,
 commons/holy-woman-paschal/psalm-antiphon-3,62ad5037ed3b,draft archdiocesan Lauds book,,690,verified,codex,2026-07-18,
+commons/holy-woman-paschal/psalm-antiphon-4,79fdada64859,Monastic Diurnal.pdf,commons/holy-woman-paschal/psalm-antiphon-4,"52*, 6*",verified,codex,2026-09-27,"Direct page-image reading, normalized wording unchanged. Printed antiphon already ends in Alleluia; p.6* paragraph 3 explicitly says not to duplicate an existing Alleluia. Evidence: output/local-review/final-sweep/clear-readings.json"
+commons/holy-woman-paschal/psalm-antiphon-5,3a12a2a32b92,Monastic Diurnal.pdf,commons/holy-woman-paschal/psalm-antiphon-5,"52*, 6*",verified,codex,2026-09-27,"Direct page-image reading, normalized wording unchanged. Printed base antiphon and explicit Paschal Alleluia instruction on p.6* paragraph 3. Evidence: output/local-review/final-sweep/clear-readings.json"
 commons/holy-woman-paschal/short-responsory-lauds,7a28f237888b,draft archdiocesan Lauds book,,693,verified,codex,2026-07-18,
 commons/holy-woman-paschal/short-responsory-vespers,9618fe06f0aa,draft archdiocesan Vespers book,,670-671,verified,codex,2026-07-18,
 commons/holy-woman-paschal/versicle-first-vespers,eb06f2fd03a2,draft archdiocesan Vespers book,,673,verified,codex,2026-07-18,
@@ -198,6 +201,7 @@ commons/holy-woman/psalm-antiphon-2,668c49b11233,diurnal,"Common of Holy Women n
 commons/holy-woman/psalm-antiphon-3,61e13288e9ed,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/holy-woman/psalm-antiphon-4,79fdada64859,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/holy-woman/psalm-antiphon-5,738553933d8a,diurnal,"Common of Holy Women not Virgins, At Lauds",52*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/holy-woman/short-responsory-vespers,f22a1754ebfa,Monastic Diurnal.pdf,commons/holy-woman/short-responsory-vespers,"51*, 39",verified,codex,2026-09-27,"Direct page-image reading, normalized wording unchanged. Printed short responsory on p.51*; full repetitions and doxology follow the explicit example on p.39. Evidence: output/local-review/final-sweep/clear-readings.json"
 commons/holy-woman/versicle-first-vespers,b8f11348e186,diurnal,,51*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0764.png
 commons/holy-woman/versicle-lauds,c2e21ab641bb,diurnal,,53*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0766.png
 commons/martyr-paschal/hymn-lauds,ba5bc629b13f,A Noted Hymnary for the Anglican Breviary,,102,verified,codex,2026-07-17,
