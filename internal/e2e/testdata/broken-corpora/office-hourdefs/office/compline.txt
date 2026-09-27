@@ -1,0 +1,4 @@
+[Odd]
+Condition = when-the-moon-is-full
+Type = rubric
+Ref = ordinary/shared/collect

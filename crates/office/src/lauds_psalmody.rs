@@ -94,7 +94,7 @@ pub fn uses_declared_lauds_psalmody(day: &Day, t: &OfficeTexts) -> bool {
     !body.is_empty() && body != "festal"
 }
 
-fn valid_hour_psalmody_ref(hour: &str, reference: &str) -> bool {
+pub fn valid_hour_psalmody_ref(hour: &str, reference: &str) -> bool {
     (hour == "vespers" && reference == VESPERS_PSALMODY_REF)
         || (hour == "lauds" && (reference == LAUDS_PSALMODY_REF || reference == LAUDS_LAUDATE_PSALMODY_REF))
 }

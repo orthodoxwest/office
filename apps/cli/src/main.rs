@@ -2,6 +2,7 @@
 //! Go `office` commands as they are ported (RUST-PORT.md).
 
 mod args;
+mod checks;
 mod commands;
 mod dump;
 
@@ -10,7 +11,7 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: office-rs <command> [args]
 
-Commands: ordo, rubrics, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
+Commands: ordo, rubrics, validate, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -20,6 +21,7 @@ fn main() -> ExitCode {
     };
     let command: fn(&tools::fs::FsData, &[String], &mut dyn Write) -> Result<(), String> = match name.as_str() {
         "dump" => dump::cmd_dump,
+        "validate" => checks::cmd_validate,
         "ordo" => commands::cmd_ordo,
         "rubrics" => commands::cmd_rubrics,
         "lauds" => |d, a, o| commands::cmd_hour("lauds", d, a, o),
@@ -45,7 +47,10 @@ fn main() -> ExitCode {
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("{e}");
+            drop(out);
+            if e != checks::REPORTED {
+                eprintln!("{e}");
+            }
             ExitCode::FAILURE
         }
     }

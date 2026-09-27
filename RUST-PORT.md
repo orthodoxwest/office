@@ -348,7 +348,12 @@ until then.
       GABC score lookup, so the renderer does no file access. `office-rs tex`
       is byte-identical for every hour on the 127 sample dates, cycling the
       prayer forms and `--chant` (`scripts/rust-parity-tex.sh`)
-- [ ] `validate` command, hour definitions included
+- [x] `validate`: the hour definitions (`office::validate`), the provenance
+      and zero-occurrence ledgers (`tools::review`), and Go's `encoding/csv`
+      (`compat::csv`, fuzzed against Go). The broken corpora gain `office`
+      and `review` layers and five cases; the Rust reports match on all 15
+      (`cargo test -p tools`), and `make rust-parity` runs `validate` on the
+      live data
 - [ ] `audit` (placeholders, missing propers, the composition sweep)
 - [ ] `lint` (the text-corpus lints)
 - [ ] Assurance and the review subcommands still in use

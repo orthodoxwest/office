@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/office"
+	"github.com/orthodoxwest/office/internal/review"
 	"github.com/orthodoxwest/office/internal/texts"
 )
 
@@ -17,7 +19,9 @@ import (
 const brokenCorporaDir = "testdata/broken-corpora"
 
 // ValidationReport runs the data validators a case has input for: the
-// calendar layer when it has feasts/, the texts layer when it has texts/.
+// calendar layer when it has feasts/, the texts layer when it has texts/, the
+// hour definitions when it has office/, and the review ledgers (as `office
+// validate` checks them) when it has review/.
 // The data directory is written as $DATA.
 func ValidationReport(dataDir string) string {
 	var b strings.Builder
@@ -32,6 +36,18 @@ func ValidationReport(dataDir string) string {
 	}
 	if isDir(filepath.Join(dataDir, "texts")) {
 		layer("texts", texts.ValidateAll(dataDir))
+	}
+	if isDir(filepath.Join(dataDir, "office")) {
+		layer("office", office.ValidateHourDefinitions(dataDir))
+	}
+	if isDir(filepath.Join(dataDir, "review")) {
+		var errs []string
+		if inventory, err := review.ScanProvenance(dataDir); err != nil {
+			errs = append(errs, "review provenance: "+err.Error())
+		} else if _, err := review.LoadZeroClassifications(dataDir, inventory); err != nil {
+			errs = append(errs, "review zero occurrences: "+err.Error())
+		}
+		layer("review", errs)
 	}
 	return b.String()
 }

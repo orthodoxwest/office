@@ -1,0 +1,7 @@
+[Psalmody]
+Type = proper-psalmody
+Ref = vespers-psalmody
+
+[Marian]
+Type = marian
+Ref = seasonal

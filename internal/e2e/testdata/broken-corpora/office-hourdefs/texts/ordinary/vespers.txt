@@ -1,0 +1,6 @@
+[festal-psalmody]
+psalm-antiphon-2 = psalms/110
+psalm-antiphon-9 = psalms/999
+
+[psalm-antiphon-1]
+The Lord said.

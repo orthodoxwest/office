@@ -1,0 +1,7 @@
+[Collect]
+Condition = not-triduum
+Type = proper-collect
+Ref = collect
+
+Type = proper-psalmody
+Ref = lauds-psalmody

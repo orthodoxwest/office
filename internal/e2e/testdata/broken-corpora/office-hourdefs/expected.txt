@@ -1,0 +1,27 @@
+== texts
+no Latin incipit in data/latin-incipits.txt for: psalms/110
+== office
+office/lauds.txt [Opening]: unknown element Type "bogus-type"
+office/lauds.txt [Opening]: proper ref "nowhere-antiphon-3" not found in corpus (checked ordinary, shared, weekday, and feast/seasonal paths)
+office/lauds.txt [Opening]: marian element has unsupported ref "fixed" (expected "seasonal")
+office/lauds.txt [Opening]: unsupported lauds proper-psalmody Ref "vespers-psalmody"
+office/prime.txt: opening hour definition: open $DATA/office/prime.txt: no such file or directory
+office/terce.txt [Collect]: unsupported terce proper-psalmody Ref "lauds-psalmody"
+office/sext.txt: opening hour definition: open $DATA/office/sext.txt: no such file or directory
+office/none.txt: opening hour definition: open $DATA/office/none.txt: no such file or directory
+office/compline.txt: $DATA/office/compline.txt:2: invalid condition in section [Odd]: unknown condition "when-the-moon-is-full"
+office/vespers-holy-saturday.txt: opening hour definition: open $DATA/office/vespers-holy-saturday.txt: no such file or directory
+ordinary/vespers/festal-psalmody: antiphon ref not found in corpus: psalm-antiphon-9
+ordinary/vespers/festal-psalmody: psalm ref not found in corpus: psalms/999
+proper/st-nobody/vespers-psalmody: invalid Vespers psalmody declaration: line 1: expected <antiphon-key> = <psalm-key>
+proper/st-nobody/lauds-laudate-psalmody: invalid Lauds psalmody declaration (expected festal or antiphon/psalm rows)
+proper/st-nobody/lauds-psalmody: invalid Lauds psalmody declaration (expected festal or antiphon/psalm rows)
+ordinary/lauds/psalm-antiphon-2: @omit is not permitted on a psalm antiphon; every psalm is sung under one
+ordinary/lauds/versicle: @omit must name the hour it applies to (e.g. versicle-lauds); a bare slot omits the element at every hour
+office/lauds.txt [Opening]: ref not found in corpus: ordinary/lauds/missing
+office/lauds.txt [Opening]: ref not found in corpus: shared/formulas/rest-eternal
+office/vespers.txt [Marian]: ref not found in corpus: ordinary/marian/alma-redemptoris-advent
+office/vespers.txt [Marian]: ref not found in corpus: ordinary/marian/alma-redemptoris-christmas
+office/vespers.txt [Marian]: ref not found in corpus: ordinary/marian/ave-regina-caelorum
+office/vespers.txt [Marian]: ref not found in corpus: ordinary/marian/regina-caeli
+office/vespers.txt [Marian]: ref not found in corpus: ordinary/marian/salve-regina

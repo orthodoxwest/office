@@ -1,0 +1,9 @@
+[lauds-psalmody]
+psalm-antiphon-1 = psalms/110
+psalm-antiphon-1 = hymns/not-a-psalm
+
+[vespers-psalmody]
+not a declaration
+
+[lauds-laudate-psalmody]
+festal

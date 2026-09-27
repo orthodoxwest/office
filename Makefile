@@ -195,6 +195,7 @@ rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and 
 	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
 	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
 	scripts/rust-parity-tex.sh
+	scripts/rust-parity-cmd.sh validate
 	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
 
 rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden

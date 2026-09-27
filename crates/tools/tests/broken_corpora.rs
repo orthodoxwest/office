@@ -6,6 +6,7 @@
 use std::path::Path;
 
 use tools::fs::FsData;
+use tools::review::{provenance, zero_occurrence};
 use tools::validate::{validate_calendar, validate_texts};
 
 const CASES: &str = "../../internal/e2e/testdata/broken-corpora";
@@ -26,6 +27,19 @@ fn report(dir: &str) -> String {
     if Path::new(dir).join("texts").is_dir() {
         layer("texts", validate_texts(&src));
     }
+    if Path::new(dir).join("office").is_dir() {
+        layer("office", office::validate::validate_hour_definitions(&src));
+    }
+    if Path::new(dir).join("review").is_dir() {
+        let errs = match provenance::scan_provenance(&src) {
+            Err(e) => vec![format!("review provenance: {e}")],
+            Ok(inventory) => match zero_occurrence::load_zero_classifications(&src, &inventory) {
+                Err(e) => vec![format!("review zero occurrences: {e}")],
+                Ok(_) => Vec::new(),
+            },
+        };
+        layer("review", errs);
+    }
     out
 }
 
@@ -38,7 +52,7 @@ fn broken_corpora_match_go() {
         .map(|e| e.file_name().into_string().unwrap())
         .collect();
     names.sort();
-    assert!(names.len() >= 10, "found {} cases", names.len());
+    assert!(names.len() >= 15, "found {} cases", names.len());
     let mut failures = Vec::new();
     for name in &names {
         let dir = format!("{CASES}/{name}");
@@ -56,6 +70,9 @@ fn live_data_is_valid() {
     let src = FsData::new("../../data");
     assert_eq!(validate_calendar(&src), Vec::<String>::new());
     assert_eq!(validate_texts(&src), Vec::<String>::new());
+    assert_eq!(office::validate::validate_hour_definitions(&src), Vec::<String>::new());
+    let inventory = provenance::scan_provenance(&src).unwrap();
+    zero_occurrence::load_zero_classifications(&src, &inventory).unwrap();
 }
 
 #[test]

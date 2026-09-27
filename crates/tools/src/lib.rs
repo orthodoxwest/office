@@ -2,4 +2,5 @@
 //! the validators. Unlike the core crates, tools may touch the filesystem.
 
 pub mod fs;
+pub mod review;
 pub mod validate;

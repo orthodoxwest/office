@@ -3,6 +3,8 @@
 //! these helpers reproduce the few Go library behaviors that differ from
 //! Rust's. Remove the crate after the cutover (Phase 7).
 
+pub mod csv;
+
 /// Quotes `s` as Go's `strconv.Quote` does for printable text: backslash
 /// escapes for quote, backslash, and control characters; everything else
 /// literal.
