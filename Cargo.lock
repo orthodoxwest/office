@@ -60,7 +60,20 @@ dependencies = [
  "corpus",
  "liturgy",
  "office",
+ "ordo",
+ "render-text",
  "serde_json",
+ "tools",
+]
+
+[[package]]
+name = "ordo"
+version = "0.1.0"
+dependencies = [
+ "calendar",
+ "compat",
+ "liturgy",
+ "office",
  "tools",
 ]
 

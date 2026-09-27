@@ -190,10 +190,11 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-rust-parity: build ## Compare the Go and Rust dumps: calendar/office 1900-2199, hours on sample dates
+rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours on sample dates, ordo and rubrics
 	cargo build --release -p office-cli
 	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
 	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
+	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
 
 rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
 	cargo build --release -p office-cli

@@ -23,6 +23,7 @@ pub mod psalmody;
 pub mod rubric;
 pub mod scopes;
 pub mod seasonal;
+pub mod summary;
 pub mod texts;
 pub mod vespers;
 pub mod voice;

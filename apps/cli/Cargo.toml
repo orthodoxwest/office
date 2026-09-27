@@ -16,6 +16,8 @@ calendar.workspace = true
 office.workspace = true
 liturgy.workspace = true
 tools.workspace = true
+ordo.workspace = true
+render-text.workspace = true
 corpus.workspace = true
 serde_json.workspace = true
 
