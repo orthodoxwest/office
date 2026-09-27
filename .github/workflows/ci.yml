@@ -120,6 +120,9 @@ jobs:
       - name: Go/Rust parity
         run: make rust-parity
 
+      - name: Full calendar and composition regression snapshot (2026–2053)
+        run: make parity
+
   golden:
     name: Golden tests
     runs-on: ubuntu-latest

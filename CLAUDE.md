@@ -251,7 +251,7 @@ make rust-parity # Go vs Rust: dump groups 1900–2199, hours + tex on 127 sampl
                  # validate/lint/audit (live + mutated data), review reports and ledger writers,
                  # corpus/scaffold editing on data copies, and a crawl of both web servers
 make test-ux      # Playwright suites against the default Rust server
-make rust-parity-full # Rust 2026–2053 dump digest + assurance report vs their goldens (nightly in CI)
+make parity # Rust 2026–2053 dump digest + assurance report vs their goldens (in PR CI)
 make clean       # Remove artifacts
 ```
 

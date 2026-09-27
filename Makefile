@@ -1,4 +1,4 @@
-.PHONY: help build test test-race test-ux test-ux-rust parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity rust-parity-full clean install-gremlins mutate mutate-diff test-coverage
+.PHONY: help build test test-race test-ux test-ux-rust parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity clean install-gremlins mutate mutate-diff test-coverage
 
 .DEFAULT_GOAL := help
 
@@ -83,8 +83,6 @@ test-ux: build ## Run Playwright UX regression tests against Rust
 	npm --prefix .web-tools run test:ux
 
 test-ux-rust: test-ux ## Alias for test-ux
-
-parity: rust-parity-full ## Verify the 2026-2053 parity snapshot with Rust
 
 lint: ## Run Clippy
 	cargo clippy --workspace --all-targets --locked -- -D warnings
@@ -217,7 +215,7 @@ rust-parity: go-build ## Compare Go and Rust: calendar/office 1900-2199, hours a
 	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
 	scripts/rust-parity-web.sh
 
-rust-parity-full: ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
+parity: ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
 	cargo build --release -p office-cli
 	target/release/office dump -start 2026 -years 28 | target/release/office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
 	@echo "parity: Rust 2026-2053 digest matches parity-snapshot.json"

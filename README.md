@@ -90,6 +90,7 @@ The retained Go reference checks, `make golden`, `make verify-psalms`, and
 ```bash
 make test                        # Rust and Python tests, including Rust goldens
 make check                       # formatting, analysis, tests, validation, lint
+make parity                      # full 2026–2053 calendar/composition snapshot (also in CI)
 make diurnal-test                # page/transcription/discovery tests; no providers
 make golden                      # update expected output after intentional changes
 make verify-psalms                # compare the psalter with its reference witness

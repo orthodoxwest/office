@@ -229,8 +229,9 @@ identical, not when the tests look plausible.
 | 6 | Cutover | Rust owns build/deploy/CLI/UX; retain test/reference Go until the remaining test ports land; rollback by reverting the PR |
 | 7 | After cutover | the inherited-from-Go list sorted into "right", "bug", and "needs ruling"; the model tightened; text parsing moved into the core; the data layout for the Missal; then Matins, the Mass, and mobile |
 
-PR CI compares a sample: every golden date plus a fixed set of boundary
-dates. A nightly job compares the full window.
+PR CI compares both a sample (every golden date plus fixed boundary dates)
+and the complete 2026–2053 snapshot. The latter is a Rust-only regression
+gate, retained after the Go reference and differential harness are removed.
 
 ### Rules while both engines exist
 
@@ -344,8 +345,8 @@ serde_json's wording rather than encoding/json's. Semantic errors match.
       pass; `office::Engine` loads the corpus and hour definitions
 - [x] `render-text` crate: Go's `FormatOfficeHour`
 - [x] Gate: `hours` group identical for 2026–2053 in every form
-      (`make rust-parity-full` digests the Rust dump and diffs it with
-      `parity-snapshot.json`; nightly in CI), a sample of 127 dates in PR CI
+      (`make parity` digests the Rust dump and diffs it with
+      `parity-snapshot.json`; in PR CI), a sample of 127 dates in PR CI
       (`make rust-parity`: every golden date plus boundary dates), and every
       hour golden byte-identical (`cargo test -p render-text`)
 - [ ] Port the Go `office` unit tests (the black-box gate covers the sweep;
@@ -386,7 +387,7 @@ until then.
       `TraceCommemorationResolution`; `compat::json` writes Go's indented
       `encoding/json`. The sweeps compose years in parallel and fold them in
       Go's order: the 28-year assurance report takes 21s against Go's 60s, and
-      matches its golden (`make rust-parity-full`). `scripts/rust-parity-review.sh`
+      matches its golden (`make parity`). `scripts/rust-parity-review.sh`
       compares every read-only report on one- and two-year sweeps, and runs
       the ledger writers on two copies of the data, diffing output and trees
 - [x] `corpus show|put` and `scaffold propers` (`tools::corpus_edit`,
@@ -451,7 +452,7 @@ Known differences, all outside what a page or feed shows a reader:
 - [x] Docker builds Rust with bundled SQLite and bundled time-zone data;
       runtime-image CI checks validation, an hour, the feed and the usage store.
 - [x] The primary Playwright and snapshot-update jobs use Rust.
-- [x] Rust implements streaming `dump diff` and `dump digest`; the nightly
+- [x] Rust implements streaming `dump diff` and `dump digest`; the regular CI
       2026–2053 snapshot gate uses Rust throughout.
 - [x] Axum owns routing. Embedded static assets are served by exact name;
       directory listings and file-server redirects are removed. Redirects
