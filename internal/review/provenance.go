@@ -139,7 +139,7 @@ func ScanProvenance(dataDir string) (*ProvenanceInventory, error) {
 	for _, e := range entries {
 		inv.Entries = append(inv.Entries, *e)
 	}
-	sort.Slice(inv.Entries, func(i, j int) bool { return inv.Entries[i].Key < inv.Entries[j].Key })
+	sort.SliceStable(inv.Entries, func(i, j int) bool { return inv.Entries[i].Key < inv.Entries[j].Key })
 	return inv, nil
 }
 
@@ -315,9 +315,9 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 	if _, err := time.Parse("2006-01-02", opts.ReviewedOn); err != nil {
 		return nil, fmt.Errorf("invalid review date %q", opts.ReviewedOn)
 	}
-	for name, value := range map[string]string{"reviewer": opts.Reviewer, "source": opts.Source, "locator": opts.Locator, "page": opts.Page} {
-		if strings.ContainsAny(value, "\r\n") {
-			return nil, fmt.Errorf("%s may not contain a newline", name)
+	for _, field := range [][2]string{{"reviewer", opts.Reviewer}, {"source", opts.Source}, {"locator", opts.Locator}, {"page", opts.Page}} {
+		if strings.ContainsAny(field[1], "\r\n") {
+			return nil, fmt.Errorf("%s may not contain a newline", field[0])
 		}
 	}
 
@@ -350,7 +350,7 @@ func RecordAttestation(dataDir string, opts AttestOptions) (*EntryProvenance, er
 		Page: opts.Page, Status: string(ProvenanceVerified), Reviewer: opts.Reviewer,
 		ReviewedOn: opts.ReviewedOn, Notes: opts.Notes,
 	})
-	sort.Slice(kept, func(i, j int) bool { return kept[i].Key < kept[j].Key })
+	sort.SliceStable(kept, func(i, j int) bool { return kept[i].Key < kept[j].Key })
 	if err := writeAttestations(dataDir, kept); err != nil {
 		return nil, err
 	}

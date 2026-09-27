@@ -22,6 +22,7 @@ import (
 
 	"github.com/orthodoxwest/office/internal/audit"
 	"github.com/orthodoxwest/office/internal/calendar"
+	"github.com/orthodoxwest/office/internal/dump"
 	"github.com/orthodoxwest/office/internal/models"
 	"github.com/orthodoxwest/office/internal/office"
 	"github.com/orthodoxwest/office/internal/output"
@@ -300,12 +301,12 @@ func TestParityGolden(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadAssuranceBaseline: %v", err)
 	}
-	snapshot, err := review.BuildParitySnapshot(dataDir, baseline.StartYear, baseline.Years)
+	snapshot, err := dump.BuildParitySnapshot(dataDir, baseline.StartYear, baseline.Years)
 	if err != nil {
 		t.Fatalf("BuildParitySnapshot: %v", err)
 	}
 	var buf bytes.Buffer
-	if err := review.WriteParitySnapshot(snapshot, &buf); err != nil {
+	if err := dump.WriteParitySnapshot(snapshot, &buf); err != nil {
 		t.Fatalf("WriteParitySnapshot: %v", err)
 	}
 	checkGolden(t, "parity-snapshot.json", buf.String())

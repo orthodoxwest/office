@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -179,7 +180,7 @@ func BuildManifest(dataDir string, startYear, years int) (*Manifest, error) {
 	for _, u := range order {
 		units = append(units, *u)
 	}
-	sort.Slice(units, func(i, j int) bool {
+	sort.SliceStable(units, func(i, j int) bool {
 		a, b := &units[i], &units[j]
 		if pa, pb := a.Priority(), b.Priority(); pa != pb {
 			return pa < pb
@@ -202,7 +203,15 @@ func BuildManifest(dataDir string, startYear, years int) (*Manifest, error) {
 		if hourOrder[a.Hour] != hourOrder[b.Hour] {
 			return hourOrder[a.Hour] < hourOrder[b.Hour]
 		}
-		return a.Date.Before(b.Date)
+		if !a.Date.Equal(b.Date) {
+			return a.Date.Before(b.Date)
+		}
+		// The same hour and date recur once per distinct prayer form; the hash
+		// is unique per unit, so the order is total.
+		if fa, fb := slices.Index(models.PrayerForms, a.Form), slices.Index(models.PrayerForms, b.Form); fa != fb {
+			return fa < fb
+		}
+		return a.Hash < b.Hash
 	})
 
 	return &Manifest{StartYear: startYear, Years: years, Units: units}, nil

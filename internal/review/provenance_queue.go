@@ -145,7 +145,7 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		for hour := range a.hours {
 			a.entry.Hours = append(a.entry.Hours, hour)
 		}
-		sort.Slice(a.entry.Hours, func(i, j int) bool { return hourOrder[a.entry.Hours[i]] < hourOrder[a.entry.Hours[j]] })
+		sort.SliceStable(a.entry.Hours, func(i, j int) bool { return hourOrder[a.entry.Hours[i]] < hourOrder[a.entry.Hours[j]] })
 		a.entry.DistinctCompositions = len(a.compositions)
 		a.entry.Score = provenanceQueueScore(a.entry)
 		if a.hasRepresentative {
@@ -155,7 +155,7 @@ func BuildProvenanceQueue(dataDir string, startYear, years int, includeVerified 
 		}
 		queue.Entries = append(queue.Entries, a.entry)
 	}
-	sort.Slice(queue.Entries, func(i, j int) bool { return provenanceQueueLess(queue.Entries[i], queue.Entries[j]) })
+	sort.SliceStable(queue.Entries, func(i, j int) bool { return provenanceQueueLess(queue.Entries[i], queue.Entries[j]) })
 	return queue, nil
 }
 

@@ -269,7 +269,7 @@ func lintNearDuplicates(r *LintReport, entries map[string]string, keys []string)
 	// (a text near-duplicating more than one other), and the findings are
 	// collected by ranging over maps, so Detail has to break the tie or the
 	// advisory list reshuffles between runs.
-	sort.Slice(r.Advisory, func(i, j int) bool {
+	sort.SliceStable(r.Advisory, func(i, j int) bool {
 		a, b := &r.Advisory[i], &r.Advisory[j]
 		if a.Class != b.Class {
 			return a.Class < b.Class

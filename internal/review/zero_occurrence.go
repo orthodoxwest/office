@@ -116,9 +116,9 @@ func validateZeroClassification(c ZeroClassification) error {
 	if c.Disposition == ZeroDefect && strings.TrimSpace(c.Issue) == "" {
 		return fmt.Errorf("defect classification for %q needs an issue reference", c.Key)
 	}
-	for name, value := range map[string]string{"key": c.Key, "reason": c.Reason, "issue": c.Issue} {
-		if strings.ContainsAny(value, "\r\n") {
-			return fmt.Errorf("%s of classification for %q may not contain a newline", name, c.Key)
+	for _, field := range [][2]string{{"key", c.Key}, {"reason", c.Reason}, {"issue", c.Issue}} {
+		if strings.ContainsAny(field[1], "\r\n") {
+			return fmt.Errorf("%s of classification for %q may not contain a newline", field[0], c.Key)
 		}
 	}
 	return nil
@@ -218,7 +218,7 @@ func zeroOccurrenceReportFromQueue(queue *ProvenanceQueue) *ZeroOccurrenceReport
 			Heuristic:  DetectZeroHeuristic(entry.Key),
 		})
 	}
-	sort.Slice(report.Entries, func(i, j int) bool {
+	sort.SliceStable(report.Entries, func(i, j int) bool {
 		a, b := report.Entries[i], report.Entries[j]
 		if zeroHeuristicRank(a.Heuristic) != zeroHeuristicRank(b.Heuristic) {
 			return zeroHeuristicRank(a.Heuristic) < zeroHeuristicRank(b.Heuristic)
