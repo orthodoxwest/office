@@ -188,6 +188,38 @@ mod tests {
         assert_eq!(path_base("/static/style.css/"), "style.css");
     }
 
+    // Ported from Go's `TestComputeVersionDeterministicAndDataSensitive`.
+    #[test]
+    fn compute_version_is_deterministic_and_data_sensitive() {
+        let dir = std::env::temp_dir().join(format!("office-version-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("a.txt"), "one").unwrap();
+        let v1 = compute_version(&dir);
+        assert_eq!(v1, compute_version(&dir));
+        assert_eq!(v1.len(), 12);
+        std::fs::write(dir.join("a.txt"), "two").unwrap();
+        assert_ne!(compute_version(&dir), v1);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    /// `fs.WalkDir` descends into a directory where its name sorts, so "a/"
+    /// is hashed before "a.txt" although "a.txt" < "a/x" as a full path.
+    #[test]
+    fn compute_version_walks_in_go_order() {
+        let dir = std::env::temp_dir().join(format!("office-walk-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join("a")).unwrap();
+        std::fs::write(dir.join("a/x"), "1").unwrap();
+        std::fs::write(dir.join("a.txt"), "2").unwrap();
+        let mut h = Sha256::new();
+        h.update(b"a/x1a.txt2");
+        let want: String = h.finalize().iter().map(|b| format!("{b:02x}")).collect();
+        let mut walked = Sha256::new();
+        walk_data(&dir, "", &mut walked);
+        let got: String = walked.finalize().iter().map(|b| format!("{b:02x}")).collect();
+        assert_eq!(got, want);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     #[test]
     fn serves_files_as_go_does() {
         let r = serve_static("/static/style.css", "v=1", true);

@@ -217,26 +217,129 @@ impl Server {
     }
 }
 
+// Ported from Go's `internal/web/ics_test.go`.
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_server;
+
+    fn config(q: &str) -> Result<IcsConfig, String> {
+        parse_config(&Query::parse(q))
+    }
+
+    fn at(tz: &TimeZone, y: i16, m: i8, d: i8, h: i8, min: i8) -> Timestamp {
+        jiff::civil::date(y, m, d).at(h, min, 0, 0).to_zoned(tz.clone()).unwrap().timestamp()
+    }
+
+    fn ics(q: &str, now: Timestamp) -> String {
+        test_server().build_ics(&config(q).unwrap(), "https://office.example", now).unwrap()
+    }
 
     #[test]
-    fn days_parse_as_go_parses_them() {
+    fn parse_days_cases() {
         assert_eq!(parse_days("").unwrap(), [true; 7]);
-        assert_eq!(parse_days("sat-mon").unwrap(), [true, true, false, false, false, false, true]);
-        assert_eq!(parse_days(" Mon , wed").unwrap(), [false, true, false, true, false, false, false]);
+        let wk = parse_days("mon-fri").unwrap();
+        assert!(!wk[0] && !wk[6] && wk[1] && wk[5], "{wk:?}");
+        let wrap = parse_days("sat-sun").unwrap();
+        assert!(wrap[6] && wrap[0] && !wrap[1], "{wrap:?}");
+        let mixed = parse_days("mon-wed,sat").unwrap();
+        assert!(mixed[2] && mixed[6] && !mixed[5], "{mixed:?}");
+        assert!(parse_days("monday").is_err());
+        assert!(parse_days(" Mon , wed").unwrap()[3]);
         assert!(parse_days("mon-xyz").is_err());
         assert!(parse_days("mon,").is_err());
     }
 
     #[test]
-    fn lines_fold_at_75_octets() {
-        let mut out = String::new();
-        let line = "X".repeat(74) + "é" + &"Y".repeat(80);
-        fold_line(&mut out, &line);
-        let lines: Vec<&str> = out.split("\r\n").collect();
-        assert_eq!(lines[0].len(), 74);
-        assert!(lines.iter().all(|l| l.len() <= 75));
+    fn config_validation() {
+        for bad in [
+            "",
+            "lauds=6am",
+            "lauds=06:45&days=xx",
+            "lauds=06:45&alarm=-5",
+            "lauds=06:45&alarm=abc",
+            "lauds=06:45&tz=Nowhere/Nowhere",
+            "lauds=06:45&horizon=0",
+            "lauds=06:45&horizon=9999",
+        ] {
+            assert!(config(bad).is_err(), "expected an error for {bad:?}");
+        }
+        let cfg = config("vespers=18:00&lauds=06:45&alarm=none&tz=America/New_York&days=mon-fri&horizon=30").unwrap();
+        let names: Vec<&str> = cfg.hours.iter().map(|h| h.0).collect();
+        assert_eq!(names, ["lauds", "vespers"], "hours in canonical order");
+        assert_eq!(cfg.alarm, None);
+        assert_eq!(cfg.tz.iana_name(), Some("America/New_York"));
+        assert_eq!(cfg.horizon, 30);
+    }
+
+    #[test]
+    fn build_ics() {
+        let ny = crate::gotime::zone("America/New_York").unwrap();
+        // Christmas 2026 (a Friday) falls inside the horizon.
+        let body = ics("lauds=06:45&tz=America/New_York&horizon=7&alarm=15", at(&ny, 2026, 12, 20, 12, 0));
+        assert!(body.starts_with("BEGIN:VCALENDAR\r\n") && body.ends_with("END:VCALENDAR\r\n"));
+        assert_eq!(body.matches("BEGIN:VEVENT").count(), 7);
+        for want in [
+            "SUMMARY:Lauds — Nativity of Our Lord Jesus Christ",
+            // 06:45 EST is 11:45 UTC.
+            "DTSTART:20261225T114500Z",
+            "UID:lauds-2026-12-25@awrv-office",
+            "TRIGGER:-PT15M",
+            "URL:https://office.example/lauds/2026-12-25",
+        ] {
+            assert!(body.contains(want), "missing {want:?}");
+        }
+        for (i, line) in body.split("\r\n").enumerate() {
+            assert!(line.len() <= 75, "line {} exceeds 75 octets: {line:?}", i + 1);
+        }
+    }
+
+    #[test]
+    fn day_filter_and_no_alarm() {
+        // 2026-06-08 is a Monday.
+        let body = ics("vespers=18:00&days=sun&alarm=none&horizon=14", at(&TimeZone::UTC, 2026, 6, 8, 12, 0));
+        assert_eq!(body.matches("BEGIN:VEVENT").count(), 2);
+        assert!(!body.contains("BEGIN:VALARM"));
+        assert!(body.contains("DTSTART:20260614T180000Z"));
+    }
+
+    #[test]
+    fn spans_year_boundary() {
+        let body = ics("compline=21:00&horizon=10", at(&TimeZone::UTC, 2026, 12, 28, 12, 0));
+        assert!(body.contains("UID:compline-2027-01-03@awrv-office"));
+        assert_eq!(body.matches("BEGIN:VEVENT").count(), 10);
+    }
+
+    #[test]
+    fn escapes_text() {
+        assert_eq!(escape_ics("a;b,c\\d\ne"), r"a\;b\,c\\d\ne");
+    }
+
+    #[test]
+    fn folds_lines() {
+        for line in [String::new(), "a".repeat(75), "a".repeat(150), "a".repeat(225), "a".repeat(74) + &"é".repeat(100), "🕯".repeat(80)]
+        {
+            let mut folded = String::new();
+            fold_line(&mut folded, &line);
+            for physical in folded.split("\r\n") {
+                assert!(physical.len() <= 75, "physical line has {} bytes", physical.len());
+            }
+            assert_eq!(folded.strip_suffix("\r\n").unwrap().replace("\r\n ", ""), line, "unfolding changed the line");
+        }
+    }
+
+    /// Santiago's September 6 begins at 01:00. The civil dates must not
+    /// repeat September 5 or skip the 6th.
+    #[test]
+    fn dates_across_midnight_dst() {
+        let cfg = config("lauds=06:45&tz=America/Santiago&horizon=3").unwrap();
+        let now = at(&cfg.tz, 2026, 9, 5, 0, 30);
+        let body = test_server().build_ics(&cfg, "https://office.example", now).unwrap();
+        for date in ["2026-09-05", "2026-09-06", "2026-09-07"] {
+            assert_eq!(body.matches(&format!("UID:lauds-{date}@awrv-office\r\n")).count(), 1, "{date}");
+        }
+        for start in ["20260905T104500Z", "20260906T094500Z", "20260907T094500Z"] {
+            assert!(body.contains(&format!("DTSTART:{start}\r\n")), "missing {start}");
+        }
     }
 }

@@ -20,9 +20,9 @@ use render_html::view::{
 use tools::review::assurance::{dedupe_decisions, hour_dependencies};
 use tools::review::provenance::ProvenanceStatus;
 
-use crate::Server;
 use crate::gonet::{Query, cookie, redirect, response, set};
 use crate::gotime::{date_slug, load_location, local, long_date, now_in, parse_date};
+use crate::{Review, Server};
 
 /// What a page handler reads from the request.
 pub struct Req<'a> {
@@ -256,6 +256,70 @@ fn invalid_date(s: &str) -> String {
     format!("Invalid date {} — please use YYYY-MM-DD format.", compat::quote(s))
 }
 
+impl Review {
+    /// The review notice shows unless every text the hour draws on is
+    /// verified.
+    pub(crate) fn show_vetting_banner(&self, hour: &OfficeHour) -> bool {
+        let deps = hour_dependencies(hour);
+        deps.is_empty() || deps.iter().any(|k| self.provenance.get(k) != Some(&ProvenanceStatus::Verified))
+    }
+
+    pub(crate) fn hour_assurance(&self, hour: &OfficeHour, hour_name: &str, slug: &str) -> HourAssurance {
+        let mut data = HourAssurance {
+            decisions: dedupe_decisions(&hour.decisions)
+                .into_iter()
+                .map(|d| AssuranceDecision {
+                    rule: d.rule.clone(),
+                    outcome: d.outcome.clone(),
+                    detail: d.detail.clone().unwrap_or_default(),
+                })
+                .collect(),
+            ..HourAssurance::default()
+        };
+        for key in hour_dependencies(hour) {
+            let status = self.provenance.get(&key).copied().unwrap_or(ProvenanceStatus::SourceUnknown);
+            match status {
+                ProvenanceStatus::Verified => data.verified += 1,
+                ProvenanceStatus::NeedsReview => data.needs_review += 1,
+                ProvenanceStatus::SourceUnknown => data.source_unknown += 1,
+            }
+            let flags: Vec<AssuranceFlag> = self
+                .suspicions
+                .get(&key)
+                .map(|s| {
+                    s.iter()
+                        .map(|f| AssuranceFlag {
+                            label: f.label.clone(),
+                            state: if f.addressed { "addressed" } else { "open" }.into(),
+                            reason: f.reason.clone(),
+                        })
+                        .collect()
+                })
+                .unwrap_or_default();
+            if !flags.is_empty() {
+                data.flagged += 1;
+            }
+            let report_url = dependency_report_url(hour, hour_name, slug, &key, status);
+            data.dependencies.push(AssuranceDependency { key, status: status.as_str().into(), flags, report_url });
+        }
+        let mut seen = HashSet::new();
+        for element in hour.sections.iter().flat_map(|s| &s.elements) {
+            if element.slot_ref.is_empty() || element.source_ref.is_empty() {
+                continue;
+            }
+            let tier = element.source_ref.split('/').next().unwrap_or("");
+            if seen.insert((element.slot_ref.clone(), tier.to_string(), element.source_ref.clone())) {
+                data.resolutions.push(AssuranceResolution {
+                    slot: element.slot_ref.clone(),
+                    tier: tier.into(),
+                    source: element.source_ref.clone(),
+                });
+            }
+        }
+        data
+    }
+}
+
 impl Server {
     /// The zone in the browser's `tz` cookie, else the host zone.
     fn user_location(&self, req: &Req) -> TimeZone {
@@ -385,66 +449,6 @@ impl Server {
         }
     }
 
-    fn show_vetting_banner(&self, hour: &OfficeHour) -> bool {
-        let deps = hour_dependencies(hour);
-        deps.is_empty() || deps.iter().any(|k| self.provenance.get(k) != Some(&ProvenanceStatus::Verified))
-    }
-
-    fn hour_assurance(&self, hour: &OfficeHour, hour_name: &str, slug: &str) -> HourAssurance {
-        let mut data = HourAssurance {
-            decisions: dedupe_decisions(&hour.decisions)
-                .into_iter()
-                .map(|d| AssuranceDecision {
-                    rule: d.rule.clone(),
-                    outcome: d.outcome.clone(),
-                    detail: d.detail.clone().unwrap_or_default(),
-                })
-                .collect(),
-            ..HourAssurance::default()
-        };
-        for key in hour_dependencies(hour) {
-            let status = self.provenance.get(&key).copied().unwrap_or(ProvenanceStatus::SourceUnknown);
-            match status {
-                ProvenanceStatus::Verified => data.verified += 1,
-                ProvenanceStatus::NeedsReview => data.needs_review += 1,
-                ProvenanceStatus::SourceUnknown => data.source_unknown += 1,
-            }
-            let flags: Vec<AssuranceFlag> = self
-                .suspicions
-                .get(&key)
-                .map(|s| {
-                    s.iter()
-                        .map(|f| AssuranceFlag {
-                            label: f.label.clone(),
-                            state: if f.addressed { "addressed" } else { "open" }.into(),
-                            reason: f.reason.clone(),
-                        })
-                        .collect()
-                })
-                .unwrap_or_default();
-            if !flags.is_empty() {
-                data.flagged += 1;
-            }
-            let report_url = dependency_report_url(hour, hour_name, slug, &key, status);
-            data.dependencies.push(AssuranceDependency { key, status: status.as_str().into(), flags, report_url });
-        }
-        let mut seen = HashSet::new();
-        for element in hour.sections.iter().flat_map(|s| &s.elements) {
-            if element.slot_ref.is_empty() || element.source_ref.is_empty() {
-                continue;
-            }
-            let tier = element.source_ref.split('/').next().unwrap_or("");
-            if seen.insert((element.slot_ref.clone(), tier.to_string(), element.source_ref.clone())) {
-                data.resolutions.push(AssuranceResolution {
-                    slot: element.slot_ref.clone(),
-                    tier: tier.into(),
-                    source: element.source_ref.clone(),
-                });
-            }
-        }
-        data
-    }
-
     fn hour(&self, req: &Req, hour_name: &str, date_str: &str) -> Response<Body> {
         if !VALID_HOURS.contains(&hour_name) {
             return self.not_found_page(req);
@@ -507,9 +511,9 @@ impl Server {
                 .map(|(form, h)| LeaderForm {
                     form: form.as_str().into(),
                     label: form.label().into(),
-                    assurance: self.hour_assurance(h, hour_name, &date_str),
+                    assurance: self.review.hour_assurance(h, hour_name, &date_str),
                     report_url: report_url(h, hour_name, &date_str),
-                    show_banner: self.show_vetting_banner(h),
+                    show_banner: self.review.show_vetting_banner(h),
                 })
                 .collect(),
             hour_name: hour_name.into(),
@@ -530,8 +534,8 @@ impl Server {
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
-            show_banner: self.show_vetting_banner(&hour),
-            assurance: self.hour_assurance(&hour, hour_name, &date_str),
+            show_banner: self.review.show_vetting_banner(&hour),
+            assurance: self.review.hour_assurance(&hour, hour_name, &date_str),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -628,13 +632,216 @@ pub fn celebration_name(day: &Day) -> String {
 mod tests {
     use super::*;
 
+    // Ported from Go's `internal/web/schedule_contract_test.go`: app.js
+    // mirrors the schedule so a cached home page can update itself.
     #[test]
-    fn schedule_matches_go() {
-        assert_eq!(current_hour_entry(0), ("compline", "Compline", -1));
+    fn client_office_schedule_matches_server() {
+        let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
+        let client: Vec<(i8, String, String, i32)> = src
+            .split("{ start: ")
+            .skip(1)
+            .map(|rest| {
+                let entry = &rest[..rest.find(" }").unwrap()];
+                let field = |name: &str| {
+                    let at = entry.find(&format!("{name}: ")).unwrap() + name.len() + 2;
+                    entry[at..].split(',').next().unwrap().trim_matches('"').to_string()
+                };
+                let start = entry.split(',').next().unwrap().parse().unwrap();
+                (start, field("slug"), field("label"), field("offset").parse().unwrap())
+            })
+            .collect();
+        assert_eq!(client.len(), CURRENT_HOUR_SCHEDULE.len(), "client and server boundaries");
+        for (got, want) in client.iter().zip(CURRENT_HOUR_SCHEDULE) {
+            assert_eq!((got.0, got.1.as_str(), got.2.as_str(), got.3), want);
+        }
+    }
+
+    #[test]
+    fn current_hour_entry_at_every_boundary() {
+        for (start, slug, label, offset) in CURRENT_HOUR_SCHEDULE {
+            assert_eq!(current_hour_entry(start), (slug, label, offset), "{start:02}:00");
+        }
         assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
-        assert_eq!(current_hour_entry(2), ("lauds", "Lauds", 0));
         assert_eq!(current_hour_entry(16), ("none", "None", 0));
         assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
+    }
+
+    use axum::http::Uri;
+    use calendar::Decision;
+    use liturgy::{ElementType, OfficeElement, OfficeSection};
+
+    use crate::test_server;
+
+    fn hour_with(elements: Vec<OfficeElement>) -> OfficeHour {
+        OfficeHour {
+            form: PrayerForm::Private,
+            date: calendar::Date::new(2026, 1, 1),
+            hour: "lauds".into(),
+            title: "Lauds".into(),
+            season: Some(calendar::Season::Pentecost),
+            feast: "Trinity Sunday".into(),
+            color: Some(calendar::Color::White),
+            sections: vec![OfficeSection { label: "The Collect".into(), collapsible: false, elements }],
+            decisions: Vec::new(),
+        }
+    }
+
+    fn sourced(kind: ElementType, text: &str, key: &str) -> OfficeElement {
+        OfficeElement { source_ref: key.into(), source_refs: vec![key.into()], ..OfficeElement::new(kind, text) }
+    }
+
+    fn review(entries: &[(&str, ProvenanceStatus)]) -> Review {
+        Review { provenance: entries.iter().map(|(k, s)| (k.to_string(), *s)).collect(), ..Review::default() }
+    }
+
+    /// A GET through the whole server, as the mux dispatches it.
+    fn get(path: &str) -> (StatusCode, HeaderMap, String) {
+        let resp = test_server().handle(&Method::GET, &path.parse::<Uri>().unwrap(), &HeaderMap::new(), Some(Vec::new()));
+        let (parts, body) = resp.into_parts();
+        let runtime = tokio::runtime::Builder::new_current_thread().build().unwrap();
+        let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
+        (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
+    }
+
+    // Ported from Go's `internal/web/server_test.go`.
+
+    #[test]
+    fn show_vetting_banner_depends_on_corpus_provenance() {
+        let hour = hour_with(vec![sourced(ElementType::Collect, "Almighty and everlasting God...", "proper/example/collect")]);
+        assert!(!review(&[("proper/example/collect", ProvenanceStatus::Verified)]).show_vetting_banner(&hour), "verified hides it");
+        assert!(review(&[("proper/example/collect", ProvenanceStatus::NeedsReview)]).show_vetting_banner(&hour), "unreviewed shows it");
+        assert!(review(&[]).show_vetting_banner(&hour), "unknown provenance shows it");
+    }
+
+    #[test]
+    fn hour_assurance_counts_dependencies_without_source_contents() {
+        let mut hour = hour_with(vec![
+            sourced(ElementType::Collect, "A collect.", "proper/example/collect"),
+            sourced(ElementType::Psalm, "A psalm.", "psalms/001"),
+            sourced(ElementType::Chapter, "A chapter.", "proper/example/chapter"),
+        ]);
+        hour.decisions = vec![Decision::new("occurrence:higher-rank", "challenger-wins", "")];
+        let got = review(&[("proper/example/collect", ProvenanceStatus::Verified), ("psalms/001", ProvenanceStatus::NeedsReview)])
+            .hour_assurance(&hour, "lauds", "2026-01-01");
+        assert_eq!((got.verified, got.needs_review, got.source_unknown, got.dependencies.len()), (1, 1, 1, 3));
+        assert!(got.decisions.len() == 1 && got.decisions[0].rule == "occurrence:higher-rank");
+        assert!(
+            got.dependencies.iter().any(|d| d.key == "psalms/001" && d.report_url.contains("psalms%2F001")),
+            "the report names the psalm"
+        );
+    }
+
+    #[test]
+    fn hour_page_assurance_disclosure_is_collapsed_and_source_safe() {
+        let (status, _, body) = get("/lauds/2026-06-07");
+        assert_eq!(status, StatusCode::OK);
+        for want in [
+            r#"<details class="assurance-panel">"#,
+            r#"<details class="site-menu">"#,
+            r#"class="today-link""#,
+            r#"class="hour-continuation""#,
+            r#"href="/prime/2026-06-07""#,
+            "Text dependencies",
+            "Composition decisions",
+            "need review",
+            "source unknown",
+        ] {
+            assert!(body.contains(want), "hour page missing {want:?}");
+        }
+        for unwanted in [" documented", "undocumented", "SOURCE:", ".txt", "/home/", "../resources"] {
+            assert!(!body.contains(unwanted), "hour page contains {unwanted:?}");
+        }
+    }
+
+    #[test]
+    fn adjacent_hours_keep_date() {
+        let s = |v: (String, String, String, String)| v;
+        assert_eq!(
+            s(adjacent_hours("sext", "2026-06-07")),
+            ("Terce".into(), "/terce/2026-06-07".into(), "None".into(), "/none/2026-06-07".into())
+        );
+        let (prev, prev_link, _, _) = adjacent_hours("lauds", "2026-06-07");
+        assert!(prev.is_empty() && prev_link.is_empty());
+        let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
+        assert!(next.is_empty() && next_link.is_empty());
+    }
+
+    #[test]
+    fn not_found_page_has_no_vetting_banner() {
+        let (status, _, body) = get("/missing/page/here");
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        assert!(!body.contains(r#"id="site-banner""#));
+    }
+
+    #[test]
+    fn calendar_rejects_extra_path_segments() {
+        for path in ["/calendar/2026/extra", "/calendar/not-a-year/extra"] {
+            assert_eq!(get(path).0, StatusCode::NOT_FOUND, "{path}");
+        }
+    }
+
+    /// A feria still names the day before its commemorations.
+    #[test]
+    fn home_names_feria_before_commemorations() {
+        let (status, headers, body) = get("/?date=2026-09-22");
+        assert_eq!(status, StatusCode::OK);
+        assert_eq!(headers[header::CACHE_CONTROL], "no-cache");
+        let feast = body.find(r#"<p class="feast">Pentecost feria</p>"#).expect("names the feria");
+        let also = body.find(r#"class="commemorations-label""#).expect("commemorations");
+        assert!(feast < also);
+        assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");
+    }
+
+    // Ported from Go's `internal/web/season_test.go`.
+
+    fn body_classes(path: &str) -> Vec<String> {
+        let (status, _, body) = get(path);
+        assert_eq!(status, StatusCode::OK, "{path}");
+        let after = body.split_once(r#"<body class=""#).expect("body class").1;
+        after[..after.find('"').unwrap()].split_whitespace().map(String::from).collect()
+    }
+
+    /// Dates come from the Julian paschalion, not hand-written Easter dates.
+    #[test]
+    fn seasonal_ornament_class_follows_the_paschalion() {
+        let m = MoveableDates::compute(2026);
+        for (what, date, want) in [
+            // Veiled: Passion Sunday through Holy Saturday.
+            ("Passion Sunday", m.passion_sunday, "season-passiontide"),
+            ("mid-Passiontide", m.passion_sunday.add_days(3), "season-passiontide"),
+            ("Palm Sunday", m.passion_sunday.add_days(7), "season-passiontide"),
+            ("Good Friday", m.good_friday, "season-passiontide"),
+            ("Holy Saturday", m.holy_saturday, "season-passiontide"),
+            // Lent proper keeps the ordinary gold.
+            ("Saturday before Passion Sunday", m.passion_sunday.add_days(-1), ""),
+            ("Ash Wednesday", m.ash_wednesday, ""),
+            // Bright: Easter Sunday through the eve of Pentecost.
+            ("Easter Sunday", m.easter, "season-eastertide"),
+            ("Easter Monday", m.easter.add_days(1), "season-eastertide"),
+            ("Low Sunday", m.easter.add_days(7), "season-eastertide"),
+            ("Ascension", m.ascension, "season-eastertide"),
+            ("eve of Pentecost", m.pentecost.add_days(-1), "season-eastertide"),
+            ("Pentecost", m.pentecost, ""),
+            ("Trinity Sunday", m.pentecost.add_days(7), ""),
+        ] {
+            let slug = date_slug(date);
+            for path in [format!("/lauds/{slug}"), format!("/?date={slug}")] {
+                let classes = body_classes(&path);
+                for class in ["season-passiontide", "season-eastertide"] {
+                    assert_eq!(classes.iter().any(|c| c == class), class == want, "{what} ({path}): {class} in {classes:?}");
+                }
+            }
+        }
+    }
+
+    /// Holy Saturday's Vespers is I Vespers of Easter: the ornament follows
+    /// the hour on hour pages and the day on the home page.
+    #[test]
+    fn holy_saturday_vespers_unveils_ahead_of_the_day() {
+        let slug = date_slug(MoveableDates::compute(2026).holy_saturday);
+        assert!(body_classes(&format!("/lauds/{slug}")).contains(&"season-passiontide".into()));
+        assert!(body_classes(&format!("/vespers/{slug}")).contains(&"season-eastertide".into()));
+        assert!(body_classes(&format!("/?date={slug}")).contains(&"season-passiontide".into()));
     }
 
     #[test]

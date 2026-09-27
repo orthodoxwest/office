@@ -38,9 +38,16 @@ pub struct Server {
     cache: YearCache,
     pages: Pages,
     version: String,
+    review: Review,
+    usage: Option<Store>,
+}
+
+/// The review metadata an hour page discloses: each corpus entry's
+/// provenance and its suspicions.
+#[derive(Default)]
+pub(crate) struct Review {
     provenance: HashMap<String, ProvenanceStatus>,
     suspicions: BTreeMap<String, Vec<Suspicion>>,
-    usage: Option<Store>,
 }
 
 /// The registered patterns of Go's mux, by what they serve.
@@ -107,7 +114,7 @@ impl Server {
         let inventory = scan_provenance(&src).map_err(|e| format!("loading provenance: {e}"))?;
         let suspicions = suspicion_by_key(&src, &inventory).map_err(|e| format!("loading review suspicions: {e}"))?;
         let provenance = inventory.entries.iter().map(|e| (e.key.clone(), e.status)).collect();
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, provenance, suspicions, usage: None })
+        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance, suspicions }, usage: None })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A
@@ -202,6 +209,13 @@ pub fn run(server: Server, addr: &str) -> Result<(), String> {
         let app = Router::new().fallback(entry).with_state(server);
         axum::serve(listener, app).await.map_err(|e| format!("server error: {e}"))
     })
+}
+
+/// One server over the live data, shared by the tests.
+#[cfg(test)]
+pub(crate) fn test_server() -> &'static Server {
+    static SERVER: std::sync::OnceLock<Server> = std::sync::OnceLock::new();
+    SERVER.get_or_init(|| Server::new(Path::new("../../data")).unwrap())
 }
 
 #[cfg(test)]

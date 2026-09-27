@@ -149,14 +149,14 @@ pub struct HourData {
     pub assurance: HourAssurance,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct CommemorationRow {
     pub name: String,
     pub incipit: String,
 }
 
 /// One day of the year calendar, with its office digest.
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct DayRow {
     pub day_num: u32,
     pub weekday: String,
@@ -181,7 +181,7 @@ pub struct DayRow {
     pub vespers_note: String,
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
 pub struct MonthData {
     pub name: String,
     pub slug: String,

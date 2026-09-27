@@ -96,6 +96,8 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   ordo/                    Text ordo (Tabula + per-hour stanzas) and the rubrics TSV
   render-text/             Plain-text hour rendering (Go's FormatOfficeHour)
   render-tex/              LuaLaTeX booklet (Go's FormatOfficeHourTeX); caller supplies GABC lookup
+  render-html/             Go's internal/render: HTML conversion, leader forms, usage model, and the
+                           templates in minijinja (identical markup; html/template escaping reproduced)
   tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
                            corpus editing, proper scaffolds
 apps/
@@ -243,7 +245,8 @@ make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make rust-parity # Go vs Rust: dump groups 1900–2199, hours + tex on 127 sample dates, ordo/rubrics,
                  # validate/lint/audit (live + mutated data), review reports and ledger writers,
-                 # corpus/scaffold editing on data copies
+                 # corpus/scaffold editing on data copies, and a crawl of both web servers
+make test-ux-rust # Playwright suites against office-rs serve (PLAYWRIGHT_SERVER=rust)
 make rust-parity-full # Rust 2026–2053 dump digest + assurance report vs their goldens (nightly in CI)
 make clean       # Remove artifacts
 ```

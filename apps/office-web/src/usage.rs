@@ -189,9 +189,10 @@ fn eastern() -> jiff::tz::TimeZone {
     crate::gotime::zone("America/New_York").unwrap_or(jiff::tz::TimeZone::UTC)
 }
 
-/// The reporting day of now: a civil date in America/New_York.
-fn eastern_today() -> Date {
-    crate::gotime::now_in(&eastern()).0
+/// The reporting day of an instant: its civil date in America/New_York.
+fn eastern_day(now: jiff::Timestamp) -> Date {
+    let z = now.to_zoned(eastern());
+    Date::new(i32::from(z.year()), i32::from(z.month()), i32::from(z.day()))
 }
 
 /// The SQLite store, one connection as in Go.
@@ -221,11 +222,11 @@ CREATE TABLE IF NOT EXISTS seen (
 
     /// Counts a browser once per day for the site, the page scope, and each
     /// dimension. Only a per-day hash of the cookie is stored.
-    pub fn record(&self, browser: &str, scope: &str, dimensions: &[String]) -> Result<(), String> {
+    pub fn record(&self, now: jiff::Timestamp, browser: &str, scope: &str, dimensions: &[String]) -> Result<(), String> {
         if !valid_scope(scope) || dimensions.iter().any(|d| dimension_key(d).is_none()) {
             return Err("invalid usage event".into());
         }
-        let today = eastern_today();
+        let today = eastern_day(now);
         let day = crate::gotime::date_slug(today);
         let hash = Sha256::digest(format!("{day}\x00{browser}").as_bytes());
         let mut conn = self.conn.lock().map_err(|e| e.to_string())?;
@@ -249,11 +250,11 @@ CREATE TABLE IF NOT EXISTS seen (
     }
 
     /// A zero-filled window of `days`, newest first.
-    pub fn daily(&self, days: usize) -> Result<Vec<UsageDay>, String> {
+    pub fn daily(&self, now: jiff::Timestamp, days: usize) -> Result<Vec<UsageDay>, String> {
         if !(1..=366).contains(&days) {
             return Err("invalid day window".into());
         }
-        let today = eastern_today();
+        let today = eastern_day(now);
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
         conn.execute("DELETE FROM seen WHERE day < ?", [crate::gotime::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
         let mut result: Vec<UsageDay> =
@@ -396,7 +397,7 @@ pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap,
             id
         }
     };
-    if store.record(&id, &event.scope, &event.dimensions).is_err() {
+    if store.record(jiff::Timestamp::now(), &id, &event.scope, &event.dimensions).is_err() {
         let mut failed = response(StatusCode::SERVICE_UNAVAILABLE, Body::empty());
         if let Some(c) = resp.headers().get(header::SET_COOKIE) {
             failed.headers_mut().insert(header::SET_COOKIE, c.clone());
@@ -422,7 +423,7 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
             _ => return with_usage_headers(http_error("Choose 7, 30, 90 or 365 days", StatusCode::BAD_REQUEST)),
         }
     }
-    let Ok(rows) = store.daily(days as usize) else {
+    let Ok(rows) = store.daily(jiff::Timestamp::now(), days as usize) else {
         return with_usage_headers(http_error("Usage temporarily unavailable", StatusCode::SERVICE_UNAVAILABLE));
     };
     let data = render_html::usage::usage_data(rows, days, &DIMENSIONS);
@@ -449,15 +450,6 @@ mod tests {
     }
 
     #[test]
-    fn bots() {
-        assert!(is_bot(""));
-        assert!(is_bot("Mozilla/5.0 (compatible; Googlebot/2.1)"));
-        assert!(is_bot("somethingbot/1.0"));
-        assert!(!is_bot("Mozilla/5.0 (Linux; Android 10; Cubot Note 20)"));
-        assert!(is_bot("curl/8.0"));
-    }
-
-    #[test]
     fn origins() {
         assert_eq!(origin_parts("https://office.example:8443"), Some(("https".into(), "office.example:8443".into())));
         assert_eq!(origin_parts("HTTP://a.b"), Some(("http".into(), "a.b".into())));
@@ -465,21 +457,246 @@ mod tests {
         assert_eq!(origin_parts("https://a.b:x"), None);
     }
 
+    // Ported from Go's `internal/usage/bots_test.go`.
     #[test]
-    fn store_round_trip() {
-        let dir = std::env::temp_dir().join(format!("office-usage-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("usage.db");
-        let store = Store::open(path.to_str().unwrap()).unwrap();
-        store.record("a", "lauds", &["screen:mobile".into()]).unwrap();
-        store.record("a", "lauds", &[]).unwrap();
-        store.record("b", "ordo", &[]).unwrap();
-        let rows = store.daily(7).unwrap();
-        assert_eq!(rows.len(), 7);
-        assert_eq!(rows[0].users, 2);
-        assert_eq!(rows[0].hours[0], 1);
-        assert_eq!(rows[0].ordo, 1);
-        assert_eq!(rows[0].dimensions.get("screen:mobile"), Some(&1));
-        std::fs::remove_dir_all(&dir).unwrap();
+    fn bots_and_people() {
+        for agent in [
+            "",
+            "   ",
+            "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+            "Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)",
+            "Mozilla/5.0 (compatible; AhrefsBot/7.0; +http://ahrefs.com/robot/)",
+            "Mozilla/5.0 (compatible; SemrushBot/7~bl; +http://www.semrush.com/bot.html)",
+            "GPTBot/1.1 (+https://openai.com/gptbot)",
+            "Mozilla/5.0 (compatible; ClaudeBot/1.0; +claudebot@anthropic.com)",
+            "Mozilla/5.0 (compatible; PerplexityBot/1.0)",
+            "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.0.0 Safari/537.36",
+            "python-requests/2.32.3",
+            "curl/8.7.1",
+            "Wget/1.21.4",
+            "Go-http-client/2.0",
+            "Scrapy/2.11 (+https://scrapy.org)",
+            "facebookexternalhit/1.1",
+            "Mozilla/5.0 (compatible; YandexBot/3.0)",
+            // An unknown crawler in the "<name>bot/<version>" form.
+            "Mozilla/5.0 (compatible; NewfangledBot/0.3; +https://example.test)",
+        ] {
+            assert!(is_bot(agent), "is_bot({agent:?})");
+        }
+        // Several phone makers put "bot" inside a model name.
+        for agent in [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
+            "Mozilla/5.0 (Linux; Android 13; Cubot Note 20) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 10; CUBOT_X30) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
+            "Mozilla/5.0 (Linux; Android 14; Abbot One) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15",
+        ] {
+            assert!(!is_bot(agent), "is_bot({agent:?})");
+        }
+    }
+
+    // Ported from Go's `internal/usage/store_test.go` and `leader_test.go`.
+
+    struct TempDb(std::path::PathBuf);
+
+    impl TempDb {
+        fn new(name: &str) -> TempDb {
+            let dir = std::env::temp_dir().join(format!("office-usage-{name}-{}", std::process::id()));
+            std::fs::create_dir_all(&dir).unwrap();
+            TempDb(dir.join("usage.sqlite"))
+        }
+
+        fn open(&self) -> Store {
+            Store::open(self.0.to_str().unwrap()).unwrap()
+        }
+    }
+
+    impl Drop for TempDb {
+        fn drop(&mut self) {
+            if let Some(dir) = self.0.parent() {
+                let _ = std::fs::remove_dir_all(dir);
+            }
+        }
+    }
+
+    fn eastern_at(y: i16, m: i8, d: i8, h: i8, min: i8) -> jiff::Timestamp {
+        jiff::civil::date(y, m, d).at(h, min, 0, 0).to_zoned(eastern()).unwrap().timestamp()
+    }
+
+    fn count(store: &Store, sql: &str) -> i64 {
+        store.conn.lock().unwrap().query_row(sql, [], |r| r.get(0)).unwrap()
+    }
+
+    fn dims(v: &[&str]) -> Vec<String> {
+        v.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn daily_deduplication_and_persistence() {
+        let db = TempDb::new("dedupe");
+        let store = db.open();
+        let now = eastern_at(2026, 9, 4, 23, 59);
+        std::thread::scope(|s| {
+            for _ in 0..12 {
+                s.spawn(|| store.record(now, "browser-a", "lauds", &[]).unwrap());
+            }
+        });
+        for (id, scope) in
+            [("browser-a", "vespers"), ("browser-b", "lauds"), ("browser-c", "site"), ("browser-d", "ordo"), ("browser-e", "reminders")]
+        {
+            store.record(now, id, scope, &[]).unwrap();
+        }
+        drop(store);
+        let store = db.open();
+        let rows = store.daily(now, 7).unwrap();
+        assert!(
+            rows[0].users == 5
+                && rows[0].hours[0] == 2
+                && rows[0].hours[5] == 1
+                && rows[0].ordo == 1
+                && rows[0].reminders == 1
+                && rows[1].users == 0,
+            "counts: {rows:?}"
+        );
+        let tomorrow = now.checked_add(jiff::SignedDuration::from_mins(2)).unwrap();
+        store.record(tomorrow, "browser-a", "lauds", &[]).unwrap();
+        let rows = store.daily(tomorrow, 7).unwrap();
+        assert!(rows[0].day == "2026-09-05" && rows[0].users == 1 && rows[1].users == 5, "midnight counts: {rows:?}");
+        assert_eq!(
+            count(&store, "SELECT COUNT(DISTINCT browser) FROM seen WHERE scope='vespers' OR day='2026-09-05'"),
+            2,
+            "daily hashes were reused"
+        );
+        let future = eastern_at(2026, 9, 8, 23, 59);
+        let rows = store.daily(future, 7).unwrap();
+        assert_eq!(count(&store, "SELECT COUNT(*) FROM seen"), 0, "retention kept identifiers");
+        assert_eq!(rows[4].users, 5, "retention lost totals");
+    }
+
+    #[test]
+    fn reporting_day_across_dst() {
+        for (value, utc_day) in [("2026-03-08T04:59:00Z", "2026-03-08"), ("2026-11-01T03:59:00Z", "2026-11-01")] {
+            let now: jiff::Timestamp = value.parse().unwrap();
+            assert_ne!(crate::gotime::date_slug(eastern_day(now)), utc_day, "used UTC instead of Eastern: {value}");
+        }
+    }
+
+    // Ported from Go's `TestUsageTrendDimensionsCoverTheVocabulary`: every
+    // stored family has a report breakdown.
+    #[test]
+    fn trend_dimensions_cover_the_vocabulary() {
+        use render_html::usage::TREND_LABELS;
+        assert_eq!(TREND_LABELS.len() + 1, DIMENSIONS.len());
+        for (key, labels) in TREND_LABELS {
+            let dimension = DIMENSIONS.iter().find(|d| d.key == key).unwrap_or_else(|| panic!("unmapped {key}"));
+            assert_eq!(dimension.values.len(), labels.len(), "{key}");
+            assert!(labels.iter().all(|l| !l.is_empty()), "{key}");
+        }
+    }
+
+    #[test]
+    fn dimension_vocabulary_is_unambiguous() {
+        // Counts live under "<key>:<value>" forever: keys and values stay
+        // distinct and colon-free, and no page scope looks qualified.
+        let mut keys = Vec::new();
+        let mut scopes = Vec::new();
+        for d in &DIMENSIONS {
+            assert!(!d.key.is_empty() && !d.key.contains(':') && !keys.contains(&d.key), "key {:?}", d.key);
+            keys.push(d.key);
+            assert_ne!(d.values[0], d.values[1], "{} has one value twice", d.key);
+            for value in d.values {
+                assert!(!value.is_empty() && !value.contains(':'), "value {value:?}");
+                let scope = format!("{}:{value}", d.key);
+                assert!(!scopes.contains(&scope) && !valid_scope(&scope), "scope {scope:?} collides");
+                assert_eq!(dimension_key(&scope), Some(d.key));
+                scopes.push(scope);
+            }
+        }
+        for scope in ["site", "ordo", "reminders"].iter().chain(HOURS.iter()) {
+            assert!(!scope.contains(':'));
+        }
+    }
+
+    #[test]
+    fn beacon_dimensions_parse_and_count() {
+        for (body, scope, want) in [
+            ("lauds appearance:apse screen:mobile", "lauds", vec!["appearance:apse", "screen:mobile"]),
+            ("site appearance:nave screen:desktop", "site", vec!["appearance:nave", "screen:desktop"]),
+            // A client from before dimensions existed.
+            ("vespers", "vespers", vec![]),
+            // Unreadable tokens are dropped; a bare value names no family.
+            ("ordo chant:gabc appearance:apse", "ordo", vec!["appearance:apse"]),
+            ("ordo apse", "ordo", vec![]),
+            // One value per family wins.
+            ("prime appearance:nave appearance:apse screen:mobile", "prime", vec!["appearance:nave", "screen:mobile"]),
+        ] {
+            let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
+            assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
+        }
+        for body in ["", "matins", "matins appearance:nave", "appearance:nave", " lauds"] {
+            assert!(parse_event(body).is_none(), "{body:?} accepted");
+        }
+
+        let db = TempDb::new("dimensions");
+        let store = db.open();
+        let now = eastern_at(2026, 9, 4, 9, 0);
+        // One reader praying two hours counts once in each dimension.
+        for hour in ["lauds", "vespers"] {
+            store.record(now, "browser-a", hour, &dims(&["appearance:apse", "screen:mobile"])).unwrap();
+        }
+        store.record(now, "browser-b", "lauds", &dims(&["appearance:nave", "screen:desktop"])).unwrap();
+        // A browser without the new app.js still counts overall.
+        store.record(now, "browser-c", "lauds", &[]).unwrap();
+        for bad in ["narthex:vault", "apse"] {
+            assert!(store.record(now, "browser-d", "lauds", &dims(&[bad])).is_err(), "accepted {bad:?}");
+        }
+        let rows = store.daily(now, 7).unwrap();
+        let d = |r: &UsageDay, k: &str| r.dimensions.get(k).copied().unwrap_or(0);
+        assert!(rows[0].users == 3 && rows[0].hours[0] == 3, "totals: {:?}", rows[0]);
+        for k in ["appearance:apse", "screen:mobile", "appearance:nave", "screen:desktop"] {
+            assert_eq!(d(&rows[0], k), 1, "{k}");
+        }
+        assert_eq!(d(&rows[1], "appearance:nave"), 0);
+        // The silent client is in the total but in neither appearance.
+        assert!(d(&rows[0], "appearance:nave") + d(&rows[0], "appearance:apse") < rows[0].users);
+        // Switching appearance during the day counts on both sides.
+        store.record(eastern_at(2026, 9, 4, 10, 0), "browser-a", "compline", &dims(&["appearance:nave", "screen:mobile"])).unwrap();
+        let rows = store.daily(now, 7).unwrap();
+        assert!(
+            rows[0].users == 3
+                && d(&rows[0], "appearance:nave") == 2
+                && d(&rows[0], "appearance:apse") == 1
+                && d(&rows[0], "screen:mobile") == 1,
+            "appearance switch: {:?}",
+            rows[0]
+        );
+    }
+
+    #[test]
+    fn prayer_form_dimension_counts_forms_without_inflating_visits() {
+        let db = TempDb::new("forms");
+        let store = db.open();
+        let now: jiff::Timestamp = "2026-09-10T12:00:00Z".parse().unwrap();
+        for body in [
+            "lauds prayer-form:private",
+            "lauds prayer-form:private",
+            "lauds prayer-form:priest",
+            "vespers prayer-form:deacon",
+            "site prayer-form:private",
+            "lauds prayer-form:unknown",
+        ] {
+            let event = parse_event(body).unwrap();
+            store.record(now, "one-browser", &event.scope, &event.dimensions).unwrap();
+        }
+        let row = &store.daily(now, 1).unwrap()[0];
+        assert!(row.users == 1 && row.hours[0] == 1 && row.hours[5] == 1, "inflated visits: {row:?}");
+        for form in ["private", "deacon", "priest"] {
+            assert_eq!(row.dimensions.get(&format!("prayer-form:{form}")), Some(&1), "{form}");
+        }
+        for scope in ["site", "ordo", "reminders"] {
+            assert!(parse_event(&format!("{scope} prayer-form:priest")).unwrap().dimensions.is_empty(), "form counted without an office");
+        }
     }
 }

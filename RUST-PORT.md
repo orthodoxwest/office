@@ -5,13 +5,14 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0–4 are complete. `office-rs dump` is byte-identical to Go:
-the corpus, calendar, and office groups for 1900–2199, and every hour in
-every prayer form for 2026–2053 (the parity snapshot). Every Go command but
-`serve` has a Rust counterpart with the same output: the ordo, the rubrics
-TSV, the hours, the TeX booklet, validate, audit, lint, the review
-subcommands, and the data-editing commands. Next: Phase 5, the web server.
-Nothing user-facing changes until the cutover in Phase 6.
+**Status:** Phases 0–4 are complete, and Phase 5 is awaiting its CI gate.
+`office-rs dump` is byte-identical to Go: the corpus, calendar, and office
+groups for 1900–2199, and every hour in every prayer form for 2026–2053 (the
+parity snapshot). Every Go command has a Rust counterpart with the same
+output: the ordo, the rubrics TSV, the hours, the TeX booklet, validate,
+audit, lint, the review subcommands, the data-editing commands, and `serve`,
+whose pages match Go's server response for response. Nothing user-facing
+changes until the cutover in Phase 6.
 
 ## Why Rust
 
@@ -384,3 +385,51 @@ until then.
       `tools::scaffold`): `scripts/rust-parity-edit.sh` runs the same
       sequence, error paths included, on two copies of the data and diffs
       the output and trees
+
+## Phase 5 checklist
+
+- [x] `render-html` crate: Go's `internal/render`. The text-to-HTML
+      conversion, the leader-form alignment, and the usage report model are
+      ported as they are; the templates are the Go templates translated to
+      minijinja with identical markup, and a formatter reproduces
+      `html/template`'s escaping in text, attribute, URL, and JSON contexts.
+      Floats reach the templates already formatted as Go prints them
+- [x] `apps/office-web`: Go's `internal/web` and `internal/usage` on axum,
+      rusqlite, and jiff, served by `office-rs serve`. The static assets are
+      embedded from `internal/web/static`; the SQLite schema is Go's, so either
+      server opens the other's database. Routing reproduces `http.ServeMux`
+      (path cleaning, the `/static` trailing-slash redirect, per-segment
+      unescaping) and `http.FileServer` (listings, `index.html` and slash
+      redirects, error headers). Zones come from jiff's bundled database, as
+      Go's come from the embedded `time/tzdata`, looked up by exact name; the
+      reminder feed resolves skipped and repeated wall times as `time.Date`
+      does. The engine gains the Martyrology preview (`ComposeOptions`)
+- [x] The Go unit tests for `internal/render`, `internal/usage`, and the
+      handler logic of `internal/web`, where they reach code the crawl cannot
+      (synthetic elements, the store's dedupe and retention, the cache, the
+      ICS builder, the app.js schedule contract, version hashing). Tests of
+      the shared static files (service worker, app.js, CSS) stay in Go
+- [x] The crawl (`scripts/rust-parity-web.sh`, in `make rust-parity`): both
+      servers answer the same 2163 requests identically after normalizing
+      the build stamp, DTSTAMP, and the usage cookie. It covers every hour
+      and day page on the 127 sample dates and the links they carry,
+      calendar years, `tz` cookies, the reminder feed and its errors, the
+      usage beacon and report against a seeded database, static assets,
+      HEAD and other methods, and Go's canonicalization of odd paths
+- [ ] The Playwright suites, visual snapshots included, pass unchanged
+      against `office-rs` (CI job "UX (Rust server)"; `make test-ux-rust`
+      locally). The behavior suite matched Go's results locally
+
+Known differences, all outside what a page or feed shows a reader:
+
+- `/static/` ignores `Range` and conditional headers. Go's `ServeContent`
+  honors them, though Go sends neither `ETag` nor `Last-Modified` for
+  embedded files, so no browser revalidates them.
+- Transport-level handling (Host validation, malformed request lines beyond a
+  bad path escape, HTTP/2) is hyper's, not Go's.
+- Error pages word calendar-build failures in Rust's terms, per the rule on
+  error wording, and show undecodable bytes in a path or query as U+FFFD
+  where Go's `%q` shows `\xff`.
+- The feast files load once at startup; Go rereads them for each year it
+  builds, which only matters if the data directory changes under a running
+  server.
