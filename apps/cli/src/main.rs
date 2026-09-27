@@ -1,0 +1,42 @@
+//! `office-rs`: the command-line front end of the Rust engine. It mirrors the
+//! Go `office` commands as they are ported (RUST-PORT.md).
+
+mod args;
+mod dump;
+mod fsdata;
+
+use std::io::Write;
+use std::process::ExitCode;
+
+const USAGE: &str = "usage: office-rs <command> [args]
+
+Commands: dump";
+
+fn main() -> ExitCode {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let Some((name, rest)) = args.split_first() else {
+        eprintln!("{USAGE}");
+        return ExitCode::FAILURE;
+    };
+    let command: fn(&fsdata::FsData, &[String], &mut dyn Write) -> Result<(), String> = match name.as_str() {
+        "dump" => dump::cmd_dump,
+        _ => {
+            eprintln!("Unknown command: {name}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let Some(data) = fsdata::FsData::find() else {
+        eprintln!("Cannot find data directory");
+        return ExitCode::FAILURE;
+    };
+    let stdout = std::io::stdout();
+    let mut out = std::io::BufWriter::with_capacity(1 << 20, stdout.lock());
+    let result = command(&data, rest, &mut out).and_then(|()| out.flush().map_err(|e| e.to_string()));
+    match result {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("{e}");
+            ExitCode::FAILURE
+        }
+    }
+}

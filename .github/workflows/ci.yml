@@ -74,6 +74,43 @@ jobs:
           path: output/coverage/
           retention-days: 14
 
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          components: rustfmt, clippy
+          # The core crates must cross-compile for the mobile apps from the
+          # first week (RUST-PORT.md, "Rules").
+          targets: aarch64-apple-ios, aarch64-linux-android
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Format, lint, and test
+        run: make rust-check
+
+      - name: Cross-compile the core crates for iOS and Android
+        run: |
+          for target in aarch64-apple-ios aarch64-linux-android; do
+            cargo build -p calendar --target "$target"
+          done
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Go/Rust parity
+        run: make rust-parity
+
   golden:
     name: Golden tests
     runs-on: ubuntu-latest

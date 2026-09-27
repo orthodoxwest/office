@@ -5,8 +5,10 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phase 0 (the oracle) is in progress. Nothing user-facing changes
-until the cutover in Phase 6.
+**Status:** Phase 1 (the `calendar` crate) is complete: `office-rs dump
+-groups calendar` is byte-identical to Go for 1900–2199. Phase 0's corpus
+prerequisites are still open. Nothing user-facing changes until the cutover in
+Phase 6.
 
 ## Why Rust
 
@@ -261,6 +263,25 @@ dates. A nightly job compares the full window.
 - [ ] Phase 2 prerequisites: a `corpus` record group (every key with its
       resolved body and directive) and broken test corpora with expected
       `validate` output
+
+## Phase 1 checklist
+
+- [x] Cargo workspace at the repository root (`crates/calendar`, `apps/cli`),
+      toolchain pinned in CI, `rustfmt.toml`
+- [x] `calendar` crate: civil date type, computus and moveable dates, seasons,
+      Tabula, feast and penitential loaders (through a `DataSource`, no file
+      access), occurrence, XIV.14 commemoration order, the year builder
+- [x] `office-rs dump` for the `calendar` group (`-start`/`-years`, `-dates`,
+      `-hours`, `-forms`, `-groups`)
+- [x] Gate: `make rust-parity` — `calendar` group identical for 1900–2199,
+      Tabula included
+- [x] CI: `make rust-check` (fmt, clippy `-D warnings`, tests), iOS and
+      Android cross-builds of the core crates, and the parity gate
+- [ ] Port the remaining Go calendar unit tests (a first set is ported; the
+      data-backed builder assertions are also covered by the parity gate)
+
+Concurrence (`concurrence.go`), the Marian antiphon, and the historia weeks
+move to the `office` crate with the `office_day` record, as planned.
 
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change

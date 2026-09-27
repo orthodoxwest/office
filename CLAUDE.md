@@ -86,6 +86,10 @@ internal/
     prescreen.go           Durable prescreen-flag ledger + suspicion map (flags ∪ advisory lints)
     assurance.go           Composition explanations and optional engine-behavior samples
     assurance_gate.go      Text-provenance baseline, gate, and CI summary
+crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo root
+  calendar/                Computus, seasons, feast loader, occurrence, builder (no file access)
+apps/
+  cli/                     office-rs: dump (compared byte for byte against Go's office dump)
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
   genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)
@@ -225,6 +229,8 @@ make mutate      # Mutation-test whole packages (MUTATE_PKGS=./internal/calendar
 make mutate-diff # Mutation-test only lines changed vs master (local review)
 make test-coverage # Run unit tests and enforce per-package coverage floors (also in CI)
 make golden      # Regenerate golden test files after intentional changes
+make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
+make rust-parity # Go vs Rust dump for the ported record groups (calendar: 1900–2199)
 make clean       # Remove artifacts
 ```
 

@@ -1,4 +1,4 @@
-.PHONY: help build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden clean install-gremlins mutate mutate-diff test-coverage
+.PHONY: help build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity clean install-gremlins mutate mutate-diff test-coverage
 
 YEAR ?= 2026
 
@@ -184,6 +184,15 @@ mutate: install-gremlins ## Mutation-test whole packages for targeted test revie
 mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
 	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
 		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
+
+rust-check: ## Rust workspace: fmt, clippy, and tests
+	cargo fmt --check
+	cargo clippy --workspace --all-targets -- -D warnings
+	cargo test --workspace
+
+rust-parity: build ## Compare the Go and Rust dumps for the ported record groups
+	cargo build --release -p office-cli
+	scripts/rust-parity.sh calendar -start 1900 -years 300
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1
