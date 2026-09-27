@@ -354,6 +354,11 @@ until then.
       and `review` layers and five cases; the Rust reports match on all 15
       (`cargo test -p tools`), and `make rust-parity` runs `validate` on the
       live data
-- [ ] `audit` (placeholders, missing propers, the composition sweep)
-- [ ] `lint` (the text-corpus lints)
+- [x] `audit` (placeholders, missing propers, flat antiphons, translation
+      review, and the composition sweep) and `lint` (`tools::audit`):
+      identical on the live data and, through
+      `scripts/rust-parity-mutated.sh`, on a copy of it broken in known ways,
+      which reaches the finding paths the clean data never does.
+      `compat::quote` now escapes exactly what Go's `strconv.IsPrint`
+      rejects (Go's tables, checked on every code point)
 - [ ] Assurance and the review subcommands still in use

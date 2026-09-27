@@ -36,3 +36,26 @@ pub fn cmd_validate(data: &FsData, args: &[String], out: &mut dyn Write) -> Resu
     }
     Err(REPORTED.into())
 }
+
+/// `audit [-year N]`: placeholders and missing propers, then the composition
+/// sweep of one year.
+pub fn cmd_audit(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
+    let flags = crate::args::Flags::parse(args, &["year"])?;
+    let year = flags.int("year", i64::from(crate::commands::today().year()))?;
+    let year = i32::try_from(year).map_err(|_| format!("invalid value \"{year}\" for flag -year: value out of range"))?;
+    let report = tools::audit::run(data)?;
+    write!(out, "{}", tools::audit::format_report(&report)).map_err(|e| e.to_string())?;
+    let sweep = tools::audit::sweep::sweep_year(data, year).map_err(|e| format!("running sweep: {e}"))?;
+    write!(out, "{}", tools::audit::sweep::format_sweep(&sweep)).map_err(|e| e.to_string())
+}
+
+/// `lint`: mechanical findings fail; advisory ones are printed for triage.
+pub fn cmd_lint(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
+    if !args.is_empty() {
+        return Err("usage: office lint".into());
+    }
+    let report = tools::audit::lint::lint(data)?;
+    let (text, failed) = tools::audit::lint::format_lint(&report);
+    write!(out, "{text}").map_err(|e| e.to_string())?;
+    if failed { Err(REPORTED.into()) } else { Ok(()) }
+}

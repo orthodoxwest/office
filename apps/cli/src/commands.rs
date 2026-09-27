@@ -119,7 +119,7 @@ pub fn cmd_tex(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<()
 
 /// Today's civil date. PORT(inherited): Go's `time.Now()` is local time; this
 /// is UTC, which only differs when no date is given near midnight.
-fn today() -> Date {
+pub fn today() -> Date {
     let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
     Date::new(1970, 1, 1).add_days((secs / 86_400) as i32)
 }

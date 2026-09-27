@@ -11,7 +11,7 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: office-rs <command> [args]
 
-Commands: ordo, rubrics, validate, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
+Commands: ordo, rubrics, validate, audit, lint, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -22,6 +22,8 @@ fn main() -> ExitCode {
     let command: fn(&tools::fs::FsData, &[String], &mut dyn Write) -> Result<(), String> = match name.as_str() {
         "dump" => dump::cmd_dump,
         "validate" => checks::cmd_validate,
+        "audit" => checks::cmd_audit,
+        "lint" => checks::cmd_lint,
         "ordo" => commands::cmd_ordo,
         "rubrics" => commands::cmd_rubrics,
         "lauds" => |d, a, o| commands::cmd_hour("lauds", d, a, o),

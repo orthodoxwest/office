@@ -4,10 +4,10 @@
 //! Rust's. Remove the crate after the cutover (Phase 7).
 
 pub mod csv;
+mod isprint;
 
-/// Quotes `s` as Go's `strconv.Quote` does for printable text: backslash
-/// escapes for quote, backslash, and control characters; everything else
-/// literal.
+/// Quotes `s` as Go's `strconv.Quote` does: backslash escapes for quote,
+/// backslash, and every rune Go's `strconv.IsPrint` rejects.
 pub fn quote(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 2);
     out.push('"');
@@ -22,14 +22,36 @@ pub fn quote(s: &str) -> String {
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
             '\u{b}' => out.push_str("\\v"),
+            c if is_print(c) => out.push(c),
             c if (c as u32) < 0x20 || c == '\u{7f}' => out.push_str(&format!("\\x{:02x}", c as u32)),
-            // PORT(inherited): Go also escapes non-printable Unicode (unicode.IsPrint);
-            // the data files contain none.
-            c => out.push(c),
+            c if (c as u32) < 0x10000 => out.push_str(&format!("\\u{:04x}", c as u32)),
+            c => out.push_str(&format!("\\U{:08x}", c as u32)),
         }
     }
     out.push('"');
     out
+}
+
+/// Go's `strconv.IsPrint`: letters, marks, numbers, punctuation, symbols,
+/// and the ASCII space, per Go's Unicode tables.
+pub fn is_print(c: char) -> bool {
+    let r = c as u32;
+    if r <= 0xFF {
+        return (0x20..=0x7E).contains(&r) || ((0xA1..=0xFF).contains(&r) && r != 0xAD);
+    }
+    // The first index whose entry is >= x starts or ends the range that
+    // might hold x.
+    fn in_ranges<T: Ord + Copy>(ranges: &[T], x: T) -> bool {
+        let i = ranges.partition_point(|&v| v < x);
+        i < ranges.len() && ranges[i & !1] <= x && x <= ranges[i | 1]
+    }
+    if let Ok(rr) = u16::try_from(r) {
+        return in_ranges(&isprint::IS_PRINT16, rr) && isprint::IS_NOT_PRINT16.binary_search(&rr).is_err();
+    }
+    if !in_ranges(&isprint::IS_PRINT32, r) {
+        return false;
+    }
+    r >= 0x20000 || isprint::IS_NOT_PRINT32.binary_search(&((r - 0x10000) as u16)).is_err()
 }
 
 /// Go's `bufio.Scanner` with `ScanLines`: split on `\n`, drop one trailing
@@ -53,6 +75,12 @@ pub fn atoi(s: &str) -> Result<i64, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn quote_escapes_what_go_cannot_print() {
+        assert_eq!(quote("a\u{a0}b\u{200b}\u{E0001}\u{378}é\u{7f}\u{1F600}"), "\"a\\u00a0b\\u200b\\U000e0001\\u0378é\\x7f\u{1F600}\"");
+        assert!(is_print(' ') && is_print('…') && !is_print('\u{ad}') && !is_print('\u{2028}'));
+    }
 
     #[test]
     fn scan_lines_matches_bufio() {

@@ -288,6 +288,7 @@ dependencies = [
  "calendar",
  "compat",
  "corpus",
+ "liturgy",
  "office",
  "regex",
  "sha2",
