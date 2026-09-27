@@ -120,11 +120,11 @@ To Father and to Paraclete.
 
 Amen.
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Of All Thy Warrior Saints, O Lord, One Martyr out of Paschaltide Vespers.docx); draft archdiocesan Vespers book, p. 65
+# SOURCE: Monastic Diurnal.pdf, p. 196–197
 Deus, tuorum militum
 
 Of all thy warrior saints, O Lord,
-The portion, crown, and great reward,
+The portion, crown, and great reward:
 From all transgressions set us free,
 Who sing thy Martyr's victory.
 
@@ -143,12 +143,13 @@ Regard us from thy throne above,
 On this thy Martyr's triumph day,
 Wash every stain of sin away.
 
-Enduring laud and praise be done
-To God the Father, and the Son,
-And to the Holy Paraclete,
-For endless ages as is meet.
+All honour, laud, and glory be,
+O Jesu, Virgin-born, to thee;
+All glory, as is ever meet,
+To Father and to Paraclete.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 78 (Saint Stephen, Protomartyr)
 V. Devout men carried Stephen to his burial.

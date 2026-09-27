@@ -77,12 +77,12 @@ These were redeemed from among men, being the firstfruits unto God and to the La
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (All Hail! Ye Infant Martyr Flowers, Holy Innocents Vespers.docx); draft archdiocesan Lauds/Vespers books, pp. 98, 85
+# SOURCE: Monastic Diurnal.pdf, p. 202
 Salvete, flores Martyrum
 
 All hail! ye infant martyr flowers,
 Cut off in life's first dawning hours:
-As rose-buds snapt in tempest strife
+As rosebuds snapt in tempest strife
 When Herod sought your Saviour's life.
 
 You, tender flock of Christ, we sing,
@@ -96,6 +96,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [hymn-vespers]
 @use proper/holy-innocents/hymn-lauds
 

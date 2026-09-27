@@ -13,8 +13,8 @@ Right worthy of honour * is blessed John the Apostle, who leaned on the Lord's b
 This is that disciple * which testifieth of these things: and we know that his testimony is true.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 82 (Saint John, Apostle and Evangelist)
-This is my disciple * if I will that he tarry till I come.
+# SOURCE: Monastic Diurnal.pdf, p. 198
+This is my disciple, * if I will that he tarry till I come.
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 83 (Saint John, Apostle and Evangelist)
@@ -55,12 +55,12 @@ There went this saying abroad * among the brethren, that that disciple should no
 @use proper/st-john-evangelist/versicle-vespers
 
 [commemoration-collect]
-# SOURCE: draft archdiocesan Vespers book, p. 68 (Commemoration of Saint John)
-Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church; that it, being illumined by the doctrine of thy blessed Apostle and Evangelist Saint John, may so walk in the light of thy truth, that it may at length attain to life everlasting.
+# SOURCE: Monastic Diurnal.pdf, p. 197, 199
+Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church, that it, being illumined by the doctrine of thy blessed Apostle and Evangelist Saint John, may so walk in the light of thy truth, that it may at length attain to life everlasting.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 90, 77
-O Lord, graciously illumine thy Church; that, being enlightened by the doctrine of blessed John, thy Apostle and Evangelist, she may attain unto everlasting gifts.
+# SOURCE: Monastic Diurnal.pdf, p. 199
+Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church, that it, being illumined by the doctrine of thy blessed Apostle and Evangelist Saint John, may so walk in the light of thy truth, that it may at length attain to life everlasting.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 86 (Saint John, Apostle and Evangelist)
