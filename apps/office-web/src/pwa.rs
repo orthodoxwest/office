@@ -23,18 +23,27 @@ pub fn file(name: &str) -> Option<&'static [u8]> {
 /// exactly when a deploy can change a page.
 pub fn compute_version(data_dir: &Path) -> String {
     let mut h = Sha256::new();
-    if let Ok(exe) = std::env::current_exe()
-        && let Ok(bytes) = std::fs::read(exe)
-    {
-        h.update(&bytes);
+    if let Ok(exe) = std::env::current_exe() {
+        hash_file(&exe, &mut h);
     }
     walk_data(data_dir, "", &mut h);
     let digest = h.finalize();
     digest.iter().map(|b| format!("{b:02x}")).collect::<String>()[..12].to_string()
 }
 
-/// `fs.WalkDir` visits each directory's entries sorted by name, descending
-/// into a directory where it sorts, and does not follow symlinked ones.
+/// Streams a file into the hash rather than holding it in memory; the
+/// server binary alone is tens of megabytes.
+fn hash_file(path: &Path, h: &mut Sha256) {
+    let Ok(mut f) = std::fs::File::open(path) else { return };
+    let mut buf = [0u8; 64 * 1024];
+    // Reading a symlinked directory as a file fails before any bytes.
+    while let Ok(n @ 1..) = f.read(&mut buf) {
+        h.update(&buf[..n]);
+    }
+}
+
+/// Visits each directory's entries sorted by name, descending into a
+/// directory where it sorts, and does not follow symlinked ones.
 fn walk_data(dir: &Path, rel: &str, h: &mut Sha256) {
     let Ok(entries) = std::fs::read_dir(dir) else { return };
     let mut entries: Vec<_> = entries.filter_map(Result::ok).collect();
@@ -48,13 +57,7 @@ fn walk_data(dir: &Path, rel: &str, h: &mut Sha256) {
             continue;
         }
         h.update(path.as_bytes());
-        if let Ok(mut f) = std::fs::File::open(entry.path()) {
-            let mut buf = Vec::new();
-            // Reading a symlinked directory as a file fails.
-            if f.read_to_end(&mut buf).is_ok() {
-                h.update(&buf);
-            }
-        }
+        hash_file(&entry.path(), h);
     }
 }
 
@@ -128,7 +131,7 @@ mod tests {
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
-    /// `fs.WalkDir` descends into a directory where its name sorts, so "a/"
+    /// The walk descends into a directory where its name sorts, so "a/"
     /// is hashed before "a.txt" although "a.txt" < "a/x" as a full path.
     #[test]
     fn compute_version_walks_in_sorted_depth_first_order() {
