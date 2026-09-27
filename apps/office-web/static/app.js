@@ -778,6 +778,23 @@ function usageBeaconBody(scope) {
     if (narrowMenu.addEventListener) {
       narrowMenu.addEventListener("change", syncSiteMenu);
     }
+
+    // The phone menu is an overlay: a tap anywhere outside it, or Escape,
+    // puts it away. Taps inside (including the preferences) leave it open.
+    document.addEventListener("click", function (e) {
+      if (narrowMenu.matches && siteMenu.open && !siteMenu.contains(e.target)) {
+        siteMenu.removeAttribute("open");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && narrowMenu.matches && siteMenu.open) {
+        siteMenu.removeAttribute("open");
+        var summary = siteMenu.querySelector("summary");
+        if (summary) {
+          summary.focus();
+        }
+      }
+    });
   }
 
   // Native disclosures start closed at every width, including without JS.

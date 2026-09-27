@@ -164,10 +164,37 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   ]);
   expect(prefs.y).toBeGreaterThanOrEqual(links.y + links.height);
 
-  // Hour pages keep the hours in the menu for hopping between them.
+  // The menu is an overlay: a tap on the page or Escape puts it away, but a
+  // preference tap inside it does not.
+  await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(menu).toHaveAttribute("open", "");
+  await page.locator("footer").click();
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(menu).not.toHaveAttribute("open", "");
+  await expect(page.locator(".site-menu > summary")).toBeFocused();
+
+  // Home's card sits close above the footer line, not above a band of wall.
+  const [card, footer] = await Promise.all([
+    page.locator(".home").boundingBox(),
+    page.locator("footer").boundingBox(),
+  ]);
+  expect(footer.y - (card.y + card.height)).toBeLessThan(40);
+
+  // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
   await openDatedPage(page, `/lauds/${testDate}`);
   await page.getByText("Menu", { exact: true }).click();
   await expect(primary.getByRole("link", { name: "Vespers", exact: true })).toBeVisible();
+  const rows = await primary.locator('[data-nav="hour"]').evaluateAll((links) => {
+    const byTop = new Map();
+    for (const a of links) {
+      const top = Math.round(a.getBoundingClientRect().top);
+      byTop.set(top, [...(byTop.get(top) || []), a.dataset.hour]);
+    }
+    return [...byTop.values()];
+  });
+  expect(rows).toEqual([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]);
 });
 
 test("psalm spacing groups each antiphon with its own psalm", async ({ page }) => {

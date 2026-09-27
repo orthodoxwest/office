@@ -528,6 +528,18 @@ footer .text-size-switch {
     display: none;
   }
 
+  /* With the preferences gone the phone footer is one quiet line. Home's
+     card is shorter than the global 60vh floor, which left a tall empty
+     band of wall between the card and that line; desktop already releases
+     the floor to centre its niche. */
+  .page-home main {
+    min-height: 0;
+  }
+
+  .page-home footer {
+    --footer-gap: 1.75rem;
+  }
+
   /* Match site menu / hour-chip touch floor (~44px). */
   .theme-option,
   .text-size-option {
@@ -611,17 +623,42 @@ footer .text-size-switch {
     display: none;
   }
 
+  /* Six tracks so the hours fall into home's Morning / Day / Evening bands:
+     two, three, two — no Compline stranded on a row of its own. Ordo and
+     Reminders take halves like the outer bands. Centred like the home
+     directory, since the day row's cells have their own edges. */
   .site-menu nav {
     display: grid;
-    grid-template-columns: repeat(2, minmax(7rem, 1fr));
-    gap: 0.15rem;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.15rem 0;
+  }
+
+  .site-menu nav a {
+    grid-column: span 3;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .site-menu nav a[data-hour="terce"],
+  .site-menu nav a[data-hour="sext"],
+  .site-menu nav a[data-hour="none"] {
+    grid-column: span 2;
+  }
+
+  /* A hairline between the bands, so the grouping reads without labels. */
+  .site-menu nav a[data-hour="terce"],
+  .site-menu nav a[data-hour="sext"],
+  .site-menu nav a[data-hour="none"],
+  .site-menu nav a[data-hour="vespers"],
+  .site-menu nav a[data-hour="compline"] {
+    border-top: 1px solid var(--surface-edge);
   }
 
   .site-menu nav a {
     display: flex;
     align-items: center;
     min-height: 2.75rem;
-    padding: 0.55rem 0.65rem;
+    padding: 0.55rem 0.4rem;
     font-size: 0.82rem;
   }
 
