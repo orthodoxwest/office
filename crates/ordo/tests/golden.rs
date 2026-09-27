@@ -1,11 +1,11 @@
-//! The ordo goldens Go writes (tests/fixtures/golden/ordo-YEAR.txt).
+//! Ordo regression snapshots (`tests/fixtures/golden/ordo-YEAR.txt`).
 
 use calendar::{CalendarData, MoveableDates, build_calendar};
 use office::{Day, Engine, resolve_office_days};
 use tools::fs::FsData;
 
 #[test]
-fn ordo_goldens_match_go() {
+fn ordo_goldens_match() {
     let src = FsData::new("../../data");
     let engine = Engine::load(&src).unwrap();
     let data = CalendarData::load(&src).unwrap();

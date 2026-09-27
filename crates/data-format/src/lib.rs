@@ -1,18 +1,11 @@
-//! Go-compatible parsing and formatting. While both engines exist
-//! (RUST-PORT.md), output and findings must match the Go engine byte for
-//! byte, so these helpers reproduce the Go library behaviors that shape
-//! them: which lines and integers parse, how CSV splits, how a key is quoted
-//! in a finding, and how report JSON is written. Error prose is not part of
-//! that contract, and Rust words its own. Remove the crate after the cutover
-//! (Phase 7).
+//! Parsing and formatting contracts shared by the corpus, review ledgers, and reports: lines,
+//! integers, CSV, quoted diagnostic keys, and JSON.
 
 pub mod csv;
 pub mod json;
 
-/// Quotes `s` as Go's `%q` does for the text in our data: backslash escapes
-/// for quote, backslash, and ASCII control characters; everything else
-/// literal. Go also escapes non-printing Unicode (U+00A0, U+200B, …); this
-/// prints it literally, a deliberate difference (RUST-PORT.md).
+/// Quotes `s` with backslash escapes for quote, backslash, and ASCII control characters. All other
+/// characters, including non-printing Unicode, remain literal.
 pub fn quote(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 2);
     out.push('"');
@@ -35,17 +28,15 @@ pub fn quote(s: &str) -> String {
     out
 }
 
-/// Go's `bufio.Scanner` with `ScanLines`: split on `\n`, drop one trailing
-/// `\r` from each line (including a final unterminated one), and produce no
-/// empty final line after a trailing newline.
+/// Splits on `\n`, drops one trailing `\r` from each line (including a final unterminated one), and
+/// produces no empty final line after a trailing newline.
 pub fn scan_lines(s: &str) -> impl Iterator<Item = &str> {
     let body = s.strip_suffix('\n').unwrap_or(s);
     let pieces = if s.is_empty() { None } else { Some(body.split('\n')) };
     pieces.into_iter().flatten().map(|line| line.strip_suffix('\r').unwrap_or(line))
 }
 
-/// The integers Go's `strconv.Atoi` accepts: an optional sign and ASCII
-/// digits.
+/// Parses an optional sign followed by ASCII digits.
 pub fn atoi(s: &str) -> Result<i64, String> {
     let digits = s.strip_prefix(['+', '-']).unwrap_or(s);
     if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
@@ -69,14 +60,14 @@ mod tests {
     }
 
     #[test]
-    fn quote_matches_go_on_ascii() {
+    fn quotes_ascii_controls() {
         assert_eq!(quote("a\"b\\c\u{7}\u{1}é\u{7f}"), "\"a\\\"b\\\\c\\a\\x01é\\x7f\"");
-        // Non-printing Unicode stays literal (Go would write \u00a0).
+        // Non-printing Unicode stays literal.
         assert_eq!(quote("a\u{a0}b"), "\"a\u{a0}b\"");
     }
 
     #[test]
-    fn atoi_accepts_what_go_accepts() {
+    fn parses_signed_ascii_integers() {
         assert_eq!(atoi("+5"), Ok(5));
         assert_eq!(atoi("-3"), Ok(-3));
         assert_eq!(atoi("07"), Ok(7));

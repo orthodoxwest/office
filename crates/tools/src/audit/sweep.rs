@@ -1,6 +1,5 @@
-//! The composition sweep: compose every hour of every day of a year and
-//! report rendered not-found markers and ordinary-tier fallbacks on
-//! Double-or-above days. Ported from Go's `audit/sweep.go`.
+//! The composition sweep: compose every hour of every day of a year and report rendered not-found
+//! markers and ordinary-tier fallbacks on Double-or-above days.
 
 use std::collections::HashMap;
 use std::fmt::Write as _;
@@ -53,8 +52,8 @@ pub struct SweepReport {
     pub ordinary_fallbacks: Vec<OrdinaryFallback>,
 }
 
-/// Go's `SweepYear`: findings deduplicated across the year and suppressible
-/// per feast and slot in `data/audit-ok.txt`.
+/// Findings are deduplicated across the year and suppressible per feast and slot in
+/// `data/audit-ok.txt`.
 pub fn sweep_year(src: &dyn DataSource, year: i32) -> Result<SweepReport, String> {
     let engine = Engine::load(src).map_err(|e| format!("creating office engine: {e}"))?;
     let days = crate::year::load_office_days(src, year).map_err(|e| format!("building calendar for {year}: {e}"))?;

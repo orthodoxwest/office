@@ -2,12 +2,12 @@
 //! templates, reminder feed, and optional usage store.
 
 mod cache;
-pub mod gotime;
 mod handlers;
 mod http;
 mod ics;
 pub mod pwa;
 pub mod usage;
+pub mod web_time;
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
@@ -153,7 +153,7 @@ async fn entry(server: Arc<Server>, route: Route, req: Request) -> Response<Body
     }
 }
 
-/// Go's `ListenAndServe(":8080")` listens on every interface.
+/// An address of the form `:8080` listens on every interface.
 async fn listen(addr: &str) -> Result<tokio::net::TcpListener, String> {
     if let Some(port) = addr.strip_prefix(':') {
         if let Ok(l) = tokio::net::TcpListener::bind(format!("[::]:{port}")).await {
@@ -207,7 +207,7 @@ mod routing_tests {
     }
 
     #[tokio::test]
-    async fn routes_preserve_pages_assets_and_head_without_a_custom_mux() {
+    async fn routes_serve_pages_assets_and_head() {
         for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/sw.js"] {
             let get = request(Method::GET, path, Body::empty()).await;
             let head = request(Method::HEAD, path, Body::empty()).await;
@@ -223,7 +223,7 @@ mod routing_tests {
     }
 
     #[tokio::test]
-    async fn framework_path_matching_does_not_recreate_go_canonicalization() {
+    async fn framework_rejects_noncanonical_paths() {
         for path in ["/lauds//2026-03-11", "/./lauds/2026-03-11", "/lauds/../prime/2026-03-11", "/%73tatic/app.js", "/%73w.js"] {
             assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
         }
@@ -241,7 +241,7 @@ mod routing_tests {
     }
 
     #[tokio::test]
-    async fn beacon_limits_and_method_checks_survive_routing() {
+    async fn beacons_enforce_limits_and_methods() {
         let get = request(Method::GET, "/api/usage", Body::empty()).await;
         assert_eq!(get.status(), StatusCode::METHOD_NOT_ALLOWED);
         assert_eq!(get.headers()[header::ALLOW], "POST");

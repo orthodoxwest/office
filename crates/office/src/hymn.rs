@@ -1,4 +1,4 @@
-//! The Sunday Lauds hymn's summer window. Ported from Go's `hymn.go`.
+//! The Sunday Lauds hymn's summer window.
 
 use calendar::{Date, MoveableDates};
 

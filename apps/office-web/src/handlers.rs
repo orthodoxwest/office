@@ -1,5 +1,5 @@
-//! Page handlers: resolve the request to a liturgical day, drive the engine,
-//! and fill the view models. Ported from Go's `web/handlers.go`.
+//! Page handlers: resolve the request to a liturgical day, drive the engine, and fill the view
+//! models.
 
 use std::collections::HashSet;
 
@@ -20,8 +20,8 @@ use render_html::view::{
 use tools::review::assurance::{dedupe_decisions, hour_dependencies};
 use tools::review::provenance::ProvenanceStatus;
 
-use crate::gotime::{date_slug, load_location, local, long_date, now_in, parse_date};
 use crate::http::{Query, cookie, redirect, response, set};
+use crate::web_time::{date_slug, load_location, local, long_date, now_in, parse_date};
 use crate::{Review, Server};
 
 /// What a page handler reads from the request.
@@ -48,7 +48,7 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
 /// The GitHub new-issue endpoint behind "Report a problem".
 const REPO_ISSUES_URL: &str = "https://github.com/orthodoxwest/office/issues/new";
 
-/// Go's `url.QueryEscape`.
+/// Escapes a query component; spaces become `+`.
 fn query_escape(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for &c in s.as_bytes() {
@@ -91,7 +91,6 @@ fn report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str) -> String {
 
 **What the books say** (cite diurnal/supplement page if possible):
 
-
 **What the app shows:**
 
 ",
@@ -113,7 +112,6 @@ fn dependency_report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str, ke
 
 **Source and page/section locator:**
 
-
 **Finding:**
 
 ",
@@ -125,8 +123,8 @@ fn dependency_report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str, ke
     issue_url(&title, &body)
 }
 
-/// The Go `currentHourSchedule`, mirrored in app.js: from each hour of the
-/// clock, the office being prayed and its day offset.
+/// The schedule mirrored in app.js: from each clock hour, the office being prayed and its day
+/// offset.
 const CURRENT_HOUR_SCHEDULE: [(i8, &str, &str, i32); 8] = [
     (0, "compline", "Compline", -1),
     (2, "lauds", "Lauds", 0),
@@ -169,7 +167,7 @@ fn adjacent_hours(hour: &str, date: &str) -> (String, String, String, String) {
     out
 }
 
-/// An HTML page: Go sniffs the type, and every page revalidates.
+/// An HTML page that revalidates on every request.
 fn html(status: StatusCode, body: String) -> Response<Body> {
     let mut resp = response(status, body);
     set(&mut resp, header::CONTENT_TYPE, "text/html; charset=utf-8");
@@ -202,7 +200,7 @@ pub fn build_month_data(days: &[Day], engine: &Engine, moveable: &MoveableDates)
     let mut months: Vec<MonthData> = Vec::new();
     let summarize = |hour: &str, day: &Day| engine.compose_hour(hour, day, moveable, PrayerForm::Private).ok().map(|h| summarize_hour(&h));
     for d in days {
-        let name = crate::gotime::month_name(d.date);
+        let name = crate::web_time::month_name(d.date);
         if months.last().is_none_or(|m| m.name != name) {
             months.push(MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() });
         }
@@ -253,7 +251,7 @@ pub fn build_month_data(days: &[Day], engine: &Engine, moveable: &MoveableDates)
 }
 
 fn invalid_date(s: &str) -> String {
-    format!("Invalid date {} — please use YYYY-MM-DD format.", compat::quote(s))
+    format!("Invalid date {} — please use YYYY-MM-DD format.", data_format::quote(s))
 }
 
 impl Review {
@@ -343,7 +341,7 @@ impl Server {
         };
         match self.pages.error_page(&data) {
             Ok(body) => html(status, body),
-            // Go has already sent the status; the body is whatever rendered.
+            // Preserve the response status if the error page itself cannot render.
             Err(_) => html(status, String::new()),
         }
     }
@@ -567,9 +565,9 @@ impl Server {
             let target = format!("/calendar/{}{form_query}#d-{}", now.year(), date_slug(now));
             return redirect(&target, StatusCode::FOUND);
         }
-        let year = match compat::atoi(parts[1]) {
+        let year = match data_format::atoi(parts[1]) {
             Ok(y) if (1..=9999).contains(&y) => y as i32,
-            _ => return self.error_page(req, StatusCode::BAD_REQUEST, &format!("Invalid year {}.", compat::quote(parts[1]))),
+            _ => return self.error_page(req, StatusCode::BAD_REQUEST, &format!("Invalid year {}.", data_format::quote(parts[1]))),
         };
         let months = match self.cache.months(year, &self.engine) {
             Ok(m) => m,
@@ -632,8 +630,7 @@ pub fn celebration_name(day: &Day) -> String {
 mod tests {
     use super::*;
 
-    // Ported from Go's `internal/web/schedule_contract_test.go`: app.js
-    // mirrors the schedule so a cached home page can update itself.
+    // app.js mirrors the schedule so a cached home page can update itself.
     #[test]
     fn client_office_schedule_matches_server() {
         let src = std::str::from_utf8(crate::pwa::file("static/app.js").unwrap()).unwrap();
@@ -704,8 +701,6 @@ mod tests {
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
     }
-
-    // Ported from Go's `internal/web/server_test.go`.
 
     #[test]
     fn show_vetting_banner_depends_on_corpus_provenance() {
@@ -794,8 +789,6 @@ mod tests {
         assert!(!body.contains(r#"class="home-season""#), "the season is not repeated");
     }
 
-    // Ported from Go's `internal/web/season_test.go`.
-
     fn body_classes(path: &str) -> Vec<String> {
         let (status, _, body) = get(path);
         assert_eq!(status, StatusCode::OK, "{path}");
@@ -847,7 +840,7 @@ mod tests {
     }
 
     #[test]
-    fn query_escape_matches_go() {
+    fn query_escape_encodes_special_characters() {
         assert_eq!(query_escape("a b/c?d=é—*"), "a+b%2Fc%3Fd%3D%C3%A9%E2%80%94%2A");
     }
 }

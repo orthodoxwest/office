@@ -1,13 +1,10 @@
-//! A proleptic Gregorian civil date with no time of day and no time zone.
-//!
-//! Go represents dates as `time.Time` at UTC midnight with Sunday as weekday
-//! 0. This type keeps the same weekday numbering and reproduces the one piece
-//! of `time.Date` behavior the engine relies on: out-of-range months and days
-//! normalize by carrying into the next unit (February 30 is March 2).
+//! A proleptic Gregorian civil date with no time of day and no time zone. Weekdays are numbered
+//! from Sunday = 0. Out-of-range months and days normalize by carrying into the next unit (February
+//! 30 is March 2 in a common year).
 
 use std::fmt;
 
-/// Day of the week, numbered from Sunday = 0 as in Go.
+/// Day of the week, numbered from Sunday = 0.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Weekday {
     Sunday,
@@ -23,7 +20,7 @@ impl Weekday {
     pub const ALL: [Weekday; 7] =
         [Weekday::Sunday, Weekday::Monday, Weekday::Tuesday, Weekday::Wednesday, Weekday::Thursday, Weekday::Friday, Weekday::Saturday];
 
-    /// Days since Sunday (Go's `int(time.Weekday)`).
+    /// Days since Sunday.
     pub fn number(self) -> i32 {
         match self {
             Weekday::Sunday => 0,
@@ -40,7 +37,7 @@ impl Weekday {
         Weekday::ALL[n.rem_euclid(7) as usize]
     }
 
-    /// The English name, as Go's `time.Weekday.String`.
+    /// The English weekday name.
     pub fn name(self) -> &'static str {
         match self {
             Weekday::Sunday => "Sunday",
@@ -91,9 +88,8 @@ fn civil_from_days(z: i64) -> (i64, u32, u32) {
 }
 
 impl Date {
-    /// Builds a date the way Go's `time.Date` does: a month outside 1–12
-    /// carries into the year, and a day outside the month carries into the
-    /// neighboring months.
+    /// Builds a date with normalization: a month outside 1–12 carries into the year, and a day
+    /// outside the month carries into the neighboring months.
     pub fn new(year: i32, month: i32, day: i32) -> Date {
         let m0 = i64::from(month) - 1;
         let y = i64::from(year) + m0.div_euclid(12);
@@ -136,7 +132,7 @@ impl Date {
         Weekday::from_number((self.days + 4).rem_euclid(7) as i32)
     }
 
-    /// Day of the year, 1-based (Go's `YearDay`).
+    /// Day of the year, 1-based.
     pub fn ordinal(self) -> u32 {
         (self.days - Date::new(self.year(), 1, 1).days + 1) as u32
     }
@@ -186,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn normalizes_like_go() {
+    fn normalizes_out_of_range_dates() {
         assert_eq!(Date::new(2026, 2, 30).to_string(), "2026-03-02");
         assert_eq!(Date::new(2026, 2, 29).to_string(), "2026-03-01");
         assert_eq!(Date::new(2026, 13, 1).to_string(), "2027-01-01");

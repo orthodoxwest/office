@@ -1,5 +1,4 @@
-//! Review tooling: text provenance, the zero-occurrence ledger, and the
-//! composition diagnostics. Ported from Go's `internal/review`.
+//! Review tooling: text provenance, the zero-occurrence ledger, and the composition diagnostics.
 
 pub mod assurance;
 pub mod gate;

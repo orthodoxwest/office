@@ -1,6 +1,5 @@
-//! `office dump`: the canonical record stream the Go and Rust engines are
-//! compared on (RUST-PORT.md, "Dump format"). The Go generator in
-//! Record fields form the versioned regression snapshot contract.
+//! `office dump`: the canonical record stream for regression snapshots. Record fields form a
+//! versioned contract.
 
 use std::io::Write;
 
@@ -46,7 +45,7 @@ fn canonical_subset(what: &str, chosen: &[String], order: &[&str]) -> Result<Vec
         return Ok(order.iter().map(|s| s.to_string()).collect());
     }
     if let Some(c) = chosen.iter().find(|c| !order.contains(&c.as_str())) {
-        return Err(format!("unknown {what} {} (want one of [{}])", compat::quote(c), order.join(" ")));
+        return Err(format!("unknown {what} {} (want one of [{}])", data_format::quote(c), order.join(" ")));
     }
     Ok(order.iter().filter(|o| chosen.iter().any(|c| c == *o)).map(|s| s.to_string()).collect())
 }
@@ -224,7 +223,7 @@ pub fn generate(
     Ok(())
 }
 
-/// Go's zero-value mapping: `None` is null.
+/// `None` is serialized as null.
 fn opt(s: &Option<String>) -> Value {
     s.as_ref().map_or(Value::Null, |s| Value::String(s.clone()))
 }
@@ -265,7 +264,7 @@ fn feasts(list: &[calendar::FeastRef]) -> Value {
     Value::Array(list.iter().map(|f| feast(Some(f))).collect())
 }
 
-/// Go's `str`: the empty string is null.
+/// Empty strings represent absent values and are serialized as null.
 fn s(text: &str) -> Value {
     if text.is_empty() { Value::Null } else { Value::String(text.to_string()) }
 }
@@ -464,7 +463,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn canonical_encoding_matches_go() {
+    fn canonical_encoding_matches_snapshot_contract() {
         let v = json!({"b": "<&>\u{2028}", "a": [1, null, true], "c": "\u{1}\t\"\\"});
         assert_eq!(marshal(&v).unwrap(), r#"{"a":[1,null,true],"b":"<&>\u{2028}","c":"\u0001\t\"\\"}"#.replace("\\u{2028}", "\u{2028}"));
         assert_eq!(marshal(&json!({"x": [{"y": ""}]})).unwrap_err(), "/x/0/y: empty string (absent values are null)");

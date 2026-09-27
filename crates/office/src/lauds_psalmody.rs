@@ -1,9 +1,8 @@
-//! Lauds psalmody: the weekday psalter on lesser Doubles and Simples, the
-//! festal weekday canticle, and declared psalmody. Ported from Go's
-//! `lauds_psalmody.go`.
+//! Lauds psalmody: the weekday psalter on lesser Doubles and Simples, the festal weekday canticle,
+//! and declared psalmody.
 
 use calendar::{Category, Rank, Season, Weekday};
-use compat::quote;
+use data_format::quote;
 
 use crate::day::Day;
 use crate::preces::SATURDAY_OFFICE_BVM_ID;

@@ -100,7 +100,7 @@ checksum = "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
 name = "calendar"
 version = "0.1.0"
 dependencies = [
- "compat",
+ "data-format",
 ]
 
 [[package]]
@@ -120,10 +120,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
 
 [[package]]
-name = "compat"
-version = "0.1.0"
-
-[[package]]
 name = "const-oid"
 version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -133,7 +129,7 @@ checksum = "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
 name = "corpus"
 version = "0.1.0"
 dependencies = [
- "compat",
+ "data-format",
 ]
 
 [[package]]
@@ -153,6 +149,10 @@ checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
 dependencies = [
  "hybrid-array",
 ]
+
+[[package]]
+name = "data-format"
+version = "0.1.0"
 
 [[package]]
 name = "defmt"
@@ -462,7 +462,7 @@ name = "liturgy"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
+ "data-format",
 ]
 
 [[package]]
@@ -521,8 +521,8 @@ name = "office"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
  "corpus",
+ "data-format",
  "liturgy",
  "serde_json",
 ]
@@ -532,8 +532,8 @@ name = "office-cli"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
  "corpus",
+ "data-format",
  "liturgy",
  "office",
  "office-web",
@@ -551,7 +551,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "calendar",
- "compat",
+ "data-format",
  "jiff",
  "liturgy",
  "office",
@@ -574,7 +574,7 @@ name = "ordo"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
+ "data-format",
  "liturgy",
  "office",
  "tools",
@@ -665,8 +665,8 @@ name = "render-html"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
  "corpus",
+ "data-format",
  "liturgy",
  "minijinja",
  "office",
@@ -906,8 +906,8 @@ name = "tools"
 version = "0.1.0"
 dependencies = [
  "calendar",
- "compat",
  "corpus",
+ "data-format",
  "liturgy",
  "office",
  "regex",

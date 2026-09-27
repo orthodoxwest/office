@@ -1,5 +1,4 @@
-//! Spoken and silent spans of the secret and corporate prayers. Ported from
-//! Go's `voice.go`.
+//! Spoken and silent spans of the secret and corporate prayers.
 
 use liturgy::{VoiceRole, VoiceSpan};
 

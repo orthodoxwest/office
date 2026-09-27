@@ -12,7 +12,7 @@ pub fn office_days(data: &CalendarData, year: i32) -> Result<Vec<Day>, String> {
     Ok(cal.days.into_iter().zip(office).map(|(c, o)| Day::new(c, o)).collect())
 }
 
-/// Go's `calendar.BuildCalendar(year, dataDir)` plus the office days.
+/// Builds the calendar and resolves the office days for a year.
 pub fn load_office_days(src: &dyn DataSource, year: i32) -> Result<Vec<Day>, String> {
     office_days(&CalendarData::load(src)?, year)
 }

@@ -1,5 +1,5 @@
-//! Vespers: the owner of the evening, the psalmody day, and Vespers of the
-//! Dead appended on the eve of All Souls. Ported from Go's `vespers.go`.
+//! Vespers: the owner of the evening, the psalmody day, and Vespers of the Dead appended on the eve
+//! of All Souls.
 
 use calendar::{Color, Decision, MoveableDates};
 use liturgy::{OfficeHour, OfficeSection};
@@ -89,7 +89,7 @@ pub fn vespers_office_day(day: &Day) -> Day {
         return office_day;
     };
     office_day.celebration = Some(feast);
-    // PORT(inherited): an owned evening always carries a colour.
+    // An owned evening always carries a colour.
     office_day.color = v.color.unwrap_or(day.color);
     if let Some(s) = v.season {
         office_day.season = s;

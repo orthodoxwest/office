@@ -1,5 +1,4 @@
-//! Builders for unit tests ported from Go, where tests write zero-valued
-//! `models.CalendarDay` and `models.Feast` literals and `texts.NewTestCorpus`.
+//! Builders for synthetic calendar days, feasts, and text corpora used in unit tests.
 
 use std::sync::Arc;
 
@@ -11,7 +10,7 @@ use crate::concurrence::VespersDesignation;
 use crate::day::Day;
 use crate::texts::OfficeTexts;
 
-/// Go's `texts.NewTestCorpus`: concrete entries, no aliases or scopes.
+/// Concrete corpus entries, with no aliases or scopes.
 pub fn texts(entries: &[(&str, &str)]) -> OfficeTexts {
     OfficeTexts::from_corpus(Corpus::from_entries(entries.iter().map(|(k, v)| (k.to_string(), v.to_string()))))
 }
@@ -20,7 +19,7 @@ pub fn date(y: i32, m: i32, d: i32) -> Date {
     Date::new(y, m, d)
 }
 
-/// A day with no celebration. Go's zero Color becomes white.
+/// A day with no celebration, using white as its color.
 pub fn day(date: Date, season: Season) -> Day {
     Day {
         cal: CalendarDay {
@@ -45,8 +44,7 @@ pub fn day(date: Date, season: Season) -> Day {
     }
 }
 
-/// A feast with only an ID and category. Go's zero Rank (weight 0) has no
-/// Rust spelling; semi-double is the nearest rank that no rule singles out.
+/// A semi-double feast with the given ID and category.
 pub fn feast(id: &str, category: Option<Category>) -> Feast {
     let mut f = Feast::synthetic(id, "", Rank::SemiDouble, Color::White, Category::Feria);
     f.category = category;
@@ -64,7 +62,7 @@ pub fn celebrating(date: Date, season: Season, f: Feast) -> Day {
     d
 }
 
-/// Go's zero `time.Time` date (0001-01-01, a Monday).
+/// A fixed Monday: 0001-01-01.
 pub fn zero_date() -> Date {
     Date::new(1, 1, 1)
 }

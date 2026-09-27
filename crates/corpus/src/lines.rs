@@ -1,5 +1,4 @@
-//! The corpus line grammar every renderer understands (Go's
-//! `internal/texts/lines.go`):
+//! The corpus line grammar every renderer understands:
 //!
 //! ```text
 //! !Isaiah 55:1          a scripture reference

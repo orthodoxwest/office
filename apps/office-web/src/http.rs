@@ -1,5 +1,5 @@
-//! HTTP helpers shared by the handlers. Query and cookie interpretation
-//! preserve existing saved links and preferences during the cutover.
+//! HTTP helpers shared by the handlers. Query and cookie interpretation defines how saved links and
+//! preferences are read.
 
 use axum::body::Body;
 use axum::http::{HeaderMap, HeaderValue, Response, StatusCode, header};
@@ -9,8 +9,8 @@ use axum::http::{HeaderMap, HeaderValue, Response, StatusCode, header};
 pub struct Query(Vec<(String, String)>);
 
 impl Query {
-    /// Go's `url.ParseQuery`: pairs split on `&`; a pair containing `;` or a
-    /// malformed escape is dropped rather than failing the request.
+    /// Query pairs split on `&`; a pair containing `;` or a malformed escape is dropped rather than
+    /// failing the request.
     pub fn parse(raw: &str) -> Query {
         let mut pairs = Vec::new();
         for pair in raw.split('&') {
@@ -44,8 +44,7 @@ fn unhex(c: u8) -> Option<u8> {
     }
 }
 
-/// Go's `unescape`: `%XX` decodes, a malformed escape fails, and `+` is a
-/// space only in a query component.
+/// `%XX` decodes, a malformed escape fails, and `+` is a space only in a query component.
 fn unescape(s: &str, plus_is_space: bool) -> Option<Vec<u8>> {
     let b = s.as_bytes();
     let mut out = Vec::with_capacity(b.len());
@@ -71,14 +70,12 @@ fn unescape(s: &str, plus_is_space: bool) -> Option<Vec<u8>> {
     Some(out)
 }
 
-// PORT(inherited): Go keeps undecodable bytes in a query value; they reach
-// the page only inside an error message, where Rust shows U+FFFD.
+// Undecodable bytes in a query value appear as U+FFFD in error messages.
 fn query_unescape(s: &str) -> Option<String> {
     unescape(s, true).map(|b| String::from_utf8_lossy(&b).into_owned())
 }
 
-/// The decoded request path (`r.URL.Path`), or `None` when an escape is
-/// malformed, which Go's server answers before any handler runs.
+/// The decoded request path, or `None` when an escape is malformed.
 pub fn unescape_path(raw: &str) -> Option<String> {
     unescape(raw, false).map(|b| String::from_utf8_lossy(&b).into_owned())
 }
@@ -91,7 +88,7 @@ fn is_token(s: &str) -> bool {
     !s.is_empty() && s.bytes().all(|c| c.is_ascii_alphanumeric() || b"!#$%&'*+-.^_`|~".contains(&c))
 }
 
-/// Go's `r.Cookie(name)`: the first well-formed cookie of that name.
+/// The first well-formed cookie of the requested name.
 pub fn cookie(headers: &HeaderMap, name: &str) -> Option<String> {
     for line in headers.get_all(header::COOKIE) {
         let Ok(line) = line.to_str() else { continue };
@@ -132,7 +129,7 @@ pub fn response(code: StatusCode, body: impl Into<Body>) -> Response<Body> {
     resp
 }
 
-/// Go's `http.Error`: plain text, `nosniff`, and a trailing newline.
+/// An error response: plain text, `nosniff`, and a trailing newline.
 pub fn http_error(msg: &str, code: StatusCode) -> Response<Body> {
     let mut resp = response(code, format!("{msg}\n"));
     set(&mut resp, header::CONTENT_TYPE, "text/plain; charset=utf-8");
@@ -140,12 +137,12 @@ pub fn http_error(msg: &str, code: StatusCode) -> Response<Body> {
     resp
 }
 
-/// Go's `http.NotFound`.
+/// A plain-text 404 response.
 pub fn not_found() -> Response<Body> {
     http_error("404 page not found", StatusCode::NOT_FOUND)
 }
 
-/// Go's answer to a request line it cannot parse.
+/// A response for a malformed request.
 pub fn bad_request() -> Response<Body> {
     let mut resp = response(StatusCode::BAD_REQUEST, "400 Bad Request");
     set(&mut resp, header::CONTENT_TYPE, "text/plain; charset=utf-8");
@@ -166,7 +163,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn queries_follow_go() {
+    fn queries_drop_malformed_pairs() {
         let q = Query::parse("a=1&a=2&b=x+y&c=%zz&d;=1&&e&f=%41");
         assert_eq!(q.get("a"), "1");
         assert_eq!(q.get("b"), "x y");
@@ -177,14 +174,14 @@ mod tests {
     }
 
     #[test]
-    fn paths_follow_go() {
+    fn paths_decode_percent_escapes() {
         assert_eq!(unescape_path("/lauds/2026%2D01%2D01").as_deref(), Some("/lauds/2026-01-01"));
         assert_eq!(unescape_path("/a+b").as_deref(), Some("/a+b"));
         assert!(unescape_path("/a%2").is_none());
     }
 
     #[test]
-    fn cookies_follow_go() {
+    fn cookies_select_first_valid_match() {
         let mut h = HeaderMap::new();
         h.append(header::COOKIE, HeaderValue::from_static("a=1; tz=\"America/New_York\"; tz=UTC"));
         assert_eq!(cookie(&h, "tz").as_deref(), Some("America/New_York"));

@@ -1,4 +1,4 @@
-//! Terce, Sext, and None. Ported from Go's `minor.go`.
+//! Terce, Sext, and None.
 
 use calendar::{MoveableDates, Season};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection};

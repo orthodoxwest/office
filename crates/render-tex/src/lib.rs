@@ -1,6 +1,5 @@
-//! LuaLaTeX booklet rendering (half-letter) of a composed hour. Ported from
-//! Go's `output/tex.go`. The renderer does no file access: chant scores are
-//! found through a caller-supplied [`Chant`] lookup.
+//! LuaLaTeX booklet rendering (half-letter) of a composed hour. The renderer does no file access:
+//! chant scores are found through a caller-supplied [`Chant`] lookup.
 
 use corpus::lines::{BlockKind, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, RubricSpan, VoiceRole};
@@ -345,7 +344,7 @@ fn drop_cap(text: &str) -> String {
     format!("\\dropcap{{{}}}{{{}}}{}", tex_line(&initial), tex_line(&word_rest), mediant_line(&tail))
 }
 
-/// Go's `unicode.ToLower` of one rune.
+/// Unicode simple lowercase of one character.
 fn lower_rune(c: char) -> char {
     let mut l = c.to_lowercase();
     match (l.next(), l.next()) {
@@ -369,9 +368,7 @@ fn soften_opening(s: &str) -> String {
         }
         let end = rest.find(char::is_whitespace).unwrap_or(rest.len());
         let word = &rest[..end];
-        // PORT(inherited): Go's unicode.IsLetter/IsUpper are general-category
-        // tests; Rust's are the Alphabetic/Uppercase properties. They agree on
-        // the corpus.
+        // Use the Unicode Alphabetic and Uppercase properties.
         let letter_end = word.char_indices().rev().find(|(_, c)| c.is_alphabetic()).map_or(0, |(i, c)| i + c.len_utf8());
         if letter_end == 0 {
             out.push_str(rest);

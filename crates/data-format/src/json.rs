@@ -1,6 +1,5 @@
-//! Go's `encoding/json` output for the review reports: an `Encoder` with
-//! `SetIndent("", "  ")` and HTML escaping on (the default). Object fields
-//! keep insertion order, as Go's struct fields do.
+//! JSON output for review reports: two-space indentation and HTML escaping. Object fields keep
+//! insertion order.
 
 /// A JSON value. `omitempty` is the builder's job: leave the field out.
 #[derive(Clone, Debug, PartialEq)]
@@ -18,13 +17,13 @@ impl Json {
         Json::Str(s.into())
     }
 
-    /// A non-nil Go slice of strings.
+    /// An array of strings, including an empty array.
     pub fn strings(values: &[String]) -> Json {
         Json::Arr(values.iter().map(|v| Json::Str(v.clone())).collect())
     }
 }
 
-/// An object under construction, with Go's `omitempty` helpers.
+/// An object under construction, with helpers for omitting empty fields.
 #[derive(Default)]
 pub struct Obj(Vec<(String, Json)>);
 
@@ -157,8 +156,8 @@ fn write_value(out: &mut String, v: &Json, depth: usize) {
     }
 }
 
-/// Go's string encoding with HTML escaping: `<`, `>`, `&`, U+2028, and
-/// U+2029 as `\u` escapes; `\b`, `\f`, `\n`, `\r`, `\t` short forms.
+/// String encoding with HTML escaping: `<`, `>`, `&`, U+2028, and U+2029 as `\u` escapes; `\b`,
+/// `\f`, `\n`, `\r`, `\t` short forms.
 fn write_string(out: &mut String, s: &str) {
     out.push('"');
     for c in s.chars() {
@@ -191,7 +190,7 @@ mod tests {
     }
 
     #[test]
-    fn encodes_like_go() {
+    fn encodes_report_json() {
         let v = Obj::new()
             .str("a", "x<y>&\u{2028}\u{1}\u{8}é")
             .field("empty", Json::Arr(Vec::new()))

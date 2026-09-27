@@ -1,15 +1,13 @@
 # AWRV Benedictine Divine Office
 
 Rust web application that renders the hours of the Benedictine Office, as used by the AWRV.
-Cargo builds the server and CLI. Go and the differential harness have been
-retired; Git history retains the reference implementation. See RUST-PORT.md
-for the completed cutover and remaining domain-model cleanup.
+Cargo builds the server and CLI.
 
 ## Architecture
 
 ```
 crates/
-  compat/                  Corpus/ledger CSV, report JSON, quoting and parsing contracts
+  data-format/                  Corpus/ledger CSV, report JSON, quoting and parsing contracts
   calendar/                Computus, feast loading, occurrence, octaves, fasting; no file access
   corpus/                  Text loading, aliases, sidecars and shared line grammar
   liturgy/                 Document model, element kinds, prayer forms and voice spans
@@ -22,8 +20,8 @@ crates/
 apps/
   cli/                     office command dispatch, dump stream, diff and digest
   office-web/              Axum routes, usage SQLite store, reminders, embedded static/ assets
-                           http.rs holds saved-link query/cookie parsing; gotime.rs preserves
-                           reminder instants at DST transitions
+                           http.rs holds saved-link query/cookie parsing; web_time.rs handles
+                           civil dates, time zones and reminder instants
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
@@ -117,7 +115,7 @@ never resolved automatically.
 
 Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly every issue worth filing here. Apply based on where the defect actually lives, not the symptom:
 
-- **`bug`** — the Go code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrenceWinner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
+- **`bug`** — the Rust code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrence_winner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
 - **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not the Rust engine.
 - **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and a decision from clergy is required before any fix can be written. Don't guess an implementation here; file the question and wait for a ruling.
 
@@ -128,9 +126,10 @@ These aren't mutually exclusive — an issue can need a ruling *and* turn into a
 ```bash
 make build       # Build binary
 make test        # Run all tests (includes golden)
-make vet         # Run go vet
-make fmt         # Check formatting
-make check       # fmt + vet + lint + test + validate + lint-texts
+make lint        # Run Clippy
+make fmt         # Reformat Rust source
+make fmt-check   # Check Rust formatting
+make check       # Formatting, Clippy, JS lint, tests, data validation and text lint
 make serve       # Start web server on :8080
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
@@ -174,7 +173,7 @@ make clean       # Remove artifacts
 
 `crates/render-tex/` — TeX document renderer
 
-Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `OfficeHour`. Mirrors `FormatOfficeHour` in `office.go` but emits LaTeX instead of plain text.
+Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `OfficeHour`. Uses the same composed document model as the plain-text and HTML renderers.
 
 - CLI: `./office tex HOUR [YYYY-MM-DD]` — date defaults to today
 - Makefile: `make pdf HOUR=compline` (chains `./office tex` → `lualatex`)

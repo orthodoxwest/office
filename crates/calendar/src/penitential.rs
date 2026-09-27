@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use crate::date::{Date, Weekday};
 use crate::loader::Section;
 use crate::model::CalendarDay;
-use compat::atoi;
-use compat::quote;
+use data_format::atoi;
+use data_format::quote;
 
 /// One `[rule]` of `penitential.txt`. Later rules override earlier ones.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,7 +20,7 @@ pub struct PenitentialRule {
     pub abstinence: Option<bool>,
 }
 
-/// Go's `strconv.ParseBool`.
+/// Parses booleans: 1/0 and true/false in lowercase, uppercase, or title case.
 fn parse_bool(s: &str) -> Option<bool> {
     match s {
         "1" | "t" | "T" | "TRUE" | "true" | "True" => Some(true),
@@ -56,7 +56,7 @@ pub(crate) fn section_to_penitential_rule(m: &Section, source_file: &str) -> Res
     if rule.fast.is_none() && rule.abstinence.is_none() {
         return Err(format!("{source_file}: rule {qid} must set Fast and/or Abstinence"));
     }
-    // PORT(inherited): Go reports whichever unknown key map iteration meets first.
+    // Report the first unknown key in byte order.
     if let Some(key) = m.values.keys().find(|k| !KNOWN_KEYS.contains(&k.as_str())) {
         return Err(format!("{source_file}: rule {qid}: unrecognized key {}", quote(key)));
     }
@@ -111,7 +111,7 @@ fn resolve_anchor(raw: &str, year: i32, feast_dates: &HashMap<String, Date>) -> 
         }
         let month = atoi(parts[0]).map_err(|_| format!("invalid month in {}", quote(raw)))?;
         let day = atoi(parts[1]).map_err(|_| format!("invalid day in {}", quote(raw)))?;
-        // PORT(inherited): Go's time.Date normalizes out-of-range values.
+        // Out-of-range dates are normalized by carrying into the neighboring month or year.
         Date::new(year, month.clamp(-100_000, 100_000) as i32, day.clamp(-10_000_000, 10_000_000) as i32)
     } else {
         return Err(format!("invalid anchor {}", quote(raw)));

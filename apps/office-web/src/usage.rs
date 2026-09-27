@@ -1,7 +1,5 @@
-//! Approximate daily browser counts, not request logs, and the two
-//! endpoints that write and read them. Ported from Go's `usage/store.go`,
-//! `usage/bots.go`, and `web/usage.go`; the SQLite schema is shared, so
-//! either server can open the other's database.
+//! Approximate daily browser counts, not request logs, and the two endpoints that write and read
+//! them.
 
 use std::collections::BTreeMap;
 use std::io::Read as _;
@@ -163,14 +161,14 @@ const BOT_TOKENS: &[&str] = &[
     "monitoring",
 ];
 
-/// Go's `strings.ToLower`: one rune for one rune.
-fn go_lower(s: &str) -> String {
+/// Unicode simple lowercase: one character maps to one character.
+fn simple_lowercase(s: &str) -> String {
     s.chars()
         .map(|c| {
             let mut lower = c.to_lowercase();
             match (lower.next(), lower.next()) {
                 (Some(l), None) => l,
-                // Only U+0130 lowers to two runes; Go's simple mapping is 'i'.
+                // Only U+0130 expands under full lowercase; its simple mapping is 'i'.
                 _ => 'i',
             }
         })
@@ -181,12 +179,12 @@ fn go_lower(s: &str) -> String {
 /// it catches the "<name>bot/<version>" form, but not a bare "bot", which
 /// phone models carry ("Cubot"). An empty agent is a scripted client.
 pub fn is_bot(agent: &str) -> bool {
-    let agent = go_lower(agent.trim());
+    let agent = simple_lowercase(agent.trim());
     agent.is_empty() || agent.contains("bot/") || BOT_TOKENS.iter().any(|t| agent.contains(t))
 }
 
 fn eastern() -> jiff::tz::TimeZone {
-    crate::gotime::zone("America/New_York").unwrap_or(jiff::tz::TimeZone::UTC)
+    crate::web_time::zone("America/New_York").unwrap_or(jiff::tz::TimeZone::UTC)
 }
 
 /// The reporting day of an instant: its civil date in America/New_York.
@@ -195,7 +193,7 @@ fn eastern_day(now: jiff::Timestamp) -> Date {
     Date::new(i32::from(z.year()), i32::from(z.month()), i32::from(z.day()))
 }
 
-/// The SQLite store, one connection as in Go.
+/// The SQLite store, using a single connection.
 pub struct Store {
     conn: Mutex<Connection>,
 }
@@ -227,11 +225,11 @@ CREATE TABLE IF NOT EXISTS seen (
             return Err("invalid usage event".into());
         }
         let today = eastern_day(now);
-        let day = crate::gotime::date_slug(today);
+        let day = crate::web_time::date_slug(today);
         let hash = Sha256::digest(format!("{day}\x00{browser}").as_bytes());
         let mut conn = self.conn.lock().map_err(|e| e.to_string())?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
-        tx.execute("DELETE FROM seen WHERE day < ?", [crate::gotime::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
+        tx.execute("DELETE FROM seen WHERE day < ?", [crate::web_time::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
         let mut scopes = vec!["site"];
         if scope != "site" {
             scopes.push(scope);
@@ -256,9 +254,9 @@ CREATE TABLE IF NOT EXISTS seen (
         }
         let today = eastern_day(now);
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
-        conn.execute("DELETE FROM seen WHERE day < ?", [crate::gotime::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
+        conn.execute("DELETE FROM seen WHERE day < ?", [crate::web_time::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
         let mut result: Vec<UsageDay> =
-            (0..days).map(|i| UsageDay { day: crate::gotime::date_slug(today.add_days(-(i as i32))), ..UsageDay::default() }).collect();
+            (0..days).map(|i| UsageDay { day: crate::web_time::date_slug(today.add_days(-(i as i32))), ..UsageDay::default() }).collect();
         let indices: BTreeMap<String, usize> = result.iter().enumerate().map(|(i, r)| (r.day.clone(), i)).collect();
         let mut stmt = conn.prepare("SELECT day, scope, users FROM totals WHERE day >= ? AND day <= ?").map_err(|e| e.to_string())?;
         let rows = stmt
@@ -298,8 +296,7 @@ fn with_usage_headers(mut resp: Response<Body>) -> Response<Body> {
     resp
 }
 
-/// Go's `url.Parse(origin)` far enough to compare its scheme and host;
-/// `None` where Go's parse fails.
+/// Parses an origin far enough to compare its scheme and host; malformed input returns `None`.
 fn origin_parts(origin: &str) -> Option<(String, String)> {
     let origin = origin.split('#').next().unwrap_or("");
     let mut scheme = "";
@@ -418,7 +415,7 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
     let mut days = 30;
     let raw = query.get("days");
     if !raw.is_empty() {
-        match compat::atoi(raw) {
+        match data_format::atoi(raw) {
             Ok(n) if [7, 30, 90, 365].contains(&n) => days = n,
             _ => return with_usage_headers(http_error("Choose 7, 30, 90 or 365 days", StatusCode::BAD_REQUEST)),
         }
@@ -440,7 +437,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn events_parse_as_go_parses_them() {
+    fn events_validate_scopes_and_dimensions() {
         assert_eq!(parse_event("lauds appearance:apse screen:mobile prayer-form:priest").unwrap().dimensions.len(), 3);
         let e = parse_event("ordo prayer-form:priest appearance:nave appearance:apse future:x").unwrap();
         assert_eq!(e.dimensions, vec!["appearance:nave".to_string()]);
@@ -457,7 +454,6 @@ mod tests {
         assert_eq!(origin_parts("https://a.b:x"), None);
     }
 
-    // Ported from Go's `internal/usage/bots_test.go`.
     #[test]
     fn bots_and_people() {
         for agent in [
@@ -496,8 +492,6 @@ mod tests {
             assert!(!is_bot(agent), "is_bot({agent:?})");
         }
     }
-
-    // Ported from Go's `internal/usage/store_test.go` and `leader_test.go`.
 
     struct TempDb(std::path::PathBuf);
 
@@ -579,12 +573,11 @@ mod tests {
     fn reporting_day_across_dst() {
         for (value, utc_day) in [("2026-03-08T04:59:00Z", "2026-03-08"), ("2026-11-01T03:59:00Z", "2026-11-01")] {
             let now: jiff::Timestamp = value.parse().unwrap();
-            assert_ne!(crate::gotime::date_slug(eastern_day(now)), utc_day, "used UTC instead of Eastern: {value}");
+            assert_ne!(crate::web_time::date_slug(eastern_day(now)), utc_day, "used UTC instead of Eastern: {value}");
         }
     }
 
-    // Ported from Go's `TestUsageTrendDimensionsCoverTheVocabulary`: every
-    // stored family has a report breakdown.
+    // Every stored family has a report breakdown.
     #[test]
     fn trend_dimensions_cover_the_vocabulary() {
         use render_html::usage::TREND_LABELS;

@@ -1,5 +1,4 @@
-//! The `/office.ics` reminder feed: stateless, configured entirely by its
-//! query. Ported from Go's `web/ics.go`.
+//! The `/office.ics` reminder feed: stateless, configured entirely by its query.
 
 use axum::body::Body;
 use axum::http::{HeaderMap, Response, StatusCode, header};
@@ -8,8 +7,8 @@ use jiff::{SignedDuration, Timestamp};
 use render_html::links::title_case;
 
 use crate::Server;
-use crate::gotime::{date_slug, ics_stamp, load_location, parse_clock, wall_time};
 use crate::http::{Query, header_value, http_error, response, set};
+use crate::web_time::{date_slug, ics_stamp, load_location, parse_clock, wall_time};
 
 /// The hours in liturgical order, so a day's events are in sequence
 /// whatever the query's order.
@@ -44,7 +43,7 @@ fn parse_days(spec: &str) -> Result<[bool; 7], String> {
         let token = token.trim().to_lowercase();
         if let Some((from, to)) = token.split_once('-') {
             let (Some(start), Some(end)) = (day_number(from), day_number(to)) else {
-                return Err(format!("invalid day range {}", compat::quote(&token)));
+                return Err(format!("invalid day range {}", data_format::quote(&token)));
             };
             let mut d = start;
             loop {
@@ -57,7 +56,7 @@ fn parse_days(spec: &str) -> Result<[bool; 7], String> {
             continue;
         }
         let Some(d) = day_number(&token) else {
-            return Err(format!("invalid day {}", compat::quote(&token)));
+            return Err(format!("invalid day {}", data_format::quote(&token)));
         };
         days[d] = true;
     }
@@ -72,7 +71,7 @@ fn parse_config(q: &Query) -> Result<IcsConfig, String> {
             continue;
         }
         let Some((hh, mm)) = parse_clock(v) else {
-            return Err(format!("invalid time {} for {name} — use HH:MM (24-hour)", compat::quote(v)));
+            return Err(format!("invalid time {} for {name} — use HH:MM (24-hour)", data_format::quote(v)));
         };
         hours.push((name, hh, mm));
     }
@@ -85,22 +84,23 @@ fn parse_config(q: &Query) -> Result<IcsConfig, String> {
     if v == "none" {
         alarm = None;
     } else if !v.is_empty() {
-        match compat::atoi(v) {
+        match data_format::atoi(v) {
             Ok(n) if (0..=24 * 60).contains(&n) => alarm = Some(n),
-            _ => return Err(format!("invalid alarm {} — minutes before the hour, or \"none\"", compat::quote(v))),
+            _ => return Err(format!("invalid alarm {} — minutes before the hour, or \"none\"", data_format::quote(v))),
         }
     }
     let mut tz = TimeZone::UTC;
     let v = q.get("tz");
     if !v.is_empty() {
-        tz = load_location(v).ok_or_else(|| format!("unknown timezone {} — use an IANA name like America/New_York", compat::quote(v)))?;
+        tz = load_location(v)
+            .ok_or_else(|| format!("unknown timezone {} — use an IANA name like America/New_York", data_format::quote(v)))?;
     }
     let mut horizon = DEFAULT_HORIZON_DAYS;
     let v = q.get("horizon");
     if !v.is_empty() {
-        match compat::atoi(v) {
+        match data_format::atoi(v) {
             Ok(n) if (1..=MAX_HORIZON_DAYS).contains(&n) => horizon = n,
-            _ => return Err(format!("invalid horizon {} — days from 1 to {MAX_HORIZON_DAYS}", compat::quote(v))),
+            _ => return Err(format!("invalid horizon {} — days from 1 to {MAX_HORIZON_DAYS}", data_format::quote(v))),
         }
     }
     Ok(IcsConfig { hours, days, alarm, tz, horizon })
@@ -217,7 +217,6 @@ impl Server {
     }
 }
 
-// Ported from Go's `internal/web/ics_test.go`.
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -274,7 +273,7 @@ mod tests {
 
     #[test]
     fn build_ics() {
-        let ny = crate::gotime::zone("America/New_York").unwrap();
+        let ny = crate::web_time::zone("America/New_York").unwrap();
         // Christmas 2026 (a Friday) falls inside the horizon.
         let body = ics("lauds=06:45&tz=America/New_York&horizon=7&alarm=15", at(&ny, 2026, 12, 20, 12, 0));
         assert!(body.starts_with("BEGIN:VCALENDAR\r\n") && body.ends_with("END:VCALENDAR\r\n"));

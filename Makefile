@@ -1,4 +1,4 @@
-.PHONY: help build test test-ux test-ux-rust parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage
+.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage
 
 .DEFAULT_GOAL := help
 
@@ -64,8 +64,6 @@ discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
 
 test-ux: build ## Run Playwright UX regression tests against Rust
 	npm --prefix .web-tools run test:ux
-
-test-ux-rust: test-ux ## Alias for test-ux
 
 lint: ## Run Clippy
 	cargo clippy --workspace --all-targets --locked -- -D warnings

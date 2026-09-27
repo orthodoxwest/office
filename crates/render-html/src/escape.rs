@@ -1,11 +1,8 @@
-//! The escapers Go's `html/template` applies, so pages render byte for byte
-//! as the Go server's did (RUST-PORT.md, Phase 5). Templates are not
-//! contextually autoescaped here: the environment's formatter escapes every
-//! value for text and quoted attributes, and URL-valued attributes pass
-//! through the `url` or `urlpart` filters first, as html/template's escaper
-//! chains would.
+//! Escaping for HTML templates. The environment's formatter escapes every value for text and quoted
+//! attributes. URL-valued attributes must also pass through the `url` or `urlpart` filter; the
+//! template engine does not infer their context.
 
-/// `html/template.HTMLEscapeString`: `"`, `'`, `&`, `<`, `>`, and NUL.
+/// Escapes `"`, `'`, `&`, `<`, `>`, and NUL.
 pub fn html_escape_string(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for c in s.chars() {
@@ -22,8 +19,7 @@ pub fn html_escape_string(s: &str) -> String {
     out
 }
 
-/// html/template's escaper for a value in a text node or a quoted attribute
-/// (its `htmlReplacementTable`): as [`html_escape_string`], plus `+`.
+/// Escapes a text node or quoted attribute: as [`html_escape_string`], plus `+`.
 pub fn template_escape(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for c in s.chars() {
@@ -41,19 +37,19 @@ pub fn template_escape(s: &str) -> String {
     out
 }
 
-/// html/template's `urlFilter`: anything with a scheme other than http,
-/// https, or mailto becomes `#ZgotmplZ`.
+/// Rejects schemes other than http,
+/// https, or mailto becomes `#invalid-url`.
 fn url_filter(s: &str) -> String {
     if let Some((protocol, _)) = s.split_once(':')
         && !protocol.contains('/')
         && !["http", "https", "mailto"].iter().any(|p| protocol.eq_ignore_ascii_case(p))
     {
-        return "#ZgotmplZ".to_string();
+        return "#invalid-url".to_string();
     }
     s.to_string()
 }
 
-/// html/template's `processURLOnto`: percent-encodes what a URL may not
+/// Percent-encodes what a URL may not
 /// carry; when normalizing, reserved characters and valid escapes stay.
 fn process_url(s: &str, norm: bool) -> String {
     let mut out = String::with_capacity(s.len() + 16);
@@ -90,9 +86,8 @@ pub fn url_part(s: &str) -> String {
     process_url(s, false)
 }
 
-/// Go's `fmt.Sprint` of a float64 (`%g`, shortest digits): a decimal, or an
-/// exponent below 1e-4 and from 1e6.
-pub fn go_float(f: f64) -> String {
+/// Shortest float formatting: decimal notation, or an exponent below 1e-4 and from 1e6.
+pub fn format_float(f: f64) -> String {
     if f == 0.0 || !f.is_finite() {
         return if f.is_nan() {
             "NaN".into()
@@ -117,32 +112,32 @@ mod tests {
     use super::*;
 
     #[test]
-    fn escapes_like_html_template() {
+    fn escapes_text_and_quoted_attributes() {
         assert_eq!(template_escape("a+b & \"c\" 'd' <e>"), "a&#43;b &amp; &#34;c&#34; &#39;d&#39; &lt;e&gt;");
         assert_eq!(html_escape_string("a+b"), "a+b");
     }
 
     #[test]
-    fn urls_like_html_template() {
+    fn urls_filter_schemes_and_escape_components() {
         assert_eq!(url_start("/lauds/2026-01-01"), "/lauds/2026-01-01");
         assert_eq!(
             url_start("https://x.org/new?title=%5Breview%5D+a&labels=review"),
             "https://x.org/new?title=%5Breview%5D+a&labels=review"
         );
-        assert_eq!(url_start("javascript:alert(1)"), "#ZgotmplZ");
+        assert_eq!(url_start("javascript:alert(1)"), "#invalid-url");
         assert_eq!(url_start("/a b\"c"), "/a%20b%22c");
         assert_eq!(url_part("a/b c"), "a%2fb%20c");
     }
 
     #[test]
-    fn floats_like_fmt_sprint() {
-        assert_eq!(go_float(160.0), "160");
-        assert_eq!(go_float(2.16), "2.16");
-        assert_eq!(go_float(0.00001), "1e-05");
-        assert_eq!(go_float(1e20), "1e+20");
-        assert_eq!(go_float(123456789.125), "1.23456789125e+08");
-        assert_eq!(go_float(0.0001), "0.0001");
-        assert_eq!(go_float(999999.5), "999999.5");
-        assert_eq!(go_float(-3.5), "-3.5");
+    fn floats_use_compact_decimal_or_exponent_notation() {
+        assert_eq!(format_float(160.0), "160");
+        assert_eq!(format_float(2.16), "2.16");
+        assert_eq!(format_float(0.00001), "1e-05");
+        assert_eq!(format_float(1e20), "1e+20");
+        assert_eq!(format_float(123456789.125), "1.23456789125e+08");
+        assert_eq!(format_float(0.0001), "0.0001");
+        assert_eq!(format_float(999999.5), "999999.5");
+        assert_eq!(format_float(-3.5), "-3.5");
     }
 }

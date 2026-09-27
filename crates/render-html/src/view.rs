@@ -1,7 +1,6 @@
-//! The view models the templates read: plain data filled in by the web
-//! server. Ported from Go's `render/view.go`. Floats are formatted here, as
-//! Go's templates print them, so the templates only substitute strings.
-//! Review metadata arrives as plain strings rather than as `tools` types.
+//! The view models the templates read: plain data filled in by the web server. Floats are formatted
+//! here so the templates only substitute strings. Review metadata arrives as plain strings rather
+//! than as `tools` types.
 
 use serde::Serialize;
 

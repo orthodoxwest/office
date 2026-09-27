@@ -129,7 +129,7 @@ pub fn determine_season(date: Date, m: &MoveableDates) -> Season {
     if date >= Date::new(year, 1, 6) && date < m.septuagesima {
         return Season::Epiphany;
     }
-    // PORT(inherited): unreachable for valid dates; Go falls back to Christmas.
+    // Unreachable for valid dates; retain Christmas as the fallback.
     Season::Christmas
 }
 

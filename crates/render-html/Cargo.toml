@@ -8,7 +8,7 @@ publish.workspace = true
 
 [dependencies]
 calendar.workspace = true
-compat.workspace = true
+data-format.workspace = true
 corpus.workspace = true
 liturgy.workspace = true
 minijinja.workspace = true

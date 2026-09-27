@@ -1,6 +1,5 @@
-//! Text-to-HTML conversion of composed office elements: psalm verses,
-//! liturgical blocks, hymns, and the typography every run of display text
-//! passes through. Ported from Go's `render/html.go` and `render/typeset.go`.
+//! Text-to-HTML conversion of composed office elements: psalm verses, liturgical blocks, hymns, and
+//! the typography every run of display text passes through.
 
 use corpus::lines::{BlockKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm};
 use liturgy::{ElementType, OfficeElement, VoiceRole, VoiceSpan};
@@ -17,8 +16,7 @@ const SIGIL_ALL_CLASS: &str = "sigil sigil-all";
 /// Words that begin with an eliding apostrophe rather than an opening quote.
 const ELIDED_WORDS: [&str; 9] = ["mid", "midst", "tis", "twas", "twere", "gainst", "neath", "tween", "twixt"];
 
-// PORT(inherited): Go's unicode.IsLetter / IsDigit / IsUpper / IsSpace are
-// general-category tests; these Rust properties agree on the corpus.
+// Typography uses Unicode Alphabetic, Uppercase, White_Space, and numeric properties.
 fn is_letter(c: char) -> bool {
     c.is_alphabetic()
 }
@@ -36,7 +34,7 @@ pub fn typeset(s: &str) -> String {
     let mut b = String::with_capacity(s.len() + 8);
     let mut prev: Option<char> = None;
     for (i, r) in s.char_indices() {
-        // Go decodes past the end as U+FFFD, which is neither letter nor digit.
+        // The sentinel U+FFFD is neither a letter nor a digit.
         let next = s[i + r.len_utf8()..].chars().next().unwrap_or('\u{FFFD}');
         match r {
             '\'' => {
@@ -114,7 +112,7 @@ fn soften_drop_cap_opening(s: &str) -> String {
             let mut chars = letters.chars();
             out.push(chars.next().expect("non-empty"));
             for c in chars {
-                // Go's unicode.ToLower maps one rune to one rune.
+                // Use Unicode simple lowercase, mapping one character to one character.
                 let mut lower = c.to_lowercase();
                 match (lower.next(), lower.next()) {
                     (Some(l), None) => out.push(l),
@@ -450,8 +448,7 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
             BlockKind::Versicle => ("versicle-line", SIGIL_CLASS, "℣."),
             BlockKind::Response => ("response-line", SIGIL_CLASS, "℟."),
             BlockKind::Blessing => ("versicle-line", SIGIL_WORD_CLASS, "Blessing."),
-            // PORT(inherited): Go's voiced renderer has no All: case; the
-            // line is prose.
+            // An `All:` line is rendered as prose here.
             BlockKind::All | BlockKind::Prose => {
                 prose.push(line);
                 continue;

@@ -7,7 +7,7 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
-compat.workspace = true
+data-format.workspace = true
 calendar.workspace = true
 corpus.workspace = true
 office.workspace = true

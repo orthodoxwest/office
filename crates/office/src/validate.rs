@@ -1,13 +1,11 @@
-//! Hour-definition validation: every `Ref` in `data/office/` resolves, and
-//! the psalmody declarations and omission markers are well formed. Ported
-//! from Go's `office/validate.go` (with the psalmody validators from
-//! `psalmody.go` and `lauds_psalmody.go`).
+//! Hour-definition validation: every `Ref` in `data/office/` resolves, and the psalmody
+//! declarations and omission markers are well formed.
 
 use std::collections::HashMap;
 
 use calendar::DataSource;
-use compat::quote;
 use corpus::{Corpus, OMIT_MARKER, is_omitted};
+use data_format::quote;
 
 use crate::engine::{HOLY_SATURDAY_VESPERS_DEFINITION, HOUR_NAMES, hour_definition_names};
 use crate::hourdef::{Condition, parse_hour_definition};
@@ -73,8 +71,8 @@ fn validation_hours<'a>(hour: &'a str, kind: &str, reference: &str) -> &'a str {
     hour
 }
 
-/// Go's `ValidateHourDefinitions`: definition parse errors, then the
-/// psalmody declaration and omission errors, then unresolved refs (sorted).
+/// Returns definition parse errors, then psalmody declaration and omission errors, then unresolved
+/// refs (sorted).
 pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
     let texts = match load_texts(src) {
         Ok(t) => t,

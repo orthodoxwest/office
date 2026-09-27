@@ -1,5 +1,5 @@
-//! Per-year calendar days and calendar-page summaries. Ported from Go's
-//! `web/cache.go`: a small window of recently used years, not an archive.
+//! Per-year calendar days and calendar-page summaries: a small window of recently used years, not
+//! an archive.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -37,9 +37,7 @@ impl YearCache {
 
     /// The year's days, building them if the year is not cached. A year in
     /// use moves to the back so browsing older years does not evict it.
-    // PORT(inherited): Go rereads the feast files for every year it builds;
-    // Rust loads them once at startup, as the data directory is fixed for a
-    // deploy.
+    // Feast data is loaded once at startup and stays fixed for the lifetime of this cache.
     pub fn get(&self, year: i32) -> Result<Arc<YearEntry>, String> {
         let mut guard = self.entries.lock().map_err(|e| e.to_string())?;
         let Entries { years: entries, order } = &mut *guard;
@@ -68,9 +66,6 @@ impl YearCache {
     }
 }
 
-// Ported from Go's `internal/web/cache_test.go`. Go's test that a failed
-// build is not cached has no counterpart: the feast data loads once, at
-// startup, so a year cannot fail to build for want of it.
 #[cfg(test)]
 mod tests {
     use super::*;

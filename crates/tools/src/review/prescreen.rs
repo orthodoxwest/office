@@ -1,12 +1,11 @@
-//! The prescreen ledger (read-through suspicions bound to a text version)
-//! and the per-key suspicion map it forms with the advisory lints. Ported
-//! from Go's `review/prescreen.go`.
+//! The prescreen ledger (read-through suspicions bound to a text version) and the per-key suspicion
+//! map it forms with the advisory lints.
 
 use std::collections::BTreeMap;
 use std::path::Path;
 
 use calendar::DataSource;
-use compat::{csv, quote};
+use data_format::{csv, quote};
 
 use super::provenance::{ProvenanceInventory, ProvenanceStatus, read_ledger, scan_provenance};
 
@@ -151,8 +150,7 @@ fn suspicion_rank(s: &Suspicion) -> u8 {
     }
 }
 
-/// Go's `RecordPrescreenFlag`: binds the flag to the entry's current text
-/// and rewrites the ledger atomically.
+/// Binds the flag to the entry's current text and rewrites the ledger atomically.
 pub fn record_prescreen_flag(src: &dyn DataSource, dir: &Path, mut flag: PrescreenFlag, replace: bool) -> Result<PrescreenFlag, String> {
     flag.key = flag.key.trim().to_string();
     flag.reason = flag.reason.trim().to_string();

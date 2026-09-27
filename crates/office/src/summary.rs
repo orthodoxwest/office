@@ -1,6 +1,5 @@
-//! The ordo-relevant digest of a composed hour: preces, suffrage,
-//! commemorations, and the gospel-canticle antiphon. Shared by the ordo, the
-//! calendar view, and `office rubrics`. Ported from Go's `summary.go`.
+//! The ordo-relevant digest of a composed hour: preces, suffrage, commemorations, and the
+//! gospel-canticle antiphon. Shared by the ordo, the calendar view, and `office rubrics`.
 
 use calendar::Color;
 use liturgy::{ElementType, OfficeHour};

@@ -1,5 +1,4 @@
 //! Plain-text rendering of a composed hour, for the CLI and the text goldens.
-//! Ported from Go's `output/office.go`.
 
 use liturgy::{ElementType, OfficeElement, OfficeHour, VoiceRole};
 

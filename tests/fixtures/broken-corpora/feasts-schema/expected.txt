@@ -6,7 +6,7 @@ temporal.txt: feast "bad-category": invalid feast category: "hermit"
 temporal.txt: feast "both-dates" must not have both Month/Day and DateRule
 sanctoral.txt: feast "half-date" must specify Month and Day together
 sanctoral.txt: feast "impossible-date" has invalid fixed date 2/30
-sanctoral.txt: feast "bad-month": invalid Month: strconv.Atoi: parsing "March": invalid syntax
+sanctoral.txt: feast "bad-month": invalid Month: "March" is not an integer
 sanctoral.txt: feast "no-date" must have either Month/Day or DateRule
 sanctoral.txt: feast "unknown-keys": unrecognized key "Aardvark"
 sanctoral.txt: feast "bad-bool": HasOctave: expected true or false, got "yes"

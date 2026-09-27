@@ -1,12 +1,11 @@
-//! Structured per-entry source inventory and attestations. Ported from Go's
-//! `review/provenance.go`.
+//! Structured per-entry source inventory and attestations.
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::sync::LazyLock;
 
 use calendar::{DataSource, Date};
-use compat::{csv, quote, scan_lines};
+use data_format::{csv, quote, scan_lines};
 use regex::Regex;
 use sha2::{Digest, Sha256};
 
@@ -111,7 +110,7 @@ impl Attestation {
     }
 }
 
-// Go's \b and \s are ASCII.
+// Word boundaries and whitespace are ASCII.
 static PAGE_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?-u:\b)p(?:age)?\.?[\t\n\f\r ]*([0-9]+(?:[-–][0-9]+)?)").expect("valid regex"));
 static PDF_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^([^\t\n\f\r ]+\.pdf)[\t\n\f\r ]*(.*)$").expect("valid regex"));
@@ -251,7 +250,7 @@ fn parse_citation(raw: &str, line: usize) -> SourceCitation {
     c
 }
 
-/// Reads a review ledger: `Ok(None)` when absent, Go's CSV errors otherwise.
+/// `Ok(None)` if the review ledger is absent; malformed CSV returns an error.
 pub fn read_ledger(src: &dyn DataSource, rel: &str) -> Result<Option<Vec<Vec<String>>>, String> {
     let Some(content) = src.read(rel)? else { return Ok(None) };
     csv::read_all(&content).map(Some).map_err(|e| format!("reading {}: {e}", src.display_path(rel)))
@@ -330,9 +329,8 @@ pub struct AttestOptions {
     pub replace: bool,
 }
 
-/// Go's `RecordAttestation`: validates, binds the attestation to the
-/// entry's current text, rewrites the ledger atomically, and prunes any
-/// prescreen flag the verification supersedes. Never stores book contents.
+/// Validates, binds the attestation to the entry's current text, rewrites the ledger atomically,
+/// and prunes any prescreen flag the verification supersedes. Never stores book contents.
 pub fn record_attestation(src: &dyn DataSource, dir: &std::path::Path, mut o: AttestOptions) -> Result<EntryProvenance, String> {
     for f in [&mut o.key, &mut o.reviewer, &mut o.source, &mut o.locator, &mut o.page, &mut o.reviewed_on, &mut o.notes] {
         *f = f.trim().to_string();

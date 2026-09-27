@@ -1,3 +1,3 @@
 == texts
 == review
-review provenance: reading $DATA/review/provenance.csv: record on line 2: wrong number of fields
+review provenance: reading $DATA/review/provenance.csv: line 2: expected 9 fields, found 3

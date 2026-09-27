@@ -1,5 +1,4 @@
 //! Preces, the Suffrage of All Saints, and the Commemoration of the Cross.
-//! Ported from Go's `preces.go`.
 
 use calendar::{Category, Feast, MoveableDates, Rank, Season, Weekday};
 

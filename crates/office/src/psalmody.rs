@@ -1,10 +1,9 @@
-//! Psalmody declarations and the Office of the Dead. Ported from Go's
-//! `psalmody.go`.
+//! Psalmody declarations and the Office of the Dead.
 
 use std::collections::{BTreeSet, HashMap};
 
 use calendar::{Category, Color, Date, Rank, Season};
-use compat::{quote, scan_lines};
+use data_format::{quote, scan_lines};
 use liturgy::OfficeElement;
 
 use crate::concurrence::{VespersDesignation, VespersOwner};
@@ -146,8 +145,7 @@ pub fn select_psalmody_items(items: Vec<PsalmodyItem>, date: Date) -> Result<Vec
         *counts.entry(item.slot.clone()).or_default() += 1;
         selected.push(item);
     }
-    // PORT(inherited): Go reports the first failing slot in map order; this
-    // reports the first in declaration order.
+    // Report the first failing slot in declaration order.
     for slot in &expected {
         match counts.get(slot).copied().unwrap_or(0) {
             0 => return Err(format!("antiphon key {} has no alternative for date {month_day}", quote(slot))),

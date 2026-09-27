@@ -1,6 +1,5 @@
-//! A small flag parser that accepts what Go's `flag` package accepts:
-//! `-name value`, `-name=value`, `--name value`, boolean `-name`, and parsing
-//! stops at the first non-flag. The error messages are our own.
+//! Command-line flags: `-name value`, `-name=value`, `--name value`, and boolean `-name`. Parsing
+//! stops at the first non-flag.
 
 use std::collections::HashMap;
 
@@ -40,7 +39,7 @@ impl Flags {
             };
             if bools.contains(&name.as_str()) {
                 if parse_bool(&value).is_none() {
-                    return Err(format!("flag -{name}: {} is not true or false", compat::quote(&value)));
+                    return Err(format!("flag -{name}: {} is not true or false", data_format::quote(&value)));
                 }
             } else if !known.contains(&name.as_str()) {
                 return Err(format!("unknown flag -{name}"));
@@ -68,7 +67,7 @@ impl Flags {
     pub fn int(&self, name: &str, default: i32) -> Result<i32, String> {
         match self.values.get(name) {
             None => Ok(default),
-            Some(v) => v.parse().map_err(|_| format!("flag -{name}: {} is not an integer", compat::quote(v))),
+            Some(v) => v.parse().map_err(|_| format!("flag -{name}: {} is not an integer", data_format::quote(v))),
         }
     }
 }
@@ -78,7 +77,7 @@ pub fn split_list(value: &str) -> Vec<String> {
     value.split(',').map(str::trim).filter(|p| !p.is_empty()).map(str::to_string).collect()
 }
 
-/// Go's `strconv.ParseBool`.
+/// Parses booleans: 1/0 and true/false in lowercase, uppercase, or title case.
 fn parse_bool(v: &str) -> Option<bool> {
     match v {
         "1" | "t" | "T" | "true" | "TRUE" | "True" => Some(true),

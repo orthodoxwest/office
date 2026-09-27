@@ -13,7 +13,8 @@ The trial covers September 7–9, read at Prime on September 6–8; try
 authentication: the parameter isn't persisted, previews bypass the service
 worker and send `Cache-Control: private, no-store` and
 `X-Robots-Tag: noindex, nofollow`. Programmatic review uses
-`ComposeHourWithOptions` with `MartyrologyPreview: true`. The flag can go once
+`Engine::compose_hour_with_options` with
+`ComposeOptions { martyrology_preview: true, ..Default::default() }`. The flag can go once
 clergy approve; making the section collapsible is a separate decision.
 
 Tests cover next-day selection, year and leap-year rollover, civil time across

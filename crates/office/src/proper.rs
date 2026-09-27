@@ -1,6 +1,5 @@
-//! Proper text resolution: feast proper, Common, weekly temporal texts,
-//! seasonal default, weekday ordinary, ordinary, shared. Ported from Go's
-//! `proper.go`.
+//! Proper text resolution: feast proper, Common, weekly temporal texts, seasonal default, weekday
+//! ordinary, ordinary, shared.
 
 use calendar::{Category, Feast, MoveableDates, Season};
 

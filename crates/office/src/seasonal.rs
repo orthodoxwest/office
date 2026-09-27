@@ -38,8 +38,7 @@ pub fn marian_antiphon(date: Date, m: &MoveableDates) -> &'static str {
     if date >= pentecost_saturday && date <= two_days_before_advent1 {
         return "salve-regina";
     }
-    // PORT(inherited): Holy Thursday and Good Friday fall through to Salve
-    // Regina, as in Go.
+    // Holy Thursday and Good Friday fall through to Salve Regina.
     "salve-regina"
 }
 
@@ -73,7 +72,6 @@ pub fn historia_week_id(date: Date) -> Option<String> {
     let mut week = sunday.days_since(start) / 7;
     if month == 3 && week > 0 {
         // Count back from Advent: the week ending at Advent is the fifth.
-        // PORT(inherited): Go computes (hours - 24) / (24*7) in integer hours.
         week = 4 - (advent1.days_since(sunday) * 24 - 24) / (24 * 7);
     }
     Some(format!("{}-{}", HISTORIA_MONTHS[month], week + 1))

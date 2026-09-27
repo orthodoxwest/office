@@ -1,4 +1,4 @@
-//! Compline. Ported from Go's `compline.go`.
+//! Compline.
 
 use calendar::MoveableDates;
 use liturgy::{OfficeHour, OfficeSection};

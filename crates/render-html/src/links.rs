@@ -1,5 +1,4 @@
-//! Navigation and asset URLs. Ported from Go's `render/links.go`. Appearance
-//! is client-side only, so no link carries a theme.
+//! Navigation and asset URLs. Appearance is client-side only, so no link carries a theme.
 
 use calendar::Date;
 
@@ -66,7 +65,6 @@ pub fn season_class(season: Option<calendar::Season>) -> &'static str {
 mod tests {
     use super::*;
 
-    // Ported from Go's `internal/render/links_test.go`.
     #[test]
     fn nav_link_keeps_chrome_dated() {
         const DATE: &str = "2026-06-07";
