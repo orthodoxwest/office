@@ -1,18 +1,26 @@
-//! Prime. Ported from Go's `prime.go` (without the unpublished Martyrology
-//! preview, which the dump never selects).
+//! Prime. Ported from Go's `prime.go`.
 
 use calendar::{Category, MoveableDates, Season};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};
 
 use crate::day::Day;
-use crate::engine::{append_hour_element, compact_refs};
-use crate::hourdef::HourSection;
+use crate::engine::{append_hour_element, compact_refs, resolve_element};
+use crate::hourdef::{HourElement, HourSection};
 use crate::major::record_condition_decision;
 use crate::preces::SATURDAY_OFFICE_BVM_ID;
 use crate::proper::{lookup_feast_proper_text, resolve_proper_text};
 use crate::texts::OfficeTexts;
 
-pub fn compose_prime(day: &Day, sections: &[HourSection], t: &OfficeTexts, moveable: Option<&MoveableDates>) -> OfficeHour {
+/// Composes Prime. `martyrology_preview` substitutes the next day's
+/// reviewed Martyrology entry for the static rubric; it is only ever an
+/// explicit request, never part of the published office.
+pub fn compose_prime(
+    day: &Day,
+    sections: &[HourSection],
+    t: &OfficeTexts,
+    moveable: Option<&MoveableDates>,
+    martyrology_preview: bool,
+) -> OfficeHour {
     let mut hour = new_hour("Prime", day);
     for section in sections {
         if !section.condition.is_empty() {
@@ -24,6 +32,10 @@ pub fn compose_prime(day: &Day, sections: &[HourSection], t: &OfficeTexts, movea
         }
         let mut elems = Vec::new();
         for elem in &section.elements {
+            if martyrology_preview && section.name == "Martyrology" && elem.reference == MARTYROLOGY_RUBRIC {
+                elems.extend(resolve_prime_martyrology(day, t));
+                continue;
+            }
             if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" {
                 elems.push(resolve_prime_psalm_antiphon(day, t, moveable));
                 continue;
@@ -33,6 +45,35 @@ pub fn compose_prime(day: &Day, sections: &[HourSection], t: &OfficeTexts, movea
         hour.sections.push(OfficeSection { label: section.label.clone(), collapsible: section.collapsible, elements: elems });
     }
     hour
+}
+
+const MARTYROLOGY_RUBRIC: &str = "ordinary/prime/martyrology-rubric";
+
+const MONTH_NAMES: [&str; 12] =
+    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+/// The next day's reviewed Martyrology entry. The static rubric remains the
+/// fallback while the per-date corpus is being populated.
+fn resolve_prime_martyrology(day: &Day, t: &OfficeTexts) -> Vec<OfficeElement> {
+    let next = day.date.add_days(1);
+    let reference = format!("ordinary/martyrology/{:02}-{:02}", next.month(), next.day());
+    const CONCLUSION: &str = "ordinary/martyrology/conclusion";
+    const RESPONSE: &str = "ordinary/martyrology/response";
+    let (text, conclusion, response) = (t.get(&reference), t.get(CONCLUSION), t.get(RESPONSE));
+    if text.is_empty() || conclusion.is_empty() || response.is_empty() {
+        return vec![resolve_element(&HourElement::new("rubric", MARTYROLOGY_RUBRIC), t)];
+    }
+    let sourced = |kind: ElementType, text: String, key: &str| OfficeElement {
+        source_ref: key.to_string(),
+        source_refs: vec![key.to_string()],
+        ..OfficeElement::new(kind, text)
+    };
+    vec![
+        sourced(ElementType::Heading, format!("Martyrology — {} {}", MONTH_NAMES[next.month() as usize - 1], next.day()), &reference),
+        sourced(ElementType::Reading, text.to_string(), &reference),
+        sourced(ElementType::Reading, conclusion.to_string(), CONCLUSION),
+        sourced(ElementType::Response, format!("R. {response}"), RESPONSE),
+    ]
 }
 
 /// An hour titled `name` for the day's own office.

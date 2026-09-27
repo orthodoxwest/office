@@ -1,0 +1,137 @@
+{% extends "layout.html" %}{% block title %}Divine Office — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
+<div class="home">
+  <span class="sr-only">Liturgical color: {{ color }}</span>
+  {# The source order is the frontispiece order at every width: day identity,
+       prayer invitation, then the secondary date control. Keeping the visual
+       and focus orders aligned makes the threshold equally clear by keyboard
+       and screen reader. #}
+  <div class="home-hero day-color-{{ color }}">
+    {# Corner tooling is decorative, outside the reading and focus order. #}
+    <svg class="home-frame-corner home-frame-corner-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <defs>
+        <path id="home-corner-rule" d="M3 29V3h26"/>
+        <path id="home-corner-leaf" d="M7 7c7 0 12 4 13 11C13 18 8 14 7 7Zm0 0 9 8"/>
+      </defs>
+      <use href="#home-corner-rule"/>
+      <use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-start" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <svg class="home-frame-corner home-frame-corner-bottom-end" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <use href="#home-corner-rule"/><use class="ornament-foliage" href="#home-corner-leaf"/>
+    </svg>
+    <section class="home-summary day-color-{{ color }}" aria-labelledby="home-date-heading">
+      <header class="home-day-head">
+        {{ headpiece(true) }}
+        <h1 id="home-date-heading">
+          <a class="home-date-link" href="{{ calendar_link|url }}" title="See this day in the ordo">{{ date_str }}</a>
+        </h1>
+        {% if feast_name %}<p class="feast">{{ feast_name|typeset }}</p>{% endif %}
+        {% if octave_note %}<p class="octave-note">{{ octave_note }}</p>{% endif %}
+        {# Always visible when not local today — "Change date" keeps a secondary
+             Today control, but overnight PWA resume must not require opening it. #}
+        {# No role=status here: intentional archive browsing should not
+             announce on every load. Client-injected notices (midnight freeze)
+             use a live region because those appear without a navigation. #}
+        {% if show_today %}
+        <p class="not-today-notice">
+          <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
+        </p>
+        {% endif %}
+        {% if penitential %}
+        <p class="penitential">
+          {% for label in penitential %}<span class="penitential-badge">{{ label }}</span>{% endfor %}
+        </p>
+        {% endif %}
+        {% if commemorations %}
+        <div class="commemorations">
+          <span class="commemorations-label">Also</span>
+          <ul>
+            {% for name in commemorations %}<li>{{ name|typeset }}</li>{% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </header>
+    </section>
+
+    <section class="home-prayer-card" aria-labelledby="home-pray-heading" data-date-slug="{{ date_slug }}">
+      <h2 id="home-pray-heading">Pray the hours</h2>
+      <p class="pray-now-wrap"><a class="pray-now" href="{{ pray_now_link|url }}">{{ pray_now_label }}</a></p>
+      <nav class="home-hour-links" aria-label="Hours for the day">
+        <section class="home-hour-group home-hour-group-morning" aria-labelledby="home-hours-morning">
+          <h3 class="home-hour-group-label" id="home-hours-morning">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <path d="M2 13h20M7 13a5 5 0 0 1 10 0M12 2v3M4.2 5.2l2.1 2.1M19.8 5.2l-2.1 2.1"/>
+            </svg>
+            <span>Morning</span>
+          </h3>
+          <div class="home-hour-group-links">
+            {% for h in hours %}{% if h.slug in ["lauds", "prime"] %}
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+              <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
+            </a>
+            {% endif %}{% endfor %}
+          </div>
+        </section>
+        <section class="home-hour-group home-hour-group-day" aria-labelledby="home-hours-day">
+          <h3 class="home-hour-group-label" id="home-hours-day">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="8" r="3.5"/>
+              <path d="M12 0.75v1.5M12 13.75v1.5M4.75 8h1.5M17.75 8h1.5M6.9 2.9l1.05 1.05M16.05 12.05l1.05 1.05M6.9 13.1l1.05-1.05M16.05 3.95l1.05-1.05"/>
+            </svg>
+            <span>Day</span>
+          </h3>
+          <div class="home-hour-group-links">
+            {% for h in hours %}{% if h.slug in ["terce", "sext", "none"] %}
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+              <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
+            </a>
+            {% endif %}{% endfor %}
+          </div>
+        </section>
+        <section class="home-hour-group home-hour-group-evening" aria-labelledby="home-hours-evening">
+          <h3 class="home-hour-group-label" id="home-hours-evening">
+            <svg class="home-period-ornament" viewBox="0 0 24 16" aria-hidden="true" focusable="false">
+              <path d="m12 1 1.8 4.7L19 7.5l-5.2 1.8L12 14l-1.8-4.7L5 7.5l5.2-1.8Z"/>
+            </svg>
+            <span>Evening</span>
+          </h3>
+          <div class="home-hour-group-links">
+            {% for h in hours %}{% if h.slug in ["vespers", "compline"] %}
+            <a class="home-hour-link{% if h.is_current %} is-current{% endif %}" href="{{ h.url|url }}" data-hour="{{ h.slug }}"{% if h.is_current %} aria-current="time"{% endif %}>
+              <span class="home-hour-link-name">{{ h.name }}</span>
+              {% if h.is_current %}<span class="home-hour-link-state sr-only">Now</span>{% endif %}
+            </a>
+            {% endif %}{% endfor %}
+          </div>
+        </section>
+      </nav>
+    </section>
+
+    {# Season rides the secondary control row: context without interrupting
+         the date → prayer invitation reading order. #}
+    <div class="home-day-meta">
+      {% if season %}<p class="home-season">{{ season }}</p>{% endif %}
+      <details class="hour-date-nav home-date-nav">
+        <summary>Change date</summary>
+        <nav class="day-nav" aria-label="Date navigation">
+          <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
+          <form class="date-jump-form" action="/" method="get">
+            <label class="sr-only" for="home-date-jump">Jump to date</label>
+            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}">
+            <button class="date-submit" type="submit">Go</button>
+            {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
+          </form>
+          <a href="{{ next_link|url }}" aria-label="Next day">Next &rarr;</a>
+        </nav>
+      </details>
+    </div>
+  </div>
+</div>
+{% endblock %}

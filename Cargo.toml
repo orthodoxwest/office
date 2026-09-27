@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/compat", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/tools", "apps/cli"]
+members = ["crates/compat", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/render-html", "crates/tools", "apps/cli", "apps/office-web"]
 
 [workspace.package]
 edition = "2024"
@@ -16,10 +16,18 @@ tools = { path = "crates/tools" }
 office = { path = "crates/office" }
 ordo = { path = "crates/ordo" }
 render-tex = { path = "crates/render-tex" }
+render-html = { path = "crates/render-html" }
+office-web = { path = "apps/office-web" }
 render-text = { path = "crates/render-text" }
 serde_json = "1"
 regex = "1.13"
 sha2 = "0.11"
+serde = { version = "1", features = ["derive", "rc"] }
+minijinja = "2"
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 
 # Core crates add `wildcard_enum_match_arm = "deny"` in their own [lints]
 # (RUST-PORT.md, "Rules"): adding a liturgical enum variant must break the

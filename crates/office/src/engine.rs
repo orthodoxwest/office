@@ -25,6 +25,19 @@ pub fn hour_definition_names() -> Vec<&'static str> {
     HOUR_NAMES.iter().copied().chain([HOLY_SATURDAY_VESPERS_DEFINITION]).collect()
 }
 
+/// Per-composition choices. The default is private prayer without previews.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ComposeOptions {
+    pub form: PrayerForm,
+    pub martyrology_preview: bool,
+}
+
+impl Default for ComposeOptions {
+    fn default() -> ComposeOptions {
+        ComposeOptions { form: PrayerForm::Private, martyrology_preview: false }
+    }
+}
+
 /// The loaded corpus and hour definitions, immutable and shareable.
 pub struct Engine {
     pub texts: OfficeTexts,
@@ -51,6 +64,19 @@ impl Engine {
 
     /// Composes the named hour for the given day in the given prayer form.
     pub fn compose_hour(&self, hour_name: &str, day: &Day, moveable: &MoveableDates, form: PrayerForm) -> Result<OfficeHour, String> {
+        self.compose_hour_with_options(hour_name, day, moveable, &ComposeOptions { form, martyrology_preview: false })
+    }
+
+    /// Composes with explicitly requested, unpublished content. Preview
+    /// choices stay local to this composition; the engine is unchanged.
+    pub fn compose_hour_with_options(
+        &self,
+        hour_name: &str,
+        day: &Day,
+        moveable: &MoveableDates,
+        options: &ComposeOptions,
+    ) -> Result<OfficeHour, String> {
+        let form = options.form;
         if !HOUR_NAMES.contains(&hour_name) {
             return Err(format!("unknown hour: {hour_name}"));
         }
@@ -61,7 +87,7 @@ impl Engine {
         let composed = match hour_name {
             "lauds" => major::compose_major_hour(day, sections, t, Some(moveable), &major::MajorHourOptions::lauds()),
             "vespers" => vespers::compose_vespers(day, sections, t, Some(moveable)),
-            "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable))),
+            "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable), options.martyrology_preview)),
             "compline" => Ok(compline::compose_compline(day, sections, t, Some(moveable))),
             "terce" => Ok(minor::compose_minor_hour("Terce", day, sections, t, Some(moveable))),
             "sext" => Ok(minor::compose_minor_hour("Sext", day, sections, t, Some(moveable))),

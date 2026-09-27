@@ -43,7 +43,7 @@ use calendar::{CalendarDay, MoveableDates, YearCalendar};
 
 pub use concurrence::{VespersDesignation, VespersOwner};
 pub use day::Day;
-pub use engine::{Engine, HOUR_NAMES};
+pub use engine::{ComposeOptions, Engine, HOUR_NAMES};
 
 /// The Office-only resolution of one day.
 #[derive(Clone, Debug)]

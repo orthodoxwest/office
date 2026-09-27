@@ -72,6 +72,41 @@ pub fn encode_indent(v: &Json) -> String {
     out
 }
 
+/// `json.Marshal(v)`: compact, with the same escaping.
+pub fn encode_compact(v: &Json) -> String {
+    let mut out = String::new();
+    write_compact(&mut out, v);
+    out
+}
+
+fn write_compact(out: &mut String, v: &Json) {
+    match v {
+        Json::Arr(items) => {
+            out.push('[');
+            for (i, item) in items.iter().enumerate() {
+                if i > 0 {
+                    out.push(',');
+                }
+                write_compact(out, item);
+            }
+            out.push(']');
+        }
+        Json::Obj(fields) => {
+            out.push('{');
+            for (i, (name, value)) in fields.iter().enumerate() {
+                if i > 0 {
+                    out.push(',');
+                }
+                write_string(out, name);
+                out.push(':');
+                write_compact(out, value);
+            }
+            out.push('}');
+        }
+        Json::Null | Json::Bool(_) | Json::Int(_) | Json::Str(_) => write_value(out, v, 0),
+    }
+}
+
 fn indent(out: &mut String, depth: usize) {
     out.push('\n');
     for _ in 0..depth {
@@ -146,6 +181,14 @@ fn write_string(out: &mut String, s: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compact_like_marshal() {
+        let v = Json::Arr(vec![
+            Obj::new().str("Key", "a<b").field("Points", Json::Null).field("N", Json::Arr(vec![Json::Int(1), Json::Int(2)])).build(),
+        ]);
+        assert_eq!(encode_compact(&v), "[{\"Key\":\"a\\u003cb\",\"Points\":null,\"N\":[1,2]}]");
+    }
 
     #[test]
     fn encodes_like_go() {

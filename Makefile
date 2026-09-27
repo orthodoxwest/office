@@ -1,4 +1,4 @@
-.PHONY: help build test test-race test-ux parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity rust-parity-full clean install-gremlins mutate mutate-diff test-coverage
+.PHONY: help build test test-race test-ux test-ux-rust parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity rust-parity-full clean install-gremlins mutate mutate-diff test-coverage
 
 YEAR ?= 2026
 
@@ -66,6 +66,10 @@ test-race: ## Run Go tests with the race detector
 
 test-ux: ## Run Playwright UX regression tests
 	npm --prefix .web-tools run test:ux
+
+test-ux-rust: ## Run the Playwright UX tests against the Rust server
+	cargo build --release -p office-cli
+	PLAYWRIGHT_SERVER=rust npm --prefix .web-tools run test:ux
 
 parity: ## Verify the 2026-2053 date-sensitive parity snapshot
 	go test ./internal/e2e -run TestParityGolden -count=1
@@ -190,7 +194,7 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and tex on sample dates, ordo and rubrics
+rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and tex on sample dates, ordo and rubrics, a crawl of both web servers
 	cargo build --release -p office-cli
 	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
 	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
@@ -202,6 +206,7 @@ rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and 
 	scripts/rust-parity-review.sh
 	scripts/rust-parity-edit.sh
 	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
+	scripts/rust-parity-web.sh
 
 rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
 	cargo build --release -p office-cli

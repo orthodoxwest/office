@@ -1,0 +1,100 @@
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import leader_assurance %}
+<div class="office-hour">
+  <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
+  <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
+    <div class="hour-scroll-progress-bar"></div>
+  </div>
+  <div class="hour-header">
+    <h1>{{ hour.title }}</h1>
+    <p class="hour-meta">{{ date_str }}{% if hour.feast %} &middot; {{ hour.feast|typeset }}{% endif %} &middot; {{ hour.season|titlecase }}</p>
+    {# Always visible when not local today — recovery from an overnight tab
+         must not require opening "Change date". Secondary Today stays in the form. #}
+    {# No role=status on server markup — see home.html. Client inject uses a live region. #}
+    {% if show_today %}
+    <p class="not-today-notice">
+      <a class="today-link not-today-link" href="{{ today_link|url }}">Go to today</a>
+    </p>
+    {% endif %}
+    <div class="hour-context-controls">
+    <details class="hour-date-nav">
+      <summary>Change date</summary>
+      <nav class="day-nav" aria-label="Date navigation">
+        <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
+        <form class="date-jump-form" action="/{{ hour_name|urlnorm }}" method="get">
+          <label class="sr-only" for="hour-date-jump">Jump to date</label>
+          <input id="hour-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}">
+          <button class="date-submit" type="submit">Go</button>
+          {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
+        </form>
+        <a href="{{ next_link|url }}" aria-label="Next day">Next &rarr;</a>
+      </nav>
+    </details>
+    {% if leader_forms %}
+    <details class="leader-selector">
+      <summary>Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</summary>
+      <fieldset disabled aria-describedby="leader-preference-note">
+        <legend>How are you praying?</legend>
+        <div class="leader-options">
+          {% for f in leader_forms %}<label class="leader-option"><input type="radio" name="office-prayer-form" value="{{ f.form }}"{% if f.form == "private" %} checked{% endif %}> <span>{% if f.form == "private" %}Praying privately{% elif f.form == "deacon" %}With others, led by a deacon{% else %}With others, led by a priest{% endif %}</span></label>{% endfor %}
+        </div>
+        <p id="leader-preference-note">Remembered on this device. Change it any time.</p>
+      </fieldset>
+      <noscript><p>JavaScript is needed to change the prayer form. The private form is shown.</p></noscript>
+    </details>
+    <p class="leader-print-label">Prayer form: {% for f in leader_forms %}<span data-leaders="{{ f.form }}">{{ f.label }}</span>{% endfor %}</p>
+    <span class="sr-only" id="leader-status" role="status"></span>
+    {% endif %}
+    </div>
+  </div>
+  {% if show_banner %}
+  {% if leader_forms %}<div data-leaders="{{ banner_forms }}">{% endif %}
+  <aside class="site-banner" id="site-banner" aria-label="Review notice">
+    <p>Not fully checked against the printed books; may contain errors.</p>
+    <button type="button" data-dismiss-banner aria-label="Dismiss review notice">Dismiss</button>
+  </aside>
+  {% if leader_forms %}</div>{% endif %}
+  {% endif %}
+  <div class="elements">
+    {% if leader_forms %}
+    {% for section in leader_sections %}
+      {% if section.collapsible %}
+      <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+        <summary>{{ section.label }}</summary>
+        <div class="session-prayers-content">{{ section.html|safe }}</div>
+      </details>
+      {% else %}
+      {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
+      {{ section.html|safe }}
+      {% endif %}
+    {% endfor %}
+    {% else %}
+    {% for section in sections %}
+      {% if section.collapsible %}
+      <details class="session-prayers"{% if hour_name in ["lauds", "prime", "vespers"] %} open{% endif %}>
+        <summary>{{ section.label }}</summary>
+        <div class="session-prayers-content">{{ section.html|safe }}</div>
+      </details>
+      {% else %}
+      {% if section.label %}{{ section_heading(section.label) }}{% elif hour_name == "compline" and loop.index0 == 0 %}{{ section_heading("Opening") }}{% endif %}
+      {{ section.html|safe }}
+      {% endif %}
+    {% endfor %}
+    {% endif %}
+  </div>
+  {# The prayer ends above this wrapper. In Apse it becomes the threshold
+       where the vault may fade in around the administrative epilogue without
+       ever sitting behind liturgical text. #}
+  <div class="hour-epilogue">
+    <nav class="hour-continuation" aria-label="Other hours for this day">
+      {% if previous_hour_link %}<a class="hour-continuation-link previous-hour" href="{{ previous_hour_link|url }}"><span class="continuation-label">Previous hour</span><span>&larr; {{ previous_hour_name }}</span></a>{% else %}<span></span>{% endif %}
+      <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
+      {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">Next hour</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+    </nav>
+    {# The one-line digest names only nonzero categories; the full
+         dependency, resolution, and decision lists below always render. #}
+    {% if leader_forms %}
+    {% for f in leader_forms %}<div data-leaders="{{ f.form }}">{{ leader_assurance(f.assurance, f.report_url) }}</div>{% endfor %}
+    {% else %}{{ leader_assurance(assurance, report_url) }}{% endif %}
+  </div>
+</div>
+{% endblock %}

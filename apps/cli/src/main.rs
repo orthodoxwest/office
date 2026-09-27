@@ -13,7 +13,16 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: office-rs <command> [args]
 
-Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
+Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, lauds, prime, terce, sext, none, vespers, compline, tex, serve";
+
+/// Starts the web server and blocks: `serve [ADDR]`, ":8080" by default.
+fn cmd_serve(data: &tools::fs::FsData, args: &[String], _out: &mut dyn Write) -> Result<(), String> {
+    let addr = args.first().map(String::as_str).unwrap_or(":8080");
+    let mut server = office_web::Server::new(&data.dir).map_err(|e| format!("creating server: {e}"))?;
+    server.open_usage_from_env();
+    eprintln!("Listening on http://localhost{addr}");
+    office_web::run(server, addr)
+}
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -39,6 +48,7 @@ fn main() -> ExitCode {
         "vespers" => |d, a, o| commands::cmd_hour("vespers", d, a, o),
         "compline" => |d, a, o| commands::cmd_hour("compline", d, a, o),
         "tex" => commands::cmd_tex,
+        "serve" => cmd_serve,
         _ => {
             eprintln!("Unknown command: {name}");
             return ExitCode::FAILURE;

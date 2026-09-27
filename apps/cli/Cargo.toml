@@ -21,6 +21,7 @@ render-text.workspace = true
 render-tex.workspace = true
 corpus.workspace = true
 serde_json.workspace = true
+office-web.workspace = true
 
 [lints]
 workspace = true

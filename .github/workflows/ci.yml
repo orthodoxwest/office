@@ -289,6 +289,8 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    outputs:
+      run: ${{ steps.ux_changes.outputs.run }}
 
     steps:
       - name: Determine whether UX tests are needed
@@ -469,3 +471,61 @@ jobs:
       - name: Record skipped UX suite
         if: steps.ux_changes.outputs.run == 'false'
         run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
+
+  # The same suites against the Rust server (RUST-PORT.md, Phase 5 gate): the
+  # behavior tests and the visual snapshots must pass unchanged. Built inside
+  # the browser container so the binary matches its C library.
+  ux-rust:
+    name: UX (Rust server)
+    needs: ux
+    if: needs.ux.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build the Rust server
+        run: cargo build --release -p office-cli
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .web-tools/package-lock.json
+
+      - name: Install UX test dependencies
+        run: npm ci --prefix .web-tools
+
+      - name: Run UX behavior and accessibility tests
+        env:
+          PLAYWRIGHT_SERVER: rust
+          PLAYWRIGHT_SUITE: rust-behavior
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=2
+
+      - name: Run UX visual regression tests
+        env:
+          PLAYWRIGHT_SERVER: rust
+          PLAYWRIGHT_SUITE: rust-visual
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js
+
+      - name: Upload UX test report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-rust
+          path: output/playwright/
+          retention-days: 14

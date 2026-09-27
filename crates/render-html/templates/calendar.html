@@ -1,0 +1,117 @@
+{% extends "layout.html" %}{% block title %}Ordo {{ year }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish %}
+<div class="calendar">
+  <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="icon-fish" viewBox="0 0 24 12">
+      <path d="M1 6 C5 1.2 13 1.2 17 6 C13 10.8 5 10.8 1 6 Z"/>
+      <path d="M16.5 6 L23 1.5 L21.2 6 L23 10.5 Z"/>
+    </symbol>
+  </svg>
+  {% set theme = "" %}
+  <div class="calendar-header" id="calendar-top">
+    <div class="calendar-title">
+      {{ headpiece(true) }}
+      <h1>{{ year }} Ordo</h1>
+      <p class="calendar-subtitle">Feasts &amp; daily observances</p>
+    </div>
+    <nav class="year-nav" aria-label="Calendar year">
+      {% if year > 1 %}<a href="{{ calendar_year_link(prev_year)|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
+      <a id="calendar-today-link" class="calendar-today-link" href="/calendar">Today</a>
+      {% if year < 9999 %}<a href="{{ calendar_year_link(next_year)|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
+    </nav>
+  </div>
+  <nav class="month-jump" aria-label="Jump to month">
+    {% for m in months %}<a href="#{{ m.slug|urlpart }}" aria-label="{{ m.name }}">{{ m.name[:3] }}</a>{% endfor %}
+  </nav>
+  <div class="calendar-tools">
+  <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
+  <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
+  </div>
+  {% for m in months %}
+  <section class="month" id="{{ m.slug }}">
+    {# The heading is sticky, so its jump link stays reachable all year. #}
+    <h2>{{ m.name }}<a class="month-top" href="#calendar-top" title="Back to the top of the year"><span aria-hidden="true">&uarr;</span><span class="sr-only">Back to the top of the year</span></a></h2>
+    <table class="month-table">
+      <caption class="sr-only">{{ m.name }} {{ year }} ordo with feast, penitential observances, liturgical color, and rank.</caption>
+      <thead>
+        <tr>
+          <th scope="col">Day</th>
+          <th scope="col">Wk</th>
+          <th scope="col">Feast / Observance</th>
+          <th scope="col">Fast</th>
+          <th scope="col">Abst.</th>
+          <th scope="col">Rank</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in m.days %}
+        <tr class="day {{ d.color_class }}" id="d-{{ d.date_slug }}">
+          <td class="day-num" data-label="Day"><a href="{{ home_link(d.date_slug)|url }}">{{ d.day_num }}</a></td>
+          <td class="day-wk" data-label="Weekday">{{ d.weekday }}</td>
+          <td class="day-feast" data-label="Feast">
+            <span class="sr-only">Liturgical color: {{ d.color }}. </span>
+            <div class="day-mobile-head">
+              <a class="day-mobile-date" href="{{ home_link(d.date_slug)|url }}">
+                <span class="day-mobile-num">{{ d.day_num }}</span>
+                <span class="day-mobile-weekday">{{ d.weekday }}</span>
+              </a>
+              <span class="day-mobile-flags">
+                {# aria-label is not allowed on a bare span; name these the
+                     way the wide-table cells below do. #}
+                {% if d.fast %}<span class="day-mobile-flag"><span aria-hidden="true">§</span><span class="sr-only">Fasting</span></span>{% endif %}
+                {% if d.abstinence %}<span class="day-mobile-flag">{{ fish() }}<span class="sr-only">Abstinence</span></span>{% endif %}
+                {% if d.rank %}{% if d.rank_full %}<abbr class="day-mobile-rank" tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}<span class="day-mobile-rank">{{ d.rank }}</span>{% endif %}{% endif %}
+              </span>
+            </div>
+            <a class="day-feast-name" href="{{ home_link(d.date_slug)|url }}">{{ d.feast_name|typeset }}</a>
+            {# On cards both disclosures share one line; see .day-disclosures. #}
+            <div class="day-disclosures">
+            {% if d.commemorations %}<details class="day-commemorations"><summary>{{ d.commemorations|length }} commemoration{% if d.commemorations|length > 1 %}s{% endif %}</summary>{% for c in d.commemorations %}<span class="day-commemoration">{{ c|typeset }}</span>{% endfor %}</details>{% endif %}
+            {% if d.benedictus_antiphon or d.magnificat_antiphon or d.lauds_preces or d.lauds_suffrage or d.hours_preces or d.vespers_preces or d.vespers_suffrage or d.vespers_note or d.lauds_comms or d.vespers_comms %}
+            <details class="day-office-details">
+              <summary>Office details</summary>
+              <dl class="day-office-digest">
+              {% if d.benedictus_antiphon or d.lauds_preces or d.lauds_suffrage or d.lauds_comms %}
+              <div class="day-office-hour">
+                <dt>Lauds</dt>
+                <dd>
+                  {% if d.benedictus_antiphon %}<span class="day-office-incipit">Ben. &ldquo;{{ d.benedictus_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.lauds_preces %}<span class="day-office-badge">Preces</span>{% endif %}
+                  {% if d.lauds_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% for c in d.lauds_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                </dd>
+              </div>
+              {% endif %}
+              {% if d.hours_preces %}
+              <div class="day-office-hour">
+                <dt>Hours</dt>
+                <dd><span class="day-office-badge">Preces</span></dd>
+              </div>
+              {% endif %}
+              {% if d.magnificat_antiphon or d.vespers_preces or d.vespers_suffrage or d.vespers_comms or d.vespers_note %}
+              <div class="day-office-hour">
+                <dt>Vespers</dt>
+                <dd>
+                  {% if d.vespers_note %}<span class="day-office-note">{{ d.vespers_note }}</span>{% endif %}
+                  {% if d.magnificat_antiphon %}<span class="day-office-incipit">Mag. &ldquo;{{ d.magnificat_antiphon }}&rdquo;</span>{% endif %}
+                  {% if d.vespers_preces %}<span class="day-office-badge">Preces</span>{% endif %}
+                  {% if d.vespers_suffrage %}<span class="day-office-badge">Suffrage</span>{% endif %}
+                  {% for c in d.vespers_comms %}<span class="day-office-comm">Com. {{ c.name|typeset }}{% if c.incipit %} &ldquo;{{ c.incipit|typeset }}&rdquo;{% endif %}</span>{% endfor %}
+                </dd>
+              </div>
+              {% endif %}
+              </dl>
+            </details>
+            {% endif %}
+            </div>
+          </td>
+          <td class="day-penitential-flag" data-label="Fast">{% if d.fast %}<span aria-hidden="true">§</span><span class="sr-only">Fasting</span>{% endif %}</td>
+          <td class="day-penitential-flag" data-label="Abstinence">{% if d.abstinence %}{{ fish() }}<span class="sr-only">Abstinence</span>{% endif %}</td>
+          <td class="day-rank" data-label="Rank">{% if d.rank_full %}<abbr tabindex="0" title="{{ d.rank_full }}">{{ d.rank }}</abbr>{% else %}{{ d.rank }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}
