@@ -8,8 +8,11 @@ The Triduum still suppresses the whole section. Readings follow civil dates
 regardless of feast transfers; nothing else in the calendar or other hours
 changes.
 
-The trial covers September 7–9, read at Prime on September 6–8; try
-`/prime/2026-09-07?preview=martyrology`. It is an unlinked review feature, not
+The trial covers September 7–9 and September 28–December 31, read at Prime
+on the preceding day; try `/prime/2026-09-07?preview=martyrology`. Within the
+autumn batch, October 8 and 12, November 6, 10 and 30, and December 2 hold a
+notice with no usable chronology; December 8, 15 and 25 await clergy review of
+their announcements. Held days keep the rubric. It is an unlinked review feature, not
 authentication: the parameter isn't persisted, previews bypass the service
 worker and send `Cache-Control: private, no-store` and
 `X-Robots-Tag: noindex, nofollow`. Programmatic review uses
@@ -18,7 +21,8 @@ worker and send `Cache-Control: private, no-store` and
 clergy approve; making the section collapsible is a separate decision.
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
-DST, missing-text fallback, the Triduum, and the pilot exclusions.
+DST, missing-text fallback, the Triduum, autumn coverage with its held days,
+and omitted post-1200 notices.
 
 ## Eligibility
 
