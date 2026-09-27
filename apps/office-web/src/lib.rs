@@ -1,13 +1,10 @@
-//! The Office web server. Ported from Go's `internal/web` and
-//! `internal/usage`: the same routes, pages, static assets, reminder feed,
-//! and usage store, answering every request as the Go server does (Phase 5
-//! of RUST-PORT.md). Axum only carries requests; routing reproduces Go's
-//! `http.ServeMux` so path canonicalization and fallbacks match too.
+//! The Office web server: Axum routes over a shared calendar, corpus,
+//! templates, reminder feed, and optional usage store.
 
 mod cache;
-pub mod gonet;
 pub mod gotime;
 mod handlers;
+mod http;
 mod ics;
 pub mod pwa;
 pub mod usage;
@@ -18,8 +15,9 @@ use std::sync::Arc;
 
 use axum::Router;
 use axum::body::Body;
-use axum::extract::{Request, State};
+use axum::extract::Request;
 use axum::http::{HeaderMap, Method, Response, StatusCode, Uri, header};
+use axum::routing::any;
 use calendar::CalendarData;
 use office::Engine;
 use render_html::Pages;
@@ -28,8 +26,8 @@ use tools::review::prescreen::{Suspicion, suspicion_by_key};
 use tools::review::provenance::{ProvenanceStatus, scan_provenance};
 
 use crate::cache::YearCache;
-use crate::gonet::{Query, bad_request, clean_path, redirect, unescape_path, url_string};
 use crate::handlers::Req;
+use crate::http::{Query, bad_request, unescape_path};
 use crate::usage::{BeaconBody, MAX_BEACON, Store};
 
 /// Everything a request reads, loaded once and shared.
@@ -50,7 +48,7 @@ pub(crate) struct Review {
     suspicions: BTreeMap<String, Vec<Suspicion>>,
 }
 
-/// The registered patterns of Go's mux, by what they serve.
+/// Application endpoints; Axum owns path matching.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Route {
     UsageEvent,
@@ -61,46 +59,6 @@ enum Route {
     Reminders,
     Calendar,
     Root,
-}
-
-/// A path's segments as Go's routing tree compares them: split on the
-/// escaped slashes, each segment unescaped.
-fn segments(escaped: &str) -> Vec<String> {
-    escaped.trim_start_matches('/').split('/').map(|s| unescape_path(s).unwrap_or_else(|| s.to_string())).collect()
-}
-
-fn route(escaped: &str) -> Route {
-    let segs = segments(escaped);
-    let segs: Vec<&str> = segs.iter().map(String::as_str).collect();
-    match segs.as_slice() {
-        ["api", "usage"] => Route::UsageEvent,
-        ["admin", "usage"] => Route::UsageDashboard,
-        ["sw.js"] => Route::ServiceWorker,
-        ["office.ics"] => Route::Ics,
-        ["reminders"] => Route::Reminders,
-        ["calendar", ..] => Route::Calendar,
-        ["static", _, ..] => Route::Static,
-        _ => Route::Root,
-    }
-}
-
-/// Whether a registered pattern matches the path exactly, which decides
-/// Go's "/tree" → "/tree/" redirect.
-fn exact(escaped: &str) -> bool {
-    let segs = segments(escaped);
-    let segs: Vec<&str> = segs.iter().map(String::as_str).collect();
-    matches!(
-        segs.as_slice(),
-        ["api", "usage"]
-            | ["admin", "usage"]
-            | ["sw.js"]
-            | ["office.ics"]
-            | ["reminders"]
-            | ["calendar"]
-            | ["calendar", ""]
-            | ["static", ""]
-            | [""]
-    )
 }
 
 impl Server {
@@ -130,28 +88,16 @@ impl Server {
         }
     }
 
-    /// Answers one request as Go's mux and handlers would.
-    pub fn handle(&self, method: &Method, uri: &Uri, headers: &HeaderMap, body: BeaconBody) -> Response<Body> {
-        let raw_path = uri.path();
+    fn handle(&self, route: Route, method: &Method, uri: &Uri, headers: &HeaderMap, body: BeaconBody) -> Response<Body> {
         let raw_query = uri.query().unwrap_or("");
-        // Go rejects a malformed escape while parsing the request line.
-        let Some(path) = unescape_path(raw_path) else { return bad_request() };
-        let cleaned = clean_path(raw_path);
-        if method != Method::CONNECT {
-            if !exact(&cleaned) && !cleaned.ends_with('/') && exact(&format!("{cleaned}/")) {
-                return redirect(method, &url_string(&format!("{}/", clean_path(&path)), raw_query), StatusCode::TEMPORARY_REDIRECT);
-            }
-            if cleaned != raw_path {
-                return redirect(method, &url_string(&cleaned, raw_query), StatusCode::TEMPORARY_REDIRECT);
-            }
-        }
+        let Some(path) = unescape_path(uri.path()) else { return bad_request() };
         let query = Query::parse(raw_query);
         let host = headers.get(header::HOST).and_then(|h| h.to_str().ok()).or_else(|| uri.authority().map(|a| a.as_str())).unwrap_or("");
         let req = Req { method, headers, path: &path, query: &query };
-        match route(&cleaned) {
+        match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
-            Route::Static => pwa::serve_static(&path, raw_query, !query.get("v").is_empty()),
+            Route::Static => pwa::serve_static(&path, !query.get("v").is_empty()),
             Route::ServiceWorker => pwa::service_worker(&self.version),
             Route::Ics => self.ics(&query, headers, host),
             Route::Reminders => self.reminders(&req),
@@ -166,18 +112,44 @@ impl Server {
     }
 }
 
-async fn entry(State(server): State<Arc<Server>>, req: Request) -> Response<Body> {
+/// Construct the same router for production and request-level tests.
+impl Server {
+    pub fn router(self: Arc<Self>) -> Router {
+        let endpoint = |route| {
+            let server = Arc::clone(&self);
+            any(move |req: Request| entry(Arc::clone(&server), route, req))
+        };
+        Router::new()
+            .route("/api/usage", endpoint(Route::UsageEvent))
+            .route("/admin/usage", endpoint(Route::UsageDashboard))
+            .route("/static", endpoint(Route::Static))
+            .route("/static/", endpoint(Route::Static))
+            .route("/static/{*path}", endpoint(Route::Static))
+            .route("/sw.js", endpoint(Route::ServiceWorker))
+            .route("/office.ics", endpoint(Route::Ics))
+            .route("/reminders", endpoint(Route::Reminders))
+            .route("/calendar", endpoint(Route::Calendar))
+            .route("/calendar/", endpoint(Route::Calendar))
+            .route("/calendar/{*path}", endpoint(Route::Calendar))
+            .fallback(move |req: Request| entry(Arc::clone(&self), Route::Root, req))
+    }
+}
+
+async fn entry(server: Arc<Server>, route: Route, req: Request) -> Response<Body> {
     let (parts, body) = req.into_parts();
     // Only the beacon reads a body, and never more than it allows.
-    let beacon = if route(&clean_path(parts.uri.path())) == Route::UsageEvent && parts.method == Method::POST {
+    let beacon = if route == Route::UsageEvent && parts.method == Method::POST {
         axum::body::to_bytes(body, MAX_BEACON).await.ok().map(|b| b.to_vec())
     } else {
         Some(Vec::new())
     };
-    let task = tokio::task::spawn_blocking(move || server.handle(&parts.method, &parts.uri, &parts.headers, beacon));
+    let task = tokio::task::spawn_blocking(move || server.handle(route, &parts.method, &parts.uri, &parts.headers, beacon));
     match task.await {
         Ok(resp) => resp,
-        Err(e) => gonet::http_error(&e.to_string(), StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            eprintln!("request failed: {e}");
+            http::http_error("Internal server error", StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
@@ -206,36 +178,74 @@ pub fn run(server: Server, addr: &str) -> Result<(), String> {
             }
         });
         let listener = listen(addr).await?;
-        let app = Router::new().fallback(entry).with_state(server);
+        let app = server.router();
         axum::serve(listener, app).await.map_err(|e| format!("server error: {e}"))
     })
 }
 
 /// One server over the live data, shared by the tests.
 #[cfg(test)]
-pub(crate) fn test_server() -> &'static Server {
-    static SERVER: std::sync::OnceLock<Server> = std::sync::OnceLock::new();
-    SERVER.get_or_init(|| Server::new(Path::new("../../data")).unwrap())
+pub(crate) fn test_server() -> Arc<Server> {
+    static SERVER: std::sync::OnceLock<Arc<Server>> = std::sync::OnceLock::new();
+    Arc::clone(SERVER.get_or_init(|| Arc::new(Server::new(Path::new("../../data")).unwrap())))
 }
 
 #[cfg(test)]
-mod tests {
+mod routing_tests {
     use super::*;
+    use tower::ServiceExt;
 
-    #[test]
-    fn routes_follow_go_mux() {
-        assert_eq!(route("/api/usage"), Route::UsageEvent);
-        assert_eq!(route("/api/usage/"), Route::Root);
-        assert_eq!(route("/static/style.css"), Route::Static);
-        assert_eq!(route("/static/"), Route::Static);
-        assert_eq!(route("/static"), Route::Root);
-        assert_eq!(route("/%73tatic/style.css"), Route::Static);
-        assert_eq!(route("/static%2Fstyle.css"), Route::Root);
-        assert_eq!(route("/calendar"), Route::Calendar);
-        assert_eq!(route("/calendar/2026"), Route::Calendar);
-        assert_eq!(route("/reminders/"), Route::Root);
-        assert!(exact("/static/"));
-        assert!(!exact("/static"));
-        assert!(exact("/"));
+    async fn request(method: Method, path: &str, body: impl Into<Body>) -> Response<Body> {
+        let request = Request::builder()
+            .method(method)
+            .uri(path)
+            .header("x-office-usage", "1")
+            .header("user-agent", "Mozilla/5.0")
+            .body(body.into())
+            .unwrap();
+        test_server().router().oneshot(request).await.unwrap()
+    }
+
+    #[tokio::test]
+    async fn routes_preserve_pages_assets_and_head_without_a_custom_mux() {
+        for path in ["/lauds/2026-03-11", "/static/style.css", "/reminders", "/sw.js"] {
+            let get = request(Method::GET, path, Body::empty()).await;
+            let head = request(Method::HEAD, path, Body::empty()).await;
+            assert_eq!(get.status(), StatusCode::OK, "{path}");
+            assert_eq!(head.status(), get.status(), "{path}");
+            assert_eq!(head.headers().get(header::CONTENT_TYPE), get.headers().get(header::CONTENT_TYPE));
+            assert!(axum::body::to_bytes(head.into_body(), usize::MAX).await.unwrap().is_empty());
+        }
+        let redirect = request(Method::GET, "/calendar?form=priest", Body::empty()).await;
+        assert_eq!(redirect.status(), StatusCode::FOUND);
+        assert!(redirect.headers()[header::LOCATION].to_str().unwrap().contains("?form=priest#d-"));
+        assert!(axum::body::to_bytes(redirect.into_body(), usize::MAX).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn framework_path_matching_does_not_recreate_go_canonicalization() {
+        for path in ["/lauds//2026-03-11", "/./lauds/2026-03-11", "/lauds/../prime/2026-03-11", "/%73tatic/app.js", "/%73w.js"] {
+            assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
+        }
+        for path in
+            ["/static", "/static/", "/static/fonts", "/static/fonts/", "/static/style.css/", "/static/../data/review/provenance.csv"]
+        {
+            assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
+        }
+        let asset = request(Method::GET, "/static/style.css?v=build", Body::empty()).await;
+        assert_eq!(asset.headers()[header::CACHE_CONTROL], "public, max-age=31536000, immutable");
+        assert!(!asset.headers().contains_key(header::ACCEPT_RANGES));
+        for path in ["/lauds/2026-03-11%", "/lauds/2026-03-11%zz"] {
+            assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::BAD_REQUEST);
+        }
+    }
+
+    #[tokio::test]
+    async fn beacon_limits_and_method_checks_survive_routing() {
+        let get = request(Method::GET, "/api/usage", Body::empty()).await;
+        assert_eq!(get.status(), StatusCode::METHOD_NOT_ALLOWED);
+        assert_eq!(get.headers()[header::ALLOW], "POST");
+        assert_eq!(request(Method::POST, "/api/usage", "lauds").await.status(), StatusCode::NO_CONTENT);
+        assert_eq!(request(Method::POST, "/api/usage", "x".repeat(MAX_BEACON + 1)).await.status(), StatusCode::BAD_REQUEST);
     }
 }

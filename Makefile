@@ -1,15 +1,30 @@
 .PHONY: help build test test-race test-ux test-ux-rust parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity rust-parity-full clean install-gremlins mutate mutate-diff test-coverage
 
+.DEFAULT_GOAL := help
+
 YEAR ?= 2026
+
+# The Go reference must never resolve to the default Rust ./office binary.
+export GO_OFFICE := $(CURDIR)/output/office-go
+.PHONY: go-build go-check
+go-check: ## Check the retained Go reference
+	test -z "$$(gofmt -l .)"
+	go vet ./...
+	staticcheck ./...
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
 
-build: ## Build the binary
-	go build -o office ./cmd/server
+build: ## Build the Rust binary
+	cargo build --locked --release -p office-cli
+	cp target/release/office office
 
-test: ## Run all tests
-	go test ./...
+go-build: ## Build the Go reference binary
+	mkdir -p output
+	go build -o output/office-go ./cmd/server
+
+test: ## Run Rust and Python tests
+	cargo test --workspace --locked
 	python3 scripts/test_coverage_threshold.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
@@ -64,18 +79,15 @@ discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
 test-race: ## Run Go tests with the race detector
 	go test -race ./...
 
-test-ux: ## Run Playwright UX regression tests
+test-ux: build ## Run Playwright UX regression tests against Rust
 	npm --prefix .web-tools run test:ux
 
-test-ux-rust: ## Run the Playwright UX tests against the Rust server
-	cargo build --release -p office-cli
-	PLAYWRIGHT_SERVER=rust npm --prefix .web-tools run test:ux
+test-ux-rust: test-ux ## Alias for test-ux
 
-parity: ## Verify the 2026-2053 date-sensitive parity snapshot
-	go test ./internal/e2e -run TestParityGolden -count=1
+parity: rust-parity-full ## Verify the 2026-2053 parity snapshot with Rust
 
-lint: ## Run staticcheck linter
-	staticcheck ./...
+lint: ## Run Clippy
+	cargo clippy --workspace --all-targets --locked -- -D warnings
 
 lint-js: ## Run ESLint on browser and service-worker JavaScript
 	npm --prefix .web-tools run lint
@@ -83,16 +95,16 @@ lint-js: ## Run ESLint on browser and service-worker JavaScript
 vet: ## Run go vet
 	go vet ./...
 
-fmt: ## Reformat source files with gofmt
-	gofmt -w .
+fmt: ## Reformat Rust source files
+	cargo fmt
 
-fmt-check: ## Check formatting without modifying files
-	@test -z "$$(gofmt -l .)" || (gofmt -l . && exit 1)
+fmt-check: ## Check Rust formatting
+	cargo fmt --check
 
 lint-texts: build ## Lint the text corpus (mechanical findings fail; advisory printed)
 	./office lint
 
-check: fmt-check vet lint lint-js test validate lint-texts ## Run all formatting, static analysis, tests, and data checks
+check: fmt-check lint lint-js test validate lint-texts ## Run all formatting, static analysis, tests, and data checks
 
 serve: build ## Start the web server
 	./office serve
@@ -154,10 +166,7 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 
 GREMLINS_VERSION = v0.6.0
 GREMLINS_BIN = $(shell go env GOBIN)
-ifeq ($(GREMLINS_BIN),)
-GREMLINS_BIN = $(shell go env GOPATH)/bin
-endif
-GREMLINS = $(GREMLINS_BIN)/gremlins
+GREMLINS = $(if $(GREMLINS_BIN),$(GREMLINS_BIN),$(shell go env GOPATH)/bin)/gremlins
 MUTATE_PKGS ?= ./internal/models/ ./internal/calendar/ ./internal/office/ ./internal/texts/
 MUTATE_DIFF_BASE ?= master
 # In --diff mode gremlins measures its baseline over the whole suite (~30s)
@@ -194,7 +203,7 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and tex on sample dates, ordo and rubrics, a crawl of both web servers
+rust-parity: go-build ## Compare Go and Rust: calendar/office 1900-2199, hours and tex on sample dates, ordo and rubrics, a crawl of both web servers
 	cargo build --release -p office-cli
 	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
 	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
@@ -208,11 +217,11 @@ rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and 
 	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
 	scripts/rust-parity-web.sh
 
-rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
+rust-parity-full: ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
 	cargo build --release -p office-cli
-	target/release/office-rs dump -start 2026 -years 28 | ./office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
+	target/release/office dump -start 2026 -years 28 | target/release/office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
 	@echo "parity: Rust 2026-2053 digest matches parity-snapshot.json"
-	target/release/office-rs review assurance -markdown | diff - internal/e2e/testdata/golden/assurance-report.md
+	target/release/office review assurance -markdown | diff - internal/e2e/testdata/golden/assurance-report.md
 	@echo "parity: Rust assurance report matches assurance-report.md"
 
 golden: ## Regenerate rendered-office and assurance golden files

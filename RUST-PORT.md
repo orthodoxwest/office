@@ -5,14 +5,22 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0–5 are complete. `office-rs dump` is byte-identical to
-Go: the corpus, calendar, and office groups for 1900–2199, and every hour in
-every prayer form for 2026–2053 (the parity snapshot). Every Go command has a
-Rust counterpart with the same output: the ordo, the rubrics TSV, the hours,
-the TeX booklet, validate, audit, lint, the review subcommands, the
-data-editing commands, and `serve`, whose responses match Go's server on the
-crawl and which passes the Playwright suites, visual snapshots included. Next:
-Phase 6, the cutover. Nothing user-facing changes until then.
+**Status:** Phases 0–5 are complete; Phase 6 switches the default build,
+CLI, container, and browser tests to Rust. `make build` produces `./office`
+from Cargo. `office dump diff` and `office dump digest` are now implemented
+in Rust as well as the dump generator. The full-window snapshot gate no
+longer requires Go.
+
+Go remains temporarily as a test/reference implementation: some calendar
+and office unit tests and the static-asset contract tests still need porting,
+and the golden updater and maintenance utilities still use Go. This is not
+a rollback mechanism. Rollback is a revert of the cutover PR followed by a
+redeploy, as appropriate for this pre-production service; no tagged Go build
+or mandatory live shadow period is required.
+
+The semantic contract remains exact for corpus loading, calendar computation,
+office composition, rendered pages and feeds. Framework-generated HTTP
+behavior is allowed to follow Rust conventions; see the Phase 6 checklist.
 
 ## Why Rust
 
@@ -218,7 +226,7 @@ identical, not when the tests look plausible.
 | 3 | `office` composer, one hour at a time: Compline, the minor hours, Prime, Lauds, Vespers | `office` and `hours` groups identical for 2026–2053 in every form; text goldens byte-identical |
 | 4 | `ordo`, renderers, `tools` | ordo text, rubrics TSV, and TeX byte-identical; audit, lint, and assurance reports identical; review subcommands still in use ported |
 | 5 | `apps/office-web`: routes, templates, static assets, reminder feed, usage store | a crawl of both servers matches after HTML normalization; the Playwright suite, visual snapshots included, passes unchanged |
-| 6 | Cutover | a shadow period on the live service; a tagged Go build kept for rollback; then Go deleted |
+| 6 | Cutover | Rust owns build/deploy/CLI/UX; retain test/reference Go until the remaining test ports land; rollback by reverting the PR |
 | 7 | After cutover | the inherited-from-Go list sorted into "right", "bug", and "needs ruling"; the model tightened; text parsing moved into the core; the data layout for the Missal; then Matins, the Mass, and mobile |
 
 PR CI compares a sample: every golden date plus a fixed set of boundary
@@ -342,7 +350,7 @@ serde_json's wording rather than encoding/json's. Semantic errors match.
       hour golden byte-identical (`cargo test -p render-text`)
 - [ ] Port the Go `office` unit tests (the black-box gate covers the sweep;
       the unit tests reach cases it cannot)
-- [ ] The Martyrology preview at Prime (unpublished; not in the dump)
+- [x] The Martyrology preview at Prime (ported in Phase 5; not in the dump)
 - [x] Composition tracing (`TraceProperResolution`), used by the review tools
       in Phase 4 (`office::trace`)
 
@@ -433,3 +441,46 @@ Known differences, all outside what a page or feed shows a reader:
 - The feast files load once at startup; Go rereads them for each year it
   builds, which only matters if the data directory changes under a running
   server.
+
+
+## Phase 6 checklist
+
+- [x] `make build`, `serve`, `test`, formatting and linting default to Rust;
+      the binary is `office`. `make go-build` writes a separate reference at
+      `output/office-go`, so parity cannot accidentally compare Rust to itself.
+- [x] Docker builds Rust with bundled SQLite and bundled time-zone data;
+      runtime-image CI checks validation, an hour, the feed and the usage store.
+- [x] The primary Playwright and snapshot-update jobs use Rust.
+- [x] Rust implements streaming `dump diff` and `dump digest`; the nightly
+      2026–2053 snapshot gate uses Rust throughout.
+- [x] Axum owns routing. Embedded static assets are served by exact name;
+      directory listings and file-server redirects are removed. Redirects
+      use Axum responses. Canonical page markup, assets, feed and usage
+      behavior remain covered by parity and Playwright.
+- [ ] Deploy the cutover after review. A revert plus redeploy is sufficient
+      rollback; there is no tagged-build or shadow-period gate.
+- [ ] Finish the outstanding calendar/office unit-test ports (including
+      synthetic cases), static JS/CSS contract tests, and e2e assertions.
+- [ ] Replace Go golden generation, coverage/mutation jobs and maintenance
+      utilities (`verify-psalms`, asset generators); move shared assets and
+      fixtures out of `internal/`, then delete Go and the differential harness.
+
+### Cleanup decisions
+
+Done during cutover: remove the handwritten `ServeMux` router and the
+`FileServer` emulation, use Axum redirect responses, stop advertising byte
+ranges that the static handler does not implement. The web comparison still
+checks all application pages, feeds, assets, query errors, usage responses,
+and redirect destinations. It excludes Go's malformed-path canonicalization,
+encoded literal route names, and directory browsing; Rust router tests
+explicitly check their new behavior. Redirect bodies are framework output,
+so only their status and destination are compared.
+
+Retained for a focused follow-up: CSV parsing/serialization that determines
+corpus and ledger acceptance; query/cookie semantics used by saved links and
+preferences; time-zone and DST resolution that determines reminder instants;
+template escaping that determines rendered UI. Replace these only with
+focused contract tests, rather than changing them incidentally during deploy
+cutover. The core's `PORT(inherited)` decisions still need sorting into
+correct behavior, defects, and questions requiring a ruling. Renderer parsing
+and stronger domain types remain Phase 7 work.

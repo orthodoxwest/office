@@ -2,11 +2,11 @@
 # Compare one command between the Go and Rust CLIs:
 #   scripts/rust-parity-cmd.sh ordo 2026
 # Stdout and the exit status must match; stderr is not compared, since error
-# wording is not part of the parity contract (RUST-PORT.md). Expects ./office
-# and target/release/office-rs; shows a unified diff on a mismatch.
+# wording is not part of the parity contract (RUST-PORT.md). Expects output/office-go
+# and target/release/office; shows a unified diff on a mismatch.
 set -euo pipefail
-go_bin=${GO_OFFICE:-./office}
-rs_bin=${RUST_OFFICE:-target/release/office-rs}
+go_bin=${GO_OFFICE:-output/office-go}
+rs_bin=${RUST_OFFICE:-target/release/office}
 out=$(mktemp -d)
 trap 'rm -rf "${out:?}"' EXIT
 go_rc=0

@@ -29,3 +29,8 @@ output
 **/.DS_Store
 **/Thumbs.db
 fly.toml
+
+# Local caches and development tools
+target
+.git
+.web-tools/node_modules

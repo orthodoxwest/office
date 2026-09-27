@@ -13,15 +13,10 @@ permissions:
 
 jobs:
   parity:
-    name: Go/Rust parity 2026-2053
+    name: Rust parity snapshot 2026-2053
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: true
 
       - uses: dtolnay/rust-toolchain@1.94.1
 

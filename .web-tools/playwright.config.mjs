@@ -3,11 +3,10 @@ import { defineConfig } from "@playwright/test";
 const goFlags = [process.env.GOFLAGS, "-buildvcs=false"].filter(Boolean).join(" ");
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:18159";
 const externalServer = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
-// PLAYWRIGHT_SERVER=rust runs the suite against the Rust port (RUST-PORT.md,
-// Phase 5), built first with `cargo build --release -p office-cli`.
-const serverCommand = process.env.PLAYWRIGHT_SERVER === "rust"
-  ? "target/release/office-rs serve 127.0.0.1:18159"
-  : "go run ./cmd/server serve 127.0.0.1:18159";
+// Rust is the default; the retained Go reference is opt-in during cutover.
+const serverCommand = process.env.PLAYWRIGHT_SERVER === "go"
+  ? "go run ./cmd/server serve 127.0.0.1:18159"
+  : "target/release/office serve 127.0.0.1:18159";
 // Separate CI invocations must retain both reports and their failure traces.
 const outputRoot = process.env.PLAYWRIGHT_SUITE
   ? `../output/playwright/${process.env.PLAYWRIGHT_SUITE}`

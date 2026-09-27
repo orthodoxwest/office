@@ -5,8 +5,7 @@
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
-fn walk(dir: &Path, rel: &str, files: &mut Vec<(String, PathBuf)>, dirs: &mut Vec<String>) {
-    dirs.push(rel.to_string());
+fn walk(dir: &Path, rel: &str, files: &mut Vec<(String, PathBuf)>) {
     let mut entries: Vec<_> = std::fs::read_dir(dir).expect("reading static dir").map(|e| e.expect("static entry")).collect();
     entries.sort_by_key(|e| e.file_name());
     for entry in entries {
@@ -17,7 +16,7 @@ fn walk(dir: &Path, rel: &str, files: &mut Vec<(String, PathBuf)>, dirs: &mut Ve
         let path = entry.path();
         let child = format!("{rel}/{name}");
         if path.is_dir() {
-            walk(&path, &child, files, dirs);
+            walk(&path, &child, files);
         } else {
             files.push((child, path));
         }
@@ -28,15 +27,11 @@ fn main() {
     let manifest = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let root = manifest.join("../../internal/web/static").canonicalize().expect("internal/web/static");
     println!("cargo:rerun-if-changed={}", root.display());
-    let (mut files, mut dirs) = (Vec::new(), Vec::new());
-    walk(&root, "static", &mut files, &mut dirs);
+    let mut files = Vec::new();
+    walk(&root, "static", &mut files);
     let mut out = String::from("/// The embedded files, by path.\npub static FILES: &[(&str, &[u8])] = &[\n");
     for (name, path) in &files {
         writeln!(out, "    ({name:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
-    }
-    out.push_str("];\n\n/// The embedded directories.\npub static DIRS: &[&str] = &[\n");
-    for dir in &dirs {
-        writeln!(out, "    {dir:?},").expect("write");
     }
     out.push_str("];\n");
     let dest = PathBuf::from(std::env::var("OUT_DIR").expect("OUT_DIR")).join("static_files.rs");

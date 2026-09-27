@@ -541,6 +541,7 @@ dependencies = [
  "render-tex",
  "render-text",
  "serde_json",
+ "sha2",
  "tools",
 ]
 
@@ -559,6 +560,7 @@ dependencies = [
  "sha2",
  "tokio",
  "tools",
+ "tower",
 ]
 
 [[package]]

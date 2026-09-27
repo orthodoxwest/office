@@ -2,10 +2,10 @@
 # Phase 5 gate: run the Go and Rust web servers side by side and crawl both
 # with the same requests (scripts/rust-parity-web.py). Each server gets its
 # own copy of a usage database seeded with a year of counts, so the usage
-# report has history to draw. Expects ./office and target/release/office-rs.
+# report has history to draw. Expects output/office-go and target/release/office.
 set -euo pipefail
-go_bin=${GO_OFFICE:-./office}
-rs_bin=${RUST_OFFICE:-target/release/office-rs}
+go_bin=${GO_OFFICE:-output/office-go}
+rs_bin=${RUST_OFFICE:-target/release/office}
 go_port=${GO_PORT:-18180}
 rs_port=${RUST_PORT:-18181}
 dates=${1:-$(scripts/rust-parity-dates.sh)}

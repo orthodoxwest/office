@@ -15,7 +15,7 @@ use render_html::usage::{Dimension, HOURS, UsageDay};
 use rusqlite::{Connection, params};
 use sha2::{Digest, Sha256};
 
-use crate::gonet::{Query, cookie, header_value, http_error, not_found, response, set};
+use crate::http::{Query, cookie, header_value, http_error, not_found, response, set};
 
 /// Single-purpose scopes counted beside the hours: the ordo (calendar) page
 /// and a generated reminder-feed link.
