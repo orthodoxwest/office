@@ -1,0 +1,135 @@
+%% Compile with: lualatex <file>.tex
+%% For booklet imposition: pdfjam --booklet true --paper letter <file>.pdf
+
+\documentclass[10pt]{article}
+
+\usepackage[
+  paperwidth=5.5in,
+  paperheight=8.5in,
+  top=0.65in,
+  bottom=0.75in,
+  inner=0.7in,
+  outer=0.5in
+]{geometry}
+
+\usepackage{fontspec}
+\usepackage{gregoriotex}
+\gresetcompilegabc{auto}
+\usepackage{xcolor}
+\usepackage{lettrine}
+\usepackage{microtype}
+\microtypesetup{verbose=silent}
+\usepackage{setspace}
+
+% Fonts — requires EB Garamond to be installed on the system.
+% Small caps carry web-like tracking everywhere (\scshape, \textsc), matching
+% the letterspaced section headings, psalm labels, and Ant. sigils online.
+\setmainfont{EB Garamond}[Ligatures=TeX,SmallCapsFeatures={LetterSpace=8.0}]
+
+% Prayer leading sits a touch deeper than LaTeX's default, as the web hour
+% sets body text at 1.6 and psalm/hymn verse at 1.75.
+\linespread{1.25}
+
+% Colors — the web Nave palette, so print and screen share one set of inks:
+% rubric red, gilding gold with its hairline, and muted grey for verse
+% numbers, labels, and pointing marks.
+\definecolor{rubricred}{rgb}{0.545,0.102,0.102}
+\definecolor{ornamentgold}{rgb}{0.604,0.451,0.157}
+\definecolor{goldline}{rgb}{0.788,0.675,0.447}
+\definecolor{mutedgray}{rgb}{0.420,0.365,0.333}
+
+% ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
+\newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
+\newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
+
+% Rubrics are smaller red roman; quoted prayer remains ordinary black roman.
+\newcommand{\rubric}[1]{{\color{rubricred}\small\normalfont #1}}
+% A prayer quoted inside a rubric remains ordinary black text.
+\newcommand{\rubricprayed}[1]{{\color{black}\normalfont #1}}
+% Scripture references share the rubric treatment without becoming instructions.
+\newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}
+
+% Gilded two-line initials. All call sites are semantic spoken openings, never
+% private/secret prayer text. Only the initial itself is gilt: the rest of the
+% opening word stays ordinary prose, as ::first-letter does on the web hour.
+\renewcommand{\LettrineTextFont}{\normalfont}
+\newcommand{\dropcap}[2]{\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
+
+% Section heading: centered small caps with open air, as the web hour centers
+% each transition in tracked small caps.
+\newcommand{\sectionheading}[1]{%
+  \bigskip\begin{center}{\scshape #1}\end{center}\smallskip\noindent%
+}
+
+% Mid-canticle section break (e.g. the two-part structure of Deut 32):
+% centered muted italic, as the web canticle-section line.
+\newcommand{\canticlesection}[1]{%
+  \smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\smallskip\noindent%
+}
+
+% Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
+% beside it, as a printed diurnal sets them. #2 is empty when no incipit is
+% recorded, in which case the label stands alone.
+\newcommand{\psalmlabel}[2]{%
+  \begin{center}{\color{mutedgray}\scshape #1}%
+  \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi%
+  \end{center}\smallskip%
+}
+
+% Pointing mediant: muted and raised to the optical middle of the line, as the
+% web verse renderer lifts the asterisk clear of the ascenders.
+\newcommand{\mediant}{\,\raisebox{0.25em}{\small\color{mutedgray}*}\,}
+
+% Psalm verses environment and command. Verses breathe a little deeper than
+% prose, as psalm-verses does online.
+\newenvironment{psalmverses}{%
+  \setlength{\parindent}{0pt}%
+  \setlength{\parskip}{2pt}%
+  \setstretch{1.35}%
+}{%
+  \par%
+}
+
+% Hymn stanza environment: deeper verse leading, as hymn-verses does.
+\newenvironment{hymnverses}{%
+  \setstretch{1.35}%
+}{%
+  \par%
+}
+
+% \psalmverse{num}{text} — num is empty for unnumbered first verse.
+% Numbered verses hang from a muted right-aligned gutter so every spoken line
+% shares one left edge, as verse-num does on the web hour.
+\newcommand{\psalmverse}[2]{%
+  \if\relax\detokenize{#1}\relax%
+    \noindent #2\par%
+  \else%
+    \noindent\hangindent=2em\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
+  \fi%
+}
+
+% Gloria Patri: two verses, each pointed at its own mediant, on their own
+% lines, standing a little apart from the verses above as its own stanza.
+\newcommand{\gloriapatri}[2]{\medskip\noindent #1\\#2\par}
+
+% Spoken-role sigils set in rubric red, as the web sigil column does.
+% \Vbar/\Rbar come from gregoriotex, which the preamble loads above.
+\newcommand{\Vsig}{{\color{rubricred}\Vbar{}}}
+\newcommand{\Rsig}{{\color{rubricred}\Rbar{}}}
+\newcommand{\allsig}{{\color{rubricred}\scshape All:}\kern0.3em{}}
+\newcommand{\blessingsig}{{\color{rubricred}Blessing.}\kern0.3em{}}
+
+% Antiphon: a red small-cap sigil with the body in ordinary roman, hanging so
+% a wrapped remainder tucks under its own line, as body antiphons do online.
+\newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
+% Opening acclamation (not an antiphon)
+\newcommand{\acclamation}[1]{\noindent #1\par}
+% Initial response of a Short Responsory. No \par here — call sites append the
+% rest of the response (and a single trailing \par) so lettrine can wrap line 2.
+\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}
+
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\pagestyle{plain}
+
+\begin{document}

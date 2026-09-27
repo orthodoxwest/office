@@ -1,6 +1,6 @@
 //! The data directory on disk, as the core crates' [`DataSource`].
 
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use calendar::DataSource;
 
@@ -20,7 +20,7 @@ impl FsData {
         if let Ok(exe) = std::env::current_exe()
             && let Some(dir) = exe.parent()
         {
-            for candidate in [dir.join("data"), dir.join("..").join("..").join("data")] {
+            for candidate in [clean(&dir.join("data")), clean(&dir.join("..").join("..").join("data"))] {
                 if candidate.is_dir() {
                     return Some(FsData { dir: candidate });
                 }
@@ -28,6 +28,44 @@ impl FsData {
         }
         Path::new("data").is_dir().then(|| FsData { dir: PathBuf::from("data") })
     }
+}
+
+/// Go's `filepath.Clean`: the shortest lexically equivalent path.
+pub fn clean(path: &Path) -> PathBuf {
+    let mut out: Vec<Component> = Vec::new();
+    for c in path.components() {
+        match c {
+            Component::CurDir => {}
+            Component::ParentDir => match out.last() {
+                Some(Component::Normal(_)) => {
+                    out.pop();
+                }
+                Some(Component::RootDir | Component::Prefix(_)) => {}
+                Some(Component::ParentDir | Component::CurDir) | None => out.push(c),
+            },
+            Component::Normal(_) | Component::RootDir | Component::Prefix(_) => out.push(c),
+        }
+    }
+    if out.is_empty() {
+        return PathBuf::from(".");
+    }
+    out.iter().collect()
+}
+
+/// Go's `filepath.Rel` for two absolute paths: `target` relative to `base`.
+pub fn rel(base: &Path, target: &Path) -> PathBuf {
+    let (base, target) = (clean(base), clean(target));
+    let b: Vec<Component> = base.components().collect();
+    let t: Vec<Component> = target.components().collect();
+    let common = b.iter().zip(&t).take_while(|(x, y)| x == y).count();
+    let mut out = PathBuf::new();
+    for _ in common..b.len() {
+        out.push("..");
+    }
+    for c in &t[common..] {
+        out.push(c);
+    }
+    if out.as_os_str().is_empty() { PathBuf::from(".") } else { out }
 }
 
 impl DataSource for FsData {
@@ -81,4 +119,20 @@ fn walk_dir(path: &Path, rel: &str, out: &mut Vec<(String, Vec<u8>)>) -> Result<
         walk_dir(&path.join(&name), &child_rel, out)?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn clean_and_rel_follow_go() {
+        assert_eq!(clean(Path::new("/a/b/../../data")), PathBuf::from("/data"));
+        assert_eq!(clean(Path::new("./data/")), PathBuf::from("data"));
+        assert_eq!(clean(Path::new("../x/./y/..")), PathBuf::from("../x"));
+        assert_eq!(clean(Path::new("")), PathBuf::from("."));
+        assert_eq!(rel(Path::new("/home/u/office"), Path::new("/home/u/office/data")), PathBuf::from("data"));
+        assert_eq!(rel(Path::new("/tmp/x"), Path::new("/home/u/data")), PathBuf::from("../../home/u/data"));
+        assert_eq!(rel(Path::new("/a"), Path::new("/a")), PathBuf::from("."));
+    }
 }

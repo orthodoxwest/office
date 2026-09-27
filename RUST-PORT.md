@@ -9,7 +9,8 @@ only then is Go removed.
 the corpus, calendar, and office groups for 1900–2199, and every hour in
 every prayer form for 2026–2053 (the parity snapshot). The Rust validators
 reproduce Go's reports on every broken test corpus, and the text renderer
-reproduces every hour golden. Next: Phase 4. Nothing user-facing changes until
+reproduces every hour golden. Phase 4 is under way: the ordo, the rubrics
+TSV, and the TeX booklet are byte-identical. Nothing user-facing changes until
 the cutover in Phase 6.
 
 ## Why Rust
@@ -336,3 +337,18 @@ serde_json's wording rather than encoding/json's. Semantic errors match.
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change
 until then.
+
+## Phase 4 checklist
+
+- [x] `ordo` crate: the text ordo (Tabula Temporaria and per-hour stanzas)
+      and the rubrics TSV; `office-rs ordo` and `office-rs rubrics` are
+      byte-identical to Go (`make rust-parity`: 2026, 2027, 2038; the ordo
+      goldens in `cargo test -p ordo`)
+- [x] `render-tex` crate: Go's `FormatOfficeHourTeX`; the caller supplies the
+      GABC score lookup, so the renderer does no file access. `office-rs tex`
+      is byte-identical for every hour on the 127 sample dates, cycling the
+      prayer forms and `--chant` (`scripts/rust-parity-tex.sh`)
+- [ ] `validate` command, hour definitions included
+- [ ] `audit` (placeholders, missing propers, the composition sweep)
+- [ ] `lint` (the text-corpus lints)
+- [ ] Assurance and the review subcommands still in use

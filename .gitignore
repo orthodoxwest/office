@@ -37,6 +37,7 @@ Thumbs.db
 
 #LaTeX handling
 *.tex
+!/crates/render-tex/src/preamble.tex
 *.log
 
 # Python

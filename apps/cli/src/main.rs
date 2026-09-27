@@ -10,7 +10,7 @@ use std::process::ExitCode;
 
 const USAGE: &str = "usage: office-rs <command> [args]
 
-Commands: ordo, rubrics, dump, lauds, prime, terce, sext, none, vespers, compline";
+Commands: ordo, rubrics, dump, lauds, prime, terce, sext, none, vespers, compline, tex";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -29,6 +29,7 @@ fn main() -> ExitCode {
         "none" => |d, a, o| commands::cmd_hour("none", d, a, o),
         "vespers" => |d, a, o| commands::cmd_hour("vespers", d, a, o),
         "compline" => |d, a, o| commands::cmd_hour("compline", d, a, o),
+        "tex" => commands::cmd_tex,
         _ => {
             eprintln!("Unknown command: {name}");
             return ExitCode::FAILURE;
