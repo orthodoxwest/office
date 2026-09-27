@@ -1,22 +1,22 @@
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 49 (Vigil of the Nativity)
-O Judah and Jerusalem, * be ye not dismayed: tomorrow go ye forth, and the Lord himself will be with you, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 182
+O Judah and Jerusalem, * be ye not dismayed: to-morrow go ye forth, and the Lord himself will be with you, alleluia.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds book, p. 50 (Vigil of the Nativity)
 Ye shall know this day * that the Lord will come; and in the morning ye shall see his glory.
 
 [psalm-antiphon-3]
-# SOURCE: draft archdiocesan Lauds book, p. 50 (Vigil of the Nativity)
-Tomorrow * the iniquity of the earth shall be blotted out: and the Saviour of the world shall reign over us.
+# SOURCE: Monastic Diurnal.pdf, p. 182
+To-morrow * the iniquity of the earth shall be blotted out: and the Saviour of the world shall reign over us.
 
 [psalm-antiphon-4]
 # SOURCE: draft archdiocesan Lauds book, p. 51 (Vigil of the Nativity)
 The Lord will come, * go ye out to meet him, saying: Great is his dominion, and of his kingdom there shall be no end: the mighty God, the Governor, the Prince of peace, alleluia.
 
 [psalm-antiphon-5]
-# SOURCE: draft archdiocesan Lauds book, p. 53 (Vigil of the Nativity)
-Tomorrow * ye shall have salvation, saith the Lord God of hosts.
+# SOURCE: Monastic Diurnal.pdf, p. 182
+To-morrow * ye shall have salvation, saith the Lord God of hosts.
 
 [psalm-antiphon]
 @use proper/vigil-nativity/psalm-antiphon-1
@@ -57,8 +57,8 @@ By whom we have received grace and apostleship, * for obedience to the faith amo
 R. Thanks be to God.
 
 [versicle-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 57 (Vigil of the Nativity)
-V. Tomorrow the iniquity of the earth shall be blotted out.
+# SOURCE: Monastic Diurnal.pdf, p. 182
+V. To-morrow the iniquity of the earth shall be blotted out.
 R. And the Saviour of the world shall reign over us.
 
 [short-responsory-terce]

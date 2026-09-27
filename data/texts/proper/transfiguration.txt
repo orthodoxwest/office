@@ -28,8 +28,8 @@ While he yet spake, * behold, a bright cloud overshadowed them.
 @use proper/transfiguration/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
-And behold a voice * out of the cloud, which said, This is my beloved Son, in whom I am well pleased, hear ye him, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 583
+And behold a voice * out of the cloud, which said, This is my beloved Son, in whom I am well pleased; hear ye him, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 442 (II Vespers, The Transfiguration of Our Lord Jesus Christ)
@@ -86,18 +86,18 @@ To Father and to Paraclete.
 
 Amen.
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 441 (The Transfiguration of Our Lord Jesus Christ)
-Quicumque Christum, quæritis
+# SOURCE: Monastic Diurnal.pdf, p. 581, 582
+Quicumque Christum
 
 All ye who seek for Jesus, raise
 Your eyes above, and upward gaze:
 There may ye see the wondrous sign
-Of never-ending glory shine.
+Of never ending glory shine.
 
 Behold him in celestial rays
 Who never knoweth end of days;
 Exalted, infinite, sublime;
-Older than heav'n or hell or time.
+Older than heaven or hell or time.
 
 This is the Gentiles' King and Lord;
 The Prince by Judah's race adored,
@@ -115,6 +115,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 509 (The Transfiguration of Our Lord Jesus Christ)
 V. A crown of gold is upon his head.

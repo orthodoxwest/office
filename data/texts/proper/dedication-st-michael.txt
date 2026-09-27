@@ -115,7 +115,7 @@ Ever resoundeth.
 
 Amen.
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 501–503; older Sanctoral Vespers
+# SOURCE: Monastic Diurnal.pdf, p. 608
 Tibi, Christe, splendor Patris
 
 Thee, O Christ, the Father's splendour,
@@ -134,7 +134,7 @@ Cast Abaddon from on high.
 
 By whose watchful care repelling,
 King of everlasting grace,
-Ev'ry ghostly adversary
+Every ghostly adversary,
 All things evil, all things base,
 Grant us of thine only goodness
 In thy Paradise a place.
@@ -147,6 +147,7 @@ Standing forth, One God and Trinal,
 Ere the ages; as is meet.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 569 (Dedication of St Michael)
 V. An Angel stood at the altar of the temple.
