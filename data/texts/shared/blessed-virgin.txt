@@ -9,8 +9,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Hail, Mary, full of grace, * the Lord is with thee.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (O Glorious Lady, BVM Lauds.docx)
-# SOURCE: draft archdiocesan Lauds book, pp. 498, 537–538, 387–388, 439 (Visitation, Nativity, Purification, and Annunciation)
+# SOURCE: Monastic Diurnal.pdf, p. 66*, 67*
 O gloriosa Domina
 
 O glorious Lady, throned in rest,
@@ -23,7 +22,7 @@ The Blossom sprung from thee restores,
 And, granting bliss to souls that grieve,
 Unbars the everlasting doors.
 
-O Gate, through which hath pass'd the King,
+O Gate, through which hath passed the King,
 O Hall, whence Light shone through the gloom;
 The ransom'd nations praise and sing
 Life given from the Virgin womb.
@@ -34,6 +33,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: monastic diurnal, p. 64* (Common of Feasts B.V.M., At I Vespers)
 Ave, maris stella

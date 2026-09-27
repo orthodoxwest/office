@@ -52,7 +52,8 @@ Whosoever will come after me * let him deny himself, and take up his cross, and 
 This is a Martyr * who strove for his Master's precepts, even unto death: and feared not the words of evil men, forasmuch as he was stablished on a sure foundation.
 
 [commemoration-antiphon]
-Whosoever shall confess me * before men, him will I confess also before my Father who is in heaven.
+# SOURCE: Monastic Diurnal.pdf, p. 21*
+Whosoever shall confess me * before men, him will I confess also before my Father.
 
 [commemoration-antiphon-lauds]
 # Rubric: commemorations use the gospel-canticle antiphon of the common

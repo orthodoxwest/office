@@ -95,7 +95,7 @@ To Father and to Paraclete.
 
 Amen.
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Why, Impious Herod, Vainly Fear, Sat in oct of Epiphany Vespers.docx)
+# SOURCE: Monastic Diurnal.pdf, p. 223, 224
 Hostis Herodes impie
 
 Why, impious Herod, vainly fear
@@ -115,7 +115,7 @@ Might cleanse his people from their own.
 
 New miracle of power divine!
 The water reddens into wine:
-He spoke the word, and poured the wave
+He spake the word, and poured the wave
 In other streams than nature gave.
 
 All glory, Lord, to thee we pay
@@ -124,6 +124,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: monastic diurnal, p. 225 (Epiphany, At Lauds)
 V. O worship the Lord, alleluia.

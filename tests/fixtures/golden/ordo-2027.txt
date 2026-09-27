@@ -810,7 +810,7 @@ MAY
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
                Com. Ss Nereus, Achilles, Domitilla & Pancras, Martyrs ("Daughters of Jerusalem")
            Hours   No Preces
-           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+           Vespers r · II prec. · Mag. Light perpetual · No Suff.
  13  Thu     Feria                                            w
            Lauds   w · Ben. My heart burns · No Preces · No Suff.
            Hours   Preces
@@ -838,7 +838,7 @@ MAY
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Solemnity of St Joseph, Spouse of the Blessed Virgin Mary) · Mag. When Mary · No Suff.
-               Com. St Venantius, Martyr ("O ye holy and righteous")
+               Com. St Venantius, Martyr ("Light perpetual")
                Com. St Pudentiana, Virgin ("Come, thou Bride of Christ")
  19  Wed     SOLEMNITY OF ST JOSEPH, SPOUSE OF THE BLESSED VIRGIN MARY [1cl] w
            St Pudentiana, Virgin (com)
@@ -942,7 +942,7 @@ JUNE
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (V Sunday after Easter) · Mag. Hitherto · No Suff.
-               Com. St Boniface, Bishop & Martyr ("O ye holy and righteous")
+               Com. St Boniface, Bishop & Martyr ("Light perpetual")
   6  Sun     V Sunday after Easter                      [sd]  w
            Lauds   w · Ben. Hitherto · No Preces · No Suff.
            Hours   No Preces
@@ -975,7 +975,7 @@ JUNE
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
                Com. Day II within the Octave of the Ascension ("I ascend")
            Hours   No Preces
-           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+           Vespers r · II prec. · Mag. Light perpetual · No Suff.
                Com. Day II within the Octave of the Ascension ("Ye men of Galilee")
                Com. Ss Basilides, Cyrinus, Nabor & Nazarius, Martyrs ("Light perpetual")
  12  Sat     Day III within the Octave of the Ascension [sd]  w
