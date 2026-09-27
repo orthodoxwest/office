@@ -737,7 +737,6 @@ mod tests {
             r#"<details class="site-menu">"#,
             r#"class="today-link""#,
             r#"class="hour-continuation""#,
-            r#"href="/prime/2026-06-07""#,
             "Text dependencies",
             "Composition decisions",
             "need review",
@@ -746,7 +745,7 @@ mod tests {
             assert!(body.contains(want), "hour page missing {want:?}");
         }
         for unwanted in [" documented", "undocumented", "SOURCE:", ".txt", "/home/", "../resources"] {
-            assert!(!body.contains(unwanted), "hour page contains {unwanted:?}");
+            assert!(!body.contains(unwanted) && !body.contains(&unwanted.replace('/', "&#x2f;")), "hour page contains {unwanted:?}");
         }
     }
 

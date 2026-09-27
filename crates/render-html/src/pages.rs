@@ -1,10 +1,10 @@
-//! The page templates and their minijinja environment, with explicit escaping (see
-//! [`crate::escape`]).
+//! Page templates with native MiniJinja HTML autoescaping and explicit URL filters
+//! (see [`crate::escape`]).
 
 use minijinja::value::Value;
-use minijinja::{AutoEscape, Environment, Error, Output, State};
+use minijinja::{AutoEscape, Environment};
 
-use crate::escape::{template_escape, url_norm, url_part, url_start};
+use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
 use crate::links::{calendar_year_link, home_link, hour_link, nav_link, static_url, title_case};
@@ -28,26 +28,14 @@ pub struct Pages {
     env: Environment<'static>,
 }
 
-/// Escapes every value printed into a text node or quoted attribute, unless it is trusted markup.
-fn html_formatter(out: &mut Output, _state: &State, value: &Value) -> Result<(), Error> {
-    if value.is_safe() {
-        write!(out, "{value}").map_err(Error::from)
-    } else if value.is_none() || value.is_undefined() {
-        Ok(())
-    } else {
-        out.write_str(&template_escape(&value.to_string())).map_err(Error::from)
-    }
-}
-
 impl Pages {
     /// Parses the embedded templates. `version` stamps static asset URLs so
     /// a deploy that changes CSS or JS produces new URLs.
     pub fn new(version: &str) -> Result<Pages, String> {
         let mut env = Environment::new();
         env.set_keep_trailing_newline(true);
-        // Macro output is trusted markup; the formatter escapes the rest.
+        // Native HTML autoescaping also preserves trusted macro and fragment output.
         env.set_auto_escape_callback(|_| AutoEscape::Html);
-        env.set_formatter(html_formatter);
         env.set_undefined_behavior(minijinja::UndefinedBehavior::Strict);
         for (name, source) in TEMPLATES {
             env.add_template(name, source).map_err(|e| format!("parsing {name} template: {e}"))?;
@@ -135,6 +123,31 @@ mod tests {
 
     fn at(body: &str, needle: &str) -> usize {
         body.find(needle).unwrap_or_else(|| panic!("missing {needle:?}"))
+    }
+
+    #[test]
+    fn templates_escape_values_and_preserve_explicit_markup() {
+        let mut pages = Pages::new("test").unwrap();
+        pages
+            .env
+            .add_template("boundary.html", r#"<p title="{{ text }}">{{ text }}</p><a href="{{ link|url }}">Link</a>{{ markup|safe }}"#)
+            .unwrap();
+        let html = pages
+            .env
+            .get_template("boundary.html")
+            .unwrap()
+            .render(minijinja::context! {
+                text => r#"" onmouseover="alert(1)"><script>alert(2)</script> + & café"#,
+                link => "javascript:alert(3)",
+                markup => "<strong>Trusted &amp; text</strong>",
+            })
+            .unwrap();
+        assert!(html.contains(r#"title="&quot; onmouseover=&quot;alert(1)&quot;&gt;&lt;script&gt;"#));
+        assert!(html.contains(" + &amp; café"));
+        assert!(!html.contains("<script>") && !html.contains("javascript:"));
+        assert!(html.contains(r##"href="#invalid-url""##));
+        assert!(html.ends_with("<strong>Trusted &amp; text</strong>"));
+        assert!(pages.env.render_str("{{ missing }}", ()).is_err());
     }
 
     #[test]

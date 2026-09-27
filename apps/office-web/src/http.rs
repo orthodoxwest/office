@@ -4,7 +4,7 @@
 use axum::body::Body;
 use axum::http::{HeaderMap, HeaderValue, Response, StatusCode, header};
 
-/// A request's query as `r.URL.Query()` reads it.
+/// A decoded query that preserves parameter order and repeated keys.
 #[derive(Clone, Debug, Default)]
 pub struct Query(Vec<(String, String)>);
 
@@ -25,7 +25,7 @@ impl Query {
         Query(pairs)
     }
 
-    /// The first value for `key`, or "" (`url.Values.Get`).
+    /// The first value for `key`, or "" if absent.
     pub fn get(&self, key: &str) -> &str {
         self.0.iter().find(|(k, _)| k == key).map(|(_, v)| v.as_str()).unwrap_or("")
     }
@@ -111,7 +111,7 @@ pub fn cookie(headers: &HeaderMap, name: &str) -> Option<String> {
     None
 }
 
-/// A header's first value (`Header.Get`), "" when absent or not text.
+/// A header's first value, "" when absent or not text.
 pub fn header_value<'a>(headers: &'a HeaderMap, name: &str) -> &'a str {
     headers.get(name).and_then(|v| v.to_str().ok()).unwrap_or("")
 }

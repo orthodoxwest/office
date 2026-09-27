@@ -3268,3 +3268,28 @@ test("Apse clears the report line from the starfield", async ({ page }) => {
     for (const ground of grounds) expect(ground.background).toBe(ground.expected);
   }
 });
+
+
+test("error pages display hostile input as text", async ({ page }) => {
+  const payload = '<img src=x onerror="window.unsafeMarkup=true"> + " & / café';
+  const response = await page.goto(`/?date=${encodeURIComponent(payload)}`);
+  expect(response.status()).toBe(400);
+  await expect(page.locator(".not-found-msg")).toHaveText(
+    `Invalid date ${JSON.stringify(payload)} — please use YYYY-MM-DD format.`,
+  );
+  await expect(page.locator(".not-found img")).toHaveCount(0);
+  expect(await page.evaluate(() => window.unsafeMarkup)).toBeUndefined();
+  await expect(page.locator(".not-found-home a")).toHaveAttribute("href", "/");
+});
+
+test("escaped page links retain navigation and report query values", async ({ page }) => {
+  await page.goto("/lauds/2026-06-07");
+  await expect(page.locator(".next-hour")).toHaveAttribute("href", "/prime/2026-06-07");
+  const report = page.getByRole("link", { name: "Report a problem", exact: true }).first();
+  const url = new URL(await report.getAttribute("href"));
+  expect(url.hostname).toBe("github.com");
+  expect(url.searchParams.get("body")).toContain("2026-06-07");
+  expect(url.searchParams.get("body")).toContain("lauds");
+  await page.locator(".next-hour").click();
+  await expect(page).toHaveURL(/\/prime\/2026-06-07/);
+});
