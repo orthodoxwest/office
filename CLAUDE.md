@@ -1,6 +1,8 @@
 # AWRV Benedictine Divine Office
 
-Go web application that renders the hours of the Benedictine Office, as used by the AWRV
+Go web application that renders the hours of the Benedictine Office, as used by the AWRV.
+The engine is being ported to Rust; see RUST-PORT.md for the plan, the target crate
+structure, and the rules while both engines exist (engine changes land in Go first).
 
 ## Architecture
 
@@ -64,8 +66,11 @@ internal/
     pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
     ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
     static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
+  dump/                    Canonical record stream the Go and Rust engines are compared on
+                           (RUST-PORT.md): calendar_day / office_day / hour records, the
+                           RFC 8785 encoder, dump diff, and the parity-snapshot digests
   e2e/                     End-to-end golden-file tests
-    golden_test.go         Rendered-hour, ordo, audit, and assurance golden tests
+    golden_test.go         Rendered-hour, ordo, audit, assurance, and parity golden tests
     testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)
   audit/                   Data completeness audit
     audit.go               Placeholder scanner + missing-propers reporter
@@ -205,6 +210,9 @@ make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-spr
 make review-plan      # Sample observed engine behavior (default 28y); no completion score
 make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
+./office dump -start 2026 [-years N] | -dates D,... [-hours ..] [-forms ..] [-groups ..]  # canonical JSONL
+./office dump diff LEFT RIGHT     # first differences by JSON Pointer (Go vs Rust, before vs after)
+./office dump digest FILE         # parity snapshot of a dump
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 ./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
 

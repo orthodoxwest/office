@@ -70,6 +70,9 @@ make project-status YEAR=2026     # proper, assurance, and ordo reports
 
 ## Development
 
+The engine is being ported from Go to Rust; [RUST-PORT.md](RUST-PORT.md) has
+the plan, the target structure, and the comparison tooling (`office dump`).
+
 The full check suite needs Go, Make, Python 3, `staticcheck`, Node.js 20.19+
 and npm. CI uses Node.js 22. Install the pinned tooling:
 
