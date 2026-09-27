@@ -1,0 +1,13 @@
+[collect]
+O God, who didst give thy martyr N. the crown.
+@lookup Commune/C2 Oratio
+
+[chapter]
+ex C2
+Placeholder chapter.
+
+[lauds-psalmodie]
+@use psalmody/lauds/sunday
+
+[vespers-psalmody-frist]
+@use psalmody/lauds/sunday

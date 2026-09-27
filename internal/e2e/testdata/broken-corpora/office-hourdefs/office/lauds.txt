@@ -1,0 +1,24 @@
+[Opening]
+Type = versicle
+Ref = ordinary/lauds/missing
+
+Type = bogus-type
+Ref = ordinary/shared/collect
+
+Type = proper-hymn
+Ref = hymn
+
+Type = proper-antiphon
+Ref = nowhere-antiphon-3
+
+Type = marian
+Ref = fixed
+
+Type = proper-psalmody
+Ref = vespers-psalmody
+
+Type = gloria-patri
+Ref = office
+
+Type = commemorations
+Ref = anything

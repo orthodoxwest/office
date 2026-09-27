@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	metaLine  = `{"format":"office-dump/1","kind":"meta"}`
+	metaLine  = `{"format":"office-dump/2","kind":"meta"}`
 	dayLine   = `{"date":"2026-01-01","kind":"calendar_day","season":"christmas"}`
 	hourLine  = `{"date":"2026-01-01","form":"private","hour":"lauds","kind":"hour","sections":[{"elements":[{"text":"O God, make speed to save me."}]}]}`
 	hourLine2 = `{"date":"2026-01-01","form":"private","hour":"lauds","kind":"hour","sections":[{"elements":[{"text":"O God, make haste to save me."}]}]}`

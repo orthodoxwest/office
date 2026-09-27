@@ -145,13 +145,18 @@ func validateSemantics(feasts []*models.Feast) []string {
 		rank  models.Rank
 	}
 	fixedDates := make(map[dateRankKey][]string)
+	var fixedOrder []dateRankKey // first appearance, so reports are deterministic
 	for _, f := range feasts {
 		if f.IsFixed() {
 			key := dateRankKey{f.Month, f.Day, f.Rank}
+			if _, seen := fixedDates[key]; !seen {
+				fixedOrder = append(fixedOrder, key)
+			}
 			fixedDates[key] = append(fixedDates[key], f.ID)
 		}
 	}
-	for key, ids := range fixedDates {
+	for _, key := range fixedOrder {
+		ids := fixedDates[key]
 		if key.rank == models.Commemoration {
 			continue
 		}

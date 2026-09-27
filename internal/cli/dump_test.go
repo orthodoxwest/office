@@ -10,7 +10,7 @@ import (
 
 func TestDumpDiffAndDigestRoundTrip(t *testing.T) {
 	e, out, _ := testEnv(t)
-	args := []string{"-dates", "2026-12-25,2026-11-02", "-hours", "compline,vespers", "-forms", "private"}
+	args := []string{"-dates", "2026-12-25,2026-11-02", "-hours", "compline,vespers", "-forms", "private", "-groups", "calendar,office,hours"}
 	if err := cmdDump(e, args); err != nil {
 		t.Fatalf("cmdDump: %v", err)
 	}

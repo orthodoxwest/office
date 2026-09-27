@@ -1,0 +1,37 @@
+[easter-sunday]
+Name = Easter
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+0
+HasOctave = true
+OctaveClass = privileged-first
+
+[pentecost]
+Name = Pentecost
+Rank = double-1st-class
+Color = red
+Category = lord
+DateRule = easter+49
+HasVigil = true
+
+[bad-rule]
+Name = Bad Rule
+Rank = double
+Color = white
+Category = lord
+DateRule = whitsun+1
+
+[bad-advent]
+Name = Bad Advent
+Rank = double
+Color = violet
+Category = lord
+DateRule = advent-sunday-5
+
+[bad-epiphany]
+Name = Bad Epiphany
+Rank = double
+Color = white
+Category = lord
+DateRule = epiphany-sunday-0

@@ -1,0 +1,44 @@
+[only-with-missing]
+Name = Only With Missing
+Rank = commemoration
+Color = white
+Category = confessor
+Month = 7
+Day = 1
+OnlyWith = no-such-feast
+
+[companion-missing]
+Name = Companion Missing
+Rank = commemoration
+Color = white
+Category = apostle
+Month = 7
+Day = 2
+CompanionOf = no-such-feast
+
+[companion-self]
+Name = Companion Self
+Rank = commemoration
+Color = white
+Category = apostle
+Month = 7
+Day = 3
+CompanionOf = companion-self
+
+[companion-of-companion]
+Name = Companion Of Companion
+Rank = commemoration
+Color = white
+Category = apostle
+Month = 7
+Day = 4
+CompanionOf = companion-missing
+
+[companion-rank]
+Name = Companion Rank
+Rank = double
+Color = white
+Category = apostle
+Month = 7
+Day = 5
+CompanionOf = st-z

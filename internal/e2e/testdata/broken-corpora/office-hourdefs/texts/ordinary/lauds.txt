@@ -1,0 +1,11 @@
+[hymn-monday]
+A Monday hymn.
+
+[versicle]
+@omit
+
+[psalm-antiphon-2]
+@omit
+
+[chapter-lauds]
+@omit

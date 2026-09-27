@@ -4,8 +4,10 @@ package texts
 import (
 	"bufio"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -33,6 +35,8 @@ type TextCorpus struct {
 	// Appointment scopes describe when a seasonal fallback is eligible;
 	// they are configuration, not transcribed corpus entries.
 	appointmentScopes map[appointmentScopeKey][]*AppointmentScope
+	// appointmentScopeList keeps the validated scopes in file order.
+	appointmentScopeList []*AppointmentScope
 }
 
 // LoadTexts loads all text files from the data/texts/ directory tree.
@@ -388,7 +392,9 @@ func IsOmitted(text string) bool {
 // text map, then verifies that every alias terminates at a real corpus entry.
 // It also rejects malformed @omit bodies, which must stand alone.
 func (c *TextCorpus) extractAndValidateAliases() error {
-	for key, body := range c.texts {
+	// Keys are visited in sorted order so the first reported error is stable.
+	for _, key := range slices.Sorted(maps.Keys(c.texts)) {
+		body := c.texts[key]
 		trimmed := strings.TrimSpace(body)
 		if strings.HasPrefix(trimmed, OmitMarker) && trimmed != OmitMarker {
 			return fmt.Errorf("invalid corpus omission %q: %s must be the whole body", key, OmitMarker)
@@ -404,12 +410,18 @@ func (c *TextCorpus) extractAndValidateAliases() error {
 		delete(c.texts, key)
 	}
 
-	for alias := range c.aliases {
+	for _, alias := range slices.Sorted(maps.Keys(c.aliases)) {
 		if canonical := c.CanonicalRef(alias); canonical == "" {
 			return fmt.Errorf("corpus alias %q does not resolve (target %q)", alias, c.aliases[alias])
 		}
 	}
 	return nil
+}
+
+// AliasTarget returns the direct @use target of an alias key.
+func (c *TextCorpus) AliasTarget(key string) (string, bool) {
+	target, ok := c.aliases[key]
+	return target, ok
 }
 
 // FindPlaceholders returns all corpus keys whose text begins with "placeholder"

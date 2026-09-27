@@ -1,0 +1,14 @@
+[package]
+name = "render-tex"
+version = "0.1.0"
+description = "LuaLaTeX booklet rendering of a composed hour"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+corpus.workspace = true
+liturgy.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"

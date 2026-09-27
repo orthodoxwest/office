@@ -1,0 +1,9 @@
+== texts
+no Latin incipit in data/latin-incipits.txt for: psalms/15
+placeholder text remains in corpus: commons/martyr/vespers/hymn
+texts/proper/st-x/lauds.txt:12: unrecognized section name "vespers-psalmody-frist" (did you mean "vespers-psalmody-first"?)
+texts/proper/st-x/lauds.txt:3 [collect]: unexpected Divinum Officium directive: "@lookup Commune/C2 Oratio"
+texts/proper/st-x/lauds.txt:6 [chapter]: unexpected Divinum Officium extract directive: "ex C2"
+texts/proper/st-x/lauds.txt:9: unrecognized section name "lauds-psalmodie" (did you mean "lauds-psalmody"?)
+texts/psalms/1.txt:1:19: unexpected control character U+0007
+texts/psalms/15.txt:1:1: unexpected UTF-8 BOM

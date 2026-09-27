@@ -24,6 +24,11 @@ type Engine struct {
 	definitions map[string][]HourSection
 }
 
+// Corpus returns the engine's loaded text corpus. It must not be modified.
+func (e *Engine) Corpus() *texts.TextCorpus {
+	return e.corpus
+}
+
 // NewEngine creates an office engine, loading the text corpus and compiling
 // all hour definitions from dataDir once for immutable concurrent reuse.
 func NewEngine(dataDir string) (*Engine, error) {

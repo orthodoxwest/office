@@ -2,8 +2,10 @@ package calendar
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -86,7 +88,7 @@ func sectionToPenitentialRule(m map[string]string, sourceFile string) (penitenti
 		"_id": true, "From": true, "To": true, "Weekdays": true,
 		"Fast": true, "Abstinence": true,
 	}
-	for key := range m {
+	for _, key := range slices.Sorted(maps.Keys(m)) {
 		if !knownKeys[key] {
 			return rule, fmt.Errorf("%s: rule %q: unrecognized key %q", sourceFile, rule.ID, key)
 		}

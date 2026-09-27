@@ -7,6 +7,9 @@
 *.so
 *.dylib
 
+# Rust build output
+/target/
+
 # Test binary
 *.test
 
@@ -34,6 +37,7 @@ Thumbs.db
 
 #LaTeX handling
 *.tex
+!/crates/render-tex/src/preamble.tex
 *.log
 
 # Python

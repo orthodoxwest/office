@@ -1,0 +1,2 @@
+== texts
+loading text corpus: $DATA/appointment-scopes.json: scope "lent-chapters": slot "chapter" has no seasonal corpus candidate for lent/sext

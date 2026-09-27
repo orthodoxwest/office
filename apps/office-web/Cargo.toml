@@ -1,0 +1,23 @@
+[package]
+name = "office-web"
+version = "0.1.0"
+description = "The Office web server: routes, handlers, static assets, reminder feed, usage store"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+calendar.workspace = true
+compat.workspace = true
+liturgy.workspace = true
+office.workspace = true
+render-html.workspace = true
+tools.workspace = true
+axum.workspace = true
+tokio.workspace = true
+rusqlite.workspace = true
+jiff.workspace = true
+sha2.workspace = true
+
+[lints]
+workspace = true

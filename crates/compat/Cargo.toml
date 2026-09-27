@@ -1,0 +1,15 @@
+[package]
+name = "compat"
+version = "0.1.0"
+description = "Go-compatible string helpers used while the Go and Rust engines coexist"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+wildcard_enum_match_arm = "deny"

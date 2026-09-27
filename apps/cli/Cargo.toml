@@ -1,0 +1,27 @@
+[package]
+name = "office-cli"
+version = "0.1.0"
+description = "Command-line front end of the Rust engine (office-rs)"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "office-rs"
+path = "src/main.rs"
+
+[dependencies]
+compat.workspace = true
+calendar.workspace = true
+office.workspace = true
+liturgy.workspace = true
+tools.workspace = true
+ordo.workspace = true
+render-text.workspace = true
+render-tex.workspace = true
+corpus.workspace = true
+serde_json.workspace = true
+office-web.workspace = true
+
+[lints]
+workspace = true

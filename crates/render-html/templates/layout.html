@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Benedictine Divine Office with the daily hours, ordo, and liturgical calendar.">
+  <title>{% block title %}Divine Office{% endblock %}</title>
+  {# Apply stored appearance before CSS to avoid a flash.
+       Keys: office-theme, office-text-size, office-prayer-form. #}
+  <script>
+    (function () {
+      try {
+        var leaders = ["private", "deacon", "priest"];
+        var requestedLeader = new URLSearchParams(location.search).get("form");
+        var leader = leaders.indexOf(requestedLeader) >= 0 ? requestedLeader : localStorage.getItem("office-prayer-form");
+        if (leaders.indexOf(leader) >= 0) document.documentElement.setAttribute("data-leader", leader);
+      } catch (e) {}
+      try {
+        var t = localStorage.getItem("office-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+        } else if (t === "default") {
+          document.documentElement.removeAttribute("data-theme");
+        }
+        var s = localStorage.getItem("office-text-size");
+        if (s === "small" || s === "large") {
+          document.documentElement.setAttribute("data-text-size", s);
+        } else if (s === "default") {
+          document.documentElement.removeAttribute("data-text-size");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  {# static stamps ?v=build so HTML and CSS/JS never desync across deploys. #}
+  {# Start the ordo font fetch early to reduce reflow in the long year table. #}
+  {% if page == "calendar" %}<link rel="preload" href="/static/fonts/eb-garamond-regular.woff2" as="font" type="font/woff2" crossorigin>{% endif %}
+  <link rel="stylesheet" href="{{ static("style.css")|url }}">
+  {# Report filters should refresh immediately. A cross-document snapshot
+       can hold a dense report's controls while its new view is rendering. #}
+  {% if page == "usage" %}<style>@view-transition { navigation: none; }</style>{% endif %}
+  <link rel="icon" type="image/svg+xml" href="{{ static("favicon.svg")|url }}">
+  <link rel="manifest" href="{{ static("manifest.webmanifest")|url }}">
+  <link rel="apple-touch-icon" href="{{ static("icons/apple-touch-icon.png")|url }}">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#fdf1e6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121c28" media="(prefers-color-scheme: dark)">
+  <script src="{{ static("leader.js")|url }}" defer></script>
+  <script src="{{ static("app.js")|url }}" defer></script>
+  {% if page == "usage" %}<script src="{{ static("usage.js")|url }}" defer></script>{% endif %}
+</head>
+{# SeasonClass retints the gold ornaments for Passiontide/Paschaltide — see
+     render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
+     that do not stand on a single day. #}
+<body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="site-header">
+    <div class="site-nav-shell">
+      {%- set t = "" %}
+      {%- set d = nav_date %}
+      {%- set p = page %}
+      {# data-nav-* lets app.js re-stamp dates on load so cached chrome hits SW keys.
+           Brand is always undated home (→ local today): a long-lived PWA/tab left
+           on yesterday should not keep "Daily Office" pinned to that day. Hour
+           and ordo links still carry $d so hopping hours on a chosen day works.
+           app.js rewrites brand to /?date=today for SW cache keys. #}
+      {# Brand is current only on *today's* home. Historical home still has
+           Page=home but brand navigates to today, so aria-current would lie.
+           app.js re-syncs active/aria-current after midnight SWR freezes. #}
+      <a class="site-brand{% if p == "home" and not show_today %} active{% endif %}" href="{{ nav_link("/", "")|url }}" data-nav="home" data-nav-home="today"{% if p == "home" and not show_today %} aria-current="page"{% endif %}><span aria-hidden="true">✠</span> Daily Office</a>
+      {# Closed by default: desktop CSS shows .site-menu > nav regardless of
+           [open], and the native <details>/<summary> toggle lets no-JS mobile
+           visitors expand it with a tap — no script needed either way. #}
+      <details class="site-menu">
+        <summary>Menu</summary>
+        <nav aria-label="Primary">
+          <a href="{{ nav_link("/lauds", d)|url }}" data-nav="hour" data-hour="lauds"{% if p == "lauds" %} class="active" aria-current="page"{% endif %}>Lauds</a>
+          <a href="{{ nav_link("/prime", d)|url }}" data-nav="hour" data-hour="prime"{% if p == "prime" %} class="active" aria-current="page"{% endif %}>Prime</a>
+          <a href="{{ nav_link("/terce", d)|url }}" data-nav="hour" data-hour="terce"{% if p == "terce" %} class="active" aria-current="page"{% endif %}>Terce</a>
+          <a href="{{ nav_link("/sext", d)|url }}" data-nav="hour" data-hour="sext"{% if p == "sext" %} class="active" aria-current="page"{% endif %}>Sext</a>
+          <a href="{{ nav_link("/none", d)|url }}" data-nav="hour" data-hour="none"{% if p == "none" %} class="active" aria-current="page"{% endif %}>None</a>
+          <a href="{{ nav_link("/vespers", d)|url }}" data-nav="hour" data-hour="vespers"{% if p == "vespers" %} class="active" aria-current="page"{% endif %}>Vespers</a>
+          <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
+          <span class="nav-divider" aria-hidden="true"></span>
+          <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
+          <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
+        </nav>
+      </details>
+    </div>
+  </header>
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>Benedictine Divine Office</p>
+    {# Appearance preference: quiet footer control on every page including hours. #}
+    <div class="theme-switch" role="group" aria-label="Appearance">
+      <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
+      <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
+      <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
+    </div>
+    {# Text size: sibling of the appearance control, same quiet language.
+         Glyphs carry the meaning visually; aria-label/title carry the words. #}
+    <div class="text-size-switch" role="group" aria-label="Text size">
+      <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+      <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+    </div>
+  </footer>
+</body>
+</html>

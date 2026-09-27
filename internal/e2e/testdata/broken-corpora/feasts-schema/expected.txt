@@ -1,0 +1,21 @@
+== calendar
+temporal.txt: feast "no-name" missing Name
+temporal.txt: feast "bad-rank": invalid rank: "triple"
+temporal.txt: feast "bad-color": invalid color: "puce"
+temporal.txt: feast "bad-category": invalid feast category: "hermit"
+temporal.txt: feast "both-dates" must not have both Month/Day and DateRule
+sanctoral.txt: feast "half-date" must specify Month and Day together
+sanctoral.txt: feast "impossible-date" has invalid fixed date 2/30
+sanctoral.txt: feast "bad-month": invalid Month: strconv.Atoi: parsing "March": invalid syntax
+sanctoral.txt: feast "no-date" must have either Month/Day or DateRule
+sanctoral.txt: feast "unknown-keys": unrecognized key "Aardvark"
+sanctoral.txt: feast "bad-bool": HasOctave: expected true or false, got "yes"
+sanctoral.txt: feast "vigil-category" is a vigil but has category "martyr" instead of feria
+sanctoral.txt: feast "vigil-without-owner" is a vigil but does not specify VigilOf
+sanctoral.txt: feast "owner-without-vigil" specifies VigilOf but is not a vigil
+sanctoral.txt: feast "octave-class-without-octave" specifies OctaveClass without HasOctave (except a Simple octave day)
+sanctoral.txt: feast "bad-octave-class": invalid OctaveClass "privileged-fourth"
+sanctoral.txt: feast "commemoration-class-category": CommemorationClass requires feria category
+sanctoral.txt: feast "primary-rank": PrimaryOfOurLord requires a Double I Class feast of Our Lord
+Syntax error in awrv.txt: $DATA/feasts/awrv.txt:10: expected Key = value, got "this line is not a key-value pair"
+Missing data file: $DATA/feasts/commemorations.txt

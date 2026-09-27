@@ -1,0 +1,8 @@
+[a]
+@use shared/aliases/b
+
+[b]
+@use shared/aliases/a
+
+[c]
+@use shared/aliases/missing

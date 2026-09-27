@@ -5,8 +5,14 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phase 0 (the oracle) is in progress. Nothing user-facing changes
-until the cutover in Phase 6.
+**Status:** Phases 0–5 are complete. `office-rs dump` is byte-identical to
+Go: the corpus, calendar, and office groups for 1900–2199, and every hour in
+every prayer form for 2026–2053 (the parity snapshot). Every Go command has a
+Rust counterpart with the same output: the ordo, the rubrics TSV, the hours,
+the TeX booklet, validate, audit, lint, the review subcommands, the
+data-editing commands, and `serve`, whose responses match Go's server on the
+crawl and which passes the Playwright suites, visual snapshots included. Next:
+Phase 6, the cutover. Nothing user-facing changes until then.
 
 ## Why Rust
 
@@ -123,7 +129,7 @@ Streams can be piped rather than stored:
 The Go generator in `internal/dump/records.go` is the reference field list.
 This section states the rules a second implementation needs.
 
-### Dump format (`office-dump/1`)
+### Dump format (`office-dump/2`)
 
 **Encoding.** One record per line, each a JSON object followed by `\n`.
 
@@ -149,15 +155,20 @@ as long as serde_json's `preserve_order` feature stays off.
 **Records.** Each has a `kind`. They appear in this order:
 
 1. `meta`: format name and the normalized selection.
-2. Per civil year, `calendar_year`: the Tabula and every moveable date.
-3. Per date, `calendar_day`: the observance every product shares. It holds
+2. The corpus, which depends on `data/` alone: a `corpus_entry` for every
+   resolvable key in byte order (its `@use` or `@omit` directive, the direct
+   `use_target`, the `canonical` key, the resolved `body`, the collect
+   conclusion form, and the Latin incipit), then an `appointment_scope` for
+   each scope in file order.
+3. Per civil year, `calendar_year`: the Tabula and every moveable date.
+4. Per date, `calendar_day`: the observance every product shares. It holds
    season, tempora, celebration, commemorations, the feria commemoration,
    color, notes, the occurrence rule and trace, temporal week, octave, and
    fasting.
-4. Per date, `office_day`: what only the Office resolves. It holds the
+5. Per date, `office_day`: what only the Office resolves. It holds the
    Vespers designation (owner, feast, color, commemorations, the split at the
    Chapter, the appended Office of the Dead) and the Marian antiphon.
-5. Per date, `hour` for each hour (Lauds through Compline) and prayer form
+6. Per date, `hour` for each hour (Lauds through Compline) and prayer form
    (private, deacon, priest): title, color, sections, elements, and the
    decision trace.
 
@@ -167,16 +178,17 @@ that exist only on the synthetic I Vespers day (`FirstVespers`,
 them. `Feast.Notes` is left out: it is documentation and never reaches output.
 
 Selections: `-start`/`-years` or `-dates`, narrowed by `-hours`, `-forms`, and
-`-groups` (`calendar`, `office`, `hours`). The stream order depends only on
+`-groups` (`corpus`, `calendar`, `office`, `hours`). The stream order depends only on
 what is selected, not on how it is spelled.
 
-### Parity snapshot (`office-parity/1`)
+### Parity snapshot (`office-parity/2`)
 
 `internal/e2e/testdata/golden/parity-snapshot.json` is the digest of the
 2026–2053 dump. Each digest is a SHA-256 over canonical lines:
 
 | Digest | Lines |
 |---|---|
+| `corpus` | the `corpus_entry` and `appointment_scope` records |
 | `calendar` (per year) | the `calendar_year` and `calendar_day` records |
 | `office` (per year) | the `office_day` records |
 | `content` (per year, hour, form) | the date plus hour label, title, season, feast, color, section labels, and each element's type, label, incipit, rubric, text, and spoken voice text |
@@ -227,6 +239,17 @@ dates. A nightly job compares the full window.
   indistinguishable from fixes.
 - **Port the Go unit tests with each crate.** They encode edge cases the black
   box can't reach.
+- **Output and findings match; error wording does not.** What must be
+  byte-identical is output (stdout, the files a command writes, the exit
+  status) and findings, the validate, lint, audit, and review lines a data
+  editor acts on. The parity scripts compare stdout and the exit status and
+  ignore stderr, and Rust words its own I/O, parse, and flag errors. Two
+  narrow allowances inside findings, both gone with Go at the cutover: where
+  a Go finding ends in a Go library's error text (strconv, os,
+  encoding/csv), the Rust finding keeps the finding and words that tail
+  itself, which is all the broken-corpora test tolerates; and `%q` in
+  findings escapes only ASCII control characters, where Go also escapes
+  non-printing Unicode such as U+00A0.
 
 ## Go-to-Rust traps
 
@@ -258,10 +281,155 @@ dates. A nightly job compares the full window.
       (the sweep went from 67 to 52 seconds)
 - [x] Stable sorts throughout; a total order for the review manifest;
       fixed-order field validation instead of map iteration
-- [ ] Phase 2 prerequisites: a `corpus` record group (every key with its
+- [x] Phase 2 prerequisites: a `corpus` record group (every key with its
       resolved body and directive) and broken test corpora with expected
-      `validate` output
+      `validate` output (`internal/e2e/testdata/broken-corpora/`, one data
+      directory per case, the calendar and texts reports in `expected.txt`
+      with the data directory written `$DATA`). The validators now report in
+      a fixed order instead of Go map order.
+
+## Phase 1 checklist
+
+- [x] Cargo workspace at the repository root (`crates/calendar`, `apps/cli`),
+      toolchain pinned in CI, `rustfmt.toml`
+- [x] `calendar` crate: civil date type, computus and moveable dates, seasons,
+      Tabula, feast and penitential loaders (through a `DataSource`, no file
+      access), occurrence, XIV.14 commemoration order, the year builder
+- [x] `office-rs dump` for the `calendar` group (`-start`/`-years`, `-dates`,
+      `-hours`, `-forms`, `-groups`)
+- [x] Gate: `make rust-parity` — `calendar` group identical for 1900–2199,
+      Tabula included
+- [x] CI: `make rust-check` (fmt, clippy `-D warnings`, tests), iOS and
+      Android cross-builds of the core crates, and the parity gate
+- [ ] Port the remaining Go calendar unit tests (a first set is ported; the
+      data-backed builder assertions are also covered by the parity gate)
+
+## Phase 2 checklist
+
+- [x] `corpus` crate: the `data/texts/` format (INI and plain files, comment
+      stripping, Go `filepath.Walk` order), `@use` and `@omit`, the collect
+      conclusion and Latin incipit sidecars, and the line grammar
+      (`parse_psalm`, `parse_block`, `parse_hymn`); Go's tests ported
+- [x] Appointment scopes in the `office` crate (they name hours and slots),
+      loaded with the corpus by `office::texts::load_texts`
+- [x] `tools` crate: the filesystem `DataSource` and the calendar and texts
+      validators
+- [x] `compat` crate: Go's `%q` quoting of keys in findings, `bufio.Scanner`
+      lines, and the integers `Atoi` accepts; removed after the cutover
+- [x] Gate: the `corpus` group is identical (`make rust-parity`), and
+      `cargo test -p tools` reproduces every `expected.txt` under
+      `internal/e2e/testdata/broken-corpora/`
+
+Known gap, by design: JSON syntax errors in `appointment-scopes.json` carry
+serde_json's wording rather than encoding/json's. Semantic errors match.
+
+## Phase 3 checklist
+
+- [x] `office` crate: Vespers concurrence (`concurrence.go`), the Marian
+      antiphon, and the historia weeks; Go's concurrence unit tests ported
+- [x] `office_day` record identical for 1900–2199 (`make rust-parity`)
+- [x] `liturgy` crate: the document model (element types, voice and rubric
+      spans, `OfficeHour`, `PrayerForm`)
+- [x] Hour composers: Compline, the minor hours, Prime, Lauds, Vespers (with
+      Vespers of the Dead), proper resolution, psalmody declarations,
+      commemorations, preces and suffrage, conclusions, and the prayer-form
+      pass; `office::Engine` loads the corpus and hour definitions
+- [x] `render-text` crate: Go's `FormatOfficeHour`
+- [x] Gate: `hours` group identical for 2026–2053 in every form
+      (`make rust-parity-full` digests the Rust dump and diffs it with
+      `parity-snapshot.json`; nightly in CI), a sample of 127 dates in PR CI
+      (`make rust-parity`: every golden date plus boundary dates), and every
+      hour golden byte-identical (`cargo test -p render-text`)
+- [ ] Port the Go `office` unit tests (the black-box gate covers the sweep;
+      the unit tests reach cases it cannot)
+- [ ] The Martyrology preview at Prime (unpublished; not in the dump)
+- [x] Composition tracing (`TraceProperResolution`), used by the review tools
+      in Phase 4 (`office::trace`)
 
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change
 until then.
+
+## Phase 4 checklist
+
+- [x] `ordo` crate: the text ordo (Tabula Temporaria and per-hour stanzas)
+      and the rubrics TSV; `office-rs ordo` and `office-rs rubrics` are
+      byte-identical to Go (`make rust-parity`: 2026, 2027, 2038; the ordo
+      goldens in `cargo test -p ordo`)
+- [x] `render-tex` crate: Go's `FormatOfficeHourTeX`; the caller supplies the
+      GABC score lookup, so the renderer does no file access. `office-rs tex`
+      is byte-identical for every hour on the 127 sample dates, cycling the
+      prayer forms and `--chant` (`scripts/rust-parity-tex.sh`)
+- [x] `validate`: the hour definitions (`office::validate`), the provenance
+      and zero-occurrence ledgers (`tools::review`), and Go's `encoding/csv`
+      parsing (`compat::csv`, fuzzed against Go). The broken corpora gain `office`
+      and `review` layers and five cases; the Rust findings match on all 15
+      (`cargo test -p tools`), and `make rust-parity` runs `validate` on the
+      live data
+- [x] `audit` (placeholders, missing propers, flat antiphons, translation
+      review, and the composition sweep) and `lint` (`tools::audit`):
+      identical on the live data and, through
+      `scripts/rust-parity-mutated.sh`, on a copy of it broken in known ways,
+      which reaches the finding paths the clean data never does
+- [x] The review subcommands (`tools::review`): manifest, provenance,
+      provenance-queue, zero-occurrences, resolution-inventory, plan,
+      explain, assurance, and the ledger writers attest and flag.
+      `office::trace` ports `TraceProperResolution` and
+      `TraceCommemorationResolution`; `compat::json` writes Go's indented
+      `encoding/json`. The sweeps compose years in parallel and fold them in
+      Go's order: the 28-year assurance report takes 21s against Go's 60s, and
+      matches its golden (`make rust-parity-full`). `scripts/rust-parity-review.sh`
+      compares every read-only report on one- and two-year sweeps, and runs
+      the ledger writers on two copies of the data, diffing output and trees
+- [x] `corpus show|put` and `scaffold propers` (`tools::corpus_edit`,
+      `tools::scaffold`): `scripts/rust-parity-edit.sh` runs the same
+      sequence, error paths included, on two copies of the data and diffs
+      the output and trees
+
+## Phase 5 checklist
+
+- [x] `render-html` crate: Go's `internal/render`. The text-to-HTML
+      conversion, the leader-form alignment, and the usage report model are
+      ported as they are; the templates are the Go templates translated to
+      minijinja with identical markup, and a formatter reproduces
+      `html/template`'s escaping in text, attribute, URL, and JSON contexts.
+      Floats reach the templates already formatted as Go prints them
+- [x] `apps/office-web`: Go's `internal/web` and `internal/usage` on axum,
+      rusqlite, and jiff, served by `office-rs serve`. The static assets are
+      embedded from `internal/web/static`; the SQLite schema is Go's, so either
+      server opens the other's database. Routing reproduces `http.ServeMux`
+      (path cleaning, the `/static` trailing-slash redirect, per-segment
+      unescaping) and `http.FileServer` (listings, `index.html` and slash
+      redirects, error headers). Zones come from jiff's bundled database, as
+      Go's come from the embedded `time/tzdata`, looked up by exact name; the
+      reminder feed resolves skipped and repeated wall times as `time.Date`
+      does. The engine gains the Martyrology preview (`ComposeOptions`)
+- [x] The Go unit tests for `internal/render`, `internal/usage`, and the
+      handler logic of `internal/web`, where they reach code the crawl cannot
+      (synthetic elements, the store's dedupe and retention, the cache, the
+      ICS builder, the app.js schedule contract, version hashing). Tests of
+      the shared static files (service worker, app.js, CSS) stay in Go
+- [x] The crawl (`scripts/rust-parity-web.sh`, in `make rust-parity`): both
+      servers answer the same 2163 requests identically after normalizing
+      the build stamp, DTSTAMP, and the usage cookie. It covers every hour
+      and day page on the 127 sample dates and the links they carry,
+      calendar years, `tz` cookies, the reminder feed and its errors, the
+      usage beacon and report against a seeded database, static assets,
+      HEAD and other methods, and Go's canonicalization of odd paths
+- [x] The Playwright suites, visual snapshots included, pass unchanged
+      against `office-rs` (CI job "UX (Rust server)"; `make test-ux-rust`
+      locally)
+
+Known differences, all outside what a page or feed shows a reader:
+
+- `/static/` ignores `Range` and conditional headers. Go's `ServeContent`
+  honors them, though Go sends neither `ETag` nor `Last-Modified` for
+  embedded files, so no browser revalidates them.
+- Transport-level handling (Host validation, malformed request lines beyond a
+  bad path escape, HTTP/2) is hyper's, not Go's.
+- Error pages word calendar-build failures in Rust's terms, per the rule on
+  error wording, and show undecodable bytes in a path or query as U+FFFD
+  where Go's `%q` shows `\xff`.
+- The feast files load once at startup; Go rereads them for each year it
+  builds, which only matters if the data directory changes under a running
+  server.

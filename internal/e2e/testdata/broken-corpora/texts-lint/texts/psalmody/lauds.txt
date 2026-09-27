@@ -1,0 +1,2 @@
+[sunday]
+psalm-antiphon-1 = psalms/1

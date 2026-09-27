@@ -1,0 +1,16 @@
+[package]
+name = "calendar"
+version = "0.1.0"
+description = "Computus, moveable dates, seasons, feast catalog, occurrence, and fasting"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+compat.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+wildcard_enum_match_arm = "deny"

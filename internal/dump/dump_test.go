@@ -3,6 +3,7 @@ package dump
 import (
 	"bytes"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -226,7 +227,7 @@ func TestParallelYearDigestsMatchOneSequentialDump(t *testing.T) {
 	if err := WriteParitySnapshot(parallel, &out); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{`"format": "office-parity/1"`, `"year_count": 3`, `"hour": "compline"`} {
+	for _, want := range []string{`"format": "office-parity/2"`, `"corpus": "`, `"year_count": 3`, `"hour": "compline"`} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("snapshot lacks %s", want)
 		}
@@ -244,5 +245,41 @@ func TestDigestRejectsMalformedStreams(t *testing.T) {
 		if _, err := Digest(strings.NewReader(input)); err == nil {
 			t.Errorf("%s: Digest succeeded, want an error", name)
 		}
+	}
+}
+
+func TestCorpusRecordsPrecedeTheYearsInKeyOrder(t *testing.T) {
+	records := collect(t, Selection{Dates: []time.Time{date(t, "2026-04-12")}, Groups: []string{GroupCalendar, GroupCorpus}})
+	if records[0]["kind"] != KindMeta || records[len(records)-2]["kind"] != KindCalendarYear {
+		t.Fatalf("corpus records must follow meta and precede the years: %v ... %v", records[0]["kind"], records[len(records)-2]["kind"])
+	}
+	var keys []string
+	directives := map[any]int{}
+	scopes := 0
+	for _, r := range records[1 : len(records)-2] {
+		switch r["kind"] {
+		case KindCorpusEntry:
+			if scopes > 0 {
+				t.Fatal("corpus entries must precede the appointment scopes")
+			}
+			keys = append(keys, r["key"].(string))
+			directives[r["directive"]]++
+			if r["canonical"] == nil || r["body"] == nil {
+				t.Fatalf("%v: unresolved corpus entry", r["key"])
+			}
+			if (r["directive"] == "use") != (r["use_target"] != nil) {
+				t.Fatalf("%v: use_target must accompany exactly the @use directive", r["key"])
+			}
+		case KindAppointmentScope:
+			scopes++
+		default:
+			t.Fatalf("unexpected record %v", r["kind"])
+		}
+	}
+	if !slices.IsSorted(keys) || len(keys) < 1000 {
+		t.Fatalf("%d corpus keys, sorted=%v", len(keys), slices.IsSorted(keys))
+	}
+	if directives["use"] == 0 || directives["omit"] == 0 || directives[nil] == 0 || scopes == 0 {
+		t.Fatalf("directives %v, scopes %d: the live corpus uses @use, @omit, plain bodies, and scopes", directives, scopes)
 	}
 }

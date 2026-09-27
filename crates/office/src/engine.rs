@@ -1,0 +1,606 @@
+//! The Office engine: loads the corpus and hour definitions, dispatches to the
+//! hour composers, and applies the passes every hour shares. Ported from Go's
+//! `engine.go`.
+
+use std::collections::{HashMap, HashSet};
+
+use calendar::{DataSource, Decision, MoveableDates, Season};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PrayerForm, VoiceSpan};
+
+use crate::conclusion::apply_conclusion;
+use crate::concurrence::VespersOwner;
+use crate::day::Day;
+use crate::hourdef::{HourElement, HourSection, parse_hour_definition, uses_triduum_form};
+use crate::proper::{resolve_proper_collect_text, resolve_proper_text};
+use crate::psalmody::{DOXOLOGY_REF_PER_OFFICE, VESPERS_OF_THE_DEAD_LABEL, psalm_doxology_ref, says_psalm_doxology};
+use crate::texts::{OfficeTexts, load_texts};
+use crate::{compline, lauds_psalmody, major, minor, preces, prime, rubric, vespers, voice};
+
+/// The seven hours, in canonical order.
+pub const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub const HOLY_SATURDAY_VESPERS_DEFINITION: &str = "vespers-holy-saturday";
+
+/// Every hour definition file, including exceptional forms.
+pub fn hour_definition_names() -> Vec<&'static str> {
+    HOUR_NAMES.iter().copied().chain([HOLY_SATURDAY_VESPERS_DEFINITION]).collect()
+}
+
+/// Per-composition choices. The default is private prayer without previews.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ComposeOptions {
+    pub form: PrayerForm,
+    pub martyrology_preview: bool,
+}
+
+impl Default for ComposeOptions {
+    fn default() -> ComposeOptions {
+        ComposeOptions { form: PrayerForm::Private, martyrology_preview: false }
+    }
+}
+
+/// The loaded corpus and hour definitions, immutable and shareable.
+pub struct Engine {
+    pub texts: OfficeTexts,
+    definitions: HashMap<String, Vec<HourSection>>,
+}
+
+impl Engine {
+    /// Loads everything under the data directory. Errors match Go's `NewEngine`.
+    pub fn load(src: &dyn DataSource) -> Result<Engine, String> {
+        let texts = load_texts(src).map_err(|e| format!("loading text corpus: {e}"))?;
+        if texts.scopes.is_none() {
+            return Err(format!("missing required appointment scopes: {}", src.display_path("appointment-scopes.json")));
+        }
+        let mut definitions = HashMap::new();
+        for name in hour_definition_names() {
+            let rel = format!("office/{name}.txt");
+            let path = src.display_path(&rel);
+            let content = src.read(&rel)?.ok_or_else(|| format!("parsing {name} definition: {path} does not exist"))?;
+            let sections = parse_hour_definition(&path, &content).map_err(|e| format!("parsing {name} definition: {e}"))?;
+            definitions.insert(name.to_string(), sections);
+        }
+        Ok(Engine { texts, definitions })
+    }
+
+    /// Composes the named hour for the given day in the given prayer form.
+    pub fn compose_hour(&self, hour_name: &str, day: &Day, moveable: &MoveableDates, form: PrayerForm) -> Result<OfficeHour, String> {
+        self.compose_hour_with_options(hour_name, day, moveable, &ComposeOptions { form, martyrology_preview: false })
+    }
+
+    /// Composes with explicitly requested, unpublished content. Preview
+    /// choices stay local to this composition; the engine is unchanged.
+    pub fn compose_hour_with_options(
+        &self,
+        hour_name: &str,
+        day: &Day,
+        moveable: &MoveableDates,
+        options: &ComposeOptions,
+    ) -> Result<OfficeHour, String> {
+        let form = options.form;
+        if !HOUR_NAMES.contains(&hour_name) {
+            return Err(format!("unknown hour: {hour_name}"));
+        }
+        let definition =
+            if hour_name == "vespers" && vespers::is_holy_saturday_vespers(day) { HOLY_SATURDAY_VESPERS_DEFINITION } else { hour_name };
+        let sections = &self.definitions[definition];
+        let t = &self.texts;
+        let composed = match hour_name {
+            "lauds" => major::compose_major_hour(day, sections, t, Some(moveable), &major::MajorHourOptions::lauds()),
+            "vespers" => vespers::compose_vespers(day, sections, t, Some(moveable)),
+            "prime" => Ok(prime::compose_prime(day, sections, t, Some(moveable), options.martyrology_preview)),
+            "compline" => Ok(compline::compose_compline(day, sections, t, Some(moveable))),
+            "terce" => Ok(minor::compose_minor_hour("Terce", day, sections, t, Some(moveable))),
+            "sext" => Ok(minor::compose_minor_hour("Sext", day, sections, t, Some(moveable))),
+            _ => Ok(minor::compose_minor_hour("None", day, sections, t, Some(moveable))),
+        };
+        let mut hour = composed.map_err(|e| format!("composing {hour_name}: {e}"))?;
+        if definition != hour_name {
+            hour.decisions.push(Decision::new(
+                "context:office-form",
+                "holy-saturday-vigil",
+                "Diurnal pp. 360–361, Vespers apart from Mass",
+            ));
+        }
+        crate::leader::apply_leader(&mut hour, form, t)?;
+        drop_empty_sections(&mut hour);
+        canonicalize_source_refs(&mut hour, t);
+        collapse_uniform_antiphons(&mut hour);
+        mark_psalm_doxologies(&mut hour);
+        mark_announced_antiphons(&mut hour, day, hour_name);
+        append_context_decisions(&mut hour, day, hour_name, moveable);
+        Ok(hour)
+    }
+}
+
+/// Review dependencies follow corpus aliases.
+fn canonicalize_source_refs(hour: &mut OfficeHour, t: &OfficeTexts) {
+    for section in &mut hour.sections {
+        for elem in &mut section.elements {
+            let original = if elem.source_refs.is_empty() && !elem.source_ref.is_empty() {
+                vec![elem.source_ref.clone()]
+            } else {
+                elem.source_refs.clone()
+            };
+            let refs: Vec<String> = original.iter().map(|r| t.canonical_ref(r).unwrap_or(r).to_string()).collect();
+            elem.source_refs = compact_refs(refs);
+        }
+    }
+}
+
+fn weekday_lower(day: &Day) -> String {
+    day.date.weekday().name().to_lowercase()
+}
+
+fn append_context_decisions(hour: &mut OfficeHour, day: &Day, hour_name: &str, moveable: &MoveableDates) {
+    let d = &mut hour.decisions;
+    let add = |d: &mut Vec<Decision>, rule: &str, outcome: &str, detail: &str| d.push(Decision::new(rule, outcome, detail));
+    add(d, "context:season", day.season.as_str(), "");
+    add(d, "context:weekday", &weekday_lower(day), "");
+    add(d, "occurrence", &day.resolution_rule, "");
+    d.extend(day.occurrence_decisions.iter().cloned());
+    match day.celebration.as_deref() {
+        None => add(d, "context:office", "feria", ""),
+        Some(c) => {
+            add(d, "context:office", "celebration", &c.id);
+            add(d, "context:rank", c.rank.as_str(), "");
+            add(d, "context:category", c.category.map_or("", |c| c.as_str()), "");
+        }
+    }
+    add(d, "context:commemorations", &day.commemorations.len().to_string(), "");
+    match &day.within_octave_of {
+        Some(o) => add(d, "context:octave", "within", o),
+        None => add(d, "context:octave", "outside", ""),
+    }
+    if let Some(f) = &day.feria_commemoration {
+        add(d, "context:feria-commemoration", "present", f.proper_id.as_deref().unwrap_or(""));
+    }
+    match hour_name {
+        "prime" => add(d, "preces", preces::preces_disposition(Some(day), Some(moveable)).1, ""),
+        "compline" => add(d, "preces", preces::preces_disposition(Some(&compline::compline_office_day(day)), Some(moveable)).1, ""),
+        _ => {}
+    }
+    match hour_name {
+        "vespers" => {
+            let owner = match day.vespers.owner {
+                VespersOwner::NotApplicable => "not-applicable",
+                VespersOwner::IIOfPreceding => "second-of-preceding",
+                VespersOwner::IOfFollowing => "first-of-following",
+            };
+            add(d, "vespers:owner", owner, "");
+            add(d, "vespers:rule", &day.vespers.rule, "");
+            d.extend(day.vespers.decisions.iter().cloned());
+            let office_day = vespers::vespers_office_day(day);
+            append_evening_office_context_decisions(d, &office_day);
+            add(d, "suffrage", preces::suffrage_disposition(Some(&office_day)).1, "");
+            add_marian_decisions(d, &office_day, hour_name);
+        }
+        "lauds" => {
+            add(d, "suffrage", preces::suffrage_disposition(Some(day)).1, "");
+            add_marian_decisions(d, day, hour_name);
+        }
+        "compline" => {
+            let office_day = compline::compline_office_day(day);
+            append_evening_office_context_decisions(d, &office_day);
+            add_marian_decisions(d, &office_day, hour_name);
+        }
+        _ => {}
+    }
+    let outcome = if antiphons_doubled(day, hour_name) { "doubled" } else { "announced" };
+    add(d, "antiphon:doubling", outcome, "");
+}
+
+pub const MARIAN_BOUNDARY_CIVIL_DAY: &str = "civil-day";
+pub const MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE: &str = "purification-vespers-override";
+
+fn add_marian_decisions(d: &mut Vec<Decision>, day: &Day, hour_name: &str) {
+    let (key, boundary) = marian_antiphon_selection(day, hour_name);
+    d.push(Decision::new("marian:selection", key, ""));
+    d.push(Decision::new("marian:boundary", boundary, ""));
+}
+
+/// Describes the synthetic office day that drove Vespers or Compline.
+fn append_evening_office_context_decisions(d: &mut Vec<Decision>, office_day: &Day) {
+    let add = |d: &mut Vec<Decision>, rule: &str, outcome: &str, detail: &str| d.push(Decision::new(rule, outcome, detail));
+    add(d, "office-context:season", office_day.season.as_str(), "");
+    add(d, "office-context:weekday", &weekday_lower(office_day), "");
+    match office_day.celebration.as_deref() {
+        None => add(d, "office-context:office", "feria", ""),
+        Some(c) => {
+            add(d, "office-context:office", "celebration", &c.id);
+            add(d, "office-context:rank", c.rank.as_str(), "");
+            add(d, "office-context:category", c.category.map_or("", |c| c.as_str()), "");
+        }
+    }
+    add(d, "office-context:commemorations", &office_day.commemorations.len().to_string(), "");
+    match &office_day.within_octave_of {
+        Some(o) => add(d, "office-context:octave", "within", o),
+        None => add(d, "office-context:octave", "outside", ""),
+    }
+    add(d, "office-context:first-vespers", if office_day.first_vespers { "yes" } else { "no" }, "");
+}
+
+/// Psalm groups "under one antiphon": within a run of psalm-bearing
+/// sections, three or more consecutive equal antiphons keep only the first
+/// and the last.
+fn collapse_uniform_antiphons(hour: &mut OfficeHour) {
+    let has_psalmody = |s: &liturgy::OfficeSection| s.elements.iter().any(|e| e.kind.is_psalmody());
+    let mut start = 0;
+    while start < hour.sections.len() {
+        if !has_psalmody(&hour.sections[start]) {
+            start += 1;
+            continue;
+        }
+        let mut end = start;
+        while end + 1 < hour.sections.len() && has_psalmody(&hour.sections[end + 1]) {
+            end += 1;
+        }
+        let ants: Vec<(usize, usize)> = (start..=end)
+            .flat_map(|si| {
+                hour.sections[si].elements.iter().enumerate().filter(|(_, e)| e.kind == ElementType::Antiphon).map(move |(i, _)| (si, i))
+            })
+            .collect();
+        let text = |p: (usize, usize)| &hour.sections[p.0].elements[p.1].text;
+        let mut drop: HashSet<(usize, usize)> = HashSet::new();
+        let mut lo = 0;
+        while lo < ants.len() {
+            let mut hi = lo;
+            while hi + 1 < ants.len() && text(ants[hi + 1]) == text(ants[lo]) {
+                hi += 1;
+            }
+            if hi - lo + 1 >= 3 {
+                drop.extend(ants[lo + 1..hi].iter().copied());
+            }
+            lo = hi + 1;
+        }
+        if !drop.is_empty() {
+            for si in start..=end {
+                let elems = std::mem::take(&mut hour.sections[si].elements);
+                hour.sections[si].elements =
+                    elems.into_iter().enumerate().filter(|(i, _)| !drop.contains(&(si, *i))).map(|(_, e)| e).collect();
+            }
+        }
+        start = end + 1;
+    }
+}
+
+/// Whether psalm and canticle antiphons are doubled: only Lauds and Vespers
+/// of a Double office (General Rubrics I.4 / XXIV.8).
+pub fn antiphons_doubled(day: &Day, hour_name: &str) -> bool {
+    if hour_name != "lauds" && hour_name != "vespers" {
+        return false;
+    }
+    let office_day = if hour_name == "vespers" { vespers::vespers_office_day(day) } else { day.clone() };
+    office_day.celebration.as_deref().is_some_and(|c| c.rank.is_double())
+}
+
+/// Flags the opening antiphon of each psalm when antiphons are not doubled.
+/// Vespers of the Dead is said as a Double.
+fn mark_announced_antiphons(hour: &mut OfficeHour, day: &Day, hour_name: &str) {
+    let doubled = antiphons_doubled(day, hour_name);
+    let mut in_dead = false;
+    for section in &mut hour.sections {
+        if section.label == VESPERS_OF_THE_DEAD_LABEL {
+            in_dead = true;
+        }
+        if doubled || in_dead {
+            continue;
+        }
+        let n = section.elements.len();
+        for i in 0..n {
+            if section.elements[i].kind == ElementType::Antiphon && i + 1 < n && section.elements[i + 1].kind.is_psalmody() {
+                section.elements[i].announce = true;
+            }
+        }
+    }
+}
+
+/// A doxology directly after a psalm or canticle is a psalm doxology.
+fn mark_psalm_doxologies(hour: &mut OfficeHour) {
+    for section in &mut hour.sections {
+        for i in 1..section.elements.len() {
+            if section.elements[i].kind == ElementType::Doxology && section.elements[i - 1].kind.is_psalmody() {
+                section.elements[i].kind = ElementType::PsalmDoxology;
+            }
+        }
+    }
+}
+
+/// Resolves a plain element by looking up its text.
+pub fn resolve_element(elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
+    let mut text = t.get(&elem.reference).to_string();
+    if text.is_empty() {
+        text = format!("[Text not found: {}]", elem.reference);
+    }
+    // Only the legacy partly-secret Pater omits its final Amen.
+    if elem.kind == "partly-secret-prayer"
+        && elem.reference.ends_with("/our-father")
+        && let Some(stripped) = text.strip_suffix(" Amen.")
+    {
+        text = stripped.to_string();
+    }
+    let kind = map_element_type(&elem.kind);
+    let label = format_label(&elem.kind, &elem.reference);
+    let with_source = |mut e: OfficeElement| {
+        e.source_ref = elem.reference.clone();
+        e.source_refs = vec![elem.reference.clone()];
+        e
+    };
+    if kind == ElementType::Chapter {
+        let (r, body) = extract_chapter_ref(&text);
+        let mut e = OfficeElement::new(ElementType::Chapter, body);
+        e.label = r;
+        return with_source(e);
+    }
+    if kind == ElementType::Preces {
+        let mut e = OfficeElement::new(ElementType::Preces, text);
+        e.label = "Preces".to_string();
+        return with_source(e);
+    }
+    let mut oe = OfficeElement::new(kind, text);
+    oe.label = label;
+    oe = with_source(oe);
+    if kind.is_psalmody() {
+        oe.incipit = t.incipit(&elem.reference).unwrap_or("").to_string();
+    }
+    match elem.kind.as_str() {
+        "officiant-greeting" => oe.leader_slot = "greeting".to_string(),
+        "officiant-confession" => oe.leader_slot = "confession".to_string(),
+        "officiant-opening" => oe.leader_slot = "opening".to_string(),
+        "secret-prayer" => oe.voice = voice::build_prayer_voice(&elem.reference, &oe.text, false),
+        // The Triduum's concluding Our Father is entirely silent (p. 313).
+        "silent-prayer" => oe.voice = vec![VoiceSpan::new(oe.text.clone(), false, None)],
+        "partly-secret-prayer" => oe.voice = voice::build_prayer_voice(&elem.reference, &oe.text, true),
+        "corporate-lord-prayer" => oe.voice = voice::build_corporate_lord_prayer_voice(&elem.reference, &oe.text),
+        "rubric" => oe.rubric_spans = rubric::build_rubric_spans(&elem.reference, &oe.text),
+        _ => {}
+    }
+    oe
+}
+
+/// The seasonal Marian antiphon slug and its boundary branch. Alma
+/// Redemptoris continues through II Vespers of the Purification.
+pub fn marian_antiphon_selection<'a>(day: &'a Day, hour_name: &str) -> (&'a str, &'static str) {
+    if hour_name == "vespers" && day.date.month() == 2 && day.date.day() == 2 {
+        return ("alma-redemptoris-christmas", MARIAN_BOUNDARY_PURIFICATION_VESPERS_OVERRIDE);
+    }
+    (&day.marian_antiphon, MARIAN_BOUNDARY_CIVIL_DAY)
+}
+
+fn resolve_marian_element(day: &Day, hour_name: &str, t: &OfficeTexts) -> OfficeElement {
+    let (key, _) = marian_antiphon_selection(day, hour_name);
+    let r = format!("ordinary/marian/{key}");
+    let mut text = t.get(&r).to_string();
+    if text.is_empty() {
+        text = format!("[Text not found: {r}]");
+    }
+    let mut oe = OfficeElement::new(ElementType::Antiphon, text);
+    oe.label = compline::marian_label(key).to_string();
+    oe.slot_ref = "marian-antiphon".to_string();
+    oe.source_ref = r.clone();
+    oe.source_refs = vec![r];
+    oe
+}
+
+/// Resolves and appends an element unless the corpus omits it.
+pub fn append_hour_element(elems: &mut Vec<OfficeElement>, day: &Day, hour_name: &str, elem: &HourElement, t: &OfficeTexts) {
+    append_resolved(elems, resolve_hour_element(day, hour_name, elem, t));
+}
+
+/// Appends an already-resolved element unless it is an omission.
+pub fn append_resolved(elems: &mut Vec<OfficeElement>, oe: OfficeElement) {
+    if !corpus::is_omitted(&oe.text) {
+        elems.push(oe);
+    }
+}
+
+fn drop_empty_sections(hour: &mut OfficeHour) {
+    hour.sections.retain(|s| !s.elements.is_empty());
+}
+
+fn element(kind: ElementType, text: String, slot_ref: &str, src: &str) -> OfficeElement {
+    let mut e = OfficeElement::new(kind, text);
+    e.slot_ref = slot_ref.to_string();
+    e.source_ref = src.to_string();
+    e.source_refs = compact_refs(vec![src.to_string()]);
+    e
+}
+
+/// Resolves an hour element, with proper resolution for the `proper-*` types.
+/// An omitted element resolves with the omission marker as its text.
+pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &OfficeTexts) -> OfficeElement {
+    let r = elem.reference.as_str();
+    match elem.kind.as_str() {
+        "marian" => {
+            if r == "seasonal" {
+                resolve_marian_element(day, hour_name, t)
+            } else {
+                resolve_element(elem, t)
+            }
+        }
+        "gloria-patri" => {
+            if !says_psalm_doxology(day, hour_name) {
+                let mut e = OfficeElement::new(ElementType::Doxology, corpus::OMIT_MARKER);
+                e.slot_ref = r.to_string();
+                return e;
+            }
+            if r == DOXOLOGY_REF_PER_OFFICE {
+                return resolve_element(&HourElement::new(&elem.kind, psalm_doxology_ref(day)), t);
+            }
+            resolve_element(elem, t)
+        }
+        "proper-antiphon" => {
+            let (mut text, mut src) = resolve_proper_text(day, hour_name, r, t);
+            if hour_name == "lauds" && r.starts_with("psalm-antiphon-") && lauds_psalmody::uses_weekday_lauds_psalmody(day, t) {
+                (text, src) = lauds_psalmody::weekday_lauds_antiphon(day, r, t);
+                if text.is_empty() {
+                    text = format!("[Weekday Lauds antiphon not found: {src}]");
+                }
+            }
+            element(ElementType::Antiphon, text, r, &src)
+        }
+        "proper-opening-acclamation" => {
+            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            element(ElementType::OpeningAcclamation, text, r, &src)
+        }
+        "proper-collect" => {
+            let (text, src) = resolve_proper_collect_text(day, hour_name, t);
+            let body = text.trim_end_matches('\n').to_string();
+            // The collect of the day is always concluded (XXXIII.5).
+            let (text, refs) = apply_conclusion(&text, &src, t);
+            let mut e = element(ElementType::Collect, text.clone(), "collect", &src);
+            e.source_refs = compact_refs(refs.clone());
+            if uses_triduum_form(day, hour_name) && refs.len() == 2 {
+                // The body is said in a low voice; the conclusion is silent
+                // with no aloud response (Diurnal p. 313).
+                let conclusion = text.strip_prefix(&format!("{body}\n")).unwrap_or(&text).replace("\nR. Amen.", "\nAmen.");
+                e.text = format!("{body}\n{conclusion}");
+                e.voice = vec![VoiceSpan::new(format!("{body}\n"), true, None), VoiceSpan::new(conclusion, false, None)];
+            }
+            e
+        }
+        "proper-hymn" => {
+            let (mut text, src) = resolve_proper_text(day, hour_name, r, t);
+            if corpus::is_omitted(&text) {
+                return element(ElementType::Hymn, text, r, &src);
+            }
+            let mut refs = vec![src.clone()];
+            let doxology_ref = if uses_ascension_hymn_doxology(day) { "hymn-doxology-ascension" } else { "hymn-doxology" };
+            let (dox, dox_ref) = resolve_proper_text(day, hour_name, doxology_ref, t);
+            if dox_ref.starts_with("seasonal/") {
+                text = substitute_hymn_doxology(&text, &dox);
+                refs.push(dox_ref);
+            }
+            let (title, body) = corpus::lines::split_hymn_title(&text);
+            let mut e = OfficeElement::new(ElementType::Hymn, body);
+            e.label = title.to_string();
+            e.slot_ref = r.to_string();
+            e.source_ref = src;
+            e.source_refs = compact_refs(refs);
+            e
+        }
+        "proper-responsory" => {
+            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            element(ElementType::Response, text, r, &src)
+        }
+        "proper-short-responsory" => {
+            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            element(ElementType::ShortResponsory, text, r, &src)
+        }
+        "proper-versicle" => {
+            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            element(ElementType::Versicle, text, r, &src)
+        }
+        "proper-chapter" => {
+            let (text, src) = resolve_proper_text(day, hour_name, r, t);
+            let (label, body) = extract_chapter_ref(&text);
+            let mut e = element(ElementType::Chapter, body, r, &src);
+            e.label = label;
+            e
+        }
+        _ => resolve_element(elem, t),
+    }
+}
+
+/// The Ascensiontide hymn ending, from the Ascension until Pentecost.
+fn uses_ascension_hymn_doxology(day: &Day) -> bool {
+    day.season == Season::Easter && day.date >= MoveableDates::compute(day.date.year()).ascension
+}
+
+/// De-duplicates refs, dropping empty ones, keeping first occurrences.
+pub fn compact_refs(refs: Vec<String>) -> Vec<String> {
+    let mut seen = HashSet::new();
+    refs.into_iter().filter(|r| !r.is_empty() && seen.insert(r.clone())).collect()
+}
+
+fn map_element_type(kind: &str) -> ElementType {
+    match kind {
+        "psalm" => ElementType::Psalm,
+        "canticle" => ElementType::Canticle,
+        "hymn" | "proper-hymn" => ElementType::Hymn,
+        "antiphon" | "marian" | "proper-antiphon" => ElementType::Antiphon,
+        "versicle" | "officiant-greeting" | "officiant-opening" | "proper-versicle" => ElementType::Versicle,
+        "response" | "proper-responsory" => ElementType::Response,
+        "prayer" | "secret-prayer" | "silent-prayer" | "partly-secret-prayer" | "officiant-confession" => ElementType::Prayer,
+        "corporate-lord-prayer" => ElementType::CorporateLordPrayer,
+        "preces" => ElementType::Preces,
+        "gloria-patri" => ElementType::Doxology,
+        "chapter" | "proper-chapter" => ElementType::Chapter,
+        "collect" | "proper-collect" => ElementType::Collect,
+        "blessing" => ElementType::Blessing,
+        "proper-opening-acclamation" => ElementType::OpeningAcclamation,
+        "proper-short-responsory" => ElementType::ShortResponsory,
+        "dialogue" => ElementType::Dialogue,
+        // PORT(inherited): unknown types (and "commemorations") are rubrics.
+        _ => ElementType::Rubric,
+    }
+}
+
+/// A label from the ref's last path component: "Psalm 4", or a title-cased
+/// canticle or hymn name.
+fn format_label(kind: &str, reference: &str) -> String {
+    let name = reference.rsplit('/').next().unwrap_or("").replace('-', " ");
+    match kind {
+        "psalm" => {
+            let n = name.trim_start_matches('0');
+            format!("Psalm {}", if n.is_empty() { "0" } else { n })
+        }
+        "canticle" | "hymn" => title_case(&name),
+        _ => String::new(),
+    }
+}
+
+/// A leading "!" line is the chapter's scripture reference.
+pub fn extract_chapter_ref(text: &str) -> (String, String) {
+    if let Some((first, rest)) = text.split_once('\n') {
+        let first = first.trim();
+        if let Some(r) = first.strip_prefix('!') {
+            return (r.to_string(), rest.trim().to_string());
+        }
+    }
+    (String::new(), text.to_string())
+}
+
+/// Replaces a hymn's last stanza with a seasonal doxology (hymns ending
+/// "Amen." only).
+fn substitute_hymn_doxology(hymn: &str, doxology: &str) -> String {
+    let trimmed = hymn.trim();
+    if !trimmed.ends_with("Amen.") {
+        return hymn.to_string();
+    }
+    match trimmed.rfind("\n\n") {
+        None => hymn.to_string(),
+        Some(i) => format!("{}{}", &trimmed[..i + 2], doxology.trim()),
+    }
+}
+
+pub fn title_case(s: &str) -> String {
+    s.split_whitespace()
+        .map(|w| {
+            let mut c = w.chars();
+            match c.next() {
+                Some(f) => f.to_uppercase().chain(c).collect(),
+                None => String::new(),
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(" ")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn labels_and_chapters() {
+        assert_eq!(format_label("psalm", "psalms/004"), "Psalm 4");
+        assert_eq!(format_label("psalm", "psalms/000"), "Psalm 0");
+        assert_eq!(format_label("canticle", "canticles/benedictus"), "Benedictus");
+        assert_eq!(format_label("hymn", "hymns/te-lucis"), "Te Lucis");
+        assert_eq!(format_label("versicle", "x/y"), "");
+        assert_eq!(extract_chapter_ref("!Romans 13\nBrethren."), ("Romans 13".to_string(), "Brethren.".to_string()));
+        assert_eq!(extract_chapter_ref("Brethren."), (String::new(), "Brethren.".to_string()));
+        assert_eq!(substitute_hymn_doxology("A\n\nB Amen.", "Dox"), "A\n\nDox");
+        assert_eq!(substitute_hymn_doxology("A\n\nB", "Dox"), "A\n\nB");
+        assert_eq!(compact_refs(vec!["a".into(), String::new(), "b".into(), "a".into()]), ["a", "b"]);
+    }
+}
