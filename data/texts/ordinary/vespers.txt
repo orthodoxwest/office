@@ -29,11 +29,11 @@ Shall live and reign eternally.
 
 Amen.
 [hymn-monday]
-# SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 31
+# SOURCE: Monastic Diurnal.pdf, p. 121, 122
 Immense caeli Conditor
 
 O GREAT Creator of the sky,
-Who wouldst not the floods on high
+Who wouldest not the floods on high
 With earthly waters to confound,
 But madest the firmament their bound:
 
@@ -58,6 +58,7 @@ Who, with the Holy Ghost and thee,
 Shall live and reign eternally.
 
 Amen.
+
 [hymn-tuesday]
 # SOURCE: A Noted Hymnary for the Anglican Breviary and Other Prayer Books, p. 34
 Telluris ingens Conditor

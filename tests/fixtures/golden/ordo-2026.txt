@@ -709,7 +709,7 @@ APRIL
  23  Thu     ST GEORGE                                  [1cl] r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+           Vespers r · II prec. · Mag. Light perpetual · No Suff.
  24  Fri  L  Day II within the Octave of St George      [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
@@ -719,7 +719,7 @@ APRIL
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
                Com. Day III within the Octave of St George ("Whosoever shall confess Me")
            Hours   No Preces
-           Vespers r · II prec. · Mag. O ye holy and righteous · No Suff.
+           Vespers r · II prec. · Mag. Light perpetual · No Suff.
                Com. II Sunday after Easter ("I am")
  26  Sun     II Sunday after Easter                     [sd]  w
            Day IV within the Octave of St George (sd)
@@ -733,7 +733,7 @@ APRIL
  27  Mon     Day V within the Octave of St George       [sd]  r
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · Mag. O ye holy and righteous · No Suff.
+           Vespers r · Mag. Light perpetual · No Suff.
                Com. St Vitalis, Martyr ("Light perpetual")
  28  Tue     Day VI within the Octave of St George      [sd]  r
            St Vitalis, Martyr (com)
@@ -855,14 +855,14 @@ MAY
            Lauds   w · Ben. Hitherto · No Preces · No Suff.
            Hours   No Preces
            Vespers w · II prec. · Mag. Ask · No Suff.
-               Com. St Venantius, Martyr ("O ye holy and righteous")
+               Com. St Venantius, Martyr ("Light perpetual")
  18  Mon     Rogation Monday                            [f2]  v
            St Venantius, Martyr (d)
            Lauds   v · Ben. Ask · No Preces · No Suff.
                Com. St Venantius, Martyr ("Daughters of Jerusalem")
            Hours   No Preces
            Vespers w · Mag. For the Father · No Suff.
-               Com. St Venantius, Martyr ("O ye holy and righteous")
+               Com. St Venantius, Martyr ("Light perpetual")
                Com. St Pudentiana, Virgin ("Come, thou Bride of Christ")
  19  Tue     Feria                                            w
            St Pudentiana, Virgin (com)

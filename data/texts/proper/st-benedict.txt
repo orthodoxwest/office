@@ -11,8 +11,8 @@ Let all the multitude * of the faithful exult in the glory of the gracious Fathe
 Today holy Benedict, * while his disciples beheld it, ascended by way of the East on a straight pathway to heaven: today with hands uplifted he died between the words of his supplication: today he was received into glory by the Angels.
 
 [collect]
-# SOURCE: parish Sanctoral Lauds booklet, PDF p. 82 (St. Benedict, Collect)
-Almighty and everlasting God, who as on this day didst release thy most venerable Confessor Benedict from the prison-house of the flesh, that thou mightiest lift him up to heaven: we beseech thee, grant unto us thy servants who keep this festival the pardon of all our sins; that we, who with glad hearts rejoice in his glory, may at his intercession with thee be made partakers of his everlasting reward.
+# SOURCE: Monastic Diurnal.pdf, p. 496
+Almighty and everlasting God, who as on this day didst release thy most venerable Confessor Benedict from the prison-house of the flesh, that thou mightest lift him up to heaven: we beseech thee, grant unto thy servants who keep this festival the pardon of all our sins; that we, who with glad hearts rejoice in his glory, may at his intercession with thee be made partakers of his everlasting reward.
 
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).
