@@ -20,7 +20,7 @@ const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespe
 const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 
 /// Groups this engine can produce so far.
-const PORTED_GROUPS: [&str; 1] = [GROUP_CALENDAR];
+const PORTED_GROUPS: [&str; 2] = [GROUP_CALENDAR, GROUP_OFFICE];
 
 const USAGE: &str = "usage: office-rs dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
        office-rs dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
@@ -157,23 +157,27 @@ pub fn generate(sel: &Selection, data: &CalendarData, emit: &mut dyn FnMut(Value
         if sel.has(GROUP_CALENDAR) {
             emit(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year)))?;
         }
-        let days: Vec<&CalendarDay> = match &dates {
-            None => cal.days.iter().collect(),
+        let office_days = if sel.has(GROUP_OFFICE) { office::resolve_office_days(&cal) } else { Vec::new() };
+        let indices: Vec<usize> = match &dates {
+            None => (0..cal.days.len()).collect(),
             Some(dates) => dates
                 .iter()
                 .map(|d| {
                     let i = d.ordinal() as usize - 1;
                     match cal.days.get(i) {
-                        Some(day) if day.date == *d => Ok(day),
+                        Some(day) if day.date == *d => Ok(i),
                         Some(day) => Err(format!("calendar for {year} returned {} at {d}", day.date)),
                         None => Err(format!("{d} is outside the {year} calendar")),
                     }
                 })
                 .collect::<Result<_, _>>()?,
         };
-        for day in days {
+        for i in indices {
             if sel.has(GROUP_CALENDAR) {
-                emit(calendar_day_record(day))?;
+                emit(calendar_day_record(&cal.days[i]))?;
+            }
+            if sel.has(GROUP_OFFICE) {
+                emit(office_day_record(&cal.days[i], &office_days[i]))?;
             }
         }
     }
@@ -270,6 +274,31 @@ fn calendar_day_record(d: &CalendarDay) -> Value {
         "temporal_week_id": opt(&d.temporal_week_id),
         "within_octave_of": opt(&d.within_octave_of),
         "penitential": {"fast": d.penitential.fast, "abstinence": d.penitential.abstinence},
+    })
+}
+
+/// The Office-only resolution of the day: concurrence and the Marian antiphon.
+fn office_day_record(d: &CalendarDay, o: &office::OfficeDay) -> Value {
+    let v = &o.vespers;
+    json!({
+        "kind": "office_day",
+        "date": day_str(d.date),
+        "marian_antiphon": o.marian_antiphon,
+        "vespers": {
+            "owner": v.owner.as_str(),
+            "feast": feast(v.feast.as_deref()),
+            "color": v.color.map(|c| c.as_str()),
+            "season": v.season.map(|s| s.as_str()),
+            "within_octave_of": opt(&v.within_octave_of),
+            "rule": v.rule,
+            "decisions": decisions(&v.decisions),
+            "commemorations": feasts(&v.commemorations),
+            "following_office_commemoration_id": opt(&v.following_office_commemoration_id),
+            "following_office_octave_of": opt(&v.following_office_octave_of),
+            "psalmody_from_preceding": v.psalmody_from_preceding,
+            "appended_office_of_the_dead": v.appended_office_of_the_dead,
+            "appended_feast": feast(v.appended_feast.as_deref()),
+        },
     })
 }
 

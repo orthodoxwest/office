@@ -192,7 +192,7 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 
 rust-parity: build ## Compare the Go and Rust dumps for the ported record groups
 	cargo build --release -p office-cli
-	scripts/rust-parity.sh calendar -start 1900 -years 300
+	scripts/rust-parity.sh calendar,office -start 1900 -years 300
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

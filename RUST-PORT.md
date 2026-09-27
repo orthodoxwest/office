@@ -5,8 +5,9 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phase 1 (the `calendar` crate) is complete: `office-rs dump
--groups calendar` is byte-identical to Go for 1900–2199. Phase 0's corpus
+**Status:** Phase 1 (the `calendar` crate) is complete, and Phase 3 has
+begun with the Office day: `office-rs dump -groups calendar,office` is
+byte-identical to Go for 1900–2199. Phase 0's corpus
 prerequisites are still open. Nothing user-facing changes until the cutover in
 Phase 6.
 
@@ -280,8 +281,13 @@ dates. A nightly job compares the full window.
 - [ ] Port the remaining Go calendar unit tests (a first set is ported; the
       data-backed builder assertions are also covered by the parity gate)
 
-Concurrence (`concurrence.go`), the Marian antiphon, and the historia weeks
-move to the `office` crate with the `office_day` record, as planned.
+## Phase 3 checklist
+
+- [x] `office` crate: Vespers concurrence (`concurrence.go`), the Marian
+      antiphon, and the historia weeks; Go's concurrence unit tests ported
+- [x] `office_day` record identical for 1900–2199 (`make rust-parity`)
+- [ ] Hour composers: Compline, the minor hours, Prime, Lauds, Vespers
+      (needs the Phase 2 `corpus` crate)
 
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change
