@@ -559,13 +559,14 @@ pub fn extract_chapter_ref(text: &str) -> (String, String) {
     (String::new(), text.to_string())
 }
 
-/// Replaces a hymn's last stanza with a seasonal doxology (hymns ending
-/// "Amen." only).
+/// Replaces a hymn's final verse stanza and closing Amen with the complete
+/// seasonal doxology. Amen may stand alone after a blank line.
 fn substitute_hymn_doxology(hymn: &str, doxology: &str) -> String {
-    let trimmed = hymn.trim();
-    if !trimmed.ends_with("Amen.") {
+    let Some(without_amen) = hymn.trim().strip_suffix("Amen.") else {
         return hymn.to_string();
-    }
+    };
+    // Find the verse stanza before the Amen, not an Amen-only final block.
+    let trimmed = without_amen.trim_end();
     match trimmed.rfind("\n\n") {
         None => hymn.to_string(),
         Some(i) => format!("{}{}", &trimmed[..i + 2], doxology.trim()),
@@ -598,9 +599,54 @@ mod tests {
         assert_eq!(format_label("versicle", "x/y"), "");
         assert_eq!(extract_chapter_ref("!Romans 13\nBrethren."), ("Romans 13".to_string(), "Brethren.".to_string()));
         assert_eq!(extract_chapter_ref("Brethren."), (String::new(), "Brethren.".to_string()));
-        assert_eq!(substitute_hymn_doxology("A\n\nB Amen.", "Dox"), "A\n\nDox");
-        assert_eq!(substitute_hymn_doxology("A\n\nB", "Dox"), "A\n\nB");
         assert_eq!(compact_refs(vec!["a".into(), String::new(), "b".into(), "a".into()]), ["a", "b"]);
+    }
+
+    #[test]
+    fn seasonal_doxology_replaces_the_stanza_and_its_amen() {
+        const OPENING: &str = "Hymn title\n\nOpening line,\nSecond line.";
+        const DOXOLOGY: &str = "Seasonal praise,\nTo the Trinity.\n\nAmen.";
+        for ending in [
+            "Original praise,\nFor ever. Amen.",
+            "Original praise,\nFor ever.\nAmen.",
+            "Original praise,\nFor ever.\n\nAmen.",
+            "Original praise,\nFor ever.\n\n  Amen.  \n",
+        ] {
+            let hymn = format!("{OPENING}\n\n{ending}");
+            assert_eq!(substitute_hymn_doxology(&hymn, DOXOLOGY), format!("{OPENING}\n\n{DOXOLOGY}"), "{ending:?}");
+        }
+    }
+
+    #[test]
+    fn seasonal_doxology_leaves_ineligible_hymns_unchanged() {
+        for hymn in ["A single stanza. Amen.", "Title\n\nAmen.", "Amen.", ""] {
+            assert_eq!(substitute_hymn_doxology(hymn, "Seasonal praise.\n\nAmen."), hymn);
+        }
+        let hymn = "Title\n\nOpening verse.\n\nFinal verse.\n";
+        assert_eq!(substitute_hymn_doxology(hymn, "Seasonal praise.\n\nAmen."), hymn);
+    }
+
+    #[test]
+    fn seasonal_compline_has_one_doxology_and_one_amen() {
+        use crate::testutil::{date, day, live_texts};
+
+        let t = live_texts();
+        let (title, body) = corpus::lines::split_hymn_title(t.get("ordinary/compline/hymn"));
+        let opening = body.split("\n\n").take(2).collect::<Vec<_>>().join("\n\n");
+        for (date, season, seasonal_ref) in [
+            (date(2026, 12, 26), Season::Christmas, "seasonal/christmas/hymn-doxology"),
+            (date(2026, 1, 20), Season::Epiphany, "seasonal/epiphany/hymn-doxology"),
+            (MoveableDates::compute(2026).ascension, Season::Easter, "seasonal/easter/hymn-doxology-ascension"),
+        ] {
+            let hymn = resolve_hour_element(&day(date, season), "compline", &HourElement::new("proper-hymn", "hymn"), t);
+            assert_eq!(hymn.label, title);
+            assert_eq!(hymn.text, format!("{opening}\n\n{}", t.get(seasonal_ref).trim()), "{seasonal_ref}");
+            assert_eq!(hymn.text.matches("Amen.").count(), 1, "{seasonal_ref}");
+            assert_eq!(hymn.source_refs, ["ordinary/compline/hymn", seasonal_ref]);
+        }
+        let ordinary = resolve_hour_element(&day(date(2026, 3, 16), Season::Lent), "compline", &HourElement::new("proper-hymn", "hymn"), t);
+        assert_eq!(ordinary.text, body);
+        assert_eq!(ordinary.source_refs, ["ordinary/compline/hymn"]);
     }
 }
 
