@@ -1,6 +1,5 @@
-//! Escaping for HTML templates. The environment's formatter escapes every value for text and quoted
-//! attributes. URL-valued attributes must also pass through the `url` or `urlpart` filter; the
-//! template engine does not infer their context.
+//! Escaping for composed HTML fragments and URL attributes. MiniJinja handles template
+//! autoescaping; URL-valued attributes also use the `url`, `urlnorm`, or `urlpart` filter.
 
 /// Escapes `"`, `'`, `&`, `<`, `>`, and NUL.
 pub fn html_escape_string(s: &str) -> String {
@@ -19,26 +18,7 @@ pub fn html_escape_string(s: &str) -> String {
     out
 }
 
-/// Escapes a text node or quoted attribute: as [`html_escape_string`], plus `+`.
-pub fn template_escape(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for c in s.chars() {
-        match c {
-            '"' => out.push_str("&#34;"),
-            '\'' => out.push_str("&#39;"),
-            '&' => out.push_str("&amp;"),
-            '+' => out.push_str("&#43;"),
-            '<' => out.push_str("&lt;"),
-            '>' => out.push_str("&gt;"),
-            '\0' => out.push('\u{FFFD}'),
-            c => out.push(c),
-        }
-    }
-    out
-}
-
-/// Rejects schemes other than http,
-/// https, or mailto becomes `#invalid-url`.
+/// Replaces URL schemes other than http, https, or mailto with `#invalid-url`.
 fn url_filter(s: &str) -> String {
     if let Some((protocol, _)) = s.split_once(':')
         && !protocol.contains('/')
@@ -112,9 +92,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn escapes_text_and_quoted_attributes() {
-        assert_eq!(template_escape("a+b & \"c\" 'd' <e>"), "a&#43;b &amp; &#34;c&#34; &#39;d&#39; &lt;e&gt;");
-        assert_eq!(html_escape_string("a+b"), "a+b");
+    fn escapes_composed_text_and_attribute_values() {
+        assert_eq!(html_escape_string("a+b & \"c\" 'd' <e>"), "a+b &amp; &#34;c&#34; &#39;d&#39; &lt;e&gt;");
     }
 
     #[test]

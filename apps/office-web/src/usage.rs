@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 
 use axum::body::Body;
-use axum::http::{HeaderMap, Method, Response, StatusCode, header};
+use axum::http::{HeaderMap, Method, Response, StatusCode, Uri, header};
 use calendar::Date;
 use render_html::usage::{Dimension, HOURS, UsageDay};
 use rusqlite::{Connection, params};
@@ -296,39 +296,18 @@ fn with_usage_headers(mut resp: Response<Body>) -> Response<Body> {
     resp
 }
 
-/// Parses an origin far enough to compare its scheme and host; malformed input returns `None`.
-fn origin_parts(origin: &str) -> Option<(String, String)> {
-    let origin = origin.split('#').next().unwrap_or("");
-    let mut scheme = "";
-    let mut rest = origin;
-    for (i, c) in origin.bytes().enumerate() {
-        match c {
-            b'a'..=b'z' | b'A'..=b'Z' => {}
-            b'0'..=b'9' | b'+' | b'-' | b'.' if i > 0 => {}
-            b':' if i == 0 => return None,
-            b':' => {
-                scheme = &origin[..i];
-                rest = &origin[i + 1..];
-                break;
-            }
-            _ => break,
-        }
-    }
-    let scheme = scheme.to_ascii_lowercase();
-    let rest = rest.split('?').next().unwrap_or("");
-    let Some(authority) = rest.strip_prefix("//").filter(|_| !scheme.is_empty()) else {
-        return Some((scheme, String::new()));
-    };
-    let authority = authority.split('/').next().unwrap_or("");
-    let host = authority.rsplit_once('@').map(|(_, h)| h).unwrap_or(authority);
-    if !host.starts_with('[')
-        && let Some((_, port)) = host.rsplit_once(':')
-        && !port.bytes().all(|c| c.is_ascii_digit())
-    {
-        return None;
-    }
-    let host_ok = host.bytes().all(|c| c >= 0x80 || c.is_ascii_alphanumeric() || b"-_.~!$&'()*+,;=:[]<>\"".contains(&c));
-    host_ok.then(|| (scheme, host.to_string()))
+/// Accepts an HTTP(S) origin for this host, including its explicit port.
+fn origin_matches_host(origin: &str, host: &str) -> bool {
+    let Ok(uri) = origin.parse::<Uri>() else { return false };
+    let Some(authority) = uri.authority() else { return false };
+    // An Origin is a scheme and authority, not a full URL. Uri discards
+    // fragments and accepts userinfo, so reject those explicitly.
+    matches!(uri.scheme_str(), Some("http" | "https"))
+        && !origin.contains(['#', '@'])
+        && uri.path() == "/"
+        && uri.query().is_none()
+        && (authority.as_str() == authority.host() || authority.port_u16().is_some())
+        && authority.as_str().eq_ignore_ascii_case(host)
 }
 
 fn random_id() -> Option<String> {
@@ -359,11 +338,8 @@ pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap,
         return with_usage_headers(http_error("Forbidden", StatusCode::FORBIDDEN));
     }
     let origin = header_value(headers, "origin");
-    if !origin.is_empty() {
-        match origin_parts(origin) {
-            Some((scheme, h)) if h == host && (scheme == "https" || scheme == "http") => {}
-            _ => return with_usage_headers(http_error("Forbidden", StatusCode::FORBIDDEN)),
-        }
+    if !origin.is_empty() && !origin_matches_host(origin, host) {
+        return with_usage_headers(http_error("Forbidden", StatusCode::FORBIDDEN));
     }
     // Scraping is welcome; it just never counts.
     if is_bot(header_value(headers, "user-agent")) {
@@ -447,11 +423,36 @@ mod tests {
     }
 
     #[test]
-    fn origins() {
-        assert_eq!(origin_parts("https://office.example:8443"), Some(("https".into(), "office.example:8443".into())));
-        assert_eq!(origin_parts("HTTP://a.b"), Some(("http".into(), "a.b".into())));
-        assert_eq!(origin_parts("null"), Some((String::new(), String::new())));
-        assert_eq!(origin_parts("https://a.b:x"), None);
+    fn beacons_require_matching_http_origins() {
+        for (host, origin, allowed) in [
+            ("office.example", "https://office.example", true),
+            ("office.example", "HTTP://office.example", true),
+            ("OFFICE.EXAMPLE", "https://office.example", true),
+            ("localhost:18159", "http://localhost:18159", true),
+            ("office.example:8443", "https://office.example:8443", true),
+            ("[::1]:18159", "http://[::1]:18159", true),
+            ("office.example", "", true), // Non-browser clients may omit Origin.
+            ("office.example", "null", false),
+            ("office.example", "https://other.example", false),
+            ("office.example", "https://office.example.evil.test", false),
+            ("office.example:8443", "https://office.example:9443", false),
+            ("office.example", "ftp://office.example", false),
+            ("office.example", "//office.example", false),
+            ("office.example", "https://user@office.example", false),
+            ("office.example", "https://office.example/path", false),
+            ("office.example", "https://office.example?query", false),
+            ("office.example", "https://office.example#fragment", false),
+            ("office.example:x", "https://office.example:x", false),
+            ("office.example:99999", "https://office.example:99999", false),
+            ("office.example", "https://office.example https://other.example", false),
+        ] {
+            let mut headers = HeaderMap::new();
+            headers.insert("x-office-usage", "1".parse().unwrap());
+            headers.insert(header::ORIGIN, origin.parse().unwrap());
+            let response = handle_event(None, &Method::POST, &headers, host, Some(b"lauds".to_vec()));
+            let expected = if allowed { StatusCode::NO_CONTENT } else { StatusCode::FORBIDDEN };
+            assert_eq!(response.status(), expected, "host={host}, origin={origin}");
+        }
     }
 
     #[test]
