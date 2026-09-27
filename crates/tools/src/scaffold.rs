@@ -1,6 +1,5 @@
-//! Proper-file scaffolds: create missing proper files and append missing
-//! commented keys to sparse ones, never touching live sections. Ported from
-//! Go's `internal/scaffold`.
+//! Proper-file scaffolds: create missing proper files and append missing commented keys to sparse
+//! ones, never touching live sections.
 
 use std::collections::HashSet;
 use std::path::Path;
@@ -165,7 +164,7 @@ pub struct Options<'a> {
     pub feast_id: &'a str,
 }
 
-/// Go's `EnsurePropers`.
+/// Creates missing proper files and adds missing key catalogs.
 pub fn ensure_propers(src: &dyn DataSource, dir: &Path, opts: &Options) -> Result<Vec<ScaffoldResult>, String> {
     let feasts = load_feasts(src).map_err(|e| format!("loading feasts: {e}"))?;
     let proper_dir = dir.join("texts").join("proper");
@@ -177,7 +176,7 @@ pub fn ensure_propers(src: &dyn DataSource, dir: &Path, opts: &Options) -> Resul
         results.push(ensure_one(&proper_dir, feast, opts)?);
     }
     if !opts.feast_id.is_empty() && results.is_empty() {
-        return Err(format!("unknown feast id {}", compat::quote(opts.feast_id)));
+        return Err(format!("unknown feast id {}", data_format::quote(opts.feast_id)));
     }
     results.sort_by(|a, b| a.feast_id.cmp(&b.feast_id));
     Ok(results)

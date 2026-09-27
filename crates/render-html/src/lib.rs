@@ -1,7 +1,6 @@
-//! HTML rendering of the Office: the text-to-HTML conversion of composed
-//! elements, the view models, and the page templates. Ported from Go's
-//! `internal/render`; it touches neither the calendar nor the office engine,
-//! and review metadata arrives as plain data.
+//! HTML rendering of the Office: the text-to-HTML conversion of composed elements, the view models,
+//! and the page templates. It touches neither the calendar nor the office engine, and review
+//! metadata arrives as plain data.
 
 pub mod escape;
 pub mod html;

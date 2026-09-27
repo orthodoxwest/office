@@ -1,9 +1,6 @@
-//! The document model: a composed hour of sections and elements, with speaker
-//! roles and rubric spans. Every composer produces it and every renderer
-//! consumes it. Ported from Go's `models/office.go` and `models/leader.go`.
-//!
-//! PORT(inherited): text fields keep Go's convention that `""` means absent
-//! (the dump writes it as null). Tightening them to `Option` waits for Phase 7.
+//! The document model: a composed hour of sections and elements, with speaker roles and rubric
+//! spans. Every composer produces it and every renderer consumes it. Empty text fields represent
+//! absence; the dump serializes them as null.
 
 use calendar::{Color, Date, Decision, Season};
 
@@ -120,8 +117,7 @@ pub struct RubricSpan {
     pub prayed: bool,
 }
 
-/// One element of a composed hour. See Go's `models.OfficeElement` for the
-/// meaning of each field.
+/// One element of a composed hour, with presentation and source metadata.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OfficeElement {
     pub leader_slot: String,
@@ -195,8 +191,7 @@ pub fn antiphon_announcement(text: &str) -> String {
         && i > 0
     {
         let incipit = text[..i].trim().trim_end_matches([',', ';', ':']);
-        // PORT(inherited): Go tests the final byte, so a closing ’ counts as
-        // unpunctuated.
+        // Only terminal ASCII punctuation is recognized; a closing ’ counts as unpunctuated.
         if incipit.as_bytes().last().is_some_and(|b| b".?!".contains(b)) {
             return incipit.to_string();
         }
@@ -240,7 +235,7 @@ impl PrayerForm {
         PrayerForm::ALL
             .into_iter()
             .find(|f| f.as_str() == value)
-            .ok_or_else(|| format!("invalid prayer form {}: choose private, deacon, or priest", compat::quote(value)))
+            .ok_or_else(|| format!("invalid prayer form {}: choose private, deacon, or priest", data_format::quote(value)))
     }
 
     pub fn label(self) -> &'static str {

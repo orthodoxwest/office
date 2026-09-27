@@ -1,8 +1,6 @@
-//! Observational tracing of dynamic proper resolution, for the review tools.
-//! Composition never calls this: the trace records how a source the composer
-//! already selected relates to the day's proper IDs. Ported from Go's
-//! `ProperResolutionTrace` (`proper.go`) and the `Trace*Resolution` engine
-//! methods (`engine.go`).
+//! Observational tracing of dynamic proper resolution, for the review tools. Composition never
+//! calls this: the trace records how a source the composer already selected relates to the day's
+//! proper IDs.
 
 use calendar::traits::octave_parent_id;
 use calendar::{Category, Feast, Rank, Season};

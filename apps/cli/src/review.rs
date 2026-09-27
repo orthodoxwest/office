@@ -1,4 +1,4 @@
-//! `review` and its subcommands. Ported from Go's `cli/review.go`.
+//! `review` and its subcommands.
 
 use std::io::Write;
 

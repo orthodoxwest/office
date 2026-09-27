@@ -1,5 +1,3 @@
-//! Ported from Go's `internal/office/proper_test.go`.
-
 use calendar::{Category, Rank, Season, Weekday};
 
 use crate::proper::{

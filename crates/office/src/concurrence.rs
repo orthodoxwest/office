@@ -1,6 +1,5 @@
-//! Vespers concurrence: which office owns each evening, and the evening's
-//! commemorations (General Rubrics XIII–XIV). Ported from Go's
-//! `internal/calendar/concurrence.go`.
+//! Vespers concurrence: which office owns each evening, and the evening's commemorations (General
+//! Rubrics XIII–XIV).
 
 use std::sync::Arc;
 
@@ -37,8 +36,7 @@ impl VespersOwner {
     }
 }
 
-/// The office that owns an evening's Vespers and the evening's
-/// commemorations. Field meanings follow Go's `models.VespersDesignation`.
+/// The office that owns an evening's Vespers and the evening's commemorations.
 #[derive(Clone, Debug)]
 pub struct VespersDesignation {
     pub owner: VespersOwner,
@@ -456,8 +454,7 @@ fn boundary_commemorations(
             decisions.push(decision("commemoration:incoming-at-second-vespers", "suppressed", &c.id));
         }
     }
-    // PORT(inherited): Go's nil-preceding fallback to following.Season is
-    // unreachable; the preceding day always exists here.
+    // The preceding day always exists here, so it supplies the season.
     let incoming: Vec<FeastRef> = following.celebration.iter().chain(&following.commemorations).cloned().collect();
     let (finalized, final_decisions) = ordered_commemorations(
         winner,

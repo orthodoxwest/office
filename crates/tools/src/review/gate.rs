@@ -1,5 +1,4 @@
-//! The text-provenance assurance report, its reviewable baseline, and the
-//! CI gate. Ported from Go's `review/assurance_gate.go`.
+//! The text-provenance assurance report, its reviewable baseline, and the CI gate.
 
 use std::collections::HashSet;
 use std::fmt::Write as _;
@@ -87,8 +86,7 @@ fn rendered_dependencies(src: &dyn DataSource, start: i32, years: i32) -> Result
     Ok((rendered, count))
 }
 
-/// Reads the floor. Go decodes it with `encoding/json`; the file is a flat
-/// object of three integers.
+/// Reads the floor as a flat JSON object of three integers.
 pub fn load_assurance_baseline(src: &dyn DataSource) -> Result<AssuranceBaseline, String> {
     let path = src.display_path(ASSURANCE_BASELINE_FILE);
     let body = src.read(ASSURANCE_BASELINE_FILE)?.ok_or_else(|| format!("{path} does not exist"))?;
@@ -149,8 +147,7 @@ pub fn assurance_summary(r: &AssuranceReport, failures: &[String], markdown: boo
     w
 }
 
-/// Resets the floor to the current report, as Go's `json.MarshalIndent`
-/// writes it.
+/// Resets the floor to the current report, as indented JSON.
 pub fn update_assurance_baseline(dir: &Path, r: &AssuranceReport) -> Result<(), String> {
     let body = format!("{{\n  \"start_year\": {},\n  \"years\": {},\n  \"verified_minimum\": {}\n}}\n", r.start_year, r.years, r.verified);
     let dir = dir.join("review");

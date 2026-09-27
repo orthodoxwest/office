@@ -1,10 +1,7 @@
-//! Go's `encoding/csv` with its default settings (comma separator, no
-//! comments, strict quotes, field count fixed by the first record), so the
-//! review ledgers parse, reject, and write exactly as in Go. Error messages
-//! are our own.
+//! CSV for corpus and review ledgers: comma separator, no comments, strict quotes, and field count
+//! fixed by the first record.
 
-/// `csv.NewReader(r).ReadAll()`: every record, or where the input breaks
-/// Go's rules.
+/// Parses every record, or returns an error at the first invalid record.
 pub fn read_all(input: &str) -> Result<Vec<Vec<String>>, String> {
     let mut reader = Reader { input: input.as_bytes(), pos: 0, num_line: 0, fields_per_record: 0 };
     let mut records = Vec::new();
@@ -167,7 +164,7 @@ impl Reader<'_> {
     }
 }
 
-/// One record as Go's `csv.Writer.Write` writes it (LF line endings).
+/// Writes one CSV record with LF line endings.
 pub fn write_record(out: &mut String, record: &[&str]) {
     for (n, field) in record.iter().enumerate() {
         if n > 0 {
@@ -191,7 +188,7 @@ fn needs_quotes(field: &str) -> bool {
     if field == "\\." || field.bytes().any(|c| matches!(c, b'\n' | b'\r' | b'"' | b',')) {
         return true;
     }
-    // Go's unicode.IsSpace is the White_Space property, as here.
+    // Use the Unicode White_Space property.
     field.chars().next().is_some_and(char::is_whitespace)
 }
 
@@ -200,11 +197,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reads_like_go() {
+    fn reads_csv_records() {
         assert_eq!(read_all("a,b\r\n\n\"c,\"\"d\",e\n").unwrap(), vec![vec!["a", "b"], vec!["c,\"d", "e"]]);
         assert_eq!(read_all("a,\"x\ny\"\n").unwrap(), vec![vec!["a", "x\ny"]]);
         assert_eq!(read_all("a,b\r").unwrap(), vec![vec!["a", "b"]]);
-        // Go's rejections, in our words.
+        // Malformed records are rejected.
         assert_eq!(read_all("a,b\nc\n").unwrap_err(), "line 2: expected 2 fields, found 1");
         assert_eq!(read_all("a,b\"c\n").unwrap_err(), "line 1, column 4: quote inside an unquoted field");
         assert_eq!(read_all("\"a\"b\n").unwrap_err(), "line 1, column 3: unterminated quoted field or stray quote after one");
@@ -213,7 +210,7 @@ mod tests {
     }
 
     #[test]
-    fn writes_like_go() {
+    fn writes_csv_records() {
         let mut out = String::new();
         write_record(&mut out, &["a", "", "b,c", "say \"hi\"", " lead", "\\.", "x\ny"]);
         assert_eq!(out, "a,,\"b,c\",\"say \"\"hi\"\"\",\" lead\",\"\\.\",\"x\ny\"\n");

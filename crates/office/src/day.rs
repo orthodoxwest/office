@@ -1,7 +1,6 @@
-//! The day as the composers see it: the shared calendar day plus the Office's
-//! own resolution (Vespers, the Marian antiphon) and the two fields that exist
-//! only on the synthetic office-day used while composing I Vespers. This is
-//! Go's whole `models.CalendarDay`.
+//! The day as the composers see it: the shared calendar day plus the Office's own resolution
+//! (Vespers, the Marian antiphon) and the two fields that exist only on the synthetic office-day
+//! used while composing I Vespers.
 
 use std::ops::{Deref, DerefMut};
 

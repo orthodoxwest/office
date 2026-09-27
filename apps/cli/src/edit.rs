@@ -1,5 +1,4 @@
-//! `corpus` and `scaffold`: the data-editing commands. Ported from Go's
-//! `cli/corpus.go` and `cli/scaffold.go`.
+//! `corpus` and `scaffold`: the data-editing commands.
 
 use std::io::Write;
 
@@ -48,7 +47,7 @@ pub fn cmd_scaffold(data: &FsData, args: &[String], out: &mut dyn Write) -> Resu
         return Err("usage: office scaffold <propers> [flags]\n\nSubcommands:\n  propers   ensure proper text files exist with commented key catalogs".into());
     };
     if sub != "propers" {
-        return Err(format!("unknown scaffold subcommand {}\nusage: office scaffold propers [flags]", compat::quote(sub)));
+        return Err(format!("unknown scaffold subcommand {}\nusage: office scaffold propers [flags]", data_format::quote(sub)));
     }
     let flags = Flags::parse_with_bools(rest, &["feast"], &["check", "dry-run", "include-commemorations"])?;
     if !flags.rest.is_empty() {

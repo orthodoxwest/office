@@ -1,6 +1,6 @@
 /* Service worker for the Divine Office PWA.
  *
- * Served at /sw.js by the Go server, which stamps the version placeholder
+ * Served at /sw.js by the server, which stamps the version placeholder
  * below with a hash of the binary + data directory. A deploy that changes anything affecting
  * rendered pages therefore changes this file, reinstalls the worker, and
  * starts a fresh cache.

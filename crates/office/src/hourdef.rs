@@ -1,8 +1,7 @@
-//! Hour definition files (`data/office/<hour>.txt`) and their condition
-//! language. Ported from Go's `hourdef.go` and `condition.go`.
+//! Hour definition files (`data/office/<hour>.txt`) and their condition language.
 
 use calendar::{MoveableDates, Season, Weekday};
-use compat::{quote, scan_lines};
+use data_format::{quote, scan_lines};
 
 use crate::day::Day;
 use crate::texts::OfficeTexts;
@@ -57,7 +56,7 @@ impl HourSection {
     }
 }
 
-/// Parses an hour definition. Errors match Go's `ParseHourDefinition`.
+/// Parses an hour definition.
 pub fn parse_hour_definition(path: &str, content: &str) -> Result<Vec<HourSection>, String> {
     let mut sections = Vec::new();
     let mut current: Option<HourSection> = None;

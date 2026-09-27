@@ -23,7 +23,7 @@ macro_rules! kebab_enum {
             pub fn parse(s: &str) -> Result<$name, String> {
                 match s {
                     $($text => Ok($name::$variant),)+
-                    _ => Err(format!(concat!("invalid ", $what, ": {}"), compat::quote(s))),
+                    _ => Err(format!(concat!("invalid ", $what, ": {}"), data_format::quote(s))),
                 }
             }
         }
@@ -257,8 +257,7 @@ pub struct MonthDay {
     pub day: u32,
 }
 
-/// A liturgical feast or observance. Field meanings follow Go's
-/// `models.Feast`; see that type for the rubrical background of each flag.
+/// A liturgical feast or observance and its rubrical attributes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Feast {
     pub id: String,
@@ -343,7 +342,7 @@ impl Feast {
 
 pub type FeastRef = Arc<Feast>;
 
-/// Maps Go's empty-string zero value to `None`.
+/// Maps an empty string to `None`.
 pub fn non_empty(s: impl Into<String>) -> Option<String> {
     let s = s.into();
     (!s.is_empty()).then_some(s)
@@ -411,7 +410,7 @@ pub struct CalendarDay {
     pub celebration: Option<FeastRef>,
     pub commemorations: Vec<FeastRef>,
     pub color: Color,
-    // PORT(inherited): Go's CalendarDay.Notes is never set by the builder.
+    // The calendar builder leaves notes empty.
     pub notes: Option<String>,
     pub resolution_rule: String,
     pub occurrence_decisions: Vec<Decision>,

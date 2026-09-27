@@ -1,9 +1,7 @@
-//! The liturgical calendar shared by every product: computus and moveable
-//! dates, seasons, the feast catalog, occurrence, the temporal week, octaves,
-//! and fasting. Ported from Go's `internal/calendar` (see RUST-PORT.md).
-//!
-//! The crate does no file, network, or clock access: callers supply data
-//! files through [`loader::DataSource`] and pass dates explicitly.
+//! The liturgical calendar shared by every product: computus and moveable dates, seasons, the feast
+//! catalog, occurrence, the temporal week, octaves, and fasting. The crate does no file,
+//! network, or clock access: callers supply data files through [`loader::DataSource`] and pass
+//! dates explicitly.
 
 pub mod builder;
 pub mod commemoration;

@@ -1,5 +1,4 @@
-//! Commemorations at Lauds and Vespers: heading, antiphon, versicle,
-//! invitation, collect. Ported from the helpers in Go's `lauds.go`.
+//! Commemorations at Lauds and Vespers: heading, antiphon, versicle, invitation, collect.
 
 use calendar::commemoration::lauds_commemorations;
 use calendar::traits::{is_day_within_octave, octave_parent_id};

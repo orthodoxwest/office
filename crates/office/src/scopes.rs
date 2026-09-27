@@ -1,5 +1,4 @@
-//! Appointment scopes (`data/appointment-scopes.json`): when a seasonal
-//! fallback text is eligible. Ported from Go's `texts/appointment_scopes.go`.
+//! Appointment scopes (`data/appointment-scopes.json`): when a seasonal fallback text is eligible.
 
 use std::collections::HashMap;
 
@@ -71,12 +70,10 @@ impl AppointmentScopes {
             .find(|s| s.slots.iter().any(|sel| slot_matches(sel, slot)))
     }
 
-    /// Parses and validates `appointment-scopes.json`. `path` prefixes the
-    /// errors, as in Go.
+    /// Parses and validates `appointment-scopes.json`. Errors are prefixed with `path`.
     pub fn load(path: &str, raw: &str, corpus: &Corpus) -> Result<AppointmentScopes, String> {
         let mut stream = serde_json::Deserializer::from_str(raw).into_iter::<Value>();
-        // PORT(inherited): JSON syntax and type errors carry serde_json's
-        // wording, not encoding/json's; the semantic errors match Go.
+
         let value = match stream.next() {
             Some(Ok(v)) => v,
             Some(Err(e)) => return Err(format!("{path}: {e}")),
@@ -89,7 +86,7 @@ impl AppointmentScopes {
             Value::Null => return Err(format!("{path}: expected an array, not null")),
             Value::Array(items) => items,
             Value::Bool(_) | Value::Number(_) | Value::String(_) | Value::Object(_) => {
-                return Err(format!("{path}: json: cannot unmarshal into Go value of type []*texts.AppointmentScope"));
+                return Err(format!("{path}: expected an array of appointment scopes"));
             }
         };
         let mut scopes = AppointmentScopes::default();
@@ -99,12 +96,12 @@ impl AppointmentScopes {
                 Value::Null => return Err(format!("{path}: null appointment scope")),
                 Value::Object(map) => decode(map).map_err(|e| format!("{path}: {e}"))?,
                 Value::Bool(_) | Value::Number(_) | Value::String(_) | Value::Array(_) => {
-                    return Err(format!("{path}: json: cannot unmarshal into Go value of type texts.AppointmentScope"));
+                    return Err(format!("{path}: expected an appointment scope object"));
                 }
             };
-            let scope = validate(scope, corpus).map_err(|(id, e)| format!("{path}: scope {}: {e}", compat::quote(&id)))?;
+            let scope = validate(scope, corpus).map_err(|(id, e)| format!("{path}: scope {}: {e}", data_format::quote(&id)))?;
             if !ids.insert(scope.id.clone()) {
-                return Err(format!("{path}: duplicate scope ID {}", compat::quote(&scope.id)));
+                return Err(format!("{path}: duplicate scope ID {}", data_format::quote(&scope.id)));
             }
             let idx = scopes.list.len();
             for hour in &scope.hours {
@@ -116,8 +113,8 @@ impl AppointmentScopes {
                             if selectors_overlap(a, b) {
                                 return Err(format!(
                                     "{path}: scopes {} and {} overlap at {}/{hour} ({a}, {b})",
-                                    compat::quote(&prior.id),
-                                    compat::quote(&scope.id),
+                                    data_format::quote(&prior.id),
+                                    data_format::quote(&scope.id),
                                     scope.season
                                 ));
                             }
@@ -145,9 +142,8 @@ struct Raw {
     until_easter: Option<i64>,
 }
 
-/// Decodes one object as Go's encoding/json does for the struct: field names
-/// match case-insensitively, unknown fields are rejected, and null leaves a
-/// field at its zero value.
+/// Decodes one object: field names match case-insensitively, unknown fields are rejected, and null
+/// leaves a field at its default value.
 fn decode(map: serde_json::Map<String, Value>) -> Result<Raw, String> {
     let mut raw = Raw {
         id: String::new(),
@@ -192,14 +188,14 @@ fn decode(map: serde_json::Map<String, Value>) -> Result<Raw, String> {
             "exclude_weekdays" => raw.exclude_weekdays = strings(v, "exclude_weekdays")?,
             "from_easter" => raw.from_easter = int(v, "from_easter")?,
             "until_easter" => raw.until_easter = int(v, "until_easter")?,
-            _ => return Err(format!("json: unknown field {}", compat::quote(key))),
+            _ => return Err(format!("json: unknown field {}", data_format::quote(key))),
         }
     }
     Ok(raw)
 }
 
 fn type_error(field: &str) -> String {
-    format!("json: cannot unmarshal into Go struct field AppointmentScope.{field}")
+    format!("invalid type for appointment scope field {field}")
 }
 
 fn validate(raw: Raw, corpus: &Corpus) -> Result<AppointmentScope, (String, String)> {
@@ -208,7 +204,7 @@ fn validate(raw: Raw, corpus: &Corpus) -> Result<AppointmentScope, (String, Stri
     if raw.id.trim().is_empty() || raw.source.trim().is_empty() || raw.hours.is_empty() || raw.slots.is_empty() {
         return Err(fail("id, source, hours and slots are required".to_string()));
     }
-    let season = Season::parse(&raw.season).map_err(|_| fail(format!("unknown season {}", compat::quote(&raw.season))))?;
+    let season = Season::parse(&raw.season).map_err(|_| fail(format!("unknown season {}", data_format::quote(&raw.season))))?;
     if let (Some(f), Some(u)) = (raw.from_easter, raw.until_easter)
         && f >= u
     {
@@ -223,32 +219,32 @@ fn validate(raw: Raw, corpus: &Corpus) -> Result<AppointmentScope, (String, Stri
     let mut excluded = [false; 7];
     for weekday in &raw.exclude_weekdays {
         let Some(day) = Weekday::ALL.into_iter().find(|d| d.name().to_lowercase() == *weekday) else {
-            return Err(fail(format!("unknown weekday {}", compat::quote(weekday))));
+            return Err(fail(format!("unknown weekday {}", data_format::quote(weekday))));
         };
         let slot = &mut excluded[day.number() as usize];
         if *slot {
-            return Err(fail(format!("duplicate weekday {}", compat::quote(weekday))));
+            return Err(fail(format!("duplicate weekday {}", data_format::quote(weekday))));
         }
         *slot = true;
     }
     let mut seen_hours = Vec::new();
     for hour in &raw.hours {
         if !HOURS.contains(&hour.as_str()) {
-            return Err(fail(format!("unknown hour {}", compat::quote(hour))));
+            return Err(fail(format!("unknown hour {}", data_format::quote(hour))));
         }
         if seen_hours.contains(&hour) {
-            return Err(fail(format!("duplicate hour {}", compat::quote(hour))));
+            return Err(fail(format!("duplicate hour {}", data_format::quote(hour))));
         }
         seen_hours.push(hour);
         for (i, slot) in raw.slots.iter().enumerate() {
             if !matches!(slot.as_str(), "chapter" | "versicle" | "psalm-antiphon*") {
-                return Err(fail(format!("invalid slot selector {}", compat::quote(slot))));
+                return Err(fail(format!("invalid slot selector {}", data_format::quote(slot))));
             }
             if let Some(prior) = raw.slots[..i].iter().find(|p| selectors_overlap(p, slot)) {
-                return Err(fail(format!("overlapping slot selectors {} and {}", compat::quote(prior), compat::quote(slot))));
+                return Err(fail(format!("overlapping slot selectors {} and {}", data_format::quote(prior), data_format::quote(slot))));
             }
             if !has_seasonal_scope_slot(corpus, season, hour, slot) {
-                return Err(fail(format!("slot {} has no seasonal corpus candidate for {season}/{hour}", compat::quote(slot))));
+                return Err(fail(format!("slot {} has no seasonal corpus candidate for {season}/{hour}", data_format::quote(slot))));
             }
         }
     }
@@ -315,6 +311,9 @@ mod tests {
         let err = |raw: &str| AppointmentScopes::load("s.json", raw, &c).unwrap_err();
         let one = |fields: &str| format!(r#"[{{"id":"x","source":"s","season":"lent","hours":["terce"],"slots":["chapter"],{fields}}}]"#);
         assert_eq!(err("null"), "s.json: expected an array, not null");
+        assert_eq!(err("{}"), "s.json: expected an array of appointment scopes");
+        assert_eq!(err("[false]"), "s.json: expected an appointment scope object");
+        assert_eq!(err(&one(r#""require_ferial":1"#)), "s.json: invalid type for appointment scope field require_ferial");
         assert_eq!(err("[] []"), "s.json: expected one JSON array");
         assert_eq!(err("[null]"), "s.json: null appointment scope");
         assert_eq!(err(&one(r#""require_ferial":true,"bogus":1"#)), "s.json: json: unknown field \"bogus\"");

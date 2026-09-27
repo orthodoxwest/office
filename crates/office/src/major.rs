@@ -1,4 +1,4 @@
-//! The shared composer of Lauds and Vespers. Ported from Go's `major.go`.
+//! The shared composer of Lauds and Vespers.
 
 use calendar::{Decision, MoveableDates};
 use liturgy::{OfficeHour, OfficeSection, PrayerForm};

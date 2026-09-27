@@ -1,5 +1,3 @@
-//! Ported from Go's `internal/render/html_test.go`.
-
 use liturgy::{ElementType, OfficeElement, RubricSpan, VoiceRole, VoiceSpan};
 
 use crate::html::*;
@@ -403,8 +401,6 @@ fn silent_triduum_prayers() {
     }
 }
 
-// Ported from Go's `internal/render/incipit_test.go`.
-
 fn psalm_67(incipit: &str) -> OfficeElement {
     let mut e = elem(ElementType::Psalm, "Psalm 67\n\n1. Be merciful unto us * and bless us.");
     e.label = "Psalm 67".into();
@@ -452,8 +448,6 @@ fn psalm_incipit_is_escaped() {
     has(&html, "&lt;b&gt;misereatur&lt;/b&gt; &amp; nostri");
 }
 
-// Ported from Go's `internal/render/martyrology_test.go`.
-
 #[test]
 fn martyrology_reading_renders_paragraphs_without_chapter_heading() {
     let got = render(&elem(ElementType::Reading, "First notice.\n\nSecond notice."));
@@ -466,8 +460,7 @@ fn martyrology_reading_renders_paragraphs_without_chapter_heading() {
     has(&response, "Thanks be to God.");
 }
 
-// Ported from Go's `internal/render/athanasian_test.go` and
-// `internal/render/ordinary_prayer_test.go`: the live corpus.
+// Checks against the live Athanasian Creed and ordinary prayer texts.
 
 fn live() -> tools::fs::FsData {
     tools::fs::FsData::new("../../data")
@@ -496,7 +489,7 @@ fn athanasian_creed_corpus() {
 fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
     let src = live();
     let engine = office::Engine::load(&src).unwrap();
-    // A bare Pentecost-season day, as Go builds it: no celebration.
+    // A bare Pentecost-season day with no celebration.
     let day = office::Day {
         cal: calendar::CalendarDay {
             date: calendar::Date::new(2026, 9, 7),
@@ -543,8 +536,6 @@ fn composed_preces_creed_renders_silent_middle_and_spoken_tail() {
     }
 }
 
-// Ported from Go's `internal/render/typeset_test.go`.
-
 #[test]
 fn typeset_cases() {
     for (input, want) in [
@@ -573,7 +564,6 @@ fn esc_text_typesets_before_escaping() {
     assert_eq!(esc_text("David's <b>"), "David’s &lt;b&gt;");
 }
 
-// Ported from Go's `TestPrayerSpeakerLabelsKeepResponsesInOrder`.
 #[test]
 fn prayer_speaker_labels_keep_responses_in_order() {
     let mut e = elem(ElementType::Prayer, "Have mercy upon thee.\nR. Amen.");

@@ -1,5 +1,3 @@
-//! Ported from Go's `internal/office/preces_test.go`.
-
 use calendar::{Category, Feast, MoveableDates, Rank, Season};
 
 use crate::day::Day;
@@ -13,7 +11,7 @@ fn ranked(id: &str, category: Option<Category>, rank: Rank) -> Feast {
     f
 }
 
-/// Go's `makeDay`: a Lenten violet day.
+/// A Lenten violet day.
 fn make_day(m: i32, d: i32, celebration: Option<Feast>, comms: Vec<Feast>, within: Option<&str>) -> Day {
     let mut x = day(date(2026, m, d), Season::Lent);
     x.color = calendar::Color::Violet;
@@ -203,7 +201,6 @@ fn preces_octave_commemoration() {
     assert_eq!(preces_disposition(Some(&x), None), (false, PRECES_SUPPRESSED_OCTAVE_COMMEMORATION));
 }
 
-/// Ported from `compline_test.go` TestShouldSayPreces.
 #[test]
 fn should_say_preces_table() {
     let m = MoveableDates::compute(2026);

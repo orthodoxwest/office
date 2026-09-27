@@ -50,8 +50,7 @@ jobs:
         uses: dtolnay/rust-toolchain@1.94.1
         with:
           components: rustfmt, clippy
-          # The core crates must cross-compile for the mobile apps from the
-          # first week (RUST-PORT.md, "Rules").
+          # Core crates must also build for the mobile apps.
           targets: aarch64-apple-ios, aarch64-linux-android
 
       - name: Cache Cargo
@@ -74,31 +73,8 @@ jobs:
       - name: Cross-compile the core crates for iOS and Android
         run: |
           for target in aarch64-apple-ios aarch64-linux-android; do
-            cargo build -p compat -p calendar -p corpus -p office --target "$target"
+            cargo build -p data-format -p calendar -p corpus -p office --target "$target"
           done
-
-  coverage:
-    name: Rust coverage
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.94.1
-        with:
-          components: llvm-tools-preview
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-llvm-cov@0.8.7
-      - name: Collect Rust line coverage
-        run: make test-coverage
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: rust-coverage
-          path: output/coverage/
-          retention-days: 14
 
   golden:
     name: Golden tests
@@ -454,11 +430,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build runtime image
-        run: docker build -t office-cutover .
+        run: docker build -t office-smoke .
       - name: Validate the packaged corpus and serve pages with usage enabled
         run: |
-          docker run --rm office-cutover /app/run-app validate
-          docker run -d --name office-smoke -p 18080:8080 -e OFFICE_USAGE_DB=/tmp/usage.sqlite office-cutover
+          docker run --rm office-smoke /app/run-app validate
+          docker run -d --name office-smoke -p 18080:8080 -e OFFICE_USAGE_DB=/tmp/usage.sqlite office-smoke
           trap 'docker logs office-smoke; docker rm -f office-smoke' EXIT
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:18080/sw.js > /dev/null; then break; fi

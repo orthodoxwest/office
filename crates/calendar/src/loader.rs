@@ -7,8 +7,8 @@ use std::sync::Arc;
 use crate::date::Date;
 use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonthDay, OctaveClass, Rank};
 use crate::penitential::{PenitentialRule, section_to_penitential_rule};
-use compat::atoi;
-use compat::quote;
+use data_format::atoi;
+use data_format::quote;
 
 /// The feast definition files, in load order.
 pub const FEAST_FILES: [&str; 4] = ["temporal.txt", "sanctoral.txt", "awrv.txt", "commemorations.txt"];
@@ -18,19 +18,17 @@ pub const PENITENTIAL_RULES_FILE: &str = "penitential.txt";
 
 /// Supplies data files by path relative to the data directory.
 pub trait DataSource {
-    /// The path as it should appear in error messages (Go joins it onto the
-    /// data directory).
+    /// The path as it should appear in error messages, including the data directory.
     fn display_path(&self, rel: &str) -> String;
     /// The file's contents, `Ok(None)` when it does not exist.
     fn read(&self, rel: &str) -> Result<Option<String>, String>;
-    /// Every regular file under the directory `rel`, with its path relative
-    /// to `rel` (`/`-separated) and its bytes, in Go `filepath.Walk` order:
-    /// depth first, each directory's entries in byte order. An error names
-    /// the failing path as Go does (`lstat <path>: no such file or directory`).
+    /// Every regular file under the directory `rel`, with its path relative to `rel`
+    /// (`/`-separated) and its bytes: depth first, each directory's entries in byte order. An error
+    /// names the failing path.
     fn walk(&self, rel: &str) -> Result<Vec<(String, Vec<u8>)>, String>;
 }
 
-/// One `[section]` of a data file. Keys keep their last assignment, as in Go.
+/// One `[section]` of a data file. Keys keep their last assignment.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Section {
     pub id: String,
@@ -42,7 +40,7 @@ impl Section {
         self.values.get(key).map(String::as_str)
     }
 
-    /// Go's `m[key]`: the value or the empty string.
+    /// The value for a key, or the empty string.
     fn value(&self, key: &str) -> &str {
         self.get(key).unwrap_or("")
     }
@@ -52,7 +50,7 @@ impl Section {
 /// ignored; each `[id]` starts a section; other lines are `Key = value`.
 pub fn parse_ini_sections(path: &str, content: &str) -> Result<Vec<Section>, String> {
     let mut sections: Vec<Section> = Vec::new();
-    for (i, line) in compat::scan_lines(content).enumerate() {
+    for (i, line) in data_format::scan_lines(content).enumerate() {
         let trimmed = line.trim();
         if trimmed.is_empty() || trimmed.starts_with('#') {
             continue;
@@ -203,8 +201,7 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
         f.proper_id = text("ProperID");
     }
 
-    // PORT(inherited): Go reports whichever unknown key map iteration meets
-    // first; this reports the first in byte order.
+    // Report the first unknown key in byte order.
     if let Some(key) = m.values.keys().find(|k| !KNOWN_FEAST_KEYS.contains(&k.as_str())) {
         return Err(fail(format!("unrecognized key {}", quote(key))));
     }

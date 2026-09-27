@@ -1,5 +1,5 @@
-//! Predicates over feasts shared by occurrence (here) and concurrence (the
-//! office crate). Many classify generated feasts by their ID shape, as Go does.
+//! Predicates over feasts shared by occurrence (here) and concurrence (the office crate). Many
+//! classify generated feasts by their ID shape.
 
 use crate::model::{Category, Feast, Rank, Season};
 

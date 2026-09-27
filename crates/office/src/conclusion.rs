@@ -1,5 +1,4 @@
-//! Collect conclusions (General Rubrics XII / XXXIII.4-5). Ported from Go's
-//! `conclusion.go`.
+//! Collect conclusions (General Rubrics XII / XXXIII.4-5).
 
 use crate::texts::OfficeTexts;
 

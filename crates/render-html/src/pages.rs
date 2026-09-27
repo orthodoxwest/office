@@ -1,7 +1,5 @@
-//! The page templates and their environment. Ported from Go's
-//! `render/render.go`: the templates are the Go templates translated to
-//! minijinja with identical markup, and the environment reproduces
-//! html/template's escaping (see [`crate::escape`]).
+//! The page templates and their minijinja environment, with explicit escaping (see
+//! [`crate::escape`]).
 
 use minijinja::value::Value;
 use minijinja::{AutoEscape, Environment, Error, Output, State};
@@ -30,9 +28,8 @@ pub struct Pages {
     env: Environment<'static>,
 }
 
-/// Every value printed into a page is escaped as html/template escapes a
-/// text node or quoted attribute, unless it is trusted markup.
-fn go_formatter(out: &mut Output, _state: &State, value: &Value) -> Result<(), Error> {
+/// Escapes every value printed into a text node or quoted attribute, unless it is trusted markup.
+fn html_formatter(out: &mut Output, _state: &State, value: &Value) -> Result<(), Error> {
     if value.is_safe() {
         write!(out, "{value}").map_err(Error::from)
     } else if value.is_none() || value.is_undefined() {
@@ -50,7 +47,7 @@ impl Pages {
         env.set_keep_trailing_newline(true);
         // Macro output is trusted markup; the formatter escapes the rest.
         env.set_auto_escape_callback(|_| AutoEscape::Html);
-        env.set_formatter(go_formatter);
+        env.set_formatter(html_formatter);
         env.set_undefined_behavior(minijinja::UndefinedBehavior::Strict);
         for (name, source) in TEMPLATES {
             env.add_template(name, source).map_err(|e| format!("parsing {name} template: {e}"))?;
@@ -118,8 +115,7 @@ impl Pages {
     }
 }
 
-// Ported from Go's `internal/render/templates_test.go` and `season_test.go`.
-// The source checks name the same markup in minijinja's syntax.
+// Page markup and seasonal presentation contracts.
 #[cfg(test)]
 mod tests {
     use super::{Pages, TEMPLATES};
@@ -279,8 +275,7 @@ mod tests {
 
     #[test]
     fn calendar_fish_uses_sprite() {
-        // The fish instance is a macro in macros.html; Go defines it inside
-        // calendar.html.
+        // The fish instance is a macro in macros.html.
         assert!(source("calendar.html").contains(r#"id="icon-fish""#), "the calendar defines one fish symbol");
         assert!(source("macros.html").contains(r##"<use href="#icon-fish"/>"##), "fish instances use the symbol");
         let paths: usize = TEMPLATES.iter().map(|(_, s)| s.matches("M1 6 C5 1.2").count()).sum();

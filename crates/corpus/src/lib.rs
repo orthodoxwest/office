@@ -1,16 +1,14 @@
-//! The liturgical text corpus: the `data/texts/` file format, the loader, the
-//! `@use` and `@omit` directives, the collect-conclusion and Latin-incipit
-//! sidecars, and the line grammar. Ported from Go's `internal/texts`.
-//!
-//! The crate does no file access. Callers pass the files under `data/texts/`
-//! in Go `filepath.Walk` order (directory entries in byte order, depth first),
-//! which matters because a later file may redefine an earlier key.
+//! The liturgical text corpus: the `data/texts/` file format, the loader, the `@use` and `@omit`
+//! directives, the collect-conclusion and Latin-incipit sidecars, and the line grammar. The crate
+//! does no file access. Callers pass the files under `data/texts/` in depth-first order, with each
+//! directory’s entries in byte order, which matters because a later file may redefine an earlier
+//! key.
 
 pub mod lines;
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use compat::{quote, scan_lines};
+use data_format::{quote, scan_lines};
 
 /// One file under `data/texts/`.
 #[derive(Clone, Debug)]
@@ -73,10 +71,9 @@ impl Corpus {
         Corpus { texts: texts.into_iter().collect(), ..Corpus::default() }
     }
 
-    /// Loads the corpus from the files under `data/texts/` (in walk order)
-    /// and the optional sidecars `collect-conclusions.txt` and
-    /// `latin-incipits.txt`. Error messages match Go's `LoadTexts`, except
-    /// that appointment scopes are loaded by the office crate.
+    /// Loads the corpus from the files under `data/texts/` (in walk order) and the optional
+    /// sidecars `collect-conclusions.txt` and `latin-incipits.txt`. Appointment scopes are loaded
+    /// by the office crate.
     pub fn load(files: &[TextFile], conclusions: Option<Sidecar<'_>>, incipits: Option<Sidecar<'_>>) -> Result<Corpus, String> {
         let mut c = Corpus::default();
         for f in files.iter().filter(|f| f.rel_path.rsplit('/').next().is_some_and(|n| n.ends_with(".txt"))) {

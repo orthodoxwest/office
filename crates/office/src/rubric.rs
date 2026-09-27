@@ -1,5 +1,4 @@
-//! Prayer words quoted inside instructional rubrics. Ported from Go's
-//! `rubric.go`.
+//! Prayer words quoted inside instructional rubrics.
 
 use liturgy::RubricSpan;
 

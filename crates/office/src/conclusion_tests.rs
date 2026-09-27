@@ -1,5 +1,3 @@
-//! Ported from Go's `internal/office/conclusion_test.go`.
-
 use calendar::{Category, Rank, Season};
 use liturgy::{ElementType, OfficeElement};
 

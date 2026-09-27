@@ -1,5 +1,5 @@
-//! Loading the text corpus the Office reads: `data/texts/`, the sidecars, and
-//! the appointment scopes (Go's `texts.LoadTexts`).
+//! Loading the text corpus the Office reads: `data/texts/`, the sidecars, and the appointment
+//! scopes.
 
 use calendar::DataSource;
 use corpus::{Corpus, Sidecar, TextFile};
@@ -14,14 +14,14 @@ pub struct OfficeTexts {
     pub scopes: Option<AppointmentScopes>,
 }
 
-/// Loads `data/texts/` and its sidecars. Errors match Go's `LoadTexts`.
+/// Loads `data/texts/` and its sidecars.
 pub fn load_texts(src: &dyn DataSource) -> Result<OfficeTexts, String> {
     let mut files = Vec::new();
     for (rel, bytes) in src.walk("texts").map_err(|e| format!("loading texts: {e}"))? {
         if !rel.rsplit('/').next().is_some_and(|n| n.ends_with(".txt")) {
             continue;
         }
-        // PORT(inherited): Go reads any bytes; the corpus is UTF-8 throughout.
+        // Corpus files must be UTF-8.
         let content =
             String::from_utf8(bytes).map_err(|_| format!("loading texts: {}: invalid UTF-8", src.display_path(&format!("texts/{rel}"))))?;
         files.push(TextFile { rel_path: rel, content });

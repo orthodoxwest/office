@@ -1,7 +1,6 @@
-//! Data completeness audit: placeholder texts, missing propers, flat
-//! antiphon sets, and translation-register review. Ported from Go's
-//! `audit/audit.go`; the composition sweep and the text lints are in
-//! [`sweep`] and [`lint`].
+//! Data completeness audit: placeholder texts, missing propers, flat antiphon sets, and
+//! translation-register review. The composition sweep and the text lints are in [`sweep`] and
+//! [`lint`].
 
 pub mod lint;
 pub mod sweep;
@@ -12,8 +11,8 @@ use std::sync::LazyLock;
 
 use calendar::loader::load_feasts;
 use calendar::{DataSource, FeastRef, Rank};
-use compat::scan_lines;
 use corpus::Corpus;
+use data_format::scan_lines;
 use regex::Regex;
 
 /// The refs looked up under `proper/<feast-id>/`: the first four for the
@@ -67,7 +66,7 @@ pub struct Report {
     pub modern_collects: Vec<String>,
 }
 
-// Go's \b is ASCII.
+// Word boundaries are ASCII.
 static ARCHAIC_PRONOUN_RE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?i)(?-u:\b)(thou|thee|thy|thine)(?-u:\b)").expect("valid regex"));
 static MODERN_PRONOUN_RE: LazyLock<Regex> =

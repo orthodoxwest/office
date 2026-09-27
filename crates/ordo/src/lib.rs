@@ -1,6 +1,5 @@
-//! The text ordo (Tabula Temporaria plus a stanza per day) and the rubrics
-//! TSV the ordo cross-checks read. Ported from Go's `output/ordo.go` and
-//! `cli/ordo.go`.
+//! The text ordo (Tabula Temporaria plus a stanza per day) and the rubrics TSV the ordo
+//! cross-checks read.
 
 use calendar::{Date, Feast, MoveableDates, Rank, Tabula, Weekday};
 use liturgy::PrayerForm;
@@ -27,9 +26,9 @@ fn day_abbrev(wd: Weekday) -> &'static str {
     }
 }
 
-/// Go's `strings.ToUpper`: rune by rune, keeping runes with no single-rune
-/// uppercase.
-fn go_upper(s: &str) -> String {
+/// Unicode simple uppercase: one character maps to one character, keeping characters with no
+/// single-character uppercase.
+fn simple_uppercase(s: &str) -> String {
     s.chars()
         .map(|c| {
             let mut up = c.to_uppercase();
@@ -41,7 +40,7 @@ fn go_upper(s: &str) -> String {
         .collect()
 }
 
-/// Go's `%-Ns`: left-justified, padded to `width` runes.
+/// Left-justified text, padded to `width` Unicode characters.
 fn pad(s: &str, width: usize) -> String {
     let n = s.chars().count();
     if n >= width { s.to_string() } else { format!("{s}{}", " ".repeat(width - n)) }
@@ -96,7 +95,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
         }
         Some(feast) => {
             let rank = ordo_display_rank(feast);
-            let name = if rank == Rank::Double1stClass { go_upper(&feast.name) } else { feast.name.clone() };
+            let name = if rank == Rank::Double1stClass { simple_uppercase(&feast.name) } else { feast.name.clone() };
             format!("{day_num}  {dow}  {marker} {} {} {color}", pad(&name, 42), pad(&format!("[{}]", rank.abbrev()), 5))
         }
     };
@@ -119,7 +118,7 @@ pub fn format_day(day: &Day, engine: Option<&Engine>, moveable: &MoveableDates) 
                 if c.incipit.is_empty() {
                     format!("{INDENT}    Com. {}", c.name)
                 } else {
-                    format!("{INDENT}    Com. {} ({})", c.name, compat::quote(&c.incipit))
+                    format!("{INDENT}    Com. {} ({})", c.name, data_format::quote(&c.incipit))
                 }
             })
             .collect()

@@ -1,11 +1,10 @@
-//! Data validation: the feast files (Go's `calendar.ValidateAll`) and the
-//! text corpus (Go's `texts.ValidateAll`). Reports match Go's line for line.
+//! Validation of feast files and the text corpus.
 
 use std::collections::HashMap;
 
 use calendar::loader::{FEAST_FILES, parse_ini_sections, section_to_feast};
 use calendar::{DataSource, Feast, Rank};
-use compat::{atoi, quote, scan_lines};
+use data_format::{atoi, quote, scan_lines};
 
 /// Validates the feast files in three layers: syntax, schema, semantics.
 pub fn validate_calendar(src: &dyn DataSource) -> Vec<String> {

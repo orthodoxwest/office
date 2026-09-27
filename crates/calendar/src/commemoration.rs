@@ -19,12 +19,11 @@ pub fn lauds_commemorations(day: &CalendarDay) -> Vec<FeastRef> {
     order_commemorations(&comms, &OrderContext { season: Some(day.season), winner: day.celebration.clone(), ..OrderContext::default() })
 }
 
-/// Ordering is separate from eligibility, duplicate selection, and text
-/// context. Feasts are compared by identity (`Arc::ptr_eq`), as Go compares
-/// pointers.
+/// Ordering is separate from eligibility, duplicate selection, and text context. Feasts are
+/// compared by identity (`Arc::ptr_eq`).
 #[derive(Clone, Debug, Default)]
 pub struct OrderContext {
-    // PORT(inherited): Go's zero Season is "", which no rule matches.
+    // Without a season, no seasonal eligibility rule matches.
     pub season: Option<Season>,
     pub winner: Option<FeastRef>,
     pub concurrent: Option<FeastRef>,
@@ -188,7 +187,7 @@ pub fn is_privileged_feast(f: &Feast) -> bool {
 
 /// Folds a name for fuzzy duplicate detection.
 pub fn normalize_commemoration_name(name: &str) -> String {
-    // PORT(inherited): Go lowercases rune by rune (unicode.ToLower).
+    // Use Unicode simple lowercase, mapping one character to one character.
     let mut n: String = name.trim().chars().map(|c| c.to_lowercase().next().unwrap_or(c)).collect();
     for (from, to) in [
         ("&", " and "),
@@ -208,7 +207,8 @@ pub fn normalize_commemoration_name(name: &str) -> String {
     ] {
         n = n.replace(from, to);
     }
-    // Go: TrimSpace, then collapse RE2 \s+ ([\t\n\f\r ]) to one space.
+    // Trim surrounding Unicode whitespace, then collapse ASCII whitespace (`[\t\n\f\r ]`) to one
+    // space.
     let mut out = String::with_capacity(n.len());
     let mut in_space = false;
     for c in n.trim().chars() {

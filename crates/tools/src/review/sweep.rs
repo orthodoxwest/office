@@ -1,9 +1,8 @@
-//! The review sweep: compose every hour of every day of a window of years,
-//! in every prayer form, keeping one witness per distinct composition (Go's
-//! `composeReviewForms`). Years compose in parallel; each composition is
-//! mapped to a small record on its worker and the records are folded in Go's
-//! sequential order (year, day, hour, form), so the reports stay
-//! deterministic and memory stays bounded by the years in flight.
+//! The review sweep: compose every hour of every day of a window of years, in every prayer form,
+//! keeping one witness per distinct composition. Years compose in parallel; each composition is
+//! mapped to a small record on its worker and the records are folded in deterministic order (year,
+//! day, hour, form), so the reports stay deterministic and memory stays bounded by the years in
+//! flight.
 
 use std::collections::{BTreeMap, HashSet};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -34,14 +33,13 @@ pub fn compose_review_forms(engine: &Engine, hour_name: &str, day: &Day, moveabl
 pub enum Forms {
     /// Every distinct form (`compose_review_forms`).
     All,
-    /// Private prayer only (Go's `ComposeHour`).
+    /// Private prayer only.
     Private,
 }
 
-/// Maps every composition in `[start, start+years)` and folds the records
-/// in sweep order, each year as soon as the years before it are folded.
-/// `calendar_error` formats a failure to build a year; the first failure in
-/// sweep order is returned, as Go's sequential loop would.
+/// Maps every composition in `[start, start+years)` and folds the records in sweep order, each year
+/// as soon as the years before it are folded. `calendar_error` formats a failure to build a year;
+/// the first failure in sweep order is returned.
 #[allow(clippy::too_many_arguments)]
 pub fn sweep<T: Send>(
     engine: &Engine,

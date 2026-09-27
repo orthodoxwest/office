@@ -13,9 +13,8 @@ impl FsData {
         FsData { dir: dir.into() }
     }
 
-    /// Finds `data/` beside the executable, two levels above it (a cargo
-    /// `target/<profile>/` build), or in the working directory, as Go's
-    /// `FindDataDir` does.
+    /// Finds `data/` beside the executable, two levels above it (a Cargo `target/<profile>/`
+    /// build), or in the working directory.
     pub fn find() -> Option<FsData> {
         if let Ok(exe) = std::env::current_exe()
             && let Some(dir) = exe.parent()
@@ -30,8 +29,7 @@ impl FsData {
     }
 }
 
-/// Replaces `path` atomically, as the Go review tools do: a temporary file
-/// beside it, synced, made 0644, then renamed over it.
+/// Replaces `path` atomically: a temporary file beside it, synced, made 0644, then renamed over it.
 pub fn write_atomic(path: &Path, contents: &[u8]) -> Result<(), String> {
     use std::io::Write as _;
     let dir = path.parent().unwrap_or(Path::new("."));
@@ -55,7 +53,7 @@ pub fn write_atomic(path: &Path, contents: &[u8]) -> Result<(), String> {
     result
 }
 
-/// Go's `filepath.Clean`: the shortest lexically equivalent path.
+/// The shortest lexically equivalent path.
 pub fn clean(path: &Path) -> PathBuf {
     let mut out: Vec<Component> = Vec::new();
     for c in path.components() {
@@ -77,7 +75,7 @@ pub fn clean(path: &Path) -> PathBuf {
     out.iter().collect()
 }
 
-/// Go's `filepath.Rel` for two absolute paths: `target` relative to `base`.
+/// For two absolute paths, returns `target` relative to `base`.
 pub fn rel(base: &Path, target: &Path) -> PathBuf {
     let (base, target) = (clean(base), clean(target));
     let b: Vec<Component> = base.components().collect();
@@ -119,8 +117,8 @@ pub fn io_error(op: &str, path: &Path, e: &std::io::Error) -> String {
     format!("{op} {}: {e}", path.display())
 }
 
-/// Go's `filepath.Walk`: lstat the root, then visit directory entries in
-/// byte order, depth first. Anything that is not a directory is a file.
+/// Inspect the root without following symlinks, then visit directory entries in byte order, depth
+/// first. Anything that is not a directory is a file.
 fn walk_dir(path: &Path, rel: &str, out: &mut Vec<(String, Vec<u8>)>) -> Result<(), String> {
     let meta = std::fs::symlink_metadata(path).map_err(|e| io_error("lstat", path, &e))?;
     if !meta.is_dir() {
@@ -147,7 +145,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn clean_and_rel_follow_go() {
+    fn cleans_paths_and_computes_relative_paths() {
         assert_eq!(clean(Path::new("/a/b/../../data")), PathBuf::from("/data"));
         assert_eq!(clean(Path::new("./data/")), PathBuf::from("data"));
         assert_eq!(clean(Path::new("../x/./y/..")), PathBuf::from("../x"));

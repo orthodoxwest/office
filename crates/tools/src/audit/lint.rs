@@ -1,12 +1,12 @@
-//! Text-corpus lints: mechanical findings fail `make check`; advisory ones
-//! are heuristics for a human eye. Ported from Go's `audit/lint.go`.
+//! Text-corpus lints: mechanical findings fail `make check`; advisory ones are heuristics for a
+//! human eye.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::fmt::Write as _;
 use std::sync::LazyLock;
 
 use calendar::DataSource;
-use compat::quote;
+use data_format::quote;
 use regex::Regex;
 
 use super::trim_index_suffix;
@@ -150,8 +150,7 @@ fn lint_latin(r: &mut LintReport, key: &str, text: &str) {
 /// An entry ending in a letter was probably cut off.
 fn lint_truncation(r: &mut LintReport, key: &str, text: &str) {
     let chars: Vec<char> = text.trim().chars().collect();
-    // PORT(inherited): Go's unicode.IsLetter (category L) against Rust's
-    // Alphabetic property; they agree on the corpus's final characters.
+    // The final character is tested with the Unicode Alphabetic property.
     if !chars.last().is_some_and(|c| c.is_alphabetic()) {
         return;
     }

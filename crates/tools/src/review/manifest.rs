@@ -1,10 +1,9 @@
-//! The review manifest: every distinct rendered composition of a sweep, as a
-//! reviewer checklist. Ported from Go's `review/review.go`.
+//! The review manifest: every distinct rendered composition of a sweep, as a reviewer checklist.
 
 use std::collections::HashMap;
 
 use calendar::{CalendarData, DataSource, Date, Rank, Season};
-use compat::csv;
+use data_format::csv;
 use liturgy::PrayerForm;
 use office::engine::Engine;
 

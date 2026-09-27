@@ -1,10 +1,9 @@
-//! The zero-occurrence ledger: durable judgments on corpus entries a sweep
-//! never selects. Ported from Go's `review/zero_occurrence.go`.
+//! The zero-occurrence ledger: durable judgments on corpus entries a sweep never selects.
 
 use std::collections::BTreeMap;
 
 use calendar::DataSource;
-use compat::quote;
+use data_format::quote;
 
 use super::provenance::{ProvenanceInventory, read_ledger};
 

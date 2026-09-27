@@ -1,10 +1,9 @@
-//! `corpus show` and `corpus put`: read one corpus body, or replace or
-//! activate one section in place, with its source citation. Ported from Go's
-//! `cli/corpus.go`.
+//! `corpus show` and `corpus put`: read one corpus body, or replace or activate one section in
+//! place, with its source citation.
 
 use std::path::{Path, PathBuf};
 
-use compat::quote;
+use data_format::quote;
 
 use crate::fs::io_error;
 
@@ -34,17 +33,17 @@ fn valid_segment(s: &str) -> bool {
 
 /// `^\[([a-z0-9-]+)\]\s*$` on an already-trimmed line.
 fn live_section(s: &str) -> Option<&str> {
-    let inner = s.strip_prefix('[')?.trim_end_matches(go_space).strip_suffix(']')?;
+    let inner = s.strip_prefix('[')?.trim_end_matches(section_whitespace).strip_suffix(']')?;
     (!inner.is_empty() && inner.bytes().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')).then_some(inner)
 }
 
 /// `^#\s*\[([a-z0-9-]+)\]\s*$`
 fn comment_section(s: &str) -> Option<&str> {
-    live_section(s.strip_prefix('#')?.trim_start_matches(go_space))
+    live_section(s.strip_prefix('#')?.trim_start_matches(section_whitespace))
 }
 
-/// Go's regexp `\s`: ASCII whitespace.
-fn go_space(c: char) -> bool {
+/// ASCII whitespace.
+fn section_whitespace(c: char) -> bool {
     matches!(c, '\t' | '\n' | '\x0c' | '\r' | ' ')
 }
 

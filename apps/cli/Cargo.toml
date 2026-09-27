@@ -11,7 +11,7 @@ name = "office"
 path = "src/main.rs"
 
 [dependencies]
-compat.workspace = true
+data-format.workspace = true
 calendar.workspace = true
 office.workspace = true
 liturgy.workspace = true

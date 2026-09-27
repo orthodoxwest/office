@@ -1,12 +1,11 @@
-//! Composition explanations and the sample planner. Ported from Go's
-//! `review/assurance.go`.
+//! Composition explanations and the sample planner.
 
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt::Write as _;
 
 use calendar::{CalendarData, DataSource, Date, Decision};
-use compat::csv;
-use compat::json::{Json, Obj};
+use data_format::csv;
+use data_format::json::{Json, Obj};
 use liturgy::{OfficeElement, OfficeHour, PrayerForm};
 use office::day::Day;
 use office::engine::Engine;
@@ -49,8 +48,7 @@ fn is_resolution_source(r: &str) -> bool {
     ["proper/", "commons/", "seasonal/", "ordinary/"].iter().any(|p| r.starts_with(p))
 }
 
-/// Go's `ExplainComposition`: one hour joined to its provenance, as the
-/// `review explain` JSON.
+/// One hour joined to its provenance, as the `review explain` JSON.
 pub fn explain_composition(src: &dyn DataSource, hour_name: &str, date: Date, form: PrayerForm) -> Result<String, String> {
     let days = crate::year::load_office_days(src, date.year())?;
     let day = days.get(date.ordinal() as usize - 1).ok_or_else(|| format!("date out of range: {date}"))?;
@@ -115,7 +113,7 @@ pub fn explain_composition(src: &dyn DataSource, hour_name: &str, date: Date, fo
         .field("dependencies", if dependencies.is_empty() { Json::Null } else { Json::Arr(dependencies) })
         .field_omitempty_arr("resolutions", resolutions)
         .build();
-    Ok(compat::json::encode_indent(&v))
+    Ok(data_format::json::encode_indent(&v))
 }
 
 fn citation_json(s: &SourceCitation) -> Json {
@@ -233,7 +231,7 @@ pub fn candidate_cmp(a: &ReviewCandidate, b: &ReviewCandidate) -> std::cmp::Orde
         .then_with(|| hour_tier(a.hour).cmp(&hour_tier(b.hour)))
         .then_with(|| a.date.cmp(&b.date))
         .then_with(|| hour_order(a.hour).cmp(&hour_order(b.hour)))
-        // Go compares the form strings.
+        // Order by the serialized prayer-form names.
         .then_with(|| a.form.as_str().cmp(b.form.as_str()))
         .then_with(|| a.hash.cmp(&b.hash))
 }
@@ -271,8 +269,7 @@ pub struct ReviewPlan {
     pub future_year_pages: usize,
 }
 
-/// Go's `BuildReviewPlan`: a greedy frequency-weighted cover of every
-/// observed feature, primary year first.
+/// A greedy frequency-weighted cover of every observed feature, primary year first.
 pub fn build_review_plan(src: &dyn DataSource, start: i32, years: i32, include_sources: bool) -> Result<ReviewPlan, String> {
     if years < 1 {
         return Err("years must be at least 1".into());

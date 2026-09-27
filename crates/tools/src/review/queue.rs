@@ -1,13 +1,11 @@
-//! The dependency-weighted provenance queue, usage-weighted provenance, and
-//! the zero-occurrence report built on it. Ported from Go's
-//! `review/provenance_queue.go`, `provenance_weighted.go`, and the report
-//! half of `zero_occurrence.go`.
+//! The dependency-weighted provenance queue, usage-weighted provenance, and the zero-occurrence
+//! report built on it.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fmt::Write as _;
 
 use calendar::{CalendarData, DataSource, Date};
-use compat::csv;
+use data_format::csv;
 use liturgy::PrayerForm;
 use office::engine::Engine;
 
@@ -80,8 +78,8 @@ struct Representative {
     date: Date,
 }
 
-/// Go's `BuildProvenanceQueue`: suspect entries first, then by
-/// 20·compositions + 5·priority-A uses + 3·principal-hour uses + uses.
+/// Suspect entries first, then by 20·compositions + 5·priority-A uses + 3·principal-hour uses +
+/// uses.
 pub fn build_provenance_queue(src: &dyn DataSource, start: i32, years: i32, include_verified: bool) -> Result<ProvenanceQueue, String> {
     if years < 1 {
         return Err("years must be at least 1".into());

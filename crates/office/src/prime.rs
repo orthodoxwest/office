@@ -1,4 +1,4 @@
-//! Prime. Ported from Go's `prime.go`.
+//! Prime.
 
 use calendar::{Category, MoveableDates, Season};
 use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};

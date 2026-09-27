@@ -1,5 +1,5 @@
-//! The prayer-form pass: marked ordinary slots take the private, deacon, or
-//! priest form after composition. Ported from Go's `leader.go`.
+//! The prayer-form pass: marked ordinary slots take the private, deacon, or priest form after
+//! composition.
 
 use std::collections::HashSet;
 

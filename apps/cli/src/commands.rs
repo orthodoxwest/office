@@ -1,5 +1,4 @@
 //! Year and hour commands: `ordo`, `rubrics`, and one command per hour.
-//! Mirrors Go's `cli/ordo.go` and `cli/hours.go`.
 
 use std::io::Write;
 
@@ -10,7 +9,7 @@ use tools::fs::FsData;
 
 fn parse_year(args: &[String], command: &str) -> Result<i32, String> {
     let arg = args.first().ok_or_else(|| format!("usage: office {command} YEAR"))?;
-    compat::atoi(arg).ok().and_then(|y| i32::try_from(y).ok()).ok_or_else(|| format!("invalid year: {arg}"))
+    data_format::atoi(arg).ok().and_then(|y| i32::try_from(y).ok()).ok_or_else(|| format!("invalid year: {arg}"))
 }
 
 /// The calendar days (with their Office resolution) and the engine.
@@ -117,8 +116,7 @@ pub fn cmd_tex(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<()
     write!(out, "{}", render_tex::format_office_hour_tex(&hour, chant.then_some(&lookup))).map_err(|e| e.to_string())
 }
 
-/// Today's civil date. PORT(inherited): Go's `time.Now()` is local time; this
-/// is UTC, which only differs when no date is given near midnight.
+/// Today's civil date in UTC, used when the command omits an explicit date.
 pub fn today() -> Date {
     let secs = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs());
     Date::new(1970, 1, 1).add_days((secs / 86_400) as i32)

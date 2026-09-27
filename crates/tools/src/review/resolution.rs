@@ -1,12 +1,11 @@
-//! The resolution inventory: every dynamic proper slot of a sweep with the
-//! tier it resolved from, deduplicated. Ported from Go's
-//! `review/resolution_inventory.go`.
+//! The resolution inventory: every dynamic proper slot of a sweep with the tier it resolved from,
+//! deduplicated.
 
 use std::collections::HashMap;
 use std::fmt::Write as _;
 
 use calendar::{CalendarData, DataSource};
-use compat::json::{Json, Obj};
+use data_format::json::{Json, Obj};
 use office::engine::Engine;
 use office::trace::ProperResolutionTrace;
 
@@ -37,8 +36,8 @@ fn is_dynamic_resolution_ref(r: &str) -> bool {
     ["proper/", "commons/", "seasonal/", "ordinary/"].iter().any(|p| r.starts_with(p))
 }
 
-/// Go's `BuildResolutionInventory`: one private composition per date and
-/// hour (forms vary only marked ordinary slots after resolution).
+/// One private composition per date and hour (forms vary only marked ordinary slots after
+/// resolution).
 pub fn build_resolution_inventory(src: &dyn DataSource, start: i32, years: i32) -> Result<ResolutionInventory, String> {
     if years < 1 {
         return Err("years must be positive".into());
@@ -194,7 +193,7 @@ impl ResolutionInventory {
         w
     }
 
-    /// Go's JSON encoding of the inventory.
+    /// JSON encoding of the inventory.
     pub fn json(&self) -> String {
         let rows = self
             .rows
@@ -230,6 +229,6 @@ impl ResolutionInventory {
             .int("years", i64::from(self.years))
             .field("rows", Json::Arr(rows))
             .build();
-        compat::json::encode_indent(&v)
+        data_format::json::encode_indent(&v)
     }
 }

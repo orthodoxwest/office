@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/compat", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/render-html", "crates/tools", "apps/cli", "apps/office-web"]
+members = ["crates/data-format", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/render-html", "crates/tools", "apps/cli", "apps/office-web"]
 
 [workspace.package]
 edition = "2024"
@@ -8,7 +8,7 @@ rust-version = "1.94"
 publish = false
 
 [workspace.dependencies]
-compat = { path = "crates/compat" }
+data-format = { path = "crates/data-format" }
 calendar = { path = "crates/calendar" }
 corpus = { path = "crates/corpus" }
 liturgy = { path = "crates/liturgy" }
@@ -30,8 +30,8 @@ rusqlite = { version = "0.37", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 
 # Core crates add `wildcard_enum_match_arm = "deny"` in their own [lints]
-# (RUST-PORT.md, "Rules"): adding a liturgical enum variant must break the
-# build at every match that has to consider it.
+# configuration: adding a liturgical enum variant must break the build at
+# every match that has to consider it.
 [workspace.lints.rust]
 unsafe_code = "forbid"
 

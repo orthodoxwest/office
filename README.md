@@ -70,9 +70,7 @@ make project-status YEAR=2026     # proper, assurance, and ordo reports
 
 ## Development
 
-Rust is the default engine, CLI, and web server. [RUST-PORT.md](RUST-PORT.md)
-tracks the remaining test migration and Go removal. The retained Go code is
-a comparison reference, not part of the deployed image.
+The engine, CLI, and web server are written in Rust.
 
 The check suite needs Rust, Make, Python 3, Node.js 20.19+ and npm. CI uses
 Node.js 22. Install browser tooling with:
@@ -133,9 +131,8 @@ pdfjam --booklet true --paper letter output/compline-2026-09-04.pdf
 The app runs on Fly.io ([fly.toml](fly.toml)). The [Dockerfile](Dockerfile)
 builds a Rust binary with bundled SQLite and time-zone data, then copies it
 and `data/` into a Debian slim runtime image. CI smoke-tests that image.
-Maintainers with Fly access deploy with `fly deploy`. Roll back by reverting
-the cutover PR, merging the revert, and deploying it; no separate Go tag is
-required. The usage database schema is unchanged.
+Maintainers with Fly access deploy with `fly deploy`. To roll back a change,
+revert its PR, merge the revert, and deploy it.
 
 ### Usage metrics
 
@@ -171,7 +168,7 @@ crawler presents a fresh cookie jar per page and would otherwise mint a
 - Only current pages count: the beacon rejects dates outside today ±1 day (±1
   year for the ordo), capping any crawl at about ten pages.
 - Nothing reports until the page is touched or visible for eight seconds.
-- Self-identifying crawlers (`usage.IsBot`: `<name>bot/<version>` or an
+- Self-identifying crawlers (`usage::is_bot`: `<name>bot/<version>` or an
   explicit token, not merely the substring "bot") get `204` with no cookie.
 
 A stealth scraper that dwells on today's pages still counts, and a reader

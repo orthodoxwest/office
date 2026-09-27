@@ -11,7 +11,7 @@ use crate::model::{CalendarDay, Category, Color, FERIA_COMMEMORATION_ID, Feast, 
 use crate::occurrence::resolve_day;
 use crate::penitential::{PenitentialRule, apply_penitential_rules};
 use crate::traits::is_penitential_feria_season;
-use compat::atoi;
+use data_format::atoi;
 
 /// Short names for octave and vigil references.
 const SHORT_NAMES: [(&str, &str); 14] = [
@@ -50,7 +50,7 @@ pub fn title_case(s: &str) -> String {
         .map(|w| {
             let mut chars = w.chars();
             match chars.next() {
-                // PORT(inherited): Go uppercases the first byte; identical for ASCII.
+                // Uppercase the initial byte of these ASCII weekday names.
                 Some(c) => c.to_uppercase().chain(chars).collect::<String>(),
                 None => String::new(),
             }
@@ -377,7 +377,7 @@ fn adjust_fixed_date_for_leap_year(year: i32, month: u32, day: u32, feast_id: &s
     (month, day)
 }
 
-/// Go's `strconv.Atoi` with the error discarded (0 on failure).
+/// Parses an integer, returning 0 on failure.
 fn atoi_or_zero(s: &str) -> i32 {
     atoi(s).ok().and_then(|n| i32::try_from(n).ok()).unwrap_or(0)
 }

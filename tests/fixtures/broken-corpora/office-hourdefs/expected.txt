@@ -5,12 +5,12 @@ office/lauds.txt [Opening]: unknown element Type "bogus-type"
 office/lauds.txt [Opening]: proper ref "nowhere-antiphon-3" not found in corpus (checked ordinary, shared, weekday, and feast/seasonal paths)
 office/lauds.txt [Opening]: marian element has unsupported ref "fixed" (expected "seasonal")
 office/lauds.txt [Opening]: unsupported lauds proper-psalmody Ref "vespers-psalmody"
-office/prime.txt: opening hour definition: open $DATA/office/prime.txt: no such file or directory
+office/prime.txt: opening hour definition: $DATA/office/prime.txt does not exist
 office/terce.txt [Collect]: unsupported terce proper-psalmody Ref "lauds-psalmody"
-office/sext.txt: opening hour definition: open $DATA/office/sext.txt: no such file or directory
-office/none.txt: opening hour definition: open $DATA/office/none.txt: no such file or directory
+office/sext.txt: opening hour definition: $DATA/office/sext.txt does not exist
+office/none.txt: opening hour definition: $DATA/office/none.txt does not exist
 office/compline.txt: $DATA/office/compline.txt:2: invalid condition in section [Odd]: unknown condition "when-the-moon-is-full"
-office/vespers-holy-saturday.txt: opening hour definition: open $DATA/office/vespers-holy-saturday.txt: no such file or directory
+office/vespers-holy-saturday.txt: opening hour definition: $DATA/office/vespers-holy-saturday.txt does not exist
 ordinary/vespers/festal-psalmody: antiphon ref not found in corpus: psalm-antiphon-9
 ordinary/vespers/festal-psalmody: psalm ref not found in corpus: psalms/999
 proper/st-nobody/vespers-psalmody: invalid Vespers psalmody declaration: line 1: expected <antiphon-key> = <psalm-key>

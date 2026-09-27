@@ -1,12 +1,11 @@
-//! `validate`, `audit`, and `lint`. Ported from Go's `cli/checks.go`.
+//! `validate`, `audit`, and `lint`.
 
 use std::io::Write;
 
 use tools::fs::FsData;
 use tools::review::{provenance, zero_occurrence};
 
-/// Go's `errReported`: the findings are already written, so the command
-/// fails without a further message.
+/// The findings are already written, so the command fails without a further message.
 pub const REPORTED: &str = "";
 
 /// `validate`: every data layer, the hour definitions, and the review ledgers.

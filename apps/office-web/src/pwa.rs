@@ -18,9 +18,9 @@ pub fn file(name: &str) -> Option<&'static [u8]> {
     FILES.iter().find(|(n, _)| *n == name).map(|(_, b)| *b)
 }
 
-/// A deterministic build identifier: the SHA-256 of the server binary and
-/// every data file (path and contents, in Go's `fs.WalkDir` order), cut to
-/// 12 hex digits. It changes exactly when a deploy can change a page.
+/// A deterministic build identifier: the SHA-256 of the server binary and every data file (path and
+/// contents, depth first with each directory sorted by name), cut to 12 hex digits. It changes
+/// exactly when a deploy can change a page.
 pub fn compute_version(data_dir: &Path) -> String {
     let mut h = Sha256::new();
     if let Ok(exe) = std::env::current_exe()
@@ -50,7 +50,7 @@ fn walk_data(dir: &Path, rel: &str, h: &mut Sha256) {
         h.update(path.as_bytes());
         if let Ok(mut f) = std::fs::File::open(entry.path()) {
             let mut buf = Vec::new();
-            // A symlinked directory opens but does not read, as in Go.
+            // Reading a symlinked directory as a file fails.
             if f.read_to_end(&mut buf).is_ok() {
                 h.update(&buf);
             }
@@ -58,8 +58,7 @@ fn walk_data(dir: &Path, rel: &str, h: &mut Sha256) {
     }
 }
 
-/// `mime.TypeByExtension` for the embedded files' extensions, with the two
-/// Go registers at startup; anything else is sniffed as Go would.
+/// Content types for embedded assets; unrecognized extensions fall back to inspecting the content.
 fn content_type(name: &str, body: &[u8]) -> &'static str {
     let ext = name.rsplit_once('.').map(|(_, e)| e).unwrap_or("");
     match ext {
@@ -116,7 +115,6 @@ mod tests {
         assert!(file("static/fonts/eb-garamond-regular.woff2").is_some());
     }
 
-    // Ported from Go's `TestComputeVersionDeterministicAndDataSensitive`.
     #[test]
     fn compute_version_is_deterministic_and_data_sensitive() {
         let dir = std::env::temp_dir().join(format!("office-version-{}", std::process::id()));
@@ -133,7 +131,7 @@ mod tests {
     /// `fs.WalkDir` descends into a directory where its name sorts, so "a/"
     /// is hashed before "a.txt" although "a.txt" < "a/x" as a full path.
     #[test]
-    fn compute_version_walks_in_go_order() {
+    fn compute_version_walks_in_sorted_depth_first_order() {
         let dir = std::env::temp_dir().join(format!("office-walk-{}", std::process::id()));
         std::fs::create_dir_all(dir.join("a")).unwrap();
         std::fs::write(dir.join("a/x"), "1").unwrap();

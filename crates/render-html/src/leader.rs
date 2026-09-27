@@ -1,6 +1,5 @@
-//! One hour page for every prayer form: sections whose elements agree are
-//! shared, and each explicit leader slot carries its alternatives, tagged
-//! with the forms they apply to. Ported from Go's `render/leader.go`.
+//! One hour page for every prayer form: sections whose elements agree are shared, and each explicit
+//! leader slot carries its alternatives, tagged with the forms they apply to.
 
 use liturgy::{OfficeElement, OfficeHour, PrayerForm};
 
@@ -114,7 +113,6 @@ pub fn leader_sections(forms: &[(PrayerForm, &OfficeHour)]) -> Result<Vec<Leader
     Ok(sections)
 }
 
-// Ported from Go's `internal/render/leader_test.go`.
 #[cfg(test)]
 mod tests {
     use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm};

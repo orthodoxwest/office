@@ -1,6 +1,5 @@
-//! The Office engine: loads the corpus and hour definitions, dispatches to the
-//! hour composers, and applies the passes every hour shares. Ported from Go's
-//! `engine.go`.
+//! The Office engine: loads the corpus and hour definitions, dispatches to the hour composers, and
+//! applies the passes every hour shares.
 
 use std::collections::{HashMap, HashSet};
 
@@ -45,7 +44,7 @@ pub struct Engine {
 }
 
 impl Engine {
-    /// Loads everything under the data directory. Errors match Go's `NewEngine`.
+    /// Loads everything under the data directory.
     pub fn load(src: &dyn DataSource) -> Result<Engine, String> {
         let texts = load_texts(src).map_err(|e| format!("loading text corpus: {e}"))?;
         if texts.scopes.is_none() {
@@ -530,7 +529,7 @@ fn map_element_type(kind: &str) -> ElementType {
         "proper-opening-acclamation" => ElementType::OpeningAcclamation,
         "proper-short-responsory" => ElementType::ShortResponsory,
         "dialogue" => ElementType::Dialogue,
-        // PORT(inherited): unknown types (and "commemorations") are rubrics.
+        // Unknown types (and "commemorations") are rubrics.
         _ => ElementType::Rubric,
     }
 }

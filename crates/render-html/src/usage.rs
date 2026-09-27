@@ -1,13 +1,12 @@
-//! The usage report's view model. Ported from Go's `render/usage.go` and
-//! `render/usage_trends.go`.
+//! The usage report's view model.
 
 use std::collections::BTreeMap;
 
 use calendar::Date;
-use compat::json::{Json, Obj};
+use data_format::json::{Json, Obj};
 use serde::Serialize;
 
-use crate::escape::go_float;
+use crate::escape::format_float;
 use crate::view::Chrome;
 
 /// The seven hours, as the usage store names its office scopes.
@@ -69,7 +68,7 @@ pub struct UsageData {
     #[serde(flatten)]
     pub chrome: Chrome,
     pub trend_groups: Vec<TrendGroup>,
-    /// The trend groups as Go's templates encode them into the page.
+    /// The trend groups encoded into the page.
     pub trend_json: String,
     pub days: i64,
     pub max: i64,
@@ -92,8 +91,8 @@ pub struct UsageData {
 
 const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/// Go's `NewUsageData`: the chart chronological, the table newest first,
-/// the peak a daily count rather than a sum of overlapping browsers.
+/// Builds the chronological chart and newest-first table. The peak is a daily count, not a sum of
+/// overlapping browsers.
 pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> UsageData {
     let mut d = UsageData {
         chrome: Chrome { page: "usage".into(), ..Chrome::default() },
@@ -111,7 +110,7 @@ pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> U
         .map(|(name, &count)| UsageOffice {
             name: name.to_string(),
             count,
-            width: go_float(if peak_office > 0 { 100.0 * count as f64 / peak_office as f64 } else { 0.0 }),
+            width: format_float(if peak_office > 0 { 100.0 * count as f64 / peak_office as f64 } else { 0.0 }),
         })
         .collect();
     let mut average = 0.0;
@@ -161,10 +160,10 @@ pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> U
         d.chart.push(UsageBar {
             day: rows[i].day.clone(),
             users: rows[i].users,
-            x: go_float((n - 1 - i) as f64 * step + gap / 2.0),
-            y: go_float(160.0 - height),
-            width: go_float(step - gap),
-            height: go_float(height),
+            x: format_float((n - 1 - i) as f64 * step + gap / 2.0),
+            y: format_float(160.0 - height),
+            width: format_float(step - gap),
+            height: format_float(height),
             today: i == 0,
         });
     }
@@ -201,8 +200,7 @@ fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> 
     groups
 }
 
-/// The trend groups as html/template writes a value in a JSON script
-/// element: `json.Marshal` with Go's field names.
+/// The trend groups as a JSON script element, with the field names expected by the browser.
 fn trend_json(groups: &[TrendGroup]) -> String {
     let nil_or = |items: Vec<Json>| if items.is_empty() { Json::Null } else { Json::Arr(items) };
     let value = Json::Arr(
@@ -231,7 +229,7 @@ fn trend_json(groups: &[TrendGroup]) -> String {
             })
             .collect(),
     );
-    compat::json::encode_compact(&value)
+    data_format::json::encode_compact(&value)
 }
 
 #[cfg(test)]
@@ -252,7 +250,6 @@ mod tests {
         s.parse().unwrap()
     }
 
-    // Ported from Go's `internal/render/usage_test.go`.
     #[test]
     fn summary_and_chronological_chart() {
         let d = usage_data(vec![row("2026-09-05", 3), row("2026-09-04", 12), row("2026-09-03", 0)], 7, &DIMENSIONS);
@@ -297,7 +294,6 @@ mod tests {
         }
     }
 
-    // Ported from Go's `internal/render/usage_trends_test.go`.
     #[test]
     fn trends_keep_scope_counts_and_chronological_dates() {
         let dimensions = [("appearance:nave", 4), ("appearance:apse", 5), ("screen:mobile", 8), ("prayer-form:priest", 2)]
@@ -320,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn trend_json_matches_go_encoding() {
+    fn trend_json_matches_browser_contract() {
         let groups = trend_groups(&[row("2026-09-14", 0)], &DIMENSIONS[..1]);
         assert_eq!(
             trend_json(&groups),

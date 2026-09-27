@@ -1,7 +1,5 @@
-//! Ported from Go's `internal/calendar/concurrence_test.go` and
-//! `concurrence_trace_test.go`. Go's zero-valued test days (no season, no
-//! color, 0001-01-01) become a Monday in the season after Pentecost, which
-//! every rule here treats the same way.
+//! Vespers concurrence and decision-trace tests. Unless specified otherwise, synthetic days use a
+//! Monday in the season after Pentecost.
 
 use std::sync::Arc;
 
@@ -463,8 +461,7 @@ fn boundary_trace_rules() {
     let loser = f("loser", Rank::Simple, Category::Martyr);
     let incoming = f("incoming", Rank::Commemoration, Category::Martyr);
     let following = day(Some(&loser), &[&incoming]);
-    // Go passes a nil preceding day; any day without an octave office is
-    // equivalent here.
+    // The preceding day has no octave office.
     let (comms, decisions) = boundary_commemorations(Some(&w), Some(&loser), &day(None, &[]), &following, true, false);
     assert!(comms.is_empty(), "{:?}", ids(&comms));
     assert_trace_rule(&decisions, "commemoration:following-office-at-second-vespers-simple-or-memorial");
