@@ -22,6 +22,22 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
+// Phones reach Appearance and Text size from the foot of the site menu;
+// desktop keeps them in the footer. Click whichever copy is showing, opening
+// (and afterwards closing) the phone menu so later measurements see the page.
+async function choosePreference(page, name) {
+  const visible = page.getByRole("button", { name, exact: true });
+  if (await visible.count()) {
+    await visible.click();
+    return;
+  }
+  const summary = page.locator(".site-menu > summary");
+  await summary.click();
+  await page.locator(".menu-prefs").getByRole("button", { name, exact: true }).click();
+  await summary.click();
+  await expect(page.locator(".site-menu")).not.toHaveAttribute("open", "");
+}
+
 // The raised initial increases the line box without adding a line of text.
 async function openingTextLines(opening) {
   return opening.evaluate(el => {
@@ -133,11 +149,52 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   const menu = page.locator(".site-menu");
   await expect(menu).not.toHaveAttribute("open", "");
 
+  // Home lists every hour on its prayer card; the menu does not repeat them.
+  const primary = page.getByRole("navigation", { name: "Primary" });
   await page.getByText("Menu", { exact: true }).click();
   await expect(menu).toHaveAttribute("open", "");
-  await expect(
-    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Lauds", exact: true }),
-  ).toBeVisible();
+  await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
+  await expect(primary.locator('[data-nav="hour"]')).toHaveCount(0);
+  // Preferences sit at the foot of the menu, not at the foot of the page.
+  await expect(page.locator(".menu-prefs").getByRole("button", { name: "Apse", exact: true })).toBeVisible();
+  await expect(page.locator(".footer-prefs")).toBeHidden();
+  const [links, prefs] = await Promise.all([
+    primary.boundingBox(),
+    page.locator(".menu-prefs").boundingBox(),
+  ]);
+  expect(prefs.y).toBeGreaterThanOrEqual(links.y + links.height);
+
+  // The menu is an overlay: a tap on the page or Escape puts it away, but a
+  // preference tap inside it does not.
+  await page.locator(".menu-prefs").getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(menu).toHaveAttribute("open", "");
+  await page.locator("footer").click();
+  await expect(menu).not.toHaveAttribute("open", "");
+  await page.getByText("Menu", { exact: true }).click();
+  await page.keyboard.press("Escape");
+  await expect(menu).not.toHaveAttribute("open", "");
+  await expect(page.locator(".site-menu > summary")).toBeFocused();
+
+  // Home's card sits close above the footer line, not above a band of wall.
+  const [card, footer] = await Promise.all([
+    page.locator(".home").boundingBox(),
+    page.locator("footer").boundingBox(),
+  ]);
+  expect(footer.y - (card.y + card.height)).toBeLessThan(40);
+
+  // Hour pages keep the hours in the menu, in home's 2 / 3 / 2 bands.
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await page.getByText("Menu", { exact: true }).click();
+  await expect(primary.getByRole("link", { name: "Vespers", exact: true })).toBeVisible();
+  const rows = await primary.locator('[data-nav="hour"]').evaluateAll((links) => {
+    const byTop = new Map();
+    for (const a of links) {
+      const top = Math.round(a.getBoundingClientRect().top);
+      byTop.set(top, [...(byTop.get(top) || []), a.dataset.hour]);
+    }
+    return [...byTop.values()];
+  });
+  expect(rows).toEqual([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]]);
 });
 
 test("psalm spacing groups each antiphon with its own psalm", async ({ page }) => {
@@ -280,7 +337,7 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
 
     for (const size of ["default", "large", "small"]) {
       if (size !== "default") {
-        await page.getByRole("button", { name: size === "large" ? "Larger text" : "Smaller text" }).click();
+        await choosePreference(page, size === "large" ? "Larger text" : "Smaller text");
       }
 
       const geometry = await page.evaluate(() => ({
@@ -310,7 +367,7 @@ test("home hour directory fits thumb targets across phone widths and text sizes"
       expect(geometry.labelAlignment, `${width}px/${size} label alignment`).toBe("center");
 
       if (size === "large") {
-        await page.getByRole("button", { name: "Default text size" }).click();
+        await choosePreference(page, "Default text size");
       }
     }
   }
@@ -339,7 +396,7 @@ test("current hour and frontispiece invitation update in Nave and Apse", async (
   expect(naveState.background).toBe("rgba(0, 0, 0, 0)");
   expect(naveState.borderStyle).toBe("double");
 
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const apseState = await invitation.evaluate((element) => ({
     background: getComputedStyle(element).backgroundColor,
@@ -422,7 +479,7 @@ test("parish material stays off the mobile prayer page", async ({
   }));
   expect(naveMaterial.inscriptionBand).not.toBe("rgba(0, 0, 0, 0)");
 
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   // The Apse vault is a background-image, which can only snap rather than
   // crossfade, so app.js dips it invisible and applies the theme (and swaps
   // this image) only once that dip completes — poll instead of reading the
@@ -446,7 +503,7 @@ test("parish material stays off the mobile prayer page", async ({
 
   // The wall has no composition to become a spotlight on a wide canvas, so
   // desktop Nave keeps it too; the body itself paints nothing over it.
-  await page.getByRole("button", { name: "Nave", exact: true }).click();
+  await choosePreference(page, "Nave");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe(
     "none",
@@ -454,7 +511,7 @@ test("parish material stays off the mobile prayer page", async ({
   expect((await wall()).image).toMatch(/plaster(-wide)?\.jpg/);
 
   // Apse adds the vault over the wall.
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const readVault = () =>
     page.evaluate(() => {
@@ -595,13 +652,13 @@ test("the wall fades out before a theme swap and respects reduced motion", async
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     });
   });
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   expect(await page.evaluate(() => window.wallAtThemeSwap)).toBeLessThan(0.1);
   const opacity = () => page.evaluate(() => Number(getComputedStyle(document.documentElement, "::before").opacity));
   await expect.poll(opacity).toBe(1);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.getByRole("button", { name: "Nave", exact: true }).click();
+  await choosePreference(page, "Nave");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   expect(await opacity()).toBe(1);
 });
@@ -1059,7 +1116,8 @@ test("the header beam holds one line and one geometry on every page", async ({ p
         shell: Math.round(document.querySelector(".site-nav-shell").getBoundingClientRect().width),
       };
     });
-    expect(header.links).toBe(9);
+    // Hour pages carry the seven hours; elsewhere only Ordo and Reminders.
+    expect(header.links).toBe(path.startsWith("/lauds") ? 9 : 2);
     expect(header.rows).toBe(1);
     shellWidths.push(`${width}:${header.shell}`);
   }
@@ -1090,7 +1148,7 @@ test("the inscription band carries the frontispiece heading in both themes", asy
   expect(nave.ground).not.toBe("rgba(0, 0, 0, 0)");
   expect(nave.bleed).toBe(true);
 
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   // app.js dips the Apse vault invisible before it applies data-theme (so the
   // vault's background-image swaps while unseen instead of popping), which
   // holds this attribute back by ~100ms; the painted course then separately
@@ -1188,9 +1246,12 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await openDatedPage(page, `/?date=${testDate}`);
 
   await expect(page.locator(".site-menu")).toHaveAttribute("open", "");
-  await expect(
-    page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Vespers", exact: true }),
-  ).toBeVisible();
+  // The frontispiece is home's hour directory; the header does not repeat it.
+  const primary = page.getByRole("navigation", { name: "Primary" });
+  await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
+  await expect(primary.locator('[data-nav="hour"]')).toHaveCount(0);
+  await expect(page.locator(".menu-prefs")).toBeHidden();
+  await expect(page.locator(".footer-prefs").getByRole("button", { name: "Apse", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
   const rules = await page.evaluate(() => {
@@ -1261,7 +1322,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
 
     for (const size of ["default", "large", "small"]) {
       if (size !== "default") {
-        await page.getByRole("button", { name: size === "large" ? "Larger text" : "Smaller text" }).click();
+        await choosePreference(page, size === "large" ? "Larger text" : "Smaller text");
       }
 
       const geometry = await page.evaluate(() => {
@@ -1280,7 +1341,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
       expect(geometry.shortestTarget, `${width}px/${size} hour targets`).toBeGreaterThanOrEqual(44);
 
       if (size === "large") {
-        await page.getByRole("button", { name: "Default text size" }).click();
+        await choosePreference(page, "Default text size");
       }
     }
   }
@@ -1289,7 +1350,7 @@ test("desktop frontispiece fits its breakpoint and reader sizes", async ({ page 
 test("appearance choice persists across prayer navigation", async ({ page }) => {
   await page.goto(`/?date=${testDate}`);
 
-  await page.getByRole("button", { name: "Apse", exact: true }).click();
+  await choosePreference(page, "Apse");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
   await page.goto(`/lauds/${testDate}`);
@@ -1304,15 +1365,15 @@ test("text size choice persists across prayer navigation", async ({ page }) => {
   expect(await page.evaluate(() => localStorage.getItem("office-text-size"))).toBeNull();
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
 
-  await page.getByRole("button", { name: "Larger text", exact: true }).click();
+  await choosePreference(page, "Larger text");
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
 
   await page.goto(`/lauds/${testDate}`);
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
-  await expect(page.getByRole("button", { name: "Larger text", exact: true })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  // Both copies (menu and footer) reflect the stored choice.
+  const large = page.locator('.text-size-option[data-text-size-choice="large"]');
+  await expect(large).toHaveCount(2);
+  for (const button of await large.all()) await expect(button).toHaveAttribute("aria-pressed", "true");
 });
 
 test("larger text grows the prayer without breaking the phone layout", async ({ page }) => {
@@ -1328,23 +1389,33 @@ test("larger text grows the prayer without breaking the phone layout", async ({ 
   const base = await prayerSize();
   expect(await overflows()).toBe(false);
 
-  await page.getByRole("button", { name: "Larger text", exact: true }).click();
+  await choosePreference(page, "Larger text");
   expect(await prayerSize()).toBeGreaterThan(base);
   expect(await overflows()).toBe(false);
 
-  // Every footer control keeps a thumb-sized target at the largest setting.
-  const heights = await page.evaluate(() =>
-    Array.from(document.querySelectorAll(".text-size-option, .theme-option")).map(
-      (el) => el.getBoundingClientRect().height,
-    ),
-  );
-  expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+  // Every menu preference keeps a thumb-sized target at the largest setting,
+  // and the two rows share columns so each theme sits over a text size.
+  await page.locator(".site-menu > summary").click();
+  const cells = await page.evaluate(() => {
+    const rects = (sel) =>
+      Array.from(document.querySelectorAll(`.menu-prefs ${sel}`)).map((el) => el.getBoundingClientRect());
+    return { themes: rects(".theme-option"), sizes: rects(".text-size-option") };
+  });
+  const all = [...cells.themes, ...cells.sizes];
+  expect(all).toHaveLength(6);
+  expect(Math.min(...all.map((r) => r.height))).toBeGreaterThanOrEqual(44);
+  cells.themes.forEach((r, i) => {
+    expect(Math.abs(r.left - cells.sizes[i].left)).toBeLessThan(1);
+    expect(Math.abs(r.width - cells.sizes[i].width)).toBeLessThan(1);
+  });
+  expect(await overflows()).toBe(false);
+  await page.locator(".site-menu > summary").click();
 
-  await page.getByRole("button", { name: "Smaller text", exact: true }).click();
+  await choosePreference(page, "Smaller text");
   expect(await prayerSize()).toBeLessThan(base);
   expect(await overflows()).toBe(false);
 
-  await page.getByRole("button", { name: "Default text size", exact: true }).click();
+  await choosePreference(page, "Default text size");
   expect(await prayerSize()).toBeCloseTo(base, 1);
   await expect(page.locator("html")).not.toHaveAttribute("data-text-size", /./);
 });
@@ -1581,9 +1652,9 @@ test("short prose openings keep one baseline and adapt to the reading measure", 
     }
   }
   // At this measure the normal setting fits; Large needs two lines.
-  await page.getByRole("button", { name: "Larger text", exact: true }).click();
+  await choosePreference(page, "Larger text");
   await expect(opening).not.toHaveClass(/initial-raised/);
-  await page.getByRole("button", { name: "Default text size", exact: true }).click();
+  await choosePreference(page, "Default text size");
   await expect(opening).toHaveClass(/initial-raised/);
   expect(await opening.textContent()).toBe(originalText);
 });
