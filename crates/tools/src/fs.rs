@@ -114,7 +114,8 @@ impl DataSource for FsData {
     }
 }
 
-fn io_error(op: &str, path: &Path, e: &std::io::Error) -> String {
+/// An I/O error as Go's `*PathError` prints it: `op path: reason`.
+pub fn io_error(op: &str, path: &Path, e: &std::io::Error) -> String {
     let msg = match e.kind() {
         std::io::ErrorKind::NotFound => "no such file or directory".to_string(),
         std::io::ErrorKind::PermissionDenied => "permission denied".to_string(),

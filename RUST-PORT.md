@@ -5,14 +5,13 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0–3 are complete. `office-rs dump` is byte-identical to Go:
+**Status:** Phases 0–4 are complete. `office-rs dump` is byte-identical to Go:
 the corpus, calendar, and office groups for 1900–2199, and every hour in
-every prayer form for 2026–2053 (the parity snapshot). The Rust validators
-reproduce Go's reports on every broken test corpus, and the text renderer
-reproduces every hour golden. Phase 4 is under way: the ordo, the rubrics
-TSV, the TeX booklet, validate, audit, lint, and the review subcommands are
-byte-identical. Nothing user-facing changes until
-the cutover in Phase 6.
+every prayer form for 2026–2053 (the parity snapshot). Every Go command but
+`serve` has a Rust counterpart with the same output: the ordo, the rubrics
+TSV, the hours, the TeX booklet, validate, audit, lint, the review
+subcommands, and the data-editing commands. Next: Phase 5, the web server.
+Nothing user-facing changes until the cutover in Phase 6.
 
 ## Why Rust
 
@@ -372,4 +371,7 @@ until then.
       matches its golden (`make rust-parity-full`). `scripts/rust-parity-review.sh`
       compares every read-only report on one- and two-year sweeps, and runs
       the ledger writers on two copies of the data, diffing output and trees
-- [ ] `corpus` and `scaffold` commands
+- [x] `corpus show|put` and `scaffold propers` (`tools::corpus_edit`,
+      `tools::scaffold`): `scripts/rust-parity-edit.sh` runs the same
+      sequence, error paths included, on two copies of the data and diffs
+      the output and trees

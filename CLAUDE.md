@@ -96,10 +96,10 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   ordo/                    Text ordo (Tabula + per-hour stanzas) and the rubrics TSV
   render-text/             Plain-text hour rendering (Go's FormatOfficeHour)
   render-tex/              LuaLaTeX booklet (Go's FormatOfficeHourTeX); caller supplies GABC lookup
-  tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers
+  tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
+                           corpus editing, proper scaffolds
 apps/
-  cli/                     office-rs: dump, ordo, rubrics, hours, tex, validate, audit, lint, review
-                           (compared byte for byte with Go)
+  cli/                     office-rs: every Go command but serve (compared byte for byte with Go)
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
   genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)
@@ -241,7 +241,8 @@ make test-coverage # Run unit tests and enforce per-package coverage floors (als
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make rust-parity # Go vs Rust: dump groups 1900–2199, hours + tex on 127 sample dates, ordo/rubrics,
-                 # validate/lint/audit (live + mutated data), review reports and ledger writers
+                 # validate/lint/audit (live + mutated data), review reports and ledger writers,
+                 # corpus/scaffold editing on data copies
 make rust-parity-full # Rust 2026–2053 dump digest + assurance report vs their goldens (nightly in CI)
 make clean       # Remove artifacts
 ```
