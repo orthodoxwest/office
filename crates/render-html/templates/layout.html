@@ -52,6 +52,7 @@
      render.SeasonClass and "Seasonal ornament" in style.css. Empty on pages
      that do not stand on a single day. #}
 <body class="page-{{ page }}{% if page in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %} page-hour{% endif %}{% if season_class %} {{ season_class }}{% endif %}"{% if usage_when %} data-usage-when="{{ usage_when }}"{% endif %}>
+  {%- from "macros.html" import prefs %}
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="site-header">
     <div class="site-nav-shell">
@@ -67,12 +68,18 @@
            Page=home but brand navigates to today, so aria-current would lie.
            app.js re-syncs active/aria-current after midnight SWR freezes. #}
       <a class="site-brand{% if p == "home" and not show_today %} active{% endif %}" href="{{ nav_link("/", "")|url }}" data-nav="home" data-nav-home="today"{% if p == "home" and not show_today %} aria-current="page"{% endif %}><span aria-hidden="true">✠</span> Daily Office</a>
-      {# Closed by default: desktop CSS shows .site-menu > nav regardless of
+      {# Closed by default: desktop CSS shows the menu panel regardless of
            [open], and the native <details>/<summary> toggle lets no-JS mobile
            visitors expand it with a tap — no script needed either way. #}
+      {# Hour links appear only on hour pages, where hopping between hours is
+           the task. Home's prayer card already lists all seven, so repeating
+           them in the header there (and on ordo/reminders) was just noise. #}
+      {%- set on_hour = p in ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"] %}
       <details class="site-menu">
         <summary>Menu</summary>
+        <div class="site-menu-panel">
         <nav aria-label="Primary">
+          {%- if on_hour %}
           <a href="{{ nav_link("/lauds", d)|url }}" data-nav="hour" data-hour="lauds"{% if p == "lauds" %} class="active" aria-current="page"{% endif %}>Lauds</a>
           <a href="{{ nav_link("/prime", d)|url }}" data-nav="hour" data-hour="prime"{% if p == "prime" %} class="active" aria-current="page"{% endif %}>Prime</a>
           <a href="{{ nav_link("/terce", d)|url }}" data-nav="hour" data-hour="terce"{% if p == "terce" %} class="active" aria-current="page"{% endif %}>Terce</a>
@@ -81,9 +88,17 @@
           <a href="{{ nav_link("/vespers", d)|url }}" data-nav="hour" data-hour="vespers"{% if p == "vespers" %} class="active" aria-current="page"{% endif %}>Vespers</a>
           <a href="{{ nav_link("/compline", d)|url }}" data-nav="hour" data-hour="compline"{% if p == "compline" %} class="active" aria-current="page"{% endif %}>Compline</a>
           <span class="nav-divider" aria-hidden="true"></span>
+          {%- endif %}
           <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
         </nav>
+        {# Phone-only: the same preference controls, at the foot of the menu
+             so the landing page stays quiet. Hidden on desktop (the footer
+             copy serves there); app.js syncs every copy. #}
+        <div class="site-prefs menu-prefs">
+          {{ prefs() }}
+        </div>
+        </div>
       </details>
     </div>
   </header>
@@ -92,18 +107,10 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
-    {# Appearance preference: quiet footer control on every page including hours. #}
-    <div class="theme-switch" role="group" aria-label="Appearance">
-      <button type="button" class="theme-option" data-theme-choice="default" title="Follow your device light or dark setting" aria-pressed="false">Default</button>
-      <button type="button" class="theme-option" data-theme-choice="light" title="Light — warm plaster" aria-pressed="false">Nave</button>
-      <button type="button" class="theme-option" data-theme-choice="dark" title="Dark — night sky" aria-pressed="false">Apse</button>
-    </div>
-    {# Text size: sibling of the appearance control, same quiet language.
-         Glyphs carry the meaning visually; aria-label/title carry the words. #}
-    <div class="text-size-switch" role="group" aria-label="Text size">
-      <button type="button" class="text-size-option" data-text-size-choice="small" title="Smaller text" aria-label="Smaller text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
-      <button type="button" class="text-size-option" data-text-size-choice="default" title="Default text size" aria-label="Default text size" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
-      <button type="button" class="text-size-option" data-text-size-choice="large" title="Larger text" aria-label="Larger text" aria-pressed="false"><span class="text-size-glyph" aria-hidden="true">A</span></button>
+    {# Desktop keeps the preferences here; narrow screens hide this copy and
+         show the one at the foot of the site menu instead. #}
+    <div class="site-prefs footer-prefs">
+      {{ prefs() }}
     </div>
   </footer>
 </body>

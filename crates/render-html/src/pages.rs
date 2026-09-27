@@ -188,9 +188,15 @@ mod tests {
     #[test]
     fn layout_includes_text_size_control() {
         let body = source("layout.html");
+        // Preferences render once at the foot of the phone menu and once in the
+        // desktop footer; CSS shows one copy per width.
+        has_all(body, &[r#"import prefs"#, r#"class="site-prefs menu-prefs""#, r#"class="site-prefs footer-prefs""#]);
+        assert!(at(body, "menu-prefs") < at(body, "</details>"), "phone preferences sit inside the site menu");
+        assert!(at(body, "footer-prefs") > at(body, "<footer>"), "desktop preferences stay in the footer");
         has_all(
-            body,
+            source("macros.html"),
             &[
+                r#"class="theme-switch" role="group" aria-label="Appearance""#,
                 r#"class="text-size-switch" role="group" aria-label="Text size""#,
                 r#"data-text-size-choice="small""#,
                 r#"data-text-size-choice="default""#,
@@ -201,6 +207,11 @@ mod tests {
                 r#"title="Smaller text""#,
                 r#"title="Larger text""#,
                 r#"aria-pressed="false""#,
+            ],
+        );
+        has_all(
+            body,
+            &[
                 r#"localStorage.getItem("office-text-size")"#,
                 r#"setAttribute("data-text-size", s)"#,
                 r#"removeAttribute("data-text-size")"#,

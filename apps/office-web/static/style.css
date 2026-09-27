@@ -350,11 +350,22 @@ summary:focus-visible {
   display: none;
 }
 
-.site-menu > nav {
+.site-menu-panel {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.site-menu nav {
   display: flex;
   flex-wrap: wrap;
   gap: 0.1rem 0.35rem;
   justify-content: flex-end;
+}
+
+/* The phone menu carries its own copy of the preferences; desktop uses the
+   footer's. */
+.menu-prefs {
+  display: none;
 }
 
 .site-menu nav a {
@@ -403,9 +414,21 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Quiet footer preference controls (all pages): Default / Nave / Apse above,
+/* Quiet footer preference controls (desktop): Default / Nave / Apse above,
    Smaller / Default / Larger text below. Same hairline group, same weight —
-   neither should read louder than the other. */
+   neither should read louder than the other. Phones get the same controls at
+   the foot of the site menu instead (see the narrow-screen menu block). */
+.footer-prefs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Row labels belong to the menu grid; the footer pair explains itself. */
+.footer-prefs .pref-label {
+  display: none;
+}
+
 footer .theme-switch,
 footer .text-size-switch {
   display: inline-flex;
@@ -499,15 +522,15 @@ footer .text-size-switch {
 }
 
 @media (max-width: 700px) {
-  footer .theme-switch,
-  footer .text-size-switch {
-    width: min(18rem, 100%);
+  /* Phones reach the preferences from the site menu, so the landing page
+     and the end of each hour are not closed by a settings panel. */
+  .footer-prefs {
+    display: none;
   }
 
   /* Match site menu / hour-chip touch floor (~44px). */
   .theme-option,
   .text-size-option {
-    flex: 1 1 0;
     min-height: 2.75rem;
     font-size: 0.75rem;
     padding: 0.5rem 0.35rem;
@@ -566,18 +589,16 @@ footer .text-size-switch {
     content: "▴";
   }
 
-  .site-menu > nav {
+  .site-menu-panel {
+    display: block;
     position: absolute;
     top: calc(100% + 0.1rem);
     /* The shell is padded now that the header is full-bleed, so `right: 0`
        would put the panel against the screen edge instead of the gutter the
        page copy uses. */
     right: max(var(--page-gutter), env(safe-area-inset-right));
-    display: grid;
-    grid-template-columns: repeat(2, minmax(7rem, 1fr));
     width: min(21rem, calc(100vw - 2rem));
     padding: 0.65rem;
-    gap: 0.15rem;
     background: var(--surface);
     border: 1px solid var(--border);
     border-top: 2px solid var(--ornament-line);
@@ -586,8 +607,14 @@ footer .text-size-switch {
       0 0.45rem 1rem rgba(36, 28, 23, 0.09);
   }
 
-  .site-menu:not([open]) > nav {
+  .site-menu:not([open]) > .site-menu-panel {
     display: none;
+  }
+
+  .site-menu nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(7rem, 1fr));
+    gap: 0.15rem;
   }
 
   .site-menu nav a {
@@ -611,6 +638,45 @@ footer .text-size-switch {
     width: auto;
     height: 1px;
     margin: 0.25rem 0;
+  }
+
+  /* Preferences close the menu, below a rule like the one between the hours
+     and Ordo. Both rows share one column template, so Default / Nave / Apse
+     sit exactly over the three sizes of A, whatever the label widths. */
+  .menu-prefs {
+    display: grid;
+    gap: 0;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .menu-prefs .theme-switch,
+  .menu-prefs .text-size-switch {
+    display: grid;
+    grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .menu-prefs .text-size-switch {
+    border-top: 1px solid var(--surface-edge);
+  }
+
+  /* The grid already separates the cells; the footer's vertical hairlines
+     would box every option inside the panel. */
+  .menu-prefs .theme-option,
+  .menu-prefs .text-size-option {
+    border-right: none;
+  }
+
+  .pref-label {
+    display: flex;
+    align-items: center;
+    padding-left: 0.65rem;
+    color: var(--muted);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 }
 
@@ -3058,26 +3124,26 @@ body.season-eastertide {
    Desktop shows the nav regardless of [open] (and app.js force-opens it), and
    this block never applies there. */
 @media (max-width: 700px) and (prefers-reduced-motion: no-preference) {
-  :root.motion-ready .site-menu > nav {
+  :root.motion-ready .site-menu-panel {
     transition:
       opacity 160ms ease-out,
       transform 160ms ease-out,
       display 160ms allow-discrete;
   }
 
-  :root.motion-ready .site-menu:not([open]) > nav {
+  :root.motion-ready .site-menu:not([open]) > .site-menu-panel {
     opacity: 0;
     transform: translateY(-0.3rem);
   }
 
-  :root.motion-ready .site-menu[open] > nav {
+  :root.motion-ready .site-menu[open] > .site-menu-panel {
     opacity: 1;
     transform: none;
   }
 
   /* Without @starting-style the menu simply appears at full opacity. */
   @starting-style {
-    :root.motion-ready .site-menu[open] > nav {
+    :root.motion-ready .site-menu[open] > .site-menu-panel {
       opacity: 0;
       transform: translateY(-0.3rem);
     }
