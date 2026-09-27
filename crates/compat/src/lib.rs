@@ -1,14 +1,18 @@
-//! Go-compatible string helpers. While both engines exist (RUST-PORT.md),
-//! error messages and line handling must match the Go engine byte for byte;
-//! these helpers reproduce the few Go library behaviors that differ from
-//! Rust's. Remove the crate after the cutover (Phase 7).
+//! Go-compatible parsing and formatting. While both engines exist
+//! (RUST-PORT.md), output and findings must match the Go engine byte for
+//! byte, so these helpers reproduce the Go library behaviors that shape
+//! them: which lines and integers parse, how CSV splits, how a key is quoted
+//! in a finding, and how report JSON is written. Error prose is not part of
+//! that contract, and Rust words its own. Remove the crate after the cutover
+//! (Phase 7).
 
 pub mod csv;
-mod isprint;
 pub mod json;
 
-/// Quotes `s` as Go's `strconv.Quote` does: backslash escapes for quote,
-/// backslash, and every rune Go's `strconv.IsPrint` rejects.
+/// Quotes `s` as Go's `%q` does for the text in our data: backslash escapes
+/// for quote, backslash, and ASCII control characters; everything else
+/// literal. Go also escapes non-printing Unicode (U+00A0, U+200B, …); this
+/// prints it literally, a deliberate difference (RUST-PORT.md).
 pub fn quote(s: &str) -> String {
     let mut out = String::with_capacity(s.len() + 2);
     out.push('"');
@@ -23,36 +27,12 @@ pub fn quote(s: &str) -> String {
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
             '\u{b}' => out.push_str("\\v"),
-            c if is_print(c) => out.push(c),
             c if (c as u32) < 0x20 || c == '\u{7f}' => out.push_str(&format!("\\x{:02x}", c as u32)),
-            c if (c as u32) < 0x10000 => out.push_str(&format!("\\u{:04x}", c as u32)),
-            c => out.push_str(&format!("\\U{:08x}", c as u32)),
+            c => out.push(c),
         }
     }
     out.push('"');
     out
-}
-
-/// Go's `strconv.IsPrint`: letters, marks, numbers, punctuation, symbols,
-/// and the ASCII space, per Go's Unicode tables.
-pub fn is_print(c: char) -> bool {
-    let r = c as u32;
-    if r <= 0xFF {
-        return (0x20..=0x7E).contains(&r) || ((0xA1..=0xFF).contains(&r) && r != 0xAD);
-    }
-    // The first index whose entry is >= x starts or ends the range that
-    // might hold x.
-    fn in_ranges<T: Ord + Copy>(ranges: &[T], x: T) -> bool {
-        let i = ranges.partition_point(|&v| v < x);
-        i < ranges.len() && ranges[i & !1] <= x && x <= ranges[i | 1]
-    }
-    if let Ok(rr) = u16::try_from(r) {
-        return in_ranges(&isprint::IS_PRINT16, rr) && isprint::IS_NOT_PRINT16.binary_search(&rr).is_err();
-    }
-    if !in_ranges(&isprint::IS_PRINT32, r) {
-        return false;
-    }
-    r >= 0x20000 || isprint::IS_NOT_PRINT32.binary_search(&((r - 0x10000) as u16)).is_err()
 }
 
 /// Go's `bufio.Scanner` with `ScanLines`: split on `\n`, drop one trailing
@@ -64,24 +44,19 @@ pub fn scan_lines(s: &str) -> impl Iterator<Item = &str> {
     pieces.into_iter().flatten().map(|line| line.strip_suffix('\r').unwrap_or(line))
 }
 
-/// Go's `strconv.Atoi`: an optional sign and ASCII digits.
+/// The integers Go's `strconv.Atoi` accepts: an optional sign and ASCII
+/// digits.
 pub fn atoi(s: &str) -> Result<i64, String> {
     let digits = s.strip_prefix(['+', '-']).unwrap_or(s);
     if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
-        return Err(format!("strconv.Atoi: parsing {}: invalid syntax", quote(s)));
+        return Err(format!("{} is not an integer", quote(s)));
     }
-    s.parse::<i64>().map_err(|_| format!("strconv.Atoi: parsing {}: value out of range", quote(s)))
+    s.parse::<i64>().map_err(|_| format!("{} is out of range", quote(s)))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn quote_escapes_what_go_cannot_print() {
-        assert_eq!(quote("a\u{a0}b\u{200b}\u{E0001}\u{378}é\u{7f}\u{1F600}"), "\"a\\u00a0b\\u200b\\U000e0001\\u0378é\\x7f\u{1F600}\"");
-        assert!(is_print(' ') && is_print('…') && !is_print('\u{ad}') && !is_print('\u{2028}'));
-    }
 
     #[test]
     fn scan_lines_matches_bufio() {
@@ -94,12 +69,14 @@ mod tests {
     }
 
     #[test]
-    fn quote_matches_go() {
-        assert_eq!(quote("a\"b\\c\u{7}\u{1}é"), "\"a\\\"b\\\\c\\a\\x01é\"");
+    fn quote_matches_go_on_ascii() {
+        assert_eq!(quote("a\"b\\c\u{7}\u{1}é\u{7f}"), "\"a\\\"b\\\\c\\a\\x01é\\x7f\"");
+        // Non-printing Unicode stays literal (Go would write \u00a0).
+        assert_eq!(quote("a\u{a0}b"), "\"a\u{a0}b\"");
     }
 
     #[test]
-    fn atoi_matches_go() {
+    fn atoi_accepts_what_go_accepts() {
         assert_eq!(atoi("+5"), Ok(5));
         assert_eq!(atoi("-3"), Ok(-3));
         assert_eq!(atoi("07"), Ok(7));

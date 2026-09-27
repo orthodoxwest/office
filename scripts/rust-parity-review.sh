@@ -4,6 +4,7 @@
 # checks the 28-year assurance report against its golden), and the ledger
 # writers (flag, attest, assurance -update-baseline) on two copies of data/,
 # comparing their output and the resulting trees.
+# Stdout and exit statuses are compared; stderr is not (RUST-PORT.md).
 # Expects ./office and target/release/office-rs.
 set -euo pipefail
 go_bin=$(realpath "${GO_OFFICE:-./office}")
@@ -43,7 +44,7 @@ k1=$(echo "$keys" | head -1)
 k2=$(echo "$keys" | tail -1)
 run() {
   for impl in go rs; do
-    (cd "$work/$impl" && { ./office "$@" 2>&1 || echo "exit $?"; } >> log.txt)
+    (cd "$work/$impl" && { ./office "$@" 2>/dev/null || echo "exit $?"; } >> log.txt)
   done
 }
 run review flag --reason "suspect wording, it's \"odd\"" --severity medium --flagged 2026-09 "$k1"

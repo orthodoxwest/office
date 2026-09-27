@@ -87,7 +87,7 @@ internal/
     assurance.go           Composition explanations and optional engine-behavior samples
     assurance_gate.go      Text-provenance baseline, gate, and CI summary
 crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo root
-  compat/                  Go-compatible %q / line scanning / Atoi (transitional)
+  compat/                  Go-compatible %q, line scanning, integers, CSV, report JSON (transitional)
   calendar/                Computus, seasons, feast loader, occurrence, builder (no file access)
   corpus/                  Text corpus format, loader, @use/@omit, sidecars, line grammar
   liturgy/                 Document model: element types, voice/rubric spans, OfficeHour
@@ -99,7 +99,8 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
                            corpus editing, proper scaffolds
 apps/
-  cli/                     office-rs: every Go command but serve (compared byte for byte with Go)
+  cli/                     office-rs: every Go command but serve (stdout, exit status, and written
+                           files compared byte for byte with Go; error wording is not)
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
   genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)

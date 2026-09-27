@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Compare `office tex` between the Go and Rust CLIs for every hour on each
 # sample date (scripts/rust-parity-dates.sh), cycling the prayer form and the
-# --chant flag across dates so every variant is exercised.
+# --chant flag across dates so every variant is exercised. Stdout and the
+# exit status are compared; stderr is not (RUST-PORT.md).
 # Expects ./office and target/release/office-rs.
 set -euo pipefail
 go_bin=${GO_OFFICE:-./office}
@@ -15,10 +16,10 @@ for date in ${dates//,/ }; do
   i=$((i + 1))
   for hour in lauds prime terce sext none vespers compline; do
     checked=$((checked + 1))
-    if ! cmp -s <("$go_bin" tex "${flags[@]}" "$hour" "$date" 2>&1) <("$rs_bin" tex "${flags[@]}" "$hour" "$date" 2>&1); then
+    if ! cmp -s <("$go_bin" tex "${flags[@]}" "$hour" "$date" 2>/dev/null; echo "exit $?") <("$rs_bin" tex "${flags[@]}" "$hour" "$date" 2>/dev/null; echo "exit $?"); then
       failed=$((failed + 1))
       echo "parity: office tex ${flags[*]} $hour $date DIFFERS" >&2
-      diff -u <("$go_bin" tex "${flags[@]}" "$hour" "$date" 2>&1) <("$rs_bin" tex "${flags[@]}" "$hour" "$date" 2>&1) | head -20 >&2 || true
+      diff -u <("$go_bin" tex "${flags[@]}" "$hour" "$date" 2>/dev/null; echo "exit $?") <("$rs_bin" tex "${flags[@]}" "$hour" "$date" 2>/dev/null; echo "exit $?") | head -20 >&2 || true
     fi
   done
 done

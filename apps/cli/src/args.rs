@@ -1,5 +1,6 @@
-//! A small flag parser with Go `flag` package conventions: `-name value`,
-//! `-name=value`, `--name value`, and parsing stops at the first non-flag.
+//! A small flag parser that accepts what Go's `flag` package accepts:
+//! `-name value`, `-name=value`, `--name value`, boolean `-name`, and parsing
+//! stops at the first non-flag. The error messages are our own.
 
 use std::collections::HashMap;
 
@@ -32,17 +33,17 @@ impl Flags {
                 Some((n, v)) => (n.to_string(), v.to_string()),
                 None if bools.contains(&body) => (body.to_string(), "true".to_string()),
                 None => {
-                    let v = args.get(i + 1).ok_or_else(|| format!("flag needs an argument: -{body}"))?;
+                    let v = args.get(i + 1).ok_or_else(|| format!("flag -{body} needs a value"))?;
                     i += 1;
                     (body.to_string(), v.clone())
                 }
             };
             if bools.contains(&name.as_str()) {
                 if parse_bool(&value).is_none() {
-                    return Err(format!("invalid boolean value {} for -{name}: parse error", compat::quote(&value)));
+                    return Err(format!("flag -{name}: {} is not true or false", compat::quote(&value)));
                 }
             } else if !known.contains(&name.as_str()) {
-                return Err(format!("flag provided but not defined: -{name}"));
+                return Err(format!("unknown flag -{name}"));
             }
             values.insert(name, value);
             i += 1;
@@ -64,10 +65,10 @@ impl Flags {
         self.values.get(name).map_or(default, String::as_str)
     }
 
-    pub fn int(&self, name: &str, default: i64) -> Result<i64, String> {
+    pub fn int(&self, name: &str, default: i32) -> Result<i32, String> {
         match self.values.get(name) {
             None => Ok(default),
-            Some(v) => v.parse().map_err(|_| format!("invalid value {v:?} for flag -{name}: parse error")),
+            Some(v) => v.parse().map_err(|_| format!("flag -{name}: {} is not an integer", compat::quote(v))),
         }
     }
 }

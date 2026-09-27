@@ -41,8 +41,7 @@ pub fn cmd_validate(data: &FsData, args: &[String], out: &mut dyn Write) -> Resu
 /// sweep of one year.
 pub fn cmd_audit(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
     let flags = crate::args::Flags::parse(args, &["year"])?;
-    let year = flags.int("year", i64::from(crate::commands::today().year()))?;
-    let year = i32::try_from(year).map_err(|_| format!("invalid value \"{year}\" for flag -year: value out of range"))?;
+    let year = flags.int("year", crate::commands::today().year())?;
     let report = tools::audit::run(data)?;
     write!(out, "{}", tools::audit::format_report(&report)).map_err(|e| e.to_string())?;
     let sweep = tools::audit::sweep::sweep_year(data, year).map_err(|e| format!("running sweep: {e}"))?;

@@ -97,7 +97,7 @@ pub fn validate_hour_definitions(src: &dyn DataSource) -> Vec<String> {
         let path = src.display_path(&rel);
         let sections = match src.read(&rel) {
             Err(e) => Err(format!("opening hour definition: {e}")),
-            Ok(None) => Err(format!("opening hour definition: open {path}: no such file or directory")),
+            Ok(None) => Err(format!("opening hour definition: {path} does not exist")),
             Ok(Some(content)) => parse_hour_definition(&path, &content),
         };
         let sections = match sections {

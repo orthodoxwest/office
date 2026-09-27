@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 
 use compat::quote;
 
+use crate::fs::io_error;
+
 const NAMESPACES: [&str; 7] = ["proper", "commons", "seasonal", "ordinary", "shared", "psalms", "canticles"];
 
 struct Location {
@@ -46,10 +48,6 @@ fn go_space(c: char) -> bool {
     matches!(c, '\t' | '\n' | '\x0c' | '\r' | ' ')
 }
 
-fn io_err(op: &str, path: &Path, e: &std::io::Error) -> String {
-    crate::fs::io_error(op, path, e)
-}
-
 fn resolve(dir: &Path, key: &str) -> Result<Location, String> {
     if key.contains('\\') || key.starts_with('/') {
         return Err(format!("invalid corpus key {}", quote(key)));
@@ -69,14 +67,14 @@ fn resolve(dir: &Path, key: &str) -> Result<Location, String> {
     let plain = PathBuf::from(format!("{}.txt", plain.display()));
     match std::fs::metadata(&plain) {
         Ok(m) if !m.is_dir() => {
-            let content = std::fs::read(&plain).map_err(|e| format!("reading corpus file: {}", io_err("open", &plain, &e)))?;
+            let content = std::fs::read(&plain).map_err(|e| format!("reading corpus file: {}", io_error("open", &plain, &e)))?;
             if !contains_live_section(&String::from_utf8_lossy(&content)) {
                 return Ok(Location { path: plain, section: String::new(), plain: true });
             }
         }
         Ok(_) => {}
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
-        Err(e) => return Err(format!("stat corpus file: {}", io_err("stat", &plain, &e))),
+        Err(e) => return Err(format!("stat corpus file: {}", io_error("stat", &plain, &e))),
     }
     let section = parts[parts.len() - 1].to_string();
     let mut path = texts;
@@ -86,7 +84,7 @@ fn resolve(dir: &Path, key: &str) -> Result<Location, String> {
     let path = PathBuf::from(format!("{}.txt", path.display()));
     match std::fs::metadata(&path) {
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(format!("corpus file for {} does not exist", quote(key))),
-        Err(e) => Err(format!("stat corpus file: {}", io_err("stat", &path, &e))),
+        Err(e) => Err(format!("stat corpus file: {}", io_error("stat", &path, &e))),
         Ok(m) if m.is_dir() => Err(format!("corpus file for {} is a directory", quote(key))),
         Ok(_) => Ok(Location { path, section, plain: false }),
     }
@@ -157,7 +155,7 @@ fn section_bounds<'a>(content: &'a str, section: &str) -> Result<(Line<'a>, usiz
 /// `corpus show KEY`: the live body, comments stripped.
 pub fn read_corpus_body(dir: &Path, key: &str) -> Result<String, String> {
     let loc = resolve(dir, key)?;
-    let content = std::fs::read(&loc.path).map_err(|e| format!("reading corpus file: {}", io_err("open", &loc.path, &e)))?;
+    let content = std::fs::read(&loc.path).map_err(|e| format!("reading corpus file: {}", io_error("open", &loc.path, &e)))?;
     let content = String::from_utf8_lossy(&content);
     if loc.plain {
         let body = strip_comments(&content);
@@ -218,7 +216,7 @@ fn replacement_body(body: &str, source: &str, eol: &str) -> Result<String, Strin
 /// activates a commented scaffold, keeping the file's line endings and mode.
 pub fn put_corpus_body(dir: &Path, key: &str, body: &str, source: &str) -> Result<(), String> {
     let loc = resolve(dir, key)?;
-    let content = std::fs::read(&loc.path).map_err(|e| format!("reading corpus file: {}", io_err("open", &loc.path, &e)))?;
+    let content = std::fs::read(&loc.path).map_err(|e| format!("reading corpus file: {}", io_error("open", &loc.path, &e)))?;
     let content = String::from_utf8_lossy(&content).into_owned();
     let updated = if loc.plain {
         replacement_body(body, source, "\n")?
@@ -234,7 +232,7 @@ pub fn put_corpus_body(dir: &Path, key: &str, body: &str, source: &str) -> Resul
         }
         format!("{}{header_text}{replacement}{}", &content[..header.start], &content[body_end..])
     };
-    let meta = std::fs::metadata(&loc.path).map_err(|e| format!("stat corpus file: {}", io_err("stat", &loc.path, &e)))?;
+    let meta = std::fs::metadata(&loc.path).map_err(|e| format!("stat corpus file: {}", io_error("stat", &loc.path, &e)))?;
     let parent = loc.path.parent().unwrap_or(Path::new("."));
     let tmp = parent.join(format!(".corpus-put-{}", std::process::id()));
     let result = std::fs::write(&tmp, &updated)

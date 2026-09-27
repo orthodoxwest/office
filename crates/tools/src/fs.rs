@@ -114,14 +114,9 @@ impl DataSource for FsData {
     }
 }
 
-/// An I/O error as Go's `*PathError` prints it: `op path: reason`.
+/// An I/O error with the operation and path it concerns.
 pub fn io_error(op: &str, path: &Path, e: &std::io::Error) -> String {
-    let msg = match e.kind() {
-        std::io::ErrorKind::NotFound => "no such file or directory".to_string(),
-        std::io::ErrorKind::PermissionDenied => "permission denied".to_string(),
-        _ => e.to_string(),
-    };
-    format!("{op} {}: {msg}", path.display())
+    format!("{op} {}: {e}", path.display())
 }
 
 /// Go's `filepath.Walk`: lstat the root, then visit directory entries in
@@ -129,7 +124,7 @@ pub fn io_error(op: &str, path: &Path, e: &std::io::Error) -> String {
 fn walk_dir(path: &Path, rel: &str, out: &mut Vec<(String, Vec<u8>)>) -> Result<(), String> {
     let meta = std::fs::symlink_metadata(path).map_err(|e| io_error("lstat", path, &e))?;
     if !meta.is_dir() {
-        let bytes = std::fs::read(path).map_err(|e| format!("reading {}: {}", path.display(), io_error("open", path, &e)))?;
+        let bytes = std::fs::read(path).map_err(|e| io_error("reading", path, &e))?;
         out.push((rel.to_string(), bytes));
         return Ok(());
     }

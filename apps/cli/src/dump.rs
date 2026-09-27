@@ -126,8 +126,8 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
             sel.dates.push(Date::parse(&value).ok_or_else(|| format!("invalid date (use YYYY-MM-DD): {value}"))?);
         }
     } else {
-        sel.start_year = i32::try_from(start).map_err(|_| "start year out of range".to_string())?;
-        sel.years = i32::try_from(years).map_err(|_| "years out of range".to_string())?;
+        sel.start_year = start;
+        sel.years = years;
     }
     let sel = sel.normalize()?;
     if let Some(g) = sel.groups.iter().find(|g| !PORTED_GROUPS.contains(&g.as_str())) {

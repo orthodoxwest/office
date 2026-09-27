@@ -59,14 +59,9 @@ pub fn cmd_review(data: &FsData, args: &[String], out: Out) -> Result<(), String
     }
 }
 
-fn year_flag(flags: &Flags, name: &str, default: i32) -> Result<i32, String> {
-    let v = flags.int(name, i64::from(default))?;
-    i32::try_from(v).map_err(|_| format!("invalid value \"{v}\" for flag -{name}: value out of range"))
-}
-
 /// `-start`, `-years`, and `-base`, shared by the sweeping subcommands.
 fn sweep_flags(flags: &Flags, default_years: i32) -> Result<(i32, i32), String> {
-    Ok((year_flag(flags, "start", today().year())?, year_flag(flags, "years", default_years)?))
+    Ok((flags.int("start", today().year())?, flags.int("years", default_years)?))
 }
 
 fn review_manifest(data: &FsData, args: &[String], out: Out) -> Result<(), String> {

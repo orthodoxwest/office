@@ -1,8 +1,10 @@
 //! Go's `encoding/csv` with its default settings (comma separator, no
 //! comments, strict quotes, field count fixed by the first record), so the
-//! review ledgers read, fail, and write byte for byte as in Go.
+//! review ledgers parse, reject, and write exactly as in Go. Error messages
+//! are our own.
 
-/// `csv.NewReader(r).ReadAll()`. The error is Go's `ParseError` text.
+/// `csv.NewReader(r).ReadAll()`: every record, or where the input breaks
+/// Go's rules.
 pub fn read_all(input: &str) -> Result<Vec<Vec<String>>, String> {
     let mut reader = Reader { input: input.as_bytes(), pos: 0, num_line: 0, fields_per_record: 0 };
     let mut records = Vec::new();
@@ -25,19 +27,14 @@ struct Reader<'a> {
 enum ParseErr {
     Quote,
     BareQuote,
-    FieldCount,
 }
 
-fn parse_error(start_line: usize, line: usize, column: usize, err: ParseErr) -> String {
+fn parse_error(line: usize, column: usize, err: ParseErr) -> String {
     let text = match err {
-        ParseErr::FieldCount => return format!("record on line {line}: wrong number of fields"),
-        ParseErr::Quote => "extraneous or missing \" in quoted-field",
-        ParseErr::BareQuote => "bare \" in non-quoted-field",
+        ParseErr::Quote => "unterminated quoted field or stray quote after one",
+        ParseErr::BareQuote => "quote inside an unquoted field",
     };
-    if start_line != line {
-        return format!("record on line {start_line}; parse error on line {line}, column {column}: {text}");
-    }
-    format!("parse error on line {line}, column {column}: {text}")
+    format!("line {line}, column {column}: {text}")
 }
 
 fn length_nl(b: &[u8]) -> usize {
@@ -93,7 +90,7 @@ impl Reader<'_> {
                     None => &cur[..cur.len() - length_nl(cur)],
                 };
                 if let Some(j) = field.iter().position(|&c| c == b'"') {
-                    err = Some(parse_error(rec_line, self.num_line, pos_col + j, ParseErr::BareQuote));
+                    err = Some(parse_error(self.num_line, pos_col + j, ParseErr::BareQuote));
                     break 'parse;
                 }
                 buffer.extend_from_slice(field);
@@ -130,7 +127,7 @@ impl Reader<'_> {
                         indexes.push(buffer.len());
                         break 'parse;
                     } else {
-                        err = Some(parse_error(rec_line, self.num_line, pos_col - 1, ParseErr::Quote));
+                        err = Some(parse_error(self.num_line, pos_col - 1, ParseErr::Quote));
                         break 'parse;
                     }
                 } else if !cur.is_empty() {
@@ -144,7 +141,7 @@ impl Reader<'_> {
                     owned = next;
                     offset = 0;
                 } else {
-                    err = Some(parse_error(rec_line, pos_line, pos_col, ParseErr::Quote));
+                    err = Some(parse_error(pos_line, pos_col, ParseErr::Quote));
                     break 'parse;
                 }
             }
@@ -161,7 +158,7 @@ impl Reader<'_> {
         }
         if self.fields_per_record > 0 {
             if record.len() != self.fields_per_record {
-                return Err(parse_error(rec_line, rec_line, 1, ParseErr::FieldCount));
+                return Err(format!("line {rec_line}: expected {} fields, found {}", self.fields_per_record, record.len()));
             }
         } else {
             self.fields_per_record = record.len();
@@ -207,13 +204,11 @@ mod tests {
         assert_eq!(read_all("a,b\r\n\n\"c,\"\"d\",e\n").unwrap(), vec![vec!["a", "b"], vec!["c,\"d", "e"]]);
         assert_eq!(read_all("a,\"x\ny\"\n").unwrap(), vec![vec!["a", "x\ny"]]);
         assert_eq!(read_all("a,b\r").unwrap(), vec![vec!["a", "b"]]);
-        assert_eq!(read_all("a,b\nc\n").unwrap_err(), "record on line 2: wrong number of fields");
-        assert_eq!(read_all("a,b\"c\n").unwrap_err(), "parse error on line 1, column 4: bare \" in non-quoted-field");
-        assert_eq!(read_all("\"a\"b\n").unwrap_err(), "parse error on line 1, column 3: extraneous or missing \" in quoted-field");
-        assert_eq!(
-            read_all("x\n\"a\nb").unwrap_err(),
-            "record on line 2; parse error on line 3, column 2: extraneous or missing \" in quoted-field"
-        );
+        // Go's rejections, in our words.
+        assert_eq!(read_all("a,b\nc\n").unwrap_err(), "line 2: expected 2 fields, found 1");
+        assert_eq!(read_all("a,b\"c\n").unwrap_err(), "line 1, column 4: quote inside an unquoted field");
+        assert_eq!(read_all("\"a\"b\n").unwrap_err(), "line 1, column 3: unterminated quoted field or stray quote after one");
+        assert_eq!(read_all("x\n\"a\nb").unwrap_err(), "line 3, column 2: unterminated quoted field or stray quote after one");
         assert!(read_all("").unwrap().is_empty());
     }
 

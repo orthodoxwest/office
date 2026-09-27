@@ -42,9 +42,7 @@ impl Engine {
         for name in hour_definition_names() {
             let rel = format!("office/{name}.txt");
             let path = src.display_path(&rel);
-            let content = src
-                .read(&rel)?
-                .ok_or_else(|| format!("parsing {name} definition: opening hour definition: open {path}: no such file or directory"))?;
+            let content = src.read(&rel)?.ok_or_else(|| format!("parsing {name} definition: {path} does not exist"))?;
             let sections = parse_hour_definition(&path, &content).map_err(|e| format!("parsing {name} definition: {e}"))?;
             definitions.insert(name.to_string(), sections);
         }

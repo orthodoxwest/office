@@ -259,9 +259,7 @@ pub fn load_feasts(src: &dyn DataSource) -> Result<Vec<FeastRef>, String> {
 /// Loads the penitential rules file, which must exist.
 pub fn load_penitential_rules(src: &dyn DataSource) -> Result<Vec<PenitentialRule>, String> {
     let path = src.display_path(PENITENTIAL_RULES_FILE);
-    let content = src
-        .read(PENITENTIAL_RULES_FILE)?
-        .ok_or_else(|| format!("parsing {PENITENTIAL_RULES_FILE}: open {path}: no such file or directory"))?;
+    let content = src.read(PENITENTIAL_RULES_FILE)?.ok_or_else(|| format!("parsing {PENITENTIAL_RULES_FILE}: {path} does not exist"))?;
     let sections = parse_ini_sections(&path, &content).map_err(|e| format!("parsing {PENITENTIAL_RULES_FILE}: {e}"))?;
     sections.iter().map(|s| section_to_penitential_rule(s, PENITENTIAL_RULES_FILE)).collect()
 }

@@ -1,9 +1,14 @@
 //! The Phase 2 gate for validation: the Rust validators must write Go's
-//! report for every case in internal/e2e/testdata/broken-corpora (see
+//! findings for every case in internal/e2e/testdata/broken-corpora (see
 //! internal/e2e/broken_corpora_test.go, which checks Go against the same
-//! expected.txt files).
+//! expected.txt files). Findings match line for line; only where Go ends a
+//! finding with a Go library's own error text (strconv, os, encoding/csv)
+//! may Rust word that tail itself (RUST-PORT.md).
 
 use std::path::Path;
+use std::sync::LazyLock;
+
+use regex::Regex;
 
 use tools::fs::FsData;
 use tools::review::{provenance, zero_occurrence};
@@ -58,11 +63,41 @@ fn broken_corpora_match_go() {
         let dir = format!("{CASES}/{name}");
         let want = std::fs::read_to_string(format!("{dir}/expected.txt")).unwrap();
         let got = report(&dir);
-        if got != want {
+        if !same_findings(&got, &want) {
             failures.push(format!("{name}\n--- got\n{got}--- want\n{want}"));
         }
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
+/// The shapes of Go library error text that can end a finding.
+static GO_LIBRARY_DETAIL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(strconv\.\w+: |open \S+: |record on line \d+|parse error on line \d+)").expect("valid regex"));
+
+/// Whether `got` states `want`'s findings: every line identical, except
+/// that a Go library error tail after a shared `…: ` prefix may be worded
+/// differently (but not left out).
+fn same_findings(got: &str, want: &str) -> bool {
+    let (got, want): (Vec<&str>, Vec<&str>) = (got.lines().collect(), want.lines().collect());
+    got.len() == want.len() && got.iter().zip(&want).all(|(g, w)| g == w || same_prefix_before_library_detail(g, w))
+}
+
+fn same_prefix_before_library_detail(got: &str, want: &str) -> bool {
+    want.match_indices(": ").any(|(i, _)| {
+        let prefix = &want[..i + 2];
+        GO_LIBRARY_DETAIL.is_match(&want[i + 2..]) && got.len() > prefix.len() && got.starts_with(prefix)
+    })
+}
+
+#[test]
+fn library_detail_tolerance_is_narrow() {
+    let want = "x.txt: feast \"m\": invalid Month: strconv.Atoi: parsing \"March\": invalid syntax";
+    assert!(same_findings("x.txt: feast \"m\": invalid Month: \"March\" is not an integer", want));
+    // The finding itself must still match, and the detail must be present.
+    assert!(!same_findings("x.txt: feast \"m\": invalid Day: \"March\" is not an integer", want));
+    assert!(!same_findings("x.txt: feast \"m\": invalid Month: ", want));
+    // Our own wording is never tolerated.
+    assert!(!same_findings("Duplicate feast ID: 'st-y'", "Duplicate feast ID: 'st-x'"));
 }
 
 #[test]

@@ -2,6 +2,7 @@
 # Compare the data-editing commands (scaffold propers, corpus show/put)
 # between the Go and Rust CLIs: each runs the same sequence, error paths
 # included, on its own copy of data/, and the output and trees are diffed.
+# Stdout and exit statuses are compared; stderr is not (RUST-PORT.md).
 # Expects ./office and target/release/office-rs.
 set -euo pipefail
 go_bin=$(realpath "${GO_OFFICE:-./office}")
@@ -29,7 +30,7 @@ cp "$go_bin" "$work/go/office"
 cp "$rs_bin" "$work/rs/office"
 run() {
   for impl in go rs; do
-    (cd "$work/$impl" && { ./office "$@" 2>&1 || echo "exit $?"; } >> log.txt)
+    (cd "$work/$impl" && { ./office "$@" 2>/dev/null || echo "exit $?"; } >> log.txt)
   done
 }
 run scaffold propers -dry-run

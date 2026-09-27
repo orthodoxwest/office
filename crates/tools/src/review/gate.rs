@@ -91,7 +91,7 @@ fn rendered_dependencies(src: &dyn DataSource, start: i32, years: i32) -> Result
 /// object of three integers.
 pub fn load_assurance_baseline(src: &dyn DataSource) -> Result<AssuranceBaseline, String> {
     let path = src.display_path(ASSURANCE_BASELINE_FILE);
-    let body = src.read(ASSURANCE_BASELINE_FILE)?.ok_or_else(|| format!("open {path}: no such file or directory"))?;
+    let body = src.read(ASSURANCE_BASELINE_FILE)?.ok_or_else(|| format!("{path} does not exist"))?;
     let v: serde_json::Value = serde_json::from_str(&body).map_err(|e| format!("reading {path}: {e}"))?;
     let int = |name: &str| v.get(name).and_then(serde_json::Value::as_i64).unwrap_or(0);
     let baseline =
@@ -155,7 +155,7 @@ pub fn update_assurance_baseline(dir: &Path, r: &AssuranceReport) -> Result<(), 
     let body = format!("{{\n  \"start_year\": {},\n  \"years\": {},\n  \"verified_minimum\": {}\n}}\n", r.start_year, r.years, r.verified);
     let dir = dir.join("review");
     if !dir.is_dir() {
-        return Err(format!("open {}: no such file or directory", dir.display()));
+        return Err(format!("{} does not exist", dir.display()));
     }
     crate::fs::write_atomic(&dir.join("assurance-baseline.json"), body.as_bytes())
 }

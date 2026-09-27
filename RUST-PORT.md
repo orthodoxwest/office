@@ -238,6 +238,17 @@ dates. A nightly job compares the full window.
   indistinguishable from fixes.
 - **Port the Go unit tests with each crate.** They encode edge cases the black
   box can't reach.
+- **Output and findings match; error wording does not.** What must be
+  byte-identical is output (stdout, the files a command writes, the exit
+  status) and findings, the validate, lint, audit, and review lines a data
+  editor acts on. The parity scripts compare stdout and the exit status and
+  ignore stderr, and Rust words its own I/O, parse, and flag errors. Two
+  narrow allowances inside findings, both gone with Go at the cutover: where
+  a Go finding ends in a Go library's error text (strconv, os,
+  encoding/csv), the Rust finding keeps the finding and words that tail
+  itself, which is all the broken-corpora test tolerates; and `%q` in
+  findings escapes only ASCII control characters, where Go also escapes
+  non-printing Unicode such as U+00A0.
 
 ## Go-to-Rust traps
 
@@ -302,8 +313,8 @@ dates. A nightly job compares the full window.
       loaded with the corpus by `office::texts::load_texts`
 - [x] `tools` crate: the filesystem `DataSource` and the calendar and texts
       validators
-- [x] `compat` crate: Go-compatible `%q`, `bufio.Scanner` lines, and `Atoi`,
-      so messages match byte for byte; removed after the cutover
+- [x] `compat` crate: Go's `%q` quoting of keys in findings, `bufio.Scanner`
+      lines, and the integers `Atoi` accepts; removed after the cutover
 - [x] Gate: the `corpus` group is identical (`make rust-parity`), and
       `cargo test -p tools` reproduces every `expected.txt` under
       `internal/e2e/testdata/broken-corpora/`
@@ -350,17 +361,15 @@ until then.
       prayer forms and `--chant` (`scripts/rust-parity-tex.sh`)
 - [x] `validate`: the hour definitions (`office::validate`), the provenance
       and zero-occurrence ledgers (`tools::review`), and Go's `encoding/csv`
-      (`compat::csv`, fuzzed against Go). The broken corpora gain `office`
-      and `review` layers and five cases; the Rust reports match on all 15
+      parsing (`compat::csv`, fuzzed against Go). The broken corpora gain `office`
+      and `review` layers and five cases; the Rust findings match on all 15
       (`cargo test -p tools`), and `make rust-parity` runs `validate` on the
       live data
 - [x] `audit` (placeholders, missing propers, flat antiphons, translation
       review, and the composition sweep) and `lint` (`tools::audit`):
       identical on the live data and, through
       `scripts/rust-parity-mutated.sh`, on a copy of it broken in known ways,
-      which reaches the finding paths the clean data never does.
-      `compat::quote` now escapes exactly what Go's `strconv.IsPrint`
-      rejects (Go's tables, checked on every code point)
+      which reaches the finding paths the clean data never does
 - [x] The review subcommands (`tools::review`): manifest, provenance,
       provenance-queue, zero-occurrences, resolution-inventory, plan,
       explain, assurance, and the ledger writers attest and flag.

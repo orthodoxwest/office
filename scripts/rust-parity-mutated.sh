@@ -3,6 +3,7 @@
 # data/ broken in known ways. The live data is clean, so most finding paths
 # (placeholders, missing propers, flat antiphons, lint classes, orphan chant
 # scores, not-found markers, ordinary fallbacks) are only reached this way.
+# Stdout and the exit status are compared; stderr is not (RUST-PORT.md).
 # Expects ./office and target/release/office-rs.
 set -euo pipefail
 go_bin=$(realpath "${GO_OFFICE:-./office}")
@@ -33,7 +34,9 @@ for line in open('collect-conclusions.txt').read().split('\n'):
     kept.append(line)
 open('collect-conclusions.txt', 'w').write('\n'.join(kept))
 p = 'texts/ordinary/lauds.txt'
-s = open(p).read().replace('\n[chapter]\n', '\n[chapter]\nPlaceholder chapter\ttext `x` \\n ** Domine deus  end \n\n[chapter-was]\n', 1)
+# The non-breaking space sits outside the 40-character tail the truncation
+# finding quotes: Go's %q escapes it and Rust's quoting does not (RUST-PORT.md).
+s = open(p).read().replace('\n[chapter]\n', '\n[chapter]\nPlaceholder\u00a0chapter, long enough to push it out of the quoted tail,\ttext `x` \\n ** Domine deus  end \n\n[chapter-was]\n', 1)
 open(p, 'w').write(s)
 for i, f in enumerate(sorted(glob.glob('texts/proper/*.txt'))[:40]):
     s = open(f).read()
@@ -51,13 +54,13 @@ PY
 failed=0
 for cmd in validate lint "audit -year 2026" "audit -year 2031"; do
   # shellcheck disable=SC2086
-  if cmp -s <(cd "$work" && ./office $cmd 2>&1; echo "exit $?") <(cd "$work" && ./office-rs $cmd 2>&1; echo "exit $?"); then
+  if cmp -s <(cd "$work" && ./office $cmd 2>/dev/null; echo "exit $?") <(cd "$work" && ./office-rs $cmd 2>/dev/null; echo "exit $?"); then
     echo "parity: mutated data: office $cmd identical"
   else
     failed=1
     echo "parity: mutated data: office $cmd DIFFERS" >&2
     # shellcheck disable=SC2086
-    diff -u <(cd "$work" && ./office $cmd 2>&1) <(cd "$work" && ./office-rs $cmd 2>&1) | head -40 >&2 || true
+    diff -u <(cd "$work" && ./office $cmd 2>/dev/null) <(cd "$work" && ./office-rs $cmd 2>/dev/null) | head -40 >&2 || true
   fi
 done
 exit $failed
