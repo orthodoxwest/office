@@ -101,8 +101,10 @@ crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo
   tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
                            corpus editing, proper scaffolds
 apps/
-  cli/                     office-rs: every Go command but serve (stdout, exit status, and written
-                           files compared byte for byte with Go; error wording is not)
+  cli/                     office-rs: every Go command (stdout, exit status, and written files
+                           compared byte for byte with Go; error wording is not); serve runs office-web
+  office-web/              Go's internal/web + internal/usage on axum/rusqlite/jiff; reproduces ServeMux and
+                           FileServer behavior; gonet.rs/gotime.rs hold the Go net/http and time semantics
 tools/
   genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
   genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)
