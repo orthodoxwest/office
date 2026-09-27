@@ -1,0 +1,294 @@
+//! Expectations read from cited sources, independent of generated snapshots.
+use std::collections::{HashMap, HashSet};
+use std::sync::OnceLock;
+
+use calendar::{CalendarData, Category, Date, MoveableDates, Season, build_calendar};
+use liturgy::{ElementType, PrayerForm};
+
+use crate::{Day, Engine, HOUR_NAMES, resolve_office_days, testutil::TestData};
+
+fn engine() -> &'static Engine {
+    static ENGINE: OnceLock<Engine> = OnceLock::new();
+    ENGINE.get_or_init(|| Engine::load(&TestData("../../data".into())).unwrap())
+}
+
+fn year(year: i32) -> (Vec<Day>, MoveableDates) {
+    let data = CalendarData::load(&TestData("../../data".into())).unwrap();
+    let cal = build_calendar(year, &data).unwrap();
+    let offices = resolve_office_days(&cal);
+    (cal.days.into_iter().zip(offices).map(|(c, o)| Day::new(c, o)).collect(), MoveableDates::compute(year))
+}
+
+#[test]
+fn cited_composition_requirements() {
+    let rules: serde_json::Value = serde_json::from_str(include_str!("../../../data/review/composition-requirements.json")).unwrap();
+    let rules = rules.as_array().unwrap();
+    assert!(!rules.is_empty());
+    let mut ids = HashSet::new();
+    let mut years = HashMap::new();
+    let string = |v: &serde_json::Value, key: &str| v[key].as_str().unwrap_or("").to_string();
+    for rule in rules {
+        let id = string(rule, "id");
+        let source = string(rule, "source");
+        let cases = rule["cases"].as_array().unwrap();
+        assert!(!id.is_empty() && !source.is_empty() && !cases.is_empty() && ids.insert(id.clone()), "{rule}");
+        for case in cases {
+            let date = Date::parse(case["date"].as_str().unwrap()).unwrap();
+            let hour = case["hour"].as_str().unwrap();
+            let owner = string(case, "commemoration_owner");
+            let slot = string(case, "slot");
+            let reference = string(case, "ref");
+            let contains = string(case, "contains");
+            let before = string(case, "before_slot");
+            let absent = case["absent"].as_bool().unwrap_or(false);
+            let context = format!("{id}: {source}: {date} {hour} {slot}");
+            assert!(!slot.is_empty() && (absent || !reference.is_empty() || !contains.is_empty()), "{context}");
+            let (days, moveable) = years.entry(date.year()).or_insert_with(|| year(date.year()));
+            let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = composed
+                .sections
+                .iter()
+                .flat_map(|s| &s.elements)
+                .enumerate()
+                .filter(|(_, e)| e.commemoration_owner_id == owner && e.is_commemoration != owner.is_empty())
+                .collect();
+            let found: Vec<_> = elements.iter().filter(|(_, e)| e.slot_ref == slot).collect();
+            if absent {
+                assert!(found.is_empty(), "{context}: unexpected slot");
+                continue;
+            }
+            assert!(!found.is_empty(), "{context}: missing slot for {owner}");
+            for (_, e) in &found {
+                if !reference.is_empty() {
+                    assert_eq!(e.source_ref, reference, "{context}");
+                }
+                if !contains.is_empty() {
+                    assert!(e.text.contains(&contains), "{context}: lacks {contains:?}");
+                }
+            }
+            if !before.is_empty() {
+                let next = elements.iter().find(|(_, e)| e.slot_ref == before).expect(&context);
+                assert!(found[0].0 < next.0, "{context}: must precede {before}");
+            }
+        }
+    }
+}
+
+#[test]
+fn sunday_commemoration_versicles_across_calendars() {
+    for y in [2026, 2027, 2032] {
+        let (days, moveable) = year(y);
+        let mut checked = 0;
+        for day in days.iter().filter(|d| d.season == Season::Pentecost) {
+            for comm in day
+                .commemorations
+                .iter()
+                .filter(|c| c.category == Some(Category::Sunday) && !["pentecost-sunday-1", "pentecost-sunday-2"].contains(&c.id.as_str()))
+            {
+                let hour = engine().compose_hour("lauds", day, &moveable, PrayerForm::Private).unwrap();
+                let found: Vec<_> = hour
+                    .sections
+                    .iter()
+                    .flat_map(|s| &s.elements)
+                    .filter(|e| e.commemoration_owner_id == comm.id && e.slot_ref == "commemoration-versicle")
+                    .collect();
+                assert!(!found.is_empty(), "{} {}", day.date, comm.id);
+                for e in found {
+                    assert_eq!(e.source_ref, "ordinary/lauds/versicle-sunday", "Diurnal pp. xxix, 41: {} {}", day.date, comm.id);
+                    checked += 1;
+                }
+            }
+        }
+        assert!(checked > 0, "no Sunday commemorations in {y}");
+    }
+}
+
+#[test]
+fn composition_structure_across_calendars() {
+    for y in 2024..=2028 {
+        let (days, moveable) = year(y);
+        for day in &days {
+            for name in HOUR_NAMES {
+                let hour = engine().compose_hour(name, day, &moveable, PrayerForm::Private).unwrap();
+                let context = format!("{} {name}", day.date);
+                let mut labels = HashSet::new();
+                for section in &hour.sections {
+                    assert!(section.label.is_empty() || labels.insert(&section.label), "{context}: duplicate {}", section.label);
+                    for e in &section.elements {
+                        assert!(!e.text.lines().any(|l| l.trim().starts_with('#')), "{context}: leaked annotation {}", e.text);
+                    }
+                }
+                if name == "vespers" && y == 2026 {
+                    // Diurnal pp. 72*–75*: five psalms of the Dead; pp. 313, 315:
+                    // five Triduum psalms plus Miserere; p. 360: Vigil Psalm 117 only.
+                    let mut expected = match day.celebration_id() {
+                        Some("holy-thursday" | "good-friday") => 6,
+                        Some("holy-saturday") => 1,
+                        _ if hour.feast == "All Souls' Day" => 5,
+                        _ => 4,
+                    };
+                    if hour.sections.iter().any(|s| s.label == "Vespers of the Dead") {
+                        expected += 5;
+                    }
+                    let psalms = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.kind == ElementType::Psalm).count();
+                    assert_eq!(psalms, expected, "{context}");
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn parallel_composition_preserves_shared_engine_and_day() {
+    let (days, moveable) = year(2026);
+    let day = &days[76];
+    let expected = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+    std::thread::scope(|scope| {
+        let jobs: Vec<_> = (0..8)
+            .map(|_| {
+                scope.spawn(|| {
+                    for form in PrayerForm::ALL {
+                        engine().compose_hour("vespers", day, &moveable, form).unwrap();
+                    }
+                    engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap()
+                })
+            })
+            .collect();
+        for job in jobs {
+            assert_eq!(job.join().unwrap().sections, expected.sections);
+        }
+    });
+}
+
+fn principal<'a>(hour: &'a liturgy::OfficeHour, slot: &str) -> &'a liturgy::OfficeElement {
+    let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| !e.is_commemoration && e.slot_ref == slot).collect();
+    assert_eq!(elements.len(), 1, "{} {}: {slot}", hour.date, hour.hour);
+    elements[0]
+}
+
+#[test]
+fn seasonal_little_hours_and_weekday_vespers_across_calendars() {
+    // Diurnal pp. 163–164, 250–251, 272–275, 372–374; weekday Vespers
+    // pp. 121, 125, 131, 135, 139. Future years test interactions, not ordo agreement.
+    for y in [2026, 2027, 2032] {
+        let (days, m) = year(y);
+        let mut checked = [0; 3];
+        for d in &days {
+            let feria = d
+                .celebration
+                .as_ref()
+                .is_none_or(|f| f.category == Some(Category::Feria) && (f.id.contains("feria") || f.id.contains("ember")));
+            for (name, antiphon) in [("terce", "psalm-antiphon-2"), ("sext", "psalm-antiphon-3"), ("none", "psalm-antiphon-5")] {
+                let seasonal = (d.season == Season::Lent && d.date > m.lent1)
+                    || (d.season == Season::Easter && d.date > m.low_sunday && d.date < m.ascension)
+                    || d.season == Season::Advent;
+                let passion = d.date >= m.passion_sunday && d.date < m.holy_thursday;
+                let holy_week = matches!(d.celebration_id(), Some("holy-monday" | "holy-tuesday" | "holy-wednesday"));
+                let sunday = matches!(d.celebration_id(), Some("passion-sunday" | "palm-sunday"));
+                if feria && seasonal || passion && (feria || holy_week || sunday) {
+                    let h = engine().compose_hour(name, d, &m, PrayerForm::Private).unwrap();
+                    if feria && seasonal {
+                        for slot in ["chapter", "versicle"] {
+                            assert_eq!(
+                                principal(&h, slot).source_ref,
+                                format!("seasonal/{}/{slot}-{name}", d.season.as_str()),
+                                "{}",
+                                d.date
+                            );
+                            checked[0] += 1;
+                        }
+                    }
+                    if passion && (feria || holy_week || sunday) {
+                        assert_eq!(principal(&h, "versicle").source_ref, format!("seasonal/passiontide/versicle-{name}"));
+                        checked[1] += 1;
+                        if !sunday {
+                            assert_eq!(principal(&h, "chapter").source_ref, format!("seasonal/passiontide/chapter-{name}"));
+                            if d.date < m.palm_sunday {
+                                let ants: Vec<_> = h
+                                    .sections
+                                    .iter()
+                                    .flat_map(|s| &s.elements)
+                                    .filter(|e| !e.is_commemoration && e.slot_ref == antiphon)
+                                    .collect();
+                                assert!(!ants.is_empty());
+                                assert!(ants.iter().all(|e| e.source_ref == format!("seasonal/passiontide/psalm-antiphon-{name}")));
+                            }
+                        }
+                    }
+                }
+            }
+            if d.vespers.feast.is_none()
+                && d.celebration.as_ref().is_none_or(|f| f.category == Some(Category::Feria))
+                && (1..=5).contains(&d.date.weekday().number())
+                && matches!(d.season, Season::Pentecost | Season::Epiphany | Season::Septuagesima)
+            {
+                let h = engine().compose_hour("vespers", d, &m, PrayerForm::Private).unwrap();
+                let e = principal(&h, "short-responsory");
+                assert_eq!(e.source_ref, format!("ordinary/vespers/short-responsory-{}", d.date.weekday().name().to_lowercase()));
+                assert!(e.text.contains("I will bless the Lord"));
+                checked[2] += 1;
+            }
+        }
+        assert!(checked.iter().all(|n| *n > 0), "{y}: {checked:?}");
+    }
+}
+
+#[test]
+fn major_collects_have_invitations_and_only_first_and_last_conclusions() {
+    // Diurnal General Rubrics XII, p. xxxi; ordinary pp. 42–43, 144–147;
+    // Breviary XXXIII.3,5 p. 50. Fixtures do not adjudicate occurrence.
+    let (days, m) = year(2026);
+    for (date, name, comms, final_ref) in [
+        ("2026-01-01", "lauds", 0, ""),
+        ("2026-01-01", "vespers", 0, ""),
+        ("2026-01-03", "vespers", 2, ""),
+        ("2026-01-04", "lauds", 2, ""),
+        ("2026-01-05", "lauds", 1, ""),
+        ("2026-01-17", "vespers", 4, ""),
+        ("2026-01-19", "lauds", 2, "ordinary/shared/suffrage-collect"),
+        ("2026-02-03", "vespers", 2, "ordinary/shared/suffrage-collect"),
+        ("2026-01-30", "vespers", 0, "ordinary/shared/suffrage-collect-bvm"),
+        ("2026-01-31", "lauds", 0, "ordinary/shared/suffrage-collect-bvm"),
+        ("2026-06-20", "lauds", 1, "ordinary/shared/suffrage-collect-bvm"),
+        ("2026-04-21", "vespers", 1, "ordinary/shared/cross-collect"),
+        ("2026-04-22", "lauds", 1, "ordinary/shared/cross-collect"),
+    ] {
+        let d = &days[Date::parse(date).unwrap().ordinal() as usize - 1];
+        for form in PrayerForm::ALL {
+            let h = engine().compose_hour(name, d, &m, form).unwrap();
+            let elements: Vec<_> = h.sections.iter().flat_map(|s| &s.elements).collect();
+            let start = elements.iter().position(|e| e.kind == ElementType::Collect).unwrap() - 1;
+            let end = start + elements[start..].iter().position(|e| e.leader_slot == "greeting").unwrap();
+            let run = &elements[start..end];
+            let positions: Vec<_> = run.iter().enumerate().filter(|(_, e)| e.kind == ElementType::Collect).map(|(i, _)| i).collect();
+            assert_eq!(positions.len(), 1 + comms + usize::from(!final_ref.is_empty()), "{date} {name}");
+            assert_eq!(run.iter().filter(|e| e.kind == ElementType::Collect && e.is_commemoration).count(), comms);
+            assert_eq!(run.iter().filter(|e| e.source_ref == "shared/leader/let-us-pray").count(), positions.len());
+            if !final_ref.is_empty() {
+                assert_eq!(run[*positions.last().unwrap()].source_ref, final_ref);
+            }
+            for (j, &i) in positions.iter().enumerate() {
+                assert!(i > 0);
+                let invitation = run[i - 1];
+                assert_eq!(invitation.kind, ElementType::Prayer);
+                assert_eq!(invitation.source_ref, "shared/leader/let-us-pray");
+                assert_eq!(invitation.text, "Let us pray.");
+                if run[i].is_commemoration {
+                    assert!(i >= 3);
+                    assert_eq!(run[i - 2].kind, ElementType::Versicle);
+                    assert_eq!(run[i - 3].kind, ElementType::Antiphon);
+                    assert!(invitation.is_commemoration);
+                    assert_eq!(invitation.commemoration_owner_id, run[i].commemoration_owner_id);
+                }
+                let end = positions.get(j + 1).copied().unwrap_or(run.len());
+                let text = run[i..end].iter().map(|e| e.text.as_str()).collect::<Vec<_>>().join(" ");
+                let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
+                assert_eq!(
+                    text.matches("world without end.").count(),
+                    usize::from(j == 0 || j + 1 == positions.len()),
+                    "{date} {name}: collect {j}"
+                );
+            }
+        }
+    }
+}

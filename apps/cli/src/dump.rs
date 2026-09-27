@@ -1,6 +1,6 @@
 //! `office dump`: the canonical record stream the Go and Rust engines are
 //! compared on (RUST-PORT.md, "Dump format"). The Go generator in
-//! `internal/dump/records.go` is the reference field list.
+//! Record fields form the versioned regression snapshot contract.
 
 use std::io::Write;
 

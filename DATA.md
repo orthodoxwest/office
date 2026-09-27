@@ -94,7 +94,7 @@ In prose sections (collects, chapters, prayers) a single newline is a soft wrap
 and the web renderer reflows the paragraph; a blank line starts a new one. Hymn
 and psalm renderers keep their verse structure.
 
-Common sections (the [scaffold catalog](internal/scaffold/keys.go) lists every
+Common sections (the [scaffold catalog](crates/tools/src/scaffold.rs) lists every
 supported key):
 
 | Section | Used in |

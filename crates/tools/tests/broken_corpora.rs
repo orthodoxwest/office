@@ -1,9 +1,4 @@
-//! The Phase 2 gate for validation: the Rust validators must write Go's
-//! findings for every case in internal/e2e/testdata/broken-corpora (see
-//! internal/e2e/broken_corpora_test.go, which checks Go against the same
-//! expected.txt files). Findings match line for line; only where Go ends a
-//! finding with a Go library's own error text (strconv, os, encoding/csv)
-//! may Rust word that tail itself (RUST-PORT.md).
+//! Deliberately broken corpora protect validation diagnostics and boundaries.
 
 use std::path::Path;
 use std::sync::LazyLock;
@@ -14,7 +9,7 @@ use tools::fs::FsData;
 use tools::review::{provenance, zero_occurrence};
 use tools::validate::{validate_calendar, validate_texts};
 
-const CASES: &str = "../../internal/e2e/testdata/broken-corpora";
+const CASES: &str = "../../tests/fixtures/broken-corpora";
 
 fn report(dir: &str) -> String {
     let src = FsData::new(dir);

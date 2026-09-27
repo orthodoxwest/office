@@ -1,12 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
-const goFlags = [process.env.GOFLAGS, "-buildvcs=false"].filter(Boolean).join(" ");
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:18159";
 const externalServer = Boolean(process.env.PLAYWRIGHT_EXTERNAL_SERVER);
-// Rust is the default; the retained Go reference is opt-in during cutover.
-const serverCommand = process.env.PLAYWRIGHT_SERVER === "go"
-  ? "go run ./cmd/server serve 127.0.0.1:18159"
-  : "target/release/office serve 127.0.0.1:18159";
+const serverCommand = "target/release/office serve 127.0.0.1:18159";
 // Separate CI invocations must retain both reports and their failure traces.
 const outputRoot = process.env.PLAYWRIGHT_SUITE
   ? `../output/playwright/${process.env.PLAYWRIGHT_SUITE}`
@@ -45,7 +41,6 @@ export default defineConfig({
         cwd: "..",
         env: {
           ...process.env,
-          GOFLAGS: goFlags,
           OFFICE_USAGE_DB: process.env.OFFICE_USAGE_DB || "output/playwright/usage.sqlite",
         },
         url: baseURL,

@@ -1,6 +1,4 @@
-//! Embeds `internal/web/static` as Go's `//go:embed static` does: every file
-//! under it except names beginning with `.` or `_`, keyed by its path from
-//! the embedding directory ("static/app.js").
+//! Embed the web assets at build time, keyed by their public static path.
 
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -25,7 +23,7 @@ fn walk(dir: &Path, rel: &str, files: &mut Vec<(String, PathBuf)>) {
 
 fn main() {
     let manifest = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
-    let root = manifest.join("../../internal/web/static").canonicalize().expect("internal/web/static");
+    let root = manifest.join("static").canonicalize().expect("apps/office-web/static");
     println!("cargo:rerun-if-changed={}", root.display());
     let mut files = Vec::new();
     walk(&root, "static", &mut files);

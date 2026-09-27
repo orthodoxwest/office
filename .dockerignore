@@ -1,7 +1,6 @@
 # flyctl launch added from .gitignore
 # Binaries
 office
-cmd/server/server
 **/*.exe
 **/*.exe~
 **/*.dll
@@ -13,10 +12,6 @@ cmd/server/server
 
 # Output
 output
-
-# Go workspace
-**/go.work
-**/go.work.sum
 
 # IDE
 **/.idea

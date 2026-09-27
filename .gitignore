@@ -1,6 +1,5 @@
 # Binaries
 /office
-/cmd/server/server
 *.exe
 *.exe~
 *.dll
@@ -15,10 +14,6 @@
 
 # Output
 /output/
-
-# Go workspace
-go.work
-go.work.sum
 
 # IDE
 .idea/
@@ -44,7 +39,7 @@ Thumbs.db
 __pycache__/
 
 # Node
-/.web-tools/node_modules/
+/.web-tools/node_modules
 
 # Misc
 /references

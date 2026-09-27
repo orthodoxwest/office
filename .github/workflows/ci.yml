@@ -21,29 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - name: Cache Go build and module cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-            ~/go/bin
-          key: go-${{ runner.os }}-check-${{ hashFiles('go.mod', 'go.sum') }}-staticcheck-v0.7.0-${{ hashFiles('**/*.go') }}
-          restore-keys: |
-            go-${{ runner.os }}-check-${{ hashFiles('go.mod', 'go.sum') }}-staticcheck-v0.7.0-
-
-      - name: Install staticcheck
-        run: |
-          if ! ~/go/bin/staticcheck -version 2>/dev/null | grep -q v0.7.0; then
-            go install honnef.co/go/tools/cmd/staticcheck@v0.7.0
-          fi
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -54,25 +31,11 @@ jobs:
       - name: Install JavaScript lint dependencies
         run: npm ci --prefix .web-tools
 
-      - name: Lint and vet
-        run: make go-check lint-js
-
-      - name: Test coverage checker
-        run: python3 scripts/test_coverage_threshold.py
+      - name: Lint JavaScript
+        run: make lint-js
 
       - name: Test golden updater
         run: python3 scripts/test_update_golden_workflow.py
-
-      - name: Run unit tests and enforce coverage floors
-        run: make test-coverage
-
-      - name: Upload unit-test coverage
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: output/coverage/
-          retention-days: 14
 
   rust:
     name: Rust
@@ -101,6 +64,8 @@ jobs:
         run: |
           python3 scripts/test_ordo_compare.py
           python3 scripts/test_project_status.py
+          python3 scripts/test_static_contracts.py
+          python3 scripts/test_verify_psalms.py
           make diurnal-test
 
       - name: Validate and lint the corpus with Rust
@@ -112,16 +77,28 @@ jobs:
             cargo build -p compat -p calendar -p corpus -p office --target "$target"
           done
 
-      - uses: actions/setup-go@v5
+  coverage:
+    name: Rust coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.94.1
         with:
-          go-version-file: go.mod
-          cache: true
-
-      - name: Go/Rust parity
-        run: make rust-parity
-
-      - name: Full calendar and composition regression snapshot (2026–2053)
-        run: make parity
+          components: llvm-tools-preview
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov@0.8.7
+      - name: Collect Rust line coverage
+        run: make test-coverage
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: rust-coverage
+          path: output/coverage/
+          retention-days: 14
 
   golden:
     name: Golden tests
@@ -133,24 +110,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-
-      - name: Cache Go build and modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: go-${{ runner.os }}-golden-${{ hashFiles('go.mod', 'go.sum') }}-${{ hashFiles('**/*.go') }}
-          restore-keys: |
-            go-${{ runner.os }}-golden-${{ hashFiles('go.mod', 'go.sum') }}-
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+      - run: make build
 
       - name: Run golden tests
         id: golden
-        run: go test ./internal/e2e/ -count=1
+        run: python3 scripts/golden.py --check
         continue-on-error: true
 
       - name: Capture golden diff
@@ -158,8 +124,8 @@ jobs:
         if: steps.golden.outcome == 'failure'
         run: |
           make golden
-          DIFF=$(git diff internal/e2e/testdata/golden/)
-          git checkout -- internal/e2e/testdata/golden/
+          DIFF=$(git diff tests/fixtures/golden/)
+          git checkout -- tests/fixtures/golden/
           MAX=50000
           if [ "${#DIFF}" -gt "$MAX" ]; then
             DIFF="${DIFF:0:$MAX}"$'\n\n... (diff truncated — too large to display in full)'
@@ -301,7 +267,7 @@ jobs:
           script: |
             const isIgnored = filename =>
               filename.startsWith('data/') ||
-              filename.startsWith('internal/e2e/testdata/golden/');
+              filename.startsWith('tests/fixtures/golden/');
 
             let files;
             if (context.eventName === 'pull_request') {
@@ -344,7 +310,7 @@ jobs:
             const run = files.length === 0 || files.some(filename => !isIgnored(filename));
             core.notice(run
               ? 'Running UX tests because the change includes application or test files.'
-              : 'Skipping UX tests because only data and Go golden files changed.');
+              : 'Skipping UX tests because only data and golden files changed.');
             core.setOutput('run', run ? 'true' : 'false');
 
       - uses: actions/checkout@v4
@@ -478,7 +444,7 @@ jobs:
 
       - name: Record skipped UX suite
         if: steps.ux_changes.outputs.run == 'false'
-        run: echo "Playwright skipped because only data and Go golden files changed." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "Playwright skipped because only data and golden files changed." >> "$GITHUB_STEP_SUMMARY"
 
   container:
     name: Rust runtime image

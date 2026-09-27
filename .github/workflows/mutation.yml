@@ -1,6 +1,6 @@
 name: Mutation review
 
-# Mutation is an investigation tool; routine PRs use unit coverage in CI.
+# Mutation is an investigation tool; routine PRs use the Rust suites and full composition snapshot.
 on:
   workflow_dispatch:
     inputs:
@@ -8,12 +8,12 @@ on:
         description: Package to inspect for missing assertions
         type: choice
         required: true
-        default: models
+        default: calendar
         options:
-          - models
+          - liturgy
           - calendar
           - office
-          - texts
+          - corpus
 
 permissions:
   contents: read
@@ -30,12 +30,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - uses: dtolnay/rust-toolchain@1.94.1
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
         with:
-          go-version-file: go.mod
-
-      - name: Install Gremlins
-        run: make install-gremlins
+          tool: cargo-mutants@27.1.0
 
       - name: Run mutation review
         env:
@@ -45,10 +44,10 @@ jobs:
           mkdir -p output/mutation
           # Validate before using input as a package path. One worker limits
           # simultaneous runaway mutants and contention on the hosted runner.
-          case "$PACKAGE" in models|calendar|office|texts) ;; *) exit 2 ;; esac
+          case "$PACKAGE" in liturgy|calendar|office|corpus) ;; *) exit 2 ;; esac
           timeout --signal=TERM --kill-after=15s 20m \
-            "$(go env GOPATH)/bin/gremlins" unleash "./internal/$PACKAGE/" \
-            --workers 1 --output output/mutation/report.json \
+            cargo mutants --package "$PACKAGE" --jobs 1 --timeout 60 \
+            --gitignore true --output output/mutation \
             2>&1 | tee output/mutation/run.log
 
       - name: Summarize review

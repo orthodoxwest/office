@@ -1,0 +1,3 @@
+# Optional dependencies for deterministic asset generation.
+Pillow>=10
+numpy>=1.26

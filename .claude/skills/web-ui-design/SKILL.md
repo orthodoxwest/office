@@ -23,7 +23,7 @@ or impose a redesign on an unrelated change.
 
 ## Shared visual language
 
-- Use existing tokens in `internal/web/static/style.css`, not copied hex values.
+- Use existing tokens in `apps/office-web/static/style.css`, not copied hex values.
   Nave is warm plaster; Apse is cool blue, not forest green.
 - `--accent` / `--oak` supply structure; `--border` / `--surface-edge` separate
   surfaces. Use the existing surface tokens for panels and tables.
@@ -88,10 +88,10 @@ or impose a redesign on an unrelated change.
 
 | Concern | Location |
 |---------|----------|
-| Tokens, layout, print | `internal/web/static/style.css` |
-| Markup and view models | `internal/render/templates/`, `internal/render/` |
-| Client behavior | `internal/web/static/app.js` |
-| Offline behavior | `internal/web/static/sw.js`, `manifest.webmanifest` |
+| Tokens, layout, print | `apps/office-web/static/style.css` |
+| Markup and view models | `crates/render-html/templates/`, `crates/render-html/src/` |
+| Client behavior | `apps/office-web/static/app.js` |
+| Offline behavior | `apps/office-web/static/sw.js`, `manifest.webmanifest` |
 | Browser checks | `.web-tools/tests/ux.spec.js`, `visual.spec.js` |
 
 ## Validation and delivery
@@ -102,7 +102,7 @@ Playwright rather than relying only on screenshots. Check home and an hour
 when shared CSS/chrome changes. Recheck seasonal colours only when changing
 ornament or theme tokens; measure paint cost when adding decoration.
 
-Run `go test ./internal/render/ ./internal/web/`, rebuild embedded assets,
+Run `cargo test -p render-html -p office-web`, rebuild embedded assets,
 and run `make test-ux` for UI changes. CI runs behavior tests from
 `ux.spec.js`; add coverage there when warranted. Preserve meaningful
 accessibility and visual checks, updating assertions only for deliberate

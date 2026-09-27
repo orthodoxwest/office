@@ -68,10 +68,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-go@v5
+      - uses: dtolnay/rust-toolchain@1.94.1
+
+      - uses: Swatinem/rust-cache@v2
         with:
-          go-version-file: pr/go.mod
-          cache: false
+          workspaces: pr
 
       - name: Merge the base branch
         env:
@@ -81,13 +82,13 @@ jobs:
       - name: Regenerate and verify
         run: |
           make golden
-          go test ./...
+          cargo test --workspace --locked
           make validate
 
       - uses: actions/upload-artifact@v4
         with:
           name: golden-candidates
-          path: pr/internal/e2e/testdata/golden/
+          path: pr/tests/fixtures/golden/
           if-no-files-found: error
           retention-days: 1
 
@@ -156,7 +157,7 @@ jobs:
             } else if (process.env.PUSHED === 'true') {
               result = '## Golden files updated\n\n' +
                 'CI merged the base branch, regenerated the golden files, and pushed the result. ' +
-                'The Go tests and data validation passed before publishing.';
+                'The Rust tests and data validation passed before publishing.';
             } else {
               result = '## Golden files already current\n\n' +
                 'The branch was up to date and regeneration produced no changes. Nothing was pushed.';

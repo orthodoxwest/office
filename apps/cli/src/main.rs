@@ -1,5 +1,4 @@
-//! `office`: the command-line front end of the Rust engine. It mirrors the
-//! Go `office` commands as they are ported (RUST-PORT.md).
+//! `office`: the command-line front end and web-server entry point.
 
 mod args;
 mod checks;

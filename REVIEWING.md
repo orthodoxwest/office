@@ -51,7 +51,7 @@ commemoration. Add a citation plus representative and boundary cases with each
 repair, and never regenerate expectations from current output.
 
 ```bash
-go test ./internal/e2e -run 'TestCompositionRequirements|TestSundayCommemoration|TestCalendarCompositionRequirements'
+cargo test -p office requirements_tests
 ```
 
 The calendar tests compose all seven hours on every date of 2026, 2027, and
