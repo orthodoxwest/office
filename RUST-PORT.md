@@ -17,8 +17,8 @@ concurrence and proper-resolution tables, antiphon grouping, collect chains,
 and Martyrology rollover boundaries. The suites consolidate overlapping Go
 cases rather than preserving a one-to-one test-function inventory. Python
 retains the shared static JS/CSS contracts; Playwright retains browser behavior
-and visual baselines. Rust line coverage replaces the Go statement report;
-new per-crate floors need a measured Rust baseline, not copied Go percentages.
+and visual baselines. Coverage and mutation tools are optional local diagnostics;
+there are no coverage-percentage targets or planned coverage floors.
 
 The read-only psalm verifier and deterministic asset generators now use Python.
 The old fetch/split/Divinum seed programs are retired: corpus ingestion uses

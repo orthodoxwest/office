@@ -22,8 +22,8 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
 
-# Rust line coverage is reported separately from the retired Go statement metric.
-test-coverage: ## Collect Rust coverage (requires cargo-llvm-cov and llvm-tools-preview)
+# Optional local diagnostic; normal checks do not collect coverage.
+test-coverage: ## Inspect local Rust coverage (requires cargo-llvm-cov and llvm-tools-preview)
 	mkdir -p output/coverage
 	cargo llvm-cov --workspace --locked --lcov --output-path output/coverage/lcov.info
 

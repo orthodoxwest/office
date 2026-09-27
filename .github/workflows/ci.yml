@@ -77,29 +77,6 @@ jobs:
             cargo build -p compat -p calendar -p corpus -p office --target "$target"
           done
 
-  coverage:
-    name: Rust coverage
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.94.1
-        with:
-          components: llvm-tools-preview
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-llvm-cov@0.8.7
-      - name: Collect Rust line coverage
-        run: make test-coverage
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: rust-coverage
-          path: output/coverage/
-          retention-days: 14
-
   golden:
     name: Golden tests
     runs-on: ubuntu-latest

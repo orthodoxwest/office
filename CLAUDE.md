@@ -162,7 +162,7 @@ make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults 
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
 make mutate      # Mutation-test a Rust crate (MUTATE_PKG=calendar) — see MUTATION-TESTING.md
 make mutate-diff # Mutation-test only lines changed vs master (local review)
-make test-coverage # Collect Rust line coverage (also in CI)
+make test-coverage # Optional local Rust line-coverage diagnostic
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make test-ux      # Playwright suites against the default Rust server
