@@ -1,0 +1,2 @@
+== texts
+loading text corpus: $DATA/collect-conclusions.txt:2: proper/st-x/lauds/collect names conclusion form "qui-vivis", but shared/formulas/collect-conclusion-qui-vivis is not in the corpus

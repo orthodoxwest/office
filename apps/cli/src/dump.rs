@@ -10,12 +10,13 @@ use serde_json::{Value, json};
 use crate::args::{Flags, split_list};
 use crate::fsdata::FsData;
 
-pub const FORMAT: &str = "office-dump/1";
+pub const FORMAT: &str = "office-dump/2";
 
+const GROUP_CORPUS: &str = "corpus";
 const GROUP_CALENDAR: &str = "calendar";
 const GROUP_OFFICE: &str = "office";
 const GROUP_HOURS: &str = "hours";
-const GROUPS: [&str; 3] = [GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
+const GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
 const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 
@@ -347,6 +348,6 @@ mod tests {
         assert_eq!(sel.hours, ["lauds", "vespers"]);
         assert_eq!(sel.forms, PRAYER_FORMS);
         let err = Selection { start_year: 2026, years: 1, groups: vec!["x".into()], ..Selection::default() }.normalize().unwrap_err();
-        assert_eq!(err, "unknown record group \"x\" (want one of [calendar office hours])");
+        assert_eq!(err, "unknown record group \"x\" (want one of [corpus calendar office hours])");
     }
 }

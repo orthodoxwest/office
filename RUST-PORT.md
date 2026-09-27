@@ -5,11 +5,10 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phase 1 (the `calendar` crate) is complete, and Phase 3 has
-begun with the Office day: `office-rs dump -groups calendar,office` is
-byte-identical to Go for 1900–2199. Phase 0's corpus
-prerequisites are still open. Nothing user-facing changes until the cutover in
-Phase 6.
+**Status:** Phases 0 and 1 are complete. Phase 3 has begun with the Office
+day: `office-rs dump -groups calendar,office` is byte-identical to Go for
+1900–2199. Phase 2 (the `corpus` crate) is in progress. Nothing user-facing
+changes until the cutover in Phase 6.
 
 ## Why Rust
 
@@ -126,7 +125,7 @@ Streams can be piped rather than stored:
 The Go generator in `internal/dump/records.go` is the reference field list.
 This section states the rules a second implementation needs.
 
-### Dump format (`office-dump/1`)
+### Dump format (`office-dump/2`)
 
 **Encoding.** One record per line, each a JSON object followed by `\n`.
 
@@ -152,15 +151,20 @@ as long as serde_json's `preserve_order` feature stays off.
 **Records.** Each has a `kind`. They appear in this order:
 
 1. `meta`: format name and the normalized selection.
-2. Per civil year, `calendar_year`: the Tabula and every moveable date.
-3. Per date, `calendar_day`: the observance every product shares. It holds
+2. The corpus, which depends on `data/` alone: a `corpus_entry` for every
+   resolvable key in byte order (its `@use` or `@omit` directive, the direct
+   `use_target`, the `canonical` key, the resolved `body`, the collect
+   conclusion form, and the Latin incipit), then an `appointment_scope` for
+   each scope in file order.
+3. Per civil year, `calendar_year`: the Tabula and every moveable date.
+4. Per date, `calendar_day`: the observance every product shares. It holds
    season, tempora, celebration, commemorations, the feria commemoration,
    color, notes, the occurrence rule and trace, temporal week, octave, and
    fasting.
-4. Per date, `office_day`: what only the Office resolves. It holds the
+5. Per date, `office_day`: what only the Office resolves. It holds the
    Vespers designation (owner, feast, color, commemorations, the split at the
    Chapter, the appended Office of the Dead) and the Marian antiphon.
-5. Per date, `hour` for each hour (Lauds through Compline) and prayer form
+6. Per date, `hour` for each hour (Lauds through Compline) and prayer form
    (private, deacon, priest): title, color, sections, elements, and the
    decision trace.
 
@@ -170,16 +174,17 @@ that exist only on the synthetic I Vespers day (`FirstVespers`,
 them. `Feast.Notes` is left out: it is documentation and never reaches output.
 
 Selections: `-start`/`-years` or `-dates`, narrowed by `-hours`, `-forms`, and
-`-groups` (`calendar`, `office`, `hours`). The stream order depends only on
+`-groups` (`corpus`, `calendar`, `office`, `hours`). The stream order depends only on
 what is selected, not on how it is spelled.
 
-### Parity snapshot (`office-parity/1`)
+### Parity snapshot (`office-parity/2`)
 
 `internal/e2e/testdata/golden/parity-snapshot.json` is the digest of the
 2026–2053 dump. Each digest is a SHA-256 over canonical lines:
 
 | Digest | Lines |
 |---|---|
+| `corpus` | the `corpus_entry` and `appointment_scope` records |
 | `calendar` (per year) | the `calendar_year` and `calendar_day` records |
 | `office` (per year) | the `office_day` records |
 | `content` (per year, hour, form) | the date plus hour label, title, season, feast, color, section labels, and each element's type, label, incipit, rubric, text, and spoken voice text |
@@ -261,9 +266,12 @@ dates. A nightly job compares the full window.
       (the sweep went from 67 to 52 seconds)
 - [x] Stable sorts throughout; a total order for the review manifest;
       fixed-order field validation instead of map iteration
-- [ ] Phase 2 prerequisites: a `corpus` record group (every key with its
+- [x] Phase 2 prerequisites: a `corpus` record group (every key with its
       resolved body and directive) and broken test corpora with expected
-      `validate` output
+      `validate` output (`internal/e2e/testdata/broken-corpora/`, one data
+      directory per case, the calendar and texts reports in `expected.txt`
+      with the data directory written `$DATA`). The validators now report in
+      a fixed order instead of Go map order.
 
 ## Phase 1 checklist
 

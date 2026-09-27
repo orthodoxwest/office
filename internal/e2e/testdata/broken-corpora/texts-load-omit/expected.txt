@@ -1,0 +1,2 @@
+== texts
+loading text corpus: invalid corpus omission "shared/omit/broken": @omit must be the whole body

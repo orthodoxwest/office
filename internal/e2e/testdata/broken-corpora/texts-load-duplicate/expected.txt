@@ -1,0 +1,2 @@
+== texts
+loading text corpus: loading texts: shared/dup.txt:7: duplicate INI section [first] (first declared at line 1)

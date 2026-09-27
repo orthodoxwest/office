@@ -16,7 +16,7 @@ import (
 )
 
 // ParityFormat names the snapshot schema written by WriteParitySnapshot.
-const ParityFormat = "office-parity/1"
+const ParityFormat = "office-parity/2"
 
 // ParitySnapshot fingerprints a dump. Every digest is a SHA-256 over canonical
 // lines, so any implementation that produces the same dump reproduces it. The
@@ -26,7 +26,10 @@ type ParitySnapshot struct {
 	StartYear int // zero when the dump selected individual dates
 	YearCount int
 	DateHours int // hour records in the private form: one per date and hour
-	Years     []YearDigest
+	// Corpus digests the corpus_entry and appointment_scope records, which
+	// depend on data/ alone; empty when the dump selected no corpus group.
+	Corpus string
+	Years  []YearDigest
 	// CommemorationMerges lists every fuzzy-name commemoration suppression.
 	// They deserve human review, so they are spelled out rather than hidden
 	// inside a digest.
@@ -112,6 +115,8 @@ var (
 // Digester accumulates a ParitySnapshot from records in dump order.
 type Digester struct {
 	startYear, yearCount int
+	corpus               hash.Hash
+	corpusLines          int
 	years                map[int]*yearDigester
 }
 
@@ -126,7 +131,7 @@ type yearDigester struct {
 
 // NewDigester returns an empty Digester.
 func NewDigester() *Digester {
-	return &Digester{years: map[int]*yearDigester{}}
+	return &Digester{corpus: sha256.New(), years: map[int]*yearDigester{}}
 }
 
 func (d *Digester) year(y int) *yearDigester {
@@ -150,6 +155,9 @@ func (d *Digester) Add(r Record) error {
 			}
 		}
 		return nil
+	case KindCorpusEntry, KindAppointmentScope:
+		d.corpusLines++
+		return writeLine(d.corpus, r)
 	case KindCalendarYear:
 		y, ok := asInt(r["year"])
 		if !ok {
@@ -340,8 +348,26 @@ func yearOf(date string) (int, error) {
 	return strconv.Atoi(date[:4])
 }
 
-// absorb moves other's years into d. The years must not overlap.
+// corpusDigest is the hex corpus digest, or "" when no corpus lines were seen.
+func (d *Digester) corpusDigest() string {
+	if d.corpusLines == 0 {
+		return ""
+	}
+	return hex.EncodeToString(d.corpus.Sum(nil))
+}
+
+// absorb moves other's years into d. The years must not overlap. Every part
+// of a parallel digest sees the same corpus records, so their corpus
+// digests must agree; d adopts it.
 func (d *Digester) absorb(other *Digester) error {
+	if theirs := other.corpusDigest(); theirs != "" {
+		if ours := d.corpusDigest(); ours != "" && ours != theirs {
+			return fmt.Errorf("corpus digests differ between parts")
+		}
+		if d.corpusLines == 0 {
+			d.corpus, d.corpusLines = other.corpus, other.corpusLines
+		}
+	}
 	for y, yd := range other.years {
 		if _, ok := d.years[y]; ok {
 			return fmt.Errorf("year %d digested twice", y)
@@ -354,7 +380,7 @@ func (d *Digester) absorb(other *Digester) error {
 // Snapshot finishes the digests. Years ascend; hours follow HourNames and
 // forms follow models.PrayerForms.
 func (d *Digester) Snapshot() *ParitySnapshot {
-	s := &ParitySnapshot{StartYear: d.startYear, YearCount: d.yearCount}
+	s := &ParitySnapshot{StartYear: d.startYear, YearCount: d.yearCount, Corpus: d.corpusDigest()}
 	years := make([]int, 0, len(d.years))
 	for y := range d.years {
 		years = append(years, y)
@@ -472,6 +498,7 @@ func (s *ParitySnapshot) record() Record {
 		"start_year":           optionalInt(s.StartYear),
 		"year_count":           optionalInt(s.YearCount),
 		"date_hours":           s.DateHours,
+		"corpus":               str(s.Corpus),
 		"years":                years,
 		"commemoration_merges": merges,
 	}

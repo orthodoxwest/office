@@ -1,0 +1,112 @@
+[half-date]
+Name = Half Date
+Rank = double
+Color = red
+Category = martyr
+Month = 3
+
+[impossible-date]
+Name = Impossible Date
+Rank = double
+Color = red
+Category = martyr
+Month = 2
+Day = 30
+
+[bad-month]
+Name = Bad Month
+Rank = double
+Color = red
+Category = martyr
+Month = March
+Day = 1
+
+[no-date]
+Name = No Date
+Rank = double
+Color = red
+Category = martyr
+
+[unknown-keys]
+Name = Unknown Keys
+Rank = double
+Color = red
+Category = martyr
+Month = 3
+Day = 5
+Zebra = 1
+Aardvark = 2
+
+[bad-bool]
+Name = Bad Bool
+Rank = double
+Color = red
+Category = martyr
+Month = 3
+Day = 6
+HasOctave = yes
+
+[vigil-category]
+Name = Vigil Category
+Rank = simple
+Color = violet
+Category = martyr
+Month = 3
+Day = 7
+IsVigil = true
+VigilOf = easter-sunday
+
+[vigil-without-owner]
+Name = Vigil Without Owner
+Rank = simple
+Color = violet
+Category = feria
+Month = 3
+Day = 8
+IsVigil = true
+
+[owner-without-vigil]
+Name = Owner Without Vigil
+Rank = simple
+Color = violet
+Category = feria
+Month = 3
+Day = 9
+VigilOf = easter-sunday
+
+[octave-class-without-octave]
+Name = Octave Class Without Octave
+Rank = double
+Color = white
+Category = lord
+Month = 3
+Day = 10
+OctaveClass = privileged-second
+
+[bad-octave-class]
+Name = Bad Octave Class
+Rank = double
+Color = white
+Category = lord
+Month = 3
+Day = 11
+HasOctave = true
+OctaveClass = privileged-fourth
+
+[commemoration-class-category]
+Name = Commemoration Class Category
+Rank = simple
+Color = white
+Category = lord
+Month = 3
+Day = 12
+CommemorationClass = epiphany-vigil
+
+[primary-rank]
+Name = Primary Rank
+Rank = double
+Color = white
+Category = lord
+Month = 3
+Day = 13
+PrimaryOfOurLord = true

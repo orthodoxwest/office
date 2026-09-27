@@ -6,19 +6,22 @@ import (
 
 	"github.com/orthodoxwest/office/internal/calendar"
 	"github.com/orthodoxwest/office/internal/models"
+	"github.com/orthodoxwest/office/internal/texts"
 )
 
 // Format names the record schema. Bump it for any change a consumer could
 // observe: a field added, removed, renamed, or given a different meaning.
-const Format = "office-dump/1"
+const Format = "office-dump/2"
 
 // Record kinds, in the order they appear for a date (see Generator.Generate).
 const (
-	KindMeta         = "meta"
-	KindCalendarYear = "calendar_year"
-	KindCalendarDay  = "calendar_day"
-	KindOfficeDay    = "office_day"
-	KindHour         = "hour"
+	KindMeta             = "meta"
+	KindCorpusEntry      = "corpus_entry"
+	KindAppointmentScope = "appointment_scope"
+	KindCalendarYear     = "calendar_year"
+	KindCalendarDay      = "calendar_day"
+	KindOfficeDay        = "office_day"
+	KindHour             = "hour"
 )
 
 const dateLayout = "2006-01-02"
@@ -85,6 +88,54 @@ func decisions(list []models.CompositionDecision) []any {
 	out := make([]any, 0, len(list))
 	for _, d := range list {
 		out = append(out, Record{"rule": str(d.Rule), "outcome": str(d.Outcome), "detail": str(d.Detail)})
+	}
+	return out
+}
+
+// corpusRecords lists every resolvable corpus key in byte order with its
+// directive and resolved body, then the appointment scopes in file order.
+// They depend on data/ alone, not on any date.
+func corpusRecords(c *texts.TextCorpus) []Record {
+	var out []Record
+	for _, key := range c.References() {
+		var directive, target any
+		body := c.Get(key)
+		if t, ok := c.AliasTarget(key); ok {
+			directive, target = "use", t
+		} else if texts.IsOmitted(body) {
+			directive = "omit"
+		}
+		conclusion, _ := c.CollectConclusionForm(key)
+		out = append(out, Record{
+			"kind":               KindCorpusEntry,
+			"key":                key,
+			"directive":          directive,
+			"use_target":         target,
+			"canonical":          c.CanonicalRef(key),
+			"body":               str(body),
+			"collect_conclusion": str(conclusion),
+			"incipit":            str(c.Incipit(key)),
+		})
+	}
+	for _, s := range c.AppointmentScopes() {
+		bound := func(n *int) any {
+			if n == nil {
+				return nil
+			}
+			return *n
+		}
+		out = append(out, Record{
+			"kind":             KindAppointmentScope,
+			"id":               s.ID,
+			"source":           str(s.Source),
+			"season":           str(s.Season),
+			"hours":            anyList(s.Hours),
+			"slots":            anyList(s.Slots),
+			"require_ferial":   s.RequireFerial,
+			"exclude_weekdays": anyList(s.ExcludeWeekdays),
+			"from_easter":      bound(s.FromEaster),
+			"until_easter":     bound(s.UntilEaster),
+		})
 	}
 	return out
 }

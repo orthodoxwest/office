@@ -1,0 +1,8 @@
+[hymn]
+placeholder: the hymn is not yet transcribed
+
+[magnificat-antiphon]
+@use commons/martyr/vespers/hymn
+
+[omitted]
+@omit

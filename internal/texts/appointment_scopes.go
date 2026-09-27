@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -120,7 +121,13 @@ func (c *TextCorpus) LoadAppointmentScopes(path string) error {
 		}
 	}
 	c.appointmentScopes = index
+	c.appointmentScopeList = scopes
 	return nil
+}
+
+// AppointmentScopes returns the validated scopes in file order.
+func (c *TextCorpus) AppointmentScopes() []*AppointmentScope {
+	return slices.Clone(c.appointmentScopeList)
 }
 
 func (c *TextCorpus) loadAppointmentScopes(dataDir string) error {

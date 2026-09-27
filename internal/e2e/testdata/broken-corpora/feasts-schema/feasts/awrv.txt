@@ -1,0 +1,10 @@
+[st-herman]
+Name = St Herman of Alaska
+Rank = double
+Color = white
+Category = confessor
+Month = 12
+Day = 13
+Source = awrv
+
+this line is not a key-value pair

@@ -128,6 +128,10 @@ func recordKey(r Record) string {
 		return fmt.Sprintf("%s %d", kind, y)
 	case KindCalendarDay, KindOfficeDay:
 		return fmt.Sprintf("%s %v", kind, r["date"])
+	case KindCorpusEntry:
+		return fmt.Sprintf("%s %v", kind, r["key"])
+	case KindAppointmentScope:
+		return fmt.Sprintf("%s %v", kind, r["id"])
 	case KindHour:
 		return fmt.Sprintf("%s %v %v %v", kind, r["date"], r["hour"], r["form"])
 	default:

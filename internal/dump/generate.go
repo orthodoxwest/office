@@ -12,13 +12,14 @@ import (
 
 // Record groups a Selection can ask for.
 const (
+	GroupCorpus   = "corpus"   // corpus_entry and appointment_scope
 	GroupCalendar = "calendar" // calendar_year and calendar_day
 	GroupOffice   = "office"   // office_day
 	GroupHours    = "hours"    // hour
 )
 
 // Groups is the canonical group order.
-var Groups = []string{GroupCalendar, GroupOffice, GroupHours}
+var Groups = []string{GroupCorpus, GroupCalendar, GroupOffice, GroupHours}
 
 // HourNames is the canonical order of hours within a date.
 var HourNames = []string{"lauds", "prime", "terce", "sext", "none", "vespers", "compline"}
@@ -175,7 +176,7 @@ func NewGenerator(dataDir string) (*Generator, error) {
 }
 
 // Generate calls emit for each selected record in canonical order: the meta
-// record; then per civil year, calendar_year followed by each date's
+// record; the corpus records; then per civil year, calendar_year followed by each date's
 // calendar_day, office_day, and hour records (hours in HourNames order, each
 // in models.PrayerForms order).
 func (g *Generator) Generate(sel Selection, emit func(Record) error) error {
@@ -185,6 +186,13 @@ func (g *Generator) Generate(sel Selection, emit func(Record) error) error {
 	}
 	if err := emit(sel.meta()); err != nil {
 		return err
+	}
+	if sel.has(GroupCorpus) {
+		for _, r := range corpusRecords(g.engine.Corpus()) {
+			if err := emit(r); err != nil {
+				return err
+			}
+		}
 	}
 	for _, p := range sel.plan() {
 		if err := g.generateYear(sel, p, emit); err != nil {

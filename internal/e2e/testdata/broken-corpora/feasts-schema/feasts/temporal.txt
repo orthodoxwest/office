@@ -1,0 +1,40 @@
+# Schema errors are reported per file; a file with any schema error
+# contributes no feasts to the semantic layer.
+[easter-sunday]
+Name = Easter
+Rank = double-1st-class
+Color = white
+Category = lord
+DateRule = easter+0
+
+[no-name]
+Rank = double
+Color = white
+DateRule = easter+1
+
+[bad-rank]
+Name = Bad Rank
+Rank = triple
+Color = white
+DateRule = easter+2
+
+[bad-color]
+Name = Bad Color
+Rank = double
+Color = puce
+DateRule = easter+3
+
+[bad-category]
+Name = Bad Category
+Rank = double
+Color = white
+Category = hermit
+DateRule = easter+4
+
+[both-dates]
+Name = Both Dates
+Rank = double
+Color = white
+DateRule = easter+5
+Month = 3
+Day = 4

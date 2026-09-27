@@ -1,0 +1,64 @@
+[st-x]
+Name = St X
+Rank = double
+Color = red
+Category = martyr
+Month = 5
+Day = 1
+
+[st-y]
+Name = St Y
+Rank = double
+Color = red
+Category = martyr
+Month = 5
+Day = 1
+
+[st-z]
+Name = St Z
+Rank = greater-double
+Color = red
+Category = martyr
+Month = 6
+Day = 1
+HasOctave = true
+
+[st-x]
+Name = St X again
+Rank = simple
+Color = red
+Category = martyr
+Month = 5
+Day = 2
+
+[com-a]
+Name = Com A
+Rank = commemoration
+Color = red
+Category = martyr
+Month = 5
+Day = 1
+
+[com-b]
+Name = Com B
+Rank = commemoration
+Color = red
+Category = martyr
+Month = 5
+Day = 1
+
+[st-w]
+Name = St W
+Rank = simple
+Color = white
+Category = confessor
+Month = 4
+Day = 1
+
+[st-v]
+Name = St V
+Rank = simple
+Color = white
+Category = confessor
+Month = 4
+Day = 1

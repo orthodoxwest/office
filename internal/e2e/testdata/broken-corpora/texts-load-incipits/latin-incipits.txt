@@ -1,0 +1,3 @@
+# psalms/24 is not in this corpus
+psalms/23 = Dominus regit me
+psalms/24 = Domini est terra

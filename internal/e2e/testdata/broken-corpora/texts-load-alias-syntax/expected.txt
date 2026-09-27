@@ -1,0 +1,2 @@
+== texts
+loading text corpus: invalid corpus alias "shared/aliases/two-targets": expected @use <corpus-key>

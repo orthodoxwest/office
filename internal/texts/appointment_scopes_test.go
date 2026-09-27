@@ -167,3 +167,25 @@ func TestAppointmentScopeOpenBoundsFamilyAndAtomicLoad(t *testing.T) {
 		}
 	}
 }
+
+func TestAppointmentScopesListAndAliasTargets(t *testing.T) {
+	dir, _ := scopeFixture(t, testAppointmentScope)
+	c, err := LoadTexts(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	scopes := c.AppointmentScopes()
+	if len(scopes) != 1 || scopes[0].ID != "sample" {
+		t.Fatalf("scopes = %+v, want the one file entry", scopes)
+	}
+	scopes[0] = nil
+	if c.AppointmentScopes()[0] == nil {
+		t.Fatal("AppointmentScopes must return a copy")
+	}
+	if target, ok := c.AliasTarget("seasonal/lent/psalm-antiphon-terce"); !ok || target != "seasonal/lent/chapter-terce" {
+		t.Fatalf("AliasTarget = %q, %v", target, ok)
+	}
+	if _, ok := c.AliasTarget("seasonal/lent/chapter-terce"); ok {
+		t.Fatal("a concrete entry is not an alias")
+	}
+}

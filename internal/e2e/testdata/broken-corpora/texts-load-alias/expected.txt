@@ -1,0 +1,2 @@
+== texts
+loading text corpus: corpus alias "shared/aliases/a" does not resolve (target "shared/aliases/b")

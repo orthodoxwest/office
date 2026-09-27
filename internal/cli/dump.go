@@ -35,7 +35,7 @@ func cmdDump(e env, args []string) error {
 	dates := fs.String("dates", "", "comma-separated dates instead of a year window")
 	hours := fs.String("hours", "", "comma-separated hours (default: all)")
 	forms := fs.String("forms", "", "comma-separated prayer forms (default: all)")
-	groups := fs.String("groups", "", "comma-separated record groups: calendar, office, hours (default: all)")
+	groups := fs.String("groups", "", "comma-separated record groups: corpus, calendar, office, hours (default: all)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}

@@ -1,0 +1,18 @@
+== calendar
+Duplicate feast ID: 'st-x'
+Feast 'only-with-missing' has OnlyWith target 'no-such-feast' which does not exist
+Feast 'companion-missing' has invalid CompanionOf target 'no-such-feast'
+Feast 'companion-self' has invalid CompanionOf target 'companion-self'
+Feast 'companion-of-companion' has invalid CompanionOf target 'companion-missing'
+Vigil 'vigil-missing-owner' has VigilOf target 'no-such-feast' which does not exist
+Vigil 'vigil-of-vigil' has invalid vigil target 'vigil-missing-owner'
+Vigil 'vigil-self' has invalid vigil target 'vigil-self'
+Feast 'pentecost' generates a vigil but explicit vigil 'explicit-pentecost-vigil' defines the same observance
+Explicit vigils 'vigil-st-z-a' and 'vigil-st-z-b' define the same observance for 'st-z'
+Multiple feasts on 5/1 at rank double: st-x, st-y
+Multiple feasts on 4/1 at rank simple: st-w, st-v
+Feast 'st-z' has an octave but is only ranked greater-double
+Feast 'companion-rank' is an apostolic companion but is ranked double instead of commemoration
+Feast 'bad-rule' has unrecognized DateRule: "whitsun+1" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
+Feast 'bad-advent' has unrecognized DateRule: "advent-sunday-5" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)
+Feast 'bad-epiphany' has unrecognized DateRule: "epiphany-sunday-0" (expected easter±N, epiphany-sunday-N, advent-sunday-N, pentecost-sunday-N, holy-name, or last-sunday-october)

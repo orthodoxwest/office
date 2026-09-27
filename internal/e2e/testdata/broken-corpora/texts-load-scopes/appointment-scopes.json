@@ -1,0 +1,10 @@
+[
+  {
+    "id": "lent-chapters",
+    "source": "Diurnal p. 250",
+    "season": "lent",
+    "hours": ["terce", "sext"],
+    "slots": ["chapter"],
+    "require_ferial": true
+  }
+]

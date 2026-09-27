@@ -4,8 +4,10 @@ package calendar
 import (
 	"bufio"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -200,7 +202,8 @@ func sectionToFeast(m map[string]string, sourceFile string) (*models.Feast, erro
 		"CompanionOf":        true,
 		"OnlyWith":           true, "SkipRomanLeapShift": true, "Source": true, "Notes": true,
 	}
-	for key := range m {
+	// Sorted so a section with several unknown keys always reports the same one.
+	for _, key := range slices.Sorted(maps.Keys(m)) {
 		if !knownKeys[key] {
 			return nil, fmt.Errorf("%s: feast %q: unrecognized key %q", sourceFile, f.ID, key)
 		}

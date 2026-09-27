@@ -1,0 +1,58 @@
+[vigil-missing-owner]
+Name = Vigil Missing Owner
+Rank = simple
+Color = violet
+Category = feria
+Month = 8
+Day = 1
+IsVigil = true
+VigilOf = no-such-feast
+
+[vigil-of-vigil]
+Name = Vigil Of Vigil
+Rank = simple
+Color = violet
+Category = feria
+Month = 8
+Day = 2
+IsVigil = true
+VigilOf = vigil-missing-owner
+
+[vigil-self]
+Name = Vigil Self
+Rank = simple
+Color = violet
+Category = feria
+Month = 8
+Day = 3
+IsVigil = true
+VigilOf = vigil-self
+
+[explicit-pentecost-vigil]
+Name = Explicit Pentecost Vigil
+Rank = simple
+Color = violet
+Category = feria
+DateRule = easter+48
+IsVigil = true
+VigilOf = pentecost
+
+[vigil-st-z-a]
+Name = Vigil of St Z (a)
+Rank = simple
+Color = violet
+Category = feria
+Month = 5
+Day = 31
+IsVigil = true
+VigilOf = st-z
+
+[vigil-st-z-b]
+Name = Vigil of St Z (b)
+Rank = simple
+Color = violet
+Category = feria
+Month = 5
+Day = 30
+IsVigil = true
+VigilOf = st-z

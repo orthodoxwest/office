@@ -1,0 +1,8 @@
+[fine]
+@use shared/aliases/target
+
+[target]
+Text.
+
+[two-targets]
+@use shared/aliases/target shared/aliases/fine
