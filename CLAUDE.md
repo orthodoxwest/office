@@ -87,8 +87,11 @@ internal/
     assurance.go           Composition explanations and optional engine-behavior samples
     assurance_gate.go      Text-provenance baseline, gate, and CI summary
 crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo root
+  compat/                  Go-compatible %q / line scanning / Atoi (transitional)
   calendar/                Computus, seasons, feast loader, occurrence, builder (no file access)
-  office/                  Vespers concurrence, Marian antiphon, historia weeks; hour composers to come
+  corpus/                  Text corpus format, loader, @use/@omit, sidecars, line grammar
+  office/                  Concurrence, Marian antiphon, historia, appointment scopes; composers to come
+  tools/                   Filesystem DataSource and the calendar/texts validators
 apps/
   cli/                     office-rs: dump (compared byte for byte against Go's office dump)
 tools/
@@ -231,7 +234,7 @@ make mutate-diff # Mutation-test only lines changed vs master (local review)
 make test-coverage # Run unit tests and enforce per-package coverage floors (also in CI)
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
-make rust-parity # Go vs Rust dump for the ported record groups (calendar, office: 1900–2199)
+make rust-parity # Go vs Rust dump for the ported record groups (corpus, calendar, office: 1900–2199)
 make clean       # Remove artifacts
 ```
 

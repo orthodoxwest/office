@@ -5,7 +5,9 @@
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
 pub mod concurrence;
+pub mod scopes;
 pub mod seasonal;
+pub mod texts;
 
 use calendar::{CalendarDay, MoveableDates, YearCalendar};
 

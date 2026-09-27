@@ -5,10 +5,11 @@
 use std::io::Write;
 
 use calendar::{CalendarData, CalendarDay, Date, Decision, Feast, MoveableDates, Tabula, build_calendar};
+use office::texts::OfficeTexts;
 use serde_json::{Value, json};
 
 use crate::args::{Flags, split_list};
-use crate::fsdata::FsData;
+use tools::fs::FsData;
 
 pub const FORMAT: &str = "office-dump/2";
 
@@ -21,7 +22,7 @@ const HOUR_NAMES: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespe
 const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 
 /// Groups this engine can produce so far.
-const PORTED_GROUPS: [&str; 2] = [GROUP_CALENDAR, GROUP_OFFICE];
+const PORTED_GROUPS: [&str; 3] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE];
 
 const USAGE: &str = "usage: office-rs dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
        office-rs dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
@@ -44,7 +45,7 @@ fn canonical_subset(what: &str, chosen: &[String], order: &[&str]) -> Result<Vec
         return Ok(order.iter().map(|s| s.to_string()).collect());
     }
     if let Some(c) = chosen.iter().find(|c| !order.contains(&c.as_str())) {
-        return Err(format!("unknown {what} {} (want one of [{}])", calendar::go_quote(c), order.join(" ")));
+        return Err(format!("unknown {what} {} (want one of [{}])", compat::quote(c), order.join(" ")));
     }
     Ok(order.iter().filter(|o| chosen.iter().any(|c| c == *o)).map(|s| s.to_string()).collect())
 }
@@ -131,8 +132,10 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
     if let Some(g) = sel.groups.iter().find(|g| !PORTED_GROUPS.contains(&g.as_str())) {
         return Err(format!("the Rust engine does not produce the {g} record group yet (use -groups {})", PORTED_GROUPS.join(",")));
     }
+    let texts =
+        if sel.has(GROUP_CORPUS) { Some(office::texts::load_texts(data).map_err(|e| format!("loading text corpus: {e}"))?) } else { None };
     let data = CalendarData::load(data)?;
-    generate(&sel, &data, &mut |record| {
+    generate(&sel, &data, texts.as_ref(), &mut |record| {
         let line = marshal(&record).map_err(|e| format!("{}: {e}", describe_record(&record)))?;
         out.write_all(line.as_bytes()).and_then(|()| out.write_all(b"\n")).map_err(|e| e.to_string())
     })
@@ -151,8 +154,19 @@ fn describe_record(r: &Value) -> String {
 }
 
 /// Emits every selected record in canonical order.
-pub fn generate(sel: &Selection, data: &CalendarData, emit: &mut dyn FnMut(Value) -> Result<(), String>) -> Result<(), String> {
+pub fn generate(
+    sel: &Selection,
+    data: &CalendarData,
+    texts: Option<&OfficeTexts>,
+    emit: &mut dyn FnMut(Value) -> Result<(), String>,
+) -> Result<(), String> {
     emit(sel.meta())?;
+    if sel.has(GROUP_CORPUS) {
+        let texts = texts.ok_or("the corpus group needs the loaded texts")?;
+        for record in corpus_records(texts) {
+            emit(record)?;
+        }
+    }
     for (year, dates) in sel.plan() {
         let cal = build_calendar(year, data).map_err(|e| format!("building calendar for {year}: {e}"))?;
         if sel.has(GROUP_CALENDAR) {
@@ -228,6 +242,47 @@ fn feasts(list: &[calendar::FeastRef]) -> Value {
 
 fn decisions(list: &[Decision]) -> Value {
     Value::Array(list.iter().map(|d| json!({"rule": d.rule, "outcome": d.outcome, "detail": opt(&d.detail)})).collect())
+}
+
+/// Every resolvable corpus key in byte order with its directive and resolved
+/// body, then the appointment scopes in file order.
+fn corpus_records(texts: &OfficeTexts) -> Vec<Value> {
+    let c = &texts.corpus;
+    let text = |s: Option<&str>| s.map_or(Value::Null, |s| if s.is_empty() { Value::Null } else { Value::String(s.to_string()) });
+    let mut out = Vec::new();
+    for key in c.references() {
+        let body = c.get(key);
+        let (directive, target) = match c.alias_target(key) {
+            Some(t) => (Some("use"), Some(t)),
+            None if corpus::is_omitted(body) => (Some("omit"), None),
+            None => (None, None),
+        };
+        out.push(json!({
+            "kind": "corpus_entry",
+            "key": key,
+            "directive": directive,
+            "use_target": target,
+            "canonical": c.canonical_ref(key),
+            "body": text(Some(body)),
+            "collect_conclusion": text(c.collect_conclusion_form(key)),
+            "incipit": text(c.incipit(key)),
+        }));
+    }
+    for s in texts.scopes.as_ref().map_or(&[][..], |s| s.list()) {
+        out.push(json!({
+            "kind": "appointment_scope",
+            "id": s.id,
+            "source": text(Some(&s.source)),
+            "season": s.season.as_str(),
+            "hours": s.hours,
+            "slots": s.slots,
+            "require_ferial": s.require_ferial,
+            "exclude_weekdays": s.exclude_weekdays,
+            "from_easter": s.from_easter,
+            "until_easter": s.until_easter,
+        }));
+    }
+    out
 }
 
 fn calendar_year_record(year: i32, t: &Tabula, m: &MoveableDates) -> Value {

@@ -100,7 +100,7 @@ jobs:
       - name: Cross-compile the core crates for iOS and Android
         run: |
           for target in aarch64-apple-ios aarch64-linux-android; do
-            cargo build -p calendar -p office --target "$target"
+            cargo build -p compat -p calendar -p corpus -p office --target "$target"
           done
 
       - uses: actions/setup-go@v5

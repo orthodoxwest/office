@@ -5,9 +5,10 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use crate::date::Date;
-use crate::goquote::quote;
 use crate::model::{Category, Color, CommemorationClass, Feast, FeastRef, MonthDay, OctaveClass, Rank};
 use crate::penitential::{PenitentialRule, section_to_penitential_rule};
+use compat::atoi;
+use compat::quote;
 
 /// The feast definition files, in load order.
 pub const FEAST_FILES: [&str; 4] = ["temporal.txt", "sanctoral.txt", "awrv.txt", "commemorations.txt"];
@@ -22,6 +23,11 @@ pub trait DataSource {
     fn display_path(&self, rel: &str) -> String;
     /// The file's contents, `Ok(None)` when it does not exist.
     fn read(&self, rel: &str) -> Result<Option<String>, String>;
+    /// Every regular file under the directory `rel`, with its path relative
+    /// to `rel` (`/`-separated) and its bytes, in Go `filepath.Walk` order:
+    /// depth first, each directory's entries in byte order. An error names
+    /// the failing path as Go does (`lstat <path>: no such file or directory`).
+    fn walk(&self, rel: &str) -> Result<Vec<(String, Vec<u8>)>, String>;
 }
 
 /// One `[section]` of a data file. Keys keep their last assignment, as in Go.
@@ -46,7 +52,7 @@ impl Section {
 /// ignored; each `[id]` starts a section; other lines are `Key = value`.
 pub fn parse_ini_sections(path: &str, content: &str) -> Result<Vec<Section>, String> {
     let mut sections: Vec<Section> = Vec::new();
-    for (i, line) in content.lines().enumerate() {
+    for (i, line) in compat::scan_lines(content).enumerate() {
         let trimmed = line.trim();
         if trimmed.is_empty() || trimmed.starts_with('#') {
             continue;
@@ -73,15 +79,6 @@ fn parse_data_bool(value: &str) -> Result<bool, String> {
         "false" => Ok(false),
         _ => Err(format!("expected true or false, got {}", quote(value))),
     }
-}
-
-/// Go's `strconv.Atoi`: an optional sign and ASCII digits.
-pub(crate) fn atoi(s: &str) -> Result<i64, String> {
-    let digits = s.strip_prefix(['+', '-']).unwrap_or(s);
-    if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
-        return Err(format!("strconv.Atoi: parsing {}: invalid syntax", quote(s)));
-    }
-    s.parse::<i64>().map_err(|_| format!("strconv.Atoi: parsing {}: value out of range", quote(s)))
 }
 
 fn valid_fixed_date(month: i64, day: i64) -> bool {
@@ -351,15 +348,5 @@ mod tests {
         for (text, want) in cases {
             assert_eq!(section_to_feast(&section(text), "s.txt").unwrap_err(), want);
         }
-    }
-
-    #[test]
-    fn atoi_matches_go() {
-        assert_eq!(atoi("+5"), Ok(5));
-        assert_eq!(atoi("-3"), Ok(-3));
-        assert_eq!(atoi("07"), Ok(7));
-        assert!(atoi("").is_err());
-        assert!(atoi("1_0").is_err());
-        assert!(atoi(" 1").is_err());
     }
 }

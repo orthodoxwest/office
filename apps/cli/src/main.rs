@@ -3,7 +3,6 @@
 
 mod args;
 mod dump;
-mod fsdata;
 
 use std::io::Write;
 use std::process::ExitCode;
@@ -18,14 +17,14 @@ fn main() -> ExitCode {
         eprintln!("{USAGE}");
         return ExitCode::FAILURE;
     };
-    let command: fn(&fsdata::FsData, &[String], &mut dyn Write) -> Result<(), String> = match name.as_str() {
+    let command: fn(&tools::fs::FsData, &[String], &mut dyn Write) -> Result<(), String> = match name.as_str() {
         "dump" => dump::cmd_dump,
         _ => {
             eprintln!("Unknown command: {name}");
             return ExitCode::FAILURE;
         }
     };
-    let Some(data) = fsdata::FsData::find() else {
+    let Some(data) = tools::fs::FsData::find() else {
         eprintln!("Cannot find data directory");
         return ExitCode::FAILURE;
     };

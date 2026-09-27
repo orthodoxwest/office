@@ -5,10 +5,11 @@ port is test-driven: the Go engine stays the reference until the Rust engine
 reproduces its output for every date, hour, and prayer form in the sweep, and
 only then is Go removed.
 
-**Status:** Phases 0 and 1 are complete. Phase 3 has begun with the Office
-day: `office-rs dump -groups calendar,office` is byte-identical to Go for
-1900–2199. Phase 2 (the `corpus` crate) is in progress. Nothing user-facing
-changes until the cutover in Phase 6.
+**Status:** Phases 0–2 are complete, and Phase 3 has begun with the Office
+day: `office-rs dump -groups corpus,calendar,office` is byte-identical to Go
+for 1900–2199, and the Rust validators reproduce Go's reports on every broken
+test corpus. Next: the hour composers. Nothing user-facing changes until the
+cutover in Phase 6.
 
 ## Why Rust
 
@@ -288,6 +289,25 @@ dates. A nightly job compares the full window.
       Android cross-builds of the core crates, and the parity gate
 - [ ] Port the remaining Go calendar unit tests (a first set is ported; the
       data-backed builder assertions are also covered by the parity gate)
+
+## Phase 2 checklist
+
+- [x] `corpus` crate: the `data/texts/` format (INI and plain files, comment
+      stripping, Go `filepath.Walk` order), `@use` and `@omit`, the collect
+      conclusion and Latin incipit sidecars, and the line grammar
+      (`parse_psalm`, `parse_block`, `parse_hymn`); Go's tests ported
+- [x] Appointment scopes in the `office` crate (they name hours and slots),
+      loaded with the corpus by `office::texts::load_texts`
+- [x] `tools` crate: the filesystem `DataSource` and the calendar and texts
+      validators
+- [x] `compat` crate: Go-compatible `%q`, `bufio.Scanner` lines, and `Atoi`,
+      so messages match byte for byte; removed after the cutover
+- [x] Gate: the `corpus` group is identical (`make rust-parity`), and
+      `cargo test -p tools` reproduces every `expected.txt` under
+      `internal/e2e/testdata/broken-corpora/`
+
+Known gap, by design: JSON syntax errors in `appointment-scopes.json` carry
+serde_json's wording rather than encoding/json's. Semantic errors match.
 
 ## Phase 3 checklist
 

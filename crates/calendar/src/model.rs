@@ -23,7 +23,7 @@ macro_rules! kebab_enum {
             pub fn parse(s: &str) -> Result<$name, String> {
                 match s {
                     $($text => Ok($name::$variant),)+
-                    _ => Err(format!(concat!("invalid ", $what, ": {}"), crate::goquote::quote(s))),
+                    _ => Err(format!(concat!("invalid ", $what, ": {}"), compat::quote(s))),
                 }
             }
         }

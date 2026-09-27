@@ -5,6 +5,20 @@ version = 4
 [[package]]
 name = "calendar"
 version = "0.1.0"
+dependencies = [
+ "compat",
+]
+
+[[package]]
+name = "compat"
+version = "0.1.0"
+
+[[package]]
+name = "corpus"
+version = "0.1.0"
+dependencies = [
+ "compat",
+]
 
 [[package]]
 name = "itoa"
@@ -23,6 +37,9 @@ name = "office"
 version = "0.1.0"
 dependencies = [
  "calendar",
+ "compat",
+ "corpus",
+ "serde_json",
 ]
 
 [[package]]
@@ -30,8 +47,11 @@ name = "office-cli"
 version = "0.1.0"
 dependencies = [
  "calendar",
+ "compat",
+ "corpus",
  "office",
  "serde_json",
+ "tools",
 ]
 
 [[package]]
@@ -103,6 +123,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
+]
+
+[[package]]
+name = "tools"
+version = "0.1.0"
+dependencies = [
+ "calendar",
+ "compat",
+ "corpus",
+ "office",
 ]
 
 [[package]]

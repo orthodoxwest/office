@@ -6,11 +6,12 @@ use std::sync::Arc;
 
 use crate::computus::{MoveableDates, determine_season, roman};
 use crate::date::{Date, Weekday, is_leap_year};
-use crate::loader::{CalendarData, atoi};
+use crate::loader::CalendarData;
 use crate::model::{CalendarDay, Category, Color, FERIA_COMMEMORATION_ID, Feast, FeastRef, MonthDay, Rank, Season, non_empty};
 use crate::occurrence::resolve_day;
 use crate::penitential::{PenitentialRule, apply_penitential_rules};
 use crate::traits::is_penitential_feria_season;
+use compat::atoi;
 
 /// Short names for octave and vigil references.
 const SHORT_NAMES: [(&str, &str); 14] = [

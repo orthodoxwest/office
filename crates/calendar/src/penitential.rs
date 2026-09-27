@@ -3,9 +3,10 @@
 use std::collections::HashMap;
 
 use crate::date::{Date, Weekday};
-use crate::goquote::quote;
-use crate::loader::{Section, atoi};
+use crate::loader::Section;
 use crate::model::CalendarDay;
+use compat::atoi;
+use compat::quote;
 
 /// One `[rule]` of `penitential.txt`. Later rules override earlier ones.
 #[derive(Clone, Debug, PartialEq, Eq)]
