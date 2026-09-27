@@ -37,8 +37,8 @@ Lo, Mary * hath brought forth to us the Saviour; whom when John beheld, he cried
 @use proper/vigil-epiphany/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 129 (Vigil of the Epiphany)
-While all things were in quiet silence, * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne. Alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 222
+While all things were in quiet silence, * and that night was in the midst of her swift course, thine Almighty Word, O Lord, leaped down out of thy royal throne, alleluia.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 112 (Vigil of the Epiphany; dormant at the January 5 Epiphany boundary)
@@ -51,8 +51,8 @@ The Child Jesus * increased in wisdom and stature in the sight of God and man.
 @use proper/vigil-epiphany/versicle-lauds
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 130, 113 (Vigil of the Epiphany)
-Almighty and everlasting God, direct our actions according to thy good pleasure: that in the Name of thy well-beloved Son, we may be worthy to abound in good works.
+# SOURCE: Monastic Diurnal.pdf, p. 222
+Almighty, everlasting God, direct our actions according to thy good pleasure: that in the Name of thy beloved Son we may be worthy to abound in good works.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 127 (Vigil of the Epiphany)

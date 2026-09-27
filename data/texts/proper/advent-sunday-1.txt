@@ -114,8 +114,8 @@ The Holy Ghost * shall come upon thee, Mary; fear not, thou shalt bear in thy wo
 Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt conceive, and bring forth a Son, alleluia.
 
 [magnificat-antiphon-first]
-# SOURCE: draft archdiocesan Vespers book, p. 10 (The First Sunday in Advent, I Vespers)
-Behold, the Name of the Lord * cometh from afar, and his glory filleth all the earth.
+# SOURCE: Monastic Diurnal.pdf, p. 158
+Behold, the Name of the Lord * cometh from afar: and his glory filleth all the earth.
 
 [commemoration-antiphon]
 @use proper/advent-sunday-1/benedictus-antiphon
