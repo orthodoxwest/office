@@ -156,7 +156,7 @@ rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-parity: build ## Check every retained snapshot, including the 2026–2053 digest
+parity: build ## Check every snapshot, including the 2026–2053 digest
 	python3 scripts/golden.py --check
 
 golden: build ## Regenerate rendered-office and assurance golden files

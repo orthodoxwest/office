@@ -7,7 +7,7 @@ Cargo builds the server and CLI.
 
 ```
 crates/
-  data-format/                  Corpus/ledger CSV, report JSON, quoting and parsing contracts
+  data-format/             Corpus/ledger CSV, report JSON, quoting and parsing contracts
   calendar/                Computus, feast loading, occurrence, octaves, fasting; no file access
   corpus/                  Text loading, aliases, sidecars and shared line grammar
   liturgy/                 Document model, element kinds, prayer forms and voice spans
@@ -164,7 +164,7 @@ make mutate-diff # Mutation-test only lines changed vs master (local review)
 make test-coverage # Optional local Rust line-coverage diagnostic
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
-make test-ux      # Playwright suites against the default Rust server
+make test-ux      # Playwright browser suites
 make parity      # Check all snapshots, including the full 2026–2053 digest
 make clean       # Remove artifacts
 ```
