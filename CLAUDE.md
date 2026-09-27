@@ -1,116 +1,34 @@
 # AWRV Benedictine Divine Office
 
 Rust web application that renders the hours of the Benedictine Office, as used by the AWRV.
-Cargo builds the deployed server and CLI. See RUST-PORT.md for the cutover and
-remaining test migration. Go under `internal/` is temporarily retained for
-reference tests and golden generation; `make go-build` writes output/office-go.
+Cargo builds the server and CLI. Go and the differential harness have been
+retired; Git history retains the reference implementation. See RUST-PORT.md
+for the completed cutover and remaining domain-model cleanup.
 
 ## Architecture
 
 ```
-apps/cli/src/main.rs     Production CLI and server entry point
-cmd/server/main.go        Retained Go reference entry point
-internal/
-  cli/                     Command implementations (testable: io.Writer in, error out)
-    cli.go                 Run dispatch, data-dir discovery, shared arg parsing
-    ordo.go                ordo + rubrics (the ordo cross-check TSV; column order is a contract)
-    hours.go               Per-hour text and TeX commands
-    checks.go              validate, audit, lint
-    review.go              review subcommands (manifest, plan, provenance, assurance, …)
-    serve.go               serve
-  models/                  Shared types (Feast, CalendarDay, Rank, Color, Season, OfficeHour)
-  calendar/                Calendar engine (ported from Python reference at ../calendar/)
-    paschalion.go          Julian Easter calculation
-    moveable.go            All moveable dates derived from Easter/Christmas
-    seasons.go             Season determination
-    loader.go              INI-like data file parser
-    builder.go             Main pipeline: feasts → dates → resolve → CalendarDay list
-    occurrence.go          Conflict resolution (which feast wins each day)
-    validate.go            Three-layer data validation
-  output/                  Output formatters (presentation only — see office/summary.go)
-    ordo.go                Text ordo formatter
-    office.go              Plain-text office hour formatter
-    tex.go                 LaTeX booklet formatter (half-letter, lualatex)
-  texts/                   Text corpus loader
-    loader.go              Corpus loading (INI-style sections + plain files)
-    lines.go               Corpus line grammar: ParsePsalm / ParseBlock / ParseHymn,
-                           shared by every renderer (and by the engine's hymn-title
-                           split) so HTML and LaTeX cannot drift apart
-  office/                  Office composition engine
-    engine.go              Engine: loads corpus, dispatches to hour composers
-    summary.go             HourSummary/SummarizeHour: rubric digest of a composed hour
-                           (preces, suffrage, commemorations, gospel antiphon) shared by
-                           the ordo, the calendar view, and `office rubrics`
-    hourdef.go             Hour definition file parser
-    lauds.go               Lauds composer
-    vespers.go             Vespers composer
-    prime.go               Prime composer
-    compline.go            Compline composer
-    minor.go               Minor hours composer (Terce, Sext, None)
-    proper.go              Proper antiphon resolution
-    marian.go              Marian antiphon selection
-    preces.go              Preces condition logic
-  render/                  HTML presentation layer (no calendar/office engine imports)
-    render.go              Embedded templates, Pages type + per-page render methods, FuncMap
-    view.go                View models the templates read (HomeData, HourData, CalendarData, …)
-    html.go                Text-to-HTML conversion (psalm verses, liturgical blocks, hymns)
-    links.go               Nav/asset URL construction (navLink, hourLink, static stamping)
-    templates/             Embedded HTML templates (layout, home, hour, calendar)
-                           UI design principles: .claude/skills/web-ui-design/ (invoke /web-ui-design)
-  usage/                   Approximate daily usage counts (not request logs)
-    store.go               SQLite day/scope/browser-hash dedupe + daily rollup
-    bots.go                Crawler user-agent filter: scraping is welcome, it just
-                           never counts (see README "Usage metrics")
-  web/                     HTTP server
-    server.go              Server struct, route registration, embedded static assets
-    handlers.go            Handlers: home, hour, calendar — resolve the day, fill render view models
-    cache.go               Per-year CalendarDay + MoveableDates cache
-    pwa.go                 PWA support: /sw.js handler + build-version hash (binary + data dir)
-    ics.go                 /office.ics reminder feed (stateless, query-param config) + /reminders page
-    static/                Embedded CSS, PWA manifest, icons, service worker source (sw.js)
-  dump/                    Canonical record stream the Go and Rust engines are compared on
-                           (RUST-PORT.md): calendar_day / office_day / hour records, the
-                           RFC 8785 encoder, dump diff, and the parity-snapshot digests
-  e2e/                     End-to-end golden-file tests
-    golden_test.go         Rendered-hour, ordo, audit, assurance, and parity golden tests
-    testdata/golden/       Checked-in output/review snapshots (regenerate with make golden)
-  audit/                   Data completeness audit
-    audit.go               Placeholder scanner + missing-propers reporter
-    sweep.go               Composition sweep: not-found markers + ordinary fallbacks on Double+ days
-    lint.go                Text-corpus lints (mechanical fail make check; advisory for triage)
-  scaffold/                Proper-file scaffolds (commented key catalogs for missing/sparse propers)
-    keys.go                Core + optional section key catalog with one-line blurbs
-    propers.go             EnsurePropers: create missing files, append missing keys, never rewrite live sections
-  review/                  Composition diagnostics, sampling, and text provenance
-    review.go              Manifest sweep: inventory distinct rendered compositions
-    provenance.go          Structured per-entry source inventory and attestations
-    provenance_queue.go    Dependency-weighted atomic text review ordering (suspect tier first)
-    prescreen.go           Durable prescreen-flag ledger + suspicion map (flags ∪ advisory lints)
-    assurance.go           Composition explanations and optional engine-behavior samples
-    assurance_gate.go      Text-provenance baseline, gate, and CI summary
-crates/                    Rust port (RUST-PORT.md); Cargo workspace at the repo root
-  compat/                  Go-compatible %q, line scanning, integers, CSV, report JSON (transitional)
-  calendar/                Computus, seasons, feast loader, occurrence, builder (no file access)
-  corpus/                  Text corpus format, loader, @use/@omit, sidecars, line grammar
-  liturgy/                 Document model: element types, voice/rubric spans, OfficeHour
-  office/                  Concurrence, Marian, historia, scopes, hour composers, Engine,
-                           hour-definition validation, resolution tracing
-  ordo/                    Text ordo (Tabula + per-hour stanzas) and the rubrics TSV
-  render-text/             Plain-text hour rendering (Go's FormatOfficeHour)
-  render-tex/              LuaLaTeX booklet (Go's FormatOfficeHourTeX); caller supplies GABC lookup
-  render-html/             Go's internal/render: HTML conversion, leader forms, usage model, and the
-                           templates in minijinja (identical markup; html/template escaping reproduced)
-  tools/                   Filesystem DataSource, validators, audit/lint, review reports and ledgers,
-                           corpus editing, proper scaffolds
+crates/
+  compat/                  Corpus/ledger CSV, report JSON, quoting and parsing contracts
+  calendar/                Computus, feast loading, occurrence, octaves, fasting; no file access
+  corpus/                  Text loading, aliases, sidecars and shared line grammar
+  liturgy/                 Document model, element kinds, prayer forms and voice spans
+  office/                  Hour composition, concurrence, scopes, summaries and tracing
+  ordo/                    Text calendar and rubrics TSV
+  render-text/             Plain-text office rendering
+  render-tex/              LuaLaTeX booklet; caller supplies GABC lookup
+  render-html/             HTML rendering, view models and minijinja templates
+  tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
-  cli/                     office: every Go command (stdout, exit status, and written files
-                           compared byte for byte with Go; error wording is not); serve runs office-web
-  office-web/              Go's internal/web + internal/usage on axum/rusqlite/jiff; reproduces ServeMux and
-                           FileServer behavior; gonet.rs/gotime.rs hold the Go net/http and time semantics
+  cli/                     office command dispatch, dump stream, diff and digest
+  office-web/              Axum routes, usage SQLite store, reminders, embedded static/ assets
+                           http.rs holds saved-link query/cookie parsing; gotime.rs preserves
+                           reminder instants at DST transitions
+tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
+                           broken corpora for validation boundary tests
 tools/
-  genicons/                Generates checked-in PWA icon PNGs from the favicon cross design
-  genplaster/              Generates the limewash wall textures (plaster.jpg, plaster-wide.jpg)
-                           from the parish nave photo in ../resources/design/parish/
+  genicons.py              PWA icon generator; requires tools/requirements.txt
+  genplaster.py            Texture generator; source photograph stays in ../resources/
 data/
   feasts/                  Feast definitions (INI-like format)
   texts/                   Liturgical texts
@@ -130,8 +48,8 @@ scripts/
   diurnal-pages.py         Render/index page images; OCR only locates pages
   diurnal-transcribe.py    Read provenance-queue entries from pages and apply agreed wording
   diurnal-discover.py      Find printed propers behind runtime fallbacks
-  seed-divinum.go          Seed propers/commons from a local Divinum Officium checkout
-                           (go run scripts/seed-divinum.go -do <path> [-feast id] [-write])
+  golden.py               Check/regenerate snapshots using the Rust CLI
+  verify-psalms.py         Read-only comparison with the official BCP Psalter
   ordo-compare.py          Diff app output against a parish ordo PDF (see /ordo-verify skill)
 ```
 
@@ -182,11 +100,11 @@ All changes must go through a pull request — do not push directly to `master`.
 ### The `update-golden` label
 
 Adding `update-golden` to a PR makes CI merge `master` into the branch, run `make golden`,
-verify the merged tree (`go test ./...` + `make validate`), and push the result. Use it both
+verify the merged tree (`cargo test --workspace --locked` + `make validate`), and push the result. Use it both
 when an intentional data/logic change moved the golden files and when the PR is blocked on
 merge conflicts.
 
-Conflicts are auto-settled **only** inside `internal/e2e/testdata/golden/`. Those files are
+Conflicts are auto-settled **only** inside `tests/fixtures/golden/`. Those files are
 whole-corpus rollups — `parity-snapshot.json` digests an entire year per row and
 `assurance-report.md` is a table of global counts — so two PRs fixing unrelated corpus entries
 always collide there, and the correct merged value is neither side's: it has to be recomputed.
@@ -200,7 +118,7 @@ never resolved automatically.
 Repo labels `bug`, `needs ruling`, and `data validation` together cover nearly every issue worth filing here. Apply based on where the defect actually lives, not the symptom:
 
 - **`bug`** — the Go code (composers, resolvers, formatters) produces output that contradicts a rubric or spec we already agree on. The fix is a code change. E.g. `concurrenceWinner` picking the wrong feast per XIII.10, Preces firing on the wrong days.
-- **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not `internal/`.
+- **`data validation`** — the code is correct but a text/data file is missing, wrong, or a placeholder (missing propers, wrong antiphon corpus, `SOURCE: divinum-officium` text never checked against the diurnal). The fix is editing `data/`, not the Rust engine.
 - **`needs ruling`** — the ordo/rubrics are ambiguous, contradictory, or silent, and a decision from clergy is required before any fix can be written. Don't guess an implementation here; file the question and wait for a ruling.
 
 These aren't mutually exclusive — an issue can need a ruling *and* turn into a bug/data-validation fix once the ruling lands (see #13, #15). Use the other labels (`enhancement`, `question`, `documentation`, `duplicate`, `invalid`, `wontfix`, `good first issue`, `help wanted`, `update-golden`) only when none of the three above fit.
@@ -232,7 +150,7 @@ make review-plan      # Sample observed engine behavior (default 28y); no comple
 make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office dump -start 2026 [-years N] | -dates D,... [-hours ..] [-forms ..] [-groups ..]  # canonical JSONL
-./office dump diff LEFT RIGHT     # first differences by JSON Pointer (Go vs Rust, before vs after)
+./office dump diff LEFT RIGHT     # first differences by JSON Pointer (before vs after)
 ./office dump digest FILE         # parity snapshot of a dump
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 ./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
@@ -242,16 +160,13 @@ source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,
 and review links are allowed; local paths and inaccessible PDF links are not.
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
-make mutate      # Mutation-test whole packages (MUTATE_PKGS=./internal/calendar/) — see MUTATION-TESTING.md
+make mutate      # Mutation-test a Rust crate (MUTATE_PKG=calendar) — see MUTATION-TESTING.md
 make mutate-diff # Mutation-test only lines changed vs master (local review)
-make test-coverage # Run unit tests and enforce per-package coverage floors (also in CI)
+make test-coverage # Collect Rust line coverage (also in CI)
 make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
-make rust-parity # Go vs Rust: dump groups 1900–2199, hours + tex on 127 sample dates, ordo/rubrics,
-                 # validate/lint/audit (live + mutated data), review reports and ledger writers,
-                 # corpus/scaffold editing on data copies, and a crawl of both web servers
 make test-ux      # Playwright suites against the default Rust server
-make parity # Rust 2026–2053 dump digest + assurance report vs their goldens (in PR CI)
+make parity      # Check all snapshots, including the full 2026–2053 digest
 make clean       # Remove artifacts
 ```
 

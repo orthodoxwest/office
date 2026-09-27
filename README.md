@@ -82,10 +82,8 @@ npm ci --prefix .web-tools
 make check
 ```
 
-The retained Go reference checks, `make golden`, `make verify-psalms`, and
-`make rust-parity` additionally need Go from [go.mod](go.mod).
-`make go-check` needs `staticcheck` v0.7.0. `make go-build` writes
-`output/office-go`; it never replaces the Rust `./office` executable.
+Golden generation and the psalm verifier use Python and the Rust binary.
+Optional coverage and mutation tools are described in [MUTATION-TESTING.md](MUTATION-TESTING.md).
 
 ```bash
 make test                        # Rust and Python tests, including Rust goldens
@@ -96,7 +94,7 @@ make golden                      # update expected output after intentional chan
 make verify-psalms                # compare the psalter with its reference witness
 ```
 
-Review changes under [internal/e2e/testdata/golden/](internal/e2e/testdata/golden/)
+Review changes under [tests/fixtures/golden/](tests/fixtures/golden/)
 (rendered hours, date-sensitive parity, text provenance) before committing.
 
 Playwright behavior and accessibility tests run separately from `make check`:

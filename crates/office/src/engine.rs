@@ -604,3 +604,7 @@ mod tests {
         assert_eq!(compact_refs(vec!["a".into(), String::new(), "b".into(), "a".into()]), ["a", "b"]);
     }
 }
+
+#[cfg(test)]
+#[path = "engine_tests.rs"]
+mod behavior_tests;

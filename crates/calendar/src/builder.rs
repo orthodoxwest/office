@@ -718,3 +718,50 @@ mod tests {
         assert_eq!(rule("easter"), None);
     }
 }
+
+#[cfg(test)]
+mod octave_tests {
+    use super::*;
+    use crate::model::OctaveClass;
+
+    #[test]
+    fn privileged_octaves_exclude_explicit_feasts_and_keep_easter_offsets() {
+        for (id, offset, days) in [("easter-sunday", 0, vec![4, 5, 6, 7]), ("pentecost", 49, vec![2, 3, 4, 5, 6, 7])] {
+            let mut f = Feast::synthetic(id, id, Rank::Double1stClass, Color::White, Category::Lord);
+            f.has_octave = true;
+            f.octave_class = OctaveClass::PrivilegedFirst;
+            f.date_rule = Some(format!("easter+{offset}"));
+            let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
+            assert_eq!(generated.len(), days.len());
+            for (f, n) in generated.iter().zip(days) {
+                assert_eq!(f.id, format!("{id}-octave-day-{n}"));
+                assert_eq!(f.date_rule, Some(format!("easter+{}", offset + n - 1)));
+                assert_eq!(f.rank, Rank::Double1stClass);
+                assert!(f.is_privileged_octave_day);
+            }
+        }
+    }
+
+    #[test]
+    fn octave_antiphon_sets_skip_sunday_and_terminal_day() {
+        let mut f = Feast::synthetic("example", "Example", Rank::Double1stClass, Color::White, Category::Apostle);
+        f.fixed = Some(MonthDay { month: 6, day: 11 });
+        f.has_octave = true;
+        f.octave_class = OctaveClass::PrivilegedThird;
+        let generated = octave_feasts(&[Arc::new(f)], 2026, &MoveableDates::compute(2026));
+        let expected = [
+            "example-octave-set-1",
+            "example-octave-set-2",
+            "example",
+            "example-octave-set-3",
+            "example-octave-set-4",
+            "example-octave-set-5",
+            "example",
+        ];
+        for (f, want) in generated.iter().zip(expected) {
+            assert_eq!(f.proper_id.as_deref(), Some(want));
+        }
+        assert_eq!(generated.last().unwrap().rank, Rank::GreaterDouble);
+        assert!(!generated.last().unwrap().is_privileged_octave_day);
+    }
+}

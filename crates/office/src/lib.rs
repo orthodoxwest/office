@@ -1,6 +1,6 @@
 //! The Office: what only the Office resolves from the shared calendar
 //! (Vespers concurrence, the Compline Marian antiphon, the historia weeks),
-//! and, as the port proceeds, the hour composers (RUST-PORT.md).
+//! and the hour composers.
 //!
 //! Like the calendar crate, this crate does no file, network, or clock access.
 
@@ -65,3 +65,6 @@ pub fn resolve_office_days(cal: &YearCalendar) -> Vec<OfficeDay> {
         })
         .collect()
 }
+
+#[cfg(test)]
+mod requirements_tests;

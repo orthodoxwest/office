@@ -168,3 +168,61 @@ fn prime_element(slot: &str, key: &str, text: String) -> OfficeElement {
     e.source_refs = compact_refs(vec![key.to_string()]);
     e
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::testutil::{celebrating, date, day, feast, texts};
+    use calendar::Rank;
+
+    #[test]
+    fn martyrology_preview_uses_next_civil_date_and_keeps_missing_day_rubric() {
+        let sections = crate::hourdef::parse_hour_definition("prime", include_str!("../../../data/office/prime.txt")).unwrap();
+        for (current, key, title) in [
+            (date(2026, 9, 7), "09-08", "September 8"),
+            (date(2026, 12, 31), "01-01", "January 1"),
+            (date(2027, 2, 28), "03-01", "March 1"),
+            (date(2028, 2, 28), "02-29", "February 29"),
+            (date(2026, 3, 7), "03-08", "March 8"),
+        ] {
+            let reference = format!("ordinary/martyrology/{key}");
+            let t = texts(&[
+                (MARTYROLOGY_RUBRIC, "Read the Martyrology."),
+                (&reference, "Reviewed entry."),
+                ("ordinary/martyrology/conclusion", "Many other holy ones."),
+                ("ordinary/martyrology/response", "Thanks be to God."),
+            ]);
+            let d = day(current, Season::Lent);
+            let h = compose_prime(&d, &sections, &t, Some(&MoveableDates::compute(current.year())), true);
+            let elements: Vec<_> = h
+                .sections
+                .iter()
+                .flat_map(|s| &s.elements)
+                .filter(|e| e.source_ref.starts_with("ordinary/martyrology/") || e.kind == ElementType::Heading)
+                .collect();
+            assert_eq!(elements.len(), 4);
+            assert_eq!(elements[0].text, format!("Martyrology — {title}"));
+            assert_eq!(elements[1].kind, ElementType::Reading);
+            assert_eq!(elements[1].text, "Reviewed entry.");
+            assert_eq!(elements[1].source_ref, reference);
+            assert_eq!(elements[2].text, "Many other holy ones.");
+            assert_eq!(elements[3].kind, ElementType::Response);
+            assert_eq!(elements[3].text, "R. Thanks be to God.");
+            let plain = compose_prime(&d, &sections, &t, None, false);
+            assert!(!plain.sections.iter().flat_map(|s| &s.elements).any(|e| e.kind == ElementType::Reading));
+        }
+        let t = texts(&[(MARTYROLOGY_RUBRIC, "Read the Martyrology.")]);
+        let d = day(date(2026, 12, 31), Season::Christmas);
+        let fallback = resolve_prime_martyrology(&d, &t);
+        assert_eq!(fallback.len(), 1);
+        assert_eq!(fallback[0].kind, ElementType::Rubric);
+        assert_eq!(fallback[0].text, "Read the Martyrology.");
+        for id in ["holy-thursday", "good-friday", "holy-saturday"] {
+            let mut f = feast(id, None);
+            f.rank = Rank::Double1stClass;
+            let d = celebrating(date(2026, 4, 9), Season::Passiontide, f);
+            let h = compose_prime(&d, &sections, &t, Some(&MoveableDates::compute(2026)), true);
+            assert!(!h.sections.iter().flat_map(|s| &s.elements).any(|e| e.source_ref.contains("martyrology")));
+        }
+    }
+}

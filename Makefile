@@ -1,16 +1,8 @@
-.PHONY: help build test test-race test-ux test-ux-rust parity lint lint-js lint-texts vet fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check rust-parity clean install-gremlins mutate mutate-diff test-coverage
+.PHONY: help build test test-ux test-ux-rust parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage
 
 .DEFAULT_GOAL := help
 
 YEAR ?= 2026
-
-# The Go reference must never resolve to the default Rust ./office binary.
-export GO_OFFICE := $(CURDIR)/output/office-go
-.PHONY: go-build go-check
-go-check: ## Check the retained Go reference
-	test -z "$$(gofmt -l .)"
-	go vet ./...
-	staticcheck ./...
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -19,13 +11,10 @@ build: ## Build the Rust binary
 	cargo build --locked --release -p office-cli
 	cp target/release/office office
 
-go-build: ## Build the Go reference binary
-	mkdir -p output
-	go build -o output/office-go ./cmd/server
-
 test: ## Run Rust and Python tests
 	cargo test --workspace --locked
-	python3 scripts/test_coverage_threshold.py
+	python3 scripts/test_static_contracts.py
+	python3 scripts/test_verify_psalms.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_update_golden_workflow.py
@@ -33,13 +22,10 @@ test: ## Run Rust and Python tests
 	python3 scripts/test_diurnal_transcribe.py
 	python3 scripts/test_diurnal_discover.py
 
-# Keep package-local coverage: integration/golden tests must not hide unit-test gaps.
-COVERAGE_PROFILE ?= output/coverage/unit.out
-
-test-coverage: ## Run unit tests and enforce per-package statement coverage floors
-	mkdir -p $(dir $(COVERAGE_PROFILE))
-	go test -count=1 -covermode=set -coverprofile=$(COVERAGE_PROFILE) $$(go list ./... | grep -v '/e2e$$')
-	python3 scripts/check_coverage_threshold.py $(COVERAGE_PROFILE)
+# Rust line coverage is reported separately from the retired Go statement metric.
+test-coverage: ## Collect Rust coverage (requires cargo-llvm-cov and llvm-tools-preview)
+	mkdir -p output/coverage
+	cargo llvm-cov --workspace --locked --lcov --output-path output/coverage/lcov.info
 
 diurnal-test: ## Run page-image, transcription, and discovery unit tests
 	python3 scripts/test_diurnal_pages.py
@@ -76,9 +62,6 @@ discover-report: ## Print discovery PR markdown for RUN=<run-id-or-directory>
 	@test -n "$(RUN)" || (echo "RUN is required" >&2; exit 2)
 	python3 scripts/diurnal-discover.py report "$(RUN)"
 
-test-race: ## Run Go tests with the race detector
-	go test -race ./...
-
 test-ux: build ## Run Playwright UX regression tests against Rust
 	npm --prefix .web-tools run test:ux
 
@@ -89,9 +72,6 @@ lint: ## Run Clippy
 
 lint-js: ## Run ESLint on browser and service-worker JavaScript
 	npm --prefix .web-tools run lint
-
-vet: ## Run go vet
-	go vet ./...
 
 fmt: ## Reformat Rust source files
 	cargo fmt
@@ -123,7 +103,7 @@ project-status: build ## Generate clergy-facing proper, assurance, and YEAR ordo
 	python3 scripts/project-status.py --year $(YEAR)
 
 verify-psalms: ## Compare the Coverdale psalter against the official 1662 BCP witness
-	go run scripts/verify-psalms.go
+	python3 scripts/verify-psalms.py
 
 review-manifest: build ## Inventory distinct rendered compositions for current year (START=2026 YEARS=1)
 	./office review manifest $(if $(START),-start $(START),) $(if $(YEARS),-years $(YEARS),)
@@ -162,68 +142,27 @@ pdf: build ## Generate PDF booklet for HOUR [DATE] [CHANT=1] (e.g., make pdf HOU
 	lualatex --shell-escape --interaction=nonstopmode --output-directory=output output/$(HOUR)-$(DATE).tex
 	@echo "PDF: output/$(HOUR)-$(DATE).pdf"
 
-GREMLINS_VERSION = v0.6.0
-GREMLINS_BIN = $(shell go env GOBIN)
-GREMLINS = $(if $(GREMLINS_BIN),$(GREMLINS_BIN),$(shell go env GOPATH)/bin)/gremlins
-MUTATE_PKGS ?= ./internal/models/ ./internal/calendar/ ./internal/office/ ./internal/texts/
+MUTATE_PKG ?= calendar
 MUTATE_DIFF_BASE ?= master
-# In --diff mode gremlins measures its baseline over the whole suite (~30s)
-# rather than one package (~1s), so the coefficient pinned in .gremlins.yaml
-# would yield a ~15-minute per-mutant timeout. Override it here; the large
-# baseline already makes a small coefficient generous.
-MUTATE_DIFF_COEFFICIENT ?= 5
 
-# `gremlins version` reports "dev" for go-install builds, but the module version
-# is recorded in the binary and readable with `go version -m`. Check that rather
-# than mere presence: CI restores ~/go/bin from a prefix-matched cache, so a
-# presence-only check would silently keep running a stale version after a bump.
-install-gremlins: ## Install the pinned mutation-testing tool if missing or stale
-	@go version -m $(GREMLINS) 2>/dev/null | grep -q 'gremlins[[:space:]]*$(GREMLINS_VERSION)' || \
-		go install github.com/go-gremlins/gremlins/cmd/gremlins@$(GREMLINS_VERSION)
+mutate: ## Inspect Rust assertion gaps (requires cargo-mutants)
+	cargo mutants --package $(MUTATE_PKG) --output output/mutation --jobs 1 --timeout 60 --gitignore true
 
-# Note: thresholds are 0, so gremlins exits 0 regardless of efficacy. The
-# `|| exit 1` catches hard failures (compile errors, crashes), not bad scores.
-mutate: install-gremlins ## Mutation-test whole packages for targeted test review
-	@for pkg in $(MUTATE_PKGS); do \
-		echo "==> $$pkg"; \
-		$(GREMLINS) unleash $$pkg || exit 1; \
-	done
-
-# Must run from the module root with no package path: passing a path alongside
-# --diff makes gremlins skip every mutant, including the changed ones, and
-# still exit 0.
-mutate-diff: install-gremlins ## Mutation-test only lines changed vs MUTATE_DIFF_BASE (default master)
-	$(GREMLINS) unleash --diff $(MUTATE_DIFF_BASE) \
-		--timeout-coefficient $(MUTATE_DIFF_COEFFICIENT)
+mutate-diff: ## Inspect mutations in changed Rust lines
+	mkdir -p output/mutation
+	git diff $(MUTATE_DIFF_BASE) -- '*.rs' > output/mutation/changes.diff
+	cargo mutants --package $(MUTATE_PKG) --in-diff output/mutation/changes.diff --output output/mutation --jobs 1 --timeout 60 --gitignore true
 
 rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo fmt --check
 	cargo clippy --workspace --all-targets -- -D warnings
 	cargo test --workspace
 
-rust-parity: go-build ## Compare Go and Rust: calendar/office 1900-2199, hours and tex on sample dates, ordo and rubrics, a crawl of both web servers
-	cargo build --release -p office-cli
-	scripts/rust-parity.sh corpus,calendar,office -start 1900 -years 300
-	scripts/rust-parity.sh hours -dates $$(scripts/rust-parity-dates.sh)
-	scripts/rust-parity-tex.sh
-	scripts/rust-parity-cmd.sh validate
-	scripts/rust-parity-cmd.sh lint
-	scripts/rust-parity-cmd.sh audit -year 2026
-	scripts/rust-parity-mutated.sh
-	scripts/rust-parity-review.sh
-	scripts/rust-parity-edit.sh
-	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
-	scripts/rust-parity-web.sh
+parity: build ## Check every retained snapshot, including the 2026–2053 digest
+	python3 scripts/golden.py --check
 
-parity: ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
-	cargo build --release -p office-cli
-	target/release/office dump -start 2026 -years 28 | target/release/office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
-	@echo "parity: Rust 2026-2053 digest matches parity-snapshot.json"
-	target/release/office review assurance -markdown | diff - internal/e2e/testdata/golden/assurance-report.md
-	@echo "parity: Rust assurance report matches assurance-report.md"
-
-golden: ## Regenerate rendered-office and assurance golden files
-	go test ./internal/e2e/ -update -count=1
+golden: build ## Regenerate rendered-office and assurance golden files
+	python3 scripts/golden.py
 
 clean: ## Remove build artifacts
 	rm -f office

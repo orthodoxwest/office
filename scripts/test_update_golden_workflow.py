@@ -15,7 +15,7 @@ import unittest
 from unittest.mock import patch
 
 HELPER = Path(__file__).with_name("update_golden.py").resolve()
-GOLDEN = Path("internal/e2e/testdata/golden")
+GOLDEN = Path("tests/fixtures/golden")
 
 
 def authorize(stale_base, current_base, permission="write"):
@@ -259,7 +259,7 @@ class GoldenUpdateTest(unittest.TestCase):
                 self.assertEqual(self.remote_head(), self.env["HEAD_SHA"])
 
     def test_destination_symlinks_are_rejected_without_writing_outside(self):
-        for name in ("internal", str(GOLDEN), str(GOLDEN / "a.txt")):
+        for name in ("tests", str(GOLDEN), str(GOLDEN / "a.txt")):
             with self.subTest(path=name):
                 work = self.checkout("symlink-" + name.replace("/", "-"))
                 target = work / name
@@ -267,14 +267,14 @@ class GoldenUpdateTest(unittest.TestCase):
                 target.rename(outside)
                 target.symlink_to(outside)
                 self.run_helper(work=work, success=False)
-                original = outside / "e2e/testdata/golden/a.txt" if name == "internal" else outside / "a.txt" if name == str(GOLDEN) else outside
+                original = outside / "fixtures/golden/a.txt" if name == "tests" else outside / "a.txt" if name == str(GOLDEN) else outside
                 self.assertEqual(original.read_text(), "original\n")
 
     def test_symlink_introduced_by_base_merge_is_rejected(self):
         self.git(self.source, "checkout", "master")
         path = self.source / GOLDEN / "a.txt"
         path.unlink()
-        path.symlink_to("../../../../data.txt")
+        path.symlink_to("../../../data.txt")
         self.git(self.source, "add", "-A")
         self.git(self.source, "commit", "-m", "symlink in base")
         self.git(self.source, "push", "origin", "master")

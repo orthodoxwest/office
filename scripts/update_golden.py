@@ -9,7 +9,7 @@ import stat
 import subprocess
 import sys
 
-GOLDEN = Path("internal/e2e/testdata/golden")
+GOLDEN = Path("tests/fixtures/golden")
 FILENAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.(txt|md|json)")
 
 

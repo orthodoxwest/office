@@ -20,3 +20,6 @@ pub use computus::{MoveableDates, Tabula};
 pub use date::{Date, Weekday};
 pub use loader::{CalendarData, DataSource};
 pub use model::{CalendarDay, Category, Color, Decision, Feast, FeastRef, Rank, Season};
+
+#[cfg(test)]
+mod behavior_tests;

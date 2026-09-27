@@ -1,6 +1,4 @@
-//! The Phase 3 text gate: every `<hour>-<date>.txt` golden under
-//! internal/e2e/testdata/golden, which Go writes with FormatOfficeHour, must
-//! be reproduced byte for byte.
+//! Render every retained hour/date golden without regenerating expectations.
 
 use std::collections::HashMap;
 
@@ -10,10 +8,10 @@ use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
 use render_text::format_office_hour;
 use tools::fs::FsData;
 
-const GOLDEN: &str = "../../internal/e2e/testdata/golden";
+const GOLDEN: &str = "../../tests/fixtures/golden";
 
 #[test]
-fn hour_goldens_match_go() {
+fn hour_goldens_match() {
     let src = FsData::new("../../data");
     let engine = Engine::load(&src).unwrap();
     let data = CalendarData::load(&src).unwrap();
