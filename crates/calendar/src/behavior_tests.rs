@@ -197,3 +197,37 @@ fn transfers_continue_through_a_blocked_year_boundary() {
         assert!(cal.days[index].occurrence_decisions.iter().any(|d| d.rule == rule), "{index}: {rule}");
     }
 }
+
+#[test]
+fn commemoration_callers_preserve_principal_companion_priority() {
+    let parent = feast("apostolic-office", Rank::Double, Category::Apostle);
+    let mut companion = (*feast("companion", Rank::Commemoration, Category::Apostle)).clone();
+    companion.companion_of = Some(parent.id.clone());
+    let companion = Arc::new(companion);
+    let greater = feast("greater", Rank::GreaterDouble, Category::Confessor);
+    let input = vec![greater, companion];
+    let (ordered, _) = ordered_commemorations(Some(&parent), &input, OrderContext::default());
+    assert_eq!(ids(&ordered), ["companion", "greater"]);
+    let (mut day, _) = resolve_day(Date::new(2026, 7, 7), &[], Season::Pentecost, Color::Green, &[]);
+    day.celebration = Some(parent);
+    day.commemorations = input;
+    assert_eq!(ids(&lauds_commemorations(&day)), ["companion", "greater"]);
+}
+
+#[test]
+fn occurrence_passes_season_to_commemoration_order_with_and_without_winner() {
+    let memorial = feast("memorial", Rank::Commemoration, Category::Martyr);
+    let feria = feast("feria", Rank::Commemoration, Category::Feria);
+    let winner = feast("winner", Rank::Double, Category::Confessor);
+    for principal in [false, true] {
+        let mut candidates = vec![memorial.clone(), feria.clone()];
+        if principal {
+            candidates.push(winner.clone());
+        }
+        for (season, expected) in [(Season::Lent, ["feria", "memorial"]), (Season::Pentecost, ["memorial", "feria"])] {
+            let (day, _) = resolve_day(Date::new(2026, 3, 11), &candidates, season, Color::Violet, &[]);
+            assert_eq!(day.celebration.is_some(), principal);
+            assert_eq!(ids(&day.commemorations), expected);
+        }
+    }
+}
