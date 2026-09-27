@@ -291,6 +291,7 @@ dependencies = [
  "liturgy",
  "office",
  "regex",
+ "serde_json",
  "sha2",
 ]
 

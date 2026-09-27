@@ -5,6 +5,7 @@
 
 pub mod csv;
 mod isprint;
+pub mod json;
 
 /// Quotes `s` as Go's `strconv.Quote` does: backslash escapes for quote,
 /// backslash, and every rune Go's `strconv.IsPrint` rejects.

@@ -36,7 +36,7 @@ pub fn cmd_rubrics(data: &FsData, args: &[String], out: &mut dyn Write) -> Resul
 }
 
 /// Accepts `--form X` or `--form=X` anywhere among the arguments.
-fn take_prayer_form(args: &[String]) -> Result<(Vec<String>, PrayerForm), String> {
+pub fn take_prayer_form(args: &[String]) -> Result<(Vec<String>, PrayerForm), String> {
     let mut form = PrayerForm::Private;
     let mut rest = Vec::new();
     let mut seen = false;

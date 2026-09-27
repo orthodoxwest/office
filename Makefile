@@ -199,12 +199,15 @@ rust-parity: build ## Compare Go and Rust: calendar/office 1900-2199, hours and 
 	scripts/rust-parity-cmd.sh lint
 	scripts/rust-parity-cmd.sh audit -year 2026
 	scripts/rust-parity-mutated.sh
+	scripts/rust-parity-review.sh
 	for y in 2026 2027 2038; do scripts/rust-parity-cmd.sh ordo $$y && scripts/rust-parity-cmd.sh rubrics $$y || exit 1; done
 
 rust-parity-full: build ## Digest the Rust dump for 2026-2053 and compare it with the parity golden
 	cargo build --release -p office-cli
 	target/release/office-rs dump -start 2026 -years 28 | ./office dump digest - | diff - internal/e2e/testdata/golden/parity-snapshot.json
 	@echo "parity: Rust 2026-2053 digest matches parity-snapshot.json"
+	target/release/office-rs review assurance -markdown | diff - internal/e2e/testdata/golden/assurance-report.md
+	@echo "parity: Rust assurance report matches assurance-report.md"
 
 golden: ## Regenerate rendered-office and assurance golden files
 	go test ./internal/e2e/ -update -count=1

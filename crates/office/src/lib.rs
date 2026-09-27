@@ -25,6 +25,7 @@ pub mod scopes;
 pub mod seasonal;
 pub mod summary;
 pub mod texts;
+pub mod trace;
 pub mod validate;
 pub mod vespers;
 pub mod voice;

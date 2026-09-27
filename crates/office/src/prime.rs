@@ -115,7 +115,7 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     prime_element(SLOT, &key, text)
 }
 
-fn is_prime_antiphon_ref(reference: &str, season: Season) -> bool {
+pub(crate) fn is_prime_antiphon_ref(reference: &str, season: Season) -> bool {
     reference.ends_with("-prime") || reference.ends_with(&format!("-prime-{season}"))
 }
 

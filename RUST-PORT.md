@@ -10,7 +10,8 @@ the corpus, calendar, and office groups for 1900–2199, and every hour in
 every prayer form for 2026–2053 (the parity snapshot). The Rust validators
 reproduce Go's reports on every broken test corpus, and the text renderer
 reproduces every hour golden. Phase 4 is under way: the ordo, the rubrics
-TSV, and the TeX booklet are byte-identical. Nothing user-facing changes until
+TSV, the TeX booklet, validate, audit, lint, and the review subcommands are
+byte-identical. Nothing user-facing changes until
 the cutover in Phase 6.
 
 ## Why Rust
@@ -331,8 +332,8 @@ serde_json's wording rather than encoding/json's. Semantic errors match.
 - [ ] Port the Go `office` unit tests (the black-box gate covers the sweep;
       the unit tests reach cases it cannot)
 - [ ] The Martyrology preview at Prime (unpublished; not in the dump)
-- [ ] Composition tracing (`TraceProperResolution`), used by the review tools
-      in Phase 4
+- [x] Composition tracing (`TraceProperResolution`), used by the review tools
+      in Phase 4 (`office::trace`)
 
 HTML goldens are intentionally absent. Phase 5 crawls the Go and Rust servers
 and compares them directly; checked-in HTML would churn with every UI change
@@ -361,4 +362,14 @@ until then.
       which reaches the finding paths the clean data never does.
       `compat::quote` now escapes exactly what Go's `strconv.IsPrint`
       rejects (Go's tables, checked on every code point)
-- [ ] Assurance and the review subcommands still in use
+- [x] The review subcommands (`tools::review`): manifest, provenance,
+      provenance-queue, zero-occurrences, resolution-inventory, plan,
+      explain, assurance, and the ledger writers attest and flag.
+      `office::trace` ports `TraceProperResolution` and
+      `TraceCommemorationResolution`; `compat::json` writes Go's indented
+      `encoding/json`. The sweeps compose years in parallel and fold them in
+      Go's order: the 28-year assurance report takes 21s against Go's 60s, and
+      matches its golden (`make rust-parity-full`). `scripts/rust-parity-review.sh`
+      compares every read-only report on one- and two-year sweeps, and runs
+      the ledger writers on two copies of the data, diffing output and trees
+- [ ] `corpus` and `scaffold` commands

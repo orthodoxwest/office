@@ -12,6 +12,7 @@ calendar.workspace = true
 corpus.workspace = true
 office.workspace = true
 liturgy.workspace = true
+serde_json.workspace = true
 regex.workspace = true
 sha2.workspace = true
 

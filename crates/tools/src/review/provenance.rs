@@ -316,6 +316,84 @@ fn validate_attestation(a: &Attestation) -> Result<(), String> {
     }
 }
 
+/// One word-for-word source verification to record.
+#[derive(Clone, Debug, Default)]
+pub struct AttestOptions {
+    pub key: String,
+    pub reviewer: String,
+    pub source: String,
+    pub locator: String,
+    pub page: String,
+    /// YYYY-MM-DD; the caller supplies today's date when none was given.
+    pub reviewed_on: String,
+    pub notes: String,
+    pub replace: bool,
+}
+
+/// Go's `RecordAttestation`: validates, binds the attestation to the
+/// entry's current text, rewrites the ledger atomically, and prunes any
+/// prescreen flag the verification supersedes. Never stores book contents.
+pub fn record_attestation(src: &dyn DataSource, dir: &std::path::Path, mut o: AttestOptions) -> Result<EntryProvenance, String> {
+    for f in [&mut o.key, &mut o.reviewer, &mut o.source, &mut o.locator, &mut o.page, &mut o.reviewed_on, &mut o.notes] {
+        *f = f.trim().to_string();
+    }
+    if o.key.is_empty() || o.reviewer.is_empty() || o.source.is_empty() {
+        return Err("key, reviewer, and source are required".into());
+    }
+    if o.page.is_empty() && o.locator.is_empty() {
+        return Err("page or locator is required".into());
+    }
+    if Date::parse(&o.reviewed_on).is_none() {
+        return Err(format!("invalid review date {}", quote(&o.reviewed_on)));
+    }
+    for (field, value) in [("reviewer", &o.reviewer), ("source", &o.source), ("locator", &o.locator), ("page", &o.page)] {
+        if value.contains(['\r', '\n']) {
+            return Err(format!("{field} may not contain a newline"));
+        }
+    }
+    let inv = scan_provenance(src)?;
+    let mut entry =
+        inv.by_key().get(o.key.as_str()).map(|e| (*e).clone()).ok_or_else(|| format!("unknown corpus key {}", quote(&o.key)))?;
+    let existing = load_attestations(src)?;
+    let found = existing.iter().any(|a| a.key == o.key);
+    if found && !o.replace {
+        return Err(format!("entry {} already has an attestation; use --replace to replace it", quote(&o.key)));
+    }
+    let mut kept: Vec<Attestation> = existing.into_iter().filter(|a| a.key != o.key).collect();
+    kept.push(Attestation {
+        key: o.key.clone(),
+        content_hash: entry.content_hash.clone(),
+        source: o.source.clone(),
+        locator: o.locator.clone(),
+        page: o.page.clone(),
+        status: "verified".into(),
+        reviewer: o.reviewer.clone(),
+        reviewed_on: o.reviewed_on.clone(),
+        notes: o.notes.clone(),
+    });
+    kept.sort_by(|a, b| a.key.cmp(&b.key));
+    let mut out = String::new();
+    csv::write_record(&mut out, &PROVENANCE_HEADER);
+    for a in &kept {
+        csv::write_record(&mut out, &a.row());
+    }
+    crate::fs::write_atomic(&dir.join(PROVENANCE_FILE), out.as_bytes())?;
+    super::prescreen::prune_prescreen_flag(src, dir, &o.key).map_err(|e| format!("pruning prescreen flag: {e}"))?;
+    entry.status = ProvenanceStatus::Verified;
+    entry.reviewer = o.reviewer;
+    entry.reviewed_on = o.reviewed_on;
+    entry.notes = o.notes.clone();
+    entry.sources.push(SourceCitation {
+        kind: "attestation".into(),
+        source: o.source,
+        locator: o.locator,
+        page: o.page,
+        note: o.notes,
+        line: 0,
+    });
+    Ok(entry)
+}
+
 /// Generated, non-stale corpus assurance counts.
 pub fn provenance_summary(p: &ProvenanceInventory) -> String {
     let mut counts: BTreeMap<ProvenanceStatus, usize> = BTreeMap::new();

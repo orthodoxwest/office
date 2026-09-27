@@ -30,6 +30,31 @@ impl FsData {
     }
 }
 
+/// Replaces `path` atomically, as the Go review tools do: a temporary file
+/// beside it, synced, made 0644, then renamed over it.
+pub fn write_atomic(path: &Path, contents: &[u8]) -> Result<(), String> {
+    use std::io::Write as _;
+    let dir = path.parent().unwrap_or(Path::new("."));
+    std::fs::create_dir_all(dir).map_err(|e| io_error("mkdir", dir, &e))?;
+    let name = path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+    let tmp = dir.join(format!(".{name}.{}.tmp", std::process::id()));
+    let result = (|| {
+        let mut f = std::fs::File::create(&tmp).map_err(|e| io_error("open", &tmp, &e))?;
+        f.write_all(contents).map_err(|e| io_error("write", &tmp, &e))?;
+        f.sync_all().map_err(|e| io_error("sync", &tmp, &e))?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt as _;
+            std::fs::set_permissions(&tmp, std::fs::Permissions::from_mode(0o644)).map_err(|e| io_error("chmod", &tmp, &e))?;
+        }
+        std::fs::rename(&tmp, path).map_err(|e| io_error("rename", &tmp, &e))
+    })();
+    if result.is_err() {
+        let _ = std::fs::remove_file(&tmp);
+    }
+    result
+}
+
 /// Go's `filepath.Clean`: the shortest lexically equivalent path.
 pub fn clean(path: &Path) -> PathBuf {
     let mut out: Vec<Component> = Vec::new();

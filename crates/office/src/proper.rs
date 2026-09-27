@@ -102,7 +102,7 @@ pub fn lookup_seasonal_text(day: &Day, hour_name: &str, reference: &str, t: &Off
     lookup_section_text(&prefix, None, hour_name, reference, t)
 }
 
-fn season_ref_candidates(refs: &[String], season: Option<Season>) -> Vec<String> {
+pub(crate) fn season_ref_candidates(refs: &[String], season: Option<Season>) -> Vec<String> {
     match season {
         None => Vec::new(),
         Some(s) => refs.iter().map(|r| format!("{r}-{s}")).collect(),
