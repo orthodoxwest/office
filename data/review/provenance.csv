@@ -1217,8 +1217,26 @@ proper/guardian-angels/short-responsory-none,0a692d614a29,diurnal,"Holy Guardian
 proper/guardian-angels/short-responsory-vespers,8aba3cb98a7d,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
 proper/guardian-angels/versicle-lauds,9c50d614fe3b,diurnal,"October 2, At Lauds",615,verified,claude,2026-08-20,
 proper/guardian-angels/versicle-vespers,9c50d614fe3b,diurnal,"October 2, At I Vespers",613,verified,claude,2026-08-20,
-proper/historia-september-3/magnificat-antiphon-first,b12975bdada6,diurnal,Saturday before the III Sunday of September,425,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0471.png
-proper/historia-september-4/magnificat-antiphon-first,5881b46cd434,diurnal,Saturday before the IV Sunday of September,426,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0472.png
+proper/historia-august-1/magnificat-antiphon-first,6f1a141c13dd,diurnal,Antiphons on Saturdays after Pentecost,424,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-august-2/magnificat-antiphon-first,16f22b81930c,diurnal,Antiphons on Saturdays after Pentecost,424,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-august-3/magnificat-antiphon-first,2c3f181bd44f,diurnal,Antiphons on Saturdays after Pentecost,424,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-august-4/magnificat-antiphon-first,5a1c6225ff63,diurnal,Antiphons on Saturdays after Pentecost,424,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-august-5/magnificat-antiphon-first,c4aff3279bca,diurnal,Antiphons on Saturdays after Pentecost,425,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-november-1/magnificat-antiphon-first,1196d0f0c168,diurnal,Antiphons on Saturdays after Pentecost,428,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-november-2/magnificat-antiphon-first,abf5828ccefa,diurnal,Antiphons on Saturdays after Pentecost,428,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-november-3/magnificat-antiphon-first,8ef29a3ce646,diurnal,Antiphons on Saturdays after Pentecost,428,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-november-4/magnificat-antiphon-first,9ee29dac219e,diurnal,Antiphons on Saturdays after Pentecost,429,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-november-5/magnificat-antiphon-first,36fc25df5321,diurnal,Antiphons on Saturdays after Pentecost,429,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-october-1/magnificat-antiphon-first,e90a29703423,diurnal,Antiphons on Saturdays after Pentecost,427,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-october-2/magnificat-antiphon-first,d086f15d638c,diurnal,Antiphons on Saturdays after Pentecost,427,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-october-3/magnificat-antiphon-first,04ff783f73e4,diurnal,Antiphons on Saturdays after Pentecost,427,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-october-4/magnificat-antiphon-first,6d86ba90216c,diurnal,Antiphons on Saturdays after Pentecost,427,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-october-5/magnificat-antiphon-first,f406d0f9bfdf,diurnal,Antiphons on Saturdays after Pentecost,428,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-september-1/magnificat-antiphon-first,703a6007af50,diurnal,Antiphons on Saturdays after Pentecost,425,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-september-2/magnificat-antiphon-first,1ed9ffbc0aed,diurnal,Antiphons on Saturdays after Pentecost,425,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-september-3/magnificat-antiphon-first,1be46c04db78,diurnal,Antiphons on Saturdays after Pentecost,425,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-september-4/magnificat-antiphon-first,300ba5a06043,diurnal,Antiphons on Saturdays after Pentecost,426,verified,claude,2026-09-28,word-for-word from printed page image
+proper/historia-september-5/magnificat-antiphon-first,c4090f45079a,diurnal,Antiphons on Saturdays after Pentecost,427,verified,claude,2026-09-28,word-for-word from printed page image
 proper/holy-innocents/benedictus-antiphon,d0fecbb41021,diurnal,"Holy Innocents, At Lauds",202,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/chapter-lauds,f2eea018e581,diurnal,"Holy Innocents, At Lauds",201,verified,grok,2026-08-23,word-for-word from printed page image
 proper/holy-innocents/chapter-none,ef33c67872ce,diurnal,"Holy Innocents, At None",203,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1552,28 +1570,38 @@ proper/pentecost-sunday-1/benedictus-antiphon,c804f1e9be9b,diurnal,"Trinity Sund
 proper/pentecost-sunday-1/collect,1d0047c532f1,diurnal,"Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost",403,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-1/magnificat-antiphon,ad2804dc822f,diurnal,"Trinity Sunday, II Vespers, For Commemoration of Sunday",408,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-1/magnificat-antiphon-first,9e3848664e1c,diurnal,"Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost",403,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-10/benedictus-antiphon,acac951e2b16,diurnal,"Sundays after Pentecost, 10 Sunday, Ant. on Benedictus",435,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-10/collect,114ea732b585,diurnal,,435,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0481.png
-proper/pentecost-sunday-10/magnificat-antiphon,c48b3afa540e,diurnal,X Sunday after Pentecost,435,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-10/magnificat-antiphon,c48b3afa540e,diurnal,"Sundays after Pentecost, 10 Sunday, Ant. on Magnificat",435,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-10/magnificat-antiphon-first,0ae6f39254bd,diurnal,Antiphons on Saturdays after Pentecost,423,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-11/benedictus-antiphon,53ace529934c,diurnal,"Sundays after Pentecost, 11 Sunday, Ant. on Benedictus",435,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-11/collect,3aae5edc6824,diurnal,,435,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0481.png
-proper/pentecost-sunday-11/magnificat-antiphon,a3d9a48301b5,diurnal,XI Sunday after Pentecost,435,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-11/magnificat-antiphon,a3d9a48301b5,diurnal,"Sundays after Pentecost, 11 Sunday, Ant. on Magnificat",435,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-11/magnificat-antiphon-first,63019e6133de,diurnal,Antiphons on Saturdays after Pentecost,423,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-12/benedictus-antiphon,83800b1f9f2f,diurnal,"Sundays after Pentecost, 12 Sunday, Ant. on Benedictus",436,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-12/collect,6dbfee41984e,diurnal,,436,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0482.png
-proper/pentecost-sunday-12/magnificat-antiphon,8f2a23031065,diurnal,XII Sunday after Pentecost,436,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-12/magnificat-antiphon,8f2a23031065,diurnal,"Sundays after Pentecost, 12 Sunday, Ant. on Magnificat",436,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-13/benedictus-antiphon,189717c7edbb,diurnal,"Sundays after Pentecost, 13 Sunday, Ant. on Benedictus",436,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-13/collect,67c834767d33,diurnal,,436,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0482.png
-proper/pentecost-sunday-13/magnificat-antiphon,1394bada35bb,diurnal,XIII Sunday after Pentecost,436,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-13/magnificat-antiphon,1394bada35bb,diurnal,"Sundays after Pentecost, 13 Sunday, Ant. on Magnificat",436,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-14/benedictus-antiphon,d2958c466563,diurnal,"Sundays after Pentecost, 14 Sunday, Ant. on Benedictus",437,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-14/collect,3a89c33ddc0f,diurnal,,436,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0482.png
-proper/pentecost-sunday-14/magnificat-antiphon,24d0531c5b45,diurnal,XIV Sunday after Pentecost,437,verified,grok,2026-08-22,word-for-word from printed page image
-proper/pentecost-sunday-15/benedictus-antiphon,c71a5f953dd2,diurnal,XV Sunday after Pentecost,437,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0483.png
+proper/pentecost-sunday-14/magnificat-antiphon,24d0531c5b45,diurnal,"Sundays after Pentecost, 14 Sunday, Ant. on Magnificat",437,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-15/benedictus-antiphon,c71a5f953dd2,diurnal,"Sundays after Pentecost, 15 Sunday, Ant. on Benedictus",437,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-15/collect,f9bd88e92995,diurnal,XV Sunday after Pentecost,437,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0483.png
-proper/pentecost-sunday-15/magnificat-antiphon,c102baca6b34,diurnal,XV Sunday after Pentecost,437,verified,grok,2026-08-22,word-for-word from printed page image
-proper/pentecost-sunday-16/benedictus-antiphon,f7dea8fc448e,diurnal,XVI Sunday after Pentecost,437,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0483.png
+proper/pentecost-sunday-15/magnificat-antiphon,c102baca6b34,diurnal,"Sundays after Pentecost, 15 Sunday, Ant. on Magnificat",437,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-16/benedictus-antiphon,f7dea8fc448e,diurnal,"Sundays after Pentecost, 16 Sunday, Ant. on Benedictus",437,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-16/collect,516d0996a0fb,diurnal,XVI Sunday after Pentecost,437,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0483.png
-proper/pentecost-sunday-16/magnificat-antiphon,3880f0dc442e,diurnal,XVI Sunday after Pentecost,437-438,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-16/magnificat-antiphon,3880f0dc442e,diurnal,"Sundays after Pentecost, 16 Sunday, Ant. on Magnificat",438,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-17/benedictus-antiphon,0a8d8a51f786,diurnal,"Sundays after Pentecost, 17 Sunday, Ant. on Benedictus",438,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-17/collect,6ac92861f7a9,diurnal,,438,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0484.png
-proper/pentecost-sunday-17/magnificat-antiphon,bef861e14395,diurnal,XVII Sunday after Pentecost,438,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-17/magnificat-antiphon,bef861e14395,diurnal,"Sundays after Pentecost, 17 Sunday, Ant. on Magnificat",438,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-18/benedictus-antiphon,3eda2f970637,diurnal,"Sundays after Pentecost, 18 Sunday, Ant. on Benedictus",438,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-18/collect,cd77bdd1d19c,diurnal,,438,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0484.png
-proper/pentecost-sunday-18/magnificat-antiphon,016fdf9272e1,diurnal,XVIII Sunday after Pentecost,438,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-18/magnificat-antiphon,016fdf9272e1,diurnal,"Sundays after Pentecost, 18 Sunday, Ant. on Magnificat",438,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-19/benedictus-antiphon,b5a054c2fed7,diurnal,"Sundays after Pentecost, 19 Sunday, Ant. on Benedictus",439,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-19/collect,dcb47ddbe9c3,diurnal,,438,verified,codex,2026-09-10,"Word-for-word after normalization; page images output/pages/monastic-diurnal/0484.png and 0485.png; first reader matched, second read XVIII on the same spread"
-proper/pentecost-sunday-19/magnificat-antiphon,0414c8d652e6,diurnal,XIX Sunday after Pentecost,439,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-19/magnificat-antiphon,0414c8d652e6,diurnal,"Sundays after Pentecost, 19 Sunday, Ant. on Magnificat",439,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-2/benedictus-antiphon,9fdc28a3e468,Monastic Diurnal.pdf,proper/pentecost-sunday-2/benedictus-antiphon; PDF pages 465,419,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__pentecost-sunday-2__benedictus-antiphon/record.json"
 proper/pentecost-sunday-2/chapter-lauds,ed161d15b330,Monastic Diurnal.pdf,"proper/pentecost-sunday-2/chapter-lauds; PDF pages 464, 85","418, 39",verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__pentecost-sunday-2__chapter-lauds/record.json"
 proper/pentecost-sunday-2/chapter-none,d0244c5cd4e1,diurnal,,420,verified,codex,2026-09-15,Word-for-word after normalization; page image output/sunday-chapter-review/page-466-300dpi.png
@@ -1599,30 +1627,49 @@ proper/pentecost-sunday-2/short-responsory-lauds,979bb8cb3d04,Monastic Diurnal.p
 proper/pentecost-sunday-2/versicle-first-vespers,883abdf3da0f,Monastic Diurnal.pdf,proper/pentecost-sunday-2/versicle-first-vespers; PDF pages 464,418,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__pentecost-sunday-2__versicle-first-vespers/record.json"
 proper/pentecost-sunday-2/versicle-lauds,c1cb38f309f0,Monastic Diurnal.pdf,proper/pentecost-sunday-2/versicle-lauds; PDF pages 465,419,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__pentecost-sunday-2__versicle-lauds/record.json"
 proper/pentecost-sunday-2/versicle-none,ff93e2f83559,diurnal,,420,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0466.png
+proper/pentecost-sunday-20/benedictus-antiphon,8835aace85c6,diurnal,"Sundays after Pentecost, 20 Sunday, Ant. on Benedictus",439,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-20/collect,f70cda00e659,diurnal,,439,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0485.png
-proper/pentecost-sunday-20/magnificat-antiphon,1998a3b3303a,diurnal,XX Sunday after Pentecost,439,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-20/magnificat-antiphon,1998a3b3303a,diurnal,"Sundays after Pentecost, 20 Sunday, Ant. on Magnificat",439,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-21/benedictus-antiphon,9b5d35d0fc9d,diurnal,"Sundays after Pentecost, 21 Sunday, Ant. on Benedictus",439,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-21/collect,5d7aac8bc0e9,diurnal,,439,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0485.png
-proper/pentecost-sunday-21/magnificat-antiphon,50ad1174f2f9,diurnal,XXI Sunday after Pentecost,440,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-21/magnificat-antiphon,50ad1174f2f9,diurnal,"Sundays after Pentecost, 21 Sunday, Ant. on Magnificat",440,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-22/benedictus-antiphon,9bd628eece0d,diurnal,"Sundays after Pentecost, 22 Sunday, Ant. on Benedictus",440,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-22/collect,9e620c28e60c,diurnal,,440,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0486.png
-proper/pentecost-sunday-22/magnificat-antiphon,0ed891b96755,diurnal,XXII Sunday after Pentecost,440,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-22/magnificat-antiphon,0ed891b96755,diurnal,"Sundays after Pentecost, 22 Sunday, Ant. on Magnificat",440,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-23/benedictus-antiphon,9decae75b55f,diurnal,"Sundays after Pentecost, 23 Sunday, Ant. on Benedictus",441,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-23/collect,822650ca3128,diurnal,,440,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0486.png
-proper/pentecost-sunday-23/magnificat-antiphon,8e28686f54d0,diurnal,XXIII Sunday after Pentecost,441,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-23/magnificat-antiphon,8e28686f54d0,diurnal,"Sundays after Pentecost, 23 Sunday, Ant. on Magnificat",441,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-24/benedictus-antiphon,38103ff2a043,diurnal,"Sundays after Pentecost, 24 Sunday, Ant. on Benedictus",441,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-24/collect,a0fa462f63ec,diurnal,,441,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0487.png
-proper/pentecost-sunday-24/magnificat-antiphon,2eb19dec4d32,diurnal,XXIV Sunday after Pentecost,442,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-24/magnificat-antiphon,2eb19dec4d32,diurnal,"Sundays after Pentecost, 24 Sunday, Ant. on Magnificat",442,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-3/benedictus-antiphon,e944ef34ade3,diurnal,"Sundays after Pentecost, 3 Sunday, Ant. on Benedictus",430,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-3/collect,9f5f9200d901,diurnal,,430,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0476.png
-proper/pentecost-sunday-3/magnificat-antiphon,31c6ed53783e,diurnal,III Sunday after Pentecost,431,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-3/magnificat-antiphon,31c6ed53783e,diurnal,"Sundays after Pentecost, 3 Sunday, Ant. on Magnificat",431,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-3/magnificat-antiphon-first,7bdb44aa2d03,diurnal,Antiphons on Saturdays after Pentecost,422,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-4/benedictus-antiphon,8cbe4b315eee,diurnal,"Sundays after Pentecost, 4 Sunday, Ant. on Benedictus",432,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-4/collect,390f46aa1be9,diurnal,,432,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0478.png
-proper/pentecost-sunday-4/magnificat-antiphon,1550e51efed6,diurnal,IV Sunday after Pentecost,432,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-4/magnificat-antiphon,1550e51efed6,diurnal,"Sundays after Pentecost, 4 Sunday, Ant. on Magnificat",432,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-4/magnificat-antiphon-first,83d0b3f5288d,diurnal,Antiphons on Saturdays after Pentecost,422,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-5/benedictus-antiphon,64d16a49426d,diurnal,"Sundays after Pentecost, 5 Sunday, Ant. on Benedictus",432,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-5/collect,baf007192c28,diurnal,,432,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0478.png
-proper/pentecost-sunday-5/magnificat-antiphon,f43ebc78b67a,diurnal,V Sunday after Pentecost,432,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-5/magnificat-antiphon,28c8354181a2,diurnal,"Sundays after Pentecost, 5 Sunday, Ant. on Magnificat",432,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-5/magnificat-antiphon-first,d7b88cd50354,diurnal,Antiphons on Saturdays after Pentecost,422,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-6/benedictus-antiphon,e512f38aa1fb,diurnal,"Sundays after Pentecost, 6 Sunday, Ant. on Benedictus",433,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-6/collect,8413b33b9c94,diurnal,,432,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0478.png
-proper/pentecost-sunday-6/magnificat-antiphon,79cc14342938,diurnal,VI Sunday after Pentecost,433,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-6/magnificat-antiphon,79cc14342938,diurnal,"Sundays after Pentecost, 6 Sunday, Ant. on Magnificat",433,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-6/magnificat-antiphon-first,6d4d84c17638,diurnal,Antiphons on Saturdays after Pentecost,422,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-7/benedictus-antiphon,8fed6c00fc1f,diurnal,"Sundays after Pentecost, 7 Sunday, Ant. on Benedictus",433,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-7/collect,b9fe5a66eb25,diurnal,,433,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0479.png
-proper/pentecost-sunday-7/magnificat-antiphon,2dd8b5790d7b,diurnal,VII Sunday after Pentecost,433,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-7/magnificat-antiphon,2dd8b5790d7b,diurnal,"Sundays after Pentecost, 7 Sunday, Ant. on Magnificat",433,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-7/magnificat-antiphon-first,230bcde333fe,diurnal,Antiphons on Saturdays after Pentecost,423,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-8/benedictus-antiphon,e68155608574,diurnal,"Sundays after Pentecost, 8 Sunday, Ant. on Benedictus",434,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-8/collect,48bdeff63821,diurnal,,433,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0479.png
-proper/pentecost-sunday-8/magnificat-antiphon,0e0572703198,diurnal,VIII Sunday after Pentecost,434,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-8/magnificat-antiphon,0e0572703198,diurnal,"Sundays after Pentecost, 8 Sunday, Ant. on Magnificat",434,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-8/magnificat-antiphon-first,03bbc8df9acf,diurnal,Antiphons on Saturdays after Pentecost,423,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-9/benedictus-antiphon,ce9e1195622a,diurnal,"Sundays after Pentecost, 9 Sunday, Ant. on Benedictus",434,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-9/collect,330b47763798,diurnal,,434,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0480.png
-proper/pentecost-sunday-9/magnificat-antiphon,6e0988985284,diurnal,IX Sunday after Pentecost,434-435,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-9/magnificat-antiphon,6e0988985284,diurnal,"Sundays after Pentecost, 9 Sunday, Ant. on Magnificat",434,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-9/magnificat-antiphon-first,fbfb6f6c1f8d,diurnal,Antiphons on Saturdays after Pentecost,423,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost/benedictus-antiphon,947ffcdb05e3,draft archdiocesan Lauds book,,310,verified,codex,2026-07-17,
 proper/pentecost/chapter-lauds,736f1f1c8b19,draft archdiocesan Lauds book,The Feast of Pentecost,304,verified,codex,2026-07-18,
 proper/pentecost/chapter-none,ab0076dd1125,diurnal,"The Feast of Pentecost, At None",398,verified,grok,2026-08-22,word-for-word from printed page image
