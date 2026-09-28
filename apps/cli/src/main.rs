@@ -12,11 +12,6 @@ mod review;
 use std::io::Write;
 use std::process::ExitCode;
 
-// Composition and dump records allocate heavily from every worker thread;
-// mimalloc cuts the 28-year parity digest by about a third over glibc.
-#[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
-
 const USAGE: &str = "usage: office <command> [args]
 
 Commands: ordo, rubrics, validate, audit, lint, review, corpus, scaffold, dump, lauds, prime, terce, sext, none, vespers, compline, tex, serve";
