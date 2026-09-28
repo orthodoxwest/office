@@ -68,6 +68,9 @@ proper/st-helen/collect who-livest
 proper/st-joseph/collect who-livest
 # The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
+# Diurnal pp. 177-178 print Who with God the Father ... livest.
+proper/advent-ember-friday/collect-lauds who-livest
+proper/advent-ember-saturday/collect-lauds who-livest
 # Diurnal p. 588 prints Who with God the Father ... livest.
 proper/vigil-of-assumption-bvm/collect who-livest
 

@@ -145,7 +145,6 @@ vigil-nativity magnificat-antiphon commemoration-antiphon commemoration-versicle
 vigil-epiphany psalm-antiphon magnificat-antiphon commemoration-versicle
 vigil-ascension psalm-antiphon magnificat-antiphon commemoration-versicle
 vigil-pentecost psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-vigil-st-james psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 
 # Psalm antiphons taken from the category commons per Divinum Officium
 # (flat per-feast copies removed; see commons/<category>.txt for the texts).

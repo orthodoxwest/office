@@ -326,11 +326,13 @@ Day = 22
 
 [st-james-greater]
 Name = St James the Greater, Apostle
+ProperName = James
 Rank = double-2nd-class
 Color = red
 Category = apostle
 Month = 7
 Day = 25
+HasVigil = true
 
 [st-anne]
 Name = St Anne, Mother of the Blessed Virgin Mary
@@ -737,17 +739,6 @@ Category = confessor
 ProperName = Elias
 Month = 7
 Day = 20
-
-[vigil-st-james]
-Name = Vigil of St James
-ProperName = James
-Rank = simple
-Color = violet
-Category = feria
-Month = 7
-Day = 24
-IsVigil = true
-VigilOf = st-james-greater
 
 [st-martha-bethany]
 Name = St Martha of Bethany, Virgin

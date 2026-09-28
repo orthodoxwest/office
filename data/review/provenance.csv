@@ -577,6 +577,9 @@ ordinary/vespers/short-responsory-monday,6a4ce01db8aa,diurnal,,121,verified,code
 ordinary/vespers/short-responsory-saturday,be8b7880d915,draft archdiocesan Vespers book,,214,verified,codex,2026-07-18,
 ordinary/vespers/versicle,53ce6754ccf1,diurnal,Monday at Vespers,122,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0168.png
 ordinary/vespers/versicle-saturday,f5cff1ac993d,00. Vespers for Saturdays & Major Feasts 2026 Jacob edit 06-30 v.29.docx,THE VERSICLE,219,verified,grok,2026-07-20,Word-for-word.
+proper/advent-ember-friday/collect-lauds,1fcd0676c40c,diurnal,"III Week in Advent, Ember Friday",177,verified,claude,2026-09-28,word-for-word from printed page image
+proper/advent-ember-saturday/collect-lauds,20534e05014f,diurnal,"III Week in Advent, Ember Saturday",178,verified,claude,2026-09-28,word-for-word from printed page image
+proper/advent-ember-wednesday/collect-lauds,2a59579722c4,diurnal,"III Week in Advent, Ember Wednesday",177,verified,claude,2026-09-28,word-for-word from printed page image
 proper/advent-sunday-1/benedictus-antiphon,0456eca8e11f,diurnal,"I Sunday in Advent, At Lauds",160,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-1/benedictus-antiphon-friday,ac5bdbe011c8,diurnal,"I Week in Advent, Friday",165,verified,grok,2026-08-22,word-for-word from printed page image
 proper/advent-sunday-1/benedictus-antiphon-monday,3133c0a73fb6,diurnal,"I Week in Advent, Monday",165,verified,grok,2026-08-22,word-for-word from printed page image

@@ -283,11 +283,11 @@ fn lookup_temporal_commemoration(feast: &Feast, season: Season, hour_name: &str,
         }
         "commemoration-collect" => {
             for id in &ids {
-                let key = format!("proper/{id}/collect");
-                let text = t.get(&key);
+                // An hour's own collect (an Ember day's collect-lauds) first.
+                let (text, key) = lookup_section_text(&format!("proper/{id}/"), Some(season), hour_name, "collect", t);
                 if !text.is_empty() {
                     // A vigil may share its Common's "N." collect (Diurnal p. 7*).
-                    return (substitute_proper_name(text, &feast_proper_name(feast)), key);
+                    return (substitute_proper_name(&text, &feast_proper_name(feast)), key);
                 }
             }
         }
