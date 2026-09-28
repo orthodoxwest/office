@@ -26,6 +26,31 @@
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
+/* EB Garamond has no ✠, so every platform once substituted its own dingbat:
+   a heavy sans cross here, a different one there. This face holds only that
+   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
+   each text stack. unicode-range keeps it from touching any other letter.
+   Block, not swap: a cross that appears a moment late is quieter than one
+   that changes shape as the page settles. */
+@font-face {
+  font-family: "Office Cross";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
+/* The same upright glyph serves italic text, so it is never slanted. */
+@font-face {
+  font-family: "Office Cross";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
 /* The long ordo keeps its first font choice for the entire visit. A late
    download must not rewrap hundreds of rows above a day anchor. The preload
    and the existing offline font cache still give ready visits EB Garamond.
@@ -198,7 +223,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -243,7 +268,7 @@ footer {
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", Georgia, "Times New Roman", serif;
 }
 
 main {
@@ -337,9 +362,16 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
+/* The cross beside capitals: its drawing is 88% of Garamond's cap height and
+   floats 0.074em above the line, which suits running text but looked shrunk
+   beside DAILY OFFICE. Scaled to the capitals and seated on their baseline;
+   line-height 1 keeps the larger glyph from deepening the header. */
 .site-brand span {
   color: var(--ornament);
   margin-right: 0.2rem;
+  font-size: 1.14em;
+  line-height: 1;
+  vertical-align: -0.074em;
 }
 
 .site-menu {
@@ -1332,7 +1364,7 @@ footer::before {
 }
 
 .date-jump {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -1736,7 +1768,7 @@ footer::before {
 }
 
 .psalm-text {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -2228,7 +2260,7 @@ footer::before {
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -2311,7 +2343,7 @@ footer::before {
 .day-mobile-flags,
 .day-wk,
 .day-rank {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", Georgia, "Times New Roman", serif;
 }
 .month-jump {
   display: grid;
@@ -2469,7 +2501,7 @@ footer::before {
   content: "Today";
   display: block;
   visibility: hidden;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 0.7rem;
   font-weight: normal;
   line-height: 1.4;
@@ -2591,7 +2623,7 @@ footer::before {
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
   flex: 0 0 4.4rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", Georgia, "Times New Roman", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
