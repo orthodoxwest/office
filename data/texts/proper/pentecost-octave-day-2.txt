@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 399 (Monday within the Octave of Pentecost)
+O God, who didst pour out upon thine Apostles the gift of the Holy Spirit: graciously fulfil the devout prayers of thy people; that upon them to whom thou hast given faith, thou mayest also abundantly bestow the blessing of peace.
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 399 (Monday within the Octave of Pentecost)
 God so loved the world, * that he gave his only-begotten Son, that whosoever believeth in him should not perish, but have everlasting life, alleluia.

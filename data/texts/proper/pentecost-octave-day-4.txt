@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 400 (Ember Wednesday within the Octave of Pentecost)
+We beseech thee, O Lord, that the Comforter, who proceedeth from thee, may enlighten our minds: and lead us into all truth, as thy Son hath promised.
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 400 (Ember Wednesday within the Octave of Pentecost)
 I am the living bread, * saith the Lord, which came down from heaven, alleluia, alleluia.

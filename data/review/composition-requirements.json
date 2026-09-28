@@ -2574,5 +2574,39 @@
         "contains": "The very hairs"
       }
     ]
+  },
+  {
+    "id": "pentecost-octave-day-collects",
+    "source": "Monastic Diurnal pp. 399-402 (a proper collect for each day but Thursday, which repeats the Sunday's). 2026 ordo 1-6 June.",
+    "cases": [
+      {
+        "date": "2026-06-01",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-2/collect"
+      },
+      {
+        "date": "2026-06-03",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-4/collect"
+      },
+      {
+        "date": "2026-06-04",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost/collect"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-7/collect"
+      }
+    ]
   }
 ]

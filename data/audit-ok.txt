@@ -187,3 +187,10 @@ palm-sunday psalm-antiphon
 # St. Mark is directed wholly to the Common of Apostles and Evangelists,
 # apart from his collect.
 st-mark hymn
+
+# The Whit Ember days are kept as days within the Octave of Pentecost; their
+# collects and antiphons live on proper/pentecost-octave-day-4/6/7 (Diurnal
+# pp. 400-402) and the Ember feasts themselves are suppressed.
+whit-ember-wednesday *
+whit-ember-friday *
+whit-ember-saturday *

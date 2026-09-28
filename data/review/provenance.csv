@@ -1523,15 +1523,21 @@ proper/passion-sunday/psalm-antiphon-prime,4196994a25be,diurnal,,272,verified,co
 proper/passion-sunday/psalm-antiphon-sext,5de71c890ebe,diurnal,,272,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0318.png
 proper/passion-sunday/psalm-antiphon-terce,06cf4bd97282,diurnal,,272,verified,codex,2026-09-13,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0318.png
 proper/pentecost-octave-day-2/benedictus-antiphon,8e31039791a7,diurnal,Monday within the Octave of Pentecost,399,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-octave-day-2/collect,922b5c9536a9,diurnal,Monday within the Octave of Pentecost,399,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-octave-day-2/magnificat-antiphon,2baa30d13622,diurnal,Monday within the Octave of Pentecost,399,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-3/benedictus-antiphon,b7f0d13eb28b,diurnal,Tuesday within the Octave of Pentecost,400,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-octave-day-3/collect,eea3ed9c71ff,diurnal,Tuesday within the Octave of Pentecost,400,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-octave-day-3/magnificat-antiphon,a3abbec48afc,diurnal,Tuesday within the Octave of Pentecost,400,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-4/benedictus-antiphon,bf35fece931a,diurnal,Ember Wednesday within the Octave of Pentecost,400,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-octave-day-4/collect,7b3e09a3d46e,diurnal,Ember Wednesday within the Octave of Pentecost,400,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-octave-day-4/magnificat-antiphon,e272a77f8757,diurnal,Ember Wednesday within the Octave of Pentecost,400-401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-5/benedictus-antiphon,d181a71804ff,diurnal,Thursday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-5/magnificat-antiphon,8f2e347d5705,diurnal,Thursday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-6/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-octave-day-6/collect,9c77581cba01,diurnal,Ember Friday within the Octave of Pentecost,401,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-octave-day-6/magnificat-antiphon,c889ff7a5a64,diurnal,Ember Friday within the Octave of Pentecost,401,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-octave-day-7/benedictus-antiphon,07a890231c18,diurnal,Ember Saturday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-octave-day-7/collect,111069a3c77a,diurnal,Ember Saturday within the Octave of Pentecost,401-402,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-1/benedictus-antiphon,c804f1e9be9b,diurnal,"Trinity Sunday, Lauds, For Commemoration of Sunday",405,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-1/collect,1d0047c532f1,diurnal,"Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost",403,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-1/magnificat-antiphon,ad2804dc822f,diurnal,"Trinity Sunday, II Vespers, For Commemoration of Sunday",408,verified,claude,2026-09-28,word-for-word from printed page image
@@ -2170,9 +2176,6 @@ proper/visitation-bvm/psalm-antiphon-2,e6051ff2bf65,Monastic Diurnal.pdf,proper/
 proper/visitation-bvm/psalm-antiphon-3,092b8f2348c3,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
 proper/visitation-bvm/psalm-antiphon-4,8ccf7fea9b4f,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
 proper/visitation-bvm/psalm-antiphon-5,d53d9445057b,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
-proper/whit-ember-friday/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
-proper/whit-ember-friday/psalm-antiphon-2,55916376dd89,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
-proper/whit-ember-friday/psalm-antiphon-4,6288bf850fd5,diurnal,"The Feast of Pentecost, At Lauds",396,verified,grok,2026-08-22,word-for-word from printed page image
 psalms/001,e19d81a02f61,Coverdale Psalter,Psalm 1,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/002,cebfe3005251,Coverdale Psalter,Psalm 2,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
 psalms/003,90dcbba6a990,Coverdale Psalter,Psalm 3,,verified,codex,2026-07-10,Machine-verified against 1662 BCP
