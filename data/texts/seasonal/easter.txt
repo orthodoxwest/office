@@ -86,30 +86,6 @@ Amen.
 V. O Christ, arise, help us, alleluia.
 R. And deliver us for thy Name's sake, alleluia.
 
-[short-responsory-terce]
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us, alleluia, alleluia.
-Thou, O Lord, art in the midst of us, and thy holy Name is called upon us, alleluia, alleluia.
-V. Forsake us not, O Lord our God.
-R. And thy holy Name is called upon us, alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us, alleluia, alleluia.
-
-[short-responsory-sext]
-R. The Lord hath made known his salvation, alleluia, alleluia.
-The Lord hath made known his salvation, alleluia, alleluia.
-V. He hath revealed his righteousness in the sight of the nations.
-R. His salvation, alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord hath made known his salvation, alleluia, alleluia.
-
-[short-responsory-none]
-R. Redeem me, O Lord, and have mercy on me, alleluia, alleluia.
-Redeem me, O Lord, and have mercy on me, alleluia, alleluia.
-V. My foot standeth in an even place.
-R. Have mercy on me, alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Redeem me, O Lord, and have mercy on me, alleluia, alleluia.
-
 [short-responsory-compline]
 # SOURCE: diurnal p. 151
 V. Keep us, O Lord, as the apple of an eye. Alleluia.

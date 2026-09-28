@@ -44,25 +44,12 @@ R. Thanks be to God.
 V. The Lord is my shepherd; therefore can I lack nothing.
 R. He shall feed me in a green pasture.
 
-[short-responsory]
-R. The Lord hath made known his salvation.
-The Lord hath made known his salvation.
-V. He hath revealed his righteousness in the sight of the nations.
-R. His salvation.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The Lord hath made known his salvation.
-
 [pre-collect-versicles]
 # SOURCE: 03. Sext Throughout the Week Alex edit 09-23 v.03.docx, p. 5
 V. The Lord be with you.
 R. And with thy spirit.
 
 Let us pray.
-
-[collect]
-Grant unto us, O Lord, the right use of this midday hour; and let thy
-blessing rest upon all the work of our hands, that being cheered with
-bodily refreshment, we may return to our labour with renewed hearts.
 
 [blessing]
 @use shared/formulas/daily-blessing

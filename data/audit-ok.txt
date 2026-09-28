@@ -161,7 +161,9 @@ presentation-bvm psalm-antiphon
 ash-wednesday psalm-antiphon
 lent-ember-wednesday psalm-antiphon
 lent-ember-friday psalm-antiphon
-lent-ember-saturday psalm-antiphon
+# Saturday Vespers is always the Sunday's I Vespers, so an Ember Saturday has no
+# Magnificat antiphon of its own.
+lent-ember-saturday psalm-antiphon magnificat-antiphon
 
 # The Saturday Vespers books appoint the Saturday psalter for I Vespers of
 # these Sundays.

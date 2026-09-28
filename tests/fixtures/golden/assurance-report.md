@@ -8,7 +8,7 @@ Source verification does not establish correct appointments or complete office s
 | Verified text entries | 2621 |
 | Rendered text entries needing review | 28 |
 | Rendered text entries with unknown source | 3 |
-| Classified zero-occurrence entries | 23 |
-| Zeroes needing classification | 10 |
+| Classified zero-occurrence entries | 4 |
+| Zeroes needing classification | 5 |
 | Stale zero-occurrence classifications | 0 |
 | Stale attestations | 0 |

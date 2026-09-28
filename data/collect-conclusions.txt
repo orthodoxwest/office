@@ -42,8 +42,6 @@
 # slot, so ordinary/{terce,sext,none}/collect are unreachable in practice (see
 # data/review/zero-occurrences.csv). They are classified anyway so that the data
 # stays correct if that redirect ever changes.
-ordinary/none/collect through-same
-ordinary/terce/collect through-spirit
 
 # --- Addressed to the Son: "Who with God the Father ... livest and reignest" ---
 proper/advent-sunday-1/collect who-livest

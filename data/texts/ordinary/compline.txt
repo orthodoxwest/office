@@ -46,9 +46,6 @@ R. Who hath made heaven and earth.
 [confiteor-rubric]
 Our Father entirely in secret. Then confession is made:
 
-[psalm-antiphon]
-Have mercy upon us, O Lord, have mercy upon us.
-
 [chapter]
 !Jer. 14:9
 Thou, O Lord, art in the midst of us, and we are called by thy Name: leave us not, O Lord our God.

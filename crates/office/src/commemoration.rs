@@ -51,7 +51,10 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             let found = lookup_commemoration(comm, day.season, hour_name, reference, t);
             // A vigil or feria without its own antiphon takes the Psalter's
             // for the weekday (General Rubrics VI; Diurnal p. 1*).
-            if reference == "commemoration-antiphon" && comm.is_category(Category::Feria) && found.1.starts_with("ordinary/") {
+            if reference == "commemoration-antiphon"
+                && comm.is_category(Category::Feria)
+                && (found.1.starts_with("ordinary/") || found.0.starts_with('['))
+            {
                 let slot = if hour_name == "vespers" { "magnificat-antiphon" } else { "benedictus-antiphon" };
                 let key = format!("ordinary/{hour_name}/{slot}-{}", day.civil_weekday_name());
                 let text = t.get(&key);
@@ -245,7 +248,7 @@ fn ordinary_or_marker(feast: &Feast, hour_name: &str, reference: &str, t: &Offic
     if !text.is_empty() {
         return (text.to_string(), ordinary_ref);
     }
-    (format!("[{reference}: {}]", feast.id), reference.to_string())
+    (format!("[Commemoration text not found: {reference} for {}]", feast.id), reference.to_string())
 }
 
 /// A de Tempore commemoration (Sunday, Ember day, vigil): its own gospel
@@ -388,5 +391,5 @@ fn lookup_commemoration_office(
     if !text.is_empty() {
         return (substitute_proper_name(text, &proper_name), ordinary_ref);
     }
-    (format!("[{reference}: {}]", feast.id), reference.to_string())
+    (format!("[Commemoration text not found: {reference} for {}]", feast.id), reference.to_string())
 }
