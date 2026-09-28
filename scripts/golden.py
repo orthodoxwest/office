@@ -29,16 +29,7 @@ def render(path):
         args = ["review", "assurance", "-markdown"]
     elif name == "parity-snapshot.json":
         baseline = json.loads((ROOT / "data/review/assurance-baseline.json").read_text())
-        with subprocess.Popen([str(OFFICE), "dump", "-start", str(baseline["start_year"]),
-                               "-years", str(baseline["years"])], cwd=ROOT, stdout=subprocess.PIPE) as dump:
-            try:
-                result = subprocess.run([str(OFFICE), "dump", "digest", "-"], cwd=ROOT,
-                                        stdin=dump.stdout, stdout=subprocess.PIPE, check=True)
-            finally:
-                dump.stdout.close()
-            if dump.wait():
-                raise RuntimeError("office dump failed; refusing to accept a partial snapshot")
-        return result.stdout
+        args = ["dump", "-start", str(baseline["start_year"]), "-years", str(baseline["years"]), "-digest"]
     else:
         raise ValueError(f"unrecognized golden: {name}")
     output = subprocess.check_output([str(OFFICE), *args], cwd=ROOT)
