@@ -20,7 +20,6 @@ ordo.workspace = true
 render-text.workspace = true
 render-tex.workspace = true
 corpus.workspace = true
-serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
 office-web.workspace = true

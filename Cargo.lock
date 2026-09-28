@@ -559,7 +559,6 @@ dependencies = [
  "ordo",
  "render-tex",
  "render-text",
- "serde",
  "serde_json",
  "sha2",
  "tools",

@@ -6,6 +6,7 @@ mod commands;
 mod dump;
 mod dump_tools;
 mod edit;
+mod parity;
 mod review;
 
 use std::io::Write;
@@ -64,7 +65,6 @@ fn main() -> ExitCode {
     // File inspection does not need an installed corpus.
     let result = match (name.as_str(), rest.first().map(String::as_str)) {
         ("dump", Some("diff")) => dump_tools::cmd_diff(&rest[1..], &mut out),
-        ("dump", Some("digest")) => dump_tools::cmd_digest(&rest[1..], &mut out),
         _ => {
             let Some(data) = tools::fs::FsData::find() else {
                 eprintln!("Cannot find data directory");
