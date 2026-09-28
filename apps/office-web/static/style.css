@@ -1209,10 +1209,12 @@ footer::before {
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  /* Functional gold underline — the chosen-control marker, not seasonal gilding. */
-  box-shadow: inset 0 -1px 0 var(--gold-line);
+  /* Functional gold underline — the chosen-control marker, not seasonal
+     gilding. Drawn under the words, not the box: the phone's 44px touch
+     height put a box edge some 20px below the letters, a stray rule. */
   padding: 0.2rem 0.1rem 0.15rem;
-  text-decoration: none;
+  text-decoration: underline 1px var(--gold-line);
+  text-underline-offset: 0.4em;
 }
 
 .not-today-notice .not-today-link:hover {
@@ -1416,10 +1418,13 @@ footer::before {
   gap: 1.25rem;
 }
 
+/* "All hours" sits on the line of the hour names either side of it, not
+   midway between their small-cap labels and the names themselves. */
 .hour-continuation {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  align-items: last baseline;
   gap: 0.8rem;
   max-width: 38rem;
   width: 100%;
@@ -1671,8 +1676,11 @@ footer::before {
 
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
    it. Italic and un-small-capped so it reads as the Latin title rather than
-   as more of the label; it wraps with the label on narrow screens. */
+   as more of the label. On a narrow screen it moves to its own line whole
+   ("Psalm 110 ·" / "Dixit Dominus Domino meo") instead of breaking inside
+   the title; a title longer than the line still wraps within itself. */
 .psalm-incipit {
+  display: inline-block;
   font-variant: normal;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -2011,6 +2019,13 @@ footer::before {
 .sigil-text {
   flex: 1;
   min-width: 0;
+}
+
+/* A short responsory is a dialogue. Its Gloria is printed without a ℣ in the
+   parish source, so it jutted to the margin between two ℟ lines; it keeps
+   the spoken-text edge the ℣/℟ lines share, as a marked verse would. */
+.short-responsory > .plain-line {
+  padding-left: var(--verse-gutter);
 }
 
 /* Only the opening response of an explicitly modelled Short Responsory takes
@@ -5161,9 +5176,12 @@ body.page-home::before {
     color: #888;
   }
 
+  /* ℣, ℟ and their spelled-out forms are rubrics too; the booklet sets them
+     in its rubric red, and grey here made them read as page furniture. */
   .rubric,
   .prayer-speaker,
   .cross,
+  .sigil,
   .chapter-ref,
   .scripture-ref {
     color: #600;
@@ -5177,8 +5195,7 @@ body.page-home::before {
   }
 
   .mediant,
-  .psalm-verses .verse-num,
-  .sigil {
+  .psalm-verses .verse-num {
     color: #555;
   }
 

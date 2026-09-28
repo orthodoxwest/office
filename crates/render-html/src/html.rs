@@ -198,7 +198,8 @@ fn render_office_element(elem: &OfficeElement, doxology: &str) -> String {
                 sb.push_str("<h3 class=\"item-label\">");
                 sb.push_str(&esc_text(&elem.label));
                 if !elem.incipit.is_empty() {
-                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\"> · </span>");
+                    // The dot stays with the label; the Latin title wraps whole.
+                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
                     sb.push_str("<span class=\"psalm-incipit\" lang=\"la\">");
                     sb.push_str(&esc_text(&elem.incipit));
                     sb.push_str("</span>");
@@ -503,7 +504,11 @@ pub fn chant_line_html(line: &str) -> String {
 }
 
 fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
-    let mut sb = String::from("<div class=\"liturgical-block\">");
+    let mut sb = String::from(if short_responsory {
+        "<div class=\"liturgical-block short-responsory\">"
+    } else {
+        "<div class=\"liturgical-block\">"
+    });
     let mut prose: Vec<String> = Vec::new();
     let mut prose_blocks = 0;
     let mut pending_gap = false;

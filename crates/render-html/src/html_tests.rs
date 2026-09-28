@@ -259,6 +259,14 @@ fn short_responsory_drops_only_first_response_sigil() {
 }
 
 #[test]
+fn short_responsory_marks_its_block_for_the_dialogue_edge() {
+    let html = short_responsory("R. Heal my soul.\nR. Heal my soul.\nGlory be to the Father.\nR. Heal my soul.");
+    assert!(html.starts_with(r#"<div class="liturgical-block short-responsory">"#), "{html}");
+    has(&html, r#"<p class="plain-line">Glory be to the Father.</p>"#);
+    lacks(&render_liturgical_block("V. O Lord, hear my prayer."), "short-responsory");
+}
+
+#[test]
 fn short_responsory_opening_versicle_keeps_an_ordinary_pair() {
     // Compline's slot holds a versicle and its response, not a responsory.
     let html = short_responsory("V. Keep us, O Lord, as the apple of an eye.\nR. Hide us under the shadow of thy wings.");
@@ -438,7 +446,7 @@ fn psalm_label_carries_latin_incipit() {
         &html,
         concat!(
             r#"<h3 class="item-label">Psalm 67"#,
-            r#"<span class="label-sep" aria-hidden="true"> · </span>"#,
+            "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>",
             r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
         ),
     );
