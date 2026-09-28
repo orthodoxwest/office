@@ -2,6 +2,7 @@
 # Psalms vary by day of week. Benedictus antiphon uses proper resolution.
 
 [Pre-Office]
+Condition = not-office-of-the-dead
 Collapsible = true
 Label = Prayers Before the Office
 
@@ -13,6 +14,17 @@ Ref = ordinary/session/open-my-mouth
 
 Type = rubric
 Ref = ordinary/session/our-father-hail-mary-rubric
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = secret-prayer
+Ref = ordinary/shared/hail-mary
+
+[Pre-Office-Dead]
+# Diurnal pp. 651–653: these prayers precede the psalmody when the hour
+# is begun separately. Keep them in the main prayer flow.
+Condition = office-of-the-dead
 
 Type = secret-prayer
 Ref = ordinary/shared/our-father
@@ -1085,7 +1097,7 @@ Condition = office-of-the-dead
 Type = rubric
 Ref = shared/formulas/kneeling-our-father-rubric
 
-Type = corporate-lord-prayer
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer

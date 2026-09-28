@@ -36,7 +36,7 @@ pub fn compose_prime(
                 elems.extend(resolve_prime_martyrology(day, t));
                 continue;
             }
-            if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" {
+            if elem.kind == "proper-antiphon" && elem.reference == "psalm-antiphon-1" && !crate::psalmody::is_office_of_the_dead(day) {
                 elems.push(resolve_prime_psalm_antiphon(day, t, moveable));
                 continue;
             }

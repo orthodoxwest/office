@@ -9,6 +9,7 @@ use data_format::json::{Json, Obj};
 use liturgy::{OfficeElement, OfficeHour, PrayerForm};
 use office::day::Day;
 use office::engine::Engine;
+use office::psalmody::{VESPERS_OF_THE_DEAD_LABEL, dead_office_day};
 use office::trace::ProperResolutionTrace;
 
 use super::provenance::{ProvenanceStatus, SourceCitation, scan_provenance};
@@ -37,7 +38,14 @@ pub fn dedupe_decisions(decisions: &[Decision]) -> Vec<&Decision> {
 }
 
 /// Traces a rendered slot, as a commemoration when it is one.
-pub fn trace_element(engine: &Engine, day: &Day, hour_name: &str, elem: &OfficeElement) -> ProperResolutionTrace {
+pub fn trace_element(engine: &Engine, day: &Day, hour_name: &str, elem: &OfficeElement, appended_dead: bool) -> ProperResolutionTrace {
+    let dead;
+    let day = if appended_dead {
+        dead = dead_office_day(day);
+        &dead
+    } else {
+        day
+    };
     if elem.is_commemoration {
         return engine.trace_commemoration_resolution(day, hour_name, &elem.slot_ref, &elem.source_ref, &elem.commemoration_owner_id);
     }
@@ -77,29 +85,33 @@ pub fn explain_composition(src: &dyn DataSource, hour_name: &str, date: Date, fo
         })
         .collect();
     let mut resolutions = Vec::new();
-    for elem in hour.sections.iter().flat_map(|s| &s.elements) {
-        if elem.slot_ref.is_empty() {
-            continue;
+    let mut appended_dead = false;
+    for section in &hour.sections {
+        appended_dead |= section.label == VESPERS_OF_THE_DEAD_LABEL;
+        for elem in &section.elements {
+            if elem.slot_ref.is_empty() {
+                continue;
+            }
+            let t = trace_element(&engine, day, hour_name, elem, appended_dead);
+            if !is_resolution_source(&elem.source_ref) && t.selected_tier != "not-found" {
+                continue;
+            }
+            resolutions.push(
+                Obj::new()
+                    .str("requested_slot", &t.requested_slot)
+                    .str("resolver_hour", &t.resolver_hour)
+                    .str("resolver_slot", &t.resolver_slot)
+                    .str_omitempty("canonical_owner", &t.canonical_owner)
+                    .strings_omitempty("proper_ids", &t.proper_ids)
+                    .strings_omitempty("direct_candidates", &t.direct_candidates)
+                    .strings_omitempty("direct_existing", &t.direct_existing)
+                    .str("selected_ref", &t.selected_ref)
+                    .str("selected_tier", &t.selected_tier)
+                    .str("reason", &t.reason)
+                    .bool_omitempty("first_vespers", t.first_vespers)
+                    .build(),
+            );
         }
-        let t = trace_element(&engine, day, hour_name, elem);
-        if !is_resolution_source(&elem.source_ref) && t.selected_tier != "not-found" {
-            continue;
-        }
-        resolutions.push(
-            Obj::new()
-                .str("requested_slot", &t.requested_slot)
-                .str("resolver_hour", &t.resolver_hour)
-                .str("resolver_slot", &t.resolver_slot)
-                .str_omitempty("canonical_owner", &t.canonical_owner)
-                .strings_omitempty("proper_ids", &t.proper_ids)
-                .strings_omitempty("direct_candidates", &t.direct_candidates)
-                .strings_omitempty("direct_existing", &t.direct_existing)
-                .str("selected_ref", &t.selected_ref)
-                .str("selected_tier", &t.selected_tier)
-                .str("reason", &t.reason)
-                .bool_omitempty("first_vespers", t.first_vespers)
-                .build(),
-        );
     }
     let v = Obj::new()
         .str("form", hour.form.as_str())
