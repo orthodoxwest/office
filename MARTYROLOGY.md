@@ -21,8 +21,7 @@ worker and send `Cache-Control: private, no-store` and
 clergy approve; making the section collapsible is a separate decision.
 
 Tests cover next-day selection, year and leap-year rollover, civil time across
-DST, missing-text fallback, the Triduum, autumn coverage with its held days,
-and omitted post-1200 notices.
+DST, missing-text fallback, and the Triduum.
 
 ## Eligibility
 
