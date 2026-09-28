@@ -473,7 +473,7 @@ Condition = office-of-the-dead
 Type = rubric
 Ref = shared/formulas/kneeling-our-father-rubric
 
-Type = corporate-lord-prayer
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer
@@ -554,6 +554,10 @@ Ref = shared/leader/greeting-clergy
 
 Type = versicle
 Ref = shared/leader/benedicamus-domino
+
+[Closing-Faithful-Departed]
+# Diurnal p. 642: Vespers of the Dead begins immediately after Benedicamus.
+Condition = not-appended-office-of-the-dead,not-office-of-the-dead,not-triduum
 
 Type = versicle
 Ref = shared/formulas/faithful-departed

@@ -2,6 +2,7 @@
 # Psalms vary by day of week. Sunday/Monday use Ps 119 sections, Tue-Sat use Ps 120-122.
 
 [Pre-Office]
+Condition = not-office-of-the-dead
 Collapsible = true
 Label = Prayers Before the Office
 
@@ -20,8 +21,19 @@ Ref = ordinary/shared/our-father
 Type = secret-prayer
 Ref = ordinary/shared/hail-mary
 
+[Pre-Office-Dead]
+# Diurnal pp. 651–653: these prayers precede the psalmody when the hour
+# is begun separately. Keep them in the main prayer flow.
+Condition = office-of-the-dead
+
+Type = secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = secret-prayer
+Ref = ordinary/shared/hail-mary
+
 [Opening]
-Condition = not-triduum
+Condition = not-triduum,not-office-of-the-dead
 Label = Opening Versicles
 
 Type = versicle
@@ -31,7 +43,7 @@ Type = proper-opening-acclamation
 Ref = alleluia
 
 [Hymn]
-Condition = not-triduum
+Condition = not-triduum,not-office-of-the-dead
 Type = proper-hymn
 Ref = hymn
 
@@ -72,19 +84,19 @@ Type = psalm
 Ref = psalms/119-v
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/119-vi
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/119-vii
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -99,19 +111,19 @@ Type = psalm
 Ref = psalms/119-xiv
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/119-xv
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/119-xvi
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -126,19 +138,19 @@ Type = psalm
 Ref = psalms/120
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/121
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/122
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -153,19 +165,19 @@ Type = psalm
 Ref = psalms/120
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/121
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/122
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -180,19 +192,19 @@ Type = psalm
 Ref = psalms/120
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/121
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/122
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -207,19 +219,19 @@ Type = psalm
 Ref = psalms/120
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/121
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/122
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
@@ -234,25 +246,25 @@ Type = psalm
 Ref = psalms/120
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/121
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = psalm
 Ref = psalms/122
 
 Type = gloria-patri
-Ref = ordinary/shared/gloria-patri
+Ref = office
 
 Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 [Chapter]
-Condition = not-triduum
+Condition = not-triduum,not-office-of-the-dead
 Type = proper-chapter
 Ref = chapter
 
@@ -260,7 +272,7 @@ Type = proper-versicle
 Ref = versicle
 
 [Pre-Collect]
-Condition = not-triduum
+Condition = not-triduum,not-office-of-the-dead
 Label = Closing Prayers
 
 Type = dialogue
@@ -268,6 +280,25 @@ Ref = ordinary/shared/kyrie
 
 Type = corporate-lord-prayer
 Ref = ordinary/shared/our-father
+
+Type = officiant-greeting
+Ref = shared/leader/greeting-clergy
+
+Type = prayer
+Ref = shared/leader/let-us-pray
+
+[Pre-Collect-Dead]
+Condition = office-of-the-dead
+Label = The Prayers
+
+Type = rubric
+Ref = shared/formulas/kneeling-our-father-rubric
+
+Type = partly-secret-prayer
+Ref = ordinary/shared/our-father
+
+Type = prayer
+Ref = shared/leader/dead-pre-collect-prayers
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
@@ -305,7 +336,7 @@ Type = proper-collect
 Ref = collect
 
 [Closing]
-Condition = not-triduum
+Condition = not-triduum,not-office-of-the-dead
 
 Type = officiant-greeting
 Ref = shared/leader/greeting-clergy
@@ -322,7 +353,17 @@ Ref = shared/formulas/closing-our-father
 Type = secret-prayer
 Ref = ordinary/shared/our-father
 
+[Closing-Dead]
+Condition = office-of-the-dead
+
+Type = versicle
+Ref = shared/formulas/rest-eternal
+
+Type = versicle
+Ref = shared/formulas/may-they-rest-in-peace
+
 [Post-Office]
+Condition = not-office-of-the-dead
 Collapsible = true
 Label = Prayers After the Office
 

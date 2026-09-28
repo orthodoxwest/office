@@ -428,6 +428,11 @@ pub fn resolve_hour_element(day: &Day, hour_name: &str, elem: &HourElement, t: &
             resolve_element(elem, t)
         }
         "proper-antiphon" => {
+            // Diurnal pp. 652–654: the weekday psalms of Prime and the
+            // Little Hours of the Dead are said without antiphons.
+            if crate::psalmody::is_office_of_the_dead(day) && matches!(hour_name, "prime" | "terce" | "sext" | "none") {
+                return OfficeElement::new(ElementType::Antiphon, corpus::OMIT_MARKER);
+            }
             let (mut text, mut src) = resolve_proper_text(day, hour_name, r, t);
             if hour_name == "lauds" && r.starts_with("psalm-antiphon-") && lauds_psalmody::uses_weekday_lauds_psalmody(day, t) {
                 (text, src) = lauds_psalmody::weekday_lauds_antiphon(day, r, t);

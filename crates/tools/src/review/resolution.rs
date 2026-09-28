@@ -7,6 +7,7 @@ use std::fmt::Write as _;
 use calendar::{CalendarData, DataSource};
 use data_format::json::{Json, Obj};
 use office::engine::Engine;
+use office::psalmody::VESPERS_OF_THE_DEAD_LABEL;
 use office::trace::ProperResolutionTrace;
 
 use super::assurance::trace_element;
@@ -78,14 +79,14 @@ pub fn build_resolution_inventory(src: &dyn DataSource, start: i32, years: i32) 
             let weekday = day.date.weekday().name();
             let date = day.date.to_string();
             for section in &hour.sections {
-                if section.elements.iter().any(|e| e.source_ref.starts_with("shared/formulas/appended-vespers-of-the-dead-rubric")) {
+                if section.label == VESPERS_OF_THE_DEAD_LABEL {
                     part = "appended-office-of-the-dead";
                 }
                 for elem in &section.elements {
                     if elem.slot_ref.is_empty() {
                         continue;
                     }
-                    let trace = trace_element(&engine, day, hour_name, elem);
+                    let trace = trace_element(&engine, day, hour_name, elem, part == "appended-office-of-the-dead");
                     if !is_dynamic_resolution_ref(&elem.source_ref) && trace.selected_tier != "not-found" {
                         continue;
                     }

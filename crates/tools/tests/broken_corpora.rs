@@ -72,6 +72,45 @@ fn live_data_is_valid() {
 }
 
 #[test]
+fn appended_dead_office_keeps_its_resolution_boundary_without_a_rubric() {
+    let inventory = tools::review::resolution::build_resolution_inventory(&FsData::new("../../data"), 2026, 1).unwrap();
+    let rows: Vec<_> =
+        inventory.rows.iter().filter(|r| r.hour == "vespers" && r.trace.selected_ref.starts_with("proper/all-souls/")).collect();
+    assert!(!rows.is_empty());
+    assert!(rows.iter().all(|r| r.part == "appended-office-of-the-dead" && r.dates == ["2026-11-01"]));
+    for row in rows {
+        let t = &row.trace;
+        assert_eq!(t.owner_id, "all-souls");
+        assert_eq!(t.canonical_owner, "all-souls");
+        assert_eq!(t.proper_ids, ["all-souls"]);
+        assert_eq!(t.selected_tier, "proper");
+        assert!(!t.first_vespers);
+        assert!(!t.direct_candidates.is_empty());
+        assert!(t.direct_candidates.iter().all(|r| r.starts_with("proper/all-souls/")));
+    }
+    for date in [calendar::Date::new(2026, 11, 1), calendar::Date::new(2025, 11, 2)] {
+        let explanation =
+            tools::review::assurance::explain_composition(&FsData::new("../../data"), "vespers", date, liturgy::PrayerForm::Private)
+                .unwrap();
+        let json: serde_json::Value = serde_json::from_str(&explanation).unwrap();
+        let resolutions = json.get("resolutions").unwrap().as_array().unwrap();
+        let mut dead_count = 0;
+        let mut principal_count = 0;
+        for row in resolutions {
+            if row.get("selected_ref").and_then(|v| v.as_str()).unwrap_or("").starts_with("proper/all-souls/") {
+                dead_count += 1;
+                assert_eq!(row.get("canonical_owner").and_then(|v| v.as_str()), Some("all-souls"));
+                assert_eq!(row.get("selected_tier").and_then(|v| v.as_str()), Some("proper"));
+            } else if row.get("canonical_owner").and_then(|v| v.as_str()).is_some_and(|owner| !owner.is_empty() && owner != "all-souls") {
+                principal_count += 1;
+            }
+        }
+        assert!(dead_count > 0);
+        assert!(principal_count > 0);
+    }
+}
+
+#[test]
 fn assumption_week_commemoration_routing() {
     let texts = office::texts::load_texts(&FsData::new("../../data")).unwrap();
     for (reference, want) in [

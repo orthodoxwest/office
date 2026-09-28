@@ -180,7 +180,7 @@ Label = Collect
 Type = rubric
 Ref = shared/formulas/kneeling-our-father-rubric
 
-Type = corporate-lord-prayer
+Type = partly-secret-prayer
 Ref = ordinary/shared/our-father
 
 Type = prayer

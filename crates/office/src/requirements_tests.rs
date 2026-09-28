@@ -75,6 +75,159 @@ fn cited_composition_requirements() {
 }
 
 #[test]
+fn all_souls_vespers_is_a_continuous_office() {
+    // Diurnal pp. 642–643 and 72*–76*; 2026 ordo pp. 21, 112.
+    // The 2025 ordo p. 112 permits the appended office on the transferred
+    // Sunday eve. Once included, it follows the same order as November 1.
+    for (y, month, date) in [(2026, 11, 1), (2025, 11, 2)] {
+        let (days, moveable) = year(y);
+        let eve = Date::new(y, month, date);
+        let day = &days[eve.ordinal() as usize - 1];
+        for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
+            let hour = engine().compose_hour("vespers", day, &moveable, form).unwrap();
+            let boundary = hour.sections.iter().position(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL).unwrap();
+            let preceding: Vec<_> = hour.sections[..boundary].iter().flat_map(|s| &s.elements).collect();
+            let dead: Vec<_> = hour.sections[boundary..].iter().flat_map(|s| &s.elements).collect();
+            assert_eq!(preceding.last().unwrap().source_ref, "shared/leader/benedicamus-domino", "{eve} {form:?}");
+            assert_eq!(dead[0].source_ref, "proper/all-souls/psalm-antiphon-1-vespers", "{eve} {form:?}");
+            assert_eq!(dead[1].source_ref, "psalms/116");
+            assert_eq!(dead.last().unwrap().source_ref, "shared/formulas/may-they-rest-in-peace");
+            assert!(hour.sections.iter().flat_map(|s| &s.elements).all(|e| !e.source_ref.contains("appended-vespers-of-the-dead-rubric")));
+            let psalms: Vec<_> = dead.iter().filter(|e| e.kind == ElementType::Psalm).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(psalms, ["psalms/116", "psalms/120", "psalms/121", "psalms/130", "psalms/138"]);
+            assert_eq!(dead.iter().filter(|e| e.kind == ElementType::Antiphon).count(), 12);
+            assert!(dead.iter().filter(|e| e.kind == ElementType::Antiphon).all(|e| !e.announce));
+            assert!(dead.iter().filter(|e| e.kind == ElementType::PsalmDoxology).all(|e| e.source_ref == "shared/formulas/rest-eternal"));
+            assert_eq!(dead.iter().filter(|e| e.source_ref == "ordinary/shared/our-father").count(), 1);
+            assert!(dead.iter().all(|e| !e.is_commemoration && !e.source_ref.contains("hail-mary")));
+
+            // Diurnal pp. 642–643, 651–652: the Lord's Prayer before the
+            // collect is secret until its final versicle, in all three hours.
+            for (name, date) in [("vespers", eve), ("compline", eve), ("lauds", eve.add_days(1))] {
+                let office = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, form).unwrap();
+                let prayer =
+                    office.sections.iter().flat_map(|s| &s.elements).rev().find(|e| e.source_ref == "ordinary/shared/our-father").unwrap();
+                assert!(prayer.voice.iter().any(|s| !s.spoken && s.text.contains("Thy kingdom come")), "{date} {name}");
+                assert!(prayer.voice.iter().any(|s| s.spoken && s.text.contains("And lead us not into temptation")), "{date} {name}");
+                assert_eq!(office.sections.last().unwrap().elements.last().unwrap().source_ref, "shared/formulas/may-they-rest-in-peace");
+            }
+
+            // All Souls ends after None: its civil evening is the octave's
+            // Vespers, with the ordinary closing prayers restored.
+            let following = &days[eve.ordinal() as usize];
+            let evening = engine().compose_hour("vespers", following, &moveable, form).unwrap();
+            assert!(!evening.sections.iter().any(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL));
+            let elements: Vec<_> = evening.sections.iter().flat_map(|s| &s.elements).collect();
+            assert!(elements.iter().any(|e| e.source_ref == "proper/all-saints/magnificat-antiphon"));
+            assert!(elements.iter().any(|e| e.source_ref == "shared/formulas/faithful-departed"));
+        }
+    }
+}
+
+#[test]
+fn all_souls_minor_hours_follow_the_weekday_psalter_and_special_prayers() {
+    // Diurnal pp. 652–654; 2026 ordo pp. 21, 112. All six possible
+    // weekdays, including the Sunday-to-Monday transfer in the 2025 ordo.
+    for (y, date, prime_psalms) in [
+        (2025, 3, vec!["001", "002", "006"]),
+        (2026, 2, vec!["001", "002", "006"]),
+        (2027, 2, vec!["007", "008", "009a"]),
+        (2033, 2, vec!["009b", "010", "011", "012"]),
+        (2028, 2, vec!["013", "014", "015"]),
+        (2029, 2, vec!["016", "017", "018a"]),
+        (2030, 2, vec!["018b", "019", "020"]),
+    ] {
+        let (days, moveable) = year(y);
+        let date = Date::new(y, 11, date);
+        let day = &days[date.ordinal() as usize - 1];
+        assert!(day.celebration_is("all-souls"));
+        let monday = day.civil_weekday() == calendar::Weekday::Monday;
+        for form in [PrayerForm::Private, PrayerForm::Deacon, PrayerForm::Priest] {
+            for name in ["prime", "terce", "sext", "none"] {
+                let hour = engine().compose_hour(name, day, &moveable, form).unwrap();
+                let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
+                let context = format!("{date} {name} {form:?}");
+                assert!(hour.sections.iter().all(|s| !s.collapsible), "{context}");
+                let refs: Vec<_> = elements.iter().map(|e| e.source_ref.as_str()).collect();
+                assert_eq!(&refs[..2], ["ordinary/shared/our-father", "ordinary/shared/hail-mary"], "{context}");
+                let first_psalm = if name == "prime" {
+                    assert_eq!(refs[2], "ordinary/shared/apostles-creed");
+                    3
+                } else {
+                    2
+                };
+                assert_eq!(elements[first_psalm].kind, ElementType::Psalm, "{context}");
+                assert!(
+                    elements.iter().all(|e| !matches!(e.kind, ElementType::Antiphon | ElementType::Hymn | ElementType::Chapter)),
+                    "{context}"
+                );
+                let expected = match name {
+                    "prime" => prime_psalms.clone(),
+                    "terce" if monday => vec!["119-xiv", "119-xv", "119-xvi"],
+                    "sext" if monday => vec!["119-xvii", "119-xviii", "119-xix"],
+                    "none" if monday => vec!["119-xx", "119-xxi", "119-xxii"],
+                    "terce" => vec!["120", "121", "122"],
+                    "sext" => vec!["123", "124", "125"],
+                    _ => vec!["126", "127", "128"],
+                };
+                let psalms: Vec<_> = refs.iter().filter_map(|r| r.strip_prefix("psalms/")).collect();
+                assert_eq!(psalms, expected, "{context}");
+                let doxologies: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::PsalmDoxology).collect();
+                assert_eq!(doxologies.len(), 3, "{context}");
+                assert!(doxologies.iter().all(|e| e.source_ref == "shared/formulas/rest-eternal"), "{context}");
+                assert_eq!(refs.iter().filter(|r| **r == "ordinary/shared/our-father").count(), 2, "{context}");
+                assert_eq!(refs.iter().filter(|r| **r == "ordinary/shared/hail-mary").count(), 1, "{context}");
+                assert!(elements.iter().any(|e| e.voice.iter().any(|s| !s.spoken && s.text.contains("Thy kingdom come"))), "{context}");
+                let collects: Vec<_> = elements.iter().filter(|e| e.kind == ElementType::Collect).collect();
+                let expected_collects = if name == "prime" {
+                    vec!["proper/all-souls/collect-prime", "proper/all-souls/prime-concluding-collect"]
+                } else {
+                    vec!["proper/all-souls/collect"]
+                };
+                assert_eq!(collects.iter().map(|e| e.source_ref.as_str()).collect::<Vec<_>>(), expected_collects, "{context}");
+                assert!(collects.iter().all(|e| e.text.ends_with("R. Amen.")), "{context}");
+                if name == "prime" {
+                    let i = refs.iter().position(|r| *r == "proper/all-souls/collect-prime").unwrap();
+                    assert_eq!(refs[i + 1], "proper/all-souls/prime-concluding-versicle");
+                    assert_eq!(refs[i + 2], "shared/leader/let-us-pray");
+                    assert_eq!(refs[i + 3], "proper/all-souls/prime-concluding-collect");
+                }
+                assert_eq!(&refs[refs.len() - 2..], ["shared/formulas/rest-eternal", "shared/formulas/may-they-rest-in-peace"]);
+                assert!(refs.iter().all(|r| !r.contains("martyrology")
+                    && !r.contains("benedicamus")
+                    && !r.contains("opening-versicle")
+                    && !r.contains("kyrie")));
+            }
+            // A standalone Lauds has the preliminary prayers in the main flow
+            // (Diurnal p. 651), while appended Vespers has no second opening.
+            let lauds = engine().compose_hour("lauds", day, &moveable, form).unwrap();
+            assert!(!lauds.sections[0].collapsible);
+            let refs: Vec<_> = lauds.sections.iter().flat_map(|s| &s.elements).map(|e| e.source_ref.as_str()).collect();
+            assert_eq!(&refs[..3], ["ordinary/shared/our-father", "ordinary/shared/hail-mary", "proper/all-souls/psalm-antiphon-1"]);
+        }
+    }
+    for date in [Date::new(2025, 11, 2), Date::new(2026, 11, 1), Date::new(2026, 11, 3)] {
+        let (days, moveable) = year(date.year());
+        for name in ["prime", "terce", "sext", "none"] {
+            let hour = engine().compose_hour(name, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+            let elements: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).collect();
+            assert!(elements.iter().any(|e| e.kind == ElementType::Antiphon));
+            assert!(elements.iter().any(|e| e.kind == ElementType::Hymn));
+            assert!(elements.iter().any(|e| e.source_ref == "ordinary/shared/gloria-patri"));
+            assert!(elements.iter().all(|e| e.source_ref != "shared/formulas/rest-eternal"));
+        }
+    }
+    // Diurnal p. 654: when All Souls is Saturday, the following Sunday
+    // owns the evening instead of the All Saints octave.
+    let (days, moveable) = year(2030);
+    let day = &days[Date::new(2030, 11, 2).ordinal() as usize - 1];
+    assert_eq!(day.vespers.owner, crate::VespersOwner::IOfFollowing);
+    assert_eq!(day.vespers.feast.as_ref().unwrap().category, Some(Category::Sunday));
+    let evening = engine().compose_hour("vespers", day, &moveable, PrayerForm::Private).unwrap();
+    assert!(!evening.sections.iter().any(|s| s.label == crate::psalmody::VESPERS_OF_THE_DEAD_LABEL));
+}
+
+#[test]
 fn sunday_commemoration_versicles_across_calendars() {
     for y in [2026, 2027, 2032] {
         let (days, moveable) = year(y);

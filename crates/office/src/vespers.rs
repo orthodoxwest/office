@@ -2,12 +2,11 @@
 //! of All Souls.
 
 use calendar::{Color, Decision, MoveableDates};
-use liturgy::{OfficeHour, OfficeSection};
+use liturgy::OfficeHour;
 
 use crate::concurrence::VespersOwner;
 use crate::day::Day;
-use crate::engine::resolve_element;
-use crate::hourdef::{HourElement, HourSection};
+use crate::hourdef::HourSection;
 use crate::major::{MajorHourOptions, compose_major_hour};
 use crate::psalmody::{VESPERS_OF_THE_DEAD_LABEL, dead_office_day, resolve_vespers_psalmody};
 use crate::texts::OfficeTexts;
@@ -45,14 +44,12 @@ fn append_vespers_of_the_dead(
     t: &OfficeTexts,
     moveable: Option<&MoveableDates>,
 ) -> Result<(), String> {
-    let dead = compose_major_hour(&dead_office_day(day), sections, t, moveable, &vespers_options())?;
-    let rubric_ref = if day.celebration_is("all-saints") {
-        "shared/formulas/appended-vespers-of-the-dead-rubric"
-    } else {
-        "shared/formulas/appended-vespers-of-the-dead-rubric-optional"
-    };
-    let rubric = resolve_element(&HourElement::new("rubric", rubric_ref), t);
-    hour.sections.push(OfficeSection { label: VESPERS_OF_THE_DEAD_LABEL.to_string(), collapsible: false, elements: vec![rubric] });
+    let mut dead = compose_major_hour(&dead_office_day(day), sections, t, moveable, &vespers_options())?;
+    // Diurnal pp. 642–643; 2026 ordo, November 1: the prayers themselves
+    // implement the immediate transition, without a second opening.
+    if let Some(first) = dead.sections.iter_mut().find(|s| !s.elements.is_empty()) {
+        first.label = VESPERS_OF_THE_DEAD_LABEL.to_string();
+    }
     hour.sections.extend(dead.sections);
     hour.decisions.extend(dead.decisions);
     hour.decisions.push(Decision::new("vespers:appended-office-of-the-dead", "included", "all-souls"));
