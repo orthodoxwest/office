@@ -2,32 +2,109 @@
 # In the Benedictine rite, Alleluia is NOT suppressed during Advent.
 # Add overrides here as needed.
 
-[psalm-antiphon-1-prime-monday]
-# SOURCE: monastic diurnal, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+[psalm-antiphon-1-late-monday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
 Behold the Lord shall come, * the Prince of the kings of the earth: blessed are they that are prepared to meet him.
 
-[psalm-antiphon-1-prime-tuesday]
-# SOURCE: monastic diurnal, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+[psalm-antiphon-2-late-monday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+When the Son of man * cometh, shall he find faith on the earth?
+
+[psalm-antiphon-3-late-monday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+Lo, now cometh * the fulness of the time, wherein God sent his Son into the world.
+
+[psalm-antiphon-4-late-monday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+With joy shall ye draw * water out of the wells of salvation.
+
+[psalm-antiphon-5-late-monday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Monday)
+The Lord shall go * forth out of his holy place: he shall come to save his people.
+
+[psalm-antiphon-1-late-tuesday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
 Drop down, ye heavens, from above, * and let the skies pour down righteousness: let the earth open, and let them bring forth salvation.
 
-[psalm-antiphon-1-prime-wednesday]
-# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+[psalm-antiphon-2-late-tuesday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+Send, O Lord, the Lamb, * the Ruler of the land, from the rock of the desert unto the mount of the daughter of Sion.
+
+[psalm-antiphon-3-late-tuesday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+That thy way, O Lord, * may be known upon earth, thy saving health among all nations.
+
+[psalm-antiphon-4-late-tuesday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+Reward thou them, * O Lord, that wait for thee, and let thy prophets be found faithful.
+
+[psalm-antiphon-5-late-tuesday]
+# SOURCE: Monastic Diurnal.pdf, p. 174 (Antiphons at Lauds and the Hours, Dec. 17–23, Tuesday)
+The law was given by Moses, * but grace and truth came by Jesus Christ.
+
+[psalm-antiphon-1-late-wednesday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
 The prophets did foretell * that a Saviour should be born of the Virgin Mary.
 
-[psalm-antiphon-1-prime-thursday]
-# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+[psalm-antiphon-2-late-wednesday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+The Spirit * of the Lord is upon me: he hath sent me to preach the Gospel to the poor.
+
+[psalm-antiphon-3-late-wednesday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+For Sion's sake * I will not hold my peace, until the righteousness thereof go forth as brightness.
+
+[psalm-antiphon-4-late-wednesday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+Behold the Lord shall come, * that he may sit among princes, and inherit the throne of glory.
+
+[psalm-antiphon-5-late-wednesday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Wednesday)
+Tell it out * among the nations, and say: Behold, our God and Saviour cometh.
+
+[psalm-antiphon-1-late-thursday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
 From Sion * draweth nigh the Lord Almighty to bring salvation unto his people.
 
-[psalm-antiphon-1-prime-friday]
-# SOURCE: monastic diurnal, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+[psalm-antiphon-2-late-thursday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+Turn thee again, O Lord, * at the last, and do not delay to come unto thy servants.
+
+[psalm-antiphon-3-late-thursday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+From Sion * cometh he that is to reign as Lord: Emmanuel is his mighty Name.
+
+[psalm-antiphon-4-late-thursday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+Lo, my God, * and I will give him honour: my fathers' God, and I will exalt him.
+
+[psalm-antiphon-5-late-thursday]
+# SOURCE: Monastic Diurnal.pdf, p. 175 (Antiphons at Lauds and the Hours, Dec. 17–23, Thursday)
+The Lord is our Lawgiver, * the Lord is our King, he himself will come, and will save us.
+
+[psalm-antiphon-1-late-friday]
+# SOURCE: Monastic Diurnal.pdf, p. 175-176 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
 Be ye steadfast, * and see the salvation of the Lord with you.
 
-[psalm-antiphon-1-prime-saturday]
-# SOURCE: divinum-officium Psalterium/Psalmi/Psalmi minor.txt [Adv47, 1] — check against diurnal
-# The diurnal (pp. 173–176) does not print a Saturday set of hour ants for
-# Dec. 17–23. Saturday takes the ants of the weekday on which St Thomas
-# (21 Dec.) falls, which changes year to year.
-Consider how glorious is the one * who shall bring about the salvation of the peoples.
+[psalm-antiphon-2-late-friday]
+# SOURCE: Monastic Diurnal.pdf, p. 175-176 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+Unto thee, O Lord, * do I lift up my soul: come and deliver me, for I flee unto thee, O Lord.
+
+[psalm-antiphon-3-late-friday]
+# SOURCE: Monastic Diurnal.pdf, p. 175-176 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+Come, O Lord, * and do not tarry: forgive the offences of thy people Israel.
+
+[psalm-antiphon-4-late-friday]
+# SOURCE: Monastic Diurnal.pdf, p. 175-176 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+God shall come from Lebanon, * and his brightness shall be as the light.
+
+[psalm-antiphon-5-late-friday]
+# SOURCE: Monastic Diurnal.pdf, p. 175-176 (Antiphons at Lauds and the Hours, Dec. 17–23, Friday)
+Therefore * I will look unto the Lord; and I will wait for the God of my salvation.
+
+[psalm-antiphon-late-saturday]
+# SOURCE: Monastic Diurnal.pdf, pp. 173-174, 176 (Saturday takes the set of the weekday of St Thomas, the 3rd and 4th replaced by this Ant. on Canticle)
+The word of the Lord * shall be looked for as the rain, and as the dew shall our God come down upon us.
 
 [chapter-lauds]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 122

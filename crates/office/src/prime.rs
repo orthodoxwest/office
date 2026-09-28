@@ -8,7 +8,7 @@ use crate::engine::{append_hour_element, compact_refs, resolve_element};
 use crate::hourdef::{HourElement, HourSection};
 use crate::major::record_condition_decision;
 use crate::preces::SATURDAY_OFFICE_BVM_ID;
-use crate::proper::{lookup_feast_proper_text, resolve_proper_text};
+use crate::proper::{advent_ferial_psalm_antiphon_ref, lookup_feast_proper_text, resolve_proper_text};
 use crate::texts::OfficeTexts;
 
 /// Composes Prime. `martyrology_preview` substitutes the next day's
@@ -127,10 +127,8 @@ fn resolve_prime_psalm_antiphon(day: &Day, t: &OfficeTexts, moveable: Option<&Mo
     let mut key = format!("ordinary/prime/{SLOT}-{weekday}");
     match day.season {
         Season::Advent => {
-            if day.date.month() == 12 && (17..=23).contains(&day.date.day()) {
-                key = format!("seasonal/advent/{SLOT}-prime-{weekday}");
-            } else if let Some(week) = day.temporal_week_id.as_deref().filter(|w| w.starts_with("advent-sunday-")) {
-                key = format!("proper/{week}/{SLOT}");
+            if let Some(advent) = advent_ferial_psalm_antiphon_ref(day, "prime", 1) {
+                key = advent;
             }
         }
         Season::Lent => {
