@@ -3,3 +3,7 @@
 
 [commemoration-antiphon-vespers]
 @use commons/martyrs/commemoration-antiphon
+
+[commemoration-collect]
+# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF p. 759 (August 22, Ss Timothy, Hippolytus and Symphorian, Collect)
+We beseech thee, O Lord, graciously to impart unto us thy help: and, at the intercession of thy blessed Martyrs Timothy, Hippolytus, and Symphorian, stretch forth upon us the right hand of thy mercy.

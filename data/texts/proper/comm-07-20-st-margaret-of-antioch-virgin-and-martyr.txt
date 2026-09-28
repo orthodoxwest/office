@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: 2026 archdiocesan ordo, 19-20 July (Col. "We beseech thee" 49*)
+@use commons/virgin-martyr/collect-alternate

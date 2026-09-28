@@ -761,10 +761,8 @@ MAY
            Vespers w · II prec. · Mag. Jesus saith unto his disciples · No Suff.
   6  Thu     Day V within the Octave of Easter          [sd]  w
            St John before the Latin Gate (gd)
-           Octave of the Solemnity of St Joseph (com)
            Lauds   w · Ben. Mary stood · No Preces · No Suff.
                Com. St John before the Latin Gate ("Daughters of Jerusalem")
-               Com. Octave of the Solemnity of St Joseph ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. They have taken · No Suff.
   7  Fri     Day VI within the Octave of Easter         [sd]  w
@@ -878,10 +876,13 @@ MAY
            Hours   Preces
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
                Com. St Eleutherius, Bishop & Martyr ("Light perpetual")
+               Com. Octave of the Solemnity of St Joseph ("When Mary")
  26  Wed     St Augustine of Canterbury, Bishop & Confessor [d]   w
            St Eleutherius, Bishop & Martyr (com)
+           Octave of the Solemnity of St Joseph (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St Eleutherius, Bishop & Martyr ("Daughters of Jerusalem")
+               Com. Octave of the Solemnity of St Joseph ("Joseph, thou son of David")
            Hours   No Preces
            Vespers w · I fol. (St Bede the Venerable, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Augustine of Canterbury, Bishop & Confessor ("The Lord loved him")

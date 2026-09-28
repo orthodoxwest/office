@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: 2026 archdiocesan ordo, 4-5 Dec. (Col. 45*, For an Abbot)
+@use commons/confessor/collect-abbot

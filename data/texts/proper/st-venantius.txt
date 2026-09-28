@@ -107,3 +107,7 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF pp. 679-680 (May 18, St Venantius, Collect)
+O God, who hast hallowed this day by the triumph of blessed Venantius, thy Martyr: graciously hear the prayers of thy people, and grant; that we who venerate his merits may imitate the constancy of his faith.
