@@ -8,11 +8,15 @@ The Triduum still suppresses the whole section. Readings follow civil dates
 regardless of feast transfers; nothing else in the calendar or other hours
 changes.
 
-The trial covers September 7–9 and September 28–December 31, read at Prime
-on the preceding day; try `/prime/2026-09-07?preview=martyrology`. Within the
-autumn batch, October 8 and 12, November 6, 10 and 30, and December 2 hold a
-notice with no usable chronology; December 8, 15 and 25 await clergy review of
-their announcements. Held days keep the rubric. It is an unlinked review feature, not
+The trial covers the whole civil year except the held days below, read at
+Prime on the preceding day; try `/prime/2026-09-07?preview=martyrology`. These
+days hold a notice with no usable chronology: January 2, 14 and 28; February 7;
+March 12 and 24; April 26; May 5, 16, 22 and 29; June 30; July 5, 28 and 29;
+August 1 and 27; September 12, 22 and 26; October 8 and 12; November 6, 10 and 30;
+and December 2. February 24–28 are held because the source moves those
+announcements by a day in leap years and the corpus is keyed by month and day
+(the source has no February 29 entry). December 8, 15 and 25 await clergy review
+of their announcements. Held days keep the rubric. It is an unlinked review feature, not
 authentication: the parameter isn't persisted, previews bypass the service
 worker and send `Cache-Control: private, no-store` and
 `X-Robots-Tag: noindex, nofollow`. Programmatic review uses
@@ -39,6 +43,9 @@ dates and order; retained wording is not edited.
   inseparable cases to review.
 - Feast announcements, octaves, vigils, and translations are not people.
   Review their AWRV observance and wording separately.
+  A feast, octave or devotion announced on its Roman date stays only when the
+  AWRV calendar keeps that observance on that date; vigils always wait until
+  their placement is modelled.
 - Absence from the AWRV office calendar is no reason to omit an eligible
   notice, and presence in it is no exception to the cutoff.
 
