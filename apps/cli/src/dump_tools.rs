@@ -3,12 +3,14 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
+use calendar::CalendarData;
 use serde_json::{Map, Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::args::Flags;
-use crate::dump::{FORMAT, HOUR_NAMES, PRAYER_FORMS};
+use crate::dump::{FORMAT, HOUR_NAMES, PRAYER_FORMS, Selection, generate_year};
 
 fn input(path: &str) -> Result<Box<dyn BufRead>, String> {
     if path == "-" {
@@ -147,102 +149,175 @@ fn merges(out: &mut Vec<Value>, date: &Value, surface: &str, winner: &Value, dec
     }
 }
 
-pub fn digest(reader: impl BufRead) -> Result<Value, String> {
-    let mut years: BTreeMap<i64, Year> = BTreeMap::new();
-    let mut corpus = Hash::default();
-    let mut start = Value::Null;
-    let mut count = Value::Null;
-    for (i, line) in reader.lines().enumerate() {
-        let line = line.map_err(|e| e.to_string())?;
-        let result = (|| {
-            let r = parse(&line, true)?;
-            let kind = r["kind"].as_str().ok_or("missing record kind")?;
-            match kind {
-                "meta" => {
-                    if r["format"] != FORMAT {
-                        return Err("unsupported dump format".into());
-                    }
-                    if start.is_null() && count.is_null() {
-                        start = r["selection"]["start_year"].clone();
-                        count = r["selection"]["years"].clone();
-                    }
-                    return Ok(());
+/// Folds dump records into a parity snapshot. Hashes run in record order, so a year is one
+/// uninterrupted stretch of the stream; `absorb` joins digests of disjoint years.
+#[derive(Default)]
+struct Digester {
+    years: BTreeMap<i64, Year>,
+    corpus: Hash,
+    start: Value,
+    count: Value,
+}
+
+impl Digester {
+    fn add(&mut self, r: &Value) -> Result<(), String> {
+        let kind = r["kind"].as_str().ok_or("missing record kind")?;
+        match kind {
+            "meta" => {
+                if r["format"] != FORMAT {
+                    return Err("unsupported dump format".into());
                 }
-                "corpus_entry" | "appointment_scope" => {
-                    corpus.add(&r);
-                    return Ok(());
+                if self.start.is_null() && self.count.is_null() {
+                    self.start = r["selection"]["start_year"].clone();
+                    self.count = r["selection"]["years"].clone();
                 }
-                "calendar_year" => {
-                    let year = r["year"].as_i64().ok_or("calendar_year without year")?;
-                    years.entry(year).or_default().calendar.add(&r);
-                    return Ok(());
-                }
-                "calendar_day" | "office_day" | "hour" => {}
-                _ => return Err(format!("unknown record kind {kind:?}")),
+                return Ok(());
             }
-            let date = r["date"].as_str().ok_or("missing date")?;
-            if !date.is_ascii() {
-                return Err("invalid record date".into());
+            "corpus_entry" | "appointment_scope" => {
+                self.corpus.add(r);
+                return Ok(());
             }
-            let year = calendar::Date::parse(date).ok_or("invalid record date")?.year();
-            let y = years.entry(i64::from(year)).or_default();
-            match kind {
-                "calendar_day" => {
-                    y.calendar.add(&r);
-                    merges(&mut y.merges, &r["date"], "occurrence", &r["celebration"], &r["occurrence_decisions"]);
-                }
-                "office_day" => {
-                    y.office.add(&r);
-                    merges(&mut y.merges, &r["date"], "vespers", &r["vespers"]["feast"], &r["vespers"]["decisions"]);
-                }
-                "hour" => {
-                    let hour = r["hour"].as_str().ok_or("missing hour")?;
-                    let form = r["form"].as_str().ok_or("missing form")?;
-                    if !HOUR_NAMES.contains(&hour) || !PRAYER_FORMS.contains(&form) {
-                        return Err("unknown hour or form".into());
-                    }
-                    let hashes = y.hours.entry((hour.into(), form.into())).or_default();
-                    for (hash, group) in hashes.iter_mut().zip(GROUPS) {
-                        hash.add(&project(&r, Level::Hour, group)?);
-                    }
-                    y.date_hours += usize::from(form == "private");
-                }
-                _ => unreachable!(),
+            "calendar_year" => {
+                let year = r["year"].as_i64().ok_or("calendar_year without year")?;
+                self.years.entry(year).or_default().calendar.add(r);
+                return Ok(());
             }
-            Ok(())
-        })();
-        result.map_err(|e: String| format!("line {}: {e}", i + 1))?;
+            "calendar_day" | "office_day" | "hour" => {}
+            _ => return Err(format!("unknown record kind {kind:?}")),
+        }
+        let date = r["date"].as_str().ok_or("missing date")?;
+        if !date.is_ascii() {
+            return Err("invalid record date".into());
+        }
+        let year = calendar::Date::parse(date).ok_or("invalid record date")?.year();
+        let y = self.years.entry(i64::from(year)).or_default();
+        match kind {
+            "calendar_day" => {
+                y.calendar.add(r);
+                merges(&mut y.merges, &r["date"], "occurrence", &r["celebration"], &r["occurrence_decisions"]);
+            }
+            "office_day" => {
+                y.office.add(r);
+                merges(&mut y.merges, &r["date"], "vespers", &r["vespers"]["feast"], &r["vespers"]["decisions"]);
+            }
+            "hour" => {
+                let hour = r["hour"].as_str().ok_or("missing hour")?;
+                let form = r["form"].as_str().ok_or("missing form")?;
+                if !HOUR_NAMES.contains(&hour) || !PRAYER_FORMS.contains(&form) {
+                    return Err("unknown hour or form".into());
+                }
+                let hashes = y.hours.entry((hour.into(), form.into())).or_default();
+                for (hash, group) in hashes.iter_mut().zip(GROUPS) {
+                    hash.add(&project(r, Level::Hour, group)?);
+                }
+                y.date_hours += usize::from(form == "private");
+            }
+            _ => unreachable!(),
+        }
+        Ok(())
     }
-    let mut snapshots = Vec::new();
-    let mut all_merges = Vec::new();
-    let mut date_hours = 0;
-    for (year, mut y) in years {
-        let mut hours = Vec::new();
-        for hour in HOUR_NAMES {
-            for form in PRAYER_FORMS {
-                if let Some(hashes) = y.hours.remove(&(hour.into(), form.into())) {
-                    let mut h = json!({"hour": hour, "form": form});
-                    for (name, hash) in NAMES.into_iter().zip(hashes) {
-                        h[name] = hash.finish();
-                    }
-                    hours.push(h);
-                }
+
+    /// Appends the digest of a later part of the same stream. A hash cannot be resumed, so the
+    /// part may hold only years this digest has not begun.
+    fn absorb(&mut self, part: Digester) -> Result<(), String> {
+        if part.corpus.lines > 0 {
+            return Err("corpus records belong to the leading digest".into());
+        }
+        for (year, y) in part.years {
+            if self.years.insert(year, y).is_some() {
+                return Err(format!("records for {year} were digested in two parts"));
             }
         }
-        snapshots.push(json!({"year": year, "calendar": y.calendar.finish(), "office": y.office.finish(), "hours": hours}));
-        date_hours += y.date_hours;
-        all_merges.extend(y.merges);
+        Ok(())
     }
-    Ok(json!({"format": "office-parity/2", "dump_format": FORMAT, "start_year": start, "year_count": count,
-        "date_hours": date_hours, "corpus": corpus.finish(), "years": snapshots, "commemoration_merges": all_merges}))
+
+    fn finish(self) -> Value {
+        let mut snapshots = Vec::new();
+        let mut all_merges = Vec::new();
+        let mut date_hours = 0;
+        for (year, mut y) in self.years {
+            let mut hours = Vec::new();
+            for hour in HOUR_NAMES {
+                for form in PRAYER_FORMS {
+                    if let Some(hashes) = y.hours.remove(&(hour.into(), form.into())) {
+                        let mut h = json!({"hour": hour, "form": form});
+                        for (name, hash) in NAMES.into_iter().zip(hashes) {
+                            h[name] = hash.finish();
+                        }
+                        hours.push(h);
+                    }
+                }
+            }
+            snapshots.push(json!({"year": year, "calendar": y.calendar.finish(), "office": y.office.finish(), "hours": hours}));
+            date_hours += y.date_hours;
+            all_merges.extend(y.merges);
+        }
+        json!({"format": "office-parity/2", "dump_format": FORMAT, "start_year": self.start, "year_count": self.count,
+            "date_hours": date_hours, "corpus": self.corpus.finish(), "years": snapshots, "commemoration_merges": all_merges})
+    }
+}
+
+pub fn digest(reader: impl BufRead) -> Result<Value, String> {
+    let mut digester = Digester::default();
+    for (i, line) in reader.lines().enumerate() {
+        let line = line.map_err(|e| e.to_string())?;
+        parse(&line, true).and_then(|r| digester.add(&r)).map_err(|e| format!("line {}: {e}", i + 1))?;
+    }
+    Ok(digester.finish())
+}
+
+/// The snapshot `digest` would produce from the dump of `sel`, without encoding the stream:
+/// each entry of the selection's plan is generated and digested by its own worker.
+pub fn digest_selection(sel: &Selection, data: &CalendarData, engine: Option<&office::Engine>) -> Result<Value, String> {
+    let add = |digester: &mut Digester, r: Value| validate(&r).and_then(|()| digester.add(&r)).map_err(|e| format!("{}: {e}", key(&r)));
+    let mut digester = Digester::default();
+    add(&mut digester, sel.meta())?;
+    if sel.has("corpus") {
+        let engine = engine.ok_or("the corpus group needs the loaded texts")?;
+        for record in crate::dump::corpus_records(&engine.texts) {
+            add(&mut digester, record)?;
+        }
+    }
+    let plan = sel.plan();
+    let next = AtomicUsize::new(0);
+    let workers = std::thread::available_parallelism().map_or(1, |n| n.get()).min(plan.len().max(1));
+    let mut parts: Vec<(usize, Result<Digester, String>)> = std::thread::scope(|scope| {
+        let handles: Vec<_> = (0..workers)
+            .map(|_| {
+                scope.spawn(|| {
+                    let mut done = Vec::new();
+                    loop {
+                        let i = next.fetch_add(1, Ordering::Relaxed);
+                        let Some((year, dates)) = plan.get(i) else { return done };
+                        let mut part = Digester::default();
+                        let result = generate_year(sel, data, engine, *year, dates.as_deref(), &mut |r| add(&mut part, r)).map(|()| part);
+                        if result.is_err() {
+                            // Later years are moot once one fails.
+                            next.store(plan.len(), Ordering::Relaxed);
+                        }
+                        done.push((i, result));
+                    }
+                })
+            })
+            .collect();
+        handles.into_iter().flat_map(|h| h.join().expect("digest worker panicked")).collect()
+    });
+    parts.sort_by_key(|(i, _)| *i);
+    for (_, part) in parts {
+        digester.absorb(part?)?;
+    }
+    Ok(digester.finish())
+}
+
+pub fn write_snapshot(snapshot: &Value, out: &mut dyn Write) -> Result<(), String> {
+    writeln!(out, "{}", serde_json::to_string_pretty(snapshot).map_err(|e| e.to_string())?).map_err(|e| e.to_string())
 }
 
 pub fn cmd_digest(args: &[String], out: &mut dyn Write) -> Result<(), String> {
     if args.len() > 1 {
         return Err("usage: office dump digest [FILE|-]".into());
     }
-    let snapshot = digest(input(args.first().map(String::as_str).unwrap_or("-"))?)?;
-    writeln!(out, "{}", serde_json::to_string_pretty(&snapshot).map_err(|e| e.to_string())?).map_err(|e| e.to_string())
+    write_snapshot(&digest(input(args.first().map(String::as_str).unwrap_or("-"))?)?, out)
 }
 
 fn key(r: &Value) -> String {
@@ -424,6 +499,28 @@ mod tests {
         let r = json!({"kind":"hour","date":"2026-01-01","hour":"lauds","form":"private","sections":[{"elements":[{"voice":[{"future":"new"}]}]}]});
         assert!(digest(r.to_string().as_bytes()).unwrap_err().contains("no parity digest assignment"));
     }
+    #[test]
+    fn absorbed_year_parts_equal_one_stream() {
+        let meta = json!({"kind":"meta","format":FORMAT,"selection":{"start_year":2026,"years":2}});
+        let corpus = json!({"kind":"corpus_entry","key":"k","body":"b"});
+        let day = |date: &str| json!({"kind":"calendar_day","date":date,"celebration":null,"occurrence_decisions":[]});
+        let records = [meta.clone(), corpus.clone(), day("2026-12-31"), day("2027-01-01")];
+        let stream: String = records.iter().map(|r| format!("{r}\n")).collect();
+
+        let digested = |records: &[Value]| {
+            let mut d = Digester::default();
+            records.iter().for_each(|r| d.add(r).unwrap());
+            d
+        };
+        let mut whole = digested(&records[..3]);
+        whole.absorb(digested(&records[3..])).unwrap();
+        assert_eq!(whole.finish(), digest(stream.as_bytes()).unwrap());
+
+        let mut lead = digested(&records[..3]);
+        assert!(lead.absorb(digested(&[day("2026-12-30")])).unwrap_err().contains("2026"));
+        assert!(digested(&[meta]).absorb(digested(&[corpus])).is_err());
+    }
+
     #[test]
     fn digest_groups_are_independent_and_keep_positions() {
         let a = json!({"kind":"hour","date":"2026-01-01","hour":"lauds","form":"private","sections":[{"elements":[{"text":"prayer", "display_text":"display", "source_ref":"ordinary/shared", "voice":[{"text":"prayer","role":"all","spoken":true}]}]}]});

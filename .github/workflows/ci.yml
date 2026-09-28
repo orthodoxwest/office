@@ -90,6 +90,25 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: make build
 
+      # The assurance-report golden renders this same command, so a floor
+      # failure is reported here rather than as a golden crash.
+      - name: Check text provenance baseline
+        id: assurance
+        run: |
+          set +e
+          ./office review assurance -markdown > assurance-summary.md
+          STATUS=$?
+          set -e
+          cat assurance-summary.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$STATUS"
+
+      - name: Upload assurance summary
+        if: always() && steps.assurance.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: assurance-summary
+          path: assurance-summary.md
+
       - name: Run golden tests
         id: golden
         run: python3 scripts/golden.py --check
@@ -193,37 +212,6 @@ jobs:
         if: steps.golden.outcome == 'failure'
         run: exit 1
 
-  assurance:
-    name: Text provenance
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@1.94.1
-
-      - uses: Swatinem/rust-cache@v2
-
-      - name: Check text provenance baseline
-        id: assurance
-        run: |
-          make build
-          set +e
-          ./office review assurance -markdown > assurance-summary.md
-          STATUS=$?
-          set -e
-          cat assurance-summary.md >> "$GITHUB_STEP_SUMMARY"
-          exit "$STATUS"
-
-      - name: Upload assurance summary
-        if: always() && steps.assurance.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
-        with:
-          name: assurance-summary
-          path: assurance-summary.md
-
   ux:
     name: UX
     runs-on: ubuntu-latest
@@ -322,7 +310,7 @@ jobs:
         env:
           PLAYWRIGHT_SUITE: behavior
         if: steps.ux_changes.outputs.run == 'true'
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=2
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=4
 
       - name: Run UX visual regression tests
         env:

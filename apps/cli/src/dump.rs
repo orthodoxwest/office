@@ -24,8 +24,11 @@ pub(super) const PRAYER_FORMS: [&str; 3] = ["private", "deacon", "priest"];
 /// Groups this engine can produce so far.
 const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GROUP_HOURS];
 
-const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST]
-       office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST]";
+const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
+       office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
+
+-digest prints the parity snapshot of the selection, computed in memory one civil year per
+worker; it equals piping the dump through `office dump digest -`.";
 
 /// A slice of the record stream: whole civil years or individual dates.
 #[derive(Clone, Debug, Default)]
@@ -67,11 +70,11 @@ impl Selection {
         Ok(self)
     }
 
-    fn has(&self, group: &str) -> bool {
+    pub(crate) fn has(&self, group: &str) -> bool {
         self.groups.iter().any(|g| g == group)
     }
 
-    fn meta(&self) -> Value {
+    pub(crate) fn meta(&self) -> Value {
         let (start, years, dates) = if self.dates.is_empty() {
             (json!(self.start_year), json!(self.years), Value::Null)
         } else {
@@ -88,7 +91,7 @@ impl Selection {
     }
 
     /// Civil years with the dates to emit (`None` = every day).
-    fn plan(&self) -> Vec<(i32, Option<Vec<Date>>)> {
+    pub(crate) fn plan(&self) -> Vec<(i32, Option<Vec<Date>>)> {
         if self.dates.is_empty() {
             return (self.start_year..self.start_year + self.years).map(|y| (y, None)).collect();
         }
@@ -111,7 +114,8 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
             _ => {}
         }
     }
-    let flags = Flags::parse(args, &["start", "years", "dates", "hours", "forms", "groups"]).map_err(|e| format!("{e}\n{USAGE}"))?;
+    let flags = Flags::parse_with_bools(args, &["start", "years", "dates", "hours", "forms", "groups"], &["digest"])
+        .map_err(|e| format!("{e}\n{USAGE}"))?;
     if !flags.rest.is_empty() {
         return Err(USAGE.to_string());
     }
@@ -145,6 +149,10 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
         None
     };
     let data = CalendarData::load(data)?;
+    if flags.bool("digest") {
+        let snapshot = crate::dump_tools::digest_selection(&sel, &data, engine.as_ref())?;
+        return crate::dump_tools::write_snapshot(&snapshot, out);
+    }
     generate(&sel, &data, engine.as_ref(), &mut |record| {
         let line = marshal(&record).map_err(|e| format!("{}: {e}", describe_record(&record)))?;
         out.write_all(line.as_bytes()).and_then(|()| out.write_all(b"\n")).map_err(|e| e.to_string())
@@ -178,44 +186,58 @@ pub fn generate(
         }
     }
     for (year, dates) in sel.plan() {
-        let cal = build_calendar(year, data).map_err(|e| format!("building calendar for {year}: {e}"))?;
+        generate_year(sel, data, engine, year, dates.as_deref(), emit)?;
+    }
+    Ok(())
+}
+
+/// Emits the calendar, office and hour records of one entry of `Selection::plan`. Years are
+/// independent, so callers may generate them concurrently.
+pub(crate) fn generate_year(
+    sel: &Selection,
+    data: &CalendarData,
+    engine: Option<&office::Engine>,
+    year: i32,
+    dates: Option<&[Date]>,
+    emit: &mut dyn FnMut(Value) -> Result<(), String>,
+) -> Result<(), String> {
+    let cal = build_calendar(year, data).map_err(|e| format!("building calendar for {year}: {e}"))?;
+    if sel.has(GROUP_CALENDAR) {
+        emit(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year)))?;
+    }
+    let office_days = if sel.has(GROUP_OFFICE) || sel.has(GROUP_HOURS) { office::resolve_office_days(&cal) } else { Vec::new() };
+    let moveable = MoveableDates::compute(year);
+    let indices: Vec<usize> = match dates {
+        None => (0..cal.days.len()).collect(),
+        Some(dates) => dates
+            .iter()
+            .map(|d| {
+                let i = d.ordinal() as usize - 1;
+                match cal.days.get(i) {
+                    Some(day) if day.date == *d => Ok(i),
+                    Some(day) => Err(format!("calendar for {year} returned {} at {d}", day.date)),
+                    None => Err(format!("{d} is outside the {year} calendar")),
+                }
+            })
+            .collect::<Result<_, _>>()?,
+    };
+    for i in indices {
         if sel.has(GROUP_CALENDAR) {
-            emit(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year)))?;
+            emit(calendar_day_record(&cal.days[i]))?;
         }
-        let office_days = if sel.has(GROUP_OFFICE) || sel.has(GROUP_HOURS) { office::resolve_office_days(&cal) } else { Vec::new() };
-        let moveable = MoveableDates::compute(year);
-        let indices: Vec<usize> = match &dates {
-            None => (0..cal.days.len()).collect(),
-            Some(dates) => dates
-                .iter()
-                .map(|d| {
-                    let i = d.ordinal() as usize - 1;
-                    match cal.days.get(i) {
-                        Some(day) if day.date == *d => Ok(i),
-                        Some(day) => Err(format!("calendar for {year} returned {} at {d}", day.date)),
-                        None => Err(format!("{d} is outside the {year} calendar")),
-                    }
-                })
-                .collect::<Result<_, _>>()?,
-        };
-        for i in indices {
-            if sel.has(GROUP_CALENDAR) {
-                emit(calendar_day_record(&cal.days[i]))?;
-            }
-            if sel.has(GROUP_OFFICE) {
-                emit(office_day_record(&cal.days[i], &office_days[i]))?;
-            }
-            if sel.has(GROUP_HOURS) {
-                let engine = engine.ok_or("the hours group needs the office engine")?;
-                let day = office::Day::new(cal.days[i].clone(), office_days[i].clone());
-                for hour_name in &sel.hours {
-                    for form in &sel.forms {
-                        let form = PrayerForm::parse(form)?;
-                        let h = engine
-                            .compose_hour(hour_name, &day, &moveable, form)
-                            .map_err(|e| format!("composing {hour_name} {} for {}: {e}", form.as_str(), day.date))?;
-                        emit(hour_record(day.date, hour_name, form, &h)?)?;
-                    }
+        if sel.has(GROUP_OFFICE) {
+            emit(office_day_record(&cal.days[i], &office_days[i]))?;
+        }
+        if sel.has(GROUP_HOURS) {
+            let engine = engine.ok_or("the hours group needs the office engine")?;
+            let day = office::Day::new(cal.days[i].clone(), office_days[i].clone());
+            for hour_name in &sel.hours {
+                for form in &sel.forms {
+                    let form = PrayerForm::parse(form)?;
+                    let h = engine
+                        .compose_hour(hour_name, &day, &moveable, form)
+                        .map_err(|e| format!("composing {hour_name} {} for {}: {e}", form.as_str(), day.date))?;
+                    emit(hour_record(day.date, hour_name, form, &h)?)?;
                 }
             }
         }
@@ -320,7 +342,7 @@ fn element(e: &OfficeElement) -> Value {
 
 /// Every resolvable corpus key in byte order with its directive and resolved
 /// body, then the appointment scopes in file order.
-fn corpus_records(texts: &OfficeTexts) -> Vec<Value> {
+pub(crate) fn corpus_records(texts: &OfficeTexts) -> Vec<Value> {
     let c = &texts.corpus;
     let text = |s: Option<&str>| s.map_or(Value::Null, |s| if s.is_empty() { Value::Null } else { Value::String(s.to_string()) });
     let mut out = Vec::new();

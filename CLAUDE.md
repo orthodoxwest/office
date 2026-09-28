@@ -148,9 +148,6 @@ make review-suspects  # Only pre-flagged/lint-flagged texts — the findings-spr
 make review-plan      # Sample observed engine behavior (default 28y); no completion score
 make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
-./office dump -start 2026 [-years N] | -dates D,... [-hours ..] [-forms ..] [-groups ..]  # canonical JSONL
-./office dump diff LEFT RIGHT     # first differences by JSON Pointer (before vs after)
-./office dump digest FILE         # parity snapshot of a dump
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 ./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
 
