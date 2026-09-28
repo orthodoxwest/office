@@ -1119,6 +1119,8 @@ proper/epiphany-octave-set-4/benedictus-antiphon,805df3148da7,diurnal,"Within th
 proper/epiphany-octave-set-4/magnificat-antiphon,f61b95f7bb2a,diurnal,"Within the Octave of the Epiphany, V Day",228,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-5/benedictus-antiphon,6fe815a1a16d,diurnal,"Within the Octave of the Epiphany, VI Day",228,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany-octave-set-5/magnificat-antiphon,ca38dde79348,diurnal,"Within the Octave of the Epiphany, VI Day",228,verified,grok,2026-08-24,word-for-word from printed page image
+proper/epiphany-sunday-1/benedictus-antiphon,116ac4d63dd8,md_holy-family.pdf,"Holy Family, At Lauds, Ant. on Ben.",6,verified,claude,2026-09-28,word-for-word from printed page image
+proper/epiphany-sunday-1/magnificat-antiphon,774058796332,md_holy-family.pdf,"Holy Family, At II Vespers, Ant. on Mag.",7,verified,claude,2026-09-28,word-for-word from printed page image
 proper/epiphany-sunday-2/benedictus-antiphon,994b31822f5e,Monastic Diurnal.pdf,proper/epiphany-sunday-2/benedictus-antiphon; PDF pages 278,232,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__epiphany-sunday-2__benedictus-antiphon/record.json"
 proper/epiphany-sunday-2/collect,12857be26406,diurnal,,232,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0278.png
 proper/epiphany-sunday-2/magnificat-antiphon,551e77aceee9,diurnal,II Sunday after the Epiphany,232,verified,grok,2026-08-24,word-for-word from printed page image
@@ -1145,11 +1147,10 @@ proper/epiphany/chapter-lauds,de310a2d710f,diurnal,"Epiphany, At Lauds",224,veri
 proper/epiphany/chapter-none,c8a77b00203c,diurnal,"Epiphany, At None",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/chapter-sext,0462d501e782,diurnal,"Epiphany, At Sext",226,verified,grok,2026-08-24,word-for-word from printed page image
 proper/epiphany/collect,6c60591a0964,draft archdiocesan Lauds book,,141,verified,codex,2026-07-17,
-proper/epiphany/commemoration-antiphon,fe9bf919d185,diurnal,,224,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/hymn-lauds,e41d24f57d46,Monastic Diurnal.pdf,proper/epiphany/hymn-lauds; PDF pages 271,225,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__epiphany__hymn-lauds/record.json"
 proper/epiphany/hymn-vespers,765173c01490,Monastic Diurnal.pdf,"proper/epiphany/hymn-vespers; PDF pages 269, 270","223, 224",verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording. Evidence: output/local-review/agent-sweep-20260927/applied/proper__epiphany__hymn-vespers/record.json
 proper/epiphany/magnificat-antiphon,0b75863eebed,Monastic Diurnal.pdf,proper/epiphany/magnificat-antiphon; PDF pages 272,226,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__epiphany__magnificat-antiphon/record.json"
-proper/epiphany/magnificat-antiphon-first,27bbc713aaa1,Monastic Diurnal.pdf,proper/epiphany/magnificat-antiphon-first; PDF pages 270,224,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__epiphany__magnificat-antiphon-first/record.json"
+proper/epiphany/magnificat-antiphon-first,fe9bf919d185,diurnal,"The Epiphany, At I Vespers, Ant. on Magnificat",224,verified,claude,2026-09-28,word-for-word from printed page image
 proper/epiphany/psalm-antiphon-1,7c5a7b1eeb8e,diurnal,,224,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png; first reader discarded as wrong-page because corpus was far
 proper/epiphany/psalm-antiphon-2,b5e68f2371e5,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
 proper/epiphany/psalm-antiphon-3,f1b43827efea,diurnal,,224,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0270.png
@@ -1167,6 +1168,7 @@ proper/exaltation-holy-cross/chapter-sext,1f78ef8ab598,diurnal,"Exaltation of th
 proper/exaltation-holy-cross/collect,6c0b63f79a43,diurnal,"Exaltation of the Holy Cross, At Lauds",600,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0644.png
 proper/exaltation-holy-cross/hymn-lauds,f653d437eeac,draft archdiocesan Lauds book,,547-549,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/hymn-vespers,6158946e9065,draft archdiocesan Vespers book,,482-483,verified,codex,2026-07-18,
+proper/exaltation-holy-cross/magnificat-antiphon,235d29e66907,diurnal,"September 15, I Vespers, commemoration of the Exaltation (its II Vespers Ant. on Magnificat)",601-602,verified,claude,2026-09-28,word-for-word from printed page image
 proper/exaltation-holy-cross/magnificat-antiphon-first,2d8d44848148,draft archdiocesan Vespers book,,484,verified,codex,2026-07-18,
 proper/exaltation-holy-cross/psalm-antiphon-1,2e2b3e7f742a,draft archdiocesan Lauds book,,546,verified,codex,2026-07-17,
 proper/exaltation-holy-cross/psalm-antiphon-2,1926c58c8001,draft archdiocesan Lauds book,,547,verified,codex,2026-07-17,
