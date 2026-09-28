@@ -84,7 +84,7 @@ jobs:
         run: npm ci --prefix .web-tools
 
       - name: Run UX behavior and accessibility tests
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js
+        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=4
 
       - name: Regenerate UX snapshots
         run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --update-snapshots=all

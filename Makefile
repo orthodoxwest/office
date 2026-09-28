@@ -153,8 +153,8 @@ mutate-diff: ## Inspect mutations in changed Rust lines
 
 rust-check: ## Rust workspace: fmt, clippy, and tests
 	cargo fmt --check
-	cargo clippy --workspace --all-targets -- -D warnings
-	cargo test --workspace
+	cargo clippy --workspace --all-targets --locked -- -D warnings
+	cargo test --workspace --locked
 
 parity: build ## Check every snapshot, including the 2026–2053 digest
 	python3 scripts/golden.py --check
