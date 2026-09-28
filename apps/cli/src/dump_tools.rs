@@ -6,7 +6,8 @@ use std::io::{BufRead, BufReader, Write};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use calendar::CalendarData;
-use serde_json::{Map, Value, json};
+use serde::ser::{Serialize, SerializeMap, Serializer};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::args::Flags;
@@ -79,52 +80,113 @@ fn assignment(level: Level, field: &str) -> Result<Group, String> {
     Ok(group)
 }
 
-fn project(value: &Value, level: Level, group: Group) -> Result<Value, String> {
+fn nested_level(level: Level) -> Level {
+    match level {
+        Level::Hour => Level::Section,
+        Level::Section => Level::Element,
+        Level::Element => Level::Voice,
+        Level::Voice => unreachable!(),
+    }
+}
+
+/// Checks that every field at every depth has a digest assignment, including
+/// nesting that no projection includes (e.g. sources has no voice fields).
+fn check_assignments(value: &Value, level: Level) -> Result<(), String> {
     let object = value.as_object().ok_or("nested record is not an object")?;
-    let mut out = Map::new();
     for (key, value) in object {
-        let assigned = assignment(level, key)?;
-        if assigned == group {
-            out.insert(key.clone(), value.clone());
-        }
-        if assigned == Group::Nested {
+        if assignment(level, key)? == Group::Nested {
             let array = value.as_array().ok_or_else(|| format!("field {key:?} is not a list"))?;
-            let next = match level {
-                Level::Hour => Level::Section,
-                Level::Section => Level::Element,
-                Level::Element => Level::Voice,
-                Level::Voice => unreachable!(),
-            };
-            // Validate the entire nested schema even when this projection
-            // doesn't include it (e.g. sources has no voice fields).
-            let nested = array.iter().map(|v| project(v, next, group)).collect::<Result<Vec<_>, _>>()?;
-            if group != Group::Decisions && (!matches!(level, Level::Element) || matches!(group, Group::Content | Group::Presentation)) {
-                out.insert(key.clone(), Value::Array(nested));
+            array.iter().try_for_each(|v| check_assignments(v, nested_level(level)))?;
+        }
+    }
+    Ok(())
+}
+
+/// One group's view of a record that passed `check_assignments`, serialized
+/// by reference: the assigned fields and projected nesting in key order.
+#[derive(Clone, Copy)]
+struct Projection<'a> {
+    value: &'a Value,
+    level: Level,
+    group: Group,
+}
+
+enum Field<'a> {
+    Value(&'a Value),
+    Nested(Projection<'a>),
+    Empty,
+}
+
+impl<'a> Projection<'a> {
+    fn fields(self) -> Vec<(&'a str, Field<'a>)> {
+        let (level, group) = (self.level, self.group);
+        let object = self.value.as_object().expect("checked record");
+        let nests =
+            group != Group::Decisions && (!matches!(level, Level::Element) || matches!(group, Group::Content | Group::Presentation));
+        let mut out = Vec::new();
+        for (key, value) in object {
+            match assignment(level, key).expect("checked record") {
+                g if g == group => out.push((key.as_str(), Field::Value(value))),
+                Group::Nested if nests => out.push((key.as_str(), Field::Nested(Projection { value, level: nested_level(level), group }))),
+                _ => {}
             }
         }
-    }
-    if matches!(level, Level::Hour) {
-        out.insert("date".into(), value["date"].clone());
-        if group != Group::Decisions {
-            out.entry("sections").or_insert(json!([]));
+        let default = match level {
+            Level::Hour => {
+                out.push(("date", Field::Value(&self.value["date"])));
+                (group != Group::Decisions).then_some("sections")
+            }
+            Level::Section => Some("elements"),
+            Level::Element if nests => Some("voice"),
+            _ => None,
+        };
+        if let Some(key) = default.filter(|key| !out.iter().any(|(k, _)| k == key)) {
+            out.push((key, Field::Empty));
         }
-    } else if matches!(level, Level::Section) {
-        out.entry("elements").or_insert(json!([]));
-    } else if matches!(level, Level::Element) && matches!(group, Group::Content | Group::Presentation) {
-        out.entry("voice").or_insert(json!([]));
+        out.sort_unstable_by_key(|(key, _)| *key);
+        out
     }
-    Ok(Value::Object(out))
+}
+
+impl Serialize for Projection<'_> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        let fields = self.fields();
+        let mut map = s.serialize_map(Some(fields.len()))?;
+        for (key, field) in fields {
+            match field {
+                Field::Value(v) => map.serialize_entry(key, v)?,
+                Field::Nested(p) => {
+                    let items = p.value.as_array().expect("checked record");
+                    map.serialize_entry(key, &Items(items, p))?
+                }
+                Field::Empty => map.serialize_entry(key, &[] as &[Value])?,
+            }
+        }
+        map.end()
+    }
+}
+
+/// A nested list, each item projected like `template`.
+struct Items<'a>(&'a [Value], Projection<'a>);
+
+impl Serialize for Items<'_> {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.collect_seq(self.0.iter().map(|value| Projection { value, ..self.1 }))
+    }
 }
 
 #[derive(Default)]
 struct Hash {
     state: Sha256,
     lines: usize,
+    buf: Vec<u8>,
 }
 impl Hash {
-    fn add(&mut self, v: &Value) {
-        self.state.update(serde_json::to_vec(v).expect("JSON value"));
-        self.state.update(b"\n");
+    fn add(&mut self, v: &impl Serialize) {
+        self.buf.clear();
+        serde_json::to_writer(&mut self.buf, v).expect("JSON value");
+        self.buf.push(b'\n');
+        self.state.update(&self.buf);
         self.lines += 1;
     }
     fn finish(self) -> Value {
@@ -206,9 +268,10 @@ impl Digester {
                 if !HOUR_NAMES.contains(&hour) || !PRAYER_FORMS.contains(&form) {
                     return Err("unknown hour or form".into());
                 }
+                check_assignments(r, Level::Hour)?;
                 let hashes = y.hours.entry((hour.into(), form.into())).or_default();
                 for (hash, group) in hashes.iter_mut().zip(GROUPS) {
-                    hash.add(&project(r, Level::Hour, group)?);
+                    hash.add(&Projection { value: r, level: Level::Hour, group });
                 }
                 y.date_hours += usize::from(form == "private");
             }
