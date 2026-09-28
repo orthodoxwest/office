@@ -44,12 +44,6 @@ While all things were in quiet silence, * and that night was in the midst of her
 # SOURCE: draft archdiocesan Vespers book, p. 112 (Vigil of the Epiphany; dormant at the January 5 Epiphany boundary)
 The Child Jesus * increased in wisdom and stature in the sight of God and man.
 
-[commemoration-antiphon]
-@use proper/vigil-epiphany/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/vigil-epiphany/versicle-lauds
-
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 222
 Almighty, everlasting God, direct our actions according to thy good pleasure: that in the Name of thy beloved Son we may be worthy to abound in good works.

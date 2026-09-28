@@ -48,12 +48,6 @@ These are they * which were not defiled with women; for they are virgins: and th
 # SOURCE: monastic diurnal, p. 204 (Holy Innocents, At II Vespers)
 Then were innocent children * slain instead of Christ by a wicked ruler; the very sucklings were put to death: spotless, they follow the Lamb himself, and say for ever: Glory be to thee, O Lord.
 
-[commemoration-antiphon]
-@use proper/holy-innocents/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/holy-innocents/versicle-lauds
-
 [collect]
 # SOURCE: monastic diurnal, p. 202 (Holy Innocents, At Lauds)
 O God, whose praise the Martyr Innocents confessed this day, not by speaking but by dying: mortify in us all the evils of vice, that our life may shew forth in deeds that faith in thee which our lips profess.

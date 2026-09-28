@@ -52,12 +52,6 @@ Thee, O God, * the Father unbegotten; thee, O only-begotten Son; thee, O Holy Sp
 # SOURCE: draft archdiocesan Vespers book, p. 195 (I Vespers, The Feast of the Most Holy Trinity)
 Thanks, O God, * be unto thee, thanks be unto thee, one and very Trinity, one and supreme Deity, holy and onely Unity.
 
-[commemoration-antiphon]
-@use proper/trinity-sunday/psalm-antiphon-1
-
-[commemoration-versicle]
-@use proper/trinity-sunday/versicle-lauds
-
 [collect]
 # SOURCE: diurnal p. 404
 Almighty and everlasting God, who hast given unto us thy servants grace, by the confession of a true faith, to acknowledge the glory of the eternal Trinity, and in the power of the Divine Majesty to worship the Unity; We beseech thee that thou wouldest keep us stedfast in this faith, and evermore defend us from all adversities.

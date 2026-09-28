@@ -45,12 +45,6 @@ Jesus himself * began to be about thirty years of age, being, as was supposed, t
 # SOURCE: monastic diurnal, p. 493 (St Joseph, At II Vespers)
 Behold a faithful * and wise servant, whom his Lord hath made ruler over his household.
 
-[commemoration-antiphon]
-And Jacob begat Joseph * the husband of Mary, of whom was born Jesus, Who is called Christ.
-
-[commemoration-versicle]
-@use proper/st-joseph/versicle-vespers
-
 [collect]
 # SOURCE: monastic diurnal, p. 492 (St Joseph, At Lauds)
 Help us, we beseech thee, O Lord, for the worth of him who espoused thy most holy Mother: that those good things which we cannot obtain by our own power may be given us at his petition.

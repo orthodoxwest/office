@@ -1,0 +1,11 @@
+[commemoration-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 577 (St Peter's Chains, I Vespers, Commemoration of St Paul; Lauds p. 579 and II Vespers p. 580 "as above")
+@use proper/commemoration-st-paul-apostle/commemoration-antiphon
+
+[commemoration-versicle]
+# SOURCE: Monastic Diurnal.pdf, p. 577 (St Peter's Chains, Commemoration of St Paul)
+@use proper/commemoration-st-paul-apostle/commemoration-versicle
+
+[commemoration-collect]
+# SOURCE: Monastic Diurnal.pdf, p. 577 (St Peter's Chains, Commemoration of St Paul)
+O God, who didst teach a multitude of the Gentiles by the preaching of blessed Paul the Apostle: grant unto us, we beseech thee, that we who honour his Commemoration may perceive the benefits of his intercession before thee.

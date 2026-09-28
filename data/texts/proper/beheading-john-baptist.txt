@@ -29,12 +29,6 @@ Give me in a charger * the head of John the Baptist: and the king was exceeding 
 # SOURCE: monastic diurnal, p. 595 (Beheading of St John Baptist, At II Vespers)
 The king, the unbeliever, * sent his detestable servants, and commanded them to behead John the Baptist.
 
-[commemoration-antiphon]
-@use proper/beheading-john-baptist/psalm-antiphon-1
-
-[commemoration-versicle]
-@use commons/bishop-martyr/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, p. 594 (Beheading of St John Baptist, At Lauds)
 We beseech thee, O Lord, that the reverend festival of holy John Baptist thy Forerunner and Martyr: may bring upon us the benefit of thy saving help.

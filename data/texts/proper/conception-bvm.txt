@@ -36,13 +36,6 @@ Let us celebrate * the worshipful Conception of the blessed and glorious Virgin 
 # SOURCE: draft archdiocesan Vespers book, p. 249 (I Vespers of the Conception of the B.V.M.)
 All generations * shall call me blessed: for he that is mighty hath magnified me, alleluia.
 
-[commemoration-antiphon]
-@use proper/conception-bvm/psalm-antiphon-1
-
-[commemoration-versicle]
-V. This day is the Holy Virgin Mary conceived without sin.
-R. The Virgin's foot hath bruised the serpent's head.
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 368, 250
 O merciful God, hear the supplication of thy servants: that we who are gathered together to honour the Conception of the Virgin Mother of God may through her intercession be delivered by thee from the perils which beset us.

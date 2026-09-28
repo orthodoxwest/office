@@ -96,12 +96,6 @@ R. Blessed are the dead which die in the Lord.
 V. I heard a voice from heaven, saying unto me.
 R. Blessed are the dead which die in the Lord.
 
-[commemoration-antiphon]
-@use proper/all-souls/psalm-antiphon-1-vespers
-
-[commemoration-versicle]
-@use proper/all-souls/versicle-vespers
-
 [collect]
 # SOURCE: Monastic Diurnal.pdf, p. 77* (The Office of the Dead, Collects)
 # The ordo appoints the first collect only on Nov 2 ("1st Col. only, MD 77*").
@@ -169,7 +163,6 @@ R. Amen.
 # SOURCE: Monastic Diurnal pp. 99*-104*; preserves the existing Lauds of the Dead appointment
 @use psalmody/lauds/dead
 
-
 [lauds-laudate-psalmody]
 # SOURCE: Monastic Diurnal pp. 99*-104*; preserves the existing Lauds of the Dead appointment
 @use psalmody/lauds/dead-laudate
@@ -178,12 +171,10 @@ R. Amen.
 # SOURCE: Monastic Diurnal.pdf, p. 652
 We suppliants, O Lord, pour forth our prayers for the souls of all thy servants and handmaids: that thou wouldst mercifully pardon whatsoever hath been amiss in their human conversation, and graciously deliver them from all suffering.
 
-
 [prime-concluding-versicle]
 # SOURCE: Monastic Diurnal.pdf, p. 653
 V. The righteous shall be had in everlasting remembrance.
 R. They will not be afraid of any evil tidings.
-
 
 [prime-concluding-collect]
 # SOURCE: Monastic Diurnal.pdf, p. 653

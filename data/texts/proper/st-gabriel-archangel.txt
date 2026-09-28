@@ -29,9 +29,6 @@ The Angel Gabriel * descended to Zacharias, and said unto him: Thy wife shall be
 # SOURCE: monastic diurnal, p. 501 (St Gabriel, At II Vespers)
 The Archangel Gabriel * said unto Mary: With God nothing shall be impossible. And Mary said, Behold the handmaid of the Lord: be it unto me according to thy word. And the Angel departed from her.
 
-[commemoration-antiphon]
-The Angel Gabriel was sent * to a virgin espoused to a man whose name was Joseph, and the virgin's name was Mary.
-
 [commemoration-versicle]
 @use proper/guardian-angels/commemoration-versicle
 

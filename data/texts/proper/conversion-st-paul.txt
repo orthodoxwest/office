@@ -34,9 +34,6 @@ Thrice was I beaten with rods, * once was I stoned, thrice I suffered shipwreck,
 [psalm-antiphon-4-vespers]
 @use proper/conversion-st-paul/psalm-antiphon-5
 
-[commemoration-antiphon]
-@use proper/conversion-st-paul/magnificat-antiphon-first
-
 [collect]
 # SOURCE: monastic diurnal, p. 464 (Conversion of St Paul, At Lauds)
 O God, who hast taught the whole world by the preaching of blessed Paul the Apostle: grant unto us, we beseech thee, that we who on this day celebrate his Conversion may, by following his example, advance in the way that leadeth unto thee.
@@ -108,9 +105,6 @@ Amen.
 # SOURCE: draft archdiocesan Lauds book, p. 378 (Conversion of St Paul)
 V. Thou art a chosen vessel, holy Apostle Paul.
 R. A preacher of the truth throughout all the world.
-
-[commemoration-versicle]
-@use proper/conversion-st-paul/versicle-lauds
 
 [versicle-vespers]
 @use proper/conversion-st-paul/versicle-lauds

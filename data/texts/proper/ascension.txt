@@ -39,13 +39,6 @@ O King of glory, * thou Lord of Sabaoth, who triumphing to-day hast ascended abo
 # SOURCE: draft archdiocesan Vespers book, p. 178 (I Vespers, The Ascension of Our Lord)
 Father, * I have manifested thy Name unto the men which thou gavest me: and now I pray for them, not for the world, because I come to thee, alleluia.
 
-[commemoration-antiphon]
-@use proper/ascension/psalm-antiphon
-
-[commemoration-versicle]
-V. God is ascended with jubilee, alleluia.
-R. And the Lord with the sound of trumpet, alleluia.
-
 [collect]
 # SOURCE: diurnal p. 391
 Grant, we beseech thee, Almighty God, that like as we do believe thy only-begotten Son our Lord Jesus Christ to have ascended into the heavens; so we may also in heart and mind thither ascend, and with him continually dwell.
@@ -204,7 +197,6 @@ R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 65 (octave commemoration at Sunday I Vespers)
 @use proper/ascension/magnificat-antiphon
 
-
 [commemoration-versicle-sunday-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 65 (octave commemoration at Sunday I Vespers)
 @use proper/ascension/versicle-vespers
@@ -212,7 +204,6 @@ R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 [commemoration-antiphon-at-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 66 (Ascension octave at I Vespers of another feast)
 @use proper/ascension/magnificat-antiphon
-
 
 [commemoration-versicle-at-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 66 (Ascension octave at I Vespers of another feast)

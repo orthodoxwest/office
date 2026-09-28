@@ -8,6 +8,7 @@ Whatsoever * thou shalt bind on earth shall be bound in heaven: and whatsoever t
 Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
 
 [magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 580 (St Peter's Chains, II Vespers)
 Loosen these earthly fetters * at the command of God, O Peter; and let the kingdom of heaven be opened unto the blessed.
 
 [chapter-lauds]
@@ -16,8 +17,9 @@ Herod the King stretched forth his hands to vex certain of the Church. And he ki
 R. Thanks be to God.
 
 [chapter-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 579 (St Peter's Chains, At Sext)
 !Acts 12:5
-Peter therefore was kept in prison. * But prayer was made without ceasing of the Church unto God for him.
+Peter therefore was kept in prison: * but prayer was made without ceasing of the church unto God for him.
 
 [chapter-none]
 !Acts 12:11
@@ -27,6 +29,7 @@ And when Peter was come to himself, he said, Now I know of a surety, that the Lo
 @use proper/chair-peter-antioch/hymn-lauds
 
 [hymn-vespers]
+# SOURCE: Monastic Diurnal.pdf, pp. 576-577 (St Peter's Chains, I Vespers)
 Petrus beatus catenarum
 
 Peter the blessed, bidden by Christ's messenger,
@@ -47,8 +50,9 @@ Amen.
 V. Thou art Peter.
 R. And upon this rock I will build my Church.
 
-[commemoration-antiphon]
-@use proper/chains-st-peter/benedictus-antiphon
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 578 (St Peter's Chains, At Lauds)
+@use proper/chains-st-peter/versicle-vespers
 
 [chapter-vespers]
 @use proper/chains-st-peter/chapter-lauds
@@ -72,6 +76,7 @@ The Angel said unto Peter, * Cast thy garment about thee, and follow me.
 The Lord hath sent * his Angel, and hath delivered me out of the hand of Herod, alleluia.
 
 [psalm-antiphon-5]
+# SOURCE: Monastic Diurnal.pdf, p. 578 (St Peter's Chains, At Lauds)
 Thou art Peter, * and upon this rock I will build my Church.
 
 # Versicle pair (V. … / R. …) for the commemoration of this feast.

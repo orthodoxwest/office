@@ -25,12 +25,6 @@ Jesus said: * But that ye may know that the Son of man hath power on earth to fo
 [magnificat-antiphon]
 The Apostles spoke in diverse tongues * the wonderful works of God, alleluia, alleluia, alleluia.
 
-[commemoration-antiphon]
-@use proper/pentecost/commemoration-antiphon
-
-[commemoration-versicle]
-@use proper/pentecost/versicle-lauds
-
 [collect]
 O most merciful God, we beseech thee to grant unto thy Church that, forasmuch as she is gathered together in the Holy Ghost, no assaults of her enemies may be able to trouble her.
 

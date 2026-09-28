@@ -48,12 +48,6 @@ This is the same John, * who leaned on the Lord's bosom at the last supper: the 
 # SOURCE: draft archdiocesan Vespers book, p. 76 (Saint John, Apostle and Evangelist)
 There went this saying abroad * among the brethren, that that disciple should not die: yet Jesus said not unto him, He shall not die; but, if I will that he tarry till I come.
 
-[commemoration-antiphon]
-@use proper/st-john-evangelist/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/st-john-evangelist/versicle-vespers
-
 [commemoration-collect]
 # SOURCE: Monastic Diurnal.pdf, p. 197, 199
 Merciful Lord, we beseech thee to cast thy bright beams of light upon thy Church, that it, being illumined by the doctrine of thy blessed Apostle and Evangelist Saint John, may so walk in the light of thy truth, that it may at length attain to life everlasting.

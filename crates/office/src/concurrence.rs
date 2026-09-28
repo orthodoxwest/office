@@ -51,6 +51,10 @@ pub struct VespersDesignation {
     /// The following celebration when its office is commemorated at II
     /// Vespers (its antiphon and versicle then come from I Vespers, XIV.14).
     pub following_office_commemoration_id: Option<String>,
+    /// Commemorated offices that belong to the following day: each begins
+    /// with its own I-Vespers antiphon and versicle (XIV.14; 2026 ordo
+    /// 24 January, 23 March, 10 November).
+    pub incoming_commemoration_ids: Vec<String>,
     /// The octave whose office is celebrated tomorrow when this is II Vespers.
     pub following_office_octave_of: Option<String>,
     /// A Vespers split at the Chapter: psalmody from the outgoing office.
@@ -77,6 +81,7 @@ impl VespersDesignation {
             decisions: Vec::new(),
             commemorations: Vec::new(),
             following_office_commemoration_id: None,
+            incoming_commemoration_ids: Vec::new(),
             following_office_octave_of: None,
             psalmody_from_preceding: false,
             appended_office_of_the_dead: false,
@@ -627,6 +632,13 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
 /// `following`. A plain feria (no celebration) has no Vespers rights of its
 /// own, but the following day's I Vespers still applies.
 pub fn resolve_concurrence(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
+    let mut d = resolve_concurrence_owner(preceding, following);
+    let incoming: Vec<&str> = following.celebration.iter().chain(&following.commemorations).map(|f| f.id.as_str()).collect();
+    d.incoming_commemoration_ids = d.commemorations.iter().filter(|c| incoming.contains(&c.id.as_str())).map(|c| c.id.clone()).collect();
+    d
+}
+
+fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
     // All Souls ends at None; Vespers are of the displaced All Saints octave.
     if let Some(octave) = all_souls_octave_vespers_office(preceding) {
         let mut synth = preceding.clone();

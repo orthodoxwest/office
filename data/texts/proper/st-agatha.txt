@@ -28,12 +28,6 @@ The multitude * of the heathen, fleeing to the tomb of the virgin, took thence h
 [magnificat-antiphon]
 @use proper/st-agatha/magnificat-antiphon-first
 
-[commemoration-antiphon]
-@use proper/st-agatha/psalm-antiphon-1
-
-[commemoration-versicle]
-@use commons/virgin-martyr/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, pp. 472–473 (St Agatha)
 O God, who among other miracles of thy power hast bestowed the victory of martyrdom even upon women: mercifully grant that we who honour the birthday of blessed Agatha, thy Virgin and Martyr, may through her example walk in the way that leadeth unto thee.

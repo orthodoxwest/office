@@ -22,12 +22,6 @@
 [magnificat-antiphon]
 @use proper/whit-ember-friday/magnificat-antiphon
 
-[commemoration-antiphon]
-@use proper/pentecost/commemoration-antiphon
-
-[commemoration-versicle]
-@use proper/pentecost/versicle-lauds
-
 [collect]
 O Lord, we beseech thee, that the Comforter, Which proceeded from thee, may enlighten our minds, and lead us into all truth, even as thy Son hath promised unto us.
 

@@ -38,12 +38,6 @@ Whatsoever * thou shalt bind on earth shall be bound in heaven: and whatsoever t
 # SOURCE: draft archdiocesan Vespers book, p. 300 (II Vespers, Chair of St Peter at Antioch)
 During his pontificate * never was he moved by respect of men, but rather went ever gloriously on his way to the kingdom of heaven.
 
-[commemoration-antiphon]
-Thou art the shepherd of the sheep, * O chief of the Apostles: unto thee were given the keys of the kingdom of heaven.
-
-[commemoration-versicle]
-@use proper/chair-peter-antioch/versicle-vespers
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 398, 292, 301 (Chair of St Peter at Antioch)
 O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.

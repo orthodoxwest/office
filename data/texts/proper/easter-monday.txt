@@ -29,9 +29,6 @@ Jesus himself * drew near to his disciples in the way, and went with them: but t
 # SOURCE: diurnal p. 367
 What manner of communications * are these that ye have one to another, as ye walk, and are sad? alleluia, alleluia.
 
-[commemoration-antiphon]
-@use proper/easter-sunday/easter-antiphon-5
-
 [commemoration-versicle]
 @use proper/easter-sunday/commemoration-versicle
 

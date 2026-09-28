@@ -52,9 +52,6 @@ The child * that is born unto us is more than a prophet; for this is he of whom 
 [commemoration-antiphon]
 He shall go before him * in the spirit and power of Elias, to make ready a people prepared for the Lord.
 
-[commemoration-versicle]
-@use proper/nativity-john-baptist/versicle-vespers
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 470, 391, 399 (The Nativity of St John Baptist)
 O God, who hast made this day honourable for us by the Nativity of blessed John: grant unto thy people the grace of spiritual joys, and direct the souls of all the faithful into the way of eternal salvation.

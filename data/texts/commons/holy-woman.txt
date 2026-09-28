@@ -39,27 +39,6 @@ She stretcheth out * her hand to the poor; yea, she reacheth forth her hands to 
 # SOURCE: draft archdiocesan Vespers book, p. 674 (Common of Holy Women not Virgins)
 The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who, when he had found one pearl of great price, went and sold all that he had, and bought it.
 
-[commemoration-antiphon]
-A woman that feareth the Lord, * she shall be praised.
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/holy-woman/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/holy-woman/magnificat-antiphon
-
-[commemoration-versicle]
-V. The Lord loved her and beautified her.
-R. He clothed her with a robe of glory.
-
-[commemoration-versicle-lauds]
-@use commons/holy-woman/versicle-lauds
-
-[commemoration-versicle-vespers]
-@use commons/holy-woman/versicle-vespers
-
 [commemoration-collect]
 @use commons/holy-woman/collect
 

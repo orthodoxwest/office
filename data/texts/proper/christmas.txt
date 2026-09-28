@@ -89,9 +89,6 @@ When the sun hath risen * in the heavens, ye shall see the King of kings, procee
 # SOURCE: 2026 ordo pp. 127-129; Monastic Diurnal p. 197 (Nativity commemoration at Vespers)
 @use proper/christmas/versicle-vespers
 
-[commemoration-versicle-lauds]
-@use proper/christmas/versicle-lauds
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 70, 50, 61 (Nativity)
 Grant, we beseech thee, Almighty God: that we, who through our ancient bondage are held beneath the yoke of sin, may by the new Birth of thy only-begotten Son in the flesh obtain deliverance.

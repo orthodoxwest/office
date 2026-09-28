@@ -22,12 +22,6 @@
 [magnificat-antiphon]
 @use proper/whit-ember-friday/magnificat-antiphon
 
-[commemoration-antiphon]
-@use proper/pentecost/commemoration-antiphon
-
-[commemoration-versicle]
-@use proper/pentecost/versicle-lauds
-
 [collect]
 We beseech Thee, O Lord, mercifully to pour into our hearts Thy Holy Spirit, by Whose Wisdom we have been created, and by Whose Providence all our ways are ordered.
 

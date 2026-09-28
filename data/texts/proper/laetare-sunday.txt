@@ -29,13 +29,6 @@ When Jesus * lifted up his eyes, and saw a great company come unto him, he saith
 # SOURCE: monastic diurnal, p. 266 (IV Sunday in Lent, At II Vespers)
 And Jesus * went up into a mountain, and there he sat with his disciples.
 
-[commemoration-antiphon]
-@use proper/laetare-sunday/magnificat-antiphon-first
-
-[commemoration-versicle]
-V. I will bless the Lord at all times.
-R. His praise shall continually be in my mouth.
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 232, 141; monastic diurnal, p. 265 (Fourth Sunday in Lent)
 Grant, we beseech thee, Almighty God: that we, who for our evil deeds do worthily deserve to be punished, by the comfort of thy grace may mercifully be relieved; through our Lord and Saviour Jesus Christ.

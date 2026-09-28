@@ -52,13 +52,6 @@ Thou shalt call * his name Jesus, for he shall save his people from their sins, 
 # SOURCE: draft Temporal Cycle Vespers book, p. 100 (I Vespers, Holy Name of Jesus)
 For he that is mighty * hath magnified me, and holy is his Name, alleluia.
 
-[commemoration-antiphon]
-Whosoever shall call * on the name of the Lord shall be saved.
-
-[commemoration-versicle]
-V. Blessed be the Name of the Lord, alleluia.
-R. From this time forth, and for evermore, alleluia.
-
 [collect]
 # SOURCE: diurnal p. 217
 O God, who didst appoint thine only-begotten Son to be the Saviour of mankind, and didst bid that he be called Jesus: mercifully grant that we, who reverence his holy Name on earth, may also be filled with the joy of beholding him in heaven.

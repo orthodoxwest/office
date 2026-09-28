@@ -29,12 +29,6 @@ Simon, sleepest thou? * couldest not thou watch with me one hour?
 # SOURCE: diurnal p. 284
 A maid said unto Peter, * Surely thou art one of them, for thy speech bewrayeth thee.
 
-[commemoration-antiphon]
-@use proper/holy-wednesday/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/holy-monday/commemoration-versicle
-
 [collect]
 # SOURCE: diurnal p. 284
 Grant, we beseech thee, Almighty God: that we, who are continually afflicted because of our transgressions, may be delivered by the Passion of thine only-begotten Son.

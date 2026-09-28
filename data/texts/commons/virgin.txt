@@ -30,26 +30,6 @@ The kingdom of heaven * is likened unto a merchantman seeking goodly pearls; who
 [magnificat-antiphon]
 @use commons/virgin-martyr/magnificat-antiphon
 
-[commemoration-antiphon]
-@use commons/virgin-martyr/commemoration-antiphon
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/virgin/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/virgin/magnificat-antiphon
-
-[commemoration-versicle]
-@use commons/virgin-martyr/commemoration-versicle
-
-[commemoration-versicle-lauds]
-@use commons/virgin/versicle-lauds
-
-[commemoration-versicle-vespers]
-@use commons/virgin/versicle-lauds
-
 [commemoration-collect]
 @use commons/virgin/collect
 

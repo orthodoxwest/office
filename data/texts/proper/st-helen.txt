@@ -4,9 +4,3 @@
 [collect]
 # SOURCE: monastic diurnal, p. 591 (St Helen)
 O Lord Jesus Christ, who didst reveal to blessed Helena the place where thy Cross lay hidden, that through her thy Church might be enriched with the precious treasure: grant us, at her intercession, that by the ransom of that life-giving wood, we may obtain the reward of everlasting life.
-
-[commemoration-antiphon-lauds]
-@use commons/holy-woman/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-@use commons/holy-woman/magnificat-antiphon-first

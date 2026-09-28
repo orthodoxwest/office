@@ -42,12 +42,6 @@ O Prince most glorious, * Michael the Archangel, keep us in remembrance: here an
 # SOURCE: draft archdiocesan Vespers book, p. 503 (I Vespers, Dedication of St Michael)
 While John beheld * the sacred mystery, the Archangel Michael sounded the trumpet: Forgive us, O Lord our God, that openest the book, and loosest the seals thereof, alleluia.
 
-[commemoration-antiphon]
-The smoke of the incense ascended up * before the Lord, out of the Angel's hand.
-
-[commemoration-versicle]
-@use proper/dedication-st-michael/versicle-vespers
-
 [collect]
 # SOURCE: older Sanctoral Lauds/Vespers books (Dedication of St Michael)
 O everlasting God, who hast ordained and constituted the services of Angels and men in a wonderful order; mercifully grant that, as thy holy Angels always do thee service in heaven, so, by thy appointment, they may succour and defend us on earth.

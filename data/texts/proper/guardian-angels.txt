@@ -29,9 +29,6 @@ And the Angel * that talked with me came again, and waked me, as a man that is w
 # SOURCE: monastic diurnal, p. 616 (Holy Guardian Angels, At II Vespers)
 Ye holy Angels, * our Guardians, defend us in time of battle, lest we perish in the dreadful day of judgment.
 
-[commemoration-antiphon]
-@use proper/guardian-angels/psalm-antiphon-1
-
 [commemoration-versicle]
 V. He shall give his Angels charge over thee.
 R. To keep thee in all thy ways.

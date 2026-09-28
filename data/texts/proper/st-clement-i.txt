@@ -29,12 +29,6 @@ When he had started going to the sea, * the people cried out with loud voices, O
 # SOURCE: monastic diurnal, p. 668 (St Clement, At II Vespers)
 @use proper/st-clement-i/magnificat-antiphon-first
 
-[commemoration-antiphon]
-@use proper/st-clement-i/psalm-antiphon-1
-
-[commemoration-versicle]
-@use commons/bishop-martyr/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, p. 667 (St Clement, At Lauds)
 O God, who makest us glad by the yearly festival of blessed Clement, thy Martyr and Bishop: mercifully grant that we who honour his birthday may imitate his fortitude in suffering.

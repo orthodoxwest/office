@@ -2499,5 +2499,39 @@
         "absent": true
       }
     ]
+  },
+  {
+    "id": "incoming-feast-commemoration-first-vespers",
+    "source": "Monastic Diurnal General Rubrics XIV.14. 2026 ordo 24 January (Comm. Conversion 'Go forth Ananias'), 25 January ('O holy Apostle Paul'); 2017 and 2018 ordos 23 March (Comm. Gabriel 'The angel Gabriel came in').",
+    "cases": [
+      {
+        "date": "2026-01-24",
+        "hour": "vespers",
+        "commemoration_owner": "conversion-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "Go forth, Ananias"
+      },
+      {
+        "date": "2026-01-25",
+        "hour": "vespers",
+        "commemoration_owner": "conversion-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "O holy Apostle Paul"
+      },
+      {
+        "date": "2026-03-23",
+        "hour": "vespers",
+        "commemoration_owner": "st-gabriel-archangel",
+        "slot": "commemoration-antiphon",
+        "contains": "came in unto Mary"
+      },
+      {
+        "date": "2026-03-24",
+        "hour": "vespers",
+        "commemoration_owner": "st-gabriel-archangel",
+        "slot": "commemoration-antiphon",
+        "contains": "With God nothing shall be impossible"
+      }
+    ]
   }
 ]

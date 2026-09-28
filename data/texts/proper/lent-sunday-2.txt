@@ -29,13 +29,6 @@ And Jesus taketh his disciples, * and goeth up into a mountain, and was transfig
 # SOURCE: monastic diurnal, pp. 254, 256 (II Sunday in Lent, At I and II Vespers)
 Tell the vision * which ye have seen to no man, until the Son of Man be risen again from the dead.
 
-[commemoration-antiphon]
-@use proper/lent-sunday-2/magnificat-antiphon
-
-[commemoration-versicle]
-V. I will bless the Lord at all times.
-R. His praise shall continually be in my mouth.
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 210, 141 (Second Sunday in Lent)
 Almighty God, who seest that we have no power of ourselves to help ourselves; keep us both outwardly in our bodies, and inwardly in our souls; that we may be defended from all adversities which may happen to the body, and from all evil thoughts which may assault and hurt the soul.

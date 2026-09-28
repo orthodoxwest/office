@@ -52,17 +52,6 @@ The Lord loved him * and adorned him; he clothed him with a robe of glory, and a
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, At I Vespers)
 O thou Priest and Bishop, * thou worker of mighty works, thou good shepherd of the people, pray unto the Lord for us.
 
-[commemoration-antiphon]
-@use commons/confessor-bishop/psalm-antiphon-1
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/confessor-bishop/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/confessor-bishop/magnificat-antiphon
-
 [commemoration-versicle]
 V. The Lord loved him and adorned him.
 R. He clothed him with a robe of glory.

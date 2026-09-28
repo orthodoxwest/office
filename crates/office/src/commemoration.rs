@@ -153,6 +153,7 @@ fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, refere
 pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &str) -> bool {
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
         || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id)
+        || day.vespers.incoming_commemoration_ids.contains(&comm.id)
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }

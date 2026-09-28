@@ -29,13 +29,6 @@ Then was Jesus * led up of the Spirit into the wilderness to be tempted of the d
 # SOURCE: monastic diurnal, pp. 249–250 (I Sunday in Lent, At II Vespers)
 Behold, now * is the accepted time; behold, now is the day of salvation: let us therefore in all things approve ourselves as the ministers of God, in much patience, in watchings, in fastings, and by love unfeigned.
 
-[commemoration-antiphon]
-@use proper/lent-sunday-1/magnificat-antiphon-first
-
-[commemoration-versicle]
-V. I will bless the Lord at all times.
-R. His praise shall continually be in my mouth.
-
 [collect]
 # SOURCE: monastic diurnal, p. 248 (I Sunday in Lent)
 O God, who dost purify thy Church by the yearly observance of the Lenten fast: grant unto this thy family, that what they endeavour to obtain of thee by abstinence, they may shew forth in good works.

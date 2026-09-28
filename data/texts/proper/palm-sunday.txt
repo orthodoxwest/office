@@ -29,13 +29,6 @@ The multitudes * which came together for the feast day cried unto the Lord: Bles
 # SOURCE: monastic diurnal, pp. 280–281 (Palm Sunday, At II Vespers)
 For it is written, * I will smite the shepherd, and the sheep shall be scattered. But after I am risen again, I will go before you into Galilee: there shall ye see me, saith the Lord.
 
-[commemoration-antiphon]
-@use proper/palm-sunday/magnificat-antiphon-first
-
-[commemoration-versicle]
-V. I will bless the Lord at all times.
-R. His praise shall continually be in my mouth.
-
 [collect]
 # SOURCE: draft archdiocesan Lauds book, p. 256 (Palm Sunday)
 Almighty and everlasting God, who, of thy tender love towards mankind, hast sent thy Son, our Saviour Jesus Christ, to take upon him our flesh, and to suffer death upon the cross, that all mankind should follow the example of his great humility; mercifully grant, that we may both follow the example of his patience, and also be made partakers of his resurrection.

@@ -56,9 +56,6 @@ With peaceful joy, * let us celebrate the Motherhood of blessed Mary ever a Virg
 # SOURCE: draft archdiocesan Vespers book, p. 512 (II Vespers, Motherhood of the B.V.M.)
 Thy Motherhood, * O Virgin Mother of God, hath heralded joy to all the world; for from thee hath risen the Sun of justice, Christ our God.
 
-[commemoration-antiphon]
-@use proper/motherhood-bvm/benedictus-antiphon
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 580, 513 (Motherhood of the B.V.M.)
 O God, who didst vouchsafe that thy Word should be made flesh in the womb of the Blessed Virgin Mary at the message of an Angel: grant to us thy humble servants; that we, believing her to be indeed the Mother of God, may by her intercession find favour in thy sight.

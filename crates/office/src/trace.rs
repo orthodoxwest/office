@@ -112,6 +112,7 @@ fn commemoration_takes_first_vespers(day: &Day, comm: Option<&Feast>, reference:
     let Some(comm) = comm else { return false };
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
         || (!comm.id.is_empty() && comm.id == day.following_office_commemoration_id)
+        || day.vespers.incoming_commemoration_ids.contains(&comm.id)
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }

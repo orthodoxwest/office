@@ -29,13 +29,6 @@ When a strong man armed * keepeth his palace, all his goods are in peace.
 # SOURCE: monastic diurnal, p. 261 (III Sunday in Lent, At II Vespers)
 A certain woman * of the company lifted up her voice and cried, Blessed is the womb that bare thee, and the paps which thou hast sucked. But Jesus answered, Yea, rather, blessed are they that hear the word of God, and keep it.
 
-[commemoration-antiphon]
-@use proper/lent-sunday-3/magnificat-antiphon-first
-
-[commemoration-versicle]
-V. I will bless the Lord at all times.
-R. His praise shall continually be in my mouth.
-
 [collect]
 # SOURCE: diurnal p. 260
 We beseech thee, Almighty God, look upon the hearty desires of thy humble servants: and stretch forth the right hand of thy Majesty, to be our defence against all our enemies.

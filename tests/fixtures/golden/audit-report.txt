@@ -1,20 +1,144 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 2 feast(s) ===
+=== Missing propers: 64 feast(s) ===
 
   [base]
+  [1cl] All Saints (all-saints)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Annunciation of the Blessed Virgin Mary (annunciation)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Ascension of Our Lord (ascension)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Ash Wednesday (ash-wednesday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Assumption of the Blessed Virgin Mary (assumption-bvm)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Corpus Christi (corpus-christi)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Dedication of St Michael the Archangel (dedication-st-michael)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Easter Monday (easter-monday)
+    missing: commemoration-antiphon
+  [1cl] Easter Tuesday (easter-tuesday)
+    missing: commemoration-antiphon
+  [1cl] Good Friday (good-friday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Holy Monday (holy-monday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Holy Saturday (holy-saturday)
+    missing: commemoration-versicle
+  [1cl] Holy Thursday (holy-thursday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Holy Tuesday (holy-tuesday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Holy Wednesday (holy-wednesday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] I Sunday in Lent (lent-sunday-1)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] II Sunday in Lent (lent-sunday-2)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] III Sunday in Lent (lent-sunday-3)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] IV Sunday in Lent (laetare-sunday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Nativity of St John the Baptist (nativity-john-baptist)
+    missing: commemoration-versicle
+  [1cl] Palm Sunday (palm-sunday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Ss Peter and Paul, Apostles (ss-peter-paul)
+    missing: commemoration-antiphon
+  [1cl] St George (st-george)
+    missing: commemoration-versicle
+  [1cl] Sunday of the Passion (passion-sunday)
+    missing: commemoration-versicle
+  [1cl] Sunday of the Resurrection (easter-sunday)
+    missing: commemoration-antiphon
+  [1cl] Trinity Sunday (trinity-sunday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [1cl] Whitsunday — Pentecost (pentecost)
+    missing: commemoration-versicle
+  [2cl] Chair of St Peter at Antioch (chair-peter-antioch)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Circumcision of Our Lord (circumcision)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Conception of the Blessed Virgin Mary (conception-bvm)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Holy Innocents (holy-innocents)
+    missing: commemoration-versicle
+  [2cl] Holy Name of Jesus (holy-name-jesus)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Purification of the Blessed Virgin Mary (purification-bvm)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Quinquagesima Sunday (quinquagesima)
+    missing: commemoration-versicle
+  [2cl] Septuagesima Sunday (septuagesima)
+    missing: commemoration-versicle
+  [2cl] Sexagesima Sunday (sexagesima)
+    missing: commemoration-versicle
+  [2cl] Ss Philip and James, Apostles (ss-philip-james)
+    missing: commemoration-antiphon
+  [2cl] St Andrew, Apostle (st-andrew)
+    missing: commemoration-antiphon
+  [2cl] St John, Apostle and Evangelist (st-john-evangelist)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] St Joseph, Spouse of the Blessed Virgin Mary (st-joseph)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] St Lawrence, Martyr (st-lawrence)
+    missing: commemoration-versicle
+  [2cl] Transfiguration of Our Lord (transfiguration)
+    missing: commemoration-antiphon, commemoration-versicle
+  [2cl] Visitation of the Blessed Virgin Mary (visitation-bvm)
+    missing: commemoration-antiphon, commemoration-versicle
+  [gd] Apparition of St Michael the Archangel (apparition-st-michael)
+    missing: commemoration-antiphon, commemoration-versicle
+  [gd] Beheading of St John the Baptist (beheading-john-baptist)
+    missing: commemoration-versicle
+  [gd] Conversion of St Paul (conversion-st-paul)
+    missing: commemoration-antiphon
+  [gd] Holy Guardian Angels (guardian-angels)
+    missing: commemoration-antiphon
+  [gd] St Gabriel the Archangel (st-gabriel-archangel)
+    missing: commemoration-antiphon
+  [gd] St Martin of Tours (st-martin-tours)
+    missing: commemoration-antiphon
+  [gd] St Raphael the Archangel (st-raphael-archangel)
+    missing: commemoration-antiphon, commemoration-versicle
+  [d] All Souls' Day (all-souls)
+    missing: commemoration-antiphon, commemoration-versicle
+  [d] St Clement I, Bishop and Martyr (st-clement-i)
+    missing: commemoration-antiphon
   [sd] Friday after the Octave of Ascension (friday-after-ascension-octave)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon, commemoration-versicle
+  [f2] Lent Ember Friday (lent-ember-friday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [f2] Lent Ember Saturday (lent-ember-saturday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [f2] Lent Ember Wednesday (lent-ember-wednesday)
+    missing: commemoration-antiphon, commemoration-versicle
   [f2] Rogation Monday (rogation-monday)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon, commemoration-versicle
+  [sd] The Vigil of the Epiphany (vigil-epiphany)
+    missing: commemoration-antiphon
+  [sd] Whit Ember Friday (whit-ember-friday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [sd] Whit Ember Saturday (whit-ember-saturday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [sd] Whit Ember Wednesday (whit-ember-wednesday)
+    missing: commemoration-antiphon, commemoration-versicle
+  [s] Vigil of the Ascension (vigil-ascension)
+    missing: commemoration-antiphon
 
 === Commons fallback: 3 feast(s) ===
 These refs are covered by the category commons, not feast-specific propers.
 Add to data/audit-ok.txt to acknowledge and suppress.
 
   [base]
-  [1cl] St George (st-george)
-    commons: benedictus-antiphon, magnificat-antiphon
+  [2cl] St Stephen, Protomartyr (st-stephen)
+    commons: commemoration-antiphon
+  [gd] St Agatha (st-agatha)
+    commons: commemoration-antiphon, commemoration-versicle
+  [d] St Cecilia (st-cecilia)
+    commons: commemoration-antiphon, commemoration-versicle
 
 === Flat indexed psalm antiphons: 0 proper, 0 common ===
 

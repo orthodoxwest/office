@@ -31,10 +31,6 @@ O death, I will be thy death; * O grave, I will be thy destruction.
 [commemoration-antiphon]
 O all ye that pass by * behold, and see if there be any sorrow like unto my sorrow.
 
-[commemoration-versicle]
-V. My flesh shall rest in hope.
-R. Neither wilt Thou suffer thine Holy One to see corruption.
-
 [triduum-antiphon]
 # SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
 # Said after the psalmody at every Hour of the Triduum; the second and
