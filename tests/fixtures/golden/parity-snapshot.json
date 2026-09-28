@@ -6105,7 +6105,7 @@
       "winner": "conception-bvm-octave-day"
     }
   ],
-  "corpus": "d0bd3b7eb2e81df649f11d22a3606f349d7c25a1aa5f61d854eb5a53a3ad9ea4",
+  "corpus": "7536774ec4ea9b941f4612a5dd3ced201ffa8905c683925905c0fa7bed5e98fa",
   "date_hours": 71589,
   "dump_format": "office-dump/2",
   "format": "office-parity/3",
@@ -6116,27 +6116,27 @@
       "calendar": "ef74a7feb906643b0b0968ce3d7eee81285da3c2812385156738ba92d146f052",
       "hours": [
         {
-          "content": "323f2b03c9c6794ba0eaa2375751ec3a6283480da799327b00b8137fe1eeba06",
+          "content": "94920c19f5f2a71bfb75f51b427bcc4ef730bf21f1269562dc5e07b8257bfa1e",
           "decisions": "6ac9436e43797454dee9c94d2609465e9c0b96a1f6c9756e9e9ea6386d6b1985",
           "form": "private",
           "hour": "lauds",
-          "presentation": "5bcd8ed4fd9f9c50ac3877a013790df0b7ff9f532655e7afec051f68a5b749aa",
+          "presentation": "c8757327706796f8c12786cbdb169f235698f14284f0133e5790dd88023a757c",
           "sources": "e34b37263145b5a584e9c8f897f3c0afe121b1a90fb42041c5efefc0721fbe03"
         },
         {
-          "content": "55ec19c7f224b144c7c77709280fcbdd341d9dd894e8ea06c15e61be2848fea5",
+          "content": "2d561084386cdf15d856578643106cfa85e098314ab6e3184be6485e36acfca2",
           "decisions": "178a65349f33c44ba967cb612b7f8613f986a0393c28584e279aa925cadfd710",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "29c99ee2360f489b86f1474fc4754f5975d8061578e31ec9ee218d0221c0a331",
+          "presentation": "ddb95e746d94acde85c0a4c49bae03265da63f9cf91511d00289c207981750ae",
           "sources": "b7048662f3b0b6bfdf59b4e65793428d77e539f7682f7d8b7bdeffb4a1448b78"
         },
         {
-          "content": "55ec19c7f224b144c7c77709280fcbdd341d9dd894e8ea06c15e61be2848fea5",
+          "content": "2d561084386cdf15d856578643106cfa85e098314ab6e3184be6485e36acfca2",
           "decisions": "bf4ce4ddf3327d465eac1e8d82976d8dffde01a0045337f65097904d9fca3c19",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "29c99ee2360f489b86f1474fc4754f5975d8061578e31ec9ee218d0221c0a331",
+          "presentation": "ddb95e746d94acde85c0a4c49bae03265da63f9cf91511d00289c207981750ae",
           "sources": "b7048662f3b0b6bfdf59b4e65793428d77e539f7682f7d8b7bdeffb4a1448b78"
         },
         {
@@ -6291,27 +6291,27 @@
       "calendar": "86f05256f19d97d0460100cad4051a61b2252244ed5786d42b7cb6e5af18339d",
       "hours": [
         {
-          "content": "f921bb029a956b528522ad8e3f1ae3eb0a7dcc3a49105f681071e7ec1c039c1a",
+          "content": "dfb04e7145de0d48df14d7094e01309627064e74476bd345b67dfa57382808ca",
           "decisions": "e871f709a7f426fb8cc1e6a4b6f64cb40cfb24e148e1466329837df574e0e2be",
           "form": "private",
           "hour": "lauds",
-          "presentation": "9fcd2a24d7342c162d67a90a9ddfa26b7f5950d71dde87b11ffa8b68b4dc83cd",
+          "presentation": "59ba5f74ed7e9d4f2b415e907ebacef6b0241bb0fa730da57584b37990a088aa",
           "sources": "cfe6b1434977bdebfbcb7dc54511d1a8f3255f6a060bcf968fa177749bc1495d"
         },
         {
-          "content": "a2a1a0b62e7033bd136adceb7ff165cac2e8afc0fe920528a38b761ba8b90187",
+          "content": "a155cb8cbfcfa2b696cbaa5eb97fae490a5da70626e64d75d40612e1bdfa0223",
           "decisions": "3819c6e5fddfeeeef4ffe3421be1ad3ba279eeb73801561606b1f6241c94a448",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "128491288b67c9e77dede851fe69b3a7a97ce70a89db1642bed50456100d2409",
+          "presentation": "7988a308aca2089ef797a1cdfe6d5e1e466683a92b0418974f3669efe93bfa2a",
           "sources": "d49c1d7da4b400717664932b61d716b9ec3a218f6c02030360ed25c0ba3b886e"
         },
         {
-          "content": "a2a1a0b62e7033bd136adceb7ff165cac2e8afc0fe920528a38b761ba8b90187",
+          "content": "a155cb8cbfcfa2b696cbaa5eb97fae490a5da70626e64d75d40612e1bdfa0223",
           "decisions": "c8609b6d79898faa731d1fd03d6949329c677a4c7f5e98d8e6d5b81c9803848d",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "128491288b67c9e77dede851fe69b3a7a97ce70a89db1642bed50456100d2409",
+          "presentation": "7988a308aca2089ef797a1cdfe6d5e1e466683a92b0418974f3669efe93bfa2a",
           "sources": "d49c1d7da4b400717664932b61d716b9ec3a218f6c02030360ed25c0ba3b886e"
         },
         {
@@ -6466,27 +6466,27 @@
       "calendar": "5d3a974cec54c3684568221ef40ac021611e75c2cf2f73bf433e4c8642023c52",
       "hours": [
         {
-          "content": "2773c52a944cbc2ed26f2d6d1a1f19fae84749b52515edc04d2cd550ca5552bf",
+          "content": "20dcaf3d3f0494c7941a9fdea6d0f623a3cd8625d2a4ca7a6226f5c53d547fd4",
           "decisions": "62350836840fd5a4f929a08ba5ae21a391330f854b1ecd79cbb75a5c7bfa332b",
           "form": "private",
           "hour": "lauds",
-          "presentation": "1df9678cd846af7c7e9f540a56428bcc684e718cbd416f0fc151c4b31048df89",
+          "presentation": "1673647dfea256c2c6fe63f95ac6425a573c89ea8af861cf49c1a8f587cb7686",
           "sources": "61e219246e58873219e97e37f6c5db3d5897f5ca3ae893d64761193374c856bb"
         },
         {
-          "content": "8ddb37322851c566b5099f5a7723edfdf706ba078e6053b7a722cf627793a6a0",
+          "content": "3c02c586e2c559c6d22e35ccced1186d74292067007cf804913e82af418af30b",
           "decisions": "b7f6ca885f4cf4401f21377df7b4508e7c598e8ed38eee19464d030a30b5c385",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "6b6218b278ac98f08bb9f4ce5d20c768bd8641f95b9cbc7e20a5b34a0899c396",
+          "presentation": "ea5a4a238e26b86cf3c1025309e14427ee51217ce6a7970a416b6370768d4bbc",
           "sources": "325f48e36bfe2e2bf44883af64c01c607662f96cc6f6f853905f368d2b66dfae"
         },
         {
-          "content": "8ddb37322851c566b5099f5a7723edfdf706ba078e6053b7a722cf627793a6a0",
+          "content": "3c02c586e2c559c6d22e35ccced1186d74292067007cf804913e82af418af30b",
           "decisions": "f191eabecb1cc754c9e42de543fe8a8bb10479cdd4dffdf9c2fe12cf4f5f4586",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "6b6218b278ac98f08bb9f4ce5d20c768bd8641f95b9cbc7e20a5b34a0899c396",
+          "presentation": "ea5a4a238e26b86cf3c1025309e14427ee51217ce6a7970a416b6370768d4bbc",
           "sources": "325f48e36bfe2e2bf44883af64c01c607662f96cc6f6f853905f368d2b66dfae"
         },
         {
@@ -6641,27 +6641,27 @@
       "calendar": "7a66c2427a6d3ef4f022bf4982f8a4b3d5307dbb3575001ae6a76d8c426d2528",
       "hours": [
         {
-          "content": "5156640c23a4d5c9454547e748a168a045e15c95b2732c7ba09c70677da32223",
+          "content": "7b5be2c99a7144b0335f126a2c010c84dded9b174d15b6aea512c56090ccfaab",
           "decisions": "050325988bbefe16c7f083d1341be60982269f9d33dc38804d773131e3d98ee3",
           "form": "private",
           "hour": "lauds",
-          "presentation": "33d5fee186cd39ab4355ab318cfa5bfb200091e16bdb9cdb4fa20868cb956a1d",
+          "presentation": "1366d83709948e8d167dba70bb09af5c33ff046b5ca65641ec201c6031615004",
           "sources": "a35c1e2a7cb3b218598cde6e7764f556c8ca97e884476d2e7cf2bb0ab9faaf17"
         },
         {
-          "content": "5d15081923187208e44c0420cc7872d02cc19c65ff03db6d51e063decec44421",
+          "content": "b942136ae8132f951c5cfdcde4499a048fc981ac8cfaa13b923b7fe47df232df",
           "decisions": "0161b245bb10a50d277d115a630b2847dc911f2c9143c58c34d58a8d0503ce31",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "370c4d7330e313259a94e387bceb32d9b7451e112c70d7ed27c2f6d0373ddbc3",
+          "presentation": "a50f09267dbba96a1ae36cd47d05f7abdff61b3cc5f2dec68ff8a4bfc4786829",
           "sources": "9fc232928c8e70808390b93b9082e9ffe07b392163a2286c6cc3a583c0712854"
         },
         {
-          "content": "5d15081923187208e44c0420cc7872d02cc19c65ff03db6d51e063decec44421",
+          "content": "b942136ae8132f951c5cfdcde4499a048fc981ac8cfaa13b923b7fe47df232df",
           "decisions": "5a13d72baebaa974aec9f6d85cf7af86ae1fe83de469b489af03b1288eb0e4c2",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "370c4d7330e313259a94e387bceb32d9b7451e112c70d7ed27c2f6d0373ddbc3",
+          "presentation": "a50f09267dbba96a1ae36cd47d05f7abdff61b3cc5f2dec68ff8a4bfc4786829",
           "sources": "9fc232928c8e70808390b93b9082e9ffe07b392163a2286c6cc3a583c0712854"
         },
         {
@@ -6816,27 +6816,27 @@
       "calendar": "339a36439615fa0ba2c107401fa39e1523a747e7ab319014f949dafae16df08e",
       "hours": [
         {
-          "content": "3fe2fe4a4b5590393ed1576b79d33c5c1a51856742ed7b33be1af319a1b92aaf",
+          "content": "6952dd621c9e3d17963e0ddf82f8f212201276f6ee48a0bccc3071e065da2146",
           "decisions": "cc913dc5a29423222319055948b622c65bd75030c21e89804c3681736debef77",
           "form": "private",
           "hour": "lauds",
-          "presentation": "e1404647ad6cc7d4d4fe3d00a501c7a429739466f1dcb64a9a95256dda06ad0b",
+          "presentation": "35c2992ce205c2163d6f7b9f78a4c73b5e11f1c380b4bee57e13f76dc9534166",
           "sources": "f96ee89f79f6b4f06be5624ed47fd2e26a41e25c8878d94386f6d538aa022235"
         },
         {
-          "content": "59bfe750a50d5ae299e7380bcdd43d0c08f22f932d50f7b478a1aebcc2423f91",
+          "content": "7d418f4c72d9a2a821aaf31553d7c7711df9c24c3fe56122ddf182beb026acbb",
           "decisions": "bb55954e4a6303334b514d94349021177b7e3de04b28a71edb2cf287b3b8434f",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "dc84ff1718beddcea08222759651efbcd06bb4e817add9e46a56712440307831",
+          "presentation": "5f68837d819f45db72e4dfd91ad1b00858ad902d5aa6f4c56a202700ab89f81a",
           "sources": "4dfa9af7e8410a18f0606e65d81642294ef72ac02ab307f1f0a26273bb9484de"
         },
         {
-          "content": "59bfe750a50d5ae299e7380bcdd43d0c08f22f932d50f7b478a1aebcc2423f91",
+          "content": "7d418f4c72d9a2a821aaf31553d7c7711df9c24c3fe56122ddf182beb026acbb",
           "decisions": "0f5e3a7c5605a0bd27c7b2135e2447070c2aea16ae6b50d453019f8676841855",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "dc84ff1718beddcea08222759651efbcd06bb4e817add9e46a56712440307831",
+          "presentation": "5f68837d819f45db72e4dfd91ad1b00858ad902d5aa6f4c56a202700ab89f81a",
           "sources": "4dfa9af7e8410a18f0606e65d81642294ef72ac02ab307f1f0a26273bb9484de"
         },
         {
@@ -6991,27 +6991,27 @@
       "calendar": "ac7e550c39b9624bba160d801926395ff5f35fb83bbe1afbfe41ce1e69d72c38",
       "hours": [
         {
-          "content": "3e8381d66e0d3cb044311b4b5b1a0437ed5c3373f837152ce872ef6156acfe87",
+          "content": "8480e460025a944e59095aaa4effbbf0252d50f72c909447f9c47b430e1cf462",
           "decisions": "3b72dfe8da7102fb2220c0e89a7341faae5d23f6b13c9cbd69580118e9365d53",
           "form": "private",
           "hour": "lauds",
-          "presentation": "f3a7d858adb95208a03ccf4de85d9c188a4b78b1692bcfcbfc1c5aa8da58765a",
+          "presentation": "bc997afa4bcdbe6fc336653ffd13bb2b11ae43af27f89c5ba833e4d7af8a2cd3",
           "sources": "56f14d90ec7d465840b077a282d9dac944ad29eb8abddf1b8686af7bf9cd1ff1"
         },
         {
-          "content": "21deb80e31a2b56d1d3092d379dc02508f1dab48c3003075110e7c4baab11b43",
+          "content": "4e6cd0eb410bb1ffed83a00aeb240a248046e5872e60f7bb8c8c697850fd48de",
           "decisions": "4637b1a1a2e000618d0c4f13183dbdfe86b8134ae8b3466ab42901771667cf5c",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "d2d31c7aa20910d603976a47c31c1cb63fb51633f90c106d3183898525e43bc9",
+          "presentation": "cf07df994afcc794592303dafd17e587afe2bbd3ce14f23fa0063a4c46a65e8b",
           "sources": "84d3ff860b551a7fd764278feb910fb98c8caeeb662779a31a63e6d885a293e1"
         },
         {
-          "content": "21deb80e31a2b56d1d3092d379dc02508f1dab48c3003075110e7c4baab11b43",
+          "content": "4e6cd0eb410bb1ffed83a00aeb240a248046e5872e60f7bb8c8c697850fd48de",
           "decisions": "72b960bac462722d4018dfa6efa06d7d5123558e24d8cab3bac7d96ef91cb51c",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "d2d31c7aa20910d603976a47c31c1cb63fb51633f90c106d3183898525e43bc9",
+          "presentation": "cf07df994afcc794592303dafd17e587afe2bbd3ce14f23fa0063a4c46a65e8b",
           "sources": "84d3ff860b551a7fd764278feb910fb98c8caeeb662779a31a63e6d885a293e1"
         },
         {
@@ -7166,27 +7166,27 @@
       "calendar": "af76208a4efae8e8fa6e9d6f3173a3f3b2ccdd4941890f94806dc101897a4712",
       "hours": [
         {
-          "content": "617b118902e349055b23571df828922660957baf7c008fdd7a8bb6df72389d35",
+          "content": "b538973302dd432bb12a4dd0ec494bb65cc705c8af37710b1df7e635c9e4a55f",
           "decisions": "84becdd303661df48b9dcd79814c4f0a5f7ca2149f97c28f991ddf8d6eea0ebf",
           "form": "private",
           "hour": "lauds",
-          "presentation": "ef65d09fd38edf9018b2d690940f1d9084543971274919a9e676c2f9766c8079",
+          "presentation": "7a55b586819122aced2ca5e4c7dd5c3594bb4c8d44f30ed0007ec17a0acd71ed",
           "sources": "26e9f0b45fc3aa17654dec143901291ae047747745a7349cdbfb964a5472b105"
         },
         {
-          "content": "8cf59f76c8eb04769ef24d9f56bfad86ac32adcd4c040b54dff9b19144abc984",
+          "content": "f11e2a4a6b750ed853cf886142e06d4d835144299faf12fd66eb922136ba4f65",
           "decisions": "e79b757562f0c717d56d175cb897abba043eccae9fbb67867db980c0d8fb02ab",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "1d42e4ff8db49cb8acbba29ebc5163d4004acd9753feabc42a0e40b259066d7a",
+          "presentation": "d92bef8f0e5f405d3e44f8c28cb5175c6837d2af168b89fb4dd43b03d539a9ad",
           "sources": "8d703c7fb0ba81adf4f109e4d24dc89d1e88d73847434be002da70dc04d8c1dc"
         },
         {
-          "content": "8cf59f76c8eb04769ef24d9f56bfad86ac32adcd4c040b54dff9b19144abc984",
+          "content": "f11e2a4a6b750ed853cf886142e06d4d835144299faf12fd66eb922136ba4f65",
           "decisions": "d27360ecfba1331c54751bec7de587e7b75e76218de7315cee7dbb05cb780697",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "1d42e4ff8db49cb8acbba29ebc5163d4004acd9753feabc42a0e40b259066d7a",
+          "presentation": "d92bef8f0e5f405d3e44f8c28cb5175c6837d2af168b89fb4dd43b03d539a9ad",
           "sources": "8d703c7fb0ba81adf4f109e4d24dc89d1e88d73847434be002da70dc04d8c1dc"
         },
         {
@@ -7341,27 +7341,27 @@
       "calendar": "b780877c24f4184ebd4462e0957040b5218fc712e0b3e0140bb89dceaeb0081e",
       "hours": [
         {
-          "content": "3059a660c81348013eecb367573503e5923a2d43f9d819bbd4aae676ca261180",
+          "content": "5427c4f4f3aa5427e57b6b2b8ff51054503b4e174c59f1428f8d7ebe5ff20ee4",
           "decisions": "8a997d4080e785cfeb53981a747815c416e01f7bd382667789654b260f4044de",
           "form": "private",
           "hour": "lauds",
-          "presentation": "966125b44c29a5b3cdcb45a288d69b181be7ca88189002963ebece0ee794be1f",
+          "presentation": "0dc8723da89bb66b2083b6c6233f0876eb8232a3f755538f459e8efafc7f2ed1",
           "sources": "d582eecf6c816e99f6d31a11deb31a1adc94c49d617bfbaf631077761870f788"
         },
         {
-          "content": "e788425963597ee29777ffaec4e01d3ca49cb6d6215d8c8313d5735068338b91",
+          "content": "a97c1ce87ce7a3d37490cda24e48edd2d5d29b1897c87483888754c57024ddeb",
           "decisions": "689f79320ebd94ea1acaedc1a767f10134f3df08a68855ff7b8c654245f469e2",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "2019bd950842e315290949d672b777f7e0fd85f12a3ca6259a4f40c02c7159ec",
+          "presentation": "97ed33acea15513e83ffe1a7ba524905b7c108082e9746ab996fe37c6a02f89f",
           "sources": "9bdb09f3fa5983c7e75469497002147c40d26fd7f7fee837c3c789d651a8b5dc"
         },
         {
-          "content": "e788425963597ee29777ffaec4e01d3ca49cb6d6215d8c8313d5735068338b91",
+          "content": "a97c1ce87ce7a3d37490cda24e48edd2d5d29b1897c87483888754c57024ddeb",
           "decisions": "4bef43af38c10a181e2bb23ed7397e41be87b4935c846027e02e7a56a817e8d0",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "2019bd950842e315290949d672b777f7e0fd85f12a3ca6259a4f40c02c7159ec",
+          "presentation": "97ed33acea15513e83ffe1a7ba524905b7c108082e9746ab996fe37c6a02f89f",
           "sources": "9bdb09f3fa5983c7e75469497002147c40d26fd7f7fee837c3c789d651a8b5dc"
         },
         {
@@ -7516,27 +7516,27 @@
       "calendar": "23125c4e112e0669914176b3de3452c65fe3bb4408d83aea37f1b627fafc9ca1",
       "hours": [
         {
-          "content": "a22256f714ce98cf1aaac03107c383bd8702f6662ef45ddf16e4087b7f53d6d9",
+          "content": "6d093c02b2fd8a64a90a5c16dafa5e03894460f179312c4d9f68d9b29b742ab1",
           "decisions": "69c39152d7e23a40afcfff97668a49a7e6eaa776a1df7ca2c530b1f711ff3f2e",
           "form": "private",
           "hour": "lauds",
-          "presentation": "efd0c4fa0a055ffa6b1b1de1829cdd5a6caf730d4f5b8e06fdcef2cb92e042d0",
+          "presentation": "ef7712174a475d4454453994aa595f979954a8a1076d946f7a90fadba797bb32",
           "sources": "4fd7ef421d47df69f3e3675834668080f2f1d64d262d367efcf4c9db4bdab034"
         },
         {
-          "content": "f44bf67d0c25d43020d96d77fc2464357a984245a62f517bc3c46aa492378b63",
+          "content": "b84c72e2e0da682eab65b0c993949ef851d901b0ee4c8e3868a7ff52a29eb5e5",
           "decisions": "d05453684ef5f4db118d878e1e259fdc6d6c27e7eefacfb6ea3563290272bbe6",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "2a09648a1926122c1fc736498c70c7bb241d2db1ce64a879c48e73edece02ac2",
+          "presentation": "f35b9155c9678680cdffc0ad751faaa35f34dfc9b3d60958e90ece5dcaa10245",
           "sources": "84fb344fccc93614fa3c707a79d49aa3b7ec6148ec43b2283fdda07e4b600952"
         },
         {
-          "content": "f44bf67d0c25d43020d96d77fc2464357a984245a62f517bc3c46aa492378b63",
+          "content": "b84c72e2e0da682eab65b0c993949ef851d901b0ee4c8e3868a7ff52a29eb5e5",
           "decisions": "3342b146c9b49d31f92efc661cdeba304967c141420678bdddb4cc275db5c62a",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "2a09648a1926122c1fc736498c70c7bb241d2db1ce64a879c48e73edece02ac2",
+          "presentation": "f35b9155c9678680cdffc0ad751faaa35f34dfc9b3d60958e90ece5dcaa10245",
           "sources": "84fb344fccc93614fa3c707a79d49aa3b7ec6148ec43b2283fdda07e4b600952"
         },
         {
@@ -7691,27 +7691,27 @@
       "calendar": "5460ef83198193f3f26131c9e4d118e6bcc4823565f17648c2c08e4bc38b1efc",
       "hours": [
         {
-          "content": "d59dd610ab227e5270f16582503527cf6089d6f5ed6f49afdc498a0d3c400e3c",
+          "content": "c113a099d24085cfaba53ab5c697b649ed2f9dfb4afc186b682b7a6b2a657897",
           "decisions": "9e1dcf1d04cb7654eeb6fdad1da9187e367067573ff3b14978e6d706ea25e7fc",
           "form": "private",
           "hour": "lauds",
-          "presentation": "fb2d3f5b35e33e74add58c82c79ccfe93af518ec2fee0a65b07ceccea0fcf98f",
+          "presentation": "520ac768e235486c08dadb6d2c1421cb05f042f16f808a41b3532c97c7e35e10",
           "sources": "5441178d4ddd2c6997f86171b2a40b48bdd56f743e8e05c63454011e21fdb8ba"
         },
         {
-          "content": "d8c2a669cb57028fb9b78e3e2191af615a127c40aabaa7017a1fce5793fa650e",
+          "content": "e2c4f91058b8a4cecea2bd36bb8a74c165c5ab3cbd10f6e998beb82d16c73bbe",
           "decisions": "72ea10f53b412ec03c2caf49dfe2a92551fc6ae43f3a8166ed5bd43cc99e7f4c",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "f95c2618b92d65513b401c705217ba44efc25e7b7c5b1865840668faa1a3023e",
+          "presentation": "331952d27fc2c10ea00c981341d269a9a5d09a9072f658be5b3faf643ab5877a",
           "sources": "99d09ab5ee726514bf4a30caa11ab7f7a9c7b94470b11b973c1df93a9d683fa8"
         },
         {
-          "content": "d8c2a669cb57028fb9b78e3e2191af615a127c40aabaa7017a1fce5793fa650e",
+          "content": "e2c4f91058b8a4cecea2bd36bb8a74c165c5ab3cbd10f6e998beb82d16c73bbe",
           "decisions": "5cc52958bebce615a163fd56c4e93f7a6b872508636c58ff2441e75e6fc1e5b9",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "f95c2618b92d65513b401c705217ba44efc25e7b7c5b1865840668faa1a3023e",
+          "presentation": "331952d27fc2c10ea00c981341d269a9a5d09a9072f658be5b3faf643ab5877a",
           "sources": "99d09ab5ee726514bf4a30caa11ab7f7a9c7b94470b11b973c1df93a9d683fa8"
         },
         {
@@ -7866,27 +7866,27 @@
       "calendar": "edf19da38d07917915d4c8e318269356427d7ac6af6d04acb94876ae347d51a3",
       "hours": [
         {
-          "content": "c0b6f5e45ae0f5122bb5fa319b910b0afc10141c6531b85a8139f7f0255a5731",
+          "content": "bba2ca69b004e0c36a94689b7ad1f377e2ab8daa8fca8d3cbb3ff5347fa9ac17",
           "decisions": "2c91464abb9d87e9025bbbff778b3ee876447db14aea8f4db60ba0e36584af00",
           "form": "private",
           "hour": "lauds",
-          "presentation": "9ec84a78bdbc222ee303b08c40f5ed3217f1f93043b361d5582f1238921a1ee8",
+          "presentation": "7ae75846dfb1d2a201d2ab05de417e2d9a20de2ffe396e9f14bef51915ae383d",
           "sources": "a149b1d4432516a6ae2d28481c184846b7da2eac14ab20c69740ef9f468182f4"
         },
         {
-          "content": "c7b7ef8798802ef6a08445157b05bd419a43c012c044d8b671dbae526d48c30c",
+          "content": "66a1830ac5cefdc7237ccc96f1e3c376f31bdf19a6814f77681ba49780daed2f",
           "decisions": "ff2450a4b090688c93b5f8b4970b675197429cc9c154751979683f6bf1a1b145",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "89fdd2a68931ea2ac193118d4591a0683ee22b16254ec8049bbffee39b0121c8",
+          "presentation": "12a6620bef7ac6e20cf1ca10511e749d0575ea88771962cebd57c93143b8061e",
           "sources": "053a75fedb7282f92fab291d319cea5b790525a82417010a46b5dbbac75a1703"
         },
         {
-          "content": "c7b7ef8798802ef6a08445157b05bd419a43c012c044d8b671dbae526d48c30c",
+          "content": "66a1830ac5cefdc7237ccc96f1e3c376f31bdf19a6814f77681ba49780daed2f",
           "decisions": "fdad29ea9fe6956edfaacba25ca595bf945f675939cf7ddaea236052349e8a66",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "89fdd2a68931ea2ac193118d4591a0683ee22b16254ec8049bbffee39b0121c8",
+          "presentation": "12a6620bef7ac6e20cf1ca10511e749d0575ea88771962cebd57c93143b8061e",
           "sources": "053a75fedb7282f92fab291d319cea5b790525a82417010a46b5dbbac75a1703"
         },
         {
@@ -8041,27 +8041,27 @@
       "calendar": "08a5c487c220704512cd76309bd5104b9dbe692542f88e2218a7e462bd3b5155",
       "hours": [
         {
-          "content": "6dbdd62872643845648231e93163bbf675c73f084ad7b056344288d6eb48ad03",
+          "content": "cd445008458a5e7dfd4cd45aa6ab8b99e901fe85a4d088327d2219469ec87143",
           "decisions": "974e0c9159b5d1df1040d246b4cc353aff397b6607bc0e5a447aa3c9db836b3a",
           "form": "private",
           "hour": "lauds",
-          "presentation": "9dc7cd1dcc737db52440e08f9fe45be32d99babd31e25970005aa2c76b0adc8f",
+          "presentation": "40f91c5543810c6a3a3a60c3bc700183d1db2487016bccfbe94c7b6750aa4a58",
           "sources": "bfff6ea45c3fbb34d2f46cf10dd67bad983202b0e30eeb85ce346bcede7817e4"
         },
         {
-          "content": "ea0e30182281c67be446743dc58871fb807c7c475165b455c8b7d9cdfb49e942",
+          "content": "ada1776e8f3d205ab4b7810bc7bec1cfccdf46e8dea7c55fb03326446daf572c",
           "decisions": "401722488916e31b29997e347a971b7d674831376c8d180a4d823b07af9b3f7b",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "753466515ab2cd8263ee6413684dc3bd4d2790d2c4cdb32f7d5af75065c2732f",
+          "presentation": "f995debc87c9d6fb64406058ef372298e61207bf017f47c9e622ba76f3ecd807",
           "sources": "156c9a4b1f781640f0fc6a8c2e35dea3dbdfd740515c7df364505dd2b088212b"
         },
         {
-          "content": "ea0e30182281c67be446743dc58871fb807c7c475165b455c8b7d9cdfb49e942",
+          "content": "ada1776e8f3d205ab4b7810bc7bec1cfccdf46e8dea7c55fb03326446daf572c",
           "decisions": "fe031947138ad5f87e9cc5a3465480e7f0a865b97c237b9b790c3388f367d835",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "753466515ab2cd8263ee6413684dc3bd4d2790d2c4cdb32f7d5af75065c2732f",
+          "presentation": "f995debc87c9d6fb64406058ef372298e61207bf017f47c9e622ba76f3ecd807",
           "sources": "156c9a4b1f781640f0fc6a8c2e35dea3dbdfd740515c7df364505dd2b088212b"
         },
         {
@@ -8216,27 +8216,27 @@
       "calendar": "533281d203a55983259804c687f3f9fa94c7ce81b2bfa2cde7545364caddec84",
       "hours": [
         {
-          "content": "7ac84d5102b4f8c751fee92d056e2e960e9759cd129847b077dfd90a6f707c72",
+          "content": "82b58f1fbcbc92d2ed1f56b2ab1c20fe2d781165b0ddc79205db97d094f779c3",
           "decisions": "d3eb34e20117294392d229115fb4fc20d483c252cc334206053db5f5530c9bef",
           "form": "private",
           "hour": "lauds",
-          "presentation": "ee3c7d62bd3e8e2745280f0ba9ccd9934dd7bbcc8f8e9f90f96e5b66dcc79fe8",
+          "presentation": "64d714a8bbeeb4ca2b8fcb3d86bbe93298a8b9dddcd4ad18add715f6f993db4c",
           "sources": "df729a2d03aae00786e325ef113ffb70be5150ef4660e1168204bc052e2355ca"
         },
         {
-          "content": "a0350048f07a299632297affe059568cb91469157b6e286f4b31bfcd18654143",
+          "content": "2a823dae448f539ae636ccc2b1dd3b47e2a5b546b7a2dcf76427cb424e202881",
           "decisions": "7b64aa8df831c398db596ef709ba6517ff59483c75b3abe532b7bd285f10631a",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "7b000414058100edffd2ee36a6347bd0e16fd5f478b0d160364a9a7777cbae13",
+          "presentation": "40d7302560329a041facdb3de8eb9bb4b551cf2fecdc527afb5992a86c5afc44",
           "sources": "2120ee7dd9765cbce4eb824ba2fef468728262e7c40b261fba316455b04e1cd7"
         },
         {
-          "content": "a0350048f07a299632297affe059568cb91469157b6e286f4b31bfcd18654143",
+          "content": "2a823dae448f539ae636ccc2b1dd3b47e2a5b546b7a2dcf76427cb424e202881",
           "decisions": "842c271cb3aa18cb910226cf0587513be7cc8dc33d813d3ee269c0734737d22a",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "7b000414058100edffd2ee36a6347bd0e16fd5f478b0d160364a9a7777cbae13",
+          "presentation": "40d7302560329a041facdb3de8eb9bb4b551cf2fecdc527afb5992a86c5afc44",
           "sources": "2120ee7dd9765cbce4eb824ba2fef468728262e7c40b261fba316455b04e1cd7"
         },
         {
@@ -8391,27 +8391,27 @@
       "calendar": "a168768e945e34324e60e096d1ddaf196e733ffda71f55b9657f77b981afad0c",
       "hours": [
         {
-          "content": "f83f360fd88c62ee62222fefa72bb98b328ca1254c9eda0a702f53516a0b89b5",
+          "content": "6ed95091e4901ad570625066726c772a38730d58305c45d490dcc28ed3d2ca8e",
           "decisions": "6befdf84188c18025ad011bca1f350b03b97adb594d91608c141931f9ad7fc90",
           "form": "private",
           "hour": "lauds",
-          "presentation": "d98baa7d7c1507f72a4e64fa833ab8d878a6f2dd62d6902a006caba81825dd16",
+          "presentation": "566b8f9e8cc908fee86aa9a27fe28301f2722ab97ebe6bf272ddbd56ba18ffef",
           "sources": "478f6a0fc5a43d70e9beb09dddbf09b2708ff2ab0bb39559dda98446017a9838"
         },
         {
-          "content": "e92080a614c04587fc14612595028c43774cfda5ef47571a7d71b41da4f17818",
+          "content": "8fdfcd30ee268c3ce359f9c0c37c02cf12122f2d34bd14a9338e3fbc3a570850",
           "decisions": "e9536b2362be88c8990008103a2b63063b78a07988f4770a1875c2f19d5cc04b",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "1d0ca391edc00b97d159700afda9ff19226c82cbb8c586928220f57c030559f7",
+          "presentation": "a7f808c93de02be8192dbedde085489705eb63dcfd02aefcc22a7ae8aba7dc4d",
           "sources": "67f9dcf7ff8f0fb7bb41cadfe29166a98af6ae14a9a78f3c452c4dd7da8f5681"
         },
         {
-          "content": "e92080a614c04587fc14612595028c43774cfda5ef47571a7d71b41da4f17818",
+          "content": "8fdfcd30ee268c3ce359f9c0c37c02cf12122f2d34bd14a9338e3fbc3a570850",
           "decisions": "aaccb777ed0049df54712a6553e3c933f87f81602d3d754faa7748ad17f403dc",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "1d0ca391edc00b97d159700afda9ff19226c82cbb8c586928220f57c030559f7",
+          "presentation": "a7f808c93de02be8192dbedde085489705eb63dcfd02aefcc22a7ae8aba7dc4d",
           "sources": "67f9dcf7ff8f0fb7bb41cadfe29166a98af6ae14a9a78f3c452c4dd7da8f5681"
         },
         {
@@ -8566,27 +8566,27 @@
       "calendar": "89c709557d56eead5089798fbc92fdbfcad086f975a7c32bddb9c12123c3ad57",
       "hours": [
         {
-          "content": "c71023da377c3881f88b232d5159deaff3b8515e6b14b7da521f04ba7047eb51",
+          "content": "ba4c266752432682dc1af29cec7d24f72813cf58535ca44abf30fea2f6201acc",
           "decisions": "75ae0cf1a207a87da10a56e540b2926de52937109627e65ca497fe15e2f3e7de",
           "form": "private",
           "hour": "lauds",
-          "presentation": "090eb1f357be41e618372e75a7d5943e5de6e8ca466bae376af7152c78b72f50",
+          "presentation": "0cce3c02db8cf8dac615f1a5df45def9e4caf2d3de29539ff3e44e4ff9ac564a",
           "sources": "c3fb8b2053c84e4cf7689fa6049a444ccba989379fcafa475da2243708969c00"
         },
         {
-          "content": "e734626a0f8a099a13acab9b2afbafd11351f1a93f54e9fb0ae7567cd83369da",
+          "content": "afda079403c4d2b18a81624f0e5b386f668363381b026cd26a82ec82b66befda",
           "decisions": "e4c373f1a7ce8cbe452e4cd34139817bd6fdfdb8ba45da4fbd12d04115529690",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "c0008f6abff530550f842171135e36f0ae76a5fdfe13b65470b16abf79408891",
+          "presentation": "abde71fd0ba61d6324e73739976a9a7fbc20590d3ab8d140dbf3f0b14cd66918",
           "sources": "a449b14c04d69ac08acd54a0b529949baf7f297ef24dbffb85e00a213df7b449"
         },
         {
-          "content": "e734626a0f8a099a13acab9b2afbafd11351f1a93f54e9fb0ae7567cd83369da",
+          "content": "afda079403c4d2b18a81624f0e5b386f668363381b026cd26a82ec82b66befda",
           "decisions": "c10c2719e4607a594785e738f20d02e2fa041707905ce46b225bbd972cf1d763",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "c0008f6abff530550f842171135e36f0ae76a5fdfe13b65470b16abf79408891",
+          "presentation": "abde71fd0ba61d6324e73739976a9a7fbc20590d3ab8d140dbf3f0b14cd66918",
           "sources": "a449b14c04d69ac08acd54a0b529949baf7f297ef24dbffb85e00a213df7b449"
         },
         {
@@ -8741,27 +8741,27 @@
       "calendar": "59716377de8efde856bba19535de8dcd094a4f7ef734d88aacfe560c8037ab65",
       "hours": [
         {
-          "content": "461bc544c671540c75d92e51b1151427ebf8966ddf1441ebb31a26a05de2170d",
+          "content": "d67db57c649fb4c059c2f5355d22aaf5a21a0fc052e984ba197e27731e5a2c97",
           "decisions": "5413e900647034dc052c22e60b3b7d2265b9880c3784f04bc4156b5292200292",
           "form": "private",
           "hour": "lauds",
-          "presentation": "a277d02a99a06bcdab712e17138f820864e541c1a302a4210725db54d04e121c",
+          "presentation": "3c39d0e6dda0e0b853de7deae550fb758fdbdc26349a9e93542630c444ae1f9b",
           "sources": "e648edf217aa82fe7a0de00119602dfe3d426b3b595c99c35dbf6ad44e1c4860"
         },
         {
-          "content": "549d84ff093f206e7e4e4917e5caebe040dc86f3fd808508b89335baca409e9e",
+          "content": "116cf1ffd14429a5274ba8c7ed7484c1104159377e6c31defaf69da1ce861ab7",
           "decisions": "74f33884c6bacf4217b8b63ac0f9d743fe24b56da633537b17d83872b6cd6306",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "43954804ac25bb0e3052c66003fdec34b56371b10a6c3b30f0a74fc9e06338f0",
+          "presentation": "8b6454b46003cd3d7dba7c507c2554f9e04acd03c6e9705e097ddbb11f8f7b51",
           "sources": "044764a72ca5f3bde4734dd4f57cfe5f3e52d87cee7668fc1737650697ce7de9"
         },
         {
-          "content": "549d84ff093f206e7e4e4917e5caebe040dc86f3fd808508b89335baca409e9e",
+          "content": "116cf1ffd14429a5274ba8c7ed7484c1104159377e6c31defaf69da1ce861ab7",
           "decisions": "df3a8dd0b7c5ce7cba0ef96eb37273d6138842659268f2ac1eaaace1e5c90c05",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "43954804ac25bb0e3052c66003fdec34b56371b10a6c3b30f0a74fc9e06338f0",
+          "presentation": "8b6454b46003cd3d7dba7c507c2554f9e04acd03c6e9705e097ddbb11f8f7b51",
           "sources": "044764a72ca5f3bde4734dd4f57cfe5f3e52d87cee7668fc1737650697ce7de9"
         },
         {
@@ -8916,27 +8916,27 @@
       "calendar": "74d2320e7846ebfa48d5139d70d74574aa99fd01abc67ad5eea6c5917dd86692",
       "hours": [
         {
-          "content": "6509880645311a895fcc5ab2f53e7d48f447f2301f3a0b42b43a8825c96d6437",
+          "content": "7c54fe01bc0ed948519ab6a229c8697249ebb7339f832d9d767f2d51f149ee25",
           "decisions": "3b45bf51b2a0300cd92af890f6ec344e280a55609d4cc4fe1520e44e85f92bed",
           "form": "private",
           "hour": "lauds",
-          "presentation": "6595d865f496e74e44bc9c42ab5d393f1ac43b0c42e78e70ed900ce35028520d",
+          "presentation": "fa83dd5fa32afea83f441619e1d41707d687fa573ff4994ed1fb534a21eaafaa",
           "sources": "5ab90dff138bef27a2d8a21c3f3a927b72fd489fb028347a9784c91796f7db0d"
         },
         {
-          "content": "a55dce9d6add7b185b370678455ec7bf7c673b0b9fbd359f6741720a543811c1",
+          "content": "9e66f6bde5e7cae9f80af61478f51f9ba576c045775c82f8e4cb312649d4ba77",
           "decisions": "4bc0cc5c89bd0d9c76cfa06cba70d351056d1e3964c4355f1012364b97ef4c19",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "cc489cdbf98e40cd5f5821977049e0a5a0f607e42b621015e2f17cd139430bb3",
+          "presentation": "36dead3a3ec74433f5101dbdf3fdd8db7a4228ae074887f6dc1780a843ee625b",
           "sources": "4ce6828e4f1ef7adfbcbf3f09f082446c94266bbaad45efd46cd5e114dce7f5c"
         },
         {
-          "content": "a55dce9d6add7b185b370678455ec7bf7c673b0b9fbd359f6741720a543811c1",
+          "content": "9e66f6bde5e7cae9f80af61478f51f9ba576c045775c82f8e4cb312649d4ba77",
           "decisions": "bc2778b8ff4480d4f43c25d32275c04d6788c9f99c36d2376e26cf1fb249348f",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "cc489cdbf98e40cd5f5821977049e0a5a0f607e42b621015e2f17cd139430bb3",
+          "presentation": "36dead3a3ec74433f5101dbdf3fdd8db7a4228ae074887f6dc1780a843ee625b",
           "sources": "4ce6828e4f1ef7adfbcbf3f09f082446c94266bbaad45efd46cd5e114dce7f5c"
         },
         {
@@ -9091,27 +9091,27 @@
       "calendar": "4e0e641d0adbdde2939dd2347dd563788173438b87832c4c2668e52b567e7396",
       "hours": [
         {
-          "content": "f17d495691333dc4785d59f1e98114b816c1aceae86066f05ec5acfa690ce5ec",
+          "content": "11ad44afe6137b4eba1562ac20542a82301917839fb9eb05c76e15415697f6e9",
           "decisions": "e61ecf17c7588dde983379658210acef8d27f6c9758950f75ad2abf91a9f5377",
           "form": "private",
           "hour": "lauds",
-          "presentation": "67bb507f9ddf13474df001782b0a21dff48595f5ebea8e61329c295d0d2407ac",
+          "presentation": "d16df955d70cc3813137a057755859a5fa84c078a0a75131b48bb0c9e3fa319b",
           "sources": "5ca39628e67d2dc4f5cd29bcea9936c8db08430bdef0256cd8bcb3616602f386"
         },
         {
-          "content": "752aee1101cd251014846fe0446a18251f89c1079d6cc842335a8856d64588af",
+          "content": "7219acc5529c45d0fbff6421f24bf9b8c1e73635ec0cf7b62084b94ad6ffca26",
           "decisions": "59872b0eacddf9c0708d321d484c46553d0c0263d3afc67f5f955354c71e4fc3",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "0c56c2632a9783eb2f6f5b391e25060cb64f0088c7ec9662d99afc12f4fe5b15",
+          "presentation": "bbccb5dc4098b558c0a7e01d4f06f10c493ecd7065798639fc04b3eb031d0d0b",
           "sources": "f1d5263f53b66f011090934b0971551ec6054a8b852fb105665b91ac31c84182"
         },
         {
-          "content": "752aee1101cd251014846fe0446a18251f89c1079d6cc842335a8856d64588af",
+          "content": "7219acc5529c45d0fbff6421f24bf9b8c1e73635ec0cf7b62084b94ad6ffca26",
           "decisions": "d3d5377915bac0618344f5eab36c4cd07707e1b462972a4cbf33dc0b3e13ac65",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "0c56c2632a9783eb2f6f5b391e25060cb64f0088c7ec9662d99afc12f4fe5b15",
+          "presentation": "bbccb5dc4098b558c0a7e01d4f06f10c493ecd7065798639fc04b3eb031d0d0b",
           "sources": "f1d5263f53b66f011090934b0971551ec6054a8b852fb105665b91ac31c84182"
         },
         {
@@ -9266,27 +9266,27 @@
       "calendar": "82cbfb55cab27d6ef15e4276a775bee6e981b766e43eb1c5fafb1141c0ab27a0",
       "hours": [
         {
-          "content": "09c677ce4379a74caf3473fc32354fcdd7c049cfbe96bc9dfe0e6ae48d9fb684",
+          "content": "3a401a2a3e130fa11673ed86fc4f5e6ff50a7b97d2f2332a6dbd0b9364cf3583",
           "decisions": "ace6e3808d638925e0ba70b0e044aca923eb533698c2a46592953042f84d7171",
           "form": "private",
           "hour": "lauds",
-          "presentation": "0e8436938d574d2d0555fcbb9f74554eae5dd8c66afcd6296c185431e40a4c2f",
+          "presentation": "47ee355aa75527ec04de17d83ec7d81893c13ccae4dd8bec2e65c278b3b375e0",
           "sources": "f7d610d6f0becfe6ee520790939f88bb82188d9e9304546ad7997d38d7fee4ed"
         },
         {
-          "content": "e81484833cd386b53f19c836f7615a12f199714bf1970694ccd68adfea644049",
+          "content": "34c3bd687783578b9405a71184aa4ec1c4dc09f8dac30af728975c177974709b",
           "decisions": "bdb6c20b344366a5c592b56860469d666134c7c1f826d54ebe966e8e6fdc840b",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "e4f8c1dfaadb6347b2e4e5d6c88b2bf2bc7cceeb73c522c20212e91941501ca8",
+          "presentation": "d697bfa83b4843b1010630fb7c2fa27cf45c248704d57900092aa1d2a8387377",
           "sources": "f6adf36f899197b3ffd6782cd7c23c1f0e1f78451070dc59c7c8dd30decceba1"
         },
         {
-          "content": "e81484833cd386b53f19c836f7615a12f199714bf1970694ccd68adfea644049",
+          "content": "34c3bd687783578b9405a71184aa4ec1c4dc09f8dac30af728975c177974709b",
           "decisions": "4619f0288aaeaaa59e5fdba77cfb5520eca5102cebb8f676126ecc0ddbea881c",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "e4f8c1dfaadb6347b2e4e5d6c88b2bf2bc7cceeb73c522c20212e91941501ca8",
+          "presentation": "d697bfa83b4843b1010630fb7c2fa27cf45c248704d57900092aa1d2a8387377",
           "sources": "f6adf36f899197b3ffd6782cd7c23c1f0e1f78451070dc59c7c8dd30decceba1"
         },
         {
@@ -9441,27 +9441,27 @@
       "calendar": "ec1326136e500c740f275b5ebf5f970570d28954dfb9ef4cf356d9b3f2fb469c",
       "hours": [
         {
-          "content": "cb43126715fa6de1dbb8c56be3b238cce5e1f92887cc9e87717b94062e79c99d",
+          "content": "792b7fdb0a2d314ed8f6edf92cb0eb5ad33889069a5f27200d5af5761e08be7c",
           "decisions": "d02ae27406b7be6854252463fb842cda4f170629f9d1ea85d09f923074f6b008",
           "form": "private",
           "hour": "lauds",
-          "presentation": "35e3c9b4dd2e020454372ecf579be5b9a1b70d0e5927d479feb5f408aae0f11d",
+          "presentation": "81f5040c4d2b90a0097a9ca880441371ac906544972d1d38fa5e7c3313292141",
           "sources": "d9e24b389c7f72dd46701fa125aad92591017029af874c8e8107ddf482bef920"
         },
         {
-          "content": "40ad69442f0e78f55a1e1e671090307a150c93f377e001ac1d3d348ff9d4bb75",
+          "content": "1fe6cff1882cc679c1c38e713ca270ccaa6e8e4d40adddda5249a61cf8db17a4",
           "decisions": "e23bd621590c63e3838099707ceeb9a4eae23d7ae215c202900dc4afc649b182",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "f531b5c61a66808223ff26ed12e11ac427e7d581ef88c1b7cf209027d06dc01e",
+          "presentation": "413dae4327bd4c4313c91cfa4fc4862f572ec773dc92d369cc39e41c83a6ee61",
           "sources": "1e8f64ca219ffdabd431bd52d36d6ff2a63428801d505a13ce2bc1b3bdd66504"
         },
         {
-          "content": "40ad69442f0e78f55a1e1e671090307a150c93f377e001ac1d3d348ff9d4bb75",
+          "content": "1fe6cff1882cc679c1c38e713ca270ccaa6e8e4d40adddda5249a61cf8db17a4",
           "decisions": "baae0bdd71e8bb36994d7462f808d56b68730b978ecb723ea84d0a59f555b443",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "f531b5c61a66808223ff26ed12e11ac427e7d581ef88c1b7cf209027d06dc01e",
+          "presentation": "413dae4327bd4c4313c91cfa4fc4862f572ec773dc92d369cc39e41c83a6ee61",
           "sources": "1e8f64ca219ffdabd431bd52d36d6ff2a63428801d505a13ce2bc1b3bdd66504"
         },
         {
@@ -9616,27 +9616,27 @@
       "calendar": "1a72ab5e547c4904f972287f8fa07cc88a29ca008e9b9f8da951a119879e769c",
       "hours": [
         {
-          "content": "db3147dca5bc05d53649d2cb8f51ff421a6e8e214bb6c7c10f2f53870f6fc5a1",
+          "content": "ef00b6636ecfcbd96acf32e7494fa3eb3a7037e374604eb3bb11d995dcc9b0c9",
           "decisions": "ce667101ed6d8e3b913bf5e34cfb01f2cd49c34dfb69b644db680d6a95aa9ec9",
           "form": "private",
           "hour": "lauds",
-          "presentation": "80d7a4ee19c28fb8e359ba93855fa144974ef24bfeb110b7705b829a6937edb7",
+          "presentation": "8fa3341aafcd405454d15e4b84b5bbfc338b17405ed5dc3cbc1b32da74a8cd88",
           "sources": "e7002aaeb2e6abfee04adfa978955cd9f8466639cd7e5f4295b27509168eaac2"
         },
         {
-          "content": "8a5c4276e9e15f84708ee003516440f63630eb65c51b6a5fc953b8ad2f80af8e",
+          "content": "075ccb0e6286f8b48512df6795c6b6a420ac3b9119e00eb55d72fa9f13faf1b2",
           "decisions": "a55b76b14a91ac2afe162bf0f164263ffc2ecd9a9820f2ff599eef26a14a0668",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "35efd3154aa61d6910dd1945ae3b0fddd173fb7bcf43fa1d3eda68d1c1020857",
+          "presentation": "871cd2faafda1ccf391af9d746143e484c7bfcf98515f070bf513084a92b61fe",
           "sources": "2070de017086690856f8beba3a2d8e70eb286aa9a8ada5b67e54277336f4b0b6"
         },
         {
-          "content": "8a5c4276e9e15f84708ee003516440f63630eb65c51b6a5fc953b8ad2f80af8e",
+          "content": "075ccb0e6286f8b48512df6795c6b6a420ac3b9119e00eb55d72fa9f13faf1b2",
           "decisions": "3651f740c5786ec07700ce846440167ecc7ed38636e7d2b21687a93513301e53",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "35efd3154aa61d6910dd1945ae3b0fddd173fb7bcf43fa1d3eda68d1c1020857",
+          "presentation": "871cd2faafda1ccf391af9d746143e484c7bfcf98515f070bf513084a92b61fe",
           "sources": "2070de017086690856f8beba3a2d8e70eb286aa9a8ada5b67e54277336f4b0b6"
         },
         {
@@ -9791,27 +9791,27 @@
       "calendar": "070d57db23bf342b19ebde460aff775404a21a6db66b2919ccada73e2f79e6c5",
       "hours": [
         {
-          "content": "665956000fe01270f9c42eb90a614f2585c9a31908e5e0bc444683ef2a40824e",
+          "content": "b940870135163e7e2b5e297cfd2d54dc6a321d23a1cac414bce4572987a43663",
           "decisions": "315e20df689a838a58e34fdbb3e6656f5e8a83ce26b810a30d6c2e3db48995ee",
           "form": "private",
           "hour": "lauds",
-          "presentation": "740651253d53fe2eb440c6edd42a3498dcd16466aaaec0e2539deb3ae46b066a",
+          "presentation": "03d8de41d958db97daa908e7b7cff17842e4688949a72fd7acd729a3a0439ec3",
           "sources": "a082f43b56509d4b267d51507cd453f45918ff88a5927b89af211a77dee8bfc0"
         },
         {
-          "content": "bd92b114ace24eca17daa4494ac542d49686bffebef0f37b8375e57b610d7d34",
+          "content": "fc8ede09595c43e6fef4f71d2d64351a851f0c7b0e600b1b90852a19dff4562a",
           "decisions": "1dfc8188747c9cb9aad61d756ac3764b70b50f90b7e584f4896cf2f755b5fd82",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "14d8f5617d7f2e5388ba9ad2231b6cc887513765b41fbe86ceedc574fcf1f70d",
+          "presentation": "77d5413e346ce937c2b124b98c595752a1961ac6091105f03942c76b0f037819",
           "sources": "4ef0a79534702924d5d6aa2cb1b7f63c7c46711433225f02794c2c661a09f055"
         },
         {
-          "content": "bd92b114ace24eca17daa4494ac542d49686bffebef0f37b8375e57b610d7d34",
+          "content": "fc8ede09595c43e6fef4f71d2d64351a851f0c7b0e600b1b90852a19dff4562a",
           "decisions": "3893485171225bad84cfce0a600e80af54d0a7c8eb1571366cf712198f2fe927",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "14d8f5617d7f2e5388ba9ad2231b6cc887513765b41fbe86ceedc574fcf1f70d",
+          "presentation": "77d5413e346ce937c2b124b98c595752a1961ac6091105f03942c76b0f037819",
           "sources": "4ef0a79534702924d5d6aa2cb1b7f63c7c46711433225f02794c2c661a09f055"
         },
         {
@@ -9966,27 +9966,27 @@
       "calendar": "c3830a8d094551c945acda12517f16a3ecc0052a3a1c53703fdadf946f2ddb84",
       "hours": [
         {
-          "content": "73cb1d8b3616e3812a32cc6bf3ea193cacd70cc734f08ec3e98f9d55dc3604a6",
+          "content": "9d680d5a8d8e4c337c114956cae8612dd8158c293f7b1c2ebd3fbe64d4796c0d",
           "decisions": "bbfaaf3a9f1e384b9ed5968b86ec55570efd47b4f024bb15efa27c764d20a59a",
           "form": "private",
           "hour": "lauds",
-          "presentation": "5dcc5b4c96a5fee06acb8929abd7cbfb8e36c3710477f6c271aa9506ee2636d9",
+          "presentation": "c70dca99963c866beb93258209192932666d9fb2be05c7a4ee3444d768fa2efc",
           "sources": "5a6bc2283303a196d9089c591c4dbad1d4d6dc2ccf464b689a403e78a767924e"
         },
         {
-          "content": "22a93f39042f7b12a213601215c2d4b0327e2ac821d3f3fec1be6fa09ccee503",
+          "content": "6687a66be2ba10ba9b88c9743cbde0e10392097287478730cdd8d72af6f27e19",
           "decisions": "ef9c9f9551651754ee70872a76279e44ef9e2ac49a9917ce8069f8383a31eb4c",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "d9f88d0fbb39a1c3df565cf91e8fa8aac5948995efc4e9d84b92864de229ad72",
+          "presentation": "35f1182842389d06615469b62257daf014c7d83eb3c1f8a4e048c40ce992ce24",
           "sources": "8fa2cd590bb7675b1b8ad399bcbea026e53d7301b564eeaa4f7aa502c88ff960"
         },
         {
-          "content": "22a93f39042f7b12a213601215c2d4b0327e2ac821d3f3fec1be6fa09ccee503",
+          "content": "6687a66be2ba10ba9b88c9743cbde0e10392097287478730cdd8d72af6f27e19",
           "decisions": "4f90d137b096c1b8d134f71ba77a2ff0f8993f758b0b613f3509cdb687b9a757",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "d9f88d0fbb39a1c3df565cf91e8fa8aac5948995efc4e9d84b92864de229ad72",
+          "presentation": "35f1182842389d06615469b62257daf014c7d83eb3c1f8a4e048c40ce992ce24",
           "sources": "8fa2cd590bb7675b1b8ad399bcbea026e53d7301b564eeaa4f7aa502c88ff960"
         },
         {
@@ -10141,27 +10141,27 @@
       "calendar": "32e686a59a590ec6b4e9c866dd0e8caa3f03fa992a28a0630d5e14b01fd1cb04",
       "hours": [
         {
-          "content": "ea68c677884ce83a3db0d3dd622ca332606d07abb92a03654776a931cf0c4480",
+          "content": "95d8b8f91f16d0f15673292c7934a91a8ddb82983b9610a14ccb206c66cc7ae8",
           "decisions": "6f235a89d01f33e268057701993b4ebd436a9ccf7bc0c02717601301242c2a84",
           "form": "private",
           "hour": "lauds",
-          "presentation": "810adadf113da1288be0ae74346bfc1005c7953d9439787f9d53fdcc637a5232",
+          "presentation": "fc3749ff323e5faf21589ebad58eb0c832aadb5cb260b0932a0dd66c4e25be87",
           "sources": "c1835ba2f2603260dc35a43b58a366b90e64d31efda6168b203f2075b169dbe8"
         },
         {
-          "content": "cd067050c4bd03576aa7fb663aa771e56a59812222fc1dfe3e6650a796a7a928",
+          "content": "5fa4b862f4b87db65501f4c1e198404c8edffe2f1c811bbc137704a06fd10392",
           "decisions": "b86c29fc22fe206eb0ba00968a359561e6983d221ed19cfc03eccfdb98d914a6",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "d24fa9100fd7be4edf7eb00987820d25fb41dcb9a9be4f1c2003b107e4d97e13",
+          "presentation": "b7626065d3cf0179b6991614f7c8ebd9c31cf36df082231a2cb1e921eb551cb2",
           "sources": "d1138ba2d9826d369e66f254853ba45dd657d397c40616ec19e0eb28dcde0de5"
         },
         {
-          "content": "cd067050c4bd03576aa7fb663aa771e56a59812222fc1dfe3e6650a796a7a928",
+          "content": "5fa4b862f4b87db65501f4c1e198404c8edffe2f1c811bbc137704a06fd10392",
           "decisions": "88a2bcb0a3afa75d8b8a4218ddeaa7c195c6617305b56ad3311499d0bb88ace1",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "d24fa9100fd7be4edf7eb00987820d25fb41dcb9a9be4f1c2003b107e4d97e13",
+          "presentation": "b7626065d3cf0179b6991614f7c8ebd9c31cf36df082231a2cb1e921eb551cb2",
           "sources": "d1138ba2d9826d369e66f254853ba45dd657d397c40616ec19e0eb28dcde0de5"
         },
         {
@@ -10316,27 +10316,27 @@
       "calendar": "d9aecb22b534f1950eb8edd56e478984146ade4f72c73ab444c456320b279ffd",
       "hours": [
         {
-          "content": "1fa512a32dfa7164034155ea592bf9cebf65909151df1bd598e4fd35ffbdcaee",
+          "content": "3f22650a94f994a4981df3a15816974791e55d2606293d65ba471f139e91b416",
           "decisions": "c6abc46a9498114b1f28fe6ffd0fd66072d2c47de3d2c1f240bd5ec59129e908",
           "form": "private",
           "hour": "lauds",
-          "presentation": "d057cf11dfe3fd6da6a308ee0ee8401f205756c364d7dbe73b79ce0184b1213c",
+          "presentation": "ac0a1fd6f866e528a5d512a70fbd6df99225482ae849cce5e64c4ee0353772b1",
           "sources": "fb17a6f798371dcdb40a1843ac60b02f4d368a6609527ca556100f7c67aec4e9"
         },
         {
-          "content": "068fe18279732163f2cafdda13691ecdfa4ee8bfec8852b59f21dce80ecb88b7",
+          "content": "77ac60cf90debaee91f81c1bbc4500c71239bb1e608b0b1a8e24f4b16a7036e3",
           "decisions": "3f9ea8df27d5d996aa3f40769887e54b6c26ad0ec14fb554c1112f5172f1b02a",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "9a0cdc4a1b0184053f6c1b30c39f61beb23e06c6769d3dd0f14fd7b241bf1aa2",
+          "presentation": "98a972d8e806e9c89cdec7bad7d797f02bbc5bae21aaa9eb21ce5cffc50c6d82",
           "sources": "6fd9abeece9658a7c622a49033ac9525d487fe16190c3710edf63136ecdd9e3a"
         },
         {
-          "content": "068fe18279732163f2cafdda13691ecdfa4ee8bfec8852b59f21dce80ecb88b7",
+          "content": "77ac60cf90debaee91f81c1bbc4500c71239bb1e608b0b1a8e24f4b16a7036e3",
           "decisions": "f79dad855d4692cda918966b6016aec8539da3582c9b3f5544a10a80c96486f7",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "9a0cdc4a1b0184053f6c1b30c39f61beb23e06c6769d3dd0f14fd7b241bf1aa2",
+          "presentation": "98a972d8e806e9c89cdec7bad7d797f02bbc5bae21aaa9eb21ce5cffc50c6d82",
           "sources": "6fd9abeece9658a7c622a49033ac9525d487fe16190c3710edf63136ecdd9e3a"
         },
         {
@@ -10491,27 +10491,27 @@
       "calendar": "433f94a36c57eb8da3f611b3bc57bbc67b274e8fb72d32a52187cc393ec99bbe",
       "hours": [
         {
-          "content": "318f427d6d758902ff1d75345a9b4600c93e1b09e7f359953287e3c481b44a36",
+          "content": "793eb387ae66b34e06f30a350d4c224dcf9e812f5b3234168ae724e3c2bec08c",
           "decisions": "d8122d4acba2b865c7e387d30ecc5094cacc2d150514bd85b538742d571c3923",
           "form": "private",
           "hour": "lauds",
-          "presentation": "d6ee180e7291f2d6b40032b503fee88bbd7a7b16c3059ceacb52763e0fb83209",
+          "presentation": "45b25019683136ade00fd4d303a64e26eb7d6a739767b5352691b0c3a10aaffc",
           "sources": "e49243e54ea10737e873ed53bf69288d45eaab8b758b636b13b630da16ea98e5"
         },
         {
-          "content": "1c8138172306fd8595b6395ea7bbaa12e41a7e1a65e72faf649e11f7c070e411",
+          "content": "04db2fa2a822a0940c651c983a772e5c10b2db015f8dba0c1e2dd3767bc4e29c",
           "decisions": "2dbf7cf52626630cabb46109422f19034bc28ce6231a1d3558a3a55333214979",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "e00e4f150169fb6200cc05c1c048ada078d3b5a10ecfb1c4ea642edd8f6e2ed9",
+          "presentation": "d0406776611e1b95aee30962ae89f97530c0c804bc71cb044323adf6dba91989",
           "sources": "c207de35e2763ffa212ffb2f48ad04d4f9302a78c3f518fe3c0ebe80005c7284"
         },
         {
-          "content": "1c8138172306fd8595b6395ea7bbaa12e41a7e1a65e72faf649e11f7c070e411",
+          "content": "04db2fa2a822a0940c651c983a772e5c10b2db015f8dba0c1e2dd3767bc4e29c",
           "decisions": "da415287af268ef6812cfb1e08b91d0c3af14555ef404d969f2cf572aac723d8",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "e00e4f150169fb6200cc05c1c048ada078d3b5a10ecfb1c4ea642edd8f6e2ed9",
+          "presentation": "d0406776611e1b95aee30962ae89f97530c0c804bc71cb044323adf6dba91989",
           "sources": "c207de35e2763ffa212ffb2f48ad04d4f9302a78c3f518fe3c0ebe80005c7284"
         },
         {
@@ -10666,27 +10666,27 @@
       "calendar": "b0a21b6d32be5b5a47cc58e11f5be4b17ebf2e78f120024c6b0f8e80b54945e6",
       "hours": [
         {
-          "content": "494314a34a54cf83719cb60a396a3e46eea3f7f95cba489b39a5a2330cdb14d4",
+          "content": "1bb4a3808f2a0078682c1bc4863ba977e57db9c9029754497edc956ef92ea447",
           "decisions": "7ae5d524341ca0b21ec1a1f77517ead78f71ac9b6d06da57631ce728b0f2e55c",
           "form": "private",
           "hour": "lauds",
-          "presentation": "164bf20589cb0e99ffda7ba68ac59de0458e88680d895842cf0eebe5750e1057",
+          "presentation": "98e47866f8f2935bb442150cad67bb2d43d2da5283e07837ef01008d9fa91586",
           "sources": "b163623e071ff0400187f45b5ecf4c423d409cf442aa8852e795220ddb4f5608"
         },
         {
-          "content": "d84c8d281a11365ee9b2aebc8afdc4c4f08b76f39d291063520c644ceda6d7f3",
+          "content": "b62cb89a651dba6ce539426398167d4a6c7c06235229aa5e2206c3d42126f32e",
           "decisions": "09c5adcd164cfa53c985f153b94039877df107f0b5f2c40fe00315530e562770",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "2775ada86745790b0896f63ef3a45208bbbbc549cf8a869d4934b1c83d0fdf92",
+          "presentation": "45fe84b6f4369aec705e9e4091cbce208c898c7f098dea43d0b784d32b08e77c",
           "sources": "ad2c3f570ca14d04ac24064b7f951b3ad19cf90e2a23db2dad486066a09a006a"
         },
         {
-          "content": "d84c8d281a11365ee9b2aebc8afdc4c4f08b76f39d291063520c644ceda6d7f3",
+          "content": "b62cb89a651dba6ce539426398167d4a6c7c06235229aa5e2206c3d42126f32e",
           "decisions": "e0fe66aeb459b8e40ebc8affdc6a366ae578c410c915fa12494dd5d60ef06658",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "2775ada86745790b0896f63ef3a45208bbbbc549cf8a869d4934b1c83d0fdf92",
+          "presentation": "45fe84b6f4369aec705e9e4091cbce208c898c7f098dea43d0b784d32b08e77c",
           "sources": "ad2c3f570ca14d04ac24064b7f951b3ad19cf90e2a23db2dad486066a09a006a"
         },
         {
@@ -10841,27 +10841,27 @@
       "calendar": "2c827acefb8c0ce5c11e043716b1023a2cff58433dfa2dca5893079377ea21fb",
       "hours": [
         {
-          "content": "15bf227480cf78b544cad1097ccde40872b5b559a8a26d1751365c03b785bb0a",
+          "content": "b4ea7c45e8140dba3f8272d8b7f0e5af77ca607adb598fcf8a906132b5be0d8c",
           "decisions": "752bbeba58ce935896ec6551902a7f856119e6226b4855f9d23adc137761dc75",
           "form": "private",
           "hour": "lauds",
-          "presentation": "ef4a04be4c1443129339b1b8bd2f2a0cc8bc854de97931148d057a5c06fca42e",
+          "presentation": "66c16ce123ee2e812e7f8cf1e023543dafaf7d7a6de6bbb8ca45f0cecdf70f31",
           "sources": "7630f7b6b139554924b37b87483b9bf4d55290db0ff8bf39d31303cd7bd1c249"
         },
         {
-          "content": "c344b944a8fb1998450ee7b58ffc82be3de5bd024637eafbfa1f7599c1c00442",
+          "content": "c7df25a3c24f732e8c197e7430c87511eb3dc559ac3a883b8181b3d1bd7bc554",
           "decisions": "d22a35f9fc5c7a0823f118b9f8491056514b45b3cfe4af3d754eb06caf81210c",
           "form": "deacon",
           "hour": "lauds",
-          "presentation": "5bf19e7564b02d023a89acc2ec76479e491a04ae4dfdfc3eae11026d2eece91f",
+          "presentation": "52f5c083a921903e0802a6a94b6c1197d8f6330a0a60e657fb048d3891d459d3",
           "sources": "b38baa6544bef47cdf10826aa0cbdf2f6c393c5960fe0c99a53e1770375dc462"
         },
         {
-          "content": "c344b944a8fb1998450ee7b58ffc82be3de5bd024637eafbfa1f7599c1c00442",
+          "content": "c7df25a3c24f732e8c197e7430c87511eb3dc559ac3a883b8181b3d1bd7bc554",
           "decisions": "a9e7185fad73aab90ad8cb056e86a53051b5e8880f726de928852ad124a64f80",
           "form": "priest",
           "hour": "lauds",
-          "presentation": "5bf19e7564b02d023a89acc2ec76479e491a04ae4dfdfc3eae11026d2eece91f",
+          "presentation": "52f5c083a921903e0802a6a94b6c1197d8f6330a0a60e657fb048d3891d459d3",
           "sources": "b38baa6544bef47cdf10826aa0cbdf2f6c393c5960fe0c99a53e1770375dc462"
         },
         {
