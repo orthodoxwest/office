@@ -2339,5 +2339,72 @@
         "before_slot": "commemoration-collect"
       }
     ]
+  },
+  {
+    "id": "saturday-sunday-commemoration-first-vespers",
+    "source": "Monastic Diurnal General Rubrics XIV.14; Trinity Sunday pp. 403, 405, 408-409 (Commemoration of I Sunday after Pentecost; ferias take the preceding Sunday's collect). 2026 ordo, 2 May, 6-8 June, 10 October.",
+    "cases": [
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/magnificat-antiphon-first",
+        "contains": "Speak, Lord"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/vespers/versicle-saturday",
+        "contains": "Let our evening prayer"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-collect",
+        "ref": "proper/pentecost-sunday-1/collect"
+      },
+      {
+        "date": "2026-06-07",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/benedictus-antiphon",
+        "contains": "Be ye therefore"
+      },
+      {
+        "date": "2026-06-07",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/magnificat-antiphon",
+        "contains": "Judge not"
+      },
+      {
+        "date": "2026-06-08",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-sunday-1/collect"
+      },
+      {
+        "date": "2026-05-02",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-3",
+        "slot": "commemoration-antiphon",
+        "contains": "A little while"
+      },
+      {
+        "date": "2026-10-10",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-19",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/historia-october-2/magnificat-antiphon-first",
+        "contains": "The sun shone"
+      }
+    ]
   }
 ]

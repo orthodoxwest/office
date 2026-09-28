@@ -12,7 +12,7 @@ use crate::engine::{compact_refs, resolve_element};
 use crate::hourdef::HourElement;
 use crate::proper::{
     advent_date_commemoration_antiphon, feast_proper_ids, feast_proper_name, is_synthesized_feria, lookup_commons_text,
-    lookup_section_text, substitute_proper_name,
+    lookup_section_text, resolve_proper_text, substitute_proper_name,
 };
 use crate::psalmody::is_office_of_the_dead;
 use crate::texts::OfficeTexts;
@@ -42,8 +42,8 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if is_synthesized_feria(comm) {
                 return lookup_feria_commemoration(Some(day), comm, day.season, hour_name, reference, t);
             }
-            if is_saturday_second_vespers_sunday_commemoration(day, comm, hour_name, reference) {
-                return lookup_sunday_first_vespers_commemoration(day, comm, t);
+            if is_saturday_sunday_commemoration(day, comm, hour_name, reference) {
+                return lookup_sunday_first_vespers_commemoration(day, comm, reference, t);
             }
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
                 return lookup_following_office_commemoration(comm, day.season, reference, t);
@@ -114,28 +114,30 @@ pub fn octave_commemoration_ref(day: &Day, comm: &Feast, hour_name: &str, refere
     Some(format!("proper/{parent}/{reference}-{context}"))
 }
 
-/// A Sunday commemorated while a Saturday feast keeps II Vespers begins with
-/// its I-Vespers Magnificat antiphon (XIV.14).
-pub fn is_saturday_second_vespers_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
+/// A Sunday commemorated at Saturday Vespers — whether a Saturday feast keeps
+/// II Vespers or a feast on the Sunday takes I Vespers — begins with its own
+/// I-Vespers antiphon and versicle (XIV.14; Diurnal p. 403).
+pub fn is_saturday_sunday_commemoration(day: &Day, feast: &Feast, hour_name: &str, reference: &str) -> bool {
     hour_name == "vespers"
-        && reference == "commemoration-antiphon"
-        && day.date.weekday() == Weekday::Saturday
-        && day.vespers.owner == VespersOwner::IIOfPreceding
+        && (reference == "commemoration-antiphon" || reference == "commemoration-versicle")
+        && day.civil_weekday() == Weekday::Saturday
         && feast.is_category(Category::Sunday)
 }
 
-fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &Feast, t: &OfficeTexts) -> (String, String) {
-    if let Some(id) = crate::seasonal::historia_week_id(day.date.add_days(1)) {
-        let key = format!("proper/historia-{id}/magnificat-antiphon-first");
-        let text = t.get(&key);
-        if !text.is_empty() {
-            return (text.to_string(), key);
-        }
+/// Resolves the commemorated Sunday's slot exactly as its own I Vespers
+/// would: historia, the Sunday's "-first" proper, season, Saturday psalter.
+fn lookup_sunday_first_vespers_commemoration(day: &Day, feast: &FeastRef, reference: &str, t: &OfficeTexts) -> (String, String) {
+    let mut sunday = day.clone();
+    if !sunday.first_vespers {
+        sunday.cal.date = day.date.add_days(1);
+        sunday.first_vespers = true;
     }
-    lookup_commemoration(feast, day.season, "vespers", "magnificat-antiphon-first", t)
+    sunday.cal.celebration = Some(feast.clone());
+    let slot = if reference == "commemoration-antiphon" { "magnificat-antiphon" } else { "versicle" };
+    resolve_proper_text(&sunday, "vespers", slot, t)
 }
 
-/// An incoming office, Memorial, or Saturday-II-Vespers Sunday begins with
+/// An incoming office, Memorial, or Saturday-Vespers Sunday begins with
 /// its own I-Vespers texts.
 pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &str) -> bool {
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
@@ -143,7 +145,7 @@ pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &st
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_second_vespers_sunday_commemoration(day, comm, "vespers", reference)
+    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
 }
 
 /// The I-Vespers texts of an incoming office or Memorial (VIII, X).

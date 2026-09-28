@@ -1533,6 +1533,10 @@ proper/pentecost-octave-day-5/benedictus-antiphon,d181a71804ff,diurnal,Thursday 
 proper/pentecost-octave-day-5/magnificat-antiphon,8f2e347d5705,diurnal,Thursday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-6/benedictus-antiphon,158d33b29951,diurnal,Ember Friday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-octave-day-7/benedictus-antiphon,07a890231c18,diurnal,Ember Saturday within the Octave of Pentecost,401,verified,grok,2026-08-22,word-for-word from printed page image
+proper/pentecost-sunday-1/benedictus-antiphon,c804f1e9be9b,diurnal,"Trinity Sunday, Lauds, For Commemoration of Sunday",405,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-1/collect,1d0047c532f1,diurnal,"Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost",403,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-1/magnificat-antiphon,ad2804dc822f,diurnal,"Trinity Sunday, II Vespers, For Commemoration of Sunday",408,verified,claude,2026-09-28,word-for-word from printed page image
+proper/pentecost-sunday-1/magnificat-antiphon-first,9e3848664e1c,diurnal,"Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost",403,verified,claude,2026-09-28,word-for-word from printed page image
 proper/pentecost-sunday-10/collect,114ea732b585,diurnal,,435,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0481.png
 proper/pentecost-sunday-10/magnificat-antiphon,c48b3afa540e,diurnal,X Sunday after Pentecost,435,verified,grok,2026-08-22,word-for-word from printed page image
 proper/pentecost-sunday-11/collect,3aae5edc6824,diurnal,,435,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0481.png

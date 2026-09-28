@@ -5,7 +5,7 @@
 use calendar::traits::octave_parent_id;
 use calendar::{Category, Feast, Rank, Season};
 
-use crate::commemoration::{is_saturday_second_vespers_sunday_commemoration, octave_commemoration_ref};
+use crate::commemoration::{is_saturday_sunday_commemoration, octave_commemoration_ref};
 use crate::day::Day;
 use crate::engine::Engine;
 use crate::prime::is_prime_antiphon_ref;
@@ -107,7 +107,7 @@ fn commemoration_owner_day(day: &Day, owner_id: &str) -> (Day, bool) {
 }
 
 /// Mirrors the composer: an incoming office, Memorial, or Sunday at Saturday
-/// II Vespers begins with its own I-Vespers texts.
+/// Vespers begins with its own I-Vespers texts.
 fn commemoration_takes_first_vespers(day: &Day, comm: Option<&Feast>, reference: &str) -> bool {
     let Some(comm) = comm else { return false };
     if (comm.rank == Rank::Commemoration && comm.companion_of.is_none())
@@ -115,7 +115,7 @@ fn commemoration_takes_first_vespers(day: &Day, comm: Option<&Feast>, reference:
     {
         return reference == "commemoration-antiphon" || reference == "commemoration-versicle";
     }
-    is_saturday_second_vespers_sunday_commemoration(day, comm, "vespers", reference)
+    is_saturday_sunday_commemoration(day, comm, "vespers", reference)
 }
 
 fn trace(day: &Day, hour_name: &str, reference: &str, selected: &str, t: &OfficeTexts) -> ProperResolutionTrace {
