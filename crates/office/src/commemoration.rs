@@ -170,6 +170,15 @@ fn lookup_following_office_commemoration(feast: &Feast, season: Season, referenc
         "commemoration-versicle" => &["versicle-first-vespers", "versicle-vespers"],
         _ => &[],
     };
+    // The feast's own Vespers text outranks its Common's I-Vespers one.
+    for candidate in candidates {
+        for id in feast_proper_ids(feast) {
+            let (text, source) = lookup_section_text(&format!("proper/{id}/"), Some(season), "vespers", candidate, t);
+            if !text.is_empty() {
+                return (substitute_proper_name(&text, &feast_proper_name(feast)), source);
+            }
+        }
+    }
     for candidate in candidates {
         let (text, source) = lookup_commemoration(feast, season, "vespers", candidate, t);
         if !text.is_empty() && !text.starts_with('[') {

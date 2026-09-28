@@ -2502,7 +2502,7 @@
   },
   {
     "id": "incoming-feast-commemoration-first-vespers",
-    "source": "Monastic Diurnal General Rubrics XIV.14. 2026 ordo 24 January (Comm. Conversion 'Go forth Ananias'), 25 January ('O holy Apostle Paul'); 2017 and 2018 ordos 23 March (Comm. Gabriel 'The angel Gabriel came in').",
+    "source": "Monastic Diurnal General Rubrics XIV.14. 2026 ordo 24 January (Comm. Conversion 'Go forth Ananias'), 25 January ('O holy Apostle Paul'); 2017 and 2018 ordos 23 March (Comm. Gabriel 'The angel Gabriel came in'). Monastic Diurnal p. 197 (Commemoration of St John at St Stephen's II Vespers); Chair of St Peter supplement (I Vespers).",
     "cases": [
       {
         "date": "2026-01-24",
@@ -2531,6 +2531,27 @@
         "commemoration_owner": "st-gabriel-archangel",
         "slot": "commemoration-antiphon",
         "contains": "With God nothing shall be impossible"
+      },
+      {
+        "date": "2026-12-26",
+        "hour": "vespers",
+        "commemoration_owner": "st-john-evangelist",
+        "slot": "commemoration-versicle",
+        "contains": "Right worthy of honour"
+      },
+      {
+        "date": "2026-01-17",
+        "hour": "vespers",
+        "commemoration_owner": "chair-peter-rome",
+        "slot": "commemoration-antiphon",
+        "contains": "Thou art the shepherd"
+      },
+      {
+        "date": "2026-01-17",
+        "hour": "vespers",
+        "commemoration_owner": "chair-peter-rome",
+        "slot": "commemoration-versicle",
+        "contains": "Thou art Peter"
       }
     ]
   },

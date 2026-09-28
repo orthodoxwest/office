@@ -14,6 +14,10 @@
 # heaven' 5*; Col. 575)". Ordos 2017-2022 instead used a supplement antiphon,
 # "Rejoice, O glorious matron"; 2023-2026 consistently use the common.
 
+[magnificat-antiphon-first]
+# SOURCE: 2023-2026 ordos, 25 July (Comm. St Anne at St James's II Vespers, "The kingdom of heaven", Common of a Holy Woman)
+@use commons/holy-woman/magnificat-antiphon-first
+
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, p. 674 (St. Anne said as in the Common of a Holy Woman not a Virgin; Manum suam, II Vespers)
 # Ordo 26 July Vespers: "Mag. Ant. 'She stretcheth out' (55*)".

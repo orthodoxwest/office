@@ -131,7 +131,8 @@ dedication-basilica-holy-apostles *
 
 # Apostle feasts with proper collect — antiphons from commons/apostle
 chains-st-peter psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-chair-peter-rome psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+# Chair of St Peter in Rome: the Antioch office, through ProperID.
+chair-peter-rome *
 commemoration-st-paul-apostle psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 st-john-latin-gate psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 octave-day-st-john psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle

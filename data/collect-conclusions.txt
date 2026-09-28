@@ -55,7 +55,6 @@ proper/all-souls/collect who-livest
 proper/chair-peter-antioch/collect who-livest
 # This is the same collect whose Diurnal form is printed for the commemoration
 # of St Peter on p. 463 with "Who with God the Father ... livest".
-proper/chair-peter-rome/collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest

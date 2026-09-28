@@ -931,6 +931,9 @@ Color = white
 Category = apostle
 Month = 1
 Day = 18
+# One office serves both Chairs (supplement "01 18 Chair of St Peter in Rome
+# and 02 22 Chair of St Peter in Antioch"; 2026 ordo 17-18 January, "suppl.").
+ProperID = chair-peter-antioch
 
 [st-agnes-rome]
 Name = St Agnes of Rome, Virgin & Martyr

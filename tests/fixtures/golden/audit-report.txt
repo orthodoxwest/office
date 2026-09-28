@@ -34,7 +34,7 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
     proper/easter-sunday-4/benedictus-antiphon
     proper/ss-philip-james/psalm-antiphon-3
 
-=== Suppressed: 78 feast(s) via data/audit-ok.txt ===
+=== Suppressed: 79 feast(s) via data/audit-ok.txt ===
   whit-ember-wednesday
   whit-ember-friday
   whit-ember-saturday
@@ -93,6 +93,7 @@ Mixed-register entries contain both thou/thee/thy and you/your language in the s
   st-catherine-alexandria
   st-peter-chrysologus
   st-hilary
+  chair-peter-rome
   st-agnes-rome
   st-cyril-alexandria
   st-ignatius-antioch
