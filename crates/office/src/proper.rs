@@ -141,7 +141,7 @@ pub fn derive_proper_name_from_title(name: &str) -> String {
     if name.is_empty() {
         return String::new();
     }
-    for prefix in ["Commemoration of ", "The Second Feast of ", "The Feast of "] {
+    for prefix in ["Commemoration of ", "The Second Feast of ", "The Feast of ", "Vigil of "] {
         if let Some(rest) = name.strip_prefix(prefix) {
             name = rest;
             break;
@@ -206,7 +206,12 @@ pub fn resolve_proper_collect_text(day: &Day, hour_name: &str, t: &OfficeTexts) 
 }
 
 fn proper_name_of(day: &Day) -> String {
-    day.celebration.as_deref().and_then(|c| c.proper_name.clone()).unwrap_or_default()
+    match day.celebration.as_deref() {
+        // A vigil's collect may be its Common's "N." form (Diurnal p. 7*).
+        Some(c) if c.is_vigil => feast_proper_name(c),
+        Some(c) => c.proper_name.clone().unwrap_or_default(),
+        None => String::new(),
+    }
 }
 
 fn ferial_vespers_antiphon(day: &Day, hour_name: &str, reference: &str, t: &OfficeTexts) -> bool {

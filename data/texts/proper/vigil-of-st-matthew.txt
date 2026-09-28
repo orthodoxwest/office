@@ -1,0 +1,3 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 606 (Vigil of St Matthew, Collect as in the Common, p. 7*)
+@use commons/apostle/vigil-collect

@@ -442,6 +442,7 @@ Color = red
 Category = apostle
 Month = 9
 Day = 21
+HasVigil = true
 
 [dedication-st-michael]
 Name = Dedication of St Michael the Archangel
@@ -543,7 +544,7 @@ Color = white
 Category = blessed-virgin
 Month = 12
 Day = 8
-HasVigil = true
+# No Office vigil (Diurnal p. 447).
 HasOctave = true
 
 [st-nicholas]

@@ -56,6 +56,7 @@ commons/apostle/versicle-first-vespers,f886575e0617,diurnal,,10*,verified,codex,
 commons/apostle/versicle-lauds,c3fdc4e4c6fe,draft archdiocesan Lauds book,Common of Apostles and Evangelists out of Paschaltide,610,verified,codex,2026-07-18,
 commons/apostle/versicle-none,ae84a36d62ac,diurnal,,12*,verified,codex,2026-09-14,Word-for-word after normalization; page image output/apostle-pilot/page-0725-300dpi.png
 commons/apostle/versicle-sext,081d346161c8,diurnal,,12*,verified,codex,2026-09-14,Word-for-word after normalization; page image /home/bwaldrep/code/orthodoxwest/office/output/pages/monastic-diurnal/0725.png
+commons/apostle/vigil-collect,0bafff901ec3,diurnal,On Vigils of Apostles,7*,verified,claude,2026-09-28,word-for-word from printed page image
 commons/bishop-martyr/chapter-lauds,b659584a8eb7,diurnal,"Common of One Martyr out of Paschaltide, At Lauds",21*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/chapter-none,2cca33a77d09,diurnal,"Common of One Martyr, At None",23*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/bishop-martyr/chapter-sext,923dc9141a72,diurnal,"Common of One Martyr, At Sext",23*,verified,grok,2026-08-23,word-for-word from printed page image
@@ -2157,7 +2158,13 @@ proper/vigil-nativity/short-responsory-none,52ea7635a9d6,diurnal,"Christmas Eve,
 proper/vigil-nativity/short-responsory-sext,e715b85b58da,diurnal,"Christmas Eve, At Sext",183,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-nativity/short-responsory-terce,16415e791824,diurnal,"Christmas Eve, At Terce",183,verified,grok,2026-08-24,word-for-word from printed page image
 proper/vigil-nativity/versicle-lauds,d79bec1a9cbb,Monastic Diurnal.pdf,proper/vigil-nativity/versicle-lauds,182,verified,codex,2026-09-26,Direct page-image reading; normalized wording also agrees with independent Sonnet reading. Evidence: output/local-review/second-pass/plan.json; output/pages/monastic-diurnal/0228.png
-proper/vigil-st-james/collect,9c1c987bd0bf,diurnal,On Vigils of Apostles; assigned on p. 570 to the Vigil of St James,7*,verified,grok,2026-08-23,word-for-word from printed page image
+proper/vigil-of-all-saints/collect,b0b196479e70,diurnal,"October 31, Vigil of All Saints",636,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-assumption-bvm/collect,c7199e7a8028,diurnal,"August 14, Vigil of the Assumption",588,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-nativity-john-baptist/collect,6608cff7d0a9,diurnal,"June 23, Vigil of St John Baptist",538,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-ss-peter-paul/collect,69ecbce7c3d4,diurnal,"June 28, Vigil of Sts Peter and Paul",543,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-ss-simon-jude/collect,c3594e454aab,diurnal,"October 27, Vigil of Sts Simon and Jude",635,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-st-andrew/collect,2f2a5bb56539,diurnal,"November 29, Vigil of St Andrew",669,verified,claude,2026-09-28,word-for-word from printed page image
+proper/vigil-of-st-lawrence/collect,84a3e1f8af05,diurnal,"August 9, Vigil of St Laurence",585,verified,claude,2026-09-28,word-for-word from printed page image
 proper/visitation-bvm/benedictus-antiphon,c4425f8988c1,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png
 proper/visitation-bvm/collect,a286c1d28616,diurnal,,557,verified,codex,2026-09-11,"Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png; dual readers agreed, auto-apply blocked because corpus similarity 0.59"
 proper/visitation-bvm/magnificat-antiphon,28a9a22edb7d,diurnal,,557,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0602.png

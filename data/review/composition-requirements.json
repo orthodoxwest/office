@@ -2406,5 +2406,98 @@
         "contains": "The sun shone"
       }
     ]
+  },
+  {
+    "id": "vigil-offices-and-commemorations",
+    "source": "Monastic Diurnal General Rubrics VI; pp. 1*, 7*, 481, 538, 543, 669. 2026 ordo 23 and 27 June, 28 November; 2021 ordo 20 September.",
+    "cases": [
+      {
+        "date": "2026-06-23",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/vigil-of-nativity-john-baptist/collect",
+        "contains": "John the Forerunner"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/vigil-of-st-andrew/collect"
+      },
+      {
+        "date": "2026-06-27",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-ss-peter-paul",
+        "slot": "commemoration-antiphon",
+        "ref": "ordinary/lauds/benedictus-antiphon-saturday",
+        "contains": "Give light"
+      },
+      {
+        "date": "2026-06-27",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-ss-peter-paul",
+        "slot": "commemoration-collect",
+        "ref": "proper/vigil-of-ss-peter-paul/collect"
+      },
+      {
+        "date": "2027-09-20",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-st-matthew",
+        "slot": "commemoration-collect",
+        "ref": "proper/vigil-of-st-matthew/collect",
+        "contains": "Apostle Matthew"
+      },
+      {
+        "date": "2026-02-23",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-st-matthias",
+        "slot": "commemoration-collect",
+        "absent": true
+      }
+    ]
+  },
+  {
+    "id": "feria-commemorations-at-lauds-and-vespers",
+    "source": "Monastic Diurnal p. 1*; General Rubrics V. 2026 ordo 10 February, 21 March, 8 April, 12 December.",
+    "cases": [
+      {
+        "date": "2026-02-10",
+        "hour": "lauds",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "ref": "ordinary/lauds/benedictus-antiphon-tuesday",
+        "contains": "The Lord hath raised up"
+      },
+      {
+        "date": "2026-02-10",
+        "hour": "vespers",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "contains": "The householder"
+      },
+      {
+        "date": "2026-03-21",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2026-04-08",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2026-12-12",
+        "hour": "vespers",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      }
+    ]
   }
 ]

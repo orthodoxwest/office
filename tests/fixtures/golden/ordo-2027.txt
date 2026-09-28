@@ -419,11 +419,10 @@ MARCH
                Com. Friday after Septuagesima ("So the last")
   6  Sat     St Perpetua & Felicitas, Martyrs           [d]   r
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
-               Com. Saturday after Septuagesima ("Blessed be the Lord God of Israel, for he…")
+               Com. Saturday after Septuagesima ("Give light, O Lord")
            Hours   No Preces
            Vespers v · I fol. (Sexagesima Sunday) · Mag. The Lord · No Suff.
                Com. St Perpetua & Felicitas, Martyrs ("In the heavenly kingdom")
-               Com. Saturday after Septuagesima ("My soul doth magnify the Lord, and my spirit…")
   7  Sun     Sexagesima Sunday                          [2cl] v
            Lauds   v · Ben. When much people · No Preces · Suff.
            Hours   Preces
@@ -453,7 +452,7 @@ MARCH
                Com. Thursday after Sexagesima ("Some seed")
  12  Fri  L  St Gregory the Great                       [2cl] w
            Lauds   w · Ben. Gregory · No Preces · No Suff.
-               Com. Friday after Sexagesima ("Blessed be the Lord God of Israel, for he…")
+               Com. Friday after Sexagesima ("Through the tender mercy")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
                Com. Friday after Sexagesima ("They who keep the word of God")
@@ -722,7 +721,6 @@ APRIL
                Com. St Vitalis, Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers v · Mag. A maid said unto Peter · No Suff.
-               Com. Thursday after Palm Sunday ("My soul doth magnify the Lord, and my spirit…")
  29  Thu  L§ HOLY THURSDAY                              [1cl] w
            Thursday after Palm Sunday (f2)
            Lauds   w · Ben. Now he that betrayed him · No Preces · No Suff.
@@ -1080,23 +1078,23 @@ JUNE
                Com. Octave of the Compassion of Our Lord Jesus Christ ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · I fol. (Trinity Sunday) · Mag. Thanks, O God · No Suff.
-               Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
+               Com. I Sunday after Pentecost ("Speak, Lord")
  27  Sun     TRINITY SUNDAY                             [1cl] w
            I Sunday after Pentecost (sd)
            Day IV within the Octave of St John Baptist (sd)
            Lauds   w · Ben. Blessed be · No Preces · No Suff.
-               Com. I Sunday after Pentecost ("Blessed be the Lord God of Israel, for he…")
+               Com. I Sunday after Pentecost ("Be ye therefore")
                Com. Day IV within the Octave of St John Baptist ("The mouth of Zacharias")
            Hours   No Preces
            Vespers w · II prec. · Mag. Thee, O God · No Suff.
                Com. Nativity of St John the Baptist ("When Zacharias")
-               Com. I Sunday after Pentecost ("My soul doth magnify the Lord, and my spirit…")
+               Com. I Sunday after Pentecost ("Judge not")
  28  Mon     NATIVITY OF ST JOHN THE BAPTIST            [1cl] w
            Day V within the Octave of St John Baptist (sd)
            Vigil of Ss Peter & Paul (s)
            Lauds   w · Ben. The mouth of Zacharias · No Preces · No Suff.
                Com. Day V within the Octave of St John Baptist ("The mouth of Zacharias")
-               Com. Vigil of Ss Peter & Paul ("Blessed be the Lord God of Israel, for he…")
+               Com. Vigil of Ss Peter & Paul ("Blessed")
            Hours   No Preces
            Vespers w · II prec. · Mag. The child · No Suff.
                Com. Ss Peter and Paul, Apostles ("Thou art the shepherd of the sheep")
@@ -1152,7 +1150,7 @@ JULY
                Com. Day V within the Octave of Ss Peter & Paul ("Glorious princes")
            Hours   No Preces
            Vespers w · I fol. (Visitation of the Blessed Virgin Mary) · Mag. Blessed art thou · No Suff.
-               Com. Sunday within the Octave of Corpus Christi ("Go out quickly")
+               Com. Sunday within the Octave of Corpus Christi ("The child Samuel")
                Com. All Saints of Antioch ("I will liken him")
   4  Sun     Visitation of the Blessed Virgin Mary      [2cl] w
            Sunday within the Octave of Corpus Christi (sd)
@@ -1310,7 +1308,7 @@ JULY
                Com. St Christina, Virgin & Martyr ("The kingdom of heaven")
            Hours   Preces
            Vespers r · I fol. (St James the Greater, Apostle) · Mag. They will deliver you up · No Suff.
-               Com. V Sunday after Pentecost ("If thou bring")
+               Com. V Sunday after Pentecost ("Ye mountains")
                Com. St Christopher, Martyr ("This is a Martyr")
  25  Sun     St James the Greater, Apostle              [2cl] r
            V Sunday after Pentecost (sd)
@@ -1453,7 +1451,7 @@ AUGUST
                Com. St Eusebius, Priest & Confessor ("Well done, good and faithful servant")
            Hours   Preces
            Vespers w · I fol. (Assumption of the Blessed Virgin Mary) · Mag. O most prudent Virgin · No Suff.
-               Com. VIII Sunday after Pentecost ("What shall I do?")
+               Com. VIII Sunday after Pentecost ("All wisdom")
  15  Sun     ASSUMPTION OF THE BLESSED VIRGIN MARY      [1cl] w
            VIII Sunday after Pentecost (sd)
            Lauds   w · Ben. Who is she · No Preces · No Suff.
@@ -1682,7 +1680,9 @@ SEPTEMBER
                Com. St Eustace & companions, Martyrs ("For theirs is the kingdom of heaven")
                Com. St Januarius & companions, Martyrs ("In the heavenly kingdom")
  20  Mon     St Eustace & companions, Martyrs           [d]   r
+           Vigil of St Matthew, Apostle and Evangelist (s)
            Lauds   r · Ben. The very hairs of your head · No Preces · No Suff.
+               Com. Vigil of St Matthew, Apostle and Evangelist ("Blessed")
            Hours   No Preces
            Vespers r · I fol. (St Matthew, Apostle and Evangelist) · Mag. They will deliver you up · No Suff.
                Com. St Eustace & companions, Martyrs ("In the heavenly kingdom")
@@ -1908,7 +1908,7 @@ OCTOBER
            Lauds   v · Ben. Give light, O Lord · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (The Feast of O..J.C. The King) · Mag. The Lord God shall give unto him · No Suff.
-               Com. XIX Sunday after Pentecost ("And when the king came in")
+               Com. XIX Sunday after Pentecost ("I saw the Lord also")
  31  Sun     THE FEAST OF O..J.C. THE KING              [1cl] w
            XIX Sunday after Pentecost (sd)
            Lauds   w · Ben. Unto God and his Father · No Preces · No Suff.
@@ -2197,7 +2197,6 @@ DECEMBER
            Hours   No Preces
            Vespers p · I fol. (III Sunday of Advent (Gaudete)) · Mag. Before me · No Suff.
                Com. Day V within Conception Octave ("Thou art all fair, O Mary")
-               Com. Saturday after Advent Sunday 2 ("My soul doth magnify the Lord, and my spirit…")
  12  Sun  L  III Sunday of Advent (Gaudete)             [2cl] p
            Day V within Conception Octave (sd)
            Lauds   p · Ben. He shall sit upon the throne · No Preces · No Suff.

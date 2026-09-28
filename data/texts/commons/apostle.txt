@@ -204,3 +204,7 @@ R. They shall remember thy Name, O Lord.
 # SOURCE: diurnal p. 12*
 V. Exceedingly honoured are thy friends, O God.
 R. Firmly stablished is their princedom.
+
+[vigil-collect]
+# SOURCE: Monastic Diurnal.pdf, p. 7* (On Vigils of Apostles)
+Grant, we beseech thee, Almighty God: that the reverend solemnity of thy blessed Apostle N., to which we are drawing nigh, may both increase our devotion and set forward our salvation.

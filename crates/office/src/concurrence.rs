@@ -142,6 +142,12 @@ fn incoming_feria_excluded_at_vespers(f: &Feast) -> bool {
     f.is_category(Category::Feria) && f.id != "vigil-epiphany"
 }
 
+/// Saturday evening is always the Sunday's I Vespers, so a feria displaced on
+/// Saturday has no Vespers to commemorate (2026 ordo 21 March, 12 December).
+fn saturday_feria_without_vespers(day: &CalendarDay, f: &Feast) -> bool {
+    f.is_category(Category::Feria) && day.date.weekday() == Weekday::Saturday
+}
+
 /// XIV.9: Ember days, Rogation Monday, and common vigils have Lauds only.
 fn occurrence_commemorated_at_first_vespers(comm: &Feast) -> (bool, &'static str) {
     if is_ember_day(comm) || is_rogation_day(comm) || is_vigil(comm) {
@@ -394,7 +400,13 @@ fn boundary_commemorations(
         {
             c = Some(Arc::new(seasonal_feria_commemoration(preceding, julian_easter(preceding.date.year()))));
         }
-        if let Some(c) = c {
+        if let Some(c) = c.filter(|c| {
+            let saturday = saturday_feria_without_vespers(preceding, c);
+            if saturday {
+                decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &c.id));
+            }
+            !saturday
+        }) {
             let (included, rule) = outgoing_commemorated_at_first_vespers(w, &c);
             if included {
                 comms.push(c.clone());
@@ -516,6 +528,10 @@ fn second_vespers_commemorations(
         comms.push(c.clone());
     }
     for comm in &occurrence {
+        if saturday_feria_without_vespers(day, comm) {
+            decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &comm.id));
+            continue;
+        }
         let (included, rule) = occurrence_commemorated_at_second_vespers(Some(winner), comm);
         if included {
             if !same(&concurrent_octave, comm) {
@@ -553,6 +569,10 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
     let mut incoming = Vec::new();
     let mut decisions = Vec::new();
     for comm in &preceding.commemorations {
+        if saturday_feria_without_vespers(preceding, comm) {
+            decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &comm.id));
+            continue;
+        }
         let (included, rule) = occurrence_commemorated_at_second_vespers(preceding.celebration.as_deref(), comm);
         if included {
             current.push(comm.clone());
@@ -561,6 +581,11 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
     }
     for comm in &following.commemorations {
         let (included, rule) = occurrence_commemorated_at_first_vespers(comm);
+        // Holy Wednesday does not commemorate Thursday's feria (2026 ordo 8 April).
+        if included && incoming_feria_excluded_at_vespers(comm) {
+            decisions.push(decision("commemoration:incoming-feria-not-at-vespers-boundary", "suppressed", &comm.id));
+            continue;
+        }
         if included {
             incoming.push(comm.clone());
             decisions.push(decision("commemoration:incoming-at-unowned-vespers", "included", &comm.id));

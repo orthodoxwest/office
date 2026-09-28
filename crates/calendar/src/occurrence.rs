@@ -92,9 +92,11 @@ fn resolved_day_color(winner: Option<&Feast>, season: Season, season_color: Colo
 }
 
 /// General Rubrics VI.2: a common vigil in Advent, Lent, or on an Ember Day
-/// has neither office nor commemoration.
+/// has neither office nor commemoration; nor, after Septuagesima, St
+/// Matthias's (Diurnal p. 481), the only vigil that can fall there.
 fn exclude_seasonal_vigils(candidates: Vec<FeastRef>, season: Season) -> (Vec<FeastRef>, Vec<Decision>) {
-    let excluded = matches!(season, Season::Advent | Season::Lent | Season::Passiontide) || candidates.iter().any(|f| is_ember_day(f));
+    let excluded = matches!(season, Season::Advent | Season::Septuagesima | Season::Lent | Season::Passiontide)
+        || candidates.iter().any(|f| is_ember_day(f));
     if !excluded {
         return (candidates, Vec::new());
     }

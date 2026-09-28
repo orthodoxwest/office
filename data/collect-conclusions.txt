@@ -69,6 +69,8 @@ proper/st-helen/collect who-livest
 proper/st-joseph/collect who-livest
 # The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
+# Diurnal p. 588 prints Who with God the Father ... livest.
+proper/vigil-of-assumption-bvm/collect who-livest
 
 # --- The Son is mentioned at the ending: "Who with thee ... liveth" ---
 proper/ascension/collect who-liveth
@@ -100,6 +102,8 @@ proper/st-stephen/commemoration-collect who-liveth
 # Same collect with the August wording adaptation (2026 ordo p. 86).
 proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
+# Diurnal p. 538 prints Who with thee ... liveth.
+proper/vigil-of-nativity-john-baptist/collect who-liveth
 
 # --- The Son is mentioned before, but not at, the ending ---
 # Directly printed "Through the same" in the Diurnal (pp. 167, 206, and 222).

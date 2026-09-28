@@ -4,7 +4,7 @@
 
 [collect]
 # SOURCE: monastic diurnal, p. 7* (On Vigils of Apostles; p. 570 assigns this collect to the Vigil of St James)
-Grant, we beseech thee, Almighty God: that the reverend solemnity of thy blessed Apostle James, to which we are drawing nigh, may both increase our devotion and set forward our salvation.
+@use commons/apostle/vigil-collect
 
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.

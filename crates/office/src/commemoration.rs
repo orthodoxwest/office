@@ -48,7 +48,18 @@ pub fn add_commemorations(day: &Day, hour_name: &str, t: &OfficeTexts, more_coll
             if hour_name == "vespers" && commemoration_takes_first_vespers(day, comm, reference) {
                 return lookup_following_office_commemoration(comm, day.season, reference, t);
             }
-            lookup_commemoration(comm, day.season, hour_name, reference, t)
+            let found = lookup_commemoration(comm, day.season, hour_name, reference, t);
+            // A vigil or feria without its own antiphon takes the Psalter's
+            // for the weekday (General Rubrics VI; Diurnal p. 1*).
+            if reference == "commemoration-antiphon" && comm.is_category(Category::Feria) && found.1.starts_with("ordinary/") {
+                let slot = if hour_name == "vespers" { "magnificat-antiphon" } else { "benedictus-antiphon" };
+                let key = format!("ordinary/{hour_name}/{slot}-{}", day.civil_weekday_name());
+                let text = t.get(&key);
+                if !text.is_empty() {
+                    return (text.to_string(), key);
+                }
+            }
+            found
         };
         let owned = |mut e: OfficeElement| {
             e.commemoration_owner_id = comm.id.clone();
@@ -180,11 +191,16 @@ fn lookup_feria_commemoration(
     match reference {
         "commemoration-antiphon" => {
             let ant_slot = if hour_name == "vespers" { "magnificat-antiphon" } else { "benedictus-antiphon" };
-            if let (Some(day), Some(proper)) = (day, &feast.proper_id) {
-                let ant_ref = format!("proper/{proper}/{ant_slot}-{}", day.civil_weekday_name());
-                let text = t.get(&ant_ref);
-                if !text.is_empty() {
-                    return (text.to_string(), ant_ref);
+            if let Some(day) = day {
+                // The week's own ferial antiphon, else the Psalter's for the
+                // weekday (2026 ordo 10 February: "The Lord" p. 55).
+                let weekday = day.civil_weekday_name();
+                let proper_ref = feast.proper_id.as_ref().map(|p| format!("proper/{p}/{ant_slot}-{weekday}"));
+                for ant_ref in proper_ref.into_iter().chain([format!("ordinary/{hour_name}/{ant_slot}-{weekday}")]) {
+                    let text = t.get(&ant_ref);
+                    if !text.is_empty() {
+                        return (text.to_string(), ant_ref);
+                    }
                 }
             }
             let ant_ref = format!("ordinary/{hour_name}/{ant_slot}");
@@ -260,7 +276,8 @@ fn lookup_temporal_commemoration(feast: &Feast, season: Season, hour_name: &str,
                 let key = format!("proper/{id}/collect");
                 let text = t.get(&key);
                 if !text.is_empty() {
-                    return (text.to_string(), key);
+                    // A vigil may share its Common's "N." collect (Diurnal p. 7*).
+                    return (substitute_proper_name(text, &feast_proper_name(feast)), key);
                 }
             }
         }
