@@ -2223,12 +2223,14 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   const printStyles = await page.evaluate(() => {
     const body = getComputedStyle(document.body);
     const elements = getComputedStyle(document.querySelector(".elements"));
+    // Review progress can make this office fully verified, which omits the banner.
+    const banner = document.querySelector(".site-banner");
     return {
       bodyFont: parseFloat(body.fontSize),
       prayerFont: parseFloat(elements.fontSize),
       prayerMaxWidth: elements.maxWidth,
       headerDisplay: getComputedStyle(document.querySelector("header")).display,
-      bannerDisplay: getComputedStyle(document.querySelector(".site-banner")).display,
+      bannerDisplay: banner ? getComputedStyle(banner).display : "none",
       sessionSummaryDisplay: getComputedStyle(
         document.querySelector(".session-prayers > summary"),
       ).display,
