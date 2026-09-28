@@ -1,10 +1,16 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 3 feast(s) ===
+=== Missing propers: 6 feast(s) ===
 
   [base]
+  [1cl] Easter Monday (easter-monday)
+    missing: commemoration-versicle
+  [1cl] Easter Tuesday (easter-tuesday)
+    missing: commemoration-versicle
   [1cl] Holy Saturday (holy-saturday)
     missing: magnificat-antiphon
+  [1cl] Sunday of the Resurrection (easter-sunday)
+    missing: commemoration-versicle
   [sd] Friday after the Octave of Ascension (friday-after-ascension-octave)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon
   [f2] Rogation Monday (rogation-monday)

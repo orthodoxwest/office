@@ -48,15 +48,15 @@ Benedict, the man of God, * was filled with the spirit of all the righteous: may
 [chapter-lauds]
 # SOURCE: parish Sanctoral Lauds booklet, PDF p. 78 (St. Benedict, Chapter; printed Eph. 2:19-20 citation is erroneous; text is Sir 50:6-7)
 !Sir 50:6-7
-Behold a great Confessor, who was as the morning star in the midst of a cloud, and as the moon at the full: as the sun shining upon the temple of the Most High.
+Behold a great Confessor, who was as the morning star in the midst of a cloud, and as the moon at the full: * as the sun shining upon the temple of the Most High.
 R. Thanks be to God.
 
 # [chapter-vespers]
 # Chapter at Vespers (often @use of chapter-lauds).
 #
 [hymn-lauds]
-# SOURCE: parish Sanctoral Lauds booklet, PDF pp. 80-81 (St. Benedict; Laudibus cives resonent canoris)
-Laudibus cives resonent canoris
+# SOURCE: Monastic Diurnal.pdf, pp. 495-496 (St Benedict, At Lauds)
+Inter aeternas
 
 Gem of the highest, diadem immortal,
 Cherished for ever after sacred struggle,
@@ -65,17 +65,17 @@ Benedict, shinest.
 
 Thee in thy boyhood holy eld adorned;
 Surely of nothing hath desire despoiled thee;
-Earth's blossom whithered, to thy heart uplifted
+Earth's blossom withered, to thy heart uplifted
 Unto the highest.
 
 Fleeing in secret, thou didst leave thy native
-Country and parents: then, a forest dweller,
+Country and parents: then, a forest-dweller,
 Into subjection unto Christ, by torment
 Broughtest thy body.
 
 Not long securely couldst thou be hidden,
 Good deeds and wonders brought thee to men's knowledge;
-Through the world widely spread the happy rumour,
+Through the world widely spread the happy rumour
 Speedily flying.
 
 Praise to the Father, to the Sole-begotten,
@@ -85,9 +85,42 @@ Through all the ages.
 
 Amen.
 
-# [hymn-vespers]
-# Hymn at Vespers.
-#
+[hymn-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 494 (St Benedict, At I Vespers; II Vespers "all as at I Vespers", p. 497)
+Laudibus cives resonent canoris
+
+Shout, all ye people! Let your measured praises
+Ring through the churches solemnly and sweetly:
+On this his feast day, Benedict ascended
+Heaven's high summit.
+
+He, when his youthful joyous years were blooming,
+Yet in his boyhood, left his native dwelling,
+Seeking concealment hid within a cavern
+Lonely and silent.
+
+There amid nettles, rigid thorns, and briars
+Won he the battle over youth's enticement,
+Nurse of pollution: then he wrote a Holy
+Rule of blest living.
+
+Thy brazen image, infamous Apollo,
+Soon hath he smitten; burnt the grove of Venus;
+Then to the Baptist, on the sacred mountain
+Stablished a chapel.
+
+Now doth he witness happily in heaven
+Seraphim, leading throngs of shining Angels,
+While he refreshes faithful hearts who need him
+With living waters.
+
+Praise to the Father, to the Sole-begotten,
+And to thee, alway with the Twain co-equal,
+Fostering Spirit; one and only Godhead
+Through all the ages.
+
+Amen.
+
 # [versicle-lauds]
 # Versicle after the hymn at Lauds (V. … / R. …).
 #

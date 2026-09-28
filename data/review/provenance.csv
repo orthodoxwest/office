@@ -51,6 +51,7 @@ commons/apostle/psalm-antiphon-4,dd9685c3b942,diurnal,"Common of Apostles out of
 commons/apostle/psalm-antiphon-4-first-vespers,d8c01a0143cf,draft archdiocesan Vespers book,,542,verified,codex,2026-07-17,
 commons/apostle/psalm-antiphon-4-vespers,54e7e85d54a6,diurnal,"Common of Apostles out of Paschaltide, At II Vespers",14*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0727.png
 commons/apostle/short-responsory-lauds,395c0e048b0d,diurnal,"Common of Apostles out of Paschaltide, At Lauds",11*,verified,codex,2026-09-08,Word-for-word after normalization; page image output/pages/monastic-diurnal/0724.png
+commons/apostle/short-responsory-none,22beaeaba11c,diurnal,"Common of Apostles and Evangelists, At None",12*,verified,claude,2026-09-28,"the Diurnal prints the reduced form at None (V. Exceedingly honoured are thy friends, O God. R. Firmly stablished is their princedom.); the stored responsory reduces to exactly that versicle"
 commons/apostle/short-responsory-vespers,b2de766128db,draft archdiocesan Vespers book,,552,verified,codex,2026-07-18,
 commons/apostle/versicle-first-vespers,f886575e0617,diurnal,,10*,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0723.png
 commons/apostle/versicle-lauds,c3fdc4e4c6fe,draft archdiocesan Lauds book,Common of Apostles and Evangelists out of Paschaltide,610,verified,codex,2026-07-18,
@@ -185,6 +186,7 @@ commons/dedication/short-responsory-sext,99f6cc1e2ec3,diurnal,"Common of the Ded
 commons/dedication/short-responsory-terce,0a3b14519bee,diurnal,"Common of the Dedication of a Church, At Terce",60*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/dedication/versicle-lauds,4dfce1df4e4a,diurnal,"Common of the Dedication of a Church, At Lauds",59*,verified,grok,2026-08-23,word-for-word from printed page image
 commons/dedication/versicle-vespers,5addc4cdbf2e,diurnal,"Common of the Dedication of a Church, At II Vespers",61*,verified,grok,2026-08-23,word-for-word from printed page image
+commons/evangelist/benedictus-antiphon,7b6c1bbab6d9,diurnal,"Common of Apostles and Evangelists, At Lauds, Ant. on Benedictus",12*,verified,claude,2026-09-28,word-for-word from printed page image
 commons/evangelist/magnificat-antiphon,6604db859c3c,draft archdiocesan Vespers book,"Common of Apostles and Evangelists; Estote fortes, II Vespers",564,verified,claude,2026-09-28,"wording matches the DOCX (v.26 Lauds / v.29 Vespers) word for word; case, punctuation, drop capitals and chant syllabification normalized"
 commons/evangelist/magnificat-antiphon-first,19ade77096dd,draft archdiocesan Vespers book,"Common of Apostles and Evangelists; Tradent enim vos, I Vespers",555,verified,claude,2026-09-28,"wording matches the DOCX (v.26 Lauds / v.29 Vespers) word for word; case, punctuation, drop capitals and chant syllabification normalized"
 commons/evangelist/psalm-antiphon-1,c6041b6635df,draft archdiocesan Commons Vespers book,,1,verified,codex,2026-07-17,
@@ -687,6 +689,7 @@ proper/all-saints/versicle-terce,6e4d900a617f,diurnal,,640,verified,codex,2026-0
 proper/all-souls/benedictus-antiphon,c3836c77f5ad,diurnal,"Lauds of the Dead, Ant. on Benedictus",104*,verified,claude,2026-08-21,
 proper/all-souls/collect,da4ecabf7176,draft archdiocesan Commons Vespers book,,165,verified,codex,2026-07-17,
 proper/all-souls/collect-prime,f6e6b4e37ca5,Monastic Diurnal.pdf,"All Souls, Prime; PDF page 696",652,verified,codex,2026-09-28,Page-image readings by Codex and Claude Sonnet agree. Evidence: output/all-souls-investigation/collect-prime-evidence.json
+proper/all-souls/compline-collect,903831642b37,diurnal,"November 2, At Compline",644,verified,claude,2026-09-28,word-for-word from printed page image
 proper/all-souls/magnificat-antiphon,5591cbb1c834,diurnal,"Vespers of the Dead, Ant. on Magnificat",75*,verified,claude,2026-08-21,
 proper/all-souls/prime-concluding-collect,efa5406ac0a4,Monastic Diurnal.pdf,"All Souls, Prime; PDF page 697",653,verified,codex,2026-09-28,Page-image readings by Codex and Claude Sonnet agree. Evidence: output/all-souls-investigation/prime-concluding-collect-evidence.json
 proper/all-souls/prime-concluding-versicle,e574bdc26046,Monastic Diurnal.pdf,"All Souls, Prime; PDF page 697",653,verified,codex,2026-09-28,Page-image readings by Codex and Claude Sonnet agree. Evidence: output/all-souls-investigation/prime-concluding-versicle-evidence.json
@@ -1197,7 +1200,9 @@ proper/finding-holy-cross/commemoration-antiphon,2e2b3e7f742a,draft archdiocesan
 proper/finding-holy-cross/commemoration-antiphon-easter,6457229ee88d,draft archdiocesan Lauds book,,453,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle,82344825b400,draft archdiocesan Vespers book,,483,verified,codex,2026-07-18,
 proper/finding-holy-cross/commemoration-versicle-easter,b3a8fd311c36,draft archdiocesan Vespers book,,381,verified,codex,2026-07-18,
+proper/finding-holy-cross/hymn-vespers,0bfeabab349c,diurnal,"Finding of the Holy Cross, At I Vespers, Vexilla Regis",520-521,verified,claude,2026-09-28,word-for-word from printed page image
 proper/finding-holy-cross/magnificat-antiphon,21e34a68dfe0,diurnal,,525,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0571.png
+proper/finding-holy-cross/magnificat-antiphon-first,df8c6f6aef17,diurnal,"Finding of the Holy Cross, At I Vespers, Ant. on Magnificat",521-522,verified,claude,2026-09-28,word-for-word from printed page image
 proper/finding-holy-cross/psalm-antiphon-1,6457229ee88d,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
 proper/finding-holy-cross/psalm-antiphon-2,aad920150db2,diurnal,,522,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0568.png
 proper/finding-holy-cross/psalm-antiphon-3,598ad0d0eb3b,Monastic Diurnal.pdf,proper/finding-holy-cross/psalm-antiphon-3; PDF pages 568,522,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__finding-holy-cross__psalm-antiphon-3/record.json"
@@ -1484,7 +1489,6 @@ proper/low-sunday/chapter-lauds,961b291efe92,diurnal,"Low Sunday, At Lauds",370,
 proper/low-sunday/chapter-none,400f028fef65,diurnal,"Low Sunday, At None",371-372,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/chapter-sext,8d410df9f426,diurnal,"Low Sunday, At Sext",371,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/collect,ac988f4e77f4,diurnal,,371,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0417.png
-proper/low-sunday/commemoration-antiphon,caba32c4f64b,diurnal,,370,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0416.png
 proper/low-sunday/magnificat-antiphon,dc570ffb0206,diurnal,"Low Sunday, At II Vespers",372,verified,grok,2026-08-22,word-for-word from printed page image
 proper/low-sunday/magnificat-antiphon-first,caba32c4f64b,draft archdiocesan Vespers book,proper/low-sunday/magnificat-antiphon-first,162,verified,claude,2026-09-28,"wording matches the DOCX (v.26 Lauds / v.29 Vespers) word for word; case, punctuation, drop capitals and chant syllabification normalized"
 proper/low-sunday/magnificat-antiphon-monday,81b39a781d2f,diurnal,"I Week after the Octave of Easter, Monday",376,verified,grok,2026-08-22,word-for-word from printed page image
@@ -1775,6 +1779,7 @@ proper/saturday-office-bvm-christmastide/benedictus-antiphon,71723a27cb06,diurna
 proper/saturday-office-bvm-christmastide/magnificat-antiphon,e94affcbd982,diurnal,"Office of Saint Mary on Saturday, II After Christmas, At Vespers",70*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-paschal/magnificat-antiphon,420d7ab91a53,diurnal,"Office of Saint Mary on Saturday, III In Paschaltide, At Vespers",71*,verified,claude,2026-08-22,
 proper/saturday-office-bvm-paschal/short-responsory-lauds,91143d1f7b76,Copy of OCP Ferial Lauds.pdf,,120,verified,codex,2026-07-18,
+proper/saturday-office-bvm-paschal/versicle-lauds,92ca43af8a95,Copy of OCP Ferial Lauds.pdf,"Saturday Office of the BVM, The Versicle (In Paschaltide: alleluia)",107,verified,claude,2026-09-28,word-for-word from printed page image; agrees with Monastic Diurnal p. 69* plus the Paschaltide alleluia
 proper/saturday-office-bvm/benedictus-antiphon,a1d0eddde456,diurnal,"Office of Saint Mary on Saturday, At Lauds",69*,verified,claude,2026-08-22,
 proper/saturday-office-bvm/chapter-lauds,a68ffb5aa5d7,diurnal,,65*,verified,grok,2026-09-18,Word-for-word after normalization; page image output/pages/monastic-diurnal/0778.png
 proper/saturday-office-bvm/hymn-lauds,0002effe3e0f,Copy of OCP Ferial Lauds.pdf,,107,verified,codex,2026-07-18,
@@ -1947,8 +1952,12 @@ proper/st-barnabas/collect,3aa7272a85d9,diurnal,,535,verified,codex,2026-09-13,W
 proper/st-bartholomew/collect,fec50c1bccc5,Monastic Diurnal.pdf,proper/st-bartholomew/collect; PDF pages 636,592,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__st-bartholomew__collect/record.json"
 proper/st-basil-great/collect,b0659f89131a,diurnal,,536,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0581.png
 proper/st-bede-venerable/collect,c3ee8aef7130,diurnal,,528,verified,codex,2026-09-09,Word-for-word after normalization; page image output/pages/monastic-diurnal/0573.png
+proper/st-benedict/benedictus-antiphon,5eea5a137011,diurnal,"St Benedict, At Lauds, Ant. on Benedictus",496,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-benedict/chapter-lauds,da3ca2245297,diurnal,"St Benedict, At Lauds, Chapter",495,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/chapter-none,dcd2be32a3f5,diurnal,,497,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
 proper/st-benedict/collect,d44d2c5ecc2b,Monastic Diurnal.pdf,proper/st-benedict/collect; PDF pages 542,496,verified,codex,2026-09-27,Direct page-image review; corrected to the printed wording. Evidence: output/local-review/agent-sweep-20260927/applied/proper__st-benedict__collect/record.json
+proper/st-benedict/hymn-lauds,9cf85218b14f,diurnal,"St Benedict, At Lauds, Inter aeternas",495-496,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-benedict/hymn-vespers,ce8291584f07,diurnal,"St Benedict, At I Vespers, Laudibus cives",494,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-benedict/magnificat-antiphon,6d57b61773f9,draft archdiocesan Vespers book,"St. Benedict, II Vespers; Hodie sanctus Benedictus",351,verified,claude,2026-09-28,"wording matches the DOCX (v.26 Lauds / v.29 Vespers) word for word; case, punctuation, drop capitals and chant syllabification normalized"
 proper/st-benedict/magnificat-antiphon-first,83df2153ca05,draft archdiocesan Vespers book,"St. Benedict, I Vespers; Exsultet omnium",351,verified,claude,2026-09-28,"wording matches the DOCX (v.26 Lauds / v.29 Vespers) word for word; case, punctuation, drop capitals and chant syllabification normalized"
 proper/st-benedict/psalm-antiphon-2,bada6a8106ee,diurnal,,495,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0541.png
@@ -2243,6 +2252,7 @@ proper/trinity-sunday/short-responsory-none,19b2080b7c16,diurnal,"Trinity Sunday
 proper/trinity-sunday/short-responsory-sext,ae92b8f5f33d,diurnal,"Trinity Sunday, At Sext",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/trinity-sunday/short-responsory-terce,2a231f9f2b86,diurnal,"Trinity Sunday, At Terce",408,verified,grok,2026-08-22,word-for-word from printed page image
 proper/trinity-sunday/short-responsory-vespers,2a231f9f2b86,Monastic Diurnal.pdf,"proper/trinity-sunday/short-responsory-vespers; PDF pages 448, 85","402, 39",verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__trinity-sunday__short-responsory-vespers/record.json"
+proper/trinity-sunday/versicle-first-vespers,44523f7cffbc,diurnal,"Trinity Sunday, At I Vespers",402,verified,claude,2026-09-28,word-for-word from printed page image
 proper/trinity-sunday/versicle-lauds,0e5082cb03db,Monastic Diurnal.pdf,proper/trinity-sunday/versicle-lauds; PDF pages 450,404,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-2/applied/proper__trinity-sunday__versicle-lauds/record.json"
 proper/vigil-ascension/benedictus-antiphon,b43a93770b3e,diurnal,Rogation Wednesday / Vigil of the Ascension,387,verified,grok,2026-08-22,word-for-word from printed page image
 proper/vigil-ascension/collect,69e0b9e0fe88,diurnal,V Sunday after Easter; said on the Vigil,385,verified,grok,2026-08-22,word-for-word from printed page image

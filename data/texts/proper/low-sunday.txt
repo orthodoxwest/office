@@ -28,13 +28,6 @@ The same day * at evening, being the first day of the week, when the doors were 
 # SOURCE: monastic diurnal, p. 372 (Low Sunday, At II Vespers)
 After eight days, * when the doors were shut, the Lord entered, and said unto them, Peace be unto you, alleluia, alleluia.
 
-[commemoration-antiphon]
-# SOURCE: diurnal p. 370
-The same day * at evening, being the first day of the week, when the doors were shut where the disciples were assembled, came Jesus and stood in the midst, and saith unto them, Peace be unto you, alleluia.
-
-[commemoration-versicle]
-@use proper/easter-sunday/commemoration-versicle
-
 [collect]
 # SOURCE: diurnal p. 371
 Grant, we beseech thee, Almighty God: that we who have fulfilled the Paschal feast, may, by thy bounty, shew forth its effects in our life and actions.
@@ -105,8 +98,6 @@ I did put my finger * into the print of the nails, and thrust my hand into his s
 # SOURCE: monastic diurnal, p. 377 (I Week after the Octave of Easter, Friday)
 There came unto the tomb * Mary Magdalene and the other Mary, to see the sepulchre, alleluia.
 
-[magnificat-antiphon-friday]
-@use proper/low-sunday/commemoration-antiphon
 [benedictus-antiphon-saturday]
 # SOURCE: monastic diurnal, p. 80 (Saturday at Lauds, Throughout the Year); p. 373
 # directs the ferial Paschal office to the occurrent feria's Benedictus
@@ -202,3 +193,7 @@ The same day * at evening, being the first day of the week, when the doors were 
 [lauds-psalmody]
 # SOURCE: Monastic Diurnal p. 370 (Lauds psalmody)
 @use psalmody/lauds/festal
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, pp. 370, 372 (Low Sunday: "Short R., Hymn and V. as in the Ordinary of the Ferial Office in Paschaltide", p. 376)
+@use seasonal/easter/versicle-vespers
