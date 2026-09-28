@@ -5,6 +5,7 @@
 //! key.
 
 pub mod lines;
+pub mod typography;
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 
