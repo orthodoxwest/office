@@ -217,12 +217,13 @@ fn octave_celebration_parent(day: &CalendarDay) -> Option<&str> {
     if c.has_octave {
         return Some(&c.id);
     }
-    let parent = day.within_octave_of.as_deref()?;
-    if c.id.starts_with(&format!("{parent}-octave-day")) {
+    // The day's own octave, even when another octave overlaps it (St George
+    // within Easter week: 2022 and 2025 ordos, "No Comm.").
+    if let Some(parent) = octave_parent_id(c) {
         return Some(parent);
     }
-    // Easter Monday and Tuesday continue the Easter octave office.
-    if parent == "easter-sunday" && matches!(c.id.as_str(), "easter-monday" | "easter-tuesday") {
+    let parent = day.within_octave_of.as_deref()?;
+    if c.id.starts_with(&format!("{parent}-octave-day")) {
         return Some(parent);
     }
     None

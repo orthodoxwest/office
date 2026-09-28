@@ -29,9 +29,6 @@ The Angel Gabriel * descended to Zacharias, and said unto him: Thy wife shall be
 # SOURCE: monastic diurnal, p. 501 (St Gabriel, At II Vespers)
 The Archangel Gabriel * said unto Mary: With God nothing shall be impossible. And Mary said, Behold the handmaid of the Lord: be it unto me according to thy word. And the Angel departed from her.
 
-[commemoration-versicle]
-@use proper/guardian-angels/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, p. 500 (St Gabriel, At Lauds)
 O God, who from among other Angels didst choose the Archangel Gabriel to announce the mystery of thy Incarnation: mercifully grant that we who celebrate his feast on earth may experience his protection from heaven.
@@ -205,3 +202,17 @@ R. In the presence of the Angels * I will sing praise unto thee, O my God.
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[versicle-lauds]
+# SOURCE: Monastic Diurnal.pdf, p. 500 (St Gabriel, At Lauds)
+V. An Angel stood at the altar of the temple.
+R. Having in his hand a golden censer.
+
+[versicle-first-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 498 (St Gabriel, At I Vespers)
+@use proper/st-gabriel-archangel/versicle-lauds
+
+[versicle-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 501 (St Gabriel, At II Vespers)
+V. In the presence of the Angels I will sing praise unto thee, O my God.
+R. I will worship toward thy holy temple, and praise thy Name.

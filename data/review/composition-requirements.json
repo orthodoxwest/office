@@ -2552,6 +2552,13 @@
         "commemoration_owner": "chair-peter-rome",
         "slot": "commemoration-versicle",
         "contains": "Thou art Peter"
+      },
+      {
+        "date": "2026-02-22",
+        "hour": "vespers",
+        "commemoration_owner": "comm-extra-02-23-commemoration-of-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "O holy Apostle Paul"
       }
     ]
   },
@@ -2627,6 +2634,33 @@
         "commemoration_owner": "",
         "slot": "collect",
         "ref": "proper/pentecost-octave-day-7/collect"
+      }
+    ]
+  },
+  {
+    "id": "easter-octave-with-overlapping-octave",
+    "source": "Monastic Diurnal General Rubrics VII (days of one octave are one office). 2022 and 2025 ordos, Easter week Vespers: 'No Comm.' while St George's octave overlaps.",
+    "cases": [
+      {
+        "date": "2025-04-22",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-octave-day-4",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2025-04-24",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-octave-day-6",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2022-04-24",
+        "hour": "vespers",
+        "commemoration_owner": "easter-monday",
+        "slot": "commemoration-antiphon",
+        "absent": true
       }
     ]
   }

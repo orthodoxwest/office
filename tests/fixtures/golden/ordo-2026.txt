@@ -124,7 +124,7 @@ JANUARY
            Vespers g · I fol. (II Sunday after Epiphany) · Mag. God hath holpen · No Suff.
                Com. St Anthony of Egypt ("The world, and all things earthly")
                Com. Chair of St Peter in Rome ("Thou art the shepherd of the sheep")
-               Com. St Paul ("I will liken him")
+               Com. St Paul ("O holy Apostle Paul")
                Com. St Prisca of Rome, Virgin Martyr ("Come, thou Bride of Christ")
  18  Sun     II Sunday after Epiphany                   [sd]  g
            Chair of St Peter in Rome (gd)
@@ -132,12 +132,12 @@ JANUARY
            St Prisca of Rome, Virgin Martyr (com)
            Lauds   g · Ben. There was a marriage · No Preces · No Suff.
                Com. Chair of St Peter in Rome ("Whatsoever")
-               Com. St Paul ("Well done, good and faithful servant")
+               Com. St Paul ("O holy Apostle Paul")
                Com. St Prisca of Rome, Virgin Martyr ("The kingdom of heaven")
            Hours   No Preces
            Vespers g · II prec. · Mag. And when they wanted wine · No Suff.
                Com. Chair of St Peter in Rome ("During his pontificate")
-               Com. St Paul ("The world, and all things earthly")
+               Com. St Paul ("O holy Apostle Paul")
                Com. Ss Marius, Martha, Audifax, & Abachum, Martyrs ("For theirs is the kingdom of heaven")
                Com. St Mark of Ephesus, Bishop & Confessor ("O thou Priest and Bishop")
  19  Mon     Feria                                            g
@@ -177,7 +177,7 @@ JANUARY
            Vespers g · I fol. (III Sunday after Epiphany) · Mag. God hath holpen · No Suff.
                Com. St Timothy, Bishop & Martyr ("Whosoever will come after me")
                Com. Conversion of St Paul ("Go forth, Ananias")
-               Com. St Peter ("I will liken him")
+               Com. St Peter ("Thou art the shepherd of the sheep, O chief…")
  25  Sun     III Sunday after Epiphany                  [sd]  g
            Conversion of St Paul (gd)
            St Peter (com)
@@ -1365,7 +1365,7 @@ JULY
            Lauds   g · Ben. Through the tender mercy · No Preces · Suff.
            Hours   Preces
            Vespers w · I fol. (Chains of St Peter, Apostle) · Mag. Thou art the shepherd of the sheep · No Suff.
-               Com. St Paul, Apostle ("They will deliver you up")
+               Com. St Paul, Apostle ("O holy Apostle Paul")
                Com. Holy Maccabees, Martyrs ("For theirs is the kingdom of heaven")
 
 AUGUST
@@ -2061,12 +2061,12 @@ NOVEMBER
  21  Sat     Presentation of the Blessed Virgin Mary    [gd]  w
            St Columbanus, Abbot (com)
            St Gelasius, Bishop & Confessor (com)
-           Lauds   w · Ben. O Mary · No Preces · No Suff.
+           Lauds   w · Ben. Blessed art thou · No Preces · No Suff.
                Com. St Columbanus, Abbot ("Well done, good and faithful servant")
                Com. St Gelasius, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers g · I fol. (XXIV & Last Sunday after Pentecost) · Mag. I have set watchmen · No Suff.
-               Com. Presentation of the Blessed Virgin Mary ("O Holy Mary")
+               Com. Presentation of the Blessed Virgin Mary ("O ever blessed Mother of God")
                Com. St Cecilia ("It is secret")
  22  Sun     XXIV & Last Sunday after Pentecost         [sd]  g
            St Cecilia (d)

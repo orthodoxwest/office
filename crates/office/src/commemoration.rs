@@ -162,7 +162,7 @@ pub fn commemoration_takes_first_vespers(day: &Day, comm: &Feast, reference: &st
 
 /// The I-Vespers texts of an incoming office or Memorial (VIII, X).
 fn lookup_following_office_commemoration(feast: &Feast, season: Season, reference: &str, t: &OfficeTexts) -> (String, String) {
-    if feast.rank == Rank::Commemoration && feast.companion_of.is_none() {
+    if feast.rank == Rank::Commemoration {
         return lookup_commemoration_office(feast, season, "vespers", reference, true, t);
     }
     let candidates: &[&str] = match reference {

@@ -1,14 +1,16 @@
 === Placeholders: 0 corpus entries ===
 
-=== Missing propers: 2 feast(s) ===
+=== Missing propers: 3 feast(s) ===
 
   [base]
+  [1cl] Holy Saturday (holy-saturday)
+    missing: magnificat-antiphon
   [sd] Friday after the Octave of Ascension (friday-after-ascension-octave)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon
   [f2] Rogation Monday (rogation-monday)
     missing: psalm-antiphon, benedictus-antiphon, magnificat-antiphon, collect, commemoration-antiphon
 
-=== Commons fallback: 6 feast(s) ===
+=== Commons fallback: 7 feast(s) ===
 These refs are covered by the category commons, not feast-specific propers.
 Add to data/audit-ok.txt to acknowledge and suppress.
 
@@ -17,6 +19,8 @@ Add to data/audit-ok.txt to acknowledge and suppress.
     commons: benedictus-antiphon, magnificat-antiphon, commemoration-antiphon, commemoration-versicle
   [gd] Beheading of St John the Baptist (beheading-john-baptist)
     commons: commemoration-versicle
+  [gd] Presentation of the Blessed Virgin Mary (presentation-bvm)
+    commons: benedictus-antiphon, commemoration-versicle
   [gd] St Agatha (st-agatha)
     commons: commemoration-versicle
   [d] St Cecilia (st-cecilia)

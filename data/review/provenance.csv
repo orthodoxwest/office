@@ -799,12 +799,16 @@ proper/beheading-john-baptist/psalm-antiphon-5,1309d6a58700,diurnal,"Beheading o
 proper/chains-st-peter/benedictus-antiphon,da3f8f56db0b,diurnal,"St Peter’s Chains, At Lauds",579,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witnesses DI-6912d65ec4cd-P0620-P0623
 proper/chains-st-peter/chapter-lauds,582ddada56e6,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chains-st-peter/chapter-none,21bae413cd1f,diurnal,"St Peter’s Chains, At None",579,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0623
+proper/chains-st-peter/chapter-sext,e5f0ebda2d13,diurnal,"St Peter's Chains, At Sext",579,verified,claude,2026-09-28,word-for-word from printed page image
 proper/chains-st-peter/collect,ed754457ffca,diurnal,,579,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0623.png
+proper/chains-st-peter/hymn-vespers,9fe656dcbbc5,diurnal,"St Peter's Chains, I Vespers hymn Petrus beatus catenarum",576-577,verified,claude,2026-09-28,word-for-word from printed page image
+proper/chains-st-peter/magnificat-antiphon,351cf8002c9c,diurnal,"St Peter's Chains, II Vespers",580,verified,claude,2026-09-28,word-for-word from printed page image
 proper/chains-st-peter/magnificat-antiphon-first,52503eefbfc5,Monastic Diurnal.pdf,proper/chains-st-peter/magnificat-antiphon-first; PDF pages 594,549,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__chains-st-peter__magnificat-antiphon-first/record.json"
 proper/chains-st-peter/psalm-antiphon-1,3e2aac86b414,diurnal,,578,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0622.png
 proper/chains-st-peter/psalm-antiphon-2,46145a17f839,diurnal,,578,verified,codex,2026-09-13,Word-for-word after normalization; page image output/pages/monastic-diurnal/0622.png
 proper/chains-st-peter/psalm-antiphon-3,3fb60e06f1af,Monastic Diurnal.pdf,proper/chains-st-peter/psalm-antiphon-3; PDF pages 590,545,verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__chains-st-peter__psalm-antiphon-3/record.json"
 proper/chains-st-peter/psalm-antiphon-4,05828e814e65,diurnal,"St Peter’s Chains, At Lauds",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
+proper/chains-st-peter/psalm-antiphon-5,5f1f7f49d2da,diurnal,"St Peter's Chains, At Lauds",578,verified,claude,2026-09-28,word-for-word from printed page image
 proper/chains-st-peter/versicle-vespers,ea9cc7f6ba65,diurnal,"St Peter’s Chains, At II Vespers",578,verified,codex,2026-08-24,word-for-word from rendered printed page image; OCR witness DI-6912d65ec4cd-P0622
 proper/chair-peter-antioch/benedictus-antiphon,da3f8f56db0b,draft archdiocesan Lauds book,,402,verified,codex,2026-07-17,
 proper/chair-peter-antioch/collect,f468a5336263,diurnal,,463,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0509.png
@@ -895,6 +899,8 @@ proper/comm-01-25-commemoration-of-st-peter/commemoration-antiphon-vespers,b8b37
 proper/comm-01-25-commemoration-of-st-peter/commemoration-collect,f468a5336263,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0509.png
 proper/comm-01-25-commemoration-of-st-peter/commemoration-versicle-vespers,ea9cc7f6ba65,diurnal,,463,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0509.png
 proper/comm-06-10-st-margaret-of-scotland-queen-and-widow/commemoration-collect,0827d9854ae3,diurnal,,535,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0580.png
+proper/comm-08-01-commemoration-of-st-paul-apostle/commemoration-collect,99d00c355863,diurnal,"St Peter's Chains, Commemoration of St Paul",577,verified,claude,2026-09-28,word-for-word from printed page image
+proper/comm-08-01-holy-maccabees-martyrs/commemoration-collect,c4c01400eb50,diurnal,"St Peter's Chains, Commemoration of the Holy Maccabees",577,verified,claude,2026-09-28,word-for-word from printed page image
 proper/comm-09-02-st-stephen-of-hungary-king-and-confessor/collect,89a7cb3cbf0c,diurnal,"St Stephen of Hungary, K.C.",595,verified,bwaldrep,2026-09-02,word-for-word from printed page
 proper/comm-09-11-ss-protus-and-hyacinth-martyrs/commemoration-collect,d2b949e00c37,diurnal,,597,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0641.png
 proper/comm-09-22-st-maurice-and-companions-martyrs/commemoration-collect,bf09da3db59c,diurnal,,607,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0651.png
@@ -1197,7 +1203,7 @@ proper/guardian-angels/collect,11308c76aac6,diurnal,"Holy Guardian Angels, At La
 proper/guardian-angels/hymn-lauds,fc77bbc0ec86,diurnal,"Holy Guardian Angels, At Lauds",614-615,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/hymn-vespers,64f86dcc2ef5,diurnal,"Holy Guardian Angels, At I Vespers",613,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/magnificat-antiphon,f03e66b67193,diurnal,"Holy Guardian Angels, At II Vespers",616,verified,grok,2026-08-23,word-for-word from printed page image
-proper/guardian-angels/magnificat-antiphon-first,d751e90bd00c,diurnal,"Holy Guardian Angels, At I Vespers",614,verified,grok,2026-08-23,word-for-word from printed page image
+proper/guardian-angels/magnificat-antiphon-first,7f8fc8ca7529,diurnal,"Guardian Angels, At I Vespers",614,verified,claude,2026-09-28,"word-for-word from printed page image (printed full stop, not the KJV question mark)"
 proper/guardian-angels/psalm-antiphon-1,1899b5e43072,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/psalm-antiphon-2,0c5ff8a28fe9,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
 proper/guardian-angels/psalm-antiphon-3,99f9091294eb,diurnal,"Holy Guardian Angels, At Lauds",614,verified,grok,2026-08-23,word-for-word from printed page image
@@ -1280,9 +1286,11 @@ proper/holy-rosary-bvm/versicle-first-vespers,305e37b7d15f,diurnal,,619,verified
 proper/holy-rosary-bvm/versicle-lauds,9cef917b4788,diurnal,,620,verified,codex,2026-09-03,Word-for-word after normalization; page image output/pages/monastic-diurnal/0664.png
 proper/holy-saturday/benedictus-antiphon,d5cb19550893,diurnal,,359,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0405.png
 proper/holy-saturday/collect,2f718e1003d6,diurnal,,313,verified,codex,2026-09-15,Word-for-word after normalization; page image output/pages/monastic-diurnal/0359.png
-proper/holy-saturday/psalm-antiphon-2,628fe44c671f,diurnal,,356,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0402.png
+proper/holy-saturday/psalm-antiphon-1,adb398877c2e,diurnal,Easter Even at Lauds,356,verified,claude,2026-09-28,word-for-word from printed page image
+proper/holy-saturday/psalm-antiphon-2,829b983fdedb,diurnal,Easter Even at Lauds,356,verified,claude,2026-09-28,word-for-word from printed page image (hath)
 proper/holy-saturday/psalm-antiphon-3,84d8ef29db99,diurnal,,357,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0403.png
 proper/holy-saturday/psalm-antiphon-4,a82bdb8df0e5,diurnal,,358,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0404.png
+proper/holy-saturday/psalm-antiphon-5,ab055bf4b996,diurnal,Easter Even at Lauds,359,verified,claude,2026-09-28,word-for-word from printed page image
 proper/holy-saturday/triduum-antiphon,3498be524a99,diurnal,"Maundy Thursday at Lauds, addition on the third night",313,verified,claude,2026-08-30,Transcribed from the page image.
 proper/holy-saturday/versicle-lauds,ed55f40e6979,diurnal,Easter Even at Lauds,359,verified,claude,2026-08-20,Read from the scanned page image; OCR text is column-interleaved and unreliable.
 proper/holy-saturday/vigil-collect,ae5554075fbf,diurnal,,360,verified,codex,2026-09-15,Word-for-word after normalization; page image /tmp/office-triduum-hours/output/pages/monastic-diurnal/0406.png
@@ -1908,7 +1916,13 @@ proper/st-gabriel-archangel/psalm-antiphon-2,de55702221db,diurnal,"St Gabriel, A
 proper/st-gabriel-archangel/psalm-antiphon-3,fc09919f60c3,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/psalm-antiphon-4,6b23bb2bef20,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
 proper/st-gabriel-archangel/psalm-antiphon-5,5680eec9c7c2,diurnal,"St Gabriel, At Lauds",499,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/short-responsory-lauds,0a692d614a29,diurnal,"St Gabriel, At Lauds",499,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-gabriel-archangel/short-responsory-none,0a692d614a29,diurnal,"St Gabriel, At None",501,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-gabriel-archangel/short-responsory-sext,8aba3cb98a7d,diurnal,"St Gabriel, At Sext",501,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-gabriel-archangel/short-responsory-terce,1571f3a59379,diurnal,"St Gabriel, At Terce",500,verified,grok,2026-08-23,word-for-word from printed page image
+proper/st-gabriel-archangel/short-responsory-vespers,8aba3cb98a7d,diurnal,"St Gabriel, At I Vespers",498,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-gabriel-archangel/versicle-lauds,d0fa20313df6,diurnal,"St Gabriel, At Lauds",500,verified,claude,2026-09-28,word-for-word from printed page image
+proper/st-gabriel-archangel/versicle-vespers,9c50d614fe3b,diurnal,"St Gabriel, At II Vespers",501,verified,claude,2026-09-28,word-for-word from printed page image
 proper/st-george/collect,60e7f9750312,diurnal,,512,verified,codex,2026-09-05,Word-for-word after normalization; page image output/pages/monastic-diurnal/0558.png
 proper/st-gregory-great/chapter-lauds,213d609129d9,Monastic Diurnal.pdf,"proper/st-gregory-great/chapter-lauds; PDF pages 532, 85","486, 39",verified,codex,2026-09-27,"Direct page-image review; wording confirmed, allowing typographic and corpus-format normalization. Evidence: output/local-review/agent-sweep-20260927/applied/proper__st-gregory-great__chapter-lauds/record.json"
 proper/st-gregory-great/collect,4828ee47e1c8,diurnal,,487,verified,codex,2026-09-22,Word-for-word after normalization; page image output/pages/monastic-diurnal/0533.png

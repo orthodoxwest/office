@@ -59,7 +59,9 @@ Source = awrv
 Name = Commemoration of St Paul
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
+# Chair of St Peter supplement: "Commem. of S. Paul (as on August 1) (577)".
+ProperID = comm-08-01-commemoration-of-st-paul-apostle
 Month = 1
 Day = 18
 Source = awrv
@@ -1189,7 +1191,9 @@ Source = awrv
 Name = Commemoration of St Paul
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
+# Chair of St Peter supplement: "Commem. of S. Paul (as on August 1) (577)".
+ProperID = comm-08-01-commemoration-of-st-paul-apostle
 Month = 2
 Day = 22
 OnlyWith = chair-peter-antioch
@@ -1585,10 +1589,11 @@ Source = awrv
 Name = Commemoration of St Paul
 Rank = commemoration
 Color = white
-Category = confessor
+Category = apostle
+# Chair of St Peter supplement: "Commem. of S. Paul (as on August 1) (577)".
+ProperID = comm-08-01-commemoration-of-st-paul-apostle
 Month = 2
 Day = 23
-ProperID = commemoration-st-paul-apostle
 OnlyWith = chair-peter-antioch
 Source = awrv
 CompanionOf = chair-peter-antioch

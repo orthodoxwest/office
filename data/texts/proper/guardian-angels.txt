@@ -29,10 +29,6 @@ And the Angel * that talked with me came again, and waked me, as a man that is w
 # SOURCE: monastic diurnal, p. 616 (Holy Guardian Angels, At II Vespers)
 Ye holy Angels, * our Guardians, defend us in time of battle, lest we perish in the dreadful day of judgment.
 
-[commemoration-versicle]
-V. He shall give his Angels charge over thee.
-R. To keep thee in all thy ways.
-
 [collect]
 # SOURCE: monastic diurnal, p. 615 (Holy Guardian Angels, At Lauds)
 O God, who in thine unspeakable providence deignest to send thy holy Angels for our safekeeping: grant unto us thy suppliants, that we may ever be defended by their protection, and may rejoice in their eternal fellowship.
@@ -170,7 +166,7 @@ R. In the presence of the Angels * I will sing praise unto thee, O my God.
 
 [magnificat-antiphon-first]
 # SOURCE: monastic diurnal, p. 614 (Holy Guardian Angels, At I Vespers)
-They are all * ministering spirits, sent forth to minister to them who shall be heirs of salvation?
+They are all * ministering spirits, sent forth to minister to them who shall be heirs of salvation.
 
 # [commemoration-collect]
 # Collect for the commemoration (defaults to [collect] when omitted).

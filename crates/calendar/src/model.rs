@@ -280,6 +280,9 @@ pub struct Feast {
     pub is_privileged_octave_day: bool,
     pub is_vigil: bool,
     pub vigil_of: Option<String>,
+    /// The octave this day continues when its ID does not say so (Easter
+    /// Monday and Tuesday).
+    pub octave_of: Option<String>,
     pub companion_of: Option<String>,
     pub primary_of_our_lord: bool,
     pub only_with: Option<String>,
@@ -311,6 +314,7 @@ impl Feast {
             is_privileged_octave_day: false,
             is_vigil: false,
             vigil_of: None,
+            octave_of: None,
             companion_of: None,
             primary_of_our_lord: false,
             only_with: None,

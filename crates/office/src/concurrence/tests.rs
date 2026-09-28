@@ -361,9 +361,10 @@ fn octave_celebration_parent_easter_week() {
     let easter = with("easter-sunday", Rank::Double1stClass, Category::Lord, |x| x.has_octave = true);
     assert_eq!(octave_celebration_parent(&day(Some(&easter), &[])), Some("easter-sunday"));
     for (id, want) in [("easter-monday", Some("easter-sunday")), ("easter-tuesday", Some("easter-sunday")), ("annunciation-bvm", None)] {
-        let c = f(id, Rank::Double1stClass, Category::Lord);
+        let c = with(id, Rank::Double1stClass, Category::Lord, |x| x.octave_of = want.map(str::to_string));
+        // An overlapping octave (St George) must not hide the day's own octave.
         let mut d = day(Some(&c), &[]);
-        d.within_octave_of = Some("easter-sunday".to_string());
+        d.within_octave_of = Some("st-george".to_string());
         assert_eq!(octave_celebration_parent(&d), want, "{id}");
     }
 }
