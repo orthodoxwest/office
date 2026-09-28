@@ -1,17 +1,21 @@
 document.documentElement.classList.add("js");
 
 // Source capitals at prose openings use real small caps, preserving the text.
-// Ornamented openings are handled by the initial enhancement below instead.
+// The first letter stays a full capital ("I CONFESS"), the setting a service
+// book gives an opening without an ornamented initial; the rest of the run
+// takes small caps. Ornamented openings are handled by the enhancement below.
 (function () {
   document.querySelectorAll(".liturgical-block > .plain-line:first-child").forEach(function (opening) {
     if (opening.closest(".collect, .chapter")) return;
     var walker = document.createTreeWalker(opening, NodeFilter.SHOW_TEXT);
     var node = walker.nextNode();
     if (!node) return;
-    var match = /^(\s*)([\p{Lu}][\p{Lu}\p{M}’'-]*(?:\s+[\p{Lu}][\p{Lu}\p{M}’'-]*)*)(?=[\s,;:.!?]|$)/u.exec(node.textContent);
-    if (!match || !/\p{Lu}{2}/u.test(match[2])) return;
-    var word = node.splitText(match[1].length);
-    word.splitText(match[2].length);
+    var match = /^(\s*\p{Lu}\p{M}*)([\p{Lu}\p{M}’'-]*(?:\s+[\p{Lu}][\p{Lu}\p{M}’'-]*)*)(?=[\s,;:.!?]|$)/u.exec(node.textContent);
+    if (!match || !/\p{Lu}{2}/u.test(match[0])) return;
+    // A one-letter first word keeps its space outside the small caps.
+    var space = /^\s*/u.exec(match[2])[0].length;
+    var word = node.splitText(match[1].length + space);
+    word.splitText(match[2].length - space);
     var span = document.createElement("span");
     span.className = "opening-small-caps";
     word.parentNode.insertBefore(span, word);

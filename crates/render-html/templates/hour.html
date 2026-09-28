@@ -6,7 +6,9 @@
   </div>
   <div class="hour-header">
     <h1>{{ hour.title }}</h1>
-    <p class="hour-meta">{{ date_str }}{% if hour.feast %} &middot; {{ hour.feast|typeset }}{% endif %} &middot; {{ hour.season|titlecase }}</p>
+    {# The no-break space holds each dot to the part before it, so a wrapped
+         line never opens with a separator. #}
+    <p class="hour-meta"><span class="hour-meta-part">{{ date_str }}</span>{% if hour.feast %}&nbsp;&middot; <span class="hour-meta-part">{{ hour.feast|typeset }}</span>{% endif %}&nbsp;&middot; <span class="hour-meta-part">{{ hour.season|titlecase }}</span></p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}

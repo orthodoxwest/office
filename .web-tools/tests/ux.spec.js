@@ -3276,9 +3276,12 @@ test("Compline openings preserve words and align response columns around the ble
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/compline/2026-12-25");
     await expect(page.locator(".elements > .section-heading").first()).toHaveText("Opening");
-    const confession = page.locator(".opening-small-caps:visible").filter({ hasText: /^I CONFESS$/ });
+    // The opening capital stays full size; only the rest of the run is small caps.
+    const confession = page.locator(".opening-small-caps:visible").filter({ hasText: /^CONFESS$/ });
     await expect(confession).toHaveCount(1);
     expect(await confession.evaluate(el => getComputedStyle(el).fontVariantCaps)).toBe("all-small-caps");
+    expect(await confession.evaluate(el => el.parentElement.textContent.startsWith("I CONFESS to God"))).toBe(true);
+    expect(await confession.evaluate(el => el.previousSibling.textContent)).toBe("I ");
     const lines = page.locator(".elements .sigil:visible:not(.sigil-word):not(.sigil-all)");
     const edges = await lines.evaluateAll(els => els.slice(0, 5).map(el => el.getBoundingClientRect().left));
     for (const edge of edges) expect(edge).toBeCloseTo(edges[0], 0);

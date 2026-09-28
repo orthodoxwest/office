@@ -1106,8 +1106,13 @@ footer::before {
 
 /* ── Hour page ── */
 
+/* The rule closing the header runs to the prayer's own measure. At the full
+   46rem copy width it overhung the text column by 2.5–3rem on each side from
+   tablet up, the one line on the page that answered to no edge below it. */
 .hour-header {
-  margin-bottom: 1.1rem;
+  width: 100%;
+  max-width: 38rem;
+  margin: 0 auto 1.1rem;
   padding: 0 0 0.45rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
@@ -1148,6 +1153,14 @@ footer::before {
   margin: 0 auto 0.35rem;
   max-width: 34rem;
   line-height: 1.45;
+  text-wrap: balance;
+}
+
+/* Date, day and season each wrap whole, so a phone breaks the line between
+   them rather than inside a saint's title ("St Michael the / Archangel").
+   A part longer than the line still wraps within itself. */
+.hour-meta-part {
+  display: inline-block;
 }
 
 /* Recovery when the open document is not local today (historical browse, or a
@@ -1546,10 +1559,12 @@ footer::before {
 
 /* The seasonal opening Alleluia (or its penitential replacement) belongs to
    the opening rite, not a psalm frame, so it has no Ant. sigil or hanging
-   antiphon indent. */
+   antiphon indent. It completes the Gloria above it and keeps the Gloria's
+   edge: an antiphon's capped, auto-margined box shrank to "Alleluia" and
+   centred it, while Lent's longer replacement filled the measure and sat
+   left, one line of the rite moving across the page with the season. */
 .opening-acclamation {
-  max-width: 34rem;
-  margin: 0.25rem auto 0.7rem;
+  margin: 0.25rem 0 0.7rem;
   line-height: 1.6;
   text-align: left;
 }
@@ -1711,11 +1726,13 @@ footer::before {
   text-indent: 0;
 }
 
-/* Amen is nested in the last hymn-line span; a thin leading gap separates it
-   from the verse as printed diurnals do, and it stays roman like the prayer. */
+/* Amen is nested in the last hymn-line span and follows the verse after an
+   ordinary word space, as printed diurnals set it; it stays roman like the
+   prayer. The earlier 0.35em sat beside Garamond's narrow 0.2em space and
+   read as a stray double space rather than a deliberate pause. */
 .hymn-amen {
   font-style: normal;
-  margin-left: 0.35em;
+  margin-left: 0.25em;
 }
 
 .psalm-text {
@@ -1755,9 +1772,13 @@ footer::before {
   white-space: pre;
 }
 
-/* Numbered verses — flex so the number sits in a fixed-width gutter */
+/* Numbered verses — flex so the number sits in a fixed-width gutter. The
+   smaller number's own line box is shorter than the verse's, so stretched
+   to the top it rode about a quarter em above the text, like a footnote
+   mark; baseline alignment sets it on the line it numbers. */
 .psalm-verses .verse.numbered {
   display: flex;
+  align-items: baseline;
   padding-left: 0;
   clear: left;
 }
@@ -1792,6 +1813,16 @@ footer::before {
   color: var(--muted);
   position: relative;
   top: 0.25em;
+}
+
+/* The Gloria Patri's two verses, wherever they are said. Unnumbered, a
+   wrapped half-verse met the left edge exactly as the second verse did, so
+   the doxology read as three or four lines. A wrap steps inward, as a hymn
+   line's does, and each verse keeps its own edge. */
+.source-line {
+  display: block;
+  padding-left: 1.1rem;
+  text-indent: -1.1rem;
 }
 
 /* Gloria Patri doxology rendered with * mediant like a psalm verse */
@@ -2016,6 +2047,10 @@ footer::before {
   .elements {
     max-width: 37rem;
     font-size: 1.25rem;
+  }
+
+  .hour-header {
+    max-width: 37rem;
   }
 }
 
@@ -4444,13 +4479,21 @@ body.season-eastertide {
   .home-date-link,
   .not-today-notice .not-today-link,
   .hour-date-nav > summary,
-  .session-prayers > summary,
   .day-nav a,
   .year-nav a,
   .month-jump a,
   .report-issue a {
     display: inline-flex;
     align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  /* A session-prayer summary is a section heading that opens. Shrunk to an
+     inline box it sat at the left margin on phones, the only heading in the
+     office that was not centred; a full-width row centres it and widens the
+     target without changing its type. */
+  .session-prayers > summary {
+    display: flex;
     min-height: var(--touch-target);
   }
 
