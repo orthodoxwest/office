@@ -166,7 +166,7 @@ mod tests {
             ],
         );
         let (header, banner, elements) =
-            (at(body, r#"class="hour-header""#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
+            (at(body, r#"class="hour-header"#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
         assert!(header < banner && banner < elements, "the notice sits between the hour header and the prayers");
         assert!(!source("layout.html").contains(r#"class="site-banner""#), "the shared layout has no hour banner");
     }

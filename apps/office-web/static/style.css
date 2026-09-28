@@ -1150,8 +1150,40 @@ footer::before {
   border-bottom: 1px solid var(--border);
 }
 
-/* Double gold hairlines framing the hour title, echoing the gilded altar frame */
+/* Double gold hairlines framing the hour title, echoing the gilded altar
+   frame. The printer's headpiece home and the ordo open with is set into the
+   upper rule, as the lozenge is into the lower, so the ornament costs the
+   phone no extra height. That rule is two gradient hairlines rather than a
+   border because a border cannot open a gap for it, and a patch of ground
+   behind the ornament would show on the wide hours' plaster wall. */
+.hour-header {
+  --title-rule: var(--ornament-line);
+  /* Half the break in the upper rule: the headpiece's 4.25rem half-width,
+     less the 0.5rem its sprigs are inset in their boxes, plus 0.4rem of
+     clear air before each end of the rule. */
+  --title-rule-break: 4.15rem;
+}
+
+.hour-header .ornament-headpiece {
+  position: relative;
+  z-index: 1;
+  /* Centred on the 3px rule below it: half its own 0.9rem height, plus half
+     the rule. */
+  margin: 0 auto calc(-0.45rem - 1.5px);
+}
+
+/* The cross's ink sits high in its line box (measured 3px at the default
+   size); lowered so it centres on the rule with the leaves. */
+.hour-header .ornament-headpiece > span {
+  position: relative;
+  top: 0.23em;
+}
+
 .hour-header h1 {
+  --title-upper-rule: linear-gradient(to right,
+    var(--title-rule) calc(50% - var(--title-rule-break)),
+    transparent calc(50% - var(--title-rule-break)) calc(50% + var(--title-rule-break)),
+    var(--title-rule) calc(50% + var(--title-rule-break)));
   position: relative;
   font-size: 1.55rem;
   font-weight: normal;
@@ -1160,21 +1192,55 @@ footer::before {
   width: fit-content;
   min-width: min(100%, 24rem);
   margin: 0 auto 0.25rem;
-  padding: 0.15rem 1.3rem 0.2rem;
-  border-top: 3px double var(--ornament-line);
-  border-bottom: 3px double var(--ornament-line);
+  /* Room for the headpiece's lower leaves above the capitals. */
+  padding: calc(0.3rem + 3px) 1.3rem 0.2rem;
+  background:
+    var(--title-upper-rule) 0 0 / 100% 1px no-repeat,
+    var(--title-upper-rule) 0 2px / 100% 1px no-repeat;
+  border-bottom: 3px double var(--title-rule);
 }
 
-/* A single lozenge interrupts the existing rule without adding a title row. */
+/* Forced colours repaint borders in the system ink but leave a gradient in
+   its authored gold, so there the upper rule returns to a plain border and
+   the decorative headpiece stands down. */
+@media (forced-colors: active) {
+  .hour-header h1 {
+    background: none;
+    border-top: 3px double;
+  }
+
+  .hour-header .ornament-headpiece {
+    display: none;
+  }
+}
+
+/* Passiontide veils the foliage. In the title rule the cross stands alone,
+   and the rule closes up to it. */
+.season-passiontide .hour-header {
+  --title-rule-break: 0.8rem;
+}
+
+.season-passiontide .hour-header .ornament-headpiece {
+  width: auto;
+}
+
+.season-passiontide .hour-header .ornament-sprig {
+  display: none;
+}
+
+/* A single lozenge interrupts the lower rule without adding a title row. It
+   carries the day's colour, set like enamel in the gilding: the gold ring
+   keeps a violet or green legible on the Apse night, and a white day reads
+   as an ivory stone. */
 .hour-header h1::after {
   content: "";
   position: absolute;
   left: 50%;
   bottom: -1.5px;
-  width: 0.25rem;
-  height: 0.25rem;
-  background: var(--ornament);
-  box-shadow: 0 0 0 2px var(--bg);
+  width: 0.3rem;
+  height: 0.3rem;
+  background: var(--day-color, var(--ornament));
+  box-shadow: 0 0 0 1px var(--ornament), 0 0 0 3px var(--bg);
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
 }
@@ -5163,8 +5229,20 @@ body.page-home::before {
     padding-bottom: 0.5rem;
   }
 
+  /* Gold prints pale, so the title's rules, headpiece and lozenge print
+     grey. The upper rule is a background, which browsers drop from paper
+     unless told to keep it. */
+  .hour-header {
+    --title-rule: #888;
+  }
+
   .hour-header h1 {
-    border-color: #888;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .hour-header .ornament-headpiece {
+    color: #888;
   }
 
   .hour-header h1::after {

@@ -1241,6 +1241,36 @@ for (const theme of ["light", "dark"]) {
   });
 }
 
+for (const theme of ["light", "dark"]) {
+  test(`hour titles set the headpiece in their rule and the day's colour in the lozenge — ${theme}`, async ({ page }) => {
+    const title = async () => page.evaluate(() => {
+      const heading = document.querySelector(".hour-header h1");
+      const headpiece = document.querySelector(".hour-header .ornament-headpiece");
+      const box = headpiece.getBoundingClientRect();
+      return {
+        lozenge: getComputedStyle(heading, "::after").backgroundColor,
+        // The upper rule is 3px deep at the heading's top edge.
+        offset: (box.top + box.bottom) / 2 - (heading.getBoundingClientRect().top + 1.5),
+        sprigs: [...headpiece.querySelectorAll(".ornament-sprig")].map(svg => getComputedStyle(svg).display),
+      };
+    });
+    await openDatedPage(page, "/lauds/2026-09-28", theme);
+    const green = await title();
+    expect(Math.abs(green.offset)).toBeLessThan(1);
+    expect(green.sprigs).toEqual(["block", "block"]);
+    await openDatedPage(page, "/lauds/2026-06-29", theme);
+    const red = await title();
+    expect(red.lozenge).toBe("rgb(176, 42, 36)");
+    expect(red.lozenge).not.toBe(green.lozenge);
+    // Passiontide veils the foliage: the cross stands alone in the rule.
+    await openDatedPage(page, "/lauds/2026-03-31", theme);
+    const veiled = await title();
+    expect(veiled.sprigs).toEqual(["none", "none"]);
+    expect(Math.abs(veiled.offset)).toBeLessThan(1);
+    await expect(page.locator(".hour-header .ornament-headpiece > span")).toBeVisible();
+  });
+}
+
 test("desktop navigation and frontispiece remain composed", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await openDatedPage(page, `/?date=${testDate}`);
