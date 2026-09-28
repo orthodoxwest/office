@@ -27,8 +27,8 @@ const PORTED_GROUPS: [&str; 4] = [GROUP_CORPUS, GROUP_CALENDAR, GROUP_OFFICE, GR
 const USAGE: &str = "usage: office dump -start YEAR [-years N] [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
        office dump -dates YYYY-MM-DD,... [-hours LIST] [-forms LIST] [-groups LIST] [-digest]
 
--digest prints the parity snapshot of the selection, computed in memory one civil year per
-worker; it equals piping the dump through `office dump digest -`.";
+-digest prints the parity snapshot of the selection instead: per-year hashes of each record
+group, computed in memory one civil year per worker.";
 
 /// A slice of the record stream: whole civil years or individual dates.
 #[derive(Clone, Debug, Default)]
@@ -107,12 +107,8 @@ impl Selection {
 }
 
 pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(), String> {
-    if let Some((command, rest)) = args.split_first() {
-        match command.as_str() {
-            "digest" => return crate::dump_tools::cmd_digest(rest, out),
-            "diff" => return crate::dump_tools::cmd_diff(rest, out),
-            _ => {}
-        }
+    if args.first().is_some_and(|command| command == "diff") {
+        return crate::dump_tools::cmd_diff(&args[1..], out);
     }
     let flags = Flags::parse_with_bools(args, &["start", "years", "dates", "hours", "forms", "groups"], &["digest"])
         .map_err(|e| format!("{e}\n{USAGE}"))?;
@@ -150,8 +146,8 @@ pub fn cmd_dump(data: &FsData, args: &[String], out: &mut dyn Write) -> Result<(
     };
     let data = CalendarData::load(data)?;
     if flags.bool("digest") {
-        let snapshot = crate::dump_tools::digest_selection(&sel, &data, engine.as_ref())?;
-        return crate::dump_tools::write_snapshot(&snapshot, out);
+        let snapshot = crate::parity::digest_selection(&sel, &data, engine.as_ref())?;
+        return crate::parity::write_snapshot(&snapshot, out);
     }
     generate(&sel, &data, engine.as_ref(), &mut |record| {
         let line = marshal(&record).map_err(|e| format!("{}: {e}", describe_record(&record)))?;
@@ -186,9 +182,19 @@ pub fn generate(
         }
     }
     for (year, dates) in sel.plan() {
-        generate_year(sel, data, engine, year, dates.as_deref(), emit)?;
+        generate_year(sel, data, engine, year, dates.as_deref(), &mut |record| match record {
+            Record::Value(v) => emit(v),
+            Record::Hour { name, hour } => emit(hour_record(name, hour)),
+        })?;
     }
     Ok(())
+}
+
+/// A record of one year: composed hours stay borrowed so the parity digest can
+/// hash them without building their dump encoding.
+pub(crate) enum Record<'a> {
+    Value(Value),
+    Hour { name: &'a str, hour: &'a OfficeHour },
 }
 
 /// Emits the calendar, office and hour records of one entry of `Selection::plan`. Years are
@@ -199,11 +205,11 @@ pub(crate) fn generate_year(
     engine: Option<&office::Engine>,
     year: i32,
     dates: Option<&[Date]>,
-    emit: &mut dyn FnMut(Value) -> Result<(), String>,
+    emit: &mut dyn FnMut(Record) -> Result<(), String>,
 ) -> Result<(), String> {
     let cal = build_calendar(year, data).map_err(|e| format!("building calendar for {year}: {e}"))?;
     if sel.has(GROUP_CALENDAR) {
-        emit(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year)))?;
+        emit(Record::Value(calendar_year_record(year, &Tabula::compute(year), &MoveableDates::compute(year))))?;
     }
     let office_days = if sel.has(GROUP_OFFICE) || sel.has(GROUP_HOURS) { office::resolve_office_days(&cal) } else { Vec::new() };
     let moveable = MoveableDates::compute(year);
@@ -223,10 +229,10 @@ pub(crate) fn generate_year(
     };
     for i in indices {
         if sel.has(GROUP_CALENDAR) {
-            emit(calendar_day_record(&cal.days[i]))?;
+            emit(Record::Value(calendar_day_record(&cal.days[i])))?;
         }
         if sel.has(GROUP_OFFICE) {
-            emit(office_day_record(&cal.days[i], &office_days[i]))?;
+            emit(Record::Value(office_day_record(&cal.days[i], &office_days[i])))?;
         }
         if sel.has(GROUP_HOURS) {
             let engine = engine.ok_or("the hours group needs the office engine")?;
@@ -237,7 +243,16 @@ pub(crate) fn generate_year(
                     let h = engine
                         .compose_hour(hour_name, &day, &moveable, form)
                         .map_err(|e| format!("composing {hour_name} {} for {}: {e}", form.as_str(), day.date))?;
-                    emit(hour_record(day.date, hour_name, form, &h)?)?;
+                    if h.form != form || h.date != day.date {
+                        return Err(format!(
+                            "{} {hour_name} {}: composer returned {} {}",
+                            day.date,
+                            form.as_str(),
+                            h.date,
+                            h.form.as_str()
+                        ));
+                    }
+                    emit(Record::Hour { name: hour_name, hour: &h })?;
                 }
             }
         }
@@ -295,21 +310,19 @@ fn decisions(list: &[Decision]) -> Value {
     Value::Array(list.iter().map(|d| json!({"rule": s(&d.rule), "outcome": s(&d.outcome), "detail": opt(&d.detail)})).collect())
 }
 
-/// One composed hour. Every field lands in exactly one parity digest.
-fn hour_record(date: Date, hour_name: &str, form: PrayerForm, h: &OfficeHour) -> Result<Value, String> {
-    if h.form != form || h.date != date {
-        return Err(format!("{date} {hour_name} {}: composer returned {} {}", form.as_str(), h.date, h.form.as_str()));
-    }
+/// One composed hour, for reading and diffing. The parity digest hashes the
+/// same fields straight from `OfficeHour` (see `dump_tools::hash_hour`).
+fn hour_record(hour_name: &str, h: &OfficeHour) -> Value {
     let sections: Vec<Value> = h
         .sections
         .iter()
         .map(|sec| json!({"label": s(&sec.label), "collapsible": sec.collapsible, "elements": sec.elements.iter().map(element).collect::<Vec<_>>()}))
         .collect();
-    Ok(json!({
+    json!({
         "kind": "hour",
-        "date": day_str(date),
+        "date": day_str(h.date),
         "hour": hour_name,
-        "form": form.as_str(),
+        "form": h.form.as_str(),
         "hour_label": s(&h.hour),
         "title": s(&h.title),
         "season": h.season.map(|x| x.as_str()),
@@ -317,7 +330,7 @@ fn hour_record(date: Date, hour_name: &str, form: PrayerForm, h: &OfficeHour) ->
         "color": h.color.map(|c| c.as_str()),
         "sections": sections,
         "decisions": decisions(&h.decisions),
-    }))
+    })
 }
 
 fn element(e: &OfficeElement) -> Value {
