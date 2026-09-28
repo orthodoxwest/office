@@ -79,6 +79,27 @@
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
+/* The ordo's cross keeps the same first-choice rule: if the glyph is not
+   ready for first paint, the platform's cross stands for the whole visit,
+   because even a narrower ✠ arriving late rewrapped rows above a day anchor. */
+@font-face {
+  font-family: "Ordo Cross";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
+@font-face {
+  font-family: "Ordo Cross";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
 /* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
    Dark theme (below): the apse night sky — cooler blue lime wash with gold. */
 :root {
@@ -268,7 +289,7 @@ footer {
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
-  font-family: "Office Cross", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
 }
 
 main {
@@ -2341,7 +2362,7 @@ footer::before {
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Office Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -2424,7 +2445,7 @@ footer::before {
 .day-mobile-flags,
 .day-wk,
 .day-rank {
-  font-family: "Office Cross", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
 }
 .month-jump {
   display: grid;
@@ -2582,7 +2603,7 @@ footer::before {
   content: "Today";
   display: block;
   visibility: hidden;
-  font-family: "Office Cross", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
   font-size: 0.7rem;
   font-weight: normal;
   line-height: 1.4;
@@ -2704,7 +2725,7 @@ footer::before {
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
   flex: 0 0 4.4rem;
-  font-family: "Office Cross", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
