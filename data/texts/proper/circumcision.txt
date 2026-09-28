@@ -39,12 +39,6 @@ Great * is the mystery of the inheritance: the womb of her that knew not man is 
 # SOURCE: draft archdiocesan Vespers book, p. 96 (I Vespers, Circumcision)
 God, * for his great love wherewith he loved us, hath sent his own Son in the likeness of sinful flesh, alleluia.
 
-[commemoration-antiphon]
-O wondrous interchange! * the Creator of mankind, taking upon him a living body, vouchsafed to be born of a pure Virgin: and by his Humanity, which was begotten in no earthly wise, hath made us partakers of his Divinity.
-
-[commemoration-versicle]
-@use proper/circumcision/versicle-lauds
-
 [collect]
 # SOURCE: diurnal p. 212
 O God, who by the fruitful virginity of blessed Mary hast bestowed upon mankind the reward of eternal salvation: grant, we beseech thee, that we may know the help of her intercession, through whom we have been accounted worthy to receive the Author of our life, Jesus Christ thy Son our Lord.

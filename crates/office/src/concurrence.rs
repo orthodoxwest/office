@@ -51,6 +51,10 @@ pub struct VespersDesignation {
     /// The following celebration when its office is commemorated at II
     /// Vespers (its antiphon and versicle then come from I Vespers, XIV.14).
     pub following_office_commemoration_id: Option<String>,
+    /// Commemorated offices that belong to the following day: each begins
+    /// with its own I-Vespers antiphon and versicle (XIV.14; 2026 ordo
+    /// 24 January, 23 March, 10 November).
+    pub incoming_commemoration_ids: Vec<String>,
     /// The octave whose office is celebrated tomorrow when this is II Vespers.
     pub following_office_octave_of: Option<String>,
     /// A Vespers split at the Chapter: psalmody from the outgoing office.
@@ -77,6 +81,7 @@ impl VespersDesignation {
             decisions: Vec::new(),
             commemorations: Vec::new(),
             following_office_commemoration_id: None,
+            incoming_commemoration_ids: Vec::new(),
             following_office_octave_of: None,
             psalmody_from_preceding: false,
             appended_office_of_the_dead: false,
@@ -140,6 +145,12 @@ pub fn has_second_vespers(f: &Feast) -> bool {
 
 fn incoming_feria_excluded_at_vespers(f: &Feast) -> bool {
     f.is_category(Category::Feria) && f.id != "vigil-epiphany"
+}
+
+/// Saturday evening is always the Sunday's I Vespers, so a feria displaced on
+/// Saturday has no Vespers to commemorate (2026 ordo 21 March, 12 December).
+fn saturday_feria_without_vespers(day: &CalendarDay, f: &Feast) -> bool {
+    f.is_category(Category::Feria) && day.date.weekday() == Weekday::Saturday
 }
 
 /// XIV.9: Ember days, Rogation Monday, and common vigils have Lauds only.
@@ -206,12 +217,13 @@ fn octave_celebration_parent(day: &CalendarDay) -> Option<&str> {
     if c.has_octave {
         return Some(&c.id);
     }
-    let parent = day.within_octave_of.as_deref()?;
-    if c.id.starts_with(&format!("{parent}-octave-day")) {
+    // The day's own octave, even when another octave overlaps it (St George
+    // within Easter week: 2022 and 2025 ordos, "No Comm.").
+    if let Some(parent) = octave_parent_id(c) {
         return Some(parent);
     }
-    // Easter Monday and Tuesday continue the Easter octave office.
-    if parent == "easter-sunday" && matches!(c.id.as_str(), "easter-monday" | "easter-tuesday") {
+    let parent = day.within_octave_of.as_deref()?;
+    if c.id.starts_with(&format!("{parent}-octave-day")) {
         return Some(parent);
     }
     None
@@ -394,7 +406,13 @@ fn boundary_commemorations(
         {
             c = Some(Arc::new(seasonal_feria_commemoration(preceding, julian_easter(preceding.date.year()))));
         }
-        if let Some(c) = c {
+        if let Some(c) = c.filter(|c| {
+            let saturday = saturday_feria_without_vespers(preceding, c);
+            if saturday {
+                decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &c.id));
+            }
+            !saturday
+        }) {
             let (included, rule) = outgoing_commemorated_at_first_vespers(w, &c);
             if included {
                 comms.push(c.clone());
@@ -516,6 +534,10 @@ fn second_vespers_commemorations(
         comms.push(c.clone());
     }
     for comm in &occurrence {
+        if saturday_feria_without_vespers(day, comm) {
+            decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &comm.id));
+            continue;
+        }
         let (included, rule) = occurrence_commemorated_at_second_vespers(Some(winner), comm);
         if included {
             if !same(&concurrent_octave, comm) {
@@ -553,6 +575,10 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
     let mut incoming = Vec::new();
     let mut decisions = Vec::new();
     for comm in &preceding.commemorations {
+        if saturday_feria_without_vespers(preceding, comm) {
+            decisions.push(decision("commemoration:saturday-feria-without-vespers", "suppressed", &comm.id));
+            continue;
+        }
         let (included, rule) = occurrence_commemorated_at_second_vespers(preceding.celebration.as_deref(), comm);
         if included {
             current.push(comm.clone());
@@ -561,6 +587,11 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
     }
     for comm in &following.commemorations {
         let (included, rule) = occurrence_commemorated_at_first_vespers(comm);
+        // Holy Wednesday does not commemorate Thursday's feria (2026 ordo 8 April).
+        if included && incoming_feria_excluded_at_vespers(comm) {
+            decisions.push(decision("commemoration:incoming-feria-not-at-vespers-boundary", "suppressed", &comm.id));
+            continue;
+        }
         if included {
             incoming.push(comm.clone());
             decisions.push(decision("commemoration:incoming-at-unowned-vespers", "included", &comm.id));
@@ -602,6 +633,13 @@ fn no_owner_commemorations(preceding: &CalendarDay, following: &CalendarDay) -> 
 /// `following`. A plain feria (no celebration) has no Vespers rights of its
 /// own, but the following day's I Vespers still applies.
 pub fn resolve_concurrence(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
+    let mut d = resolve_concurrence_owner(preceding, following);
+    let incoming: Vec<&str> = following.celebration.iter().chain(&following.commemorations).map(|f| f.id.as_str()).collect();
+    d.incoming_commemoration_ids = d.commemorations.iter().filter(|c| incoming.contains(&c.id.as_str())).map(|c| c.id.clone()).collect();
+    d
+}
+
+fn resolve_concurrence_owner(preceding: &CalendarDay, following: &CalendarDay) -> VespersDesignation {
     // All Souls ends at None; Vespers are of the displaced All Saints octave.
     if let Some(octave) = all_souls_octave_vespers_office(preceding) {
         let mut synth = preceding.clone();

@@ -326,11 +326,13 @@ Day = 22
 
 [st-james-greater]
 Name = St James the Greater, Apostle
+ProperName = James
 Rank = double-2nd-class
 Color = red
 Category = apostle
 Month = 7
 Day = 25
+HasVigil = true
 
 [st-anne]
 Name = St Anne, Mother of the Blessed Virgin Mary
@@ -442,6 +444,7 @@ Color = red
 Category = apostle
 Month = 9
 Day = 21
+HasVigil = true
 
 [dedication-st-michael]
 Name = Dedication of St Michael the Archangel
@@ -543,7 +546,7 @@ Color = white
 Category = blessed-virgin
 Month = 12
 Day = 8
-HasVigil = true
+# No Office vigil (Diurnal p. 447).
 HasOctave = true
 
 [st-nicholas]
@@ -737,16 +740,6 @@ ProperName = Elias
 Month = 7
 Day = 20
 
-[vigil-st-james]
-Name = Vigil of St James
-Rank = simple
-Color = violet
-Category = feria
-Month = 7
-Day = 24
-IsVigil = true
-VigilOf = st-james-greater
-
 [st-martha-bethany]
 Name = St Martha of Bethany, Virgin
 Rank = double
@@ -929,6 +922,9 @@ Color = white
 Category = apostle
 Month = 1
 Day = 18
+# One office serves both Chairs (supplement "01 18 Chair of St Peter in Rome
+# and 02 22 Chair of St Peter in Antioch"; 2026 ordo 17-18 January, "suppl.").
+ProperID = chair-peter-antioch
 
 [st-agnes-rome]
 Name = St Agnes of Rome, Virgin & Martyr

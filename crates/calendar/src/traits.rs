@@ -43,6 +43,9 @@ pub fn is_privileged_octave_commemoration(f: &Feast) -> bool {
 
 /// The parent feast ID of a generated octave day, if `f` is one.
 pub fn octave_parent_id(f: &Feast) -> Option<&str> {
+    if let Some(parent) = f.octave_of.as_deref() {
+        return Some(parent);
+    }
     if is_octave_day(f) {
         return f.id.strip_suffix("-octave-day");
     }

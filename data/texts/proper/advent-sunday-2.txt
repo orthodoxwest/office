@@ -114,8 +114,5 @@ Art thou he * that should come, or do we look for another? Go and shew John thos
 # SOURCE: draft archdiocesan Vespers book, p. 18 (The Second Sunday in Advent, I Vespers)
 Come, O Lord, in peace, * visit us with thy salvation, that we may rejoice before thee with a perfect heart.
 
-[commemoration-antiphon]
-@use proper/advent-sunday-2/benedictus-antiphon
-
 [psalm-antiphon-4-vespers]
 @use proper/advent-sunday-2/psalm-antiphon-5

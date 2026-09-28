@@ -114,8 +114,5 @@ Blessed art thou, * O Mary, for thou hast believed the Lord: and there shall be 
 # SOURCE: draft archdiocesan Vespers book, p. 26 (The Third Sunday in Advent, I Vespers)
 Before me * there was no God formed, neither shall there be after me: unto me every knee shall bow, and me shall every tongue confess.
 
-[commemoration-antiphon]
-@use proper/advent-sunday-3/benedictus-antiphon
-
 [psalm-antiphon-4-vespers]
 @use proper/advent-sunday-3/psalm-antiphon-5

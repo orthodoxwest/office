@@ -271,6 +271,7 @@ pub fn dead_office_day(day: &Day) -> Day {
         decisions: Vec::new(),
         commemorations: Vec::new(),
         following_office_commemoration_id: None,
+        incoming_commemoration_ids: Vec::new(),
         following_office_octave_of: None,
         psalmody_from_preceding: false,
         appended_office_of_the_dead: true,

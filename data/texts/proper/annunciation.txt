@@ -65,18 +65,6 @@ The Angel Gabriel * spake unto Mary, saying: Hail, thou that art full of grace, 
 # SOURCE: draft archdiocesan Vespers book, p. 354 (Annunciation, II Vespers; Paschaltide)
 The Angel Gabriel * spake unto Mary, saying: Hail, thou that art full of grace, the Lord is with thee; blessed art thou among women. Alleluia.
 
-[commemoration-antiphon]
-@use proper/annunciation/psalm-antiphon-1
-
-[commemoration-antiphon-easter]
-@use proper/annunciation/psalm-antiphon-1-easter
-
-[commemoration-versicle]
-@use proper/annunciation/versicle-lauds
-
-[commemoration-versicle-easter]
-@use proper/annunciation/versicle-lauds-easter
-
 [collect]
 # SOURCE: monastic diurnal, p. 503 (Annunciation, At Lauds)
 O God, who didst ordain that thy Word should take flesh in the womb of the blessed Virgin Mary, at the message of an Angel: grant that we thy suppliants, who believe her to be indeed the Mother of God, may be aided by her intercessions before thee.

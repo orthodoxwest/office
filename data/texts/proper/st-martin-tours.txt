@@ -28,9 +28,6 @@ Martin is received, * rejoicing, into the bosom of Abraham: Martin, poor and low
 # SOURCE: monastic diurnal, p. 657 (St Martin, At II Vespers)
 O blessed Bishop, * who with all his heart loved Christ the King, and feared not the dominion of princes! O holy soul, which, although withheld from the persecutor's sword, lacked not the palm of martyrdom!
 
-[commemoration-antiphon]
-@use proper/st-martin-tours/magnificat-antiphon-first
-
 [collect]
 # SOURCE: monastic diurnal, p. 657 (St Martin)
 O God, who seest that of our own strength we cannot stand upright: mercifully grant, at the prayer of blessed Martin, thy Confessor and Bishop, that we may be defended against all adversities.

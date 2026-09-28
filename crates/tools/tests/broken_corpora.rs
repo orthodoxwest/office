@@ -110,17 +110,10 @@ fn appended_dead_office_keeps_its_resolution_boundary_without_a_rubric() {
     }
 }
 
+/// The rendered Assumption-week memorials are checked in
+/// data/review/composition-requirements.json ("assumption-week-memorials").
 #[test]
-fn assumption_week_commemoration_routing() {
+fn live_corpus_loads_its_scopes() {
     let texts = office::texts::load_texts(&FsData::new("../../data")).unwrap();
-    for (reference, want) in [
-        ("proper/st-eusebius-august/commemoration-antiphon-vespers", "I will liken him"),
-        ("proper/st-helen/commemoration-antiphon-vespers", "The kingdom of heaven"),
-        ("proper/st-helen/commemoration-antiphon-lauds", "Give her"),
-        ("proper/st-agapitus/commemoration-antiphon-vespers", "This is a Martyr"),
-        ("proper/st-agapitus/commemoration-antiphon-lauds", "The very hairs"),
-    ] {
-        assert!(texts.corpus.get(reference).starts_with(want), "{reference} = {:?}", texts.corpus.get(reference));
-    }
     assert!(texts.scopes.is_some_and(|s| !s.list().is_empty()));
 }

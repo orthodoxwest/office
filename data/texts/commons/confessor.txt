@@ -52,26 +52,6 @@ The world, and all things earthly, * this man despised, triumphant: he laid up t
 # SOURCE: monastic diurnal, p. 42* (Common of a Confessor not a Bishop, At I Vespers)
 I will liken him * unto a wise man, which built his house upon a rock.
 
-[commemoration-antiphon]
-@use commons/confessor/psalm-antiphon-1
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/confessor/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/confessor/magnificat-antiphon
-
-[commemoration-versicle]
-@use commons/confessor-doctor/commemoration-versicle
-
-[commemoration-versicle-lauds]
-@use commons/confessor/versicle-lauds
-
-[commemoration-versicle-vespers]
-@use commons/confessor/versicle-lauds
-
 [commemoration-collect]
 @use commons/confessor/collect
 

@@ -68,27 +68,6 @@ Be ye valiant in warfare * and contend ye with the old serpent: and ye shall rec
 # SOURCE: draft archdiocesan Vespers book (Common of Apostles and Evangelists; Tradent enim vos, I Vespers)
 They will deliver you up * to the councils, and they will scourge you in their synagogues; and ye shall be brought before governors and kings for my sake, for a testimony against them and the Gentiles.
 
-[commemoration-antiphon]
-@use commons/evangelist/psalm-antiphon-1
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/evangelist/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/evangelist/magnificat-antiphon
-
-[commemoration-versicle]
-V. Their sound hath gone forth into all the earth:
-R. And their words unto the ends of the world.
-
-[commemoration-versicle-lauds]
-@use commons/evangelist/versicle-lauds
-
-[commemoration-versicle-vespers]
-@use commons/evangelist/versicle-vespers
-
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 11* (Common of Apostles and Evangelists out of Paschaltide, At Lauds)
 @use commons/apostle/chapter-lauds

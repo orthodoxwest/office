@@ -48,9 +48,6 @@ And Stephen, full of faith and power, * did great wonders and miracles among the
 # SOURCE: monastic diurnal, p. 197 (St Stephen, At II Vespers)
 Devout men * carried Stephen to his burial, and made great lamentation over him.
 
-[commemoration-antiphon]
-@use proper/st-stephen/benedictus-antiphon
-
 [commemoration-versicle]
 # SOURCE: draft archdiocesan Vespers book, p. 59 (Commemoration of Saint Stephen)
 V. Thou hast crowned him with glory and honour, O Lord.

@@ -37,13 +37,6 @@ They set up * over his head his accusation written: Jesus of Nazareth, the King 
 # SOURCE: diurnal p. 341
 When he had received * the vinegar, he said, It is finished: and he bowed his head, and gave up the ghost.
 
-[commemoration-antiphon]
-@use proper/good-friday/psalm-antiphon-1
-
-[commemoration-versicle]
-V. He hath set me in dark places.
-R. As they that be dead of old.
-
 [triduum-antiphon]
 # SOURCE: Monastic Diurnal.pdf, printed p. 313 (Maundy Thursday at Lauds)
 # Said after the psalmody at every Hour of the Triduum; the second and

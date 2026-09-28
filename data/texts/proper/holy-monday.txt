@@ -26,13 +26,6 @@ O Father, glorify thou me * with thine own self, with the glory which I had with
 [magnificat-antiphon]
 Thou couldest have no power * at all against Me, except it were given thee from above.
 
-[commemoration-antiphon]
-@use proper/holy-monday/benedictus-antiphon
-
-[commemoration-versicle]
-V. Christ became obedient for us unto death.
-R. Yea, the death of the Cross.
-
 [collect]
 # SOURCE: diurnal p. 281
 Grant, we beseech thee, Almighty God: that we, who by reason of our weakness do falter amid so many adversities, may take heart again through the interceding Passion of thine only-begotten Son.

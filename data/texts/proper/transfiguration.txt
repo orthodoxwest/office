@@ -39,12 +39,6 @@ And when the disciples heard it, * they fell on their face, and were sore afraid
 # SOURCE: draft archdiocesan Vespers book, p. 442 (I Vespers, The Transfiguration of Our Lord Jesus Christ)
 Christ Jesus, * the brightness of the Father, and the express image of his person, who upholdeth all things by the word of his power, while he was by himself purging away our sins, vouchsafed on this day to shew himself in glory upon an high mountain.
 
-[commemoration-antiphon]
-@use proper/transfiguration/psalm-antiphon-1
-
-[commemoration-versicle]
-@use proper/transfiguration/versicle-vespers
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 510, 443 (The Transfiguration; recovered directly from DOCX text flow)
 O God, who in the glorious Transfiguration of thine only-begotten Son didst confirm the mysteries of the faith by the testimony of the fathers, and in the voice which came down from the bright cloud didst marvellously foreshew the perfect adoption of sons: vouchsafe in thy mercy to make us coheirs with this glorious King, and grant that we may be partakers of his glory.

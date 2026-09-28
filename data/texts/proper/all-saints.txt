@@ -47,12 +47,6 @@ The glorious company * of the Apostles praise thee; the goodly fellowship of the
 # SOURCE: draft archdiocesan Vespers book, p. 536 (II Vespers for The Feast of All Saints)
 O how glorious * is the kingdom wherein all the Saints rejoice with Christ; arrayed in white robes, they follow the Lamb whithersoever he goeth.
 
-[commemoration-antiphon]
-@use proper/all-saints/psalm-antiphon-1
-
-[commemoration-versicle]
-@use commons/martyrs/versicle-vespers
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 601, 530, 536 (The Feast of All Saints)
 Almighty everlasting God, by whose favour we venerate the merits of all thy Saints in one solemnity: we beseech thee to bestow upon us, through so many intercessors, the abundance of thy mercy which we desire.

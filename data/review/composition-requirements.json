@@ -2339,5 +2339,329 @@
         "before_slot": "commemoration-collect"
       }
     ]
+  },
+  {
+    "id": "saturday-sunday-commemoration-first-vespers",
+    "source": "Monastic Diurnal General Rubrics XIV.14; Trinity Sunday pp. 403, 405, 408-409 (Commemoration of I Sunday after Pentecost; ferias take the preceding Sunday's collect). 2026 ordo, 2 May, 6-8 June, 10 October.",
+    "cases": [
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/magnificat-antiphon-first",
+        "contains": "Speak, Lord"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-versicle",
+        "ref": "ordinary/vespers/versicle-saturday",
+        "contains": "Let our evening prayer"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-collect",
+        "ref": "proper/pentecost-sunday-1/collect"
+      },
+      {
+        "date": "2026-06-07",
+        "hour": "lauds",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/benedictus-antiphon",
+        "contains": "Be ye therefore"
+      },
+      {
+        "date": "2026-06-07",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-1",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/pentecost-sunday-1/magnificat-antiphon",
+        "contains": "Judge not"
+      },
+      {
+        "date": "2026-06-08",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-sunday-1/collect"
+      },
+      {
+        "date": "2026-05-02",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-3",
+        "slot": "commemoration-antiphon",
+        "contains": "A little while"
+      },
+      {
+        "date": "2026-10-10",
+        "hour": "vespers",
+        "commemoration_owner": "pentecost-sunday-19",
+        "slot": "commemoration-antiphon",
+        "ref": "proper/historia-october-2/magnificat-antiphon-first",
+        "contains": "The sun shone"
+      }
+    ]
+  },
+  {
+    "id": "vigil-offices-and-commemorations",
+    "source": "Monastic Diurnal General Rubrics VI; pp. 1*, 7*, 481, 538, 543, 669. 2026 ordo 23 and 27 June, 28 November; 2021 ordo 20 September.",
+    "cases": [
+      {
+        "date": "2026-06-23",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/vigil-of-nativity-john-baptist/collect",
+        "contains": "John the Forerunner"
+      },
+      {
+        "date": "2026-11-28",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/vigil-of-st-andrew/collect"
+      },
+      {
+        "date": "2026-06-27",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-ss-peter-paul",
+        "slot": "commemoration-antiphon",
+        "ref": "ordinary/lauds/benedictus-antiphon-saturday",
+        "contains": "Give light"
+      },
+      {
+        "date": "2026-06-27",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-ss-peter-paul",
+        "slot": "commemoration-collect",
+        "ref": "proper/vigil-of-ss-peter-paul/collect"
+      },
+      {
+        "date": "2027-09-20",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-st-matthew",
+        "slot": "commemoration-collect",
+        "ref": "proper/vigil-of-st-matthew/collect",
+        "contains": "Apostle Matthew"
+      },
+      {
+        "date": "2026-02-23",
+        "hour": "lauds",
+        "commemoration_owner": "vigil-of-st-matthias",
+        "slot": "commemoration-collect",
+        "absent": true
+      }
+    ]
+  },
+  {
+    "id": "feria-commemorations-at-lauds-and-vespers",
+    "source": "Monastic Diurnal p. 1*; General Rubrics V. 2026 ordo 10 February, 21 March, 8 April, 12 December.",
+    "cases": [
+      {
+        "date": "2026-02-10",
+        "hour": "lauds",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "ref": "ordinary/lauds/benedictus-antiphon-tuesday",
+        "contains": "The Lord hath raised up"
+      },
+      {
+        "date": "2026-02-10",
+        "hour": "vespers",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "contains": "The householder"
+      },
+      {
+        "date": "2026-03-21",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2026-04-08",
+        "hour": "vespers",
+        "commemoration_owner": "privileged-lenten-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2026-12-12",
+        "hour": "vespers",
+        "commemoration_owner": "penitential-feria",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      }
+    ]
+  },
+  {
+    "id": "incoming-feast-commemoration-first-vespers",
+    "source": "Monastic Diurnal General Rubrics XIV.14. 2026 ordo 24 January (Comm. Conversion 'Go forth Ananias'), 25 January ('O holy Apostle Paul'); 2017 and 2018 ordos 23 March (Comm. Gabriel 'The angel Gabriel came in'). Monastic Diurnal p. 197 (Commemoration of St John at St Stephen's II Vespers); Chair of St Peter supplement (I Vespers).",
+    "cases": [
+      {
+        "date": "2026-01-24",
+        "hour": "vespers",
+        "commemoration_owner": "conversion-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "Go forth, Ananias"
+      },
+      {
+        "date": "2026-01-25",
+        "hour": "vespers",
+        "commemoration_owner": "conversion-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "O holy Apostle Paul"
+      },
+      {
+        "date": "2026-03-23",
+        "hour": "vespers",
+        "commemoration_owner": "st-gabriel-archangel",
+        "slot": "commemoration-antiphon",
+        "contains": "came in unto Mary"
+      },
+      {
+        "date": "2026-03-24",
+        "hour": "vespers",
+        "commemoration_owner": "st-gabriel-archangel",
+        "slot": "commemoration-antiphon",
+        "contains": "With God nothing shall be impossible"
+      },
+      {
+        "date": "2026-12-26",
+        "hour": "vespers",
+        "commemoration_owner": "st-john-evangelist",
+        "slot": "commemoration-versicle",
+        "contains": "Right worthy of honour"
+      },
+      {
+        "date": "2026-01-17",
+        "hour": "vespers",
+        "commemoration_owner": "chair-peter-rome",
+        "slot": "commemoration-antiphon",
+        "contains": "Thou art the shepherd"
+      },
+      {
+        "date": "2026-01-17",
+        "hour": "vespers",
+        "commemoration_owner": "chair-peter-rome",
+        "slot": "commemoration-versicle",
+        "contains": "Thou art Peter"
+      },
+      {
+        "date": "2026-02-22",
+        "hour": "vespers",
+        "commemoration_owner": "comm-extra-02-23-commemoration-of-st-paul",
+        "slot": "commemoration-antiphon",
+        "contains": "O holy Apostle Paul"
+      }
+    ]
+  },
+  {
+    "id": "assumption-week-memorials",
+    "source": "Monastic Diurnal pp. 588-591; 2026 ordo 13, 17-18 August.",
+    "cases": [
+      {
+        "date": "2026-08-13",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-14-st-eusebius-priest-and-confessor",
+        "slot": "commemoration-antiphon",
+        "contains": "I will liken him"
+      },
+      {
+        "date": "2026-08-17",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-18-st-helen-empress",
+        "slot": "commemoration-antiphon",
+        "contains": "The kingdom of heaven"
+      },
+      {
+        "date": "2026-08-18",
+        "hour": "lauds",
+        "commemoration_owner": "comm-08-18-st-helen-empress",
+        "slot": "commemoration-antiphon",
+        "contains": "Give her"
+      },
+      {
+        "date": "2026-08-17",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-18-st-agapitus-martyr",
+        "slot": "commemoration-antiphon",
+        "contains": "This is a Martyr"
+      },
+      {
+        "date": "2026-08-18",
+        "hour": "lauds",
+        "commemoration_owner": "comm-08-18-st-agapitus-martyr",
+        "slot": "commemoration-antiphon",
+        "contains": "The very hairs"
+      }
+    ]
+  },
+  {
+    "id": "pentecost-octave-day-collects",
+    "source": "Monastic Diurnal pp. 399-402 (a proper collect for each day but Thursday, which repeats the Sunday's). 2026 ordo 1-6 June.",
+    "cases": [
+      {
+        "date": "2026-06-01",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-2/collect"
+      },
+      {
+        "date": "2026-06-03",
+        "hour": "vespers",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-4/collect"
+      },
+      {
+        "date": "2026-06-04",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost/collect"
+      },
+      {
+        "date": "2026-06-06",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "ref": "proper/pentecost-octave-day-7/collect"
+      }
+    ]
+  },
+  {
+    "id": "easter-octave-with-overlapping-octave",
+    "source": "Monastic Diurnal General Rubrics VII (days of one octave are one office). 2022 and 2025 ordos, Easter week Vespers: 'No Comm.' while St George's octave overlaps.",
+    "cases": [
+      {
+        "date": "2025-04-22",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-octave-day-4",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2025-04-24",
+        "hour": "vespers",
+        "commemoration_owner": "easter-sunday-octave-day-6",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      },
+      {
+        "date": "2022-04-24",
+        "hour": "vespers",
+        "commemoration_owner": "easter-monday",
+        "slot": "commemoration-antiphon",
+        "absent": true
+      }
+    ]
   }
 ]

@@ -1,0 +1,15 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 403 (Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost)
+O God, the strength of all those who put their trust in thee; Mercifully accept our prayers; and because, through the weakness of our mortal nature, we can do no good thing without thee, grant us the help of thy grace, that in keeping thy commandments we may please thee, both in will and deed.
+
+[magnificat-antiphon-first]
+# SOURCE: Monastic Diurnal.pdf, p. 403 (Trinity Sunday, I Vespers, Commemoration of I Sunday after Pentecost)
+Speak, Lord, * for thy servant heareth.
+
+[benedictus-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 405 (Trinity Sunday, Lauds, For Commemoration of Sunday)
+Be ye therefore * merciful, as your Father also is merciful, saith the Lord.
+
+[magnificat-antiphon]
+# SOURCE: Monastic Diurnal.pdf, p. 408 (Trinity Sunday, II Vespers, For Commemoration of Sunday)
+Judge not, * that ye be not judged: for with what judgment ye judge, ye shall be judged, saith the Lord.

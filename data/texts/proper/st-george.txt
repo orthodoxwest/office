@@ -1,9 +1,3 @@
-[commemoration-antiphon]
-Whosoever shall confess Me * before men, him will I confess also before My Father.
-
-[commemoration-versicle]
-@use commons/bishop-martyr/commemoration-versicle
-
 [collect]
 # SOURCE: 00. The Sanctoral Cycle - Lauds 2025 Jacob edit 03-31 v.10.pdf, p. 92
 O God, who makest us to rejoice in the merits and intercession of blessed George thy Martyr: mercifully grant that we who ask for thy benefits through him, may obtain them by the gift of thy grace.

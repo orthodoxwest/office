@@ -27,9 +27,6 @@ Jesus stood * in the midst of his disciples and said unto them, Peace be unto yo
 [magnificat-antiphon]
 Behold My Hands * and my Feet, that it is I myself, alleluia, alleluia.
 
-[commemoration-antiphon]
-@use proper/easter-tuesday/benedictus-antiphon
-
 [commemoration-versicle]
 @use proper/easter-sunday/commemoration-versicle
 

@@ -55,7 +55,6 @@ proper/all-souls/collect who-livest
 proper/chair-peter-antioch/collect who-livest
 # This is the same collect whose Diurnal form is printed for the commemoration
 # of St Peter on p. 463 with "Who with God the Father ... livest".
-proper/chair-peter-rome/collect who-livest
 proper/corpus-christi/collect who-livest
 proper/corpus-christi/collect-lauds who-livest
 proper/finding-holy-cross/collect who-livest
@@ -69,6 +68,11 @@ proper/st-helen/collect who-livest
 proper/st-joseph/collect who-livest
 # The Diurnal prints this collect and its second-person ending directly (p. 604).
 proper/seven-sorrows-bvm/collect who-livest
+# Diurnal pp. 177-178 print Who with God the Father ... livest.
+proper/advent-ember-friday/collect-lauds who-livest
+proper/advent-ember-saturday/collect-lauds who-livest
+# Diurnal p. 588 prints Who with God the Father ... livest.
+proper/vigil-of-assumption-bvm/collect who-livest
 
 # --- The Son is mentioned at the ending: "Who with thee ... liveth" ---
 proper/ascension/collect who-liveth
@@ -100,6 +104,8 @@ proper/st-stephen/commemoration-collect who-liveth
 # Same collect with the August wording adaptation (2026 ordo p. 86).
 proper/finding-st-stephen/collect who-liveth
 proper/vigil-nativity/collect who-liveth
+# Diurnal p. 538 prints Who with thee ... liveth.
+proper/vigil-of-nativity-john-baptist/collect who-liveth
 
 # --- The Son is mentioned before, but not at, the ending ---
 # Directly printed "Through the same" in the Diurnal (pp. 167, 206, and 222).
@@ -124,7 +130,9 @@ proper/vigil-epiphany/collect through-same
 # --- The Holy Spirit is mentioned: "in the unity of the same Holy Ghost" ---
 proper/pentecost/collect through-spirit
 proper/presentation-bvm/collect through-spirit
-proper/whit-ember-friday/collect through-spirit
-proper/whit-ember-saturday/collect through-spirit
+proper/pentecost-octave-day-2/collect through-spirit
+proper/pentecost-octave-day-3/collect through-spirit
+proper/pentecost-octave-day-6/collect through-spirit
+proper/pentecost-octave-day-7/collect through-spirit
 # Names both the Comforter and, at the end, the Son.
-proper/whit-ember-wednesday/collect who-liveth-spirit
+proper/pentecost-octave-day-4/collect who-liveth-spirit

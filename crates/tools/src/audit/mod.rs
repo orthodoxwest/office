@@ -95,6 +95,30 @@ pub fn load_suppress_file(src: &dyn DataSource) -> Result<Suppressions, String> 
     Ok(result)
 }
 
+/// Whether `prefix` supplies `reference`, counting the slots the composer
+/// derives a commemoration from: the hour's own gospel antiphon and versicle.
+fn derived_ref_present(corpus: &Corpus, prefix: &str, reference: &str) -> bool {
+    let candidates: &[&str] = match reference {
+        "commemoration-antiphon" => &[
+            "commemoration-antiphon",
+            "commemoration-antiphon-lauds",
+            "commemoration-antiphon-vespers",
+            "benedictus-antiphon",
+            "magnificat-antiphon",
+        ],
+        "commemoration-versicle" => &[
+            "commemoration-versicle",
+            "commemoration-versicle-lauds",
+            "commemoration-versicle-vespers",
+            "versicle-lauds",
+            "versicle-vespers",
+            "versicle",
+        ],
+        _ => &[],
+    };
+    corpus.has(&format!("{prefix}{reference}")) || candidates.iter().any(|c| corpus.has(&format!("{prefix}{c}")))
+}
+
 pub fn run(src: &dyn DataSource) -> Result<Report, String> {
     let texts = office::texts::load_texts(src).map_err(|e| format!("loading texts: {e}"))?;
     let corpus: &Corpus = &texts;
@@ -119,10 +143,16 @@ pub fn run(src: &dyn DataSource) -> Result<Report, String> {
         let category = feast.category.map_or("", |c| c.as_str());
         let (mut missing, mut commons, mut ph) = (Vec::new(), Vec::new(), Vec::new());
         for reference in PROPER_REFS {
-            if supp.contains(reference) || corpus.has(&format!("proper/{}/{reference}", feast.id)) {
+            if supp.contains(reference) || derived_ref_present(corpus, &format!("proper/{}/", feast.id), reference) {
                 continue;
             }
-            if corpus.has(&format!("commons/{category}/{reference}")) {
+            // A de Tempore commemoration takes the season's or Psalter's versicle (X, p. xxix).
+            if reference == "commemoration-versicle"
+                && (feast.is_category(calendar::Category::Sunday) || feast.is_category(calendar::Category::Feria))
+            {
+                continue;
+            }
+            if derived_ref_present(corpus, &format!("commons/{category}/"), reference) {
                 commons.push(reference);
             } else {
                 missing.push(reference);

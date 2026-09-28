@@ -88,12 +88,6 @@ R. Shall be blotted out.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. To-morrow the iniquity of the earth * shall be blotted out.
 
-[commemoration-antiphon]
-@use proper/vigil-nativity/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/vigil-nativity/versicle-lauds
-
 [chapter-vespers]
 @use proper/vigil-nativity/chapter-lauds
 

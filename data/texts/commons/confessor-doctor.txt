@@ -62,25 +62,6 @@ O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the 
 # SOURCE: monastic diurnal, p. 35* (Common of a Confessor and Bishop, "For a Doctor, at both Vespers")
 @use commons/confessor-doctor/magnificat-antiphon
 
-[commemoration-antiphon]
-@use commons/confessor-doctor/psalm-antiphon-1
-
-[commemoration-antiphon-lauds]
-@use commons/confessor-doctor/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-@use commons/confessor-doctor/magnificat-antiphon
-
-[commemoration-versicle]
-V. The Lord loved him and adorned him.
-R. He clothed him with a robe of glory.
-
-[commemoration-versicle-lauds]
-@use commons/confessor-doctor/versicle-lauds
-
-[commemoration-versicle-vespers]
-@use commons/confessor-doctor/versicle-vespers
-
 [commemoration-collect]
 @use commons/confessor-doctor/collect
 

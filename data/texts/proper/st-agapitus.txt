@@ -3,6 +3,3 @@
 
 [commemoration-antiphon-lauds]
 @use commons/martyrs/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-@use commons/martyr/magnificat-antiphon-first

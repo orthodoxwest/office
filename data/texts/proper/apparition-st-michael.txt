@@ -29,12 +29,6 @@ There was silence in heaven * while the dragon waged war: and Michael fought aga
 # SOURCE: draft archdiocesan Vespers book, p. 509 (St. Michael II Vespers, shared by Apparition; Princeps gloriosissime)
 O Prince most glorious, * Michael the Archangel, keep us in remembrance: here and everywhere, always, entreat the Son of God for us, alleluia, alleluia.
 
-[commemoration-antiphon]
-@use proper/apparition-st-michael/psalm-antiphon-1
-
-[commemoration-versicle]
-@use proper/apparition-st-michael/versicle-lauds
-
 [collect]
 # SOURCE: monastic diurnal, p. 610 (Dedication of St Michael, At Lauds; Apparition uses the same office)
 O everlasting God, who hast ordained and constituted the services of Angels and men in a wonderful order; mercifully grant that, as thy holy Angels always do thee service in heaven, so, by thy appointment, they may succour and defend us on earth.

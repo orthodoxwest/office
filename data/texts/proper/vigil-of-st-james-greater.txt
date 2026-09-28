@@ -1,0 +1,3 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 570 (Vigil of St James, as in the Common of Apostles, p. 7*)
+@use commons/apostle/vigil-collect

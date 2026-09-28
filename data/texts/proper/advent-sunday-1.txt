@@ -116,6 +116,3 @@ Fear not, Mary, * for thou hast found favour with the Lord: behold, thou shalt c
 [magnificat-antiphon-first]
 # SOURCE: Monastic Diurnal.pdf, p. 158
 Behold, the Name of the Lord * cometh from afar: and his glory filleth all the earth.
-
-[commemoration-antiphon]
-@use proper/advent-sunday-1/benedictus-antiphon

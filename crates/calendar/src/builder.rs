@@ -258,6 +258,7 @@ fn vigil_feasts(feasts: &[FeastRef], year: i32, m: &MoveableDates) -> Vec<Feast>
         v.fixed = fixed(date);
         v.is_vigil = true;
         v.vigil_of = Some(feast.id.clone());
+        v.proper_name = feast.proper_name.clone();
         vigils.push(v);
     }
     vigils

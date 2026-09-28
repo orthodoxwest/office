@@ -2,9 +2,6 @@
 # SOURCE: monastic diurnal, p. 387 (Rogation Wednesday / Vigil of the Ascension)
 Father, the hour is come: * glorify thy Son with the glory which I had with thee before the world was, alleluia.
 
-[commemoration-antiphon]
-@use proper/vigil-ascension/benedictus-antiphon
-
 [collect]
 # SOURCE: monastic diurnal, p. 385 (V Sunday after Easter; said on the Vigil)
 O Lord, from whom all good things do come; grant to us thy humble servants, that by thy holy inspiration we may think those things that are good, and by thy merciful guiding may perform the same.

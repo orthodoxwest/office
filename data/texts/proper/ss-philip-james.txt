@@ -39,9 +39,6 @@ If ye love me, * keep my commandments, alleluia, alleluia, alleluia.
 # SOURCE: draft archdiocesan Vespers book, p. 378 (II Vespers for Saints Philip and James)
 If ye abide in me, * and my words abide in you, ye shall ask what ye will, and it shall be done unto you, alleluia, alleluia, alleluia.
 
-[commemoration-antiphon]
-@use proper/ss-philip-james/psalm-antiphon-1
-
 [collect]
 # SOURCE: draft archdiocesan Lauds/Vespers books, pp. 457, 370, 379 (Saints Philip and James)
 O God, who makest us glad by the yearly solemnity of thine Apostles Philip and James: grant, we beseech thee, that we who rejoice in their merits may be taught by their example.

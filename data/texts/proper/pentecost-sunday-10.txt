@@ -4,7 +4,7 @@ O God, who declarest thy almighty power chiefly in shewing mercy and pity; Merci
 
 [benedictus-antiphon]
 # SOURCE: Antiphons on the Benedictus for Sunday Lauds Throughout the Year.docx, p. 6 (Stans a longe)
-And the publican * standing afar off, would not lift up so much as his eyes unto heaven, but smote upon his breast, saying, God be merciful to me a sinner.
+And the publican, * standing afar off, would not lift up so much as his eyes unto heaven, but smote upon his breast, saying, God be merciful to me a sinner.
 
 [magnificat-antiphon]
 # SOURCE: monastic diurnal, p. 435 (X Sunday after Pentecost)
@@ -12,4 +12,4 @@ This man went down * to his house justified rather than the other: for every one
 
 [magnificat-antiphon-first]
 # SOURCE: Antiphons on the Magnificat for Saturday Vespers Throughout the Year.docx, p. 4 (Fecit Joas)
-Jehoash * did that which was right in the sight of the Lord all his days, wherein Jehoiada the priest, instructed him.
+Jehoash * did that which was right in the sight of the Lord all his days, wherein Jehoiada the priest instructed him.

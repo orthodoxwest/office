@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, p. 401 (Ember Friday within the Octave of Pentecost)
+Grant, we beseech thee, O merciful God: that thy Church being gathered together in the Holy Spirit, may be disturbed by no assaults of the enemy.
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 401 (Ember Friday within the Octave of Pentecost)
 Jesus said: * But that ye may know that the Son of man hath power on earth to forgive sins, (he saith unto the sick of the palsy) I say unto thee, Arise, take up thy bed, and go thy way into thine house, alleluia.

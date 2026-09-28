@@ -1,5 +1,6 @@
 [collect]
-Shine upon thy Church, O Lord, in thy goodness, that, enlightened by the teachings of blessed John thy Apostle and Evangelist, she may attain to everlasting gifts.
+# SOURCE: Monastic Diurnal.pdf, p. 220 (Octave of St John, "Collect of the Feast, p. 199")
+@use proper/st-john-evangelist/collect
 
 [benedictus-antiphon]
 # Octave day repeats the feast; 2026 ordo Jan 3 Lauds incipit "This is the same John".

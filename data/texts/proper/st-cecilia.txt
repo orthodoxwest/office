@@ -29,12 +29,6 @@ When the dawn of day was breaking, * Cecilia the Martyr cried, saying: Forward, 
 # SOURCE: monastic diurnal, p. 666 (St Cecilia, At II Vespers)
 This noble maiden * alway bare the glorious Gospel of Christ in her bosom: without ceasing, she continued in prayer and supplication, and celestial converse, night and day.
 
-[commemoration-antiphon]
-@use proper/st-cecilia/psalm-antiphon-1
-
-[commemoration-versicle]
-@use commons/virgin-martyr/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, p. 666 (St Cecilia, At Lauds)
 O God, who makest us glad with the yearly festival of blessed Cecilia thy Virgin and Martyr: grant that we, who honour her with duteous service, may also follow the example of her good and holy life.

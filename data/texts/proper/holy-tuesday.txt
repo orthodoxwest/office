@@ -29,12 +29,6 @@ Now before the feast * of the Passover, when Jesus knew that his hour was come, 
 # SOURCE: diurnal p. 283
 I have power * to lay down my life, and I have power to take it again.
 
-[commemoration-antiphon]
-@use proper/holy-tuesday/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/holy-monday/commemoration-versicle
-
 [collect]
 # SOURCE: diurnal p. 282
 Almighty, everlasting God: grant us so to celebrate the mysteries of the Lord's Passion, that we may be worthy to receive thy forgiveness.

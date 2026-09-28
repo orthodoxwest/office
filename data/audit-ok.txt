@@ -131,7 +131,8 @@ dedication-basilica-holy-apostles *
 
 # Apostle feasts with proper collect — antiphons from commons/apostle
 chains-st-peter psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-chair-peter-rome psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
+# Chair of St Peter in Rome: the Antioch office, through ProperID.
+chair-peter-rome *
 commemoration-st-paul-apostle psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 st-john-latin-gate psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 octave-day-st-john psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
@@ -144,7 +145,6 @@ vigil-nativity magnificat-antiphon commemoration-antiphon commemoration-versicle
 vigil-epiphany psalm-antiphon magnificat-antiphon commemoration-versicle
 vigil-ascension psalm-antiphon magnificat-antiphon commemoration-versicle
 vigil-pentecost psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
-vigil-st-james psalm-antiphon benedictus-antiphon magnificat-antiphon commemoration-antiphon commemoration-versicle
 
 # Psalm antiphons taken from the category commons per Divinum Officium
 # (flat per-feast copies removed; see commons/<category>.txt for the texts).
@@ -187,3 +187,10 @@ palm-sunday psalm-antiphon
 # St. Mark is directed wholly to the Common of Apostles and Evangelists,
 # apart from his collect.
 st-mark hymn
+
+# The Whit Ember days are kept as days within the Octave of Pentecost; their
+# collects and antiphons live on proper/pentecost-octave-day-4/6/7 (Diurnal
+# pp. 400-402) and the Ember feasts themselves are suppressed.
+whit-ember-wednesday *
+whit-ember-friday *
+whit-ember-saturday *

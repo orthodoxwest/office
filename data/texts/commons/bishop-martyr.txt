@@ -48,17 +48,6 @@ Father, * I will that where I am, there may also my servant be.
 [magnificat-antiphon-first]
 @use commons/martyr/magnificat-antiphon-first
 
-[commemoration-antiphon]
-@use commons/martyr/commemoration-antiphon
-
-[commemoration-antiphon-lauds]
-# Rubric: commemorations use the gospel-canticle antiphon of the common
-@use commons/bishop-martyr/benedictus-antiphon
-
-[commemoration-antiphon-vespers]
-# Rubric: Vespers commemorations use the Magnificat antiphon of the common
-@use commons/bishop-martyr/magnificat-antiphon
-
 [commemoration-versicle]
 # SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At I Vespers)
 V. Thou hast crowned him with glory and honour, O Lord.

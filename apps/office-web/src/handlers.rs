@@ -739,8 +739,7 @@ mod tests {
             r#"class="hour-continuation""#,
             "Text dependencies",
             "Composition decisions",
-            "need review",
-            "source unknown",
+            " verified",
         ] {
             assert!(body.contains(want), "hour page missing {want:?}");
         }

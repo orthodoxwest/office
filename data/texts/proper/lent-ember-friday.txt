@@ -6,13 +6,6 @@ An Angel of the Lord * went down from heaven and troubled the water, and one was
 # SOURCE: diurnal p. 254
 He that made me whole, * the same commanded me: Take up thy bed, and walk in peace.
 
-[commemoration-antiphon]
-@use proper/lent-ember-friday/benedictus-antiphon
-
-[commemoration-versicle]
-V. O Lord, have mercy upon us.
-R. For we have sinned against thee.
-
 [collect]
 # SOURCE: diurnal p. 254
 Be favourable to thy people, O Lord: and mercifully revive with thine abundant help those whom thou makest devoted unto thee.

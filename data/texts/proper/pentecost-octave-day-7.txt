@@ -1,3 +1,7 @@
+[collect]
+# SOURCE: Monastic Diurnal.pdf, pp. 401-402 (Ember Saturday within the Octave of Pentecost)
+We beseech thee, O Lord, graciously pour forth into our hearts thy Holy Spirit: by whose wisdom we were created, and by whose providence we are governed.
+
 [benedictus-antiphon]
 # SOURCE: monastic diurnal, p. 401 (Ember Saturday within the Octave of Pentecost)
 The love of God is shed * abroad in our hearts by his Spirit which dwelleth in us, alleluia.

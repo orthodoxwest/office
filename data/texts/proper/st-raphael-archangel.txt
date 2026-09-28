@@ -29,12 +29,6 @@ Peace be with you, * fear not: bless ye the Lord, and sing praises unto him.
 # SOURCE: monastic diurnal, p. 635 (St Raphael, At II Vespers)
 O Prince most glorious, * Raphael the Archangel, keep us in remembrance: here and everywhere, always, entreat the Son of God for us.
 
-[commemoration-antiphon]
-I am the Angel Raphael, * who stand before the Lord: bless ye God, and tell of all his wondrous works.
-
-[commemoration-versicle]
-@use proper/guardian-angels/commemoration-versicle
-
 [collect]
 # SOURCE: monastic diurnal, p. 634 (St Raphael, At Lauds)
 O God, who gavest blessed Raphael, the Archangel, unto thy servant Tobias as a comrade on his journey: grant unto us thy servants that we may always be protected by his watchfulness and defended by his help.

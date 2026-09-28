@@ -88,7 +88,7 @@ fn valid_fixed_date(month: i64, day: i64) -> bool {
     i64::from(date.month()) == month && i64::from(date.day()) == day
 }
 
-const KNOWN_FEAST_KEYS: [&str; 21] = [
+const KNOWN_FEAST_KEYS: [&str; 22] = [
     "Name",
     "Rank",
     "Color",
@@ -102,6 +102,7 @@ const KNOWN_FEAST_KEYS: [&str; 21] = [
     "HasVigil",
     "IsVigil",
     "VigilOf",
+    "OctaveOf",
     "CommemorationClass",
     "OctaveClass",
     "PrimaryOfOurLord",
@@ -178,6 +179,9 @@ pub fn section_to_feast(m: &Section, source_file: &str) -> Result<Feast, String>
     let text = |key: &str| m.get(key).and_then(crate::model::non_empty);
     if m.get("VigilOf").is_some() {
         f.vigil_of = text("VigilOf");
+    }
+    if m.get("OctaveOf").is_some() {
+        f.octave_of = text("OctaveOf");
     }
     if m.get("CompanionOf").is_some() {
         f.companion_of = text("CompanionOf");
