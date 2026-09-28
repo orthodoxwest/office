@@ -2533,5 +2533,46 @@
         "contains": "With God nothing shall be impossible"
       }
     ]
+  },
+  {
+    "id": "assumption-week-memorials",
+    "source": "Monastic Diurnal pp. 588-591; 2026 ordo 13, 17-18 August.",
+    "cases": [
+      {
+        "date": "2026-08-13",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-14-st-eusebius-priest-and-confessor",
+        "slot": "commemoration-antiphon",
+        "contains": "I will liken him"
+      },
+      {
+        "date": "2026-08-17",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-18-st-helen-empress",
+        "slot": "commemoration-antiphon",
+        "contains": "The kingdom of heaven"
+      },
+      {
+        "date": "2026-08-18",
+        "hour": "lauds",
+        "commemoration_owner": "comm-08-18-st-helen-empress",
+        "slot": "commemoration-antiphon",
+        "contains": "Give her"
+      },
+      {
+        "date": "2026-08-17",
+        "hour": "vespers",
+        "commemoration_owner": "comm-08-18-st-agapitus-martyr",
+        "slot": "commemoration-antiphon",
+        "contains": "This is a Martyr"
+      },
+      {
+        "date": "2026-08-18",
+        "hour": "lauds",
+        "commemoration_owner": "comm-08-18-st-agapitus-martyr",
+        "slot": "commemoration-antiphon",
+        "contains": "The very hairs"
+      }
+    ]
   }
 ]

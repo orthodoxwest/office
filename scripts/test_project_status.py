@@ -144,7 +144,6 @@ class ProjectStatusTest(unittest.TestCase):
             ("vespers-ownership", "04-24", "open-question", "62"),
             ("vespers-ownership", "08-29", "open-question", "62"),
             ("vespers-ownership", "11-29", "open-question", "62"),
-            ("lauds-commemorations", "02-23", "open-question", "381"),
             ("lauds-commemorations", "08-22", "open-question", "381"),
             ("vespers-commemorations", "02-23", "open-question", "377"),
             ("magnificat-antiphon", "04-01", "suspected-reference-error", "373"),
