@@ -7,8 +7,8 @@ Wisdom hath builded her house, * she hath mingled her wine, and furnished her ta
 Wisdom hath builded her house, * she hath mingled her wine, and furnished her table, alleluia.
 
 [psalm-antiphon-2-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 321 (Sunday within the Octave of Corpus Christi)
-Thou feddest * thine own people with angels' food, and didst send them bread from heaven, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 415, 418
+Thou feddest * thine people with angels' food, and didst send them bread from heaven, alleluia.
 
 [psalm-antiphon-3-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 321 (Sunday within the Octave of Corpus Christi)
@@ -55,8 +55,8 @@ The child Samuel * ministered unto the Lord before Eli, and the word of the Lord
 O Lord, who never failest to help and govern those whom thou dost bring up in thy stedfast fear and love: keep us, we beseech thee, under the protection of thy good providence, and make us to have a perpetual fear and love of thy holy Name.
 
 [collect-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, p. 209 (I Vespers of the Sunday within the Octave of Corpus Christi)
-O Lord, who never failest to govern them whom thou dost stablish in thy love: make us to have a perpetual fear and love of thy holy Name.
+# SOURCE: Monastic Diurnal.pdf, p. 418, 419
+O Lord, who never failest to help and govern those whom thou dost bring up in thy stedfast fear and love: Keep us, we beseech thee, under the protection of thy good providence, and make us to have a perpetual fear and love of thy holy Name.
 
 [chapter-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 325 (Sunday within the Octave of Corpus Christi)
@@ -86,7 +86,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. He gave them bread from heaven, * alleluia, alleluia.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 327-328 (Sunday within the Octave of Corpus Christi)
+# SOURCE: Monastic Diurnal.pdf, p. 415, 416, 419
 Verbum supernum prodiens
 
 The Word proceeding from above,
@@ -94,9 +94,9 @@ Yet leaving not the Father's side,
 Went forth upon his work of love,
 And reached at length life's eventide.
 
-By false disciple to be giv'n
+By false disciple to be given
 To foemen for his death athirst,
-Himself, the living Bread from heav'n,
+Himself, the living Bread from heaven,
 He gave to his disciples first.
 
 To them he gave in twofold kind,
@@ -109,9 +109,9 @@ Our Food while seated at the board:
 He died our Ransom thus to be,
 He reigns to be our great reward.
 
-O Saving Victim, op'ning wide
-The gate of heav'n to man below:
-Our foes press on from ev'ry side;
+O Saving Victim, opening wide
+The gate of heaven to man below:
+Our foes press on from every side;
 Thine aid supply, thy strength bestow.
 
 All praise and thanks to thee ascend
@@ -120,18 +120,19 @@ O grant us life that shall not end
 In our true native land with thee.
 
 Amen.
+
 [hymn-first-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 205-207 (Saturday within the Octave of Corpus Christi)
+# SOURCE: Monastic Diurnal.pdf, p. 413, 414, 418
 Pange lingua gloriosi
 
-Now, my tongue, the Myst'ry telling,
+Now, my tongue, the Mystery telling,
 Of the glorious Body sing,
 And the Blood, all price excelling,
 Which the Gentiles' Lord and King,
 In a noble womb once dwelling,
 Shed for this world's ransoming.
 
-Giv'n for us, and condescending,
+Given for us, and condescending,
 To be born for us below,
 He, with men in converse blending,
 Dwelt the seed of truth to sow,
@@ -164,9 +165,10 @@ To the Father, and the Son,
 Honour, might, and praise addressing,
 While unending ages run;
 Ever too his love confessing
-Who from One with both is One.
+Who from Both with Both is One.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 328 (Sunday within the Octave of Corpus Christi)
 V. He gave them bread from heaven, alleluia.

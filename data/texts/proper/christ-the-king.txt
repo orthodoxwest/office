@@ -79,7 +79,7 @@ For it pleased the Father that in him should all fulness dwell; and, having made
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Now Christ Unfurls, in Triumph High, Christ the King Lauds.docx); draft archdiocesan Lauds book, pp. 588–590
+# SOURCE: Monastic Diurnal.pdf, p. 630
 Vexilla Christus inclyta
 
 Now Christ unfurls, in triumph high,
@@ -104,7 +104,7 @@ The civil order safe abides.
 
 There married faith is kept secure;
 There ripening youth is ever pure;
-And modest household flourish fair
+And modest households flourish fair
 With sweet and homely virtues there.
 
 Pour down that longed-for light of thine
@@ -118,6 +118,7 @@ All glory as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: office-hymns.zip (O Lord of Ages, Thee We Sing, Christ the King, Vespers.docx); draft archdiocesan Vespers book, pp. 520–521
 Te saeculorum Principem

@@ -39,8 +39,8 @@ These are the words * which I spake unto you, while I was yet with you, alleluia
 Now I go my way * to him that sent me; and none of you asketh me, Whither goest thou? alleluia, alleluia.
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 163 (IV Sunday after Easter Vespers; Vado… et nemo)
-Now I go my way * to him that sent me; and none of you asketh me, Whither goest thou? alleluia, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 383
+Now I go my way * to him that sent me: but because I said these things unto you, sorrow hath filled your heart, alleluia.
 
 [magnificat-antiphon-first]
 @use proper/easter-sunday-4/benedictus-antiphon
