@@ -2,6 +2,10 @@
 //! templates, reminder feed, and optional usage store.
 
 mod cache;
+// build.rs trims and stamps the stylesheet with this module; the library
+// compiles it only to test it.
+#[cfg(test)]
+mod css;
 mod handlers;
 mod http;
 mod ics;
@@ -68,7 +72,7 @@ impl Server {
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
         let version = pwa::compute_version(data_dir);
-        let pages = Pages::new(&version).map_err(|e| format!("parsing templates: {e}"))?;
+        let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
         let inventory = scan_provenance(&src).map_err(|e| format!("loading provenance: {e}"))?;
         let suspicions = suspicion_by_key(&src, &inventory).map_err(|e| format!("loading review suspicions: {e}"))?;
         let provenance = inventory.entries.iter().map(|e| (e.key.clone(), e.status)).collect();
@@ -97,7 +101,7 @@ impl Server {
         match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
-            Route::Static => pwa::serve_static(&path, !query.get("v").is_empty()),
+            Route::Static => pwa::serve_static(&path, query.get("v")),
             Route::ServiceWorker => pwa::service_worker(&self.version),
             Route::Ics => self.ics(&query, headers, host),
             Route::Reminders => self.reminders(&req),
@@ -106,7 +110,7 @@ impl Server {
         }
     }
 
-    /// The build stamp on static URLs and the service worker.
+    /// The build stamp on the service worker and its page cache.
     pub fn version(&self) -> &str {
         &self.version
     }
@@ -232,7 +236,7 @@ mod routing_tests {
         {
             assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
         }
-        let asset = request(Method::GET, "/static/style.css?v=build", Body::empty()).await;
+        let asset = request(Method::GET, &pwa::asset_url("style.css"), Body::empty()).await;
         assert_eq!(asset.headers()[header::CACHE_CONTROL], "public, max-age=31536000, immutable");
         assert!(!asset.headers().contains_key(header::ACCEPT_RANGES));
         for path in ["/lauds/2026-03-11%", "/lauds/2026-03-11%zz"] {

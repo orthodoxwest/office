@@ -5,9 +5,12 @@
  * rendered pages therefore changes this file, reinstalls the worker, and
  * starts a fresh cache.
  *
- * Static assets are referenced with ?v=VERSION (same stamp HTML uses). That
- * makes each deploy a new URL for CSS/JS, so cache-first cannot pair a new
- * page with a previous stylesheet — the main risk during active development.
+ * Static assets are referenced with ?v=STAMP, a hash of each file's content
+ * (the same URLs pages and style.css use; the server fills ASSET_STAMPS
+ * below). A deploy that changes CSS or JS changes its URL, so cache-first
+ * cannot pair a new page with a previous stylesheet — the main risk during
+ * active development — while an unchanged font or image keeps its URL and is
+ * carried into the new cache instead of downloaded again.
  *
  * Page strategy (per URL class):
  *   - Dated hours, /?date=YYYY-MM-DD, /calendar/YYYY, /reminders →
@@ -19,7 +22,9 @@
  *
  * Install only precaches the shell + today so skipWaiting is not blocked on
  * the full 14-day window; activate claims quickly, then app message + free
- * precacheUpcoming fill the rest.
+ * precacheUpcoming fill the rest. Within one version a page's liturgical
+ * content cannot change, so the daily top-up fetches only days not yet
+ * cached; stale-while-revalidate refreshes the rest as they are opened.
  */
 
 var VERSION = "__VERSION__";
@@ -30,12 +35,14 @@ var PRECACHE_DAYS = 14;
 var PAGE_NETWORK_TIMEOUT_MS = 2500;
 var HOURS = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
 var ASSET_Q = "?v=" + VERSION;
+// Filled by the server: "/static/path": "content stamp" for every asset.
+var ASSET_STAMPS = {/*__ASSET_STAMPS__*/};
 var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 var HOUR_DATED_RE = /^\/(lauds|prime|terce|sext|none|vespers|compline)\/(\d{4}-\d{2}-\d{2})$/;
 var CALENDAR_YEAR_RE = /^\/calendar\/\d{4}$/;
 
 function assetURL(path) {
-  return path + ASSET_Q;
+  return path + (ASSET_STAMPS[path] ? "?v=" + ASSET_STAMPS[path] : ASSET_Q);
 }
 
 var CORE_ASSETS = [
@@ -46,21 +53,20 @@ var CORE_ASSETS = [
   assetURL("/static/manifest.webmanifest"),
   assetURL("/static/icons/icon-192.png"),
   assetURL("/static/icons/icon-512.png"),
-  // Fonts are requested by style.css without ?v= (relative @font-face URLs),
-  // so precache the bare paths. They still live in the versioned Cache bucket
-  // (office-VERSION), which is dropped on activate after a deploy.
-  "/static/fonts/eb-garamond-regular.woff2",
-  "/static/fonts/eb-garamond-italic.woff2",
-  "/static/fonts/eb-garamond-bold.woff2",
-  "/static/fonts/noto-sans-symbols-cross.woff2",
+  // style.css requests these with the same stamps (the server stamps its
+  // url()s at build). The -ext faces load only for rare characters, so they
+  // are cached when first used rather than precached.
+  assetURL("/static/fonts/eb-garamond-regular.woff2"),
+  assetURL("/static/fonts/eb-garamond-italic.woff2"),
+  assetURL("/static/fonts/eb-garamond-bold.woff2"),
+  assetURL("/static/fonts/noto-sans-symbols-cross.woff2"),
   // The limewash wall (portrait for phones, wide crop for large screens) and
-  // the softened copies behind wide hours' prayer are also relative url()s in
-  // style.css; precache them all so an installed app looks the same offline
-  // whatever it is opened on.
-  "/static/plaster.jpg",
-  "/static/plaster-wide.jpg",
-  "/static/plaster-soft.jpg",
-  "/static/plaster-wide-soft.jpg"
+  // the softened copies behind wide hours' prayer; precache them all so an
+  // installed app looks the same offline whatever it is opened on.
+  assetURL("/static/plaster.jpg"),
+  assetURL("/static/plaster-wide.jpg"),
+  assetURL("/static/plaster-soft.jpg"),
+  assetURL("/static/plaster-wide-soft.jpg")
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always
@@ -109,6 +115,25 @@ function precacheURLs(cache, urls) {
   }));
 }
 
+// precacheAssets fills the new bucket with the shell's stamped assets. A
+// stamped URL names exact bytes, so a copy in any cache — the previous
+// deploy's bucket included — is reused, and a miss may come from the HTTP
+// cache the first page view just filled; only new content is downloaded.
+function precacheAssets(cache, urls) {
+  return Promise.all(urls.map(function (u) {
+    return caches.match(u).then(function (held) {
+      if (held) {
+        return cache.put(u, held);
+      }
+      return fetch(u).then(function (resp) {
+        return putIfOk(cache, u, resp);
+      });
+    }).catch(function () {
+      // Offline or transient failure during install: cacheFirst fills in.
+    });
+  }));
+}
+
 function todayShellURLs() {
   var today = localDateSlug(new Date());
   var urls = ["/?date=" + today, "/reminders"];
@@ -120,7 +145,7 @@ function todayShellURLs() {
 }
 
 function precacheCore(cache) {
-  return precacheURLs(cache, CORE_ASSETS.concat(todayShellURLs()));
+  return Promise.all([precacheAssets(cache, CORE_ASSETS), precacheURLs(cache, todayShellURLs())]);
 }
 
 self.addEventListener("install", function (event) {
@@ -494,6 +519,17 @@ self.addEventListener("fetch", function (event) {
   event.respondWith(networkFirstWithFallback(req, url));
 });
 
+// uncachedURLs keeps the URLs this version's bucket does not hold yet.
+function uncachedURLs(cache, urls) {
+  return Promise.all(urls.map(function (u) {
+    return cache.match(u).then(function (held) {
+      return held ? null : u;
+    });
+  })).then(function (missing) {
+    return missing.filter(Boolean);
+  });
+}
+
 // fetchInBatches fetches URLs a few at a time, caching successes and
 // ignoring individual failures.
 function fetchInBatches(cache, urls, batchSize) {
@@ -561,7 +597,9 @@ function precacheUpcoming() {
         }
         urls.push("/reminders");
         return pruneOldPages(cache, today).then(function () {
-          return fetchInBatches(cache, urls, 6);
+          return uncachedURLs(cache, urls);
+        }).then(function (missing) {
+          return fetchInBatches(cache, missing, 6);
         });
       }).then(function () {
         return meta.put(stampKey, new Response(stampValue));

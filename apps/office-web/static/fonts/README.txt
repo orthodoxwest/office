@@ -5,7 +5,11 @@ See OFL-1.1.txt in this directory.
 
 Source: http://www.georgduffner.at/ebgaramond/
 Packaged as WOFF2 from the Debian fonts-ebgaramond OpenType files
-(EBGaramond12 Regular / Italic / Bold).
+(EBGaramond12 Regular / Italic / Bold) and split by tools/gengaramond.py:
+eb-garamond-{regular,italic,bold}.woff2 hold the Latin core every page
+sets; eb-garamond-{regular,italic}-ext.woff2 hold the remaining glyphs,
+which style.css loads only for pages that use them. Regenerate both from
+the full Debian faces, never from the core files.
 
 Noto Sans Symbols (The Noto Project Authors)
 Copyright 2022 The Noto Project Authors (https://github.com/notofonts/symbols)

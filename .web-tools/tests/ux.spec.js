@@ -2496,7 +2496,7 @@ for (const [width, size, hash] of [
     await page.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
     let releaseFonts;
     const ready = new Promise((resolve) => { releaseFonts = resolve; });
-    await page.route("**/*.woff2", async (route) => { await ready; await route.continue(); });
+    await page.route("**/*.woff2*", async (route) => { await ready; await route.continue(); });
     await page.exposeBinding("releaseOrdoFonts", () => releaseFonts());
     await page.addInitScript(() => {
       const geometry = () => ({

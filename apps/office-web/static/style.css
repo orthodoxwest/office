@@ -1,13 +1,30 @@
 /* AWRV Divine Office — typography-focused stylesheet */
 
 /* Self-hosted EB Garamond (OFL-1.1). Paths are relative to this stylesheet
-   (/static/style.css → /static/fonts/…). No third-party font CDN. */
+   (/static/style.css → /static/fonts/…). No third-party font CDN.
+
+   Each face is split by tools/gengaramond.py: the core file holds Latin-1,
+   the punctuation, and ℟ ℣ — every letter the office sets, at under a third
+   of the full face's bytes — and an -ext file holds the rest (Greek,
+   Cyrillic, extended Latin). The unicode-ranges come from that tool; a
+   browser fetches an -ext file only for a page that sets one of its
+   characters. Bold covers ASCII alone and is not split. */
 @font-face {
   font-family: "EB Garamond";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -16,6 +33,16 @@
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -61,6 +88,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -69,6 +106,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
