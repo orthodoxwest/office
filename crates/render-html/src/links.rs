@@ -23,17 +23,27 @@ pub fn hour_link(hour: &str, date: &str) -> String {
     if date.is_empty() { format!("/{hour}") } else { format!("/{hour}/{date}") }
 }
 
-/// The year calendar, anchored at the day's row.
+/// The ordo's page for the day's month, anchored at the day's row.
 pub fn calendar_link(date: &str) -> String {
     match Date::parse(date) {
-        Some(d) => format!("/calendar/{}#d-{date}", d.year()),
+        Some(d) => format!("{}#d-{date}", calendar_month_link(d.year(), d.month())),
         None => "/calendar".to_string(),
     }
 }
 
-/// A calendar year without a day anchor.
+/// A year's ordo frontispiece: the Tabula Temporaria and its months.
 pub fn calendar_year_link(year: i32) -> String {
     format!("/calendar/{year}")
+}
+
+/// One month of the ordo (`month` is 1-based).
+pub fn calendar_month_link(year: i32, month: u32) -> String {
+    format!("/calendar/{year}/{month:02}")
+}
+
+/// The whole year's ordo on one page, for print and search.
+pub fn calendar_all_link(year: i32) -> String {
+    format!("/calendar/{year}/all")
 }
 
 /// A build-stamped static asset path.
@@ -100,7 +110,7 @@ mod tests {
         for (base, want) in [
             ("/", "/?date=2026-06-07"),
             ("/lauds", "/lauds/2026-06-07"),
-            ("/calendar", "/calendar/2026#d-2026-06-07"),
+            ("/calendar", "/calendar/2026/06#d-2026-06-07"),
             ("/reminders", "/reminders"),
         ] {
             assert_eq!(nav_link(base, DATE), want, "nav_link({base:?})");
@@ -119,7 +129,11 @@ mod tests {
     fn links() {
         assert_eq!(nav_link("/", "2026-03-11"), "/?date=2026-03-11");
         assert_eq!(nav_link("/lauds", "2026-03-11"), "/lauds/2026-03-11");
-        assert_eq!(nav_link("/calendar", "2026-03-11"), "/calendar/2026#d-2026-03-11");
+        assert_eq!(nav_link("/calendar", "2026-03-11"), "/calendar/2026/03#d-2026-03-11");
+        assert_eq!(nav_link("/calendar", "2026-12-31"), "/calendar/2026/12#d-2026-12-31");
+        assert_eq!(calendar_month_link(2027, 1), "/calendar/2027/01");
+        assert_eq!(calendar_year_link(2027), "/calendar/2027");
+        assert_eq!(calendar_all_link(2027), "/calendar/2027/all");
         assert_eq!(nav_link("/calendar", ""), "/calendar");
         assert_eq!(nav_link("/reminders", "2026-03-11"), "/reminders");
         assert_eq!(static_url("/style.css", "abc"), "/static/style.css?v=abc");

@@ -1,5 +1,22 @@
-{% extends "layout.html" %}{% block title %}Ordo {{ year }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish %}
-<div class="calendar">
+{% extends "layout.html" %}{% block title %}{% if view == "month" %}{{ months[0].name }} {{ year }} — Ordo{% elif view == "all" %}Ordo {{ year }} — Whole year{% else %}Ordo {{ year }}{% endif %}{% endblock %}{% block content %}{% from "macros.html" import headpiece, fish %}
+{% if view == "year" %}
+{# A link into the year from before the ordo was set a month to a page
+     (/calendar/2026#d-2026-09-12, or #september) forwards to that month
+     before the frontispiece paints. #}
+<script>
+  (function () {
+    var day = /^#d-(\d{4})-(\d{2})-\d{2}$/.exec(location.hash);
+    var months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+    var month = months.indexOf(location.hash.slice(1)) + 1;
+    if (day) {
+      location.replace("/calendar/" + day[1] + "/" + day[2] + location.search + location.hash);
+    } else if (month) {
+      location.replace("/calendar/{{ year }}/" + (month < 10 ? "0" : "") + month + location.search);
+    }
+  })();
+</script>
+{% endif %}
+<div class="calendar" data-view="{{ view }}">
   <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="svg-sprite" aria-hidden="true" focusable="false">
     <symbol id="icon-fish" viewBox="0 0 24 12">
       <path d="M1 6 C5 1.2 13 1.2 17 6 C13 10.8 5 10.8 1 6 Z"/>
@@ -11,17 +28,46 @@
     <div class="calendar-title">
       {{ headpiece(true) }}
       <h1>{{ year }} Ordo</h1>
-      <p class="calendar-subtitle">Feasts &amp; daily observances</p>
+      {# The frontispiece reads as the printed ordo's title page. #}
+      <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
     <nav class="year-nav" aria-label="Calendar year">
-      {% if year > 1 %}<a href="{{ calendar_year_link(prev_year)|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
+      {% if year > 1 %}<a href="{{ prev_year_link|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
       <a id="calendar-today-link" class="calendar-today-link" href="/calendar">Today</a>
-      {% if year < 9999 %}<a href="{{ calendar_year_link(next_year)|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
+      {% if year < 9999 %}<a href="{{ next_year_link|url }}" aria-label="Next year, {{ next_year }}">{{ next_year }} &rsaquo;</a>{% else %}<span></span>{% endif %}
     </nav>
   </div>
+  {# One month to a page: the strip leads between them, its current month
+       underlined. The whole year keeps it as in-page jumps. #}
   <nav class="month-jump" aria-label="Jump to month">
-    {% for m in months %}<a href="#{{ m.slug|urlpart }}" aria-label="{{ m.name }}">{{ m.name[:3] }}</a>{% endfor %}
+    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}</a>{% endfor %}
   </nav>
+  {% if view == "year" %}
+  {# The frontispiece's one tool sits where a month keeps its own. #}
+  <div class="calendar-tools">
+    <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>
+  </div>
+  <section class="tabula" aria-labelledby="tabula-heading">
+    <h2 id="tabula-heading">Tabula Temporaria</h2>
+    <dl class="tabula-figures">
+      {% for r in tabula.figures %}<div><dt>{{ r.label }}</dt><dd>{{ r.value }}</dd></div>{% endfor %}
+    </dl>
+    <div class="tabula-tables">
+      <section aria-labelledby="tabula-moveable">
+        <h3 id="tabula-moveable">Moveable feasts</h3>
+        <dl>
+          {% for r in tabula.moveable %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
+        </dl>
+      </section>
+      <section aria-labelledby="tabula-ember">
+        <h3 id="tabula-ember">Ember days</h3>
+        <dl>
+          {% for r in tabula.ember %}<div><dt>{{ r.label }}</dt><dd><a href="{{ r.href|url }}">{{ r.value }}</a></dd></div>{% endfor %}
+        </dl>
+      </section>
+    </div>
+  </section>
+  {% else %}
   <div class="calendar-tools">
   <p class="calendar-legend"><span aria-hidden="true">§</span> Fasting <span aria-hidden="true">·</span> {{ fish() }} Abstinence</p>
   <button type="button" class="calendar-expand" aria-pressed="false" hidden>Show office details</button>
@@ -113,5 +159,14 @@
     </table>
   </section>
   {% endfor %}
+  {% if view == "month" %}
+  {# The hours' continuation: the same diamond, labels and targets. #}
+  <nav class="hour-continuation ordo-continuation" aria-label="Other months">
+    {% if prev_month %}<a class="hour-continuation-link previous-hour" href="{{ prev_month.href|url }}"><span class="continuation-label">Previous month</span><span>&larr; {{ prev_month.name }}</span></a>{% else %}<span></span>{% endif %}
+    <a class="day-hours-link" href="{{ year_link|url }}">{{ year }} Ordo</a>
+    {% if next_month %}<a class="hour-continuation-link next-hour" href="{{ next_month.href|url }}"><span class="continuation-label">Next month</span><span>{{ next_month.name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
+  </nav>
+  {% endif %}
+  {% endif %}
 </div>
 {% endblock %}

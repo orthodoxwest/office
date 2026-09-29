@@ -75,6 +75,10 @@ or impose a redesign on an unrelated change.
   without checking how much prayer remains visible.
 - Ordo is a working page: keep columns near their content and the office
   digest within reading measure. Avoid dotted underlines on abbreviations.
+  It sets one month to a page (`/calendar/YYYY/MM`, ~1,200 elements where
+  the year was ~14,000); `/calendar/YYYY` is the frontispiece (Tabula
+  Temporaria and the month strip) and `/calendar/YYYY/all` the whole year
+  for print and find-in-page. Links to a day go to its month's page.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
   texture tiles on long pages. Keep liturgical text on a quiet field.
 - The limewash wall is the parish nave photograph, high-passed to grey

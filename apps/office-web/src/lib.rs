@@ -222,7 +222,11 @@ mod routing_tests {
         }
         let redirect = request(Method::GET, "/calendar?form=priest", Body::empty()).await;
         assert_eq!(redirect.status(), StatusCode::FOUND);
-        assert!(redirect.headers()[header::LOCATION].to_str().unwrap().contains("?form=priest#d-"));
+        let location = redirect.headers()[header::LOCATION].to_str().unwrap();
+        assert!(location.starts_with("/calendar/") && location.contains("?form=priest#d-"), "{location}");
+        // Today's month, anchored at today: /calendar/YYYY/MM?form=priest#d-YYYY-MM-DD.
+        let (month, day) = (&location["/calendar/".len().."/calendar/YYYY/MM".len()], &location[location.len() - 10..]);
+        assert_eq!(month.replace('/', "-"), day[..7]);
         assert!(axum::body::to_bytes(redirect.into_body(), usize::MAX).await.unwrap().is_empty());
     }
 
