@@ -5923,63 +5923,75 @@ body.page-home::before {
   }
 }
 
-/* Usage report: a working room in the same plaster, oak and gold palette. */
+/* Usage report: a working room in the same plaster, oak and gold palette,
+   titled like the reminders page and ruled like the ordo's months. */
 .page-usage main { max-width: 64rem; }
 .usage-page { padding-block: 1.2rem 2rem; }
-.usage-heading { margin-bottom: 1.8rem; }
-.usage-eyebrow { color: var(--accent); font-size: .78rem; text-transform: uppercase; letter-spacing: .13em; }
-.usage-heading h1 { font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 400; line-height: 1.1; margin: .5rem 0; }
-.usage-heading > p:last-child { color: var(--muted); margin: .6rem 0 0; }
-.usage-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem 1rem; border-block: 1px solid var(--border); }
-.usage-toolbar > p { color: var(--muted); font-size: .85rem; margin: .5rem 0; }
-.usage-window { display: flex; gap: 1.3rem; }
-.usage-window a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-block: .35rem; color: var(--muted); text-decoration: none; }
-.usage-window a:hover, .usage-window [aria-current] { color: var(--text); box-shadow: inset 0 -2px 0 var(--gold); }
-.usage-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.8rem; border-bottom: 1px solid var(--border); }
+.usage-heading { margin-bottom: 1.4rem; }
+.usage-heading .ornament-headpiece { width: 5rem; margin: 0 0 .55rem; font-size: .75rem; }
+.usage-heading h1 { margin: 0; font-size: 2.15rem; font-weight: 400; line-height: 1.15; }
+.usage-subtitle { margin: .3rem 0 0; color: var(--muted); font-size: .95rem; }
+/* The period strip is the ordo's month strip, at four stops. */
+.usage-window { display: flex; border-bottom: 1px solid var(--border); }
+.usage-window a { display: flex; align-items: center; justify-content: center; min-height: var(--touch-target); padding-inline: 1.1rem; border-bottom: 2px solid transparent; margin-bottom: -1px; color: var(--muted); text-decoration: none; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; -webkit-tap-highlight-color: transparent; }
+.usage-window a:first-child { padding-left: 0; }
+.usage-window a:hover, .usage-window a[aria-current] { color: var(--accent); border-bottom-color: var(--gold-line); }
+.usage-window a:active { background-color: var(--pressed-wash); }
+.usage-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0 0 2rem; padding-block: 1.5rem 1.6rem; border-bottom: 1px solid var(--border); }
 .usage-summary > div { padding-inline: 1.2rem; border-left: 1px solid var(--border); }
 .usage-summary > div:first-child { padding-left: 0; border-left: 0; }
-.usage-summary dt { font-size: .9rem; color: var(--muted); }
-.usage-summary dd { margin: .4rem 0; font-size: 3rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
-.usage-summary .usage-stat-note { margin: .6rem 0 0; color: var(--muted); font-size: .82rem; line-height: 1.4; }
-.usage-panel { min-width: 0; margin-block: 1.5rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-top: 2px solid var(--accent); }
-.usage-section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
-.usage-section-heading h2 { margin: 0; font-size: 1.5rem; font-weight: 400; }
-.usage-section-heading p { margin: .25rem 0 0; color: var(--muted); font-size: .92rem; }
-.usage-period { color: var(--muted); font-size: .85rem; white-space: nowrap; }
-.usage-trend { position: relative; margin: 0; padding-left: 2rem; }
+.usage-summary dt { color: var(--accent); font-size: .9rem; font-variant-caps: all-small-caps; letter-spacing: .08em; }
+.usage-summary dd { margin: .45rem 0 0; font-size: 2.8rem; line-height: 1; font-variant-numeric: lining-nums tabular-nums; }
+.usage-summary .usage-stat-note { margin: .55rem 0 0; color: var(--muted); font-size: .82rem; line-height: 1.4; }
+.usage-panel { min-width: 0; margin-block: 1.5rem; padding: 1.3rem 1.5rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; }
+/* Each panel's heading carries a month heading's double rule and lozenge. */
+.usage-section-heading { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; padding-bottom: .55rem; border-bottom: 3px double var(--ornament-line); }
+.usage-section-heading::after { content: ""; position: absolute; left: 50%; bottom: -1.5px; width: .22rem; height: .22rem; background: var(--ornament); box-shadow: 0 0 0 2px var(--surface); transform: translate(-50%, 50%) rotate(45deg); pointer-events: none; }
+.usage-section-heading h2 { margin: 0; color: var(--accent); font-size: 1.2rem; font-weight: 400; font-variant-caps: small-caps; letter-spacing: .06em; line-height: 1.3; }
+.usage-section-heading p { margin: .15rem 0 0; color: var(--muted); font-size: .88rem; }
+.usage-period { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.usage-trend { position: relative; margin: 0; }
+.usage-plot { position: relative; margin-left: 2.4rem; }
 .usage-chart { display: block; width: 100%; height: 11rem; overflow: visible; }
 .usage-grid { fill: none; stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .usage-bar { fill: var(--accent); opacity: .8; }
 .usage-bar-today { fill: var(--gold); opacity: 1; }
-.usage-chart-scale { position: absolute; left: 0; top: -.45rem; height: 11.9rem; display: flex; flex-direction: column; justify-content: space-between; color: var(--muted); font-size: .8rem; }
-.usage-trend figcaption { display: flex; justify-content: space-between; margin-top: .7rem; color: var(--muted); font-size: .85rem; }
-.usage-empty { position: absolute; inset: 2.3rem 0 auto 2rem; text-align: center; color: var(--text); background: var(--surface); padding-block: .7rem; }
+.usage-chart-scale [hidden] { visibility: hidden; }
+.usage-chart-scale { position: absolute; right: 100%; margin-right: .5rem; top: -.45rem; bottom: -.45rem; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; color: var(--muted); font-size: .8rem; font-variant-numeric: lining-nums tabular-nums; }
+/* The average is marked on the axis, where it cannot cover a bar. */
+.usage-average { position: absolute; left: -.3rem; right: 0; border-top: 1px dashed color-mix(in srgb, var(--text) 60%, transparent); pointer-events: none; }
+.usage-average span { position: absolute; right: calc(100% + .2rem); top: 0; transform: translateY(-50%); color: var(--text); font-size: .8rem; font-variant-numeric: lining-nums tabular-nums; line-height: 1; white-space: nowrap; }
+.usage-average-key { display: inline-flex; align-items: center; gap: .4rem; }
+.usage-average-key::before { content: ""; width: 1.2rem; border-top: 1px dashed color-mix(in srgb, var(--text) 60%, transparent); }
+.usage-trend figcaption { display: flex; justify-content: space-between; gap: 1rem; margin: .7rem 0 0 2.4rem; color: var(--muted); font-size: .85rem; }
+.usage-empty { position: absolute; inset: 2.3rem 0 auto 2.4rem; text-align: center; color: var(--text); background: var(--surface); padding-block: .7rem; }
 .usage-empty span { font-size: .9rem; color: var(--muted); }
 .usage-splits-note { max-width: 46rem; margin: 1.4rem 0 0; color: var(--muted); font-size: .85rem; line-height: 1.5; }
 .usage-table-wrap { overflow: auto; max-height: 28rem; scrollbar-color: var(--border) var(--surface); }
 .usage-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .95rem; font-variant-numeric: lining-nums tabular-nums; }
 .usage-table th, .usage-table td { padding: .8rem .65rem; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
-.usage-table thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); font-size: .8rem; font-weight: 400; color: var(--muted); }
+.usage-table thead th { position: sticky; top: 0; z-index: 2; background: var(--surface); font-size: .7rem; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
 .usage-table th:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); font-weight: 400; }
 .usage-table thead th:first-child { z-index: 3; }
 .usage-table tbody th { z-index: 1; }
 .usage-total { font-weight: 700; }
 .usage-zero { color: var(--muted); }
-.usage-today-label { display: block; color: var(--accent); font-size: .72rem; }
+.usage-weekday { margin-left: .35rem; color: var(--muted); font-size: .8rem; }
+.usage-today .usage-weekday { color: var(--accent); }
 .usage-today td, .usage-today th { border-bottom-color: var(--gold-line); }
 .usage-notes { max-width: 46rem; margin-top: 2rem; color: var(--muted); }
 .usage-notes h2 { font-size: 1.1rem; color: var(--text); font-weight: 400; margin-bottom: .6rem; }
 .usage-notes p { font-size: .9rem; margin: .6rem 0 1rem; }
 .usage-range { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem 1rem; margin: .8rem 0 0; font-size: .9rem; }
-.usage-range span { color: var(--muted); font-size: .82rem; }
+.usage-range strong { font-weight: 400; color: var(--accent); }
+.usage-range-note { color: var(--muted); font-size: .82rem; }
 .usage-jump { display: flex; flex-wrap: wrap; gap: 0 1.5rem; margin-top: -1rem; }
-.usage-jump a { color: var(--accent); display: inline-flex; align-items: center; min-height: 2.75rem; font-size: .85rem; text-underline-offset: .2em; }
+.usage-jump a { color: var(--accent); display: inline-flex; align-items: center; min-height: 2.75rem; font-size: .85rem; text-decoration-color: var(--gold-line); text-underline-offset: .25em; }
 .usage-page h2 { scroll-margin-top: 1.5rem; }
 .usage-overview { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 1.5rem; }
 .usage-overview .usage-panel { margin-bottom: 0; }
 .usage-overview .usage-trend { margin-top: 2.2rem; }
 .usage-overview .usage-chart { height: 12rem; }
-.usage-overview .usage-chart-scale { height: 12.9rem; }
 .usage-office-totals { margin: 0; font-size: .9rem; font-variant-numeric: lining-nums tabular-nums; }
 .usage-office-totals > div { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); align-items: center; gap: .75rem; margin-block: .55rem; }
 .usage-office-totals dd { display: flex; align-items: center; gap: .7rem; margin: 0; }
@@ -6002,8 +6014,8 @@ body.page-home::before {
 @media (max-width: 540px) {
   .usage-page { padding-top: .5rem; }
   .usage-heading { margin-bottom: 1.4rem; }
-  .usage-toolbar { gap: 0; padding-bottom: .4rem; }
-  .usage-window { justify-content: space-between; gap: .8rem; width: 100%; }
+  .usage-window { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .usage-window a, .usage-window a:first-child { padding-inline: 0; }
   .usage-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem 0; padding-block: 1.3rem; margin-bottom: 1.3rem; }
   .usage-summary > div:nth-child(3) { padding-left: 0; border-left: 0; }
   .usage-jump { gap: 0 1rem; }
@@ -6014,7 +6026,6 @@ body.page-home::before {
   .usage-panel { padding: 1rem .8rem; }
   .usage-section-heading { gap: .5rem; }
   .usage-overview .usage-chart { height: 9rem; }
-  .usage-overview .usage-chart-scale { height: 9.9rem; }
   .usage-table th, .usage-table td { padding: .7rem .55rem; }
 }
 /* Trend exploration belongs to the working report, with no new theme colours. */
