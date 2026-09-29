@@ -737,7 +737,7 @@ for (const theme of ["light", "dark"]) {
     await openDatedPage(page, `/lauds/${testDate}`, theme);
     await page.addStyleTag({
       content: `.elements, .hour-header, .hour-epilogue > *, footer > *, header, .hour-scroll-progress { visibility: hidden !important; }
-        .hour-epilogue::before, footer::after, .office-hour::after { display: none !important; }`,
+        .hour-epilogue::before, footer::after, .office-hour::before, .office-hour::after { display: none !important; }`,
     });
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     const layered = await stripes(page);
@@ -1239,44 +1239,85 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   expect(desktop.horizontalOverflow).toBe(false);
 });
 
-test("wide hours set a still vault beside the prayer and clear it before the ending", async ({ page }) => {
+test("wide hours set a still vault beside the prayer that comes down to meet the ending", async ({ page }) => {
   // From 1680px the Apse vault stands in the margins while the office is
-  // said: fixed, so nothing moves at the edge of sight, faded in only after
-  // the opening, and gone before the epilogue's own field (at another phase)
-  // scrolls into view.
-  const margins = () =>
+  // said: fixed, so nothing moves at the edge of sight, and faded in only
+  // after the opening. The ending's field is a second fixed layer on the
+  // same phase, so the sides stay and run straight down into it.
+  const fields = () =>
     page.evaluate(() => {
-      const field = getComputedStyle(document.querySelector(".office-hour"), "::after");
+      const read = (element, pseudo) => {
+        const field = getComputedStyle(element, pseudo);
+        return {
+          content: field.content,
+          position: field.position,
+          opacity: Number(field.opacity),
+          mask: field.maskImage || field.webkitMaskImage,
+          size: field.maskSize || field.webkitMaskSize,
+          phase: field.maskPosition || field.webkitMaskPosition,
+          ink: field.backgroundColor,
+        };
+      };
+      const hour = document.querySelector(".office-hour");
       return {
-        content: field.content,
-        position: field.position,
-        opacity: Number(field.opacity),
-        mask: field.maskImage || field.webkitMaskImage,
-        size: field.maskSize || field.webkitMaskSize,
-        ink: field.backgroundColor,
+        sides: read(hour, "::after"),
+        ending: read(hour, "::before"),
+        epilogue: read(document.querySelector(".hour-epilogue"), "::before"),
+        footer: read(document.querySelector("footer"), "::after"),
       };
     });
   await page.setViewportSize({ width: 1920, height: 1080 });
   await openDatedPage(page, `/lauds/${testDate}`, "dark");
-  const top = await margins();
-  expect(top.position).toBe("fixed");
-  expect(vaultPaints(top)).toBe(true);
-  // From 1800px the diaper widens, and every star takes its own share of
-  // the leaf.
-  expect(top.size.startsWith("208px 208px")).toBe(true);
-  expect(top.mask).toContain("leaf.png");
-  expect(top.opacity).toBe(0);
+  const top = await fields();
+  for (const field of [top.sides, top.ending]) {
+    expect(field.position).toBe("fixed");
+    expect(vaultPaints(field)).toBe(true);
+    // From 1800px the diaper widens, and every star takes its own share of
+    // the leaf.
+    expect(field.size.startsWith("208px 208px")).toBe(true);
+    expect(field.mask).toContain("leaf.png");
+    expect(field.opacity).toBe(0);
+  }
+  // One phase for both, so the lattices meet star to star.
+  expect(top.ending.size).toBe(top.sides.size);
+  expect(top.ending.phase).toBe(top.sides.phase);
+  // The scrolling fields would meet the fixed ones mid-lattice.
+  expect(top.epilogue.content).toBe("none");
+  expect(top.footer.content).toBe("none");
   await page.evaluate(() => window.scrollTo(0, innerHeight));
-  await expect.poll(async () => (await margins()).opacity).toBe(1);
+  await expect.poll(async () => (await fields()).sides.opacity).toBe(1);
+  expect((await fields()).ending.opacity).toBe(0);
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  await expect.poll(async () => (await margins()).opacity).toBe(0);
+  await expect.poll(async () => (await fields()).ending.opacity).toBe(1);
+  expect((await fields()).sides.opacity).toBe(1);
 
-  // Nave has no vault; narrower screens keep plain margins.
+  // At rest the fixed lattice takes the phase the scrolling fields took
+  // from the seam between epilogue and footer, at every text size.
+  for (const size of ["default", "large"]) {
+    await page.addInitScript((choice) => localStorage.setItem("office-text-size", choice), size);
+    await openDatedPage(page, `/lauds/${testDate}`, "dark");
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const seam = await page.evaluate(() => {
+      const phase = getComputedStyle(document.querySelector(".office-hour"), "::before").maskPosition;
+      const offset = parseFloat(phase.match(/bottom (-?[\d.]+)px/)[1]);
+      return { lattice: innerHeight - offset, epilogue: document.querySelector(".hour-epilogue").getBoundingClientRect().bottom };
+    });
+    expect(Math.abs(seam.lattice - seam.epilogue), `${size} seam`).toBeLessThan(2);
+  }
+
+  // Nave has no vault; narrower screens keep plain margins and the
+  // scrolling ending.
   await openDatedPage(page, `/lauds/${testDate}`, "light");
-  expect(vaultPaints(await margins())).toBe(false);
+  const nave = await fields();
+  expect(vaultPaints(nave.sides)).toBe(false);
+  expect(vaultPaints(nave.ending)).toBe(false);
   await page.setViewportSize({ width: 1600, height: 1000 });
   await openDatedPage(page, `/lauds/${testDate}`, "dark");
-  expect((await margins()).content).toBe("none");
+  const narrower = await fields();
+  expect(narrower.sides.content).toBe("none");
+  expect(narrower.ending.content).toBe("none");
+  expect(vaultPaints(narrower.epilogue)).toBe(true);
+  expect(vaultPaints(narrower.footer)).toBe(true);
 });
 
 test("the home vault is lit from the frontispiece in Apse only", async ({ page }) => {

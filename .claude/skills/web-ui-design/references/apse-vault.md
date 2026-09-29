@@ -53,16 +53,24 @@ four short diagonals) and small four-ray sparks.
   viewport edges without widening `.elements`. The stars sit straight on
   the wall, as home's do. A flat night ground once eased in beneath them
   (each host's outset `border-image`), but its fade banded (see below).
-- From 1680px an hour also shows the vault in the margins beside the prayer:
-  one fixed layer (`.office-hour::after`), outside the softened band, at half
-  strength. A field scrolling with the page could share the epilogue's
-  phase, but it repainted every strip of a long hour (about ten times the
-  raster time of a full scroll of Lauds); a fixed one is drawn once. A
-  scroll-driven opacity fades it in over the first half-screen and out
-  before the epilogue scrolls into view, so it never meets the ending's
-  field at a different phase. Both fades run on the compositor; without
-  scroll timelines (`@supports`) the margins stay plain. Below 1680px the
-  margin holds a column of stars or less, which reads as an accident.
+- From 1680px an hour also shows the vault in the margins beside the prayer,
+  at half strength, running down to meet the ending. Both are fixed layers
+  on one phase: the sides (`.office-hour::after`) and the ending
+  (`.office-hour::before`), which there replaces the scrolling epilogue and
+  footer fields. A field scrolling with the page repainted every strip of a
+  long hour (about ten times the raster time of a full scroll of Lauds), and
+  a fixed field meets a scrolling one on the same phase at only one scroll
+  position; an earlier version faded the sides out before the epilogue for
+  that reason, which left the margins empty around the ending. Scroll-driven
+  opacity fades the sides in over the first half-screen and the ending in
+  over the last 9rem, on the compositor. The ending's mask and phase are
+  set in rem from the screen's foot (`--apse-rest-seam`, the epilogue/footer
+  seam at rest), which holds at every text size, so at rest it reproduces
+  the scrolling fields. `mask-position` takes the four-value form
+  (`left 50% bottom …`); the three-value form is invalid there and silently
+  drops to `0% 0%`. Without scroll timelines (`@supports`) the margins stay
+  plain and the ending scrolls. Below 1680px the margin holds a column of
+  stars or less, which reads as an accident.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
   band floating between blank margins. Keep the field static, and hide the
   footer diamond where the vault already provides ornament.

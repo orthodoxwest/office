@@ -3619,6 +3619,7 @@ body.season-eastertide {
   :root.theme-anim.vault-hidden::before,
   :root.theme-anim.vault-hidden body:is(.page-home, .page-hour)::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
+  :root.theme-anim.vault-hidden body.page-hour .office-hour::before,
   :root.theme-anim.vault-hidden body.page-hour .office-hour::after,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
     opacity: 0 !important;
@@ -5468,32 +5469,35 @@ body.page-hour .report-issue {
 }
 
 /* On a wide screen the vault stands to either side of the prayer, as the
-   apse dome stands around the altar. Only where there is room for it: under
-   1680px the field beyond the softened band is a column or less, and a
-   sliver of stars at the screen edge reads as an accident. The stars keep
-   out of the band and stay at half strength.
+   apse dome stands around the altar, and comes down to meet the ending's
+   field. Only where there is room for it: under 1680px the margin beside
+   the prayer holds a column of stars or less, and a sliver of stars at the
+   screen edge reads as an accident. The side stars stay at half strength.
 
-   Fixed, like the home vault: the prayer scrolls past a still sky, so
-   nothing moves at the edge of sight, and the layer is rasterized once. A
-   field scrolling with the page could share the ending's tile origin, but
-   repainted every new strip of the page and cost ten times the raster time
-   over a full scroll of Lauds. Instead the scroll position fades it: in
-   over the first half-screen, so the opening is as quiet as it was, and out
-   before the epilogue comes into view, so it has gone by the time the full
-   vault rises there at its own phase. Both fades run on the compositor.
-   Browsers without scroll timelines keep the plain wall, as before. */
-@keyframes apse-sides-in {
+   Both layers are fixed, like the home vault: the prayer scrolls past a
+   still sky, so nothing moves at the edge of sight, and each layer is
+   rasterized once. A field scrolling with the page repainted every new
+   strip of it (ten times the raster time over a full scroll of Lauds), and
+   a fixed field and a scrolling one only share a phase at one scroll
+   position, so the scrolling epilogue field would have had to meet the
+   sides mid-lattice. Here the ending is a second fixed layer on the same
+   phase instead, so the sides run straight down into it. The scroll
+   position fades each in on the compositor: the sides over the first
+   half-screen, so the opening is as quiet as it was, and the ending over
+   the last 9rem, so no star rises behind the prayer's last lines. Its mask
+   is set in rem from the screen's foot, where the epilogue and footer
+   come to rest at every text size, and follows the fields it replaces:
+   clear through the continuation links, full around the report link, and
+   thinning under the footer. Browsers without scroll timelines keep the
+   scrolling epilogue field and plain margins. */
+@keyframes apse-vault-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-@keyframes apse-sides-out {
-  from { opacity: 0; }
-  to { opacity: -1; }
-}
-
 @media (min-width: 1680px) {
   @supports (animation-timeline: scroll()) {
+    body.page-hour .office-hour::before,
     body.page-hour .office-hour::after {
       content: "";
       position: fixed;
@@ -5502,23 +5506,37 @@ body.page-hour .report-issue {
       pointer-events: none;
       background-color: var(--apse-ink);
       opacity: 0;
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
       -webkit-mask-repeat: repeat, no-repeat, repeat;
       mask-repeat: repeat, no-repeat, repeat;
       -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
-      -webkit-mask-position: top center;
-      mask-position: top center;
+      /* Where the epilogue meets the footer at rest: the scrolling fields
+         took their phase from that seam. Four values, since mask-position
+         has no three-value form. */
+      --apse-rest-seam: 13.2rem;
+      -webkit-mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
+      mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       -webkit-mask-composite: source-in;
       mask-composite: intersect;
-      /* The epilogue and footer take about 410px below the prayer (450px
-         with Large text), so the field is gone just before the epilogue
-         scrolls into view. */
-      animation: apse-sides-in linear both, apse-sides-out linear both;
-      animation-composition: replace, add;
-      animation-timeline: scroll(root), scroll(root);
-      animation-range: 0 50vh, calc(100% - 1000px) calc(100% - 450px);
+      animation: apse-vault-in linear both;
+      animation-timeline: scroll(root);
+    }
+
+    body.page-hour .office-hour::before {
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
+      animation-range: calc(100% - 9rem) 100%;
+    }
+
+    body.page-hour .office-hour::after {
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+      animation-range: 0 50vh;
+    }
+
+    body.page-hour .hour-epilogue::before,
+    body.page-hour footer::after {
+      content: none;
     }
   }
 }
@@ -5738,6 +5756,7 @@ body.page-home::before {
   }
 
   body:is(.page-home, .page-hour)::before,
+  body.page-hour .office-hour::before,
   body.page-hour .office-hour::after,
   html::before {
     content: none;
