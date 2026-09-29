@@ -13,7 +13,8 @@
  * carried into the new cache instead of downloaded again.
  *
  * Page strategy (per URL class):
- *   - Dated hours, /?date=YYYY-MM-DD, /calendar/YYYY, /reminders →
+ *   - Dated hours, /?date=YYYY-MM-DD, ordo pages (/calendar/YYYY, /MM, /all),
+ *     /reminders →
  *     stale-while-revalidate (serve precache immediately, refresh in background).
  *   - Undated /, /lauds, /calendar → redirect to today's dated equivalent so
  *     navigation shares the same cache keys the precache fills.
@@ -39,7 +40,8 @@ var ASSET_Q = "?v=" + VERSION;
 var ASSET_STAMPS = {/*__ASSET_STAMPS__*/};
 var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 var HOUR_DATED_RE = /^\/(lauds|prime|terce|sext|none|vespers|compline)\/(\d{4}-\d{2}-\d{2})$/;
-var CALENDAR_YEAR_RE = /^\/calendar\/\d{4}$/;
+// A year's frontispiece, one of its months, or the whole year.
+var CALENDAR_RE = /^\/calendar\/\d{4}(?:\/(?:0[1-9]|1[0-2]|all))?$/;
 
 function assetURL(path) {
   return path + (ASSET_STAMPS[path] ? "?v=" + ASSET_STAMPS[path] : ASSET_Q);
@@ -140,8 +142,13 @@ function todayShellURLs() {
   for (var h = 0; h < HOURS.length; h++) {
     urls.push("/" + HOURS[h] + "/" + today);
   }
-  urls.push("/calendar/" + new Date().getFullYear());
+  urls.push(ordoMonthPath(today));
   return urls;
+}
+
+// ordoMonthPath is the ordo page for a day's month.
+function ordoMonthPath(slug) {
+  return "/calendar/" + slug.slice(0, 4) + "/" + slug.slice(5, 7);
 }
 
 function precacheCore(cache) {
@@ -232,8 +239,8 @@ function datedEquivalent(url) {
   }
 
   if (path === "/calendar") {
-    // Mirror server handleCalendar: year page anchored at today.
-    return "/calendar/" + new Date().getFullYear() + formQuery + "#d-" + today;
+    // Mirror the server: today's month, anchored at today.
+    return ordoMonthPath(today) + formQuery + "#d-" + today;
   }
   return null;
 }
@@ -251,7 +258,7 @@ function isSWRPage(url) {
   if (HOUR_DATED_RE.test(path)) {
     return true;
   }
-  if (CALENDAR_YEAR_RE.test(path)) {
+  if (CALENDAR_RE.test(path)) {
     return true;
   }
   return false;
@@ -271,7 +278,7 @@ function canonicalCacheKey(url) {
   if (hourMatch) {
     return "/" + hourMatch[1] + "/" + hourMatch[2];
   }
-  if (CALENDAR_YEAR_RE.test(path)) {
+  if (CALENDAR_RE.test(path)) {
     return path;
   }
   return path + url.search;
@@ -509,7 +516,7 @@ self.addEventListener("fetch", function (event) {
     return;
   }
 
-  // Dated hours, dated home, year calendar, reminders: serve cache first.
+  // Dated hours, dated home, ordo pages, reminders: serve cache first.
   if (isSWRPage(url)) {
     event.respondWith(staleWhileRevalidate(req, url));
     return;
@@ -581,20 +588,20 @@ function precacheUpcoming() {
       }
       return caches.open(CACHE).then(function (cache) {
         var urls = [];
-        var years = [];
+        var ordo = [];
         var d = new Date();
         for (var i = 0; i < PRECACHE_DAYS; i++) {
           var slug = localDateSlug(d);
           urls.push("/?date=" + slug);
-          addUniqueURL(years, String(d.getFullYear()));
+          // Each month the window touches, and its year's frontispiece.
+          addUniqueURL(ordo, ordoMonthPath(slug));
+          addUniqueURL(ordo, "/calendar/" + slug.slice(0, 4));
           for (var h = 0; h < HOURS.length; h++) {
             urls.push("/" + HOURS[h] + "/" + slug);
           }
           d.setDate(d.getDate() + 1);
         }
-        for (var y = 0; y < years.length; y++) {
-          urls.push("/calendar/" + years[y]);
-        }
+        urls = urls.concat(ordo);
         urls.push("/reminders");
         return pruneOldPages(cache, today).then(function () {
           return uncachedURLs(cache, urls);

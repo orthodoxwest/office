@@ -140,15 +140,63 @@ pub struct MonthData {
     pub days: Vec<DayRow>,
 }
 
-/// The year calendar.
+/// One entry in the ordo's month strip.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct MonthLink {
+    pub name: String,
+    /// The three-letter label the strip shows.
+    pub abbr: String,
+    pub href: String,
+    /// This page is the month's own page.
+    pub current: bool,
+}
+
+/// A labelled figure or date in the Tabula Temporaria; `href` leads to the
+/// date's row when it has one.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TabulaRow {
+    pub label: String,
+    pub value: String,
+    pub href: String,
+}
+
+/// The printed ordo's opening table for a year.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct TabulaData {
+    pub figures: Vec<TabulaRow>,
+    pub moveable: Vec<TabulaRow>,
+    pub ember: Vec<TabulaRow>,
+}
+
+/// A neighbouring month, named with its year when it lies in another.
+#[derive(Clone, Debug, Default, Serialize)]
+pub struct MonthStep {
+    pub name: String,
+    pub href: String,
+}
+
+/// An ordo page: one month, the year's frontispiece, or the whole year.
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct CalendarData {
     #[serde(flatten)]
     pub chrome: Chrome,
     pub year: i32,
+    /// "month", "year" (the frontispiece), or "all".
+    pub view: String,
     pub prev_year: i32,
     pub next_year: i32,
-    pub months: std::sync::Arc<Vec<MonthData>>,
+    /// The neighbouring years in the same view: the same month, frontispiece,
+    /// or whole year.
+    pub prev_year_link: String,
+    pub next_year_link: String,
+    pub year_link: String,
+    pub all_link: String,
+    pub month_links: Vec<MonthLink>,
+    /// The month shown, or every month of the whole-year view.
+    pub months: Vec<std::sync::Arc<MonthData>>,
+    pub prev_month: Option<MonthStep>,
+    pub next_month: Option<MonthStep>,
+    pub tabula: Option<TabulaData>,
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

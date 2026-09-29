@@ -551,6 +551,11 @@ function usageBeaconBody(scope) {
     return d.getFullYear() + "-" + (m.length < 2 ? "0" + m : m) + "-" + (day.length < 2 ? "0" + day : day);
   }
 
+  // ordoDayURL is the ordo's page for a day's month, at the day's row.
+  function ordoDayURL(slug) {
+    return "/calendar/" + slug.slice(0, 4) + "/" + slug.slice(5, 7) + "#d-" + slug;
+  }
+
   // documentDateSlug is the liturgical day this document is about (URL or
   // home card only). Returns null when the page has no day identity (error,
   // reminders, bare calendar year) so callers can fall back to local today
@@ -678,7 +683,6 @@ function usageBeaconBody(scope) {
   function syncDatedNavigation() {
     var today = localDateSlug(new Date());
     var navDate = pageDateSlug();
-    var year = navDate.slice(0, 4);
 
     var brand = document.querySelector('[data-nav="home"]');
     if (brand) {
@@ -707,8 +711,8 @@ function usageBeaconBody(scope) {
 
     var ordo = document.querySelector('[data-nav="calendar"]');
     if (ordo) {
-      // Always use navDate's year so #d-DATE exists on that year's table.
-      ordo.setAttribute("href", "/calendar/" + year + "#d-" + navDate);
+      // navDate's own month, so #d-DATE exists on the page it opens.
+      ordo.setAttribute("href", ordoDayURL(navDate));
     }
 
     ensureTodayControl(today);
@@ -1570,7 +1574,7 @@ function usageBeaconBody(scope) {
     });
     var todayLink = document.getElementById("calendar-today-link");
     if (todayLink) {
-      todayLink.setAttribute("href", "/calendar/" + new Date().getFullYear() + "#d-" + localDateSlug(new Date()));
+      todayLink.setAttribute("href", ordoDayURL(localDateSlug(new Date())));
     }
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
@@ -1605,10 +1609,14 @@ function usageBeaconBody(scope) {
         }
       });
     };
-    window.addEventListener("scroll", function () {
-      if (monthFrame === null) monthFrame = requestAnimationFrame(markVisibleMonth);
-    }, { passive: true });
-    markVisibleMonth();
+    // Only the whole year's strip jumps within the page; a month page names
+    // its own month from the server, and the frontispiece none.
+    if (calendarEl.getAttribute("data-view") === "all") {
+      window.addEventListener("scroll", function () {
+        if (monthFrame === null) monthFrame = requestAnimationFrame(markVisibleMonth);
+      }, { passive: true });
+      markVisibleMonth();
+    }
 
     calendarEl.addEventListener("click", function (e) {
       if (e.target.closest("a, abbr, details")) {

@@ -99,7 +99,7 @@ pub fn date_slug(d: Date) -> String {
     format!("{}-{:02}-{:02}", format_year(d.year()), d.month(), d.day())
 }
 
-const MONTHS: [&str; 12] =
+pub(crate) const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 pub fn month_name(d: Date) -> &'static str {

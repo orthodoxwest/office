@@ -1,5 +1,5 @@
-//! Per-year calendar days and calendar-page summaries: a small window of recently used years, not
-//! an archive.
+//! Per-year calendar days and ordo summaries, composed a month at a time: a small window of
+//! recently used years, not an archive.
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -9,11 +9,11 @@ use office::Engine;
 use office::day::Day;
 use render_html::view::MonthData;
 
-/// One year's office days, with its calendar page built on first use.
+/// One year's office days, with each month's ordo rows built on first use.
 pub struct YearEntry {
     pub days: Vec<Day>,
     pub moveable: MoveableDates,
-    months: OnceLock<Arc<Vec<MonthData>>>,
+    months: [OnceLock<Arc<MonthData>>; 12],
 }
 
 const MAX_CACHED_YEARS: usize = 8;
@@ -48,7 +48,7 @@ impl YearCache {
             return Ok(e);
         }
         let days = tools::year::office_days(&self.data, year)?;
-        let entry = Arc::new(YearEntry { days, moveable: MoveableDates::compute(year), months: OnceLock::new() });
+        let entry = Arc::new(YearEntry { days, moveable: MoveableDates::compute(year), months: Default::default() });
         if order.len() == MAX_CACHED_YEARS {
             let oldest = order.remove(0);
             entries.remove(&oldest);
@@ -58,11 +58,28 @@ impl YearCache {
         Ok(entry)
     }
 
-    /// The year's calendar page rows, composed once outside the cache lock:
-    /// readers of the same year share the work, other requests proceed.
-    pub fn months(&self, year: i32, engine: &Engine) -> Result<Arc<Vec<MonthData>>, String> {
+    /// A month's ordo rows (`month` is 1-based), composed once outside the
+    /// cache lock: readers of the same month share the work, other requests
+    /// proceed, and a month page never waits on the rest of its year.
+    pub fn month(&self, year: i32, month: u32, engine: &Engine) -> Result<Arc<MonthData>, String> {
         let entry = self.get(year)?;
-        Ok(Arc::clone(entry.months.get_or_init(|| Arc::new(crate::handlers::build_month_data(&entry.days, engine, &entry.moveable)))))
+        Ok(entry.month(month, engine))
+    }
+
+    /// Every month of the year, for the whole-year page.
+    pub fn months(&self, year: i32, engine: &Engine) -> Result<Vec<Arc<MonthData>>, String> {
+        let entry = self.get(year)?;
+        Ok((1..=12).map(|m| entry.month(m, engine)).collect())
+    }
+}
+
+impl YearEntry {
+    fn month(&self, month: u32, engine: &Engine) -> Arc<MonthData> {
+        Arc::clone(self.months[month as usize - 1].get_or_init(|| {
+            let start = self.days.iter().position(|d| d.date.month() == month).unwrap_or(self.days.len());
+            let len = self.days[start..].iter().take_while(|d| d.date.month() == month).count();
+            Arc::new(crate::handlers::build_month(&self.days[start..start + len], engine, &self.moveable))
+        }))
     }
 }
 
@@ -76,19 +93,25 @@ mod tests {
     }
 
     #[test]
-    fn calendar_cache_shares_composed_year() {
+    fn calendar_cache_shares_composed_months() {
         let cache = cache();
         let engine = &test_server().engine;
-        let results: Vec<Arc<Vec<MonthData>>> = std::thread::scope(|s| {
-            let handles: Vec<_> = (0..6).map(|_| s.spawn(|| cache.months(2026, engine).unwrap())).collect();
+        let results: Vec<Arc<MonthData>> = std::thread::scope(|s| {
+            let handles: Vec<_> = (0..6).map(|_| s.spawn(|| cache.month(2026, 9, engine).unwrap())).collect();
             handles.into_iter().map(|h| h.join().unwrap()).collect()
         });
-        for months in &results {
-            assert_eq!(months.len(), 12);
-            assert!(Arc::ptr_eq(months, &results[0]), "concurrent requests did not reuse composed summaries");
+        for month in &results {
+            assert!(Arc::ptr_eq(month, &results[0]), "concurrent requests did not reuse the composed month");
         }
         let entry = cache.get(2026).unwrap();
-        assert_eq!(*results[0], crate::handlers::build_month_data(&entry.days, engine, &entry.moveable));
+        let september: Vec<Day> = entry.days.iter().filter(|d| d.date.month() == 9).cloned().collect();
+        assert_eq!(*results[0], crate::handlers::build_month(&september, engine, &entry.moveable));
+        assert_eq!((results[0].name.as_str(), results[0].days.len()), ("September", 30));
+        let year = cache.months(2026, engine).unwrap();
+        assert_eq!(year.iter().map(|m| m.days.len()).sum::<usize>(), 365);
+        assert!(Arc::ptr_eq(&year[8], &results[0]), "the whole year reuses composed months");
+        assert_eq!(year[0].name, "January");
+        assert_eq!(year[11].days.last().map(|d| d.day_num), Some(31));
     }
 
     #[test]
