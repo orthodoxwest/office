@@ -2600,14 +2600,21 @@ test("ordo first layout and day anchors stay put when the deferred app loads", a
 });
 
 test("ordo month navigation and full details work without JavaScript", async ({ browser, baseURL }) => {
+  // As in the other no-script tests, a page reached by a click is checked by
+  // its URL; its content is read after opening it directly, since the pinned
+  // browser cannot inspect a script-disabled document it navigated to.
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   // The frontispiece's strip leads to the month's own page.
   await page.goto(`${baseURL}/calendar/2026`);
   await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  await page.goto(`${baseURL}/calendar/2026/03`);
   const day = page.locator("#d-2026-03-01");
   await expect(day).toBeInViewport();
+  await day.locator(".day-office-details > summary").click();
+  await expect(day.locator(".day-office-digest")).toBeVisible();
+  await expect(day.locator(".day-office-comm").first()).toBeVisible();
   await page.getByRole("navigation", { name: "Other months" }).getByRole("link", { name: /April/ }).click();
   await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
   // The whole year jumps within itself.
@@ -2615,10 +2622,7 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
   await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
   await expect(page.locator("#d-2026-11-01")).toBeInViewport();
   await page.goto(`${baseURL}/calendar/2026/03`);
-  await day.locator(".day-office-details > summary").click();
-  await expect(day.locator(".day-office-digest")).toBeVisible();
-  await expect(day.locator(".day-office-comm").first()).toBeVisible();
-  await day.locator(".day-feast-name").click();
+  await page.locator("#d-2026-03-01 .day-feast-name").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
   await context.close();
 });
