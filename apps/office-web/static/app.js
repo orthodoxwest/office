@@ -581,13 +581,14 @@ function usageBeaconBody(scope) {
     return documentDateSlug() || localDateSlug(new Date());
   }
 
-  function todayHrefForPage(today) {
+  // The page's own kind of page, dated: an hour stays that hour.
+  function datedHrefForPage(slug) {
     var path = location.pathname.replace(/\/$/, "");
     var hourMatch = path.match(/^\/(lauds|prime|terce|sext|none|vespers|compline)/);
     if (hourMatch) {
-      return "/" + hourMatch[1] + "/" + today;
+      return "/" + hourMatch[1] + "/" + slug;
     }
-    return "/?date=" + today;
+    return "/?date=" + slug;
   }
 
   // ensureTodayControl keeps recovery chrome honest when the open document is
@@ -598,7 +599,7 @@ function usageBeaconBody(scope) {
   function ensureTodayControl(today) {
     var docDate = documentDateSlug();
     var onToday = !docDate || docDate === today;
-    var href = todayHrefForPage(today);
+    var href = datedHrefForPage(today);
 
     // Prominent notice (outside the date disclosure).
     var notices = document.querySelectorAll(".not-today-notice");
@@ -714,7 +715,7 @@ function usageBeaconBody(scope) {
 
     // "Today" shortcuts always mean local today, not the page's selected day.
     document.querySelectorAll("a.today-link").forEach(function (link) {
-      link.setAttribute("href", todayHrefForPage(today));
+      link.setAttribute("href", datedHrefForPage(today));
     });
 
     // Home prayer card: re-stamp hour links for the card's day (or today).
@@ -1002,6 +1003,397 @@ function usageBeaconBody(scope) {
         form.requestSubmit();
       }
     });
+  });
+
+  // The date picker. Pages without script keep the native date field, but
+  // its popup is the platform's own (a spinning wheel, a system sheet) and
+  // belongs to no room here. With script, "Change date" unfolds a month set
+  // like a printed kalendar instead: Sundays in red, the page's day
+  // underlined in gold as chosen things are elsewhere, today in the ordo's
+  // wash, and every day a link to that day's page.
+  //
+  // Keyboard follows the grid pattern: one day is in the tab order, arrows
+  // move by day and week, Page Up/Down by month (with Shift, by year), Home
+  // and End to the week's ends. The title turns the grid into the year's
+  // months. Escape steps back out: months to days, days to the summary.
+  var MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  // The picker offers a working span of years; the native field's min and
+  // max in the templates match it.
+  var PICKER_FIRST_YEAR = 1950;
+  var PICKER_LAST_YEAR = 2150;
+
+  // Dates are UTC midnights built with setUTCFullYear, which neither maps
+  // years 0-99 onto the 1900s nor shifts across daylight saving, and which
+  // carries overflowing days and months into the next month or year.
+  function civilDate(year, month, day) {
+    var date = new Date(0);
+    date.setUTCFullYear(year, month, day);
+    return date;
+  }
+
+  function parseSlug(slug) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(slug || "");
+    return m ? civilDate(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+  }
+
+  function civilSlug(date) {
+    var pad = function (n, width) {
+      var text = String(n);
+      while (text.length < width) {
+        text = "0" + text;
+      }
+      return text;
+    };
+    return pad(date.getUTCFullYear(), 4) + "-" + pad(date.getUTCMonth() + 1, 2) + "-" + pad(date.getUTCDate(), 2);
+  }
+
+  // The same day of another month, or that month's last day when it is
+  // shorter.
+  function shiftMonths(date, months) {
+    var first = civilDate(date.getUTCFullYear(), date.getUTCMonth() + months, 1);
+    var last = civilDate(first.getUTCFullYear(), first.getUTCMonth() + 1, 0).getUTCDate();
+    return civilDate(first.getUTCFullYear(), first.getUTCMonth(), Math.min(date.getUTCDate(), last));
+  }
+
+  function inPickerRange(date) {
+    var year = date.getUTCFullYear();
+    return year >= PICKER_FIRST_YEAR && year <= PICKER_LAST_YEAR;
+  }
+
+  // A page dated outside the span (typed into the address) opens the picker
+  // at the nearer end, so its controls can still move.
+  function clampToPickerRange(date) {
+    if (date.getUTCFullYear() < PICKER_FIRST_YEAR) {
+      return civilDate(PICKER_FIRST_YEAR, 0, 1);
+    }
+    if (date.getUTCFullYear() > PICKER_LAST_YEAR) {
+      return civilDate(PICKER_LAST_YEAR, 11, 31);
+    }
+    return date;
+  }
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) {
+      node.className = className;
+    }
+    if (text) {
+      node.textContent = text;
+    }
+    return node;
+  }
+
+  function buildDatePicker(details) {
+    var picker = el("div", "date-picker");
+    picker.setAttribute("role", "group");
+    picker.setAttribute("aria-label", "Choose a date");
+
+    var head = el("div", "date-picker-head");
+    var back = el("button", "date-picker-step", "\u2039");
+    var title = el("button", "date-picker-title");
+    var forward = el("button", "date-picker-step", "\u203a");
+    [back, title, forward].forEach(function (button) {
+      button.type = "button";
+      head.appendChild(button);
+    });
+    var announce = el("span", "sr-only");
+    announce.setAttribute("aria-live", "polite");
+    head.appendChild(announce);
+
+    var body = el("div", "date-picker-body");
+    var grid = el("table", "date-picker-days");
+    grid.setAttribute("role", "grid");
+    var headRow = el("tr");
+    WEEKDAY_NAMES.forEach(function (name) {
+      var th = el("th");
+      th.scope = "col";
+      var abbr = el("abbr", "", name.charAt(0));
+      abbr.title = name;
+      th.appendChild(abbr);
+      headRow.appendChild(th);
+    });
+    var thead = el("thead");
+    thead.appendChild(headRow);
+    var weeks = el("tbody");
+    grid.appendChild(thead);
+    grid.appendChild(weeks);
+
+    var months = el("div", "date-picker-months");
+    months.setAttribute("role", "grid");
+    months.setAttribute("aria-label", "Months");
+    for (var row = 0; row < 4; row++) {
+      var monthRow = el("div");
+      monthRow.setAttribute("role", "row");
+      for (var col = 0; col < 3; col++) {
+        var index = row * 3 + col;
+        var cell = el("div");
+        cell.setAttribute("role", "gridcell");
+        var month = el("button", "date-picker-month", MONTH_NAMES[index].slice(0, 3));
+        month.type = "button";
+        month.setAttribute("data-month", String(index));
+        cell.appendChild(month);
+        monthRow.appendChild(cell);
+      }
+      months.appendChild(monthRow);
+    }
+    body.appendChild(grid);
+    body.appendChild(months);
+    picker.appendChild(head);
+    picker.appendChild(body);
+
+    // `focus` is the one day (or month) in the tab order; the view shows its
+    // month (or year).
+    var state = { view: "days", focus: null, chosen: null, today: null };
+
+    function reset() {
+      state.today = localDateSlug(new Date());
+      state.chosen = pageDateSlug();
+      state.focus = clampToPickerRange(parseSlug(state.chosen) || parseSlug(state.today));
+      state.view = "days";
+    }
+
+    function titleText() {
+      var year = state.focus.getUTCFullYear();
+      return state.view === "days" ? MONTH_NAMES[state.focus.getUTCMonth()] + " " + year : String(year);
+    }
+
+    function render() {
+      picker.setAttribute("data-view", state.view);
+      var days = state.view === "days";
+      title.textContent = titleText();
+      title.setAttribute("aria-label", titleText() + (days ? ", choose another month" : ", back to days"));
+      back.setAttribute("aria-label", days ? "Previous month" : "Previous year");
+      forward.setAttribute("aria-label", days ? "Next month" : "Next year");
+      var step = days ? 1 : 12;
+      back.disabled = !inPickerRange(shiftMonths(civilDate(state.focus.getUTCFullYear(), state.focus.getUTCMonth(), 1), -step));
+      forward.disabled = !inPickerRange(shiftMonths(civilDate(state.focus.getUTCFullYear(), state.focus.getUTCMonth(), 1), step));
+      grid.setAttribute("aria-label", MONTH_NAMES[state.focus.getUTCMonth()] + " " + state.focus.getUTCFullYear());
+      renderDays();
+      renderMonths();
+    }
+
+    // Six weeks always, blank where the month is not, so paging through
+    // months never moves what lies below.
+    function renderDays() {
+      var year = state.focus.getUTCFullYear();
+      var month = state.focus.getUTCMonth();
+      var lead = civilDate(year, month, 1).getUTCDay();
+      var length = civilDate(year, month + 1, 0).getUTCDate();
+      var focusSlug = civilSlug(state.focus);
+      weeks.textContent = "";
+      for (var week = 0; week < 6; week++) {
+        var tr = el("tr");
+        for (var weekday = 0; weekday < 7; weekday++) {
+          var td = el("td");
+          var day = week * 7 + weekday - lead + 1;
+          if (day >= 1 && day <= length) {
+            var date = civilDate(year, month, day);
+            var slug = civilSlug(date);
+            var link = el("a", "date-picker-day");
+            link.href = datedHrefForPage(slug);
+            link.setAttribute("data-date", slug);
+            link.tabIndex = slug === focusSlug ? 0 : -1;
+            link.setAttribute(
+              "aria-label",
+              WEEKDAY_NAMES[weekday] + ", " + MONTH_NAMES[month] + " " + day + ", " + year,
+            );
+            link.appendChild(el("span", "", String(day)));
+            if (slug === state.today) {
+              link.setAttribute("aria-current", "date");
+            }
+            if (slug === state.chosen) {
+              td.setAttribute("aria-selected", "true");
+            }
+            td.appendChild(link);
+          }
+          tr.appendChild(td);
+        }
+        weeks.appendChild(tr);
+      }
+    }
+
+    function renderMonths() {
+      var year = state.focus.getUTCFullYear();
+      var chosen = parseSlug(state.chosen);
+      var today = parseSlug(state.today);
+      months.querySelectorAll(".date-picker-month").forEach(function (button) {
+        var month = Number(button.getAttribute("data-month"));
+        button.tabIndex = month === state.focus.getUTCMonth() ? 0 : -1;
+        button.setAttribute("aria-label", MONTH_NAMES[month] + " " + year);
+        var holds = function (date) {
+          return date && date.getUTCFullYear() === year && date.getUTCMonth() === month;
+        };
+        if (holds(chosen)) {
+          button.parentNode.setAttribute("aria-selected", "true");
+        } else {
+          button.parentNode.removeAttribute("aria-selected");
+        }
+        if (holds(today)) {
+          button.setAttribute("aria-current", "date");
+        } else {
+          button.removeAttribute("aria-current");
+        }
+      });
+    }
+
+    function focusCurrent() {
+      var target =
+        state.view === "days"
+          ? weeks.querySelector('[data-date="' + civilSlug(state.focus) + '"]')
+          : months.querySelector('[data-month="' + state.focus.getUTCMonth() + '"]');
+      if (target) {
+        target.focus();
+      }
+    }
+
+    // Moves the roving focus, re-rendering when it leaves the shown month
+    // or year. Stops at the calendar's ends rather than wrapping.
+    function moveTo(date, keepFocus) {
+      if (!inPickerRange(date)) {
+        return;
+      }
+      var shown = titleText();
+      state.focus = date;
+      render();
+      if (titleText() !== shown) {
+        announce.textContent = titleText();
+      }
+      if (!keepFocus) {
+        focusCurrent();
+      }
+    }
+
+    function stepBy(direction) {
+      moveTo(shiftMonths(state.focus, direction * (state.view === "days" ? 1 : 12)), true);
+    }
+
+    back.addEventListener("click", function () {
+      stepBy(-1);
+    });
+    forward.addEventListener("click", function () {
+      stepBy(1);
+    });
+    title.addEventListener("click", function () {
+      state.view = state.view === "days" ? "months" : "days";
+      render();
+      announce.textContent = titleText();
+    });
+
+    months.addEventListener("click", function (event) {
+      var button = event.target.closest(".date-picker-month");
+      if (!button) {
+        return;
+      }
+      state.view = "days";
+      var target = shiftMonths(state.focus, Number(button.getAttribute("data-month")) - state.focus.getUTCMonth());
+      moveTo(target);
+      announce.textContent = titleText();
+    });
+
+    grid.addEventListener("keydown", function (event) {
+      var date = state.focus;
+      var d = date.getUTCDate();
+      var y = date.getUTCFullYear();
+      var m = date.getUTCMonth();
+      var next;
+      switch (event.key) {
+        case "ArrowLeft":
+          next = civilDate(y, m, d - 1);
+          break;
+        case "ArrowRight":
+          next = civilDate(y, m, d + 1);
+          break;
+        case "ArrowUp":
+          next = civilDate(y, m, d - 7);
+          break;
+        case "ArrowDown":
+          next = civilDate(y, m, d + 7);
+          break;
+        case "Home":
+          next = civilDate(y, m, d - date.getUTCDay());
+          break;
+        case "End":
+          next = civilDate(y, m, d + 6 - date.getUTCDay());
+          break;
+        case "PageUp":
+          next = shiftMonths(date, event.shiftKey ? -12 : -1);
+          break;
+        case "PageDown":
+          next = shiftMonths(date, event.shiftKey ? 12 : 1);
+          break;
+        case " ":
+          // Links answer Enter natively; a grid cell answers Space too.
+          event.preventDefault();
+          event.target.closest(".date-picker-day").click();
+          return;
+        default:
+          return;
+      }
+      event.preventDefault();
+      moveTo(next);
+    });
+
+    months.addEventListener("keydown", function (event) {
+      var shift = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -3, ArrowDown: 3, PageUp: -12, PageDown: 12 }[event.key];
+      if (!shift) {
+        return;
+      }
+      event.preventDefault();
+      moveTo(shiftMonths(state.focus, shift));
+    });
+
+    // A day or month keeps its place in the tab order when clicked or
+    // tapped, so Tab back into the grid returns to it.
+    grid.addEventListener("focusin", function (event) {
+      var link = event.target.closest(".date-picker-day");
+      if (link && link.getAttribute("data-date") !== civilSlug(state.focus)) {
+        state.focus = parseSlug(link.getAttribute("data-date"));
+        weeks.querySelectorAll(".date-picker-day").forEach(function (other) {
+          other.tabIndex = other === link ? 0 : -1;
+        });
+      }
+    });
+
+    picker.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") {
+        return;
+      }
+      event.preventDefault();
+      if (state.view === "months") {
+        state.view = "days";
+        render();
+        title.focus();
+        return;
+      }
+      details.open = false;
+      details.querySelector("summary").focus();
+    });
+
+    // Each opening starts from the page's own day, and from the current
+    // local date: a tab left open overnight must not mark yesterday.
+    details.addEventListener("toggle", function () {
+      if (details.open) {
+        reset();
+        render();
+      }
+    });
+
+    reset();
+    render();
+    return picker;
+  }
+
+  document.querySelectorAll("details.hour-date-nav").forEach(function (details) {
+    var nav = details.querySelector(".day-nav");
+    if (!nav) {
+      return;
+    }
+    nav.insertAdjacentElement("afterend", buildDatePicker(details));
+    details.classList.add("has-date-picker");
   });
 
   // currentHourInfo returns the office most likely being prayed at the given

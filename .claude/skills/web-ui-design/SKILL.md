@@ -65,24 +65,30 @@ or impose a redesign on an unrelated change.
   around it (columns, sconces, sills, arches) has been tried and read as
   illustration; prefer light and tone to objects.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
-  and Assurance/reporting after the prayer. Print expands session prayers and
+  and Assurance/reporting after the prayer. "Change date" unfolds the
+  hand-set month grid from `app.js` (days are links, the grid pattern's
+  keys); the native date field is only the no-script fallback, since its
+  popup is the platform's and belongs to no theme here. Print expands session prayers and
   hides navigation/progress controls. Don't add persistent mobile chrome
   without checking how much prayer remains visible.
 - Ordo is a working page: keep columns near their content and the office
   digest within reading measure. Avoid dotted underlines on abbreviations.
 - Lay broad surface washes once, sized to the viewport, rather than repeating
-  texture tiles on long pages. Keep liturgical text on a flat field.
+  texture tiles on long pages. Keep liturgical text on a quiet field.
 - The limewash wall is the parish nave photograph, high-passed to grey
   fields by `tools/genplaster` (portrait for phones, a landscape crop from
   1000px) and coloured by `--plaster-*` tokens. Always cover-fit; never
   stretch or tile it. The tokens are solved against the texture's pixels
   so the wall averages exactly `--bg` (see the token comment): retune one
-  and re-solve the others, or the flat clearings (wide hours, iOS sticky
-  headings) show edges. Near-white Nave needs its knee (flat ground, darker
+  and re-solve the others, or the softened prayer band and the flat iOS
+  sticky headings show edges. Near-white Nave needs its knee (flat ground, darker
   clouds); a symmetric texture there is invisible. `ux.spec.js` measures
   the rendered wall's mean and contrast in both themes.
   All textured pages share `--plaster-strength`, composed into the opaque
-  wall so sticky headings match. Wide hours clear it beneath prayer.
+  wall so sticky headings match. Wide hours soften it beneath prayer with a
+  pre-blurred copy (`genplaster --soft-of`) in a feathered band; regenerate
+  the copies whenever a field changes. Never blur the wall live: a
+  backdrop-filter over the fixed layer re-blurs it on every scrolled frame.
 
 ## Where to work
 
