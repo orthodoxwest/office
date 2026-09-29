@@ -579,7 +579,9 @@ test("wide hour plaster softens the prayer without sideways scroll or stretching
   expect(wide.content).toBe('""');
   expect(wide.position).toBe("fixed");
   expect(wide.image).toContain("plaster-wide-soft.jpg");
-  expect(wide.image.endsWith(wide.wall.replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
+  // Each file carries its own content stamp, so compare the layers unstamped.
+  const unstamped = (layers) => layers.replace(/\?v=[0-9a-f]+/g, "");
+  expect(unstamped(wide.image).endsWith(unstamped(wide.wall).replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
   expect(wide.blend).toBe(`normal, ${wide.wallBlend}`);
   expect(wide.size.split(", ").every((layer) => layer === "cover")).toBe(true);
   expect(wide.mask).toContain("linear-gradient");
@@ -1084,7 +1086,6 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
       const main = document.querySelector("main");
       const prayer = document.querySelector(".elements");
       const epilogue = document.querySelector(".hour-epilogue");
-      const assurance = document.querySelector(".assurance-panel");
       const footerElement = document.querySelector("footer");
       const field = getComputedStyle(epilogue, "::before");
       const footerField = getComputedStyle(footerElement, "::after");
@@ -1117,7 +1118,6 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
         ],
         diamond: diamond.content,
         diamondVisibility: diamond.visibility,
-        assuranceBackground: getComputedStyle(assurance).backgroundColor,
       };
     });
     await context.close();
@@ -1152,7 +1152,6 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   expect(vaultPaints(nave.footerLayers)).toBe(false);
   expect(nave.diamond).toContain("✦");
   expect(nave.diamondVisibility).toBe("visible");
-  expect(apse.assuranceBackground).not.toBe(nave.assuranceBackground);
 
   const desktop = await read("dark", 1280);
   expect(desktop.prayerField).toBe("none");
@@ -2496,7 +2495,7 @@ for (const [width, size, hash] of [
     await page.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
     let releaseFonts;
     const ready = new Promise((resolve) => { releaseFonts = resolve; });
-    await page.route("**/*.woff2", async (route) => { await ready; await route.continue(); });
+    await page.route("**/*.woff2*", async (route) => { await ready; await route.continue(); });
     await page.exposeBinding("releaseOrdoFonts", () => releaseFonts());
     await page.addInitScript(() => {
       const geometry = () => ({
@@ -2797,7 +2796,6 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
         ".site-brand",
         ".hour-date-nav > summary",
         ".session-prayers > summary",
-        ".assurance-panel > summary:visible",
         ".report-issue a:visible",
       ],
     ],
@@ -3501,13 +3499,11 @@ test("Compline openings preserve words and align response columns around the ble
     expect(blessingText.width).toBeGreaterThan(200);
     expect(blessingText.right).toBeLessThanOrEqual(width);
 
-    // Review progress can make this office fully verified. The warning
-    // follows the selected form's dependencies, not a fixed calendar date.
-    const statuses = await page.locator(".assurance-panel:visible .assurance-status").allTextContents();
-    const needsReview = statuses.length === 0 || statuses.some(status => status.trim() !== "verified");
+    // The notice follows the selected form's text provenance (the server's
+    // show_vetting_banner tests decide when); with the corpus verified it
+    // may not show. When it does, it stays compact and dismissible.
     const banner = page.locator(".site-banner:visible");
-    await expect(banner).toHaveCount(needsReview ? 1 : 0);
-    if (needsReview) {
+    if (await banner.count()) {
       expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
       expect((await banner.boundingBox()).height).toBeLessThan(100);
       await banner.getByRole("button", { name: "Dismiss review notice" }).click();

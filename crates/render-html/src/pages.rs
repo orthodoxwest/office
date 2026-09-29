@@ -7,7 +7,7 @@ use minijinja::{AutoEscape, Environment};
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
-use crate::links::{calendar_year_link, home_link, hour_link, nav_link, season_label, static_url, title_case};
+use crate::links::{calendar_year_link, home_link, hour_link, nav_link, season_label, title_case};
 use crate::usage::UsageData;
 use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
 
@@ -29,9 +29,10 @@ pub struct Pages {
 }
 
 impl Pages {
-    /// Parses the embedded templates. `version` stamps static asset URLs so
-    /// a deploy that changes CSS or JS produces new URLs.
-    pub fn new(version: &str) -> Result<Pages, String> {
+    /// Parses the embedded templates. `asset_url` maps a static file name to
+    /// its stamped URL, so a deploy that changes CSS or JS produces new URLs
+    /// and one that leaves them alone keeps them cached.
+    pub fn new(asset_url: impl Fn(&str) -> String + Send + Sync + 'static) -> Result<Pages, String> {
         let mut env = Environment::new();
         env.set_keep_trailing_newline(true);
         // Native HTML autoescaping also preserves trusted macro and fragment output.
@@ -50,8 +51,7 @@ impl Pages {
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
         env.add_function("calendar_year_link", |year: i32| calendar_year_link(year));
-        let version = version.to_string();
-        env.add_function("static", move |name: String| static_url(&name, &version));
+        env.add_function("static", move |name: String| asset_url(&name));
         env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
         Ok(Pages { env })
     }
@@ -108,7 +108,7 @@ impl Pages {
 #[cfg(test)]
 mod tests {
     use super::{Pages, TEMPLATES};
-    use crate::links::season_class;
+    use crate::links::{season_class, static_url};
     use crate::view::{CalendarData, Chrome, HomeData};
 
     fn source(name: &str) -> &'static str {
@@ -128,7 +128,7 @@ mod tests {
 
     #[test]
     fn templates_escape_values_and_preserve_explicit_markup() {
-        let mut pages = Pages::new("test").unwrap();
+        let mut pages = Pages::new(|name| static_url(name, "test")).unwrap();
         pages
             .env
             .add_template("boundary.html", r#"<p title="{{ text }}">{{ text }}</p><a href="{{ link|url }}">Link</a>{{ markup|safe }}"#)
@@ -321,7 +321,7 @@ mod tests {
 
     #[test]
     fn layout_stamps_season_class_on_body() {
-        let pages = Pages::new("test").unwrap();
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
         for (class, want) in [
             ("season-passiontide", r#"<body class="page-home season-passiontide">"#),
             ("season-eastertide", r#"<body class="page-home season-eastertide">"#),
@@ -342,7 +342,7 @@ mod tests {
     /// The year calendar spans every season, so it is never tinted.
     #[test]
     fn calendar_page_stays_season_neutral() {
-        let pages = Pages::new("test").unwrap();
+        let pages = Pages::new(|name| static_url(name, "test")).unwrap();
         let data = CalendarData { chrome: Chrome { page: "calendar".into(), ..Chrome::default() }, year: 2026, ..CalendarData::default() };
         let html = pages.calendar(&data).unwrap();
         assert!(html.contains(r#"<body class="page-calendar">"#));

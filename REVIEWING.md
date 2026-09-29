@@ -142,8 +142,7 @@ top tier, and `make review-suspects` prints only that tier. It comes from:
 2. **Advisory lints** (`./office lint`): truncation, unpointed antiphons,
    near-duplicates, leftover Latin; recomputed each run.
 
-Both show in the queue's `flags` column and on each hour's Assurance
-disclosure. Record findings in the ledger, keyed by entry, not in narrative
+Both show in the queue's `flags` column. Record findings in the ledger, keyed by entry, not in narrative
 write-ups that go stale.
 
 ### Zero-occurrence entries
@@ -170,10 +169,9 @@ floor in `data/review/assurance-baseline.json` (zero enforces nothing), and
 reports stale attestations separately. Raise the floor deliberately with
 `./office review assurance --update-baseline`.
 
-Each hour's collapsed **Assurance** disclosure shows the same dependency
-states, fallback tiers, and rule IDs without local paths or source text, and
-links unverified rows to a prefilled issue. `needs-review` means a source lead
-exists; `source-unknown` means provenance research comes first.
+`./office review explain HOUR DATE` lists an hour's dependency states,
+fallback tiers, and rule IDs. `needs-review` means a source lead exists;
+`source-unknown` means provenance research comes first.
 
 ## Date-sensitive parity
 

@@ -831,7 +831,10 @@ function usageBeaconBody(scope) {
     markMotionReady();
   }
 
-  if ("serviceWorker" in navigator) {
+  // Registered after load: on a first visit the worker's install fetches the
+  // shell, today's hours, and the ordo, and must not compete with this page
+  // for its own fonts and images.
+  var registerServiceWorker = function () {
     navigator.serviceWorker.register("/sw.js").then(function (reg) {
       // Pick up deploys while the PWA stays open across days.
       var askUpdate = function () {
@@ -857,6 +860,13 @@ function usageBeaconBody(scope) {
       // Offline reading is an enhancement; the site works without it.
       console.warn("service worker registration failed:", err);
     });
+  };
+  if ("serviceWorker" in navigator) {
+    if (document.readyState === "complete") {
+      registerServiceWorker();
+    } else {
+      window.addEventListener("load", registerServiceWorker, { once: true });
+    }
   }
 
   // Fires a one-off usage beacon for an explicit action rather than a page
@@ -1650,7 +1660,7 @@ function usageBeaconBody(scope) {
   }
 
   // Gold hairline under the color band: progress through the prayer itself.
-  // The page continues into hour navigation, assurance, issue reporting, and
+  // The page continues into hour navigation, issue reporting, and
   // appearance controls after .elements. The line remains at zero through the
   // page header and banner, starts when the prayer reaches the top of the
   // viewport, and reaches 100% when its end reaches the bottom. It then remains
