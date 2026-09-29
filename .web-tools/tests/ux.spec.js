@@ -1297,12 +1297,21 @@ test("wide hours set a still vault beside the prayer that comes down to meet the
     await page.addInitScript((choice) => localStorage.setItem("office-text-size", choice), size);
     await openDatedPage(page, `/lauds/${testDate}`, "dark");
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    const seam = await page.evaluate(() => {
-      const phase = getComputedStyle(document.querySelector(".office-hour"), "::before").maskPosition;
-      const offset = parseFloat(phase.match(/bottom (-?[\d.]+)px/)[1]);
-      return { lattice: innerHeight - offset, epilogue: document.querySelector(".hour-epilogue").getBoundingClientRect().bottom };
-    });
-    expect(Math.abs(seam.lattice - seam.epilogue), `${size} seam`).toBeLessThan(2);
+    const seam = await page.evaluate(() => ({
+      phase: getComputedStyle(document.querySelector(".office-hour"), "::before").maskPosition,
+      height: innerHeight,
+      epilogue: document.querySelector(".hour-epilogue").getBoundingClientRect().bottom,
+    }));
+    // The tile's offset from the foot, as keywords ("left 50% bottom
+    // 211px") or as the spec's offsets from the top ("50% calc(100% -
+    // 211px)"), whichever this engine serializes.
+    const tile = phaseLayers(seam.phase)[0];
+    const offset =
+      tile.match(/bottom (-?[\d.]+)px$/) ||
+      tile.match(/calc\(100% - (-?[\d.]+)px\)$/) ||
+      tile.match(/calc\(-(-?[\d.]+)px \+ 100%\)$/);
+    expect(offset, `${size} tile phase ${tile}`).not.toBeNull();
+    expect(Math.abs(seam.height - Number(offset[1]) - seam.epilogue), `${size} seam`).toBeLessThan(2);
   }
 
   // Nave has no vault; narrower screens keep plain margins and the
