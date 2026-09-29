@@ -1,11 +1,11 @@
 [hymn]
-# SOURCE: 01. Monday Prime Alex edit 10-28 v.01.docx, pp. 3-4
+# SOURCE: Monastic Diurnal.pdf, p. 2, 3
 Iam lucis orto sidere
 
 Now that the daylight fills the sky,
 We lift our hearts to God on high,
 That he, in all we do or say,
-Would keep us free from harm today:
+Would keep us free from harm to-day:
 
 Would guard our hearts and tongues from strife;
 From anger's din would hide our life;
@@ -20,14 +20,15 @@ With due and holy abstinence.
 So we, when this new day is gone,
 And night in turn is drawing on,
 With conscience by the world unstained,
-Shall praise his name for victory gained.
+Shall praise his Name for victory gained.
 
 All laud to God the Father be;
-All praise, Eternal Son, to thee;
+All praise, eternal Son, to thee;
 All glory, as is ever meet,
-To Father and to Paraclete.
+To God the Holy Paraclete.
 
 Amen.
+
 [opening-versicle]
 # SOURCE: 01. Monday Prime Alex edit 10-28 v.01.docx, p. 3
 @use shared/formulas/opening-versicle
