@@ -191,6 +191,7 @@ psalms/113       = Laudate, pueri, Dominum
 psalms/114       = In exitu Israël
 psalms/115       = Non nobis, Domine
 psalms/116       = Dilexi, quoniam exaudiet Dominus
+psalms/116a      = Dilexi, quoniam exaudiet Dominus
 psalms/116b      = Credidi, propter quod locutus sum
 psalms/117       = Laudate Dominum, omnes gentes
 psalms/118       = Confitemini Domino quoniam bonus

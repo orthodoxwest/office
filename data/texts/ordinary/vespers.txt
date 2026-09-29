@@ -303,14 +303,16 @@ Blessed be the Name * of the Lord for ever and ever.
 But we who live * from this time forth will praise the Lord.
 
 [psalm-antiphon-2-monday]
-@use ordinary/vespers/psalm-antiphon-1-monday
-[psalm-antiphon-3-monday]
 # SOURCE: monastic diurnal, p. 119 (Monday at Vespers, Throughout the Year)
 The Lord hath inclined * his ear unto me.
 
-[psalm-antiphon-4-monday]
+[psalm-antiphon-3-monday]
 # SOURCE: monastic diurnal, p. 120 (Monday at Vespers, Throughout the Year)
 I believed, * and therefore will I speak.
+
+[psalm-antiphon-4-monday]
+# SOURCE: monastic diurnal, p. 120 (Monday at Vespers, Throughout the Year)
+Many a time * have they fought against me from my youth up.
 
 [psalm-antiphon-1-tuesday]
 # SOURCE: monastic diurnal, p. 123 (Tuesday at Vespers, Throughout the Year)
