@@ -3,5 +3,6 @@
 # Vicariate Missal's proper prayer. Everything else is the Common.
 
 [collect]
-# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF p. 820 (November 25, St Catherine of Alexandria, Collect)
-O God, who didst give the law to Moses on the height of Mount Sinai, and in the same place didst through thy holy Angels wondrously bestow the body of blessed Catherine, thy Virgin and Martyress: grant, we beseech thee; that by her merits and intercession we may be enabled to attain unto that mount which is Christ.
+# SOURCE: Ordo-2026-Suppl-Collects.pdf, English Missal for the Laity (1933) p. 832
+O God, who didst give the law to Moses on the height of Mount Sinai, and in the same place didst through thy holy Angels wondrously bestow the body of blessed Catherine, thy Virgin and Martyr: grant, we beseech thee; that by her merits and intercession we may be enabled to attain unto that mount which is Christ.
+
