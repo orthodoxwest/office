@@ -205,9 +205,6 @@ Amen.
 [festal-psalmody]
 @use psalmody/vespers/festal
 
-[psalm-antiphon]
-O Lord, hear my prayer; and let our cry come unto thee.
-
 [chapter]
 # SOURCE: draft archdiocesan Vespers book, p. 129 (Wednesday; citation includes the quoted opening of verse 4)
 !2 Cor. 1:3-4
@@ -249,9 +246,6 @@ R. In thy sight as the incense.
 V. Let our evening prayer come up before thee, O Lord.
 R. And let thy mercy come down upon us.
 
-[magnificat-antiphon]
-My soul doth magnify the Lord, and my spirit hath rejoiced in God my Saviour.
-
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 122 (Monday at Vespers, Throughout the Year)
 My soul * doth magnify the Lord, for he hath regarded my lowliness.
@@ -279,13 +273,6 @@ God hath holpen * his servant Israel, as he promised to Abraham and to his seed:
 [pre-collect-versicles]
 @use shared/formulas/pre-collect-versicles
 
-[collect]
-O God, from whom all holy desires, all good counsels, and all just works do
-proceed: give unto thy servants that peace which the world cannot give; that
-both our hearts may be set to obey thy commandments, and also that by thee,
-being defended from the fear of our enemies, we may pass our time in rest and
-quietness.
-
 [blessing]
 # SOURCE: 00. The Commons - Vespers 2025 Jacob edit 04-16 v.13.pdf, p. 8 (Common of Apostles and Evangelists)
 V. The Lord be with you.
@@ -294,15 +281,6 @@ V. Let us bless the Lord.
 R. Thanks be to God.
 V. May the souls of the faithful, through the mercy of God, rest in peace.
 R. Amen.
-
-[commemoration-antiphon]
-@use shared/formulas/commemoration-antiphon
-
-[commemoration-versicle]
-@use shared/formulas/commemoration-versicle
-
-[commemoration-collect]
-@use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
 # SOURCE: monastic diurnal, pp. 110–111 (Sunday at Vespers, Throughout the Year)
@@ -419,23 +397,18 @@ R. At all times.
 V. Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I will bless the Lord * At all times.
 
-
 [short-responsory-tuesday]
 # SOURCE: Monastic Diurnal p. 125; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
 @use ordinary/vespers/short-responsory-monday
-
 
 [short-responsory-wednesday]
 # SOURCE: Monastic Diurnal p. 131; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
 @use ordinary/vespers/short-responsory-monday
 
-
 [short-responsory-thursday]
 # SOURCE: Monastic Diurnal p. 135; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
 @use ordinary/vespers/short-responsory-monday
 
-
 [short-responsory-friday]
 # SOURCE: Monastic Diurnal p. 139; same weekday responsory as Monday p. 121 (page images reviewed by Codex 2026-09-13)
 @use ordinary/vespers/short-responsory-monday
-

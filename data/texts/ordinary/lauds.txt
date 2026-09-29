@@ -276,9 +276,6 @@ Amen.
 [opening-versicle]
 @use shared/formulas/opening-versicle
 
-[psalm-antiphon]
-O praise the Lord of heaven; praise him in the height.
-
 [chapter]
 # SOURCE: draft archdiocesan Lauds book, p. 185 (Wednesday; printed citation corrected to match its Romans text)
 !Rom. 13:12-13
@@ -300,9 +297,6 @@ R. Heal my soul, * for I have sinned against thee.
 # SOURCE: Copy of OCP Ferial Lauds.pdf, pp. 15, 31, 48, 66, 86, 109
 V. O satisfy us with thy mercy, and that soon.
 R. So shall we rejoice and be glad all the days of our life.
-
-[benedictus-antiphon]
-Blessed be the Lord God of Israel, for he hath visited and redeemed his people.
 
 [benedictus-antiphon-monday]
 # SOURCE: monastic diurnal, p. 49 (Monday at Lauds, Throughout the Year)
@@ -331,23 +325,8 @@ Give light, O Lord, * to them that sit in darkness and in the shadow of death, a
 [pre-collect-versicles]
 @use shared/formulas/pre-collect-versicles
 
-[collect]
-Almighty and everlasting God, who hast safely brought us to the beginning of
-this day: defend us in the same by thy mighty power; that this day we fall into
-no sin, but that all our thoughts, words, and deeds may be ordered to the doing
-of thy righteousness.
-
 [blessing]
 @use shared/formulas/daily-blessing
-
-[commemoration-antiphon]
-@use shared/formulas/commemoration-antiphon
-
-[commemoration-versicle]
-@use shared/formulas/commemoration-versicle
-
-[commemoration-collect]
-@use shared/formulas/commemoration-collect
 
 [psalm-antiphon-1-sunday]
 # SOURCE: monastic diurnal, p. 30 (Sunday at Lauds, Throughout the Year)

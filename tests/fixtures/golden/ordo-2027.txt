@@ -67,13 +67,13 @@ JANUARY
            Lauds   w · Ben. We have seen his star · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Sunday within the Octave of the Epiphany) · Mag. The Child Jesus · No Suff.
-               Com. Day IV within the Octave of the Epiphany ("The wise men")
+               Com. Day IV within the Octave of the Epiphany ("Herod inquired")
                Com. St Paul the First Hermit ("I will liken him")
  10  Sun     Sunday within the Octave of the Epiphany   [sd]  w
            Day V within the Octave of the Epiphany (sd)
            St Paul the First Hermit (com)
            Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
-               Com. Day V within the Octave of the Epiphany ("The wise men")
+               Com. Day V within the Octave of the Epiphany ("To-day")
                Com. St Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
@@ -761,10 +761,8 @@ MAY
            Vespers w · II prec. · Mag. Jesus saith unto his disciples · No Suff.
   6  Thu     Day V within the Octave of Easter          [sd]  w
            St John before the Latin Gate (gd)
-           Octave of the Solemnity of St Joseph (com)
            Lauds   w · Ben. Mary stood · No Preces · No Suff.
                Com. St John before the Latin Gate ("Daughters of Jerusalem")
-               Com. Octave of the Solemnity of St Joseph ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · II prec. · Mag. They have taken · No Suff.
   7  Fri     Day VI within the Octave of Easter         [sd]  w
@@ -789,7 +787,7 @@ MAY
                Com. St Gregory Nazianzen, Bishop, Confessor & Doctor ("Well done")
            Hours   No Preces
            Vespers r · I fol. (Finding of the Holy Cross) · Mag. O Cross · No Suff.
-               Com. Low Sunday (Octave of Easter) ("The same day")
+               Com. Low Sunday (Octave of Easter) ("After eight days")
                Com. Ss Gordian & Epimachus, Martyrs ("Light perpetual")
  10  Mon     Finding of the Holy Cross                  [2cl] r
            Ss Gordian & Epimachus, Martyrs (com)
@@ -878,10 +876,13 @@ MAY
            Hours   Preces
            Vespers w · I fol. (St Augustine of Canterbury, Bishop & Confessor) · Mag. O thou Priest and Bishop · No Suff.
                Com. St Eleutherius, Bishop & Martyr ("Light perpetual")
+               Com. Octave of the Solemnity of St Joseph ("When Mary")
  26  Wed     St Augustine of Canterbury, Bishop & Confessor [d]   w
            St Eleutherius, Bishop & Martyr (com)
+           Octave of the Solemnity of St Joseph (com)
            Lauds   w · Ben. Well done · No Preces · No Suff.
                Com. St Eleutherius, Bishop & Martyr ("Daughters of Jerusalem")
+               Com. Octave of the Solemnity of St Joseph ("Joseph, thou son of David")
            Hours   No Preces
            Vespers w · I fol. (St Bede the Venerable, Confessor & Doctor) · Mag. O Teacher right excellent · No Suff.
                Com. St Augustine of Canterbury, Bishop & Confessor ("The Lord loved him")
@@ -1639,7 +1640,7 @@ SEPTEMBER
            Lauds   r · Ben. Thou alone · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Seven Sorrows of the B.V.M.) · Mag. Look not · No Suff.
-               Com. Exaltation of the Holy Cross ("Thou alone")
+               Com. Exaltation of the Holy Cross ("O Cross")
                Com. St Nicomedes, Martyr ("This is a Martyr")
  15  Wed  L§ Seven Sorrows of the B.V.M.                [2cl] w
            September Ember Wednesday (f2)

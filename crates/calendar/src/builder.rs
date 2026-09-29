@@ -87,6 +87,13 @@ fn epiphany_sunday_feasts(year: i32, septuagesima: Date) -> Vec<Feast> {
         f.date_rule = Some(format!("epiphany-sunday-{n}"));
         if n == 1 {
             f.proper_id = Some("epiphany-sunday-within-octave".to_string());
+            // When the Octave Day falls on Sunday, the Office of the Sunday
+            // within the Octave is said on the preceding Saturday (Diurnal
+            // p. 228; 2019 ordo, 12-13 January).
+            if current == Date::new(year, 1, 13) {
+                f.date_rule = None;
+                f.fixed = fixed(current.add_days(-1));
+            }
         }
         feasts.push(f);
         current = current.add_days(7);
@@ -626,12 +633,20 @@ fn build_calendar_year(
     let mut days = Vec::with_capacity(366);
     let mut pending: Vec<FeastRef> = incoming.to_vec();
     let mut week_id: Option<String> = None;
+    // A Sunday office anticipated on Saturday still governs the week that follows.
+    let mut anticipated_week: Option<String> = None;
     let mut current = Date::new(year, 1, 1);
     while current <= end {
         let season = determine_season(current, &m);
         let mut day_candidates = candidates.get(&current).cloned().unwrap_or_default();
         if current.weekday() == Weekday::Sunday {
-            week_id = temporal_week_id(&day_candidates);
+            week_id = temporal_week_id(&day_candidates).or(anticipated_week.take());
+        }
+        if current.weekday() == Weekday::Saturday {
+            anticipated_week = day_candidates
+                .iter()
+                .find(|f| f.is_category(Category::Sunday))
+                .map(|f| f.proper_id.clone().unwrap_or_else(|| f.id.clone()));
         }
         if let Some(feria) = privileged_lenten_feria(current, m.easter, season, week_id.as_deref())
             && !day_candidates.iter().any(|f| f.is_category(Category::Feria))

@@ -36,10 +36,8 @@ By the sign * of the Cross, deliver us from our enemies, O our God.
 Thou alone * excellest in stature all the cedars of Lebanon: for on thee the Life of the world was hanged, on thee was Christ victorious, and death over death did for ever triumph.
 
 [magnificat-antiphon]
-# SOURCE: divinum-officium Sancti/09-14 [Ant 3] — check against diurnal
-# The diurnal and parish Vespers book print only I Vespers; II Vespers is
-# displaced by I Vespers of Seven Sorrows on the fixed September 14 boundary.
-O blessed art thou, O Cross, * thou which wast counted the only tree worthy to bear the Lord and King of heaven.
+# SOURCE: Monastic Diurnal.pdf, pp. 601-602 (II Vespers, or its commemoration at I Vespers of the Seven Sorrows)
+O Cross, * exceeding blessed, which alone wast counted worthy to bear the King of heaven, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 484 (I Vespers, Exaltation of the Holy Cross)
@@ -206,12 +204,6 @@ V. And praise thy Name, O Lord.
 R. And sing of thee.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. All the world shall worship thee * and sing of thee.
-
-[commemoration-antiphon]
-@use proper/exaltation-holy-cross/benedictus-antiphon
-
-[commemoration-versicle]
-@use proper/exaltation-holy-cross/versicle-lauds
 
 [chapter-vespers]
 @use proper/exaltation-holy-cross/chapter-lauds

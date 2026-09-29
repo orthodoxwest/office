@@ -2663,5 +2663,101 @@
         "absent": true
       }
     ]
+  },
+  {
+    "id": "advent-ferial-antiphons",
+    "source": "Monastic Diurnal pp. 162-164 (Ferial Office in Advent: Hours by week), 173-176 (Antiphons at Lauds and the Hours, Dec. 17-23; Saturday rule). 2026 ordo 16 and 18 Dec. ('Wed./Fri. Ant.', 'Hours Advent Ppr.'); 2025 ordo 20 Dec. (Saturday takes Monday's set when St Thomas falls on Sunday).",
+    "cases": [
+      {
+        "date": "2026-12-01",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-2",
+        "ref": "proper/advent-sunday-1/psalm-antiphon-2"
+      },
+      {
+        "date": "2026-12-16",
+        "hour": "none",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-5",
+        "ref": "proper/advent-sunday-3/psalm-antiphon-5"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-1",
+        "ref": "seasonal/advent/psalm-antiphon-1-late-friday"
+      },
+      {
+        "date": "2026-12-18",
+        "hour": "terce",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-2",
+        "ref": "seasonal/advent/psalm-antiphon-2-late-friday"
+      },
+      {
+        "date": "2026-12-19",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-1",
+        "ref": "seasonal/advent/psalm-antiphon-1-late-monday"
+      },
+      {
+        "date": "2026-12-19",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-3",
+        "ref": "seasonal/advent/psalm-antiphon-late-saturday"
+      },
+      {
+        "date": "2026-12-19",
+        "hour": "sext",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-3",
+        "ref": "seasonal/advent/psalm-antiphon-late-saturday"
+      },
+      {
+        "date": "2025-12-20",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "psalm-antiphon-2",
+        "ref": "seasonal/advent/psalm-antiphon-2-late-monday"
+      }
+    ]
+  },
+  {
+    "id": "epiphany-octave",
+    "source": "Monastic Diurnal pp. 224-228 (all as on the Feast except each day's antiphons; Sunday office on Saturday when the Octave Day is Sunday). 2019 ordo 11-13 January; 2021-2026 ordos, Sunday II Vespers Comm. Oct. 'The wise men'.",
+    "cases": [
+      {
+        "date": "2019-01-12",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "collect",
+        "contains": "O Lord, we beseech thee mercifully to receive"
+      },
+      {
+        "date": "2019-01-13",
+        "hour": "lauds",
+        "commemoration_owner": "",
+        "slot": "benedictus-antiphon",
+        "contains": "the Church is joined"
+      },
+      {
+        "date": "2019-01-12",
+        "hour": "lauds",
+        "commemoration_owner": "epiphany-octave-day-7",
+        "slot": "commemoration-antiphon",
+        "contains": "the Church is joined"
+      },
+      {
+        "date": "2026-01-11",
+        "hour": "vespers",
+        "commemoration_owner": "epiphany-octave-day-6",
+        "slot": "commemoration-antiphon",
+        "contains": "beholding the star"
+      }
+    ]
   }
 ]

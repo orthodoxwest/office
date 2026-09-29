@@ -83,44 +83,6 @@ R. And life everlasting. Amen.
 V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
-[commemoration-antiphon]
-Pray for us, O holy N., * that we may be made worthy of the promises of Christ.
-
-[commemoration-versicle]
-V. The Lord hath chosen him for himself.
-R. As his treasure for ever.
-
-[commemoration-collect]
-# The conclusion is appended by the engine per XXXIII.4-5, as for every other
-# proper collect; it is not carried inline here.
-Grant, O Lord, we beseech thee, the prayers of thy holy servant, that we who
-cannot by our own merits attain to thy grace may be helped by his intercession.
-
-# Collect conclusions, per XII Of the Collects in the Monastic Diurnal's General
-# Rubrics (PDF p. 29, printed p. xxxi; also GRMB XXXIII.4):
-#
-#   If the Collect is addressed to God the Father, the conclusion is Through
-#   Jesus Christ; if addressed to the God the Son, the conclusion is Who livest
-#   and reignest.
-#   If, in the beginning of the Collect, the Son is mentioned, Through the same
-#   Jesus Christ is said; but if the Son is mentioned at the end of the Collect,
-#   Who liveth and reigneth is said.
-#   If mention is made of the Holy Spirit in the Collect, there is said In the
-#   unity of the same Holy Ghost, etc.
-#
-# Which form each collect takes is recorded in shared/collect-conclusions.
-# Wording follows the diurnal, which prints all five forms in full at XII and
-# says "Holy Spirit" in every one of them. The books print the conclusions
-# abbreviated ("Through &c."); we expand them, as we do the secret prayers,
-# because the ink and space constraints that justify abbreviating in print do
-# not apply here.
-#
-# The body of the diurnal prints a conclusion in full in only two places, and
-# they disagree: the Office of the Dead (printed pp. 33*, 42*, and the All
-# Souls collect) says "Holy Spirit", agreeing with the rule, while Prime
-# (printed p. 9) says "Holy Ghost". The rule and the larger group govern here;
-# ordinary/prime/collect keeps its printed wording inline and is flagged there.
-
 [collect-conclusion-through]
 # SOURCE: Monastic Diurnal.pdf General Rubrics XII, printed p. xxxi (PDF p. 29)
 Through thy Son Jesus Christ our Lord, who with thee in the unity of the Holy

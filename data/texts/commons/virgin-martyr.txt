@@ -68,6 +68,10 @@ This is a wise Virgin, * whom the Lord hath found watching.
 # SOURCE: monastic diurnal, pp. 48*–49* (Common of Virgins, For a Virgin Martyr)
 O God, who among other miracles of thy power hast bestowed the victory of martyrdom also upon women: mercifully grant that we who honour the birthday of blessed N., thy Virgin and Martyr, may through her example walk in the way that leadeth unto thee.
 
+[collect-alternate]
+# SOURCE: monastic diurnal, p. 49* (Common of Virgins, For a Virgin Martyr, Another Collect)
+We beseech thee, O Lord, that blessed N., thy Virgin and Martyr, may implore for us thy pardon: who was ever pleasing unto thee both by virtue of her chastity and by her manifestation of thy power.
+
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 47* (Common of Virgins, At Lauds)
 !2 Cor 10:17-18

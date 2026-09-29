@@ -55,25 +55,12 @@ R. Neither forsake me, O God of my salvation.
 V. I said, Lord, be merciful unto me.
 R. Heal my soul, for I have sinned against thee.
 
-[short-responsory]
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-V. Forsake us not, O Lord our God.
-R. And thy holy Name is called upon us.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-
 [pre-collect-versicles]
 # SOURCE: 03. Terce Through the Week Alex edit 11-24 v.01.docx, p. 5
 V. The Lord be with you.
 R. And with thy spirit.
 
 Let us pray.
-
-[collect]
-O God, who didst consecrate this hour by the descent of the Holy Spirit upon
-thine Apostles: grant, we beseech thee, that the fire of the same Spirit may
-abide in us, and guide all our thoughts and desires heavenward.
 
 [blessing]
 @use shared/formulas/daily-blessing

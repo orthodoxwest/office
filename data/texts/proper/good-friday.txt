@@ -1,10 +1,6 @@
 [vespers-psalmody]
-# SOURCE: Monastic Diurnal p. 315: same five psalms on this and following day
-psalm-antiphon-1 = psalms/116b
-psalm-antiphon-2 = psalms/120
-psalm-antiphon-3 = psalms/140
-psalm-antiphon-4 = psalms/141
-psalm-antiphon-5 = psalms/142
+# SOURCE: Monastic Diurnal.pdf, p. 315 (Maundy Thursday at Vespers: "On this and the following day")
+@use proper/holy-thursday/vespers-psalmody
 
 [psalm-antiphon]
 @use proper/good-friday/psalm-antiphon-1

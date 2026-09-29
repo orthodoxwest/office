@@ -113,7 +113,6 @@ class ProperStatus:
     missing_feasts: int
     commons_fallback_feasts: int
     placeholders: int
-    unresolved_rendered: int
     ordinary_fallback_candidates: int
 
 
@@ -314,7 +313,6 @@ def parse_audit(text: str, data_dir: pathlib.Path) -> ProperStatus:
         missing_feasts=header(r"^=== Missing propers: (\d+) feast"),
         commons_fallback_feasts=header(r"^=== Commons fallback: (\d+) feast"),
         placeholders=header(r"^=== Placeholders: (\d+) corpus"),
-        unresolved_rendered=header(r"^=== Sweep \d+: unresolved texts: (\d+)"),
         ordinary_fallback_candidates=header(
             r"^=== Sweep \d+: ordinary fallbacks on Double\+ days: (\d+) slot"),
     )
@@ -939,8 +937,7 @@ def render_markdown(year: int, proper: ProperStatus, provenance: ProvenanceStatu
         (f"- **Known proper-slot coverage: {percent(proper_filled, proper.expected_slots):.1f}%** "
          f"({proper_filled}/{proper.expected_slots}). The static audit flags {proper.missing_slots} "
          f"slot(s) across {proper.missing_feasts} feast(s); this is not a count of all missing appointments or open issues."),
-        (f"- **Rendered completeness: {percent(proper.expected_slots - proper.unresolved_rendered, proper.expected_slots):.1f}%** "
-         f"({proper.unresolved_rendered} unresolved annual-sweep finding(s)); "
+        (f"- **Rendered completeness:** every hour composes (a missing corpus entry fails composition); "
          f"{proper.ordinary_fallback_candidates} ordinary-fallback candidate(s) still need "
          "book-checking or an explicit acknowledgement."),
         (f"- **Text source verification: {percent(provenance.verified, provenance.total):.1f}%** "

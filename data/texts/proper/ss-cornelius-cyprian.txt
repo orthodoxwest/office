@@ -107,3 +107,7 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: monastic diurnal, p. 26* (Common of Many Martyrs, For Many Martyrs, Bishops); cited for this feast at p. 610 ("Collect, p. 26*")
+We beseech thee, O Lord, let the feast of thy blessed Martyrs, who are also Bishops, Cornelius and Cyprian, support us: and may their prayer, which we entreat, obtain for us thy favour.

@@ -107,6 +107,11 @@ impl Engine {
         mark_psalm_doxologies(&mut hour);
         mark_announced_antiphons(&mut hour, day, hour_name);
         append_context_decisions(&mut hour, day, hour_name, moveable);
+        // A missing corpus entry is a composition failure, never rendered text:
+        // the 28-year golden digest then fails before a regression ships.
+        if let Some(marker) = hour.sections.iter().flat_map(|s| &s.elements).find_map(|e| unresolved_marker(&e.text)) {
+            return Err(format!("composing {hour_name} for {}: unresolved text {marker}", day.date));
+        }
         Ok(hour)
     }
 }
@@ -589,6 +594,17 @@ pub fn title_case(s: &str) -> String {
         })
         .collect::<Vec<String>>()
         .join(" ")
+}
+
+/// The first "[… not found: …]" marker in rendered text. The composer renders
+/// such a marker instead of failing when no corpus text resolves; callers that
+/// check whole calendars (the golden digest, the audit sweep) treat it as an
+/// error.
+pub fn unresolved_marker(text: &str) -> Option<&str> {
+    let mid = text.find(" not found: ")?;
+    let start = text[..mid].rfind('[')?;
+    let end = mid + text[mid..].find(']')?;
+    Some(&text[start..=end])
 }
 
 #[cfg(test)]

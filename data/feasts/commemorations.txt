@@ -1679,12 +1679,13 @@ Source = awrv
 
 [comm-extra-05-06-octave-of-the-solemnity-of-st-joseph]
 Name = Octave of the Solemnity of St Joseph
+ProperID = solemnity-st-joseph
 Rank = commemoration
 Color = white
 Category = confessor
-Month = 5
-Day = 6
+DateRule = easter+24
 Source = awrv
+Notes = Octave Day of the Solemnity (easter+17); the 2026 ordo commemorates it from the feast's proper ("Comm. Joseph (suppl.)", 5-6 May)
 
 [comm-extra-05-07-st-alexis-toth-priest-and-confessor]
 ProperID = st-alexis-toth

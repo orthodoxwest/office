@@ -76,13 +76,13 @@ JANUARY
                Com. St Paul the First Hermit ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers w · I fol. (Sunday within the Octave of the Epiphany) · Mag. The Child Jesus · No Suff.
-               Com. Day V within the Octave of the Epiphany ("The wise men")
+               Com. Day V within the Octave of the Epiphany ("All they from Sheba")
                Com. St Hyginus of Rome, Bishop & Martyr ("This is a Martyr")
  11  Sun     Sunday within the Octave of the Epiphany   [sd]  w
            Day VI within the Octave of the Epiphany (sd)
            St Hyginus of Rome, Bishop & Martyr (com)
            Lauds   w · Ben. The Child Jesus · No Preces · No Suff.
-               Com. Day VI within the Octave of the Epiphany ("The wise men")
+               Com. Day VI within the Octave of the Epiphany ("To-day")
                Com. St Hyginus of Rome, Bishop & Martyr ("He that hateth his life")
            Hours   No Preces
            Vespers w · II prec. · Mag. Son · No Suff.
@@ -783,11 +783,11 @@ MAY
            Lauds   w · Ben. And they constrained him · No Preces · No Suff.
            Hours   Preces
            Vespers r · I fol. (St John before the Latin Gate) · Mag. John the Apostle · No Suff.
-               Com. Octave of the Solemnity of St Joseph ("I will liken him")
+               Com. Octave of the Solemnity of St Joseph ("When Mary")
   6  Wed     St John before the Latin Gate              [gd]  r
            Octave of the Solemnity of St Joseph (com)
            Lauds   r · Ben. Daughters of Jerusalem · No Preces · No Suff.
-               Com. Octave of the Solemnity of St Joseph ("Well done, good and faithful servant")
+               Com. Octave of the Solemnity of St Joseph ("Joseph, thou son of David")
            Hours   No Preces
            Vespers r · II prec. · Mag. John the Apostle · No Suff.
                Com. St Alexis Toth, Priest & Confessor ("I will liken him")
@@ -1645,7 +1645,7 @@ SEPTEMBER
            Lauds   r · Ben. Thou alone · No Preces · No Suff.
            Hours   No Preces
            Vespers w · I fol. (Seven Sorrows of the B.V.M.) · Mag. Look not · No Suff.
-               Com. Exaltation of the Holy Cross ("Thou alone")
+               Com. Exaltation of the Holy Cross ("O Cross")
                Com. St Nicomedes, Martyr ("This is a Martyr")
  15  Tue     Seven Sorrows of the B.V.M.                [2cl] w
            St Nicomedes, Martyr (com)
