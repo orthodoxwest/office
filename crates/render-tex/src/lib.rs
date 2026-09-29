@@ -77,17 +77,19 @@ fn title_block(hour: &OfficeHour) -> String {
     )
 }
 
-/// The season as a printed ordo names it.
+/// The season as the web hour header names it: the tides by their season
+/// names, so none reads as the feast day, and the season after Pentecost
+/// unnamed, its Sundays and feasts naming themselves.
 fn season_name(season: Season) -> &'static str {
     match season {
         Season::Advent => "Advent",
         Season::Christmas => "Christmastide",
-        Season::Epiphany => "Time after Epiphany",
+        Season::Epiphany => "Epiphanytide",
         Season::Septuagesima => "Septuagesima",
         Season::Lent => "Lent",
         Season::Passiontide => "Passiontide",
         Season::Easter => "Eastertide",
-        Season::Pentecost => "Time after Pentecost",
+        Season::Pentecost => "",
     }
 }
 
@@ -723,7 +725,7 @@ mod tests {
         };
         assert_eq!(
             title_block(&hour),
-            "\\officetitle{Lauds}{Tuesday, September 29, 2026}{Dedication of St Michael the Archangel}{Time after Pentecost}{White}{white}\n\n"
+            "\\officetitle{Lauds}{Tuesday, September 29, 2026}{Dedication of St Michael the Archangel}{}{White}{white}\n\n"
         );
         let setup = document_setup(&hour);
         assert!(setup.contains("\\newcommand{\\officeday}{Dedication of St Michael the Archangel}"), "{setup}");

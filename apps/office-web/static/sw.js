@@ -52,6 +52,7 @@ var CORE_ASSETS = [
   "/static/fonts/eb-garamond-regular.woff2",
   "/static/fonts/eb-garamond-italic.woff2",
   "/static/fonts/eb-garamond-bold.woff2",
+  "/static/fonts/noto-sans-symbols-cross.woff2",
   // The limewash wall (portrait for phones, wide crop for large screens) is
   // also a relative url() in style.css; precache both so an installed app
   // looks the same offline whatever it is opened on.

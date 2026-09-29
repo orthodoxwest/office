@@ -16,6 +16,14 @@ const SIGIL_CLASS: &str = "sigil";
 const SIGIL_WORD_CLASS: &str = "sigil sigil-word";
 const SIGIL_ALL_CLASS: &str = "sigil sigil-all";
 
+/// One preserved source line of a multi-line prayer (the Gloria Patri's two
+/// verses): its own block, so a wrapped remainder can hang beneath it.
+const SOURCE_LINE_OPEN: &str = "<span class=\"source-line\">";
+
+/// The pointing asterisk between half-verses. A no-break space binds it to
+/// the half it ends, so a wrap can never open a line with the mark.
+const MEDIANT: &str = "\u{a0}<span class=\"mediant\">*</span> ";
+
 /// The escape for every run of display text in an hour.
 pub fn esc_text(s: &str) -> String {
     html_escape_string(&typeset(s))
@@ -87,7 +95,8 @@ fn render_office_element(elem: &OfficeElement, doxology: &str) -> String {
                 sb.push_str("<h3 class=\"item-label\">");
                 sb.push_str(&esc_text(&elem.label));
                 if !elem.incipit.is_empty() {
-                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\"> · </span>");
+                    // The dot stays with the label; the Latin title wraps whole.
+                    sb.push_str("<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>");
                     sb.push_str("<span class=\"psalm-incipit\" lang=\"la\">");
                     sb.push_str(&esc_text(&elem.incipit));
                     sb.push_str("</span>");
@@ -182,7 +191,7 @@ pub fn render_psalm_verses(text: &str) -> String {
                 sb.push_str("<p class=\"verse\">");
                 sb.push_str(&esc_text(first));
                 if !second.is_empty() {
-                    sb.push_str(" <span class=\"mediant\">*</span> ");
+                    sb.push_str(MEDIANT);
                     sb.push_str(&esc_text(second));
                 }
                 sb.push_str("</p>");
@@ -205,7 +214,7 @@ pub fn render_psalm_verses(text: &str) -> String {
                 }
                 sb.push_str(&esc_cross(&first));
                 if !second.is_empty() {
-                    sb.push_str(" <span class=\"mediant\">*</span> ");
+                    sb.push_str(MEDIANT);
                     sb.push_str(&esc_cross(second));
                 }
                 if !number.is_empty() {
@@ -318,12 +327,17 @@ fn render_voiced_block(text: &str, spoken_at: &[bool], mode: Mode) -> String {
         }
         emit_gap(sb, pending);
         sb.push_str("<p class=\"plain-line\">");
-        let preserve = mode == Mode::PreserveLines || (mode == Mode::PreserveFirstBlock && *blocks == 0);
+        let preserve = prose.len() > 1 && (mode == Mode::PreserveLines || (mode == Mode::PreserveFirstBlock && *blocks == 0));
         for (i, l) in prose.iter().enumerate() {
-            if i > 0 {
-                sb.push_str(if preserve { "<br>" } else { " " });
+            if preserve {
+                sb.push_str(SOURCE_LINE_OPEN);
+            } else if i > 0 {
+                sb.push(' ');
             }
             emit_voiced(sb, &l.text, l.offset, spoken_at);
+            if preserve {
+                sb.push_str("</span>");
+            }
         }
         sb.push_str("</p>");
         prose.clear();
@@ -378,16 +392,20 @@ fn render_marian_antiphon(text: &str) -> String {
 /// A line of liturgical text with its " * " mediant styled.
 pub fn chant_line_html(line: &str) -> String {
     if let Some((before, after)) = line.split_once(" * ") {
-        return format!("{} <span class=\"mediant\">*</span> {}", esc_cross(before), esc_cross(after));
+        return format!("{}{MEDIANT}{}", esc_cross(before), esc_cross(after));
     }
     if let Some(before) = line.strip_suffix(" *") {
-        return format!("{} <span class=\"mediant\">*</span>", esc_cross(before));
+        return format!("{}{}", esc_cross(before), MEDIANT.trim_end());
     }
     esc_cross(line)
 }
 
 fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
-    let mut sb = String::from("<div class=\"liturgical-block\">");
+    let mut sb = String::from(if short_responsory {
+        "<div class=\"liturgical-block short-responsory\">"
+    } else {
+        "<div class=\"liturgical-block\">"
+    });
     let mut prose: Vec<String> = Vec::new();
     let mut prose_blocks = 0;
     let mut pending_gap = false;
@@ -424,18 +442,25 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
             return;
         }
         sb.push_str("<p class=\"plain-line\">");
-        for (i, l) in prose.iter().enumerate() {
-            if i > 0 {
-                sb.push_str(if mode == Mode::PreserveLines { "<br>" } else { " " });
+        if mode == Mode::PreserveLines && prose.len() > 1 {
+            for l in prose.iter() {
+                sb.push_str(&format!("{SOURCE_LINE_OPEN}{}</span>", chant_line_html(l)));
             }
-            sb.push_str(&chant_line_html(l));
+        } else {
+            sb.push_str(&prose.iter().map(|l| chant_line_html(l)).collect::<Vec<_>>().join(" "));
         }
         sb.push_str("</p>");
         prose.clear();
         *blocks += 1;
     };
-    let mut first_response = true;
+    // A responsory opens with its response (℟. br.). One that opens with a
+    // versicle, such as Compline's Keep us / Hide us, is an ordinary pair.
+    let mut opening = short_responsory;
     for line in parse_block(text) {
+        let at_opening = opening && !matches!(line.kind, BlockKind::Gap | BlockKind::ScriptureRef);
+        if at_opening {
+            opening = false;
+        }
         let (line_class, mark_class, sigil) = match line.kind {
             BlockKind::Gap => {
                 flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
@@ -449,8 +474,7 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
                 continue;
             }
             BlockKind::Versicle => ("versicle-line", SIGIL_CLASS, "℣."),
-            BlockKind::Response if short_responsory && first_response => {
-                first_response = false;
+            BlockKind::Response if at_opening => {
                 flush(&mut sb, &mut prose, &mut prose_blocks, &mut pending_gap);
                 emit_gap(&mut sb, &mut pending_gap);
                 sb.push_str(&format!(
@@ -459,10 +483,7 @@ fn render_block(text: &str, mode: Mode, short_responsory: bool) -> String {
                 ));
                 continue;
             }
-            BlockKind::Response => {
-                first_response = false;
-                ("response-line", SIGIL_CLASS, "℟.")
-            }
+            BlockKind::Response => ("response-line", SIGIL_CLASS, "℟."),
             BlockKind::Blessing => ("versicle-line", SIGIL_WORD_CLASS, "Blessing."),
             BlockKind::All => ("all-line", SIGIL_ALL_CLASS, "All:"),
             BlockKind::Prose => {
@@ -536,10 +557,12 @@ pub fn render_gloria_patri(text: &str) -> String {
     let lines: Vec<&str> = trimmed.split('\n').collect();
     let (line1, line2) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
     let mut sb = String::from("<p class=\"gloria-patri\">");
-    sb.push_str(&chant_line_html(line1));
-    if !line2.is_empty() {
-        sb.push_str("<br>");
-        sb.push_str(&chant_line_html(line2));
+    if line2.is_empty() {
+        sb.push_str(&chant_line_html(line1));
+    } else {
+        for line in [line1, line2] {
+            sb.push_str(&format!("{SOURCE_LINE_OPEN}{}</span>", chant_line_html(line)));
+        }
     }
     sb.push_str("</p>");
     sb
