@@ -75,15 +75,15 @@ There are three that bear record in heaven, the Father, the Word, and the Holy G
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 316 (The Feast of the Most Holy Trinity)
+# SOURCE: Monastic Diurnal.pdf, p. 404
 Tu, Trinitatis Unitas
 
 Thou Trinity in Unity
 Who rulest all things mightily,
 Bow down to hear the songs of praise
-Which we, thy wakeful servants raise.
+Which we, thy wakeful servants, raise.
 
-The day-star's rays are glitt'ring clear,
+The day-star's rays are glittering clear,
 And tell that day itself is near;
 The shadows of the night depart:
 Thou, holy Light, illume the heart.
@@ -94,6 +94,7 @@ All glory, as is ever meet,
 To God the Holy Paraclete.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 194 (The Feast of the Most Holy Trinity)
 O lux beata Trinitas
@@ -145,32 +146,20 @@ R. And the Holy Ghost.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Let us bless the Father, and the Son, * and the Holy Ghost.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 408 (Trinity Sunday, At Terce)
-R. Let us bless the Father, and the Son, * and the Holy Ghost.
-R. Let us bless the Father, and the Son, * and the Holy Ghost.
-V. Praise him, and magnify him for ever.
-R. And the Holy Ghost.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Let us bless the Father, and the Son, * and the Holy Ghost.
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 408 (Little Hours versicle; replaces a derived short responsory)
+V. Let us bless the Father, and the Son, and the Holy Ghost.
+R. Praise him, and magnify him for ever.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 408 (Trinity Sunday, At Sext)
-R. Blessed art thou, O Lord, * in the firmament of heaven.
-R. Blessed art thou, O Lord, * in the firmament of heaven.
-V. And to be praised, and glorified, and magnified for ever.
-R. In the firmament of heaven.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Blessed art thou, O Lord, * in the firmament of heaven.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 408 (Little Hours versicle; replaces a derived short responsory)
+V. Blessed art thou, O Lord, in the firmament of heaven.
+R. And to be praised, and glorified, and magnified for ever.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 408 (Trinity Sunday, At None)
-R. By the word of the Lord * were the heavens made.
-R. By the word of the Lord * were the heavens made.
-V. And all the hosts of them by the breath of his mouth.
-R. Were the heavens made.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. By the word of the Lord * were the heavens made.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 408 (Little Hours versicle; replaces a derived short responsory)
+V. By the word of the Lord were the heavens made.
+R. And all the hosts of them by the breath of his mouth.
 
 [chapter-vespers]
 @use proper/trinity-sunday/chapter-lauds

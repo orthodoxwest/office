@@ -91,6 +91,7 @@ To Father and to Paraclete.
 
 Amen.
 [hymn-vespers]
+# SOURCE: Monastic Diurnal.pdf, p. 64*
 Ave, maris stella
 
 Star of ocean fairest,
@@ -106,7 +107,7 @@ Eva's name of sadness.
 Loose the bonds of terror,
 Lighten blinded error,
 All our ills repressing,
-Pray for ev'ry blessing.
+Pray for every blessing.
 
 Mother's care displaying,
 Offer him thy praying,
@@ -129,6 +130,7 @@ With one praise we bless thee,
 Three in One confess thee.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 717 (Common of Feasts of the B.V.M.)
 V. Full of grace are thy lips.

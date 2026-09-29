@@ -39,8 +39,8 @@ Thou art Peter, * and upon this rock I will build my Church.
 @use commons/apostle/short-responsory-lauds
 
 [magnificat-antiphon]
-# SOURCE: draft archdiocesan Vespers book, p. 420 (II Vespers for Saints Peter and Paul)
-Today * Simon Peter ascended the gibbet of the cross, alleluia: today the Key-bearer of the Kingdom joyfully departed to Christ: today Paul the Apostle, the light of the whole world, bowed down his head; and for the Name of Christ, received the crown of martyrdom, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 547
+To-day * Simon Peter ascended the gibbet of the cross, alleluia: to-day the Key-bearer of the Kingdom joyfully departed to Christ: to-day Paul the Apostle, the light of the whole world, bowed down his head; and for the Name of Christ, received the crown of martyrdom, alleluia.
 
 [magnificat-antiphon-first]
 # SOURCE: draft archdiocesan Vespers book, p. 411 (I Vespers for Saints Peter and Paul)
@@ -93,12 +93,12 @@ Both now and ever, through the ages infinite.
 
 Amen.
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 404–405, 413–414 (I and II Vespers for Saints Peter and Paul)
+# SOURCE: Monastic Diurnal.pdf, p. 544
 Aurea luce et decore roseo
 
 With golden splendour, and with roseate loveliness,
 Thou didst illumine, Light of Light, the universe;
-The heav'ns adorning with a glorious martyrdom
+The heavens adorning with a glorious martyrdom
 This day, which bringeth pardon to the penitent.
 
 Celestial Warder! earth's Instructor eloquent!
@@ -107,7 +107,7 @@ By cross triumphant, by the sword victorious,
 Now are ye laurelled, Life's immortal senators.
 
 O Rome, thrice happy, that so great a martyrdom
-Thy walls empurpled with rich life-blood, halloweth!
+Thy walls, empurpled with rich life-blood, halloweth!
 Not thine the merit; by thy Princes' excellence
 Thou shinest fairer than the world's magnificence.
 
@@ -117,6 +117,7 @@ Trinal yet Onely, reigning in his majesty
 Both now and ever, through the ages infinite.
 
 Amen.
+
 [chapter-vespers]
 @use proper/ss-peter-paul/chapter-lauds
 

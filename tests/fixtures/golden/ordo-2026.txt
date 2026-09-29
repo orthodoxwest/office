@@ -531,7 +531,7 @@ MARCH
            Lauds   w · Ben. Benedict · No Preces · No Suff.
                Com. Saturday after Lent III ("But Jesus stooped down")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Today holy Benedict · No Suff.
+           Vespers w · II prec. · Mag. To-day holy Benedict · No Suff.
                Com. IV Sunday in Lent ("Woman")
  22  Sun  L  IV SUNDAY IN LENT                          [1cl] p
            Lauds   p · Ben. When Jesus · No Preces · Suff.
@@ -1124,7 +1124,7 @@ JUNE
  29  Mon     SS PETER AND PAUL, APOSTLES                [1cl] r
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Today · No Suff.
+           Vespers r · II prec. · Mag. To-day · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
  30  Tue     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)

@@ -55,14 +55,20 @@ Hear us, O God our Saviour: that as we rejoice in the festival of blessed N., th
 O how fair is the chaste generation in the glory thereof: for the memorial thereof is immortal, * because it is known with God and with men.
 R. Thanks be to God.
 
-[short-responsory-terce]
-@use commons/virgin-martyr/short-responsory-terce
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 49* (Little Hours versicle; replaces a derived short responsory)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.
 
-[short-responsory-sext]
-@use commons/virgin-martyr/short-responsory-sext
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 50* (Little Hours versicle; replaces a derived short responsory)
+V. God shall help her with his countenance.
+R. God is in the midst of her, therefore shall she not be removed.
 
-[short-responsory-none]
-@use commons/virgin-martyr/short-responsory-none
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 50* (Little Hours versicle; replaces a derived short responsory)
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 683 (Common of Virgins)

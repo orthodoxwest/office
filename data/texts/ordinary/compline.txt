@@ -92,4 +92,5 @@ V. May the divine help remain with us always.
 R. And with our absent brethren. Amen.
 
 [concluding-rubric]
-Then secretly, the following prayers:
+# SOURCE: Monastic Diurnal.pdf, p. 152
+Then secretly, Our Father, Hail Mary, and I believe.

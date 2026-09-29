@@ -75,7 +75,7 @@ Kings shall see and arise, princes also shall worship the Lord thy God, * and th
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: monastic diurnal, pp. 540–541 (Nativity of St John Baptist, At Lauds)
+# SOURCE: Monastic Diurnal.pdf, p. 540, 541
 O nimis felix
 
 O more than blessed, merit high attaining,
@@ -83,9 +83,9 @@ Pure as the snow-drift, innocent of evil,
 Child of the desert, mightiest of martyrs,
 Greatest of prophets.
 
-Thirtyfold increase some with glory crowneth;
-Sixtyfold fruitage prize for others winneth;
-Hundredfold measure, thrice repeated, decks thee,
+Thirty-fold increase some with glory crowneth;
+Sixty-fold fruitage prize for others winneth;
+Hundred-fold measure, thrice repeated, decks thee,
 Blest one, for guerdon.
 
 O may the virtue of thine intercession,
@@ -95,17 +95,18 @@ Here in the desert.
 
 Thus may our gracious Maker and Redeemer,
 Seeking a station for his hallowed footsteps,
-Find, when he cometh, temples undefilèd,
+Find, when he cometh, temples undefiled,
 Meet to receive him.
 
-Now as the angels celebrate thy praises,
+Now as the Angels celebrate thy praises,
 Godhead essential, Trinity co-equal;
 Spare thy redeemed ones, as they bow before thee,
 Pardon imploring.
 
 Amen.
+
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 389, 397 (The Nativity of St John Baptist)
+# SOURCE: Monastic Diurnal.pdf, p. 538, 539
 Ut queant laxis
 
 O for thy spirit, holy John, to chasten
@@ -119,12 +120,12 @@ How he shall name thee, what thy future story,
 Duly revealing.
 
 Scarcely believing message so transcendent,
-Him for a season pow'r of speech forsaketh,
+Him for a season power of speech forsaketh,
 Till, at thy wondrous birth, again returneth
 Voice to the voiceless.
 
 Thou, in thy mother's womb all darkly cradled,
-Knewest thy Monarch, biding in his chamber,
+Knewest thy Monarch, biding in his chamber;
 Whence the two parents, through their children's merits,
 Mysteries uttered.
 
@@ -134,6 +135,7 @@ Fostering Spirit; one and only Godhead
 Through all the ages.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 470 (The Nativity of St John Baptist)
 V. This child shall be great in the sight of the Lord.
@@ -147,8 +149,12 @@ R. Whose name was John.
 [versicle-first-vespers]
 @use proper/nativity-john-baptist/versicle-vespers
 
-[short-responsory-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 474; parish Sanctoral Lauds booklet, PDF p. 119 (identical at Lauds)
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 541 (Little Hours versicle; replaces a derived short responsory)
+V. There was a man sent from God.
+R. Whose name was John.
+
+[short-responsory-lauds]
 R. There was a man * sent from God.
 R. There was a man * sent from God.
 V. Whose name was John.
@@ -156,26 +162,15 @@ R. Sent from God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. There was a man * sent from God.
 
-[short-responsory-lauds]
-@use proper/nativity-john-baptist/short-responsory-terce
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)
+V. Among them that are born of women there hath not risen a greater.
+R. Than John the Baptist.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At Sext)
-R. Among them that are born of women * there hath not risen a greater.
-R. Among them that are born of women * there hath not risen a greater.
-V. Than John the Baptist.
-R. There hath not risen a greater.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Among them that are born of women * there hath not risen a greater.
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At None)
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
-V. John the Baptist, the Lord's Forerunner.
-R. Brought forth a mighty son.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)
+V. Elisabeth, the wife of Zacharias, brought forth a mighty son.
+R. John the Baptist, the Lord's Forerunner.
 
 [chapter-vespers]
 @use proper/nativity-john-baptist/chapter-lauds

@@ -19,8 +19,8 @@ R. They shall obtain joy and gladness, alleluia.
 @use commons/apostle-paschal/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 612 (Common of Apostles and Evangelists in Paschaltide)
-Thy Saints, * O Lord, shall blossom as a lily, alleluia: and as the odour of balsam shall they be before thee, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 17*
+Thy Saints, * O Lord, shall blossom as the lily, alleluia: and as the odour of balsam shall they be before thee, alleluia.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds book, p. 613 (Common of Apostles and Evangelists in Paschaltide)

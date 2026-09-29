@@ -86,30 +86,30 @@ And they departed from the presence of the council, * rejoicing that they were c
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Let Heav_ns Exultant Praises Ring, Apostles and Evang out of Paschaltide.docx); draft archdiocesan Lauds book, pp. 609-610
+# SOURCE: Monastic Diurnal.pdf, p. 11*
 Exsultet cælum laudibus
 
-Let heav'n's exultant praises ring,
+Let heaven's exultant praises ring,
 And earth with joy responsive sing:
-Th'Apostles' deeds and high estate
+The Apostles' deeds and high estate
 This festal-tide we celebrate.
 
 O ye who, throned in glory dread,
 Shall judge the living and the dead,
-True lights, the world illuminating,
+True lights, the world illumining,
 Regard the suppliant prayer we bring.
 
-The gates of heav'n at your command,
+The gates of heaven, at your command,
 To all or closed or open stand:
 May we, at your august decree,
 Be loosed from our iniquity.
 
-The pow'r, of old, to you conveyed,
+The power, of old to you conveyed,
 Sickness and health alike obeyed:
 May ye our ailing souls once more
-To strength and holiness restore.
+To strength and holiness restore;
 
-That Christ, th'unerring Judge of doom,
+That Christ, the unerring Judge of doom,
 When he at time's last end shall come,
 May grant us, for his mercy's sake,
 Of joys eternal to partake.
@@ -120,6 +120,7 @@ All glory, as is ever meet,
 To God the Holy Paraclete.
 
 Amen.
+
 [hymn-vespers]
 @use commons/apostle/hymn-lauds
 
@@ -153,16 +154,6 @@ V. They shall remember thy Name, O Lord.
 R. In all lands.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou shalt make them princes * in all lands.
-
-[short-responsory-none]
-# SOURCE: draft archdiocesan / diurnal Common of Apostles (None; reduced form is
-# V. Exceedingly honoured are thy friends, O God. / R. Firmly stablished is their princedom.)
-R. Exceedingly honoured are * thy friends, O God.
-R. Exceedingly honoured are * thy friends, O God.
-V. Firmly stablished is their princedom.
-R. Thy friends, O God.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Exceedingly honoured are * thy friends, O God.
 
 [chapter-vespers]
 @use commons/apostle/chapter-lauds

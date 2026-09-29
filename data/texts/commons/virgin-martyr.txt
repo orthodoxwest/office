@@ -91,10 +91,10 @@ Then lifted I up my supplication from the earth, and prayed for deliverance from
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 143
+# SOURCE: Monastic Diurnal.pdf, p. 48*
 Jesu, corona Virginum
 
-Jesu, the Virgins' crown, do thou,
+Jesu, the Virgins' Crown, do thou
 Accept us, as in prayer we bow;
 Born of that Virgin, whom alone
 The Mother and the Maid we own.
@@ -116,10 +116,11 @@ From taint of all corruption pure.
 
 To God the Father, God the Son,
 And God the Spirit, Three in One,
-Laud, honor, might, and glory be
+Laud, honour, might, and glory be
 From age to age eternally.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: monastic diurnal, p. 47* (Common of Virgins, At I Vespers: Hymn as below at Lauds)
 @use commons/virgin-martyr/hymn-lauds
@@ -159,22 +160,20 @@ R. Go forth, ride prosperously, and reign.
 V. Full of grace are thy lips.
 R. Because God hath blessed thee for ever.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 49* (Common of Virgins, At Terce)
-@use commons/virgin-martyr/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 49* (Little Hours versicle; replaces a derived short responsory)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At Sext)
-@use commons/virgin-martyr/short-responsory-vespers
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 50* (Little Hours versicle; replaces a derived short responsory)
+V. God shall help her with his countenance.
+R. God is in the midst of her, therefore shall she not be removed.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 50* (Common of Virgins, At None)
-R. God hath chosen her * and preferred her.
-R. God hath chosen her * and preferred her.
-V. He hath made her to dwell in his tabernacle.
-R. And preferred her.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God hath chosen her * and preferred her.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 50* (Little Hours versicle; replaces a derived short responsory)
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
 
 [chapter-vespers]
 @use commons/virgin-martyr/chapter-lauds

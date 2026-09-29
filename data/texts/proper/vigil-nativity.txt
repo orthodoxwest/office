@@ -61,32 +61,20 @@ R. Thanks be to God.
 V. To-morrow the iniquity of the earth shall be blotted out.
 R. And the Saviour of the world shall reign over us.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Terce)
-R. Be ye * steadfast.
-R. Be ye * steadfast.
-V. And see the salvation of the Lord with you.
-R. Steadfast.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Be ye * steadfast.
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 183 (Little Hours versicle; replaces a derived short responsory)
+V. Be ye steadfast.
+R. And see the salvation of the Lord with you.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At Sext)
-R. To-morrow ye shall have * salvation.
-R. To-morrow ye shall have * salvation.
-V. Saith the Lord God of hosts.
-R. Salvation.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. To-morrow ye shall have * salvation.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 183 (Little Hours versicle; replaces a derived short responsory)
+V. To-morrow ye shall have salvation.
+R. Saith the Lord God of hosts.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 183 (Christmas Eve, At None)
-R. To-morrow the iniquity of the earth * shall be blotted out.
-R. To-morrow the iniquity of the earth * shall be blotted out.
-V. And the Saviour of the world shall reign over us.
-R. Shall be blotted out.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. To-morrow the iniquity of the earth * shall be blotted out.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 183 (Little Hours versicle; replaces a derived short responsory)
+V. To-morrow the iniquity of the earth shall be blotted out.
+R. And the Saviour of the world shall reign over us.
 
 [chapter-vespers]
 @use proper/vigil-nativity/chapter-lauds

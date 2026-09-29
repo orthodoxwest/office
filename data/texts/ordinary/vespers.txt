@@ -242,9 +242,9 @@ V. Lord, let my prayer be set forth.
 R. In thy sight as the incense.
 
 [versicle-saturday]
-# SOURCE: draft archdiocesan Vespers book, p. 216 (Saturdays Throughout the Year)
+# SOURCE: Monastic Diurnal.pdf, p. 144
 V. Let our evening prayer come up before thee, O Lord.
-R. And let thy mercy come down upon us.
+R. And let thy mercy come down on us.
 
 [magnificat-antiphon-monday]
 # SOURCE: monastic diurnal, p. 122 (Monday at Vespers, Throughout the Year)

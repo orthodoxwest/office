@@ -1524,25 +1524,25 @@
   },
   {
     "id": "apostle-pilot-retains-proper-and-unmigrated-precedence",
-    "source": "Compatibility controls: Conversion of St Paul retains its explicit proper responsories. These assert preservation, not new source verification.",
+    "source": "Compatibility controls: Conversion of St Paul retains its explicit proper Little Hours versicles. These assert preservation, not new source verification.",
     "cases": [
       {
         "date": "2027-01-25",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "proper/conversion-st-paul/short-responsory-terce"
+        "ref": "proper/conversion-st-paul/versicle-terce"
       },
       {
         "date": "2027-01-25",
         "hour": "sext",
         "slot": "versicle",
-        "ref": "proper/conversion-st-paul/short-responsory-sext"
+        "ref": "proper/conversion-st-paul/versicle-sext"
       },
       {
         "date": "2027-01-25",
         "hour": "none",
         "slot": "versicle",
-        "ref": "proper/conversion-st-paul/short-responsory-none"
+        "ref": "proper/conversion-st-paul/versicle-none"
       }
     ]
   },
@@ -1890,19 +1890,19 @@
         "date": "2026-12-26",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "proper/st-stephen/short-responsory-terce"
+        "ref": "proper/st-stephen/versicle-terce"
       },
       {
         "date": "2026-12-26",
         "hour": "sext",
         "slot": "versicle",
-        "ref": "proper/st-stephen/short-responsory-sext"
+        "ref": "proper/st-stephen/versicle-sext"
       },
       {
         "date": "2026-12-26",
         "hour": "none",
         "slot": "versicle",
-        "ref": "proper/st-stephen/short-responsory-none"
+        "ref": "proper/st-stephen/versicle-none"
       }
     ]
   },
@@ -2172,37 +2172,37 @@
         "date": "2026-08-15",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "proper/assumption-bvm/short-responsory-terce"
+        "ref": "proper/assumption-bvm/versicle-terce"
       },
       {
         "date": "2026-08-15",
         "hour": "sext",
         "slot": "versicle",
-        "ref": "proper/assumption-bvm/short-responsory-sext"
+        "ref": "proper/assumption-bvm/versicle-sext"
       },
       {
         "date": "2026-08-15",
         "hour": "none",
         "slot": "versicle",
-        "ref": "proper/assumption-bvm/short-responsory-none"
+        "ref": "proper/assumption-bvm/versicle-none"
       },
       {
         "date": "2026-12-08",
         "hour": "terce",
         "slot": "versicle",
-        "ref": "proper/conception-bvm/short-responsory-terce"
+        "ref": "proper/conception-bvm/versicle-terce"
       },
       {
         "date": "2026-12-08",
         "hour": "sext",
         "slot": "versicle",
-        "ref": "proper/conception-bvm/short-responsory-sext"
+        "ref": "proper/conception-bvm/versicle-sext"
       },
       {
         "date": "2026-12-08",
         "hour": "none",
         "slot": "versicle",
-        "ref": "proper/conception-bvm/short-responsory-none"
+        "ref": "proper/conception-bvm/versicle-none"
       }
     ]
   },

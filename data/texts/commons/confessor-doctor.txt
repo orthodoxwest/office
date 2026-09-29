@@ -123,14 +123,20 @@ Amen.
 [short-responsory-vespers]
 @use commons/confessor-bishop/short-responsory-vespers
 
-[short-responsory-terce]
-@use commons/confessor-bishop/short-responsory-terce
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
 
-[short-responsory-sext]
-@use commons/confessor-bishop/short-responsory-sext
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. The Lord chose him for a priest unto himself.
+R. To offer unto him the sacrifice of praise.
 
-[short-responsory-none]
-@use commons/confessor-bishop/short-responsory-none
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. Thou art a priest for ever.
+R. After the order of Melchisedech.
 
 [versicle-lauds]
 @use commons/confessor-bishop/versicle-lauds

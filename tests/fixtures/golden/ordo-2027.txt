@@ -517,7 +517,7 @@ MARCH
            Lauds   w · Ben. Benedict · No Preces · No Suff.
                Com. Monday after Lent I ("Come, ye blessed")
            Hours   No Preces
-           Vespers w · II prec. · Mag. Today holy Benedict · No Suff.
+           Vespers w · II prec. · Mag. To-day holy Benedict · No Suff.
                Com. Monday after Lent I ("That which ye have done")
  23  Tue  L§ Tuesday after Lent I                       [f2]  v
            Lauds   v · Ben. And Jesus · No Preces · Suff.
@@ -1085,7 +1085,7 @@ JUNE
  29  Tue     SS PETER AND PAUL, APOSTLES                [1cl] r
            Lauds   r · Ben. Whatsoever · No Preces · No Suff.
            Hours   No Preces
-           Vespers r · II prec. · Mag. Today · No Suff.
+           Vespers r · II prec. · Mag. To-day · No Suff.
                Com. St Paul, Apostle ("O holy Apostle Paul")
  30  Wed     Commemoration of St Paul, Apostle          [gd]  w
            St Peter, Apostle (com)
