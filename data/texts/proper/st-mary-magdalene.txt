@@ -34,8 +34,6 @@ Think on our nature frail and weak,
 And raise her prayer that we may gain
 A passage safe o'er life's rough main.
 
-/:The following Ending is never changed.:/
-
 To God alone be honour paid
 For grace so manifold displayed:
 Their guilt he pardons who repent,
@@ -181,3 +179,7 @@ A woman * in the city which was a sinner, when she knew that Jesus sat at meat i
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[hymn-doxology-lauds]
+# SOURCE: monastic diurnal, p. 569: "The following Ending is never changed."
+@omit
