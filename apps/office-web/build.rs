@@ -63,7 +63,8 @@ fn main() {
         embedded.push((name.clone(), dest, stamp(css.as_bytes())));
     }
 
-    let mut out = String::from("/// The embedded files, by path, with their content stamps.\npub static FILES: &[(&str, &[u8], &str)] = &[\n");
+    let mut out =
+        String::from("/// The embedded files, by path, with their content stamps.\npub static FILES: &[(&str, &[u8], &str)] = &[\n");
     for (name, path, stamp) in &embedded {
         writeln!(out, "    ({name:?}, include_bytes!({:?}), {stamp:?}),", path.display().to_string()).expect("write");
     }

@@ -149,14 +149,25 @@ mod tests {
             let digest: String = Sha256::digest(body).iter().map(|b| format!("{b:02x}")).collect();
             assert_eq!(&digest[..12], *stamp, "{name}");
         }
-        assert_eq!(asset_url("fonts/eb-garamond-bold.woff2"), format!("/static/fonts/eb-garamond-bold.woff2?v={}", stamp("static/fonts/eb-garamond-bold.woff2").unwrap()));
+        assert_eq!(
+            asset_url("fonts/eb-garamond-bold.woff2"),
+            format!("/static/fonts/eb-garamond-bold.woff2?v={}", stamp("static/fonts/eb-garamond-bold.woff2").unwrap())
+        );
         assert_eq!(asset_url("missing.css"), "/static/missing.css");
     }
 
     #[test]
     fn service_worker_learns_every_asset_stamp() {
         let resp = service_worker("build1");
-        let body = String::from_utf8(tokio::runtime::Builder::new_current_thread().build().unwrap().block_on(axum::body::to_bytes(resp.into_body(), usize::MAX)).unwrap().to_vec()).unwrap();
+        let body = String::from_utf8(
+            tokio::runtime::Builder::new_current_thread()
+                .build()
+                .unwrap()
+                .block_on(axum::body::to_bytes(resp.into_body(), usize::MAX))
+                .unwrap()
+                .to_vec(),
+        )
+        .unwrap();
         assert!(body.contains(r#"var VERSION = "build1";"#));
         assert!(!body.contains("__ASSET_STAMPS__"));
         let font = stamp("static/fonts/eb-garamond-regular.woff2").unwrap();
