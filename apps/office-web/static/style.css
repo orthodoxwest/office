@@ -26,6 +26,31 @@
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
+/* EB Garamond has no ✠, so every platform once substituted its own dingbat:
+   a heavy sans cross here, a different one there. This face holds only that
+   glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
+   each text stack. unicode-range keeps it from touching any other letter.
+   Block, not swap: a cross that appears a moment late is quieter than one
+   that changes shape as the page settles. */
+@font-face {
+  font-family: "Office Cross";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
+/* The same upright glyph serves italic text, so it is never slanted. */
+@font-face {
+  font-family: "Office Cross";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: block;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
 /* The long ordo keeps its first font choice for the entire visit. A late
    download must not rewrap hundreds of rows above a day anchor. The preload
    and the existing offline font cache still give ready visits EB Garamond.
@@ -52,6 +77,27 @@
   font-weight: 700;
   font-display: optional;
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+}
+
+/* The ordo's cross keeps the same first-choice rule: if the glyph is not
+   ready for first paint, the platform's cross stands for the whole visit,
+   because even a narrower ✠ arriving late rewrapped rows above a day anchor. */
+@font-face {
+  font-family: "Ordo Cross";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
+}
+
+@font-face {
+  font-family: "Ordo Cross";
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: optional;
+  src: url("fonts/noto-sans-symbols-cross.woff2") format("woff2");
+  unicode-range: U+2720;
 }
 
 /* Light theme: the nave — rose-tinted plaster, stained oak, gold leaf.
@@ -198,7 +244,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -243,7 +289,7 @@ footer {
 .day-office-incipit,
 .day-office-comm,
 .day-office-note {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
 }
 
 main {
@@ -337,9 +383,16 @@ summary:focus-visible {
   white-space: nowrap;
 }
 
+/* The cross beside capitals: its drawing is 88% of Garamond's cap height and
+   floats 0.074em above the line, which suits running text but looked shrunk
+   beside DAILY OFFICE. Scaled to the capitals and seated on their baseline;
+   line-height 1 keeps the larger glyph from deepening the header. */
 .site-brand span {
   color: var(--ornament);
   margin-right: 0.2rem;
+  font-size: 1.14em;
+  line-height: 1;
+  vertical-align: -0.074em;
 }
 
 .site-menu {
@@ -1106,15 +1159,52 @@ footer::before {
 
 /* ── Hour page ── */
 
+/* The rule closing the header runs to the prayer's own measure. At the full
+   46rem copy width it overhung the text column by 2.5–3rem on each side from
+   tablet up, the one line on the page that answered to no edge below it. */
 .hour-header {
-  margin-bottom: 1.1rem;
+  width: 100%;
+  max-width: 38rem;
+  margin: 0 auto 1.1rem;
   padding: 0 0 0.45rem;
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
 
-/* Double gold hairlines framing the hour title, echoing the gilded altar frame */
+/* Double gold hairlines framing the hour title, echoing the gilded altar
+   frame. The printer's headpiece home and the ordo open with is set into the
+   upper rule, as the lozenge is into the lower, so the ornament costs the
+   phone no extra height. That rule is two gradient hairlines rather than a
+   border because a border cannot open a gap for it, and a patch of ground
+   behind the ornament would show on the wide hours' plaster wall. */
+.hour-header {
+  --title-rule: var(--ornament-line);
+  /* Half the break in the upper rule: the headpiece's 4.25rem half-width,
+     less the 0.5rem its sprigs are inset in their boxes, plus 0.4rem of
+     clear air before each end of the rule. */
+  --title-rule-break: 4.15rem;
+}
+
+.hour-header .ornament-headpiece {
+  position: relative;
+  z-index: 1;
+  /* Centred on the 3px rule below it: half its own 0.9rem height, plus half
+     the rule. */
+  margin: 0 auto calc(-0.45rem - 1.5px);
+}
+
+/* The cross's ink sits high in its line box (measured 3px at the default
+   size); lowered so it centres on the rule with the leaves. */
+.hour-header .ornament-headpiece > span {
+  position: relative;
+  top: 0.23em;
+}
+
 .hour-header h1 {
+  --title-upper-rule: linear-gradient(to right,
+    var(--title-rule) calc(50% - var(--title-rule-break)),
+    transparent calc(50% - var(--title-rule-break)) calc(50% + var(--title-rule-break)),
+    var(--title-rule) calc(50% + var(--title-rule-break)));
   position: relative;
   font-size: 1.55rem;
   font-weight: normal;
@@ -1123,21 +1213,55 @@ footer::before {
   width: fit-content;
   min-width: min(100%, 24rem);
   margin: 0 auto 0.25rem;
-  padding: 0.15rem 1.3rem 0.2rem;
-  border-top: 3px double var(--ornament-line);
-  border-bottom: 3px double var(--ornament-line);
+  /* Room for the headpiece's lower leaves above the capitals. */
+  padding: calc(0.3rem + 3px) 1.3rem 0.2rem;
+  background:
+    var(--title-upper-rule) 0 0 / 100% 1px no-repeat,
+    var(--title-upper-rule) 0 2px / 100% 1px no-repeat;
+  border-bottom: 3px double var(--title-rule);
 }
 
-/* A single lozenge interrupts the existing rule without adding a title row. */
+/* Forced colours repaint borders in the system ink but leave a gradient in
+   its authored gold, so there the upper rule returns to a plain border and
+   the decorative headpiece stands down. */
+@media (forced-colors: active) {
+  .hour-header h1 {
+    background: none;
+    border-top: 3px double;
+  }
+
+  .hour-header .ornament-headpiece {
+    display: none;
+  }
+}
+
+/* Passiontide veils the foliage. In the title rule the cross stands alone,
+   and the rule closes up to it. */
+.season-passiontide .hour-header {
+  --title-rule-break: 0.8rem;
+}
+
+.season-passiontide .hour-header .ornament-headpiece {
+  width: auto;
+}
+
+.season-passiontide .hour-header .ornament-sprig {
+  display: none;
+}
+
+/* A single lozenge interrupts the lower rule without adding a title row. It
+   carries the day's colour, set like enamel in the gilding: the gold ring
+   keeps a violet or green legible on the Apse night, and a white day reads
+   as an ivory stone. */
 .hour-header h1::after {
   content: "";
   position: absolute;
   left: 50%;
   bottom: -1.5px;
-  width: 0.25rem;
-  height: 0.25rem;
-  background: var(--ornament);
-  box-shadow: 0 0 0 2px var(--bg);
+  width: 0.3rem;
+  height: 0.3rem;
+  background: var(--day-color, var(--ornament));
+  box-shadow: 0 0 0 1px var(--ornament), 0 0 0 3px var(--bg);
   transform: translate(-50%, 50%) rotate(45deg);
   pointer-events: none;
 }
@@ -1148,6 +1272,14 @@ footer::before {
   margin: 0 auto 0.35rem;
   max-width: 34rem;
   line-height: 1.45;
+  text-wrap: balance;
+}
+
+/* Date, day and season each wrap whole, so a phone breaks the line between
+   them rather than inside a saint's title ("St Michael the / Archangel").
+   A part longer than the line still wraps within itself. */
+.hour-meta-part {
+  display: inline-block;
 }
 
 /* Recovery when the open document is not local today (historical browse, or a
@@ -1164,10 +1296,12 @@ footer::before {
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  /* Functional gold underline — the chosen-control marker, not seasonal gilding. */
-  box-shadow: inset 0 -1px 0 var(--gold-line);
+  /* Functional gold underline — the chosen-control marker, not seasonal
+     gilding. Drawn under the words, not the box: the phone's 44px touch
+     height put a box edge some 20px below the letters, a stray rule. */
   padding: 0.2rem 0.1rem 0.15rem;
-  text-decoration: none;
+  text-decoration: underline 1px var(--gold-line);
+  text-underline-offset: 0.4em;
 }
 
 .not-today-notice .not-today-link:hover {
@@ -1319,7 +1453,7 @@ footer::before {
 }
 
 .date-jump {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -1371,10 +1505,13 @@ footer::before {
   gap: 1.25rem;
 }
 
+/* "All hours" sits on the line of the hour names either side of it, not
+   midway between their small-cap labels and the names themselves. */
 .hour-continuation {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  align-items: last baseline;
   gap: 0.8rem;
   max-width: 38rem;
   width: 100%;
@@ -1546,10 +1683,12 @@ footer::before {
 
 /* The seasonal opening Alleluia (or its penitential replacement) belongs to
    the opening rite, not a psalm frame, so it has no Ant. sigil or hanging
-   antiphon indent. */
+   antiphon indent. It completes the Gloria above it and keeps the Gloria's
+   edge: an antiphon's capped, auto-margined box shrank to "Alleluia" and
+   centred it, while Lent's longer replacement filled the measure and sat
+   left, one line of the rite moving across the page with the season. */
 .opening-acclamation {
-  max-width: 34rem;
-  margin: 0.25rem auto 0.7rem;
+  margin: 0.25rem 0 0.7rem;
   line-height: 1.6;
   text-align: left;
 }
@@ -1624,8 +1763,11 @@ footer::before {
 
 /* Latin incipit beside a psalm or canticle number, as a printed diurnal sets
    it. Italic and un-small-capped so it reads as the Latin title rather than
-   as more of the label; it wraps with the label on narrow screens. */
+   as more of the label. On a narrow screen it moves to its own line whole
+   ("Psalm 110 ·" / "Dixit Dominus Domino meo") instead of breaking inside
+   the title; a title longer than the line still wraps within itself. */
 .psalm-incipit {
+  display: inline-block;
   font-variant: normal;
   font-style: italic;
   letter-spacing: 0.02em;
@@ -1711,15 +1853,17 @@ footer::before {
   text-indent: 0;
 }
 
-/* Amen is nested in the last hymn-line span; a thin leading gap separates it
-   from the verse as printed diurnals do, and it stays roman like the prayer. */
+/* Amen is nested in the last hymn-line span and follows the verse after an
+   ordinary word space, as printed diurnals set it; it stays roman like the
+   prayer. The earlier 0.35em sat beside Garamond's narrow 0.2em space and
+   read as a stray double space rather than a deliberate pause. */
 .hymn-amen {
   font-style: normal;
-  margin-left: 0.35em;
+  margin-left: 0.25em;
 }
 
 .psalm-text {
-  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -1755,9 +1899,13 @@ footer::before {
   white-space: pre;
 }
 
-/* Numbered verses — flex so the number sits in a fixed-width gutter */
+/* Numbered verses — flex so the number sits in a fixed-width gutter. The
+   smaller number's own line box is shorter than the verse's, so stretched
+   to the top it rode about a quarter em above the text, like a footnote
+   mark; baseline alignment sets it on the line it numbers. */
 .psalm-verses .verse.numbered {
   display: flex;
+  align-items: baseline;
   padding-left: 0;
   clear: left;
 }
@@ -1792,6 +1940,16 @@ footer::before {
   color: var(--muted);
   position: relative;
   top: 0.25em;
+}
+
+/* The Gloria Patri's two verses, wherever they are said. Unnumbered, a
+   wrapped half-verse met the left edge exactly as the second verse did, so
+   the doxology read as three or four lines. A wrap steps inward, as a hymn
+   line's does, and each verse keeps its own edge. */
+.source-line {
+  display: block;
+  padding-left: 1.1rem;
+  text-indent: -1.1rem;
 }
 
 /* Gloria Patri doxology rendered with * mediant like a psalm verse */
@@ -1950,6 +2108,13 @@ footer::before {
   min-width: 0;
 }
 
+/* A short responsory is a dialogue. Its Gloria is printed without a ℣ in the
+   parish source, so it jutted to the margin between two ℟ lines; it keeps
+   the spoken-text edge the ℣/℟ lines share, as a marked verse would. */
+.short-responsory > .plain-line {
+  padding-left: var(--verse-gutter);
+}
+
 /* Only the opening response of an explicitly modelled Short Responsory takes
    an ornamental initial; its modest raised size is set with the profiles below. */
 .short-responsory-opening .sigil-text::first-letter {
@@ -2016,6 +2181,10 @@ footer::before {
   .elements {
     max-width: 37rem;
     font-size: 1.25rem;
+  }
+
+  .hour-header {
+    max-width: 37rem;
   }
 }
 
@@ -2193,7 +2362,7 @@ footer::before {
 /* ── Calendar page ── */
 
 .page-calendar {
-  font-family: "Ordo Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", "Ordo Garamond", Georgia, "Times New Roman", serif;
 }
 
 .page-calendar main { max-width: 56rem; }
@@ -2276,7 +2445,7 @@ footer::before {
 .day-mobile-flags,
 .day-wk,
 .day-rank {
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
 }
 .month-jump {
   display: grid;
@@ -2434,7 +2603,7 @@ footer::before {
   content: "Today";
   display: block;
   visibility: hidden;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
   font-size: 0.7rem;
   font-weight: normal;
   line-height: 1.4;
@@ -2556,7 +2725,7 @@ footer::before {
 .day-office-hour + .day-office-hour { margin-top: 0.45rem; }
 .day-office-hour dt {
   flex: 0 0 4.4rem;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Ordo Cross", Georgia, "Times New Roman", serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -4444,13 +4613,21 @@ body.season-eastertide {
   .home-date-link,
   .not-today-notice .not-today-link,
   .hour-date-nav > summary,
-  .session-prayers > summary,
   .day-nav a,
   .year-nav a,
   .month-jump a,
   .report-issue a {
     display: inline-flex;
     align-items: center;
+    min-height: var(--touch-target);
+  }
+
+  /* A session-prayer summary is a section heading that opens. Shrunk to an
+     inline box it sat at the left margin on phones, the only heading in the
+     office that was not centred; a full-width row centres it and widens the
+     target without changing its type. */
+  .session-prayers > summary {
+    display: flex;
     min-height: var(--touch-target);
   }
 
@@ -5073,8 +5250,20 @@ body.page-home::before {
     padding-bottom: 0.5rem;
   }
 
+  /* Gold prints pale, so the title's rules, headpiece and lozenge print
+     grey. The upper rule is a background, which browsers drop from paper
+     unless told to keep it. */
+  .hour-header {
+    --title-rule: #888;
+  }
+
   .hour-header h1 {
-    border-color: #888;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .hour-header .ornament-headpiece {
+    color: #888;
   }
 
   .hour-header h1::after {
@@ -5086,9 +5275,12 @@ body.page-home::before {
     color: #888;
   }
 
+  /* ℣, ℟ and their spelled-out forms are rubrics too; the booklet sets them
+     in its rubric red, and grey here made them read as page furniture. */
   .rubric,
   .prayer-speaker,
   .cross,
+  .sigil,
   .chapter-ref,
   .scripture-ref {
     color: #600;
@@ -5102,8 +5294,7 @@ body.page-home::before {
   }
 
   .mediant,
-  .psalm-verses .verse-num,
-  .sigil {
+  .psalm-verses .verse-num {
     color: #555;
   }
 

@@ -7,7 +7,7 @@ use minijinja::{AutoEscape, Environment};
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
-use crate::links::{calendar_year_link, home_link, hour_link, nav_link, static_url, title_case};
+use crate::links::{calendar_year_link, home_link, hour_link, nav_link, season_label, static_url, title_case};
 use crate::usage::UsageData;
 use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
 
@@ -45,6 +45,7 @@ impl Pages {
         env.add_filter("urlpart", |s: String| url_part(&s));
         env.add_filter("typeset", |s: String| typeset(&s));
         env.add_filter("titlecase", |s: String| title_case(&s));
+        env.add_filter("season_label", |s: String| season_label(&s));
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
@@ -165,7 +166,7 @@ mod tests {
             ],
         );
         let (header, banner, elements) =
-            (at(body, r#"class="hour-header""#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
+            (at(body, r#"class="hour-header"#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
         assert!(header < banner && banner < elements, "the notice sits between the hour header and the prayers");
         assert!(!source("layout.html").contains(r#"class="site-banner""#), "the shared layout has no hour banner");
     }

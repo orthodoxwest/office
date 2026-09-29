@@ -122,7 +122,10 @@ fn section_elements_merge_psalm_doxology_into_psalm_block() {
     has(&html, r#"<div class="psalm"><h3 class="item-label">Psalm 67</h3>"#);
     has(&html, r#"<div class="psalm-verses">"#);
     has(&html, r#"<p class="gloria-patri">"#);
-    has(&html, r#"</div><p class="gloria-patri">"#);
+    has(
+        &html,
+        r#"</div><p class="gloria-patri"><span class="source-line">Glory be to the Father,</span><span class="source-line">as it was"#,
+    );
     assert!(html.ends_with("</p></div>"), "{html}");
 }
 
@@ -192,14 +195,18 @@ fn marian_antiphon_styles_incipit_mediant() {
         render_marian_antiphon("Mary we hail thee * Mother and Queen compassionate;\nMary our comfort, life, and hope, we hail thee.");
     has(
         &html,
-        r#"<p class="chant-line chant-line-opening">Mary we hail thee <span class="mediant">*</span> Mother and Queen compassionate;<br>Mary our comfort, life, and hope, we hail thee.</p>"#,
+        &format!(
+            r#"<p class="chant-line chant-line-opening">Mary we hail thee{MEDIANT}Mother and Queen compassionate;<br>Mary our comfort, life, and hope, we hail thee.</p>"#
+        ),
     );
 }
 
 #[test]
 fn antiphon_styles_mediant() {
     let html = render(&elem(ElementType::Antiphon, "The Lord said * to my Lord: Sit thou at my right hand."));
-    has(&html, r#"The Lord said <span class="mediant">*</span> to my Lord: Sit thou at my right hand."#);
+    has(&html, &format!("The Lord said{MEDIANT}to my Lord: Sit thou at my right hand."));
+    // The mark ends its half-verse; a wrap may follow it but never precede it.
+    lacks(&html, r#" <span class="mediant">"#);
 }
 
 #[test]
@@ -226,7 +233,7 @@ fn announced_antiphon_preserves_terminal_punctuation() {
 #[test]
 fn response_styles_mediant() {
     let html = render_liturgical_block("R. Great is our Lord * and great is his power.");
-    has(&html, r#"<span class="sigil-text">Great is our Lord <span class="mediant">*</span> and great is his power.</span>"#);
+    has(&html, &format!(r#"<span class="sigil-text">Great is our Lord{MEDIANT}and great is his power.</span>"#));
 }
 
 #[test]
@@ -249,6 +256,33 @@ fn short_responsory_drops_only_first_response_sigil() {
     let html = short_responsory("R. The Lord hath set his love upon me.\nV. He shall deliver me.\nR. The Lord hath set his love upon me.");
     has(&html, r#"class="response-line short-responsory-opening"><span class="sigil-text">The Lord"#);
     assert_eq!(html.matches(">℟.</span>").count(), 1, "{html}");
+}
+
+#[test]
+fn short_responsory_marks_its_block_for_the_dialogue_edge() {
+    let html = short_responsory("R. Heal my soul.\nR. Heal my soul.\nGlory be to the Father.\nR. Heal my soul.");
+    assert!(html.starts_with(r#"<div class="liturgical-block short-responsory">"#), "{html}");
+    has(&html, r#"<p class="plain-line">Glory be to the Father.</p>"#);
+    lacks(&render_liturgical_block("V. O Lord, hear my prayer."), "short-responsory");
+}
+
+#[test]
+fn short_responsory_opening_versicle_keeps_an_ordinary_pair() {
+    // Compline's slot holds a versicle and its response, not a responsory.
+    let html = short_responsory("V. Keep us, O Lord, as the apple of an eye.\nR. Hide us under the shadow of thy wings.");
+    lacks(&html, "short-responsory-opening");
+    has(&html, r#"<span class="sigil">℟.</span><span class="sigil-text">Hide us"#);
+}
+
+#[test]
+fn preserved_prose_lines_hang_as_source_lines() {
+    let html =
+        render_liturgical_block("Glory be to the Father, * and to the Holy Ghost;\nAs it was in the beginning, * world without end. Amen.");
+    has(&html, r#"<p class="plain-line"><span class="source-line">Glory be to the Father,"#);
+    has(&html, r#"Holy Ghost;</span><span class="source-line">As it was"#);
+    lacks(&html, "<br>");
+    let single = render_liturgical_block("Almighty God have mercy upon us.");
+    has(&single, r#"<p class="plain-line">Almighty God have mercy upon us.</p>"#);
 }
 
 #[test]
@@ -276,10 +310,7 @@ fn dialogue_and_corporate_lord_prayer_roles() {
 #[test]
 fn versicle_styles_mediant() {
     let html = render_liturgical_block("V. Serve the Lord in fear: * and rejoice unto him with reverence.");
-    has(
-        &html,
-        r#"<span class="sigil-text">Serve the Lord in fear: <span class="mediant">*</span> and rejoice unto him with reverence.</span>"#,
-    );
+    has(&html, &format!(r#"<span class="sigil-text">Serve the Lord in fear:{MEDIANT}and rejoice unto him with reverence.</span>"#));
 }
 
 #[test]
@@ -415,7 +446,7 @@ fn psalm_label_carries_latin_incipit() {
         &html,
         concat!(
             r#"<h3 class="item-label">Psalm 67"#,
-            r#"<span class="label-sep" aria-hidden="true"> · </span>"#,
+            "<span class=\"label-sep\" aria-hidden=\"true\">\u{a0}· </span>",
             r#"<span class="psalm-incipit" lang="la">Deus misereatur nostri</span></h3>"#
         ),
     );

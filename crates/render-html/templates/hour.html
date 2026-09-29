@@ -1,12 +1,18 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import leader_assurance %}
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, leader_assurance %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
     <div class="hour-scroll-progress-bar"></div>
   </div>
-  <div class="hour-header">
+  {# The day's colour reaches the title's lozenge; the headpiece is set
+       into the title's upper rule, as home and the ordo open their pages. #}
+  <div class="hour-header day-color-{{ hour.color }}">
+    {{ headpiece(true) }}
     <h1>{{ hour.title }}</h1>
-    <p class="hour-meta">{{ date_str }}{% if hour.feast %} &middot; {{ hour.feast|typeset }}{% endif %} &middot; {{ hour.season|titlecase }}</p>
+    {# The no-break space holds each dot to the part before it, so a wrapped
+         line never opens with a separator. #}
+    {%- set season = hour.season|season_label %}
+    <p class="hour-meta"><span class="hour-meta-part">{{ date_str }}</span>{% if hour.feast %}&nbsp;&middot; <span class="hour-meta-part">{{ hour.feast|typeset }}</span>{% endif %}{% if season %}&nbsp;&middot; <span class="hour-meta-part">{{ season }}</span>{% endif %}</p>
     {# Always visible when not local today — recovery from an overnight tab
          must not require opening "Change date". Secondary Today stays in the form. #}
     {# No role=status on server markup — see home.html. Client inject uses a live region. #}
