@@ -147,9 +147,11 @@ fn companions_stay_grouped_and_concurrent_office_precedes_the_cap() {
 }
 
 #[test]
-fn memorial_suppression_keeps_protected_and_unresolved_scopes() {
+fn memorial_suppression_keeps_protected_scopes() {
     let memorial = feast("memorial", Rank::Commemoration, Category::Martyr);
-    // Diurnal VIII, pp. xxviii–xxix; unresolved appointments #378/#380 stay held.
+    // Diurnal VIII, pp. xxviii–xxix. Easter and Pentecost Monday–Tuesday omit
+    // Memorials in every ordo 2017–2026 (#380); St Joseph's Solemnity follows
+    // the Primary Feast list (#138, #378).
     for (id, rank, category, suppressed) in [
         ("lord", Rank::Double1stClass, Category::Lord, true),
         ("saint", Rank::Double1stClass, Category::Confessor, true),
@@ -160,11 +162,11 @@ fn memorial_suppression_keeps_protected_and_unresolved_scopes() {
         ("easter-sunday-octave-day-6", Rank::Double1stClass, Category::Lord, false),
         ("pentecost-octave-day-5", Rank::Double1stClass, Category::Lord, false),
         ("low-sunday", Rank::Double1stClass, Category::Lord, false),
-        ("easter-monday", Rank::Double1stClass, Category::Lord, false),
-        ("easter-tuesday", Rank::Double1stClass, Category::Lord, false),
-        ("pentecost-octave-day-2", Rank::Double1stClass, Category::Lord, false),
-        ("pentecost-octave-day-3", Rank::Double1stClass, Category::Lord, false),
-        ("solemnity-st-joseph", Rank::Double1stClass, Category::Lord, false),
+        ("easter-monday", Rank::Double1stClass, Category::Lord, true),
+        ("easter-tuesday", Rank::Double1stClass, Category::Lord, true),
+        ("pentecost-octave-day-2", Rank::Double1stClass, Category::Lord, true),
+        ("pentecost-octave-day-3", Rank::Double1stClass, Category::Lord, true),
+        ("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor, true),
     ] {
         let winner = feast(id, rank, category);
         let (kept, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(&memorial), OrderContext::default());
@@ -172,6 +174,62 @@ fn memorial_suppression_keeps_protected_and_unresolved_scopes() {
         if suppressed {
             assert!(decisions.iter().any(|d| d.rule == "commemoration:memorial-under-first-class-feast"));
         }
+    }
+}
+
+#[test]
+fn first_class_feasts_admit_only_privileged_octaves() {
+    // Diurnal X and General Rubrics XIV.4 (#378): no St George octave on St
+    // Joseph's Solemnity, no St John Baptist octave on Ss Peter and Paul; a
+    // Double II Class (St Mark) and a Sunday keep the common octave.
+    let common = feast("st-george-octave-day-7", Rank::SemiDouble, Category::Martyr);
+    let mut privileged = (*feast("corpus-christi-octave-day-3", Rank::SemiDouble, Category::Lord)).clone();
+    privileged.is_privileged_octave_day = true;
+    let privileged = Arc::new(privileged);
+    for (winner, comm, kept) in [
+        (feast("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor), &common, false),
+        (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &common, false),
+        (feast("ss-peter-paul", Rank::Double1stClass, Category::Apostle), &privileged, true),
+        (feast("st-mark", Rank::Double2ndClass, Category::Apostle), &common, true),
+        (feast("some-sunday", Rank::Double1stClass, Category::Sunday), &common, true),
+    ] {
+        let (out, decisions) = ordered_commemorations(Some(&winner), std::slice::from_ref(comm), OrderContext::default());
+        assert_eq!(!out.is_empty(), kept, "{} under {}: {decisions:?}", comm.id, winner.id);
+        if !kept {
+            assert!(decisions.iter().any(|d| d.rule == "commemoration:common-octave-under-first-class-feast"));
+        }
+    }
+}
+
+#[test]
+fn joseph_solemnity_suppresses_doubles_like_a_primary_feast() {
+    // Fr Jason's #138 ruling alone (no ordo has a Double on the day): St
+    // Joseph's Solemnity follows the Primary Feast list.
+    let double = feast("st-pius-v", Rank::Double, Category::Confessor);
+    let apostle = feast("st-john-latin-gate", Rank::GreaterDouble, Category::Apostle);
+    let joseph = feast("solemnity-st-joseph", Rank::Double1stClass, Category::Confessor);
+    let (kept, decisions) = primary_feast_doubles(Some(&joseph), vec![double.clone(), apostle.clone()]);
+    assert!(kept.is_empty(), "{:?}", ids(&kept));
+    assert!(decisions.iter().any(|d| d.rule == "commemoration:double-under-primary-feast-of-our-lord"));
+    let other = feast("assumption", Rank::Double1stClass, Category::BlessedVirgin);
+    let (kept, _) = primary_feast_doubles(Some(&other), vec![double, apostle]);
+    assert_eq!(kept.len(), 2);
+}
+
+#[test]
+fn only_trinity_and_corpus_christi_keep_an_occurring_apostle() {
+    // The ordos keep Barnabas on Trinity (2017, 2023) and Corpus Christi
+    // (2026) and St Paul on Trinity (2024); the ruling's exception goes no
+    // further (#138, #379).
+    let barnabas = feast("st-barnabas", Rank::GreaterDouble, Category::Apostle);
+    let basil = feast("st-basil", Rank::GreaterDouble, Category::ConfessorDoctor);
+    for (id, want) in
+        [("corpus-christi", vec!["st-barnabas"]), ("trinity-sunday", vec!["st-barnabas"]), ("pentecost", vec![]), ("ascension", vec![])]
+    {
+        let mut w = (*feast(id, Rank::Double1stClass, Category::Lord)).clone();
+        w.primary_of_our_lord = true;
+        let (kept, _) = primary_feast_doubles(Some(&w), vec![barnabas.clone(), basil.clone()]);
+        assert_eq!(ids(&kept), want, "{id}");
     }
 }
 

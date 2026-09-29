@@ -271,6 +271,11 @@ fn suppresses_st_george_octave(winner: Option<&Feast>) -> bool {
 /// Diurnal VIII: a Memorial is not commemorated on a Double I Class feast.
 fn suppresses_memorials(winner: Option<&Feast>) -> bool {
     let Some(w) = winner else { return false };
+    // Easter and Pentecost Monday and Tuesday omit their Memorials in every
+    // ordo 2017–2026, several marked "omitted this year" (Diurnal VII; #380).
+    if matches!(w.id.as_str(), "easter-monday" | "easter-tuesday" | "pentecost-octave-day-2" | "pentecost-octave-day-3") {
+        return true;
+    }
     if w.rank != Rank::Double1stClass
         || w.is_category(Category::Sunday)
         || w.is_category(Category::Feria)
@@ -279,9 +284,24 @@ fn suppresses_memorials(winner: Option<&Feast>) -> bool {
     {
         return false;
     }
-    // Low Sunday is printed Gd in the 2026 ordo; Easter Monday/Tuesday and
-    // St Joseph's solemnity await scope rulings (#380, #378).
-    !matches!(w.id.as_str(), "low-sunday" | "easter-monday" | "easter-tuesday" | "solemnity-st-joseph")
+    // Low Sunday is printed Gd in the 2026 ordo.
+    w.id != "low-sunday"
+}
+
+/// Fr Jason's #138 ruling: St Joseph's Solemnity suppresses ordinary
+/// commemorations like a Primary Feast of Our Lord (2024 omits Romanus, 2026
+/// the St George octave; #378).
+fn suppresses_like_primary_feast(w: &Feast) -> bool {
+    w.primary_of_our_lord || w.id == "solemnity-st-joseph"
+}
+
+/// Diurnal X and General Rubrics XIV.4: a Double I Class admits the
+/// commemoration of a privileged octave only, not a day within a common one
+/// (St George's octave on St Joseph's Solemnity, St John Baptist's on Ss Peter
+/// and Paul: 2018–2026 ordos; #378). Doubles II Class keep it (St George's
+/// octave on St Mark, 2026 ordo 25 April).
+fn suppresses_common_octave(w: &Feast, comm: &Feast) -> bool {
+    w.rank == Rank::Double1stClass && !w.is_category(Category::Sunday) && is_day_within_octave(comm) && !comm.is_privileged_octave_day
 }
 
 fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Decision> {
@@ -306,20 +326,33 @@ fn commemoration_suppression(winner: Option<&Feast>, comm: &Feast) -> Option<Dec
     if suppresses_st_george_octave(Some(w)) && comm.id.starts_with("st-george-octave-day") {
         return Some(Decision::new("commemoration:st-george-octave", "suppressed", comm.id.as_str()));
     }
+    if suppresses_common_octave(w, comm) {
+        return Some(Decision::new("commemoration:common-octave-under-first-class-feast", "suppressed", comm.id.as_str()));
+    }
     None
 }
 
+/// Fr Jason's #138 ruling keeps an occurring Apostle as a narrow local
+/// exception, "not beyond what the Ordo prints": Barnabas on Trinity 2017 and
+/// 2023 and on Corpus Christi 2026, St Paul on Trinity 2024, each at I
+/// Vespers, Lauds and II Vespers (#379).
+pub fn apostle_kept_on_primary_feast(winner: &Feast, comm: &Feast) -> bool {
+    comm.is_category(Category::Apostle) && matches!(winner.id.as_str(), "trinity-sunday" | "corpus-christi")
+}
+
 /// General Rubrics X: at a Primary Feast of Our Lord, an occurring Greater or
-/// Lesser Double is not commemorated (apostles and octaves excepted).
+/// Lesser Double is not commemorated (octaves excepted). St Joseph's Solemnity
+/// is treated the same way (#138), and Trinity and Corpus Christi keep an
+/// occurring Apostle (#379).
 pub fn primary_feast_doubles(winner: Option<&Feast>, comms: Vec<FeastRef>) -> (Vec<FeastRef>, Vec<Decision>) {
-    if !winner.is_some_and(|w| w.primary_of_our_lord) {
+    let Some(w) = winner.filter(|w| suppresses_like_primary_feast(w)) else {
         return (comms, Vec::new());
-    }
+    };
     let mut kept = Vec::new();
     let mut decisions = Vec::new();
     for comm in comms {
         if matches!(comm.rank, Rank::GreaterDouble | Rank::Double)
-            && !comm.is_category(Category::Apostle)
+            && !apostle_kept_on_primary_feast(w, &comm)
             && !comm.is_category(Category::Sunday)
             && !comm.is_category(Category::Feria)
             && !comm.is_vigil

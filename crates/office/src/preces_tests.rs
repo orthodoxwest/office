@@ -168,6 +168,49 @@ fn cross_commemoration() {
     within.within_octave_of = Some("st-george".into());
     assert!(!should_say_cross_commemoration(&within, Some(&m)));
     assert!(!should_say_cross_commemoration(&feria, None));
+
+    // Diurnal p. 146: from Monday after Low Sunday through the Vigil of the
+    // Ascension (Easter 2026 is 12 April; #356).
+    let feria_on = |d: i32| {
+        let (mm, dd) = if d <= 30 { (4, d) } else { (5, d - 30) };
+        suffrage_day(mm, dd, Season::Easter, ranked("feria", Some(Category::Feria), Rank::Commemoration), vec![])
+    };
+    for (d, want) in [(19, false), (20, true), (50, true), (51, false)] {
+        let x = feria_on(d);
+        assert_eq!(should_say_cross_commemoration(&x, Some(&m)), want, "{}", x.date);
+    }
+
+    // "Except when there has been Commemoration of a Double, even in
+    // concurrence, or an Office or Commemoration of any Octave"; a Memorial
+    // does not suppress it (2026 ordo, 18–19 May).
+    let rogation = || ranked("rogation-monday", Some(Category::Feria), Rank::PrivilegedFeria);
+    let venantius = suffrage_day(5, 18, Season::Easter, rogation(), vec![ranked("st-venantius", Some(Category::Martyr), Rank::Double)]);
+    assert!(!should_say_cross_commemoration(&venantius, Some(&m)));
+    let octave = suffrage_day(
+        4,
+        26,
+        Season::Easter,
+        ranked("easter-sunday-2", Some(Category::Sunday), Rank::SemiDouble),
+        vec![ranked("st-george-octave-day-4", Some(Category::Martyr), Rank::SemiDouble)],
+    );
+    assert!(!should_say_cross_commemoration(&octave, Some(&m)));
+    let memorial = suffrage_day(
+        5,
+        19,
+        Season::Easter,
+        ranked("feria", Some(Category::Feria), Rank::Commemoration),
+        vec![ranked("st-pudentiana", Some(Category::Virgin), Rank::Commemoration)],
+    );
+    assert!(should_say_cross_commemoration(&memorial, Some(&m)));
+}
+
+#[test]
+fn vigil_of_all_saints_omits_the_suffrage() {
+    // Diurnal p. 636: "At Lauds the Suffrage of All Saints is not said" (#471).
+    let vigil = suffrage_day(10, 31, Season::Pentecost, ranked("vigil-of-all-saints", Some(Category::Feria), Rank::Simple), vec![]);
+    assert_eq!(suffrage_disposition(Some(&vigil)), (false, SUFFRAGE_SUPPRESSED_ALL_SAINTS_VIGIL));
+    let feria = suffrage_day(10, 30, Season::Pentecost, ranked("feria", Some(Category::Feria), Rank::Commemoration), vec![]);
+    assert!(should_say_suffrage(Some(&feria)));
 }
 
 #[test]
