@@ -855,117 +855,8 @@ footer::before {
   text-align: center;
 }
 
-.report-issue a,
-.assurance-panel a {
+.report-issue a {
   color: var(--accent);
-}
-
-/* ── Assurance disclosure ── */
-
-.assurance-panel {
-  margin-top: 2.5rem;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.18);
-  padding: 0.75rem 0.9rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-/* A sentence with counts, not a label: lowercase goes to small caps and the
-   leading capital stays, which is the running-text setting. */
-.assurance-panel > summary {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  cursor: pointer;
-  color: var(--accent);
-  font-variant-caps: small-caps;
-  letter-spacing: 0.04em;
-  list-style: none;
-}
-
-.assurance-panel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.assurance-panel > summary::after {
-  content: "▾";
-  margin-left: 0.3em;
-  color: var(--gold-line);
-  font-size: 0.85em;
-  font-variant-caps: normal;
-  letter-spacing: 0;
-}
-
-.assurance-panel[open] > summary::after {
-  content: "▴";
-}
-
-.assurance-panel h2 {
-  margin: 1rem 0 0.35rem;
-  color: var(--text);
-  font-size: 0.95rem;
-  font-weight: normal;
-}
-
-.assurance-intro {
-  margin-top: 0.7rem;
-}
-
-.assurance-list {
-  list-style: none;
-  display: grid;
-  gap: 0.25rem;
-  overflow-wrap: anywhere;
-}
-
-.assurance-list code {
-  color: var(--text);
-  font-size: 0.76rem;
-}
-
-.assurance-status {
-  display: inline-block;
-  margin-left: 0.25rem;
-  padding: 0 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-}
-
-.status-verified { color: #356535; }
-.status-needs-review { color: var(--rubric); }
-.status-source-unknown { color: var(--muted); }
-.assurance-detail { font-style: italic; }
-
-.assurance-flag {
-  color: var(--rubric);
-  font-size: 0.76rem;
-  padding-left: 1rem;
-}
-
-@media (max-width: 700px) {
-  .assurance-panel {
-    padding: 0.65rem 0.7rem;
-    font-size: 0.78rem;
-  }
-
-  .assurance-panel > summary {
-    min-height: var(--touch-target);
-  }
-}
-
-/* In an Apse hour the vault rises around the post-office material, but the
-   expanded provenance list is still a reading surface. Nearly opaque slate
-   quiets the ribs beneath the panel while leaving the field visible around
-   its edges. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.page-hour .assurance-panel {
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
-  }
-}
-
-:root[data-theme="dark"] body.page-hour .assurance-panel {
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 /* ── Home page ──
@@ -1409,8 +1300,7 @@ footer::before {
    as they do in the block-level disclosures elsewhere. */
 .hour-date-nav > summary,
 .leader-selector > summary,
-.session-prayers > summary,
-.assurance-panel > summary {
+.session-prayers > summary {
   flex-wrap: wrap;
   align-content: center;
   align-items: baseline;
@@ -3527,7 +3417,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.assurance-panel::details-content,
   :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
@@ -3541,7 +3430,6 @@ body.season-eastertide {
 
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.assurance-panel[open]::details-content,
   :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
@@ -4812,7 +4700,7 @@ body.season-eastertide {
    Tapping navigation should not flash a grey box over the page, and a
    long-press on a menu item should not begin a selection. Strictly limited to
    navigation chrome: every word of the office itself stays selectable and
-   copyable, as do dates, feast names and the assurance panel. */
+   copyable, as do dates and feast names. */
 .site-brand,
 .site-menu > summary,
 .site-menu nav a,
@@ -5292,7 +5180,7 @@ body {
 
 /* An hour shows no stars until the office has ended. The vault
    begins only in the post-prayer epilogue: transparent through the hour
-   continuation, emerging around Assurance, then continuing through the
+   continuation, emerging around the report link, then continuing through the
    footer. Both layers share main's bottom as their tile origin.
 
    The negative inline reach restores the full main/footer measure around the

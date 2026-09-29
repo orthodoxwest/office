@@ -1660,7 +1660,7 @@ function usageBeaconBody(scope) {
   }
 
   // Gold hairline under the color band: progress through the prayer itself.
-  // The page continues into hour navigation, assurance, issue reporting, and
+  // The page continues into hour navigation, issue reporting, and
   // appearance controls after .elements. The line remains at zero through the
   // page header and banner, starts when the prayer reaches the top of the
   // viewport, and reaches 100% when its end reaches the bottom. It then remains

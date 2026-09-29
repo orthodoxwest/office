@@ -1,8 +1,6 @@
 //! Page handlers: resolve the request to a liturgical day, drive the engine, and fill the view
 //! models.
 
-use std::collections::HashSet;
-
 use axum::body::Body;
 use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
 use calendar::MoveableDates;
@@ -13,11 +11,10 @@ use office::summary::{CommSummary, summarize_hour};
 use office::{ComposeOptions, Engine, VespersOwner};
 use render_html::links::{calendar_link, home_link, hour_link, season_class, title_case};
 use render_html::view::{
-    AssuranceDecision, AssuranceDependency, AssuranceFlag, AssuranceResolution, CalendarData, Chrome, CommemorationRow, DayRow, ErrorData,
-    HomeData, HomeHourLink, HourAssurance, HourData, HourHeader, LeaderForm, MonthData, NotFoundData, ReminderDay, ReminderHour,
-    RemindersData,
+    CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
+    NotFoundData, ReminderDay, ReminderHour, RemindersData,
 };
-use tools::review::assurance::{dedupe_decisions, hour_dependencies};
+use tools::review::assurance::hour_dependencies;
 use tools::review::provenance::ProvenanceStatus;
 
 use crate::http::{Query, cookie, redirect, response, set};
@@ -97,28 +94,6 @@ fn report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str) -> String {
         form = hour.form.as_str(),
         label = hour.form.label(),
         season = title_case(season_str(hour)),
-    );
-    issue_url(&title, &body)
-}
-
-fn dependency_report_url(hour: &OfficeHour, hour_name: &str, date_slug: &str, key: &str, status: ProvenanceStatus) -> String {
-    let title = format!("[review] Source verification — {key}");
-    let body = format!(
-        "**Page:** /{hour_name}/{date_slug}?form={form}
-**Prayer form:** {label}
-**Celebration:** {celebration}
-**Corpus entry:** {key}
-**Current provenance status:** {status}
-
-**Source and page/section locator:**
-
-**Finding:**
-
-",
-        form = hour.form.as_str(),
-        label = hour.form.label(),
-        celebration = celebration(hour),
-        status = status.as_str(),
     );
     issue_url(&title, &body)
 }
@@ -260,61 +235,6 @@ impl Review {
     pub(crate) fn show_vetting_banner(&self, hour: &OfficeHour) -> bool {
         let deps = hour_dependencies(hour);
         deps.is_empty() || deps.iter().any(|k| self.provenance.get(k) != Some(&ProvenanceStatus::Verified))
-    }
-
-    pub(crate) fn hour_assurance(&self, hour: &OfficeHour, hour_name: &str, slug: &str) -> HourAssurance {
-        let mut data = HourAssurance {
-            decisions: dedupe_decisions(&hour.decisions)
-                .into_iter()
-                .map(|d| AssuranceDecision {
-                    rule: d.rule.clone(),
-                    outcome: d.outcome.clone(),
-                    detail: d.detail.clone().unwrap_or_default(),
-                })
-                .collect(),
-            ..HourAssurance::default()
-        };
-        for key in hour_dependencies(hour) {
-            let status = self.provenance.get(&key).copied().unwrap_or(ProvenanceStatus::SourceUnknown);
-            match status {
-                ProvenanceStatus::Verified => data.verified += 1,
-                ProvenanceStatus::NeedsReview => data.needs_review += 1,
-                ProvenanceStatus::SourceUnknown => data.source_unknown += 1,
-            }
-            let flags: Vec<AssuranceFlag> = self
-                .suspicions
-                .get(&key)
-                .map(|s| {
-                    s.iter()
-                        .map(|f| AssuranceFlag {
-                            label: f.label.clone(),
-                            state: if f.addressed { "addressed" } else { "open" }.into(),
-                            reason: f.reason.clone(),
-                        })
-                        .collect()
-                })
-                .unwrap_or_default();
-            if !flags.is_empty() {
-                data.flagged += 1;
-            }
-            let report_url = dependency_report_url(hour, hour_name, slug, &key, status);
-            data.dependencies.push(AssuranceDependency { key, status: status.as_str().into(), flags, report_url });
-        }
-        let mut seen = HashSet::new();
-        for element in hour.sections.iter().flat_map(|s| &s.elements) {
-            if element.slot_ref.is_empty() || element.source_ref.is_empty() {
-                continue;
-            }
-            let tier = element.source_ref.split('/').next().unwrap_or("");
-            if seen.insert((element.slot_ref.clone(), tier.to_string(), element.source_ref.clone())) {
-                data.resolutions.push(AssuranceResolution {
-                    slot: element.slot_ref.clone(),
-                    tier: tier.into(),
-                    source: element.source_ref.clone(),
-                });
-            }
-        }
-        data
     }
 }
 
@@ -509,7 +429,6 @@ impl Server {
                 .map(|(form, h)| LeaderForm {
                     form: form.as_str().into(),
                     label: form.label().into(),
-                    assurance: self.review.hour_assurance(h, hour_name, &date_str),
                     report_url: report_url(h, hour_name, &date_str),
                     show_banner: self.review.show_vetting_banner(h),
                 })
@@ -533,7 +452,6 @@ impl Server {
             },
             report_url: report_url(&hour, hour_name, &date_str),
             show_banner: self.review.show_vetting_banner(&hour),
-            assurance: self.review.hour_assurance(&hour, hour_name, &date_str),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -664,7 +582,6 @@ mod tests {
     }
 
     use axum::http::Uri;
-    use calendar::Decision;
     use liturgy::{ElementType, OfficeElement, OfficeSection};
 
     use crate::test_server;
@@ -688,7 +605,7 @@ mod tests {
     }
 
     fn review(entries: &[(&str, ProvenanceStatus)]) -> Review {
-        Review { provenance: entries.iter().map(|(k, s)| (k.to_string(), *s)).collect(), ..Review::default() }
+        Review { provenance: entries.iter().map(|(k, s)| (k.to_string(), *s)).collect() }
     }
 
     /// A GET through the whole server, as the mux dispatches it.
@@ -710,40 +627,17 @@ mod tests {
         assert!(review(&[]).show_vetting_banner(&hour), "unknown provenance shows it");
     }
 
+    /// The page ends with the continuation links and each form's report
+    /// link; no review metadata, source keys, or local paths.
     #[test]
-    fn hour_assurance_counts_dependencies_without_source_contents() {
-        let mut hour = hour_with(vec![
-            sourced(ElementType::Collect, "A collect.", "proper/example/collect"),
-            sourced(ElementType::Psalm, "A psalm.", "psalms/001"),
-            sourced(ElementType::Chapter, "A chapter.", "proper/example/chapter"),
-        ]);
-        hour.decisions = vec![Decision::new("occurrence:higher-rank", "challenger-wins", "")];
-        let got = review(&[("proper/example/collect", ProvenanceStatus::Verified), ("psalms/001", ProvenanceStatus::NeedsReview)])
-            .hour_assurance(&hour, "lauds", "2026-01-01");
-        assert_eq!((got.verified, got.needs_review, got.source_unknown, got.dependencies.len()), (1, 1, 1, 3));
-        assert!(got.decisions.len() == 1 && got.decisions[0].rule == "occurrence:higher-rank");
-        assert!(
-            got.dependencies.iter().any(|d| d.key == "psalms/001" && d.report_url.contains("psalms%2F001")),
-            "the report names the psalm"
-        );
-    }
-
-    #[test]
-    fn hour_page_assurance_disclosure_is_collapsed_and_source_safe() {
+    fn hour_page_ends_with_reporting_not_review_metadata() {
         let (status, _, body) = get("/lauds/2026-06-07");
         assert_eq!(status, StatusCode::OK);
-        for want in [
-            r#"<details class="assurance-panel">"#,
-            r#"<details class="site-menu">"#,
-            r#"class="today-link""#,
-            r#"class="hour-continuation""#,
-            "Text dependencies",
-            "Composition decisions",
-            " verified",
-        ] {
+        for want in [r#"<details class="site-menu">"#, r#"class="today-link""#, r#"class="hour-continuation""#, "Report a problem"] {
             assert!(body.contains(want), "hour page missing {want:?}");
         }
-        for unwanted in [" documented", "undocumented", "SOURCE:", ".txt", "/home/", "../resources"] {
+        assert_eq!(body.matches(r#"class="report-issue""#).count(), 3, "one report link per prayer form");
+        for unwanted in ["assurance", "Text dependencies", "Composition decisions", "SOURCE:", ".txt", "/home/", "../resources"] {
             assert!(!body.contains(unwanted) && !body.contains(&unwanted.replace('/', "&#x2f;")), "hour page contains {unwanted:?}");
         }
     }

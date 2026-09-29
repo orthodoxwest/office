@@ -13,7 +13,7 @@ pub mod pwa;
 pub mod usage;
 pub mod web_time;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -26,7 +26,6 @@ use calendar::CalendarData;
 use office::Engine;
 use render_html::Pages;
 use tools::fs::FsData;
-use tools::review::prescreen::{Suspicion, suspicion_by_key};
 use tools::review::provenance::{ProvenanceStatus, scan_provenance};
 
 use crate::cache::YearCache;
@@ -44,12 +43,9 @@ pub struct Server {
     usage: Option<Store>,
 }
 
-/// The review metadata an hour page discloses: each corpus entry's
-/// provenance and its suspicions.
-#[derive(Default)]
+/// Each corpus entry's provenance, which decides an hour's review notice.
 pub(crate) struct Review {
     provenance: HashMap<String, ProvenanceStatus>,
-    suspicions: BTreeMap<String, Vec<Suspicion>>,
 }
 
 /// Application endpoints; Axum owns path matching.
@@ -66,7 +62,7 @@ enum Route {
 }
 
 impl Server {
-    /// Loads the engine, templates, and review metadata from `data_dir`.
+    /// Loads the engine, templates, and text provenance from `data_dir`.
     pub fn new(data_dir: &Path) -> Result<Server, String> {
         let src = FsData::new(data_dir);
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
@@ -74,9 +70,8 @@ impl Server {
         let version = pwa::compute_version(data_dir);
         let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
         let inventory = scan_provenance(&src).map_err(|e| format!("loading provenance: {e}"))?;
-        let suspicions = suspicion_by_key(&src, &inventory).map_err(|e| format!("loading review suspicions: {e}"))?;
         let provenance = inventory.entries.iter().map(|e| (e.key.clone(), e.status)).collect();
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance, suspicions }, usage: None })
+        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance }, usage: None })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A

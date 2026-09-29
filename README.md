@@ -10,9 +10,9 @@ feast ranks, with AWRV observances and the Coverdale Psalter. The newest local
 archdiocesan ordo governs current-year practice.
 
 The web app includes a browsable calendar, an installable offline PWA, and a
-subscribable reminder calendar at `/reminders`. Each hour has a collapsed
-Assurance disclosure with source and composition metadata. Corpus
-verification is ongoing; see [REVIEWING.md](REVIEWING.md) to help.
+subscribable reminder calendar at `/reminders`. Each hour ends with a link
+to report a problem; see [REVIEWING.md](REVIEWING.md) for how texts are
+verified against the printed books.
 
 Each hour's **Prayer form** selector offers **Praying privately** (the default,
 including for clergy praying alone), **With others, led by a deacon**, or
