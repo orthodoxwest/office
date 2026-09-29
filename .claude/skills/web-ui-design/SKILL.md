@@ -33,7 +33,8 @@ or impose a redesign on an unrelated change.
   Dark inscription backgrounds use the seasonal Apse leaf colours in both themes.
 - Current controls use a gold underline; disclosures use the existing caret.
   Keep Default / Nave / Apse labels and visible keyboard focus.
-- The starfield belongs only to Apse home and the post-office epilogue.
+- The starfield belongs to Apse home, the post-office epilogue, and, on
+  screens 1680px and wider, the margins beside an hour's prayer.
   For changes to that field or its masks, read
   [references/apse-vault.md](references/apse-vault.md).
 

@@ -20,7 +20,14 @@ four short diagonals) and small four-ray sparks.
   sit at (25%,25%) and (75%,75%); smaller stars at (75%,25%) and (25%,75%).
   Keep stars inside the cell, where no neighbour tile is needed to finish them.
   The tile scales with `mask-size` (132px phones, 176px wider), so star size
-  scales with it.
+  scales with it. Each principal star carries a soft radial halo inside the
+  cell (28% at the centre, gone by 12 units), so the gold reads as catching
+  light; keep it interior to the cell like the stars.
+- Home's field is lit from the altar: its background is `--apse-gild`, a
+  radial gradient over the seasonal `--ornament-hi/lo` pair centred on the
+  frontispiece, and a third mask layer lets the light fall off toward the
+  corners. `--apse-gild` is `none` outside Apse, like `--apse-vault`; a
+  background image without that gate would paint gold over the Nave.
 - Declare `--apse-ink` and `--apse-vault` on `body`. Custom properties
   resolve where declared; seasonal classes also live on `body`. A `none` on
   body overrides inheritance.
@@ -37,9 +44,24 @@ four short diagonals) and small four-ray sparks.
   eases in under desktop stars cannot share the star layer's mask, so it is
   each host's own `border-image`, outset to the viewport edges with the same
   fade; it adds no layout or scrollable overflow.
+- From 1680px an hour also shows the vault in the margins beside the prayer:
+  one fixed layer (`.office-hour::after`), outside the softened band, at half
+  strength. A field scrolling with the page could share the epilogue's
+  phase, but it repainted every strip of a long hour (about ten times the
+  raster time of a full scroll of Lauds); a fixed one is drawn once. A
+  scroll-driven opacity fades it in over the first half-screen and out
+  before the epilogue scrolls into view, so it never meets the ending's
+  field at a different phase. Both fades run on the compositor; without
+  scroll timelines (`@supports`) the margins stay plain. Below 1680px the
+  margin holds a column of stars or less, which reads as an accident.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
   band floating between blank margins. Keep the field static, and hide the
   footer diamond where the vault already provides ornament.
+- Headless Chromium rasterizes in software, which truncates when it blends a
+  feathered mask over a smooth dark field: screenshots show one-level
+  vertical stripes where the band or a field fades, which GPU rasterization
+  (every ordinary desktop browser) does not. Before chasing them, re-shoot
+  with `--use-angle=swiftshader --enable-gpu-rasterization`.
 - Measure paint cost when adding layers. An earlier 172-layer version cost
   roughly 600ms of extra first paint; one repeating tile stays within noise
   of a bare page. Check rendered pixels as well as valid CSS: sub-pixel

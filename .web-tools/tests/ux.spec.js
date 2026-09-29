@@ -1166,6 +1166,50 @@ test("the hour vault begins after prayer, spans the footer, and does not move it
   expect(desktop.horizontalOverflow).toBe(false);
 });
 
+test("wide hours set a still vault beside the prayer and clear it before the ending", async ({ page }) => {
+  // From 1680px the Apse vault stands in the margins while the office is
+  // said: fixed, so nothing moves at the edge of sight, faded in only after
+  // the opening, and gone before the epilogue's own field (at another phase)
+  // scrolls into view.
+  const margins = () =>
+    page.evaluate(() => {
+      const field = getComputedStyle(document.querySelector(".office-hour"), "::after");
+      return {
+        content: field.content,
+        position: field.position,
+        opacity: Number(field.opacity),
+        mask: field.maskImage || field.webkitMaskImage,
+        ink: field.backgroundColor,
+      };
+    });
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await openDatedPage(page, `/lauds/${testDate}`, "dark");
+  const top = await margins();
+  expect(top.position).toBe("fixed");
+  expect(vaultPaints(top)).toBe(true);
+  expect(top.opacity).toBe(0);
+  await page.evaluate(() => window.scrollTo(0, innerHeight));
+  await expect.poll(async () => (await margins()).opacity).toBe(1);
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(async () => (await margins()).opacity).toBe(0);
+
+  // Nave has no vault; narrower screens keep plain margins.
+  await openDatedPage(page, `/lauds/${testDate}`, "light");
+  expect(vaultPaints(await margins())).toBe(false);
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await openDatedPage(page, `/lauds/${testDate}`, "dark");
+  expect((await margins()).content).toBe("none");
+});
+
+test("the home vault is lit from the frontispiece in Apse only", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const gilding = () => page.evaluate(() => getComputedStyle(document.body, "::before").backgroundImage);
+  await openDatedPage(page, `/?date=${testDate}`, "dark");
+  expect(await gilding()).toContain("radial-gradient");
+  await openDatedPage(page, `/?date=${testDate}`, "light");
+  expect(await gilding()).toBe("none");
+});
+
 test("the header beam holds one line and one geometry on every page", async ({ page }) => {
   // The nav used to inherit the 46rem prose column, which fits the brand and
   // nine links only if "Reminders" wraps — but the ordo widens to 62rem, so
