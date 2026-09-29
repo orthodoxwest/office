@@ -579,7 +579,9 @@ test("wide hour plaster softens the prayer without sideways scroll or stretching
   expect(wide.content).toBe('""');
   expect(wide.position).toBe("fixed");
   expect(wide.image).toContain("plaster-wide-soft.jpg");
-  expect(wide.image.endsWith(wide.wall.replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
+  // Each file carries its own content stamp, so compare the layers unstamped.
+  const unstamped = (layers) => layers.replace(/\?v=[0-9a-f]+/g, "");
+  expect(unstamped(wide.image).endsWith(unstamped(wide.wall).replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
   expect(wide.blend).toBe(`normal, ${wide.wallBlend}`);
   expect(wide.size.split(", ").every((layer) => layer === "cover")).toBe(true);
   expect(wide.mask).toContain("linear-gradient");
