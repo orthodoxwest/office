@@ -3713,7 +3713,7 @@ body.season-eastertide {
   }
 
   /* Theme crossfade. app.js adds .theme-anim to <html> around an explicit
-     Default/Nave/Apse click and removes it ~320ms later, so only that swap
+     Default/Nave/Apse click and removes it ~320ms after the swap, so only that swap
      transitions: first paint (the pre-paint script in layout.html) and a
      system light/dark flip stay instant. Scoped to every element on purpose —
      a theme change repaints text, hairlines, cards and washes together — but
