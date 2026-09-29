@@ -252,6 +252,18 @@ fn month_segment(s: &str) -> Option<u32> {
     s.parse().ok().filter(|m| (1..=12).contains(m))
 }
 
+/// A month named the way a reader might type it, "9" or "September", for a
+/// redirect to its canonical two-digit page.
+fn loose_month(s: &str) -> Option<u32> {
+    if let Ok(m) = s.parse::<u32>()
+        && s.len() == 1
+        && m >= 1
+    {
+        return Some(m);
+    }
+    MONTHS.iter().zip(1..).find(|(name, _)| name.eq_ignore_ascii_case(s) || name[..3].eq_ignore_ascii_case(s)).map(|(_, m)| m)
+}
+
 /// The Tabula Temporaria as the printed ordo opens: the year's figures, its
 /// moveable feasts, and its Ember days, each date leading to its row.
 fn tabula(year: i32) -> TabulaData {
@@ -561,7 +573,11 @@ impl Server {
             Some(&"all") => OrdoView::All,
             Some(m) => match month_segment(m) {
                 Some(m) => OrdoView::Month(m),
-                None => return self.not_found_page(req),
+                // "9" or "september" is the reader's way of naming a month.
+                None => match loose_month(m) {
+                    Some(m) => return redirect(&calendar_month_link(year, m), StatusCode::MOVED_PERMANENTLY),
+                    None => return self.not_found_page(req),
+                },
             },
         };
         let (months, current) = match view {
@@ -586,6 +602,7 @@ impl Server {
             chrome: Chrome { page: "calendar".into(), nav_date: date_slug(now), usage_when: year.to_string(), ..Chrome::default() },
             year,
             view: view.name().into(),
+            year_roman: if year <= 3999 { calendar::computus::roman(year) } else { String::new() },
             prev_year: year - 1,
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
@@ -595,12 +612,17 @@ impl Server {
             month_links: MONTHS
                 .iter()
                 .zip(1..)
-                .map(|(name, m)| MonthLink {
-                    name: name.to_string(),
-                    abbr: name[..3].to_string(),
-                    // The whole year jumps within itself; other views lead to month pages.
-                    href: if view == OrdoView::All { format!("#{}", name.to_lowercase()) } else { calendar_month_link(year, m) },
-                    current: current == Some(m),
+                .map(|(name, m)| {
+                    let today = (year, m) == (now.year(), now.month());
+                    MonthLink {
+                        name: if today { format!("{name}, this month") } else { name.to_string() },
+                        abbr: name[..3].to_string(),
+                        // The whole year jumps within itself; other views lead to month pages.
+                        href: if view == OrdoView::All { format!("#{}", name.to_lowercase()) } else { calendar_month_link(year, m) },
+                        month: format!("{year:04}-{m:02}"),
+                        current: current == Some(m),
+                        today,
+                    }
                 })
                 .collect(),
             months,
@@ -786,7 +808,7 @@ mod tests {
             "/calendar/2026/extra",
             "/calendar/not-a-year/extra",
             "/calendar/not-a-year/09",
-            "/calendar/2026/9",
+            "/calendar/2026/0",
             "/calendar/2026/00",
             "/calendar/2026/13",
             "/calendar/2026/+9",
@@ -795,6 +817,17 @@ mod tests {
             assert_eq!(get(path).0, StatusCode::NOT_FOUND, "{path}");
         }
         assert_eq!(get("/calendar/not-a-year").0, StatusCode::BAD_REQUEST);
+    }
+
+    /// A month typed as a reader would name it finds its page.
+    #[test]
+    fn loose_months_redirect_to_their_page() {
+        for path in ["/calendar/2026/9", "/calendar/2026/september", "/calendar/2026/SEPTEMBER", "/calendar/2026/Sep"] {
+            let (status, headers, _) = get(path);
+            assert_eq!(status, StatusCode::MOVED_PERMANENTLY, "{path}");
+            assert_eq!(headers[header::LOCATION], "/calendar/2026/09", "{path}");
+        }
+        assert_eq!(get("/calendar/2026/may").1[header::LOCATION], "/calendar/2026/05");
     }
 
     /// An ordo page with its attribute-escaped slashes restored.
@@ -815,7 +848,9 @@ mod tests {
         // The strip leads to each month, naming this one as the current page.
         let strip = body.split(r#"<nav class="month-jump""#).nth(1).and_then(|s| s.split("</nav>").next()).unwrap();
         assert_eq!(strip.matches(r#"<a href="/calendar/2026/"#).count(), 12);
-        assert!(body.contains(r#"<a href="/calendar/2026/09" aria-label="September" aria-current="page">Sep</a>"#));
+        assert!(strip.contains(r#"<a href="/calendar/2026/09" aria-label="September"#) && strip.contains(r#"aria-current="page">Sep</a>"#));
+        assert_eq!(strip.matches(r#"aria-current="page""#).count(), 1);
+        assert!(strip.contains(r#"data-month="2026-09""#));
         assert_eq!(body.matches(r#"aria-current="page""#).count(), 2, "the month and the Ordo menu item");
         assert!(body.contains(r#"href="/calendar/2025/09" aria-label="Previous year, 2025""#));
         assert!(body.contains(r#"href="/calendar/2027/09" aria-label="Next year, 2027""#));
@@ -848,14 +883,30 @@ mod tests {
             format!("<dt>Dominical Letter</dt><dd>{}</dd>", t.dominical_letter),
             "<dt>Easter Day</dt><dd><a href=\"/calendar/2026/04#d-2026-04-12\">April 12</a></dd>".to_string(),
             "<dt>Autumn (Holy Cross)</dt><dd><a href=\"/calendar/2026/09#d-2026-09-16\">September 16, 18, 19</a></dd>".to_string(),
-            r#"<a href="/calendar/2026/all">The whole year on one page</a>"#.to_string(),
         ] {
             assert!(body.contains(&want), "frontispiece missing {want:?}");
         }
+        assert!(body.contains("<p class=\"calendar-subtitle\">Anno Domini MMXXVI</p>"));
+        assert!(body.contains(r#"<a class="calendar-whole-year" href="/calendar/2026/all">The whole year on one page</a>"#));
         // Months are a page away; none is current here, and no rows render.
-        assert!(body.contains(r#"<a href="/calendar/2026/01" aria-label="January">Jan</a>"#));
+        assert!(body.contains(r#"<a href="/calendar/2026/01" aria-label="January""#));
+        assert!(!body.contains(r#"aria-current="page">Jan"#));
         assert!(!body.contains(r#"<tr class="day "#) && !body.contains("Previous month"));
         assert!(body.contains(r#"href="/calendar/2025" aria-label="Previous year, 2025""#));
+    }
+
+    /// Today's month carries the strip's lozenge and says so, in its own
+    /// year only; the client moves both at midnight.
+    #[test]
+    fn ordo_strip_marks_this_month() {
+        let now = now_in(&local()).0;
+        let this_month = format!("data-month=\"{}-{:02}\"", now.year(), now.month());
+        let body = ordo(&format!("/calendar/{}", now.year()));
+        assert_eq!(body.matches("is-today-month").count(), 1);
+        let link = body.split("<a ").find(|a| a.contains(&this_month)).unwrap();
+        assert!(link.contains(r#"class="is-today-month""#) && link.contains(", this month\""), "{link}");
+        assert!(!ordo(&format!("/calendar/{}", now.year() - 1)).contains("is-today-month"));
+        assert!(!ordo(&format!("/calendar/{}", now.year() + 1)).contains("this month"));
     }
 
     #[test]
@@ -863,7 +914,7 @@ mod tests {
         let body = ordo("/calendar/2026/all");
         assert!(body.contains("<title>Ordo 2026 — Whole year</title>"));
         assert_eq!(body.matches(r#"<tr class="day "#).count(), 365);
-        assert!(body.contains(r##"<a href="#january" aria-label="January">Jan</a>"##));
+        assert!(body.contains(r##"<a href="#january" aria-label="January""##));
         assert!(body.contains(r#"<section class="month" id="december">"#));
         assert!(body.contains(r#"href="/calendar/2027/all" aria-label="Next year, 2027""#));
         assert!(!body.contains("Previous month") && !body.contains("Tabula Temporaria"));

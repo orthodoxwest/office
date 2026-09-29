@@ -1576,6 +1576,15 @@ function usageBeaconBody(scope) {
     if (todayLink) {
       todayLink.setAttribute("href", ordoDayURL(localDateSlug(new Date())));
     }
+    // Today's month in the strip: its lozenge and spoken name follow the
+    // local date too.
+    var thisMonth = localDateSlug(new Date()).slice(0, 7);
+    document.querySelectorAll(".month-jump a[data-month]").forEach(function (link) {
+      var name = (link.getAttribute("aria-label") || "").replace(/, this month$/, "");
+      var today = link.getAttribute("data-month") === thisMonth;
+      link.classList.toggle("is-today-month", today);
+      link.setAttribute("aria-label", today ? name + ", this month" : name);
+    });
     var row = document.getElementById("d-" + localDateSlug(new Date()));
     if (row && row.classList.contains("day")) {
       row.classList.add("is-today");

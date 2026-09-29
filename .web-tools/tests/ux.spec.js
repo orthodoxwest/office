@@ -2680,6 +2680,44 @@ test("ordo Today leads back to the current year from an archive", async ({ page 
   // Today's own month jumps to its row.
   await page.goto("/calendar/2026/09");
   await expect(page.locator("#calendar-today-link")).toHaveAttribute("href", "#d-2026-09-12");
+  // The strip marks this month in its own year alone.
+  await page.goto("/calendar/2026");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveText("Sep");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveAttribute("aria-label", "September, this month");
+  await page.goto("/calendar/2025");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveCount(0);
+});
+
+test("the strip's month marker moves with the month at midnight", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-09-30T23:59:00-04:00") });
+  await openDatedPage(page, "/calendar/2026/09");
+  const september = page.locator('.month-jump [data-month="2026-09"]');
+  const october = page.locator('.month-jump [data-month="2026-10"]');
+  await expect(september).toHaveClass(/is-today-month/);
+  await page.clock.fastForward("02:00");
+  await expect(september).not.toHaveClass(/is-today-month/);
+  await expect(september).toHaveAttribute("aria-label", "September");
+  await expect(october).toHaveClass(/is-today-month/);
+  await expect(october).toHaveAttribute("aria-label", "October, this month");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveCount(1);
+});
+
+test("Tabula dates stay whole at the narrowest width and largest text", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-text-size", "large"));
+  await openDatedPage(page, "/calendar/2026");
+  const dates = await page.locator(".tabula-tables dd").evaluateAll((items) => items.map((dd) => ({
+    text: dd.textContent,
+    lines: dd.getClientRects().length && Math.round(dd.getBoundingClientRect().height / parseFloat(getComputedStyle(dd).lineHeight)),
+    right: Math.round(dd.getBoundingClientRect().right),
+    edge: Math.round(dd.parentElement.getBoundingClientRect().right),
+  })));
+  expect(dates.length).toBe(11);
+  for (const date of dates) {
+    expect(date.lines, date.text).toBe(1);
+    expect(date.right, date.text).toBe(date.edge);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
 
 test("links into the year from before month pages still reach their day", async ({ page }) => {

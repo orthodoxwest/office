@@ -28,7 +28,8 @@
     <div class="calendar-title">
       {{ headpiece(true) }}
       <h1>{{ year }} Ordo</h1>
-      <p class="calendar-subtitle">Feasts &amp; daily observances</p>
+      {# The frontispiece reads as the printed ordo's title page. #}
+      <p class="calendar-subtitle">{% if view == "year" and year_roman %}Anno Domini {{ year_roman }}{% else %}Feasts &amp; daily observances{% endif %}</p>
     </div>
     <nav class="year-nav" aria-label="Calendar year">
       {% if year > 1 %}<a href="{{ prev_year_link|url }}" aria-label="Previous year, {{ prev_year }}">&lsaquo; {{ prev_year }}</a>{% else %}<span></span>{% endif %}
@@ -39,9 +40,13 @@
   {# One month to a page: the strip leads between them, its current month
        underlined. The whole year keeps it as in-page jumps. #}
   <nav class="month-jump" aria-label="Jump to month">
-    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}"{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}</a>{% endfor %}
+    {% for m in month_links %}<a href="{{ m.href|url }}" aria-label="{{ m.name }}" data-month="{{ m.month }}"{% if m.today %} class="is-today-month"{% endif %}{% if m.current %} aria-current="page"{% endif %}>{{ m.abbr }}</a>{% endfor %}
   </nav>
   {% if view == "year" %}
+  {# The frontispiece's one tool sits where a month keeps its own. #}
+  <div class="calendar-tools">
+    <a class="calendar-whole-year" href="{{ all_link|url }}">The whole year on one page</a>
+  </div>
   <section class="tabula" aria-labelledby="tabula-heading">
     <h2 id="tabula-heading">Tabula Temporaria</h2>
     <dl class="tabula-figures">
@@ -61,7 +66,6 @@
         </dl>
       </section>
     </div>
-    <p class="tabula-whole-year"><a href="{{ all_link|url }}">The whole year on one page</a></p>
   </section>
   {% else %}
   <div class="calendar-tools">

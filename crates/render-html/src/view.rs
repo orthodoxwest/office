@@ -147,8 +147,12 @@ pub struct MonthLink {
     /// The three-letter label the strip shows.
     pub abbr: String,
     pub href: String,
+    /// "YYYY-MM", which the client matches against local today.
+    pub month: String,
     /// This page is the month's own page.
     pub current: bool,
+    /// Today falls in this month.
+    pub today: bool,
 }
 
 /// A labelled figure or date in the Tabula Temporaria; `href` leads to the
@@ -183,6 +187,8 @@ pub struct CalendarData {
     pub year: i32,
     /// "month", "year" (the frontispiece), or "all".
     pub view: String,
+    /// The year in Roman numerals for the frontispiece, empty past 3999.
+    pub year_roman: String,
     pub prev_year: i32,
     pub next_year: i32,
     /// The neighbouring years in the same view: the same month, frontispiece,
