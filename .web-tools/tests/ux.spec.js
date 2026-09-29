@@ -527,9 +527,9 @@ test("parish material stays off the mobile prayer page", async ({
   expect((vault.mask.match(/linear-gradient/g) || []).length).toBe(1);
 });
 
-test("wide hour plaster clears the prayer without sideways scroll or stretching", async ({ page }) => {
-  // The cleared field reaches 10rem past the column; with Large text at the
-  // 1000px threshold that once ran past the viewport.
+test("wide hour plaster softens the prayer without sideways scroll or stretching", async ({ page }) => {
+  // The prayer's field once reached 10rem past the column; with Large text
+  // at the 1000px threshold that ran past the viewport.
   for (const size of ["small", "default", "large"]) {
     for (const width of [1000, 1280]) {
       await page.setViewportSize({ width, height: 900 });
@@ -554,13 +554,92 @@ test("wide hour plaster clears the prayer without sideways scroll or stretching"
   await page.setViewportSize({ width: 390, height: 844 });
   await openDatedPage(page, `/?date=${testDate}`);
   expect((await wall()).image).toMatch(/plaster\.jpg/);
+
+  // The prayer's band is the same wall with the softened copy in place of
+  // the field and one more veil on top, cover-fitted like the wall so its
+  // clouds lie where the wall's do. Phones keep a flat page.
+  const band = () =>
+    page.evaluate(() => {
+      const wall = getComputedStyle(document.documentElement, "::before");
+      const band = getComputedStyle(document.body, "::before");
+      return {
+        content: band.content,
+        position: band.position,
+        wall: wall.backgroundImage,
+        image: band.backgroundImage,
+        blend: band.backgroundBlendMode,
+        wallBlend: wall.backgroundBlendMode,
+        size: band.backgroundSize,
+        mask: band.maskImage || band.webkitMaskImage,
+      };
+    });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  const wide = await band();
+  expect(wide.content).toBe('""');
+  expect(wide.position).toBe("fixed");
+  expect(wide.image).toContain("plaster-wide-soft.jpg");
+  expect(wide.image.endsWith(wide.wall.replace("plaster-wide.jpg", "plaster-wide-soft.jpg"))).toBe(true);
+  expect(wide.blend).toBe(`normal, ${wide.wallBlend}`);
+  expect(wide.size.split(", ").every((layer) => layer === "cover")).toBe(true);
+  expect(wide.mask).toContain("linear-gradient");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openDatedPage(page, `/lauds/${testDate}`);
+  expect((await band()).content).toBe("none");
 });
+
+// The rendered page with its content hidden: its mean colour, that mean's
+// worst channel drift from --bg, and the luminance contrast in percent.
+// `clip` narrows the sample to one region of the viewport; `block` measures
+// contrast over square block means, which keeps clouds but drops the 8-bit
+// rounding that otherwise swamps Apse's sub-level variation.
+async function sampleWall(page, { clip, block = 1 } = {}) {
+  const png = (await page.screenshot(clip ? { clip } : {})).toString("base64");
+  return page.evaluate(async ({ b64, block }) => {
+    const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
+    const bitmap = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext("2d");
+    context.drawImage(bitmap, 0, 0);
+    const { width, height } = bitmap;
+    const data = context.getImageData(0, 0, width, height).data;
+    const sums = [0, 0, 0];
+    const columns = Math.floor(width / block);
+    const rows = Math.floor(height / block);
+    const blocks = new Float64Array(columns * rows);
+    for (let y = 0; y < rows * block; y++) {
+      for (let x = 0; x < columns * block; x++) {
+        const i = 4 * (y * width + x);
+        sums[0] += data[i];
+        sums[1] += data[i + 1];
+        sums[2] += data[i + 2];
+        blocks[Math.floor(y / block) * columns + Math.floor(x / block)] +=
+          0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
+      }
+    }
+    const n = rows * block * columns * block;
+    let luminance = 0;
+    let luminance2 = 0;
+    for (const sum of blocks) {
+      const l = sum / (block * block);
+      luminance += l;
+      luminance2 += l * l;
+    }
+    const mean = luminance / blocks.length;
+    const bg = getComputedStyle(document.documentElement).backgroundColor.match(/\d+/g).map(Number);
+    return {
+      mean: sums.map((sum) => sum / n),
+      drift: Math.max(...sums.map((sum, i) => Math.abs(sum / n - bg[i]))),
+      contrast: (100 * Math.sqrt(luminance2 / blocks.length - mean * mean)) / mean,
+    };
+  }, { b64: png, block });
+}
 
 for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
   test(`the ${theme} wall is visible yet averages the page colour`, async ({ page }) => {
     // Nave once rendered at 0.46% luminance contrast: mean-matched, and
     // invisible. Sample the bare wall (content hidden) and hold both ends:
-    // visible, never loud, and averaging --bg so cleared fields show no edge.
+    // visible, never loud, and averaging --bg so flat fields show no edge.
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       // Home, not the ordo: the wall is one fixed layer on every page, and
@@ -568,37 +647,30 @@ for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
       await openDatedPage(page, `/?date=${testDate}`, theme);
       // body::after is the home niche's room light, not the wall.
       await page.addStyleTag({ content: "body > * { visibility: hidden !important; } body::before, body::after { display: none !important; }" });
-      const png = (await page.screenshot()).toString("base64");
-      const wall = await page.evaluate(async (b64) => {
-        const blob = await (await fetch(`data:image/png;base64,${b64}`)).blob();
-        const bitmap = await createImageBitmap(blob);
-        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
-        const context = canvas.getContext("2d");
-        context.drawImage(bitmap, 0, 0);
-        const data = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
-        const sums = [0, 0, 0];
-        let luminance = 0;
-        let luminance2 = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          sums[0] += data[i];
-          sums[1] += data[i + 1];
-          sums[2] += data[i + 2];
-          const l = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-          luminance += l;
-          luminance2 += l * l;
-        }
-        const n = data.length / 4;
-        const mean = luminance / n;
-        const bg = getComputedStyle(document.documentElement).backgroundColor.match(/\d+/g).map(Number);
-        return {
-          drift: Math.max(...sums.map((sum, i) => Math.abs(sum / n - bg[i]))),
-          contrast: (100 * Math.sqrt(luminance2 / n - mean * mean)) / mean,
-        };
-      }, png);
+      const wall = await sampleWall(page);
       expect(wall.drift, `${width}px mean vs --bg`).toBeLessThan(1.5);
       expect(wall.contrast, `${width}px contrast %`).toBeGreaterThan(minContrast);
       expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
     }
+  });
+
+  test(`the ${theme} prayer band is quieter than the wall but keeps its tone`, async ({ page }) => {
+    // The band's softened copy must hold the wall's mean where it covers it,
+    // or its feathered edges show as a lighter or darker column; and it must
+    // stay quieter than the wall, or it is no longer a band.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openDatedPage(page, `/lauds/${testDate}`, theme);
+    await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+    // The band's solid middle, then the same region of the bare wall.
+    const middle = { clip: { x: 440, y: 0, width: 400, height: 900 }, block: 4 };
+    const band = await sampleWall(page, middle);
+    await page.addStyleTag({ content: "body::before { display: none !important; }" });
+    const wall = await sampleWall(page, middle);
+    band.mean.forEach((channel, i) => expect(Math.abs(channel - wall.mean[i]), "band vs wall mean").toBeLessThan(1));
+    // Apse's wall varies by well under a level, so its band rounds to the
+    // same few levels: quieter, but not by a ratio the screenshot can show.
+    expect(band.contrast, "band contrast %").toBeLessThan(wall.contrast * (theme === "light" ? 0.6 : 1));
+    expect(band.contrast, "band contrast %").toBeGreaterThan(0.1);
   });
 }
 
@@ -637,6 +709,8 @@ test("forced colours drop the wall for the system canvas", async ({ page }) => {
     const wall = await page.evaluate(() => getComputedStyle(document.documentElement, "::before").content);
     expect(wall, path).toBe("none");
   }
+  const band = await page.evaluate(() => getComputedStyle(document.body, "::before").content);
+  expect(band, "hour band").toBe("none");
 });
 
 test("the wall fades out before a theme swap and respects reduced motion", async ({ page }) => {
@@ -668,21 +742,20 @@ for (const theme of ["light", "dark"]) {
     await page.setViewportSize({ width: 1280, height: 900 });
     // Home stands for the threshold pages that share its print rules; the
     // ordo adds its sticky heading, usage its own print sheet, and the hour
-    // its cleared prayer field.
+    // its softened prayer band.
     for (const path of [`/?date=${testDate}`, "/calendar/2026", "/admin/usage?days=7", `/lauds/${testDate}`]) {
       await openDatedPage(page, path, theme);
       await page.emulateMedia({ media: "print" });
       const paper = await page.evaluate(() => {
         const heading = document.querySelector(".month h2");
-        const prayers = document.querySelector(".elements");
         return {
           wall: getComputedStyle(document.documentElement, "::before").content,
           background: getComputedStyle(document.documentElement).backgroundColor,
           headingImage: heading ? getComputedStyle(heading).backgroundImage : "none",
-          prayerField: prayers ? getComputedStyle(prayers, "::before").content : "none",
+          band: getComputedStyle(document.body, "::before").content,
         };
       });
-      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none", prayerField: "none" });
+      expect(paper, path).toEqual({ wall: "none", background: "rgb(255, 255, 255)", headingImage: "none", band: "none" });
       await page.emulateMedia({ media: "screen" });
     }
   });
@@ -2287,6 +2360,85 @@ test("dated hour navigation keeps the selected liturgical day", async ({ page })
 
   await expect(page).toHaveURL(/\/lauds\/2026-03-14$/);
   await expect(page.getByRole("heading", { name: "Lauds", exact: true })).toBeVisible();
+});
+
+test("the date picker is set in the room, not the platform", async ({ page }) => {
+  // Today is Wednesday the 18th; the page is Sunday the 15th.
+  await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
+  await openDatedPage(page, `/lauds/${testDate}`);
+  await page.getByText("Change date", { exact: true }).click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  await expect(picker).toBeVisible();
+  // The native field stays in the page for no-script visitors only.
+  await expect(page.locator(".date-jump")).toBeHidden();
+
+  const grid = picker.getByRole("grid", { name: "March 2026" });
+  const chosen = grid.getByRole("link", { name: "Sunday, March 15, 2026" });
+  await expect(chosen.locator("xpath=..")).toHaveAttribute("aria-selected", "true");
+  await expect(grid.getByRole("link", { name: "Wednesday, March 18, 2026" })).toHaveAttribute("aria-current", "date");
+  await expect(grid.locator("[aria-selected=true]")).toHaveCount(1);
+  await expect(grid.locator("[aria-current=date]")).toHaveCount(1);
+  // Six weeks always, so paging months never moves what lies below.
+  await expect(grid.locator("tbody tr")).toHaveCount(6);
+  const height = await picker.evaluate((node) => node.getBoundingClientRect().height);
+  await picker.getByRole("button", { name: "Next month" }).click();
+  await expect(picker.getByRole("grid", { name: "April 2026" })).toBeVisible();
+  expect(await picker.evaluate((node) => node.getBoundingClientRect().height)).toBe(height);
+  await picker.getByRole("button", { name: "Previous month" }).click();
+
+  // One day in the tab order; arrows, Page Down and Home move it.
+  await expect(grid.locator("a[tabindex='0']")).toHaveCount(1);
+  await chosen.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(grid.getByRole("link", { name: "Monday, March 16, 2026" })).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(grid.getByRole("link", { name: "Monday, March 23, 2026" })).toBeFocused();
+  await page.keyboard.press("PageDown");
+  const april = picker.getByRole("grid", { name: "April 2026" });
+  await expect(april.getByRole("link", { name: "Thursday, April 23, 2026" })).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(april.getByRole("link", { name: "Sunday, April 19, 2026" })).toBeFocused();
+
+  // The title turns to the year's months; a month returns to its days.
+  await picker.getByRole("button", { name: /^April 2026/ }).click();
+  const months = picker.getByRole("grid", { name: "Months" });
+  await expect(months).toBeVisible();
+  await expect(april).toBeHidden();
+  await months.getByRole("button", { name: "December 2026" }).click();
+  const december = picker.getByRole("grid", { name: "December 2026" });
+  await expect(december.getByRole("link", { name: "Saturday, December 19, 2026" })).toBeFocused();
+
+  // Escape closes the disclosure back to its label.
+  await page.keyboard.press("Escape");
+  await expect(picker).toBeHidden();
+  await expect(page.locator(".hour-date-nav > summary")).toBeFocused();
+
+  // Reopening starts from the page's own day, and a day is a link to it.
+  await page.getByText("Change date", { exact: true }).click();
+  await expect(picker.getByRole("grid", { name: "March 2026" })).toBeVisible();
+  await picker.getByRole("link", { name: "Tuesday, March 17, 2026" }).click();
+  await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
+});
+
+test("home's date picker opens the chosen day's home", async ({ page }) => {
+  await openDatedPage(page, `/?date=${testDate}`);
+  await page.getByText("Change date", { exact: true }).click();
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  await picker.getByRole("button", { name: "Previous month" }).click();
+  await picker.getByRole("link", { name: "Saturday, February 14, 2026" }).click();
+  await expect(page).toHaveURL(/\/\?date=2026-02-14$/);
+});
+
+test("without JavaScript the native date field still jumps", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/lauds/${testDate}`);
+  await page.getByText("Change date", { exact: true }).click();
+  await expect(page.locator(".date-picker")).toHaveCount(0);
+  await page.getByLabel("Jump to date").fill("2026-03-20");
+  await page.getByRole("button", { name: "Go" }).click();
+  await expect(page).toHaveURL(/\/lauds.*2026-03-20/);
+  await context.close();
 });
 
 test("ordo disclosures are deliberate and survive a change in screen width", async ({ page }) => {

@@ -4,6 +4,12 @@
 Requires tools/requirements.txt. The portrait field serves phones; generate the
 wide field with --width 1600 --aspect 1.6 --soften 2 --out PATH. Keep source
 photographs outside the repository. Assets are regenerated only for design edits.
+
+Wide hours lay a softened copy of the wall behind the prayer. Derive it from a
+generated field, not the photograph, so it keeps that field's clouds exactly:
+--soft-of apps/office-web/static/plaster-wide.jpg --quality 90 --out
+.../plaster-wide-soft.jpg, and likewise plaster.jpg -> plaster-soft.jpg. The
+smooth gradients need the higher quality; the files stay under 3 KB.
 """
 import argparse
 from pathlib import Path
@@ -61,6 +67,17 @@ def texture(photo, width, radius, gain, crop, aspect, limit, soften):
     return Image.fromarray(grey)
 
 
+def soft_field(field, radius, scale):
+    """A low-frequency copy of a generated field: trowel marks and mottle
+    blurred away, the broad clouds kept in place. Its mean is the field's, so
+    it composes to the same average colour. Stored small, since nothing is
+    left at fine scale for the browser's smooth upscaling to lose."""
+    values = blur(np.asarray(field.convert("L"), dtype=float), radius)
+    w, h = field.size
+    grey = Image.fromarray(np.floor(np.clip(values, 0, 255) + 0.5).astype(np.uint8))
+    return grey.resize((max(1, round(w / scale)), max(1, round(h / scale))), Image.BOX)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--src", type=Path, default=Path("../resources/design/parish/nave-wall-plaster.jpg"))
@@ -69,7 +86,18 @@ def main():
                                 ("crop", 0.06, float), ("aspect", 0, float), ("limit", 2.5, float),
                                 ("soften", 1, int), ("quality", 72, int)]:
         parser.add_argument("--" + name, type=kind, default=default)
+    parser.add_argument("--soft-of", type=Path, help="derive the softened field from this generated field")
+    parser.add_argument("--soft-radius", type=int, default=20, help="blur radius in field pixels")
+    parser.add_argument("--soft-scale", type=int, default=8, help="downscale factor for the stored copy")
     args = parser.parse_args()
+    if args.soft_of:
+        if args.soft_radius < 1 or args.soft_scale < 1:
+            parser.error("invalid soft field parameters")
+        with Image.open(args.soft_of) as field:
+            result = soft_field(field, args.soft_radius, args.soft_scale)
+        result.save(args.out, quality=args.quality)
+        print("wrote", args.out, result.size)
+        return
     if not (args.width > 0 and 0 <= args.crop < 0.5 and args.radius >= 0 and args.aspect >= 0
             and args.limit > 0 and args.soften >= 0 and 1 <= args.quality <= 95):
         parser.error("invalid texture dimensions or processing parameters")

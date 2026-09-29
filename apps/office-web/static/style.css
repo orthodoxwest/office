@@ -110,8 +110,9 @@
      The knee clips the texture's lighter part to the ground; the clouds
      below it deepen toward --plaster-tint. Knee and dodge sum to white.
      Tint is solved per channel (scratch solver over the texture pixels) so
-     the wall averages exactly --bg: the prayer's cleared field and the iOS
-     month heading are --bg, and any other mean shows their edges. Result:
+     the wall averages exactly --bg: the iOS month heading is --bg and the
+     prayer's softened band keeps the same mean, and any other mean shows
+     their edges. Result:
      1.6% luminance contrast against Apse's 3.4%, where 0.5% was invisible. */
   --plaster-base: #fffdf7;
   --plaster-tint: #e9d3c0;
@@ -1491,6 +1492,227 @@ footer::before {
   font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* The hand-set date picker (app.js). It replaces the native field, whose
+   popup is the platform's, with a month set like the ordo's: lining figures
+   in a square grid of thumb-sized days, Sundays in rubric, the page's day
+   underlined in gold like every chosen thing, today in the ordo's wash.
+   Laid in the disclosure, not floated over the page, so nothing covers the
+   header and the unfolding motion carries it. */
+.has-date-picker .date-jump {
+  display: none;
+}
+
+/* Seven thumb-wide days where they fit; on a 320px phone, or with Large
+   text, the week narrows to the column and the days keep their height. One
+   grid track does both: it asks the disclosure for the full week (else the
+   Previous/Next row would set the width, and squeeze the grid on a day
+   with no Today link) yet never makes the header or card wider to get it. */
+.date-picker {
+  --date-cell: var(--touch-target);
+  display: grid;
+  grid-template-columns: minmax(0, calc(7 * var(--date-cell)));
+  justify-content: center;
+  margin: 0.3rem auto 0.4rem;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.date-picker-head {
+  display: grid;
+  grid-template-columns: var(--date-cell) 1fr var(--date-cell);
+  align-items: center;
+}
+
+/* Zero specificity, so each control's own rule below sets its type. */
+:where(.date-picker) button {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.date-picker-step {
+  min-height: var(--date-cell);
+  color: var(--accent);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.date-picker-step:disabled {
+  color: var(--border);
+  cursor: default;
+}
+
+/* Set like the disclosure labels around it, with their gold caret. */
+.date-picker-title {
+  justify-self: center;
+  min-height: var(--date-cell);
+  padding-inline: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.date-picker-title::after {
+  content: "▾";
+  margin-inline-start: 0.35em;
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.date-picker[data-view="months"] .date-picker-title::after {
+  content: "▴";
+}
+
+/* Both views share one cell of the grid, so the months view keeps the
+   days' height and turning between them moves nothing below. */
+.date-picker-body {
+  display: grid;
+}
+
+.date-picker-body > * {
+  grid-area: 1 / 1;
+}
+
+.date-picker[data-view="days"] .date-picker-months,
+.date-picker[data-view="months"] .date-picker-days {
+  visibility: hidden;
+}
+
+.date-picker-days {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.date-picker-days th {
+  padding: 0 0 0.15rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.date-picker-days abbr {
+  text-decoration: none;
+  cursor: default;
+}
+
+.date-picker-days td {
+  padding: 0;
+  height: var(--date-cell);
+}
+
+.date-picker-day,
+.date-picker-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text);
+  text-decoration: none;
+  font-variant-numeric: lining-nums tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.date-picker-days th:first-child,
+.date-picker-days td:first-child .date-picker-day {
+  color: var(--rubric);
+}
+
+.date-picker-day[aria-current="date"],
+.date-picker-month[aria-current="date"] {
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+/* The chosen day reads as the chosen prayer form does: oak ink on a gold
+   rule. Cut to the figures, so a single digit gets a short rule. */
+.date-picker-days [aria-selected="true"] .date-picker-day,
+.date-picker-months [aria-selected="true"] .date-picker-month {
+  color: var(--accent);
+}
+
+.date-picker-days [aria-selected="true"] .date-picker-day > span,
+.date-picker-months [aria-selected="true"] .date-picker-month {
+  box-shadow: inset 0 -1px var(--gold-line);
+}
+
+.date-picker-days [aria-selected="true"] .date-picker-day > span {
+  padding-inline: 0.1em;
+}
+
+.date-picker-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.date-picker-months [role="row"] {
+  display: contents;
+}
+
+.date-picker-months [role="gridcell"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-month {
+  width: auto;
+  height: var(--date-cell);
+  padding-inline: 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .date-picker-day:hover,
+  .date-picker-month:hover,
+  .date-picker-step:not(:disabled):hover,
+  .date-picker-title:hover {
+    background-color: var(--surface);
+  }
+}
+
+.date-picker-day:active,
+.date-picker-month:active,
+.date-picker-step:not(:disabled):active,
+.date-picker-title:active {
+  background-color: var(--pressed-wash);
+  box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+/* Inside a tight grid the usual 3px offset would ring the neighbours. */
+.date-picker a:focus-visible,
+.date-picker button:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (forced-colors: active) {
+  .date-picker-days [aria-selected="true"] .date-picker-day > span,
+  .date-picker-months [aria-selected="true"] .date-picker-month {
+    text-decoration: underline;
+  }
+
+  .date-picker-day[aria-current="date"],
+  .date-picker-month[aria-current="date"] {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
 }
 
 /* ── Office elements ── */
@@ -3318,7 +3540,7 @@ body.season-eastertide {
      slamming on. Only reachable inside .theme-anim, since app.js only ever
      toggles this alongside it. */
   :root.theme-anim.vault-hidden::before,
-  :root.theme-anim.vault-hidden body.page-home::before,
+  :root.theme-anim.vault-hidden body:is(.page-home, .page-hour)::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
     opacity: 0 !important;
@@ -4656,7 +4878,7 @@ body.season-eastertide {
    The church appears here as material and structure, not illustration.
 
    Home, Ordo, Reminders, Usage, and wide hour pages share one wall strength
-   per theme. Hours clear the wall only beneath the prayer itself.
+   per theme. Wide hours soften it beneath the prayer itself.
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
@@ -4675,8 +4897,8 @@ body.season-eastertide {
    A final veil of --bg sets the shared strength while keeping the result
    opaque, so sticky month headings can repeat it without showing rows
    passing beneath them. */
-:root {
-  --plaster-image: url("plaster.jpg");
+:root,
+body.page-hour::before {
   --plaster-veil: color-mix(in srgb, var(--bg), transparent var(--plaster-strength));
   --plaster-layers:
     linear-gradient(var(--plaster-veil), var(--plaster-veil)),
@@ -4687,6 +4909,13 @@ body.season-eastertide {
     linear-gradient(var(--plaster-knee), var(--plaster-knee));
 }
 
+/* The layers are declared again on the prayer's band so they pick up its
+   softened image; a custom property substitutes where it is declared. */
+:root {
+  --plaster-image: url("plaster.jpg");
+  --plaster-soft-image: url("plaster-soft.jpg");
+}
+
 /* Not preloaded. On a slow connection a preload arrived before first paint
    but pushed the prayer text ~300ms later, even at low fetch priority. The
    wall averages exactly --bg, so arriving late costs only texture, never
@@ -4694,6 +4923,7 @@ body.season-eastertide {
 @media (min-width: 1000px) and (orientation: landscape) {
   :root {
     --plaster-image: url("plaster-wide.jpg");
+    --plaster-soft-image: url("plaster-wide-soft.jpg");
   }
 }
 
@@ -4726,10 +4956,19 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
   background-repeat: no-repeat;
 }
 
-/* Hours carry the shared wall through the header and epilogue of
-   wide pages; phones keep a flat page. The clear field belongs to the
-   prayer wrapper, so it follows disclosures and text size without running
-   through the opening or footer. */
+/* Wide hours keep the wall behind the prayer but soften it there, rather
+   than clearing it to a flat field: a band down the column carries a copy of
+   the wall with its trowel marks blurred away, under a further veil of --bg.
+   The copy is plaster-soft (tools/genplaster --soft-of), derived from the
+   same field, so its clouds lie exactly where the wall's do and the band's
+   feathered edges show the marks sharpening out of the same wash, not a
+   panel laid over it. Its mean is the wall's, so the tone never shifts.
+   The blur is baked into a 2 KB image; a live backdrop-filter looked the
+   same but re-blurred the fixed layer on every scrolled frame.
+
+   The band is fixed like the wall and runs the viewport's full height, so
+   nothing seams as the header or epilogue scroll through it; in rem, it
+   widens with the text. Phones keep a flat page. */
 html:where(:has(> body.page-hour))::before {
   content: none;
 }
@@ -4737,42 +4976,30 @@ html:where(:has(> body.page-hour))::before {
 @media (min-width: 1000px) {
   html:where(:has(> body.page-hour))::before { content: ""; }
 
-  .page-hour .elements {
-    position: relative;
-    isolation: isolate;
-    /* Eight rem of eased feathering outside a two-rem clear text gutter.
-       The vertical feather eases through the surrounding whitespace, stays
-       opaque beneath every prayer, and ends before the continuation links. */
-    --clear-across: linear-gradient(to right,
-      transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
-      rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
-      #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
-      rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent);
-    --clear-down: linear-gradient(to bottom,
-      transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
-      rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
-      #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
-      rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
-  }
-
-  .page-hour .elements::before {
+  body.page-hour::before {
+    --plaster-image: var(--plaster-soft-image);
+    --soft-veil: color-mix(in srgb, var(--bg) 45%, transparent);
+    /* Solid across 45rem, about the measure plus its gutters, then eased
+       out over 12rem each side. At 1000px the feather runs off the screen
+       edge, which leaves the wall's marks only at the margins. */
+    --soft-band: linear-gradient(to right,
+      transparent calc(50% - 34.5rem), rgb(0 0 0 / 0.1) calc(50% - 31.5rem),
+      rgb(0 0 0 / 0.5) calc(50% - 28rem), rgb(0 0 0 / 0.9) calc(50% - 24.5rem),
+      #000 calc(50% - 22.5rem), #000 calc(50% + 22.5rem),
+      rgb(0 0 0 / 0.9) calc(50% + 24.5rem), rgb(0 0 0 / 0.5) calc(50% + 28rem),
+      rgb(0 0 0 / 0.1) calc(50% + 31.5rem), transparent calc(50% + 34.5rem));
     content: "";
-    position: absolute;
-    /* Reach 10rem past the column, but never past the viewport: with Large
-       text at 1000px the full reach overflowed and the page scrolled
-       sideways. 50% - 50vw is the column edge's distance to the viewport
-       edge; the rem keeps a classic scrollbar's width inside it. */
-    inset-block: -3rem;
-    inset-inline: max(-10rem, calc(50% - 50vw + 1rem));
+    position: fixed;
+    inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: var(--bg);
-    /* Prefixed first: an engine that knows only the prefixed mask would
-       otherwise paint this field as a hard-edged panel behind the prayer. */
-    -webkit-mask-image: var(--clear-across), var(--clear-down);
-    -webkit-mask-composite: source-in;
-    mask-image: var(--clear-across), var(--clear-down);
-    mask-composite: intersect;
+    background: linear-gradient(var(--soft-veil), var(--soft-veil)), var(--plaster-layers);
+    background-blend-mode: normal, normal, multiply, screen, color-dodge, darken, normal;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-mask-image: var(--soft-band);
+    mask-image: var(--soft-band);
   }
 }
 
@@ -4784,8 +5011,7 @@ html:where(:has(> body.page-hour))::before {
 
 /* iOS Safari treats a fixed attachment as scroll, so the heading would show
    its own copy of the wall at another scale and crop. The wall averages
-   exactly --bg, so a flat band is the one seam-free choice there, the same
-   clearing the prayer uses on wide hours. */
+   exactly --bg, so a flat band is the one seam-free choice there. */
 @supports (-webkit-touch-callout: none) {
   .page-calendar .month h2 {
     background: var(--bg);
@@ -4796,7 +5022,8 @@ html:where(:has(> body.page-hour))::before {
    would sit behind the system backplates as a patchwork; the user's own
    Canvas is the wall there. */
 @media (forced-colors: active) {
-  html::before {
+  html::before,
+  body.page-hour::before {
     content: none !important;
   }
 
@@ -5016,7 +5243,7 @@ body {
   --apse-vault: var(--apse-star-tile);
 }
 
-/* An hour remains a flat prayer page until the office has ended. The vault
+/* An hour shows no stars until the office has ended. The vault
    begins only in the post-prayer epilogue: transparent through the hour
    continuation, emerging around Assurance, then continuing through the
    footer. Both layers share main's bottom as their tile origin.
@@ -5024,7 +5251,7 @@ body {
    The negative inline reach restores the full main/footer measure around the
    narrower content box on a phone. On desktop the same post-prayer field
    bleeds to the viewport edges so the footer reads as one continuous vault,
-   while the prayer above remains on its flat 38rem measure. */
+   while the prayer above keeps its 38rem measure on the softened wall. */
 body.page-hour {
   --apse-epilogue-tile: 132px;
 }
@@ -5328,8 +5555,7 @@ body.page-home::before {
     box-shadow: none;
   }
 
-  body.page-home::before,
-  .page-hour .elements::before,
+  body:is(.page-home, .page-hour)::before,
   html::before {
     content: none;
   }

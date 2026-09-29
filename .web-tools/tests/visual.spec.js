@@ -31,6 +31,15 @@ for (const theme of ["light", "dark"]) {
     await expect(page).toHaveScreenshot(`lauds-${theme}.png`);
   });
 
+  test(`mobile date picker — ${theme}`, async ({ page }) => {
+    // Pinned so today's wash always falls on the same day of the month.
+    await page.clock.setFixedTime(new Date("2026-03-18T10:00:00-04:00"));
+    await openForSnapshot(page, `/lauds/${testDate}`, theme);
+    await page.getByText("Change date", { exact: true }).click();
+    await expect(page.locator(".date-picker")).toBeVisible();
+    await expect(page.locator(".hour-date-nav")).toHaveScreenshot(`date-picker-${theme}.png`);
+  });
+
   test(`desktop Lauds — ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await openForSnapshot(page, `/lauds/${testDate}`, theme);
