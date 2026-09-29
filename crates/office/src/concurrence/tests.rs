@@ -166,35 +166,6 @@ fn first_class_first_vespers_commemorates_the_outgoing_sunday() {
 }
 
 #[test]
-fn second_class_first_vespers_omits_incoming_memorials() {
-    // Diurnal §VIII, §X: Hadrian is not commemorated at I Vespers of the
-    // Nativity of the BVM (#390); a Greater Double still admits a Memorial,
-    // and the perpetual St Paul companion stays.
-    let hadrian = f("st-hadrian", Rank::Commemoration, Category::Martyr);
-    let nativity = f("nativity-bvm", Rank::Double2ndClass, Category::BlessedVirgin);
-    let r = resolve_concurrence(&day(None, &[]), &day(Some(&nativity), &[&hadrian]));
-    assert_eq!(r.owner, IOfFollowing);
-    assert!(r.commemorations.is_empty(), "{:?}", ids(&r.commemorations));
-    assert_trace_rule(&r.decisions, "commemoration:first-vespers-second-class-memorial-exclusion");
-
-    let greater = f("some-greater-double", Rank::GreaterDouble, Category::Confessor);
-    let r = resolve_concurrence(&day(None, &[]), &day(Some(&greater), &[&hadrian]));
-    assert!(same_list(&r.commemorations, &[&hadrian]), "{:?}", ids(&r.commemorations));
-
-    let chair = f("chair-peter", Rank::Double2ndClass, Category::Apostle);
-    let paul = with("commemoration-st-paul", Rank::Commemoration, Category::Apostle, |x| x.companion_of = Some("chair-peter".to_string()));
-    let r = resolve_concurrence(&day(None, &[]), &day(Some(&chair), &[&paul]));
-    assert!(same_list(&r.commemorations, &[&paul]), "{:?}", ids(&r.commemorations));
-
-    // A Double I Class is left to the Memorial rule: Low Sunday keeps Nereus
-    // and companions at I Vespers (2024 ordo 11 May).
-    let low_sunday = f("low-sunday", Rank::Double1stClass, Category::Lord);
-    let nereus = f("ss-nereus-achilleus-domitilla-pancras", Rank::Commemoration, Category::Martyr);
-    let r = resolve_concurrence(&day(None, &[]), &day(Some(&low_sunday), &[&nereus]));
-    assert!(same_list(&r.commemorations, &[&nereus]), "{:?}", ids(&r.commemorations));
-}
-
-#[test]
 fn saturday_bvm_yields_to_sunday() {
     let bvm = f("saturday-office-bvm", Rank::Simple, Category::BlessedVirgin);
     let sunday = f("pentecost-sunday-5", Rank::SemiDouble, Category::Sunday);
@@ -482,9 +453,11 @@ fn outgoing_at_first_vespers() {
         (&first, feast("september-ember-saturday", Rank::PrivilegedFeria, Category::Feria), false),
         (&first, second.clone(), true),
         (&first, feast("low-sunday", Rank::Double1stClass, Category::Lord), true),
-        // The Easter and Pentecost octaves end at None of Saturday.
+        // The Easter and Pentecost octaves end at None of Saturday, and the
+        // Triduum is never commemorated.
         (&first, feast("easter-sunday-octave-day-7", Rank::Double1stClass, Category::Lord), false),
         (&first, feast("pentecost-octave-day-7", Rank::Double1stClass, Category::Lord), false),
+        (&first, feast("holy-saturday", Rank::Double1stClass, Category::Lord), false),
         // Diurnal §X: the Sunday is commemorated except before the Nativity
         // and the Epiphany (#396).
         (&first, sunday.clone(), true),

@@ -394,8 +394,8 @@ fn major_collects_have_invitations_and_only_first_and_last_conclusions() {
     for (date, name, comms, final_ref) in [
         ("2026-01-01", "lauds", 0, ""),
         ("2026-01-01", "vespers", 0, ""),
+        ("2026-01-03", "vespers", 2, ""),
         ("2026-01-04", "lauds", 2, ""),
-        ("2026-01-04", "vespers", 2, ""),
         ("2026-01-05", "lauds", 1, ""),
         ("2026-01-17", "vespers", 4, ""),
         ("2026-01-19", "lauds", 2, "ordinary/shared/suffrage-collect"),

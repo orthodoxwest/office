@@ -316,15 +316,20 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
             return (false, "commemoration:first-vespers-first-class-common-octave-exclusion");
         }
         // The Easter and Pentecost octaves end at None of Saturday (2026 ordo
-        // 18 April and 6 June).
-        if loser.is_category(Category::Feria) || (is_day_within_octave(loser) && loser.rank.weight() >= Rank::Double2ndClass.weight()) {
+        // 18 April and 6 June), and the Triduum is never commemorated.
+        if loser.is_category(Category::Feria)
+            || matches!(loser.id.as_str(), "holy-thursday" | "good-friday" | "holy-saturday")
+            || (is_day_within_octave(loser) && loser.rank.weight() >= Rank::Double2ndClass.weight())
+        {
             return (false, "commemoration:first-vespers-first-class-exclusion");
         }
         if loser.rank.weight() >= Rank::Double2ndClass.weight() {
             return (true, "commemoration:first-vespers-first-class-double");
         }
-        // A Greater or Lesser Double is not on the list either, but every
-        // ordo keeps it (St Gabriel before the Annunciation), so it stays.
+        // A Greater or Lesser Double is not on the list either, but the ordos
+        // are split: St Gabriel before the Annunciation every year, against
+        // Doubles dropped before the Ascension, Pentecost and Ss Peter and
+        // Paul. It stays pending a ruling.
     }
     if w.rank == Rank::Double2ndClass {
         if w.id == "circumcision" && (loser.is_category(Category::Sunday) || loser.rank.weight() >= Rank::GreaterDouble.weight()) {
@@ -499,18 +504,6 @@ fn boundary_commemorations(
         }
         if incoming_feria_excluded_at_vespers(c) {
             decisions.push(decision("commemoration:incoming-feria-not-at-vespers-boundary", "suppressed", &c.id));
-            continue;
-        }
-        // Diurnal §VIII, §X: on a Double II Class a Simple or a Memorial "is
-        // not commemorated at I Vespers" (2017–2018 and 2024–2026 ordos; #390).
-        // A Double I Class is left to the Memorial rule, which keeps Low
-        // Sunday's (2024 ordo 11 May).
-        if !second_vespers
-            && w.is_some_and(|w| w.rank == Rank::Double2ndClass && !w.is_category(Category::Sunday))
-            && matches!(c.rank, Rank::Simple | Rank::Commemoration)
-            && !is_apostolic_companion_commemoration(c)
-        {
-            decisions.push(decision("commemoration:first-vespers-second-class-memorial-exclusion", "suppressed", &c.id));
             continue;
         }
         if !second_vespers
