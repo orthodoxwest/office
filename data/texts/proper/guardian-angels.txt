@@ -80,8 +80,6 @@ Of hostile foemen disappear;
 Let civil strife give way to peace,
 And pestilence and famine cease.
 
-/:The following Ending is never changed.:/
-
 To God the Father glory be;
 For those the Saviour setteth free,
 Anointed by the Holy Ghost,
@@ -212,3 +210,7 @@ They are all * ministering spirits, sent forth to minister to them who shall be 
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[hymn-doxology-lauds]
+# SOURCE: monastic diurnal, p. 615: "The following Ending is never changed."
+@omit
