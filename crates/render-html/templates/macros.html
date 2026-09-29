@@ -20,27 +20,7 @@
 </div>
 {% endmacro %}
 {% macro fish() %}<svg class="fish-flag" width="18" height="9" fill="currentColor" aria-hidden="true" focusable="false"><use href="#icon-fish"/></svg>{% endmacro %}
-{% macro leader_assurance(a, report_url) %}
-    <details class="assurance-panel">
-      <summary>Assurance: {{ a.verified }} verified{% if a.needs_review %} &middot; {{ a.needs_review }} {% if a.needs_review == 1 %}needs{% else %}need{% endif %} review{% endif %}{% if a.source_unknown %} &middot; {{ a.source_unknown }} source unknown{% endif %}{% if a.flagged %} &middot; {{ a.flagged }} pre-flagged{% endif %}</summary>
-      <p class="assurance-intro">This metadata explains how the page was assembled. It contains corpus keys and rule identifiers, not source-book text.</p>
-      <h2>Text dependencies</h2>
-      <ul class="assurance-list">
-        {% for dep in a.dependencies %}
-        <li><code>{{ dep.key }}</code> <span class="assurance-status status-{{ dep.status }}">{{ dep.status }}</span>{% if dep.status != "verified" %} <a href="{{ dep.report_url|url }}" target="_blank" rel="noopener">review</a>{% endif %}{% for flag in dep.flags %}<br><span class="assurance-flag">&#9873; {{ flag.label }}{% if flag.state == "addressed" %} (addressed &mdash; confirm against book){% endif %}: {{ flag.reason }}</span>{% endfor %}</li>
-        {% endfor %}
-      </ul>
-      {% if a.resolutions %}
-      <h2>Fallback resolutions</h2>
-      <ul class="assurance-list">
-        {% for r in a.resolutions %}<li><code>{{ r.slot }}</code> &rarr; {{ r.tier }} (<code>{{ r.source }}</code>)</li>{% endfor %}
-      </ul>
-      {% endif %}
-      <h2>Composition decisions</h2>
-      <ul class="assurance-list assurance-decisions">
-        {% for d in a.decisions %}<li><code>{{ d.rule }}</code> &rarr; {{ d.outcome }}{% if d.detail %} <span class="assurance-detail">{{ d.detail }}</span>{% endif %}</li>{% endfor %}
-      </ul>
-    </details>
+{% macro report_issue(report_url) %}
     <p class="report-issue">
       Spotted an error on this page? <a href="{{ report_url|url }}" target="_blank" rel="noopener">Report a problem</a>
     </p>

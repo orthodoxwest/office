@@ -1,43 +1,44 @@
 [benedictus-antiphon]
-Mary anointed * the Feet of Jesus, and wiped Them with her hair; and the house was filled with the odour of the ointment.
+# SOURCE: monastic diurnal, p. 569 (St Mary Magdalene, At Lauds)
+Mary therefore * anointed the feet of Jesus, and wiped them with her hair, and the house was filled with the odour of the ointment.
 
 [magnificat-antiphon]
 # SOURCE: Monastic Diurnal.pdf, p. 570
 A woman * in the city, which was a sinner, brought an alabaster box of ointment, and stood at the Lord's feet, and began to wash his feet with tears, and did wipe them with the hairs of her head.
 
 [collect]
-O Lord, we pray thee, that we may be helped by the pleading of Blessed Mary Magdalen, whose prayers so much availed with thee, that Thou didst call up her brother Lazarus living from the dead, when he had lain in the grave four days already.
+# SOURCE: monastic diurnal, p. 569 (St Mary Magdalene, At Lauds)
+May we be aided, O Lord, we beseech thee, by the intercession of blessed Mary Magdalene: in answer to whose prayers thou didst raise her brother Lazarus to life after he had been dead four days.
 
 [hymn-lauds]
-# SOURCE: divinum-officium Sancti/07-22 [Hymnus Laudes] — check against diurnal
-Summi Parentis Unice
+# SOURCE: monastic diurnal, p. 569 (St Mary Magdalene, At Lauds)
+Aeterni Patris Unice
 
-Son of the Highest, deign to cast
-On us a pitying eye;
-Thou, who repentant Magdalene
-Didst call to endless joy.
+Thou only Son of God on high,
+Regard us with a gracious eye,
+Who weeping Magdalene dost own
+And call unto thy glorious throne.
 
-Again the royal treasury
-Receives its long-lost coin;
-The gem is found, and, cleansed from mire,
-Doth all the stars outshine.
+Lo! in the royal coffers laid
+Again the long lost coin displayed;
+The noble gem of sparkling sheen,
+From mire recovered, glows serene.
 
-O Jesus, balm of every wound!
-The sinner's only stay!
-Wash thou in Magdalene's pure tears
-Our guilty spots away.
+Jesu, our refuge sure and sweet,
+Thee, hope of penitents, we greet;
+Forgive the hearts that fain would break,
+For that repentant sinner's sake.
 
-Mother of God! the sons of Eve
-Weeping thine aid implore:
-Oh, land us from the storms of life
-Safe on th' eternal shore.
+And may that Mother kind and meek
+Think on our nature frail and weak,
+And raise her prayer that we may gain
+A passage safe o'er life's rough main.
 
-Glory, for graces manifold,
-To the one only Lord;
-Whose mercy doth our souls forgive,
-Whose bounty doth reward.
+To God alone be honour paid
+For grace so manifold displayed:
+Their guilt he pardons who repent,
+And gives reward for punishment. Amen.
 
-Amen.
 [hymn-vespers]
 # SOURCE: monastic diurnal, p. 568 (St Mary Magdalene, At I Vespers)
 Pater superni luminis
@@ -73,10 +74,9 @@ V. Mary hath chosen that good part.
 R. Which shall not be taken away from her.
 
 [versicle-lauds]
-# SOURCE: divinum-officium Sancti/07-22 [Versum 2] — check against diurnal
-# Lauds hymn and versicle fall on printed p. 569, which this scan skips.
-V. God hath chosen her and forechosen her.
-R. He hath made her to dwell in His tabernacle.
+# SOURCE: monastic diurnal, p. 569 (St Mary Magdalene, At Lauds)
+V. Her sins, which are many, are forgiven.
+R. For she loved much.
 
 [versicle-vespers]
 # SOURCE: monastic diurnal, p. 570 (St Mary Magdalene, At II Vespers)
@@ -179,3 +179,7 @@ A woman * in the city which was a sinner, when she knew that Jesus sat at meat i
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[hymn-doxology-lauds]
+# SOURCE: monastic diurnal, p. 569: "The following Ending is never changed."
+@omit

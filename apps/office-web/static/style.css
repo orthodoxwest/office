@@ -1,13 +1,30 @@
 /* AWRV Divine Office — typography-focused stylesheet */
 
 /* Self-hosted EB Garamond (OFL-1.1). Paths are relative to this stylesheet
-   (/static/style.css → /static/fonts/…). No third-party font CDN. */
+   (/static/style.css → /static/fonts/…). No third-party font CDN.
+
+   Each face is split by tools/gengaramond.py: the core file holds Latin-1,
+   the punctuation, and ℟ ℣ — every letter the office sets, at under a third
+   of the full face's bytes — and an -ext file holds the rest (Greek,
+   Cyrillic, extended Latin). The unicode-ranges come from that tool; a
+   browser fetches an -ext file only for a page that sets one of its
+   characters. Bold covers ASCII alone and is not split. */
 @font-face {
   font-family: "EB Garamond";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -16,6 +33,16 @@
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -24,6 +51,125 @@
   font-weight: 700;
   font-display: swap;
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+}
+
+/* Until EB Garamond arrives, text is set in a system serif scaled to its
+   measure, so the swap barely rewraps a line: without this the hour header
+   and the prayer below it jumped ~20px when the face landed (CLS 0.25 on a
+   first visit). Each family scales one platform's serif — Georgia (Apple,
+   Windows), Noto Serif (Android), Times New Roman or its metric twin
+   Liberation Serif — by the ratio of letter-frequency-weighted average
+   widths: EB Garamond 12 measured with @capsizecss/unpack (383, italic 379,
+   bold 393 per 1000), the system faces from @capsizecss/metrics. Ascent and
+   descent carry EB Garamond's 710/290, divided by the same ratio. Only the
+   core range is claimed, so symbols fall through to the platform unscaled. */
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Georgia");
+  size-adjust: 85.91%;
+  ascent-override: 82.64%;
+  descent-override: 33.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Georgia Italic"), local("Georgia-Italic");
+  size-adjust: 83.37%;
+  ascent-override: 85.16%;
+  descent-override: 34.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  size-adjust: 75.79%;
+  ascent-override: 93.68%;
+  descent-override: 38.26%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Noto Serif"), local("Noto Serif Regular"), local("NotoSerif-Regular");
+  size-adjust: 79.63%;
+  ascent-override: 89.17%;
+  descent-override: 36.42%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Noto Serif Italic"), local("NotoSerif-Italic");
+  size-adjust: 80.81%;
+  ascent-override: 87.86%;
+  descent-override: 35.89%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Noto Serif Bold"), local("NotoSerif-Bold");
+  size-adjust: 76.76%;
+  ascent-override: 92.50%;
+  descent-override: 37.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif");
+  size-adjust: 94.28%;
+  ascent-override: 75.31%;
+  descent-override: 30.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic");
+  size-adjust: 92.85%;
+  ascent-override: 76.47%;
+  descent-override: 31.23%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold");
+  size-adjust: 90.84%;
+  ascent-override: 78.16%;
+  descent-override: 31.92%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* EB Garamond has no ✠, so every platform once substituted its own dingbat:
@@ -61,6 +207,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -69,6 +225,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -110,8 +276,9 @@
      The knee clips the texture's lighter part to the ground; the clouds
      below it deepen toward --plaster-tint. Knee and dodge sum to white.
      Tint is solved per channel (scratch solver over the texture pixels) so
-     the wall averages exactly --bg: the prayer's cleared field and the iOS
-     month heading are --bg, and any other mean shows their edges. Result:
+     the wall averages exactly --bg: the iOS month heading is --bg and the
+     prayer's softened band keeps the same mean, and any other mean shows
+     their edges. Result:
      1.6% luminance contrast against Apse's 3.4%, where 0.5% was invisible. */
   --plaster-base: #fffdf7;
   --plaster-tint: #e9d3c0;
@@ -244,7 +411,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -807,117 +974,8 @@ footer::before {
   text-align: center;
 }
 
-.report-issue a,
-.assurance-panel a {
+.report-issue a {
   color: var(--accent);
-}
-
-/* ── Assurance disclosure ── */
-
-.assurance-panel {
-  margin-top: 2.5rem;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.18);
-  padding: 0.75rem 0.9rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-/* A sentence with counts, not a label: lowercase goes to small caps and the
-   leading capital stays, which is the running-text setting. */
-.assurance-panel > summary {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  cursor: pointer;
-  color: var(--accent);
-  font-variant-caps: small-caps;
-  letter-spacing: 0.04em;
-  list-style: none;
-}
-
-.assurance-panel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.assurance-panel > summary::after {
-  content: "▾";
-  margin-left: 0.3em;
-  color: var(--gold-line);
-  font-size: 0.85em;
-  font-variant-caps: normal;
-  letter-spacing: 0;
-}
-
-.assurance-panel[open] > summary::after {
-  content: "▴";
-}
-
-.assurance-panel h2 {
-  margin: 1rem 0 0.35rem;
-  color: var(--text);
-  font-size: 0.95rem;
-  font-weight: normal;
-}
-
-.assurance-intro {
-  margin-top: 0.7rem;
-}
-
-.assurance-list {
-  list-style: none;
-  display: grid;
-  gap: 0.25rem;
-  overflow-wrap: anywhere;
-}
-
-.assurance-list code {
-  color: var(--text);
-  font-size: 0.76rem;
-}
-
-.assurance-status {
-  display: inline-block;
-  margin-left: 0.25rem;
-  padding: 0 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-}
-
-.status-verified { color: #356535; }
-.status-needs-review { color: var(--rubric); }
-.status-source-unknown { color: var(--muted); }
-.assurance-detail { font-style: italic; }
-
-.assurance-flag {
-  color: var(--rubric);
-  font-size: 0.76rem;
-  padding-left: 1rem;
-}
-
-@media (max-width: 700px) {
-  .assurance-panel {
-    padding: 0.65rem 0.7rem;
-    font-size: 0.78rem;
-  }
-
-  .assurance-panel > summary {
-    min-height: var(--touch-target);
-  }
-}
-
-/* In an Apse hour the vault rises around the post-office material, but the
-   expanded provenance list is still a reading surface. Nearly opaque slate
-   quiets the ribs beneath the panel while leaving the field visible around
-   its edges. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.page-hour .assurance-panel {
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
-  }
-}
-
-:root[data-theme="dark"] body.page-hour .assurance-panel {
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 /* ── Home page ──
@@ -944,13 +1002,28 @@ footer::before {
    liturgical color behind text that has no horizontal padding. */
 
 /* Shared liturgical-color palette. Home uses it as a top hairline; repeating
-   ordo entries use it as a side rail. */
-.day-color-white  { --day-color: #c9b896; }
-.day-color-red    { --day-color: #b02a24; }
-.day-color-green  { --day-color: #3a6b3a; }
-.day-color-violet { --day-color: #6a3a8a; }
-.day-color-black  { --day-color: #3a3a3a; }
-.day-color-rose   { --day-color: #c4607a; }
+   ordo entries use it as a side rail. An ordo row sets it on its rail, never
+   on the row: a custom property on each of 365 rows gives every cell beneath
+   a distinct inherited style that the engine cannot share between rows, and
+   cost a fifth of the ordo's style time. */
+.day-color-white:not(tr),
+tr.day-color-white::before,
+tr.day-color-white > td:first-child::before { --day-color: #c9b896; }
+.day-color-red:not(tr),
+tr.day-color-red::before,
+tr.day-color-red > td:first-child::before { --day-color: #b02a24; }
+.day-color-green:not(tr),
+tr.day-color-green::before,
+tr.day-color-green > td:first-child::before { --day-color: #3a6b3a; }
+.day-color-violet:not(tr),
+tr.day-color-violet::before,
+tr.day-color-violet > td:first-child::before { --day-color: #6a3a8a; }
+.day-color-black:not(tr),
+tr.day-color-black::before,
+tr.day-color-black > td:first-child::before { --day-color: #3a3a3a; }
+.day-color-rose:not(tr),
+tr.day-color-rose::before,
+tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Title stack: date and feast sit close; the base keeps only the vertical
    stack, and gaps live in .page-home .home-day-head below. */
@@ -1361,8 +1434,7 @@ footer::before {
    as they do in the block-level disclosures elsewhere. */
 .hour-date-nav > summary,
 .leader-selector > summary,
-.session-prayers > summary,
-.assurance-panel > summary {
+.session-prayers > summary {
   flex-wrap: wrap;
   align-content: center;
   align-items: baseline;
@@ -1453,7 +1525,7 @@ footer::before {
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -1491,6 +1563,227 @@ footer::before {
   font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+
+/* The hand-set date picker (app.js). It replaces the native field, whose
+   popup is the platform's, with a month set like the ordo's: lining figures
+   in a square grid of thumb-sized days, Sundays in rubric, the page's day
+   underlined in gold like every chosen thing, today in the ordo's wash.
+   Laid in the disclosure, not floated over the page, so nothing covers the
+   header and the unfolding motion carries it. */
+.has-date-picker .date-jump {
+  display: none;
+}
+
+/* Seven thumb-wide days where they fit; on a 320px phone, or with Large
+   text, the week narrows to the column and the days keep their height. One
+   grid track does both: it asks the disclosure for the full week (else the
+   Previous/Next row would set the width, and squeeze the grid on a day
+   with no Today link) yet never makes the header or card wider to get it. */
+.date-picker {
+  --date-cell: var(--touch-target);
+  display: grid;
+  grid-template-columns: minmax(0, calc(7 * var(--date-cell)));
+  justify-content: center;
+  margin: 0.3rem auto 0.4rem;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.date-picker-head {
+  display: grid;
+  grid-template-columns: var(--date-cell) 1fr var(--date-cell);
+  align-items: center;
+}
+
+/* Zero specificity, so each control's own rule below sets its type. */
+:where(.date-picker) button {
+  appearance: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.date-picker-step {
+  min-height: var(--date-cell);
+  color: var(--accent);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.date-picker-step:disabled {
+  color: var(--border);
+  cursor: default;
+}
+
+/* Set like the disclosure labels around it, with their gold caret. */
+.date-picker-title {
+  justify-self: center;
+  min-height: var(--date-cell);
+  padding-inline: 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.date-picker-title::after {
+  content: "▾";
+  margin-inline-start: 0.35em;
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.date-picker[data-view="months"] .date-picker-title::after {
+  content: "▴";
+}
+
+/* Both views share one cell of the grid, so the months view keeps the
+   days' height and turning between them moves nothing below. */
+.date-picker-body {
+  display: grid;
+}
+
+.date-picker-body > * {
+  grid-area: 1 / 1;
+}
+
+.date-picker[data-view="days"] .date-picker-months,
+.date-picker[data-view="months"] .date-picker-days {
+  visibility: hidden;
+}
+
+.date-picker-days {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.date-picker-days th {
+  padding: 0 0 0.15rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  line-height: 1.6;
+  text-transform: uppercase;
+}
+
+.date-picker-days abbr {
+  text-decoration: none;
+  cursor: default;
+}
+
+.date-picker-days td {
+  padding: 0;
+  height: var(--date-cell);
+}
+
+.date-picker-day,
+.date-picker-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--text);
+  text-decoration: none;
+  font-variant-numeric: lining-nums tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.date-picker-days th:first-child,
+.date-picker-days td:first-child .date-picker-day {
+  color: var(--rubric);
+}
+
+.date-picker-day[aria-current="date"],
+.date-picker-month[aria-current="date"] {
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+/* The chosen day reads as the chosen prayer form does: oak ink on a gold
+   rule. Cut to the figures, so a single digit gets a short rule. */
+.date-picker-days [aria-selected="true"] .date-picker-day,
+.date-picker-months [aria-selected="true"] .date-picker-month {
+  color: var(--accent);
+}
+
+.date-picker-days [aria-selected="true"] .date-picker-day > span,
+.date-picker-months [aria-selected="true"] .date-picker-month {
+  box-shadow: inset 0 -1px var(--gold-line);
+}
+
+.date-picker-days [aria-selected="true"] .date-picker-day > span {
+  padding-inline: 0.1em;
+}
+
+.date-picker-months {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.date-picker-months [role="row"] {
+  display: contents;
+}
+
+.date-picker-months [role="gridcell"] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.date-picker-month {
+  width: auto;
+  height: var(--date-cell);
+  padding-inline: 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .date-picker-day:hover,
+  .date-picker-month:hover,
+  .date-picker-step:not(:disabled):hover,
+  .date-picker-title:hover {
+    background-color: var(--surface);
+  }
+}
+
+.date-picker-day:active,
+.date-picker-month:active,
+.date-picker-step:not(:disabled):active,
+.date-picker-title:active {
+  background-color: var(--pressed-wash);
+  box-shadow: inset 0 1px 2px var(--surface-edge);
+}
+
+/* Inside a tight grid the usual 3px offset would ring the neighbours. */
+.date-picker a:focus-visible,
+.date-picker button:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (forced-colors: active) {
+  .date-picker-days [aria-selected="true"] .date-picker-day > span,
+  .date-picker-months [aria-selected="true"] .date-picker-month {
+    text-decoration: underline;
+  }
+
+  .date-picker-day[aria-current="date"],
+  .date-picker-month[aria-current="date"] {
+    outline: 1px solid CanvasText;
+    outline-offset: -1px;
+  }
 }
 
 /* ── Office elements ── */
@@ -1863,7 +2156,7 @@ footer::before {
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -2962,10 +3255,14 @@ footer::before {
   }
 
   /* White/black rails need a lift on the apse night sky. */
-  :root:not([data-theme="light"]) .day-color-white {
+  :root:not([data-theme="light"]) .day-color-white:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-white::before,
+  :root:not([data-theme="light"]) tr.day-color-white > td:first-child::before {
     --day-color: #d0b06a;
   }
-  :root:not([data-theme="light"]) .day-color-black {
+  :root:not([data-theme="light"]) .day-color-black:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-black::before,
+  :root:not([data-theme="light"]) tr.day-color-black > td:first-child::before {
     --day-color: #8a94a0;
   }
 
@@ -2997,10 +3294,14 @@ footer::before {
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .day-color-white {
+:root[data-theme="dark"] .day-color-white:not(tr),
+:root[data-theme="dark"] tr.day-color-white::before,
+:root[data-theme="dark"] tr.day-color-white > td:first-child::before {
   --day-color: #d0b06a;
 }
-:root[data-theme="dark"] .day-color-black {
+:root[data-theme="dark"] .day-color-black:not(tr),
+:root[data-theme="dark"] tr.day-color-black::before,
+:root[data-theme="dark"] tr.day-color-black > td:first-child::before {
   --day-color: #8a94a0;
 }
 
@@ -3258,7 +3559,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.assurance-panel::details-content,
   :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
@@ -3272,7 +3572,6 @@ body.season-eastertide {
 
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.assurance-panel[open]::details-content,
   :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
@@ -3318,7 +3617,7 @@ body.season-eastertide {
      slamming on. Only reachable inside .theme-anim, since app.js only ever
      toggles this alongside it. */
   :root.theme-anim.vault-hidden::before,
-  :root.theme-anim.vault-hidden body.page-home::before,
+  :root.theme-anim.vault-hidden body:is(.page-home, .page-hour)::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
     opacity: 0 !important;
@@ -4543,7 +4842,7 @@ body.season-eastertide {
    Tapping navigation should not flash a grey box over the page, and a
    long-press on a menu item should not begin a selection. Strictly limited to
    navigation chrome: every word of the office itself stays selectable and
-   copyable, as do dates, feast names and the assurance panel. */
+   copyable, as do dates and feast names. */
 .site-brand,
 .site-menu > summary,
 .site-menu nav a,
@@ -4656,7 +4955,7 @@ body.season-eastertide {
    The church appears here as material and structure, not illustration.
 
    Home, Ordo, Reminders, Usage, and wide hour pages share one wall strength
-   per theme. Hours clear the wall only beneath the prayer itself.
+   per theme. Wide hours soften it beneath the prayer itself.
 
    The wall is the parish's own nave plaster (tools/genplaster): a grey
    field holding only the photograph's mottling and trowel marks, with its
@@ -4675,8 +4974,8 @@ body.season-eastertide {
    A final veil of --bg sets the shared strength while keeping the result
    opaque, so sticky month headings can repeat it without showing rows
    passing beneath them. */
-:root {
-  --plaster-image: url("plaster.jpg");
+:root,
+body.page-hour::before {
   --plaster-veil: color-mix(in srgb, var(--bg), transparent var(--plaster-strength));
   --plaster-layers:
     linear-gradient(var(--plaster-veil), var(--plaster-veil)),
@@ -4687,6 +4986,13 @@ body.season-eastertide {
     linear-gradient(var(--plaster-knee), var(--plaster-knee));
 }
 
+/* The layers are declared again on the prayer's band so they pick up its
+   softened image; a custom property substitutes where it is declared. */
+:root {
+  --plaster-image: url("plaster.jpg");
+  --plaster-soft-image: url("plaster-soft.jpg");
+}
+
 /* Not preloaded. On a slow connection a preload arrived before first paint
    but pushed the prayer text ~300ms later, even at low fetch priority. The
    wall averages exactly --bg, so arriving late costs only texture, never
@@ -4694,6 +5000,7 @@ body.season-eastertide {
 @media (min-width: 1000px) and (orientation: landscape) {
   :root {
     --plaster-image: url("plaster-wide.jpg");
+    --plaster-soft-image: url("plaster-wide-soft.jpg");
   }
 }
 
@@ -4726,10 +5033,19 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
   background-repeat: no-repeat;
 }
 
-/* Hours carry the shared wall through the header and epilogue of
-   wide pages; phones keep a flat page. The clear field belongs to the
-   prayer wrapper, so it follows disclosures and text size without running
-   through the opening or footer. */
+/* Wide hours keep the wall behind the prayer but soften it there, rather
+   than clearing it to a flat field: a band down the column carries a copy of
+   the wall with its trowel marks blurred away, under a further veil of --bg.
+   The copy is plaster-soft (tools/genplaster --soft-of), derived from the
+   same field, so its clouds lie exactly where the wall's do and the band's
+   feathered edges show the marks sharpening out of the same wash, not a
+   panel laid over it. Its mean is the wall's, so the tone never shifts.
+   The blur is baked into a 2 KB image; a live backdrop-filter looked the
+   same but re-blurred the fixed layer on every scrolled frame.
+
+   The band is fixed like the wall and runs the viewport's full height, so
+   nothing seams as the header or epilogue scroll through it; in rem, it
+   widens with the text. Phones keep a flat page. */
 html:where(:has(> body.page-hour))::before {
   content: none;
 }
@@ -4737,42 +5053,30 @@ html:where(:has(> body.page-hour))::before {
 @media (min-width: 1000px) {
   html:where(:has(> body.page-hour))::before { content: ""; }
 
-  .page-hour .elements {
-    position: relative;
-    isolation: isolate;
-    /* Eight rem of eased feathering outside a two-rem clear text gutter.
-       The vertical feather eases through the surrounding whitespace, stays
-       opaque beneath every prayer, and ends before the continuation links. */
-    --clear-across: linear-gradient(to right,
-      transparent, rgb(0 0 0 / 0.15625) 2rem, rgb(0 0 0 / 0.5) 4rem,
-      rgb(0 0 0 / 0.84375) 6rem, #000 8rem,
-      #000 calc(100% - 8rem), rgb(0 0 0 / 0.84375) calc(100% - 6rem),
-      rgb(0 0 0 / 0.5) calc(100% - 4rem), rgb(0 0 0 / 0.15625) calc(100% - 2rem), transparent);
-    --clear-down: linear-gradient(to bottom,
-      transparent, rgb(0 0 0 / 0.15625) 0.75rem, rgb(0 0 0 / 0.5) 1.5rem,
-      rgb(0 0 0 / 0.84375) 2.25rem, #000 3rem,
-      #000 calc(100% - 3rem), rgb(0 0 0 / 0.84375) calc(100% - 2.25rem),
-      rgb(0 0 0 / 0.5) calc(100% - 1.5rem), rgb(0 0 0 / 0.15625) calc(100% - 0.75rem), transparent);
-  }
-
-  .page-hour .elements::before {
+  body.page-hour::before {
+    --plaster-image: var(--plaster-soft-image);
+    --soft-veil: color-mix(in srgb, var(--bg) 45%, transparent);
+    /* Solid across 45rem, about the measure plus its gutters, then eased
+       out over 12rem each side. At 1000px the feather runs off the screen
+       edge, which leaves the wall's marks only at the margins. */
+    --soft-band: linear-gradient(to right,
+      transparent calc(50% - 34.5rem), rgb(0 0 0 / 0.1) calc(50% - 31.5rem),
+      rgb(0 0 0 / 0.5) calc(50% - 28rem), rgb(0 0 0 / 0.9) calc(50% - 24.5rem),
+      #000 calc(50% - 22.5rem), #000 calc(50% + 22.5rem),
+      rgb(0 0 0 / 0.9) calc(50% + 24.5rem), rgb(0 0 0 / 0.5) calc(50% + 28rem),
+      rgb(0 0 0 / 0.1) calc(50% + 31.5rem), transparent calc(50% + 34.5rem));
     content: "";
-    position: absolute;
-    /* Reach 10rem past the column, but never past the viewport: with Large
-       text at 1000px the full reach overflowed and the page scrolled
-       sideways. 50% - 50vw is the column edge's distance to the viewport
-       edge; the rem keeps a classic scrollbar's width inside it. */
-    inset-block: -3rem;
-    inset-inline: max(-10rem, calc(50% - 50vw + 1rem));
+    position: fixed;
+    inset: 0;
     z-index: -1;
     pointer-events: none;
-    background-color: var(--bg);
-    /* Prefixed first: an engine that knows only the prefixed mask would
-       otherwise paint this field as a hard-edged panel behind the prayer. */
-    -webkit-mask-image: var(--clear-across), var(--clear-down);
-    -webkit-mask-composite: source-in;
-    mask-image: var(--clear-across), var(--clear-down);
-    mask-composite: intersect;
+    background: linear-gradient(var(--soft-veil), var(--soft-veil)), var(--plaster-layers);
+    background-blend-mode: normal, normal, multiply, screen, color-dodge, darken, normal;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-mask-image: var(--soft-band);
+    mask-image: var(--soft-band);
   }
 }
 
@@ -4784,8 +5088,7 @@ html:where(:has(> body.page-hour))::before {
 
 /* iOS Safari treats a fixed attachment as scroll, so the heading would show
    its own copy of the wall at another scale and crop. The wall averages
-   exactly --bg, so a flat band is the one seam-free choice there, the same
-   clearing the prayer uses on wide hours. */
+   exactly --bg, so a flat band is the one seam-free choice there. */
 @supports (-webkit-touch-callout: none) {
   .page-calendar .month h2 {
     background: var(--bg);
@@ -4796,7 +5099,8 @@ html:where(:has(> body.page-hour))::before {
    would sit behind the system backplates as a patchwork; the user's own
    Canvas is the wall there. */
 @media (forced-colors: active) {
-  html::before {
+  html::before,
+  body.page-hour::before {
     content: none !important;
   }
 
@@ -5016,15 +5320,15 @@ body {
   --apse-vault: var(--apse-star-tile);
 }
 
-/* An hour remains a flat prayer page until the office has ended. The vault
+/* An hour shows no stars until the office has ended. The vault
    begins only in the post-prayer epilogue: transparent through the hour
-   continuation, emerging around Assurance, then continuing through the
+   continuation, emerging around the report link, then continuing through the
    footer. Both layers share main's bottom as their tile origin.
 
    The negative inline reach restores the full main/footer measure around the
    narrower content box on a phone. On desktop the same post-prayer field
    bleeds to the viewport edges so the footer reads as one continuous vault,
-   while the prayer above remains on its flat 38rem measure. */
+   while the prayer above keeps its 38rem measure on the softened wall. */
 body.page-hour {
   --apse-epilogue-tile: 132px;
 }
@@ -5328,8 +5632,7 @@ body.page-home::before {
     box-shadow: none;
   }
 
-  body.page-home::before,
-  .page-hour .elements::before,
+  body:is(.page-home, .page-hour)::before,
   html::before {
     content: none;
   }

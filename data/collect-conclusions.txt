@@ -71,6 +71,8 @@ proper/advent-ember-friday/collect-lauds who-livest
 proper/advent-ember-saturday/collect-lauds who-livest
 # Diurnal p. 588 prints Who with God the Father ... livest.
 proper/vigil-of-assumption-bvm/collect who-livest
+# Diurnal p. 569 prints Who with God the Father ... livest.
+proper/st-mary-magdalene/collect who-livest
 
 # --- The Son is mentioned at the ending: "Who with thee ... liveth" ---
 proper/ascension/collect who-liveth

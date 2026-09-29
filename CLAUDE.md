@@ -150,10 +150,6 @@ make review-assurance # Check text-provenance floor and print summary
 ./office review explain HOUR DATE # JSON dependencies and rule decisions
 ./office review attest --source SOURCE --page PAGE KEY REVIEWER # Record verified text
 ./office review flag --severity high --reason WHY KEY # Record a prescreen suspicion
-
-Hour pages expose assurance metadata in a collapsed disclosure. Keep it
-source-content-free: corpus keys, provenance states, fallback tiers, rule IDs,
-and review links are allowed; local paths and inaccessible PDF links are not.
 make tex         # Emit .tex booklet (HOUR=lauds DATE=2026-03-11; DATE defaults to today)
 make pdf         # Generate PDF via lualatex (HOUR=compline; DATE defaults to today)
 make mutate      # Mutation-test a Rust crate (MUTATE_PKG=calendar) — see MUTATION-TESTING.md

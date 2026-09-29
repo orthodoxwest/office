@@ -124,7 +124,7 @@
           <a href="{{ prev_link|url }}" aria-label="Previous day">&larr; Previous</a>
           <form class="date-jump-form" action="/" method="get">
             <label class="sr-only" for="home-date-jump">Jump to date</label>
-            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}">
+            <input id="home-date-jump" class="date-jump" type="date" name="date" value="{{ date_slug }}" min="1950-01-01" max="2150-12-31">
             <button class="date-submit" type="submit">Go</button>
             {% if show_today %}<a class="today-link" href="{{ today_link|url }}">Today</a>{% endif %}
           </form>
