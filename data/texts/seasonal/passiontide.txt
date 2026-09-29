@@ -152,27 +152,6 @@ Amen.
 V. Deliver me, O Lord, from the evil man.
 R. And preserve me from the wicked man.
 
-[short-responsory-terce]
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-V. Forsake us not, O Lord our God.
-R. And thy holy Name is called upon us.
-R. Thou, O Lord, art in the midst of us, and thy holy Name is called upon us.
-
-[short-responsory-sext]
-R. The Lord hath made known his salvation.
-The Lord hath made known his salvation.
-V. He hath revealed his righteousness in the sight of the nations.
-R. His salvation.
-R. The Lord hath made known his salvation.
-
-[short-responsory-none]
-R. Redeem me, O Lord, and have mercy on me.
-Redeem me, O Lord, and have mercy on me.
-V. My foot standeth in an even place.
-R. Have mercy on me.
-R. Redeem me, O Lord, and have mercy on me.
-
 [chapter-terce]
 # SOURCE: diurnal p. 274
 !Jer 17:13

@@ -29,9 +29,6 @@ Jesus himself * drew near to his disciples in the way, and went with them: but t
 # SOURCE: diurnal p. 367
 What manner of communications * are these that ye have one to another, as ye walk, and are sad? alleluia, alleluia.
 
-[commemoration-versicle]
-@use proper/easter-sunday/commemoration-versicle
-
 [collect]
 # SOURCE: diurnal p. 367
 O God, who in the Paschal festival hast given unto the world thy healing remedies: continue, we beseech thee, to bestow thy heavenly gift upon thy people; that thereby they may be made worthy of perfect freedom, and may advance to everlasting life.

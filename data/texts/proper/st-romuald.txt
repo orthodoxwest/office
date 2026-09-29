@@ -107,3 +107,7 @@
 #
 # [psalm-antiphon-4-first-vespers]
 # I Vespers override for psalm antiphon 4.
+
+[collect]
+# SOURCE: 2026 archdiocesan ordo, 6-7 Feb. (Comm. Romuald, Col. "We beseech thee" 45*)
+@use commons/confessor/collect-abbot

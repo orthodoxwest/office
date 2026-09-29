@@ -27,7 +27,7 @@ class ProjectStatusTest(unittest.TestCase):
         rows = [self.repair_row()]
         comparison = PROJECT_STATUS.Comparison({"calendar": 10}, [])
         markdown = PROJECT_STATUS.render_markdown(
-            2027, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0, 0),
+            2027, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0),
             PROJECT_STATUS.ProvenanceStatus(0, 0, 0, 0, 0), comparison,
             PROJECT_STATUS.analyze_clusters(comparison, None), [], "", "test", rows)
         self.assertIn("chapter-example", markdown)
@@ -110,7 +110,7 @@ class ProjectStatusTest(unittest.TestCase):
         def render():
             comparison = PROJECT_STATUS.Comparison({"calendar": 10}, findings)
             return PROJECT_STATUS.render_markdown(
-                2026, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0, 0),
+                2026, PROJECT_STATUS.ProperStatus(0, 0, 0, 0, 0, 0),
                 PROJECT_STATUS.ProvenanceStatus(0, 0, 0, 0, 0), comparison,
                 PROJECT_STATUS.analyze_clusters(comparison, None), [], "", "test")
 
@@ -191,7 +191,6 @@ class ProjectStatusTest(unittest.TestCase):
     missing: collect, magnificat-antiphon
 
 === Commons fallback: 3 feast(s) ===
-=== Sweep 2026: unresolved texts: 0 ===
 === Sweep 2026: ordinary fallbacks on Double+ days: 7 slot(s) ===
 """
             status = PROJECT_STATUS.parse_audit(audit, data)

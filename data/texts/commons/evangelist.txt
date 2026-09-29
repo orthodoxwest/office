@@ -58,7 +58,7 @@ In your patience * possess ye your souls.
 
 [benedictus-antiphon]
 # SOURCE: lauds-commons-manual-noted.pdf (Common of Apostles and Evangelists) — parish noted manual
-Ye which have forsaken all * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
+Ye which have forsaken all, * and followed me, shall receive an hundredfold, and shall inherit everlasting life.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book (Common of Apostles and Evangelists; Estote fortes, II Vespers)

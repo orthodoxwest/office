@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: 2026 archdiocesan ordo, 20-21 Nov. (Col. "We beseech thee" 45*)
+@use commons/confessor/collect-abbot

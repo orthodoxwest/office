@@ -1,15 +1,19 @@
 %% Compile with: lualatex <file>.tex
 %% For booklet imposition: pdfjam --booklet true --paper letter <file>.pdf
 
-\documentclass[10pt]{article}
+% Two-sided so the wider inner margin alternates with the fold once the
+% pages are imposed as a booklet.
+\documentclass[10pt,twoside]{article}
 
 \usepackage[
   paperwidth=5.5in,
   paperheight=8.5in,
-  top=0.65in,
+  top=0.75in,
   bottom=0.75in,
   inner=0.7in,
-  outer=0.5in
+  outer=0.5in,
+  headsep=0.2in,
+  footskip=0.4in
 ]{geometry}
 
 \usepackage{fontspec}
@@ -20,6 +24,8 @@
 \usepackage{microtype}
 \microtypesetup{verbose=silent}
 \usepackage{setspace}
+\usepackage{needspace}
+\usepackage{fancyhdr}
 
 % Fonts — requires EB Garamond to be installed on the system.
 % Small caps carry web-like tracking everywhere (\scshape, \textsc), matching
@@ -38,9 +44,72 @@
 \definecolor{goldline}{rgb}{0.788,0.675,0.447}
 \definecolor{mutedgray}{rgb}{0.420,0.365,0.333}
 
+% Liturgical colors, as the web hour's color band. White is gilt on paper.
+\definecolor{lit-white}{rgb}{0.788,0.675,0.447}
+\definecolor{lit-red}{HTML}{B02A24}
+\definecolor{lit-green}{HTML}{3A6B3A}
+\definecolor{lit-violet}{HTML}{6A3A8A}
+\definecolor{lit-black}{HTML}{3A3A3A}
+\definecolor{lit-rose}{HTML}{C4607A}
+
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
 \newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
+
+% Page flow: a paragraph never leaves a single line behind or ahead of a
+% page break, so a two-line antiphon or verse always stays whole. Pages keep
+% their natural height rather than stretching the leading to fill.
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\raggedbottom
+\emergencystretch=1.5em
+
+% Running heads: the hour on the left page, the day on the right, in muted
+% small caps; the folio centred below. The opening page carries only the
+% folio. \officehour and \officeday are defined per booklet.
+\newcommand{\runninghead}[1]{{\footnotesize\color{mutedgray}\scshape #1}}
+\fancypagestyle{office}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyhead[LE]{\runninghead{\officehour}}%
+  \fancyhead[RO]{\runninghead{\officeday}}%
+  \fancyfoot[C]{{\small\color{mutedgray}\thepage}}%
+}
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[C]{{\small\color{mutedgray}\thepage}}%
+}
+\pagestyle{office}
+
+% Gilt hairline with a fleuron at its centre, framing the title. The closing
+% \null keeps TeX from discarding the right-hand leaders as trailing glue.
+\newcommand{\ornamentrule}{%
+  \noindent{\color{goldline}\leaders\hrule height 2.9pt depth -2.5pt\hfill}%
+  \enspace{\large\color{ornamentgold}❦}\enspace%
+  {\color{goldline}\leaders\hrule height 2.9pt depth -2.5pt\hfill}\null\par%
+}
+
+% Title: \officetitle{hour}{date}{feast}{season}{color name}{color key}.
+% The feast (#3) and the season line (#4, #5) may be empty.
+\newcommand{\officetitle}[6]{%
+  \thispagestyle{plain}%
+  \begin{center}%
+    \ornamentrule\vspace{10pt}%
+    {\small\color{mutedgray}\scshape The Order for}\\[3pt]%
+    {\LARGE\scshape #1}\\[8pt]%
+    \if\relax\detokenize{#3}\relax\else{\large\itshape #3}\\[4pt]\fi%
+    {\normalsize #2}\\[5pt]%
+    \if\relax\detokenize{#4#5}\relax\else%
+      {\small\color{mutedgray}#4%
+        \if\relax\detokenize{#4}\relax\else\if\relax\detokenize{#5}\relax\else\enspace$\cdot$\enspace\fi\fi%
+        \if\relax\detokenize{#5}\relax\else{\color{lit-#6}\rule[0.05em]{0.55em}{0.55em}}\,\,#5\fi}\\[2pt]%
+    \fi%
+    \vspace{6pt}\ornamentrule%
+  \end{center}%
+  \vspace{4pt}%
+}
 
 % Rubrics are smaller red roman; quoted prayer remains ordinary black roman.
 \newcommand{\rubric}[1]{{\color{rubricred}\small\normalfont #1}}
@@ -53,27 +122,42 @@
 % private/secret prayer text. Only the initial itself is gilt: the rest of the
 % opening word stays ordinary prose, as ::first-letter does on the web hour.
 \renewcommand{\LettrineTextFont}{\normalfont}
-\newcommand{\dropcap}[2]{\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
+\newif\ifcapopen
+\newcommand{\dropcap}[2]{\global\capopentrue\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
+% Call after the \par that ends a paragraph which may open with \dropcap. An
+% initial is two lines deep, so when its paragraph set only one line the
+% next paragraph would run into it: open just enough space to clear it.
+\newcommand{\capclear}{%
+  \ifcapopen\global\capopenfalse\ifnum\prevgraf<2 \vspace{0.55\baselineskip}\fi\fi%
+}
 
 % Section heading: centered small caps with open air, as the web hour centers
-% each transition in tracked small caps.
+% each transition in tracked small caps. Never stranded at the foot of a page.
 \newcommand{\sectionheading}[1]{%
-  \bigskip\begin{center}{\scshape #1}\end{center}\smallskip\noindent%
+  \Needspace{6\baselineskip}\bigskip\begin{center}{\scshape #1}\end{center}\nopagebreak\smallskip\noindent%
 }
 
 % Mid-canticle section break (e.g. the two-part structure of Deut 32):
 % centered muted italic, as the web canticle-section line.
 \newcommand{\canticlesection}[1]{%
-  \smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\smallskip\noindent%
+  \Needspace{4\baselineskip}\smallskip\begin{center}{\small\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip\noindent%
 }
 
 % Psalm/canticle label: the number in body-size small caps, the Latin incipit in italic
 % beside it, as a printed diurnal sets them. #2 is empty when no incipit is
-% recorded, in which case the label stands alone.
+% recorded, in which case the label stands alone. Kept with its first verses.
 \newcommand{\psalmlabel}[2]{%
+  \Needspace{5\baselineskip}%
   \begin{center}{\color{mutedgray}\scshape #1}%
   \if\relax\detokenize{#2}\relax\else{\color{mutedgray}\itshape\enspace$\cdot$\enspace #2}\fi%
-  \end{center}\smallskip%
+  \end{center}\nopagebreak\smallskip%
+}
+
+% Hymn or anthem title (usually its Latin incipit): muted italic, as the
+% incipit beside a psalm label. Kept with its first stanza.
+\newcommand{\hymnlabel}[1]{%
+  \Needspace{5\baselineskip}%
+  \begin{center}{\color{mutedgray}\itshape #1}\end{center}\nopagebreak\smallskip%
 }
 
 % Pointing mediant: muted and raised to the optical middle of the line, as the
@@ -90,9 +174,12 @@
   \par%
 }
 
-% Hymn stanza environment: deeper verse leading, as hymn-verses does.
+% Hymn stanza environment: deeper verse leading, as hymn-verses does. A
+% stanza is one paragraph, so the page-flow penalties keep it whole unless it
+% is longer than a page.
 \newenvironment{hymnverses}{%
   \setstretch{1.35}%
+  \interlinepenalty=10000%
 }{%
   \par%
 }
@@ -102,7 +189,7 @@
 % shares one left edge, as verse-num does on the web hour.
 \newcommand{\psalmverse}[2]{%
   \if\relax\detokenize{#1}\relax%
-    \noindent #2\par%
+    \noindent #2\par\capclear%
   \else%
     \noindent\hangindent=2em\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
   \fi%
@@ -119,6 +206,16 @@
 \newcommand{\allsig}{{\color{rubricred}\scshape All:}\kern0.3em{}}
 \newcommand{\blessingsig}{{\color{rubricred}Blessing.}\kern0.3em{}}
 
+% ℣ and ℟ lines: the sigil sits in a narrow gutter and a wrapped remainder
+% tucks under the text, not the sigil, as the web sigil column does.
+\newlength{\sigilwidth}
+\setlength{\sigilwidth}{1.3em}
+\newcommand{\sigilline}[2]{%
+  \noindent\hangindent=\sigilwidth\hangafter=1\makebox[\sigilwidth][l]{#1}\ignorespaces#2\par%
+}
+\newcommand{\versicle}[1]{\sigilline{\Vsig}{#1}}
+\newcommand{\response}[1]{\sigilline{\Rsig}{#1}}
+
 % Antiphon: a red small-cap sigil with the body in ordinary roman, hanging so
 % a wrapped remainder tucks under its own line, as body antiphons do online.
 \newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
@@ -130,6 +227,6 @@
 
 \setlength{\parskip}{4pt}
 \setlength{\parindent}{0pt}
-\pagestyle{plain}
 
-\begin{document}
+% hyperref last, for the PDF title and subject set per booklet.
+\usepackage[hidelinks,pdfcreator={office tex}]{hyperref}

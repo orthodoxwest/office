@@ -3,3 +3,7 @@
 
 [commemoration-antiphon-lauds]
 @use commons/martyrs/benedictus-antiphon
+
+[commemoration-collect]
+# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF p. 758 (August 18, St Agapitus, Collect)
+O Lord, let thy Church trust with gladness in the advocacy of thy blessed Martyr Agapitus: that by his glorious prayers she may continue in devotion, and abide in safety.

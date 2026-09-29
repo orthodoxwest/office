@@ -1,0 +1,3 @@
+[commemoration-collect]
+# SOURCE: 2026 archdiocesan ordo, 22 May (Col. suppl.); Vicariate Missal PDF p. 680 assigns the Common of an Abbot
+@use commons/confessor/collect-abbot

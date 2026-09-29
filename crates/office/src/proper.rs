@@ -1,7 +1,7 @@
 //! Proper text resolution: feast proper, Common, weekly temporal texts, seasonal default, weekday
 //! ordinary, ordinary, shared.
 
-use calendar::{Category, Feast, MoveableDates, Season};
+use calendar::{Category, Date, Feast, MoveableDates, Season, Weekday};
 
 use crate::day::Day;
 use crate::texts::OfficeTexts;
@@ -424,6 +424,17 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         }
     }
 
+    // 2.7. An Advent feria's antiphons at Lauds and the Hours.
+    if is_sunday_or_feria(celebration)
+        && let Some(n) = reference.strip_prefix("psalm-antiphon-").and_then(|n| n.parse::<u32>().ok())
+        && let Some(key) = advent_ferial_psalm_antiphon_ref(day, hour_name, n)
+    {
+        let text = t.get(&key);
+        if !text.is_empty() {
+            return (text.to_string(), key);
+        }
+    }
+
     // 3. Seasonal default. Seasonal "-first" entries model the Saturday
     // books before Sundays only.
     let seasonal_sunday_first = reference.ends_with("-first") && hour_name == "vespers";
@@ -463,6 +474,42 @@ pub fn resolve_proper_text(day: &Day, hour_name: &str, reference: &str, t: &Offi
         }
     }
     (format!("[Proper text not found: {reference}]"), reference.to_string())
+}
+
+/// An Advent feria's psalm antiphon at Lauds or the Hours (Diurnal pp. 162–164,
+/// 173–176). From 17 to 23 December Lauds and the Hours take the weekday's set;
+/// Saturday takes the set of the weekday on which St Thomas (21 Dec.) falls, its
+/// 3rd and 4th antiphons replaced by "The word of the Lord" (when 21 Dec. is a
+/// Sunday, Monday's set: 2025 ordo, 20 Dec.). Before 17 December the Hours repeat
+/// the week's Sunday Lauds antiphons ("First Week, Ant.", pp. 163–164).
+pub fn advent_ferial_psalm_antiphon_ref(day: &Day, hour_name: &str, n: u32) -> Option<String> {
+    let weekday = day.civil_weekday();
+    if day.season != Season::Advent || day.first_vespers || weekday == Weekday::Sunday {
+        return None;
+    }
+    if !matches!(hour_name, "lauds" | "prime" | "terce" | "sext" | "none") {
+        return None;
+    }
+    let date = day.date;
+    if date.month() == 12 && (17..=23).contains(&date.day()) {
+        let (set, n) = if weekday == Weekday::Saturday {
+            // Saturday Lauds has four antiphons; its last is the set's fifth.
+            let n = if hour_name == "lauds" && n == 4 { 5 } else { n };
+            if n == 3 || n == 4 {
+                return Some("seasonal/advent/psalm-antiphon-late-saturday".to_string());
+            }
+            let thomas = Date::new(date.year(), 12, 21).weekday();
+            (if matches!(thomas, Weekday::Sunday | Weekday::Saturday) { Weekday::Monday } else { thomas }, n)
+        } else {
+            (weekday, n)
+        };
+        return Some(format!("seasonal/advent/psalm-antiphon-{n}-late-{}", set.name().to_lowercase()));
+    }
+    if hour_name == "lauds" {
+        return None; // Lauds keeps the Psalter's antiphons until 17 December (p. 162).
+    }
+    let week = day.temporal_week_id.as_deref().filter(|w| w.starts_with("advent-sunday-"))?;
+    Some(format!("proper/{week}/psalm-antiphon-{n}"))
 }
 
 /// The December date whose O Antiphon belongs to this evening, if Dec 17–23.

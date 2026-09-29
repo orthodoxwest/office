@@ -45,7 +45,7 @@
 @use commons/martyr-paschal/short-responsory-vespers
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 648-649 (Common of One or Many Martyrs in Paschaltide)
+# SOURCE: Monastic Diurnal.pdf, pp. 32*-33* (Common of Martyrs in Paschaltide, Hymn for Many Martyrs; Lauds "as above at Vespers")
 Rex gloriose Martyrum
 
 All glorious King of Martyrs thou,
@@ -61,7 +61,7 @@ Forgive the sins that we have done.
 Martyrs in thee their triumph gain;
 From thee, Confessors grace obtain:
 O'ercome in us the lust of sin,
-That we thy pard'ning love may win.
+That we thy pardoning love may win.
 
 To thee who, dead, again dost live,
 All glory, Lord, thy people give;

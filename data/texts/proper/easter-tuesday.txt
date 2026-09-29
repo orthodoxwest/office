@@ -27,9 +27,6 @@ Jesus stood * in the midst of his disciples and said unto them, Peace be unto yo
 [magnificat-antiphon]
 Behold My Hands * and my Feet, that it is I myself, alleluia, alleluia.
 
-[commemoration-versicle]
-@use proper/easter-sunday/commemoration-versicle
-
 [collect]
 # SOURCE: diurnal p. 368
 O God, who dost continually multiply thy Church with new offspring: grant unto thy servants, that they may hold fast in their lives the mystery which by faith they have received.
