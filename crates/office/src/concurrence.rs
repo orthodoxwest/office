@@ -4,7 +4,9 @@
 use std::sync::Arc;
 
 use calendar::builder::seasonal_feria_commemoration;
-use calendar::commemoration::{OrderContext, cap_commemorations, dedupe_commemorations, order_commemorations, ordered_commemorations};
+use calendar::commemoration::{
+    OrderContext, apostle_kept_on_primary_feast, cap_commemorations, dedupe_commemorations, order_commemorations, ordered_commemorations,
+};
 use calendar::computus::julian_easter;
 use calendar::model::FERIA_COMMEMORATION_ID;
 use calendar::occurrence::compare_feast_precedence;
@@ -140,6 +142,11 @@ pub fn has_second_vespers(f: &Feast) -> bool {
     if f.is_category(Category::Feria) {
         return false;
     }
+    // A day within an octave is a semidouble office with the feast's II
+    // Vespers (General Rubrics II.1, VII.6; #417).
+    if is_day_within_octave(f) {
+        return true;
+    }
     f.rank.weight() >= Rank::Double.weight()
 }
 
@@ -179,6 +186,12 @@ fn occurrence_commemorated_at_second_vespers(winner: Option<&Feast>, comm: &Feas
         return (true, "commemoration:second-vespers-privileged-octave");
     }
     if let Some(w) = winner {
+        // Trinity and Corpus Christi keep an occurring Apostle through II
+        // Vespers as well as Lauds (2023 and 2024 ordos, 2026 ordo 11 June;
+        // #379).
+        if apostle_kept_on_primary_feast(w, comm) {
+            return (true, "commemoration:second-vespers-apostle-on-primary-feast");
+        }
         if w.rank == Rank::Double1stClass && !comm.is_category(Category::Sunday) {
             return (false, "commemoration:second-vespers-first-class-exclusion");
         }
@@ -233,13 +246,29 @@ fn same_octave_office(preceding: &CalendarDay, following: &CalendarDay) -> bool 
     matches!(octave_celebration_parent(preceding), Some(p) if Some(p) == octave_celebration_parent(following))
 }
 
+/// "A Feria in Advent, in Septuagesimatide, or in Lent" (Diurnal §X), with
+/// the Ember days of Advent and Lent (2021 ordo 24 March, 2022 18 March).
+fn penitential_season_feria(f: &Feast) -> bool {
+    f.id == FERIA_COMMEMORATION_ID
+        || f.id == "privileged-lenten-feria"
+        || f.id.starts_with("lent-ember-")
+        || f.id.starts_with("advent-ember-")
+}
+
 /// XIV.7-8 applied to the office displaced by I Vespers of the following.
 fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast) -> (bool, &'static str) {
     let first_class = winner.is_some_and(|w| w.rank == Rank::Double1stClass);
-    if loser.id == FERIA_COMMEMORATION_ID {
-        if first_class {
+    if first_class && penitential_season_feria(loser) {
+        // Such a feria stays at I Vespers of a Double I Class (Diurnal §X; the
+        // Annunciation in 2017, 2021–2023, 2025 and 2026). A first-class
+        // Sunday or feria is no Double: the Lenten Saturday before it is not
+        // commemorated.
+        if winner.is_some_and(|w| w.is_category(Category::Sunday) || w.is_category(Category::Feria)) {
             return (false, "commemoration:first-vespers-first-class-seasonal-feria-exclusion");
         }
+        return (true, "commemoration:first-vespers-first-class-seasonal-feria");
+    }
+    if loser.id == FERIA_COMMEMORATION_ID {
         return (true, "commemoration:first-vespers-seasonal-feria");
     }
     if first_class && loser.is_category(Category::Feria) && loser.rank == Rank::PrivilegedFeria {
@@ -266,15 +295,41 @@ fn outgoing_commemorated_at_first_vespers(winner: Option<&Feast>, loser: &Feast)
         return (true, "commemoration:first-vespers-concurrence");
     };
     if w.rank == Rank::Double1stClass {
+        // Diurnal §X (pp. xxix–xxx): the preceding day is commemorated "only
+        // if it were a Sunday (except at I Vespers of the Nativity and
+        // Epiphany of Our Lord), or a Privileged Octave, or a Double I or II
+        // Class, or a Feria in Advent, in Septuagesimatide, or in Lent". The
+        // fuller English XIV.7 reads "but not of" there, against the Table of
+        // Concurrence (p. xlv) and the ordos: IV after Pentecost before Ss
+        // Peter and Paul (2026), Low Sunday before St Tikhon (2018, 2026),
+        // Simon and Jude before Christ the King (2017, 2023), the Holy Name
+        // before the Epiphany (2025); #396.
         if loser.is_category(Category::Sunday) {
             if w.id == "christmas" || w.id == "epiphany" {
-                return (true, "commemoration:first-vespers-nativity-epiphany-sunday");
+                return (false, "commemoration:first-vespers-nativity-epiphany-sunday-exclusion");
             }
-            return (false, "commemoration:first-vespers-first-class-sunday-exclusion");
+            return (true, "commemoration:first-vespers-first-class-sunday");
         }
-        if loser.rank.weight() >= Rank::Double2ndClass.weight() || loser.is_category(Category::Feria) {
+        // A day within a common octave is not on that list (2026 ordo, the
+        // St George octave before St Joseph's Solemnity; #378).
+        if is_day_within_octave(loser) && !is_privileged_octave_commemoration(loser) {
+            return (false, "commemoration:first-vespers-first-class-common-octave-exclusion");
+        }
+        // The Easter and Pentecost octaves end at None of Saturday (2026 ordo
+        // 18 April and 6 June), and the Triduum is never commemorated.
+        if loser.is_category(Category::Feria)
+            || matches!(loser.id.as_str(), "holy-thursday" | "good-friday" | "holy-saturday")
+            || (is_day_within_octave(loser) && loser.rank.weight() >= Rank::Double2ndClass.weight())
+        {
             return (false, "commemoration:first-vespers-first-class-exclusion");
         }
+        if loser.rank.weight() >= Rank::Double2ndClass.weight() {
+            return (true, "commemoration:first-vespers-first-class-double");
+        }
+        // A Greater or Lesser Double is not on the list either, but the ordos
+        // are split: St Gabriel before the Annunciation every year, against
+        // Doubles dropped before the Ascension, Pentecost and Ss Peter and
+        // Paul. It stays pending a ruling.
     }
     if w.rank == Rank::Double2ndClass {
         if w.id == "circumcision" && (loser.is_category(Category::Sunday) || loser.rank.weight() >= Rank::GreaterDouble.weight()) {

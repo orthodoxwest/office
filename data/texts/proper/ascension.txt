@@ -201,6 +201,22 @@ R. I ascend unto my Father, and your Father. * Alleluia, alleluia.
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 65 (octave commemoration at Sunday I Vespers)
 @use proper/ascension/versicle-vespers
 
+[commemoration-antiphon-sunday-second-vespers]
+# SOURCE: Monastic Diurnal p. 393 (Sunday within the Octave, II Vespers, "For Commemoration of the Octave: Ant. Father, I have manifested"); 2017–2021 ordos print Comm. Oct. ("Father") (#398)
+@use proper/ascension/magnificat-antiphon-first
+
+[commemoration-versicle-sunday-second-vespers]
+# SOURCE: Monastic Diurnal p. 393 (Sunday within the Octave, II Vespers: V. God is gone up with a merry noise)
+@use proper/ascension/versicle-vespers
+
+[commemoration-antiphon-sunday-second-vespers-before-other-office]
+# SOURCE: Monastic Diurnal p. 393: "If on the following day the Office is not of the Octave, the Commemoration is said as above at I Vespers" (p. 391) (#398)
+@use proper/ascension/commemoration-antiphon-sunday-first-vespers
+
+[commemoration-versicle-sunday-second-vespers-before-other-office]
+# SOURCE: Monastic Diurnal p. 393 (as above at I Vespers, p. 391)
+@use proper/ascension/commemoration-versicle-sunday-first-vespers
+
 [commemoration-antiphon-at-first-vespers]
 # SOURCE: Monastic Diurnal p. 391; 2026 ordo p. 66 (Ascension octave at I Vespers of another feast)
 @use proper/ascension/magnificat-antiphon

@@ -342,22 +342,31 @@ function usageBeaconBody(scope) {
   // swap their background images while invisible, then
   // let style.css's opacity transition climb it back to full: the swap
   // itself never renders, so the material fades rather than flashing on or off.
-  // The swap waits for the wall's own fade to end rather than for its
-  // nominal length: the fade starts only at the next frame, and on a
-  // slow one a timer would land mid-fade. The timer remains for pages
-  // with no wall (forced colours), and in case the end never arrives.
+  // Wait on the dip itself rather than its nominal length: a busy frame can
+  // start it late, and a swap on a clock would then land mid-fade. The
+  // timer only bounds the wait, for a browser that reports no transitions.
   var VAULT_FADE_MS = 100;
-  var vaultFadeTimer = null;
-  var vaultFaded = null;
+  var VAULT_FADE_LIMIT_MS = 400;
+  var vaultFadeTurn = 0;
 
-  var stopVaultFade = function (root) {
-    clearTimeout(vaultFadeTimer);
-    vaultFadeTimer = null;
-    if (vaultFaded) {
-      root.removeEventListener("transitionend", vaultFaded);
-      root.removeEventListener("transitioncancel", vaultFaded);
-      vaultFaded = null;
+  var vaultDipped = function (root) {
+    if (!root.getAnimations) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, VAULT_FADE_MS);
+      });
     }
+    // getAnimations flushes style, so the dip's transitions exist by now.
+    var dips = root.getAnimations({ subtree: true }).filter(function (anim) {
+      return anim.transitionProperty === "opacity";
+    });
+    return Promise.race([
+      Promise.all(dips.map(function (anim) {
+        return anim.finished.catch(function () {});
+      })),
+      new Promise(function (resolve) {
+        setTimeout(resolve, VAULT_FADE_LIMIT_MS);
+      }),
+    ]);
   };
 
   // User action: paint + persist.
@@ -370,32 +379,19 @@ function usageBeaconBody(scope) {
       writeStoredTheme(choice);
       return;
     }
-    stopVaultFade(root);
     root.classList.add("vault-hidden");
-    var swap = function () {
-      stopVaultFade(root);
-      // The crossfade's window runs from the swap, however late it lands.
+    var turn = ++vaultFadeTurn;
+    vaultDipped(root).then(function () {
+      if (turn !== vaultFadeTurn) {
+        return;
+      }
+      // The colours crossfade from the swap, so keep .theme-anim for the
+      // whole of it even when the dip ran long.
       flashThemeTransition();
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       root.classList.remove("vault-hidden");
-    };
-    var wall = getComputedStyle(root, "::before");
-    if (wall.content === "none") {
-      vaultFadeTimer = setTimeout(swap, VAULT_FADE_MS);
-      return;
-    }
-    // Only the wall reaching transparent counts: an earlier fade back in
-    // can end (or be cut short) after this dip has begun.
-    vaultFaded = function (e) {
-      if (e.target === root && e.pseudoElement === "::before" && e.propertyName === "opacity" && Number(wall.opacity) === 0) {
-        swap();
-      }
-    };
-    root.addEventListener("transitionend", vaultFaded);
-    root.addEventListener("transitioncancel", vaultFaded);
-    // Inside .theme-anim's window, which the dip needs.
-    vaultFadeTimer = setTimeout(swap, VAULT_FADE_MS * 3);
+    });
   };
 
   paintThemeChoice(effectiveThemeChoice());

@@ -10,6 +10,10 @@ generated field, not the photograph, so it keeps that field's clouds exactly:
 --soft-of apps/office-web/static/plaster-wide.jpg --quality 90 --out
 .../plaster-wide-soft.jpg, and likewise plaster.jpg -> plaster-soft.jpg. The
 smooth gradients need the higher quality; the files stay under 3 KB.
+
+The Apse vault's gold leaf varies star by star through a small tileable alpha
+mask: --leaf --out apps/office-web/static/leaf.png. Seeded, so it regenerates
+byte for byte.
 """
 import argparse
 from pathlib import Path
@@ -78,6 +82,24 @@ def soft_field(field, radius, scale):
     return grey.resize((max(1, round(w / scale)), max(1, round(h / scale))), Image.BOX)
 
 
+def leaf_field(size=64, feature=5.5, seed=11, levels=64):
+    """Smooth periodic noise as an alpha mask: each star of the vault catches
+    its own share of light (mean 85%, clipped to 55-100%). Band-limited in the
+    frequency domain, so the tile repeats seamlessly; stored small because the
+    browser's smooth upscaling (16x) carries nothing finer than a star."""
+    rng = np.random.default_rng(seed)
+    white = rng.standard_normal((size, size))
+    fx = np.fft.fftfreq(size)[:, None]
+    fy = np.fft.fftfreq(size)[None, :]
+    field = np.real(np.fft.ifft2(np.fft.fft2(white) * np.exp(-(fx ** 2 + fy ** 2) * feature ** 2 / 2)))
+    field = (field - field.mean()) / field.std()
+    alpha = np.clip(0.85 + 0.12 * field, 0.55, 1.0)
+    alpha = np.round(alpha * (levels - 1)) / (levels - 1)
+    pixels = np.zeros((size, size, 2), np.uint8)
+    pixels[..., 1] = np.round(alpha * 255).astype(np.uint8)
+    return Image.fromarray(pixels, "LA")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--src", type=Path, default=Path("../resources/design/parish/nave-wall-plaster.jpg"))
@@ -86,10 +108,15 @@ def main():
                                 ("crop", 0.06, float), ("aspect", 0, float), ("limit", 2.5, float),
                                 ("soften", 1, int), ("quality", 72, int)]:
         parser.add_argument("--" + name, type=kind, default=default)
+    parser.add_argument("--leaf", action="store_true", help="write the vault's gold-leaf variation mask")
     parser.add_argument("--soft-of", type=Path, help="derive the softened field from this generated field")
     parser.add_argument("--soft-radius", type=int, default=20, help="blur radius in field pixels")
     parser.add_argument("--soft-scale", type=int, default=8, help="downscale factor for the stored copy")
     args = parser.parse_args()
+    if args.leaf:
+        leaf_field().save(args.out, optimize=True)
+        print("wrote", args.out)
+        return
     if args.soft_of:
         if args.soft_radius < 1 or args.soft_scale < 1:
             parser.error("invalid soft field parameters")

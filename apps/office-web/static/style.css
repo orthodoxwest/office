@@ -3713,7 +3713,7 @@ body.season-eastertide {
   }
 
   /* Theme crossfade. app.js adds .theme-anim to <html> around an explicit
-     Default/Nave/Apse click and removes it ~320ms after the swap, so only that swap
+     Default/Nave/Apse click and removes it ~320ms later, so only that swap
      transitions: first paint (the pre-paint script in layout.html) and a
      system light/dark flip stay instant. Scoped to every element on purpose —
      a theme change repaints text, hairlines, cards and washes together — but
@@ -3752,6 +3752,7 @@ body.season-eastertide {
   :root.theme-anim.vault-hidden::before,
   :root.theme-anim.vault-hidden body:is(.page-home, .page-hour)::before,
   :root.theme-anim.vault-hidden body.page-hour .hour-epilogue::before,
+  :root.theme-anim.vault-hidden body.page-hour .office-hour::after,
   :root.theme-anim.vault-hidden body.page-hour footer::after {
     opacity: 0 !important;
   }
@@ -5190,7 +5191,13 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
 
    The band is fixed like the wall and runs the viewport's full height, so
    nothing seams as the header or epilogue scroll through it; in rem, it
-   widens with the text. Phones keep a flat page. */
+   widens with the text. Phones keep a flat page.
+
+   Nave only. Apse's wall varies by under a level, so the band would buy
+   nothing there, and a feathered layer over so smooth a dark field bands:
+   software rasterizers (browsers without GPU drawing, and the snapshot
+   tests) truncate each blend, so the feather steps down in one-level
+   columns that read as vertical lines. */
 html:where(:has(> body.page-hour))::before {
   content: none;
 }
@@ -5222,6 +5229,16 @@ html:where(:has(> body.page-hour))::before {
     background-repeat: no-repeat;
     -webkit-mask-image: var(--soft-band);
     mask-image: var(--soft-band);
+  }
+
+  :root[data-theme="dark"] body.page-hour::before {
+    content: none;
+  }
+}
+
+@media (min-width: 1000px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.page-hour::before {
+    content: none;
   }
 }
 
@@ -5435,15 +5452,29 @@ html:where(:has(> body.page-hour))::before {
    the stars gold through Passiontide while every other ornament veils. */
 :root {
   /* One diaper cell, as a mask: the rib hairlines at 7%, the principal
-     eight-ray stars at 78% with a small boss, the lesser four-ray stars at
-     50%. Only alpha matters here — the colour is --apse-ink, painted through
-     it — so the file needs no tokens and can live on :root. Drawn in a
-     132-unit cell; the tile is 132px on phones and 176px wider. */
-  --apse-star-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 132 132'%3E%3Cpath d='M0 0L132 132M0 66L66 0M66 132L132 66' stroke='%23000' stroke-opacity='.07' stroke-width='1.2'/%3E%3Cpath d='M33 25.5L33.52 31.75L36.39 29.61L34.25 32.48L40.5 33L34.25 33.52L36.39 36.39L33.52 34.25L33 40.5L32.48 34.25L29.61 36.39L31.75 33.52L25.5 33L31.75 32.48L29.61 29.61L32.48 31.75ZM99 91.5L99.52 97.75L102.39 95.61L100.25 98.48L106.5 99L100.25 99.52L102.39 102.39L99.52 100.25L99 106.5L98.48 100.25L95.61 102.39L97.75 99.52L91.5 99L97.75 98.48L95.61 95.61L98.48 97.75Z' fill-opacity='.78'/%3E%3Ccircle cx='33' cy='33' r='1.7' fill-opacity='.78'/%3E%3Ccircle cx='99' cy='99' r='1.7' fill-opacity='.78'/%3E%3Cpath d='M99 28.2L99.64 32.36L102.2 33L99.64 33.64L99 37.8L98.36 33.64L95.8 33L98.36 32.36ZM33 94.2L33.64 98.36L36.2 99L33.64 99.64L33 103.8L32.36 99.64L29.8 99L32.36 98.36Z' fill-opacity='.5'/%3E%3C/svg%3E");
+     eight-ray stars at 78% with a small boss and a soft halo (28% at the
+     centre, gone by 12 units) so the gold reads as catching light rather
+     than printed flat, the lesser four-ray stars at 50%. Only alpha matters
+     here — the colour is --apse-ink, painted through it — so the file needs
+     no tokens and can live on :root. Drawn in a 132-unit cell; --apse-tile
+     sets its size. */
+  --apse-star-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 132 132'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-opacity='.28'/%3E%3Cstop offset='.3' stop-opacity='.09'/%3E%3Cstop offset='1' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='33' cy='33' r='12' fill='url(%23g)'/%3E%3Ccircle cx='99' cy='99' r='12' fill='url(%23g)'/%3E%3Cpath d='M0 0L132 132M0 66L66 0M66 132L132 66' stroke='%23000' stroke-opacity='.07' stroke-width='1.2'/%3E%3Cpath d='M33 25.5L33.52 31.75L36.39 29.61L34.25 32.48L40.5 33L34.25 33.52L36.39 36.39L33.52 34.25L33 40.5L32.48 34.25L29.61 36.39L31.75 33.52L25.5 33L31.75 32.48L29.61 29.61L32.48 31.75ZM99 91.5L99.52 97.75L102.39 95.61L100.25 98.48L106.5 99L100.25 99.52L102.39 102.39L99.52 100.25L99 106.5L98.48 100.25L95.61 102.39L97.75 99.52L91.5 99L97.75 98.48L95.61 95.61L98.48 97.75Z' fill-opacity='.78'/%3E%3Ccircle cx='33' cy='33' r='1.7' fill-opacity='.78'/%3E%3Ccircle cx='99' cy='99' r='1.7' fill-opacity='.78'/%3E%3Cpath d='M99 28.2L99.64 32.36L102.2 33L99.64 33.64L99 37.8L98.36 33.64L95.8 33L98.36 32.36ZM33 94.2L33.64 98.36L36.2 99L33.64 99.64L33 103.8L32.36 99.64L29.8 99L32.36 98.36Z' fill-opacity='.5'/%3E%3C/svg%3E");
+  /* Gold leaf is laid by hand, piece by piece, and no two stars catch the
+     light alike. A further mask of slow noise gives each star its own share
+     (about 60-100%, most near 85%): leaf.png, 64px of seamless noise from
+     tools/genplaster --leaf, drawn 16 times larger, since the browser's
+     smooth scaling carries nothing finer than a star anyway. Its 1024px
+     repeat never lines up with the star tile, so no run of stars repeats.
+     An SVG turbulence filter looked the same but cost 50ms of first paint
+     and most of a full scroll's raster time. It shares each field's tile
+     origin, so the epilogue and footer stay continuous. */
+  --apse-leaf: url("leaf.png");
+  --apse-leaf-size: 1024px 1024px;
 }
 
 body {
   --apse-vault: none;
+  --apse-gild: none;
   --apse-ink: transparent;
   --apse-ground: transparent;
   --apse-copy-shadow: none;
@@ -5454,6 +5485,7 @@ body {
     --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-ink: var(--ornament);
+    --apse-gild: var(--apse-gilding);
     --apse-vault: var(--apse-star-tile);
   }
 }
@@ -5462,20 +5494,53 @@ body {
   --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-ink: var(--ornament);
+  --apse-gild: var(--apse-gilding);
   --apse-vault: var(--apse-star-tile);
 }
 
-/* An hour shows no stars until the office has ended. The vault
-   begins only in the post-prayer epilogue: transparent through the hour
-   continuation, emerging around the report link, then continuing through the
-   footer. Both layers share main's bottom as their tile origin.
+/* The home vault is lit from the altar: stars nearest the frontispiece take
+   the gilding's light stop, those toward the corners its shadow, as leaf does
+   under candles. Built from the seasonal pair, so Passiontide veils it and
+   Paschaltide warms it with the caps. Declared on body with the pair it
+   reads, for the reason given above. */
+body {
+  --apse-gilding: radial-gradient(ellipse 70% 60% at 50% 42%, var(--ornament-hi), var(--ornament) 55%, var(--ornament-lo));
+}
+
+/* No star sits near the prayer, and below 1680px an hour shows none until
+   the office has ended (wider screens add the sides of the vault; see
+   below). The vault begins in the post-prayer epilogue: transparent
+   through the hour continuation, emerging around the report link, then
+   continuing through the footer. Both layers share main's bottom as their
+   tile origin.
 
    The negative inline reach restores the full main/footer measure around the
    narrower content box on a phone. On desktop the same post-prayer field
    bleeds to the viewport edges so the footer reads as one continuous vault,
    while the prayer above keeps its 38rem measure on the softened wall. */
-body.page-hour {
-  --apse-epilogue-tile: 132px;
+/* One tile size for every field. On very wide screens the diaper widens
+   with them, so it reads as a painted ceiling rather than a wallpaper of
+   small stars; whole pixels keep the tiles seamless. */
+body {
+  --apse-tile: 132px;
+}
+
+@media (min-width: 701px) {
+  body {
+    --apse-tile: 176px;
+  }
+}
+
+@media (min-width: 1800px) {
+  body {
+    --apse-tile: 208px;
+  }
+}
+
+@media (min-width: 2400px) {
+  body {
+    --apse-tile: 240px;
+  }
 }
 
 body.page-hour .hour-epilogue,
@@ -5491,10 +5556,10 @@ body.page-hour footer::after {
   z-index: -1;
   pointer-events: none;
   background-color: var(--apse-ink);
-  -webkit-mask-repeat: repeat, no-repeat;
-  mask-repeat: repeat, no-repeat;
-  -webkit-mask-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile), 100% 100%;
-  mask-size: var(--apse-epilogue-tile) var(--apse-epilogue-tile), 100% 100%;
+  -webkit-mask-repeat: repeat, no-repeat, repeat;
+  mask-repeat: repeat, no-repeat, repeat;
+  -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
+  mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }
@@ -5506,33 +5571,22 @@ body.page-hour .hour-epilogue::before {
   inset: 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-right))) 0 calc(-1 * max(var(--page-gutter), env(safe-area-inset-left)));
   -webkit-mask-position: bottom center;
   mask-position: bottom center;
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%);
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%), var(--apse-leaf);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 7rem, rgba(0, 0, 0, 0.28) 11rem, #000 16rem 100%), var(--apse-leaf);
 }
 
 body.page-hour footer::after {
   inset: calc(-1 * var(--footer-gap)) 0 0;
   -webkit-mask-position: top center;
   mask-position: top center;
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%);
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
 }
 
-/* Where the desktop plaster and stars overlap, a quiet ground eases in under
-   the vault so stars and texture trade prominence. The star layer paints only
-   through its mask, so the ground cannot share it: it is each host's own
-   border-image instead — outset to the viewport edges, following the same
-   fade, painting beneath the negative-z vault and adding no layout or
-   scrollable overflow. Nave's ground is transparent. */
-@media screen and (min-width: 1000px) {
-  body.page-hour .hour-epilogue {
-    border-image: linear-gradient(to bottom, transparent 0 7rem, color-mix(in srgb, var(--apse-ground) 28%, transparent) 11rem, var(--apse-ground) 16rem 100%) fill 0 / 0 / 0 100vw;
-  }
-
-  body.page-hour footer {
-    border-image: linear-gradient(to bottom, var(--apse-ground) 0, color-mix(in srgb, var(--apse-ground) 40%, transparent) 62%, transparent 94%) fill 0 / 0 / var(--footer-gap) 100vw 0;
-  }
-}
+/* The ending's stars sit straight on the wall, as the home vault's do.
+   A flat night ground once eased in beneath them to quiet the plaster, but
+   Apse's plaster varies by under a level, and the ground's fade over so
+   smooth a dark field banded into horizontal lines in software rendering. */
 
 /* Keep the existing footer lettering treatment. */
 body:is(.page-home, .page-hour) footer {
@@ -5547,7 +5601,6 @@ body.page-hour .report-issue {
 
 @media (min-width: 701px) {
   body.page-hour {
-    --apse-epilogue-tile: 176px;
     /* Full-bleed pseudo-elements use viewport units; clip the mathematical
        scrollbar sliver without hiding legitimate vertical overflow. */
     overflow-x: clip;
@@ -5556,6 +5609,62 @@ body.page-hour .report-issue {
   body.page-hour .hour-epilogue::before,
   body.page-hour footer::after {
     inset-inline: calc(50% - 50vw);
+  }
+}
+
+/* On a wide screen the vault stands to either side of the prayer, as the
+   apse dome stands around the altar. Only where there is room for it: under
+   1680px the field beyond the softened band is a column or less, and a
+   sliver of stars at the screen edge reads as an accident. The stars keep
+   out of the band and stay at half strength.
+
+   Fixed, like the home vault: the prayer scrolls past a still sky, so
+   nothing moves at the edge of sight, and the layer is rasterized once. A
+   field scrolling with the page could share the ending's tile origin, but
+   repainted every new strip of the page and cost ten times the raster time
+   over a full scroll of Lauds. Instead the scroll position fades it: in
+   over the first half-screen, so the opening is as quiet as it was, and out
+   before the epilogue comes into view, so it has gone by the time the full
+   vault rises there at its own phase. Both fades run on the compositor.
+   Browsers without scroll timelines keep the plain wall, as before. */
+@keyframes apse-sides-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes apse-sides-out {
+  from { opacity: 0; }
+  to { opacity: -1; }
+}
+
+@media (min-width: 1680px) {
+  @supports (animation-timeline: scroll()) {
+    body.page-hour .office-hour::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-color: var(--apse-ink);
+      opacity: 0;
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) calc(50% - 40rem), transparent calc(50% - 35rem), transparent calc(50% + 35rem), rgba(0, 0, 0, 0.5) calc(50% + 40rem), rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+      -webkit-mask-repeat: repeat, no-repeat, repeat;
+      mask-repeat: repeat, no-repeat, repeat;
+      -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
+      mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
+      -webkit-mask-position: top center;
+      mask-position: top center;
+      -webkit-mask-composite: source-in;
+      mask-composite: intersect;
+      /* The epilogue and footer take about 410px below the prayer (450px
+         with Large text), so the field is gone just before the epilogue
+         scrolls into view. */
+      animation: apse-sides-in linear both, apse-sides-out linear both;
+      animation-composition: replace, add;
+      animation-timeline: scroll(root), scroll(root);
+      animation-range: 0 50vh, calc(100% - 1000px) calc(100% - 450px);
+    }
   }
 }
 
@@ -5588,27 +5697,23 @@ body.page-home::before {
   z-index: -1;
   pointer-events: none;
   background-color: var(--apse-ink);
+  background-image: var(--apse-gild);
   /* Clear the header beam, carry the field behind the frontispiece, then thin
      the ornament toward the controls at the foot of the page. The fade is a
      second mask layer, intersected with the star tile, so it thins stars and
-     ribs without tinting the night itself. */
-  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%);
-  -webkit-mask-repeat: repeat, no-repeat;
-  mask-repeat: repeat, no-repeat;
-  -webkit-mask-size: 132px 132px, 100% 100%;
-  mask-size: 132px 132px, 100% 100%;
+     ribs without tinting the night itself. A third lets the light fall off
+     toward the corners of a wide screen, so the vault has a centre and does
+     not run to the edges as wallpaper. */
+  -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%), radial-gradient(ellipse 75% 85% at 50% 42%, #000 45%, rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+  mask-image: var(--apse-vault), linear-gradient(to bottom, transparent 0 3.5rem, #000 7rem 65%, rgba(0, 0, 0, 0.35) 88%, transparent 97%), radial-gradient(ellipse 75% 85% at 50% 42%, #000 45%, rgba(0, 0, 0, 0.5)), var(--apse-leaf);
+  -webkit-mask-repeat: repeat, no-repeat, no-repeat, repeat;
+  mask-repeat: repeat, no-repeat, no-repeat, repeat;
+  -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, 100% 100%, var(--apse-leaf-size);
+  mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, 100% 100%, var(--apse-leaf-size);
   -webkit-mask-position: top center;
   mask-position: top center;
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
-}
-
-@media (min-width: 701px) {
-  body.page-home::before {
-    -webkit-mask-size: 176px 176px, 100% 100%;
-    mask-size: 176px 176px, 100% 100%;
-  }
 }
 
 /* ── Print ──
@@ -5779,6 +5884,7 @@ body.page-home::before {
   }
 
   body:is(.page-home, .page-hour)::before,
+  body.page-hour .office-hour::after,
   html::before {
     content: none;
   }

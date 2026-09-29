@@ -74,6 +74,22 @@ Peter the Apostle * and Paul the Doctor of the Gentiles: these have taught us th
 # SOURCE: Monastic Diurnal p. 559; Common of Apostles pp. 7*–10*
 @use commons/apostle/psalm-antiphon-4-first-vespers
 
+[psalm-antiphon-1-vespers]
+# SOURCE: Monastic Diurnal p. 559: At I and II Vespers, "Ants., Psalms, and Chapter of the Common of Apostles, pp. 7* and 12*"; II Vespers antiphons from p. 12* (#382)
+@use commons/apostle/psalm-antiphon-1-vespers
+
+[psalm-antiphon-2-vespers]
+# SOURCE: Monastic Diurnal p. 559; Common of Apostles p. 12* (II Vespers) (#382)
+@use commons/apostle/psalm-antiphon-2-vespers
+
+[psalm-antiphon-3-vespers]
+# SOURCE: Monastic Diurnal p. 559; Common of Apostles p. 12* (II Vespers) (#382)
+@use commons/apostle/psalm-antiphon-3-vespers
+
+[psalm-antiphon-4-vespers]
+# SOURCE: Monastic Diurnal p. 559; Common of Apostles p. 12* (II Vespers) (#382)
+@use commons/apostle/psalm-antiphon-4-vespers
+
 [chapter-lauds]
 # SOURCE: Monastic Diurnal p. 558; Common of Apostles pp. 10*–12*
 @use commons/apostle/chapter-lauds

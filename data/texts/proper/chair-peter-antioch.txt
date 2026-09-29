@@ -39,8 +39,8 @@ Whatsoever * thou shalt bind on earth shall be bound in heaven: and whatsoever t
 During his pontificate * never was he moved by respect of men, but rather went ever gloriously on his way to the kingdom of heaven.
 
 [collect]
-# SOURCE: draft archdiocesan Lauds/Vespers books, pp. 398, 292, 301 (Chair of St Peter at Antioch)
-O God, who in giving the keys of the kingdom of heaven to thy blessed Apostle Peter, didst confer upon him the priestly power of binding and loosing: grant that by the help of his intercession, we may be delivered from the bonds of our sins.
+# SOURCE: Full Vicariate Missal (Completed, Rough Draft), PDF p. 611 (January 18, Chair of St Peter at Rome, Collect); Office collect = Mass collect of the day; the EM Laity p. 510 wording in Fr Jason's supplement (#472)
+O God, who didst bestow upon thy blessed Apostle Peter the keys of the kingdom of heaven, and didst appoint unto him the high priesthood of binding and loosing: vouchsafe; that by the help of his intercession we may be delivered from the bonds of our iniquities.
 
 [chapter-lauds]
 @use commons/confessor-bishop/chapter-lauds

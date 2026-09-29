@@ -107,12 +107,19 @@ pub const SUFFRAGE_SUPPRESSED_NON_CUSTOMARY: &str = "suppressed:non-customary-of
 pub const SUFFRAGE_SUPPRESSED_WITHIN_OCTAVE: &str = "suppressed:within-octave";
 pub const SUFFRAGE_SUPPRESSED_OUT_OF_SEASON: &str = "suppressed:out-of-season";
 pub const SUFFRAGE_SUPPRESSED_COMMEMORATION: &str = "suppressed:commemoration";
+pub const SUFFRAGE_SUPPRESSED_ALL_SAINTS_VIGIL: &str = "suppressed:vigil-of-all-saints";
 
 /// Whether the Suffrage of All Saints is said, and why.
 pub fn suffrage_disposition(day: Option<&Day>) -> (bool, &'static str) {
     let Some(day) = day else { return (false, SUFFRAGE_SUPPRESSED_OUT_OF_SEASON) };
     if !office_allows_customary_suffrage(day) {
         return (false, SUFFRAGE_SUPPRESSED_NON_CUSTOMARY);
+    }
+    // Diurnal p. 636: "At Lauds the Suffrage of All Saints is not said." The
+    // 2017–2019 ordos agree; the later "Suff." descends from the 2021 line for
+    // the vigil anticipated to Saturday (#471).
+    if day.celebration.as_deref().is_some_and(|c| c.id == "vigil-of-all-saints") {
+        return (false, SUFFRAGE_SUPPRESSED_ALL_SAINTS_VIGIL);
     }
     if day.within_octave_of.is_some() {
         return (false, SUFFRAGE_SUPPRESSED_WITHIN_OCTAVE);
@@ -130,14 +137,20 @@ pub fn should_say_suffrage(day: Option<&Day>) -> bool {
     suffrage_disposition(day).0
 }
 
-/// The Commemoration of the Cross in Easter weeks II–V below Double.
+/// The Commemoration of the Cross, from Monday after Low Sunday through the
+/// Vigil of the Ascension, in offices below Double (Diurnal p. 146). Like the
+/// suffrage it gives way to a commemorated Double or octave; every ordo pairs
+/// those commemorations with "No Comm. HC" (#356).
 pub fn should_say_cross_commemoration(day: &Day, moveable: Option<&MoveableDates>) -> bool {
     let Some(m) = moveable else { return false };
     if !office_allows_customary_suffrage(day) || day.within_octave_of.is_some() || day.season != Season::Easter {
         return false;
     }
+    if day.commemorations.iter().any(|c| commemoration_suppresses_suffrage(c)) {
+        return false;
+    }
     let since = day.date.days_since(m.easter);
-    (7..=35).contains(&since)
+    (8..=38).contains(&since)
 }
 
 /// The office or a commemoration is of the Blessed Virgin: the Suffrage then
