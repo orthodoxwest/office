@@ -883,13 +883,28 @@ footer::before {
    liturgical color behind text that has no horizontal padding. */
 
 /* Shared liturgical-color palette. Home uses it as a top hairline; repeating
-   ordo entries use it as a side rail. */
-.day-color-white  { --day-color: #c9b896; }
-.day-color-red    { --day-color: #b02a24; }
-.day-color-green  { --day-color: #3a6b3a; }
-.day-color-violet { --day-color: #6a3a8a; }
-.day-color-black  { --day-color: #3a3a3a; }
-.day-color-rose   { --day-color: #c4607a; }
+   ordo entries use it as a side rail. An ordo row sets it on its rail, never
+   on the row: a custom property on each of 365 rows gives every cell beneath
+   a distinct inherited style that the engine cannot share between rows, and
+   cost a fifth of the ordo's style time. */
+.day-color-white:not(tr),
+tr.day-color-white::before,
+tr.day-color-white > td:first-child::before { --day-color: #c9b896; }
+.day-color-red:not(tr),
+tr.day-color-red::before,
+tr.day-color-red > td:first-child::before { --day-color: #b02a24; }
+.day-color-green:not(tr),
+tr.day-color-green::before,
+tr.day-color-green > td:first-child::before { --day-color: #3a6b3a; }
+.day-color-violet:not(tr),
+tr.day-color-violet::before,
+tr.day-color-violet > td:first-child::before { --day-color: #6a3a8a; }
+.day-color-black:not(tr),
+tr.day-color-black::before,
+tr.day-color-black > td:first-child::before { --day-color: #3a3a3a; }
+.day-color-rose:not(tr),
+tr.day-color-rose::before,
+tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Title stack: date and feast sit close; the base keeps only the vertical
    stack, and gaps live in .page-home .home-day-head below. */
@@ -3121,10 +3136,14 @@ footer::before {
   }
 
   /* White/black rails need a lift on the apse night sky. */
-  :root:not([data-theme="light"]) .day-color-white {
+  :root:not([data-theme="light"]) .day-color-white:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-white::before,
+  :root:not([data-theme="light"]) tr.day-color-white > td:first-child::before {
     --day-color: #d0b06a;
   }
-  :root:not([data-theme="light"]) .day-color-black {
+  :root:not([data-theme="light"]) .day-color-black:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-black::before,
+  :root:not([data-theme="light"]) tr.day-color-black > td:first-child::before {
     --day-color: #8a94a0;
   }
 
@@ -3156,10 +3175,14 @@ footer::before {
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .day-color-white {
+:root[data-theme="dark"] .day-color-white:not(tr),
+:root[data-theme="dark"] tr.day-color-white::before,
+:root[data-theme="dark"] tr.day-color-white > td:first-child::before {
   --day-color: #d0b06a;
 }
-:root[data-theme="dark"] .day-color-black {
+:root[data-theme="dark"] .day-color-black:not(tr),
+:root[data-theme="dark"] tr.day-color-black::before,
+:root[data-theme="dark"] tr.day-color-black > td:first-child::before {
   --day-color: #8a94a0;
 }
 
