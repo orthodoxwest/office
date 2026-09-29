@@ -33,7 +33,8 @@ or impose a redesign on an unrelated change.
   Dark inscription backgrounds use the seasonal Apse leaf colours in both themes.
 - Current controls use a gold underline; disclosures use the existing caret.
   Keep Default / Nave / Apse labels and visible keyboard focus.
-- The starfield belongs only to Apse home and the post-office epilogue.
+- The starfield belongs to Apse home, the post-office epilogue, and, on
+  screens 1680px and wider, the margins beside an hour's prayer.
   For changes to that field or its masks, read
   [references/apse-vault.md](references/apse-vault.md).
 
@@ -85,9 +86,11 @@ or impose a redesign on an unrelated change.
   clouds); a symmetric texture there is invisible. `ux.spec.js` measures
   the rendered wall's mean and contrast in both themes.
   All textured pages share `--plaster-strength`, composed into the opaque
-  wall so sticky headings match. Wide hours soften it beneath prayer with a
-  pre-blurred copy (`genplaster --soft-of`) in a feathered band; regenerate
-  the copies whenever a field changes. Never blur the wall live: a
+  wall so sticky headings match. Wide Nave hours soften it beneath prayer
+  with a pre-blurred copy (`genplaster --soft-of`) in a feathered band;
+  regenerate the copies whenever a field changes. Apse's wall is already
+  quiet, and a feathered layer over it bands in software rendering (see the
+  vault reference), so Apse has no band. Never blur the wall live: a
   backdrop-filter over the fixed layer re-blurs it on every scrolled frame.
 
 ## Where to work
