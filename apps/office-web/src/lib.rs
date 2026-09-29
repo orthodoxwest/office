@@ -163,8 +163,11 @@ async fn listen(addr: &str) -> Result<tokio::net::TcpListener, String> {
     tokio::net::TcpListener::bind(addr).await.map_err(|e| format!("listen tcp {addr}: {e}"))
 }
 
-/// Serves until the process ends. The current year's calendar page is
-/// composed in the background so the first visit to it is fast.
+/// Serves until the process ends. The current year's calendar page, then
+/// the next year's, are composed in the background so the first visit to
+/// either is fast: composing a year takes about half a second, and the next
+/// year is one tap from the ordo and enters the offline precache each
+/// December.
 pub fn run(server: Server, addr: &str) -> Result<(), String> {
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().map_err(|e| e.to_string())?;
     runtime.block_on(async {
@@ -172,8 +175,10 @@ pub fn run(server: Server, addr: &str) -> Result<(), String> {
         let warm = Arc::clone(&server);
         tokio::task::spawn_blocking(move || {
             let year = Server::local_year();
-            if let Err(e) = warm.cache.months(year, &warm.engine) {
-                eprintln!("warn: pre-warming cache for {year}: {e}");
+            for year in [year, year + 1] {
+                if let Err(e) = warm.cache.months(year, &warm.engine) {
+                    eprintln!("warn: pre-warming cache for {year}: {e}");
+                }
             }
         });
         let listener = listen(addr).await?;
