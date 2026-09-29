@@ -53,6 +53,125 @@
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
 }
 
+/* Until EB Garamond arrives, text is set in a system serif scaled to its
+   measure, so the swap barely rewraps a line: without this the hour header
+   and the prayer below it jumped ~20px when the face landed (CLS 0.25 on a
+   first visit). Each family scales one platform's serif — Georgia (Apple,
+   Windows), Noto Serif (Android), Times New Roman or its metric twin
+   Liberation Serif — by the ratio of letter-frequency-weighted average
+   widths: EB Garamond 12 measured with @capsizecss/unpack (383, italic 379,
+   bold 393 per 1000), the system faces from @capsizecss/metrics. Ascent and
+   descent carry EB Garamond's 710/290, divided by the same ratio. Only the
+   core range is claimed, so symbols fall through to the platform unscaled. */
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Georgia");
+  size-adjust: 85.91%;
+  ascent-override: 82.64%;
+  descent-override: 33.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Georgia Italic"), local("Georgia-Italic");
+  size-adjust: 83.37%;
+  ascent-override: 85.16%;
+  descent-override: 34.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  size-adjust: 75.79%;
+  ascent-override: 93.68%;
+  descent-override: 38.26%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Noto Serif"), local("Noto Serif Regular"), local("NotoSerif-Regular");
+  size-adjust: 79.63%;
+  ascent-override: 89.17%;
+  descent-override: 36.42%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Noto Serif Italic"), local("NotoSerif-Italic");
+  size-adjust: 80.81%;
+  ascent-override: 87.86%;
+  descent-override: 35.89%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Noto Serif Bold"), local("NotoSerif-Bold");
+  size-adjust: 76.76%;
+  ascent-override: 92.50%;
+  descent-override: 37.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif");
+  size-adjust: 94.28%;
+  ascent-override: 75.31%;
+  descent-override: 30.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic");
+  size-adjust: 92.85%;
+  ascent-override: 76.47%;
+  descent-override: 31.23%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold");
+  size-adjust: 90.84%;
+  ascent-override: 78.16%;
+  descent-override: 31.92%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* EB Garamond has no ✠, so every platform once substituted its own dingbat:
    a heavy sans cross here, a different one there. This face holds only that
    glyph (760 bytes, Noto Sans Symbols Bold, the booklet's cross) and heads
@@ -292,7 +411,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -1406,7 +1525,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -2037,7 +2156,7 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
