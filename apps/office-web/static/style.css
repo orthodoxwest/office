@@ -1,13 +1,30 @@
 /* AWRV Divine Office — typography-focused stylesheet */
 
 /* Self-hosted EB Garamond (OFL-1.1). Paths are relative to this stylesheet
-   (/static/style.css → /static/fonts/…). No third-party font CDN. */
+   (/static/style.css → /static/fonts/…). No third-party font CDN.
+
+   Each face is split by tools/gengaramond.py: the core file holds Latin-1,
+   the punctuation, and ℟ ℣ — every letter the office sets, at under a third
+   of the full face's bytes — and an -ext file holds the rest (Greek,
+   Cyrillic, extended Latin). The unicode-ranges come from that tool; a
+   browser fetches an -ext file only for a page that sets one of its
+   characters. Bold covers ASCII alone and is not split. */
 @font-face {
   font-family: "EB Garamond";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -16,6 +33,16 @@
   font-weight: 400;
   font-display: swap;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -24,6 +51,125 @@
   font-weight: 700;
   font-display: swap;
   src: url("fonts/eb-garamond-bold.woff2") format("woff2");
+}
+
+/* Until EB Garamond arrives, text is set in a system serif scaled to its
+   measure, so the swap barely rewraps a line: without this the hour header
+   and the prayer below it jumped ~20px when the face landed (CLS 0.25 on a
+   first visit). Each family scales one platform's serif — Georgia (Apple,
+   Windows), Noto Serif (Android), Times New Roman or its metric twin
+   Liberation Serif — by the ratio of letter-frequency-weighted average
+   widths: EB Garamond 12 measured with @capsizecss/unpack (383, italic 379,
+   bold 393 per 1000), the system faces from @capsizecss/metrics. Ascent and
+   descent carry EB Garamond's 710/290, divided by the same ratio. Only the
+   core range is claimed, so symbols fall through to the platform unscaled. */
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Georgia");
+  size-adjust: 85.91%;
+  ascent-override: 82.64%;
+  descent-override: 33.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Georgia Italic"), local("Georgia-Italic");
+  size-adjust: 83.37%;
+  ascent-override: 85.16%;
+  descent-override: 34.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Georgia";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Georgia Bold"), local("Georgia-Bold");
+  size-adjust: 75.79%;
+  ascent-override: 93.68%;
+  descent-override: 38.26%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Noto Serif"), local("Noto Serif Regular"), local("NotoSerif-Regular");
+  size-adjust: 79.63%;
+  ascent-override: 89.17%;
+  descent-override: 36.42%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Noto Serif Italic"), local("NotoSerif-Italic");
+  size-adjust: 80.81%;
+  ascent-override: 87.86%;
+  descent-override: 35.89%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Noto";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Noto Serif Bold"), local("NotoSerif-Bold");
+  size-adjust: 76.76%;
+  ascent-override: 92.50%;
+  descent-override: 37.78%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif");
+  size-adjust: 94.28%;
+  ascent-override: 75.31%;
+  descent-override: 30.76%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: italic;
+  font-weight: 400;
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic");
+  size-adjust: 92.85%;
+  ascent-override: 76.47%;
+  descent-override: 31.23%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "EB Garamond Times";
+  font-style: normal;
+  font-weight: 700;
+  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold");
+  size-adjust: 90.84%;
+  ascent-override: 78.16%;
+  descent-override: 31.92%;
+  line-gap-override: 0%;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /* EB Garamond has no ✠, so every platform once substituted its own dingbat:
@@ -61,6 +207,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-regular.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-regular-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BD-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-051D, U+1D00-1D79, U+1D9C-1DD3, U+1E00-1FFE, U+20A5-20AB, U+20B2-20D3, U+2100-2113, U+211E, U+2120-2121, U+2126-217F, U+2196-21A1, U+21C5-2210, U+2213, U+2216-226F, U+22C5-22C7, U+22EF-2303, U+2329-232A, U+2474-24B5, U+25E6, U+2619-261E, U+275B-2767, U+27E8-27EB, U+290A, U+2A74-2A76, U+2B45-2B46, U+2C60-2C7F, U+2E18-2E3B, U+A726-A7B1, U+A7FA-A7FF, U+AB53-AB65, U+E001-E002, U+E8BF, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -69,6 +225,16 @@
   font-weight: 400;
   font-display: optional;
   src: url("fonts/eb-garamond-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2070-209F, U+20AC, U+2116, U+211F, U+2122-2123, U+2190-2195, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Ordo Garamond";
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url("fonts/eb-garamond-italic-ext.woff2") format("woff2");
+  unicode-range: U+0100-0130, U+0132-0151, U+0154-02BA, U+02BE-02C4, U+02C7-02D9, U+02DB, U+02DD-0303, U+0305-0307, U+0309-0328, U+032A-04F9, U+1D02, U+1D2C-1D6A, U+1D9C-1DBE, U+1E00-1FFE, U+20A8, U+2100-2113, U+2120, U+2126-212B, U+2160-217F, U+2196-21AE, U+2206, U+2213, U+2216-226F, U+22C5, U+22EF-2303, U+2474-24B5, U+25E6, U+261C-261E, U+2A74-2A76, U+2C7C-2C7D, U+A726-A731, U+E001-E002, U+F6BE, U+FB00-FB06;
 }
 
 @font-face {
@@ -245,7 +411,7 @@ html[data-text-size="large"] {
 }
 
 body {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   accent-color: var(--accent);
   /* 1.1875rem = the historical 19px at a 16px root; rem so the reader's own
      browser font-size preference reaches the prayer text too, exactly as it
@@ -808,117 +974,8 @@ footer::before {
   text-align: center;
 }
 
-.report-issue a,
-.assurance-panel a {
+.report-issue a {
   color: var(--accent);
-}
-
-/* ── Assurance disclosure ── */
-
-.assurance-panel {
-  margin-top: 2.5rem;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.18);
-  padding: 0.75rem 0.9rem;
-  color: var(--muted);
-  font-size: 0.82rem;
-}
-
-/* A sentence with counts, not a label: lowercase goes to small caps and the
-   leading capital stays, which is the running-text setting. */
-.assurance-panel > summary {
-  display: flex;
-  align-items: center;
-  width: fit-content;
-  cursor: pointer;
-  color: var(--accent);
-  font-variant-caps: small-caps;
-  letter-spacing: 0.04em;
-  list-style: none;
-}
-
-.assurance-panel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.assurance-panel > summary::after {
-  content: "▾";
-  margin-left: 0.3em;
-  color: var(--gold-line);
-  font-size: 0.85em;
-  font-variant-caps: normal;
-  letter-spacing: 0;
-}
-
-.assurance-panel[open] > summary::after {
-  content: "▴";
-}
-
-.assurance-panel h2 {
-  margin: 1rem 0 0.35rem;
-  color: var(--text);
-  font-size: 0.95rem;
-  font-weight: normal;
-}
-
-.assurance-intro {
-  margin-top: 0.7rem;
-}
-
-.assurance-list {
-  list-style: none;
-  display: grid;
-  gap: 0.25rem;
-  overflow-wrap: anywhere;
-}
-
-.assurance-list code {
-  color: var(--text);
-  font-size: 0.76rem;
-}
-
-.assurance-status {
-  display: inline-block;
-  margin-left: 0.25rem;
-  padding: 0 0.3rem;
-  border: 1px solid var(--border);
-  border-radius: 0.25rem;
-}
-
-.status-verified { color: #356535; }
-.status-needs-review { color: var(--rubric); }
-.status-source-unknown { color: var(--muted); }
-.assurance-detail { font-style: italic; }
-
-.assurance-flag {
-  color: var(--rubric);
-  font-size: 0.76rem;
-  padding-left: 1rem;
-}
-
-@media (max-width: 700px) {
-  .assurance-panel {
-    padding: 0.65rem 0.7rem;
-    font-size: 0.78rem;
-  }
-
-  .assurance-panel > summary {
-    min-height: var(--touch-target);
-  }
-}
-
-/* In an Apse hour the vault rises around the post-office material, but the
-   expanded provenance list is still a reading surface. Nearly opaque slate
-   quiets the ribs beneath the panel while leaving the field visible around
-   its edges. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body.page-hour .assurance-panel {
-    background: color-mix(in srgb, var(--surface) 94%, transparent);
-  }
-}
-
-:root[data-theme="dark"] body.page-hour .assurance-panel {
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
 }
 
 /* ── Home page ──
@@ -945,13 +1002,28 @@ footer::before {
    liturgical color behind text that has no horizontal padding. */
 
 /* Shared liturgical-color palette. Home uses it as a top hairline; repeating
-   ordo entries use it as a side rail. */
-.day-color-white  { --day-color: #c9b896; }
-.day-color-red    { --day-color: #b02a24; }
-.day-color-green  { --day-color: #3a6b3a; }
-.day-color-violet { --day-color: #6a3a8a; }
-.day-color-black  { --day-color: #3a3a3a; }
-.day-color-rose   { --day-color: #c4607a; }
+   ordo entries use it as a side rail. An ordo row sets it on its rail, never
+   on the row: a custom property on each of 365 rows gives every cell beneath
+   a distinct inherited style that the engine cannot share between rows, and
+   cost a fifth of the ordo's style time. */
+.day-color-white:not(tr),
+tr.day-color-white::before,
+tr.day-color-white > td:first-child::before { --day-color: #c9b896; }
+.day-color-red:not(tr),
+tr.day-color-red::before,
+tr.day-color-red > td:first-child::before { --day-color: #b02a24; }
+.day-color-green:not(tr),
+tr.day-color-green::before,
+tr.day-color-green > td:first-child::before { --day-color: #3a6b3a; }
+.day-color-violet:not(tr),
+tr.day-color-violet::before,
+tr.day-color-violet > td:first-child::before { --day-color: #6a3a8a; }
+.day-color-black:not(tr),
+tr.day-color-black::before,
+tr.day-color-black > td:first-child::before { --day-color: #3a3a3a; }
+.day-color-rose:not(tr),
+tr.day-color-rose::before,
+tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
 
 /* Title stack: date and feast sit close; the base keeps only the vertical
    stack, and gaps live in .page-home .home-day-head below. */
@@ -1362,8 +1434,7 @@ footer::before {
    as they do in the block-level disclosures elsewhere. */
 .hour-date-nav > summary,
 .leader-selector > summary,
-.session-prayers > summary,
-.assurance-panel > summary {
+.session-prayers > summary {
   flex-wrap: wrap;
   align-content: center;
   align-items: baseline;
@@ -1454,7 +1525,7 @@ footer::before {
 }
 
 .date-jump {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 0.9rem;
   color: var(--text);
   background: transparent;
@@ -2085,7 +2156,7 @@ footer::before {
 }
 
 .psalm-text {
-  font-family: "Office Cross", "EB Garamond", Georgia, "Times New Roman", serif;
+  font-family: "Office Cross", "EB Garamond", "EB Garamond Georgia", "EB Garamond Noto", "EB Garamond Times", Georgia, "Times New Roman", serif;
   font-size: 1rem;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -3184,10 +3255,14 @@ footer::before {
   }
 
   /* White/black rails need a lift on the apse night sky. */
-  :root:not([data-theme="light"]) .day-color-white {
+  :root:not([data-theme="light"]) .day-color-white:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-white::before,
+  :root:not([data-theme="light"]) tr.day-color-white > td:first-child::before {
     --day-color: #d0b06a;
   }
-  :root:not([data-theme="light"]) .day-color-black {
+  :root:not([data-theme="light"]) .day-color-black:not(tr),
+  :root:not([data-theme="light"]) tr.day-color-black::before,
+  :root:not([data-theme="light"]) tr.day-color-black > td:first-child::before {
     --day-color: #8a94a0;
   }
 
@@ -3219,10 +3294,14 @@ footer::before {
   box-shadow: none;
 }
 
-:root[data-theme="dark"] .day-color-white {
+:root[data-theme="dark"] .day-color-white:not(tr),
+:root[data-theme="dark"] tr.day-color-white::before,
+:root[data-theme="dark"] tr.day-color-white > td:first-child::before {
   --day-color: #d0b06a;
 }
-:root[data-theme="dark"] .day-color-black {
+:root[data-theme="dark"] .day-color-black:not(tr),
+:root[data-theme="dark"] tr.day-color-black::before,
+:root[data-theme="dark"] tr.day-color-black > td:first-child::before {
   --day-color: #8a94a0;
 }
 
@@ -3480,7 +3559,6 @@ body.season-eastertide {
      instant toggle. */
   :root.motion-ready details.hour-date-nav::details-content,
   :root.motion-ready details.session-prayers::details-content,
-  :root.motion-ready details.assurance-panel::details-content,
   :root.motion-ready details.day-commemorations::details-content,
   :root.motion-ready details.day-office-details::details-content,
   :root.motion-ready details.reminder-address::details-content,
@@ -3494,7 +3572,6 @@ body.season-eastertide {
 
   :root.motion-ready details.hour-date-nav[open]::details-content,
   :root.motion-ready details.session-prayers[open]::details-content,
-  :root.motion-ready details.assurance-panel[open]::details-content,
   :root.motion-ready details.day-commemorations[open]::details-content,
   :root.motion-ready details.day-office-details[open]::details-content,
   :root.motion-ready details.reminder-address[open]::details-content,
@@ -4766,7 +4843,7 @@ body.season-eastertide {
    Tapping navigation should not flash a grey box over the page, and a
    long-press on a menu item should not begin a selection. Strictly limited to
    navigation chrome: every word of the office itself stays selectable and
-   copyable, as do dates, feast names and the assurance panel. */
+   copyable, as do dates and feast names. */
 .site-brand,
 .site-menu > summary,
 .site-menu nav a,
@@ -5272,7 +5349,7 @@ body {
 /* No star sits near the prayer, and below 1680px an hour shows none until
    the office has ended (wider screens add the sides of the vault; see
    below). The vault begins in the post-prayer epilogue: transparent
-   through the hour continuation, emerging around Assurance, then
+   through the hour continuation, emerging around the report link, then
    continuing through the footer. Both layers share main's bottom as their
    tile origin.
 
@@ -5430,12 +5507,13 @@ body.page-hour .report-issue {
       mask-position: top center;
       -webkit-mask-composite: source-in;
       mask-composite: intersect;
-      /* The epilogue and footer take about 550px below the prayer, so the
-         field is gone before the ending's first stars scroll into view. */
+      /* The epilogue and footer take about 410px below the prayer (450px
+         with Large text), so the field is gone just before the epilogue
+         scrolls into view. */
       animation: apse-sides-in linear both, apse-sides-out linear both;
       animation-composition: replace, add;
       animation-timeline: scroll(root), scroll(root);
-      animation-range: 0 50vh, calc(100% - 1200px) calc(100% - 600px);
+      animation-range: 0 50vh, calc(100% - 1000px) calc(100% - 450px);
     }
   }
 }

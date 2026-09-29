@@ -1,4 +1,4 @@
-{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, leader_assurance %}
+{% extends "layout.html" %}{% block title %}{{ hour.title }} — {{ date_str }}{% endblock %}{% block content %}{% from "macros.html" import headpiece, report_issue %}
 <div class="office-hour">
   <div class="color-band color-band-{{ hour.color }}"><span class="sr-only">Liturgical color: {{ hour.color }}</span></div>
   <div class="hour-scroll-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progress through the prayer text">
@@ -96,11 +96,10 @@
       <a class="day-hours-link" href="{{ day_link|url }}">All hours</a>
       {% if next_hour_link %}<a class="hour-continuation-link next-hour" href="{{ next_hour_link|url }}"><span class="continuation-label">Next hour</span><span>{{ next_hour_name }} &rarr;</span></a>{% else %}<span></span>{% endif %}
     </nav>
-    {# The one-line digest names only nonzero categories; the full
-         dependency, resolution, and decision lists below always render. #}
+    {# Each form's report names that form's page. #}
     {% if leader_forms %}
-    {% for f in leader_forms %}<div data-leaders="{{ f.form }}">{{ leader_assurance(f.assurance, f.report_url) }}</div>{% endfor %}
-    {% else %}{{ leader_assurance(assurance, report_url) }}{% endif %}
+    {% for f in leader_forms %}<div data-leaders="{{ f.form }}">{{ report_issue(f.report_url) }}</div>{% endfor %}
+    {% else %}{{ report_issue(report_url) }}{% endif %}
   </div>
 </div>
 {% endblock %}

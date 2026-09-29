@@ -48,58 +48,12 @@ pub struct HomeData {
     pub hours: Vec<HomeHourLink>,
 }
 
-/// One suspicion on a text dependency.
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct AssuranceFlag {
-    pub label: String,
-    /// "open" or "addressed".
-    pub state: String,
-    pub reason: String,
-}
-
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct AssuranceDependency {
-    pub key: String,
-    /// "verified", "needs-review", or "source-unknown".
-    pub status: String,
-    pub flags: Vec<AssuranceFlag>,
-    pub report_url: String,
-}
-
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct AssuranceResolution {
-    pub slot: String,
-    pub tier: String,
-    pub source: String,
-}
-
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct AssuranceDecision {
-    pub rule: String,
-    pub outcome: String,
-    pub detail: String,
-}
-
-/// The hour page's review-metadata disclosure: corpus keys, provenance
-/// states, and rule decisions, never source contents or local paths.
-#[derive(Clone, Debug, Default, Serialize)]
-pub struct HourAssurance {
-    pub verified: usize,
-    pub needs_review: usize,
-    pub source_unknown: usize,
-    pub flagged: usize,
-    pub dependencies: Vec<AssuranceDependency>,
-    pub resolutions: Vec<AssuranceResolution>,
-    pub decisions: Vec<AssuranceDecision>,
-}
-
-/// One prayer form's composition of the hour, with its review metadata.
+/// One prayer form's composition of the hour.
 #[derive(Clone, Debug, Serialize)]
 pub struct LeaderForm {
     /// "private", "deacon", or "priest".
     pub form: String,
     pub label: String,
-    pub assurance: HourAssurance,
     pub report_url: String,
     pub show_banner: bool,
 }
@@ -145,7 +99,6 @@ pub struct HourData {
     pub hour: HourHeader,
     pub report_url: String,
     pub show_banner: bool,
-    pub assurance: HourAssurance,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]

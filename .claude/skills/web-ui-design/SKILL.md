@@ -66,7 +66,7 @@ or impose a redesign on an unrelated change.
   around it (columns, sconces, sills, arches) has been tried and read as
   illustration; prefer light and tone to objects.
 - Hours keep date switching secondary, wake lock scoped to `.office-hour`,
-  and Assurance/reporting after the prayer. "Change date" unfolds the
+  and issue reporting after the prayer. "Change date" unfolds the
   hand-set month grid from `app.js` (days are links, the grid pattern's
   keys); the native date field is only the no-script fallback, since its
   popup is the platform's and belongs to no theme here. Print expands session prayers and

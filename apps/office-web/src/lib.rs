@@ -2,6 +2,10 @@
 //! templates, reminder feed, and optional usage store.
 
 mod cache;
+// build.rs trims and stamps the stylesheet with this module; the library
+// compiles it only to test it.
+#[cfg(test)]
+mod css;
 mod handlers;
 mod http;
 mod ics;
@@ -9,7 +13,7 @@ pub mod pwa;
 pub mod usage;
 pub mod web_time;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -22,7 +26,6 @@ use calendar::CalendarData;
 use office::Engine;
 use render_html::Pages;
 use tools::fs::FsData;
-use tools::review::prescreen::{Suspicion, suspicion_by_key};
 use tools::review::provenance::{ProvenanceStatus, scan_provenance};
 
 use crate::cache::YearCache;
@@ -40,12 +43,9 @@ pub struct Server {
     usage: Option<Store>,
 }
 
-/// The review metadata an hour page discloses: each corpus entry's
-/// provenance and its suspicions.
-#[derive(Default)]
+/// Each corpus entry's provenance, which decides an hour's review notice.
 pub(crate) struct Review {
     provenance: HashMap<String, ProvenanceStatus>,
-    suspicions: BTreeMap<String, Vec<Suspicion>>,
 }
 
 /// Application endpoints; Axum owns path matching.
@@ -62,17 +62,16 @@ enum Route {
 }
 
 impl Server {
-    /// Loads the engine, templates, and review metadata from `data_dir`.
+    /// Loads the engine, templates, and text provenance from `data_dir`.
     pub fn new(data_dir: &Path) -> Result<Server, String> {
         let src = FsData::new(data_dir);
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
         let version = pwa::compute_version(data_dir);
-        let pages = Pages::new(&version).map_err(|e| format!("parsing templates: {e}"))?;
+        let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
         let inventory = scan_provenance(&src).map_err(|e| format!("loading provenance: {e}"))?;
-        let suspicions = suspicion_by_key(&src, &inventory).map_err(|e| format!("loading review suspicions: {e}"))?;
         let provenance = inventory.entries.iter().map(|e| (e.key.clone(), e.status)).collect();
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance, suspicions }, usage: None })
+        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance }, usage: None })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A
@@ -97,7 +96,7 @@ impl Server {
         match route {
             Route::UsageEvent => usage::handle_event(self.usage.as_ref(), method, headers, host, body),
             Route::UsageDashboard => usage::handle_dashboard(self.usage.as_ref(), &self.pages, method, &query),
-            Route::Static => pwa::serve_static(&path, !query.get("v").is_empty()),
+            Route::Static => pwa::serve_static(&path, query.get("v")),
             Route::ServiceWorker => pwa::service_worker(&self.version),
             Route::Ics => self.ics(&query, headers, host),
             Route::Reminders => self.reminders(&req),
@@ -106,7 +105,7 @@ impl Server {
         }
     }
 
-    /// The build stamp on static URLs and the service worker.
+    /// The build stamp on the service worker and its page cache.
     pub fn version(&self) -> &str {
         &self.version
     }
@@ -164,8 +163,11 @@ async fn listen(addr: &str) -> Result<tokio::net::TcpListener, String> {
     tokio::net::TcpListener::bind(addr).await.map_err(|e| format!("listen tcp {addr}: {e}"))
 }
 
-/// Serves until the process ends. The current year's calendar page is
-/// composed in the background so the first visit to it is fast.
+/// Serves until the process ends. The current year's calendar page, then
+/// the next year's, are composed in the background so the first visit to
+/// either is fast: composing a year takes about half a second, and the next
+/// year is one tap from the ordo and enters the offline precache each
+/// December.
 pub fn run(server: Server, addr: &str) -> Result<(), String> {
     let runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().map_err(|e| e.to_string())?;
     runtime.block_on(async {
@@ -173,8 +175,10 @@ pub fn run(server: Server, addr: &str) -> Result<(), String> {
         let warm = Arc::clone(&server);
         tokio::task::spawn_blocking(move || {
             let year = Server::local_year();
-            if let Err(e) = warm.cache.months(year, &warm.engine) {
-                eprintln!("warn: pre-warming cache for {year}: {e}");
+            for year in [year, year + 1] {
+                if let Err(e) = warm.cache.months(year, &warm.engine) {
+                    eprintln!("warn: pre-warming cache for {year}: {e}");
+                }
             }
         });
         let listener = listen(addr).await?;
@@ -232,7 +236,7 @@ mod routing_tests {
         {
             assert_eq!(request(Method::GET, path, Body::empty()).await.status(), StatusCode::NOT_FOUND, "{path}");
         }
-        let asset = request(Method::GET, "/static/style.css?v=build", Body::empty()).await;
+        let asset = request(Method::GET, &pwa::asset_url("style.css"), Body::empty()).await;
         assert_eq!(asset.headers()[header::CACHE_CONTROL], "public, max-age=31536000, immutable");
         assert!(!asset.headers().contains_key(header::ACCEPT_RANGES));
         for path in ["/lauds/2026-03-11%", "/lauds/2026-03-11%zz"] {

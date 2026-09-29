@@ -48,7 +48,7 @@ four short diagonals) and small four-ray sparks.
   phone gutters retain a hint of stars. Separate gap/footer pieces previously
   shifted the visible pattern as content and viewport heights changed.
 - Hours admit the vault only in `.hour-epilogue`, after prayer. Keep the field
-  transparent through continuation links, fade in around Assurance, and align
+  transparent through continuation links, fade in around the report link, and align
   its bottom with the footer continuation. On desktop these layers bleed to
   viewport edges without widening `.elements`. The flat night ground that
   eases in under desktop stars cannot share the star layer's mask, so it is
