@@ -247,6 +247,13 @@ CREATE TABLE IF NOT EXISTS seen (
         tx.commit().map_err(|e| e.to_string())
     }
 
+    /// The first reporting day with any recorded visit. Earlier days predate
+    /// collection, so they are absent rather than quiet.
+    pub fn first_day(&self) -> Result<Option<String>, String> {
+        let conn = self.conn.lock().map_err(|e| e.to_string())?;
+        conn.query_row("SELECT MIN(day) FROM totals WHERE scope = 'site'", [], |r| r.get(0)).map_err(|e| e.to_string())
+    }
+
     /// A zero-filled window of `days`, newest first.
     pub fn daily(&self, now: jiff::Timestamp, days: usize) -> Result<Vec<UsageDay>, String> {
         if !(1..=366).contains(&days) {
@@ -396,10 +403,10 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
             _ => return with_usage_headers(http_error("Choose 7, 30, 90 or 365 days", StatusCode::BAD_REQUEST)),
         }
     }
-    let Ok(rows) = store.daily(jiff::Timestamp::now(), days as usize) else {
+    let (Ok(rows), Ok(since)) = (store.daily(jiff::Timestamp::now(), days as usize), store.first_day()) else {
         return with_usage_headers(http_error("Usage temporarily unavailable", StatusCode::SERVICE_UNAVAILABLE));
     };
-    let data = render_html::usage::usage_data(rows, days, &DIMENSIONS);
+    let data = render_html::usage::usage_data(rows, days, since.as_deref(), &DIMENSIONS);
     let Ok(body) = pages.usage(&data) else {
         return with_usage_headers(http_error("Unable to render usage", StatusCode::INTERNAL_SERVER_ERROR));
     };
@@ -533,6 +540,7 @@ mod tests {
         let db = TempDb::new("dedupe");
         let store = db.open();
         let now = eastern_at(2026, 9, 4, 23, 59);
+        assert_eq!(store.first_day().unwrap(), None, "empty store has no first day");
         std::thread::scope(|s| {
             for _ in 0..12 {
                 s.spawn(|| store.record(now, "browser-a", "lauds", &[]).unwrap());
@@ -557,6 +565,7 @@ mod tests {
         );
         let tomorrow = now.checked_add(jiff::SignedDuration::from_mins(2)).unwrap();
         store.record(tomorrow, "browser-a", "lauds", &[]).unwrap();
+        assert_eq!(store.first_day().unwrap().as_deref(), Some("2026-09-04"), "first recorded day");
         let rows = store.daily(tomorrow, 7).unwrap();
         assert!(rows[0].day == "2026-09-05" && rows[0].users == 1 && rows[1].users == 5, "midnight counts: {rows:?}");
         assert_eq!(

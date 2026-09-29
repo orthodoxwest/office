@@ -20,6 +20,9 @@ pub struct UsageDay {
     pub hours: [i64; 7],
     pub ordo: i64,
     pub reminders: i64,
+    /// Display date and short weekday, filled by the view model.
+    pub label: String,
+    pub weekday: String,
     /// Counts by qualified dimension scope ("appearance:apse").
     #[serde(skip)]
     pub dimensions: BTreeMap<String, i64>,
@@ -71,6 +74,11 @@ pub struct UsageData {
     /// The trend groups encoded into the page.
     pub trend_json: String,
     pub days: i64,
+    /// Days in the window since records began; fewer than `days` when the
+    /// window reaches back before collection.
+    pub recorded_days: i64,
+    /// The first recorded day, when it falls inside the window.
+    pub since_date: String,
     pub max: i64,
     pub today: i64,
     pub yesterday: i64,
@@ -78,6 +86,9 @@ pub struct UsageData {
     pub complete_days: i64,
     /// `%.1f` of the completed-day average.
     pub daily_average: String,
+    /// The average's distance from the chart's top, as a percentage; empty
+    /// without completed days.
+    pub average_top: String,
     pub office_totals: Vec<UsageOffice>,
     pub ordo_total: i64,
     pub reminders_total: i64,
@@ -91,12 +102,18 @@ pub struct UsageData {
 
 const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const WEEKDAYS: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 /// Builds the chronological chart and newest-first table. The peak is a daily count, not a sum of
-/// overlapping browsers.
-pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> UsageData {
+/// overlapping browsers. Days before `since`, the first recorded day, predate collection: they
+/// are dropped rather than counted as quiet days, and today always remains.
+pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimensions: &[Dimension]) -> UsageData {
+    let recorded = rows.iter().take_while(|r| since.is_some_and(|s| r.day.as_str() >= s)).count();
+    rows.truncate(recorded.max(1));
     let mut d = UsageData {
         chrome: Chrome { page: "usage".into(), ..Chrome::default() },
         days,
+        recorded_days: rows.len() as i64,
         hours: HOURS.iter().map(|h| h.to_string()).collect(),
         ..UsageData::default()
     };
@@ -139,6 +156,15 @@ pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> U
         Some(t) if day[..4] != year => format!("{} {}, {}", MONTHS[t.month() as usize - 1], t.day(), t.year()),
         Some(t) => format!("{} {}", MONTHS[t.month() as usize - 1], t.day()),
     };
+    if (rows.len() as i64) < days {
+        d.since_date = label(&rows[rows.len() - 1].day);
+    }
+    for row in &mut rows {
+        row.label = label(&row.day);
+        if let Some(t) = Date::parse(&row.day) {
+            row.weekday = WEEKDAYS[t.weekday().number() as usize].to_string();
+        }
+    }
     d.today = rows[0].users;
     if rows.len() > 1 {
         d.yesterday = rows[1].users;
@@ -152,6 +178,9 @@ pub fn usage_data(rows: Vec<UsageDay>, days: i64, dimensions: &[Dimension]) -> U
         }
     }
     let scale = if d.max == 0 { 1 } else { d.max } as f64;
+    if d.complete_days > 0 && d.max > 0 {
+        d.average_top = format_float(100.0 - 100.0 * average / scale);
+    }
     let n = rows.len();
     let step = 720.0 / n as f64;
     let gap = step * 0.18;
@@ -252,20 +281,20 @@ mod tests {
 
     #[test]
     fn summary_and_chronological_chart() {
-        let d = usage_data(vec![row("2026-09-05", 3), row("2026-09-04", 12), row("2026-09-03", 0)], 7, &DIMENSIONS);
+        let d = usage_data(vec![row("2026-09-05", 3), row("2026-09-04", 12), row("2026-09-03", 0)], 3, Some("2026-09-01"), &DIMENSIONS);
         assert_eq!((d.today, d.yesterday, d.max, d.peak_date.as_str()), (3, 12, 12, "Sep 4"));
         assert!(d.chart[0].day == "2026-09-03" && d.chart[2].today && d.rows[0].day == "2026-09-05", "chart and table order");
         for bar in &d.chart {
             let (x, width, height) = (num(&bar.x), num(&bar.width), num(&bar.height));
             assert!((0.0..=160.0).contains(&height) && x >= 0.0 && x + width <= 720.0, "bar outside plot: {bar:?}");
         }
-        let empty = usage_data(vec![row("2026-09-05", 0)], 7, &DIMENSIONS);
+        let empty = usage_data(vec![row("2026-09-05", 0)], 7, None, &DIMENSIONS);
         assert!(empty.max == 0 && num(&empty.chart[0].height) == 0.0 && empty.peak_date.is_empty(), "empty report implies activity");
     }
 
     #[test]
     fn dates_across_years() {
-        let crossing = usage_data(vec![row("2026-01-02", 1), row("2025-12-31", 1)], 365, &DIMENSIONS);
+        let crossing = usage_data(vec![row("2026-01-02", 1), row("2025-12-31", 1)], 2, Some("2025-12-31"), &DIMENSIONS);
         assert_eq!((crossing.first_date.as_str(), crossing.last_date.as_str()), ("Dec 31, 2025", "Jan 2"));
     }
 
@@ -276,7 +305,7 @@ mod tests {
             UsageDay { hours: [3, 0, 0, 0, 0, 5, 0], ordo: 3, ..row("2026-09-04", 9) },
             row("2026-09-03", 0),
         ];
-        let d = usage_data(rows, 3, &DIMENSIONS);
+        let d = usage_data(rows, 3, Some("2026-09-03"), &DIMENSIONS);
         assert_eq!(
             (d.daily_average.as_str(), d.complete_days, d.browser_days),
             ("4.5", 2, 109),
@@ -288,10 +317,22 @@ mod tests {
         assert_eq!(d.office_totals[2].width, "0");
         assert_eq!((d.ordo_total, d.reminders_total), (5, 1));
         for rows in [vec![], vec![row("2026-09-05", 0)]] {
-            let d = usage_data(rows, 7, &DIMENSIONS);
+            let d = usage_data(rows, 7, None, &DIMENSIONS);
             assert_eq!((d.complete_days, d.daily_average.as_str(), d.browser_days), (0, "0.0", 0), "empty average");
             assert!(d.office_totals.iter().all(|o| o.width == "0"), "empty office comparison");
         }
+    }
+
+    #[test]
+    fn days_before_collection_are_absent_not_quiet() {
+        let rows = vec![row("2026-09-05", 2), row("2026-09-04", 10), row("2026-09-03", 6), row("2026-09-02", 0), row("2026-09-01", 0)];
+        let d = usage_data(rows, 5, Some("2026-09-03"), &DIMENSIONS);
+        assert_eq!((d.recorded_days, d.complete_days, d.daily_average.as_str()), (3, 2, "8.0"), "average spans recorded days");
+        assert_eq!((d.rows.len(), d.chart.len(), d.first_date.as_str(), d.since_date.as_str()), (3, 3, "Sep 3", "Sep 3"));
+        assert_eq!((d.rows[0].label.as_str(), d.rows[0].weekday.as_str()), ("Sep 5", "Sat"));
+        assert_eq!(num(&d.average_top), 20.0, "average line");
+        let whole = usage_data(vec![row("2026-09-05", 2), row("2026-09-04", 10)], 2, Some("2026-08-01"), &DIMENSIONS);
+        assert!(whole.since_date.is_empty() && whole.recorded_days == 2, "a fully recorded window names no start");
     }
 
     #[test]

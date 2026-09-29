@@ -1,39 +1,39 @@
-{% extends "layout.html" %}{% block title %}Usage — Divine Office{% endblock %}{% block content %}
+{% extends "layout.html" %}{% block title %}Usage — Divine Office{% endblock %}{% block content %}{% from "macros.html" import headpiece %}
 <section class="usage-page" aria-labelledby="usage-title">
   <header class="usage-heading">
-    <p class="usage-eyebrow">The Daily Office · Usage report</p>
+    {{ headpiece(false) }}
     <h1 id="usage-title">Daily usage</h1>
-    <p>Recorded visits to the Office, day by day.</p>
+    <p class="usage-subtitle">Recorded visits to the Office, day by day</p>
   </header>
-  <div class="usage-toolbar">
-    <nav class="usage-window" aria-label="Reporting period">
-      <a href="?days=7"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
-      <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
-      <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
-      <a href="?days=365"{% if days == 365 %} aria-current="page"{% endif %}>365 days</a>
-    </nav>
-  </div>
-  <p class="usage-range">{{ first_date }} – {{ last_date }} <span>Eastern time · Today in progress</span></p>
+  <nav class="usage-window" aria-label="Reporting period">
+    {% for n in [7, 30, 90, 365] %}<a href="?days={{ n }}"{% if days == n %} aria-current="page"{% endif %}>{{ n }} days</a>{% endfor %}
+  </nav>
+  {# A window reaching back before collection shows only the recorded days. #}
+  <p class="usage-range"><span>{{ first_date }} – {{ last_date }}{% if since_date %} · <strong>{{ recorded_days }} of {{ days }} days recorded</strong>{% endif %}</span> <span class="usage-range-note">Eastern time · Today in progress</span></p>
   <dl class="usage-summary">
     <div><dt>Today</dt><dd>{{ today }}</dd><dd class="usage-stat-note">Unique browsers so far</dd></div>
     <div><dt>Yesterday</dt><dd>{{ yesterday }}</dd><dd class="usage-stat-note">Unique browsers</dd></div>
-    <div><dt>Daily average</dt><dd>{% if complete_days %}{{ daily_average }}{% else %}—{% endif %}</dd><dd class="usage-stat-note">{{ complete_days }} completed days · Excludes today</dd></div>
-    <div><dt>Daily peak</dt><dd>{{ max }}</dd><dd class="usage-stat-note">{% if peak_date %}{{ peak_date }} · Selected period{% else %}No visits recorded yet{% endif %}</dd></div>
+    <div><dt>Daily average</dt><dd>{% if complete_days %}{{ daily_average }}{% else %}—{% endif %}</dd><dd class="usage-stat-note">{% if complete_days %}Over {{ complete_days }} completed day{% if complete_days != 1 %}s{% endif %}{% else %}No completed days yet{% endif %}</dd></div>
+    <div><dt>Busiest day</dt><dd>{{ max }}</dd><dd class="usage-stat-note">{% if peak_date %}{{ peak_date }}{% else %}No visits recorded yet{% endif %}</dd></div>
   </dl>
   <nav class="usage-jump" aria-label="Report sections"><a href="#usage-explore-title" class="usage-explore-link" hidden>Explore trends</a><a href="#usage-offices-title">Daily counts</a><a href="#usage-notes-title">About the counts</a></nav>
   <div class="usage-overview">
   <section class="usage-panel" aria-labelledby="usage-trend-title">
-    <div class="usage-section-heading"><div><h2 id="usage-trend-title">Daily visitors</h2><p>Unique browsers per day</p></div><span class="usage-period">{{ days }} days</span></div>
+    <div class="usage-section-heading"><div><h2 id="usage-trend-title">Daily visitors</h2><p>Unique browsers per day</p></div><span class="usage-period">{{ recorded_days }} day{% if recorded_days != 1 %}s{% endif %}</span></div>
     <figure class="usage-trend">
-      <div class="usage-chart-scale" aria-hidden="true"><span>{{ max }}</span><span>0</span></div>
+      <div class="usage-plot">
+      {# The average's axis label stands in for an end label it would crowd. #}
+      <div class="usage-chart-scale" aria-hidden="true"><span{% if average_top and average_top|float < 12 %} hidden{% endif %}>{{ max }}</span><span{% if average_top and average_top|float > 88 %} hidden{% endif %}>0</span></div>
       <svg class="usage-chart" viewBox="0 0 720 160" preserveAspectRatio="none" role="img" aria-labelledby="usage-chart-title usage-chart-desc">
         <title id="usage-chart-title">Daily unique browsers</title>
-        <desc id="usage-chart-desc">{{ days }} days, from {{ first_date }} to {{ last_date }}. Highest daily count: {{ max }}. Exact counts appear in the table below.</desc>
+        <desc id="usage-chart-desc">{{ recorded_days }} days, from {{ first_date }} to {{ last_date }}. Highest daily count: {{ max }}. Exact counts appear in the table below.</desc>
         <path class="usage-grid" d="M0 0H720 M0 80H720 M0 160H720"/>
         {% for bar in chart %}<rect class="usage-bar{% if bar.today %} usage-bar-today{% endif %}" x="{{ bar.x }}" y="{{ bar.y }}" width="{{ bar.width }}" height="{{ bar.height }}"><title>{{ bar.day }}: {{ bar.users }} browsers</title></rect>{% endfor %}
       </svg>
+      {% if average_top %}<div class="usage-average" style="top: {{ average_top }}%" aria-hidden="true"><span>{{ daily_average }}</span></div>{% endif %}
+      </div>
       {% if not max %}<p class="usage-empty">No visits recorded in this period.<br><span>Counts will appear as readers open the app.</span></p>{% endif %}
-      <figcaption><span>{{ first_date }}</span><span>{{ last_date }} · Today</span></figcaption>
+      <figcaption><span>{{ first_date }}</span>{% if average_top %}<span class="usage-average-key">Daily average</span>{% endif %}<span>Today</span></figcaption>
     </figure>
     <p class="usage-splits-note"><strong>{{ browser_days }} browser-days</strong> in this period. A returning browser counts again each day.</p>
   </section>
@@ -81,8 +81,8 @@
     <div class="usage-table-wrap" role="region" aria-label="Daily office counts; scroll for more days and offices" tabindex="0">
       <table class="usage-table">
         <caption class="sr-only">Unique browsers per day and office, newest first</caption>
-        <thead><tr><th scope="col">Date</th><th scope="col">All visitors</th>{% for h in hours %}<th scope="col">{{ h|titlecase }}</th>{% endfor %}<th scope="col">Ordo</th><th scope="col">Reminders</th></tr></thead>
-        <tbody>{% for row in rows %}<tr{% if loop.index0 == 0 %} class="usage-today"{% endif %}><th scope="row"><time datetime="{{ row.day }}">{{ row.day }}</time>{% if loop.index0 == 0 %}<span class="usage-today-label">Today</span>{% endif %}</th><td class="usage-total">{{ row.users }}</td>{% for n in row.hours %}<td{% if not n %} class="usage-zero"{% endif %}>{{ n }}</td>{% endfor %}<td{% if not row.ordo %} class="usage-zero"{% endif %}>{{ row.ordo }}</td><td{% if not row.reminders %} class="usage-zero"{% endif %}>{{ row.reminders }}</td></tr>{% endfor %}</tbody>
+        <thead><tr><th scope="col">Date</th><th scope="col">Visitors</th>{% for h in hours %}<th scope="col">{{ h|titlecase }}</th>{% endfor %}<th scope="col">Ordo</th><th scope="col">Reminders</th></tr></thead>
+        <tbody>{% for row in rows %}<tr{% if loop.index0 == 0 %} class="usage-today"{% endif %}><th scope="row"><time datetime="{{ row.day }}">{{ row.label }}</time> <span class="usage-weekday">{% if loop.index0 == 0 %}Today{% else %}{{ row.weekday }}{% endif %}</span></th><td class="usage-total">{{ row.users }}</td>{% for n in row.hours %}<td{% if not n %} class="usage-zero"{% endif %}>{{ n }}</td>{% endfor %}<td{% if not row.ordo %} class="usage-zero"{% endif %}>{{ row.ordo }}</td><td{% if not row.reminders %} class="usage-zero"{% endif %}>{{ row.reminders }}</td></tr>{% endfor %}</tbody>
       </table>
     </div>
     <p class="usage-splits-note">Period totals: <strong>{{ ordo_total }}</strong> Ordo browser-days · <strong>{{ reminders_total }}</strong> Reminders browser-days.</p>
@@ -93,7 +93,7 @@
     <details><summary>What is counted?</summary>
       <p>A browser counts once per day in each category it uses. Home contributes to all visitors; office counts overlap. Ordo counts a calendar page view. Reminders counts a generated feed link.</p>
       <p>Only today&rsquo;s Office counts, after someone interacts with the page or lingers on it. Dated archives, preloads and self-identifying crawlers are excluded. Offline visits and browsers without JavaScript are missed; separate devices or cleared cookies can count again.</p>
-      <p>The daily average includes zero days and excludes today. A zero may also mean collection was not yet active; the report cannot distinguish this from a quiet day.</p>
+      <p>The report begins with the first day any visit was recorded; a longer period shows only the days since. The daily average covers those completed days, including quiet ones, and excludes today.</p>
     </details>
     <details><summary>How are breakdowns measured?</summary>
       <p>Each browser using a category on three days contributes three browser-days. Percentages divide each category&rsquo;s count by the sum for that breakdown. Weekly totals cover Monday–Sunday; weekly percentages use summed counts, not averages of daily percentages. Today and its week are still in progress. Gaps mean no observations.</p>
