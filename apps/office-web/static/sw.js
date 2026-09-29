@@ -53,14 +53,15 @@ var CORE_ASSETS = [
   "/static/fonts/eb-garamond-italic.woff2",
   "/static/fonts/eb-garamond-bold.woff2",
   "/static/fonts/noto-sans-symbols-cross.woff2",
-  // The limewash wall (portrait for phones, wide crop for large screens) and
-  // the softened copies behind wide hours' prayer are also relative url()s in
-  // style.css; precache them all so an installed app looks the same offline
-  // whatever it is opened on.
+  // The limewash wall (portrait for phones, wide crop for large screens), the
+  // softened copies behind wide hours' prayer and the Apse vault's leaf mask
+  // are also relative url()s in style.css; precache them all so an installed
+  // app looks the same offline whatever it is opened on.
   "/static/plaster.jpg",
   "/static/plaster-wide.jpg",
   "/static/plaster-soft.jpg",
-  "/static/plaster-wide-soft.jpg"
+  "/static/plaster-wide-soft.jpg",
+  "/static/leaf.png"
 ];
 
 // networkFetch bypasses the browser HTTP cache so install/precache/SWR always

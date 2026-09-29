@@ -19,10 +19,20 @@ four short diagonals) and small four-ray sparks.
 - Ribs run corner to corner and through the edge midpoints. Principal stars
   sit at (25%,25%) and (75%,75%); smaller stars at (75%,25%) and (25%,75%).
   Keep stars inside the cell, where no neighbour tile is needed to finish them.
-  The tile scales with `mask-size` (132px phones, 176px wider), so star size
-  scales with it. Each principal star carries a soft radial halo inside the
+  The tile scales with `mask-size`, so star size scales with it. Every field
+  reads one `--apse-tile` from `body`: 132px on phones, 176px from 701px,
+  then 208px from 1800px and 240px from 2400px, so on very wide screens the
+  diaper reads as a painted ceiling rather than a wallpaper of small stars.
+  Keep the steps whole pixels; fractional tiles can seam. Each principal star carries a soft radial halo inside the
   cell (28% at the centre, gone by 12 units), so the gold reads as catching
   light; keep it interior to the cell like the stars.
+- Every field adds `--apse-leaf` as a further mask layer: `leaf.png`, 64px
+  of seamless low-frequency noise (`tools/genplaster --leaf`) drawn at
+  1024px, so each star catches its own share of light (about 60-100%) as
+  hand-laid leaf does. It takes each field's tile position, which keeps the
+  epilogue and footer continuous. An SVG `feTurbulence` mask gave the same
+  look but cost about 50ms of first paint and most of a full scroll's raster
+  time in software; the small image costs neither.
 - Home's field is lit from the altar: its background is `--apse-gild`, a
   radial gradient over the seasonal `--ornament-hi/lo` pair centred on the
   frontispiece, and a third mask layer lets the light fall off toward the

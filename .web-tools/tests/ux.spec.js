@@ -1179,6 +1179,7 @@ test("wide hours set a still vault beside the prayer and clear it before the end
         position: field.position,
         opacity: Number(field.opacity),
         mask: field.maskImage || field.webkitMaskImage,
+        size: field.maskSize || field.webkitMaskSize,
         ink: field.backgroundColor,
       };
     });
@@ -1187,6 +1188,10 @@ test("wide hours set a still vault beside the prayer and clear it before the end
   const top = await margins();
   expect(top.position).toBe("fixed");
   expect(vaultPaints(top)).toBe(true);
+  // From 1800px the diaper widens, and every star takes its own share of
+  // the leaf.
+  expect(top.size.startsWith("208px 208px")).toBe(true);
+  expect(top.mask).toContain("leaf.png");
   expect(top.opacity).toBe(0);
   await page.evaluate(() => window.scrollTo(0, innerHeight));
   await expect.poll(async () => (await margins()).opacity).toBe(1);
@@ -1206,6 +1211,12 @@ test("the home vault is lit from the frontispiece in Apse only", async ({ page }
   const gilding = () => page.evaluate(() => getComputedStyle(document.body, "::before").backgroundImage);
   await openDatedPage(page, `/?date=${testDate}`, "dark");
   expect(await gilding()).toContain("radial-gradient");
+  const field = await page.evaluate(() => {
+    const style = getComputedStyle(document.body, "::before");
+    return { mask: style.maskImage || style.webkitMaskImage, size: style.maskSize || style.webkitMaskSize };
+  });
+  expect(field.mask).toContain("leaf.png");
+  expect(field.size.startsWith("176px 176px")).toBe(true);
   await openDatedPage(page, `/?date=${testDate}`, "light");
   expect(await gilding()).toBe("none");
 });
