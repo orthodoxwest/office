@@ -61,9 +61,38 @@ pub fn season_class(season: Option<calendar::Season>) -> &'static str {
     }
 }
 
+/// The season as an hour header names it, or nothing. A bare "Easter",
+/// "Christmas", "Epiphany" or "Pentecost" beside a date reads as that feast
+/// day, so the tides take their season names. The season after Pentecost is
+/// left unnamed: "Time after Pentecost" is clumsy in a header line, and its
+/// Sundays and feasts already name themselves.
+pub fn season_label(season: &str) -> String {
+    use calendar::Season::*;
+    match calendar::Season::parse(season) {
+        Ok(Christmas) => "Christmastide".into(),
+        Ok(Epiphany) => "Epiphanytide".into(),
+        Ok(Easter) => "Eastertide".into(),
+        Ok(Pentecost) => String::new(),
+        Ok(Advent | Septuagesima | Lent | Passiontide) | Err(_) => title_case(season),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn season_label_names_tides_and_leaves_pentecost_unnamed() {
+        assert_eq!(season_label("easter"), "Eastertide");
+        assert_eq!(season_label("christmas"), "Christmastide");
+        assert_eq!(season_label("epiphany"), "Epiphanytide");
+        assert_eq!(season_label("pentecost"), "");
+        assert_eq!(season_label("lent"), "Lent");
+        assert_eq!(season_label("passiontide"), "Passiontide");
+        assert_eq!(season_label("septuagesima"), "Septuagesima");
+        assert_eq!(season_label("advent"), "Advent");
+        assert_eq!(season_label(""), "");
+    }
 
     #[test]
     fn nav_link_keeps_chrome_dated() {

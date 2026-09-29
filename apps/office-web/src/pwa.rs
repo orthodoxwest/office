@@ -116,6 +116,7 @@ mod tests {
     fn embeds_the_static_directory() {
         assert!(file("static/style.css").is_some());
         assert!(file("static/fonts/eb-garamond-regular.woff2").is_some());
+        assert!(file("static/fonts/noto-sans-symbols-cross.woff2").is_some());
     }
 
     #[test]
