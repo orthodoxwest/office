@@ -72,17 +72,20 @@ R. Thanks be to God.
 Many daughters have done virtuously, but thou excellest them all. Favour is deceitful, and beauty is vain: * but a woman that feareth the Lord, she shall be praised.
 R. Thanks be to God.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Terce)
-@use commons/holy-woman/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 54* (Little Hours versicle; replaces a derived short responsory)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 54* (Common of Holy Women not Virgins, At Sext)
-@use commons/holy-woman/short-responsory-vespers
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 54* (Little Hours versicle; replaces a derived short responsory)
+V. God shall help her with his countenance.
+R. God is in the midst of her, therefore shall she not be removed.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 55* (Common of Holy Women not Virgins, At None)
-@use commons/virgin-martyr/short-responsory-none
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 55* (Little Hours versicle; replaces a derived short responsory)
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.
 
 [hymn-lauds]
 # SOURCE: draft archdiocesan Lauds book, pp. 694–695 (Common of Holy Women not Virgins)

@@ -155,8 +155,12 @@ R. The Father of my Lord.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. I called upon the Lord, * the Father of my Lord.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 492 (St Joseph, At Terce)
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 492 (Little Hours versicle; replaces a derived short responsory)
+V. He made him lord of his house.
+R. And ruler of all his substance.
+
+[short-responsory-lauds]
 R. He made him * lord of his house.
 R. He made him * lord of his house.
 V. And ruler of all his substance.
@@ -164,26 +168,15 @@ R. Lord of his house.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. He made him * lord of his house.
 
-[short-responsory-lauds]
-@use proper/st-joseph/short-responsory-terce
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 492 (Little Hours versicle; replaces a derived short responsory)
+V. His honour is great in thy salvation.
+R. Glory and great worship shalt thou lay upon him.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 492 (St Joseph, At Sext)
-R. His honour is great * in thy salvation.
-R. His honour is great * in thy salvation.
-V. Glory and great worship shalt thou lay upon him.
-R. In thy salvation.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His honour is great * in thy salvation.
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 493 (St Joseph, At None)
-R. The righteous shall blossom * as the lily.
-R. The righteous shall blossom * as the lily.
-V. He shall flourish for ever before the Lord.
-R. As the lily.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The righteous shall blossom * as the lily.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 493 (Little Hours versicle; replaces a derived short responsory)
+V. The righteous shall blossom as the lily.
+R. He shall flourish for ever before the Lord.
 
 [chapter-vespers]
 @use proper/st-joseph/chapter-lauds

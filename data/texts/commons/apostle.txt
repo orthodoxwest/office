@@ -155,16 +155,6 @@ R. In all lands.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Thou shalt make them princes * in all lands.
 
-[short-responsory-none]
-# SOURCE: draft archdiocesan / diurnal Common of Apostles (None; reduced form is
-# V. Exceedingly honoured are thy friends, O God. / R. Firmly stablished is their princedom.)
-R. Exceedingly honoured are * thy friends, O God.
-R. Exceedingly honoured are * thy friends, O God.
-V. Firmly stablished is their princedom.
-R. Thy friends, O God.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Exceedingly honoured are * thy friends, O God.
-
 [chapter-vespers]
 @use commons/apostle/chapter-lauds
 

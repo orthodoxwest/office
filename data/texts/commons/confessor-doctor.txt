@@ -124,13 +124,18 @@ Amen.
 @use commons/confessor-bishop/short-responsory-vespers
 
 [short-responsory-terce]
-@use commons/confessor-bishop/short-responsory-terce
+@use commons/confessor-bishop/short-responsory-lauds
 
 [short-responsory-sext]
-@use commons/confessor-bishop/short-responsory-sext
+@use commons/confessor-bishop/short-responsory-vespers
 
 [short-responsory-none]
-@use commons/confessor-bishop/short-responsory-none
+R. Thou art a priest * for ever.
+R. Thou art a priest * for ever.
+V. After the order of Melchisedech.
+R. For ever.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Thou art a priest * for ever.
 
 [versicle-lauds]
 @use commons/confessor-bishop/versicle-lauds

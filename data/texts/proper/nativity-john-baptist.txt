@@ -149,8 +149,12 @@ R. Whose name was John.
 [versicle-first-vespers]
 @use proper/nativity-john-baptist/versicle-vespers
 
-[short-responsory-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 474; parish Sanctoral Lauds booklet, PDF p. 119 (identical at Lauds)
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 541 (Little Hours versicle; replaces a derived short responsory)
+V. There was a man sent from God.
+R. Whose name was John.
+
+[short-responsory-lauds]
 R. There was a man * sent from God.
 R. There was a man * sent from God.
 V. Whose name was John.
@@ -158,26 +162,15 @@ R. Sent from God.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. There was a man * sent from God.
 
-[short-responsory-lauds]
-@use proper/nativity-john-baptist/short-responsory-terce
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)
+V. Among them that are born of women there hath not risen a greater.
+R. Than John the Baptist.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At Sext)
-R. Among them that are born of women * there hath not risen a greater.
-R. Among them that are born of women * there hath not risen a greater.
-V. Than John the Baptist.
-R. There hath not risen a greater.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Among them that are born of women * there hath not risen a greater.
-
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 542 (Nativity of St John Baptist, At None)
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
-V. John the Baptist, the Lord's Forerunner.
-R. Brought forth a mighty son.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Elisabeth, the wife of Zacharias, * brought forth a mighty son.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 542 (Little Hours versicle; replaces a derived short responsory)
+V. Elisabeth, the wife of Zacharias, brought forth a mighty son.
+R. John the Baptist, the Lord's Forerunner.
 
 [chapter-vespers]
 @use proper/nativity-john-baptist/chapter-lauds

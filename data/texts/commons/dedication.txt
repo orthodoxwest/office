@@ -67,11 +67,21 @@ R. Thanks be to God.
 
 [short-responsory-lauds]
 # SOURCE: monastic diurnal, p. 58* (Common of the Dedication of a Church, At Lauds)
-@use commons/dedication/short-responsory-terce
+R. Holiness becometh * thine house, O Lord.
+R. Holiness becometh * thine house, O Lord.
+V. For ever.
+R. Thine house, O Lord.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. Holiness becometh * thine house, O Lord.
 
 [short-responsory-vespers]
 # SOURCE: monastic diurnal, p. 56* (Common of the Dedication of a Church, At I Vespers)
-@use commons/dedication/short-responsory-sext
+R. This place is holy * wherein the priest prayeth.
+R. This place is holy * wherein the priest prayeth.
+V. For the sins and offences of the people.
+R. Wherein the priest prayeth.
+Glory be to the Father, and to the Son, and to the Holy Ghost.
+R. This place is holy * wherein the priest prayeth.
 
 [hymn-lauds]
 # SOURCE: Monastic Diurnal.pdf, p. 58*, 59*
@@ -168,32 +178,20 @@ R. For ever.
 [versicle-first-vespers]
 @use commons/dedication/versicle-lauds
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 60* (Common of the Dedication of a Church, At Terce)
-R. Holiness becometh * thine house, O Lord.
-R. Holiness becometh * thine house, O Lord.
-V. For ever.
-R. Thine house, O Lord.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Holiness becometh * thine house, O Lord.
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 60* (Little Hours versicle; replaces a derived short responsory)
+V. Holiness becometh thine house, O Lord.
+R. For ever.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 56* (Common of the Dedication of a Church, At I Vespers)
-R. This place is holy * wherein the priest prayeth.
-R. This place is holy * wherein the priest prayeth.
-V. For the sins and offences of the people.
-R. Wherein the priest prayeth.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This place is holy * wherein the priest prayeth.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 61* (Little Hours versicle; replaces a derived short responsory)
+V. This place is holy wherein the priest prayeth,
+R. For the sins and offences of the people.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 61* (Common of the Dedication of a Church, At None)
-R. This is the Lord's house, * firmly builded.
-R. This is the Lord's house, * firmly builded.
-V. It is well founded on the solid rock.
-R. Firmly builded.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This is the Lord's house, * firmly builded.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 61* (Little Hours versicle; replaces a derived short responsory)
+V. This is the Lord's house, firmly builded.
+R. It is well founded on the solid rock.
 
 [chapter-vespers]
 @use commons/dedication/chapter-lauds

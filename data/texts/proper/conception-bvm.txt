@@ -88,22 +88,20 @@ R. Thou favourest me.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. By this I know * thou favourest me.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 449 (Conception of the B.V.M., At Terce)
-@use proper/conception-bvm/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 449 (Little Hours versicle; replaces a derived short responsory)
+V. The Almighty God hath girded me with strength.
+R. And made my way perfect.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At Sext)
-@use proper/conception-bvm/short-responsory-vespers
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 450 (Little Hours versicle; replaces a derived short responsory)
+V. By this I know thou favourest me.
+R. That mine enemy doth not triumph against me.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 450 (Conception of the B.V.M., At None)
-R. I will magnify thee, O Lord, * for thou hast set me up.
-R. I will magnify thee, O Lord, * for thou hast set me up.
-V. And not made my foes to triumph over me.
-R. For thou hast set me up.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. I will magnify thee, O Lord, * for thou hast set me up.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 450 (Little Hours versicle; replaces a derived short responsory)
+V. I will magnify thee, O Lord, for thou hast set me up.
+R. And not made my foes to triumph over me.
 
 [chapter-vespers]
 @use proper/conception-bvm/chapter-lauds

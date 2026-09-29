@@ -171,27 +171,20 @@ R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Our help standeth in the Name of the Lord, alleluia, alleluia.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Terce)
-@use proper/holy-name-jesus/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 217 (Little Hours versicle; replaces a derived short responsory)
+V. Blessed be the Name of the Lord, alleluia.
+R. From this time forth for evermore, alleluia.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 217 (Holy Name of Jesus, At Sext)
-R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
-R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
-V. Give the Lord the honour due unto his Name.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Ascribe unto the Lord worship and strength, * alleluia, alleluia.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 217 (Little Hours versicle; replaces a derived short responsory)
+V. Ascribe unto the Lord worship and strength, alleluia.
+R. Give the Lord the honour due unto his Name, alleluia.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 218 (Holy Name of Jesus, At None)
-R. O praise the Lord with me, * alleluia, alleluia.
-R. O praise the Lord with me, * alleluia, alleluia.
-V. And let us magnify his Name together.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. O praise the Lord with me, * alleluia, alleluia.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 218 (Little Hours versicle; replaces a derived short responsory)
+V. O praise the Lord with me, alleluia.
+R. And let us magnify his Name together, alleluia.
 
 [chapter-vespers]
 @use proper/holy-name-jesus/chapter-lauds

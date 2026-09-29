@@ -146,19 +146,16 @@ R. He clothed him with a robe of glory.
 # The versicle is one of the two things II Vespers changes from I Vespers.
 @use commons/confessor/versicle-lauds
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 45* (Common of a Confessor not a Bishop, At Terce)
-@use commons/confessor/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 45* (Little Hours versicle; replaces a derived short responsory)
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
 
 [short-responsory-vespers]
 # SOURCE: monastic diurnal, p. 41* (Common of a Confessor not a Bishop, At I Vespers);
 # the same text the Little Hours use at Sext (p. 46*).
 # II Vespers takes it unchanged: "All as at I Vespers, p. 41*, except the
 # following" names only the versicle and the Magnificat antiphon (p. 46*).
-@use commons/confessor/short-responsory-sext
-
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At Sext)
 R. The mouth of the righteous * is exercised in wisdom.
 R. The mouth of the righteous * is exercised in wisdom.
 V. And his tongue will be talking of judgment.
@@ -166,14 +163,15 @@ R. Is exercised in wisdom.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The mouth of the righteous * is exercised in wisdom.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 46* (Common of a Confessor not a Bishop, At None)
-R. The law of his God * is in his heart.
-R. The law of his God * is in his heart.
-V. And his goings shall not slide.
-R. In his heart.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. The law of his God * is in his heart.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 46* (Little Hours versicle; replaces a derived short responsory)
+V. The mouth of the righteous is exercised in wisdom.
+R. And his tongue will be talking of judgment.
+
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 46* (Little Hours versicle; replaces a derived short responsory)
+V. The law of his God is in his heart.
+R. And his goings shall not slide.
 
 [hymn-vespers]
 # SOURCE: office-hymns.zip (This the Confessor (tune for Conf not Bishop).docx)

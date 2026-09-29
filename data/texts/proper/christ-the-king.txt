@@ -192,27 +192,20 @@ R. O ye kindreds of the people.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Ascribe unto the Lord, O ye kindreds of the people.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 631 (Christ the King, At Terce)
-@use proper/christ-the-king/short-responsory-vespers
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 631 (Little Hours versicle; replaces a derived short responsory)
+V. Ascribe unto the Lord, O ye kindreds of the people.
+R. Ascribe unto the Lord glory and dominion.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 631 (Christ the King, At Sext)
-R. All kings shall fall down * before him.
-R. All kings shall fall down * before him.
-V. All nations shall do him service.
-R. Before him.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. All kings shall fall down * before him.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 631 (Little Hours versicle; replaces a derived short responsory)
+V. All kings shall fall down before him.
+R. All nations shall do him service.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 631 (Christ the King, At None)
-R. His kingdom shall be * increased.
-R. His kingdom shall be * increased.
-V. And of his peace there shall be no end.
-R. Increased.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. His kingdom shall be * increased.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 631 (Little Hours versicle; replaces a derived short responsory)
+V. His kingdom shall be increased.
+R. And of his peace there shall be no end.
 
 [commemoration-antiphon]
 # SOURCE: monastic diurnal, p. 630 (Christ the King, At Lauds)

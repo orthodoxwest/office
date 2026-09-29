@@ -206,47 +206,20 @@ R. And filleth thee with the flour of wheat, alleluia.
 V. Thou gavest them bread from heaven, alleluia.
 R. Containing in itself all sweetness, alleluia.
 
-[short-responsory-terce]
-# SOURCE: draft Temporal Cycle Vespers book, pp. 200–201 (Saturday within the Octave of Corpus Christi)
-R. He gave them bread from heaven, * alleluia, alleluia.
-R. He gave them bread from heaven, * alleluia, alleluia.
-V. So man did eat angels' food.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. He gave them bread from heaven, * alleluia, alleluia.
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 416 (Little Hours versicle; replaces a derived short responsory)
+V. He gave them bread from heaven, alleluia.
+R. So man did eat angels' food, alleluia.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At Sext)
-R. He fed them with the finest wheat flour. * Alleluia, alleluia.
-R. He fed them with the finest wheat flour. * Alleluia, alleluia.
-V. And with honey out of the stony rock did he satisfy them.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. He fed them with the finest wheat flour. * Alleluia, alleluia.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 417 (Little Hours versicle; replaces a derived short responsory)
+V. He fed them with the finest wheat flour, alleluia.
+R. And with honey out of the stony rock did he satisfy them, alleluia.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 417 (Corpus Christi, At None)
-R. Thou bringest bread out of the earth. * Alleluia, alleluia.
-R. Thou bringest bread out of the earth. * Alleluia, alleluia.
-V. And wine that maketh glad the heart of man.
-R. Alleluia, alleluia.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou bringest bread out of the earth. * Alleluia, alleluia.
-
-# [commemoration-collect]
-# Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
-# [psalm-antiphon-1-first-vespers]
-# I Vespers override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-first-vespers]
-# I Vespers override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-first-vespers]
-# I Vespers override for psalm antiphon 3.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 417 (Little Hours versicle; replaces a derived short responsory)
+V. Thou bringest bread out of the earth, alleluia.
+R. And wine that maketh glad the heart of man, alleluia.
 
 [commemoration-antiphon-lauds]
 # SOURCE: Monastic Diurnal p. 419; 2026 ordo p. 72 (octave commemoration at Lauds)

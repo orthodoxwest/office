@@ -149,55 +149,17 @@ R. The Angel of the Lord announced unto Mary, * alleluia, alleluia.
 [chapter-terce]
 @use proper/annunciation/chapter-lauds
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 503 (Annunciation, At Terce)
-@use commons/virgin-martyr/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 503 (Little Hours versicle; replaces a derived short responsory)
+V. In thy grace and in thy beauty.
+R. Go forth, ride prosperously, and reign.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 503 (Annunciation, At Sext)
-@use commons/virgin-martyr/short-responsory-vespers
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 503 (Little Hours versicle; replaces a derived short responsory)
+V. God shall help her with his countenance.
+R. God is in the midst of her, therefore shall she not be removed.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 504 (Annunciation, At None)
-R. God hath chosen her * and preferred her.
-R. God hath chosen her * and preferred her.
-V. He hath made her to dwell in his tabernacle.
-R. And preferred her.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. God hath chosen her * and preferred her.
-
-# [commemoration-collect]
-# Collect for the commemoration (defaults to [collect] when omitted).
-#
-# [versicle-first-vespers]
-# Versicle at I Vespers when it differs from II Vespers.
-#
-# [vespers-psalmody]
-# Festal Vespers psalmody table (@use ordinary/vespers/festal-psalmody or a common).
-#
-# [vespers-psalmody-first]
-# I Vespers psalmody table when it differs from II Vespers.
-#
-# [psalm-antiphon-1-vespers]
-# Vespers-only override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-vespers]
-# Vespers-only override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-vespers]
-# Vespers-only override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-vespers]
-# Vespers-only override for psalm antiphon 4 (often @use of psalm-antiphon-5).
-#
-# [psalm-antiphon-1-first-vespers]
-# I Vespers override for psalm antiphon 1.
-#
-# [psalm-antiphon-2-first-vespers]
-# I Vespers override for psalm antiphon 2.
-#
-# [psalm-antiphon-3-first-vespers]
-# I Vespers override for psalm antiphon 3.
-#
-# [psalm-antiphon-4-first-vespers]
-# I Vespers override for psalm antiphon 4.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 504 (Little Hours versicle; replaces a derived short responsory)
+V. God hath chosen her and preferred her.
+R. He hath made her to dwell in his tabernacle.

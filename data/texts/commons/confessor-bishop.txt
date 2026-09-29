@@ -178,22 +178,20 @@ R. For a priest unto himself.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. The Lord chose him * for a priest unto himself.
 
-[short-responsory-terce]
-# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Terce)
-@use commons/confessor-bishop/short-responsory-lauds
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. The Lord loved him and adorned him.
+R. He clothed him with a robe of glory.
 
-[short-responsory-sext]
-# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At Sext)
-@use commons/confessor-bishop/short-responsory-vespers
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. The Lord chose him for a priest unto himself.
+R. To offer unto him the sacrifice of praise.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, p. 37* (Common of a Confessor and Bishop, At None)
-R. Thou art a priest * for ever.
-R. Thou art a priest * for ever.
-V. After the order of Melchisedech.
-R. For ever.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. Thou art a priest * for ever.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 37* (Little Hours versicle; replaces a derived short responsory)
+V. Thou art a priest for ever.
+R. After the order of Melchisedech.
 
 [chapter-vespers]
 @use commons/confessor-bishop/chapter-lauds

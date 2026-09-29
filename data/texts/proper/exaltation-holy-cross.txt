@@ -179,32 +179,20 @@ R. Because by thy Cross thou hast redeemed the world.
 V. This sign of the Cross shall be in heaven.
 R. When the Lord shall come to judgment.
 
-[short-responsory-terce]
-# SOURCE: draft archdiocesan Lauds book, p. 552 (Exaltation of the Holy Cross)
-R. This sign of the Cross * shall be in heaven.
-R. This sign of the Cross * shall be in heaven.
-V. When the Lord shall come to judgment.
-R. Shall be in heaven.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. This sign of the Cross * shall be in heaven.
+[versicle-terce]
+# SOURCE: Monastic Diurnal.pdf, p. 600 (Little Hours versicle; replaces a derived short responsory)
+V. This sign of the Cross shall be in heaven.
+R. When the Lord shall come to judgment.
 
-[short-responsory-sext]
-# SOURCE: draft archdiocesan Vespers book, p. 481 (Exaltation of the Holy Cross)
-R. We adore thee, O Christ, * and we bless thee.
-R. We adore thee, O Christ, * and we bless thee.
-V. Because by thy Cross thou hast redeemed the world.
-R. And we bless thee.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. We adore thee, O Christ, * and we bless thee.
+[versicle-sext]
+# SOURCE: Monastic Diurnal.pdf, p. 600 (Little Hours versicle; replaces a derived short responsory)
+V. We adore thee, O Christ, and we bless thee.
+R. Because by thy Cross thou hast redeemed the world.
 
-[short-responsory-none]
-# SOURCE: monastic diurnal, pp. 600–601 (Exaltation of the Holy Cross, At None)
-R. All the world shall worship thee * and sing of thee.
-R. All the world shall worship thee * and sing of thee.
-V. And praise thy Name, O Lord.
-R. And sing of thee.
-Glory be to the Father, and to the Son, and to the Holy Ghost.
-R. All the world shall worship thee * and sing of thee.
+[versicle-none]
+# SOURCE: Monastic Diurnal.pdf, p. 600, 601 (Little Hours versicle; replaces a derived short responsory)
+V. All the world shall worship thee and sing of thee.
+R. And praise thy Name, O Lord.
 
 [chapter-vespers]
 @use proper/exaltation-holy-cross/chapter-lauds
