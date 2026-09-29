@@ -342,8 +342,32 @@ function usageBeaconBody(scope) {
   // swap their background images while invisible, then
   // let style.css's opacity transition climb it back to full: the swap
   // itself never renders, so the material fades rather than flashing on or off.
+  // Wait on the dip itself rather than its nominal length: a busy frame can
+  // start it late, and a swap on a clock would then land mid-fade. The
+  // timer only bounds the wait, for a browser that reports no transitions.
   var VAULT_FADE_MS = 100;
-  var vaultFadeTimer = null;
+  var VAULT_FADE_LIMIT_MS = 400;
+  var vaultFadeTurn = 0;
+
+  var vaultDipped = function (root) {
+    if (!root.getAnimations) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, VAULT_FADE_MS);
+      });
+    }
+    // getAnimations flushes style, so the dip's transitions exist by now.
+    var dips = root.getAnimations({ subtree: true }).filter(function (anim) {
+      return anim.transitionProperty === "opacity";
+    });
+    return Promise.race([
+      Promise.all(dips.map(function (anim) {
+        return anim.finished.catch(function () {});
+      })),
+      new Promise(function (resolve) {
+        setTimeout(resolve, VAULT_FADE_LIMIT_MS);
+      }),
+    ]);
+  };
 
   // User action: paint + persist.
   var applyThemeChoice = function (choice) {
@@ -356,15 +380,18 @@ function usageBeaconBody(scope) {
       return;
     }
     root.classList.add("vault-hidden");
-    if (vaultFadeTimer) {
-      clearTimeout(vaultFadeTimer);
-    }
-    vaultFadeTimer = setTimeout(function () {
-      vaultFadeTimer = null;
+    var turn = ++vaultFadeTurn;
+    vaultDipped(root).then(function () {
+      if (turn !== vaultFadeTurn) {
+        return;
+      }
+      // The colours crossfade from the swap, so keep .theme-anim for the
+      // whole of it even when the dip ran long.
+      flashThemeTransition();
       paintThemeChoice(choice);
       writeStoredTheme(choice);
       root.classList.remove("vault-hidden");
-    }, VAULT_FADE_MS);
+    });
   };
 
   paintThemeChoice(effectiveThemeChoice());

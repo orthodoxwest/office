@@ -655,24 +655,98 @@ for (const [theme, minContrast] of [["light", 0.84], ["dark", 1.3]]) {
       expect(wall.contrast, `${width}px contrast %`).toBeLessThan(5);
     }
   });
+}
 
-  test(`the ${theme} prayer band is quieter than the wall but keeps its tone`, async ({ page }) => {
-    // The band's softened copy must hold the wall's mean where it covers it,
-    // or its feathered edges show as a lighter or darker column; and it must
-    // stay quieter than the wall, or it is no longer a band.
-    await page.setViewportSize({ width: 1280, height: 900 });
+test("the Nave prayer band is quieter than the wall but keeps its tone", async ({ page }) => {
+  // The band's softened copy must hold the wall's mean where it covers it,
+  // or its feathered edges show as a lighter or darker column; and it must
+  // stay quieter than the wall, or it is no longer a band.
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await openDatedPage(page, `/lauds/${testDate}`, "light");
+  await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
+  // The band's solid middle, then the same region of the bare wall.
+  const middle = { clip: { x: 440, y: 0, width: 400, height: 900 }, block: 4 };
+  const band = await sampleWall(page, middle);
+  await page.addStyleTag({ content: "body::before { display: none !important; }" });
+  const wall = await sampleWall(page, middle);
+  band.mean.forEach((channel, i) => expect(Math.abs(channel - wall.mean[i]), "band vs wall mean").toBeLessThan(1));
+  expect(band.contrast, "band contrast %").toBeLessThan(wall.contrast * 0.6);
+  expect(band.contrast, "band contrast %").toBeGreaterThan(0.1);
+
+  // Apse's wall is already quiet, and a feathered layer over so smooth a
+  // dark field bands in software rendering; it has no band, by choice or
+  // by default.
+  await openDatedPage(page, `/lauds/${testDate}`, "dark");
+  expect(await page.evaluate(() => getComputedStyle(document.body, "::before").content), "Apse").toBe("none");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await openDatedPage(page, `/lauds/${testDate}`, "default");
+  expect(await page.evaluate(() => getComputedStyle(document.body, "::before").content), "default dark").toBe("none");
+});
+
+// The strongest one-pixel stripe in the rendered page: column means high-passed
+// along x and row means along y, each as the worst windowed deviation. A
+// feathered flat layer over a smooth wall shows here as software rasterizers
+// step its fade in one-level columns or rows.
+async function stripes(page) {
+  const png = (await page.screenshot()).toString("base64");
+  return page.evaluate(async (b64) => {
+    const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${b64}`)).blob());
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext("2d");
+    context.drawImage(bitmap, 0, 0);
+    const { width, height } = bitmap;
+    const data = context.getImageData(0, 0, width, height).data;
+    // Each channel apart: the Apse steps fall in blue as often as not.
+    const columns = [0, 1, 2].map(() => new Float64Array(width));
+    const rows = [0, 1, 2].map(() => new Float64Array(height));
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        for (let c = 0; c < 3; c++) {
+          const v = data[4 * (y * width + x) + c];
+          columns[c][x] += v / height;
+          rows[c][y] += v / width;
+        }
+      }
+    }
+    const worst = (profile) => {
+      const pass = profile.map((v, i) => {
+        let sum = 0;
+        let count = 0;
+        for (let j = Math.max(0, i - 4); j <= Math.min(profile.length - 1, i + 4); j++, count++) sum += profile[j];
+        return v - sum / count;
+      });
+      let max = 0;
+      for (let start = 8; start + 160 <= pass.length - 8; start += 40) {
+        const window = pass.slice(start, start + 160);
+        const mean = window.reduce((a, b) => a + b) / window.length;
+        max = Math.max(max, Math.sqrt(window.reduce((a, b) => a + (b - mean) ** 2, 0) / window.length));
+      }
+      return max;
+    };
+    return { columns: Math.max(...columns.map(worst)), rows: Math.max(...rows.map(worst)) };
+  }, png);
+}
+
+for (const theme of ["light", "dark"]) {
+  test(`the ${theme} wide hour's layers leave no stripes where they fade`, async ({ page }) => {
+    // The end of Lauds on a wide screen gathers every layer above the wall:
+    // the prayer band, the side field and the ending's vault. Hide the
+    // text and the stars (which are meant to show), then hold the rest to
+    // the bare wall's own grain.
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await openDatedPage(page, `/lauds/${testDate}`, theme);
-    await page.addStyleTag({ content: "body > * { visibility: hidden !important; }" });
-    // The band's solid middle, then the same region of the bare wall.
-    const middle = { clip: { x: 440, y: 0, width: 400, height: 900 }, block: 4 };
-    const band = await sampleWall(page, middle);
-    await page.addStyleTag({ content: "body::before { display: none !important; }" });
-    const wall = await sampleWall(page, middle);
-    band.mean.forEach((channel, i) => expect(Math.abs(channel - wall.mean[i]), "band vs wall mean").toBeLessThan(1));
-    // Apse's wall varies by well under a level, so its band rounds to the
-    // same few levels: quieter, but not by a ratio the screenshot can show.
-    expect(band.contrast, "band contrast %").toBeLessThan(wall.contrast * (theme === "light" ? 0.6 : 1));
-    expect(band.contrast, "band contrast %").toBeGreaterThan(0.1);
+    await page.addStyleTag({
+      content: `.elements, .hour-header, .hour-epilogue > *, footer > *, header, .hour-scroll-progress { visibility: hidden !important; }
+        .hour-epilogue::before, footer::after, .office-hour::after { display: none !important; }`,
+    });
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const layered = await stripes(page);
+    await page.addStyleTag({
+      content: "body, body *, body::before, body::after, body *::before, body *::after { visibility: hidden !important; }",
+    });
+    const wall = await stripes(page);
+    expect(layered.columns, "vertical stripes").toBeLessThan(wall.columns * 1.5 + 0.02);
+    expect(layered.rows, "horizontal stripes").toBeLessThan(wall.rows * 1.5 + 0.02);
   });
 }
 

@@ -50,10 +50,9 @@ four short diagonals) and small four-ray sparks.
 - Hours admit the vault only in `.hour-epilogue`, after prayer. Keep the field
   transparent through continuation links, fade in around the report link, and align
   its bottom with the footer continuation. On desktop these layers bleed to
-  viewport edges without widening `.elements`. The flat night ground that
-  eases in under desktop stars cannot share the star layer's mask, so it is
-  each host's own `border-image`, outset to the viewport edges with the same
-  fade; it adds no layout or scrollable overflow.
+  viewport edges without widening `.elements`. The stars sit straight on
+  the wall, as home's do. A flat night ground once eased in beneath them
+  (each host's outset `border-image`), but its fade banded (see below).
 - From 1680px an hour also shows the vault in the margins beside the prayer:
   one fixed layer (`.office-hour::after`), outside the softened band, at half
   strength. A field scrolling with the page could share the epilogue's
@@ -67,11 +66,15 @@ four short diagonals) and small four-ray sparks.
 - Masks clear the header and thin toward the footer. Avoid a narrow decorative
   band floating between blank margins. Keep the field static, and hide the
   footer diamond where the vault already provides ornament.
-- Headless Chromium rasterizes in software, which truncates when it blends a
-  feathered mask over a smooth dark field: screenshots show one-level
-  vertical stripes where the band or a field fades, which GPU rasterization
-  (every ordinary desktop browser) does not. Before chasing them, re-shoot
-  with `--use-angle=swiftshader --enable-gpu-rasterization`.
+- Software rasterization (headless Chromium, the snapshot tests, and any
+  browser drawing without a GPU) truncates when it blends a feathered layer
+  over a smooth dark field: a full-width fade steps down in one-level
+  columns or rows that read as hairlines. GPU rasterization does not, but
+  readers do meet software drawing, so Apse carries no full-width feathered
+  flat layer over its wall: no softened prayer band and no ground under the
+  epilogue. Star fields are safe, since their fades act only on sparse
+  shapes, and Nave's texture breaks the steps up. `ux.spec.js` measures
+  column and row stripes against the plain wall at the end of Lauds.
 - Measure paint cost when adding layers. An earlier 172-layer version cost
   roughly 600ms of extra first paint; one repeating tile stays within noise
   of a bare page. Check rendered pixels as well as valid CSS: sub-pixel

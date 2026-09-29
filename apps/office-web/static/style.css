@@ -5046,7 +5046,13 @@ html:where(:has(> body:is(.page-home, .page-calendar, .page-reminders, .page-usa
 
    The band is fixed like the wall and runs the viewport's full height, so
    nothing seams as the header or epilogue scroll through it; in rem, it
-   widens with the text. Phones keep a flat page. */
+   widens with the text. Phones keep a flat page.
+
+   Nave only. Apse's wall varies by under a level, so the band would buy
+   nothing there, and a feathered layer over so smooth a dark field bands:
+   software rasterizers (browsers without GPU drawing, and the snapshot
+   tests) truncate each blend, so the feather steps down in one-level
+   columns that read as vertical lines. */
 html:where(:has(> body.page-hour))::before {
   content: none;
 }
@@ -5078,6 +5084,16 @@ html:where(:has(> body.page-hour))::before {
     background-repeat: no-repeat;
     -webkit-mask-image: var(--soft-band);
     mask-image: var(--soft-band);
+  }
+
+  :root[data-theme="dark"] body.page-hour::before {
+    content: none;
+  }
+}
+
+@media (min-width: 1000px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body.page-hour::before {
+    content: none;
   }
 }
 
@@ -5422,21 +5438,10 @@ body.page-hour footer::after {
   mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
 }
 
-/* Where the desktop plaster and stars overlap, a quiet ground eases in under
-   the vault so stars and texture trade prominence. The star layer paints only
-   through its mask, so the ground cannot share it: it is each host's own
-   border-image instead — outset to the viewport edges, following the same
-   fade, painting beneath the negative-z vault and adding no layout or
-   scrollable overflow. Nave's ground is transparent. */
-@media screen and (min-width: 1000px) {
-  body.page-hour .hour-epilogue {
-    border-image: linear-gradient(to bottom, transparent 0 7rem, color-mix(in srgb, var(--apse-ground) 28%, transparent) 11rem, var(--apse-ground) 16rem 100%) fill 0 / 0 / 0 100vw;
-  }
-
-  body.page-hour footer {
-    border-image: linear-gradient(to bottom, var(--apse-ground) 0, color-mix(in srgb, var(--apse-ground) 40%, transparent) 62%, transparent 94%) fill 0 / 0 / var(--footer-gap) 100vw 0;
-  }
-}
+/* The ending's stars sit straight on the wall, as the home vault's do.
+   A flat night ground once eased in beneath them to quiet the plaster, but
+   Apse's plaster varies by under a level, and the ground's fade over so
+   smooth a dark field banded into horizontal lines in software rendering. */
 
 /* Keep the existing footer lettering treatment. */
 body:is(.page-home, .page-hour) footer {
