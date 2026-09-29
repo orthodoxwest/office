@@ -75,15 +75,15 @@ There are three that bear record in heaven, the Father, the Word, and the Holy G
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 316 (The Feast of the Most Holy Trinity)
+# SOURCE: Monastic Diurnal.pdf, p. 404
 Tu, Trinitatis Unitas
 
 Thou Trinity in Unity
 Who rulest all things mightily,
 Bow down to hear the songs of praise
-Which we, thy wakeful servants raise.
+Which we, thy wakeful servants, raise.
 
-The day-star's rays are glitt'ring clear,
+The day-star's rays are glittering clear,
 And tell that day itself is near;
 The shadows of the night depart:
 Thou, holy Light, illume the heart.
@@ -94,6 +94,7 @@ All glory, as is ever meet,
 To God the Holy Paraclete.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, p. 194 (The Feast of the Most Holy Trinity)
 O lux beata Trinitas

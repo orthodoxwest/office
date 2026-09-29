@@ -31,8 +31,8 @@ Gregory, * mirror of the cloistered, father of the City, beloved of all the worl
 @use proper/st-gregory-great/psalm-antiphon-5
 
 [benedictus-antiphon]
-# SOURCE: draft archdiocesan Lauds book, p. 409 (St Gregory the Great)
-Gregory, * when he looked upon the youthful Angels, said: They have the countenance of Angels, and such as these should be of the fellowship of the Angels in heaven.
+# SOURCE: Monastic Diurnal.pdf, p. 487
+Gregory, * when he looked upon the youthful Angles, said: They have the countenance of Angels, and such as these should be of the fellowship of the Angels in heaven.
 
 [magnificat-antiphon]
 # SOURCE: draft archdiocesan Vespers book, pp. 310, 318 (I/II Vespers, St Gregory the Great)
@@ -52,7 +52,7 @@ R. Thanks be to God.
 @use proper/st-gregory-great/chapter-lauds
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 407–408 (St Gregory the Great)
+# SOURCE: Monastic Diurnal.pdf, p. 486, 487
 Mella cor obdulcantia
 
 Thy lips, O Gregory, distil,
@@ -68,7 +68,7 @@ To make their subtle secrets clear.
 At once the Apostolic throne
 And majesty become thine own:
 O free us from sin's binding chain
-That heav'nly mansions we may gain.
+That heavenly mansions we may gain.
 
 O Priest and Leader of the flock,
 The Church's glory, light, and rock,
@@ -81,26 +81,27 @@ And thine, O Spirit, Breath of God,
 Be equal majesty and laud.
 
 Amen.
+
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 308, 317 (St Gregory the Great)
+# SOURCE: Monastic Diurnal.pdf, p. 485
 Anglorum jam Apostolus
 
 Apostle of the English, thou
 Art comrade of the Angels now:
 O help the faithful, Gregory,
-Who heardest then the people's cry.
+Who heardest then the peoples' cry.
 
 Abundant wealth was naught to thee
 Who, seeking princely penury,
 Didst spurn the glory of the earth
 To follow Jesus in his dearth.
 
-Like some poor needy shipwreck'd soul,
+Like some poor needy shipwrecked soul,
 His messenger besought a dole;
 Twin gifts thou gavest; nothing loth
 To offer self and silver both.
 
-First in the Church from that time forth
+First in his Church from that time forth
 Christ set thee, in thy proven worth;
 So didst thou rise to Peter's throne,
 Whose life was pattern for thine own.
@@ -112,10 +113,11 @@ Let not the sheep in peril stand.
 
 Praise to the unbegotten One,
 And glory to his only Son;
-And thine, O Spirit, breath of God,
+And thine, O Spirit, Breath of God,
 Be equal majesty and laud.
 
 Amen.
+
 [short-responsory-lauds]
 @use commons/confessor-bishop/short-responsory-lauds
 

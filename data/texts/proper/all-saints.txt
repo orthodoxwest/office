@@ -106,15 +106,15 @@ From age to age eternally.
 Amen.
 
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 528–529, 534–535 (The Feast of All Saints)
+# SOURCE: Monastic Diurnal.pdf, p. 637, 638
 Christe, Redemptor Omnium, conserva
 
 O Christ Redeemer of us all,
 Protect thy servants when they call,
-And here with reconciling care
+And hear with reconciling care
 The blessed Virgin's holy prayer.
 
-And ye, O ever-blissful throng
+And ye, O ever blissful throng
 Of heavenly Spirits, guardians strong,
 Our past and present ills dispel,
 From future peril shield us well.
@@ -145,6 +145,7 @@ One with the Holy Paraclete,
 Be glory ever, as is meet.
 
 Amen.
+
 [short-responsory-lauds]
 @use commons/martyrs/short-responsory-lauds
 

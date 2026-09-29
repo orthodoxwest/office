@@ -8,8 +8,8 @@
 @use proper/christmas/psalm-antiphon-1
 
 [psalm-antiphon-1]
-# SOURCE: draft archdiocesan Lauds book, p. 59 (Nativity and Sunday within the Octave)
-Whom beheld ye, * O shepherds? Tell us, declare to us the tidings, on earth who hath appeared? We saw the newborn Infant, and the choir of Angels, praising the Lord together, alleluia, alleluia.
+# SOURCE: Monastic Diurnal.pdf, p. 185
+Whom beheld ye, * O shepherds? Tell us, declare to us the tidings, on earth who hath appeared? We saw the new-born Infant, and the choir of Angels, praising the Lord together, alleluia, alleluia.
 
 [psalm-antiphon-2]
 # SOURCE: draft archdiocesan Lauds book, p. 63 (Nativity and Sunday within the Octave)
@@ -121,7 +121,7 @@ They shall perish, but thou remainest; and they all shall wax old as doth a garm
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 70–71 (Nativity and Sunday within the Octave)
+# SOURCE: Monastic Diurnal.pdf, p. 186, 187
 A solis ortus cardine
 
 From lands that see the sun arise,
@@ -135,7 +135,7 @@ That, liberating flesh by flesh,
 Whom he had made might live afresh.
 
 In that chaste parent's holy womb
-Celestial grace hath found its home;
+Celestial grace hath found its home:
 And she, as earthly bride unknown,
 Yet calls that Offspring blest her own.
 
@@ -152,9 +152,9 @@ The Infant Baptist had revealed.
 The manger and the straw he bore,
 The cradle did he not abhor:
 A little milk his infant fare
-Who feedeth ev'n each fowl of air.
+Who feedeth even each fowl of air.
 
-The heav'nly chorus filled the sky,
+The heavenly chorus filled the sky,
 The Angels sang to God on high,
 What time to shepherds, watching lone,
 They made creation's Shepherd known.
@@ -165,22 +165,23 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 47–48, 58–59 (I and II Vespers of Christmas)
+# SOURCE: Monastic Diurnal.pdf, p. 184, 185
 Christe, Redemptor omnium, ex Patre
 
-Jesu, the Father's only son;
+Jesu, the Father's only Son,
 Whose death for all redemption won,
 Before the worlds, of God Most High,
 Begotten all ineffably.
 
 The Father's Light and Splendour thou,
-Their endless hope to thee that bow:
+Their endless Hope to thee that bow:
 Accept the prayers and praise to-day
 That through the world thy servants pay.
 
 Salvation's Author, call to mind
-Thou took'st the form of humankind,
+Thou tookest the form of humankind,
 When of the Virgin undefiled
 Thou in man's flesh becamest a Child.
 
@@ -194,7 +195,7 @@ And earth, and all that therein is,
 Shall still, with laud and carol meet,
 The Author of thine Advent greet.
 
-And we who, by thy precious Blood,
+And we who, by thy precious Blood
 From sin redeemed, are marked for God,
 On this, the day that saw thy Birth,
 Sing the new song of ransomed earth.
@@ -205,6 +206,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: draft archdiocesan Lauds book, p. 71 (Nativity; the Sunday-within-the-Octave versicle differs)
 V. The Lord declared, alleluia.

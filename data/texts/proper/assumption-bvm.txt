@@ -59,7 +59,7 @@ R. Thanks be to God.
 # SOURCE: parish Sanctoral Lauds booklet, PDF pp. 177-178 (The Assumption of the B.V.M.; O gloriosa Domina)
 @use shared/blessed-virgin/hymn-lauds
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 464–465 (The Assumption of the B.V.M.)
+# SOURCE: Monastic Diurnal.pdf, p. 588, 64*
 Ave, maris stella
 
 /:The first stanza of the following hymn is said kneeling.:/
@@ -77,7 +77,7 @@ Eva's name of sadness.
 Loose the bonds of terror,
 Lighten blinded error,
 All our ills repressing,
-Pray for ev'ry blessing.
+Pray for every blessing.
 
 Mother's care displaying,
 Offer him thy praying,
@@ -100,6 +100,7 @@ With one praise we bless thee,
 Three in One confess thee.
 
 Amen.
+
 [versicle-lauds]
 # SOURCE: parish Sanctoral Lauds booklet, PDF p. 178 (The Assumption of the B.V.M.)
 # SOURCE: draft archdiocesan Lauds book, p. 528 (The Assumption of the B.V.M.)

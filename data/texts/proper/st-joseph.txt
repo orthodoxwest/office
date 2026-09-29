@@ -99,7 +99,7 @@ This thy true servant.
 Amen.
 
 [hymn-vespers]
-# SOURCE: office-hymns.zip (O Joseph Heav_nly Host, St. Joseph Vespers.docx); draft archdiocesan Vespers book, pp. 325–326, 334–335
+# SOURCE: Monastic Diurnal.pdf, p. 489, 490
 Te, Joseph, celebrent
 
 O Joseph, heavenly hosts thy worthiness proclaim,
@@ -108,7 +108,7 @@ Thou who in purest bonds wert to the Virgin bound;
 How glorious is thy name renowned.
 
 Thou, when thou didst behold thy Spouse about to bear,
-Wert sore oppressed with doubt, wert filled with wond'ring care;
+Wert sore oppressed with doubt, wert filled with wondering care;
 At length the Angel's word thy anxious heart relieved:
 She by the Spirit hath conceived.
 
@@ -128,6 +128,7 @@ And so our grateful hearts to thee shall ever raise
 Exulting canticles of praise.
 
 Amen.
+
 [versicle-vespers]
 # SOURCE: monastic diurnal, p. 493 (St Joseph, At II Vespers)
 V. Riches and plenteousness shall be in his house.

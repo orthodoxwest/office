@@ -75,7 +75,7 @@ Whatsoever ye do in word or deed, * do all in the Name of the Lord Jesus, giving
 R. Thanks be to God.
 
 [hymn-lauds]
-# SOURCE: office-hymns.zip (Jesu, the Beauty Angels See, Holy Name of Jesus Lauds-2.docx); draft archdiocesan Lauds book, pp. 118–119
+# SOURCE: Monastic Diurnal.pdf, p. 216, 217
 Jesu decus angelicum
 
 Jesu, the beauty Angels see,
@@ -95,7 +95,7 @@ For thee my inmost heart shall yearn.
 
 Be with us, Lord; our mental gloom
 With all thy holy light illume:
-Disperse th'oppressive shades of ill,
+Disperse the oppressive shades of ill,
 Creation with thy sweetness fill.
 
 Jesu, the Virgin Mother's Flower,
@@ -104,6 +104,7 @@ All honour to thy Name divine,
 The realm of endless bliss be thine.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: draft archdiocesan Vespers book, pp. 103–104 (Holy Name of Jesus)
 Jesu, dulcis memoria

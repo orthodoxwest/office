@@ -74,11 +74,11 @@ R. Thanks be to God.
 @use commons/dedication/short-responsory-sext
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 705–706 (Common of the Dedication of a Church)
+# SOURCE: Monastic Diurnal.pdf, p. 58*, 59*
 Angularis fundamentum
 
 Christ is made the sure Foundation,
-And the precious Cornerstone,
+And the precious Corner-stone,
 Who, the two-fold walls surmounting,
 Binds them closely into one:
 Holy Sion's help for ever,
@@ -108,11 +108,12 @@ With thy blessed ones to reign.
 Glory be to God, and honour
 In the highest, as is meet,
 To the Son and to the Father,
-And th'eternal Paraclete,
+And the eternal Paraclete,
 Whose is boundless praise and power
 Through the ages infinite.
 
 Amen.
+
 [hymn-vespers]
 # SOURCE: Monastic Diurnal.pdf, p. 57*
 Urbs Jerusalem beata

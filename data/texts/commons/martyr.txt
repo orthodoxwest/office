@@ -71,10 +71,10 @@ Whosoever shall confess me * before men, him will I confess also before my Fathe
 Grant, we beseech thee, Almighty God: that we who honour the birthday of blessed N., thy Martyr, may by his intercession be strengthened in the love of thy holy Name.
 
 [hymn-lauds]
-# SOURCE: draft archdiocesan Lauds book, pp. 628-629 (Common of One Martyr out of Paschaltide)
+# SOURCE: Monastic Diurnal.pdf, p. 21*, 22*
 Martyr Dei qui unicum
 
-Thou foll'west, Martyr of thy God,
+Thou followest, Martyr of thy God,
 The path the only Son hath trod,
 Thy conquered foes thou treadest down,
 And gloriest in a victor's crown.
@@ -95,6 +95,7 @@ All glory, as is ever meet,
 To God the Holy Paraclete.
 
 Amen.
+
 [chapter-lauds]
 @use commons/bishop-martyr/chapter-lauds
 
@@ -144,18 +145,18 @@ V. Thou hast crowned him with glory and honour, O Lord.
 R. And madest him to have dominion of the works of thy hands.
 
 [hymn-vespers]
-# SOURCE: draft archdiocesan Vespers book, pp. 576, 584 (I and II Vespers, Common of One Martyr out of Paschaltide)
+# SOURCE: Monastic Diurnal.pdf, p. 20*, 21*
 Deus, tuorum militum
 
-Of all thy warrior saints, O Lord,
-The portion, crown, and great reward,
-From all transgressions set us free,
+Of all thy warrior Saints, O Lord,
+The portion, crown, and great reward:
+From all transgressions set us free
 Who sing thy Martyr's victory.
 
-The pleasures of the world he spurn'd,
-From sin's pernicious lures he turn'd,
+The pleasures of the world he spurned,
+From sin's pernicious lures he turned;
 Accounting them as transient all,
-He reach'd at length thy heav'nly hall.
+He reached at length thy heavenly hall.
 
 For thee through many a woe he ran,
 In many a fight he played the man;
@@ -163,14 +164,14 @@ For thee his blood he dared to pour,
 And thence hath joy for evermore.
 
 We therefore pray thee, full of love,
-Regard us from thy throne above,
+Regard us from thy throne above:
 On this thy Martyr's triumph day,
-Wash ev'ry stain of sin away.
+Wash every stain of sin away.
 
 Enduring laud and praise be done
 To God the Father, and the Son,
 And to the Holy Paraclete,
-For endless ages as is meet.
+For endless ages, as is meet.
 
 Amen.
 

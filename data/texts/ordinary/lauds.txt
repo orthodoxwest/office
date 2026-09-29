@@ -2,25 +2,25 @@
 # The Winter Hymn, said from the Octave of Epiphany
 # through Quinquagesima, and from the Sunday nearest
 # the first day of October until Advent
-# SOURCE: office-hymns.zip (Maker of All, Eternal King, Thru the Year, Lauds Winter Hymn.docx)
+# SOURCE: Monastic Diurnal.pdf, p. 39, 40
 Aeterne rerum conditor
 
 Maker of all, eternal King,
 Who day and night about dost bring:
 Who weary mortals to relieve
-Dost in their turn the seasons give.
+Dost in their turn the seasons give:
 
-Now chanticleer proclaims the day
+Now chanticleer proclaims the day,
 And calls the sun's awakening ray,
-The wand'ring pilgrim's guiding light,
+The wandering pilgrim's guiding light,
 That marks the watches night by night.
 
 Roused at the note, the morning star
 Heaven's dusky veil uplifts afar:
-Night's vagrant bands no longer roam
+Night's vagrant bands no longer roam,
 But from their dark ways hie them home.
 
-Th'encouraged sailor's fears are o'er,
+The encouraged sailor's fears are o'er,
 The foaming billows rage no more:
 Lo! e'en the very Church's Rock
 Melts at the crowing of the cock.
@@ -42,7 +42,7 @@ And with due tears our pardon won.
 
 Shed through our hearts thy piercing ray,
 Our souls' dull slumber drive away:
-Thy Name be first on ev'ry tongue,
+Thy Name be first on every tongue,
 To thee our earliest praises sung.
 
 All laud to God the Father be;
@@ -51,6 +51,7 @@ All glory, as is ever meet,
 To God the Holy Paraclete.
 
 Amen.
+
 [hymn-sunday-summer]
 # The Summer Hymn — said from the II Sunday after Trinity until the Sunday
 # nearest the first of October (see crates/office/src/hymn.rs).
@@ -319,8 +320,8 @@ Let us serve * the Lord in holiness, and he will deliver us from the hand of our
 Through the tender mercy * of our God: whereby the day-spring from on high hath visited us.
 
 [benedictus-antiphon-saturday]
-# SOURCE: monastic diurnal, p. 80 (Saturday at Lauds, Throughout the Year)
-Give light, O Lord, * to them that sit in darkness and in the shadow of death, and guide our feet into the way of peace.
+# SOURCE: Monastic Diurnal.pdf, p. 80, 81
+Give light, O Lord, * to them that sit in darkness: and guide our feet into the way of peace, thou God of Israel.
 
 [pre-collect-versicles]
 @use shared/formulas/pre-collect-versicles
@@ -353,8 +354,8 @@ Have mercy * upon me, O God.
 Consider * my meditation, O Lord.
 
 [psalm-antiphon-3-monday]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 9 (Monday)
-Thy mercy, * O Lord, reacheth up to the heavens.
+# SOURCE: Monastic Diurnal.pdf, p. 45, 46
+Thy mercy, * O Lord, reacheth unto the heavens.
 
 [psalm-antiphon-4-monday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 10 (Monday)
@@ -365,8 +366,8 @@ Thine anger * is turned away, O Lord, and thou comfortedst me.
 O praise * the Lord of heaven.
 
 [psalm-antiphon-1-tuesday]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 23 (Tuesday)
-Do away, O Lord, * mine offenses.
+# SOURCE: Monastic Diurnal.pdf, p. 50
+Do away, O Lord, * mine offences.
 
 [psalm-antiphon-2-tuesday]
 # SOURCE: Copy of OCP Ferial Lauds.pdf, p. 24 (Tuesday)

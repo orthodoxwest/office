@@ -44,10 +44,10 @@ This woman * is beautiful among the daughters of Jerusalem, alleluia.
 @use commons/holy-woman-paschal/psalm-antiphon-5
 
 [short-responsory-lauds]
-# SOURCE: draft archdiocesan Lauds book, p. 693 (Common of Holy Women not Virgins, Paschaltide)
+# SOURCE: Monastic Diurnal.pdf, p. 52*
 R. In thy grace and in thy beauty * alleluia, alleluia.
 R. In thy grace and in thy beauty * alleluia, alleluia.
-V. Go forth, ride prosp'rously, and reign.
+V. Go forth, ride prosperously, and reign.
 R. Alleluia, alleluia.
 Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. In thy grace and in thy beauty * alleluia, alleluia.

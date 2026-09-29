@@ -143,7 +143,7 @@ From age to age eternally.
 
 Amen.
 [hymn-vespers]
-# SOURCE: office-hymns.zip (Creator of the Stars of Night, Advent Vespers.docx); draft archdiocesan Vespers book, pp. 8, 16, 24, 32
+# SOURCE: Monastic Diurnal.pdf, p. 157, 158
 Conditor alme siderum
 
 Creator of the stars of night,
@@ -168,8 +168,8 @@ And things terrestrial, Lord alone.
 
 O thou whose coming is with dread,
 To judge and doom the quick and dead,
-Preserve us while we dwell below,
-From ev'ry insult of the foe.
+Preserve us, while we dwell below,
+From every insult of the foe.
 
 To God the Father, God the Son,
 And God the Spirit, Three in One,
@@ -177,6 +177,7 @@ Laud, honour, might, and glory be
 From age to age eternally.
 
 Amen.
+
 [chapter-vespers]
 # SOURCE: Propers of Lauds & Vespers During Advent (propers booklet), Vespers chapter
 !Gen 49:10

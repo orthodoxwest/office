@@ -45,7 +45,7 @@ Glory be to the Father, and to the Son, and to the Holy Ghost.
 R. Hail Mary, full of grace, * The Lord is with thee.
 
 [hymn-lauds]
-# SOURCE: Copy of OCP Ferial Lauds.pdf, p. 107; office-hymns.zip (O Glorious Lady, BVM Lauds.docx)
+# SOURCE: Monastic Diurnal.pdf, p. 66*
 O gloriosa Domina
 
 O glorious Lady, throned in rest,
@@ -59,7 +59,7 @@ And, granting bliss to souls that grieve,
 Unbars the everlasting doors.
 
 O Gate, through which hath passed the King,
-O Hall, whence Light shone though the gloom;
+O Hall, whence Light shone through the gloom;
 The ransomed nations praise and sing
 Life given from the Virgin womb.
 
@@ -69,6 +69,7 @@ All glory, as is ever meet,
 To Father and to Paraclete.
 
 Amen.
+
 [versicle-lauds]
 @use shared/blessed-virgin/versicle-blessed-art-thou
 
