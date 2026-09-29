@@ -632,12 +632,9 @@ def write_jsonl(path: Path, record: dict) -> None:
 
 
 def attest(key: str, printed_page: str, png: str, *, office_runner=None) -> None:
-    png_path = Path(png)
-    try:
-        note_path = png_path.resolve().relative_to(ROOT)
-    except ValueError:
-        note_path = png_path
-    note = f"Word-for-word after normalization; page image {note_path}"
+    # Cite the PDF page, not the cache path: output/ is ignored scratch space.
+    stem = Path(png).stem
+    note = "Word-for-word after normalization" + (f"; PDF page {int(stem)}" if stem.isdigit() else "")
     (office_runner or run_office)(["review", "attest", "--source", "diurnal", "--page", printed_page,
                                   "--note", note, "--replace", key, "codex"])
 

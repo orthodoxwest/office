@@ -85,7 +85,8 @@ the queue's citation.
 "Attested by codex" is a mechanical, hash-bound statement that the corpus entry
 matches the located page image word-for-word after normalization. The ledger
 stores the corpus hash, source, printed page, reviewer, date, and a
-content-free note pointing to the cached PNG. It does not mean Codex supplied
+content-free note naming the PDF page. Notes never cite `output/` paths, which
+are ignored scratch space and won't exist for later readers. It does not mean Codex supplied
 wording, resolved a rubric, or certified another edition.
 
 ## Reviewed low-similarity replacements
