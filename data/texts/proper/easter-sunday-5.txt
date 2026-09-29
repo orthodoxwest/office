@@ -47,6 +47,22 @@ O God, from whom all good things do proceed; grant to us thy humble servants, th
 # SOURCE: Monastic Diurnal p. 386: II Vespers chapter as above at Lauds; page image reviewed by Codex 2026-09-13.
 @use proper/easter-sunday-5/chapter-lauds
 
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 385: At Terce, "Chapter as above at Lauds" (#339)
+@use proper/easter-sunday-5/chapter-lauds
+
+[chapter-sext]
+# SOURCE: monastic diurnal, p. 385 (V Sunday after Easter, At Sext)
+!James 1:25
+But whoso looketh into the perfect law of liberty, and continueth therein, he being not a forgetful hearer, but a doer of the work, * this man shall be blessed in his deed.
+R. Thanks be to God.
+
+[chapter-none]
+# SOURCE: monastic diurnal, p. 386 (V Sunday after Easter, At None)
+!James 1:27
+Pure religion and undefiled before God and the Father is this, To visit the fatherless and widows in their affliction, * and to keep himself unspotted from the world.
+R. Thanks be to God.
+
 [psalm-antiphon-1-prime]
 # SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
 @use shared/formulas/paschal-little-hour-antiphon
