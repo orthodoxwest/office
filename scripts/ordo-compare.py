@@ -464,15 +464,16 @@ def cmd_commemorations(pdf_path, tsv_path):
                 extra_total += len(extra)
         print(f"== {label} commemorations: {len(bad)}/{compared} dates differ; "
               f"{missing_total} missing; {extra_total} extra ==")
-        for (month, day), missing, extra in bad[:20]:
+        cap = SAMPLE_CAP if SHOW_ALL else 20
+        for (month, day), missing, extra in bad[:cap]:
             details = []
             if missing:
                 details.append("missing: " + "; ".join(missing))
             if extra:
                 details.append("extra: " + "; ".join(extra))
             print(f"   {month:02d}-{day:02d}  " + " | ".join(details))
-        if len(bad) > 20:
-            print(f"   ... and {len(bad) - 20} more dates")
+        if len(bad) > cap:
+            print(f"   ... and {len(bad) - cap} more dates (ORDO_COMPARE_ALL=1 to list every one)")
 
 
 def _incipit_words(text):

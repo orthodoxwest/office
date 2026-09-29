@@ -10,9 +10,10 @@
 #
 # --- core ---
 #
-# [collect]
-# Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
-#
+[collect]
+# SOURCE: 2023–2026 ordos appoint Col. "O God" (22*) at I Vespers, Lauds, the Hours and II Vespers: the second Martyr-Bishop collect on Diurnal p. 22* (#394)
+@use commons/bishop-martyr/collect-alternate
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #

@@ -66,6 +66,10 @@ R. And madest him to have dominion of the works of thy hands.
 # SOURCE: monastic diurnal, p. 22* (Common of One Martyr out of Paschaltide, For a Martyr Bishop)
 Almighty God, mercifully look upon our infirmity: and because we are oppressed by the burden of our own deeds, may the glorious intercession of blessed N., thy Martyr and Bishop, defend us.
 
+[collect-alternate]
+# SOURCE: monastic diurnal, p. 22* (Common of One Martyr out of Paschaltide, For a Martyr Bishop, Another Collect)
+O God, who makest us glad by the yearly solemnity of blessed N., thy Martyr and Bishop: mercifully grant that we who honour his birthday may rejoice in his protection.
+
 [chapter-lauds]
 # SOURCE: monastic diurnal, p. 21* (Common of One Martyr out of Paschaltide, At Lauds)
 !Jas 1:12

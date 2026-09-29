@@ -67,6 +67,18 @@ R. Thanks be to God.
 For ye were as sheep going astray; * but are now returned unto the Shepherd and Bishop of your souls.
 R. Thanks be to God.
 
+[chapter-lauds]
+# SOURCE: Monastic Diurnal p. 377: At Lauds, Chapter 1 Peter 2:21, 22; Saturday's I Vespers takes "Chapter as below at Lauds" (#335)
+@use proper/easter-sunday-2/chapter-first-vespers
+
+[chapter-terce]
+# SOURCE: Monastic Diurnal p. 378: At Terce, "Chapter as above at Lauds" (#335)
+@use proper/easter-sunday-2/chapter-lauds
+
+[chapter-vespers]
+# SOURCE: Monastic Diurnal p. 378: At Vespers, "Chapter as above at Lauds"
+@use proper/easter-sunday-2/chapter-lauds
+
 [psalm-antiphon-1-prime]
 # SOURCE: Monastic Diurnal pp. 81–91,371 (Sunday Hours in Paschaltide)
 @use shared/formulas/paschal-little-hour-antiphon
