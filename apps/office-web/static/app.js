@@ -1021,9 +1021,10 @@ function usageBeaconBody(scope) {
     "July", "August", "September", "October", "November", "December",
   ];
   var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  // The server's calendar spans four-digit years.
-  var PICKER_FIRST_YEAR = 1;
-  var PICKER_LAST_YEAR = 9999;
+  // The picker offers a working span of years; the native field's min and
+  // max in the templates match it.
+  var PICKER_FIRST_YEAR = 1950;
+  var PICKER_LAST_YEAR = 2150;
 
   // Dates are UTC midnights built with setUTCFullYear, which neither maps
   // years 0-99 onto the 1900s nor shifts across daylight saving, and which
@@ -1061,6 +1062,18 @@ function usageBeaconBody(scope) {
   function inPickerRange(date) {
     var year = date.getUTCFullYear();
     return year >= PICKER_FIRST_YEAR && year <= PICKER_LAST_YEAR;
+  }
+
+  // A page dated outside the span (typed into the address) opens the picker
+  // at the nearer end, so its controls can still move.
+  function clampToPickerRange(date) {
+    if (date.getUTCFullYear() < PICKER_FIRST_YEAR) {
+      return civilDate(PICKER_FIRST_YEAR, 0, 1);
+    }
+    if (date.getUTCFullYear() > PICKER_LAST_YEAR) {
+      return civilDate(PICKER_LAST_YEAR, 11, 31);
+    }
+    return date;
   }
 
   function el(tag, className, text) {
@@ -1139,7 +1152,7 @@ function usageBeaconBody(scope) {
     function reset() {
       state.today = localDateSlug(new Date());
       state.chosen = pageDateSlug();
-      state.focus = parseSlug(state.chosen) || parseSlug(state.today);
+      state.focus = clampToPickerRange(parseSlug(state.chosen) || parseSlug(state.today));
       state.view = "days";
     }
 

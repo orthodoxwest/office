@@ -2420,6 +2420,29 @@ test("the date picker is set in the room, not the platform", async ({ page }) =>
   await expect(page).toHaveURL(/\/lauds\/2026-03-17$/);
 });
 
+test("the date picker keeps to 1950-2150", async ({ page }) => {
+  const picker = page.getByRole("group", { name: "Choose a date" });
+  for (const [path, month, closed, open] of [
+    ["/lauds/2150-12-15", "December 2150", "Next month", "Previous month"],
+    ["/lauds/1950-01-10", "January 1950", "Previous month", "Next month"],
+    // Outside the span, the picker opens at the nearer end.
+    ["/lauds/2200-06-01", "December 2150", "Next month", "Previous month"],
+  ]) {
+    await openDatedPage(page, path);
+    await page.getByText("Change date", { exact: true }).click();
+    await expect(picker.getByRole("grid", { name: month })).toBeVisible();
+    await expect(picker.getByRole("button", { name: closed })).toBeDisabled();
+    await expect(picker.getByRole("button", { name: open })).toBeEnabled();
+  }
+  // Keys stop at the end rather than leaving the span.
+  await page.goto("/lauds/2150-12-15");
+  await page.getByText("Change date", { exact: true }).click();
+  await picker.getByRole("link", { name: "Thursday, December 31, 2150" }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(picker.getByRole("link", { name: "Thursday, December 31, 2150" })).toBeFocused();
+  await expect(page.locator(".date-jump")).toHaveAttribute("max", "2150-12-31");
+});
+
 test("home's date picker opens the chosen day's home", async ({ page }) => {
   await openDatedPage(page, `/?date=${testDate}`);
   await page.getByText("Change date", { exact: true }).click();
