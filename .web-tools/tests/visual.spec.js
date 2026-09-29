@@ -68,7 +68,7 @@ for (const theme of ["light", "dark"]) {
     test(`Ordo at ${width}px — ${theme}`, async ({ page }) => {
       await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
       await page.clock.install({ time: new Date("2026-01-04T12:00:00-05:00") });
-      await openForSnapshot(page, "/calendar/2026", theme);
+      await openForSnapshot(page, "/calendar/2026/01", theme);
       await expect(page.getByRole("heading", { name: "2026 Ordo", exact: true })).toBeVisible();
       await expect(page).toHaveScreenshot(`ordo-${width === 1280 ? "desktop-" : ""}${theme}.png`);
       if (width === 390) {
@@ -78,6 +78,20 @@ for (const theme of ["light", "dark"]) {
         await expect(today.locator(".day-office-digest")).toBeVisible();
         await expect(page).toHaveScreenshot(`ordo-details-${theme}.png`);
       }
+    });
+  }
+}
+
+// The year's frontispiece: the Tabula Temporaria and the month strip.
+for (const theme of ["light", "dark"]) {
+  for (const width of [390, 1280]) {
+    test(`Ordo frontispiece at ${width}px — ${theme}`, async ({ page }) => {
+      await page.setViewportSize({ width, height: width === 390 ? 844 : 900 });
+      // Pinned: the strip marks the month local today falls in.
+      await page.clock.install({ time: new Date("2026-01-04T12:00:00-05:00") });
+      await openForSnapshot(page, "/calendar/2026", theme);
+      await expect(page.getByRole("heading", { name: "Tabula Temporaria", exact: true })).toBeVisible();
+      await expect(page).toHaveScreenshot(`ordo-year-${width === 1280 ? "desktop-" : ""}${theme}.png`, { fullPage: true });
     });
   }
 }

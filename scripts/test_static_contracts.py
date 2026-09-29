@@ -22,7 +22,8 @@ class StaticContracts(unittest.TestCase):
         body = (STATIC / 'sw.js').read_text()
         self.required(body, [
             '"/reminders"',
-            '"/calendar/" + years[y]',
+            'addUniqueURL(ordo, ordoMonthPath(slug))',
+            'addUniqueURL(ordo, "/calendar/" + slug.slice(0, 4))',
             '"/?date=" + slug',
             '"/" + HOURS[h] + "/" + slug',
             'todayShellURLs',
@@ -119,7 +120,8 @@ class StaticContracts(unittest.TestCase):
             'if (qDate && DATE_RE.test(qDate))',
             'return "/" + hour + "/" + qDate',
             'return "/" + hour + "/" + today',
-            'return "/calendar/" + new Date().getFullYear() + formQuery + "#d-" + today',
+            'return ordoMonthPath(today) + formQuery + "#d-" + today',
+            'CALENDAR_RE = /^\\/calendar\\/\\d{4}(?:\\/(?:0[1-9]|1[0-2]|all))?$/',
             'function networkFetch(req)',
             'cache: "reload"',
             'var revalidate = networkFetch(req)',

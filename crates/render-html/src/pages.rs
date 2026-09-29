@@ -7,7 +7,7 @@ use minijinja::{AutoEscape, Environment};
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
-use crate::links::{calendar_year_link, home_link, hour_link, nav_link, season_label, title_case};
+use crate::links::{home_link, hour_link, nav_link, season_label, title_case};
 use crate::usage::UsageData;
 use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
 
@@ -50,7 +50,6 @@ impl Pages {
         env.add_function("nav_link", |base: String, date: String| nav_link(&base, &date));
         env.add_function("home_link", |date: String| home_link(&date));
         env.add_function("hour_link", |hour: String, date: String| hour_link(&hour, &date));
-        env.add_function("calendar_year_link", |year: i32| calendar_year_link(year));
         env.add_function("static", move |name: String| asset_url(&name));
         env.add_function("section_heading", |label: String| Value::from_safe_string(render_section_heading(&label)));
         Ok(Pages { env })

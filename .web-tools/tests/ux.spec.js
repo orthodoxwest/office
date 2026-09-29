@@ -753,7 +753,7 @@ for (const theme of ["light", "dark"]) {
 test("thresholds and usage share the hour wall in both themes", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   const reference = {};
-  for (const path of [`/lauds/${testDate}`, `/?date=${testDate}`, "/calendar/2026", "/reminders", "/admin/usage?days=7"]) {
+  for (const path of [`/lauds/${testDate}`, `/?date=${testDate}`, "/calendar/2026/03", "/reminders", "/admin/usage?days=7"]) {
     await page.goto(path);
     for (const theme of ["light", "dark"]) {
       const material = await page.evaluate((theme) => {
@@ -780,7 +780,7 @@ test("thresholds and usage share the hour wall in both themes", async ({ page })
 test("forced colours drop the wall for the system canvas", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
   await page.setViewportSize({ width: 1280, height: 900 });
-  for (const path of [`/?date=${testDate}`, "/calendar/2026", `/lauds/${testDate}`]) {
+  for (const path of [`/?date=${testDate}`, "/calendar/2026/03", "/calendar/2026", `/lauds/${testDate}`]) {
     await openDatedPage(page, path);
     const wall = await page.evaluate(() => getComputedStyle(document.documentElement, "::before").content);
     expect(wall, path).toBe("none");
@@ -819,7 +819,7 @@ for (const theme of ["light", "dark"]) {
     // Home stands for the threshold pages that share its print rules; the
     // ordo adds its sticky heading, usage its own print sheet, and the hour
     // its softened prayer band.
-    for (const path of [`/?date=${testDate}`, "/calendar/2026", "/admin/usage?days=7", `/lauds/${testDate}`]) {
+    for (const path of [`/?date=${testDate}`, "/calendar/2026/03", "/admin/usage?days=7", `/lauds/${testDate}`]) {
       await openDatedPage(page, path, theme);
       await page.emulateMedia({ media: "print" });
       const paper = await page.evaluate(() => {
@@ -881,7 +881,7 @@ test("the apse vault appears only over the night, and veils with the season", as
   // Present behind the Apse home at every width, absent in working rooms.
   expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
   expect((await vault({ width: 390, theme: "dark", scheme: "dark", path: home })).stars).toBe(true);
-  for (const path of ["/calendar/2026", "/reminders"]) {
+  for (const path of ["/calendar/2026/03", "/calendar/2026", "/reminders"]) {
     expect((await vault({ width: 1280, theme: "dark", scheme: "dark", path })).stars).toBe(false);
   }
 
@@ -1304,7 +1304,7 @@ test("the header beam holds one line and one geometry on every page", async ({ p
     [1024, `/?date=${testDate}`],
     [1280, `/?date=${testDate}`],
     [1280, `/lauds/${testDate}`],
-    [1280, "/calendar/2026"],
+    [1280, "/calendar/2026/03"],
     [1600, "/calendar/2026"],
   ]) {
     await page.setViewportSize({ width, height: 900 });
@@ -1436,7 +1436,7 @@ for (const theme of ["light", "dark"]) {
     await page.goto("/?date=2026-04-20");
     for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
     // The year heading remains in ordinary gold even after browsing Easter.
-    await page.goto("/calendar/2026");
+    await page.goto("/calendar/2026/04");
     await expect(page.locator("body")).not.toHaveClass(/season-/);
     for (const leaf of await leaves.all()) await expect(leaf).toBeVisible();
   });
@@ -1809,18 +1809,20 @@ test("themes never change layout", async ({ browser }) => {
   };
   const light = await open("light");
   const dark = await open("dark");
-  // The 14,000-element ordo costs ~5s at desktop width under mobile
-  // emulation; one phone width keeps it in the invariant at a third of that.
+  // A month of the ordo is light enough for both widths; the whole year's
+  // 14,000 elements keep to one phone width.
   for (const [path, widths] of [
     ["/vespers/2026-06-18", [320, 1280]],
     ["/lauds/2026-09-13", [320, 1280]],
     [`/?date=${testDate}`, [320, 1280]],
-    ["/calendar/2026", [390]],
+    ["/calendar/2026/03", [320, 1280]],
+    ["/calendar/2026", [320, 1280]],
+    ["/calendar/2026/all", [390]],
   ]) {
     for (const width of widths) {
       const [a, b] = await Promise.all([fingerprint(light.sheet, path, width), fingerprint(dark.sheet, path, width)]);
-      // Compare flat lists and report only the first difference: the ordo
-      // has ~14,000 boxes, too many for a deep-equality diff to be useful.
+      // Compare flat lists and report only the first difference: the whole
+      // year has ~14,000 boxes, too many for a deep-equality diff to be useful.
       for (const kind of ["boxes", "lines"]) {
         const at = a[kind].findIndex((value, i) => value !== b[kind][i]);
         const first = at < 0 && a[kind].length === b[kind].length ? null : { at, light: a[kind][at], dark: b[kind][at] };
@@ -2593,7 +2595,7 @@ test("without JavaScript the native date field still jumps", async ({ browser, b
 });
 
 test("ordo disclosures are deliberate and survive a change in screen width", async ({ page }) => {
-  await openDatedPage(page, "/calendar/2026");
+  await openDatedPage(page, "/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
   const details = day.locator(".day-office-details");
   await expect(details).not.toHaveAttribute("open", "");
@@ -2612,14 +2614,16 @@ test("ordo disclosures are deliberate and survive a change in screen width", asy
 // Delay the font itself: delaying app.js alone misses a late face rewrapping
 // the title and every feast above a deep link. All geometric readings happen
 // in-page, so Playwright's font-waiting screenshot helper cannot mask the swap.
-for (const [width, size, hash] of [
-  [320, "default", ""],
-  [390, "default", ""],
-  [430, "large", ""],
-  [390, "default", "#d-2026-09-12"],
-  [1280, "default", "#d-2026-09-12"],
+for (const [width, size, hash, path] of [
+  [320, "default", "", "/calendar/2026/09"],
+  [390, "default", "", "/calendar/2026/09"],
+  [430, "large", "", "/calendar/2026/09"],
+  [390, "default", "#d-2026-09-12", "/calendar/2026/09"],
+  [1280, "default", "#d-2026-09-12", "/calendar/2026/09"],
+  [390, "default", "#d-2026-09-12", "/calendar/2026/all"],
+  [390, "default", "", "/calendar/2026"],
 ]) {
-  test(`ordo keeps its layout with late fonts at ${width}px, ${size}, ${hash || "year top"}`, async ({ page }) => {
+  test(`ordo keeps its layout with late fonts at ${width}px, ${size}, ${path}${hash}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript((textSize) => localStorage.setItem("office-text-size", textSize), size);
     let releaseFonts;
@@ -2627,10 +2631,13 @@ for (const [width, size, hash] of [
     await page.route("**/*.woff2*", async (route) => { await ready; await route.continue(); });
     await page.exposeBinding("releaseOrdoFonts", () => releaseFonts());
     await page.addInitScript(() => {
+      // The first month (or the frontispiece's Tabula) and the linked day.
+      const first = () => document.querySelector(".month, .tabula");
+      const day = () => document.getElementById("d-2026-09-12") || document.querySelector(".tabula-tables");
       const geometry = () => ({
         header: document.querySelector(".calendar-header").getBoundingClientRect().height,
-        january: document.getElementById("january").getBoundingClientRect().top + scrollY,
-        day: document.getElementById("d-2026-09-12").getBoundingClientRect().top,
+        first: first().getBoundingClientRect().top + scrollY,
+        day: day().getBoundingClientRect().top,
         height: document.documentElement.scrollHeight,
         scrollY,
         width: document.documentElement.scrollWidth,
@@ -2646,7 +2653,7 @@ for (const [width, size, hash] of [
     });
     // Release the fonts from inside the page so tracing cannot insert a
     // font-waiting snapshot between navigation and the release action.
-    await page.goto(`/calendar/2026${hash}`);
+    await page.goto(`${path}${hash}`);
     await page.waitForFunction(() => window.ordoAfterFonts);
     const { before, after } = await page.evaluate(() => ({ before: window.ordoBeforeFonts, after: window.ordoAfterFonts }));
     expect(before.width).toBe(width);
@@ -2657,7 +2664,7 @@ for (const [width, size, hash] of [
 
 test("ordo small labels share a readable size and today's marker adds no height", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
-  await openDatedPage(page, "/calendar/2026#d-2026-07-29");
+  await openDatedPage(page, "/calendar/2026/07#d-2026-07-29");
   const labels = await page.locator("#d-2026-07-29 .day-mobile-weekday, #d-2026-07-29 .day-mobile-flags, #d-2026-07-29 .day-disclosures summary")
     .evaluateAll((items) => items.map((item) => ({ size: parseFloat(getComputedStyle(item).fontSize), family: getComputedStyle(item).fontFamily })));
   expect(labels.length).toBeGreaterThanOrEqual(3);
@@ -2682,7 +2689,7 @@ test("ordo hover shading is reserved for a mouse", async ({ browser, baseURL }) 
   for (const hasTouch of [true, false]) {
     const context = await browser.newContext({ baseURL, hasTouch, isMobile: hasTouch, viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
-    await page.goto("/calendar/2026#d-2026-03-01");
+    await page.goto("/calendar/2026/03#d-2026-03-01");
     await page.evaluate(() => document.fonts.ready);
     const row = page.locator("#d-2026-03-01");
     if (hasTouch) await row.locator(".day-office-details summary").tap();
@@ -2700,11 +2707,11 @@ test("ordo first layout and day anchors stay put when the deferred app loads", a
     let release;
     const ready = new Promise((resolve) => { release = resolve; });
     await page.route("**/static/app.js*", async (route) => { await ready; await route.continue(); });
-    await page.goto("/calendar/2026#d-2026-09-14", { waitUntil: "commit" });
+    await page.goto("/calendar/2026/09#d-2026-09-14", { waitUntil: "commit" });
     const row = page.locator("#d-2026-09-14");
     await expect(row).toBeAttached();
     await page.evaluate(() => document.fonts.ready);
-    await expect(page.locator("#december")).toBeAttached();
+    await expect(page.locator(".ordo-continuation")).toBeAttached();
     const geometry = () => page.evaluate(() => ({
       height: document.documentElement.scrollHeight,
       dayTop: document.getElementById("d-2026-09-14").getBoundingClientRect().top + scrollY,
@@ -2722,16 +2729,33 @@ test("ordo first layout and day anchors stay put when the deferred app loads", a
 });
 
 test("ordo month navigation and full details work without JavaScript", async ({ browser, baseURL }) => {
+  // In the pinned browser a no-script page cannot be inspected once it has
+  // navigated, so, as in the other no-script tests, a click is checked by
+  // the URL it reaches and each page read is opened in a tab of its own.
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
-  const page = await context.newPage();
-  await page.goto(`${baseURL}/calendar/2026`);
+  const open = async (path) => {
+    const page = await context.newPage();
+    await page.goto(`${baseURL}${path}`);
+    return page;
+  };
+  // The frontispiece's strip leads to the month's own page.
+  let page = await open("/calendar/2026");
   await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "March", exact: true }).click();
+  await expect(page).toHaveURL(/\/calendar\/2026\/03$/);
+  page = await open("/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
   await expect(day).toBeInViewport();
   await day.locator(".day-office-details > summary").click();
   await expect(day.locator(".day-office-digest")).toBeVisible();
   await expect(day.locator(".day-office-comm").first()).toBeVisible();
-  await day.locator(".day-feast-name").click();
+  await page.getByRole("navigation", { name: "Other months" }).getByRole("link", { name: /April/ }).click();
+  await expect(page).toHaveURL(/\/calendar\/2026\/04$/);
+  // The whole year jumps within itself.
+  page = await open("/calendar/2026/all");
+  await page.getByRole("navigation", { name: "Jump to month" }).getByRole("link", { name: "November", exact: true }).click();
+  await expect(page.locator("#d-2026-11-01")).toBeInViewport();
+  page = await open("/calendar/2026/03");
+  await page.locator("#d-2026-03-01 .day-feast-name").click();
   await expect(page).toHaveURL(/date=2026-03-01/);
   await context.close();
 });
@@ -2741,10 +2765,10 @@ test("ordo month navigation and full details work without JavaScript", async ({ 
 for (const width of [320, 390, 768, 1280]) {
   test(`ordo navigation fits ${width}px with full touch targets`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await openDatedPage(page, "/calendar/2026#d-2026-09-14");
-    await expect(page.locator('.month-jump [aria-current="location"]')).toHaveText("Sep");
+    await openDatedPage(page, "/calendar/2026/09#d-2026-09-14");
+    await expect(page.locator('.month-jump [aria-current="page"]')).toHaveText("Sep");
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
-    for (const selector of [".year-nav a", ".month-jump a", ".calendar-expand"]) {
+    for (const selector of [".year-nav a", ".month-jump a", ".calendar-expand", ".ordo-continuation a"]) {
       const boxes = await page.locator(selector).evaluateAll((items) => items.map((item) => ({ width: item.getBoundingClientRect().width, height: item.getBoundingClientRect().height })));
       for (const box of boxes) {
         expect(box.width).toBeGreaterThanOrEqual(44);
@@ -2756,39 +2780,99 @@ for (const width of [320, 390, 768, 1280]) {
 
 test("ordo print reveals the office digest without changing screen disclosures", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await openDatedPage(page, "/calendar/2026");
+  await openDatedPage(page, "/calendar/2026/03");
   const day = page.locator("#d-2026-03-01");
   await expect(day.locator(".day-office-digest")).toBeHidden();
   await page.emulateMedia({ media: "print" });
   await expect(day.locator(".day-office-digest")).toBeVisible();
   await expect(day.locator(".day-commemoration").first()).toBeVisible();
   await expect(page.locator(".calendar-tools")).toBeHidden();
+  await expect(page.locator(".ordo-continuation")).toBeHidden();
   await page.emulateMedia({ media: "screen" });
   await expect(day.locator(".day-office-digest")).toBeHidden();
 });
 
 for (const theme of ["light", "dark"]) {
   test(`ordo navigation and day rows are accessible in ${theme}`, async ({ page }) => {
-    await openDatedPage(page, "/calendar/2026", theme);
+    await openDatedPage(page, "/calendar/2026/01", theme);
     // A representative month covers the repeated table and disclosure markup.
     const results = await new AxeBuilder({ page })
-      .include(".calendar-header").include(".month-jump").include(".calendar-tools").include("#january")
+      .include(".calendar-header").include(".month-jump").include(".calendar-tools").include("#january").include(".ordo-continuation")
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(violationFingerprints(results)).toEqual([]);
+    await openDatedPage(page, "/calendar/2026", theme);
+    const frontispiece = await new AxeBuilder({ page })
+      .include(".calendar-header").include(".month-jump").include(".tabula")
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+    expect(violationFingerprints(frontispiece)).toEqual([]);
   });
 }
 
 test("ordo Today leads back to the current year from an archive", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-09-12T12:00:00-04:00") });
+  for (const path of ["/calendar/2025", "/calendar/2025/09", "/calendar/2026/08", "/calendar/2025/all"]) {
+    await page.goto(path);
+    await expect(page.locator("#calendar-today-link"), path).toHaveAttribute("href", "/calendar/2026/09#d-2026-09-12");
+  }
+  // Today's own month jumps to its row.
+  await page.goto("/calendar/2026/09");
+  await expect(page.locator("#calendar-today-link")).toHaveAttribute("href", "#d-2026-09-12");
+  // The strip marks this month in its own year alone.
+  await page.goto("/calendar/2026");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveText("Sep");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveAttribute("aria-label", "September, this month");
   await page.goto("/calendar/2025");
-  await expect(page.locator("#calendar-today-link")).toHaveAttribute("href", "/calendar/2026#d-2026-09-12");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveCount(0);
+});
+
+test("the strip's month marker moves with the month at midnight", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-09-30T23:59:00-04:00") });
+  await openDatedPage(page, "/calendar/2026/09");
+  const september = page.locator('.month-jump [data-month="2026-09"]');
+  const october = page.locator('.month-jump [data-month="2026-10"]');
+  await expect(september).toHaveClass(/is-today-month/);
+  await page.clock.fastForward("02:00");
+  await expect(september).not.toHaveClass(/is-today-month/);
+  await expect(september).toHaveAttribute("aria-label", "September");
+  await expect(october).toHaveClass(/is-today-month/);
+  await expect(october).toHaveAttribute("aria-label", "October, this month");
+  await expect(page.locator(".month-jump .is-today-month")).toHaveCount(1);
+});
+
+test("Tabula dates stay whole at the narrowest width and largest text", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.addInitScript(() => localStorage.setItem("office-text-size", "large"));
+  await openDatedPage(page, "/calendar/2026");
+  const dates = await page.locator(".tabula-tables dd").evaluateAll((items) => items.map((dd) => ({
+    text: dd.textContent,
+    lines: dd.getClientRects().length && Math.round(dd.getBoundingClientRect().height / parseFloat(getComputedStyle(dd).lineHeight)),
+    right: Math.round(dd.getBoundingClientRect().right),
+    edge: Math.round(dd.parentElement.getBoundingClientRect().right),
+  })));
+  expect(dates.length).toBe(11);
+  for (const date of dates) {
+    expect(date.lines, date.text).toBe(1);
+    expect(date.right, date.text).toBe(date.edge);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});
+
+test("links into the year from before month pages still reach their day", async ({ page }) => {
+  await page.goto("/calendar/2026#d-2026-09-12");
+  await expect(page).toHaveURL(/\/calendar\/2026\/09#d-2026-09-12$/);
+  await expect(page.locator("#d-2026-09-12")).toBeInViewport();
+  await page.goto("/calendar/2026?form=priest#march");
+  await expect(page).toHaveURL(/\/calendar\/2026\/03\?form=priest$/);
+  // The frontispiece itself, and its own anchors, stay put.
+  await page.goto("/calendar/2026#tabula-heading");
+  await expect(page).toHaveURL(/\/calendar\/2026#tabula-heading$/);
 });
 
 test("the foreground Ordo moves rather than duplicates its today marker at midnight", async ({
   page,
 }) => {
   await page.clock.install({ time: new Date("2026-07-29T23:59:00-04:00") });
-  await openDatedPage(page, "/calendar/2026");
+  await openDatedPage(page, "/calendar/2026/07");
 
   const oldToday = page.locator("#d-2026-07-29");
   const newToday = page.locator("#d-2026-07-30");
@@ -2929,8 +3013,8 @@ test("quiet mobile controls retain full thumb targets", async ({ page }) => {
       ],
     ],
     [
-      "/calendar/2026",
-      [".year-nav a:not([hidden])", ".month-jump a", ".day-disclosures summary"],
+      "/calendar/2026/03",
+      [".year-nav a:not([hidden])", ".month-jump a", ".day-disclosures summary", ".ordo-continuation a"],
     ],
     [
       "/reminders",
@@ -3076,7 +3160,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
     await route.fulfill({ status: 204 });
   });
   const year = new Date().getFullYear();
-  await page.goto(`/calendar/${year}`);
+  await page.goto(`/calendar/${year}/01`);
   await page.mouse.click(200, 300);
   await expect.poll(() => events.length).toBe(1);
   expect(scopes(events)).toEqual(["ordo"]);
@@ -3477,6 +3561,32 @@ test('cached prayer pages include every form and preserve an explicit form throu
     expect((await page.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(2);
     await choosePrayerForm(page, 'private');
     expect((await page.locator('.elements').innerText()).match(/I confess to God Almighty/gi)).toHaveLength(1);
+  } finally { await context.close(); }
+});
+
+test("the ordo's current month and frontispiece are saved for offline use", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ serviceWorkers: 'allow', baseURL });
+  try {
+    const page = await context.newPage();
+    const today = await serverTodaySlug(page);
+    const month = `/calendar/${today.slice(0, 4)}/${today.slice(5, 7)}`;
+    const year = `/calendar/${today.slice(0, 4)}`;
+    await page.goto(`/lauds/${today}`);
+    await page.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+    });
+    // The month is in the install shell; the frontispiece follows in the top-up.
+    await expect.poll(() => page.evaluate(async (paths) => {
+      for (const path of paths) if (!(await caches.match(path))) return false;
+      return true;
+    }, [month, year]), { timeout: 15000 }).toBe(true);
+    await context.setOffline(true);
+    await page.goto('/calendar');
+    await expect(page).toHaveURL(new RegExp(`${month}#d-${today}$`));
+    await expect(page.locator(`#d-${today}`)).toBeVisible();
+    await page.goto(year);
+    await expect(page.getByRole('heading', { name: 'Tabula Temporaria', exact: true })).toBeVisible();
   } finally { await context.close(); }
 });
 
