@@ -26,6 +26,14 @@
 [psalm-antiphon-4-vespers-easter]
 @use commons/confessor-paschal/psalm-antiphon-4-vespers
 
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, p. 43* / 46* (Common of a Confessor not a Bishop, For a Doctor)
+O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God.
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, For a Doctor, at both Vespers)
+@use proper/st-ephrem-syrian/magnificat-antiphon
+
 # [collect]
 # Collect of the feast (all hours when celebrated). Use N. for the proper name if needed.
 #
@@ -62,9 +70,12 @@
 # [commemoration-versicle]
 # Versicle pair (V. … / R. …) for the commemoration of this feast.
 #
-[commemoration-collect]
-# SOURCE: diurnal p. 536
+[collect]
+# SOURCE: diurnal p. 536 (also used as commemoration-collect)
 O God, who hast vouchsafed to enlighten thy Church by the wondrous learning and the excellent merits and life of blessed Ephrem thy Confessor and Doctor: we humbly beseech thee that at his intercession, thou wouldst protect it by thy power against every assault of wickedness and error.
+
+[commemoration-collect]
+@use proper/st-ephrem-syrian/collect
 
 # [chapter-lauds]
 # Chapter (capitulum) at Lauds. Bare [chapter] also works for all hours.

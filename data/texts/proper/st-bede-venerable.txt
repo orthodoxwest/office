@@ -30,6 +30,14 @@
 # SOURCE: diurnal p. 528
 O God, who by the learning of blessed Bede, thy Confessor and Doctor, hast made thy Church illustrious: mercifully grant unto thy servants, that we may ever be illuminated by his wisdom and aided by his merits.
 
+[magnificat-antiphon]
+# SOURCE: monastic diurnal, p. 43* / 46* (Common of a Confessor not a Bishop, For a Doctor)
+O Teacher right excellent, * O light of Holy Church, O blessed N., lover of the divine law: intercede for us unto the Son of God.
+
+[magnificat-antiphon-first]
+# SOURCE: monastic diurnal, p. 43* (Common of a Confessor not a Bishop, For a Doctor, at both Vespers)
+@use proper/st-bede-venerable/magnificat-antiphon
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
 #
