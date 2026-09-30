@@ -22,20 +22,17 @@ async function openDatedPage(page, path, theme = "light") {
   await page.evaluate(() => document.fonts.ready);
 }
 
-// Phones reach Appearance and Text size from the foot of the site menu;
-// desktop keeps them in the footer. Click whichever copy is showing, opening
-// (and afterwards closing) the phone menu so later measurements see the page.
+// Phones reach Appearance and Text size from the foot of the site menu; wide
+// screens from the header's Settings. Open whichever is showing, choose, and
+// close it again so later measurements see the page.
 async function choosePreference(page, name) {
-  const visible = page.getByRole("button", { name, exact: true });
-  if (await visible.count()) {
-    await visible.click();
-    return;
-  }
-  const summary = page.locator(".site-menu > summary");
+  const wide = await page.locator(".site-settings > summary").isVisible();
+  const disclosure = page.locator(wide ? ".site-settings" : ".site-menu");
+  const summary = disclosure.locator(":scope > summary");
   await summary.click();
-  await page.locator(".menu-prefs").getByRole("button", { name, exact: true }).click();
+  await page.locator(wide ? ".settings-prefs" : ".menu-prefs").getByRole("button", { name, exact: true }).click();
   await summary.click();
-  await expect(page.locator(".site-menu")).not.toHaveAttribute("open", "");
+  await expect(disclosure).not.toHaveAttribute("open", "");
 }
 
 // The raised initial increases the line box without adding a line of text.
@@ -180,7 +177,7 @@ test("mobile navigation stays quiet until opened", async ({ page }) => {
   await expect(primary.locator('[data-nav="hour"]')).toHaveCount(0);
   // Preferences sit at the foot of the menu, not at the foot of the page.
   await expect(page.locator(".menu-prefs").getByRole("button", { name: "Apse", exact: true })).toBeVisible();
-  await expect(page.locator(".footer-prefs")).toBeHidden();
+  await expect(page.locator(".site-settings")).toBeHidden();
   const [links, prefs] = await Promise.all([
     primary.boundingBox(),
     page.locator(".menu-prefs").boundingBox(),
@@ -1555,7 +1552,34 @@ test("desktop navigation and frontispiece remain composed", async ({ page }) => 
   await expect(primary.getByRole("link", { name: "Ordo", exact: true })).toBeVisible();
   await expect(primary.locator('[data-nav="hour"]')).toHaveCount(0);
   await expect(page.locator(".menu-prefs")).toBeHidden();
-  await expect(page.locator(".footer-prefs").getByRole("button", { name: "Apse", exact: true })).toBeVisible();
+  // The preferences wait under Settings at the end of the header; the page
+  // ends in its footer line alone.
+  const settings = page.locator(".site-settings");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(page.locator(".settings-prefs")).toBeHidden();
+  await expect(page.locator("footer").getByRole("button")).toHaveCount(0);
+  await settings.locator("summary").click();
+  await expect(page.locator(".settings-prefs").getByRole("button", { name: "Apse", exact: true })).toBeVisible();
+  // An overlay: a preference chosen inside leaves it open, a tap outside or Escape puts it away.
+  await page.locator(".settings-prefs").getByRole("button", { name: "Nave", exact: true }).click();
+  await expect(settings).toHaveAttribute("open", "");
+  // It opens below the header and lies over the page, not under the niche.
+  const [header, panel] = await Promise.all([
+    page.locator(".site-header").boundingBox(),
+    page.locator(".settings-prefs").boundingBox(),
+  ]);
+  expect(panel.y).toBeGreaterThanOrEqual(header.y + header.height - 1);
+  const onTop = await page.evaluate(({ x, y }) => document.elementFromPoint(x, y)?.closest(".settings-prefs") !== null, {
+    x: panel.x + panel.width / 2,
+    y: panel.y + panel.height - 8,
+  });
+  expect(onTop).toBe(true);
+  await page.locator("footer").click();
+  await expect(settings).not.toHaveAttribute("open", "");
+  await settings.locator("summary").click();
+  await page.keyboard.press("Escape");
+  await expect(settings).not.toHaveAttribute("open", "");
+  await expect(settings.locator("summary")).toBeFocused();
   await expect(page.getByRole("heading", { name: "Morning", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Evening", exact: true })).toBeVisible();
   const rules = await page.evaluate(() => {
@@ -1674,7 +1698,7 @@ test("text size choice persists across prayer navigation", async ({ page }) => {
 
   await page.goto(`/lauds/${testDate}`);
   await expect(page.locator("html")).toHaveAttribute("data-text-size", "large");
-  // Both copies (menu and footer) reflect the stored choice.
+  // Both copies (menu and Settings) reflect the stored choice.
   const large = page.locator('.text-size-option[data-text-size-choice="large"]');
   await expect(large).toHaveCount(2);
   for (const button of await large.all()) await expect(button).toHaveAttribute("aria-pressed", "true");

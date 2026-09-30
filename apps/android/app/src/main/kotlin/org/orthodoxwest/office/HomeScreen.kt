@@ -33,9 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -65,30 +68,45 @@ fun HomeScreen(
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
 ) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    // Where the niche stands in the room, which the chapel light follows.
+    var room by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var nicheBounds by remember { mutableStateOf<Rect?>(null) }
+    BoxWithConstraints(Modifier.fillMaxSize().onGloballyPositioned { room = it }) {
         // Apse: one fixed field, anchored top centre, clearing the header.
         VaultField(Modifier.fillMaxSize(), listOf(0f to 0f, 0.09f to 0f, 0.16f to 0.9f, 0.6f to 0.7f, 1f to 0.3f))
         // A wide screen sets the frontispiece in a niche, and lights the room toward it.
         val screen = maxWidth
+        val screenHeight = maxHeight
         val niche = if (LocalWide.current) nicheTokens(LocalPalette.current) else null
-        if (niche != null) ChapelLight(niche)
+        if (niche != null) ChapelLight(niche, nicheBounds)
+        val top = insets.calculateTopPadding()
+        val bottom = insets.calculateBottomPadding()
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
+            Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = top, bottom = bottom),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            chrome()
-            if (niche != null) {
-                // The moulding stands 0.75rem out from the card; room for it below the header.
-                Frontispiece(
-                    view, date, today, onDate, onHour, onOrdoDay,
-                    Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 12.dp).widthIn(max = nicheWidth(screen)).fillMaxWidth(),
-                    niche = niche,
-                    head = nicheHead(screen),
-                )
-            } else {
-                Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
+            // A wide screen centres the niche between the header and the foot, as the web's desktop
+            // home does; a phone sets its card under the header.
+            Column(
+                Modifier.fillMaxWidth().then(if (niche != null) Modifier.heightIn(min = screenHeight - top - bottom) else Modifier),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = if (niche != null) Arrangement.SpaceBetween else Arrangement.Top,
+            ) {
+                chrome()
+                if (niche != null) {
+                    // The moulding stands 0.75rem out from the card; room for it below the header.
+                    Frontispiece(
+                        view, date, today, onDate, onHour, onOrdoDay,
+                        Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 12.dp).widthIn(max = nicheWidth(screen)).fillMaxWidth()
+                            .onGloballyPositioned { card -> nicheBounds = room?.takeIf { it.isAttached }?.localBoundingBoxOf(card) },
+                        niche = niche,
+                        head = nicheHead(screen),
+                    )
+                } else {
+                    Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
+                }
+                Footer(diamond = !LocalPalette.current.dark)
             }
-            Footer(diamond = !LocalPalette.current.dark)
         }
     }
 }

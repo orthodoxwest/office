@@ -30,9 +30,10 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   the Theme (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
   days into the year's months, as the web's does.
 - **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
-  takes the web's desktop composition: the header's links inline and the preferences in the
-  footer; home's frontispiece set in the niche, with its round head, stone moulding and
-  day-coloured trim, under the chapel's light (`Niche.kt`); the ordo as the desktop table; the
+  takes the web's desktop composition: the header's links inline, ending in Settings for the
+  theme and text size; home's frontispiece set in the niche, with its round head, stone
+  moulding and day-coloured trim, centred in the room with the chapel's light on it
+  (`Niche.kt`); the ordo as the desktop table; the
   Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
   at 1280×900, beside the web's desktop snapshots, and at a tablet's and a landscape phone's
   sizes.

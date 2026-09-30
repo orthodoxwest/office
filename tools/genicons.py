@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Render the PWA cross icons. Requires Pillow (tools/requirements.txt)."""
+"""Render the PWA cross icons, and the iOS app's. Requires Pillow (tools/requirements.txt)."""
 import argparse
 from pathlib import Path
 from PIL import Image
+
+# The iOS app icon: one 1024-pixel image, which Xcode scales for every place it is shown.
+IOS_ICON = Path(__file__).resolve().parents[1] / "apps/ios/Office/Assets.xcassets/AppIcon.appiconset/icon-1024.png"
 
 
 def draw_icon(size):
@@ -23,6 +26,9 @@ def main():
         path = args.out / name
         draw_icon(size).save(path)
         print("wrote", path)
+    IOS_ICON.parent.mkdir(parents=True, exist_ok=True)
+    draw_icon(1024).save(IOS_ICON)
+    print("wrote", IOS_ICON)
 
 
 if __name__ == "__main__":

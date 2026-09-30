@@ -149,11 +149,18 @@ fun DrawScope.niche(t: NicheTokens, p: Palette, day: Color, head: Float, frame: 
 }
 
 /**
- * The chapel's light over the wall, fixed to the screen: a warm pool where the niche stands,
- * the room's edges in shade, and a shaft from a high window spending itself before the floor.
+ * Where the pool of light falls on the niche: two thirds of the way down, where the web's
+ * viewport-centred pool meets its vertically centred niche at desktop sizes.
+ */
+const val POOL_DEPTH = 0.66f
+
+/**
+ * The chapel's light over the wall, fixed to the screen: a warm pool on the niche (`niche`, its
+ * bounds in this layer; the web's 50% 54% until it is placed), the room's edges in shade, and a
+ * shaft from a high window spending itself before the floor.
  */
 @Composable
-fun ChapelLight(t: NicheTokens, modifier: Modifier = Modifier) {
+fun ChapelLight(t: NicheTokens, niche: Rect? = null, modifier: Modifier = Modifier) {
     Canvas(modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
         // CSS's radial ellipse: a circle of radius rx, squeezed to ry about its centre, over the whole screen.
         fun ellipse(cx: Float, cy: Float, rx: Float, ry: Float, vararg stops: Pair<Float, Color>) {
@@ -181,7 +188,8 @@ fun ChapelLight(t: NicheTokens, modifier: Modifier = Modifier) {
             Brush.verticalGradient(0f to Color.Black, 0.38f to Color.Black.copy(alpha = 0.55f), 0.74f to Color.Transparent),
             blendMode = BlendMode.DstIn,
         )
-        ellipse(size.width * 0.5f, size.height * 0.54f, size.width * 0.4f, size.height * 0.46f, 0f to t.pool, 0.7f to Color.Transparent)
+        val pool = niche?.let { Offset(it.center.x, it.top + it.height * POOL_DEPTH) } ?: Offset(size.width * 0.5f, size.height * 0.54f)
+        ellipse(pool.x, pool.y, size.width * 0.4f, size.height * 0.46f, 0f to t.pool, 0.7f to Color.Transparent)
         ellipse(size.width * 0.5f, size.height * 0.52f, size.width * 0.74f, size.height * 0.8f, 0.34f to Color.Transparent, 1f to t.shade)
     }
 }

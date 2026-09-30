@@ -93,12 +93,21 @@
           <a href="{{ nav_link("/calendar", d)|url }}" data-nav="calendar"{% if p == "calendar" %} class="active" aria-current="page"{% endif %}>Ordo</a>
           <a class="nav-secondary{% if p == "reminders" %} active{% endif %}" href="{{ nav_link("/reminders", d)|url }}" data-nav="reminders"{% if p == "reminders" %} aria-current="page"{% endif %}>Reminders</a>
         </nav>
-        {# Phone-only: the same preference controls, at the foot of the menu
-             so the landing page stays quiet. Hidden on desktop (the footer
-             copy serves there); app.js syncs every copy. #}
+        {# Phone-only: the preference controls, at the foot of the menu so
+             the landing page stays quiet. Wide screens have the Settings
+             disclosure below instead; app.js syncs every copy. #}
         <div class="site-prefs menu-prefs">
           {{ prefs() }}
         </div>
+        </div>
+      </details>
+      {# Wide screens: the same preferences behind their own disclosure at the
+           end of the header, so no page ends in a settings panel. Hidden on
+           phones, whose menu carries them. #}
+      <details class="site-settings">
+        <summary>Settings</summary>
+        <div class="site-prefs settings-prefs">
+          {{ prefs() }}
         </div>
       </details>
     </div>
@@ -108,11 +117,6 @@
   </main>
   <footer>
     <p>Benedictine Divine Office</p>
-    {# Desktop keeps the preferences here; narrow screens hide this copy and
-         show the one at the foot of the site menu instead. #}
-    <div class="site-prefs footer-prefs">
-      {{ prefs() }}
-    </div>
   </footer>
 </body>
 </html>

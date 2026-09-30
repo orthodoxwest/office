@@ -161,10 +161,20 @@ mod tests {
     fn layout_includes_text_size_control() {
         let body = source("layout.html");
         // Preferences render once at the foot of the phone menu and once in the
-        // desktop footer; CSS shows one copy per width.
-        has_all(body, &[r#"import prefs"#, r#"class="site-prefs menu-prefs""#, r#"class="site-prefs footer-prefs""#]);
+        // wide header's Settings disclosure; CSS shows one copy per width, and
+        // no page ends in them.
+        has_all(
+            body,
+            &[
+                r#"import prefs"#,
+                r#"class="site-prefs menu-prefs""#,
+                r#"<details class="site-settings">"#,
+                r#"class="site-prefs settings-prefs""#,
+            ],
+        );
         assert!(at(body, "menu-prefs") < at(body, "</details>"), "phone preferences sit inside the site menu");
-        assert!(at(body, "footer-prefs") > at(body, "<footer>"), "desktop preferences stay in the footer");
+        assert!(at(body, "settings-prefs") < at(body, "</header>"), "wide preferences sit in the header");
+        assert!(!body[at(body, "<footer>")..].contains("prefs()"), "the footer carries no preferences");
         has_all(
             source("macros.html"),
             &[

@@ -582,12 +582,6 @@ summary:focus-visible {
   justify-content: flex-end;
 }
 
-/* The phone menu carries its own copy of the preferences; desktop uses the
-   footer's. */
-.menu-prefs {
-  display: none;
-}
-
 .site-menu nav a {
   color: var(--accent);
   text-decoration: none;
@@ -634,44 +628,106 @@ summary:focus-visible {
   margin-bottom: 1.25rem;
 }
 
-/* Quiet footer preference controls (desktop): Default / Nave / Apse above,
-   Smaller / Default / Larger text below. Same hairline group, same weight —
-   neither should read louder than the other. Phones get the same controls at
-   the foot of the site menu instead (see the narrow-screen menu block). */
-.footer-prefs {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* The preferences: Default / Nave / Apse over Smaller / Default / Larger
+   text, in one panel wherever they appear (the foot of the phone menu, the
+   wide header's Settings). Both rows share one column template, so the three
+   themes sit exactly over the three sizes of A, whatever the label widths.
+   Same hairlines, same weight: neither row reads louder than the other. */
+.site-prefs {
+  display: grid;
+  gap: 0;
 }
 
-/* Row labels belong to the menu grid; the footer pair explains itself. */
-.footer-prefs .pref-label {
+.site-prefs .theme-switch,
+.site-prefs .text-size-switch {
+  display: grid;
+  grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.site-prefs .text-size-switch {
+  border-top: 1px solid var(--surface-edge);
+}
+
+.pref-label {
+  display: flex;
+  align-items: center;
+  padding-left: 0.65rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The phone menu's copy; wide screens use the one under Settings. */
+.menu-prefs {
   display: none;
 }
 
-footer .theme-switch,
-footer .text-size-switch {
-  display: inline-flex;
-  align-items: stretch;
-  justify-content: center;
-  /* Hairline courses above and below rather than a boxed group. These are the
-     quietest thing on the page and were reading as the loudest — two outlined
-     segmented controls stacked under the day is the one piece of chrome in the
-     app that looked like a settings panel. */
-  border-block: 1px solid var(--surface-edge);
-  margin: 0.85rem auto 0;
+/* Wide screens: Settings closes the header's links, quiet as Reminders, and
+   opens the panel beneath it. Phones hide it; their menu carries the same
+   controls. */
+.site-settings {
+  flex: 0 0 auto;
 }
 
-/* Sits directly under its sibling sharing one hairline: a single preference
-   cluster, not two bands. The middle rule belongs to both rows, so the quiet
-   controls read as one instrument panel rather than two stacked boxes. */
-footer .theme-switch {
-  margin-bottom: 0;
+/* Set like the header's links, so the header keeps its height. */
+.site-settings > summary {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.3rem 0.35rem 0.55rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  list-style: none;
+  text-transform: uppercase;
 }
 
-footer .text-size-switch {
-  margin-top: 0;
-  border-top: none;
+.site-settings > summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-settings > summary:hover {
+  color: var(--accent);
+}
+
+/* The app's one caret, in gold. */
+.site-settings > summary::after {
+  content: "▾";
+  margin-left: 0.4rem;
+  color: var(--gold-line);
+  font-size: 0.85em;
+}
+
+.site-settings[open] > summary::after {
+  content: "▴";
+}
+
+.site-settings > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Hung from the nav shell, a little below the header's rule, at the gutter
+   the page copy uses (as the phone menu's panel is), and over the page. */
+.settings-prefs {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 0.7rem + 1px + 0.35rem);
+  right: max(var(--page-gutter), env(safe-area-inset-right));
+  width: 18rem;
+  padding: 0.65rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--ornament-line);
+  box-shadow:
+    inset 0 1px 0 var(--surface-edge),
+    0 0.45rem 1rem rgba(36, 28, 23, 0.09);
+}
+
+.site-settings:not([open]) > .settings-prefs {
+  display: none;
 }
 
 .theme-option,
@@ -716,8 +772,16 @@ footer .text-size-switch {
 }
 
 .theme-option:last-child,
-.text-size-option:last-child {
+.text-size-option:last-child,
+.site-prefs .theme-option,
+.site-prefs .text-size-option {
   border-right: none;
+}
+
+/* A touch floor (~44px) wherever the preferences are, tablets included. */
+.site-prefs .theme-option,
+.site-prefs .text-size-option {
+  min-height: 2.75rem;
 }
 
 .theme-option:hover,
@@ -742,16 +806,15 @@ footer .text-size-switch {
 }
 
 @media (max-width: 700px) {
-  /* Phones reach the preferences from the site menu, so the landing page
-     and the end of each hour are not closed by a settings panel. */
-  .footer-prefs {
+  /* Phones reach the preferences from the site menu; the header's Settings
+     is for wide screens. */
+  .site-settings {
     display: none;
   }
 
-  /* With the preferences gone the phone footer is one quiet line. Home's
-     card is shorter than the global 60vh floor, which left a tall empty
-     band of wall between the card and that line; desktop already releases
-     the floor to centre its niche. */
+  /* The phone footer is one quiet line. Home's card is shorter than the
+     global 60vh floor, which left a tall empty band of wall between the card
+     and that line; desktop already releases the floor to centre its niche. */
   .page-home main {
     min-height: 0;
   }
@@ -898,42 +961,12 @@ footer .text-size-switch {
   }
 
   /* Preferences close the menu, below a rule like the one between the hours
-     and Ordo. Both rows share one column template, so Default / Nave / Apse
-     sit exactly over the three sizes of A, whatever the label widths. */
+     and Ordo. */
   .menu-prefs {
     display: grid;
-    gap: 0;
     margin-top: 0.4rem;
     padding-top: 0.4rem;
     border-top: 1px solid var(--border);
-  }
-
-  .menu-prefs .theme-switch,
-  .menu-prefs .text-size-switch {
-    display: grid;
-    grid-template-columns: 3.4rem repeat(3, minmax(0, 1fr));
-    align-items: stretch;
-  }
-
-  .menu-prefs .text-size-switch {
-    border-top: 1px solid var(--surface-edge);
-  }
-
-  /* The grid already separates the cells; the footer's vertical hairlines
-     would box every option inside the panel. */
-  .menu-prefs .theme-option,
-  .menu-prefs .text-size-option {
-    border-right: none;
-  }
-
-  .pref-label {
-    display: flex;
-    align-items: center;
-    padding-left: 0.65rem;
-    color: var(--muted);
-    font-size: 0.66rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
 }
 
@@ -3745,6 +3778,33 @@ body.season-eastertide {
   }
 }
 
+/* Wide screens' Settings panel settles the same way. */
+@media (min-width: 701px) and (prefers-reduced-motion: no-preference) {
+  :root.motion-ready .settings-prefs {
+    transition:
+      opacity 160ms ease-out,
+      transform 160ms ease-out,
+      display 160ms allow-discrete;
+  }
+
+  :root.motion-ready .site-settings:not([open]) > .settings-prefs {
+    opacity: 0;
+    transform: translateY(-0.3rem);
+  }
+
+  :root.motion-ready .site-settings[open] > .settings-prefs {
+    opacity: 1;
+    transform: none;
+  }
+
+  @starting-style {
+    :root.motion-ready .site-settings[open] > .settings-prefs {
+      opacity: 0;
+      transform: translateY(-0.3rem);
+    }
+  }
+}
+
 /* ── Shared printer's headpiece ──
    One cross opens the home, year, or reminders heading. Foliage yields to
    simple rules in Passiontide; both occupy exactly the same space. The Ordo
@@ -4935,6 +4995,7 @@ body.season-eastertide {
    copyable, as do dates and feast names. */
 .site-brand,
 .site-menu > summary,
+.site-settings > summary,
 .site-menu nav a,
 .theme-option,
 .hour-date-nav > summary,
@@ -4952,6 +5013,7 @@ body.season-eastertide {
 
 .site-brand,
 .site-menu > summary,
+.site-settings > summary,
 .site-menu nav a,
 .theme-option,
 .hour-date-nav > summary,
@@ -4969,6 +5031,7 @@ body.season-eastertide {
    effect on selectable prayer text. Individual controls keep their own
    borders and typography while sharing one material response. */
 .site-menu > summary:active,
+.site-settings > summary:active,
 .site-menu nav a:active,
 .theme-option:active,
 .text-size-option:active,
@@ -5632,10 +5695,11 @@ body.page-hour .report-issue {
       mask-repeat: repeat, no-repeat, repeat;
       -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
-      /* Where the epilogue meets the footer at rest: the scrolling fields
+      /* Where the epilogue meets the footer at rest (the footer's height,
+         now that it is one line under its diamond): the scrolling fields
          took their phase from that seam. Four values, since mask-position
          has no three-value form. */
-      --apse-rest-seam: 13.2rem;
+      --apse-rest-seam: 8.625rem;
       -webkit-mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       -webkit-mask-composite: source-in;
@@ -5645,8 +5709,10 @@ body.page-hour .report-issue {
     }
 
     body.page-hour .office-hour::before {
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
+      /* Set from the seam: clear through the continuation links, full
+         around the report link, thinning to nothing at the screen's foot. */
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
       animation-range: calc(100% - 9rem) 100%;
     }
 

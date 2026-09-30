@@ -17,7 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -85,6 +87,22 @@ class WideScreenshotTest {
     @Test fun year() { show(Page.Year(2026), ThemeChoice.NAVE); shoot("year") }
 
     @Test fun reminders() { show(Page.Reminders, ThemeChoice.NAVE); shoot("reminders") }
+
+    /** The theme and text size wait under the header's Settings; no page ends in them. */
+    @Test
+    fun settings() {
+        show(Page.Home(lent), ThemeChoice.NAVE)
+        compose.onAllNodesWithText("APSE").assertCountEquals(0)
+        compose.onNodeWithText("SETTINGS").performClick()
+        compose.onNodeWithText("APSE").assertExists()
+        compose.onNodeWithText("NAVE").performClick()
+        captureScreenRoboImage("build/screenshots/wide-settings.png")
+    }
+
+    /** Upright, the niche stands centred in the room with the light on it, as on the web. */
+    @Test
+    @Config(qualifiers = "w800dp-h1280dp-mdpi")
+    fun tabletHome() { show(Page.Home(lent), ThemeChoice.NAVE); shoot("tablet-home") }
 
     @Test
     @Config(qualifiers = "w800dp-h1280dp-mdpi")

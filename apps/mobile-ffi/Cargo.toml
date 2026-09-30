@@ -8,7 +8,8 @@ publish.workspace = true
 
 [lib]
 name = "office_mobile"
-# cdylib for Android's JNI loader; `lib` for the tests. iOS will add staticlib.
+# cdylib for Android's JNI loader; `lib` for the tests. iOS links a staticlib, which
+# apps/ios/build-core.sh builds with `cargo rustc --crate-type staticlib`.
 crate-type = ["cdylib", "lib"]
 
 [[bin]]

@@ -823,6 +823,26 @@ function usageBeaconBody(scope) {
     });
   }
 
+  // The wide header's Settings is an overlay too: a tap outside it, or
+  // Escape, puts it away; a preference chosen inside leaves it open.
+  var siteSettings = document.querySelector(".site-settings");
+  if (siteSettings) {
+    document.addEventListener("click", function (e) {
+      if (siteSettings.open && !siteSettings.contains(e.target)) {
+        siteSettings.removeAttribute("open");
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && siteSettings.open) {
+        siteSettings.removeAttribute("open");
+        var summary = siteSettings.querySelector("summary");
+        if (summary) {
+          summary.focus();
+        }
+      }
+    });
+  }
+
   // Native disclosures start closed at every width, including without JS.
   // A deliberate bulk action is useful for comparing offices across the year.
   var calendarExpand = document.querySelector(".calendar-expand");
