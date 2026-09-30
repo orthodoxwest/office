@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -45,6 +46,21 @@ import org.orthodoxwest.office.core.SectionView
 
 /** The verse gutter (`--verse-gutter`, 1.8rem): verse numbers and ℣/℟ sit in it, text beyond it. */
 val VerseGutter: Dp = 28.8.dp
+
+/** The ℣/℟ column and the space after it (the web's `.sigil`, 1.4rem + 0.4rem): together the verse gutter. */
+private val SigilGap: Dp = 6.4.dp
+private val SigilColumn: Dp = VerseGutter - SigilGap
+
+/**
+ * A sigil set right-aligned in its column. A mark wider than the column hangs up to `hang` into
+ * the margin before it; only beyond that (a large system font) does the column widen, so the
+ * mark never wraps or leaves the page.
+ */
+private fun Modifier.sigilColumn(hang: Dp): Modifier = layout { measurable, constraints ->
+    val mark = measurable.measure(constraints.copy(minWidth = 0))
+    val width = maxOf(SigilColumn.roundToPx(), mark.width - hang.roundToPx())
+    layout(width, mark.height) { mark.place(width - mark.width, 0) }
+}
 
 /** Latin within a small-caps label is set in lower case italic, as the web's `.psalm-incipit`. */
 private const val NO_SMALL_CAPS = "'smcp' 0, 'c2sc' 0, lnum"
@@ -131,15 +147,17 @@ fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
         BlockKind.VERSICLE, BlockKind.RESPONSE, BlockKind.ALL -> when {
             block.dropCap -> Opening(block, text, m, textStart = 0.dp, raised = true)
             block.marker.isEmpty() -> Text(runs(block), m.fillMaxWidth(), style = text)
-            // A spelled-out sigil ("Blessing.", "All:") stands above the text.
-            block.marker.length > 2 -> Column(m.fillMaxWidth()) {
+            // "Blessing." is too wide to hang in the page gutter: it stands above its words,
+            // both on the edge the ℣/℟ lines' words share, as the web's phone layout sets it.
+            block.kind == BlockKind.VERSICLE && block.marker.length > 2 -> Column(m.fillMaxWidth().padding(start = VerseGutter)) {
                 Text(block.marker, style = text.copy(color = p.rubric))
-                Text(runs(block), Modifier.padding(start = VerseGutter), style = text)
+                Text(runs(block), style = text)
             }
             else -> Row(m.fillMaxWidth()) {
-                // The sigil keeps its stop at any font size: the gutter widens rather than wrap it.
-                Text(block.marker, Modifier.widthIn(min = 22.dp).alignByBaseline(), softWrap = false, style = text.copy(color = p.rubric, textAlign = TextAlign.End))
-                Spacer(Modifier.width(6.4.dp))
+                // "All:" hangs its extra width into the page gutter, keeping its words on that edge.
+                val hang = if (block.kind == BlockKind.ALL) Gutter else 0.dp
+                Text(block.marker, Modifier.sigilColumn(hang).alignByBaseline(), softWrap = false, style = text.copy(color = p.rubric))
+                Spacer(Modifier.width(SigilGap))
                 Text(runs(block), Modifier.alignByBaseline(), style = text)
             }
         }
