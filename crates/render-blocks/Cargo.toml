@@ -1,0 +1,23 @@
+[package]
+name = "render-blocks"
+version = "0.1.0"
+description = "Platform-neutral layout of a composed hour: blocks of styled runs for the native apps"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+corpus.workspace = true
+liturgy.workspace = true
+
+[dev-dependencies]
+calendar.workspace = true
+office.workspace = true
+render-html.workspace = true
+tools.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+wildcard_enum_match_arm = "deny"
