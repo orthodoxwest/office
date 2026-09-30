@@ -1,13 +1,14 @@
 //! The ordo-relevant digest of a composed hour: preces, suffrage, commemorations, and the
 //! gospel-canticle antiphon. Shared by the ordo, the calendar view, and `office rubrics`,
-//! and by the web's and the native apps' ordo rows through `ordo_day`.
+//! and by the web's and the native apps' ordo rows through `ordo_day` (which
+//! `presentation::day_name` names).
 
 use calendar::{Color, MoveableDates};
 use liturgy::{ElementType, OfficeHour, PrayerForm};
 
 use crate::concurrence::VespersOwner;
 use crate::day::Day;
-use crate::engine::{Engine, title_case};
+use crate::engine::Engine;
 
 /// One commemoration: its name and its antiphon's incipit.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -76,23 +77,10 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
     s
 }
 
-/// The day's display name, as the ordo row and home name it: its celebration,
-/// else its temporal title, else the season's feria.
-pub fn day_name(day: &Day) -> String {
-    if let Some(c) = &day.celebration {
-        return c.name.clone();
-    }
-    if let Some(t) = &day.tempora {
-        return t.clone();
-    }
-    format!("{} feria", title_case(day.season.as_str()))
-}
-
 /// One day of the ordo: the calendar's facts and the digest of its composed
 /// Lauds, Hours (Prime stands for the minor hours' shared preces), and Vespers.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct OrdoDay {
-    pub name: String,
     /// The rank's abbreviation ("2cl") and full name; both empty without a celebration.
     pub rank: String,
     pub rank_full: String,
@@ -114,7 +102,6 @@ pub fn ordo_day(day: &Day, engine: &Engine, moveable: &MoveableDates) -> OrdoDay
         None => (String::new(), String::new()),
     };
     OrdoDay {
-        name: day_name(day),
         rank,
         rank_full,
         color: day.color,

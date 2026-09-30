@@ -10,9 +10,11 @@ use std::sync::{Arc, Mutex};
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
 use corpus::typography::typeset;
 use liturgy::{OfficeHour, PrayerForm};
-use office::summary::{CommSummary, HourSummary, day_name, ordo_day};
+use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
-use render_html::links::{report_url, season_class, season_label, title_case};
+use presentation::{
+    MONTHS, current_hour_entry, date_slug, day_heading, day_name, invitation, long_date, report_url, season_class, season_label,
+};
 
 pub use data::EmbeddedData;
 
@@ -82,43 +84,22 @@ impl OfficeCore {
         let now = today.parse()?;
         let year = self.year(shown.year())?;
         let day = year.days.get(shown.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {shown}")))?;
-        let feast = day_name(day);
-        let lower = feast.to_lowercase();
-        // A short note for home; the ordo carries the full wording.
-        let octave_note = match &day.within_octave_of {
-            Some(id) if !id.is_empty() && !lower.contains("octave") => format!("Octave of {}", calendar::builder::octave_display_name(id)),
-            _ => String::new(),
-        };
-        // Not repeated when the celebration already names the season.
-        let mut season = title_case(day.season.as_str());
-        if lower.contains(&season.to_lowercase()) {
-            season.clear();
-        }
-        let (mut pray_now_hour, mut pray_now_label, mut pray_now_date, mut current_hour) = ("lauds", "Open Lauds".to_string(), shown, "");
-        if shown == now {
-            let current = current_office(clock_hour);
-            pray_now_hour = HOUR_NAMES.iter().find(|h| **h == current.hour).copied().unwrap_or("lauds");
-            pray_now_label = format!("Pray {}", title_case(pray_now_hour));
-            if current.day_offset != 0 {
-                pray_now_date = now.add_days(current.day_offset);
-            } else {
-                current_hour = pray_now_hour;
-            }
-        }
+        let heading = day_heading(day);
+        let invite = invitation(shown, now, clock_hour_i8(clock_hour));
         Ok(HomeView {
             date_label: long_date(shown),
-            feast: typeset(&feast),
-            octave_note,
-            season,
+            feast: typeset(&heading.feast),
+            octave_note: heading.octave_note,
+            season: heading.season,
             color: day.color.as_str().to_string(),
             ornament: ornament(Some(day.season)),
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
             is_today: shown == now,
-            pray_now_label,
-            pray_now_hour: pray_now_hour.to_string(),
-            pray_now_date: CivilDate::from(pray_now_date),
-            current_hour: current_hour.to_string(),
+            pray_now_label: invite.label,
+            pray_now_hour: invite.hour.to_string(),
+            pray_now_date: CivilDate::from(invite.date),
+            current_hour: invite.current.to_string(),
         })
     }
 
@@ -168,23 +149,16 @@ pub struct CurrentOffice {
     pub day_offset: i32,
 }
 
-/// The web's schedule (`CURRENT_HOUR_SCHEDULE` in office-web and app.js):
-/// from each clock hour, the office being prayed and its day offset.
-const CURRENT_HOUR_SCHEDULE: [(i32, &str, i32); 8] = [
-    (0, "compline", -1),
-    (2, "lauds", 0),
-    (7, "prime", 0),
-    (9, "terce", 0),
-    (11, "sext", 0),
-    (13, "none", 0),
-    (17, "vespers", 0),
-    (20, "compline", 0),
-];
-
+/// The office being prayed at a clock hour (0–23), by the schedule the web shares.
 #[uniffi::export]
 pub fn current_office(clock_hour: i32) -> CurrentOffice {
-    let (_, hour, day_offset) = CURRENT_HOUR_SCHEDULE.iter().rev().find(|b| clock_hour >= b.0).copied().unwrap_or(CURRENT_HOUR_SCHEDULE[0]);
+    let (hour, _, day_offset) = current_hour_entry(clock_hour_i8(clock_hour));
     CurrentOffice { hour: hour.to_string(), day_offset }
+}
+
+/// A device's clock hour, held to 0–23.
+fn clock_hour_i8(hour: i32) -> i8 {
+    hour.clamp(0, 23) as i8
 }
 
 /// A civil date across the bindings.
@@ -211,11 +185,6 @@ impl From<Date> for CivilDate {
 /// The ornament season that retints the gilding: "passiontide", "eastertide", or empty.
 fn ornament(season: Option<calendar::Season>) -> String {
     season_class(season).trim_start_matches("season-").to_string()
-}
-
-/// "Wednesday, September 30, 2026".
-fn long_date(d: Date) -> String {
-    format!("{}, {} {}, {}", d.weekday().name(), MONTHS[d.month() as usize - 1], d.day(), d.year())
 }
 
 /// Home's frontispiece for one day.
@@ -290,7 +259,7 @@ impl OrdoDayView {
         OrdoDayView {
             date: CivilDate::from(d.date),
             weekday: d.date.weekday().name()[..3].to_string(),
-            feast: typeset(&o.name),
+            feast: typeset(&day_name(d)),
             rank: o.rank,
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
@@ -321,9 +290,6 @@ fn empty_summary() -> HourSummary {
         comms: Vec::new(),
     }
 }
-
-const MONTHS: [&str; 12] =
-    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 /// A composed hour, laid out for native text.
 #[derive(Clone, Debug, uniffi::Record)]
@@ -361,7 +327,7 @@ impl HourView {
             ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
-            report_url: report_url(hour, hour_name, &format!("{:04}-{:02}-{:02}", d.year(), d.month(), d.day())),
+            report_url: report_url(hour, hour_name, &date_slug(d)),
         }
     }
 }

@@ -18,6 +18,8 @@ crates/
   render-html/             HTML rendering, view models and minijinja templates
   render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
                            word-for-word against render-html
+  presentation/            Words every front shares: day, season and date names, the current-hour
+                           schedule (app.js mirrors it), home's invitation, the report-issue link
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
   cli/                     office command dispatch, dump stream, diff and digest

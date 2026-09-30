@@ -11,6 +11,7 @@ calendar.workspace = true
 data-format.workspace = true
 liturgy.workspace = true
 office.workspace = true
+presentation.workspace = true
 render-html.workspace = true
 tools.workspace = true
 axum.workspace = true

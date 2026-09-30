@@ -7,9 +7,10 @@ use minijinja::{AutoEscape, Environment};
 use crate::escape::{url_norm, url_part, url_start};
 use crate::html::{render_section_heading, typeset};
 use crate::leader::leader_sections;
-use crate::links::{home_link, hour_link, nav_link, season_label, title_case};
+use crate::links::{home_link, hour_link, nav_link};
 use crate::usage::UsageData;
 use crate::view::{CalendarData, ErrorData, HomeData, HourData, NotFoundData, RemindersData};
+use presentation::{season_label, title_case};
 
 const TEMPLATES: [(&str, &str); 9] = [
     ("layout.html", include_str!("../templates/layout.html")),
@@ -98,7 +99,7 @@ impl Pages {
 #[cfg(test)]
 mod tests {
     use super::{Pages, TEMPLATES};
-    use crate::links::{season_class, static_url};
+    use crate::links::static_url;
     use crate::view::{CalendarData, Chrome, HomeData};
 
     fn source(name: &str) -> &'static str {
@@ -268,18 +269,6 @@ mod tests {
         assert!(source("macros.html").contains(r##"<use href="#icon-fish"/>"##), "fish instances use the symbol");
         let paths: usize = TEMPLATES.iter().map(|(_, s)| s.matches("M1 6 C5 1.2").count()).sum();
         assert_eq!(paths, 1, "the fish path is defined once");
-    }
-
-    #[test]
-    fn season_class_veils_passiontide_and_brightens_paschaltide() {
-        use calendar::Season;
-        assert_eq!(season_class(Some(Season::Passiontide)), "season-passiontide");
-        assert_eq!(season_class(Some(Season::Easter)), "season-eastertide");
-        // Lent is deliberately unveiled: the veiling begins at Passion Sunday.
-        for s in [Season::Lent, Season::Advent, Season::Christmas, Season::Epiphany, Season::Septuagesima, Season::Pentecost] {
-            assert_eq!(season_class(Some(s)), "", "{s:?}");
-        }
-        assert_eq!(season_class(None), "");
     }
 
     #[test]

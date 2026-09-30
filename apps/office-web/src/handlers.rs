@@ -7,11 +7,9 @@ use calendar::{MoveableDates, Tabula};
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
-use office::summary::{CommSummary, day_name, ordo_day};
+use office::summary::{CommSummary, ordo_day};
 use office::{ComposeOptions, Engine};
-use render_html::links::{
-    calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link, report_url, season_class, title_case,
-};
+use render_html::links::{calendar_all_link, calendar_link, calendar_month_link, calendar_year_link, home_link, hour_link};
 use render_html::view::{
     CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
     MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
@@ -19,7 +17,8 @@ use render_html::view::{
 
 use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
-use crate::web_time::{MONTHS, date_slug, load_location, local, long_date, now_in, parse_date};
+use crate::web_time::{load_location, local, now_in, parse_date};
+use presentation::{MONTHS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str};
 
 /// What a page handler reads from the request.
 pub struct Req<'a> {
@@ -41,23 +40,6 @@ const ORDERED_HOURS: [(&str, &str); 7] = [
     ("Vespers", "vespers"),
     ("Compline", "compline"),
 ];
-
-/// The schedule mirrored in app.js: from each clock hour, the office being prayed and its day
-/// offset.
-const CURRENT_HOUR_SCHEDULE: [(i8, &str, &str, i32); 8] = [
-    (0, "compline", "Compline", -1),
-    (2, "lauds", "Lauds", 0),
-    (7, "prime", "Prime", 0),
-    (9, "terce", "Terce", 0),
-    (11, "sext", "Sext", 0),
-    (13, "none", "None", 0),
-    (17, "vespers", "Vespers", 0),
-    (20, "compline", "Compline", 0),
-];
-
-fn current_hour_entry(hour: i8) -> (&'static str, &'static str, i32) {
-    CURRENT_HOUR_SCHEDULE.iter().rev().find(|b| hour >= b.0).map(|b| (b.1, b.2, b.3)).unwrap_or(("compline", "Compline", -1))
-}
 
 fn build_home_hours(date_slug: &str, current: &str) -> Vec<HomeHourLink> {
     ORDERED_HOURS
@@ -105,7 +87,7 @@ fn comm_rows(comms: &[CommSummary]) -> Vec<CommemorationRow> {
 /// One month of the ordo: each day's row with the composed Lauds, Hours,
 /// and Vespers digest. `days` are the month's days in order.
 pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> MonthData {
-    let name = days.first().map(|d| crate::web_time::month_name(d.date)).unwrap_or_default();
+    let name = days.first().map(|d| month_name(d.date)).unwrap_or_default();
     let mut month = MonthData { name: name.to_string(), slug: name.to_lowercase(), days: Vec::new() };
     for d in days {
         let o = ordo_day(d, engine, moveable);
@@ -117,7 +99,7 @@ pub fn build_month(days: &[Day], engine: &Engine, moveable: &MoveableDates) -> M
             rank_full: o.rank_full,
             color: o.color.as_str().to_string(),
             color_class: format!("day-color-{}", o.color.as_str()),
-            feast_name: o.name,
+            feast_name: day_name(d),
             fast: o.fast,
             abstinence: o.abstinence,
             commemorations: o.commemorations,
@@ -192,12 +174,12 @@ fn tabula(year: i32) -> TabulaData {
     let figure = |label: &str, value: String| TabulaRow { label: label.into(), value, href: String::new() };
     let date = |label: &str, d: calendar::Date| TabulaRow {
         label: label.into(),
-        value: format!("{} {}", crate::web_time::month_name(d), d.day()),
+        value: format!("{} {}", month_name(d), d.day()),
         href: calendar_link(&date_slug(d)),
     };
     let ember = |label: &str, e: &calendar::computus::EmberSet| TabulaRow {
         label: label.into(),
-        value: format!("{} {}, {}, {}", crate::web_time::month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
+        value: format!("{} {}, {}, {}", month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
         href: calendar_link(&date_slug(e.wed)),
     };
     TabulaData {
@@ -295,34 +277,10 @@ impl Server {
             return self.error_page(req, StatusCode::INTERNAL_SERVER_ERROR, "date out of range");
         };
 
-        let feast_name = day_name(day);
-        let lower_feast = feast_name.to_lowercase();
-        // A short note for home; the ordo carries the full wording.
-        let octave_note = match &day.within_octave_of {
-            Some(id) if !id.is_empty() && !lower_feast.contains("octave") => {
-                format!("Octave of {}", calendar::builder::octave_display_name(id))
-            }
-            _ => String::new(),
-        };
-        // Not repeated when the celebration already names the season.
-        let mut season = title_case(day.season.as_str());
-        if !season.is_empty() && lower_feast.contains(&season.to_lowercase()) {
-            season.clear();
-        }
-
+        let heading = day_heading(day);
         let (now, now_hour) = now_in(&loc);
         let now_slug = date_slug(now);
-        let (mut current_slug, mut label, mut pray_now_date, mut grid_current) = ("", "Open Lauds".to_string(), slug.clone(), "");
-        if slug == now_slug {
-            let (s, l, offset) = current_hour_entry(now_hour);
-            current_slug = s;
-            label = format!("Pray {l}");
-            if offset != 0 {
-                pray_now_date = date_slug(now.add_days(offset));
-            } else {
-                grid_current = s;
-            }
-        }
+        let invite = invitation(date, now, now_hour);
         let data = HomeData {
             chrome: Chrome {
                 page: "home".into(),
@@ -337,16 +295,16 @@ impl Server {
             prev_link: home_link(&date_slug(date.add_days(-1))),
             next_link: home_link(&date_slug(date.add_days(1))),
             today_link: home_link(&now_slug),
-            feast_name,
+            feast_name: heading.feast,
             commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
             color: day.color.as_str().into(),
-            season,
-            octave_note,
+            season: heading.season,
+            octave_note: heading.octave_note,
             penitential: day.penitential.labels().into_iter().map(String::from).collect(),
             calendar_link: calendar_link(&slug),
-            pray_now_label: label,
-            pray_now_link: hour_link(if current_slug.is_empty() { "lauds" } else { current_slug }, &pray_now_date),
-            hours: build_home_hours(&slug, grid_current),
+            pray_now_label: invite.label,
+            pray_now_link: hour_link(invite.hour, &date_slug(invite.date)),
+            hours: build_home_hours(&slug, invite.current),
         };
         match self.pages.home(&data) {
             Ok(body) => html(StatusCode::OK, body),
@@ -434,7 +392,7 @@ impl Server {
                 title: hour.title.clone(),
                 color: hour.color.map(|c| c.as_str()).unwrap_or("").into(),
                 feast: hour.feast.clone(),
-                season: render_html::links::season_str(&hour).into(),
+                season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
             ..HourData::default()
@@ -596,6 +554,7 @@ pub fn celebration_name(day: &Day) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use presentation::CURRENT_HOUR_SCHEDULE;
 
     // app.js mirrors the schedule so a cached home page can update itself.
     #[test]
@@ -618,16 +577,6 @@ mod tests {
         for (got, want) in client.iter().zip(CURRENT_HOUR_SCHEDULE) {
             assert_eq!((got.0, got.1.as_str(), got.2.as_str(), got.3), want);
         }
-    }
-
-    #[test]
-    fn current_hour_entry_at_every_boundary() {
-        for (start, slug, label, offset) in CURRENT_HOUR_SCHEDULE {
-            assert_eq!(current_hour_entry(start), (slug, label, offset), "{start:02}:00");
-        }
-        assert_eq!(current_hour_entry(1), ("compline", "Compline", -1));
-        assert_eq!(current_hour_entry(16), ("none", "None", 0));
-        assert_eq!(current_hour_entry(23), ("compline", "Compline", 0));
     }
 
     use axum::http::Uri;

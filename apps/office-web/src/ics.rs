@@ -4,11 +4,11 @@ use axum::body::Body;
 use axum::http::{HeaderMap, Response, StatusCode, header};
 use jiff::tz::TimeZone;
 use jiff::{SignedDuration, Timestamp};
-use render_html::links::title_case;
+use presentation::{date_slug, title_case};
 
 use crate::Server;
 use crate::http::{Query, header_value, http_error, response, set};
-use crate::web_time::{date_slug, ics_stamp, load_location, parse_clock, wall_time};
+use crate::web_time::{ics_stamp, load_location, parse_clock, wall_time};
 
 /// The hours in liturgical order, so a day's events are in sequence
 /// whatever the query's order.

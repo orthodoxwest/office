@@ -761,8 +761,8 @@ dependencies = [
  "corpus",
  "liturgy",
  "office",
+ "presentation",
  "render-blocks",
- "render-html",
  "tools",
  "uniffi",
 ]
@@ -816,6 +816,7 @@ dependencies = [
  "jiff",
  "liturgy",
  "office",
+ "presentation",
  "render-html",
  "rusqlite",
  "sha2",
@@ -878,6 +879,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "10ab3eb7f3becc3a1cbc4f2c6f20267996cfc1a6467a873763411b136a122715"
 dependencies = [
  "portable-atomic",
+]
+
+[[package]]
+name = "presentation"
+version = "0.1.0"
+dependencies = [
+ "calendar",
+ "liturgy",
 ]
 
 [[package]]
@@ -955,6 +964,7 @@ dependencies = [
  "liturgy",
  "minijinja",
  "office",
+ "presentation",
  "serde",
  "tools",
 ]
