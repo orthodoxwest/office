@@ -1,7 +1,9 @@
 use std::path::Path;
 
 use calendar::{CalendarData, Date, MoveableDates};
-use liturgy::{ElementType, OfficeElement, OfficeHour, OfficeSection, PrayerForm, RubricSpan, VoiceRole, VoiceSpan};
+use liturgy::{
+    ElementType, OfficeElement, OfficeHour, OfficeSection, Posture, PostureAnchor, PostureCue, PrayerForm, RubricSpan, VoiceRole, VoiceSpan,
+};
 use office::{Engine, HOUR_NAMES};
 use tools::fs::FsData;
 
@@ -35,6 +37,30 @@ fn pointed_verses_mark_the_mediant_and_number_the_gutter() {
     assert!(verses[0].plain_text().starts_with("O All ye Works"), "{}", verses[0].plain_text());
     assert_eq!(styles(verses[1]), [RunStyle::Plain, RunStyle::Mediant, RunStyle::Plain, RunStyle::Plain]);
     assert_eq!(verses[1].runs[1].text, "\u{a0}*");
+}
+
+#[test]
+fn posture_cues_fall_at_their_anchors() {
+    let mut psalm = elem(ElementType::Psalm, "Psalm 95\n\nO COME, let us sing * unto the Lord.\n2 Let us come * before his presence.\n");
+    psalm.postures = vec![
+        PostureCue::new(Posture::Sit, PostureAnchor::AfterMediant(0)),
+        PostureCue::new(Posture::Stand, PostureAnchor::AfterMediant(1)),
+    ];
+    let mut gloria =
+        elem(ElementType::PsalmDoxology, "Glory be to the Father, * and to the Son;\nAs it was in the beginning, * world without end.");
+    gloria.postures = vec![
+        PostureCue::new(Posture::Bow, PostureAnchor::BeforeVerse(0)),
+        PostureCue::new(Posture::StandUpright, PostureAnchor::BeforeVerse(1)),
+    ];
+    let out = element_blocks(&[psalm, gloria]);
+    let verses: Vec<&Block> = out.iter().filter(|b| b.kind == BlockKind::Verse).collect();
+    let cues = |b: &Block| b.runs.iter().filter(|r| r.style == RunStyle::Posture).map(|r| r.text.clone()).collect::<Vec<_>>();
+    assert_eq!(verses.len(), 2, "{out:#?}");
+    assert!(verses[0].plain_text().ends_with("\u{a0}* Sit. unto the Lord."), "{}", verses[0].plain_text());
+    assert_eq!(cues(verses[1]), ["Stand."]);
+    let gloria = out.last().unwrap();
+    assert_eq!(cues(gloria), ["Bow.", "Stand upright."]);
+    assert!(gloria.plain_text().starts_with("Bow. Glory be"), "{}", gloria.plain_text());
 }
 
 #[test]

@@ -253,6 +253,7 @@ pub enum RunStyle {
     Secret,
     Latin,
     Kicker,
+    Posture,
     Break,
 }
 
@@ -267,6 +268,7 @@ impl From<render_blocks::RunStyle> for RunStyle {
             S::Secret => RunStyle::Secret,
             S::Latin => RunStyle::Latin,
             S::Kicker => RunStyle::Kicker,
+            S::Posture => RunStyle::Posture,
             S::Break => RunStyle::Break,
         }
     }

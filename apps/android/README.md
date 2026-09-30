@@ -15,6 +15,21 @@ spans), and its tests check that every hour of a year carries exactly the web's 
 corpus is compiled into the library, so the app works offline and each build prays the
 corpus it was built from.
 
+## Design standard
+
+Every interface in this project aims at immaculate craftsmanship, with as much beauty as
+possible without distracting from a reverent experience. The native apps inherit the web's
+design intent (`.claude/skills/web-ui-design/SKILL.md`): prayer is the product; navigation
+stays quiet and steps aside while praying (the date bar and hour tabs slide away on scroll
+and the screen stays awake during an hour, like the web's wake lock); current controls take
+the gold underline; the parish palette, EB Garamond, restrained rules, and generous reading
+space; no playful rewards or motion for its own sake. Review light and dark screenshots
+before shipping a visual change.
+
+The two reasons for a native app are fully offline use and **reminder notifications of a
+higher quality than the web can give** (exact, dependable delivery per hour, surviving
+reboots and Doze). Reminders are the next major piece of work.
+
 ## Trying it on a phone
 
 Every push to `master` that touches the app, the engine, or `data/` republishes the

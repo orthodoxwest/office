@@ -134,6 +134,7 @@ private fun runs(block: BlockView): AnnotatedString {
                 RunStyle.SECRET -> SpanStyle(color = p.muted)
                 RunStyle.LATIN -> SpanStyle(fontStyle = FontStyle.Italic, color = p.muted)
                 RunStyle.KICKER -> SpanStyle(fontSize = 0.8.em, fontStyle = FontStyle.Italic, color = p.muted)
+                RunStyle.POSTURE -> SpanStyle(color = p.rubric, fontSize = 0.9.em)
             }
             var text = run.text
             if (capPending && run.style == RunStyle.PLAIN && text.isNotBlank()) {

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -32,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryScrollableTabRow
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +47,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -101,37 +120,66 @@ fun OfficeScreen(
     onNow: () -> Unit,
 ) {
     val p = LocalPalette.current
+    val density = LocalDensity.current
     var picking by remember { mutableStateOf(false) }
-    Scaffold(
-        containerColor = p.page,
-        topBar = {
-            Column(Modifier.background(p.page).statusBarsPadding()) {
-                DateBar(date, form, onDay = { onShow(date.plusDays(it), hour) }, onPick = { picking = true }, onForm = onForm, onNow = onNow)
-                PrimaryScrollableTabRow(
-                    selectedTabIndex = hours.indexOf(hour).coerceAtLeast(0),
-                    containerColor = p.page,
-                    contentColor = p.rubric,
-                    edgePadding = 8.dp,
-                    divider = { HorizontalDivider(color = p.border) },
-                ) {
-                    hours.forEach { h ->
-                        Tab(
-                            selected = h == hour,
-                            onClick = { onShow(date, h) },
-                            text = { Text(hourLabel(h), style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.03.em)) },
-                            selectedContentColor = p.rubric,
-                            unselectedContentColor = p.muted,
-                        )
-                    }
-                }
+    // The date bar and hour tabs step aside as the reader scrolls down into the
+    // prayer, and return on any scroll back up: no chrome stays over the text.
+    var headerPx by remember { mutableIntStateOf(0) }
+    var headerOffset by remember { mutableFloatStateOf(0f) }
+    val quickReturn = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                headerOffset = (headerOffset + available.y).coerceIn(-headerPx.toFloat(), 0f)
+                return Offset.Zero
             }
-        },
-    ) { padding ->
+        }
+    }
+    LaunchedEffect(view?.hour, view?.dateLabel) { headerOffset = 0f }
+    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val padding = PaddingValues(top = topInset + with(density) { headerPx.toDp() }, bottom = bottomInset)
+    Box(Modifier.fillMaxSize().background(p.page).nestedScroll(quickReturn)) {
         when {
             error != null -> Message(error, padding)
             view == null -> Message("Preparing the office…", padding)
             else -> HourPage(view, hours, padding, onHour = { onShow(date, it) })
         }
+        Column(
+            Modifier.padding(top = topInset)
+                .offset { IntOffset(0, headerOffset.roundToInt()) }
+                .onSizeChanged { headerPx = it.height }
+                .background(p.page),
+        ) {
+            DateBar(date, form, onDay = { onShow(date.plusDays(it), hour) }, onPick = { picking = true }, onForm = onForm, onNow = onNow)
+            val selected = hours.indexOf(hour).coerceAtLeast(0)
+            PrimaryScrollableTabRow(
+                selectedTabIndex = selected,
+                containerColor = p.page,
+                contentColor = p.rubric,
+                edgePadding = 8.dp,
+                // Current controls take the web's gold underline.
+                indicator = {
+                    TabRowDefaults.PrimaryIndicator(
+                        Modifier.tabIndicatorOffset(selected, matchContentSize = true),
+                        width = Dp.Unspecified,
+                        color = p.gold,
+                    )
+                },
+                divider = { HorizontalDivider(color = p.border) },
+            ) {
+                hours.forEach { h ->
+                    Tab(
+                        selected = h == hour,
+                        onClick = { onShow(date, h) },
+                        text = { Text(hourLabel(h), style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.03.em)) },
+                        selectedContentColor = p.text,
+                        unselectedContentColor = p.muted,
+                    )
+                }
+            }
+        }
+        // The status bar keeps a plain ground; the header slides beneath it.
+        Box(Modifier.fillMaxWidth().windowInsetsTopHeight(WindowInsets.statusBars).background(p.page))
     }
     if (picking) {
         val state = rememberDatePickerState(initialSelectedDateMillis = date.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
@@ -187,6 +235,12 @@ private fun Message(text: String, padding: PaddingValues) {
 @Composable
 fun HourPage(view: HourView, hours: List<String>, padding: PaddingValues, onHour: (String) -> Unit) {
     val p = LocalPalette.current
+    // Like the web's wake lock: the screen stays on while an hour is open.
+    val host = LocalView.current
+    DisposableEffect(host) {
+        host.keepScreenOn = true
+        onDispose { host.keepScreenOn = false }
+    }
     val open = remember(view) { mutableStateMapOf<Int, Boolean>() }
     val listState = remember(view.hour, view.dateLabel) { LazyListState() }
     val column = Modifier.widthIn(max = 620.dp).fillMaxWidth().padding(horizontal = 20.dp)

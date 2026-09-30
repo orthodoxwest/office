@@ -9,7 +9,7 @@ use corpus::lines::{
     BlockKind as LineKind, BlockLine, PsalmItem, hymn_rubric_stanza, hymn_rubric_text, parse_block, parse_hymn, parse_psalm,
 };
 use corpus::typography::{soften_drop_cap_opening, typeset};
-use liturgy::{ElementType, OfficeElement, OfficeHour, VoiceRole, VoiceSpan};
+use liturgy::{ElementType, OfficeElement, OfficeHour, PostureAnchor, PostureCue, VoiceRole, VoiceSpan, posture_cues_at};
 
 /// What a block is, which decides its paragraph style.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -68,6 +68,8 @@ pub enum RunStyle {
     Latin,
     /// The small lead-in of a commemoration heading.
     Kicker,
+    /// A congregational posture cue in the psalmody ("Sit.", "Bow."), set as a small red rubric.
+    Posture,
     /// A preserved line break; its text is "\n".
     Break,
 }
@@ -152,9 +154,9 @@ pub fn element_blocks(elems: &[OfficeElement]) -> Vec<Block> {
     let mut i = 0;
     while i < elems.len() {
         let elem = &elems[i];
-        let mut doxology = "";
+        let mut doxology = None;
         if elem.kind.is_psalmody() && elems.get(i + 1).is_some_and(|next| next.kind == ElementType::PsalmDoxology) {
-            doxology = &elems[i + 1].text;
+            doxology = Some(&elems[i + 1]);
             i += 1;
         }
         push_element(&mut out, elem, doxology);
@@ -174,7 +176,7 @@ pub fn section_heading(label: &str) -> Block {
     Block::new(BlockKind::Heading, text_runs(label))
 }
 
-fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: &str) {
+fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&OfficeElement>) {
     match elem.kind {
         ElementType::Heading => out.push(section_heading(&elem.text)),
         ElementType::Rubric => out.push(rubric(elem)),
@@ -196,9 +198,9 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: &str) {
                 }
                 out.push(Block::new(BlockKind::ItemLabel, runs));
             }
-            psalm_verses(out, &elem.text);
-            if !doxology.is_empty() {
-                out.push(gloria_patri(doxology));
+            psalm_verses(out, &elem.text, &elem.postures);
+            if let Some(doxology) = doxology.filter(|d| !d.text.is_empty()) {
+                out.push(gloria_patri(&doxology.text, &doxology.postures));
             }
         }
         ElementType::Hymn => {
@@ -241,7 +243,7 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: &str) {
             liturgical_block(out, &elem.text, Mode::Flow, false);
         }
         ElementType::Preces => liturgical_block(out, &elem.text, Mode::PreserveLines, false),
-        ElementType::PsalmDoxology => out.push(gloria_patri(&elem.text)),
+        ElementType::PsalmDoxology => out.push(gloria_patri(&elem.text, &elem.postures)),
     }
 }
 
@@ -308,13 +310,22 @@ fn rubric(elem: &OfficeElement) -> Block {
     Block::new(BlockKind::Rubric, runs)
 }
 
-/// A psalm or canticle: any scripture reference, then its verses.
-fn psalm_verses(out: &mut Vec<Block>, text: &str) {
+/// Posture cues at one anchor, each a run followed by a space.
+fn push_postures(runs: &mut Vec<Run>, cues: &[PostureCue], at: PostureAnchor) {
+    for cue in posture_cues_at(cues, at) {
+        runs.push(Run::new(cue, RunStyle::Posture));
+        runs.push(Run::new(" ", RunStyle::Plain));
+    }
+}
+
+/// A psalm or canticle: any scripture reference, then its verses, with posture cues at their anchors.
+fn psalm_verses(out: &mut Vec<Block>, text: &str, postures: &[PostureCue]) {
     let psalm = parse_psalm(text);
     if !psalm.scripture_ref.is_empty() {
         out.push(Block::new(BlockKind::ScriptureRef, text_runs(&psalm.scripture_ref)));
     }
     let mut drop_cap_next = true;
+    let mut verse = 0;
     for item in &psalm.items {
         match item {
             PsalmItem::Section { heading } => {
@@ -334,11 +345,22 @@ fn psalm_verses(out: &mut Vec<Block>, text: &str) {
                 let drop_cap = drop_cap_next;
                 drop_cap_next = false;
                 let first = if drop_cap { soften_drop_cap_opening(first) } else { first.clone() };
-                let mut runs = cross_runs(&first, RunStyle::Plain);
+                let mut runs = Vec::new();
+                push_postures(&mut runs, postures, PostureAnchor::BeforeVerse(verse));
+                runs.extend(cross_runs(&first, RunStyle::Plain));
+                let mut after_mediant = Vec::new();
+                push_postures(&mut after_mediant, postures, PostureAnchor::AfterMediant(verse));
                 if !second.is_empty() {
                     push_mediant(&mut runs, true);
+                    runs.extend(after_mediant);
                     runs.extend(cross_runs(second, RunStyle::Plain));
+                } else if !after_mediant.is_empty() {
+                    // Without a mediant the cue ends the verse.
+                    after_mediant.pop();
+                    runs.push(Run::new(" ", RunStyle::Plain));
+                    runs.extend(after_mediant);
                 }
+                verse += 1;
                 let mut block = Block::marked(BlockKind::Verse, &typeset(number), runs);
                 block.drop_cap = drop_cap;
                 out.push(block);
@@ -587,11 +609,17 @@ fn is_hymn_amen(stanza: &[String]) -> bool {
     stanza.len() == 1 && stanza[0].trim().trim_end_matches(['.', '!', ' ']).eq_ignore_ascii_case("amen")
 }
 
-/// The Gloria Patri as two pointed lines.
-fn gloria_patri(text: &str) -> Block {
+/// The Gloria Patri as two pointed lines, each after its posture cues.
+fn gloria_patri(text: &str, postures: &[PostureCue]) -> Block {
     let lines: Vec<&str> = text.trim().split('\n').collect();
     let (first, second) = if lines.len() >= 2 { (lines[0].trim(), lines[1].trim()) } else { (text.trim(), "") };
-    let runs = if second.is_empty() { chant_runs(first) } else { join_lines([chant_runs(first), chant_runs(second)], true) };
+    let cued = |n: usize, line: &str| {
+        let mut runs = Vec::new();
+        push_postures(&mut runs, postures, PostureAnchor::BeforeVerse(n));
+        runs.extend(chant_runs(line));
+        runs
+    };
+    let runs = if second.is_empty() { cued(0, first) } else { join_lines([cued(0, first), cued(1, second)], true) };
     Block::new(BlockKind::Paragraph, runs)
 }
 
