@@ -42,7 +42,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.94.1
@@ -140,7 +140,7 @@ jobs:
           shoot "$ipad" "ipad-year-nave" -page year -theme nave
           shoot "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ios-screenshots
