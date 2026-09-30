@@ -28,7 +28,7 @@ serde = { version = "1", features = ["derive", "rc"] }
 minijinja = "2"
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal"] }
-rusqlite = { version = "0.37", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 uniffi = "0.32"
 
