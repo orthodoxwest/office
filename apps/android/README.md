@@ -119,10 +119,11 @@ the ten-minute wait, and the posted notification.
 
 ## Trying it on a phone
 
-Every push to `master` that touches the app, the engine, or `data/` republishes the
-**android-preview** prerelease. On an Android phone (8.0 or newer), open
+Every push to `master` that touches the app, the engine, or `data/` publishes a new
+**Android preview** release (tagged `android-preview-<version>`), marked latest. On an Android
+phone (8.0 or newer), open
 
-<https://github.com/orthodoxwest/office/releases/download/android-preview/office-preview.apk>
+<https://github.com/orthodoxwest/office/releases/latest/download/office-preview.apk>
 
 and allow your browser to install apps when asked. Play Protect may warn about an unknown
 developer; choose *Install anyway*. Later previews install over earlier ones and keep your
