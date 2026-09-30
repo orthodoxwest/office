@@ -13,7 +13,8 @@ use liturgy::{OfficeHour, PrayerForm};
 use office::summary::{CommSummary, HourSummary, ordo_day};
 use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
 use presentation::{
-    MONTHS, current_hour_entry, date_slug, day_heading, day_name, invitation, long_date, report_url, season_class, season_label,
+    MONTHS, REMINDER_DEFAULTS, current_hour_entry, date_slug, day_heading, day_name, invitation, long_date, reminder_description,
+    reminder_summary, report_url, season_class, season_label, title_case,
 };
 
 pub use data::EmbeddedData;
@@ -103,6 +104,54 @@ impl OfficeCore {
         })
     }
 
+    /// The reminders due over `days` days from `from`: each chosen hour at its
+    /// time, on the chosen weekdays (`weekdays[0]` is Sunday), named as the
+    /// web's calendar feed names its events. In date and time order.
+    pub fn reminders(
+        &self,
+        from: CivilDate,
+        days: i32,
+        choices: Vec<ReminderChoice>,
+        weekdays: Vec<bool>,
+    ) -> Result<Vec<ReminderView>, OfficeError> {
+        if weekdays.len() != 7 {
+            return Err(failed("weekdays must name all seven days, Sunday first"));
+        }
+        for c in &choices {
+            if !HOUR_NAMES.contains(&c.hour.as_str()) {
+                return Err(failed(format!("unknown hour: {}", c.hour)));
+            }
+            if !(0..24).contains(&c.hour_of_day) || !(0..60).contains(&c.minute) {
+                return Err(failed(format!("invalid time {}:{} for {}", c.hour_of_day, c.minute, c.hour)));
+            }
+        }
+        let mut chosen: Vec<&ReminderChoice> = choices.iter().collect();
+        chosen.sort_by_key(|c| (c.hour_of_day, c.minute));
+        let start = from.parse()?;
+        let mut out = Vec::new();
+        for i in 0..days.max(0) {
+            let date = start.add_days(i);
+            if !weekdays[date.weekday().number() as usize] {
+                continue;
+            }
+            let year = self.year(date.year())?;
+            let day = year.days.get(date.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {date}")))?;
+            for c in &chosen {
+                out.push(ReminderView {
+                    hour: c.hour.clone(),
+                    date: CivilDate::from(date),
+                    hour_of_day: c.hour_of_day,
+                    minute: c.minute,
+                    title: title_case(&c.hour),
+                    feast: typeset(&day_name(day)),
+                    summary: typeset(&reminder_summary(&c.hour, day)),
+                    description: typeset(&reminder_description(day)),
+                });
+            }
+        }
+        Ok(out)
+    }
+
     /// One month of the ordo, each day with its office digest. Composes three
     /// hours a day, so call it off the main thread.
     pub fn ordo_month(&self, year: i32, month: i32) -> Result<OrdoMonthView, OfficeError> {
@@ -154,6 +203,56 @@ pub struct CurrentOffice {
 pub fn current_office(clock_hour: i32) -> CurrentOffice {
     let (hour, _, day_offset) = current_hour_entry(clock_hour_i8(clock_hour));
     CurrentOffice { hour: hour.to_string(), day_offset }
+}
+
+/// An hour the reader asks to be reminded of, at a time of day.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReminderChoice {
+    pub hour: String,
+    pub hour_of_day: i32,
+    pub minute: i32,
+}
+
+/// One reminder: an office on a civil date at a local time, with its words.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReminderView {
+    pub hour: String,
+    pub date: CivilDate,
+    pub hour_of_day: i32,
+    pub minute: i32,
+    /// The office's name ("Vespers").
+    pub title: String,
+    /// The day it keeps ("III Sunday in Lent").
+    pub feast: String,
+    /// "Vespers — III Sunday in Lent", as the web's calendar feed names the event.
+    pub summary: String,
+    /// Rank, season, colour and commemorations, as the feed describes the event.
+    pub description: String,
+}
+
+/// The reminder page's hours as the web offers them: the suggested time and
+/// whether each starts chosen.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct ReminderDefault {
+    pub hour: String,
+    pub name: String,
+    pub hour_of_day: i32,
+    pub minute: i32,
+    pub chosen: bool,
+}
+
+#[uniffi::export]
+pub fn reminder_defaults() -> Vec<ReminderDefault> {
+    REMINDER_DEFAULTS
+        .iter()
+        .map(|&(hour, name, hh, mm, chosen)| ReminderDefault {
+            hour: hour.to_string(),
+            name: name.to_string(),
+            hour_of_day: hh as i32,
+            minute: mm as i32,
+            chosen,
+        })
+        .collect()
 }
 
 /// A device's clock hour, held to 0–23.

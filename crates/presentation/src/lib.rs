@@ -143,6 +143,36 @@ pub fn invitation(shown: Date, now: Date, now_hour: i8) -> Invitation {
     Invitation { hour, label: format!("Pray {name}"), date: now.add_days(offset), current: if offset == 0 { hour } else { "" } }
 }
 
+/// The reminder page's hours, as the web offers them and the apps start from: slug, name, the
+/// suggested time (hour, minute), and whether it starts chosen.
+pub const REMINDER_DEFAULTS: [(&str, &str, u32, u32, bool); 7] = [
+    ("lauds", "Lauds", 6, 45, true),
+    ("prime", "Prime", 7, 30, false),
+    ("terce", "Terce", 9, 0, false),
+    ("sext", "Sext", 12, 0, false),
+    ("none", "None", 15, 0, false),
+    ("vespers", "Vespers", 18, 0, true),
+    ("compline", "Compline", 21, 0, true),
+];
+
+/// A reminder's headline: the office and the day it keeps ("Vespers — III Sunday in Lent"), as
+/// the web's calendar feed names its events and the apps name their notifications.
+pub fn reminder_summary(hour: &str, day: &CalendarDay) -> String {
+    format!("{} — {}", title_case(hour), day_name(day))
+}
+
+/// A reminder's detail: the celebration's rank, the season, the colour, and any commemorations.
+pub fn reminder_description(day: &CalendarDay) -> String {
+    let mut parts = Vec::new();
+    if let Some(c) = &day.celebration {
+        parts.push(c.rank.display_name().to_string());
+    }
+    parts.push(title_case(day.season.as_str()));
+    parts.push(day.color.as_str().to_string());
+    parts.extend(day.commemorations.iter().map(|c| format!("Comm. {}", c.name)));
+    parts.join(" · ")
+}
+
 /// The GitHub new-issue endpoint behind "Report a problem".
 const REPO_ISSUES_URL: &str = "https://github.com/orthodoxwest/office/issues/new";
 

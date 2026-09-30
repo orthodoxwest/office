@@ -18,7 +18,9 @@ use render_html::view::{
 use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{load_location, local, now_in, parse_date};
-use presentation::{MONTHS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str};
+use presentation::{
+    MONTHS, REMINDER_DEFAULTS, date_slug, day_heading, day_name, invitation, long_date, month_name, report_url, season_class, season_str,
+};
 
 /// What a page handler reads from the request.
 pub struct Req<'a> {
@@ -512,23 +514,17 @@ impl Server {
     }
 
     pub fn reminders(&self, req: &Req) -> Response<Body> {
-        let hour = |name: &str, slug: &str, default: &str, checked: bool| ReminderHour {
-            name: name.into(),
-            slug: slug.into(),
-            default: default.into(),
-            checked,
-        };
         let data = RemindersData {
             chrome: Chrome { page: "reminders".into(), nav_date: self.nav_date_now(req), ..Chrome::default() },
-            hours: vec![
-                hour("Lauds", "lauds", "06:45", true),
-                hour("Prime", "prime", "07:30", false),
-                hour("Terce", "terce", "09:00", false),
-                hour("Sext", "sext", "12:00", false),
-                hour("None", "none", "15:00", false),
-                hour("Vespers", "vespers", "18:00", true),
-                hour("Compline", "compline", "21:00", true),
-            ],
+            hours: REMINDER_DEFAULTS
+                .iter()
+                .map(|&(slug, name, hh, mm, checked)| ReminderHour {
+                    name: name.into(),
+                    slug: slug.into(),
+                    default: format!("{hh:02}:{mm:02}"),
+                    checked,
+                })
+                .collect(),
             days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
                 .iter()
                 .map(|d| ReminderDay { name: d.to_string(), slug: d.to_lowercase() })
@@ -544,11 +540,6 @@ impl Server {
     pub fn local_year() -> i32 {
         now_in(&local()).0.year()
     }
-}
-
-/// A day's display name for the reminder feed.
-pub fn celebration_name(day: &Day) -> String {
-    day_name(day)
 }
 
 #[cfg(test)]

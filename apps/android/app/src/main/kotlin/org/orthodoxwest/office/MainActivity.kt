@@ -1,10 +1,17 @@
 package org.orthodoxwest.office
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,18 +29,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import java.time.LocalDate
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
 
 class MainActivity : ComponentActivity() {
+    private val vm: OfficeViewModel by viewModels()
+
+    // Turning reminders on asks for notifications first (Android 13+); on a refusal they are
+    // still scheduled, and the page says how to let them through.
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        vm.setRemindersOn(true)
+        vm.refreshReminderStatus()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        openReminded(intent)
         setContent {
-            val vm: OfficeViewModel = viewModel()
+            val vm = vm
             BackHandler(enabled = vm.canGoBack) { vm.back() }
             OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
                 OfficeApp(
@@ -53,8 +69,52 @@ class MainActivity : ComponentActivity() {
                     onForm = vm::chooseForm,
                     onTheme = vm::chooseTheme,
                     onTextSize = vm::chooseTextSize,
+                    reminders = vm.reminders,
+                    reminderStatus = vm.reminderStatus,
+                    onReminders = vm::changeReminders,
+                    onTurnOn = ::turnOnReminders,
+                    onTurnOff = { vm.setRemindersOn(false) },
+                    onAllowNotifications = ::openNotificationSettings,
+                    onAllowExact = ::openExactAlarmSettings,
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        openReminded(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        vm.refreshReminderStatus()
+        // Every visit keeps the alarm window running ahead.
+        vm.syncReminders()
+    }
+
+    /** A tapped reminder opens its hour. */
+    private fun openReminded(intent: Intent?) {
+        val hour = intent?.getStringExtra(EXTRA_HOUR) ?: return
+        val date = intent.getStringExtra(EXTRA_DATE)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return
+        vm.open(Page.Hour(date, hour))
+    }
+
+    private fun turnOnReminders() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !Notifications.allowed(this)) {
+            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            vm.setRemindersOn(true)
+        }
+    }
+
+    private fun openNotificationSettings() {
+        startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
+    }
+
+    private fun openExactAlarmSettings() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:$packageName")))
         }
     }
 }
@@ -78,6 +138,13 @@ fun OfficeApp(
     onForm: (String) -> Unit,
     onTheme: (ThemeChoice) -> Unit,
     onTextSize: (TextSize) -> Unit,
+    reminders: ReminderSettings,
+    reminderStatus: ReminderStatus,
+    onReminders: (ReminderSettings) -> Unit,
+    onTurnOn: () -> Unit,
+    onTurnOff: () -> Unit,
+    onAllowNotifications: () -> Unit,
+    onAllowExact: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
     val chrome: @Composable () -> Unit = {
@@ -93,10 +160,13 @@ fun OfficeApp(
                         is Page.Home -> page.date
                         is Page.Hour -> page.date
                         is Page.Ordo -> LocalDate.of(page.year, page.month, 1)
+                        Page.Reminders -> today
                     }
                     onOpen(Page.Ordo(d.year, d.monthValue))
                 },
                 onOrdoCurrent = page is Page.Ordo,
+                onReminders = { menu = false; onOpen(Page.Reminders) },
+                onRemindersCurrent = page is Page.Reminders,
                 theme = theme,
                 onTheme = onTheme,
                 textSize = textSize,
@@ -142,6 +212,17 @@ fun OfficeApp(
                 insets = insets,
                 onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
                 onDay = { onOpen(Page.Home(it)) },
+            )
+            page is Page.Reminders -> RemindersScreen(
+                settings = reminders,
+                status = reminderStatus,
+                chrome = chrome,
+                insets = insets,
+                onChange = onReminders,
+                onTurnOn = onTurnOn,
+                onTurnOff = onTurnOff,
+                onAllowNotifications = onAllowNotifications,
+                onAllowExact = onAllowExact,
             )
             else -> Message("Preparing the office…", insets)
         }

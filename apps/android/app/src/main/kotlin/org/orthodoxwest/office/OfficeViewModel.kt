@@ -1,7 +1,9 @@
 package org.orthodoxwest.office
 
 import android.app.Application
+import android.app.AlarmManager
 import android.content.Context
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +21,6 @@ import kotlinx.coroutines.withContext
 import org.orthodoxwest.office.core.CivilDate
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
-import org.orthodoxwest.office.core.OfficeCore
 import org.orthodoxwest.office.core.OrdoMonthView
 import org.orthodoxwest.office.core.hourNames
 
@@ -41,14 +42,16 @@ sealed interface Page {
     data class Home(val date: LocalDate) : Page
     data class Hour(val date: LocalDate, val hour: String) : Page
     data class Ordo(val year: Int, val month: Int) : Page
+    data object Reminders : Page
 }
 
 /** What is shown, the reader's remembered choices, and the composed content once ready. */
 class OfficeViewModel(app: Application) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("office", Context.MODE_PRIVATE)
 
-    // Parsing the corpus takes a moment; it starts at once, off the main thread.
-    private val core = viewModelScope.async(Dispatchers.Default) { OfficeCore() }
+    // Parsing the corpus takes a moment; it starts at once, off the main thread. The alarms share it.
+    private val core = viewModelScope.async(Dispatchers.Default) { Office.core }
+    private val reminderStore = ReminderStore(app)
     private var loading: Job? = null
 
     val hours: List<String> = hourNames()
@@ -72,6 +75,11 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
     var ordo: OrdoMonthView? by mutableStateOf(null)
         private set
     var error: String? by mutableStateOf(null)
+        private set
+
+    var reminders: ReminderSettings by mutableStateOf(reminderStore.load())
+        private set
+    var reminderStatus: ReminderStatus by mutableStateOf(ReminderStatus(notificationsAllowed = true, exactAllowed = true))
         private set
 
     val today: LocalDate get() = LocalDate.now()
@@ -117,11 +125,35 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
         prefs.edit().putString("text-size", value.name).apply()
     }
 
+    /** Saves the reminder page's choices and, when reminders are on, reschedules at once. */
+    fun changeReminders(value: ReminderSettings) {
+        reminders = value
+        reminderStore.save(value)
+        syncReminders()
+    }
+
+    fun setRemindersOn(on: Boolean) = changeReminders(reminders.copy(on = on))
+
+    /** Whether the phone lets notifications through, and on the minute; read again on every return to the app. */
+    fun refreshReminderStatus() {
+        val app = getApplication<Application>()
+        val alarms = app.getSystemService(AlarmManager::class.java)
+        reminderStatus = ReminderStatus(
+            notificationsAllowed = Notifications.allowed(app),
+            exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms(),
+        )
+    }
+
+    fun syncReminders() {
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.Default) { runCatching { ReminderScheduler.sync(app) } }
+    }
+
     /** The ornament season of what is shown, which retints the gilding. */
     val season: String get() = when (page) {
         is Page.Home -> home?.ornament.orEmpty()
         is Page.Hour -> hour?.ornament.orEmpty()
-        is Page.Ordo -> ""
+        is Page.Ordo, Page.Reminders -> ""
     }
 
     private fun load() {
@@ -142,6 +174,7 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
                         if (ordo?.let { it.year != shown.year || it.month != shown.month } == true) ordo = null
                         ordo = withContext(Dispatchers.Default) { office.ordoMonth(shown.year, shown.month) }
                     }
+                    Page.Reminders -> refreshReminderStatus()
                 }
                 error = null
             } catch (e: CancellationException) {

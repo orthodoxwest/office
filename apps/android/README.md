@@ -40,9 +40,28 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   is open, like the web's wake lock.
 
 The two reasons for a native app are fully offline use and **reminder notifications of a
-higher quality than the web can give** (exact, dependable delivery per hour, surviving
-reboots and Doze). Reminders are the next major piece of work; the menu will gain the web's
-Reminders entry with them.
+higher quality than the web can give**.
+
+## Reminders
+
+The Reminders page (from the menu, as on the web) offers the web's hours, times, days and
+lead times (`presentation::REMINDER_DEFAULTS`). Nothing fires until the reader turns
+reminders on. Each notification names the office and the day it keeps ("Vespers", "III
+Sunday in Lent"), in the same words as the web's calendar feed (`presentation::reminder_summary`),
+and a tap opens that hour.
+
+- **Scheduling.** `ReminderScheduler` keeps the next three days registered with the alarm
+  service, each alarm carrying its notification's words, so it posts at once without loading
+  the engine. Every firing, reboot, clock or time-zone change, app update and app visit syncs
+  again, so the window always runs ahead; a sync replaces alarms rather than adding to them.
+- **On the minute.** Exact alarms that fire through Doze when the reader allows "Alarms &
+  reminders" (Android 14 asks); otherwise the system's nearest time, still through Doze, and
+  the page says how to allow the exact minute.
+- **Permission.** Turning reminders on asks for notifications (Android 13+). If they are
+  refused, reminders stay scheduled and the page links to the setting.
+
+`ReminderTest` checks the schedule the alarm service holds, cancellation, and the posted
+notification.
 
 ## Trying it on a phone
 

@@ -118,6 +118,8 @@ fun MenuPanel(
     onHour: ((String) -> Unit)?,
     onOrdo: () -> Unit,
     onOrdoCurrent: Boolean,
+    onReminders: () -> Unit,
+    onRemindersCurrent: Boolean,
     theme: ThemeChoice,
     onTheme: (ThemeChoice) -> Unit,
     textSize: TextSize,
@@ -148,7 +150,11 @@ fun MenuPanel(
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
-                MenuRow { MenuCell("ORDO", onOrdoCurrent, nav, p.accent, onOrdo) }
+                MenuRow {
+                    MenuCell("ORDO", onOrdoCurrent, nav, p.accent, onOrdo)
+                    // Habit setup, not an hour: quieter than the Ordo, as on the web.
+                    MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, onReminders)
+                }
                 Hairline(p.border, Modifier.padding(top = 6.4.dp))
                 Spacer(Modifier.height(6.4.dp))
                 MenuRow {

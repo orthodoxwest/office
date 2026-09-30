@@ -4,7 +4,7 @@ use axum::body::Body;
 use axum::http::{HeaderMap, Response, StatusCode, header};
 use jiff::tz::TimeZone;
 use jiff::{SignedDuration, Timestamp};
-use presentation::{date_slug, title_case};
+use presentation::{date_slug, reminder_description, reminder_summary};
 
 use crate::Server;
 use crate::http::{Query, header_value, http_error, response, set};
@@ -160,19 +160,11 @@ impl Server {
             let entry = self.cache.get(date.year())?;
             let Some(day) = entry.days.get(date.ordinal() as usize - 1) else { continue };
             let slug = date_slug(date);
-            let feast = crate::handlers::celebration_name(day);
-            let mut parts = Vec::new();
-            if let Some(c) = &day.celebration {
-                parts.push(c.rank.display_name().to_string());
-            }
-            parts.push(title_case(day.season.as_str()));
-            parts.push(day.color.as_str().to_string());
-            parts.extend(day.commemorations.iter().map(|c| format!("Comm. {}", c.name)));
-            let desc = parts.join(" · ");
+            let desc = reminder_description(day);
             for &(name, hh, mm) in &cfg.hours {
                 let begin = wall_time(&cfg.tz, date, hh, mm);
                 let end = begin.checked_add(SignedDuration::from_mins(15)).map_err(|e| e.to_string())?;
-                let summary = format!("{} — {feast}", title_case(name));
+                let summary = reminder_summary(name, day);
                 write("BEGIN:VEVENT");
                 write(&format!("UID:{name}-{slug}@awrv-office"));
                 write(&format!("DTSTAMP:{dtstamp}"));

@@ -33,7 +33,14 @@ class ScreenshotTest {
 
     private val lent = LocalDate.of(2026, 3, 15)
 
-    private fun show(page: Page, theme: ThemeChoice, today: LocalDate = lent, form: String = "private") {
+    private fun show(
+        page: Page,
+        theme: ThemeChoice,
+        today: LocalDate = lent,
+        form: String = "private",
+        reminders: ReminderSettings = ReminderStore(ApplicationProvider.getApplicationContext()).load(),
+        status: ReminderStatus = ReminderStatus(notificationsAllowed = true, exactAllowed = true),
+    ) {
         val home = (page as? Page.Home)?.let { core.home(it.date.toCivil(), today.toCivil(), 18) }
         val hour = (page as? Page.Hour)?.let { core.compose(it.hour, it.date.year, it.date.monthValue, it.date.dayOfMonth, form) }
         val ordo = (page as? Page.Ordo)?.let { core.ordoMonth(it.year, it.month) }
@@ -42,6 +49,8 @@ class ScreenshotTest {
                 OfficeApp(
                     page, today, hourNames(), home, hour, ordo, null, form, theme, TextSize.DEFAULT, PaddingValues(),
                     onOpen = {}, onHome = {}, onForm = {}, onTheme = {}, onTextSize = {},
+                    reminders = reminders, reminderStatus = status,
+                    onReminders = {}, onTurnOn = {}, onTurnOff = {}, onAllowNotifications = {}, onAllowExact = {},
                 )
             }
         }
@@ -112,6 +121,18 @@ class ScreenshotTest {
         compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1500dp-xxhdpi")
+    fun remindersNave() { show(Page.Reminders, ThemeChoice.NAVE); shoot("reminders-nave") }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1500dp-xxhdpi")
+    fun remindersOnApse() {
+        val on = ReminderStore(ApplicationProvider.getApplicationContext()).load().copy(on = true)
+        show(Page.Reminders, ThemeChoice.APSE, reminders = on, status = ReminderStatus(notificationsAllowed = true, exactAllowed = false))
+        shoot("reminders-on-apse")
     }
 
     companion object {
