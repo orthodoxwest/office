@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/data-format", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/render-html", "crates/tools", "apps/cli", "apps/office-web"]
+members = ["crates/data-format", "crates/calendar", "crates/corpus", "crates/liturgy", "crates/office", "crates/ordo", "crates/render-text", "crates/render-tex", "crates/render-html", "crates/render-blocks", "crates/presentation", "crates/tools", "apps/cli", "apps/office-web", "apps/mobile-ffi"]
 
 [workspace.package]
 edition = "2024"
@@ -17,6 +17,8 @@ office = { path = "crates/office" }
 ordo = { path = "crates/ordo" }
 render-tex = { path = "crates/render-tex" }
 render-html = { path = "crates/render-html" }
+render-blocks = { path = "crates/render-blocks" }
+presentation = { path = "crates/presentation" }
 office-web = { path = "apps/office-web" }
 render-text = { path = "crates/render-text" }
 serde_json = "1"
@@ -28,6 +30,7 @@ axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync", "time", "signal"] }
 rusqlite = { version = "0.37", features = ["bundled"] }
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
+uniffi = "0.32"
 
 # Core crates add `wildcard_enum_match_arm = "deny"` in their own [lints]
 # configuration: adding a liturgical enum variant must break the build at

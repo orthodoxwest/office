@@ -89,28 +89,6 @@ pub fn parse_clock(s: &str) -> Option<(u32, u32)> {
     (rest.is_empty() && hour < 24 && minute < 60).then_some((hour, minute))
 }
 
-/// At least four year digits, with the sign outside them.
-fn format_year(y: i32) -> String {
-    if y < 0 { format!("-{:04}", -i64::from(y)) } else { format!("{y:04}") }
-}
-
-/// `Format("2006-01-02")`.
-pub fn date_slug(d: Date) -> String {
-    format!("{}-{:02}-{:02}", format_year(d.year()), d.month(), d.day())
-}
-
-pub(crate) const MONTHS: [&str; 12] =
-    ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-pub fn month_name(d: Date) -> &'static str {
-    MONTHS[d.month() as usize - 1]
-}
-
-/// `Format("Monday, January 2, 2006")`.
-pub fn long_date(d: Date) -> String {
-    format!("{}, {} {}, {}", d.weekday().name(), month_name(d), d.day(), format_year(d.year()))
-}
-
 /// Resolves a reminder wall time by reading it as UTC, finding the zone offset there, and
 /// correcting once using the offset at the resulting instant. At DST gaps and overlaps the choice
 /// depends on the zone: New York takes the earlier instant, while London takes the later one. These
@@ -156,14 +134,6 @@ mod tests {
         assert_eq!(parse_clock("6:5"), None);
         assert_eq!(parse_clock("12:60"), None);
         assert_eq!(parse_clock("123:45"), None);
-    }
-
-    #[test]
-    fn dates_use_padded_years() {
-        assert_eq!(date_slug(Date::new(-1, 1, 1)), "-0001-01-01");
-        assert_eq!(date_slug(Date::new(202, 1, 1)), "0202-01-01");
-        assert_eq!(date_slug(Date::new(10000, 1, 1)), "10000-01-01");
-        assert_eq!(long_date(Date::new(2026, 3, 11)), "Wednesday, March 11, 2026");
     }
 
     #[test]

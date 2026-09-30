@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="page">#FAF3E9</color>
+    <color name="icon_ground">#121C28</color>
+    <color name="icon_cross">#D8BC74</color>
+</resources>

@@ -225,11 +225,11 @@ CREATE TABLE IF NOT EXISTS seen (
             return Err("invalid usage event".into());
         }
         let today = eastern_day(now);
-        let day = crate::web_time::date_slug(today);
+        let day = presentation::date_slug(today);
         let hash = Sha256::digest(format!("{day}\x00{browser}").as_bytes());
         let mut conn = self.conn.lock().map_err(|e| e.to_string())?;
         let tx = conn.transaction().map_err(|e| e.to_string())?;
-        tx.execute("DELETE FROM seen WHERE day < ?", [crate::web_time::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
+        tx.execute("DELETE FROM seen WHERE day < ?", [presentation::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
         let mut scopes = vec!["site"];
         if scope != "site" {
             scopes.push(scope);
@@ -261,9 +261,9 @@ CREATE TABLE IF NOT EXISTS seen (
         }
         let today = eastern_day(now);
         let conn = self.conn.lock().map_err(|e| e.to_string())?;
-        conn.execute("DELETE FROM seen WHERE day < ?", [crate::web_time::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
+        conn.execute("DELETE FROM seen WHERE day < ?", [presentation::date_slug(today.add_days(-2))]).map_err(|e| e.to_string())?;
         let mut result: Vec<UsageDay> =
-            (0..days).map(|i| UsageDay { day: crate::web_time::date_slug(today.add_days(-(i as i32))), ..UsageDay::default() }).collect();
+            (0..days).map(|i| UsageDay { day: presentation::date_slug(today.add_days(-(i as i32))), ..UsageDay::default() }).collect();
         let indices: BTreeMap<String, usize> = result.iter().enumerate().map(|(i, r)| (r.day.clone(), i)).collect();
         let mut stmt = conn.prepare("SELECT day, scope, users FROM totals WHERE day >= ? AND day <= ?").map_err(|e| e.to_string())?;
         let rows = stmt
@@ -583,7 +583,7 @@ mod tests {
     fn reporting_day_across_dst() {
         for (value, utc_day) in [("2026-03-08T04:59:00Z", "2026-03-08"), ("2026-11-01T03:59:00Z", "2026-11-01")] {
             let now: jiff::Timestamp = value.parse().unwrap();
-            assert_ne!(crate::web_time::date_slug(eastern_day(now)), utc_day, "used UTC instead of Eastern: {value}");
+            assert_ne!(presentation::date_slug(eastern_day(now)), utc_day, "used UTC instead of Eastern: {value}");
         }
     }
 
