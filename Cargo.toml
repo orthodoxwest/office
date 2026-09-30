@@ -35,5 +35,9 @@ jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 [workspace.lints.rust]
 unsafe_code = "forbid"
 
+# Backtraces keep file:line; full debug info would add ~40% to every target/.
+[profile.dev]
+debug = "line-tables-only"
+
 [profile.release]
 debug = "line-tables-only"
