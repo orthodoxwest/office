@@ -18,14 +18,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
@@ -85,7 +92,8 @@ class MainActivity : ComponentActivity() {
                     form = vm.form,
                     theme = vm.theme,
                     textSize = vm.textSize,
-                    insets = WindowInsets.systemBars.asPaddingValues(),
+                    // The bars and any camera cutout: above and below on a phone upright, at the sides on its side.
+                    insets = WindowInsets.systemBars.union(WindowInsets.displayCutout).asPaddingValues(),
                     onOpen = vm::open,
                     onHome = vm::goHome,
                     onForm = vm::chooseForm,
@@ -202,29 +210,38 @@ fun OfficeApp(
         (kept - entries.toSet()).forEach(visits::removeState)
         kept = entries
     }
-    val chrome: @Composable () -> Unit = {
-        SiteHeader(onHome = { menu = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu })
-        if (menu) {
-            val onHourPage = page as? Page.Hour
-            MenuPanel(
-                currentHour = onHourPage?.hour,
-                onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
-                onOrdo = {
-                    menu = false
-                    // The ordo at the day shown, as the web's /calendar opens at today's row.
-                    onOpen(
-                        when (page) {
-                            is Page.Home -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
-                            is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
-                            is Page.Ordo -> Page.Ordo(page.year, page.month)
-                            is Page.Year -> Page.Year(page.year)
-                            Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
-                        },
-                    )
+    val onHourPage = page as? Page.Hour
+    val nav = SiteNav(
+        hours = hours,
+        currentHour = onHourPage?.hour,
+        onHour = onHourPage?.let { h -> { name: String -> menu = false; onOpen(Page.Hour(h.date, name)) } },
+        onOrdo = {
+            menu = false
+            // The ordo at the day shown, as the web's /calendar opens at today's row.
+            onOpen(
+                when (page) {
+                    is Page.Home -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                    is Page.Hour -> Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)
+                    is Page.Ordo -> Page.Ordo(page.year, page.month)
+                    is Page.Year -> Page.Year(page.year)
+                    Page.Reminders -> Page.Ordo(today.year, today.monthValue, today.dayOfMonth)
                 },
-                onOrdoCurrent = page is Page.Ordo || page is Page.Year,
-                onReminders = { menu = false; onOpen(Page.Reminders) },
-                onRemindersCurrent = page is Page.Reminders,
+            )
+        },
+        ordoCurrent = page is Page.Ordo || page is Page.Year,
+        onReminders = { menu = false; onOpen(Page.Reminders) },
+        remindersCurrent = page is Page.Reminders,
+    )
+    val chrome: @Composable () -> Unit = {
+        SiteHeader(onHome = { menu = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
+        if (menu && !LocalWide.current) {
+            MenuPanel(
+                currentHour = nav.currentHour,
+                onHour = nav.onHour,
+                onOrdo = nav.onOrdo,
+                onOrdoCurrent = nav.ordoCurrent,
+                onReminders = nav.onReminders,
+                onRemindersCurrent = nav.remindersCurrent,
                 theme = theme,
                 onTheme = onTheme,
                 textSize = textSize,
@@ -234,69 +251,77 @@ fun OfficeApp(
             )
         }
     }
-    Box(Modifier.fillMaxSize()) {
-        PlasterWall()
-        visits.SaveableStateProvider(entry) {
-            when {
-                error != null -> Message(error, insets)
-                page is Page.Home && home != null -> HomeScreen(
-                    view = home,
-                    date = page.date,
-                    today = today,
-                    chrome = chrome,
-                    insets = insets,
-                    onDate = { onOpen(Page.Home(it)) },
-                    onHour = { d, h -> onOpen(Page.Hour(d, h)) },
-                    onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
-                )
-                page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
-                    view = hour,
-                    date = page.date,
-                    today = today,
-                    hours = hours,
-                    form = form,
-                    chrome = chrome,
-                    insets = insets,
-                    onDate = { onOpen(Page.Hour(it, page.hour)) },
-                    onForm = onForm,
-                    onHour = { onOpen(Page.Hour(page.date, it)) },
-                    onAllHours = { onOpen(Page.Home(page.date)) },
-                )
-                page is Page.Ordo -> OrdoScreen(
-                    month = ordo?.takeIf { it.year == page.year && it.month == page.month },
-                    year = page.year,
-                    monthNumber = page.month,
-                    today = today,
-                    chrome = chrome,
-                    insets = insets,
-                    onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
-                    onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
-                    onYear = { onOpen(Page.Year(it)) },
-                    onDay = { onOpen(Page.Home(it)) },
-                    focusDay = page.day,
-                )
-                page is Page.Year -> OrdoYearScreen(
-                    view = remember(page.year) { ordoYear(page.year) },
-                    today = today,
-                    chrome = chrome,
-                    insets = insets,
-                    onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
-                    onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
-                    onYear = { onOpen(Page.Year(it)) },
-                    onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
-                )
-                page is Page.Reminders -> RemindersScreen(
-                    settings = reminders,
-                    status = reminderStatus,
-                    chrome = chrome,
-                    insets = insets,
-                    onChange = onReminders,
-                    onTurnOn = onTurnOn,
-                    onTurnOff = onTurnOff,
-                    onAllowNotifications = onAllowNotifications,
-                    onAllowExact = onAllowExact,
-                )
-                else -> Message("Preparing the office…", insets)
+    // The web's desktop composition from its breakpoint up: a tablet, or a phone on its side.
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        CompositionLocalProvider(LocalWide provides (maxWidth >= WideFrom), LocalPrefs provides Prefs(theme, onTheme, textSize, onTextSize)) {
+            PlasterWall()
+            // The wall runs under the bars; the page keeps clear of them at the sides (the screens
+            // take the top and bottom themselves, so their backgrounds run under the bars).
+            val direction = LocalLayoutDirection.current
+            Box(Modifier.padding(start = insets.calculateStartPadding(direction), end = insets.calculateEndPadding(direction))) {
+                visits.SaveableStateProvider(entry) {
+                    when {
+                        error != null -> Message(error, insets)
+                        page is Page.Home && home != null -> HomeScreen(
+                            view = home,
+                            date = page.date,
+                            today = today,
+                            chrome = chrome,
+                            insets = insets,
+                            onDate = { onOpen(Page.Home(it)) },
+                            onHour = { d, h -> onOpen(Page.Hour(d, h)) },
+                            onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue, page.date.dayOfMonth)) },
+                        )
+                        page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
+                            view = hour,
+                            date = page.date,
+                            today = today,
+                            hours = hours,
+                            form = form,
+                            chrome = chrome,
+                            insets = insets,
+                            onDate = { onOpen(Page.Hour(it, page.hour)) },
+                            onForm = onForm,
+                            onHour = { onOpen(Page.Hour(page.date, it)) },
+                            onAllHours = { onOpen(Page.Home(page.date)) },
+                        )
+                        page is Page.Ordo -> OrdoScreen(
+                            month = ordo?.takeIf { it.year == page.year && it.month == page.month },
+                            year = page.year,
+                            monthNumber = page.month,
+                            today = today,
+                            chrome = chrome,
+                            insets = insets,
+                            onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                            onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                            onYear = { onOpen(Page.Year(it)) },
+                            onDay = { onOpen(Page.Home(it)) },
+                            focusDay = page.day,
+                        )
+                        page is Page.Year -> OrdoYearScreen(
+                            view = remember(page.year) { ordoYear(page.year) },
+                            today = today,
+                            chrome = chrome,
+                            insets = insets,
+                            onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                            onToday = { onOpen(Page.Ordo(today.year, today.monthValue, today.dayOfMonth)) },
+                            onYear = { onOpen(Page.Year(it)) },
+                            onDay = { onOpen(Page.Ordo(it.year, it.monthValue, it.dayOfMonth)) },
+                        )
+                        page is Page.Reminders -> RemindersScreen(
+                            settings = reminders,
+                            status = reminderStatus,
+                            chrome = chrome,
+                            insets = insets,
+                            onChange = onReminders,
+                            onTurnOn = onTurnOn,
+                            onTurnOff = onTurnOff,
+                            onAllowNotifications = onAllowNotifications,
+                            onAllowExact = onAllowExact,
+                        )
+                        else -> Message("Preparing the office…", insets)
+                    }
+                }
             }
         }
     }

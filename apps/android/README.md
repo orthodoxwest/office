@@ -25,8 +25,20 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   invitation, the hour directory by period, "Change date"), each hour (colour band, framed
   title, "Change date" and "Prayer form", the office, its continuation and report link), and
   the ordo's month (year and month navigation, day rows with colour rails, ranks,
-  commemorations and office details). The site menu carries the day's hours, the Ordo, and
-  the Theme (Default / Nave / Apse) and Text (A A A) rows.
+  commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
+  date leading to its day in the ordo). The site menu carries the day's hours, the Ordo, and
+  the Theme (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
+  days into the year's months, as the web's does.
+- **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
+  takes the web's desktop composition: the header's links inline and the preferences in the
+  footer; home's frontispiece set in the niche, with its round head, stone moulding and
+  day-coloured trim, under the chapel's light (`Niche.kt`); the ordo as the desktop table; the
+  Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
+  at 1280×900, beside the web's desktop snapshots, and at a tablet's and a landscape phone's
+  sizes.
+- **Hymns.** Each hymn's stanzas are centred in a column the width of its longest line, as the
+  web's fit-content `.hymn-verses`, so the rag is balanced rather than flush left
+  (`HymnScreenshotTest`).
 - **Tokens.** `Theme.kt` holds the web's colour tokens for Nave and Apse and the seasonal
   ornament retints; `TokensTest` fails when style.css changes a token the app has not followed.
   Text size scales the whole page, as the web scales its root (93% / 100% / 110%).
@@ -47,6 +59,17 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
 - **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in
   the web's hairline glyphs. They open the day they are tapped; Compline in the small hours is
   the day before's, as "Pray now" reckons it (`ShortcutsTest`).
+
+## Home-screen widget
+
+`OfficeWidget` sets out the day as home's frontispiece does: the date, a double gold rule with
+the day's liturgical colour as its lozenge, the feast, and the invitation to the hour now,
+which opens that hour; the day opens home. On Android 12+ a widget one row high becomes a
+strip. Under the Default theme its colours are night-aware resources, so it follows the phone
+as it changes; Nave or Apse sets them. Each refresh sets a non-waking alarm for the next change
+of hour or midnight (`Widgets.nextChange`), so a sleeping phone is never woken for it; clock and
+time-zone changes, updates, the theme menu and app visits refresh it too. `WidgetTest` checks
+its words and refreshes, and renders it for review.
 
 ## Accessibility
 

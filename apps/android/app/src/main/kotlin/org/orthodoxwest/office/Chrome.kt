@@ -6,9 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -92,12 +96,44 @@ fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp): Modifie
     drawLine(color, Offset(inset.toPx(), y), Offset(size.width - inset.toPx(), y), 1.dp.toPx())
 }
 
-/** The header beam: "✠ Daily Office" home, and the menu. */
+/** The web's breakpoint (style.css `min-width: 701px`): the desktop composition from here up. */
+val WideFrom: Dp = 701.dp
+
+/** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
+val LocalWide = staticCompositionLocalOf { false }
+
+/** The reader's theme and text size, for the wide footer's controls (the phone's are in the menu). */
+class Prefs(val theme: ThemeChoice, val onTheme: (ThemeChoice) -> Unit, val textSize: TextSize, val onTextSize: (TextSize) -> Unit)
+
+val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
+
+/**
+ * Where the site's navigation leads, and which of it is the page shown: the day's hours on an
+ * hour page, then the Ordo and Reminders. The menu sets it out on a phone, the header inline
+ * on a wide screen.
+ */
+class SiteNav(
+    val hours: List<String>,
+    val currentHour: String?,
+    val onHour: ((String) -> Unit)?,
+    val onOrdo: () -> Unit,
+    val ordoCurrent: Boolean,
+    val onReminders: () -> Unit,
+    val remindersCurrent: Boolean,
+)
+
+/** The header beam: "✠ Daily Office" home, and the menu, or on a wide screen the links themselves. */
 @Composable
-fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit) {
+fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit, nav: SiteNav? = null) {
     val p = LocalPalette.current
+    val wide = LocalWide.current && nav != null
     Column {
-        Row(Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            // The web's nav shell: held to 68rem, so the whole list fits on one line.
+            Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = if (wide) 1088.dp else Dp.Infinity).fillMaxWidth()
+                .padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 buildAnnotatedString {
                     withStyle(SpanStyle(color = LocalOrnament.current.flat, fontFamily = CrossFont, fontSize = 11.sp)) { append("✠") }
@@ -107,12 +143,44 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit) {
                 style = Type.brand.copy(color = p.text),
             )
             Spacer(Modifier.weight(1f))
-            Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("MENU", style = Type.menu.copy(color = p.accent))
-                Caret(menuOpen)
+            if (wide) {
+                InlineNav(nav)
+            } else {
+                Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("MENU", style = Type.menu.copy(color = p.accent))
+                    Caret(menuOpen)
+                }
             }
         }
         Hairline(p.oakLine)
+    }
+}
+
+/** The desktop header's links (`.site-menu nav`): the current one in ink over an accent rule; Reminders quieter. */
+@Composable
+private fun InlineNav(nav: SiteNav) {
+    val p = LocalPalette.current
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        @Composable
+        fun link(label: String, current: Boolean, secondary: Boolean = false, onClick: () -> Unit) {
+            val style = if (secondary) Type.label(11.52f, 0.04f) else Type.label(12.48f, 0.06f)
+            val ink = if (current) p.text else if (secondary) p.muted else p.accent
+            Box(Modifier.heightIn(min = 44.dp).tap(selected = current, onClick = onClick).padding(horizontal = 4.8.dp), contentAlignment = Alignment.Center) {
+                Text(
+                    label.uppercase(),
+                    Modifier.drawBehind {
+                        if (current) drawLine(if (secondary) p.muted else p.accent, Offset(0f, size.height + 4.dp.toPx()), Offset(size.width, size.height + 4.dp.toPx()), 1.dp.toPx())
+                    },
+                    style = style.copy(color = ink),
+                )
+            }
+        }
+        nav.onHour?.let { onHour ->
+            nav.hours.forEach { h -> link(hourLabel(h), h == nav.currentHour) { onHour(h) } }
+            Box(Modifier.padding(horizontal = 2.4.dp).width(1.dp).height(24.dp).background(p.border))
+        }
+        link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
+        link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
     }
 }
 
@@ -411,13 +479,63 @@ fun Continuation(
     }
 }
 
-/** The page's foot: the diamond and the Office's name. */
+/** The page's foot: the diamond and the Office's name, and on a wide screen the reader's preferences. */
 @Composable
 fun Footer(modifier: Modifier = Modifier, diamond: Boolean = true) {
     val p = LocalPalette.current
+    val prefs = LocalPrefs.current
     Column(modifier.fillMaxWidth().padding(top = 40.dp, bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         if (diamond) Diamond(Modifier.padding(bottom = 16.dp), size = 7.dp)
         Text("Benedictine Divine Office", style = Type.small.copy(color = p.muted))
+        if (LocalWide.current && prefs != null) FooterPrefs(prefs)
+    }
+}
+
+/**
+ * The desktop footer's preferences (`.footer-prefs`): Default / Nave / Apse above, the three
+ * text sizes below, between hairline courses rather than in boxes, the chosen one in the
+ * accent over a gold rule, as the current hour is marked on home.
+ */
+@Composable
+private fun FooterPrefs(prefs: Prefs) {
+    val p = LocalPalette.current
+    val o = LocalOrnament.current
+    @Composable
+    fun Course(content: @Composable RowScope.() -> Unit) {
+        Row(
+            Modifier.height(IntrinsicSize.Min).drawBehind {
+                drawLine(p.surfaceEdge, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx())
+                drawLine(p.surfaceEdge, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+            },
+            content = content,
+        )
+    }
+    @Composable
+    fun RowScope.Option(label: String, chosen: Boolean, last: Boolean, style: TextStyle, spoken: String, onClick: () -> Unit) {
+        Box(
+            Modifier.fillMaxHeight().heightIn(min = 32.dp).tap(label = spoken, selected = chosen, onClick = onClick)
+                .drawBehind {
+                    if (!last) drawLine(p.surfaceEdge, Offset(size.width, 0f), Offset(size.width, size.height), 1.dp.toPx())
+                    if (chosen) drawLine(o.flat, Offset(0f, size.height - 0.5.dp.toPx()), Offset(size.width, size.height - 0.5.dp.toPx()), 1.dp.toPx())
+                }
+                .padding(horizontal = 10.4.dp, vertical = 6.4.dp),
+            contentAlignment = Alignment.Center,
+        ) { Text(label, style = style.copy(color = if (chosen) p.accent else p.muted)) }
+    }
+    Column(Modifier.padding(top = 13.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Course {
+            ThemeChoice.entries.forEachIndexed { i, t ->
+                Option(t.label.uppercase(), t == prefs.theme, i == ThemeChoice.entries.lastIndex, Type.label(11.52f, 0.06f), "${t.label} theme") { prefs.onTheme(t) }
+            }
+        }
+        Course {
+            TextSize.entries.forEachIndexed { i, s ->
+                // The size ladder is the label.
+                val size = when (s) { TextSize.SMALL -> 10.4f; TextSize.DEFAULT -> 13.7f; TextSize.LARGE -> 18.7f }
+                val spoken = when (s) { TextSize.SMALL -> "Smaller text"; TextSize.DEFAULT -> "Default text size"; TextSize.LARGE -> "Larger text" }
+                Option("A", s == prefs.textSize, i == TextSize.entries.lastIndex, Type.label(size, 0f), spoken) { prefs.onTextSize(s) }
+            }
+        }
     }
 }
 

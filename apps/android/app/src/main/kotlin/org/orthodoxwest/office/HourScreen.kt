@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
@@ -141,12 +144,19 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
     var choosing by remember { mutableStateOf(false) }
     Column(Modifier.measure().padding(top = 17.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         // The headpiece is set into the title's upper rule; the day's colour reaches the lower one's lozenge.
-        Box(contentAlignment = Alignment.Center) {
-            DoubleRule(gap = 132.8.dp)
-            Headpiece()
+        // The rules take the title's width, at least 24rem (the measure, on a phone), as the web's h1.
+        Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                DoubleRule(gap = 132.8.dp)
+                Headpiece()
+            }
+            Text(
+                view.title.uppercase(),
+                Modifier.padding(horizontal = 20.8.dp).semantics { heading(); contentDescription = view.title },
+                style = Type.hourTitle.copy(color = p.text),
+            )
+            DoubleRule(lozenge = dayColor(view.color))
         }
-        Text(view.title.uppercase(), Modifier.semantics { heading(); contentDescription = view.title }, style = Type.hourTitle.copy(color = p.text))
-        DoubleRule(lozenge = dayColor(view.color))
         val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
         Text(
             meta.joinToString(" · "),

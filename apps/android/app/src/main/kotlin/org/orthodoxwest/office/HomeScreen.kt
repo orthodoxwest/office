@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -63,15 +65,29 @@ fun HomeScreen(
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
 ) {
-    Box(Modifier.fillMaxSize()) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
         // Apse: one fixed field, anchored top centre, clearing the header.
         VaultField(Modifier.fillMaxSize(), listOf(0f to 0f, 0.09f to 0f, 0.16f to 0.9f, 0.6f to 0.7f, 1f to 0.3f))
+        // A wide screen sets the frontispiece in a niche, and lights the room toward it.
+        val screen = maxWidth
+        val niche = if (LocalWide.current) nicheTokens(LocalPalette.current) else null
+        if (niche != null) ChapelLight(niche)
         Column(
             Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = insets.calculateTopPadding(), bottom = insets.calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             chrome()
-            Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
+            if (niche != null) {
+                // The moulding stands 0.75rem out from the card; room for it below the header.
+                Frontispiece(
+                    view, date, today, onDate, onHour, onOrdoDay,
+                    Modifier.padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 12.dp).widthIn(max = nicheWidth(screen)).fillMaxWidth(),
+                    niche = niche,
+                    head = nicheHead(screen),
+                )
+            } else {
+                Frontispiece(view, date, today, onDate, onHour, onOrdoDay, Modifier.widthIn(max = 576.dp).fillMaxWidth().padding(horizontal = Gutter).padding(top = 16.dp))
+            }
             Footer(diamond = !LocalPalette.current.dark)
         }
     }
@@ -86,27 +102,47 @@ private fun Frontispiece(
     onHour: (LocalDate, String) -> Unit,
     onOrdoDay: () -> Unit,
     modifier: Modifier,
+    niche: NicheTokens? = null,
+    head: Dp = 0.dp,
 ) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     var picking by remember { mutableStateOf(false) }
     val day = dayColor(view.color)
+    val desk = niche != null
+    val side = if (desk) 28.dp else 16.dp
     Box(
-        modifier
-            .background(p.surface)
-            .border(1.dp, p.border)
-            // The day's colour as the frame's top edge, like a vestment's trim.
-            .drawBehind { drawRect(day, size = size.copy(height = 3.dp.toPx())) },
+        if (niche != null) {
+            // The niche: a low round head, the stone moulding, the day's colour as its trim.
+            val frame = if (p.dark) Color(208, 176, 106).copy(alpha = 0.34f) else Color(87, 52, 33).copy(alpha = 0.3f)
+            modifier.drawBehind { niche(niche, p, day, head.toPx(), frame, o.flat.copy(alpha = 0.18f)) }
+        } else {
+            modifier
+                .background(p.surface)
+                .border(1.dp, p.border)
+                // The day's colour as the frame's top edge, like a vestment's trim.
+                .drawBehind { drawRect(day, size = size.copy(height = 3.dp.toPx())) }
+        },
     ) {
-        FrameCorner(Modifier.align(Alignment.TopStart).padding(3.2.dp), mirror = false, flip = false)
-        FrameCorner(Modifier.align(Alignment.TopEnd).padding(3.2.dp), mirror = true, flip = false)
+        // The niche's head takes the place of the upper corner tooling.
+        if (!desk) {
+            FrameCorner(Modifier.align(Alignment.TopStart).padding(3.2.dp), mirror = false, flip = false)
+            FrameCorner(Modifier.align(Alignment.TopEnd).padding(3.2.dp), mirror = true, flip = false)
+        }
         FrameCorner(Modifier.align(Alignment.BottomStart).padding(3.2.dp), mirror = false, flip = true)
         FrameCorner(Modifier.align(Alignment.BottomEnd).padding(3.2.dp), mirror = true, flip = true)
-        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 18.2.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().padding(start = side, end = side, top = if (desk) head * 0.5f + 17.6.dp else 18.2.dp, bottom = if (desk) 20.dp else 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Headpiece()
             Spacer(Modifier.height(10.dp))
-            Text(view.dateLabel, Modifier.semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay), style = Type.body.copy(fontSize = 22.08.sp, lineHeight = 26.5.sp, letterSpacing = 0.22.sp, color = p.text, textAlign = TextAlign.Center))
-            Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = 17.28.sp, lineHeight = 21.6.sp, color = p.accent, textAlign = TextAlign.Center))
+            Text(
+                view.dateLabel,
+                Modifier.semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay),
+                style = Type.body.copy(fontSize = if (desk) 25.92.sp else 22.08.sp, lineHeight = if (desk) 31.1.sp else 26.5.sp, letterSpacing = if (desk) 0.39.sp else 0.22.sp, color = p.text, textAlign = TextAlign.Center),
+            )
+            Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = if (desk) 18.72.sp else 17.28.sp, lineHeight = if (desk) 23.4.sp else 21.6.sp, color = p.accent, textAlign = TextAlign.Center))
             if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
             if (!view.isToday) {
                 Text(
@@ -131,7 +167,7 @@ private fun Frontispiece(
             Row(
                 Modifier
                     .padding(top = 2.4.dp)
-                    .throughPadding(16.dp)
+                    .throughPadding(side)
                     .background(p.inscriptionGround)
                     .drawBehind {
                         drawLine(p.inscriptionEdge, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx())
@@ -146,9 +182,9 @@ private fun Frontispiece(
                 Canvas(Modifier.width(4.dp).height(4.dp)) { lozenge(center, size.minDimension / 2f, o.ink, null) }
             }
             Spacer(Modifier.height(13.6.dp))
-            PrayNow(view.prayNowLabel) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
+            PrayNow(view.prayNowLabel, desk) { onHour(LocalDate.of(view.prayNowDate.year, view.prayNowDate.month, view.prayNowDate.day), view.prayNowHour) }
             Spacer(Modifier.height(12.8.dp))
-            HourDirectory(view.currentHour) { onHour(date, it) }
+            HourDirectory(view.currentHour, desk) { onHour(date, it) }
             // Season and date control share one line after the invitation.
             Hairline(p.border, Modifier.padding(top = 11.2.dp))
             if (view.season.isNotEmpty()) Text(view.season, Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
@@ -167,7 +203,7 @@ private fun Modifier.throughPadding(side: Dp): Modifier = this.layout { measurab
 
 /** The invitation: a double gold rule with gilt lozenges at its ends. */
 @Composable
-private fun PrayNow(label: String, onClick: () -> Unit) {
+private fun PrayNow(label: String, desk: Boolean, onClick: () -> Unit) {
     val p = LocalPalette.current
     val o = LocalOrnament.current
     Box(
@@ -182,24 +218,25 @@ private fun PrayNow(label: String, onClick: () -> Unit) {
                 lozenge(Offset(0f, size.height / 2f), 3.5.dp.toPx(), o.flat, null)
                 lozenge(Offset(size.width, size.height / 2f), 3.5.dp.toPx(), o.flat, null)
             }
-            .padding(vertical = 13.9.dp, horizontal = 15.8.dp),
+            .padding(vertical = if (desk) 12.dp else 13.9.dp, horizontal = 15.8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = Type.body.copy(fontSize = 19.2.sp, lineHeight = 24.96.sp, letterSpacing = 0.38.sp, color = p.accent))
+        Text(label, style = Type.body.copy(fontSize = if (desk) 20.sp else 19.2.sp, lineHeight = if (desk) 26.sp else 24.96.sp, letterSpacing = 0.38.sp, color = p.accent))
     }
 }
 
 /** The hours by period in horizontal bands, the current one underlined in gold. */
 @Composable
-private fun HourDirectory(current: String, onHour: (String) -> Unit) {
+private fun HourDirectory(current: String, desk: Boolean, onHour: (String) -> Unit) {
     val p = LocalPalette.current
-    val labelStyle = Type.label(11.52f, 0.08f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
+    // The desktop's labels are in the accent, their column 5.25rem.
+    val labelStyle = Type.label(11.52f, 0.08f).copy(color = if (desk) p.accent else p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
     // One width for the three period labels, widened past the web's 83dp only when the reader's
     // font size needs it, so the hours still line up in columns.
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     val labelWidth = remember(labelStyle, density) {
-        with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(83.dp)
+        with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(if (desk) 84.dp else 83.dp)
     }
     Column(Modifier.fillMaxWidth().border(1.dp, p.border)) {
         PERIODS.forEachIndexed { i, (period, label, hours) ->
@@ -214,11 +251,11 @@ private fun HourDirectory(current: String, onHour: (String) -> Unit) {
                     Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Box(Modifier.width(1.dp).fillMaxHeight().background(p.border))
-                Row(Modifier.weight(1f).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f).heightIn(min = if (desk) 46.dp else 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
                         if (j > 0) Divider(p.border)
                         Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (h == current) "${hourLabel(h)}, now" else null) { onHour(h) }, contentAlignment = Alignment.Center) {
-                            val name = Type.body.copy(fontSize = 15.68.sp, lineHeight = 18.8.sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text)
+                            val name = Type.body.copy(fontSize = if (desk) 16.sp else 15.68.sp, lineHeight = 18.8.sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text)
                             // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
                             BasicText(
                                 hourLabel(h),
