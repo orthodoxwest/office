@@ -1923,6 +1923,15 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   line-height: 1.5;
 }
 
+/* Congregational posture cues inside psalmody (Sit., Stand., Bow., Stand
+   upright.), set as the parish booklets set them: red roman runs in the verse.
+   Inline, so the line height is the verse's own. */
+.posture {
+  color: var(--rubric);
+  font-style: normal;
+  font-size: 0.9em;
+}
+
 /* Rubrics may quote a prayer-name or an actual spoken response. The composed
    element, not a text-matching rule, marks those small runs as prayer. */
 .rubric-prayed {
@@ -5851,6 +5860,7 @@ body.page-home::before {
   /* ℣, ℟ and their spelled-out forms are rubrics too; the booklet sets them
      in its rubric red, and grey here made them read as page furniture. */
   .rubric,
+  .posture,
   .prayer-speaker,
   .cross,
   .sigil,

@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
 use calendar::{CalendarData, Category, Date, MoveableDates, Season, build_calendar};
-use liturgy::{ElementType, PrayerForm};
+use liturgy::{ElementType, PostureAnchor, PrayerForm};
 
 use crate::{Day, Engine, HOUR_NAMES, resolve_office_days, testutil::TestData};
 
@@ -450,5 +450,62 @@ fn major_collects_have_invitations_and_only_first_and_last_conclusions() {
                 );
             }
         }
+    }
+}
+
+#[test]
+fn psalmody_posture_cues_follow_the_parish_booklets() {
+    // Parish Lauds booklets (Common of Apostles out of Paschaltide, pp. 1, 4–5):
+    // Sit. after the first mediant of each unit, Stand. at the mediant of the
+    // verse before its doxology, Bow. at Glory be, Stand upright. at As it was.
+    let (days, moveable) = year(2026);
+    let cues = |hour: &str, date: Date| -> Vec<(String, ElementType, Vec<String>)> {
+        let composed = engine().compose_hour(hour, &days[date.ordinal() as usize - 1], &moveable, PrayerForm::Private).unwrap();
+        composed
+            .sections
+            .iter()
+            .flat_map(|s| &s.elements)
+            .filter(|e| e.kind.is_psalmody() || e.kind == ElementType::PsalmDoxology)
+            .map(|e| {
+                let at = |c: &liturgy::PostureCue| match c.at {
+                    PostureAnchor::AfterMediant(n) => format!("{} *{n}", c.posture.as_str()),
+                    PostureAnchor::BeforeVerse(n) => format!("{} ^{n}", c.posture.as_str()),
+                };
+                (e.source_ref.clone(), e.kind, e.postures.iter().map(at).collect())
+            })
+            .collect()
+    };
+    let of = |cues: &[(String, ElementType, Vec<String>)], source: &str| -> Vec<String> {
+        cues.iter().find(|(s, _, _)| s == source).unwrap_or_else(|| panic!("{source} missing")).2.clone()
+    };
+    let bow = ["bow ^0", "stand-upright ^1"].map(String::from).to_vec();
+
+    // Sunday Lauds: the Benedicite and Psalms 148–150 under one Gloria.
+    let lauds = cues("lauds", Date::new(2026, 10, 4));
+    assert_eq!(of(&lauds, "canticles/benedicite"), ["sit *0", "stand *17", "bow ^18", "stand-upright ^19"]);
+    assert_eq!(of(&lauds, "psalms/148"), ["sit *0"]);
+    assert!(of(&lauds, "psalms/149").is_empty());
+    assert_eq!(of(&lauds, "psalms/150"), ["stand *5"]);
+    assert_eq!(of(&lauds, "canticles/benedictus"), Vec::<String>::new());
+    for (i, (_, kind, got)) in lauds.iter().enumerate() {
+        if *kind == ElementType::PsalmDoxology {
+            assert_eq!(*got, bow, "doxology after {}", lauds[i - 1].0);
+        }
+    }
+
+    // Monday Vespers joins 114–115 and 116b–117 under one Gloria each.
+    let vespers = cues("vespers", Date::new(2026, 1, 19));
+    assert_eq!(of(&vespers, "psalms/114"), ["sit *0"]);
+    assert_eq!(of(&vespers, "psalms/115").len(), 1);
+    assert_eq!(of(&vespers, "psalms/117"), ["stand *1"]);
+    assert!(of(&vespers, "canticles/magnificat").is_empty());
+
+    // Nothing is cued without the Gloria: the Office of the Dead and the Triduum.
+    for (hour, date) in [("lauds", Date::new(2026, 11, 2)), ("lauds", moveable.good_friday), ("vespers", moveable.good_friday)] {
+        assert!(cues(hour, date).iter().all(|(_, _, got)| got.is_empty()), "{hour} {date}");
+    }
+    // Only Lauds and Vespers are cued.
+    for hour in ["prime", "terce", "compline"] {
+        assert!(cues(hour, Date::new(2026, 10, 4)).iter().all(|(_, _, got)| got.is_empty()), "{hour}");
     }
 }

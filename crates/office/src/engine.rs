@@ -105,6 +105,7 @@ impl Engine {
         canonicalize_source_refs(&mut hour, t);
         collapse_uniform_antiphons(&mut hour);
         mark_psalm_doxologies(&mut hour);
+        crate::posture::mark_postures(&mut hour, day, hour_name);
         mark_announced_antiphons(&mut hour, day, hour_name);
         append_context_decisions(&mut hour, day, hour_name, moveable);
         // A missing corpus entry is a composition failure, never rendered text:

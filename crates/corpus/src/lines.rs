@@ -38,8 +38,20 @@ pub struct PsalmText {
 /// reference. A "Glory be…" line opens a Gloria that the next "as it was…"
 /// line closes; anything else intervening leaves it open where it stands.
 pub fn parse_psalm(text: &str) -> PsalmText {
+    parse_psalm_lines(text).0
+}
+
+/// The source line (split on '\n') of each verse `parse_psalm` yields, in order.
+pub fn psalm_verse_lines(text: &str) -> Vec<usize> {
+    let (parsed, lines) = parse_psalm_lines(text);
+    parsed.items.iter().zip(lines).filter(|(item, _)| matches!(item, PsalmItem::Verse { .. })).map(|(_, line)| line).collect()
+}
+
+/// The parse, with the source line on which each item begins.
+fn parse_psalm_lines(text: &str) -> (PsalmText, Vec<usize>) {
     let lines: Vec<&str> = text.split('\n').collect();
     let mut parsed = PsalmText::default();
+    let mut item_lines = Vec::new();
     let mut content_start = lines.len();
     for (i, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
@@ -57,7 +69,7 @@ pub fn parse_psalm(text: &str) -> PsalmText {
     }
 
     let mut gloria: Option<usize> = None;
-    for line in &lines[content_start..] {
+    for (n, line) in lines.iter().enumerate().skip(content_start) {
         let line = line.trim();
         if line.is_empty() {
             continue;
@@ -65,6 +77,7 @@ pub fn parse_psalm(text: &str) -> PsalmText {
         if let Some(heading) = section_heading(line) {
             gloria = None;
             parsed.items.push(PsalmItem::Section { heading: heading.to_string() });
+            item_lines.push(n);
             continue;
         }
         if let Some(i) = gloria.take()
@@ -77,14 +90,16 @@ pub fn parse_psalm(text: &str) -> PsalmText {
         }
         if line.starts_with("Glory be") {
             parsed.items.push(PsalmItem::Gloria { first: line.to_string(), second: String::new() });
+            item_lines.push(n);
             gloria = Some(parsed.items.len() - 1);
             continue;
         }
         let (number, body, _) = split_leading_verse_number(line);
         let (first, second) = body.split_once(" * ").unwrap_or((body, ""));
         parsed.items.push(PsalmItem::Verse { number: number.to_string(), first: first.to_string(), second: second.to_string() });
+        item_lines.push(n);
     }
-    parsed
+    (parsed, item_lines)
 }
 
 /// A "[section: Heading]" canticle break.
@@ -269,6 +284,15 @@ mod tests {
                 },
             ]
         );
+    }
+
+    #[test]
+    fn verse_lines() {
+        let text =
+            "Psalm 67\n!Deus\n\n1. God be merciful * and bless us.\n\n[section: Part II]\n2 O ye Angels.\nGlory be,\nas it was.\n3. After.";
+        assert_eq!(psalm_verse_lines(text), [3, 6, 9]);
+        let lines: Vec<&str> = text.split('\n').collect();
+        assert_eq!(lines[6], "2 O ye Angels.");
     }
 
     #[test]

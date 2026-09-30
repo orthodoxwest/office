@@ -10,7 +10,7 @@ crates/
   data-format/             Corpus/ledger CSV, report JSON, quoting and parsing contracts
   calendar/                Computus, feast loading, occurrence, octaves, fasting; no file access
   corpus/                  Text loading, aliases, sidecars and shared line grammar
-  liturgy/                 Document model, element kinds, prayer forms and voice spans
+  liturgy/                 Document model, element kinds, prayer forms, voice spans and posture cues
   office/                  Hour composition, concurrence, scopes, summaries and tracing
   ordo/                    Text calendar and rubrics TSV
   render-text/             Plain-text office rendering

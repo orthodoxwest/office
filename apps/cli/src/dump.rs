@@ -4,7 +4,7 @@
 use std::io::Write;
 
 use calendar::{CalendarData, CalendarDay, Date, Decision, Feast, MoveableDates, Tabula, build_calendar};
-use liturgy::{OfficeElement, OfficeHour, PrayerForm};
+use liturgy::{OfficeElement, OfficeHour, PostureAnchor, PostureCue, PrayerForm};
 use office::texts::OfficeTexts;
 use serde_json::{Value, json};
 
@@ -343,6 +343,7 @@ fn element(e: &OfficeElement) -> Value {
         "rubric": s(&e.rubric),
         "voice": e.voice.iter().map(|v| json!({"text": s(&v.text), "spoken": v.spoken, "role": v.role.map(|r| r.as_str())})).collect::<Vec<_>>(),
         "rubric_spans": e.rubric_spans.iter().map(|r| json!({"text": s(&r.text), "prayed": r.prayed})).collect::<Vec<_>>(),
+        "postures": e.postures.iter().map(posture).collect::<Vec<_>>(),
         "leader_slot": s(&e.leader_slot),
         "slot_ref": s(&e.slot_ref),
         "source_ref": s(&e.source_ref),
@@ -351,6 +352,14 @@ fn element(e: &OfficeElement) -> Value {
         "is_commemoration": e.is_commemoration,
         "announce": e.announce,
     })
+}
+
+fn posture(c: &PostureCue) -> Value {
+    let (at, verse) = match c.at {
+        PostureAnchor::AfterMediant(n) => ("after-mediant", n),
+        PostureAnchor::BeforeVerse(n) => ("before-verse", n),
+    };
+    json!({"posture": c.posture.as_str(), "at": at, "verse": verse})
 }
 
 /// Every resolvable corpus key in byte order with its directive and resolved

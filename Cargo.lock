@@ -688,6 +688,7 @@ name = "render-text"
 version = "0.1.0"
 dependencies = [
  "calendar",
+ "corpus",
  "liturgy",
  "office",
  "tools",

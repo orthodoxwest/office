@@ -6,7 +6,7 @@ use std::io::Write;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use calendar::{CalendarData, Decision};
-use liturgy::{OfficeElement, OfficeHour, OfficeSection, RubricSpan, VoiceSpan};
+use liturgy::{OfficeElement, OfficeHour, OfficeSection, PostureAnchor, PostureCue, RubricSpan, VoiceSpan};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
@@ -97,6 +97,7 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
                 announce,
                 leader_slot,
                 rubric_spans,
+                postures,
                 slot_ref,
                 source_ref,
                 source_refs,
@@ -115,6 +116,14 @@ fn hash_hour(h: &OfficeHour, hashes: &mut [Hash; 4]) {
             for RubricSpan { text, prayed } in rubric_spans {
                 presentation.str(text);
                 presentation.bool(*prayed);
+            }
+            presentation.count(postures.len());
+            for PostureCue { posture, at } in postures {
+                presentation.str(posture.as_str());
+                match at {
+                    PostureAnchor::AfterMediant(n) => presentation.str(&format!("after-mediant:{n}")),
+                    PostureAnchor::BeforeVerse(n) => presentation.str(&format!("before-verse:{n}")),
+                }
             }
             sources.str(slot_ref);
             sources.str(source_ref);
