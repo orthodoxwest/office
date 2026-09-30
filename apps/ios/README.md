@@ -58,7 +58,7 @@ The screenshots come from launch arguments:
 - `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
   `home`, `ordo`, `year` or `reminders`;
 - `-today` fixes today;
-- `-theme apse` chooses the theme;
+- `-theme apse` chooses the theme, and `-settings YES` opens the wide header's Settings;
 - `-anchor hymn` or `-anchor psalm` scrolls an hour to its first hymn or psalm.
 
 The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to

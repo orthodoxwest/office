@@ -132,6 +132,8 @@ final class AppModel: ObservableObject {
     @Published var root: CivilDate
     @Published var path: [Page] = []
     @Published var menuOpen = false
+    /// The wide header's Settings panel.
+    @Published var settingsOpen = false
     @Published private(set) var form: String
     @Published private(set) var theme: ThemeChoice
     @Published private(set) var textSize: TextSize
@@ -161,6 +163,7 @@ final class AppModel: ObservableObject {
     /// Opens `next` over the current page; a page of the same kind replaces it, as a link would.
     func open(_ next: Page) {
         menuOpen = false
+        settingsOpen = false
         if next == page { return }
         if next.kind == page.kind {
             // Replaced in place, as a link is followed: no slide.
@@ -177,6 +180,7 @@ final class AppModel: ObservableObject {
     /// Home for today, clearing the way back, as the brand link does.
     func goHome() {
         menuOpen = false
+        settingsOpen = false
         root = today
         path = []
     }
@@ -235,6 +239,8 @@ final class AppModel: ObservableObject {
         case "reminders": path = [.reminders]
         default: path = []
         }
+        // `-settings YES` opens the wide header's Settings, for its screenshot.
+        settingsOpen = d.bool(forKey: "settings")
         return true
     }
 }

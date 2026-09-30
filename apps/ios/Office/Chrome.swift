@@ -135,6 +135,7 @@ struct SiteHeader: View {
 /// The desktop header's links (`.site-menu nav`): the current one in ink over an accent rule; Reminders quieter.
 private struct InlineNav: View {
     let nav: SiteNav
+    @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
 
@@ -146,6 +147,19 @@ private struct InlineNav: View {
             }
             link("Ordo", nav.ordoCurrent, action: nav.onOrdo)
             link("Reminders", nav.remindersCurrent, secondary: true, action: nav.onReminders)
+            // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
+            Button { model.settingsOpen.toggle() } label: {
+                HStack(spacing: 0) {
+                    Text("SETTINGS").type(.label(11.52, 0.04)).foregroundStyle(p.muted)
+                    Caret(open: model.settingsOpen)
+                }
+                .padding(.leading, m.px(8.8))
+                .padding(.trailing, m.px(3.2))
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(Quiet())
+            .accessibilityLabel("Settings")
+            .accessibilityValue(model.settingsOpen ? "Expanded" : "Collapsed")
         }
     }
 
@@ -167,9 +181,11 @@ private struct InlineNav: View {
 
 /**
  * The site menu's panel: on an hour, the day's hours (2/3/2 as on home); the Ordo and
- * Reminders; then the Theme and Text rows, the current choice underlined in gold.
+ * Reminders; then the Theme and Text rows, the current choice underlined in gold. `prefsOnly`
+ * is the wide header's Settings: the Theme and Text rows alone.
  */
 struct MenuPanel: View {
+    var prefsOnly = false
     @EnvironmentObject private var model: AppModel
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
@@ -178,7 +194,7 @@ struct MenuPanel: View {
         let nav = SiteNav(model)
         let style = TextStyle.label(13.12, 0.06)
         VStack(spacing: 0) {
-            if let onHour = nav.onHour {
+            if let onHour = nav.onHour, !prefsOnly {
                 ForEach([["lauds", "prime"], ["terce", "sext", "none"], ["vespers", "compline"]], id: \.self) { row in
                     HStack(spacing: 0) {
                         ForEach(row, id: \.self) { h in cell(hourLabel(h).uppercased(), h == nav.currentHour, style, p.accent) { onHour(h) } }
@@ -187,12 +203,14 @@ struct MenuPanel: View {
                 }
                 Hairline(color: p.border).padding(.vertical, m.px(4))
             }
-            HStack(spacing: 0) {
-                cell("ORDO", nav.ordoCurrent, style, p.accent, action: nav.onOrdo)
-                // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                cell("REMINDERS", nav.remindersCurrent, .label(12, 0.06), p.muted, action: nav.onReminders)
+            if !prefsOnly {
+                HStack(spacing: 0) {
+                    cell("ORDO", nav.ordoCurrent, style, p.accent, action: nav.onOrdo)
+                    // Habit setup, not an hour: quieter than the Ordo, as on the web.
+                    cell("REMINDERS", nav.remindersCurrent, .label(12, 0.06), p.muted, action: nav.onReminders)
+                }
+                Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             }
-            Hairline(color: p.border).padding(.top, m.px(6.4)).padding(.bottom, m.px(6.4))
             HStack(spacing: 0) {
                 rowLabel("THEME")
                 ForEach(ThemeChoice.allCases) { t in
@@ -207,7 +225,7 @@ struct MenuPanel: View {
             }
         }
         .padding(m.px(10.4))
-        .frame(maxWidth: m.px(336))
+        .frame(maxWidth: m.px(prefsOnly ? 288 : 336))
         .background(p.surface)
         .overlay(Rectangle().stroke(p.border, lineWidth: 1))
         .overlay(alignment: .top) { Rectangle().fill(p.goldLine).frame(height: 2) }
@@ -520,73 +538,20 @@ struct Continuation: View {
     }
 }
 
-/// The page's foot: the diamond and the Office's name, and on a wide screen the reader's preferences.
+/// The page's foot: the diamond and the Office's name. The preferences are in the menu, or on a wide screen under Settings.
 struct Footer: View {
     var diamond = true
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
-    @Environment(\.wide) private var wide
 
     var body: some View {
         VStack(spacing: 0) {
             if diamond { Diamond().padding(.bottom, m.px(16)) }
             Text("Benedictine Divine Office").type(Scale.small).foregroundStyle(p.muted)
-            if wide { FooterPrefs() }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, m.px(40))
         .padding(.bottom, m.px(24))
-    }
-}
-
-/**
- * The desktop footer's preferences (`.footer-prefs`): Default / Nave / Apse above, the three
- * text sizes below, between hairline courses rather than in boxes, the chosen one in the accent
- * over a gold rule, as the current hour is marked on home.
- */
-private struct FooterPrefs: View {
-    @EnvironmentObject private var model: AppModel
-    @Environment(\.palette) private var p
-    @Environment(\.ornament) private var o
-    @Environment(\.metrics) private var m
-
-    var body: some View {
-        VStack(spacing: 0) {
-            course {
-                ForEach(Array(ThemeChoice.allCases.enumerated()), id: \.offset) { i, t in
-                    option(t.label.uppercased(), t == model.theme, last: i == ThemeChoice.allCases.count - 1, .label(11.52, 0.06), "\(t.label) theme") { model.chooseTheme(t) }
-                }
-            }
-            course {
-                ForEach(Array(TextSize.allCases.enumerated()), id: \.offset) { i, s in
-                    // The size ladder is the label.
-                    let size: CGFloat = s == .small ? 10.4 : s == .standard ? 13.7 : 18.7
-                    option("A", s == model.textSize, last: i == TextSize.allCases.count - 1, .label(size, 0), textSizeName(s)) { model.chooseTextSize(s) }
-                }
-            }
-        }
-        .padding(.top, m.px(13.6))
-    }
-
-    private func course<C: View>(@ViewBuilder _ content: () -> C) -> some View {
-        HStack(spacing: 0) { content() }
-            .fixedSize(horizontal: false, vertical: true)
-            .overlay(alignment: .top) { Rectangle().fill(p.surfaceEdge).frame(height: 1) }
-            .overlay(alignment: .bottom) { Rectangle().fill(p.surfaceEdge).frame(height: 1) }
-    }
-
-    private func option(_ label: String, _ chosen: Bool, last: Bool, _ style: TextStyle, _ spoken: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(label).type(style).foregroundStyle(chosen ? p.accent : p.muted)
-                .padding(.horizontal, m.px(10.4)).padding(.vertical, m.px(6.4))
-                .frame(minHeight: m.px(32))
-                .frame(maxHeight: .infinity)
-                .overlay(alignment: .trailing) { if !last { Rectangle().fill(p.surfaceEdge).frame(width: 1) } }
-                .overlay(alignment: .bottom) { if chosen { Rectangle().fill(o.flat).frame(height: 1) } }
-        }
-        .buttonStyle(Quiet())
-        .accessibilityLabel(spoken)
-        .accessibilityAddTraits(chosen ? .isSelected : [])
     }
 }
 

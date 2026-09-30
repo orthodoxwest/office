@@ -30,6 +30,8 @@ struct HomeScreen: View {
     @Environment(\.palette) private var p
     @Environment(\.metrics) private var m
     @Environment(\.wide) private var wide
+    /// Where the niche stands on the screen, which the chapel light follows.
+    @State private var nicheFrame: CGRect?
 
     var body: some View {
         let o = Ornament.of(p, season: view.ornament)
@@ -40,17 +42,23 @@ struct HomeScreen: View {
                 // Apse: one fixed field, anchored top centre, clearing the header.
                 VaultField(fade: [(0, 0), (0.09, 0), (0.16, 0.9), (0.6, 0.7), (1, 0.3)]).ignoresSafeArea()
                 // A wide screen sets the frontispiece in a niche, and lights the room toward it.
-                if let niche { ChapelLight(t: niche).ignoresSafeArea() }
+                if let niche { ChapelLight(t: niche, niche: nicheFrame).ignoresSafeArea() }
                 ScrollView {
                     VStack(spacing: 0) {
                         SiteHeader()
                         if let niche {
+                            // Centred between the header and the foot, as the web's desktop home.
+                            Spacer(minLength: 0)
                             // The moulding stands 0.75rem out from the card; room for it below the header.
                             Frontispiece(view: view, date: date, niche: niche, head: nicheHead(screen))
+                                .background(GeometryReader { card in
+                                    Color.clear.preference(key: NicheFrameKey.self, value: card.frame(in: .global))
+                                })
                                 .frame(maxWidth: nicheWidth(screen))
                                 .padding(.horizontal, 24)
                                 .padding(.top, 40)
                                 .padding(.bottom, 12)
+                            Spacer(minLength: 0)
                         } else {
                             Frontispiece(view: view, date: date, niche: nil, head: 0)
                                 .frame(maxWidth: m.px(576))
@@ -59,11 +67,19 @@ struct HomeScreen: View {
                         }
                         Footer(diamond: !p.dark)
                     }
+                    .frame(minHeight: niche == nil ? nil : geo.size.height)
                 }
             }
         }
+        .onPreferenceChange(NicheFrameKey.self) { nicheFrame = $0 }
         .environment(\.ornament, o)
     }
+}
+
+/// The niche's frame on the screen.
+private struct NicheFrameKey: PreferenceKey {
+    static let defaultValue: CGRect? = nil
+    static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) { value = nextValue() ?? value }
 }
 
 private struct Frontispiece: View {

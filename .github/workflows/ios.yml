@@ -138,6 +138,7 @@ jobs:
             shoot "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
           done
           shoot "$ipad" "ipad-year-nave" -page year -theme nave
+          shoot "$ipad" "ipad-settings-nave" -page home -theme nave -settings YES
 
       - uses: actions/upload-artifact@v4
         if: always()

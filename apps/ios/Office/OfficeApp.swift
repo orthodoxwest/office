@@ -86,8 +86,20 @@ struct RootView: View {
                     }
                     .transition(.opacity)
                 }
+                if model.settingsOpen && geo.size.width >= wideFrom {
+                    ZStack(alignment: .topTrailing) {
+                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.settingsOpen = false }
+                            .accessibilityHidden(true)
+                        // Under the header's end: the nav shell is held to 68rem and centred.
+                        MenuPanel(prefsOnly: true)
+                            .padding(.top, 52)
+                            .padding(.trailing, max(0, (geo.size.width - 1088) / 2) + gutter)
+                    }
+                    .transition(.opacity)
+                }
             }
             .animation(.easeOut(duration: 0.15), value: model.menuOpen)
+            .animation(.easeOut(duration: 0.15), value: model.settingsOpen)
             .environment(\.wide, geo.size.width >= wideFrom)
         }
         .environment(\.palette, palette)

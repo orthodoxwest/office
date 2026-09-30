@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -202,6 +203,8 @@ fun OfficeApp(
     entries: List<Long> = listOf(entry),
 ) {
     var menu by remember { mutableStateOf(false) }
+    // The wide header's Settings panel: the theme and text size.
+    var settings by remember { mutableStateOf(false) }
     // Each visit keeps its own scroll position and open sections, for Back and for a return
     // after Android has closed the app; a visit's state goes when it leaves the way back.
     val visits = rememberSaveableStateHolder()
@@ -231,9 +234,11 @@ fun OfficeApp(
         ordoCurrent = page is Page.Ordo || page is Page.Year,
         onReminders = { menu = false; onOpen(Page.Reminders) },
         remindersCurrent = page is Page.Reminders,
+        settingsOpen = settings,
+        onSettings = { settings = !settings },
     )
     val chrome: @Composable () -> Unit = {
-        SiteHeader(onHome = { menu = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
+        SiteHeader(onHome = { menu = false; settings = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu }, nav = nav)
         if (menu && !LocalWide.current) {
             MenuPanel(
                 currentHour = nav.currentHour,
@@ -248,6 +253,26 @@ fun OfficeApp(
                 onTextSize = onTextSize,
                 onDismiss = { menu = false },
                 topOffset = insets.calculateTopPadding() + 52.dp,
+            )
+        }
+        if (settings && LocalWide.current) {
+            // Under the header's end: the nav shell is held to 68rem and centred.
+            val screen = LocalConfiguration.current.screenWidthDp.dp
+            MenuPanel(
+                currentHour = null,
+                onHour = null,
+                onOrdo = nav.onOrdo,
+                onOrdoCurrent = nav.ordoCurrent,
+                onReminders = nav.onReminders,
+                onRemindersCurrent = nav.remindersCurrent,
+                theme = theme,
+                onTheme = onTheme,
+                textSize = textSize,
+                onTextSize = onTextSize,
+                onDismiss = { settings = false },
+                topOffset = insets.calculateTopPadding() + 52.dp,
+                prefsOnly = true,
+                end = ((screen - 1088.dp) / 2).coerceAtLeast(0.dp) + Gutter,
             )
         }
     }

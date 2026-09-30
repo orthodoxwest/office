@@ -26,10 +26,11 @@
     </p>
 {% endmacro %}
 
-{# Appearance and text-size preferences. Rendered twice by layout.html (footer
-   on desktop, foot of the site menu on phones); CSS shows one copy per width
-   and app.js keeps every copy's aria-pressed in sync. The visible labels are
-   for the menu grid only; the group aria-labels carry the names. #}
+{# Appearance and text-size preferences. Rendered twice by layout.html (the
+   header's Settings panel on wide screens, the foot of the site menu on
+   phones); CSS shows one copy per width and app.js keeps every copy's
+   aria-pressed in sync. The group aria-labels carry the names; the visible
+   row labels are for the eye. #}
 {% macro prefs() %}
 <div class="theme-switch" role="group" aria-label="Appearance">
   <span class="pref-label" aria-hidden="true">Theme</span>

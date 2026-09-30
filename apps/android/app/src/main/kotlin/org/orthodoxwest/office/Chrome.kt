@@ -102,7 +102,7 @@ val WideFrom: Dp = 701.dp
 /** Whether the page is laid out at the web's desktop widths: a tablet, or a phone on its side. */
 val LocalWide = staticCompositionLocalOf { false }
 
-/** The reader's theme and text size, for the wide footer's controls (the phone's are in the menu). */
+/** The reader's theme and text size, for the wide header's Settings (the phone's are in the menu). */
 class Prefs(val theme: ThemeChoice, val onTheme: (ThemeChoice) -> Unit, val textSize: TextSize, val onTextSize: (TextSize) -> Unit)
 
 val LocalPrefs = staticCompositionLocalOf<Prefs?> { null }
@@ -120,6 +120,8 @@ class SiteNav(
     val ordoCurrent: Boolean,
     val onReminders: () -> Unit,
     val remindersCurrent: Boolean,
+    val settingsOpen: Boolean = false,
+    val onSettings: () -> Unit = {},
 )
 
 /** The header beam: "✠ Daily Office" home, and the menu, or on a wide screen the links themselves. */
@@ -181,6 +183,15 @@ private fun InlineNav(nav: SiteNav) {
         }
         link("Ordo", nav.ordoCurrent, onClick = nav.onOrdo)
         link("Reminders", nav.remindersCurrent, secondary = true, onClick = nav.onReminders)
+        // Settings closes the links, quiet as Reminders; its panel holds the theme and text size.
+        Row(
+            Modifier.heightIn(min = 44.dp).tap(label = "Settings", onClick = nav.onSettings).disclosed(nav.settingsOpen)
+                .padding(start = 8.8.dp, end = 3.2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("SETTINGS", style = Type.label(11.52f, 0.04f).copy(color = p.muted))
+            Caret(nav.settingsOpen)
+        }
     }
 }
 
@@ -201,7 +212,8 @@ private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle,
 
 /**
  * The site menu's dropdown panel: on an hour, the day's hours (2/3/2 as on home); the Ordo;
- * then the Theme and Text rows, the current choice underlined in gold.
+ * then the Theme and Text rows, the current choice underlined in gold. `prefsOnly` is the wide
+ * header's Settings: the Theme and Text rows alone, under the header's end at `end`.
  */
 @Composable
 fun MenuPanel(
@@ -217,37 +229,41 @@ fun MenuPanel(
     onTextSize: (TextSize) -> Unit,
     onDismiss: () -> Unit,
     topOffset: Dp,
+    prefsOnly: Boolean = false,
+    end: Dp = Gutter,
 ) {
     val p = LocalPalette.current
     val nav = Type.label(13.12f, 0.06f)
     Popup(
         alignment = Alignment.TopEnd,
-        offset = with(LocalDensity.current) { IntOffset(-Gutter.roundToPx(), topOffset.roundToPx()) },
+        offset = with(LocalDensity.current) { IntOffset(-end.roundToPx(), topOffset.roundToPx()) },
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
     ) {
         Column(
                 Modifier
-                    .width(336.dp)
+                    .width(if (prefsOnly) 288.dp else 336.dp)
                     .background(p.surface)
                     .border(1.dp, p.border)
                     .drawBehind { drawRect(p.goldLine, size = size.copy(height = 2.dp.toPx())) }
                     .padding(10.4.dp),
             ) {
-                if (onHour != null) {
+                if (onHour != null && !prefsOnly) {
                     listOf(listOf("lauds", "prime"), listOf("terce", "sext", "none"), listOf("vespers", "compline")).forEach { row ->
                         MenuRow { row.forEach { h -> MenuCell(hourLabel(h).uppercase(), h == currentHour, nav, p.accent) { onHour(h) } } }
                         Spacer(Modifier.height(2.4.dp))
                     }
                     Hairline(p.border, Modifier.padding(vertical = 4.dp))
                 }
-                MenuRow {
-                    MenuCell("ORDO", onOrdoCurrent, nav, p.accent, onOrdo)
-                    // Habit setup, not an hour: quieter than the Ordo, as on the web.
-                    MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, onReminders)
+                if (!prefsOnly) {
+                    MenuRow {
+                        MenuCell("ORDO", onOrdoCurrent, nav, p.accent, onOrdo)
+                        // Habit setup, not an hour: quieter than the Ordo, as on the web.
+                        MenuCell("REMINDERS", onRemindersCurrent, Type.label(12f, 0.06f), p.muted, onReminders)
+                    }
+                    Hairline(p.border, Modifier.padding(top = 6.4.dp))
+                    Spacer(Modifier.height(6.4.dp))
                 }
-                Hairline(p.border, Modifier.padding(top = 6.4.dp))
-                Spacer(Modifier.height(6.4.dp))
                 MenuRow {
                     Text("THEME", Modifier.width(54.dp).padding(start = 10.4.dp), style = Type.label(10.56f, 0.08f).copy(color = p.muted))
                     ThemeChoice.entries.forEach { t -> MenuCell(t.label.uppercase(), t == theme, Type.label(12f, 0.06f), p.accent) { onTheme(t) } }
@@ -479,63 +495,13 @@ fun Continuation(
     }
 }
 
-/** The page's foot: the diamond and the Office's name, and on a wide screen the reader's preferences. */
+/** The page's foot: the diamond and the Office's name. The preferences are in the menu, or on a wide screen under Settings. */
 @Composable
 fun Footer(modifier: Modifier = Modifier, diamond: Boolean = true) {
     val p = LocalPalette.current
-    val prefs = LocalPrefs.current
     Column(modifier.fillMaxWidth().padding(top = 40.dp, bottom = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         if (diamond) Diamond(Modifier.padding(bottom = 16.dp), size = 7.dp)
         Text("Benedictine Divine Office", style = Type.small.copy(color = p.muted))
-        if (LocalWide.current && prefs != null) FooterPrefs(prefs)
-    }
-}
-
-/**
- * The desktop footer's preferences (`.footer-prefs`): Default / Nave / Apse above, the three
- * text sizes below, between hairline courses rather than in boxes, the chosen one in the
- * accent over a gold rule, as the current hour is marked on home.
- */
-@Composable
-private fun FooterPrefs(prefs: Prefs) {
-    val p = LocalPalette.current
-    val o = LocalOrnament.current
-    @Composable
-    fun Course(content: @Composable RowScope.() -> Unit) {
-        Row(
-            Modifier.height(IntrinsicSize.Min).drawBehind {
-                drawLine(p.surfaceEdge, Offset(0f, 0f), Offset(size.width, 0f), 1.dp.toPx())
-                drawLine(p.surfaceEdge, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
-            },
-            content = content,
-        )
-    }
-    @Composable
-    fun RowScope.Option(label: String, chosen: Boolean, last: Boolean, style: TextStyle, spoken: String, onClick: () -> Unit) {
-        Box(
-            Modifier.fillMaxHeight().heightIn(min = 32.dp).tap(label = spoken, selected = chosen, onClick = onClick)
-                .drawBehind {
-                    if (!last) drawLine(p.surfaceEdge, Offset(size.width, 0f), Offset(size.width, size.height), 1.dp.toPx())
-                    if (chosen) drawLine(o.flat, Offset(0f, size.height - 0.5.dp.toPx()), Offset(size.width, size.height - 0.5.dp.toPx()), 1.dp.toPx())
-                }
-                .padding(horizontal = 10.4.dp, vertical = 6.4.dp),
-            contentAlignment = Alignment.Center,
-        ) { Text(label, style = style.copy(color = if (chosen) p.accent else p.muted)) }
-    }
-    Column(Modifier.padding(top = 13.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Course {
-            ThemeChoice.entries.forEachIndexed { i, t ->
-                Option(t.label.uppercase(), t == prefs.theme, i == ThemeChoice.entries.lastIndex, Type.label(11.52f, 0.06f), "${t.label} theme") { prefs.onTheme(t) }
-            }
-        }
-        Course {
-            TextSize.entries.forEachIndexed { i, s ->
-                // The size ladder is the label.
-                val size = when (s) { TextSize.SMALL -> 10.4f; TextSize.DEFAULT -> 13.7f; TextSize.LARGE -> 18.7f }
-                val spoken = when (s) { TextSize.SMALL -> "Smaller text"; TextSize.DEFAULT -> "Default text size"; TextSize.LARGE -> "Larger text" }
-                Option("A", s == prefs.textSize, i == TextSize.entries.lastIndex, Type.label(size, 0f), spoken) { prefs.onTextSize(s) }
-            }
-        }
     }
 }
 

@@ -149,13 +149,30 @@ struct Niche: View {
 }
 
 /**
- * The chapel's light over the wall, fixed to the screen: a warm pool where the niche stands, the
- * room's edges in shade, and a shaft from a high window spending itself before the floor.
+ * Where the pool of light falls on the niche: two thirds of the way down, where the web's
+ * viewport-centred pool meets its vertically centred niche at desktop sizes.
+ */
+let poolDepth: CGFloat = 0.66
+
+/**
+ * The chapel's light over the wall, fixed to the screen: a warm pool on the niche (`niche`, its
+ * frame on the screen; the web's 50% 54% until it is placed), the room's edges in shade, and a
+ * shaft from a high window spending itself before the floor.
  */
 struct ChapelLight: View {
     let t: NicheTokens
+    var niche: CGRect?
 
     var body: some View {
+        GeometryReader { geo in
+            let origin = geo.frame(in: .global).origin
+            light(pool: niche.map { CGPoint(x: $0.midX - origin.x, y: $0.minY + $0.height * poolDepth - origin.y) })
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func light(pool: CGPoint?) -> some View {
         Canvas { ctx, size in
             // CSS's radial ellipse: a circle of radius rx, squeezed to ry about its centre, over the whole screen.
             func ellipse(_ cx: CGFloat, _ cy: CGFloat, _ rx: CGFloat, _ ry: CGFloat, _ stops: [Gradient.Stop]) {
@@ -192,10 +209,9 @@ struct ChapelLight: View {
                     )
                 )
             }
-            ellipse(size.width * 0.5, size.height * 0.54, size.width * 0.4, size.height * 0.46, [.init(color: t.pool, location: 0), .init(color: t.pool.opacity(0), location: 0.7)])
+            let at = pool ?? CGPoint(x: size.width * 0.5, y: size.height * 0.54)
+            ellipse(at.x, at.y, size.width * 0.4, size.height * 0.46, [.init(color: t.pool, location: 0), .init(color: t.pool.opacity(0), location: 0.7)])
             ellipse(size.width * 0.5, size.height * 0.52, size.width * 0.74, size.height * 0.8, [.init(color: t.shade.opacity(0), location: 0.34), .init(color: t.shade, location: 1)])
         }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }
