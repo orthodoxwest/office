@@ -1,4 +1,4 @@
-.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage android android-screenshots
+.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage android android-screenshots ios
 
 .DEFAULT_GOAL := help
 
@@ -168,6 +168,11 @@ android: ## Build the sideloadable Android preview APK (needs Android SDK/NDK an
 
 android-screenshots: ## Render Android screens from the Rust core into apps/android/app/build/screenshots/
 	cd apps/android && ./gradlew testDebugUnitTest
+
+ios: ## Build the iOS core and generate the Xcode project (macOS with Xcode and XcodeGen; see apps/ios/README.md)
+	apps/ios/build-core.sh
+	cd apps/ios && xcodegen generate
+	@echo "Open apps/ios/Office.xcodeproj in Xcode"
 
 clean: ## Remove build artifacts
 	rm -f office

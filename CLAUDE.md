@@ -29,6 +29,8 @@ apps/
   mobile-ffi/              UniFFI bindings for the native apps; embeds data/ at build time
   android/                 Kotlin/Compose app; Gradle drives cargo-ndk and binding generation
                            (see apps/android/README.md; `make android`, `make android-screenshots`)
+  ios/                     SwiftUI app; build-core.sh builds the XCFramework and Swift bindings,
+                           XcodeGen the project (see apps/ios/README.md; `make ios`, macOS only)
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
@@ -170,6 +172,7 @@ make test-ux      # Playwright browser suites
 make parity      # Check all snapshots, including the full 2026–2053 digest
 make android     # Sideloadable Android preview APK (needs Android SDK/NDK, cargo-ndk)
 make android-screenshots # Render Android screens on the JVM (Robolectric) for review
+make ios         # iOS core (XCFramework + Swift bindings) and Xcode project (macOS, Xcode, XcodeGen)
 make clean       # Remove artifacts
 ```
 
