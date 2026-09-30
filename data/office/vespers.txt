@@ -94,6 +94,9 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 [Psalmody-Monday]
+# Diurnal pp. 117–121: Ant1 over Ps 114+115 without Gloria between;
+# Ant2 over Ps 116:1–9; Ant3 over Ps 116:10ff + Ps 117 without Gloria
+# when ferial; Ant4 over Ps 129.
 Condition = not-festal-vespers-psalmody,weekday-monday
 
 Type = proper-antiphon
@@ -101,6 +104,9 @@ Ref = psalm-antiphon-1
 
 Type = psalm
 Ref = psalms/114
+
+Type = psalm
+Ref = psalms/115
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -112,7 +118,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-2
 
 Type = psalm
-Ref = psalms/115
+Ref = psalms/116a
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -124,7 +130,10 @@ Type = proper-antiphon
 Ref = psalm-antiphon-3
 
 Type = psalm
-Ref = psalms/116
+Ref = psalms/116b
+
+Type = psalm
+Ref = psalms/117
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri
@@ -136,7 +145,7 @@ Type = proper-antiphon
 Ref = psalm-antiphon-4
 
 Type = psalm
-Ref = psalms/117
+Ref = psalms/129
 
 Type = gloria-patri
 Ref = ordinary/shared/gloria-patri

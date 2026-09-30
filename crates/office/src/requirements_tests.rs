@@ -283,7 +283,14 @@ fn composition_structure_across_calendars() {
                     if hour.sections.iter().any(|s| s.label == "Vespers of the Dead") {
                         expected += 5;
                     }
-                    let psalms = hour.sections.iter().flat_map(|s| &s.elements).filter(|e| e.kind == ElementType::Psalm).count();
+                    // A psalm said straight on from the one before it, without
+                    // Glory be, belongs to that psalm's unit (Monday pp. 118, 120).
+                    let kinds: Vec<_> = hour.sections.iter().flat_map(|s| &s.elements).map(|e| e.kind).collect();
+                    let psalms = kinds
+                        .iter()
+                        .enumerate()
+                        .filter(|&(i, &k)| k == ElementType::Psalm && (i == 0 || kinds[i - 1] != ElementType::Psalm))
+                        .count();
                     assert_eq!(psalms, expected, "{context}");
                 }
             }
