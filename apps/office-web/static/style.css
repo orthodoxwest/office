@@ -5430,13 +5430,11 @@ body {
   --apse-vault: none;
   --apse-gild: none;
   --apse-ink: transparent;
-  --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
-    --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-ink: var(--ornament);
     --apse-gild: var(--apse-gilding);
@@ -5445,7 +5443,6 @@ body {
 }
 
 :root[data-theme="dark"] body {
-  --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-ink: var(--ornament);
   --apse-gild: var(--apse-gilding);
@@ -5537,20 +5534,47 @@ body.page-hour footer::after {
   mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0, rgba(0, 0, 0, 0.4) 62%, transparent 94%), var(--apse-leaf);
 }
 
+/* A phone's ending is short: without the footer preferences the epilogue
+   and footer together are about 2.5 tiles tall, and the fades above (made
+   for the desktop ending) left one full-strength row between ghost rows,
+   a narrow band floating between blank wall. Here the ending makes room
+   for the vault instead: air between the continuation and the report
+   line, and a margin of sky below the footer. The epilogue's fade is set
+   from its bottom, so it reaches full strength at the seam whatever the
+   epilogue's height, and the footer only thins, running off the screen's
+   foot as the vault continues past it. */
+@media (max-width: 700px) {
+  body.page-hour .report-issue {
+    margin-top: 4.5rem;
+  }
+
+  body.page-hour footer {
+    padding-bottom: 4.5rem;
+  }
+
+  body.page-hour .hour-epilogue::before {
+    -webkit-mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
+    mask-image: var(--apse-vault), linear-gradient(to top, #000 0 4rem, rgba(0, 0, 0, 0.45) 7rem, transparent 10rem), var(--apse-leaf);
+  }
+
+  body.page-hour footer::after {
+    -webkit-mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
+    mask-image: var(--apse-vault), linear-gradient(to bottom, #000 0 45%, rgba(0, 0, 0, 0.5) 80%, rgba(0, 0, 0, 0.25) 100%), var(--apse-leaf);
+  }
+}
+
 /* The ending's stars sit straight on the wall, as the home vault's do.
    A flat night ground once eased in beneath them to quiet the plaster, but
    Apse's plaster varies by under a level, and the ground's fade over so
    smooth a dark field banded into horizontal lines in software rendering. */
 
-/* Keep the existing footer lettering treatment. */
-body:is(.page-home, .page-hour) footer {
-  text-shadow: var(--apse-copy-shadow);
-}
-
-/* Clear the complete report line, including spaces between its glyphs. */
+/* The footer and report lettering each carry their own soft clearing, so
+   the vault runs on around them. The report line once sat on an opaque
+   ground; on a phone its touch-target box plus the ground's spread came to
+   half a tile, which erased a whole row of stars across the screen. */
+body:is(.page-home, .page-hour) footer,
 body.page-hour .report-issue {
-  background-color: var(--apse-ground);
-  box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
+  text-shadow: var(--apse-copy-shadow);
 }
 
 @media (min-width: 701px) {
