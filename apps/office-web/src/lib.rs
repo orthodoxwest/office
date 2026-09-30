@@ -13,7 +13,6 @@ pub mod pwa;
 pub mod usage;
 pub mod web_time;
 
-use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Arc;
 
@@ -26,7 +25,6 @@ use calendar::CalendarData;
 use office::Engine;
 use render_html::Pages;
 use tools::fs::FsData;
-use tools::review::provenance::{ProvenanceStatus, scan_provenance};
 
 use crate::cache::YearCache;
 use crate::handlers::Req;
@@ -39,13 +37,7 @@ pub struct Server {
     cache: YearCache,
     pages: Pages,
     version: String,
-    review: Review,
     usage: Option<Store>,
-}
-
-/// Each corpus entry's provenance, which decides an hour's review notice.
-pub(crate) struct Review {
-    provenance: HashMap<String, ProvenanceStatus>,
 }
 
 /// Application endpoints; Axum owns path matching.
@@ -62,16 +54,14 @@ enum Route {
 }
 
 impl Server {
-    /// Loads the engine, templates, and text provenance from `data_dir`.
+    /// Loads the engine and templates from `data_dir`.
     pub fn new(data_dir: &Path) -> Result<Server, String> {
         let src = FsData::new(data_dir);
         let engine = Engine::load(&src).map_err(|e| format!("creating office engine: {e}"))?;
         let calendar = CalendarData::load(&src).map_err(|e| format!("loading calendar data: {e}"))?;
         let version = pwa::compute_version(data_dir);
         let pages = Pages::new(pwa::asset_url).map_err(|e| format!("parsing templates: {e}"))?;
-        let inventory = scan_provenance(&src).map_err(|e| format!("loading provenance: {e}"))?;
-        let provenance = inventory.entries.iter().map(|e| (e.key.clone(), e.status)).collect();
-        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, review: Review { provenance }, usage: None })
+        Ok(Server { engine, cache: YearCache::new(calendar), pages, version, usage: None })
     }
 
     /// Opens the usage database named by `OFFICE_USAGE_DB`, if any. A

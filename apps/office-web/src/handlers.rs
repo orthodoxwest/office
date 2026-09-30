@@ -16,12 +16,10 @@ use render_html::view::{
     CalendarData, Chrome, CommemorationRow, DayRow, ErrorData, HomeData, HomeHourLink, HourData, HourHeader, LeaderForm, MonthData,
     MonthLink, MonthStep, NotFoundData, ReminderDay, ReminderHour, RemindersData, TabulaData, TabulaRow,
 };
-use tools::review::assurance::hour_dependencies;
-use tools::review::provenance::ProvenanceStatus;
 
+use crate::Server;
 use crate::http::{Query, cookie, redirect, response, set};
 use crate::web_time::{MONTHS, date_slug, load_location, local, long_date, now_in, parse_date};
-use crate::{Review, Server};
 
 /// What a page handler reads from the request.
 pub struct Req<'a> {
@@ -305,15 +303,6 @@ fn tabula(year: i32) -> TabulaData {
     }
 }
 
-impl Review {
-    /// The review notice shows unless every text the hour draws on is
-    /// verified.
-    pub(crate) fn show_vetting_banner(&self, hour: &OfficeHour) -> bool {
-        let deps = hour_dependencies(hour);
-        deps.is_empty() || deps.iter().any(|k| self.provenance.get(k) != Some(&ProvenanceStatus::Verified))
-    }
-}
-
 impl Server {
     /// The zone in the browser's `tz` cookie, else the host zone.
     fn user_location(&self, req: &Req) -> TimeZone {
@@ -506,7 +495,6 @@ impl Server {
                     form: form.as_str().into(),
                     label: form.label().into(),
                     report_url: report_url(h, hour_name, &date_str),
-                    show_banner: self.review.show_vetting_banner(h),
                 })
                 .collect(),
             hour_name: hour_name.into(),
@@ -527,7 +515,6 @@ impl Server {
                 season: season_str(&hour).into(),
             },
             report_url: report_url(&hour, hour_name, &date_str),
-            show_banner: self.review.show_vetting_banner(&hour),
             ..HourData::default()
         };
         let forms: Vec<(PrayerForm, &OfficeHour)> = composed.iter().map(|(f, h)| (*f, h)).collect();
@@ -722,31 +709,8 @@ mod tests {
     }
 
     use axum::http::Uri;
-    use liturgy::{ElementType, OfficeElement, OfficeSection};
 
     use crate::test_server;
-
-    fn hour_with(elements: Vec<OfficeElement>) -> OfficeHour {
-        OfficeHour {
-            form: PrayerForm::Private,
-            date: calendar::Date::new(2026, 1, 1),
-            hour: "lauds".into(),
-            title: "Lauds".into(),
-            season: Some(calendar::Season::Pentecost),
-            feast: "Trinity Sunday".into(),
-            color: Some(calendar::Color::White),
-            sections: vec![OfficeSection { label: "The Collect".into(), collapsible: false, elements }],
-            decisions: Vec::new(),
-        }
-    }
-
-    fn sourced(kind: ElementType, text: &str, key: &str) -> OfficeElement {
-        OfficeElement { source_ref: key.into(), source_refs: vec![key.into()], ..OfficeElement::new(kind, text) }
-    }
-
-    fn review(entries: &[(&str, ProvenanceStatus)]) -> Review {
-        Review { provenance: entries.iter().map(|(k, s)| (k.to_string(), *s)).collect() }
-    }
 
     /// A GET through the whole server, as the mux dispatches it.
     fn get(path: &str) -> (StatusCode, HeaderMap, String) {
@@ -757,14 +721,6 @@ mod tests {
         let (parts, body) = resp.into_parts();
         let bytes = runtime.block_on(axum::body::to_bytes(body, usize::MAX)).unwrap();
         (parts.status, parts.headers, String::from_utf8(bytes.to_vec()).unwrap())
-    }
-
-    #[test]
-    fn show_vetting_banner_depends_on_corpus_provenance() {
-        let hour = hour_with(vec![sourced(ElementType::Collect, "Almighty and everlasting God...", "proper/example/collect")]);
-        assert!(!review(&[("proper/example/collect", ProvenanceStatus::Verified)]).show_vetting_banner(&hour), "verified hides it");
-        assert!(review(&[("proper/example/collect", ProvenanceStatus::NeedsReview)]).show_vetting_banner(&hour), "unreviewed shows it");
-        assert!(review(&[]).show_vetting_banner(&hour), "unknown provenance shows it");
     }
 
     /// The page ends with the continuation links and each form's report
@@ -793,13 +749,6 @@ mod tests {
         assert!(prev.is_empty() && prev_link.is_empty());
         let (_, _, next, next_link) = adjacent_hours("compline", "2026-06-07");
         assert!(next.is_empty() && next_link.is_empty());
-    }
-
-    #[test]
-    fn not_found_page_has_no_vetting_banner() {
-        let (status, _, body) = get("/missing/page/here");
-        assert_eq!(status, StatusCode::NOT_FOUND);
-        assert!(!body.contains(r#"id="site-banner""#));
     }
 
     #[test]

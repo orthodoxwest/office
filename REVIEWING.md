@@ -117,6 +117,11 @@ attestation stale automatically. Record one with:
 The command validates every field and rewrites the ledger atomically; pass
 `--replace` only to supersede an existing attestation deliberately.
 
+Every corpus entry must carry a verified attestation of its current text:
+`office validate` (and so CI) fails on any entry that is `needs-review`,
+`source-unknown`, or stale. A PR that adds or edits a text attests it in the
+same change. The web app no longer reads provenance at all.
+
 Sections marked `# SOURCE: … — agent-proposed, not attested` came from a
 retired pipeline. Treat them as awaiting a human check and keep the hedge
 until `review attest` marks the key `verified`.
