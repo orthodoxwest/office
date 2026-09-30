@@ -1,0 +1,117 @@
+name: Android
+
+# Builds the sideloadable preview APK and renders review screenshots. Pushes to
+# master (and manual runs) also republish the rolling "android-preview"
+# prerelease, whose APK URL stays fixed:
+# https://github.com/orthodoxwest/office/releases/download/android-preview/office-preview.apk
+on:
+  push:
+    branches: [master]
+    # The APK embeds the corpus, so a text fix on master is a new preview.
+    paths:
+      - "apps/android/**"
+      - "apps/mobile-ffi/**"
+      - "crates/**"
+      - "data/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/android.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "apps/android/**"
+      - "apps/mobile-ffi/**"
+      - "crates/render-blocks/**"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NDK_VERSION: 28.2.13676358
+
+jobs:
+  build:
+    name: Build preview APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The version code counts commits, so the preview needs full history.
+          fetch-depth: 0
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.94.1
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, x86_64-linux-android
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-ndk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-ndk
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install the Android NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$NDK_VERSION" "platforms;android-36" > /dev/null
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build the APK and render screenshots
+        working-directory: apps/android
+        run: ./gradlew --console=plain assemblePreview testDebugUnitTest
+
+      - name: Name the APK
+        run: cp apps/android/app/build/outputs/apk/preview/app-preview.apk office-preview.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: office-preview-apk
+          path: office-preview.apk
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-screenshots
+          path: apps/android/app/build/screenshots/
+          if-no-files-found: warn
+
+  publish:
+    name: Publish android-preview
+    needs: build
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: office-preview-apk
+
+      - name: Replace the prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Recreated each time so its tag names the commit the APK was built from.
+          gh release delete android-preview --cleanup-tag --yes || true
+          gh release create android-preview office-preview.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Android preview" \
+            --notes "Sideload preview built from ${GITHUB_SHA::7} on ${GITHUB_REF_NAME}. On your phone, open this page, tap office-preview.apk, and allow the install. Updates install over earlier previews."

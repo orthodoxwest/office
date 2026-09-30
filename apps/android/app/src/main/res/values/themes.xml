@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws everything; this only colors the window before the first frame. -->
+    <style name="Theme.Office" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/page</item>
+    </style>
+</resources>

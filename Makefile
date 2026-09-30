@@ -1,4 +1,4 @@
-.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage
+.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage android android-screenshots
 
 .DEFAULT_GOAL := help
 
@@ -161,6 +161,13 @@ parity: build ## Check every snapshot, including the 2026–2053 digest
 
 golden: build ## Regenerate rendered-office and assurance golden files
 	python3 scripts/golden.py
+
+android: ## Build the sideloadable Android preview APK (needs Android SDK/NDK and cargo-ndk; see apps/android/README.md)
+	cd apps/android && ./gradlew assemblePreview
+	@echo "APK: apps/android/app/build/outputs/apk/preview/app-preview.apk"
+
+android-screenshots: ## Render Android screens from the Rust core into apps/android/app/build/screenshots/
+	cd apps/android && ./gradlew testDebugUnitTest
 
 clean: ## Remove build artifacts
 	rm -f office

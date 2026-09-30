@@ -16,12 +16,17 @@ crates/
   render-text/             Plain-text office rendering
   render-tex/              LuaLaTeX booklet; caller supplies GABC lookup
   render-html/             HTML rendering, view models and minijinja templates
+  render-blocks/           Platform-neutral blocks of styled runs for the native apps; tested
+                           word-for-word against render-html
   tools/                   Filesystem access, validation, audit, review, corpus edits and scaffolds
 apps/
   cli/                     office command dispatch, dump stream, diff and digest
   office-web/              Axum routes, usage SQLite store, reminders, embedded static/ assets
                            http.rs holds saved-link query/cookie parsing; web_time.rs handles
                            civil dates, time zones and reminder instants
+  mobile-ffi/              UniFFI bindings for the native apps; embeds data/ at build time
+  android/                 Kotlin/Compose app; Gradle drives cargo-ndk and binding generation
+                           (see apps/android/README.md; `make android`, `make android-screenshots`)
 tests/fixtures/            Rendered-hour, ordo, audit, assurance and 28-year snapshots;
                            broken corpora for validation boundary tests
 tools/
@@ -161,6 +166,8 @@ make golden      # Regenerate golden test files after intentional changes
 make rust-check  # Rust workspace: cargo fmt --check, clippy -D warnings, tests
 make test-ux      # Playwright browser suites
 make parity      # Check all snapshots, including the full 2026–2053 digest
+make android     # Sideloadable Android preview APK (needs Android SDK/NDK, cargo-ndk)
+make android-screenshots # Render Android screens on the JVM (Robolectric) for review
 make clean       # Remove artifacts
 ```
 
