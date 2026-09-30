@@ -212,14 +212,14 @@ jobs:
         if: steps.golden.outcome == 'failure'
         run: exit 1
 
-  ux:
-    name: UX
+  # Decided on a bare runner so a data-only change never waits for the
+  # browser container just to learn it can skip.
+  ux-changes:
+    name: UX change detection
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-jammy
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
     outputs:
       run: ${{ steps.ux_changes.outputs.run }}
 
@@ -277,25 +277,54 @@ jobs:
               : 'Skipping UX tests because only data and golden files changed.');
             core.setOutput('run', run ? 'true' : 'false');
 
+  # The behavior suite is CPU-bound on one runner (more than 4 workers buys
+  # nothing), so it is sharded across runners and the visual suite runs
+  # beside it. Each runner builds the server itself: with the shared Rust
+  # cache that is quicker than waiting on one build job for its binary.
+  ux:
+    name: UX ${{ matrix.suite }}
+    needs: ux-changes
+    if: needs.ux-changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: behavior-1
+            args: tests/ux.spec.js --workers=4 --shard=1/3
+          - suite: behavior-2
+            args: tests/ux.spec.js --workers=4 --shard=2/3
+          - suite: behavior-3
+            args: tests/ux.spec.js --workers=4 --shard=3/3
+          - suite: visual
+            args: tests/visual.spec.js --workers=2
+
+    steps:
       - uses: actions/checkout@v4
-        if: steps.ux_changes.outputs.run == 'true'
 
       - name: Install Rust build tools
-        if: steps.ux_changes.outputs.run == 'true'
-        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl ca-certificates
+        run: |
+          if ! command -v cc > /dev/null || ! command -v make > /dev/null || ! command -v curl > /dev/null; then
+            apt-get update
+            apt-get install -y --no-install-recommends gcc libc6-dev make curl ca-certificates
+          fi
 
       - uses: dtolnay/rust-toolchain@1.94.1
-        if: steps.ux_changes.outputs.run == 'true'
 
       - uses: Swatinem/rust-cache@v2
-        if: steps.ux_changes.outputs.run == 'true'
+        with:
+          # Every entry builds the same binary; one upload is enough.
+          save-if: ${{ matrix.suite == 'visual' }}
 
       - name: Build the Rust server
-        if: steps.ux_changes.outputs.run == 'true'
         run: make build
 
       - name: Set up Node
-        if: steps.ux_changes.outputs.run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -303,34 +332,51 @@ jobs:
           cache-dependency-path: .web-tools/package-lock.json
 
       - name: Install UX test dependencies
-        if: steps.ux_changes.outputs.run == 'true'
         run: npm ci --prefix .web-tools
 
-      - name: Run UX behavior and accessibility tests
+      - name: Run UX tests
+        id: tests
         env:
-          PLAYWRIGHT_SUITE: behavior
-        if: steps.ux_changes.outputs.run == 'true'
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=4
-
-      - name: Run UX visual regression tests
-        env:
-          PLAYWRIGHT_SUITE: visual
-        if: steps.ux_changes.outputs.run == 'true'
-        id: visual
-        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js
-        continue-on-error: true
+          PLAYWRIGHT_SUITE: ${{ matrix.suite }}
+        run: npm --prefix .web-tools run test:ux -- ${{ matrix.args }}
+        # A visual mismatch still reports and prepares candidates below.
+        continue-on-error: ${{ matrix.suite == 'visual' }}
 
       - name: Upload UX test report
-        if: ${{ !cancelled() && steps.ux_changes.outputs.run == 'true' }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.suite }}
           path: output/playwright/
           retention-days: 14
 
+      # The update-ux-snapshots label commits these candidates directly
+      # instead of rebuilding and rerunning the suite. Like any snapshot run
+      # they come from PR code, so that workflow validates them first.
+      - name: Regenerate visual snapshot candidates
+        id: candidates
+        if: >-
+          matrix.suite == 'visual' &&
+          steps.tests.outcome == 'failure' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          PLAYWRIGHT_SUITE: visual-update
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=all
+
+      - name: Upload visual snapshot candidates
+        if: steps.candidates.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ux-snapshot-candidates
+          path: .web-tools/tests/visual.spec.js-snapshots/
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Post or update visual mismatch comment
         if: >-
-          steps.visual.outcome == 'failure' &&
+          matrix.suite == 'visual' &&
+          steps.tests.outcome == 'failure' &&
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
@@ -343,7 +389,8 @@ jobs:
               'The browser behavior and accessibility tests passed, but one or more visual snapshots changed. ' +
               `Review the expected, actual, and diff images in the [Playwright report artifact](${runURL}).\n\n` +
               '**If this change is intentional** — add the `update-ux-snapshots` label to this PR. ' +
-              'GitHub Actions will regenerate the snapshots in the pinned browser container and push them to this branch.\n\n' +
+              'GitHub Actions will push the snapshots this run already regenerated in the pinned browser container ' +
+              '(or regenerate them, if this run has none for the current head) to this branch.\n\n' +
               '**If this is unexpected** — inspect the visual diff and fix the UI before applying the label.\n\n' +
               marker;
 
@@ -375,7 +422,8 @@ jobs:
 
       - name: Resolve visual mismatch comment
         if: >-
-          steps.visual.outcome == 'success' &&
+          matrix.suite == 'visual' &&
+          steps.tests.outcome == 'success' &&
           github.event_name == 'pull_request' &&
           github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
@@ -403,12 +451,37 @@ jobs:
             }
 
       - name: Fail if visual snapshots differ
-        if: steps.visual.outcome == 'failure'
+        if: matrix.suite == 'visual' && steps.tests.outcome == 'failure'
         run: exit 1
 
-      - name: Record skipped UX suite
-        if: steps.ux_changes.outputs.run == 'false'
-        run: echo "Playwright skipped because only data and golden files changed." >> "$GITHUB_STEP_SUMMARY"
+  # The single UX check to require: it passes when every suite passed or the
+  # change rightly skipped them, whatever the shard layout above.
+  ux-status:
+    name: UX
+    needs: [ux-changes, ux]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Summarize UX suites
+        env:
+          DETECTION: ${{ needs.ux-changes.result }}
+          RUN: ${{ needs.ux-changes.outputs.run }}
+          SUITES: ${{ needs.ux.result }}
+        run: |
+          if [ "$DETECTION" != success ]; then
+            echo "::error::UX change detection finished as $DETECTION."
+            exit 1
+          fi
+          if [ "$RUN" != true ]; then
+            echo "Playwright skipped because only data and golden files changed." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$SUITES" != success ]; then
+            echo "::error::UX suites finished as $SUITES; see the UX jobs."
+            exit 1
+          fi
 
   container:
     name: Rust runtime image

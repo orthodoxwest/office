@@ -18,7 +18,10 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
+    outputs:
+      candidates_run: ${{ steps.candidates.outputs.run_id }}
 
     steps:
       - name: Require a trusted label actor
@@ -44,11 +47,47 @@ jobs:
             }
             core.notice(`Snapshot update authorized by @${context.actor}.`);
 
+      # CI uploads candidates when the visual suite fails on a PR. Reusing
+      # them skips a rebuild and rerun; they get the same validation below.
+      - name: Find CI snapshot candidates for this head
+        id: candidates
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const head = context.payload.pull_request.head.sha;
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              event: 'pull_request',
+              head_sha: head,
+              per_page: 20,
+            });
+            const runs = data.workflow_runs.filter(run =>
+              run.head_sha === head &&
+              run.head_repository?.full_name === `${context.repo.owner}/${context.repo.repo}`
+            );
+            for (const run of runs) {
+              const { data: listing } = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                name: 'ux-snapshot-candidates',
+              });
+              if (listing.artifacts.some(artifact => !artifact.expired)) {
+                core.notice(`Using snapshot candidates from CI run ${run.html_url}.`);
+                core.setOutput('run_id', String(run.id));
+                return;
+              }
+            }
+            core.notice('No CI snapshot candidates for this head; regenerating them.');
+
   generate:
     name: Generate snapshots without write access
     needs: authorize
     if: >-
       needs.authorize.result == 'success' &&
+      needs.authorize.outputs.candidates_run == '' &&
       github.event.label.name == 'update-ux-snapshots' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
@@ -83,11 +122,8 @@ jobs:
       - name: Install UX test dependencies
         run: npm ci --prefix .web-tools
 
-      - name: Run UX behavior and accessibility tests
-        run: npm --prefix .web-tools run test:ux -- tests/ux.spec.js --workers=4
-
       - name: Regenerate UX snapshots
-        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --update-snapshots=all
+        run: npm --prefix .web-tools run test:ux -- tests/visual.spec.js --workers=2 --update-snapshots=all
 
       - name: Upload untrusted snapshot candidates
         uses: actions/upload-artifact@v4
@@ -99,10 +135,15 @@ jobs:
 
   commit:
     name: Validate and commit snapshots
-    needs: generate
-    if: needs.generate.result == 'success'
+    needs: [authorize, generate]
+    if: >-
+      always() &&
+      needs.authorize.result == 'success' &&
+      (needs.generate.result == 'success' ||
+        (needs.generate.result == 'skipped' && needs.authorize.outputs.candidates_run != ''))
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: write
 
     steps:
@@ -110,7 +151,17 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Download untrusted snapshot candidates
+      - name: Download untrusted snapshot candidates from CI
+        if: needs.authorize.outputs.candidates_run != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: ux-snapshot-candidates
+          path: ${{ runner.temp }}/ux-snapshot-candidates
+          run-id: ${{ needs.authorize.outputs.candidates_run }}
+          github-token: ${{ github.token }}
+
+      - name: Download untrusted regenerated snapshot candidates
+        if: needs.authorize.outputs.candidates_run == ''
         uses: actions/download-artifact@v4
         with:
           name: ux-snapshot-candidates
@@ -219,7 +270,7 @@ jobs:
       - name: Comment result
         uses: actions/github-script@v7
         env:
-          UPDATE_SUCCEEDED: ${{ needs.generate.result == 'success' && needs.commit.result == 'success' }}
+          UPDATE_SUCCEEDED: ${{ needs.commit.result == 'success' }}
         with:
           script: |
             const marker = '<!-- ux-snapshot-update -->';

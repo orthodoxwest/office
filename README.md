@@ -104,7 +104,12 @@ make test-ux
 
 Visual snapshots run only in CI's pinned browser container. For intentional
 visual changes, inspect the Playwright report and add the `update-ux-snapshots`
-PR label to regenerate them ([workflow](.github/workflows/update-ux-snapshots.yml)).
+PR label. When the visual suite fails on a PR, CI already uploads regenerated
+candidates, and the label commits those after validating them; otherwise it
+regenerates them ([workflow](.github/workflows/update-ux-snapshots.yml)).
+
+In CI the behavior suite runs in three shards beside the visual suite; the
+single `UX` check reports whether they all passed or were rightly skipped.
 
 ## PDF booklets
 

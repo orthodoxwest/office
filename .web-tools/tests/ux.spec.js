@@ -39,21 +39,29 @@ async function choosePreference(page, name) {
 }
 
 // The raised initial increases the line box without adding a line of text.
+function textLinesIn(el) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const tops = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    // A posture cue's smaller type shares the line but not its glyph tops.
+    if (node === el.firstChild || node.parentElement.closest(".mediant, .posture") || !node.textContent.trim()) continue;
+    const range = document.createRange();
+    range.setStart(node, node.textContent.search(/\S/));
+    range.setEnd(node, node.textContent.trimEnd().length);
+    for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
+  }
+  return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
+}
+
 async function openingTextLines(opening) {
-  return opening.evaluate(el => {
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    const tops = [];
-    let node;
-    while ((node = walker.nextNode())) {
-      // A posture cue's smaller type shares the line but not its glyph tops.
-      if (node === el.firstChild || node.parentElement.closest(".mediant, .posture") || !node.textContent.trim()) continue;
-      const range = document.createRange();
-      range.setStart(node, node.textContent.search(/\S/));
-      range.setEnd(node, node.textContent.trimEnd().length);
-      for (const rect of range.getClientRects()) if (rect.width) tops.push(rect.top);
-    }
-    return 1 + (Math.max(...tops) - Math.min(...tops)) / parseFloat(getComputedStyle(el).lineHeight);
-  });
+  return opening.evaluate(textLinesIn);
+}
+
+// Every match in one round trip: an element-by-element loop over a whole
+// alphabet of specimens costs hundreds of protocol calls per layout.
+async function openingsTextLines(page, selector) {
+  return page.evaluate(`[...document.querySelectorAll(${JSON.stringify(selector)})].map(${textLinesIn})`);
 }
 
 // Contour-fitting deliberately puts text inside the initial's rectangular
@@ -62,6 +70,20 @@ async function openingTextLines(opening) {
 async function expectInitialInkClear(page, specimen, capSelector, label, baselineWord = null) {
   await specimen.evaluate(el => el.setAttribute("data-ink-specimen", ""));
   const root = "[data-ink-specimen]";
+  // Only the specimen, padded for an initial that overhangs its box, is read:
+  // decoding a whole long page costs seconds per layer.
+  const clip = await specimen.evaluate(el => {
+    const pad = 64;
+    const box = el.getBoundingClientRect();
+    const doc = document.documentElement;
+    const x = Math.max(0, Math.floor(box.left + scrollX - pad));
+    const y = Math.max(0, Math.floor(box.top + scrollY - pad));
+    return {
+      x, y,
+      width: Math.min(doc.scrollWidth, Math.ceil(box.right + scrollX + pad)) - x,
+      height: Math.min(doc.scrollHeight, Math.ceil(box.bottom + scrollY + pad)) - y,
+    };
+  });
   const layers = [];
   try {
     for (const cap of [true, false]) {
@@ -75,8 +97,8 @@ async function expectInitialInkClear(page, specimen, capSelector, label, baselin
       ` });
       try {
         // Whole-page coordinates remain stable when a specimen exceeds the
-        // mobile visual viewport; a clipped element screenshot can scroll it.
-        layers.push((await page.screenshot({ fullPage: true, animations: "disabled" })).toString("base64"));
+        // mobile visual viewport; an element screenshot can scroll it.
+        layers.push((await page.screenshot({ fullPage: true, clip, animations: "disabled" })).toString("base64"));
       } finally {
         await style.evaluate(el => el.remove());
       }
@@ -2092,11 +2114,12 @@ test("single-line initials clear the following verse across the alphabet and fal
         ".psalm-verses .verse:first-child::first-letter { initial-letter: normal !important; margin-top: .05em !important; margin-bottom: calc(-.1em + var(--initial-depth, 0em)) !important; }",
       }) : null;
       await page.evaluate(() => window.dispatchEvent(new Event("beforeprint")));
-      for (const opening of await page.locator(".verse:first-child").all()) {
-        await expect(opening).toHaveClass(/initial-elevated/);
-        await expect(opening).not.toHaveClass(/initial-raised/);
-        expect(await openingTextLines(opening)).toBeCloseTo(1, 1);
-      }
+      await expect.poll(() => page.locator(".verse:first-child").evaluateAll(els => els.map(el => el.className))).toEqual(
+        Array(words.length).fill(expect.stringMatching(/^(?!.*\binitial-raised\b).*\binitial-elevated\b/)),
+      );
+      const lines = await openingsTextLines(page, ".verse:first-child");
+      expect(lines).toHaveLength(words.length);
+      for (const count of lines) expect(count).toBeCloseTo(1, 1);
       await expectInitialInkClear(page, page.locator(".elements"), ".verse:first-child", `${size}/${fallback} alphabet clears numbered verses`);
       if (override) await override.evaluate(el => el.remove());
     }
@@ -3169,6 +3192,11 @@ function easternDay(offsetDays = 0) {
 // that page was rendered; most of these tests care only about the scope.
 const scopes = (events) => events.map(body => body.split(" ")[0]);
 
+// Any key or pointer press engages the page. A bare Shift does so without a
+// click that may land on a link (the home hour directory fills the middle of
+// a phone screen) and start a navigation that races the test's next goto.
+const engage = (page) => page.keyboard.press("Shift");
+
 // A person, not the default HeadlessChrome agent the server drops as a bot.
 const HUMAN_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
@@ -3199,13 +3227,13 @@ test("engaged visits to a current page send an event, passive and background one
   expect(scopes(events)).toEqual(["lauds"]);
 
   await page.goto(`/?date=${easternDay()}`);
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect.poll(() => events.length).toBe(2);
   expect(scopes(events)[1]).toBe("site");
 
   // The dashboard itself is never counted.
   await page.goto("/admin/usage?days=7");
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect(page.getByRole("heading", { name: "Daily usage", exact: true })).toBeVisible();
   expect(events.length).toBe(2);
 });
@@ -3219,7 +3247,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   // Deep past, far future, and a distant ordo year: all render, none report.
   for (const path of ["/lauds/2019-03-04", "/?date=2045-06-01", "/calendar/2050", "/vespers/2031-12-25"]) {
     await page.goto(path);
-    await page.mouse.click(200, 300);
+    await engage(page);
     await page.waitForTimeout(300);
     await expect(page.locator("body")).toBeVisible();
   }
@@ -3228,7 +3256,7 @@ test("the dated archive is freely readable but never counted", async ({ page }) 
   // Yesterday and tomorrow are ordinary use, not archive.
   for (const day of [easternDay(-1), easternDay(1)]) {
     await page.goto(`/lauds/${day}`);
-    await page.mouse.click(200, 300);
+    await engage(page);
   }
   await expect.poll(() => events.length).toBe(2);
 });
@@ -3241,7 +3269,7 @@ test("the current ordo page is tracked in its own column, not just the site tota
   });
   const year = new Date().getFullYear();
   await page.goto(`/calendar/${year}/01`);
-  await page.mouse.click(200, 300);
+  await engage(page);
   await expect.poll(() => events.length).toBe(1);
   expect(scopes(events)).toEqual(["ordo"]);
 });
@@ -3260,7 +3288,7 @@ test("generating a reminder feed link is tracked separately from viewing the pag
     });
   });
   await page.goto("/reminders");
-  await page.mouse.click(200, 300);
+  await engage(page);
   // Merely opening and engaging with the page reports "site", never "reminders".
   await expect.poll(() => scopes(events)).toEqual(["site"]);
 
@@ -3278,7 +3306,7 @@ test("the beacon reports the appearance the page was read in", async ({ page }) 
   const read = async (label) => {
     events.length = 0;
     await page.goto(`/vespers/${easternDay()}`);
-    await page.mouse.click(200, 300);
+    await engage(page);
     await expect.poll(() => events.length, { message: label }).toBe(1);
     return events[0];
   };
@@ -3307,7 +3335,7 @@ test.describe("on a screen with a mouse", () => {
     const read = async (label) => {
       events.length = 0;
       await page.goto(`/vespers/${easternDay()}`);
-      await page.mouse.click(200, 300);
+      await engage(page);
       await expect.poll(() => events.length, { message: label }).toBe(1);
       return events[0];
     };
@@ -3336,7 +3364,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
   // One browser reading several hours is one visitor, however many pages.
   for (const hour of ["lauds", "prime", "vespers"]) {
     await reader.goto(`/${hour}/${easternDay()}`);
-    await reader.mouse.click(200, 300);
+    await engage(reader);
     await reader.waitForTimeout(300);
   }
   expect(await today(reader)).toBe(before + 1);
@@ -3349,7 +3377,7 @@ test("real events deduplicate per browser and exclude crawlers", async ({ browse
     });
     const bot = await botCtx.newPage();
     await bot.goto(path);
-    await bot.mouse.click(200, 300);
+    await engage(bot);
     await bot.waitForTimeout(300);
     await botCtx.close();
   }
