@@ -30,14 +30,14 @@
 # SOURCE: diurnal p. 528
 O God, who by the learning of blessed Bede, thy Confessor and Doctor, hast made thy Church illustrious: mercifully grant unto thy servants, that we may ever be illuminated by his wisdom and aided by his merits.
 
+[magnificat-antiphon]
+@use commons/confessor/magnificat-antiphon-doctor
+
+[magnificat-antiphon-first]
+@use commons/confessor/magnificat-antiphon-doctor
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).

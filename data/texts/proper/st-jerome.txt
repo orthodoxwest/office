@@ -30,14 +30,14 @@
 # SOURCE: diurnal p. 612
 O God, who in blessed Jerome, thy Confessor, didst vouchsafe to provide for thy Church a most eminent Teacher for the setting forth of the Holy Scriptures: grant, we beseech thee, that through his prayers and merits we may be able by thy help to practise what he taught, both in word and deed.
 
+[magnificat-antiphon]
+@use commons/confessor/magnificat-antiphon-doctor
+
+[magnificat-antiphon-first]
+@use commons/confessor/magnificat-antiphon-doctor
+
 # [benedictus-antiphon]
 # Antiphon on the Benedictus at Lauds.
-#
-# [magnificat-antiphon]
-# Antiphon on the Magnificat at II Vespers.
-#
-# [magnificat-antiphon-first]
-# Antiphon on the Magnificat at I Vespers (omit if the same as II Vespers).
 #
 # [psalm-antiphon]
 # Single antiphon for all five psalms (fallback when psalm-antiphon-N is absent).

@@ -564,7 +564,7 @@ MARCH
  27  Fri  L§ Friday after Lent IV                       [f2]  v
            St John Damascene, Confessor & Doctor (d)
            Lauds   v · Ben. Our friend · No Preces · No Suff.
-               Com. St John Damascene, Confessor & Doctor ("Well done")
+               Com. St John Damascene, Confessor & Doctor ("Well done, good and faithful servant")
            Hours   No Preces
            Vespers v · Mag. Lord, if thou hadst been here · No Suff.
                Com. St John Damascene, Confessor & Doctor ("O Teacher right excellent")
@@ -912,7 +912,7 @@ MAY
  27  Wed     St Bede the Venerable, Confessor & Doctor  [d]   w
            Day VII within the Octave of the Ascension (sd)
            St John I, Bishop & Martyr (com)
-           Lauds   w · Ben. Well done · No Preces · No Suff.
+           Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
                Com. Day VII within the Octave of the Ascension ("I ascend")
                Com. St John I, Bishop & Martyr ("Daughters of Jerusalem")
            Hours   No Preces
@@ -1047,7 +1047,7 @@ JUNE
            St Ephrem the Syrian, Deacon, Confessor & Doctor (d)
            Ss Mark & Marcellianus, Martyrs (com)
            Lauds   w · Ben. I am · No Preces · No Suff.
-               Com. St Ephrem the Syrian, Deacon, Confessor & Doctor ("Well done")
+               Com. St Ephrem the Syrian, Deacon, Confessor & Doctor ("Well done, good and faithful servant")
                Com. Ss Mark & Marcellianus, Martyrs ("The very hairs of your head")
            Hours   No Preces
            Vespers w · II prec. · Mag. O sacred banquet · No Suff.
@@ -1737,7 +1737,7 @@ SEPTEMBER
                Com. St Jerome, Priest, Confessor & Doctor ("O Teacher right excellent")
  30  Wed     St Jerome, Priest, Confessor & Doctor      [gd]  w
            St Gregory of Armenia, Bishop & Confessor (com)
-           Lauds   w · Ben. Well done · No Preces · No Suff.
+           Lauds   w · Ben. Well done, good and faithful servant · No Preces · No Suff.
                Com. St Gregory of Armenia, Bishop & Confessor ("Well done")
            Hours   No Preces
            Vespers w · II prec. · Mag. O Teacher right excellent · No Suff.
