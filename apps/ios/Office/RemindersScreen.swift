@@ -186,6 +186,8 @@ struct RemindersScreen: View {
 
     /// Turning reminders on asks for notifications first; on a refusal they are still kept, and the page says how to let them through.
     private func turn(on: Bool) {
+        // Turning reminders on counts as the web counts a generated feed link.
+        if on && !settings.on { Usage.shared.record(.remindersOn, dark: p.dark, form: AppModel.shared.form) }
         var s = settings
         s.on = on
         change(s)

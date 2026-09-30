@@ -9,65 +9,12 @@ use std::time::Duration;
 use axum::body::Body;
 use axum::http::{HeaderMap, Method, Response, StatusCode, Uri, header};
 use calendar::Date;
-use render_html::usage::{Dimension, HOURS, UsageDay};
+use presentation::usage::{DIMENSIONS, HOURS, dimension_key, parse_event, valid_scope};
+use render_html::usage::UsageDay;
 use rusqlite::{Connection, params};
 use sha2::{Digest, Sha256};
 
 use crate::http::{Query, cookie, header_value, http_error, not_found, response, set};
-
-/// Single-purpose scopes counted beside the hours: the ordo (calendar) page
-/// and a generated reminder-feed link.
-const EXTRA_SCOPES: [&str; 2] = ["ordo", "reminders"];
-
-/// Families of mutually exclusive values describing how a page was
-/// rendered. Stored as "<key>:<value>"; a written key or value is never
-/// redefined.
-pub const DIMENSIONS: [Dimension<'static>; 3] = [
-    Dimension { key: "appearance", values: &["nave", "apse"] },
-    Dimension { key: "screen", values: &["desktop", "mobile"] },
-    Dimension { key: "prayer-form", values: &["private", "deacon", "priest"] },
-];
-
-/// The family a stored dimension scope belongs to.
-fn dimension_key(scope: &str) -> Option<&'static str> {
-    DIMENSIONS
-        .iter()
-        .find(|d| d.values.iter().any(|v| scope.strip_prefix(d.key).and_then(|r| r.strip_prefix(':')) == Some(v)))
-        .map(|d| d.key)
-}
-
-pub fn valid_scope(scope: &str) -> bool {
-    scope == "site" || HOURS.contains(&scope) || EXTRA_SCOPES.contains(&scope)
-}
-
-/// One beacon: the page scope and the dimensions reported about it.
-#[derive(Debug, PartialEq, Eq)]
-pub struct Event {
-    pub scope: String,
-    pub dimensions: Vec<String>,
-}
-
-/// Reads a beacon body ("lauds appearance:apse screen:mobile"). Only the
-/// scope must be understood; unknown or repeated dimension tokens are
-/// dropped, so clients from either side of a deploy still count.
-pub fn parse_event(body: &str) -> Option<Event> {
-    let mut fields = body.split(' ');
-    let scope = fields.next().unwrap_or("");
-    if !valid_scope(scope) {
-        return None;
-    }
-    let mut event = Event { scope: scope.to_string(), dimensions: Vec::new() };
-    let mut seen = Vec::new();
-    for field in fields {
-        let Some(key) = dimension_key(field) else { continue };
-        if seen.contains(&key) || (key == "prayer-form" && !HOURS.contains(&scope)) {
-            continue;
-        }
-        seen.push(key);
-        event.dimensions.push(field.to_string());
-    }
-    Some(event)
-}
 
 /// Substrings of crawler and scripted-client user agents, lowercase.
 const BOT_TOKENS: &[&str] = &[
@@ -327,10 +274,10 @@ fn valid_browser_id(id: &str) -> bool {
     id.len() == 32 && id.bytes().all(|c| c.is_ascii_hexdigit())
 }
 
+pub use presentation::usage::MAX_BEACON;
+
 /// The beacon body, or `None` when it exceeded the 96-byte limit.
 pub type BeaconBody = Option<Vec<u8>>;
-
-pub const MAX_BEACON: usize = 96;
 
 /// `POST /api/usage`: one page view's beacon.
 pub fn handle_event(store: Option<&Store>, method: &Method, headers: &HeaderMap, host: &str, body: BeaconBody) -> Response<Body> {
@@ -418,16 +365,6 @@ pub fn handle_dashboard(store: Option<&Store>, pages: &render_html::Pages, metho
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn events_validate_scopes_and_dimensions() {
-        assert_eq!(parse_event("lauds appearance:apse screen:mobile prayer-form:priest").unwrap().dimensions.len(), 3);
-        let e = parse_event("ordo prayer-form:priest appearance:nave appearance:apse future:x").unwrap();
-        assert_eq!(e.dimensions, vec!["appearance:nave".to_string()]);
-        assert!(parse_event("matins").is_none());
-        assert!(parse_event("").is_none());
-        assert!(parse_event(" lauds").is_none());
-    }
 
     #[test]
     fn beacons_require_matching_http_origins() {
@@ -591,8 +528,8 @@ mod tests {
     #[test]
     fn trend_dimensions_cover_the_vocabulary() {
         use render_html::usage::TREND_LABELS;
-        assert_eq!(TREND_LABELS.len() + 1, DIMENSIONS.len());
-        for (key, labels) in TREND_LABELS {
+        assert_eq!(TREND_LABELS.len(), DIMENSIONS.len());
+        for (key, _, labels) in TREND_LABELS {
             let dimension = DIMENSIONS.iter().find(|d| d.key == key).unwrap_or_else(|| panic!("unmapped {key}"));
             assert_eq!(dimension.values.len(), labels.len(), "{key}");
             assert!(labels.iter().all(|l| !l.is_empty()), "{key}");
@@ -600,48 +537,7 @@ mod tests {
     }
 
     #[test]
-    fn dimension_vocabulary_is_unambiguous() {
-        // Counts live under "<key>:<value>" forever: keys and values stay
-        // distinct and colon-free, and no page scope looks qualified.
-        let mut keys = Vec::new();
-        let mut scopes = Vec::new();
-        for d in &DIMENSIONS {
-            assert!(!d.key.is_empty() && !d.key.contains(':') && !keys.contains(&d.key), "key {:?}", d.key);
-            keys.push(d.key);
-            assert_ne!(d.values[0], d.values[1], "{} has one value twice", d.key);
-            for value in d.values {
-                assert!(!value.is_empty() && !value.contains(':'), "value {value:?}");
-                let scope = format!("{}:{value}", d.key);
-                assert!(!scopes.contains(&scope) && !valid_scope(&scope), "scope {scope:?} collides");
-                assert_eq!(dimension_key(&scope), Some(d.key));
-                scopes.push(scope);
-            }
-        }
-        for scope in ["site", "ordo", "reminders"].iter().chain(HOURS.iter()) {
-            assert!(!scope.contains(':'));
-        }
-    }
-
-    #[test]
-    fn beacon_dimensions_parse_and_count() {
-        for (body, scope, want) in [
-            ("lauds appearance:apse screen:mobile", "lauds", vec!["appearance:apse", "screen:mobile"]),
-            ("site appearance:nave screen:desktop", "site", vec!["appearance:nave", "screen:desktop"]),
-            // A client from before dimensions existed.
-            ("vespers", "vespers", vec![]),
-            // Unreadable tokens are dropped; a bare value names no family.
-            ("ordo chant:gabc appearance:apse", "ordo", vec!["appearance:apse"]),
-            ("ordo apse", "ordo", vec![]),
-            // One value per family wins.
-            ("prime appearance:nave appearance:apse screen:mobile", "prime", vec!["appearance:nave", "screen:mobile"]),
-        ] {
-            let event = parse_event(body).unwrap_or_else(|| panic!("{body:?} rejected"));
-            assert_eq!((event.scope.as_str(), event.dimensions), (scope, dims(&want)), "{body:?}");
-        }
-        for body in ["", "matins", "matins appearance:nave", "appearance:nave", " lauds"] {
-            assert!(parse_event(body).is_none(), "{body:?} accepted");
-        }
-
+    fn dimensions_count_once_per_browser_per_day() {
         let db = TempDb::new("dimensions");
         let store = db.open();
         let now = eastern_at(2026, 9, 4, 9, 0);
@@ -675,6 +571,35 @@ mod tests {
             "appearance switch: {:?}",
             rows[0]
         );
+    }
+
+    // The native apps post as non-browser clients: no Origin, their own daily identifier as the
+    // cookie, and an agent naming the app.
+    #[test]
+    fn app_beacons_count_under_their_own_identifier() {
+        use presentation::usage::{App, app_beacon};
+        let db = TempDb::new("apps");
+        let store = db.open();
+        for (id, agent, app) in [
+            ("0123456789abcdef0123456789abcdef", "DivineOffice/0.1.1234 (Android 15)", App::Android),
+            ("fedcba9876543210fedcba9876543210", "DivineOffice/0.1.0 (iOS 18.1)", App::Ios),
+        ] {
+            assert!(!is_bot(agent), "{agent}");
+            let mut headers = HeaderMap::new();
+            headers.insert("x-office-usage", "1".parse().unwrap());
+            headers.insert(header::USER_AGENT, agent.parse().unwrap());
+            headers.insert(header::COOKIE, format!("office-usage={id}").parse().unwrap());
+            let body = app_beacon("lauds", app, false, "priest").unwrap().into_bytes();
+            let response = handle_event(Some(&store), &Method::POST, &headers, "office.fly.dev", Some(body));
+            assert_eq!(response.status(), StatusCode::NO_CONTENT, "{agent}");
+            assert!(response.headers().get(header::SET_COOKIE).is_none(), "{agent} was given a cookie");
+        }
+        let sum = |scope: &str| count(&store, &format!("SELECT COALESCE(SUM(users), 0) FROM totals WHERE scope = '{scope}'"));
+        for (scope, n) in
+            [("site", 2), ("lauds", 2), ("client:android", 1), ("client:ios", 1), ("screen:mobile", 2), ("prayer-form:priest", 2)]
+        {
+            assert_eq!(sum(scope), n, "{scope}");
+        }
     }
 
     #[test]

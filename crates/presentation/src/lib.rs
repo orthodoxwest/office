@@ -1,8 +1,10 @@
 //! How the Office is named on every front: the web and the native apps set it in their own
 //! type, but read the same words from here. A day's name and heading, a season's, a date's; the
-//! office being prayed at a clock hour and home's invitation to it; and the prefilled "Report a
-//! problem" issue. Pure functions of the calendar and the composed hour: no templates, no
-//! platform, and nothing that composes an hour.
+//! office being prayed at a clock hour and home's invitation to it; the prefilled "Report a
+//! problem" issue; and the usage beacon's vocabulary ([`usage`]). Pure functions of the calendar
+//! and the composed hour: no templates, no platform, and nothing that composes an hour.
+
+pub mod usage;
 
 use calendar::{CalendarDay, Date, Season};
 use liturgy::OfficeHour;

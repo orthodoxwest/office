@@ -155,16 +155,29 @@ browsers are missed; multiple devices or cleared cookies inflate the count.
 rendered, chosen or inherited) and `screen:desktop|mobile` (mobile means under
 the 700px breakpoint or a touch-primary pointer). Office pages also report
 `prayer-form:private|deacon|priest`, which measures the prayers read, not the
-reader's ordination. Each counts once per browser per day, so a reader who
+reader's ordination. `client:browser|pwa|android|ios` separates a browser tab,
+the web app installed to a home screen, and the native apps. Each counts once per browser per day, so a reader who
 switches mid-day counts on both sides and a pair can exceed the daily total;
 clients with an older cached `app.js` report none, so a pair can also fall
 short. The report draws each pair as a day-by-day mix band, since one period
 share can't distinguish a steady split from a migration.
 
 Values are stored as `family:value` and are never redefined: add a new key so
-an old series ends where its meaning ended. The server only has to understand
-the scope; unknown tokens from newer or older cached clients are dropped and
-the page still counts.
+an old series ends where its meaning ended. The vocabulary lives in
+`presentation::usage`, shared by the server's parser and the apps' beacons
+(app.js mirrors it). The server only has to understand the scope; unknown
+tokens from newer or older cached clients are dropped and the page still counts.
+
+**The native apps.** Release builds of the Android and iOS apps post the same
+beacon to `https://office.fly.dev/api/usage` (`presentation::usage::ENDPOINT`)
+when a page is shown: home and the reminders page count toward the total, each
+hour and the ordo in their columns, and turning reminders on counts as
+Reminders. The same current-page window applies (`current_day`, `current_year`);
+there is no engagement gate, since nothing crawls an app. Instead of a cookie the
+server sets, each app sends a random ID it replaces every reporting day, so
+nothing it sends ties one day to the next. Beacons are best effort: never queued
+offline or retried later. Debug builds (and so the apps' tests and CI
+screenshots) never report.
 
 **Scraping is welcome but never counted.** There is no robots.txt, but a
 crawler presents a fresh cookie jar per page and would otherwise mint a
@@ -193,7 +206,8 @@ OFFICE_USAGE_DB="$PWD/output/usage/usage.sqlite" ./office serve
 ```
 
 **Privacy.** The first-party `office-usage` cookie is a random 128-bit ID
-(30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`).
+(30 days, HttpOnly, SameSite=Strict, Secure over HTTPS, path `/api/usage`); the
+apps send their own daily ID in its place.
 SQLite stores only a per-day hash, an office category, and a date — no raw
 cookie, IP, user agent, URL, or timestamp. Dedupe rows older than the day
 before yesterday are deleted on the next event or report read; aggregate counts are kept

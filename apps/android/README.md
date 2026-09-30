@@ -117,6 +117,21 @@ and a tap opens that hour.
 `ReminderTest` checks the schedule the alarm service holds, cancellation, the bell's channel,
 the ten-minute wait, and the posted notification.
 
+## Usage counts
+
+The app is counted in the web's daily usage report (the top-level README, "Usage metrics"), in
+the same words: `Usage.kt` posts one beacon, built by the Rust core (`usage_beacon`), when a
+page is shown, its theme or prayer form changes, or the reader comes back. Home and the reminders
+page count toward the day's readers, an hour and the ordo in their own columns, and turning
+reminders on as the web counts a generated feed link; only today's pages (a day either side)
+count. Each page counts once a day. In place of the web's cookie the app sends a random
+identifier it replaces every reporting day (America/New_York), so nothing it sends ties one day
+to the next. A beacon is best effort: it is never queued offline, retried later, or shown.
+
+This is the app's only use of the network (the `INTERNET` permission). Only `preview` and
+`release` builds report (`BuildConfig.COUNT_USAGE`); `debug`, and so every test and screenshot,
+never does. `UsageTest` checks what counts, the daily identifier, and the retry.
+
 ## Trying it on a phone
 
 Every push to `master` that touches the app, the engine, or `data/` publishes a new

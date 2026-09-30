@@ -9,8 +9,7 @@ use serde::Serialize;
 use crate::escape::format_float;
 use crate::view::Chrome;
 
-/// The seven hours, as the usage store names its office scopes.
-pub const HOURS: [&str; 7] = ["lauds", "prime", "terce", "sext", "none", "vespers", "compline"];
+pub use presentation::usage::{Dimension, HOURS};
 
 /// One reporting day's counts, newest first in a window.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]
@@ -26,12 +25,6 @@ pub struct UsageDay {
     /// Counts by qualified dimension scope ("appearance:apse").
     #[serde(skip)]
     pub dimensions: BTreeMap<String, i64>,
-}
-
-/// A dimension family and its values, as the usage store declares them.
-pub struct Dimension<'a> {
-    pub key: &'a str,
-    pub values: &'a [&'a str],
 }
 
 #[derive(Clone, Debug, Default, Serialize)]
@@ -200,9 +193,13 @@ pub fn usage_data(mut rows: Vec<UsageDay>, days: i64, since: Option<&str>, dimen
     d
 }
 
-/// Display labels for the two-valued families, in the store's value order.
-/// The prayer-form family has its own fixed labels below.
-pub const TREND_LABELS: [(&str, [&str; 2]); 2] = [("appearance", ["Nave", "Apse"]), ("screen", ["Desktop", "Mobile"])];
+/// Each family's breakdown: its heading and its values' labels, in the store's value order.
+pub const TREND_LABELS: [(&str, &str, &[&str]); 4] = [
+    ("appearance", "Appearance", &["Nave", "Apse"]),
+    ("screen", "Screen", &["Desktop", "Mobile"]),
+    ("prayer-form", "Prayer form", &["Private", "Deacon", "Priest"]),
+    ("client", "Client", &["Browser", "Web app", "Android", "iOS"]),
+];
 
 fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> {
     let points = |scopes: &[String]| -> Vec<TrendPoint> {
@@ -212,20 +209,16 @@ fn trend_groups(rows: &[UsageDay], dimensions: &[Dimension]) -> Vec<TrendGroup> 
             .collect()
     };
     let mut groups = Vec::new();
-    for (key, labels) in TREND_LABELS {
+    for (key, label, series) in TREND_LABELS {
         let Some(dimension) = dimensions.iter().find(|d| d.key == key) else { continue };
         let scopes: Vec<String> = dimension.values.iter().map(|v| format!("{key}:{v}")).collect();
-        let mut label = key.to_string();
-        label[..1].make_ascii_uppercase();
-        groups.push(TrendGroup { key: key.into(), label, series: labels.iter().map(|l| l.to_string()).collect(), points: points(&scopes) });
+        groups.push(TrendGroup {
+            key: key.into(),
+            label: label.into(),
+            series: series.iter().map(|l| l.to_string()).collect(),
+            points: points(&scopes),
+        });
     }
-    let form_scopes: Vec<String> = ["private", "deacon", "priest"].iter().map(|v| format!("prayer-form:{v}")).collect();
-    groups.push(TrendGroup {
-        key: "prayer-form".into(),
-        label: "Prayer form".into(),
-        series: vec!["Private".into(), "Deacon".into(), "Priest".into()],
-        points: points(&form_scopes),
-    });
     groups
 }
 
@@ -265,11 +258,7 @@ fn trend_json(groups: &[TrendGroup]) -> String {
 mod tests {
     use super::*;
 
-    const DIMENSIONS: [Dimension<'static>; 3] = [
-        Dimension { key: "appearance", values: &["nave", "apse"] },
-        Dimension { key: "screen", values: &["desktop", "mobile"] },
-        Dimension { key: "prayer-form", values: &["private", "deacon", "priest"] },
-    ];
+    use presentation::usage::{DIMENSIONS, PRAYER_FORMS};
 
     fn row(day: &str, users: i64) -> UsageDay {
         UsageDay { day: day.into(), users, ..UsageDay::default() }
@@ -337,13 +326,14 @@ mod tests {
 
     #[test]
     fn trends_keep_scope_counts_and_chronological_dates() {
-        let dimensions = [("appearance:nave", 4), ("appearance:apse", 5), ("screen:mobile", 8), ("prayer-form:priest", 2)]
-            .into_iter()
-            .map(|(k, v)| (k.to_string(), v))
-            .collect();
+        let dimensions =
+            [("appearance:nave", 4), ("appearance:apse", 5), ("screen:mobile", 8), ("prayer-form:priest", 2), ("client:ios", 3)]
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v))
+                .collect();
         let rows = vec![UsageDay { hours: [3, 0, 0, 0, 0, 2, 0], dimensions, ..row("2026-09-14", 0) }, row("2026-09-13", 0)];
         let groups = trend_groups(&rows, &DIMENSIONS);
-        assert_eq!(groups.len(), 3);
+        assert_eq!(groups.len(), 4);
         for group in &groups {
             assert!(
                 group.points[0].day == "2026-09-13"
@@ -353,19 +343,23 @@ mod tests {
             );
             assert!(group.points[0].counts.iter().all(|&c| c == 0), "missing observations invented: {group:?}");
         }
-        assert_eq!((groups[0].points[1].counts[1], groups[1].points[1].counts[1], groups[2].points[1].counts[2]), (5, 8, 2));
+        assert_eq!(
+            (groups[0].points[1].counts[1], groups[1].points[1].counts[1], groups[2].points[1].counts[2], groups[3].points[1].counts[3]),
+            (5, 8, 2, 3)
+        );
     }
 
     #[test]
     fn trend_json_matches_browser_contract() {
-        let groups = trend_groups(&[row("2026-09-14", 0)], &DIMENSIONS[..1]);
+        let some = [Dimension { key: "appearance", values: &["nave", "apse"] }, Dimension { key: "prayer-form", values: PRAYER_FORMS }];
+        let groups = trend_groups(&[row("2026-09-14", 0)], &some);
         assert_eq!(
             trend_json(&groups),
             r#"[{"Key":"appearance","Label":"Appearance","Series":["Nave","Apse"],"Points":[{"Day":"2026-09-14","Counts":[0,0]}]},{"Key":"prayer-form","Label":"Prayer form","Series":["Private","Deacon","Priest"],"Points":[{"Day":"2026-09-14","Counts":[0,0,0]}]}]"#
         );
         assert_eq!(
-            trend_json(&trend_groups(&[], &[])),
-            r#"[{"Key":"prayer-form","Label":"Prayer form","Series":["Private","Deacon","Priest"],"Points":null}]"#
+            trend_json(&trend_groups(&[], &DIMENSIONS[3..])),
+            r#"[{"Key":"client","Label":"Client","Series":["Browser","Web app","Android","iOS"],"Points":null}]"#
         );
     }
 }
