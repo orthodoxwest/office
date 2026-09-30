@@ -5695,10 +5695,11 @@ body.page-hour .report-issue {
       mask-repeat: repeat, no-repeat, repeat;
       -webkit-mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
       mask-size: var(--apse-tile) var(--apse-tile), 100% 100%, var(--apse-leaf-size);
-      /* Where the epilogue meets the footer at rest: the scrolling fields
+      /* Where the epilogue meets the footer at rest (the footer's height,
+         now that it is one line under its diamond): the scrolling fields
          took their phase from that seam. Four values, since mask-position
          has no three-value form. */
-      --apse-rest-seam: 13.2rem;
+      --apse-rest-seam: 8.625rem;
       -webkit-mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       mask-position: left 50% bottom var(--apse-rest-seam), center, left 50% bottom var(--apse-rest-seam);
       -webkit-mask-composite: source-in;
@@ -5708,8 +5709,10 @@ body.page-hour .report-issue {
     }
 
     body.page-hour .office-hour::before {
-      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
-      mask-image: var(--apse-vault), linear-gradient(to top, transparent 2.2rem, rgba(0, 0, 0, 0.4) 6rem, #000 12.5rem, rgba(0, 0, 0, 0.28) 14.8rem, transparent 18.8rem), var(--apse-leaf);
+      /* Set from the seam: clear through the continuation links, full
+         around the report link, thinning to nothing at the screen's foot. */
+      -webkit-mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
+      mask-image: var(--apse-vault), linear-gradient(to top, transparent 0, rgba(0, 0, 0, 0.4) 1.425rem, #000 7.925rem, rgba(0, 0, 0, 0.28) 10.225rem, transparent 14.225rem), var(--apse-leaf);
       animation-range: calc(100% - 9rem) 100%;
     }
 
