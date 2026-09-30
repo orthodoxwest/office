@@ -2,16 +2,21 @@ package org.orthodoxwest.office
 
 import android.Manifest
 import android.content.Intent
+import android.content.res.Configuration
+import android.content.res.Resources
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,9 +26,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +41,10 @@ import java.time.LocalDate
 import org.orthodoxwest.office.core.HomeView
 import org.orthodoxwest.office.core.HourView
 import org.orthodoxwest.office.core.OrdoMonthView
+
+/** The scrims `enableEdgeToEdge` gives a three-button navigation bar by default (Android 8–9). */
+private val LIGHT_SCRIM = Color.argb(0xe6, 0xff, 0xff, 0xff)
+private val DARK_SCRIM = Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
 class MainActivity : ComponentActivity() {
     private val vm: OfficeViewModel by viewModels()
@@ -45,15 +57,24 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        // The reader's theme from the first frame, not the phone's light or dark.
+        val theme = ThemeChoice.saved(this)
+        setTheme(theme.window)
+        dress(theme, theme.dark((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES))
         super.onCreate(savedInstanceState)
-        openReminded(intent)
+        // A restored activity still holds the intent that first opened it; the saved way back already includes it.
+        if (savedInstanceState == null) openFrom(intent)
+        Shortcuts.publish(this)
         setContent {
             val vm = vm
+            val dark = vm.theme.dark(isSystemInDarkTheme())
+            LaunchedEffect(vm.theme, dark) { dress(vm.theme, dark) }
             BackHandler(enabled = vm.canGoBack) { vm.back() }
             OfficeTheme(choice = vm.theme, textSize = vm.textSize, season = vm.season) {
                 OfficeApp(
                     page = vm.page,
+                    entry = vm.entry.id,
+                    entries = vm.entries.map { it.id },
                     today = vm.today,
                     hours = vm.hours,
                     home = vm.home,
@@ -83,7 +104,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        openReminded(intent)
+        openFrom(intent)
     }
 
     override fun onResume() {
@@ -93,9 +114,27 @@ class MainActivity : ComponentActivity() {
         vm.syncReminders()
     }
 
-    /** A tapped reminder opens its hour. */
-    private fun openReminded(intent: Intent?) {
+    /**
+     * The status and navigation bars' icons, light over the Apse and dark over the Nave, whatever
+     * the phone's own mode; and the launch screen of the next start in the same theme.
+     */
+    private fun dress(choice: ThemeChoice, dark: Boolean) {
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+            navigationBarStyle = SystemBarStyle.auto(LIGHT_SCRIM, DARK_SCRIM) { dark },
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            splashScreen.setSplashScreenTheme(if (choice == ThemeChoice.DEFAULT) Resources.ID_NULL else choice.window)
+        }
+    }
+
+    /** A tapped reminder opens its hour, and a launcher shortcut its hour or the ordo, today. */
+    private fun openFrom(intent: Intent?) {
         val hour = intent?.getStringExtra(EXTRA_HOUR) ?: return
+        if (intent.action == Shortcuts.OPEN) {
+            Shortcuts.page(hour)?.let(vm::open)
+            return
+        }
         val date = intent.getStringExtra(EXTRA_DATE)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return
         vm.open(Page.Hour(date, hour))
     }
@@ -145,8 +184,18 @@ fun OfficeApp(
     onTurnOff: () -> Unit,
     onAllowNotifications: () -> Unit,
     onAllowExact: () -> Unit,
+    entry: Long = 0,
+    entries: List<Long> = listOf(entry),
 ) {
     var menu by remember { mutableStateOf(false) }
+    // Each visit keeps its own scroll position and open sections, for Back and for a return
+    // after Android has closed the app; a visit's state goes when it leaves the way back.
+    val visits = rememberSaveableStateHolder()
+    var kept by rememberSaveable { mutableStateOf(entries) }
+    LaunchedEffect(entries) {
+        (kept - entries.toSet()).forEach(visits::removeState)
+        kept = entries
+    }
     val chrome: @Composable () -> Unit = {
         SiteHeader(onHome = { menu = false; onHome() }, menuOpen = menu, onMenu = { menu = !menu })
         if (menu) {
@@ -178,53 +227,55 @@ fun OfficeApp(
     }
     Box(Modifier.fillMaxSize()) {
         PlasterWall()
-        when {
-            error != null -> Message(error, insets)
-            page is Page.Home && home != null -> HomeScreen(
-                view = home,
-                date = page.date,
-                today = today,
-                chrome = chrome,
-                insets = insets,
-                onDate = { onOpen(Page.Home(it)) },
-                onHour = { d, h -> onOpen(Page.Hour(d, h)) },
-                onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue)) },
-            )
-            page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
-                view = hour,
-                date = page.date,
-                today = today,
-                hours = hours,
-                form = form,
-                chrome = chrome,
-                insets = insets,
-                onDate = { onOpen(Page.Hour(it, page.hour)) },
-                onForm = onForm,
-                onHour = { onOpen(Page.Hour(page.date, it)) },
-                onAllHours = { onOpen(Page.Home(page.date)) },
-            )
-            page is Page.Ordo -> OrdoScreen(
-                month = ordo?.takeIf { it.year == page.year && it.month == page.month },
-                year = page.year,
-                monthNumber = page.month,
-                today = today,
-                chrome = chrome,
-                insets = insets,
-                onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
-                onDay = { onOpen(Page.Home(it)) },
-            )
-            page is Page.Reminders -> RemindersScreen(
-                settings = reminders,
-                status = reminderStatus,
-                chrome = chrome,
-                insets = insets,
-                onChange = onReminders,
-                onTurnOn = onTurnOn,
-                onTurnOff = onTurnOff,
-                onAllowNotifications = onAllowNotifications,
-                onAllowExact = onAllowExact,
-            )
-            else -> Message("Preparing the office…", insets)
+        visits.SaveableStateProvider(entry) {
+            when {
+                error != null -> Message(error, insets)
+                page is Page.Home && home != null -> HomeScreen(
+                    view = home,
+                    date = page.date,
+                    today = today,
+                    chrome = chrome,
+                    insets = insets,
+                    onDate = { onOpen(Page.Home(it)) },
+                    onHour = { d, h -> onOpen(Page.Hour(d, h)) },
+                    onOrdoDay = { onOpen(Page.Ordo(page.date.year, page.date.monthValue)) },
+                )
+                page is Page.Hour && hour != null && hour.hour == page.hour -> HourScreen(
+                    view = hour,
+                    date = page.date,
+                    today = today,
+                    hours = hours,
+                    form = form,
+                    chrome = chrome,
+                    insets = insets,
+                    onDate = { onOpen(Page.Hour(it, page.hour)) },
+                    onForm = onForm,
+                    onHour = { onOpen(Page.Hour(page.date, it)) },
+                    onAllHours = { onOpen(Page.Home(page.date)) },
+                )
+                page is Page.Ordo -> OrdoScreen(
+                    month = ordo?.takeIf { it.year == page.year && it.month == page.month },
+                    year = page.year,
+                    monthNumber = page.month,
+                    today = today,
+                    chrome = chrome,
+                    insets = insets,
+                    onMonth = { y, m -> onOpen(Page.Ordo(y, m)) },
+                    onDay = { onOpen(Page.Home(it)) },
+                )
+                page is Page.Reminders -> RemindersScreen(
+                    settings = reminders,
+                    status = reminderStatus,
+                    chrome = chrome,
+                    insets = insets,
+                    onChange = onReminders,
+                    onTurnOn = onTurnOn,
+                    onTurnOff = onTurnOff,
+                    onAllowNotifications = onAllowNotifications,
+                    onAllowExact = onAllowExact,
+                )
+                else -> Message("Preparing the office…", insets)
+            }
         }
     }
 }

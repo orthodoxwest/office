@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -45,8 +46,30 @@ sealed interface Page {
     data object Reminders : Page
 }
 
+/** A page as saved state writes it: "hour 2026-03-15 vespers". */
+fun Page.encode(): String = when (this) {
+    is Page.Home -> "home $date"
+    is Page.Hour -> "hour $date $hour"
+    is Page.Ordo -> "ordo $year $month"
+    Page.Reminders -> "reminders"
+}
+
+fun decodePage(s: String): Page? = runCatching {
+    val f = s.split(" ")
+    when (f[0]) {
+        "home" -> Page.Home(LocalDate.parse(f[1]))
+        "hour" -> Page.Hour(LocalDate.parse(f[1]), f[2]).takeIf { it.hour in hourNames() }
+        "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt())
+        "reminders" -> Page.Reminders
+        else -> null
+    }
+}.getOrNull()
+
+/** One place on the way back: its page, and an id no other visit shares, which keys its scroll position. */
+data class Entry(val id: Long, val page: Page)
+
 /** What is shown, the reader's remembered choices, and the composed content once ready. */
-class OfficeViewModel(app: Application) : AndroidViewModel(app) {
+class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("office", Context.MODE_PRIVATE)
 
     // Parsing the corpus takes a moment; it starts at once, off the main thread. The alarms share it.
@@ -56,14 +79,26 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
 
     val hours: List<String> = hourNames()
 
-    /** The pages behind the current one, for Back. */
-    private val stack = mutableStateListOf<Page>(Page.Home(LocalDate.now()))
-    val page: Page get() = stack.last()
+    /**
+     * The pages behind the current one, for Back. Kept in saved state, so a return after Android
+     * has closed the app in the background lands where the reader was.
+     */
+    private val stack = mutableStateListOf<Entry>().apply {
+        saved.get<ArrayList<String>>(STACK)?.forEach { line ->
+            val id = line.substringBefore('|').toLongOrNull() ?: return@forEach
+            decodePage(line.substringAfter('|'))?.let { add(Entry(id, it)) }
+        }
+        if (isEmpty()) add(Entry(0, Page.Home(LocalDate.now())))
+    }
+    private var nextId = stack.maxOf { it.id } + 1
+    val entry: Entry get() = stack.last()
+    val entries: List<Entry> get() = stack
+    val page: Page get() = entry.page
     val canGoBack: Boolean get() = stack.size > 1
 
     var form: String by mutableStateOf(prefs.getString("form", "private") ?: "private")
         private set
-    var theme: ThemeChoice by mutableStateOf(enumValueOrDefault(prefs.getString("theme", null), ThemeChoice.DEFAULT))
+    var theme: ThemeChoice by mutableStateOf(ThemeChoice.saved(app))
         private set
     var textSize: TextSize by mutableStateOf(enumValueOrDefault(prefs.getString("text-size", null), TextSize.DEFAULT))
         private set
@@ -90,22 +125,29 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Opens `page` over the current one; a page of the same kind replaces it, as a link would. */
     fun open(next: Page) {
-        if (stack.last()::class == next::class) stack[stack.lastIndex] = next else stack.add(next)
-        load()
+        if (next == page) return load()
+        val e = Entry(nextId++, next)
+        if (page::class == next::class) stack[stack.lastIndex] = e else stack.add(e)
+        moved()
     }
 
     /** Back: the previous page, or false when home is all that is left. */
     fun back(): Boolean {
         if (stack.size <= 1) return false
         stack.removeAt(stack.lastIndex)
-        load()
+        moved()
         return true
     }
 
     /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
         stack.clear()
-        stack.add(Page.Home(today))
+        stack.add(Entry(nextId++, Page.Home(today)))
+        moved()
+    }
+
+    private fun moved() {
+        saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
         load()
     }
 
@@ -185,6 +227,8 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 }
+
+private const val STACK = "stack"
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(name: String?, default: T): T =
     enumValues<T>().firstOrNull { it.name == name } ?: default

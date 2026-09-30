@@ -4,4 +4,16 @@
     <style name="Theme.Office" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/page</item>
     </style>
+
+    <!--
+        The reader's own choice of theme, whatever the phone's: set on the window as the app
+        starts, and (Android 13+) for the launch screen of the next start.
+    -->
+    <style name="Theme.Office.Nave" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/nave_page</item>
+    </style>
+
+    <style name="Theme.Office.Apse" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/apse_page</item>
+    </style>
 </resources>

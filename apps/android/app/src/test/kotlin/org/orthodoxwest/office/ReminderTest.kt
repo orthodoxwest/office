@@ -3,6 +3,7 @@ package org.orthodoxwest.office
 import android.Manifest
 import android.app.AlarmManager
 import android.app.Application
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
@@ -11,6 +12,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -34,6 +36,10 @@ class ReminderTest {
         shadowOf(app).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }
 
+    /** What the alarm will deliver. Robolectric offers no replacement for the deprecated field. */
+    @Suppress("DEPRECATION")
+    private val ShadowAlarmManager.ScheduledAlarm.intent: Intent get() = shadowOf(operation).savedIntent
+
     private fun turn(on: Boolean) {
         val store = ReminderStore(app)
         store.save(store.load().copy(on = on))
@@ -45,7 +51,7 @@ class ReminderTest {
         assertEquals(0, alarms.scheduledAlarms.size)
     }
 
-    private fun times() = alarms.scheduledAlarms.map { Instant.ofEpochMilli(it.triggerAtTime).atZone(zone).toLocalDateTime().toString() }.sorted()
+    private fun times() = alarms.scheduledAlarms.map { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() }.sorted()
 
     @Test
     fun theWebsDefaultHoursAreKeptAWeekAhead() {
@@ -92,11 +98,41 @@ class ReminderTest {
     }
 
     @Test
+    fun remindersRingTheBellOnTheirOwnChannel() {
+        val manager = app.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(NotificationChannel("hours", "Hours of prayer", NotificationManager.IMPORTANCE_DEFAULT))
+        Notifications.ensureChannel(app)
+        assertEquals(Notifications.bell(app), manager.getNotificationChannel(Notifications.CHANNEL).sound)
+        // The first channel, which rang the phone's default sound, is gone.
+        assertNull(manager.getNotificationChannel("hours"))
+    }
+
+    @Test
+    fun inTenMinutesPutsTheReminderAwayAndRingsAgain() {
+        turn(on = true)
+        ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))
+        Notifications.post(app, alarms.scheduledAlarms.minBy { it.triggerAtMs }.intent)
+        val notifications = shadowOf(app.getSystemService(NotificationManager::class.java))
+        val later = notifications.allNotifications.single().actions.single()
+        assertEquals("In 10 minutes", later.title)
+        val snooze = shadowOf(later.actionIntent).savedIntent
+        assertEquals(ReminderReceiver.SNOOZE, snooze.action)
+        val before = alarms.scheduledAlarms.size
+        ReminderScheduler.snooze(app, snooze, ZonedDateTime.of(2026, 3, 15, 6, 36, 0, 0, zone))
+        assertEquals(0, notifications.allNotifications.size)
+        assertEquals(before + 1, alarms.scheduledAlarms.size)
+        val again = alarms.scheduledAlarms.single { Instant.ofEpochMilli(it.triggerAtMs).atZone(zone).toLocalDateTime().toString() == "2026-03-15T06:46" }
+        // The same words, ready to post again.
+        Notifications.post(app, again.intent)
+        assertEquals("Lauds", notifications.allNotifications.single().extras.getString("android.title"))
+    }
+
+    @Test
     fun aFiredReminderNamesTheOfficeAndTheDayAndOpensTheHour() {
         turn(on = true)
         ReminderScheduler.sync(app, ZonedDateTime.of(2026, 3, 15, 5, 0, 0, 0, zone))
-        val fired = alarms.scheduledAlarms.minBy { it.triggerAtTime }
-        val intent: Intent = shadowOf(fired.operation).savedIntent
+        val fired = alarms.scheduledAlarms.minBy { it.triggerAtMs }
+        val intent: Intent = fired.intent
         Notifications.post(app, intent)
         val posted = shadowOf(app.getSystemService(NotificationManager::class.java)).allNotifications.single()
         assertEquals("Lauds", posted.extras.getString("android.title"))

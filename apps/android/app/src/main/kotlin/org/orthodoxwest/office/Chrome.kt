@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -43,6 +50,7 @@ import androidx.compose.ui.window.PopupProperties
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 
@@ -55,12 +63,25 @@ val Measure: Dp = 608.dp
 fun Modifier.measure(): Modifier = this.widthIn(max = Measure).fillMaxWidth().padding(horizontal = Gutter)
 
 /** A tap target with no ripple: the web's controls mark state, not touches. */
-fun Modifier.tap(onClick: () -> Unit): Modifier = this.clickable(interactionSource = null, indication = null, onClick = onClick)
+fun Modifier.tap(role: Role = Role.Button, label: String? = null, selected: Boolean? = null, action: String? = null, onClick: () -> Unit): Modifier =
+    this.semantics {
+        // What a screen reader says for a control drawn as a glyph ("‹", "↑"), in place of the glyph.
+        if (label != null) contentDescription = label
+        if (selected != null) this.selected = selected
+    }.clickable(interactionSource = null, indication = null, role = role, onClickLabel = action, onClick = onClick)
+
+/** A checkbox row: the box and its words are one control, announced checked or not. */
+fun Modifier.check(checked: Boolean, onChange: (Boolean) -> Unit): Modifier =
+    this.toggleable(checked, interactionSource = null, indication = null, role = Role.Checkbox, onValueChange = onChange)
+
+/** "Expanded" or "Collapsed", after a disclosure's name. */
+fun Modifier.disclosed(open: Boolean): Modifier = this.semantics { stateDescription = if (open) "Expanded" else "Collapsed" }
 
 /** The disclosure caret, gold as the web's `▾`/`▴`. */
 @Composable
 fun Caret(open: Boolean) {
-    Text(if (open) " ▴" else " ▾", style = TextStyle(fontSize = 9.sp, color = LocalPalette.current.goldLine))
+    // Drawn, not read: the disclosure says expanded or collapsed.
+    Text(if (open) " ▴" else " ▾", Modifier.clearAndSetSemantics {}, style = TextStyle(fontSize = 9.sp, color = LocalPalette.current.goldLine))
 }
 
 /** A current control's gold underline. */
@@ -74,17 +95,17 @@ fun Modifier.goldUnderline(on: Boolean, color: Color, inset: Dp = 0.dp): Modifie
 fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit) {
     val p = LocalPalette.current
     Column {
-        Row(Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(start = Gutter, end = Gutter, top = 6.4.dp, bottom = 5.6.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(
                 buildAnnotatedString {
                     withStyle(SpanStyle(color = LocalOrnament.current.flat, fontFamily = CrossFont, fontSize = 11.sp)) { append("✠") }
                     append(" DAILY OFFICE")
                 },
-                Modifier.tap(onHome).padding(vertical = 10.dp),
+                Modifier.tap(label = "Daily Office, home", onClick = onHome).padding(vertical = 10.dp),
                 style = Type.brand.copy(color = p.text),
             )
             Spacer(Modifier.weight(1f))
-            Row(Modifier.tap(onMenu).padding(start = 12.8.dp, end = 3.2.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.tap(label = "Menu", onClick = onMenu).disclosed(menuOpen).padding(start = 12.8.dp, end = 3.2.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("MENU", style = Type.menu.copy(color = p.accent))
                 Caret(menuOpen)
             }
@@ -96,14 +117,14 @@ fun SiteHeader(onHome: () -> Unit, menuOpen: Boolean, onMenu: () -> Unit) {
 /** A row of equal cells in the menu grid, 44dp tall. */
 @Composable
 private fun MenuRow(content: @Composable RowScope.() -> Unit) {
-    Row(Modifier.fillMaxWidth().height(44.dp), verticalAlignment = Alignment.CenterVertically, content = content)
+    Row(Modifier.fillMaxWidth().heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
 @Composable
 private fun RowScope.MenuCell(label: String, current: Boolean, style: TextStyle, color: Color, onClick: () -> Unit) {
     val p = LocalPalette.current
     Box(
-        Modifier.weight(1f).height(44.dp).tap(onClick).goldUnderline(current, p.goldLine, inset = 0.dp),
+        Modifier.weight(1f).heightIn(min = 44.dp).tap(selected = current, onClick = onClick).goldUnderline(current, p.goldLine, inset = 0.dp),
         contentAlignment = Alignment.Center,
     ) { Text(label, style = style.copy(color = if (current) p.text else color, textAlign = TextAlign.Center)) }
 }
@@ -176,7 +197,7 @@ fun MenuPanel(
 @Composable
 fun Disclosure(label: String, open: Boolean, onToggle: () -> Unit, value: String? = null, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
-    Row(modifier.heightIn(min = 44.dp).tap(onToggle).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             buildAnnotatedString {
                 append(label.uppercase())
@@ -200,24 +221,25 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
     val link = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.accent)
     Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
         Hairline(p.border, Modifier.padding(horizontal = 24.dp))
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("← Previous", Modifier.tap { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("← Previous", Modifier.tap(label = "Previous day") { onPick(shown.minusDays(1)) }.padding(horizontal = 16.dp), style = link)
             Spacer(Modifier.weight(1f))
             if (shown != today) Text("TODAY", Modifier.tap { onPick(today) }, style = Type.control.copy(color = p.muted))
             Spacer(Modifier.weight(1f))
-            Text("Next →", Modifier.tap { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
+            Text("Next →", Modifier.tap(label = "Next day") { onPick(shown.plusDays(1)) }.padding(horizontal = 16.dp), style = link)
         }
-        Row(Modifier.fillMaxWidth().padding(top = 12.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹", Modifier.tap { month = month.minusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
+        Row(Modifier.fillMaxWidth().padding(top = 12.dp).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("‹", Modifier.tap(label = "Previous month") { month = month.minusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
             Text(
                 "${month.month.getDisplayName(JavaTextStyle.FULL, Locale.US).uppercase()} ${month.year}",
                 Modifier.weight(1f),
                 style = Type.label(12.8f, 0.1f).copy(color = p.text, textAlign = TextAlign.Center),
             )
-            Text("›", Modifier.tap { month = month.plusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
+            Text("›", Modifier.tap(label = "Next month") { month = month.plusMonths(1) }.padding(horizontal = 24.dp), style = link.copy(fontSize = 22.sp))
         }
         val days = listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+        // The weekday letters are for the eye; each day below names itself in full.
+        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp).clearAndSetSemantics {}) {
             days.forEach { d ->
                 Text(
                     d.getDisplayName(JavaTextStyle.NARROW, Locale.US),
@@ -236,9 +258,9 @@ fun DatePicker(shown: LocalDate, today: LocalDate, onPick: (LocalDate) -> Unit) 
                     Box(
                         Modifier
                             .weight(1f)
-                            .height(44.dp)
+                            .heightIn(min = 44.dp)
                             .then(if (day == today) Modifier.background(p.pressedWash) else Modifier)
-                            .then(if (day != null) Modifier.tap { onPick(day) } else Modifier),
+                            .then(if (day != null) Modifier.tap(label = spokenDay(day, today), selected = day == shown) { onPick(day) } else Modifier),
                         contentAlignment = Alignment.Center,
                     ) {
                         if (day != null) {
@@ -263,7 +285,7 @@ fun FormChooser(form: String, onForm: (String) -> Unit) {
         Text("How are you praying?", style = Type.body.copy(fontSize = 16.sp, lineHeight = 24.sp, color = p.muted))
         Spacer(Modifier.height(4.dp))
         PRAYER_FORMS.forEach { (value, _, phrase) ->
-            Row(Modifier.heightIn(min = 44.dp).tap { onForm(value) }, verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.heightIn(min = 44.dp).tap(role = Role.RadioButton, selected = value == form) { onForm(value) }, verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(16.dp).border(1.dp, if (value == form) p.gold else p.border, CircleShape), contentAlignment = Alignment.Center) {
                     if (value == form) Box(Modifier.size(8.dp).background(p.gold, CircleShape))
                 }
@@ -297,14 +319,14 @@ fun Continuation(
     Column(modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Diamond(size = 7.dp)
         Row(Modifier.fillMaxWidth().padding(top = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f).then(if (previous != null) Modifier.tap(onPrevious) else Modifier), horizontalAlignment = Alignment.Start) {
+            Column(Modifier.weight(1f).then(if (previous != null) Modifier.tap(label = "$previousLabel: $previous", onClick = onPrevious) else Modifier), horizontalAlignment = Alignment.Start) {
                 if (previous != null) {
                     Text(previousLabel.uppercase(), style = small)
                     Text("← $previous", style = name)
                 }
             }
-            Text(middle.uppercase(), Modifier.tap(onMiddle).padding(horizontal = 6.4.dp, vertical = 12.dp), style = Type.label(12.16f, 0.06f).copy(color = p.muted))
-            Column(Modifier.weight(1f).then(if (next != null) Modifier.tap(onNext) else Modifier), horizontalAlignment = Alignment.End) {
+            Text(middle.uppercase(), Modifier.tap(label = middle, onClick = onMiddle).padding(horizontal = 6.4.dp, vertical = 12.dp), style = Type.label(12.16f, 0.06f).copy(color = p.muted))
+            Column(Modifier.weight(1f).then(if (next != null) Modifier.tap(label = "$nextLabel: $next", onClick = onNext) else Modifier), horizontalAlignment = Alignment.End) {
                 if (next != null) {
                     Text(nextLabel.uppercase(), style = small)
                     Text("$next →", style = name)
@@ -323,3 +345,7 @@ fun Footer(modifier: Modifier = Modifier, diamond: Boolean = true) {
         Text("Benedictine Divine Office", style = Type.small.copy(color = p.muted))
     }
 }
+
+/** A day as a screen reader says it in the picker: "Sunday, March 15, today". */
+fun spokenDay(day: LocalDate, today: LocalDate): String =
+    day.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)) + if (day == today) ", today" else ""

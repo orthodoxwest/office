@@ -43,6 +43,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,7 +93,7 @@ fun RemindersScreen(
         chrome()
         Column(Modifier.measure().padding(top = 24.dp)) {
             PlainHeadpiece()
-            Text("Set prayer reminders", Modifier.padding(top = 10.dp), style = body.copy(fontSize = 26.sp, lineHeight = 32.sp))
+            Text("Set prayer reminders", Modifier.padding(top = 10.dp).semantics { heading() }, style = body.copy(fontSize = 26.sp, lineHeight = 32.sp))
             Text(
                 "Choose the hours you pray and their times. Each reminder names the office and the feast of the day. " +
                     "Your schedule stays on this phone, and reminders come without a connection.",
@@ -99,13 +104,20 @@ fun RemindersScreen(
                 settings.hours.forEachIndexed { i, h ->
                     if (i > 0) Hairline(p.border)
                     Row(Modifier.fillMaxWidth().heightIn(min = 46.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Tick(h.chosen) { onChange(settings.withHour(h.copy(chosen = !h.chosen))) }
-                        Text(h.name, Modifier.weight(1f).padding(start = 12.dp).tap { onChange(settings.withHour(h.copy(chosen = !h.chosen))) }, style = body)
+                        // The box and the hour's name are one checkbox; its time is a control of its own.
+                        Row(
+                            Modifier.weight(1f).heightIn(min = 46.dp).check(h.chosen) { onChange(settings.withHour(h.copy(chosen = it))) },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Tick(h.chosen)
+                            Text(h.name, Modifier.padding(start = 12.dp), style = body)
+                        }
                         val label = h.time.format(clock)
                         if (h.chosen) {
                             Text(
                                 label,
-                                Modifier.border(1.dp, p.border).background(p.bg).tap { editing = h }.padding(horizontal = 10.dp, vertical = 5.dp),
+                                Modifier.border(1.dp, p.border).background(p.bg).tap(label = "${h.name} at $label", action = "change the time") { editing = h }
+                                    .padding(horizontal = 10.dp, vertical = 5.dp),
                                 style = body.copy(fontFeatureSettings = "lnum"),
                             )
                         } else {
@@ -118,8 +130,12 @@ fun RemindersScreen(
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                     WEEK.forEach { d ->
                         val on = d in settings.days
-                        Row(Modifier.heightIn(min = 44.dp).tap { onChange(settings.copy(days = if (on) settings.days - d else settings.days + d)) }, verticalAlignment = Alignment.CenterVertically) {
-                            Tick(on, null)
+                        Row(
+                            Modifier.heightIn(min = 44.dp).check(on) { onChange(settings.copy(days = if (it) settings.days + d else settings.days - d)) }
+                                .semantics { contentDescription = d.getDisplayName(JavaTextStyle.FULL, Locale.US) },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Tick(on)
                             Text(d.getDisplayName(JavaTextStyle.SHORT, Locale.US), Modifier.padding(start = 8.dp), style = body)
                         }
                     }
@@ -129,7 +145,8 @@ fun RemindersScreen(
                 var open by remember { mutableStateOf(false) }
                 Box {
                     Row(
-                        Modifier.border(1.dp, p.border).background(p.bg).tap { open = true }.padding(horizontal = 12.dp, vertical = 8.dp).width(220.dp),
+                        Modifier.border(1.dp, p.border).background(p.bg).tap(action = "choose when") { open = true }.disclosed(open)
+                            .padding(horizontal = 12.dp, vertical = 8.dp).width(220.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(REMINDER_LEADS.first { it.first == settings.lead }.second, Modifier.weight(1f), style = body.copy(fontFeatureSettings = "lnum"))
@@ -183,24 +200,25 @@ private fun PlainHeadpiece() {
 @Composable
 private fun Fieldset(legend: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val p = LocalPalette.current
-    Box(modifier.fillMaxWidth()) {
+    // The legend is drawn over the frame's top edge, after its contents; a screen reader takes it first.
+    Box(modifier.fillMaxWidth().semantics { isTraversalGroup = true }) {
         Column(Modifier.padding(top = 8.dp).fillMaxWidth().border(1.dp, p.border).background(p.surface).padding(horizontal = 14.dp, vertical = 10.dp)) {
             Spacer(Modifier.height(4.dp))
             content()
         }
         Text(
             legend,
-            Modifier.padding(start = 12.dp).background(p.surface).padding(horizontal = 6.dp),
+            Modifier.padding(start = 12.dp).background(p.surface).padding(horizontal = 6.dp).semantics { heading(); traversalIndex = -1f },
             style = Type.label(10.56f, 0.1f).copy(color = p.accent, fontFeatureSettings = ALL_SMALL_CAPS, lineHeight = 16.sp),
         )
     }
 }
 
-/** A checkbox in the accent colour, as the web's `accent-color` sets them. */
+/** A checkbox in the accent colour, as the web's `accent-color` sets them; the row around it is the control. */
 @Composable
-private fun Tick(checked: Boolean, onClick: (() -> Unit)?) {
+private fun Tick(checked: Boolean) {
     val p = LocalPalette.current
-    Canvas(Modifier.size(20.dp).then(if (onClick != null) Modifier.tap(onClick) else Modifier).padding(1.dp)) {
+    Canvas(Modifier.size(20.dp).padding(1.dp)) {
         val r = 2.dp.toPx()
         if (checked) {
             drawRoundRect(p.accent, cornerRadius = CornerRadius(r))
@@ -219,7 +237,7 @@ private fun Tick(checked: Boolean, onClick: (() -> Unit)?) {
 @Composable
 private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit) {
     val p = LocalPalette.current
-    Box(modifier.fillMaxWidth().heightIn(min = 46.dp).background(p.accent).tap(onClick), contentAlignment = Alignment.Center) {
+    Box(modifier.fillMaxWidth().heightIn(min = 46.dp).background(p.accent).tap(onClick = onClick), contentAlignment = Alignment.Center) {
         Text(label, style = Type.body.copy(fontSize = 17.sp, lineHeight = 24.sp, color = p.bg))
     }
 }
@@ -227,7 +245,7 @@ private fun FilledButton(label: String, modifier: Modifier, onClick: () -> Unit)
 @Composable
 private fun OutlineButton(label: String, modifier: Modifier, onClick: () -> Unit) {
     val p = LocalPalette.current
-    Box(modifier.heightIn(min = 44.dp).border(1.dp, p.border).tap(onClick).padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+    Box(modifier.heightIn(min = 44.dp).border(1.dp, p.border).tap(onClick = onClick).padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
         Text(label, style = Type.body.copy(fontSize = 16.sp, lineHeight = 22.sp, color = p.accent))
     }
 }
@@ -240,7 +258,7 @@ private fun Note(text: String, action: String, onAction: () -> Unit) {
         Modifier.fillMaxWidth().padding(top = 16.dp).drawBehind { drawLine(p.goldLine, Offset(0f, 0f), Offset(0f, size.height), 1.dp.toPx()) }.padding(start = 12.dp),
     ) {
         Text(text, style = Type.body.copy(fontSize = 16.sp, lineHeight = 23.sp, color = p.muted))
-        Text(action, Modifier.heightIn(min = 44.dp).tap(onAction).padding(vertical = 10.dp).goldUnderline(true, p.goldLine), style = Type.menu.copy(color = p.accent))
+        Text(action, Modifier.heightIn(min = 44.dp).tap(onClick = onAction).padding(vertical = 10.dp).goldUnderline(true, p.goldLine), style = Type.menu.copy(color = p.accent))
     }
 }
 

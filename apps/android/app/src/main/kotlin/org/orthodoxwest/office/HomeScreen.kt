@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +34,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -99,7 +105,7 @@ private fun Frontispiece(
         Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 18.2.dp, bottom = 16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Headpiece()
             Spacer(Modifier.height(10.dp))
-            Text(view.dateLabel, Modifier.tap(onOrdoDay), style = Type.body.copy(fontSize = 22.08.sp, lineHeight = 26.5.sp, letterSpacing = 0.22.sp, color = p.text, textAlign = TextAlign.Center))
+            Text(view.dateLabel, Modifier.semantics { heading() }.tap(action = "open the ordo", onClick = onOrdoDay), style = Type.body.copy(fontSize = 22.08.sp, lineHeight = 26.5.sp, letterSpacing = 0.22.sp, color = p.text, textAlign = TextAlign.Center))
             Text(view.feast, Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = 17.28.sp, lineHeight = 21.6.sp, color = p.accent, textAlign = TextAlign.Center))
             if (view.octaveNote.isNotEmpty()) Text(view.octaveNote, style = Type.small.copy(color = p.muted))
             if (!view.isToday) {
@@ -167,7 +173,7 @@ private fun PrayNow(label: String, onClick: () -> Unit) {
     Box(
         Modifier
             .fillMaxWidth()
-            .tap(onClick)
+            .tap(onClick = onClick)
             .drawBehind {
                 val w = 1.dp.toPx()
                 for (inset in listOf(w / 2f, w * 2.5f)) {
@@ -187,27 +193,39 @@ private fun PrayNow(label: String, onClick: () -> Unit) {
 @Composable
 private fun HourDirectory(current: String, onHour: (String) -> Unit) {
     val p = LocalPalette.current
+    val labelStyle = Type.label(11.52f, 0.08f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS)
+    // One width for the three period labels, widened past the web's 83dp only when the reader's
+    // font size needs it, so the hours still line up in columns.
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val labelWidth = remember(labelStyle, density) {
+        with(density) { PERIODS.maxOf { measurer.measure(it.second, labelStyle).size.width }.toDp() + 8.dp }.coerceAtLeast(83.dp)
+    }
     Column(Modifier.fillMaxWidth().border(1.dp, p.border)) {
         PERIODS.forEachIndexed { i, (period, label, hours) ->
             if (i > 0) Hairline(p.border)
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 Column(
-                    Modifier.width(83.dp).fillMaxHeight().background(p.inscriptionWash).padding(vertical = 6.dp),
+                    Modifier.width(labelWidth).fillMaxHeight().background(p.inscriptionWash).padding(vertical = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     PeriodIcon(period, p.muted)
-                    Text(label, Modifier.padding(top = 2.dp), style = Type.label(11.52f, 0.08f).copy(color = p.muted, fontFeatureSettings = ALL_SMALL_CAPS))
+                    Text(label, Modifier.padding(top = 2.dp), softWrap = false, style = labelStyle)
                 }
                 Box(Modifier.width(1.dp).fillMaxHeight().background(p.border))
-                Row(Modifier.weight(1f).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.weight(1f).heightIn(min = 44.dp), verticalAlignment = Alignment.CenterVertically) {
                     hours.forEachIndexed { j, h ->
                         if (j > 0) Divider(p.border)
-                        Box(Modifier.weight(1f).fillMaxHeight().tap { onHour(h) }, contentAlignment = Alignment.Center) {
-                            Text(
+                        Box(Modifier.weight(1f).fillMaxHeight().tap(label = if (h == current) "${hourLabel(h)}, now" else null) { onHour(h) }, contentAlignment = Alignment.Center) {
+                            val name = Type.body.copy(fontSize = 15.68.sp, lineHeight = 18.8.sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text)
+                            // Never broken mid-word: at the largest font sizes a name steps down to fit its cell.
+                            BasicText(
                                 hourLabel(h),
-                                Modifier.goldUnderline(h == current, p.goldLine),
-                                style = Type.body.copy(fontSize = 15.68.sp, lineHeight = 18.8.sp, letterSpacing = 0.31.sp, color = if (h == current) p.accent else p.text),
+                                Modifier.padding(horizontal = 2.dp).goldUnderline(h == current, p.goldLine),
+                                style = name,
+                                maxLines = 1,
+                                autoSize = TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = name.fontSize),
                             )
                         }
                     }

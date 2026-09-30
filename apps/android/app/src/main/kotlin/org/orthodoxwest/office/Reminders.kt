@@ -6,9 +6,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
@@ -91,6 +94,7 @@ object ReminderScheduler {
     private const val SCHEDULED = "scheduled"
     private const val LAST = "last"
     private val REFILL = Duration.ofDays(1)
+    val SNOOZE: Duration = Duration.ofMinutes(10)
 
     /** Whether a fired reminder should sync: only once the last one scheduled is within a day, so most wake no engine. */
     fun due(context: Context, now: ZonedDateTime = ZonedDateTime.now()): Boolean {
@@ -111,14 +115,7 @@ object ReminderScheduler {
                 if (!at.isAfter(now)) null else Alarm(r.hour, office, at, r.title, r.feast, r.summary)
             }
         }
-        val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()
-        for (a in wanted) {
-            val pending = a.pendingIntent(context)
-            val t = a.at.toInstant().toEpochMilli()
-            // Exact when the reader allows it; otherwise the system's nearest, still through Doze.
-            if (exact) alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pending)
-            else alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, t, pending)
-        }
+        for (a in wanted) set(alarms, a.at.toInstant().toEpochMilli(), a.pendingIntent(context))
         val codes = wanted.map { it.code }.toSet()
         state.getStringSet(SCHEDULED, emptySet())!!.mapNotNull { it.toIntOrNull() }.filter { it !in codes }.forEach { code ->
             PendingIntent.getBroadcast(context, code, Intent(context, ReminderReceiver::class.java).setAction(ReminderReceiver.FIRE), PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
@@ -128,6 +125,25 @@ object ReminderScheduler {
             .putStringSet(SCHEDULED, codes.map { it.toString() }.toSet())
             .putLong(LAST, wanted.maxOfOrNull { it.at.toInstant().toEpochMilli() } ?: 0)
             .apply()
+    }
+
+    /** "In 10 minutes": the reminder is put away and rings again, with the same words, after the wait. */
+    fun snooze(context: Context, reminder: Intent, now: ZonedDateTime = ZonedDateTime.now()) {
+        val code = reminderCode(LocalDate.parse(reminder.getStringExtra(EXTRA_DATE) ?: return), reminder.getStringExtra(EXTRA_HOUR) ?: return)
+        NotificationManagerCompat.from(context).cancel(code)
+        val again = Intent(context, ReminderReceiver::class.java).putExtras(reminder).setAction(ReminderReceiver.FIRE)
+        // Its own request code, apart from the schedule's, so a sync neither replaces nor cancels it.
+        val pending = PendingIntent.getBroadcast(context, -code, again, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        set(context.getSystemService(AlarmManager::class.java), now.plus(SNOOZE).toInstant().toEpochMilli(), pending)
+    }
+
+    /** Exact when the reader allows it; otherwise the system's nearest, still through Doze. */
+    private fun set(alarms: AlarmManager, at: Long, pending: PendingIntent) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()) {
+            alarms.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
+        } else {
+            alarms.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, at, pending)
+        }
     }
 
     /** One scheduled reminder: the office's time, when to remind, and its words. */
@@ -162,6 +178,7 @@ private const val EXTRA_WHEN = "org.orthodoxwest.office.WHEN"
 /** Posts a reminder when its alarm fires, and syncs the schedule on every event that can disturb it. */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == SNOOZE) return ReminderScheduler.snooze(context, intent)
         if (intent.action == FIRE) {
             Notifications.post(context, intent)
             if (!ReminderScheduler.due(context)) return
@@ -179,21 +196,36 @@ class ReminderReceiver : BroadcastReceiver() {
 
     companion object {
         const val FIRE = "org.orthodoxwest.office.REMINDER"
+        const val SNOOZE = "org.orthodoxwest.office.SNOOZE"
     }
 }
 
 object Notifications {
-    const val CHANNEL = "hours"
+    /**
+     * The reminders' channel. A channel's sound is fixed once created, so the bell came with a new
+     * one; the first ("hours") rang the phone's default sound and is removed.
+     */
+    const val CHANNEL = "hours-bell"
+    private const val FIRST_CHANNEL = "hours"
 
     fun ensureChannel(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         if (manager.getNotificationChannel(CHANNEL) != null) return
+        manager.deleteNotificationChannel(FIRST_CHANNEL)
         manager.createNotificationChannel(
             NotificationChannel(CHANNEL, "Hours of prayer", NotificationManager.IMPORTANCE_DEFAULT).apply {
-                description = "A reminder at each hour you pray"
+                description = "A bell at each hour you pray"
+                val attributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                setSound(bell(context), attributes)
             },
         )
     }
+
+    /** One soft stroke of a tubular bell (res/raw/bell.ogg; see tools/bake-bell.py). */
+    fun bell(context: Context): Uri = Uri.parse("${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${R.raw.bell}")
 
     fun allowed(context: Context): Boolean =
         (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
@@ -212,6 +244,12 @@ object Notifications {
             .putExtra(EXTRA_DATE, date)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         val tap = PendingIntent.getActivity(context, code, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val later = PendingIntent.getBroadcast(
+            context,
+            code,
+            Intent(context, ReminderReceiver::class.java).putExtras(alarm).setAction(ReminderReceiver.SNOOZE),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setColor(Nave.gold.toArgb())
@@ -222,6 +260,7 @@ object Notifications {
             .setShowWhen(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(tap)
+            .addAction(R.drawable.ic_notification, "In 10 minutes", later)
             .setAutoCancel(true)
             .build()
         @Suppress("MissingPermission")

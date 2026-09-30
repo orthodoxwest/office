@@ -25,11 +25,18 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -40,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.Month
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JavaTextStyle
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -60,8 +68,8 @@ fun OrdoScreen(
     onDay: (LocalDate) -> Unit,
 ) {
     val p = LocalPalette.current
-    var allDetails by remember(year, monthNumber) { mutableStateOf(false) }
-    val listState = remember(year, monthNumber) { LazyListState() }
+    var allDetails by rememberSaveable(year, monthNumber) { mutableStateOf(false) }
+    val listState = rememberSaveable(year, monthNumber, saver = LazyListState.Saver) { LazyListState() }
     val scope = rememberCoroutineScope()
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -133,15 +141,15 @@ private fun OrdoHeader(year: Int, month: Int, today: LocalDate, onMonth: (Int, I
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Headpiece()
-        Text("$year Ordo", Modifier.padding(top = 2.dp), style = Type.body.copy(fontSize = 28.sp, lineHeight = 34.sp, color = p.text, fontFeatureSettings = "lnum"))
+        Text("$year Ordo", Modifier.padding(top = 2.dp).semantics { heading() }, style = Type.body.copy(fontSize = 28.sp, lineHeight = 34.sp, color = p.text, fontFeatureSettings = "lnum"))
         Text("Feasts & daily observances", Modifier.padding(top = 4.8.dp), style = Type.small.copy(color = p.muted))
         Row(Modifier.fillMaxWidth().padding(top = 8.dp).height(44.dp), verticalAlignment = Alignment.CenterVertically) {
             val nav = Type.body.copy(fontSize = 12.8.sp, lineHeight = 20.5.sp, color = p.accent, fontFeatureSettings = "lnum")
-            Text("‹ ${year - 1}", Modifier.weight(1f).tap { onMonth(year - 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("‹ ${year - 1}", Modifier.weight(1f).tap(label = "Previous year, ${year - 1}") { onMonth(year - 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
             Text("Today", Modifier.weight(1f).tap { onMonth(today.year, today.monthValue) }.padding(12.dp).goldUnderline(today.year == year, p.goldLine, 24.dp), style = nav.copy(textAlign = TextAlign.Center))
             Divider(p.border)
-            Text("${year + 1} ›", Modifier.weight(1f).tap { onMonth(year + 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
+            Text("${year + 1} ›", Modifier.weight(1f).tap(label = "Next year, ${year + 1}") { onMonth(year + 1, month) }.padding(12.dp), style = nav.copy(textAlign = TextAlign.Center))
         }
         Hairline(p.border, Modifier.padding(top = 8.dp))
         // The month strip: six to a row, the shown month underlined with its lozenge.
@@ -149,7 +157,7 @@ private fun OrdoHeader(year: Int, month: Int, today: LocalDate, onMonth: (Int, I
             Row(Modifier.fillMaxWidth()) {
                 row.forEach { m ->
                     val current = m.value == month
-                    Box(Modifier.weight(1f).height(44.dp).tap { onMonth(year, m.value) }, contentAlignment = Alignment.Center) {
+                    Box(Modifier.weight(1f).height(44.dp).tap(label = m.getDisplayName(JavaTextStyle.FULL, Locale.US), selected = current) { onMonth(year, m.value) }, contentAlignment = Alignment.Center) {
                         Text(
                             m.getDisplayName(JavaTextStyle.SHORT, Locale.US).uppercase(),
                             Modifier.drawBehind {
@@ -181,15 +189,15 @@ private fun MonthHeading(name: String, isTodaysMonth: Boolean, modifier: Modifie
         }.padding(vertical = 6.4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(name, Modifier.weight(1f), style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
-        Text("↑", Modifier.tap(onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
+        Text(name, Modifier.weight(1f).semantics { heading() }, style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 28.sp, color = p.accent, fontFeatureSettings = "smcp", letterSpacing = 1.3.sp))
+        Text("↑", Modifier.tap(label = "Back to the top", onClick = onTop).padding(horizontal = 14.dp, vertical = 6.dp), style = Type.body.copy(fontSize = 16.sp, lineHeight = 20.sp, color = p.muted))
     }
 }
 
 @Composable
 private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay: (LocalDate) -> Unit, modifier: Modifier) {
     val p = LocalPalette.current
-    val open = remember(d.date) { mutableStateMapOf<String, Boolean>() }
+    val open = rememberSaveable(d.date, saver = Disclosures) { mutableStateMapOf<String, Boolean>() }
     val details = open["details"] ?: allDetails
     val date = LocalDate.of(d.date.year, d.date.month, d.date.day)
     val hasDetails = d.hasLauds() || d.hoursPreces || d.hasVespers()
@@ -197,15 +205,25 @@ private fun DayRow(d: OrdoDayView, isToday: Boolean, allDetails: Boolean, onDay:
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(top = 12.8.dp, bottom = 6.4.dp)) {
             // The day's liturgical colour as a rail beside its date.
             Box(Modifier.width(3.dp).height(40.dp).background(dayColor(d.color)))
-            Column(Modifier.width(59.dp).tap { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
+            // One stop for a screen reader: the date, its colour and observances, and the feast.
+            val spoken = listOfNotNull(
+                date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d", Locale.US)) + if (isToday) ", today" else "",
+                d.feast,
+                "liturgical color: ${d.color}",
+                "fasting".takeIf { d.fast },
+                "abstinence".takeIf { d.abstinence },
+                d.rank.takeIf { it.isNotEmpty() }?.let { "rank $it" },
+            ).joinToString(". ")
+            Column(Modifier.width(59.dp).tap(label = spoken, action = "open the day") { onDay(date) }, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("${d.date.day}", style = Type.body.copy(fontSize = 21.6.sp, lineHeight = 23.76.sp, color = p.accent, fontFeatureSettings = "lnum"))
                 Text(d.weekday.uppercase(), style = Type.label(12f, 0.06f).copy(color = p.muted, lineHeight = 16.8.sp))
                 if (isToday) Text("Today", style = Type.small.copy(fontSize = 11.sp, lineHeight = 14.sp, color = p.accent))
             }
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.Top) {
-                    Text(d.feast, Modifier.weight(1f).tap { onDay(date) }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp, color = p.text))
-                    Row(Modifier.padding(start = 8.dp, top = 2.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    // The date's stop already says the feast; the feast is a second target for the eye only.
+                    Text(d.feast, Modifier.weight(1f).tap { onDay(date) }.semantics { hideFromAccessibility() }, style = Type.body.copy(fontSize = 16.sp, lineHeight = 21.6.sp, color = p.text))
+                    Row(Modifier.padding(start = 8.dp, top = 2.dp).clearAndSetSemantics {}, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         if (d.fast) Text("§", style = Type.small.copy(fontSize = 12.sp, color = p.muted))
                         if (d.abstinence) FishIcon(p.muted)
                         if (d.rank.isNotEmpty()) Text(d.rank, Modifier.goldUnderline(true, p.goldLine), style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = p.muted))
@@ -231,7 +249,7 @@ private fun OrdoDayView.hasVespers() = magnificatAntiphon.isNotEmpty() || vesper
 
 @Composable
 private fun SmallDisclosure(label: String, open: Boolean, onToggle: () -> Unit) {
-    Row(Modifier.heightIn(min = 44.dp).tap(onToggle), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.heightIn(min = 44.dp).tap(onClick = onToggle).disclosed(open), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Type.small.copy(fontSize = 12.sp, lineHeight = 16.8.sp, color = LocalPalette.current.muted))
         Caret(open)
     }
@@ -276,3 +294,9 @@ private fun DigestHour(name: String, notes: List<String>, antiphon: String?, pre
         comms.forEach { c -> Text("Com. ${c.name}" + if (c.incipit.isNotEmpty()) " “${c.incipit}”" else "", style = line) }
     }
 }
+
+/** A day's disclosures the reader has opened or closed, as saved state can hold them: "details=1". */
+private val Disclosures = listSaver<SnapshotStateMap<String, Boolean>, String>(
+    save = { m -> m.map { (k, v) -> "$k=${if (v) 1 else 0}" } },
+    restore = { l -> mutableStateMapOf<String, Boolean>().apply { l.forEach { put(it.substringBefore('='), it.endsWith("=1")) } } },
+)
