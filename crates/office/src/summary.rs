@@ -1,8 +1,13 @@
 //! The ordo-relevant digest of a composed hour: preces, suffrage, commemorations, and the
-//! gospel-canticle antiphon. Shared by the ordo, the calendar view, and `office rubrics`.
+//! gospel-canticle antiphon. Shared by the ordo, the calendar view, and `office rubrics`,
+//! and by the web's and the native apps' ordo rows through `ordo_day`.
 
-use calendar::Color;
-use liturgy::{ElementType, OfficeHour};
+use calendar::{Color, MoveableDates};
+use liturgy::{ElementType, OfficeHour, PrayerForm};
+
+use crate::concurrence::VespersOwner;
+use crate::day::Day;
+use crate::engine::{Engine, title_case};
 
 /// One commemoration: its name and its antiphon's incipit.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -69,6 +74,62 @@ pub fn summarize_hour(hour: &OfficeHour) -> HourSummary {
         }
     }
     s
+}
+
+/// The day's display name, as the ordo row and home name it: its celebration,
+/// else its temporal title, else the season's feria.
+pub fn day_name(day: &Day) -> String {
+    if let Some(c) = &day.celebration {
+        return c.name.clone();
+    }
+    if let Some(t) = &day.tempora {
+        return t.clone();
+    }
+    format!("{} feria", title_case(day.season.as_str()))
+}
+
+/// One day of the ordo: the calendar's facts and the digest of its composed
+/// Lauds, Hours (Prime stands for the minor hours' shared preces), and Vespers.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OrdoDay {
+    pub name: String,
+    /// The rank's abbreviation ("2cl") and full name; both empty without a celebration.
+    pub rank: String,
+    pub rank_full: String,
+    pub color: Color,
+    pub fast: bool,
+    pub abstinence: bool,
+    pub commemorations: Vec<String>,
+    pub lauds: Option<HourSummary>,
+    pub hours_preces: bool,
+    pub vespers: Option<HourSummary>,
+    /// "II Vespers of preceding", "I Vespers of …", or empty.
+    pub vespers_note: String,
+}
+
+pub fn ordo_day(day: &Day, engine: &Engine, moveable: &MoveableDates) -> OrdoDay {
+    let summarize = |hour: &str| engine.compose_hour(hour, day, moveable, PrayerForm::Private).ok().map(|h| summarize_hour(&h));
+    let (rank, rank_full) = match &day.celebration {
+        Some(c) => (c.rank.abbrev().to_string(), c.rank.display_name().to_string()),
+        None => (String::new(), String::new()),
+    };
+    OrdoDay {
+        name: day_name(day),
+        rank,
+        rank_full,
+        color: day.color,
+        fast: day.penitential.fast,
+        abstinence: day.penitential.abstinence,
+        commemorations: day.commemorations.iter().map(|c| c.name.clone()).collect(),
+        lauds: summarize("lauds"),
+        hours_preces: summarize("prime").is_some_and(|h| h.preces),
+        vespers: summarize("vespers"),
+        vespers_note: match day.vespers.owner {
+            VespersOwner::IIOfPreceding => "II Vespers of preceding".to_string(),
+            VespersOwner::IOfFollowing => day.vespers.feast.as_ref().map(|f| format!("I Vespers of {}", f.name)).unwrap_or_default(),
+            VespersOwner::NotApplicable => String::new(),
+        },
+    }
 }
 
 /// An antiphon's opening: through the mediant, at most nine words, without

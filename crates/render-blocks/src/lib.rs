@@ -92,18 +92,24 @@ pub struct Block {
     pub kind: BlockKind,
     /// A sigil, verse number, or "Ant." set in the gutter before the text.
     pub marker: String,
-    /// The opening of a psalm, hymn, or Marian antiphon, which may take a drop cap.
+    /// An opening that takes an initial, as the web marks them: a psalm's or
+    /// canticle's first verse, a hymn's first stanza, a Marian antiphon's sung
+    /// opening, and the first line of a chapter, a spoken collect, the corporate
+    /// Lord's Prayer, or a short responsory (whose initial is raised, not dropped).
     pub drop_cap: bool,
+    /// The first block of a liturgical element: layout keeps more air between
+    /// elements than between the lines of one.
+    pub starts_element: bool,
     pub runs: Vec<Run>,
 }
 
 impl Block {
     fn new(kind: BlockKind, runs: Vec<Run>) -> Block {
-        Block { kind, marker: String::new(), drop_cap: false, runs }
+        Block { kind, marker: String::new(), drop_cap: false, starts_element: false, runs }
     }
 
     fn marked(kind: BlockKind, marker: &str, runs: Vec<Run>) -> Block {
-        Block { kind, marker: marker.to_string(), drop_cap: false, runs }
+        Block { kind, marker: marker.to_string(), drop_cap: false, starts_element: false, runs }
     }
 
     /// The block's words as read: marker, then runs.
@@ -159,7 +165,11 @@ pub fn element_blocks(elems: &[OfficeElement]) -> Vec<Block> {
             doxology = Some(&elems[i + 1]);
             i += 1;
         }
+        let start = out.len();
         push_element(&mut out, elem, doxology);
+        if let Some(first) = out.get_mut(start) {
+            first.starts_element = true;
+        }
         i += 1;
     }
     out
@@ -213,11 +223,21 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
         ElementType::Versicle | ElementType::Response | ElementType::Blessing | ElementType::Doxology | ElementType::Dialogue => {
             liturgical_block(out, &elem.text, Mode::PreserveLines, false);
         }
-        ElementType::ShortResponsory => liturgical_block(out, &elem.text, Mode::PreserveLines, true),
-        ElementType::CorporateLordPrayer => corporate_lord_prayer(out, elem),
+        ElementType::ShortResponsory => {
+            let start = out.len();
+            liturgical_block(out, &elem.text, Mode::PreserveLines, true);
+            mark_opening(out, start, |b| b.kind == BlockKind::Response && b.marker.is_empty());
+        }
+        ElementType::CorporateLordPrayer => {
+            let start = out.len();
+            corporate_lord_prayer(out, elem);
+            mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
+        }
         ElementType::Collect => {
             if elem.voice.is_empty() {
+                let start = out.len();
                 liturgical_block(out, &elem.text, Mode::Flow, false);
+                mark_opening(out, start, |b| b.kind == BlockKind::Paragraph);
             } else {
                 voice_block(out, &elem.voice, Mode::Flow);
             }
@@ -240,10 +260,20 @@ fn push_element(out: &mut Vec<Block>, elem: &OfficeElement, doxology: Option<&Of
             if !elem.label.is_empty() {
                 out.push(Block::new(BlockKind::ChapterRef, text_runs(&elem.label)));
             }
+            let start = out.len();
             liturgical_block(out, &elem.text, Mode::Flow, false);
+            mark_opening(out, start, |b| matches!(b.kind, BlockKind::Paragraph | BlockKind::Versicle));
         }
         ElementType::Preces => liturgical_block(out, &elem.text, Mode::PreserveLines, false),
         ElementType::PsalmDoxology => out.push(gloria_patri(&elem.text, &elem.postures)),
+    }
+}
+
+/// Marks the first block from `start` as an opening when it is the kind that
+/// takes one; a reference or gap first means the opening is not a text line.
+fn mark_opening(out: &mut [Block], start: usize, takes_initial: impl Fn(&Block) -> bool) {
+    if let Some(first) = out.get_mut(start).filter(|b| takes_initial(b)) {
+        first.drop_cap = true;
     }
 }
 

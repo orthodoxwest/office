@@ -758,9 +758,11 @@ name = "mobile-ffi"
 version = "0.1.0"
 dependencies = [
  "calendar",
+ "corpus",
  "liturgy",
  "office",
  "render-blocks",
+ "render-html",
  "tools",
  "uniffi",
 ]

@@ -76,3 +76,40 @@ fn current_office_follows_the_web_schedule() {
     assert_eq!(at(19), ("vespers".to_string(), 0));
     assert_eq!(at(23), ("compline".to_string(), 0));
 }
+
+fn civil(year: i32, month: i32, day: i32) -> CivilDate {
+    CivilDate { year, month, day }
+}
+
+#[test]
+fn home_invites_to_the_current_office_only_today() {
+    let core = OfficeCore::new().unwrap();
+    let today = civil(2026, 3, 15);
+    let home = core.home(today, today, 18).unwrap();
+    assert_eq!(home.date_label, "Sunday, March 15, 2026");
+    assert_eq!(home.feast, "III Sunday in Lent");
+    // The celebration already names the season.
+    assert_eq!(home.season, "");
+    assert_eq!(home.color, "violet");
+    assert_eq!((home.pray_now_label.as_str(), home.current_hour.as_str()), ("Pray Vespers", "vespers"));
+    // Compline after midnight belongs to yesterday, and marks no hour today.
+    let late = core.home(today, today, 1).unwrap();
+    assert_eq!((late.pray_now_hour.as_str(), late.pray_now_date, late.current_hour.as_str()), ("compline", civil(2026, 3, 14), ""));
+    let other = core.home(civil(2026, 3, 16), today, 18).unwrap();
+    assert_eq!((other.pray_now_label.as_str(), other.is_today), ("Open Lauds", false));
+    assert_eq!(core.home(civil(2026, 3, 30), today, 9).unwrap().ornament, "passiontide");
+}
+
+#[test]
+fn the_ordo_month_matches_the_web_rows() {
+    let core = OfficeCore::new().unwrap();
+    let march = core.ordo_month(2026, 3).unwrap();
+    assert_eq!((march.name.as_str(), march.days.len()), ("March", 31));
+    let first = &march.days[0];
+    assert_eq!((first.feast.as_str(), first.rank.as_str(), first.weekday.as_str()), ("I Sunday in Lent", "1cl", "Sun"));
+    assert_eq!(first.commemorations, ["St David of Wales, Bishop & Confessor"]);
+    assert_eq!(first.benedictus_antiphon, "Then was Jesus");
+    assert!(first.lauds_suffrage);
+    assert_eq!(first.vespers_note, "II Vespers of preceding");
+    assert!(core.ordo_month(2026, 13).is_err());
+}

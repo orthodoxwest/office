@@ -8,8 +8,11 @@ use std::fmt;
 use std::sync::{Arc, Mutex};
 
 use calendar::{CalendarData, Date, MoveableDates, build_calendar};
+use corpus::typography::typeset;
 use liturgy::{OfficeHour, PrayerForm};
+use office::summary::{CommSummary, HourSummary, day_name, ordo_day};
 use office::{Day, Engine, HOUR_NAMES, resolve_office_days};
+use render_html::links::{report_url, season_class, season_label, title_case};
 
 pub use data::EmbeddedData;
 
@@ -71,6 +74,69 @@ impl OfficeCore {
         let composed = self.engine.compose_hour(&hour, office_day, &year.moveable, form).map_err(failed)?;
         Ok(HourView::new(&hour, &composed))
     }
+
+    /// Home for a civil date, as the web's home handler builds it. `today`
+    /// and `clock_hour` are the device's, which decide the invitation.
+    pub fn home(&self, date: CivilDate, today: CivilDate, clock_hour: i32) -> Result<HomeView, OfficeError> {
+        let shown = date.parse()?;
+        let now = today.parse()?;
+        let year = self.year(shown.year())?;
+        let day = year.days.get(shown.ordinal() as usize - 1).ok_or_else(|| failed(format!("no office day for {shown}")))?;
+        let feast = day_name(day);
+        let lower = feast.to_lowercase();
+        // A short note for home; the ordo carries the full wording.
+        let octave_note = match &day.within_octave_of {
+            Some(id) if !id.is_empty() && !lower.contains("octave") => format!("Octave of {}", calendar::builder::octave_display_name(id)),
+            _ => String::new(),
+        };
+        // Not repeated when the celebration already names the season.
+        let mut season = title_case(day.season.as_str());
+        if lower.contains(&season.to_lowercase()) {
+            season.clear();
+        }
+        let (mut pray_now_hour, mut pray_now_label, mut pray_now_date, mut current_hour) = ("lauds", "Open Lauds".to_string(), shown, "");
+        if shown == now {
+            let current = current_office(clock_hour);
+            pray_now_hour = HOUR_NAMES.iter().find(|h| **h == current.hour).copied().unwrap_or("lauds");
+            pray_now_label = format!("Pray {}", title_case(pray_now_hour));
+            if current.day_offset != 0 {
+                pray_now_date = now.add_days(current.day_offset);
+            } else {
+                current_hour = pray_now_hour;
+            }
+        }
+        Ok(HomeView {
+            date_label: long_date(shown),
+            feast: typeset(&feast),
+            octave_note,
+            season,
+            color: day.color.as_str().to_string(),
+            ornament: ornament(Some(day.season)),
+            penitential: day.penitential.labels().into_iter().map(String::from).collect(),
+            commemorations: day.commemorations.iter().map(|c| typeset(&c.name)).collect(),
+            is_today: shown == now,
+            pray_now_label,
+            pray_now_hour: pray_now_hour.to_string(),
+            pray_now_date: CivilDate::from(pray_now_date),
+            current_hour: current_hour.to_string(),
+        })
+    }
+
+    /// One month of the ordo, each day with its office digest. Composes three
+    /// hours a day, so call it off the main thread.
+    pub fn ordo_month(&self, year: i32, month: i32) -> Result<OrdoMonthView, OfficeError> {
+        if !(1..=12).contains(&month) {
+            return Err(failed(format!("invalid month {month}")));
+        }
+        let y = self.year(year)?;
+        let days: Vec<OrdoDayView> = y
+            .days
+            .iter()
+            .filter(|d| d.date.month() as i32 == month)
+            .map(|d| OrdoDayView::new(d, ordo_day(d, &self.engine, &y.moveable)))
+            .collect();
+        Ok(OrdoMonthView { name: MONTHS[month as usize - 1].to_string(), year, month, days })
+    }
 }
 
 impl OfficeCore {
@@ -121,6 +187,141 @@ pub fn current_office(clock_hour: i32) -> CurrentOffice {
     CurrentOffice { hour: hour.to_string(), day_offset }
 }
 
+/// A civil date across the bindings.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct CivilDate {
+    pub year: i32,
+    pub month: i32,
+    pub day: i32,
+}
+
+impl CivilDate {
+    fn parse(self) -> Result<Date, OfficeError> {
+        let CivilDate { year, month, day } = self;
+        Date::parse(&format!("{year:04}-{month:02}-{day:02}")).ok_or_else(|| failed(format!("invalid date {year}-{month}-{day}")))
+    }
+}
+
+impl From<Date> for CivilDate {
+    fn from(d: Date) -> CivilDate {
+        CivilDate { year: d.year(), month: d.month() as i32, day: d.day() as i32 }
+    }
+}
+
+/// The ornament season that retints the gilding: "passiontide", "eastertide", or empty.
+fn ornament(season: Option<calendar::Season>) -> String {
+    season_class(season).trim_start_matches("season-").to_string()
+}
+
+/// "Wednesday, September 30, 2026".
+fn long_date(d: Date) -> String {
+    format!("{}, {} {}, {}", d.weekday().name(), MONTHS[d.month() as usize - 1], d.day(), d.year())
+}
+
+/// Home's frontispiece for one day.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct HomeView {
+    pub date_label: String,
+    /// The celebration, or the temporal title or feria when there is none.
+    pub feast: String,
+    pub octave_note: String,
+    /// The season's name, empty when the celebration already names it.
+    pub season: String,
+    pub color: String,
+    pub ornament: String,
+    /// "Fasting", "Abstinence" and the like, set as red work.
+    pub penitential: Vec<String>,
+    pub commemorations: Vec<String>,
+    pub is_today: bool,
+    /// "Pray Vespers" today; "Open Lauds" on another day.
+    pub pray_now_label: String,
+    pub pray_now_hour: String,
+    /// The day the invitation opens: yesterday for Compline after midnight.
+    pub pray_now_date: CivilDate,
+    /// The hour the directory marks as now, or empty.
+    pub current_hour: String,
+}
+
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct OrdoMonthView {
+    pub name: String,
+    pub year: i32,
+    pub month: i32,
+    pub days: Vec<OrdoDayView>,
+}
+
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct CommemorationView {
+    pub name: String,
+    pub incipit: String,
+}
+
+/// One ordo row, as the web's month page sets it.
+#[derive(Clone, Debug, uniffi::Record)]
+pub struct OrdoDayView {
+    pub date: CivilDate,
+    /// "Sun".
+    pub weekday: String,
+    pub feast: String,
+    pub rank: String,
+    pub rank_full: String,
+    pub color: String,
+    pub fast: bool,
+    pub abstinence: bool,
+    pub commemorations: Vec<String>,
+    pub benedictus_antiphon: String,
+    pub lauds_preces: bool,
+    pub lauds_suffrage: bool,
+    pub lauds_comms: Vec<CommemorationView>,
+    pub hours_preces: bool,
+    pub magnificat_antiphon: String,
+    pub vespers_preces: bool,
+    pub vespers_suffrage: bool,
+    pub vespers_comms: Vec<CommemorationView>,
+    pub vespers_note: String,
+}
+
+impl OrdoDayView {
+    fn new(d: &Day, o: office::summary::OrdoDay) -> OrdoDayView {
+        let comms =
+            |c: &[CommSummary]| c.iter().map(|c| CommemorationView { name: typeset(&c.name), incipit: typeset(&c.incipit) }).collect();
+        let lauds = o.lauds.unwrap_or_else(empty_summary);
+        let vespers = o.vespers.unwrap_or_else(empty_summary);
+        OrdoDayView {
+            date: CivilDate::from(d.date),
+            weekday: d.date.weekday().name()[..3].to_string(),
+            feast: typeset(&o.name),
+            rank: o.rank,
+            rank_full: o.rank_full,
+            color: o.color.as_str().to_string(),
+            fast: o.fast,
+            abstinence: o.abstinence,
+            commemorations: o.commemorations.iter().map(|c| typeset(c)).collect(),
+            benedictus_antiphon: lauds.gospel_ant.clone(),
+            lauds_preces: lauds.preces,
+            lauds_suffrage: lauds.suffrage,
+            lauds_comms: comms(&lauds.comms),
+            hours_preces: o.hours_preces,
+            magnificat_antiphon: vespers.gospel_ant.clone(),
+            vespers_preces: vespers.preces,
+            vespers_suffrage: vespers.suffrage,
+            vespers_comms: comms(&vespers.comms),
+            vespers_note: typeset(&o.vespers_note),
+        }
+    }
+}
+
+fn empty_summary() -> HourSummary {
+    HourSummary {
+        color: None,
+        gospel_ant: String::new(),
+        gospel_ant_full: String::new(),
+        preces: false,
+        suffrage: false,
+        comms: Vec::new(),
+    }
+}
+
 const MONTHS: [&str; 12] =
     ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -136,9 +337,15 @@ pub struct HourView {
     pub feast: String,
     /// The season in lower case ("pentecost"), empty when none.
     pub season: String,
+    /// The season as the hour header names it ("Lent", "Eastertide"); empty after Pentecost.
+    pub season_label: String,
+    /// The ornament season: "passiontide", "eastertide", or empty.
+    pub ornament: String,
     /// The liturgical color ("green"), empty when none.
     pub color: String,
     pub sections: Vec<SectionView>,
+    /// A prefilled GitHub issue naming this hour, date, and form, as the web's "Report a problem".
+    pub report_url: String,
 }
 
 impl HourView {
@@ -147,11 +354,14 @@ impl HourView {
         HourView {
             hour: hour_name.to_string(),
             title: hour.title.clone(),
-            date_label: format!("{}, {} {}, {}", d.weekday().name(), MONTHS[d.month() as usize - 1], d.day(), d.year()),
-            feast: hour.feast.clone(),
+            date_label: long_date(d),
+            feast: typeset(&hour.feast),
             season: hour.season.map(|s| s.as_str().to_string()).unwrap_or_default(),
+            season_label: hour.season.map(|s| season_label(s.as_str())).unwrap_or_default(),
+            ornament: ornament(hour.season),
             color: hour.color.map(|c| c.as_str().to_string()).unwrap_or_default(),
             sections: render_blocks::hour_sections(hour).into_iter().map(SectionView::from).collect(),
+            report_url: report_url(hour, hour_name, &format!("{:04}-{:02}-{:02}", d.year(), d.month(), d.day())),
         }
     }
 }
@@ -174,6 +384,7 @@ pub struct BlockView {
     pub kind: BlockKind,
     pub marker: String,
     pub drop_cap: bool,
+    pub starts_element: bool,
     pub runs: Vec<RunView>,
 }
 
@@ -183,6 +394,7 @@ impl From<render_blocks::Block> for BlockView {
             kind: b.kind.into(),
             marker: b.marker,
             drop_cap: b.drop_cap,
+            starts_element: b.starts_element,
             runs: b.runs.into_iter().map(|r| RunView { text: r.text, style: r.style.into() }).collect(),
         }
     }

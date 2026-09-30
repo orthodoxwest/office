@@ -22,8 +22,11 @@ bindgen = ["uniffi/cli"]
 [dependencies]
 calendar.workspace = true
 liturgy.workspace = true
+corpus.workspace = true
 office.workspace = true
 render-blocks.workspace = true
+# Only its pure `links` helpers (season labels, ornament classes), so both fronts name alike.
+render-html.workspace = true
 uniffi.workspace = true
 
 [dev-dependencies]
