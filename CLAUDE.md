@@ -187,6 +187,7 @@ Produces a complete LuaLaTeX document (half-letter 5.5"×8.5") from a composed `
 - Makefile: `make pdf HOUR=compline` (chains `./office tex` → `lualatex`)
 - Font: EB Garamond (`fonts-ebgaramond`). Cross ✠ via Noto Sans Symbols Black (`fonts-noto-extra`).
 - Layout: two-sided (inner margin alternates for booklet imposition), running heads via `fancyhdr`, headings and psalm/hymn labels kept with their text via `needspace`, PDF title/subject via `hyperref`. Display text goes through the same `corpus::typography::typeset` as the web (curly quotes, en-dash verse ranges).
+- Initials: `\initial` in the preamble mirrors the web's initial system (small-caps opening word; dropped, raised or elevated by the lines the opening takes; per-letter optical profiles from `style.css`, eased for print on a few letters). Recalibrate against a specimen of every letter when changing the initial face.
 - gregoriotex: required (TeX Live `gregorio` package) — the preamble loads it unconditionally; it supplies the ℣/℟ glyphs (`\Vbar`/`\Rbar`) even in non-chant booklets.
 - GABC chant files: `data/texts/chant/{psalms,canticles,hymns}/{slug}.gabc`. When present, element renders as `\gregorioscore{}` instead of formatted text. Psalm slugs zero-padded to 3 digits (e.g. `psalms/067.gabc`).
 

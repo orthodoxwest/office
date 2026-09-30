@@ -20,7 +20,6 @@
 \usepackage{gregoriotex}
 \gresetcompilegabc{auto}
 \usepackage{xcolor}
-\usepackage{lettrine}
 \usepackage{microtype}
 \microtypesetup{verbose=silent}
 \usepackage{setspace}
@@ -54,6 +53,8 @@
 
 % ✠ (U+2720) fallback via Noto Sans Symbols (Dingbats block)
 \newfontface\CrossFont[Path=/usr/share/fonts/truetype/noto/,Scale=MatchLowercase]{NotoSansSymbols-Black.ttf}
+% The small caps an ornamented opening word takes (see \initial).
+\newfontface\InitialWordFont{EB Garamond}[Ligatures=TeX,Letters={SmallCaps,UppercaseSmallCaps},LetterSpace=2.5]
 \newcommand{\crux}{{\color{rubricred}{\Large\CrossFont\symbol{"2720}}}}
 
 % Page flow: a paragraph never leaves a single line behind or ahead of a
@@ -118,18 +119,248 @@
 % Scripture references share the rubric treatment without becoming instructions.
 \newcommand{\scriptureref}[1]{{\color{rubricred}\small\normalfont #1}}
 
-% Gilded two-line initials. All call sites are semantic spoken openings, never
-% private/secret prayer text. Only the initial itself is gilt: the rest of the
-% opening word stays ordinary prose, as ::first-letter does on the web hour.
-\renewcommand{\LettrineTextFont}{\normalfont}
-\newif\ifcapopen
-\newcommand{\dropcap}[2]{\global\capopentrue\lettrine[lines=2,lhang=0.1,nindent=0.1em]{\color{ornamentgold}#1}{#2}}
-% Call after the \par that ends a paragraph which may open with \dropcap. An
-% initial is two lines deep, so when its paragraph set only one line the
-% next paragraph would run into it: open just enough space to clear it.
-\newcommand{\capclear}{%
-  \ifcapopen\global\capopenfalse\ifnum\prevgraf<2 \vspace{0.55\baselineskip}\fi\fi%
-}
+\makeatletter
+% Ornamented initials, after the web hour's initial system. All call sites
+% are semantic spoken openings, never private/secret prayer text.
+%
+% \initial{mode}{key}{initial}{word}{rest} sets a whole paragraph and ends it:
+%   drop      two-line dropped initial (hymn stanza, Marian anthem)
+%   prose     dropped when the opening runs to two lines or more; an opening
+%             that fits one line takes a modest raised initial instead
+%             (chapter, collect, the officiant's Lord's Prayer)
+%   psalm     dropped; when the verse fits one line, the same full-size
+%             initial is elevated onto that line's baseline instead
+%   response  a modest raised initial at the ℟ text edge (the opening
+%             response of a Short Responsory)
+% #2 names the letter whose optical profile applies, #3 is the gilt initial
+% (with any opening quote), and #4 the rest of the opening word, set in real
+% small caps. \initial* marks a standalone O or I: its word space stays, and
+% #4 is the following word.
+%
+% Geometry is the web's float: the initial's box stands at `hang`, the second
+% line starts `gap` after the box, and the first line's word moves by `tuck`
+% from there. A two-line initial's capitals run from the first line's
+% cap-height to the second line's baseline.
+\ExplSyntaxOn
+\dim_new:N \l__initial_size_dim
+\dim_new:N \l__initial_hang_dim
+\dim_new:N \l__initial_next_dim
+\dim_new:N \l__initial_first_dim
+\box_new:N \l__initial_box
+\box_new:N \l__initial_trial_box
+\int_new:N \g__initial_rows_int
+\tl_new:N \l__initial_gap_tl
+\tl_new:N \l__initial_tuck_tl
+\tl_new:N \l__initial_hang_tl
+\tl_new:N \l__initial_depth_tl
+\tl_new:N \l__initial_raisedtuck_tl
+\bool_new:N \l__initial_standalone_bool
+
+% \initialprofile{letter}{gap}{tuck}{hang}{depth}{raised tuck}: the web's
+% optical profiles (style.css) for this same EB Garamond 12. Gap and hang are
+% in initial ems; tuck is in the web's body em, where the initial is 3.05em,
+% so it is scaled by 1/3.05 here. A negative gap lets the second line run in
+% under an arm or crossbar; depth 1 keeps a descending tail (J, Q) clear of a
+% third line. The raised tuck fits a raised initial's first word.
+% Print sets the second line hard against the initial's foot, where the web's
+% float leaves a little air, so F, J, N, P, T, U, V, W and Y are eased here
+% from the web's values (gap raised, tuck lowered by the same amount so the
+% first line keeps its place). Recalibrate against a specimen of every letter
+% dropped, raised and elevated when changing the initial face.
+\NewDocumentCommand \initialprofile { m m m m m m }
+  { \tl_const:cn { c__initial_profile_#1_tl } { {#2} {#3} {#4} {#5} {#6} } }
+
+\cs_new_protected:Npn \__initial_set:nnnnn #1#2#3#4#5
+  {
+    \tl_set:Nn \l__initial_gap_tl {#1}
+    \tl_set:Nn \l__initial_tuck_tl {#2}
+    \tl_set:Nn \l__initial_hang_tl {#3}
+    \tl_set:Nn \l__initial_depth_tl {#4}
+    \tl_set:Nn \l__initial_raisedtuck_tl {#5}
+  }
+\cs_generate_variant:Nn \__initial_set:nnnnn { V }
+\cs_new_protected:Npn \__initial_load:n #1
+  {
+    \tl_if_exist:cTF { c__initial_profile_#1_tl }
+      { \exp_last_unbraced:Nv \__initial_set:nnnnn { c__initial_profile_#1_tl } }
+      { \__initial_set:nnnnn { 0.06 } { 0 } { 0 } { 0 } { 0 } }
+  }
+
+% The two-line size: capitals as tall as one line's leading plus the body
+% cap-height, so the initial's top meets the first line's capitals.
+\cs_new_protected:Npn \__initial_full:n #1
+  {
+    \hbox_set:Nn \l_tmpa_box { E }
+    \dim_set:Nn \l__initial_size_dim
+      {
+        \fp_to_dim:n
+          {
+            \dim_to_fp:n { \f@size pt }
+            * ( \dim_to_fp:n { \baselineskip } + \dim_to_fp:n { \box_ht:N \l_tmpa_box } )
+            / \dim_to_fp:n { \box_ht:N \l_tmpa_box }
+          }
+      }
+    \__initial_box:n {#1}
+  }
+% The raised size: 1.65 body ems, as the web's raised initial.
+\cs_new_protected:Npn \__initial_raised:n #1
+  {
+    \dim_set:Nn \l__initial_size_dim { \fp_to_dim:n { 1.65 * \dim_to_fp:n { \f@size pt } } }
+    \__initial_box:n {#1}
+  }
+\cs_new_protected:Npn \__initial_box:n #1
+  {
+    \hbox_set:Nn \l__initial_box
+      {
+        \fontsize { \dim_use:N \l__initial_size_dim } { \dim_use:N \l__initial_size_dim }
+        \selectfont \color { ornamentgold } #1
+      }
+    \dim_set:Nn \l__initial_hang_dim { \l__initial_hang_tl \l__initial_size_dim }
+  }
+
+% The opening word in the font's drawn small caps, capitals included, with
+% the web's light tracking. Small caps are upright, so an italic anthem's
+% opening word is too.
+\cs_new_protected:Npn \__initial_word:n #1
+  { { \upshape \InitialWordFont #1 } }
+
+% A dropped initial: a parshape opens the first two lines (three for a tail),
+% and the initial is set, weightless, down on the second line's baseline. A
+% standalone O's word space falls at the start of the line, where the web's
+% float drops it too: its gap alone divides it from the next word.
+\cs_new_protected:Npn \__initial_drop:nn #1#2
+  {
+    \dim_set:Nn \l__initial_next_dim
+      { \l__initial_hang_dim + \box_wd:N \l__initial_box + \l__initial_gap_tl \l__initial_size_dim }
+    \dim_set:Nn \l__initial_first_dim
+      {
+        \l__initial_next_dim
+        + \bool_if:NTF \l__initial_standalone_bool { 0pt }
+            { \fp_to_dim:n { \l__initial_tuck_tl / 3.05 * \l__initial_size_dim } }
+      }
+    \noindent
+    \parshape = \int_eval:n { 3 + \l__initial_depth_tl } ~
+      \dim_use:N \l__initial_first_dim ~ \dim_eval:n { \linewidth - \l__initial_first_dim } ~
+      \prg_replicate:nn { 1 + \l__initial_depth_tl }
+        { \dim_use:N \l__initial_next_dim ~ \dim_eval:n { \linewidth - \l__initial_next_dim } ~ }
+      0pt ~ \dim_use:N \linewidth \scan_stop:
+    \hbox_set:Nn \l_tmpa_box { \box_move_down:nn { \baselineskip } { \box_use:N \l__initial_box } }
+    \box_set_ht:Nn \l_tmpa_box { 0pt }
+    \box_set_dp:Nn \l_tmpa_box { 0pt }
+    \hbox_overlap_left:n
+      {
+        \box_use:N \l_tmpa_box
+        \skip_horizontal:n { \l__initial_first_dim - \l__initial_hang_dim - \box_wd:N \l__initial_box }
+      }
+    \__initial_word:n {#1} #2 \par
+  }
+% The dropped initial needs a second line beside it. When its text set only
+% one, open just enough room below to clear the initial's foot.
+\cs_new_protected:Npn \__initial_clear:
+  {
+    \int_compare:nNnT { \prevgraf } < { 2 + \l__initial_depth_tl }
+      { \vspace { 0.55 \baselineskip } }
+  }
+
+% An inline initial on the first line's baseline: raised (modest, its own
+% small fit) or elevated (full size, the dropped fit, no word tuck). Inline,
+% a standalone O keeps its word space.
+\cs_new_protected:Npn \__initial_inline:nnn #1#2#3
+  {
+    \noindent
+    \skip_horizontal:n { \l__initial_hang_dim }
+    \box_use:N \l__initial_box
+    \skip_horizontal:n {#1}
+    \bool_if:NT \l__initial_standalone_bool { \c_space_tl }
+    \__initial_word:n {#2} #3 \par
+  }
+\cs_new:Npn \__initial_raised_fit:
+  {
+    0.035 \l__initial_size_dim
+    + \bool_if:NTF \l__initial_standalone_bool { 0pt } { \l__initial_raisedtuck_tl em }
+  }
+
+% Sets #1 in a scratch box and records how many lines it took.
+\cs_new_protected:Npn \__initial_rows:n #1
+  {
+    \vbox_set:Nn \l__initial_trial_box
+      { #1 \int_gset:Nn \g__initial_rows_int { \prevgraf } }
+  }
+
+\NewDocumentCommand \initial { s m m m m m }
+  {
+    \par
+    \bool_set:Nn \l__initial_standalone_bool {#1}
+    \__initial_load:n {#3}
+    \str_case:nn {#2}
+      {
+        { drop }
+          { \__initial_full:n {#4} \__initial_drop:nn {#5} {#6} \__initial_clear: }
+        { psalm }
+          {
+            \__initial_full:n {#4}
+            \__initial_rows:n { \__initial_drop:nn {#5} {#6} }
+            \int_compare:nNnTF { \g__initial_rows_int } > { 1 }
+              { \__initial_drop:nn {#5} {#6} }
+              {
+                \__initial_rows:n
+                  { \__initial_inline:nnn { \l__initial_gap_tl \l__initial_size_dim } {#5} {#6} }
+                % The elevated initial rises a line above its text: give it
+                % a little air beneath whatever precedes it.
+                \int_compare:nNnTF { \g__initial_rows_int } = { 1 }
+                  {
+                    \vspace { 0.2 \baselineskip }
+                    \__initial_inline:nnn { \l__initial_gap_tl \l__initial_size_dim } {#5} {#6}
+                  }
+                  { \__initial_drop:nn {#5} {#6} \__initial_clear: }
+              }
+          }
+        { prose }
+          {
+            \__initial_raised:n {#4}
+            \__initial_rows:n { \__initial_inline:nnn { \__initial_raised_fit: } {#5} {#6} }
+            \int_compare:nNnTF { \g__initial_rows_int } = { 1 }
+              { \__initial_inline:nnn { \__initial_raised_fit: } {#5} {#6} }
+              { \__initial_full:n {#4} \__initial_drop:nn {#5} {#6} \__initial_clear: }
+          }
+        { response }
+          {
+            \__initial_raised:n {#4}
+            \hangindent = \sigilwidth \hangafter = 0 \scan_stop:
+            \__initial_inline:nnn { \__initial_raised_fit: } {#5} {#6}
+          }
+      }
+  }
+\ExplSyntaxOff
+
+%                 gap        tuck       hang       depth raised tuck
+\initialprofile{A}{0.06}     {-0.8}     {-0.02}    {0}  {0}
+\initialprofile{B}{0.08}     {-0.2}     {0}        {0}  {0}
+\initialprofile{C}{0.08}     {-0.05}    {-0.025}   {0}  {0}
+\initialprofile{D}{0.03}     {0.1}      {0}        {0}  {0}
+\initialprofile{E}{0.08}     {-0.15}    {0}        {0}  {0}
+\initialprofile{F}{-0.07}    {0.45}     {0}        {0}  {0}
+\initialprofile{G}{-0.005}   {0}        {-0.025}   {0}  {0}
+\initialprofile{H}{0.06}     {0}        {0}        {0}  {0}
+\initialprofile{I}{0.03}     {0}        {0}        {0}  {0}
+\initialprofile{J}{-0.02}    {0.25}     {0}        {1}  {0}
+\initialprofile{K}{0.06}     {0}        {0}        {0}  {0}
+\initialprofile{L}{0.06}     {-0.9}     {0}        {0}  {0}
+\initialprofile{M}{0.06}     {-0.05}    {0}        {0}  {0}
+\initialprofile{N}{0.02}     {-0.05}    {0}        {0}  {0}
+\initialprofile{O}{0.045}    {0}        {-0.025}   {0}  {0}
+\initialprofile{P}{-0.15}    {0.65}     {0}        {0}  {0}
+\initialprofile{Q}{0.06}     {-0.2}     {-0.025}   {1}  {0}
+\initialprofile{R}{0.08}     {-0.8}     {0}        {0}  {0}
+\initialprofile{S}{0.06}     {-0.05}    {0}        {0}  {0}
+\initialprofile{T}{-0.08}    {0.44}     {-0.06}    {0}  {-0.04}
+\initialprofile{U}{0.03}     {0.09}     {0}        {0}  {0}
+\initialprofile{V}{-0.14}    {0.62}     {-0.025}   {0}  {-0.04}
+\initialprofile{W}{-0.10}    {0.50}     {-0.025}   {0}  {-0.04}
+\initialprofile{X}{0.06}     {0}        {0}        {0}  {0}
+\initialprofile{Y}{-0.06}    {0.48}     {-0.025}   {0}  {-0.04}
+\initialprofile{Z}{0.06}     {-0.05}    {0}        {0}  {0}
+\makeatother
 
 % Section heading: centered small caps with open air, as the web hour centers
 % each transition in tracked small caps. Never stranded at the foot of a page.
@@ -189,7 +420,7 @@
 % shares one left edge, as verse-num does on the web hour.
 \newcommand{\psalmverse}[2]{%
   \if\relax\detokenize{#1}\relax%
-    \noindent #2\par\capclear%
+    \noindent #2\par%
   \else%
     \noindent\hangindent=2em\hangafter=1\makebox[1.4em][r]{{\small\color{mutedgray}#1}}\hspace{0.6em}#2\par%
   \fi%
@@ -221,9 +452,6 @@
 \newcommand{\ant}[1]{\noindent\hangindent=1.35em\hangafter=1{\color{rubricred}\scshape Ant.}\hspace{0.3em}#1\par}
 % Opening acclamation (not an antiphon)
 \newcommand{\acclamation}[1]{\noindent #1\par}
-% Initial response of a Short Responsory. No \par here — call sites append the
-% rest of the response (and a single trailing \par) so lettrine can wrap line 2.
-\newcommand{\shortresponse}[2]{\dropcap{#1}{#2}}
 
 \setlength{\parskip}{4pt}
 \setlength{\parindent}{0pt}
