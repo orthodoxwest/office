@@ -1,9 +1,15 @@
 name: Android
 
 # Builds the sideloadable preview APK and renders review screenshots. Pushes to
-# master (and manual runs) also republish the rolling "android-preview"
-# prerelease, whose APK URL stays fixed:
-# https://github.com/orthodoxwest/office/releases/download/android-preview/office-preview.apk
+# master (and manual runs) also publish the APK as a new release, tagged
+# android-preview-<versionName> and marked latest, so this URL always serves the
+# newest preview:
+# https://github.com/orthodoxwest/office/releases/latest/download/office-preview.apk
+#
+# The repository has immutable releases on: a published release's tag can never
+# be moved or reused, even after the release is deleted. So each preview gets a
+# tag of its own rather than recreating one rolling tag; the fixed tag this
+# workflow once reused, android-preview, is spent for good.
 on:
   push:
     branches: [master]
@@ -38,12 +44,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           # The version code counts commits, so the preview needs full history.
           fetch-depth: 0
+
+      - name: Read the version
+        id: version
+        # The same versionName app/build.gradle.kts gives the APK.
+        run: echo "version=0.1.$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.94.1
@@ -103,15 +116,36 @@ jobs:
         with:
           name: office-preview-apk
 
-      - name: Replace the prerelease
+      - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          TAG: android-preview-${{ needs.build.outputs.version }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          # Recreated each time so its tag names the commit the APK was built from.
-          gh release delete android-preview --cleanup-tag --yes || true
-          gh release create android-preview office-preview.apk \
-            --prerelease \
+          # A re-run for a commit already published has nothing new to add, and
+          # an immutable release could not be replaced anyway.
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::notice::$TAG is already published; nothing to do."
+            exit 0
+          fi
+          gh release create "$TAG" office-preview.apk \
             --target "$GITHUB_SHA" \
-            --title "Android preview" \
-            --notes "Sideload preview built from ${GITHUB_SHA::7} on ${GITHUB_REF_NAME}. On your phone, open this page, tap office-preview.apk, and allow the install. Updates install over earlier previews."
+            --latest \
+            --title "Android preview $VERSION" \
+            --notes "Sideload preview $VERSION, built from ${GITHUB_SHA::7} on ${GITHUB_REF_NAME}. On your phone, open this page, tap office-preview.apk, and allow the install. Updates install over earlier previews."
+
+      - name: Prune older previews
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          KEEP: 5
+        run: |
+          # Newest first; keep the last few so a bad preview can be stepped back from.
+          gh release list --exclude-drafts --limit 100 --json tagName --jq '.[].tagName' \
+            | { grep '^android-preview-' || true; } \
+            | tail -n +$((KEEP + 1)) \
+            | while read -r tag; do
+                gh release delete "$tag" --cleanup-tag --yes \
+                  || echo "::warning::Could not delete $tag"
+              done
