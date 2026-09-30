@@ -110,8 +110,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         vm.refreshReminderStatus()
-        // Every visit keeps the alarm window running ahead.
+        // Every visit keeps the alarm window running ahead, and the widget current.
         vm.syncReminders()
+        vm.refreshWidgets()
     }
 
     /**
@@ -128,8 +129,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** A tapped reminder opens its hour, and a launcher shortcut its hour or the ordo, today. */
+    /**
+     * A tapped reminder opens its hour, a launcher shortcut its hour or the ordo, today, and the
+     * widget its hour or home.
+     */
     private fun openFrom(intent: Intent?) {
+        if (intent?.action == Widgets.HOME) return vm.goHome()
         val hour = intent?.getStringExtra(EXTRA_HOUR) ?: return
         if (intent.action == Shortcuts.OPEN) {
             Shortcuts.page(hour)?.let(vm::open)

@@ -160,6 +160,12 @@ class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : A
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
+        refreshWidgets()
+    }
+
+    fun refreshWidgets() {
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.Default) { runCatching { Widgets.refresh(app) } }
     }
 
     fun chooseTextSize(value: TextSize) {

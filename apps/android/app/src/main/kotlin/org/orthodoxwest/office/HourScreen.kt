@@ -78,6 +78,7 @@ fun HourScreen(
         }
     }
     val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
+    val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -117,7 +118,7 @@ fun HourScreen(
                     else -> if (heading) 12.dp else 0.dp
                 }
                 afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap)) }
+                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap), column = columns[i to j]) }
                 prev = block
             }
         }

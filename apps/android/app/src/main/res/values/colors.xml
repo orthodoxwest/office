@@ -5,4 +5,24 @@
     <color name="apse_page">#121C28</color>
     <color name="icon_ground">#121C28</color>
     <color name="icon_cross">#D8BC74</color>
+    <!-- The widget's palettes (Theme.kt Nave and Apse): fixed for a chosen theme, and widget_*
+         following the phone's light or dark for Default. -->
+    <color name="nave_surface">#F6EDDF</color>
+    <color name="nave_edge">#1F6B3A1F</color>
+    <color name="nave_text">#241C17</color>
+    <color name="nave_accent">#6B3A1F</color>
+    <color name="nave_muted">#6B5D54</color>
+    <color name="nave_gold_line">#C9AC72</color>
+    <color name="apse_surface">#172232</color>
+    <color name="apse_edge">#2ED0B06A</color>
+    <color name="apse_text">#E8E2D0</color>
+    <color name="apse_accent">#D0B06A</color>
+    <color name="apse_muted">#9AA4B0</color>
+    <color name="apse_gold_line">#6A5C3A</color>
+    <color name="widget_surface">#F6EDDF</color>
+    <color name="widget_edge">#1F6B3A1F</color>
+    <color name="widget_text">#241C17</color>
+    <color name="widget_accent">#6B3A1F</color>
+    <color name="widget_muted">#6B5D54</color>
+    <color name="widget_gold_line">#C9AC72</color>
 </resources>

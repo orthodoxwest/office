@@ -188,6 +188,8 @@ class ReminderReceiver : BroadcastReceiver() {
         Thread {
             try {
                 ReminderScheduler.sync(context)
+                // A clock or time-zone change, reboot or update moves the widget's hour too.
+                if (intent.action != FIRE) Widgets.refresh(context)
             } finally {
                 pending.finish()
             }

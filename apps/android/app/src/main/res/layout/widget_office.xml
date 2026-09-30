@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The widget, after home's frontispiece: the day, a double gold rule with the day's colour as
+    its lozenge, the feast, and the invitation to the hour now. The texts here are the picker's
+    preview; the widget sets its own.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_ground"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="14dp"
+    android:paddingVertical="12dp">
+
+    <LinearLayout
+        android:id="@+id/widget_day"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/eb_garamond_regular"
+            android:fontFeatureSettings="onum"
+            android:maxLines="1"
+            android:text="@string/widget_preview_date"
+            android:textColor="@color/widget_text"
+            android:textSize="17sp" />
+
+        <FrameLayout
+            android:layout_width="104dp"
+            android:layout_height="9dp"
+            android:layout_marginVertical="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
+
+                <!-- ImageViews, not Views: a widget may only hold the classes launchers inflate. -->
+                <ImageView
+                    android:id="@+id/widget_rule_top"
+                    android:importantForAccessibility="no"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/widget_gold_line" />
+
+                <ImageView
+                    android:id="@+id/widget_rule_bottom"
+                    android:importantForAccessibility="no"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="2dp"
+                    android:background="@color/widget_gold_line" />
+            </LinearLayout>
+
+            <!-- The ground behind the lozenge parts the rules around it. -->
+            <ImageView
+                android:id="@+id/widget_lozenge"
+                android:layout_width="17dp"
+                android:layout_height="9dp"
+                android:layout_gravity="center"
+                android:background="@color/widget_surface"
+                android:importantForAccessibility="no"
+                android:paddingHorizontal="4dp"
+                android:src="@drawable/widget_lozenge" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/widget_feast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="@font/eb_garamond_regular"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/widget_preview_feast"
+            android:textColor="@color/widget_accent"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_pray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/widget_invitation"
+        android:fontFamily="@font/eb_garamond_regular"
+        android:gravity="center"
+        android:letterSpacing="0.02"
+        android:maxLines="1"
+        android:paddingVertical="8dp"
+        android:text="@string/widget_preview_pray"
+        android:textColor="@color/widget_accent"
+        android:textSize="17sp" />
+</LinearLayout>

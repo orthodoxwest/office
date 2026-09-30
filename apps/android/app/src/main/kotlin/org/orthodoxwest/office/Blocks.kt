@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import org.orthodoxwest.office.core.BlockKind
 import org.orthodoxwest.office.core.BlockView
 import org.orthodoxwest.office.core.RunStyle
+import org.orthodoxwest.office.core.SectionView
 
 /** The verse gutter (`--verse-gutter`, 1.8rem): verse numbers and ℣/℟ sit in it, text beyond it. */
 val VerseGutter: Dp = 28.8.dp
@@ -77,9 +79,12 @@ fun gapBefore(prev: BlockView?, cur: BlockView): Dp {
     }
 }
 
-/** One block of a composed hour, styled after the web's classes for the same text. */
+/**
+ * One block of a composed hour, styled after the web's classes for the same text. A hymn's
+ * stanzas are set in `column`, the width of the hymn's longest line (see [hymnColumns]).
+ */
 @Composable
-fun Block(block: BlockView, modifier: Modifier = Modifier) {
+fun Block(block: BlockView, modifier: Modifier = Modifier, column: Dp? = null) {
     // One stop for a screen reader, in words (spoken): the drawn initial and gutter marks are for the eye.
     val m = if (block.kind == BlockKind.GAP) modifier else modifier.clearAndSetSemantics {
         contentDescription = spoken(block)
@@ -138,10 +143,15 @@ fun Block(block: BlockView, modifier: Modifier = Modifier) {
                 Text(runs(block), Modifier.alignByBaseline(), style = text)
             }
         }
-        BlockKind.STANZA, BlockKind.PARAGRAPH, BlockKind.CHANT_LINE -> {
-            // A hymn's wrapped line hangs beneath its own start.
-            val style = if (block.kind == BlockKind.STANZA) verse.copy(textIndent = TextIndent(restLine = 20.sp)) else text
-            if (block.dropCap) Opening(block, style, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = style)
+        // The hymn's column, centred: the rag balanced by an equal indent on the left, as the
+        // web's fit-content `.hymn-verses`. A wrapped line hangs beneath its own start.
+        BlockKind.STANZA -> Box(m.fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+            val style = verse.copy(textIndent = TextIndent(restLine = 20.sp))
+            val inColumn = if (column != null) Modifier.width(column) else Modifier
+            if (block.dropCap) Opening(block, style, inColumn, textStart = 0.dp) else Text(runs(block), inColumn.fillMaxWidth(), style = style)
+        }
+        BlockKind.PARAGRAPH, BlockKind.CHANT_LINE -> {
+            if (block.dropCap) Opening(block, text, m, textStart = 0.dp) else Text(runs(block), m.fillMaxWidth(), style = text)
         }
     }
 }
@@ -189,7 +199,8 @@ private fun Opening(block: BlockView, style: TextStyle, modifier: Modifier, text
         }
         // Two lines beside the capital; the remainder runs on at the text edge.
         val split = beside.getLineEnd(1, visibleEnd = false)
-        val first = rest.subSequence(0, split)
+        // Two lines of a hymn end at the stanza's own line break: it belongs to neither part.
+        val first = rest.subSequence(0, split).let { if (it.text.endsWith("\n")) it.subSequence(0, it.length - 1) else it }
         val after = rest.subSequence(split, rest.length).let { if (it.text.startsWith("\n")) it.subSequence(1, it.length) else it }
         // Seat the capital's foot on the second line's baseline.
         val capTop = (beside.getLineBaseline(1) - cap.firstBaseline).toInt()
@@ -275,6 +286,66 @@ fun spoken(block: BlockView): String {
 }
 
 private const val CROSS_MARK = "\uE000"
+
+/** The web's `.hymn-verses` max-width, 28rem. */
+private val HymnMax: Dp = 448.dp
+
+/** The web's `.hymn-line` hanging padding (1.1rem at a phone's width), which its fit-content column counts. */
+private val HymnHang: Dp = 17.6.dp
+
+/**
+ * Each hymn's column width, by (section, block) index of its stanzas: its longest metrical line,
+ * the opening initial included, capped at 28rem. The web centres `.hymn-verses` on the same
+ * measure (`width: fit-content`). A hymn is a run of stanzas, with any rubric or gap among them.
+ */
+@Composable
+fun hymnColumns(sections: List<SectionView>): Map<Pair<Int, Int>, Dp> {
+    val p = LocalPalette.current
+    val measurer = rememberTextMeasurer()
+    val density = LocalDensity.current
+    val style = Type.verse.copy(color = p.text)
+    val texts = sections.map { s -> s.blocks.map { if (it.kind == BlockKind.STANZA) runs(it) else null } }
+    return remember(sections, style, density) {
+        fun width(t: AnnotatedString) = measurer.measure(t, style, softWrap = false).size.width
+        val cap = style.copy(fontSize = style.fontSize * 3.05f, lineHeight = style.fontSize * 3.05f)
+        val gap = with(density) { (style.fontSize * 3.05f * 0.06f).toPx() }
+        fun stanzaWidth(block: BlockView, text: AnnotatedString): Int {
+            var start = 0
+            val lines = text.text.split('\n').map { line -> text.subSequence(start, start + line.length).also { start += line.length + 1 } }
+            return lines.mapIndexed { i, line ->
+                val w = width(line)
+                if (!block.dropCap || i > 1 || line.text.isBlank()) return@mapIndexed w
+                // The initial stands beside the first two lines: its width and gap, less the letter it replaces.
+                val letter = line.text.trimStart().take(1)
+                val beside = measurer.measure(letter, cap).size.width + gap.toInt()
+                if (i == 0) w - width(AnnotatedString(letter)) + beside else w + beside
+            }.maxOrNull() ?: 0
+        }
+        val out = mutableMapOf<Pair<Int, Int>, Dp>()
+        sections.forEachIndexed { si, s ->
+            var run = mutableListOf<Int>()
+            var widest = 0
+            fun close() {
+                val col = with(density) { widest.toDp() + HymnHang }.coerceAtMost(HymnMax)
+                run.forEach { out[si to it] = col }
+                run = mutableListOf()
+                widest = 0
+            }
+            s.blocks.forEachIndexed { bi, b ->
+                when (b.kind) {
+                    BlockKind.STANZA -> {
+                        run.add(bi)
+                        widest = maxOf(widest, stanzaWidth(b, texts[si][bi]!!))
+                    }
+                    BlockKind.RUBRIC, BlockKind.GAP -> Unit
+                    else -> close()
+                }
+            }
+            close()
+        }
+        out
+    }
+}
 
 /** A block's runs as styled text. */
 @Composable

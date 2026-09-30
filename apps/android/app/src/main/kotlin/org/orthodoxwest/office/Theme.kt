@@ -120,8 +120,10 @@ fun dayColor(name: String): Color = when (name) {
     else -> Color(0xFFC9B896)
 }
 
-/** The menu's Theme row: Default follows the device; Nave and Apse are the web's names. */
-/** The menu's Theme row; `window` is the style that colors the window, and the launch screen, before Compose draws. */
+/**
+ * The menu's Theme row: Default follows the device; Nave and Apse are the web's names. `window`
+ * is the style that colours the window, and the launch screen, before Compose draws.
+ */
 enum class ThemeChoice(val label: String, @StyleRes val window: Int) {
     DEFAULT("Default", R.style.Theme_Office),
     NAVE("Nave", R.style.Theme_Office_Nave),
