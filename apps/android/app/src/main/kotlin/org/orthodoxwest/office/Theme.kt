@@ -124,10 +124,14 @@ enum class ThemeChoice(val label: String) { DEFAULT("Default"), NAVE("Nave"), AP
 /** The menu's Text row, scaling the whole page as the web scales its root (93%, 100%, 110%). */
 enum class TextSize(val scale: Float) { SMALL(0.93f), DEFAULT(1f), LARGE(1.1f) }
 
+/**
+ * Regular and Italic only. EB Garamond 12's Bold was never finished (128 glyphs, no small caps,
+ * no ℣/℟), and the app sets nothing bold. When Android's Bold text setting raises every weight,
+ * Compose synthesizes the heavier stroke from Regular, so small caps, sigils and ligatures stay.
+ */
 val Garamond = FontFamily(
     Font(R.font.eb_garamond_regular, FontWeight.Normal, FontStyle.Normal),
     Font(R.font.eb_garamond_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.eb_garamond_bold, FontWeight.Bold, FontStyle.Normal),
 )
 
 /** Only ✠: the Garamond cut has no cross. */

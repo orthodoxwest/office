@@ -1,10 +1,13 @@
 package org.orthodoxwest.office
 
+import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
 import java.time.LocalDate
@@ -87,6 +90,21 @@ class ScreenshotTest {
 
     @Test
     fun ordoApse() { show(Page.Ordo(2026, 3), ThemeChoice.APSE); shoot("ordo-apse") }
+
+    /**
+     * Android's Bold text setting (and Samsung's font weight) adds 300 to every weight. The page
+     * must keep Garamond's small caps and ℣/℟ with a heavier stroke, not fall to a partial face.
+     */
+    @Test
+    @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
+    fun boldTextSetting() {
+        val res = ApplicationProvider.getApplicationContext<Context>().resources
+        val bold = Configuration(res.configuration).apply { fontWeightAdjustment = 300 }
+        @Suppress("DEPRECATION")
+        res.updateConfiguration(bold, res.displayMetrics)
+        show(Page.Hour(LocalDate.of(2026, 9, 30), "terce"), ThemeChoice.APSE)
+        shoot("bold-text-terce")
+    }
 
     @Test
     fun datePicker() {

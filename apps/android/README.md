@@ -91,6 +91,8 @@ CI uploads them as the `android-screenshots` artifact.
 
 ## Fonts
 
-`res/font/` holds EB Garamond and the ✠ glyph from Noto Sans Symbols, converted from the
-web's WOFF2 core subsets (`apps/office-web/static/fonts/`), under the SIL Open Font License
-(`FONTS-OFL-1.1.txt`).
+`res/font/` holds EB Garamond Regular and Italic and the ✠ glyph from Noto Sans Symbols,
+converted from the web's WOFF2 core subsets (`apps/office-web/static/fonts/`), under the SIL
+Open Font License (`FONTS-OFL-1.1.txt`). There is deliberately no Bold: EB Garamond 12's Bold
+is an unfinished 128-glyph face without small caps or ℣/℟, so under Android's Bold text setting
+Compose synthesizes weight from Regular instead (`ScreenshotTest.boldTextSetting`).
