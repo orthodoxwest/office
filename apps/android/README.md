@@ -18,17 +18,31 @@ corpus it was built from.
 ## Design standard
 
 Every interface in this project aims at immaculate craftsmanship, with as much beauty as
-possible without distracting from a reverent experience. The native apps inherit the web's
-design intent (`.claude/skills/web-ui-design/SKILL.md`): prayer is the product; navigation
-stays quiet and steps aside while praying (the date bar and hour tabs slide away on scroll
-and the screen stays awake during an hour, like the web's wake lock); current controls take
-the gold underline; the parish palette, EB Garamond, restrained rules, and generous reading
-space; no playful rewards or motion for its own sake. Review light and dark screenshots
-before shipping a visual change.
+possible without distracting from a reverent experience. The app is the web's design set in
+native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
+
+- **Pages.** Home (the day's frontispiece, the "Pray the hours" inscription band, the
+  invitation, the hour directory by period, "Change date"), each hour (colour band, framed
+  title, "Change date" and "Prayer form", the office, its continuation and report link), and
+  the ordo's month (year and month navigation, day rows with colour rails, ranks,
+  commemorations and office details). The site menu carries the day's hours, the Ordo, and
+  the Theme (Default / Nave / Apse) and Text (A A A) rows.
+- **Tokens.** `Theme.kt` holds the web's colour tokens for Nave and Apse and the seasonal
+  ornament retints; `TokensTest` fails when style.css changes a token the app has not followed.
+  Text size scales the whole page, as the web scales its root (93% / 100% / 110%).
+- **Measures.** Type sizes, line heights, gutters and the spacing between kinds of block were
+  measured from the rendered web pages at a phone's width (one CSS px to one dp); compare
+  `make android-screenshots` output with `.web-tools/tests/visual.spec.js-snapshots/`.
+- **Materials.** The plaster wall is baked from the web's own photograph and blend layers
+  (`tools/bake-plaster.py`; each theme's wall averages exactly its `--bg`). Ornaments are drawn
+  from the web templates' SVG paths, and the Apse vault from its star tile.
+- **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
+  is open, like the web's wake lock.
 
 The two reasons for a native app are fully offline use and **reminder notifications of a
 higher quality than the web can give** (exact, dependable delivery per hour, surviving
-reboots and Doze). Reminders are the next major piece of work.
+reboots and Doze). Reminders are the next major piece of work; the menu will gain the web's
+Reminders entry with them.
 
 ## Trying it on a phone
 
