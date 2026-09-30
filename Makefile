@@ -1,4 +1,4 @@
-.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean mutate mutate-diff test-coverage android android-screenshots
+.PHONY: help build test test-ux parity lint lint-js lint-texts fmt fmt-check check serve ordo validate audit scaffold-propers project-status verify-psalms review-manifest review-provenance review-provenance-queue review-zero-occurrences review-resolution-inventory review-suspects review-plan review-assurance diurnal-test pages transcribe transcribe-report discover discover-report tex pdf golden rust-check clean sweep-targets mutate mutate-diff test-coverage android android-screenshots
 
 .DEFAULT_GOAL := help
 
@@ -15,6 +15,7 @@ test: ## Run Rust and Python tests
 	cargo test --workspace --locked
 	python3 scripts/test_static_contracts.py
 	python3 scripts/test_verify_psalms.py
+	python3 scripts/test_sweep_targets.py
 	python3 scripts/test_ordo_compare.py
 	python3 scripts/test_project_status.py
 	python3 scripts/test_update_golden_workflow.py
@@ -170,5 +171,11 @@ android-screenshots: ## Render Android screens from the Rust core into apps/andr
 	cd apps/android && ./gradlew testDebugUnitTest
 
 clean: ## Remove build artifacts
+	cargo clean
 	rm -f office
 	rm -rf output/
+
+SWEEP_HOURS ?= 72
+
+sweep-targets: ## Delete target/ in checkouts idle for SWEEP_HOURS (DRY_RUN=1 to preview)
+	python3 scripts/sweep-targets.py --hours $(SWEEP_HOURS) $(if $(DRY_RUN),--dry-run)

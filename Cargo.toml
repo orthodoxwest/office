@@ -38,5 +38,9 @@ uniffi = "0.32"
 [workspace.lints.rust]
 unsafe_code = "forbid"
 
+# Backtraces keep file:line; full debug info would add ~40% to every target/.
+[profile.dev]
+debug = "line-tables-only"
+
 [profile.release]
 debug = "line-tables-only"
