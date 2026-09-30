@@ -5430,13 +5430,11 @@ body {
   --apse-vault: none;
   --apse-gild: none;
   --apse-ink: transparent;
-  --apse-ground: transparent;
   --apse-copy-shadow: none;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body {
-    --apse-ground: var(--bg);
     --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
     --apse-ink: var(--ornament);
     --apse-gild: var(--apse-gilding);
@@ -5445,7 +5443,6 @@ body {
 }
 
 :root[data-theme="dark"] body {
-  --apse-ground: var(--bg);
   --apse-copy-shadow: 0 0 0.12rem var(--bg), 0 0 0.35rem var(--bg), 0 0 0.6rem var(--bg);
   --apse-ink: var(--ornament);
   --apse-gild: var(--apse-gilding);
@@ -5571,15 +5568,13 @@ body.page-hour footer::after {
    Apse's plaster varies by under a level, and the ground's fade over so
    smooth a dark field banded into horizontal lines in software rendering. */
 
-/* Keep the existing footer lettering treatment. */
-body:is(.page-home, .page-hour) footer {
-  text-shadow: var(--apse-copy-shadow);
-}
-
-/* Clear the complete report line, including spaces between its glyphs. */
+/* The footer and report lettering each carry their own soft clearing, so
+   the vault runs on around them. The report line once sat on an opaque
+   ground; on a phone its touch-target box plus the ground's spread came to
+   half a tile, which erased a whole row of stars across the screen. */
+body:is(.page-home, .page-hour) footer,
 body.page-hour .report-issue {
-  background-color: var(--apse-ground);
-  box-shadow: 0 0 0.7rem 0.35rem var(--apse-ground);
+  text-shadow: var(--apse-copy-shadow);
 }
 
 @media (min-width: 701px) {

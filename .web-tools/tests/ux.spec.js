@@ -3838,21 +3838,31 @@ test("Office prayer instructions retain spacing and Marian collects share initia
   }
 });
 
-test("Apse clears the report line from the starfield", async ({ page }) => {
+// The report line clears its own glyphs, as the footer lettering does, and
+// leaves the stars around it: an opaque ground across its touch-target box
+// erased a whole row of the vault on phones.
+test("Apse clears the report lettering, not a band of the starfield", async ({ page }) => {
   for (const width of [390, 1280]) {
     await page.setViewportSize({ width, height: 900 });
     await openDatedPage(page, "/vespers/2026-09-22", "dark");
-    const grounds = await page.locator(".report-issue:visible").evaluateAll(els => {
-      const ground = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
-      const probe = document.createElement("span");
-      probe.style.backgroundColor = ground;
-      document.body.append(probe);
-      const expected = getComputedStyle(probe).backgroundColor;
-      probe.remove();
-      return els.map(el => ({ background: getComputedStyle(el).backgroundColor, expected }));
-    });
-    expect(grounds.length).toBe(1);
-    for (const ground of grounds) expect(ground.background).toBe(ground.expected);
+    const lines = await page.locator(".report-issue:visible").evaluateAll(els =>
+      els.map(el => {
+        const style = getComputedStyle(el);
+        return {
+          background: style.backgroundColor,
+          boxShadow: style.boxShadow,
+          textShadow: style.textShadow,
+          footerShadow: getComputedStyle(document.querySelector("footer")).textShadow,
+        };
+      }),
+    );
+    expect(lines.length).toBe(1);
+    for (const line of lines) {
+      expect(line.background).toBe("rgba(0, 0, 0, 0)");
+      expect(line.boxShadow).toBe("none");
+      expect(line.textShadow).not.toBe("none");
+      expect(line.textShadow).toBe(line.footerShadow);
+    }
   }
 });
 
