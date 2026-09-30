@@ -25,8 +25,20 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   invitation, the hour directory by period, "Change date"), each hour (colour band, framed
   title, "Change date" and "Prayer form", the office, its continuation and report link), and
   the ordo's month (year and month navigation, day rows with colour rails, ranks,
-  commemorations and office details). The site menu carries the day's hours, the Ordo, and
-  the Theme (Default / Nave / Apse) and Text (A A A) rows.
+  commemorations and office details), and the year's frontispiece (the Tabula Temporaria, each
+  date leading to its day in the ordo). The site menu carries the day's hours, the Ordo, and
+  the Theme (Default / Nave / Apse) and Text (A A A) rows. The date picker's title turns its
+  days into the year's months, as the web's does.
+- **Wide screens.** From the web's breakpoint (701dp: a tablet, or a phone on its side) the app
+  takes the web's desktop composition: the header's links inline and the preferences in the
+  footer; home's frontispiece set in the niche, with its round head, stone moulding and
+  day-coloured trim, under the chapel's light (`Niche.kt`); the ordo as the desktop table; the
+  Tabula's figures in one line and its tables side by side. `WideScreenshotTest` renders them
+  at 1280×900, beside the web's desktop snapshots, and at a tablet's and a landscape phone's
+  sizes.
+- **Hymns.** Each hymn's stanzas are centred in a column the width of its longest line, as the
+  web's fit-content `.hymn-verses`, so the rag is balanced rather than flush left
+  (`HymnScreenshotTest`).
 - **Tokens.** `Theme.kt` holds the web's colour tokens for Nave and Apse and the seasonal
   ornament retints; `TokensTest` fails when style.css changes a token the app has not followed.
   Text size scales the whole page, as the web scales its root (93% / 100% / 110%).
@@ -38,6 +50,39 @@ native text, not a restyling of it (`.claude/skills/web-ui-design/SKILL.md`):
   from the web templates' SVG paths, and the Apse vault from its star tile.
 - **Reading.** Navigation stays in the page, not over it; the screen stays awake while an hour
   is open, like the web's wake lock.
+- **Keeping the place.** Each visit on the way back keeps its own scroll position and open
+  sections, and the way back itself is saved state: Back returns to where the reader was, and
+  so does a return after Android has closed the app in the background (`PlaceTest`).
+- **The chosen theme throughout.** Nave or Apse colours the window from the first frame, the
+  status and navigation bar icons, and (Android 13+) the next launch screen, whatever the
+  phone's own light or dark (`WindowThemeTest`).
+- **Shortcuts.** Long-pressing the icon offers Lauds, Vespers, Compline and the Ordo, drawn in
+  the web's hairline glyphs. They open the day they are tapped; Compline in the small hours is
+  the day before's, as "Pray now" reckons it (`ShortcutsTest`).
+
+## Home-screen widget
+
+`OfficeWidget` sets out the day as home's frontispiece does: the date, a double gold rule with
+the day's liturgical colour as its lozenge, the feast, and the invitation to the hour now,
+which opens that hour; the day opens home. On Android 12+ a widget one row high becomes a
+strip. Under the Default theme its colours are night-aware resources, so it follows the phone
+as it changes; Nave or Apse sets them. Each refresh sets a non-waking alarm for the next change
+of hour or midnight (`Widgets.nextChange`), so a sleeping phone is never woken for it; clock and
+time-zone changes, updates, the theme menu and app visits refresh it too. `WidgetTest` checks
+its words and refreshes, and renders it for review.
+
+## Accessibility
+
+- **The office, spoken.** Each block of an hour is one stop for TalkBack, in words: ℣ and ℟
+  said as "Versicle" and "Response", the pointing marks (* and †) turned to the pauses they
+  mark, verse numbers left to the eye, ✠ said as "sign of the cross", and posture cues read as
+  asides ("(Sit.)"). `SpokenTest` checks every hour of three days.
+- **Controls.** Every control has its role (button, checkbox, radio) and state (selected,
+  expanded or collapsed); glyph-only controls ("‹", "↑") are named; headings are marked; an
+  ordo day is one stop that says its date, feast, colour and observances
+  (`AccessibilityTest`).
+- **Large text.** Rows, gutters and labels grow with Android's font size rather than clip or
+  break a word; the 200% captures (`font-200-*.png`) are rendered with the others.
 
 The two reasons for a native app are fully offline use and **reminder notifications of a
 higher quality than the web can give**.
@@ -61,9 +106,15 @@ and a tap opens that hour.
   the page says how to allow the exact minute.
 - **Permission.** Turning reminders on asks for notifications (Android 13+). If they are
   refused, reminders stay scheduled and the page links to the setting.
+- **The bell.** Reminders ring one soft stroke of a tubular bell (`res/raw/bell.ogg`), on
+  their own channel, so the phone's settings can still change or silence it. The recording is
+  from the Versilian Community Sample Library, dedicated to the public domain (CC0 1.0);
+  `tools/bake-bell.py` names the file and how it was trimmed.
+- **In 10 minutes.** A reminder's one action puts it away and rings it again, with the same
+  words, ten minutes later.
 
-`ReminderTest` checks the schedule the alarm service holds, cancellation, and the posted
-notification.
+`ReminderTest` checks the schedule the alarm service holds, cancellation, the bell's channel,
+the ten-minute wait, and the posted notification.
 
 ## Trying it on a phone
 

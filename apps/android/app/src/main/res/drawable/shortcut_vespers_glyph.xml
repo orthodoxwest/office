@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The web's evening glyph (home.html): the evening star. A 24×16 glyph, scaled into the 72dp visible area of a 108dp layer. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="33"
+        android:translateY="40"
+        android:scaleX="1.75"
+        android:scaleY="1.75">
+        <path
+            android:pathData="M12 1l1.8 4.7L19 7.5l-5.2 1.8L12 14l-1.8-4.7L5 7.5l5.2-1.8Z"
+            android:strokeColor="@color/icon_cross"
+            android:strokeWidth="1.3"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
+    </group>
+</vector>

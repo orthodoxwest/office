@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The widget's ground: home's frontispiece surface with its faint edge. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/widget_surface" />
+    <stroke android:width="1dp" android:color="@color/widget_edge" />
+    <corners android:radius="@dimen/widget_radius" />
+</shape>

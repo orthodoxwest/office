@@ -35,6 +35,18 @@
                 <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
+
+        <!-- The home-screen widget; it refreshes itself at each change of hour (Widgets.kt). -->
+        <receiver
+            android:name=".OfficeWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/office_widget" />
+        </receiver>
     </application>
 
 </manifest>

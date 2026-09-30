@@ -1,6 +1,8 @@
 package org.orthodoxwest.office
 
+import android.content.Context
 import androidx.annotation.DrawableRes
+import androidx.annotation.StyleRes
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -118,8 +120,30 @@ fun dayColor(name: String): Color = when (name) {
     else -> Color(0xFFC9B896)
 }
 
-/** The menu's Theme row: Default follows the device; Nave and Apse are the web's names. */
-enum class ThemeChoice(val label: String) { DEFAULT("Default"), NAVE("Nave"), APSE("Apse") }
+/**
+ * The menu's Theme row: Default follows the device; Nave and Apse are the web's names. `window`
+ * is the style that colours the window, and the launch screen, before Compose draws.
+ */
+enum class ThemeChoice(val label: String, @StyleRes val window: Int) {
+    DEFAULT("Default", R.style.Theme_Office),
+    NAVE("Nave", R.style.Theme_Office_Nave),
+    APSE("Apse", R.style.Theme_Office_Apse),
+    ;
+
+    fun dark(system: Boolean): Boolean = when (this) {
+        DEFAULT -> system
+        NAVE -> false
+        APSE -> true
+    }
+
+    companion object {
+        /** The reader's choice, as the menu saved it. */
+        fun saved(context: Context): ThemeChoice {
+            val name = context.getSharedPreferences("office", Context.MODE_PRIVATE).getString("theme", null)
+            return entries.firstOrNull { it.name == name } ?: DEFAULT
+        }
+    }
+}
 
 /** The menu's Text row, scaling the whole page as the web scales its root (93%, 100%, 110%). */
 enum class TextSize(val scale: Float) { SMALL(0.93f), DEFAULT(1f), LARGE(1.1f) }
@@ -178,11 +202,7 @@ fun OfficeTheme(
     season: String = "",
     content: @Composable () -> Unit,
 ) {
-    val dark = when (choice) {
-        ThemeChoice.DEFAULT -> isSystemInDarkTheme()
-        ThemeChoice.NAVE -> false
-        ThemeChoice.APSE -> true
-    }
+    val dark = choice.dark(isSystemInDarkTheme())
     val palette = if (dark) Apse else Nave
     val scheme = (if (dark) darkColorScheme() else lightColorScheme()).copy(
         primary = palette.accent,

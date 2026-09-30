@@ -2,11 +2,26 @@ package org.orthodoxwest.office
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
@@ -115,12 +130,42 @@ class ScreenshotTest {
         shoot("bold-text-terce")
     }
 
+    /** The launcher shortcuts' icons, masked to the circle most launchers draw. */
+    @Test
+    @Config(qualifiers = "w390dp-h140dp-xxhdpi")
+    fun shortcutIcons() {
+        compose.setContent {
+            Row(Modifier.fillMaxSize().background(Color(0xFF3C3C3C)), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                listOf(R.drawable.shortcut_lauds_glyph, R.drawable.shortcut_vespers_glyph, R.drawable.shortcut_compline_glyph, R.drawable.shortcut_ordo_glyph).forEach {
+                    // A 108dp layer, of which a launcher shows the middle 72dp.
+                    Box(Modifier.size(72.dp).clip(CircleShape).background(Color(0xFF121C28)), contentAlignment = Alignment.Center) {
+                        Image(painterResource(it), null, Modifier.requiredSize(108.dp))
+                    }
+                }
+            }
+        }
+        shoot("shortcut-icons")
+    }
+
+    @Test
+    @Config(qualifiers = "w390dp-h1400dp-xxhdpi")
+    fun ordoYearNave() { show(Page.Year(2026), ThemeChoice.NAVE); shoot("ordo-year-nave") }
+
     @Test
     fun datePicker() {
         show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
         compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
         compose.waitForIdle()
         shoot("date-picker-nave")
+    }
+
+    @Test
+    fun datePickerMonths() {
+        show(Page.Hour(lent, "lauds"), ThemeChoice.NAVE, today = LocalDate.of(2026, 3, 18))
+        compose.onNodeWithText("CHANGE DATE", substring = true).performClick()
+        compose.onNodeWithText("MARCH 2026").performClick()
+        compose.waitForIdle()
+        shoot("date-picker-months-nave")
     }
 
     @Test

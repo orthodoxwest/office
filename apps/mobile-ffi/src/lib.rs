@@ -241,6 +241,35 @@ pub struct ReminderDefault {
     pub chosen: bool,
 }
 
+/// One row of the Tabula Temporaria; `date` is the day a date leads to, and a figure has none.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct TabulaRowView {
+    pub label: String,
+    pub value: String,
+    pub date: Option<CivilDate>,
+}
+
+/// A year's ordo frontispiece: its title and the Tabula Temporaria.
+#[derive(Clone, Debug, PartialEq, Eq, uniffi::Record)]
+pub struct OrdoYearView {
+    pub year: i32,
+    /// "MMXXVI", for "Anno Domini"; empty past the numerals' reach.
+    pub roman: String,
+    pub figures: Vec<TabulaRowView>,
+    pub moveable: Vec<TabulaRowView>,
+    pub ember: Vec<TabulaRowView>,
+}
+
+/// The year's frontispiece, as the web's /calendar/{year}. Arithmetic only: no engine needed.
+#[uniffi::export]
+pub fn ordo_year(year: i32) -> OrdoYearView {
+    let rows = |rows: Vec<presentation::TabulaRow>| {
+        rows.into_iter().map(|r| TabulaRowView { label: r.label.into(), value: r.value, date: r.date.map(CivilDate::from) }).collect()
+    };
+    let t = presentation::tabula(year);
+    OrdoYearView { year, roman: presentation::year_roman(year), figures: rows(t.figures), moveable: rows(t.moveable), ember: rows(t.ember) }
+}
+
 #[uniffi::export]
 pub fn reminder_defaults() -> Vec<ReminderDefault> {
     REMINDER_DEFAULTS

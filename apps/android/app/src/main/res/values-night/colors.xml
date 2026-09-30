@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="page">#121C28</color>
+    <color name="widget_surface">#172232</color>
+    <color name="widget_edge">#2ED0B06A</color>
+    <color name="widget_text">#E8E2D0</color>
+    <color name="widget_accent">#D0B06A</color>
+    <color name="widget_muted">#9AA4B0</color>
+    <color name="widget_gold_line">#6A5C3A</color>
 </resources>

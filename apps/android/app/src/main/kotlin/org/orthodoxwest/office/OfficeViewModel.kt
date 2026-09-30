@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -37,16 +38,44 @@ fun hourLabel(hour: String): String = hour.replaceFirstChar { it.titlecase() }
 fun CivilDate.toLocalDate(): LocalDate = LocalDate.of(year, month, day)
 fun LocalDate.toCivil(): CivilDate = CivilDate(year, monthValue, dayOfMonth)
 
-/** The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo. */
+/**
+ * The app's pages, as the web's routes: home for a day, an hour of a day, a month of the ordo
+ * (brought to `day` when one is asked for, as the web's #d-date), and a year's frontispiece.
+ */
 sealed interface Page {
     data class Home(val date: LocalDate) : Page
     data class Hour(val date: LocalDate, val hour: String) : Page
-    data class Ordo(val year: Int, val month: Int) : Page
+    data class Ordo(val year: Int, val month: Int, val day: Int = 0) : Page
+    data class Year(val year: Int) : Page
     data object Reminders : Page
 }
 
+/** A page as saved state writes it: "hour 2026-03-15 vespers". */
+fun Page.encode(): String = when (this) {
+    is Page.Home -> "home $date"
+    is Page.Hour -> "hour $date $hour"
+    is Page.Ordo -> "ordo $year $month $day"
+    is Page.Year -> "year $year"
+    Page.Reminders -> "reminders"
+}
+
+fun decodePage(s: String): Page? = runCatching {
+    val f = s.split(" ")
+    when (f[0]) {
+        "home" -> Page.Home(LocalDate.parse(f[1]))
+        "hour" -> Page.Hour(LocalDate.parse(f[1]), f[2]).takeIf { it.hour in hourNames() }
+        "ordo" -> Page.Ordo(f[1].toInt(), f[2].toInt(), f.getOrNull(3)?.toInt() ?: 0)
+        "year" -> Page.Year(f[1].toInt())
+        "reminders" -> Page.Reminders
+        else -> null
+    }
+}.getOrNull()
+
+/** One place on the way back: its page, and an id no other visit shares, which keys its scroll position. */
+data class Entry(val id: Long, val page: Page)
+
 /** What is shown, the reader's remembered choices, and the composed content once ready. */
-class OfficeViewModel(app: Application) : AndroidViewModel(app) {
+class OfficeViewModel(app: Application, private val saved: SavedStateHandle) : AndroidViewModel(app) {
     private val prefs = app.getSharedPreferences("office", Context.MODE_PRIVATE)
 
     // Parsing the corpus takes a moment; it starts at once, off the main thread. The alarms share it.
@@ -56,14 +85,26 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
 
     val hours: List<String> = hourNames()
 
-    /** The pages behind the current one, for Back. */
-    private val stack = mutableStateListOf<Page>(Page.Home(LocalDate.now()))
-    val page: Page get() = stack.last()
+    /**
+     * The pages behind the current one, for Back. Kept in saved state, so a return after Android
+     * has closed the app in the background lands where the reader was.
+     */
+    private val stack = mutableStateListOf<Entry>().apply {
+        saved.get<ArrayList<String>>(STACK)?.forEach { line ->
+            val id = line.substringBefore('|').toLongOrNull() ?: return@forEach
+            decodePage(line.substringAfter('|'))?.let { add(Entry(id, it)) }
+        }
+        if (isEmpty()) add(Entry(0, Page.Home(LocalDate.now())))
+    }
+    private var nextId = stack.maxOf { it.id } + 1
+    val entry: Entry get() = stack.last()
+    val entries: List<Entry> get() = stack
+    val page: Page get() = entry.page
     val canGoBack: Boolean get() = stack.size > 1
 
     var form: String by mutableStateOf(prefs.getString("form", "private") ?: "private")
         private set
-    var theme: ThemeChoice by mutableStateOf(enumValueOrDefault(prefs.getString("theme", null), ThemeChoice.DEFAULT))
+    var theme: ThemeChoice by mutableStateOf(ThemeChoice.saved(app))
         private set
     var textSize: TextSize by mutableStateOf(enumValueOrDefault(prefs.getString("text-size", null), TextSize.DEFAULT))
         private set
@@ -90,22 +131,29 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Opens `page` over the current one; a page of the same kind replaces it, as a link would. */
     fun open(next: Page) {
-        if (stack.last()::class == next::class) stack[stack.lastIndex] = next else stack.add(next)
-        load()
+        if (next == page) return load()
+        val e = Entry(nextId++, next)
+        if (page::class == next::class) stack[stack.lastIndex] = e else stack.add(e)
+        moved()
     }
 
     /** Back: the previous page, or false when home is all that is left. */
     fun back(): Boolean {
         if (stack.size <= 1) return false
         stack.removeAt(stack.lastIndex)
-        load()
+        moved()
         return true
     }
 
     /** Home for today, clearing the way back, as the brand link does. */
     fun goHome() {
         stack.clear()
-        stack.add(Page.Home(today))
+        stack.add(Entry(nextId++, Page.Home(today)))
+        moved()
+    }
+
+    private fun moved() {
+        saved[STACK] = ArrayList(stack.map { "${it.id}|${it.page.encode()}" })
         load()
     }
 
@@ -118,6 +166,12 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
     fun chooseTheme(value: ThemeChoice) {
         theme = value
         prefs.edit().putString("theme", value.name).apply()
+        refreshWidgets()
+    }
+
+    fun refreshWidgets() {
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.Default) { runCatching { Widgets.refresh(app) } }
     }
 
     fun chooseTextSize(value: TextSize) {
@@ -153,7 +207,7 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
     val season: String get() = when (page) {
         is Page.Home -> home?.ornament.orEmpty()
         is Page.Hour -> hour?.ornament.orEmpty()
-        is Page.Ordo, Page.Reminders -> ""
+        is Page.Ordo, is Page.Year, Page.Reminders -> ""
     }
 
     private fun load() {
@@ -174,6 +228,8 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
                         if (ordo?.let { it.year != shown.year || it.month != shown.month } == true) ordo = null
                         ordo = withContext(Dispatchers.Default) { office.ordoMonth(shown.year, shown.month) }
                     }
+                    // The frontispiece is arithmetic, drawn at once from the page itself.
+                    is Page.Year -> Unit
                     Page.Reminders -> refreshReminderStatus()
                 }
                 error = null
@@ -185,6 +241,8 @@ class OfficeViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 }
+
+private const val STACK = "stack"
 
 private inline fun <reified T : Enum<T>> enumValueOrDefault(name: String?, default: T): T =
     enumValues<T>().firstOrNull { it.name == name } ?: default

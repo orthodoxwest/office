@@ -3,7 +3,7 @@
 
 use axum::body::Body;
 use axum::http::{HeaderMap, HeaderValue, Method, Response, StatusCode, header};
-use calendar::{MoveableDates, Tabula};
+use calendar::MoveableDates;
 use jiff::tz::TimeZone;
 use liturgy::{OfficeHour, PrayerForm};
 use office::day::Day;
@@ -168,45 +168,19 @@ fn loose_month(s: &str) -> Option<u32> {
     MONTHS.iter().zip(1..).find(|(name, _)| name.eq_ignore_ascii_case(s) || name[..3].eq_ignore_ascii_case(s)).map(|(_, m)| m)
 }
 
-/// The Tabula Temporaria as the printed ordo opens: the year's figures, its
-/// moveable feasts, and its Ember days, each date leading to its row.
+/// The Tabula Temporaria (presentation::tabula), each date leading to its row.
 fn tabula(year: i32) -> TabulaData {
-    let t = Tabula::compute(year);
-    let moveable = MoveableDates::compute(year);
-    let figure = |label: &str, value: String| TabulaRow { label: label.into(), value, href: String::new() };
-    let date = |label: &str, d: calendar::Date| TabulaRow {
-        label: label.into(),
-        value: format!("{} {}", month_name(d), d.day()),
-        href: calendar_link(&date_slug(d)),
+    let rows = |rows: Vec<presentation::TabulaRow>| {
+        rows.into_iter()
+            .map(|r| TabulaRow {
+                label: r.label.into(),
+                value: r.value,
+                href: r.date.map(|d| calendar_link(&date_slug(d))).unwrap_or_default(),
+            })
+            .collect()
     };
-    let ember = |label: &str, e: &calendar::computus::EmberSet| TabulaRow {
-        label: label.into(),
-        value: format!("{} {}, {}, {}", month_name(e.wed), e.wed.day(), e.fri.day(), e.sat.day()),
-        href: calendar_link(&date_slug(e.wed)),
-    };
-    TabulaData {
-        figures: vec![
-            figure("Golden Number", calendar::computus::roman(t.golden_number)),
-            figure("Dominical Letter", t.dominical_letter.to_string()),
-            figure("Sundays after Epiphany", t.sundays_after_epiphany.to_string()),
-            figure("Sundays after Pentecost", t.sundays_after_pentecost.to_string()),
-        ],
-        moveable: vec![
-            date("Septuagesima Sunday", moveable.septuagesima),
-            date("Ash Wednesday", moveable.ash_wednesday),
-            date("Easter Day", moveable.easter),
-            date("Ascension Day", moveable.ascension),
-            date("Pentecost", moveable.pentecost),
-            date("Corpus Christi", moveable.corpus_christi),
-            date("Advent Sunday", moveable.advent1),
-        ],
-        ember: vec![
-            ember("Spring (Lent)", &t.spring),
-            ember("Summer (Whitsun)", &t.summer),
-            ember("Autumn (Holy Cross)", &t.autumn),
-            ember("Winter (Advent)", &t.winter),
-        ],
-    }
+    let t = presentation::tabula(year);
+    TabulaData { figures: rows(t.figures), moveable: rows(t.moveable), ember: rows(t.ember) }
 }
 
 impl Server {
@@ -471,7 +445,7 @@ impl Server {
             chrome: Chrome { page: "calendar".into(), nav_date: date_slug(now), usage_when: year.to_string(), ..Chrome::default() },
             year,
             view: view.name().into(),
-            year_roman: if year <= 3999 { calendar::computus::roman(year) } else { String::new() },
+            year_roman: presentation::year_roman(year),
             prev_year: year - 1,
             next_year: year + 1,
             prev_year_link: same_view(year - 1),
@@ -688,7 +662,7 @@ mod tests {
     fn ordo_frontispiece_sets_out_the_tabula() {
         let body = ordo("/calendar/2026");
         assert!(body.contains("<title>Ordo 2026</title>") && body.contains("Tabula Temporaria"));
-        let t = Tabula::compute(2026);
+        let t = calendar::Tabula::compute(2026);
         for want in [
             format!("<dt>Golden Number</dt><dd>{}</dd>", calendar::computus::roman(t.golden_number)),
             format!("<dt>Dominical Letter</dt><dd>{}</dd>", t.dominical_letter),

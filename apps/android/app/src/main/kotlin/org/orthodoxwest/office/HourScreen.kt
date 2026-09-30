@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Text
@@ -23,11 +27,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -64,12 +74,14 @@ fun HourScreen(
         host.keepScreenOn = true
         onDispose { host.keepScreenOn = false }
     }
-    val open = remember(view.hour, view.dateLabel) {
+    // Saved with the scroll position: an opened section moves everything below it.
+    val open = rememberSaveable(view.hour, view.dateLabel, saver = OpenSections) {
         mutableStateMapOf<Int, Boolean>().apply {
             view.sections.forEachIndexed { i, s -> if (s.collapsible) put(i, view.hour in OPEN_PREPARATION) }
         }
     }
-    val listState = remember(view.hour, view.dateLabel) { LazyListState() }
+    val listState = rememberSaveable(view.hour, view.dateLabel, saver = LazyListState.Saver) { LazyListState() }
+    val columns = hymnColumns(view.sections)
     val index = hours.indexOf(view.hour)
     LazyColumn(
         Modifier.fillMaxSize(),
@@ -88,7 +100,8 @@ fun HourScreen(
                 val expanded = open[i] == true
                 item(key = "toggle-$i") {
                     Row(
-                        Modifier.measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp).tap { open[i] = !expanded },
+                        Modifier.measure().padding(top = 5.6.dp, bottom = if (expanded) 12.8.dp else 0.dp).heightIn(min = 44.dp)
+                            .semantics { heading() }.tap { open[i] = !expanded }.disclosed(expanded),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -108,7 +121,7 @@ fun HourScreen(
                     else -> if (heading) 12.dp else 0.dp
                 }
                 afterClosed = false
-                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap)) }
+                item(key = "$i-$j") { Block(block, Modifier.measure().padding(top = gap), column = columns[i to j]) }
                 prev = block
             }
         }
@@ -131,15 +144,23 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
     var choosing by remember { mutableStateOf(false) }
     Column(Modifier.measure().padding(top = 17.6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         // The headpiece is set into the title's upper rule; the day's colour reaches the lower one's lozenge.
-        Box(contentAlignment = Alignment.Center) {
-            DoubleRule(gap = 132.8.dp)
-            Headpiece()
+        // The rules take the title's width, at least 24rem (the measure, on a phone), as the web's h1.
+        Column(Modifier.widthIn(min = 384.dp).width(IntrinsicSize.Max), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                DoubleRule(gap = 132.8.dp)
+                Headpiece()
+            }
+            Text(
+                view.title.uppercase(),
+                Modifier.padding(horizontal = 20.8.dp).semantics { heading(); contentDescription = view.title },
+                style = Type.hourTitle.copy(color = p.text),
+            )
+            DoubleRule(lozenge = dayColor(view.color))
         }
-        Text(view.title.uppercase(), style = Type.hourTitle.copy(color = p.text))
-        DoubleRule(lozenge = dayColor(view.color))
+        val meta = listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }
         Text(
-            listOf(view.dateLabel, view.feast, view.seasonLabel).filter { it.isNotEmpty() }.joinToString(" · "),
-            Modifier.padding(top = 2.dp),
+            meta.joinToString(" · "),
+            Modifier.padding(top = 2.dp).semantics { contentDescription = meta.joinToString(". ") },
             style = Type.meta.copy(color = p.muted),
         )
         if (date != today) {
@@ -149,7 +170,8 @@ private fun HourTitle(view: HourView, date: LocalDate, today: LocalDate, form: S
                 style = Type.menu.copy(color = p.accent),
             )
         }
-        Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Side by side, or one above the other when the reader's font size leaves no room.
+        FlowRow(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)) {
             Disclosure("Change date", picking, { picking = !picking; choosing = false })
             Disclosure("Prayer form:", choosing, { choosing = !choosing; picking = false }, value = PRAYER_FORMS.first { it.first == form }.second)
         }
@@ -184,10 +206,16 @@ private fun Epilogue(previous: String?, next: String?, reportUrl: String, onHour
                     append("Spotted an error on this page? ")
                     withStyle(SpanStyle(color = p.accent, textDecoration = TextDecoration.Underline)) { append("Report a problem") }
                 },
-                Modifier.measure().padding(top = 40.dp).tap { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
+                Modifier.measure().padding(top = 40.dp).tap(action = "report a problem") { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(reportUrl))) },
                 style = Type.small.copy(color = p.muted, textAlign = TextAlign.Center),
             )
             Footer(diamond = !p.dark)
         }
     }
 }
+
+/** Which collapsible sections are open, as saved state can hold it. */
+private val OpenSections = listSaver<SnapshotStateMap<Int, Boolean>, Int>(
+    save = { m -> m.flatMap { (i, open) -> listOf(i, if (open) 1 else 0) } },
+    restore = { l -> mutableStateMapOf<Int, Boolean>().apply { l.chunked(2).forEach { (i, open) -> put(i, open == 1) } } },
+)
