@@ -199,10 +199,11 @@ private struct OrdoHeader: View {
                 .buttonStyle(Quiet()).accessibilityLabel("Previous year, \(String(year - 1))")
             VRule(color: p.border)
             Button { model.open(.ordo(year: Int(t.year), month: Int(t.month), day: Int(t.day))) } label: {
+                // The rule spans the cell, less its inset, as the web's current-year mark.
                 Text("Today").type(nav).foregroundStyle(p.accent)
                     .padding(m.px(12))
-                    .goldUnderline(Int(t.year) == year, p.goldLine, inset: m.px(wide ? 12 : 24))
                     .frame(maxWidth: wide ? nil : .infinity)
+                    .goldUnderline(Int(t.year) == year, p.goldLine, inset: m.px(wide ? 12 : 24))
             }
             .buttonStyle(Quiet())
             .accessibilityHint("Opens today in the ordo")

@@ -157,14 +157,16 @@ struct HourScreen: View {
 
     private func anchor(_ rows: [Row]) -> String? {
         let asked = UserDefaults.standard.string(forKey: "anchor")
-        return rows.first { row in
+        let at = rows.firstIndex { row in
             guard case let .block(_, block, _) = row else { return false }
             switch asked {
             case "hymn": return block.kind == .stanza
             case "psalm": return block.kind == .verse && block.dropCap
             default: return false
             }
-        }?.id
+        }
+        // Two rows before it, so its label shows below the status bar.
+        return at.map { rows[max(0, $0 - 2)].id }
     }
 
     /// The page's rows. Each block's space depends on the one before it, across sections.
