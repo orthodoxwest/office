@@ -1,0 +1,40 @@
+# Version updates arrive as one grouped PR per ecosystem each month. Security
+# updates are a repository setting and open separately as advisories land.
+# Bumps that move rendered output (minijinja, Playwright) need the
+# update-golden or UX-snapshot label like any other PR.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      cargo:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /.web-tools
+    schedule:
+      interval: monthly
+    groups:
+      web-tools:
+        patterns: ["*"]
+
+  - package-ecosystem: gradle
+    directory: /apps/android
+    schedule:
+      interval: monthly
+    groups:
+      android:
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+    ignore:
+      # The ref names the CI Rust version; raise it deliberately with rust-version.
+      - dependency-name: dtolnay/rust-toolchain
