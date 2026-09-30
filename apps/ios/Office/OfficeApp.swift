@@ -1,91 +1,125 @@
 import SwiftUI
+import UIKit
+import UserNotifications
 
 /**
- * The Divine Office on the shared Rust core. This first screen composes one hour, to prove the
- * pipeline end to end; the design pass follows the Android app's.
+ * The Divine Office on the shared Rust core, set as the web sets it.
  *
- * Launch arguments choose what is shown, for the simulator screenshots:
- * `-hour lauds -date 2026-03-15 -form private`.
+ * Launch arguments open a page at a date, for the simulator screenshots:
+ * `-page hour -hour lauds -date 2026-03-15`, or `-page home`, `ordo`, `year`, `reminders`;
+ * `-today 2026-03-15` fixes today, and `-theme apse` or `-text-size large` choose the look.
  */
 @main
 struct OfficeApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+    @StateObject private var model = AppModel.shared
+
     var body: some Scene {
-        WindowGroup { RootView() }
-    }
-}
-
-/// The engine, loaded once per process.
-enum Office {
-    static let core: Result<OfficeCore, Error> = Result { try OfficeCore() }
-}
-
-/// What the launch asked for, else the hour being prayed now.
-struct Request {
-    let hour: String
-    let year: Int32
-    let month: Int32
-    let day: Int32
-    let form: String
-
-    static func fromLaunch(now: Date = Date()) -> Request {
-        let defaults = UserDefaults.standard
-        let calendar = Calendar.current
-        let current = currentOffice(clockHour: Int32(calendar.component(.hour, from: now)))
-        var date = calendar.date(byAdding: .day, value: Int(current.dayOffset), to: now) ?? now
-        if let asked = defaults.string(forKey: "date"), let parsed = Request.day.date(from: asked) {
-            date = parsed
+        WindowGroup {
+            RootView().environmentObject(model)
         }
-        let parts = calendar.dateComponents([.year, .month, .day], from: date)
-        return Request(
-            hour: defaults.string(forKey: "hour") ?? current.hour,
-            year: Int32(parts.year ?? 2026),
-            month: Int32(parts.month ?? 1),
-            day: Int32(parts.day ?? 1),
-            form: defaults.string(forKey: "form") ?? "private"
-        )
     }
-
-    private static let day: DateFormatter = {
-        let f = DateFormatter()
-        f.calendar = Calendar(identifier: .gregorian)
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd"
-        return f
-    }()
 }
 
+/// Reminders: how a tapped one opens its hour, and how "In 10 minutes" puts one off.
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        ReminderScheduler.register(center)
+        ReminderScheduler.registerRefresh()
+        return true
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let info = response.notification.request.content.userInfo
+        if response.actionIdentifier == ReminderScheduler.snoozeAction {
+            ReminderScheduler.snooze(response.notification)
+        } else if response.actionIdentifier == UNNotificationDefaultActionIdentifier,
+                  let hour = info["hour"] as? String,
+                  let date = (info["date"] as? String).flatMap(CivilDate.parse) {
+            DispatchQueue.main.async { AppModel.shared.open(.hour(date, hour)) }
+        }
+        completionHandler()
+    }
+
+    // A reminder that comes while the app is open still rings and shows.
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .list, .sound])
+    }
+}
+
+/// The app on its plaster wall: whichever page is open, under the shared header and menu.
 struct RootView: View {
-    @State private var hour: HourView?
-    @State private var failure: String?
-    private let p = Palette.nave
+    @EnvironmentObject private var model: AppModel
+    @Environment(\.colorScheme) private var system
+    @Environment(\.dynamicTypeSize) private var dynamicType
+    @Environment(\.scenePhase) private var phase
+    /// The way back, kept for a return after iOS has closed the app in the background.
+    @SceneStorage("way-back") private var wayBack = ""
+    @State private var started = false
 
     var body: some View {
-        ZStack {
-            p.bg.ignoresSafeArea()
-            if let hour {
-                HourScreen(view: hour, p: p)
-            } else if let failure {
-                Text(failure).style(Scale.small).foregroundStyle(p.rubric).padding()
-            } else {
-                Text("Preparing the office…").style(Scale.small).foregroundStyle(p.muted)
+        let palette = model.theme.dark(system) ? Palette.apse : Palette.nave
+        GeometryReader { geo in
+            NavigationStack(path: $model.path) {
+                HomePage(date: model.root)
+                    .navigationDestination(for: Page.self) { page in
+                        switch page {
+                        case let .home(d): HomePage(date: d)
+                        case let .hour(d, h): HourPage(date: d, hour: h)
+                        case let .ordo(y, m, d): OrdoPage(year: y, month: m, day: d)
+                        case let .year(y): YearPage(year: y)
+                        case .reminders: RemindersPage()
+                        }
+                    }
             }
-        }
-        .task { load() }
-    }
-
-    /// Parsing the corpus takes a moment, so it runs off the main thread.
-    private func load() {
-        let request = Request.fromLaunch()
-        DispatchQueue.global(qos: .userInitiated).async {
-            let result = Result { () throws -> HourView in
-                try Office.core.get().compose(hour: request.hour, year: request.year, month: request.month, day: request.day, form: request.form)
-            }
-            DispatchQueue.main.async {
-                switch result {
-                case let .success(view): hour = view
-                case let .failure(error): failure = "\(error)"
+            .overlay(alignment: .topTrailing) {
+                if model.menuOpen && geo.size.width < wideFrom {
+                    ZStack(alignment: .topTrailing) {
+                        // A tap anywhere else closes the menu.
+                        Color.black.opacity(0.001).ignoresSafeArea().onTapGesture { model.menuOpen = false }
+                            .accessibilityHidden(true)
+                        MenuPanel()
+                            .padding(.top, 52)
+                            .padding(.horizontal, gutter)
+                    }
+                    .transition(.opacity)
                 }
             }
+            .animation(.easeOut(duration: 0.15), value: model.menuOpen)
+            .environment(\.wide, geo.size.width >= wideFrom)
         }
+        .environment(\.palette, palette)
+        .environment(\.ornament, Ornament.of(palette, season: ""))
+        .environment(\.metrics, Metrics(textSize: model.textSize, dynamicType: dynamicType))
+        .background(palette.bg.ignoresSafeArea())
+        .tint(palette.accent)
+        .preferredColorScheme(model.theme.scheme)
+        .onAppear {
+            guard !started else { return }
+            started = true
+            if !model.openFromLaunch() && !wayBack.isEmpty { model.restore(wayBack) }
+        }
+        .onChange(of: model.saved) { _, saved in wayBack = saved }
+        .onChange(of: phase) { _, now in
+            guard now == .active else { return }
+            model.refreshToday()
+            // Every visit keeps the reminders running ahead.
+            ReminderScheduler.sync()
+            ReminderScheduler.scheduleRefresh()
+        }
+    }
+}
+
+/// The pages hide the navigation bar, as the web has none; the edge swipe back stays.
+extension UINavigationController: @retroactive UIGestureRecognizerDelegate {
+    override open func viewDidLoad() {
+        super.viewDidLoad()
+        interactivePopGestureRecognizer?.delegate = self
+    }
+
+    public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        viewControllers.count > 1
     }
 }

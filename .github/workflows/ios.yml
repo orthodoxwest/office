@@ -11,6 +11,8 @@ on:
       - "apps/ios/**"
       - "apps/mobile-ffi/**"
       - "crates/**"
+      - "apps/android/app/src/main/res/font/**"
+      - "apps/android/app/src/main/res/drawable-nodpi/**"
       - "data/**"
       - "Cargo.toml"
       - "Cargo.lock"
@@ -21,6 +23,9 @@ on:
       - "apps/ios/**"
       - "apps/mobile-ffi/**"
       - "crates/render-blocks/**"
+      # The faces and plaster the iOS app shares with the Android app.
+      - "apps/android/app/src/main/res/font/**"
+      - "apps/android/app/src/main/res/drawable-nodpi/**"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
 
@@ -57,19 +62,24 @@ jobs:
         working-directory: apps/ios
         run: xcodegen generate
 
-      - name: Choose a simulator
+      - name: Choose the simulators
         id: sim
         run: |
-          # The newest runtime's iPhone 16, else its first iPhone.
-          udid=$(xcrun simctl list devices available -j | python3 -c '
+          # The newest runtime's iPhone 16 and an 11-inch iPad, else its first of each.
+          xcrun simctl list devices available -j > devices.json
+          pick() {
+            python3 - "$1" "$2" <<'PY'
           import json, sys
-          devices = json.load(sys.stdin)["devices"]
+          family, preferred = sys.argv[1], sys.argv[2]
+          devices = json.load(open("devices.json"))["devices"]
           ios = sorted((k for k in devices if "iOS" in k), key=lambda k: [int(x) for x in k.rsplit("iOS-", 1)[1].split("-")])
-          phones = [d for d in devices[ios[-1]] if d["name"].startswith("iPhone")]
-          pick = next((d for d in phones if d["name"] == "iPhone 16"), phones[0])
-          print(pick["udid"])
-          ')
-          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          found = [d for d in devices[ios[-1]] if d["name"].startswith(family)]
+          exact = [d for d in found if d["name"] == preferred]
+          print((exact or [d for d in found if d["name"].startswith(preferred)] or found)[0]["udid"])
+          PY
+          }
+          echo "udid=$(pick iPhone 'iPhone 16')" >> "$GITHUB_OUTPUT"
+          echo "ipad=$(pick iPad 'iPad Pro 11')" >> "$GITHUB_OUTPUT"
 
       - name: Build and test
         working-directory: apps/ios
@@ -88,17 +98,46 @@ jobs:
       - name: Render screenshots
         working-directory: apps/ios
         run: |
-          sim=${{ steps.sim.outputs.udid }}
-          xcrun simctl boot "$sim" 2>/dev/null || true
-          xcrun simctl bootstatus "$sim" -b
-          xcrun simctl ui "$sim" appearance light
-          xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
-          xcrun simctl install "$sim" build/dd/Build/Products/Debug-iphonesimulator/Office.app
-          for hour in lauds vespers compline; do
-            xcrun simctl launch --terminate-running-process "$sim" org.orthodoxwest.office.preview -hour "$hour" -date 2026-03-15
-            sleep 6
-            xcrun simctl io "$sim" screenshot "build/review/$hour.png"
+          app=build/dd/Build/Products/Debug-iphonesimulator/Office.app
+          id=org.orthodoxwest.office.preview
+          # Each page at a fixed day (DATE, else 15 March 2026), with today pinned to it.
+          shoot() {
+            sim=$1 name=$2
+            shift 2
+            day=${DATE:-2026-03-15}
+            xcrun simctl launch --terminate-running-process "$sim" "$id" -today "$day" -date "$day" "$@" > /dev/null
+            sleep 7
+            xcrun simctl io "$sim" screenshot "build/review/$name.png" > /dev/null
+          }
+          for sim in ${{ steps.sim.outputs.udid }} ${{ steps.sim.outputs.ipad }}; do
+            xcrun simctl boot "$sim" 2>/dev/null || true
+            xcrun simctl bootstatus "$sim" -b > /dev/null
+            xcrun simctl ui "$sim" appearance light
+            xcrun simctl status_bar "$sim" override --time 9:41 --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4
+            xcrun simctl install "$sim" "$app"
           done
+          phone=${{ steps.sim.outputs.udid }}
+          for theme in nave apse; do
+            shoot "$phone" "home-$theme" -page home -theme "$theme"
+            for hour in lauds vespers compline; do
+              shoot "$phone" "$hour-$theme" -page hour -hour "$hour" -theme "$theme"
+            done
+            shoot "$phone" "psalm-$theme" -page hour -hour vespers -anchor psalm -theme "$theme"
+            shoot "$phone" "hymn-$theme" -page hour -hour vespers -anchor hymn -theme "$theme"
+            shoot "$phone" "ordo-$theme" -page ordo -theme "$theme"
+            shoot "$phone" "year-$theme" -page year -theme "$theme"
+            shoot "$phone" "reminders-$theme" -page reminders -theme "$theme"
+          done
+          # Eastertide's warmer gilding.
+          DATE=2026-04-12 shoot "$phone" "easter-nave" -page hour -hour lauds -theme nave
+          # The desktop composition on an iPad.
+          ipad=${{ steps.sim.outputs.ipad }}
+          for theme in nave apse; do
+            shoot "$ipad" "ipad-home-$theme" -page home -theme "$theme"
+            shoot "$ipad" "ipad-vespers-$theme" -page hour -hour vespers -theme "$theme"
+            shoot "$ipad" "ipad-ordo-$theme" -page ordo -theme "$theme"
+          done
+          shoot "$ipad" "ipad-year-nave" -page year -theme nave
 
       - uses: actions/upload-artifact@v4
         if: always()

@@ -26,6 +26,11 @@ targets:
         buildPhase: resources
       - path: ../android/app/src/main/res/font/noto_sans_symbols_cross.ttf
         buildPhase: resources
+      # The plaster walls, baked once from the web's layers for both apps.
+      - path: ../android/app/src/main/res/drawable-nodpi/plaster_nave.jpg
+        buildPhase: resources
+      - path: ../android/app/src/main/res/drawable-nodpi/plaster_apse.jpg
+        buildPhase: resources
     dependencies:
       - framework: build/OfficeCore.xcframework
         embed: false
@@ -33,7 +38,14 @@ targets:
       path: build/Info.plist
       properties:
         CFBundleDisplayName: Divine Office
-        UILaunchScreen: {}
+        # The Nave's ground, or the Apse's when the phone is dark.
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        # A background refresh moves the reminders' schedule on (Reminders.swift).
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - org.orthodoxwest.office.reminders
         UIAppFonts:
           - eb_garamond_regular.otf
           - eb_garamond_italic.otf
@@ -53,6 +65,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: org.orthodoxwest.office.preview
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   OfficeTests:
     type: bundle.unit-test
     platform: iOS

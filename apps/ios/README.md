@@ -5,8 +5,31 @@ corpus are linked into the app, so it works offline; `render-blocks` lays out ea
 blocks of styled runs, and `presentation` holds the words every front shares, so the Swift code
 never parses corpus text.
 
-This first cut composes one hour, to prove the pipeline end to end. The design pass follows the
-Android app's (apps/android/README.md), which carries the web's design into native text.
+The app follows the Android app (apps/android/README.md), which carries the web's design into
+native text, screen for screen:
+
+- **Home**: the day's frontispiece, the invitation to pray, and the hours by period. On an iPad
+  it stands in the niche with the chapel light, as the web's desktop.
+- **The hours**: the colour band and framed title, the web's spacing, and the Lauds, Prime and
+  Vespers preparation open. Psalms get their gilded initials, antiphons their hanging sigils,
+  and hymns a centred column.
+- **The ordo**: the month (the wide table on an iPad), each day's office digest, and the year's
+  Tabula Temporaria.
+- **Reminders**: local notifications with the bell. Each names its hour and the day's feast,
+  and offers "In 10 minutes".
+- **Chrome**: the Nave and Apse themes, the web's three text sizes on top of Dynamic Type, and
+  the hand-set date picker.
+
+The Office's text is set with TextKit (`Prose.swift`), not SwiftUI's `Text`:
+
+- every line box is the web's line height, with its half-leading;
+- hanging indents and tab-set gutters hold verse numbers and ℣/℟;
+- an initial runs two lines deep beside the text, or stands raised when the text is short.
+
+iOS keeps at most 64 pending notifications for an app, so reminders are scheduled as far ahead
+as fit, up to four weeks. Every visit, and a background refresh about twice a day, move the
+schedule on. The bell is `Office/Resources/bell.caf`, baked with Android's
+(`apps/android/tools/bake-bell.py`).
 
 ## Building
 
@@ -27,10 +50,19 @@ shares the web's faces with the Android app (`apps/android/app/src/main/res/font
 ## Continuous integration
 
 `.github/workflows/ios.yml` runs on macOS: it builds the core, generates the project, runs
-`OfficeTests` in the simulator, and launches the app at fixed dates
-(`-hour lauds -date 2026-03-15`) to take screenshots. They are uploaded as an artifact and
-force-pushed, with the build log, to the branch `ci/ios-screenshots/<branch>`, so they can be
-fetched with git.
+`OfficeTests` in the simulator, and launches the app at fixed pages to take screenshots.
+Each page is shot on an iPhone and an iPad, in both themes.
+
+The screenshots come from launch arguments:
+
+- `-page hour -hour lauds -date 2026-03-15` opens a page at a date; `-page` also takes
+  `home`, `ordo`, `year` or `reminders`;
+- `-today` fixes today;
+- `-theme apse` chooses the theme;
+- `-anchor hymn` or `-anchor psalm` scrolls an hour to its first hymn or psalm.
+
+The screenshots are uploaded as an artifact. They are also force-pushed, with the build log, to
+the branch `ci/ios-screenshots/<branch>`, so they can be fetched with git.
 
 ## Signing
 
