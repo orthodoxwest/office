@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -79,15 +80,23 @@ class ReminderStore(context: Context) {
 }
 
 /**
- * Keeps the next few days of reminders registered with the alarm service. Each alarm carries its
- * notification's words, so it posts at once, with no engine to load; every firing, boot, clock
- * change, update and app visit syncs again, so the window always runs ahead.
+ * Keeps the next week of reminders registered with the alarm service. Each alarm carries its
+ * notification's words, so it posts at once, with no engine to load. Every boot, clock change,
+ * update and app visit syncs again; a firing syncs only when the window is nearly spent.
  */
 object ReminderScheduler {
-    /** Days ahead kept scheduled: enough to ride out a phone left off for a day. */
-    const val HORIZON_DAYS = 3
+    /** Days ahead kept scheduled: every weekday falls in the window beyond today, so a weekly reminder always has its next one waiting. */
+    const val HORIZON_DAYS = 8
 
     private const val SCHEDULED = "scheduled"
+    private const val LAST = "last"
+    private val REFILL = Duration.ofDays(1)
+
+    /** Whether a fired reminder should sync: only once the last one scheduled is within a day, so most wake no engine. */
+    fun due(context: Context, now: ZonedDateTime = ZonedDateTime.now()): Boolean {
+        val last = context.getSharedPreferences("reminders", Context.MODE_PRIVATE).getLong(LAST, 0)
+        return last - now.toInstant().toEpochMilli() < REFILL.toMillis()
+    }
 
     fun sync(context: Context, now: ZonedDateTime = ZonedDateTime.now()) {
         val settings = ReminderStore(context).load()
@@ -115,7 +124,10 @@ object ReminderScheduler {
             PendingIntent.getBroadcast(context, code, Intent(context, ReminderReceiver::class.java).setAction(ReminderReceiver.FIRE), PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE)
                 ?.let { alarms.cancel(it); it.cancel() }
         }
-        state.edit().putStringSet(SCHEDULED, codes.map { it.toString() }.toSet()).apply()
+        state.edit()
+            .putStringSet(SCHEDULED, codes.map { it.toString() }.toSet())
+            .putLong(LAST, wanted.maxOfOrNull { it.at.toInstant().toEpochMilli() } ?: 0)
+            .apply()
     }
 
     /** One scheduled reminder: the office's time, when to remind, and its words. */
@@ -150,7 +162,10 @@ private const val EXTRA_WHEN = "org.orthodoxwest.office.WHEN"
 /** Posts a reminder when its alarm fires, and syncs the schedule on every event that can disturb it. */
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == FIRE) Notifications.post(context, intent)
+        if (intent.action == FIRE) {
+            Notifications.post(context, intent)
+            if (!ReminderScheduler.due(context)) return
+        }
         // Syncing reads the corpus the first time in a process; keep it off the main thread.
         val pending = goAsync()
         Thread {

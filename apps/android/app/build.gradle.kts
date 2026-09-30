@@ -48,6 +48,13 @@ android {
             applicationIdSuffix = ".preview"
             signingConfig = signingConfigs.getByName("preview")
         }
+        // Shrunk by R8: the app's code is otherwise seven times the size of the whole
+        // Rust engine, loaded on every launch and every reminder.
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
         // Optimized and non-debuggable, so scrolling is as smooth as a release,
         // but installable beside the eventual store app.
         create("preview") {

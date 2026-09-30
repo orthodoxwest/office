@@ -50,10 +50,12 @@ reminders on. Each notification names the office and the day it keeps ("Vespers"
 Sunday in Lent"), in the same words as the web's calendar feed (`presentation::reminder_summary`),
 and a tap opens that hour.
 
-- **Scheduling.** `ReminderScheduler` keeps the next three days registered with the alarm
-  service, each alarm carrying its notification's words, so it posts at once without loading
-  the engine. Every firing, reboot, clock or time-zone change, app update and app visit syncs
-  again, so the window always runs ahead; a sync replaces alarms rather than adding to them.
+- **Scheduling.** `ReminderScheduler` keeps the next eight days registered with the alarm
+  service, so every weekday is in the window beyond today and a weekly reminder always has its
+  next one waiting. Each alarm carries its notification's words, so it posts at once without
+  loading the engine. Every reboot, clock or time-zone change, app update and app visit syncs
+  again; a firing syncs only once the last alarm scheduled is within a day, so most reminders
+  wake nothing but the notification. A sync replaces alarms rather than adding to them.
 - **On the minute.** Exact alarms that fire through Doze when the reader allows "Alarms &
   reminders" (Android 14 asks); otherwise the system's nearest time, still through Doze, and
   the page says how to allow the exact minute.
@@ -99,7 +101,10 @@ builds the host library, and generates the Kotlin bindings into `app/build/gener
 Nothing generated is checked in.
 
 Build types: `debug` (debuggable, for Android Studio) and `preview` (optimized, non-debuggable,
-what the prerelease ships). Both use the `.preview` application ID.
+what the prerelease ships). Both use the `.preview` application ID. `preview` and `release` are
+shrunk by R8; JNA binds the generated bindings by name, so `app/proguard-rules.pro` keeps JNA
+and `org.orthodoxwest.office.core` whole. The screenshot and reminder tests run against `debug`,
+so a change to those rules wants a look at a `preview` build on a phone.
 
 ## Screenshots without a device
 
