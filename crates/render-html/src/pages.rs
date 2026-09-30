@@ -65,18 +65,9 @@ impl Pages {
     }
 
     /// A composed hour. With leader forms, the forms' sections are aligned
-    /// into one page and the review banner follows the forms that need it.
+    /// into one page.
     pub fn hour(&self, data: &mut HourData, forms: &[(liturgy::PrayerForm, &liturgy::OfficeHour)]) -> Result<String, String> {
         if !data.leader_forms.is_empty() {
-            data.show_banner = false;
-            data.banner_forms.clear();
-            for form in &data.leader_forms {
-                if form.show_banner {
-                    data.show_banner = true;
-                    data.banner_forms.push_str(&form.form);
-                    data.banner_forms.push(' ');
-                }
-            }
             data.leader_sections = leader_sections(forms)?;
         }
         self.render("hour.html", data)
@@ -151,26 +142,6 @@ mod tests {
     }
 
     #[test]
-    fn hour_includes_inline_construction_banner() {
-        let body = source("hour.html");
-        has_all(
-            body,
-            &[
-                "{% if show_banner %}",
-                r#"<aside class="site-banner""#,
-                r#"id="site-banner""#,
-                r#"aria-label="Review notice""#,
-                "data-dismiss-banner",
-                "Not fully checked against the printed books",
-            ],
-        );
-        let (header, banner, elements) =
-            (at(body, r#"class="hour-header"#), at(body, r#"class="site-banner""#), at(body, r#"class="elements""#));
-        assert!(header < banner && banner < elements, "the notice sits between the hour header and the prayers");
-        assert!(!source("layout.html").contains(r#"class="site-banner""#), "the shared layout has no hour banner");
-    }
-
-    #[test]
     fn layout_includes_stamped_navigation_and_assets() {
         has_all(
             source("layout.html"),
@@ -238,13 +209,6 @@ mod tests {
             ],
         );
         assert!(!body.contains(r#"id="reminder-copy" class="date-submit""#));
-    }
-
-    #[test]
-    fn hour_review_banner_uses_consistent_accessible_names() {
-        let body = source("hour.html");
-        has_all(body, &[r#"aria-label="Review notice""#, r#"aria-label="Dismiss review notice""#]);
-        assert!(!body.contains("development notice"));
     }
 
     #[test]

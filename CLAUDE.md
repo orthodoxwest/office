@@ -86,6 +86,8 @@ work separate from an assessment of the rest of the year.
 
 Texts seeded from Divinum Officium carry a `# SOURCE: divinum-officium <file> [<section>] — check against diurnal` comment inside the section. Grep for `SOURCE: divinum-officium` to find texts awaiting verification against the printed diurnal; delete the comment once verified. Comment lines (`#`) inside INI text sections are stripped by the corpus loader and never render. `# TODO(diurnal):` comments mark refs that DO could not supply at all.
 
+Every corpus entry must have a current `verified` attestation in `data/review/provenance.csv`; `make validate` fails otherwise (a stale hash counts as unverified). Adding or editing a text means attesting it (`./office review attest`, `--replace` for an edit) in the same PR. The web server does not load provenance.
+
 ## Git workflow
 
 All changes must go through a pull request — do not push directly to `master`.
@@ -133,7 +135,7 @@ make check       # Formatting, Clippy, JS lint, tests, data validation and text 
 make serve       # Start web server on :8080
 make ordo        # Print text ordo (Tabula Temporaria header + per-hour stanzas) for current year (YEAR=2026)
 ./office rubrics YEAR  # Per-day TSV of composed rubric flags + Ben/Mag antiphons (for ordo cross-checks)
-make validate    # Validate data files
+make validate    # Validate data files (fails on any unverified or stale corpus entry)
 make audit       # Report placeholder texts, missing propers + composition sweep (./office audit -year N)
 make scaffold-propers  # Ensure proper files exist with commented key catalogs (never overwrites live sections)
 make lint-texts  # Lint text corpus: mechanical findings fail, advisory printed

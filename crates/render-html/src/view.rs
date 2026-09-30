@@ -55,7 +55,6 @@ pub struct LeaderForm {
     pub form: String,
     pub label: String,
     pub report_url: String,
-    pub show_banner: bool,
 }
 
 /// The composed hour's header fields.
@@ -84,7 +83,6 @@ pub struct HourData {
     pub leader_sections: Vec<LeaderSection>,
     /// The single form's sections, when there are no leader forms.
     pub sections: Vec<SectionView>,
-    pub banner_forms: String,
     pub hour_name: String,
     pub date_str: String,
     pub date_slug: String,
@@ -98,7 +96,6 @@ pub struct HourData {
     pub next_hour_link: String,
     pub hour: HourHeader,
     pub report_url: String,
-    pub show_banner: bool,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize)]

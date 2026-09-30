@@ -469,16 +469,6 @@ function usageBeaconBody(scope) {
     });
   });
 
-  var banner = document.getElementById("site-banner");
-  if (banner) {
-    var dismissButton = banner.querySelector("[data-dismiss-banner]");
-    if (dismissButton) {
-      dismissButton.addEventListener("click", function () {
-        banner.hidden = true;
-      });
-    }
-  }
-
   var offlineIndicator = document.createElement("div");
   offlineIndicator.className = "offline-indicator";
   offlineIndicator.textContent = "Offline";

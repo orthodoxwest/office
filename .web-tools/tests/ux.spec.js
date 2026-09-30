@@ -2506,14 +2506,11 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   const printStyles = await page.evaluate(() => {
     const body = getComputedStyle(document.body);
     const elements = getComputedStyle(document.querySelector(".elements"));
-    // Review progress can make this office fully verified, which omits the banner.
-    const banner = document.querySelector(".site-banner");
     return {
       bodyFont: parseFloat(body.fontSize),
       prayerFont: parseFloat(elements.fontSize),
       prayerMaxWidth: elements.maxWidth,
       headerDisplay: getComputedStyle(document.querySelector("header")).display,
-      bannerDisplay: banner ? getComputedStyle(banner).display : "none",
       sessionSummaryDisplay: getComputedStyle(
         document.querySelector(".session-prayers > summary"),
       ).display,
@@ -2527,7 +2524,6 @@ test("print keeps the designed 11pt prayer size at a desktop viewport", async ({
   // the full sheet width, which ran to 120-odd characters a line.
   expect(parseFloat(printStyles.prayerMaxWidth)).toBeCloseTo(30 * printStyles.bodyFont, 0);
   expect(printStyles.headerDisplay).toBe("none");
-  expect(printStyles.bannerDisplay).toBe("none");
   expect(printStyles.sessionSummaryDisplay).toBe("none");
   await expect(page.locator(".session-prayers .liturgical-block").first()).toBeVisible();
 });
@@ -3787,17 +3783,6 @@ test("Compline openings preserve words and align response columns around the ble
     expect(blessingText.left).toBeCloseTo(blessingText.reference, 0);
     expect(blessingText.width).toBeGreaterThan(200);
     expect(blessingText.right).toBeLessThanOrEqual(width);
-
-    // The notice follows the selected form's text provenance (the server's
-    // show_vetting_banner tests decide when); with the corpus verified it
-    // may not show. When it does, it stays compact and dismissible.
-    const banner = page.locator(".site-banner:visible");
-    if (await banner.count()) {
-      expect(await banner.evaluate(el => getComputedStyle(el).textAlign)).toBe("left");
-      expect((await banner.boundingBox()).height).toBeLessThan(100);
-      await banner.getByRole("button", { name: "Dismiss review notice" }).click();
-      await expect(banner).toHaveCount(0);
-    }
   }
 });
 

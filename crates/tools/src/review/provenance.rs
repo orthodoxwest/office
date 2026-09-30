@@ -392,6 +392,23 @@ pub fn record_attestation(src: &dyn DataSource, dir: &std::path::Path, mut o: At
     Ok(entry)
 }
 
+/// Every corpus entry must carry a current `verified` attestation; one
+/// message per entry that does not, for `validate` to fail on.
+pub fn unverified_entries(p: &ProvenanceInventory) -> Vec<String> {
+    p.entries
+        .iter()
+        .filter(|e| e.stale || e.status != ProvenanceStatus::Verified)
+        .map(|e| {
+            let key = quote(&e.key);
+            if e.stale {
+                format!("{key} changed since its attestation; re-verify it and record `office review attest --replace`")
+            } else {
+                format!("{key} is {}; verify it and record `office review attest`", e.status.as_str())
+            }
+        })
+        .collect()
+}
+
 /// Generated, non-stale corpus assurance counts.
 pub fn provenance_summary(p: &ProvenanceInventory) -> String {
     let mut counts: BTreeMap<ProvenanceStatus, usize> = BTreeMap::new();
@@ -492,6 +509,37 @@ mod tests {
         let c = parse_citation("Monastic Diurnal, P.44", 1);
         assert_eq!((c.kind.as_str(), c.page.as_str()), ("other", "44"));
         assert_eq!(parse_citation("step12", 1).page, "");
+    }
+
+    #[test]
+    fn only_current_verified_entries_pass() {
+        let entry = |key: &str, status, stale| EntryProvenance {
+            key: key.into(),
+            file: String::new(),
+            section: String::new(),
+            line: 0,
+            content_hash: String::new(),
+            status,
+            reviewer: String::new(),
+            reviewed_on: String::new(),
+            notes: String::new(),
+            stale,
+            sources: Vec::new(),
+            todos: Vec::new(),
+        };
+        let inv = ProvenanceInventory {
+            entries: vec![
+                entry("a", ProvenanceStatus::Verified, false),
+                entry("b", ProvenanceStatus::NeedsReview, false),
+                entry("c", ProvenanceStatus::SourceUnknown, false),
+                entry("d", ProvenanceStatus::NeedsReview, true),
+            ],
+        };
+        let got = unverified_entries(&inv);
+        assert_eq!(got.len(), 3, "{got:?}");
+        assert!(got[0].starts_with("\"b\" is needs-review"), "{got:?}");
+        assert!(got[1].starts_with("\"c\" is source-unknown"), "{got:?}");
+        assert!(got[2].starts_with("\"d\" changed since its attestation"), "{got:?}");
     }
 
     #[test]

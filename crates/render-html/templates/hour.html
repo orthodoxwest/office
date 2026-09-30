@@ -52,14 +52,6 @@
     {% endif %}
     </div>
   </div>
-  {% if show_banner %}
-  {% if leader_forms %}<div data-leaders="{{ banner_forms }}">{% endif %}
-  <aside class="site-banner" id="site-banner" aria-label="Review notice">
-    <p>Not fully checked against the printed books; may contain errors.</p>
-    <button type="button" data-dismiss-banner aria-label="Dismiss review notice">Dismiss</button>
-  </aside>
-  {% if leader_forms %}</div>{% endif %}
-  {% endif %}
   <div class="elements">
     {% if leader_forms %}
     {% for section in leader_sections %}

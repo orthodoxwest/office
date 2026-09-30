@@ -2546,60 +2546,6 @@ tr.day-color-rose > td:first-child::before { --day-color: #c4607a; }
   margin-top: 0;
 }
 
-/* ── Review notice ──
-   This belongs to the opening flow of an unvetted hour. It used to be fixed
-   to the bottom of the viewport, where it covered several lines of prayer on
-   a phone and forced every page to reserve a deep bottom gutter. Inline, it
-   is encountered before prayer begins and then scrolls away naturally.
-   It reads as a rubric line, not a card: no filled panel and no coloured
-   edge competing with the prayer that follows — the caution lives in the
-   wording, and the hour-header rule above already frames it. */
-
-.site-banner {
-  position: relative;
-  width: 100%;
-  max-width: 38rem;
-  margin: -0.5rem auto 0;
-  background: transparent;
-  border: none;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
-  padding: 0.35rem 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.15rem 0.65rem;
-  text-align: left;
-}
-
-.site-banner p {
-  flex: 1 1 12rem;
-  margin: 0;
-}
-
-.site-banner button {
-  margin-left: 0;
-  background: none;
-  border: none;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  min-height: var(--touch-target);
-  min-width: var(--touch-target);
-  padding: 0 0.5rem;
-  flex-shrink: 0;
-}
-
-.site-banner button:hover {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 /* ── Offline state ── */
 
 .offline-indicator {
@@ -4991,7 +4937,6 @@ body.season-eastertide {
 .month-jump a,
 .month-top,
 .year-nav a,
-.site-banner button,
 .skip-link {
   -webkit-tap-highlight-color: transparent;
 }
@@ -5024,8 +4969,7 @@ body.season-eastertide {
 .hour-continuation a:active,
 .month-jump a:active,
 .month-top:active,
-.year-nav a:active,
-.site-banner button:active {
+.year-nav a:active {
   background-color: var(--pressed-wash);
   box-shadow: inset 0 1px 2px var(--surface-edge);
 }
@@ -5749,7 +5693,6 @@ body.page-home::before {
   .not-today-notice,
   .color-band,
   .hour-scroll-progress,
-  .site-banner,
   .offline-indicator {
     display: none;
   }
